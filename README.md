@@ -10,7 +10,8 @@ The application allows to record up to 15 diferent maps. So if during your games
 Download App
 ============
 
-~Please add a direct link to an *apk* compliled version here~
+You can either clone this Repository and open it with android-studio to build the app
+or use the direct link to a compliled version here: https://github.com/rubo77/ProjetEi4_Android/raw/apk/download/app-debug.apk
 
 Screen
 ======
