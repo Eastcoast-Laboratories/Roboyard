@@ -641,7 +641,12 @@ public class Board {
         final int zipOutLen = 4 + zip.deflate(zipOutput, 4, zipOutput.length-4);    //skip uncompressed length
         //encode base64
         final byte[] b64Input = Arrays.copyOf(zipOutput, zipOutLen);
-        final String b64Output = Base64.getEncoder().encodeToString(b64Input);
+        final String b64Output;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            b64Output = Base64.getEncoder().encodeToString(b64Input);
+        }else{
+            b64Output = android.util.Base64.encodeToString(b64Input, android.util.Base64.DEFAULT);
+        }
         //compute CRC of encoded data
         final CRC32 crc32 = new CRC32();
         crc32.update(b64Output.getBytes(StandardCharsets.UTF_8));
@@ -670,7 +675,12 @@ public class Board {
                 throw new IllegalArgumentException("data CRC mismatch");
             }
             //parse base64 string
-            final byte[] b64Output = Base64.getDecoder().decode(inputSplit[3]);    //throws IllegalArgumentException
+            final byte[] b64Output;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                b64Output = Base64.getDecoder().decode(inputSplit[3]); //throws IllegalArgumentException
+            }else{
+                b64Output = android.util.Base64.decode(inputSplit[3], android.util.Base64.DEFAULT);
+            }
             //unzip/inflate data
             int unzipLen = 0;
             for (int i = 0;  i < 4;  ++i) {
