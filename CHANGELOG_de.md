@@ -2,6 +2,10 @@ Changelog Deutsch
 =================
 
 
+### Version 10.4
+
+- Lock Screen disabled
+
 ### Version 10.3
 
 - Link zum Impressum und Datenschutz ergänzt

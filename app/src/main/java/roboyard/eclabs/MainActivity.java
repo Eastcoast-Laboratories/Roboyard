@@ -13,6 +13,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.TextureView;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -37,6 +38,8 @@ public class MainActivity extends Activity
 
     public void init() {
         Display display = getWindowManager().getDefaultDisplay();
+        // keep screen on:
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Point size = new Point();
         display.getSize(size);
         sWidth = size.x;

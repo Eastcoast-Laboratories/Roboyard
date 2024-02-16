@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+### Version 10.4
+
+- disable lock screen
+
 ### Version 10.3
 
 - add links to imprint and privacy
