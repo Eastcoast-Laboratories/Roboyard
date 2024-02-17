@@ -100,7 +100,7 @@ public class GridGameScreen extends GameScreen {
         xGrid = 0;
         yGrid = 1080/5;
 
-        Bitmap.Config conf = Bitmap.Config.ARGB_4444;
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 
         bitmapGrid = Bitmap.createBitmap((int)(boardSizeX * gridSpace), (int) (boardSizeY * gridSpace), conf);
         canvasGrid = new Canvas(bitmapGrid);
