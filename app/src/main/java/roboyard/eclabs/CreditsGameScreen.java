@@ -1,15 +1,20 @@
 package roboyard.eclabs;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.graphics.Color;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the Credits game screen.
  * Created by Pierre on 04/02/2015.
  */
 public class CreditsGameScreen extends GameScreen {
-
+    private List<GameButtonLink> links = new ArrayList<>();
     public CreditsGameScreen(GameManager gameManager) {
         super(gameManager);
     }
@@ -73,6 +78,7 @@ public class CreditsGameScreen extends GameScreen {
         renderManager.setTextSize((int) (1.2 * ts));
         renderManager.drawText(10, 10 * ts, "Imprint/privacy policy");
         renderManager.setTextSize((int) (0.7 * ts));
+        links.clear();
         drawClickableLink(renderManager, 10, 11 * ts, "https://eclabs.de/datenschutz.html");
 
         renderManager.setColor(Color.BLACK);
@@ -96,32 +102,36 @@ public class CreditsGameScreen extends GameScreen {
      * @param url           The URL of the link
      */
     private void drawClickableLink(RenderManager renderManager, int x, int y, String url) {
-        renderManager.drawClickableText(x, y, url, Color.BLUE, (int) (0.7 * (hs2 / 10)), new RenderManager.ClickListener() {
-            @Override
-            public void onClick() {
-                openLink(url);
-            }
+        Rect rect = renderManager.drawLinkText(x, y, url, Color.BLUE, (int) (0.7 * (hs2 / 10)));
+        links.add(new GameButtonLink(rect.left, rect.top, rect.right, rect.bottom, url));
 
-            @Override
-            public void setClickableBounds(float left, float top, float right, float bottom) {
-                // No need to assign values here
-                // These bounds are set internally by the RenderManager
-            }
 
-            @Override
-            public boolean isInsideClickableBounds(float x, float y) {
-                // Check if the touch coordinates (x, y) are inside the clickable bounds
-                // Not implemented in this snippet, but you would check the bounds here
-                return true; // Placeholder return value
-            }
-
-            @Override
-            public boolean isClickable() {
-                // Determine if the text is clickable
-                // Not implemented in this snippet, but you would handle the clickable state here
-                return true; // Placeholder return value
-            }
-        });
+//        renderManager.drawClickableText(x, y, url, Color.BLUE, (int) (0.7 * (hs2 / 10)), new RenderManager.ClickListener() {
+//            @Override
+//            public void onClick() {
+//                openLink(url);
+//            }
+//
+//            @Override
+//            public void setClickableBounds(float left, float top, float right, float bottom) {
+//                // No need to assign values here
+//                // These bounds are set internally by the RenderManager
+//            }
+//
+//            @Override
+//            public boolean isInsideClickableBounds(float x, float y) {
+//                // Check if the touch coordinates (x, y) are inside the clickable bounds
+//                // Not implemented in this snippet, but you would check the bounds here
+//                return true; // Placeholder return value
+//            }
+//
+//            @Override
+//            public boolean isClickable() {
+//                // Determine if the text is clickable
+//                // Not implemented in this snippet, but you would handle the clickable state here
+//                return true; // Placeholder return value
+//            }
+//        });
     }
 
     /**
@@ -144,9 +154,17 @@ public class CreditsGameScreen extends GameScreen {
     @Override
     public void update(GameManager gameManager) {
         super.update(gameManager);
+        InputManager im = gameManager.getInputManager();
         // Handle back button press to return to the main menu
-        if (gameManager.getInputManager().backOccurred()) {
+        if (im.backOccurred()) {
             gameManager.setGameScreen(0); // Set the main menu screen
+        } else if(im.eventHasOccurred()) {
+            for (GameButtonLink link : links) {
+                boolean linkTouched = (im.getTouchX() >= link.getX() && im.getTouchX() <= link.getW()) && (im.getTouchY() >= link.getY() && im.getTouchY() <= link.getH());
+                if(linkTouched) {
+                    openLink(link.getUrl());
+                }
+            }
         }
     }
 

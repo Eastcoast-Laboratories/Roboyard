@@ -1,23 +1,16 @@
 package roboyard.eclabs;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Random;
 
 /**
@@ -223,6 +216,17 @@ public class RenderManager {
         brush.getTextBounds(text, 0, text.length(), bounds);
         target.drawText(text, x, y + bounds.height() - textSize, brush);
         clickListener.setClickableBounds(x, y, x + bounds.width(), y + bounds.height());
+    }
+
+    public Rect drawLinkText(int x, int y, String text, int color, int textSize) {
+        Rect bounds = new Rect();
+        brush.setColor(color);
+        brush.setTextSize(textSize);
+        brush.getTextBounds(text, 0, text.length(), bounds);
+        target.drawText(text, x, y + bounds.height() - textSize, brush);
+
+//        clickListener.setClickableBounds(x, y, x + bounds.width(), y + bounds.height());
+        return new Rect(x, y - textSize, x + bounds.width(), y + bounds.height());
     }
 
     /**
