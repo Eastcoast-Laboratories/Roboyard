@@ -50,7 +50,7 @@ The solver algorithm implementation is developed at [DriftingDroids](https://git
 
 # Development
 Roboyard was developed in the Project EI 4 AGI: http://perso-laris.univ-angers.fr/~projetsei4/1415/P2/index.html
-- [CREDITS.md]
+- [CREDITS](CREDITS.md)
 
 ### Report
 Download the report that was made for the university project:
