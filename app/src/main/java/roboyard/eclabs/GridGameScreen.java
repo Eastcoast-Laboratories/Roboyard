@@ -33,7 +33,7 @@ public class GridGameScreen extends GameScreen {
     private int solutionMoves = 0; // store the optimal number of moves for the solution globally
     private int NumDifferentSolutionsFound = 0; // store the number of different solution globally
     private int numSolutionClicks = 0; // count how often you clicked on the solution button, each time the shown count goes down by one
-    private int numDifferentSolutionClicks = 0; // count how often you clicked on the solution button again to show a different solution (currently disabled)
+    private int numDifferentSolutionClicks = 0; // count how often you clicked on the solution button again to show a different solution
     private int showSolutionAtHint = 5; // interval between the first hint and the current optimal solution (will be set to random 3..5 later
 
     private static int goodPuzzleMinMoves = 8; // below this number of moves there is a special hint shown from the start
@@ -388,7 +388,7 @@ public class GridGameScreen extends GameScreen {
             isSolved = true;
             buttonSolve.setEnabled(true);
             NumDifferentSolutionsFound=solver.getSolutionList().size();
-            GameSolution solution = solver.getSolution();
+            GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
             solutionMoves=0;
             for(IGameMove m : solution.getMoves()){
                 solutionMoves++;
@@ -772,7 +772,7 @@ public class GridGameScreen extends GameScreen {
     private class ButtonSolution implements IExecutor{
         public void execute(){
             if(numSolutionClicks >= showSolutionAtHint) {
-                GameSolution solution = solver.getSolution();
+                GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
                 showSolution(solution);
                 if(NumDifferentSolutionsFound > 1){
                     // if solution is shown and there are more than 1 solutions found:
@@ -781,7 +781,7 @@ public class GridGameScreen extends GameScreen {
                     }else{
                         numDifferentSolutionClicks++;
                     }
-                    // gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
+                    gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
                 }
             }else{
                 numSolutionClicks++;
