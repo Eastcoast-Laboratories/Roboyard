@@ -11,7 +11,7 @@ Roboyard allows to record up to 35 different maps. So if during your games you e
 
 # Download App
 - clone this Repository and open it with android-studio to build the app
-- download a compiled version from the releases: https://github.com/rubo77/Roboyard/releases/
+- download a compiled version from the releases: https://github.com/Eastcoast-Laboratories/Roboyard/releases/
   - minimum Android Version: 4.4 (KITKAT)
   - The last version for Android<4.4: Roboyard version 10.1
 - [download from Play Store](https://play.google.com/store/apps/details?id=de.z11.roboyard)
@@ -50,6 +50,7 @@ The solver algorithm implementation is developed at [DriftingDroids](https://git
 
 # Development
 Roboyard was developed in the Project EI 4 AGI: http://perso-laris.univ-angers.fr/~projetsei4/1415/P2/index.html
+- [CREDITS.md]
 
 ### Report
 Download the report that was made for the university project:

@@ -104,34 +104,6 @@ public class CreditsGameScreen extends GameScreen {
     private void drawClickableLink(RenderManager renderManager, int x, int y, String url) {
         Rect rect = renderManager.drawLinkText(x, y, url, Color.BLUE, (int) (0.7 * (hs2 / 10)));
         links.add(new GameButtonLink(rect.left, rect.top, rect.right, rect.bottom, url));
-
-
-//        renderManager.drawClickableText(x, y, url, Color.BLUE, (int) (0.7 * (hs2 / 10)), new RenderManager.ClickListener() {
-//            @Override
-//            public void onClick() {
-//                openLink(url);
-//            }
-//
-//            @Override
-//            public void setClickableBounds(float left, float top, float right, float bottom) {
-//                // No need to assign values here
-//                // These bounds are set internally by the RenderManager
-//            }
-//
-//            @Override
-//            public boolean isInsideClickableBounds(float x, float y) {
-//                // Check if the touch coordinates (x, y) are inside the clickable bounds
-//                // Not implemented in this snippet, but you would check the bounds here
-//                return true; // Placeholder return value
-//            }
-//
-//            @Override
-//            public boolean isClickable() {
-//                // Determine if the text is clickable
-//                // Not implemented in this snippet, but you would handle the clickable state here
-//                return true; // Placeholder return value
-//            }
-//        });
     }
 
     /**

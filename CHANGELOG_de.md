@@ -2,7 +2,7 @@ Changelog Deutsch
 =================
 
 
-### Version 10.4
+### Version 12
 
 - Lock Screen disabled
 
