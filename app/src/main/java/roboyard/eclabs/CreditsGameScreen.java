@@ -1,6 +1,9 @@
 package roboyard.eclabs;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.graphics.Color;
@@ -15,8 +18,11 @@ import java.util.List;
  */
 public class CreditsGameScreen extends GameScreen {
     private List<GameButtonLink> links = new ArrayList<>();
-    public CreditsGameScreen(GameManager gameManager) {
+    private Context mContext;
+
+    public CreditsGameScreen(GameManager gameManager, Context context) {
         super(gameManager);
+        mContext = context;
     }
 
     int hs2; // Half the screen height
@@ -50,8 +56,8 @@ public class CreditsGameScreen extends GameScreen {
     @Override
     public void draw(RenderManager renderManager) {
         // Get app version information
-        int versionCode = BuildConfig.VERSION_CODE;
-        String versionName = BuildConfig.VERSION_NAME;
+        int versionCode = getVersionCode(mContext);
+        String versionName = getVersionName(mContext);
 
         // Set background color
         //renderManager.setColor(Color.BLUE);
@@ -93,6 +99,31 @@ public class CreditsGameScreen extends GameScreen {
         super.draw(renderManager);
     }
 
+    // Method to retrieve version code using PackageManager
+    private int getVersionCode(Context context) {
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            String packageName = context.getPackageName();
+            PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return -1; // Error occurred, return -1 or handle it accordingly
+        }
+    }
+
+    // Method to retrieve version name using PackageManager
+    private String getVersionName(Context context) {
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            String packageName = context.getPackageName();
+            PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
+            return packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return ""; // Error occurred, return empty string or handle it accordingly
+        }
+    }
     /**
      * Draws a clickable link.
      *

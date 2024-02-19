@@ -57,7 +57,7 @@ public class GameManager {
         this.screens.append(0, new MainMenuGameScreen(this));
         this.screens.append(1, new GameOptionsGameScreen(this));
         this.screens.append(2, new SettingsGameScreen(this));
-        this.screens.append(3, new CreditsGameScreen(this));
+        this.screens.append(3, new CreditsGameScreen(this, activity));
         this.screens.append(4, new GridGameScreen(this));
         this.screens.append(5, new LevelChoiceGameScreen(this, 0, -1, 6));
         this.screens.append(6, new LevelChoiceGameScreen(this, 15, 5, 7));
