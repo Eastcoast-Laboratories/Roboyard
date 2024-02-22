@@ -122,7 +122,7 @@ public class GamePiece implements IGameObject {
     @Override
     public void draw(RenderManager renderManager){
         //renderManager.setColor(this.color);
-        //afficher le pion
+        //display the piece
 
         xDraw = (int)(this.xGrid+((this.x+((float)deltaX)/10)+0.5f)*this.widthCell);
         yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.heightCell);
@@ -136,7 +136,7 @@ public class GamePiece implements IGameObject {
     public void update(GameManager gameManager){
         int deltaValue; // movement speed of robots
 
-        //si le pion n'est pas en mouvement, ...
+        //if the piece is not in motion, ...
         if((this.x == this.xObjective) && (this.y == this.yObjective) && (deltaX == 0) && (deltaY == 0)){
 
 //            System.out.println(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
@@ -151,7 +151,7 @@ public class GamePiece implements IGameObject {
                 testIfWon = false;
             }
 //            inMovement = false;
-            //si il y a une entrée utilisateur, ...
+            //if there is user input, ...
             InputManager inputManager = gameManager.getInputManager();
             if(inputManager.eventHasOccurred()){
                 int xTouch, yTouch, dx, dy;
@@ -161,16 +161,16 @@ public class GamePiece implements IGameObject {
                 dy = yTouch - this.yDraw;
 
                 // TODO: if two robots touch, set tolerance to 0
-                //si l'utilisateur a touché le pion, ...
+                //if the user touched the piece, ...
                 if(dx*dx + dy*dy - toleranceForInputManagerTouch <= this.radius*this.radius && inputManager.downOccurred()){
                     // TODO: enlarge and put in front with this.radius+=1;
-                    //afficher l'interface de mouvement
+                    //display the movement interface
                     ((GridGameScreen)(gameManager.getCurrentScreen())).activateInterface(this, xDraw, yDraw);
                 }
             }
 
 
-        }else{ //sinon (si le pion doit bouger),
+        }else{ //otherwise (if the piece must move),
             // TODO: reset if enlarging worked this.radius=32;
             if(inMovement==false){
                 // before move
