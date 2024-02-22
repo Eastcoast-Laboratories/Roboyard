@@ -1,0 +1,1 @@
+- Show number of different solutions found by the AI

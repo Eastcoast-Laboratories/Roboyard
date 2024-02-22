@@ -1,6 +1,9 @@
 Changelog Deutsch
 =================
 
+### Version 13
+
+- Beim Anzeigen der Lösung die verschiedenen Lösungen durchlaufen, wenn mehr als eine Lösung gefunden wurde
 
 ### Version 12
 

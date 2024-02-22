@@ -1,0 +1,2 @@
+- cycle through different solutions if more than one solution is found
+- The solver in this version is buggy! Use at your own risk! ;)

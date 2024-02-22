@@ -1,0 +1,11 @@
+Ein einfaches, aber herausforderndes Denkspiel.
+
+Du steuerst vier Roboter in einem 16x16 Felder großen Garten. Das Ziel ist es, einen bestimmten Roboter zum Ziel zu lenken. Die Roboter bewegen sich, bis sie entweder an eine Hecke oder einen anderen Roboter stoßen.
+
+Das Besondere an dieser App ist der automatische Lösungsfindungsalgorythmus, der dir Hinweise und auch die optimale Lösung mit den wenigsten Zügen anzeigen kann.
+
+Kannst du die Lösung mit den wenigsten Zügen finden?
+
+Dieses Spiel ist Open Source und wird ohne Adds ausgeliefert. Inspiriert von Rasender Roboter
+
+Quellcode unter https://roboyard.z11.de/

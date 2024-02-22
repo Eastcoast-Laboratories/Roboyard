@@ -1,0 +1,13 @@
+An Android-based application like the board game "Ricochet Robots ©". It includes an artificial intelligence capable of solving the puzzles.
+
+A simple but challenging puzzle game.
+
+You control four robots in a yard full of hedges, that block their way. The goal is to guide a particular robot to its destination. The robots move until they either hit a hedge or another robot.
+
+The special feature of this app is the automatic solution finding algorithm, which can show you hints and also the optimal solution.
+
+Can you find the solution with the fewest moves?
+
+This game is open source and shipped without adds. 
+
+Source code: https://roboyard.z11.de/

@@ -1,0 +1,2 @@
+- add links to imprint and privacy
+- upgrade to SdkVersion 34

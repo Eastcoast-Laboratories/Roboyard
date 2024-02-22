@@ -1,0 +1,2 @@
+- shrink green robot, so it doesn't cover walls anymore
+- remove white circles in the background of robots
