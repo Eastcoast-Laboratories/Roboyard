@@ -22,7 +22,7 @@ public class GamePiece implements IGameObject {
     private int deltaX              = 0;
     private int deltaY              = 0;
     private int curMoveSquares      = 0;
-    private int numSquaresMoved     = 0;
+    // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
     private final int extraSizeForRobotsAndTargets = 1; // robots and targets are 1px larger than the grid and may overlap 1 px
     private final int toleranceForInputManagerTouch = 1000; // virtual circle around robot to touch
@@ -39,9 +39,6 @@ public class GamePiece implements IGameObject {
     public void setX(int x) {
         this.x = x;
         deltaX = 0;
-    }
-    public boolean isInMovement() {
-        return inMovement;
     }
 
     public int getColor() {
@@ -84,7 +81,7 @@ public class GamePiece implements IGameObject {
         this.yObjective = y;
         this.color = color;
         this.curMoveSquares=0;
-        this.numSquaresMoved=0;
+        // this.numSquaresMoved=0;
 
         switch(color)
         {
@@ -105,10 +102,6 @@ public class GamePiece implements IGameObject {
                 break;
         }
 
-    }
-
-    public int getCurMoveSquares(){
-        return this.curMoveSquares;
     }
 
     public void setGridDimensions(int xGrid, int yGrid, float cellSize){
@@ -154,7 +147,7 @@ public class GamePiece implements IGameObject {
             inMovement = false;
 
             if(testIfWon) {
-                ((GridGameScreen)(gameManager.getCurrentScreen())).gagne(this);
+                ((GridGameScreen)(gameManager.getCurrentScreen())).win(this);
                 testIfWon = false;
             }
 //            inMovement = false;
@@ -182,7 +175,7 @@ public class GamePiece implements IGameObject {
             if(inMovement==false){
                 // before move
                 this.curMoveSquares=Math.abs(this.xObjective-this.x)+Math.abs(this.yObjective-this.y);
-                this.numSquaresMoved+=this.curMoveSquares;
+                //this.numSquaresMoved+=this.curMoveSquares;
                 System.out.println(" start move with "+this.curMoveSquares+" squares");
                 ((GridGameScreen)(gameManager.getCurrentScreen())).setCurrentMovedSquares(this.curMoveSquares);
             }

@@ -19,7 +19,7 @@ import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 
-import static android.content.Context.MODE_PRIVATE;
+// import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Alain on 25/02/2015.
@@ -666,14 +666,14 @@ public class GridGameScreen extends GameScreen {
         }else{
             if(moved){
                 nbCoups++;
-                //boolean b = gagne(p);
+                //boolean b = win(p);
             } else {
                 allMoves.remove(allMoves.size()-1);
             }
         }
     }
 
-    public boolean gagne(GamePiece p)
+    public boolean win(GamePiece p)
     {
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;

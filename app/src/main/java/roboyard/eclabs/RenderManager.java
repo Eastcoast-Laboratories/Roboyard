@@ -9,7 +9,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
-import android.view.MotionEvent;
+// import android.view.MotionEvent;
 
 import java.util.Random;
 
@@ -77,27 +77,6 @@ public class RenderManager {
     }
 
     /**
-     * Draws a circle on the target canvas.
-     * @param x The x-coordinate of the center of the circle.
-     * @param y The y-coordinate of the center of the circle.
-     * @param radius The radius of the circle.
-     */
-    public void drawCircle(float x, float y, int radius){
-        this.target.drawCircle(x, y, radius, this.brush);
-    }
-
-    /**
-     * Draws a rectangle on the target canvas.
-     * @param x1 The x-coordinate of the top-left corner of the rectangle.
-     * @param y1 The y-coordinate of the top-left corner of the rectangle.
-     * @param x2 The x-coordinate of the bottom-right corner of the rectangle.
-     * @param y2 The y-coordinate of the bottom-right corner of the rectangle.
-     */
-    public void drawRect(float x1, float y1, float x2, float y2){
-        this.target.drawRect(x1, y1, x2, y2, this.brush);
-    }
-
-    /**
      * Draws an image on the target canvas.
      * @param x1 The x-coordinate of the top-left corner of the image.
      * @param y1 The y-coordinate of the top-left corner of the image.
@@ -120,16 +99,6 @@ public class RenderManager {
      */
     public void loadImage(int image){
         this.resourceMap.append(image, this.resources.getDrawable(image));
-    }
-
-    /**
-     * Draws a bitmap on the canvas.
-     * @param bmp The bitmap to draw.
-     * @param x The x-coordinate of the top-left corner of the bitmap.
-     * @param y The y-coordinate of the top-left corner of the bitmap.
-     */
-    public void drawBitmap(Bitmap bmp, float x, float y){
-        this.target.drawBitmap(bmp, x, y, null);
     }
 
     /**
@@ -200,24 +169,6 @@ public class RenderManager {
         this.brush.setTextSize(s);
     }
 
-    /**
-     * Draws clickable text on the canvas
-     * @param x x-coordinate
-     * @param y y-coordinate
-     * @param text Text to display
-     * @param color Color of the text
-     * @param textSize Size of the text
-     * @param clickListener Listener for the click event
-     */
-    public void drawClickableText(int x, int y, String text, int color, int textSize, ClickListener clickListener) {
-        Rect bounds = new Rect();
-        brush.setColor(color);
-        brush.setTextSize(textSize);
-        brush.getTextBounds(text, 0, text.length(), bounds);
-        target.drawText(text, x, y + bounds.height() - textSize, brush);
-        clickListener.setClickableBounds(x, y, x + bounds.width(), y + bounds.height());
-    }
-
     public Rect drawLinkText(int x, int y, String text, int color, int textSize) {
         Rect bounds = new Rect();
         brush.setColor(color);
@@ -225,36 +176,7 @@ public class RenderManager {
         brush.getTextBounds(text, 0, text.length(), bounds);
         target.drawText(text, x, y + bounds.height() - textSize, brush);
 
-//        clickListener.setClickableBounds(x, y, x + bounds.width(), y + bounds.height());
         return new Rect(x, y - textSize, x + bounds.width(), y + bounds.height());
     }
 
-    /**
-     * Handles touch events for clickable text.
-     * @param event The MotionEvent.
-     * @param clickListener The ClickListener for the text.
-     */
-    public void handleTouchEvent(MotionEvent event, ClickListener clickListener) {
-        int action = event.getAction();
-        float x = event.getX();
-        float y = event.getY();
-
-        switch (action) {
-            case MotionEvent.ACTION_UP:
-                if (clickListener != null && clickListener.isClickable() && clickListener.isInsideClickableBounds(x, y)) {
-                    clickListener.onClick();
-                }
-                break;
-        }
-    }
-
-    /**
-     * Interface for click events on clickable text.
-     */
-    public interface ClickListener {
-        void onClick();
-        void setClickableBounds(float left, float top, float right, float bottom);
-        boolean isInsideClickableBounds(float x, float y);
-        boolean isClickable();
-    }
 }

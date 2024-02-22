@@ -7,7 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.graphics.Color;
-import android.util.Log;
+// import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
