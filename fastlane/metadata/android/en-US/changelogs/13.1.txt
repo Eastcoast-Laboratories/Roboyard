@@ -1,0 +1,1 @@
+- remove unnecessary INTERNET permission

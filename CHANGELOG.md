@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+### Version 13.1
+
+- remove unnecessary INTERNET permission
+
 ### Version 13
 
 - cycle through different solutions if more than one solution is found
