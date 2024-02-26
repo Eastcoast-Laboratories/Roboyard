@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+### Version 13.2
+
+- add distributionSha256Sum to build options
+
 ### Version 13.1
 
 - remove unnecessary INTERNET permission

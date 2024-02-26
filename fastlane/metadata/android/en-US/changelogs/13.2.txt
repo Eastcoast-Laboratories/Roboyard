@@ -1,0 +1,1 @@
+-add distributionSha256Sum to build options 
