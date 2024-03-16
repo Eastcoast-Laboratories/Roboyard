@@ -11,10 +11,16 @@ Roboyard allows to record up to 35 different maps. So if during your games you e
 
 # Download App
 - clone this Repository and open it with android-studio to build the app
-- download a compiled version from the releases: https://github.com/Eastcoast-Laboratories/Roboyard/releases/
+- download a compiled version from the [Releases Section](https://github.com/Eastcoast-Laboratories/Roboyard/releases/latest)
   - minimum Android Version: 4.4 (KITKAT)
   - The last version for Android<4.4: Roboyard version 10.1
-- [download from Play Store](https://play.google.com/store/apps/details?id=de.z11.roboyard)
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/de.z11.roboyard/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=de.z11.roboyard)
 
 # Screenshot
 ![](download/Roboyard_screenshot.png)
