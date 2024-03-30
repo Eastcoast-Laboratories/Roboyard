@@ -22,7 +22,7 @@ public class GameOptionsGameScreen extends GameScreen {
 
         // screen 4: start random game
         this.instances.add(new GameButtonGotoRandomGame(ws2, (int) (ratio * 200), relativeButtonWidth, (int)(ratio * buttonSize), R.drawable.bt_start_up_random, R.drawable.bt_start_down_random, 4));
-        // screen 5: start level game
+        // screen 5-8: start level game
         this.instances.add(new GameButtonGoto(ws2, (int)(ratio * 750), relativeButtonWidth, (int)(ratio * buttonSize), R.drawable.bt_start_up, R.drawable.bt_start_down, 5));
         // screen 9: save games
         this.instances.add(new GameButtonGoto(ws2, (int)(ratio * 1300), relativeButtonWidth, (int)(ratio * buttonSize), R.drawable.bt_start_up_saved, R.drawable.bt_start_down_saved, 9));

@@ -7,9 +7,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-/**
- * Created by Alain on 28/03/2015.
- */
 public class GameButtonGotoSavedGame extends GameButtonGoto {
 
     private String mapPath = null;

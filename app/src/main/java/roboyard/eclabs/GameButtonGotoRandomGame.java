@@ -1,8 +1,5 @@
 package roboyard.eclabs;
 
-/**
- * Created by Alain on 25/02/2015.
- */
 public class GameButtonGotoRandomGame extends GameButtonGoto{
     public GameButtonGotoRandomGame(int x, int y, int w, int h, int imageUp, int imageDown, int target)
     {

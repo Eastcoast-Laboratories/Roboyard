@@ -24,10 +24,10 @@ public class LevelChoiceGameScreen extends GameScreen {
     private static GameButtonGotoLevelGame lastButtonUsed = null;
 
     /*
-     * Game screen de choix de niveaux
-     * @param firstLevel : numero de la première carte, 0 -> generatedMap_0.txt
-     * @param leftScreen : reference du gameScreen de choix de niveau précédent (-1 s'il n'y en a pas)
-     * @param rightScreen : reference du gameScreen de choix de niveau suivant (-1 s'il n'y en a pas)
+     * Game screen for level selection
+     * @param firstLevel : number of the first map, 0 -> generatedMap_0.txt
+     * @param leftScreen : reference to the previous level selection game screen (-1 if none)
+     * @param rightScreen : reference to the next level selection game screen (-1 if none)
      */
     public LevelChoiceGameScreen(GameManager gameManager, int firstLev, int lScreen, int rScreen){
 
@@ -47,8 +47,7 @@ public class LevelChoiceGameScreen extends GameScreen {
     public void create() {
 
 
-        //Il faut charger ces deux images dès le début de l'application,
-        //Ces deux lignes sont necessaires
+        //These images must be loaded at the beginning of the application,
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_played);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_down_played);
 
@@ -62,7 +61,7 @@ public class LevelChoiceGameScreen extends GameScreen {
     }
 
     /**
-     * create buttons to load Levels
+     * Create buttons to load levels
      */
     public void createButtons()
     {
@@ -150,6 +149,7 @@ public class LevelChoiceGameScreen extends GameScreen {
         for (int i = 0;  i < cols*rows;  i++) {
             col = i % cols;
             row = (i / cols) % rows;
+            // write the number of the level:
             renderManager.drawText((int)((55+(stepX*col))*ratioW)-10, (int)((45+ts+(stepY*row))*ratioH), (i+1) + ".");
         }
         super.draw(renderManager);

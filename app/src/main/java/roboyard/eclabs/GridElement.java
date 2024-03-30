@@ -1,58 +1,83 @@
 package roboyard.eclabs;
 
 /**
- * Created by Alain on 21/01/2015.
+ * Represents an element in a grid.
  */
 public class GridElement {
 
-    public static final int dimension = 2 ;
-    //Variable de classe
+    /** The x-coordinate of the grid element. */
+    private int x;
 
-    private int x ;
-    private int y ;
+    /** The y-coordinate of the grid element. */
+    private int y;
+
+    /** The type of the grid element. */
     private String type;
-    //Variables d'instance
 
-    public GridElement(){
-        this(0,0, "mh") ;
-    }
-    //Constructeur par défaut
-
-    public GridElement(int x, int y, String objectType){
-        this.setX(x) ;
-        this.setY(y) ;
+    /**
+     * Constructs a grid element with the specified coordinates and type.
+     *
+     * @param x The x-coordinate of the grid element.
+     * @param y The y-coordinate of the grid element.
+     * @param objectType The type of the grid element.
+     */
+    public GridElement(int x, int y, String objectType) {
+        this.setX(x);
+        this.setY(y);
         this.setType(objectType);
     }
-    //Constructeur avec argument
 
-    public int getX(){
-        return this.x ;
+    /**
+     * Gets the x-coordinate of the grid element.
+     *
+     * @return The x-coordinate of the grid element.
+     */
+    public int getX() {
+        return this.x;
     }
 
-    public void setX(int x){
-        this.x = x ;
-    }
-    //Accesseurs correspondant à la variable x.
-
-    public int getY(){
-        return this.y ;
-    }
-
-    public void setY(int y){
-        this.y = y ;
-    }
-    //Accesseurs correspondant à la variable y.
-
-    public String getType(){
-        return this.type ;
+    /**
+     * Sets the x-coordinate of the grid element.
+     *
+     * @param x The x-coordinate to set.
+     */
+    public void setX(int x) {
+        this.x = x;
     }
 
-    public void setType(String objectType){
-        this.type = objectType ;
+    /**
+     * Gets the y-coordinate of the grid element.
+     *
+     * @return The y-coordinate of the grid element.
+     */
+    public int getY() {
+        return this.y;
     }
-    //Accesseurs correspondant à la variable y.
 
-    public static int quelleDimension(){
-        return dimension ;
+    /**
+     * Sets the y-coordinate of the grid element.
+     *
+     * @param y The y-coordinate to set.
+     */
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    /**
+     * Gets the type of the grid element.
+     *
+     * @return The type of the grid element.
+     */
+    public String getType() {
+        return this.type;
+    }
+
+    /**
+     * Sets the type of the grid element.
+     *
+     * @param objectType The type to set.
+     */
+    public void setType(String objectType) {
+        this.type = objectType;
     }
 }
