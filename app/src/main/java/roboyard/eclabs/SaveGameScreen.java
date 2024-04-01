@@ -4,7 +4,7 @@ import android.graphics.Color;
 import java.util.ArrayList;
 
 /**
- * Created by Alain on 29/03/2015.
+ * Screen for saving and loading games.
  */
 public class SaveGameScreen extends GameScreen {
     private float ratioW;
@@ -13,6 +13,7 @@ public class SaveGameScreen extends GameScreen {
     private int iconSize;
     private int[] buttonPositionsX;
     private int[] buttonPositionsY;
+    private String[] mapUniqueString;
     private int autosaveButtonX;
     private int autosaveButtonY;
     private int backButtonX;
@@ -24,6 +25,7 @@ public class SaveGameScreen extends GameScreen {
 
     @Override
     public void create() {
+        // Load button images and initialize
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_down_saved_used);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved_used);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved);
@@ -33,20 +35,21 @@ public class SaveGameScreen extends GameScreen {
     }
 
     /**
-     * prepare Button Positions and load all saved maps to create a unique string from the mapElements
+     * calculate Button Positions and load all saved maps to create a unique string for each from the mapElements
      */
     private void init() {
-        // Button positions
+        // Button positions and dimensions
         ratioW = ((float) gameManager.getScreenWidth()) / ((float) 1080);
         ratioH = ((float) gameManager.getScreenHeight()) / ((float) 1920);
         int hs2 = this.gameManager.getScreenHeight() / 2;
         ts = hs2 / 10;
         iconSize = 144;
 
-        int stepX = 211;
-        int stepY = 222;
-        int cols = 5;
-        int rows = 7;
+        // Calculate button positions for horizontal and vertical layout
+        int stepX = 211; // Horizontal step
+        int stepY = 222; // Vertical step
+        int cols = 5; // Number of columns
+        int rows = 7; // Number of rows
 
         buttonPositionsX = new int[cols * rows];
         buttonPositionsY = new int[cols * rows];
@@ -58,16 +61,31 @@ public class SaveGameScreen extends GameScreen {
             buttonPositionsY[i] = (int) ((45 + ts + (stepY * row)) * ratioH);
         }
 
+        // Calculate positions for autosave button and back button
         autosaveButtonX = (int) (55 * ratioW);
         autosaveButtonY = (int) ((45 + ts) * ratioH);
-
         backButtonX = (int) (814 * ratioW);
         backButtonY = (int) (1650 * ratioH);
+        ArrayList gridElements;
 
-        // TODO: load all saved maps to create a unique string from the mapElements
-
+        // load all saved maps to create a unique string from the mapElements
+        mapUniqueString = new String[cols * rows];
+        for (int i = 0; i < cols * rows; i++) {
+            String mapPath = getMapPath(i);
+            SaveManager saver = new SaveManager(gameManager.getActivity());
+            if(saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
+                String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+                gridElements = MapObjects.extractDataFromString(saveData);
+                mapUniqueString[i] = MapObjects.createStringFromList(gridElements, true);
+            } else {
+                mapUniqueString[i] = "";
+            }
+        }
     }
 
+    /**
+     * Create buttons for saving and loading games.
+     */
     public void createButtons() {
         ArrayList<GameButtonGotoSavedGame> aRemove = new ArrayList<>();
         for (Object currentObject : this.instances) {
@@ -82,10 +100,8 @@ public class SaveGameScreen extends GameScreen {
         String mapPath = "";
         SaveManager saver = new SaveManager(gameManager.getActivity());
 
-        int col, row;
+        // Create buttons for each save slot
         for (int i = 0; i < buttonPositionsX.length; i++) {
-            col = i % 5;
-            row = (i / 5) % 7;
             mapPath = getMapPath(i);
             if (i == 0) {
                 this.instances.add(new GameButtonGotoSavedGame(autosaveButtonX, autosaveButtonY, iconSize * ratioH, iconSize * ratioW, saver.getButtonAutoSaved(mapPath, true), saver.getButtonAutoSaved(mapPath, false), 4, mapPath));
@@ -94,9 +110,16 @@ public class SaveGameScreen extends GameScreen {
             }
         }
 
+        // Add back button
         this.instances.add(new GameButtonGotoBack(backButtonX, backButtonY, (int) (222 * ratioH), (int) (222 * ratioW), R.drawable.bt_back_up, R.drawable.bt_back_down));
     }
 
+    /**
+     * Get the file path for a specific level in the screen.
+     *
+     * @param levelInScreen The level index in the screen.
+     * @return The file path for the level.
+     */
     public static String getMapPath(int levelInScreen) {
         return "map_" + levelInScreen + ".txt";
     }
@@ -108,18 +131,25 @@ public class SaveGameScreen extends GameScreen {
 
     @Override
     public void draw(RenderManager renderManager) {
+        init(); // TODO: call this only if a button was pressed
+
+        // Draw background and text
         renderManager.setColor(Color.parseColor("#cccccc"));
         renderManager.paintScreen();
         renderManager.setColor(Color.BLACK);
 
-        renderManager.setTextSize((int) (0.5 * ts));
+        renderManager.setTextSize((int) (0.4 * ts));
         renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select Savegame");
 
+        // Draw save slots
         for (int i = 0; i < buttonPositionsX.length; i++) {
             if (i == 0) {
-                renderManager.drawText((int) (20 * ratioW), (int) ((42 + ts) * ratioH), "Autosave");
+                renderManager.drawText((int) (20 * ratioW), (int) ((42 + ts) * ratioH)-5, "Autosave");
             } else {
-                renderManager.drawText(buttonPositionsX[i], buttonPositionsY[i], i + ".");
+                renderManager.setColor(Color.BLACK);
+                renderManager.drawText(buttonPositionsX[i], buttonPositionsY[i]-5, (i<10?" ":"") + i + ".");
+                renderManager.setColor(Color.parseColor("#222222"));
+                renderManager.drawText(buttonPositionsX[i]+33, buttonPositionsY[i]-5, mapUniqueString[i]);
             }
         }
 

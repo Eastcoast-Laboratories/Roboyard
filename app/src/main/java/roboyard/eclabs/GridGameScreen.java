@@ -299,7 +299,7 @@ public class GridGameScreen extends GameScreen {
             ArrayList gridElements = getGridElements();
             String autosaveMapPath=SaveGameScreen.getMapPath(0);
             FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
-            FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, MapObjects.createStringFromList(gridElements));
+            FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, MapObjects.createStringFromList(gridElements, false));
             gameManager.requestToast("Autosaving...", false);
             autoSaved = true;
         }

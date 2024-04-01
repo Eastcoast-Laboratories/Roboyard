@@ -4,6 +4,8 @@ CHANGELOG
 ### Version 13.4
 
 - fix game levels
+- show unique string above every savegame
+- 
 
 ### Version 13.2
 

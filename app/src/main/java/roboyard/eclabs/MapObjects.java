@@ -1,5 +1,7 @@
 package roboyard.eclabs;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -32,6 +34,8 @@ public class MapObjects {
         // r=robot (v=green, j=yellow, red, blue)
         // c=target
         // m=wall (horizontal, vertical)
+        // v=vertical wall
+        // h=horizontal wall
         List<String> objectTypes = Arrays.asList("mh", "mv", "rv", "rj", "rr", "rb", "cv", "cj", "cr", "cb", "cm");
 
         // Loop for each type of object
@@ -73,6 +77,7 @@ public class MapObjects {
     /*
      * Generate a string containing all the information from the list
      * @param data List of GridElement containing all the content of the map
+     * @param shortString Boolean if the string is squeezed into 5 letters
      * @return String containing all the map information like
      *   mv16,14;
      *   mv16,15;
@@ -80,7 +85,7 @@ public class MapObjects {
      *   rr12,9;
      *   ...
      */
-    public static String createStringFromList( ArrayList<GridElement> data)
+    public static String createStringFromList( ArrayList<GridElement> data, boolean shortString)
     {
         StringBuilder content = new StringBuilder();
 
@@ -90,6 +95,40 @@ public class MapObjects {
             content.append(currentElement.getType()).append(currentElement.getX()).append(",").append(currentElement.getY()).append(";\n");
         }
 
-        return content.toString();
+        String stringContent;
+        if (shortString) {
+            stringContent = generateUniqueString(content.toString());
+        }else{
+            stringContent = content.toString();
+        }
+
+        return stringContent;
+    }
+
+    public static String generateUniqueString(String input) {
+        try {
+            // Create a SHA-256 message digest instance
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            // Get the hash bytes for the input string
+            byte[] hashBytes = digest.digest(input.getBytes());
+
+            // Convert the hash bytes to a 5-letter string
+            // TODO: create always a vowel and a consonant in a row
+            StringBuilder uniqueString = new StringBuilder();
+            for (int i = 0; i < 5; i++) {
+                // Convert each byte to a positive integer and take modulo 26 to get a letter
+                int index = Math.abs(hashBytes[i]) % 26;
+                // Map the index to an uppercase letter (ASCII code for 'A' is 65)
+                char letter = (char) ('A' + index);
+                // Append the letter to the unique string
+                uniqueString.append(letter);
+            }
+            return uniqueString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // Handle NoSuchAlgorithmException if the specified algorithm is not available
+            e.printStackTrace();
+            return null; // or throw an exception
+        }
     }
 }
