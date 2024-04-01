@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+### Version 13.4
+
+- fix game levels
+
 ### Version 13.2
 
 - add distributionSha256Sum to build options

@@ -327,9 +327,8 @@ public class GridGameScreen extends GameScreen {
             numSolutionClicks = 0;
             currentMovedSquares = 0;
 
-            // show solution as the 2rd to 5th hint
+            // show solution as the 2nd to 5th hint
             showSolutionAtHint = 2 + (int)(Math.random() * ((5 - 2) + 1));
-
             allMoves.clear();
             autoSaved = false;
 
@@ -423,7 +422,8 @@ public class GridGameScreen extends GameScreen {
     {
         this.mapPath = "";
 
-        gridElements = MapObjects.extractDataFromString(FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath));
+        String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+        gridElements = MapObjects.extractDataFromString(saveData);
         GridGameScreen.setMap(gridElements);
 
         createGrid();
@@ -432,14 +432,13 @@ public class GridGameScreen extends GameScreen {
     public void setLevelGame(String mapPath)
     {
         this.mapPath = mapPath;
-        //setGame(mapPath);
 
         System.out.println("SetLevelGame");
-        gridElements = MapObjects.extractDataFromString(FileReadWrite.readAssets(gameManager.getActivity(), mapPath));
+        String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
+        gridElements = MapObjects.extractDataFromString(saveData);
         System.out.println("SetLevelGame, gridElements :"+gridElements.size());
-        // TODO: this doesn't work here:
-        //  GridGameScreen.setMap(gridElements);
-
+        GridGameScreen.setMap(gridElements);
+        numSolutionClicks = 0;
         createGrid();
     }
 
