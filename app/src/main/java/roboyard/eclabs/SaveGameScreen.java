@@ -4,7 +4,7 @@ import android.graphics.Color;
 import java.util.ArrayList;
 
 /**
- * Screen for saving and loading games.
+ * Screen for saving and loading games (screen 9)
  */
 public class SaveGameScreen extends GameScreen {
     private float ratioW;
@@ -18,7 +18,6 @@ public class SaveGameScreen extends GameScreen {
     private int autosaveButtonY;
     private int backButtonX;
     private int backButtonY;
-    private boolean isButtonPressed = false;
 
     public SaveGameScreen(GameManager gameManager) {
         super(gameManager);
@@ -38,7 +37,7 @@ public class SaveGameScreen extends GameScreen {
     /**
      * calculate Button Positions and load all saved maps to create a unique string for each from the mapElements
      */
-    private void init() {
+    public void init() {
         // Button positions and dimensions
         ratioW = ((float) gameManager.getScreenWidth()) / ((float) 1080);
         ratioH = ((float) gameManager.getScreenHeight()) / ((float) 1920);
@@ -88,6 +87,7 @@ public class SaveGameScreen extends GameScreen {
      * Create buttons for saving and loading games.
      */
     public void createButtons() {
+        init();
         ArrayList<GameButtonGotoSavedGame> aRemove = new ArrayList<>();
         for (Object currentObject : this.instances) {
             if (currentObject.getClass() == GameButtonGotoSavedGame.class) {
@@ -132,11 +132,6 @@ public class SaveGameScreen extends GameScreen {
 
     @Override
     public void draw(RenderManager renderManager) {
-        if (isButtonPressed) {
-            init(); // Call init() only if a button was pressed
-            isButtonPressed = false; // Reset the flag after calling init()
-        }
-
         // Draw background and text
         renderManager.setColor(Color.parseColor("#cccccc"));
         renderManager.paintScreen();

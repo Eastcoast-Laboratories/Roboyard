@@ -1,29 +1,28 @@
 package roboyard.eclabs;
 
 import android.util.SparseArray;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
- * Represents a button that navigates to a saved game.
+ * Represents a button to save or load a game.
  */
 public class GameButtonGotoSavedGame extends GameButtonGoto {
 
     private String mapPath = null;
 
     /**
-     * Constructs a GameButtonGotoSavedGame object.
+     * Constructor for GameButtonGotoSavedGame.
      * @param x The x-coordinate of the button.
      * @param y The y-coordinate of the button.
      * @param w The width of the button.
      * @param h The height of the button.
-     * @param imageUp The image resource ID when the button is not pressed.
-     * @param imageDown The image resource ID when the button is pressed.
-     * @param target The target screen to navigate to.
-     * @param filePath The file path of the saved game.
+     * @param imageUp The image when the button is not pressed.
+     * @param imageDown The image when the button is pressed.
+     * @param target The target screen number.
+     * @param filePath The file path associated with the button.
      */
     public GameButtonGotoSavedGame(float x, float y, float w, float h, int imageUp, int imageDown, int target, String filePath) {
         super((int)x, (int)y, (int)w, (int)h, imageUp, imageDown, target);
@@ -38,19 +37,14 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     public void onClick(GameManager gameManager) {
         if (gameManager.getPreviousScreenKey() == 4) {
             // Screen to save or overwrite a savegame
-
-            ArrayList gridElements = ((GridGameScreen)gameManager.getScreens().get(gameManager.getPreviousScreenKey())).getGridElements();
-
+            ArrayList gridElements = ((GridGameScreen) gameManager.getScreens().get(gameManager.getPreviousScreenKey())).getGridElements();
             FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
             FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, MapObjects.createStringFromList(gridElements, false));
             addMapsSaved(gameManager);
-            SparseArray<GameScreen> screens = gameManager.getScreens();
-            for (int i = 0; i < screens.size(); i++) {
-                if (screens.get(i).getClass() == SaveGameScreen.class) {
-                    // redraw save buttons with new state of the saved game
-                    ((SaveGameScreen) screens.get(i)).createButtons();
-                }
-            }
+
+            // redraw save buttons with new state of the saved game
+            SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
+            saveGameScreen.createButtons();
         } else {
             // Screen to select a savegame
             SaveManager saver = new SaveManager(gameManager.getActivity());

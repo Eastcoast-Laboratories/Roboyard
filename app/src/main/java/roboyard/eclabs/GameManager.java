@@ -47,27 +47,28 @@ public class GameManager {
         this.activity = activity;
 
         // List of all screens
-        /* screen 1: second start screen
+        /* screen 0: start screen
+         * screen 1: second start screen
          * screen 2: settings
          * screen 3: credits
          * screen 4: start random game
          * screen 5-8: start level game
          * screen 9: save games
          */
-        this.screens.append(0, new MainMenuGameScreen(this));
-        this.screens.append(1, new GameOptionsGameScreen(this));
-        this.screens.append(2, new SettingsGameScreen(this));
-        this.screens.append(3, new CreditsGameScreen(this, activity));
-        this.screens.append(4, new GridGameScreen(this));
-        this.screens.append(5, new LevelChoiceGameScreen(this, 0, -1, 6));
-        this.screens.append(6, new LevelChoiceGameScreen(this, 15, 5, 7));
-        this.screens.append(7, new LevelChoiceGameScreen(this, 30, 6, 8));
-        this.screens.append(8, new LevelChoiceGameScreen(this, 45, 7, -1));
-        this.screens.append(9, new SaveGameScreen(this));
+        this.screens.append(Constants.SCREEN_START, new MainMenuGameScreen(this));
+        this.screens.append(Constants.SCREEN_SECOND_START, new GameOptionsGameScreen(this));
+        this.screens.append(Constants.SCREEN_SETTINGS, new SettingsGameScreen(this));
+        this.screens.append(Constants.SCREEN_CREDITS, new CreditsGameScreen(this, activity));
+        this.screens.append(Constants.SCREEN_RANDOM_GAME, new GridGameScreen(this));
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START,     new LevelChoiceGameScreen(this, 0, -1, 6));
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 1, new LevelChoiceGameScreen(this, 15, 5, 7));
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 2, new LevelChoiceGameScreen(this, 30, 6, 8));
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_END, new LevelChoiceGameScreen(this, 45, 7, -1));
+        this.screens.append(Constants.SCREEN_SAVE_GAMES, new SaveGameScreen(this));
         // End of list of all screens
 
-        this.currentScreen = this.screens.get(0);
-        this.previousScreen = this.screens.get(0);
+        this.currentScreen = this.screens.get(Constants.SCREEN_START);
+        this.previousScreen = this.screens.get(Constants.SCREEN_START);
     }
 
     /**
