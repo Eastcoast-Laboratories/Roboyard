@@ -18,6 +18,7 @@ public class SaveGameScreen extends GameScreen {
     private int autosaveButtonY;
     private int backButtonX;
     private int backButtonY;
+    private boolean isButtonPressed = false;
 
     public SaveGameScreen(GameManager gameManager) {
         super(gameManager);
@@ -131,7 +132,10 @@ public class SaveGameScreen extends GameScreen {
 
     @Override
     public void draw(RenderManager renderManager) {
-        init(); // TODO: call this only if a button was pressed
+        if (isButtonPressed) {
+            init(); // Call init() only if a button was pressed
+            isButtonPressed = false; // Reset the flag after calling init()
+        }
 
         // Draw background and text
         renderManager.setColor(Color.parseColor("#cccccc"));

@@ -105,6 +105,11 @@ public class MapObjects {
         return stringContent;
     }
 
+    /*
+     * Generate a unique string from the input string
+     * @param input The input string
+     * @return A unique 5-letter string altering between vowels and consonants
+     */
     public static String generateUniqueString(String input) {
         try {
             // Create a SHA-256 message digest instance
@@ -113,14 +118,17 @@ public class MapObjects {
             // Get the hash bytes for the input string
             byte[] hashBytes = digest.digest(input.getBytes());
 
-            // Convert the hash bytes to a 5-letter string
-            // TODO: create always a vowel and a consonant in a row
+            // Define vowels and consonants
+            char[] vowels = {'A', 'E', 'I', 'O', 'U'};
+            char[] consonants = {'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'};
+
+            // Convert the hash bytes to a 5-letter string, alternating between vowels and consonants
             StringBuilder uniqueString = new StringBuilder();
             for (int i = 0; i < 5; i++) {
                 // Convert each byte to a positive integer and take modulo 26 to get a letter
-                int index = Math.abs(hashBytes[i]) % 26;
+                int index = Math.abs(hashBytes[i]) % (i % 2 == 0 ? consonants.length : vowels.length);
                 // Map the index to an uppercase letter (ASCII code for 'A' is 65)
-                char letter = (char) ('A' + index);
+                char letter = (i % 2 == 0 ? consonants[index] : vowels[index]);
                 // Append the letter to the unique string
                 uniqueString.append(letter);
             }
