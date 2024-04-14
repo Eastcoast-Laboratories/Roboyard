@@ -1,6 +1,15 @@
 Changelog Deutsch
 =================
 
+### Version 14
+
+- Level-Games repariert
+- Eindeutige Zeichenfolge über jedem Spielstand und eine eindeutige Hintergrundfarbe hinzugefügt
+
+### Version 13.2
+
+- `distributionSha256Sum` zu den Build-Optionen hinzugefügt
+
 ### Version 13.1
 
 - Nicht benötigte INTERNET permission entfernt

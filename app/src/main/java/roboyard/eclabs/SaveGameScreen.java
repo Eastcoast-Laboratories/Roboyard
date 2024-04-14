@@ -14,6 +14,7 @@ public class SaveGameScreen extends GameScreen {
     private int[] buttonPositionsX;
     private int[] buttonPositionsY;
     private String[] mapUniqueString;
+    private String[] mapUniqueColor;
     private int autosaveButtonX;
     private int autosaveButtonY;
     private int backButtonX;
@@ -70,6 +71,7 @@ public class SaveGameScreen extends GameScreen {
 
         // load all saved maps to create a unique string from the mapElements
         mapUniqueString = new String[cols * rows];
+        mapUniqueColor = new String[cols * rows];
         for (int i = 0; i < cols * rows; i++) {
             String mapPath = getMapPath(i);
             SaveManager saver = new SaveManager(gameManager.getActivity());
@@ -77,8 +79,10 @@ public class SaveGameScreen extends GameScreen {
                 String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
                 gridElements = MapObjects.extractDataFromString(saveData);
                 mapUniqueString[i] = MapObjects.createStringFromList(gridElements, true);
+                mapUniqueColor[i] = MapObjects.generateHexColorFromString(mapUniqueString[i]);
             } else {
                 mapUniqueString[i] = "";
+                mapUniqueColor[i] = "#000000";
             }
         }
     }
@@ -145,10 +149,20 @@ public class SaveGameScreen extends GameScreen {
             if (i == 0) {
                 renderManager.drawText((int) (20 * ratioW), (int) ((42 + ts) * ratioH)-5, "Autosave");
             } else {
-                renderManager.setColor(Color.BLACK);
-                renderManager.drawText(buttonPositionsX[i], buttonPositionsY[i]-5, (i<10?" ":"") + i + ".");
-                renderManager.setColor(Color.parseColor("#222222"));
-                renderManager.drawText(buttonPositionsX[i]+33, buttonPositionsY[i]-5, mapUniqueString[i]);
+                renderManager.setColor(Color.parseColor(mapUniqueColor[i]));
+                int moveleft=16;
+
+                if (mapUniqueString[i].length() > 0){
+                    // unicode string with 11 filled squares
+                    String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
+                    for (int j = 0; j < 8; j++) {
+                        renderManager.drawText(buttonPositionsX[i] - moveleft, buttonPositionsY[i] - 5 + j * 15, bar);
+                    }
+
+                }
+
+                renderManager.setColor(Color.parseColor("#000000"));
+                renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
             }
         }
 

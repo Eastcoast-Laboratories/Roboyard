@@ -97,7 +97,7 @@ public class MapObjects {
 
         String stringContent;
         if (shortString) {
-            stringContent = generateUniqueString(content.toString());
+            stringContent = generateUnique5LetterFromString(content.toString());
         }else{
             stringContent = content.toString();
         }
@@ -106,11 +106,50 @@ public class MapObjects {
     }
 
     /*
+     * set a color for the unique string depending on the value of the string,
+     * the color is generated from the hex value of the string
+     * - there are only generated light colors
+     *
+     * @param input The input string
+     * @return A light color in hexadecimal format
+     */
+    public static String generateHexColorFromString(String input) {
+        try {
+            // Create a SHA-256 message digest instance
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            // Get the hash bytes for the input string
+            byte[] hashBytes = digest.digest(input.getBytes());
+
+            // Convert the hash bytes to a 6-letter hexadecimal string
+            StringBuilder color = new StringBuilder("#");
+            for (int i = 0; i < 6; i++) {
+                // Convert each byte to a positive integer and take modulo 16 to get a hexadecimal digit
+                int index = Math.abs(hashBytes[i]) % 16;
+                // if it is the first, third or 5th digit, the color should be lighter
+                if (i % 2 == 0 && index <= 4) {
+                    index += 5;
+                }
+                // Map the index to a hexadecimal digit
+                char digit = (char) (index < 10 ? '0' + index : 'A' + index - 10);
+
+                // Append the digit to the color string
+                color.append(digit);
+            }
+            return color.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // Handle NoSuchAlgorithmException if the specified algorithm is not available
+            e.printStackTrace();
+            return null; // or throw an exception
+        }
+    }
+
+    /*
      * Generate a unique string from the input string
      * @param input The input string
      * @return A unique 5-letter string altering between vowels and consonants
      */
-    public static String generateUniqueString(String input) {
+    public static String generateUnique5LetterFromString(String input) {
         try {
             // Create a SHA-256 message digest instance
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

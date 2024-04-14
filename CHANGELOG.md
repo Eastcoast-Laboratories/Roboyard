@@ -1,11 +1,10 @@
 CHANGELOG
 =========
 
-### Version 13.4
+### Version 14
 
 - fix game levels
-- show unique string above every savegame
-- 
+- show a unique string above every savegame and give it a unique background color
 
 ### Version 13.2
 
