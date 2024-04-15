@@ -1,0 +1,3 @@
+- fix game levels
+- show a unique string above every savegame and give it a unique background color
+

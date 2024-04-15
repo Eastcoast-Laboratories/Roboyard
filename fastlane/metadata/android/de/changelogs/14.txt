@@ -1,0 +1,3 @@
+- Level-Games repariert
+- Eindeutige Zeichenfolge über jedem Spielstand und eine eindeutige Hintergrundfarbe hinzugefügt
+
