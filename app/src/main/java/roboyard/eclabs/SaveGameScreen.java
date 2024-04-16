@@ -1,12 +1,18 @@
 package roboyard.eclabs;
 
+import android.content.Intent;
 import android.graphics.Color;
 import java.util.ArrayList;
+import android.graphics.Rect;
+import android.net.Uri;
+
+import java.util.List;
 
 /**
  * Screen for saving and loading games (screen 9)
  */
 public class SaveGameScreen extends GameScreen {
+    private static List<GameButtonLink> links = new ArrayList<>();
     private float ratioW;
     private float ratioH;
     private int ts;
@@ -20,13 +26,15 @@ public class SaveGameScreen extends GameScreen {
     private int backButtonX;
     private int backButtonY;
 
+    int hs2; // Half the screen height
+
     public SaveGameScreen(GameManager gameManager) {
         super(gameManager);
     }
 
     @Override
     public void create() {
-        // Load button images and initialize
+        hs2 = this.gameManager.getScreenHeight() / 2;
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_down_saved_used);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved_used);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved);
@@ -42,7 +50,6 @@ public class SaveGameScreen extends GameScreen {
         // Button positions and dimensions
         ratioW = ((float) gameManager.getScreenWidth()) / ((float) 1080);
         ratioH = ((float) gameManager.getScreenHeight()) / ((float) 1920);
-        int hs2 = this.gameManager.getScreenHeight() / 2;
         ts = hs2 / 10;
         iconSize = 144;
 
@@ -163,20 +170,77 @@ public class SaveGameScreen extends GameScreen {
 
                 renderManager.setColor(Color.parseColor("#000000"));
                 renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
+
+                drawShareSymbol(buttonPositionsX[i] - 15, buttonPositionsY[i] - 15, renderManager);
             }
         }
 
         super.draw(renderManager);
     }
 
+    // Function to draw the Share symbol
+    public static void drawShareSymbol(int x, int y, RenderManager renderManager) {
+        links.clear();
+        int hs2 = 444; // TODO: get the screen height from the game manager
+        int leftPadding = 1;
+        int topPadding = (int)(hs2 * 0.27);
+        drawClickableText(renderManager, x - 22 + leftPadding, y + topPadding, "\u2B24", "https://eclabs.de"); // Circle middle
+        drawClickableText(renderManager, x + leftPadding + 5, y + topPadding + 11, "\u2B24", "https://eclabs.de"); // Circle top right
+        drawClickableText(renderManager, x + leftPadding + 5, y + topPadding - 11, "\u2B24", "https://eclabs.de"); // Circle bottom right
+        drawClickableText(renderManager, x + leftPadding - 10, y + topPadding - 7, "\u27CB", "https://eclabs.de");  // Slash-like diagonal line
+        drawClickableText(renderManager, x + leftPadding - 10 , y+ topPadding + 7, "\u27CD", "https://eclabs.de"); // Backslash-like diagonal line
+    }
+    /**
+     * Draws a clickable link.
+     *
+     * @param renderManager The render manager
+     * @param x             The x-coordinate of the link
+     * @param y             The y-coordinate of the link
+     * @param url           The URL of the link
+     */
+    private static void drawClickableText(RenderManager renderManager, int x, int y, String linkText, String url) {
+        int hs2=444; // TODO: get the screen height from the game manager
+        Rect rect = renderManager.drawLinkText(x, y, linkText, Color.BLACK, (int) (0.7 * (hs2 / 10)));
+        links.add(new GameButtonLink(rect.left, rect.top, rect.right, rect.bottom, url));
+    }
+
+    /**
+     * Opens a link in a web browser.
+     *
+     * @param url The URL to open
+     */
+    private void openLink(String url) {
+        // Create an intent to open a web browser with the specified URL
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        // Start the activity (open the web browser)
+        gameManager.getActivity().startActivity(browserIntent);
+    }
+
+    /**
+     * Updates the Credits screen.
+     *
+     * @param gameManager The game manager
+     */
     @Override
     public void update(GameManager gameManager) {
         super.update(gameManager);
-        if (gameManager.getInputManager().backOccurred()) {
+        InputManager im = gameManager.getInputManager();
+        // Handle back button press to return to the main menu
+        if (im.backOccurred()) {
             gameManager.setGameScreen(gameManager.getPreviousScreenKey());
+        } else if(im.eventHasOccurred()) {
+            for (GameButtonLink link : links) {
+                boolean linkTouched = (im.getTouchX() >= link.getX() && im.getTouchX() <= link.getW()) && (im.getTouchY() >= link.getY() && im.getTouchY() <= link.getH());
+                if(linkTouched) {
+                    openLink(link.getUrl());
+                }
+            }
         }
     }
 
+    /**
+     * Cleans up resources used by the Credits screen.
+     */
     @Override
     public void destroy() {
         super.destroy();
