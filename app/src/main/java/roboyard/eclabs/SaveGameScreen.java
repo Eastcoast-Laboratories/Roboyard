@@ -151,6 +151,8 @@ public class SaveGameScreen extends GameScreen {
         renderManager.setTextSize((int) (0.4 * ts));
         renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select Savegame");
 
+        links.clear();
+
         // Draw save slots
         for (int i = 0; i < buttonPositionsX.length; i++) {
             if (i == 0) {
@@ -180,7 +182,6 @@ public class SaveGameScreen extends GameScreen {
 
     // Function to draw the Share symbol
     public static void drawShareSymbol(int x, int y, RenderManager renderManager) {
-        links.clear();
         int hs2 = 444; // TODO: get the screen height from the game manager
         int leftPadding = 1;
         int topPadding = (int)(hs2 * 0.27);
@@ -233,6 +234,7 @@ public class SaveGameScreen extends GameScreen {
                 boolean linkTouched = (im.getTouchX() >= link.getX() && im.getTouchX() <= link.getW()) && (im.getTouchY() >= link.getY() && im.getTouchY() <= link.getH());
                 if(linkTouched) {
                     openLink(link.getUrl());
+                    break;
                 }
             }
         }
