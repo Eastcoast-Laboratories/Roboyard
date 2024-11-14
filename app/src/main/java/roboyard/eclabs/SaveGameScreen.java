@@ -153,7 +153,7 @@ public class SaveGameScreen extends GameScreen {
                 int moveleft=16;
 
                 if (mapUniqueString[i].length() > 0){
-                    // unicode string with 11 filled squares
+                    // unicode string with 7 filled squares
                     String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
                     for (int j = 0; j < 8; j++) {
                         renderManager.drawText(buttonPositionsX[i] - moveleft, buttonPositionsY[i] - 5 + j * 15, bar);
