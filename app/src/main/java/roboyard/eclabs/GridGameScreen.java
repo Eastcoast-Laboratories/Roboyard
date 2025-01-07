@@ -98,7 +98,8 @@ public class GridGameScreen extends GameScreen {
         setDifficulty(ld);
         gridSpace = (float)gameManager.getScreenWidth() / (float)boardSizeX;
         xGrid = 0;
-        yGrid = 1080/5;
+        yGrid = 133; // distance of the grid from the top
+
 
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 

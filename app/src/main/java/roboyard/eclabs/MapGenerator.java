@@ -13,8 +13,9 @@ public class MapGenerator {
     final int boardSizeX=MainActivity.boardSizeX;
     final int boardSizeY=MainActivity.boardSizeY;
 
-    int carrePosX = boardSizeX/2-1; // horizontal position of the top wall of carré, starting with 0
-    int carrePosY = boardSizeY/2-1; // vertical position the left wall of the carré
+    // position of the carré in the middle of the game board
+    int carrePosX = (boardSizeX/2)-1; // horizontal position of the top wall of carré, starting with 0
+    int carrePosY = (boardSizeY/2)-1; // vertical position the left wall of the carré
 
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
