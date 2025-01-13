@@ -31,6 +31,8 @@ public class GamePiece implements IGameObject {
 
     private int image               = 0;
 
+    private int direction; // 0: up, 1: right, 2: down, 3: left
+
     public void setY(int y) {
         this.y = y;
         deltaY = 0;
@@ -68,6 +70,14 @@ public class GamePiece implements IGameObject {
         return x;
     }
 
+    public void setDirection(int direction) {
+        this.direction = direction;
+    }
+
+    public int getDirection(){
+        return this.direction;
+    }
+
     /**
      * Constructor
      * @param x
@@ -82,6 +92,8 @@ public class GamePiece implements IGameObject {
         this.color = color;
         this.curMoveSquares=0;
         // this.numSquaresMoved=0;
+
+        this.direction = 1; // right
 
         switch(color)
         {
@@ -101,7 +113,6 @@ public class GamePiece implements IGameObject {
                 image = 0;
                 break;
         }
-
     }
 
     public void setGridDimensions(int xGrid, int yGrid, float cellSize){
@@ -128,7 +139,23 @@ public class GamePiece implements IGameObject {
         yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.heightCell);
         // renderManager.drawCircle(xDraw, yDraw, this.radius);
 
-
+        switch (color) {
+            case Color.RED:
+                image = (this.direction==3) ? R.drawable.robot_red_left : R.drawable.robot_red_right;
+                break;
+            case Color.YELLOW:
+                image = (this.direction==3) ? R.drawable.robot_yellow_left : R.drawable.robot_yellow_right;
+                break;
+            case Color.BLUE:
+                image = (this.direction==3) ? R.drawable.robot_blue_left : R.drawable.robot_blue_right;
+                break;
+            case Color.GREEN:
+                image = (this.direction==3) ? R.drawable.robot_green_left : R.drawable.robot_green_right;
+                break;
+            default:
+                image = 0;
+                break;
+        }
         renderManager.drawImage(xDraw-this.radius, yDraw-this.radius, xDraw+this.radius, yDraw+this.radius, this.image);
     }
 

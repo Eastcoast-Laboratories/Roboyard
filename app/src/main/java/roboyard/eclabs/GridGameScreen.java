@@ -114,6 +114,12 @@ public class GridGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.robot_green_right);
         gameManager.getRenderManager().loadImage(R.drawable.robot_red_right);
 
+        // robots facing left:
+        gameManager.getRenderManager().loadImage(R.drawable.robot_yellow_left);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_blue_left);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_green_left);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_red_left);
+
     }
 
     public static String getLevel() {
@@ -304,6 +310,7 @@ public class GridGameScreen extends GameScreen {
             gameManager.requestToast("Autosaving...", false);
             autoSaved = true;
         }
+
 
         if(imageLoaded)
         {
@@ -660,6 +667,8 @@ public class GridGameScreen extends GameScreen {
             }
             p.setxObjective(xDestination);
             p.setyObjective(yDestination);
+
+            p.setDirection(direction);
 
             editDestination(p, direction, true);
             numSquares++;
