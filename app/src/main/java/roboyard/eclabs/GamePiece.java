@@ -86,16 +86,16 @@ public class GamePiece implements IGameObject {
         switch(color)
         {
             case Color.RED:
-                image = R.drawable.rr;
+                image = R.drawable.robot_red_right;
                 break;
             case Color.YELLOW:
-                image = R.drawable.rj;
+                image = R.drawable.robot_yellow_right;
                 break;
             case Color.BLUE:
-                image = R.drawable.rb;
+                image = R.drawable.robot_blue_right;
                 break;
             case Color.GREEN:
-                image = R.drawable.rv;
+                image = R.drawable.robot_green_right;
                 break;
             default:
                 image = 0;

@@ -55,7 +55,10 @@ public class MapGenerator {
     }
 
     public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {
-        String[] gameElementTypes = {"rv", "rj", "rr", "rb", "cv", "cj", "cr", "cb", "cm"};
+        String[] gameElementTypes = {
+                "rv", "rj", "rr", "rb", // robots
+                "cv", "cj", "cr", "cb", "cm" // wall (mur)
+        };
         for (GridElement e: data){
             if(Arrays.asList(gameElementTypes).contains(e.getType())){
                 data.remove(e);

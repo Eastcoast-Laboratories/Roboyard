@@ -36,26 +36,12 @@ public class RRGetMap {
         colors.put("rb", Color.BLUE);
         colors.put("rv", Color.GREEN);
         colors.put("rj", Color.YELLOW);
+
         colors.put("cr", Color.RED);
         colors.put("cb", Color.BLUE);
         colors.put("cv", Color.GREEN);
         colors.put("cj", Color.YELLOW);
         colors.put("cm", 0);      // no color
-
-
-        //Todo : Remplacer par les lignes précédentes
-
-          /*
-        colors.put("rr", 1);
-        colors.put("rb", 2);
-        colors.put("rv", 3);
-        colors.put("rj", 4);
-        colors.put("cr", 1);
-        colors.put("cb", 2);
-        colors.put("cv", 3);
-        colors.put("cj", 4);
-        colors.put("cm", 0);
-        */
 
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;

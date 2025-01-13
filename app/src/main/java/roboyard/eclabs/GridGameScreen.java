@@ -109,10 +109,10 @@ public class GridGameScreen extends GameScreen {
 
         prevTime = System.currentTimeMillis();
 
-        gameManager.getRenderManager().loadImage(R.drawable.rj);
-        gameManager.getRenderManager().loadImage(R.drawable.rb);
-        gameManager.getRenderManager().loadImage(R.drawable.rv);
-        gameManager.getRenderManager().loadImage(R.drawable.rr);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_yellow_right);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_blue_right);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_green_right);
+        gameManager.getRenderManager().loadImage(R.drawable.robot_red_right);
 
     }
 
@@ -155,7 +155,7 @@ public class GridGameScreen extends GameScreen {
         gmi = new GameMovementInterface();
 
         xGrid = 0;
-        yGrid = 1080/5;
+        yGrid = 1080/4;
 
         int visibleScreenHeight=gameManager.getScreenHeight(); // bei 720x1280:1184px
 
@@ -473,10 +473,10 @@ public class GridGameScreen extends GameScreen {
         drawables.put("mh", currentRenderManager.getResources().getDrawable(R.drawable.mh)); // horizontal lines
         drawables.put("mv", currentRenderManager.getResources().getDrawable(R.drawable.mv)); // vertical lines
 
-        drawables.put("rv", currentRenderManager.getResources().getDrawable(R.drawable.rv)); // green robot
-        drawables.put("rr", currentRenderManager.getResources().getDrawable(R.drawable.rr)); // red
-        drawables.put("rj", currentRenderManager.getResources().getDrawable(R.drawable.rj)); // yellow
-        drawables.put("rb", currentRenderManager.getResources().getDrawable(R.drawable.rb)); // blue
+        drawables.put("rv", currentRenderManager.getResources().getDrawable(R.drawable.robot_green_right)); // green robot
+        drawables.put("rr", currentRenderManager.getResources().getDrawable(R.drawable.robot_red_right)); // red
+        drawables.put("rj", currentRenderManager.getResources().getDrawable(R.drawable.robot_yellow_right)); // yellow
+        drawables.put("rb", currentRenderManager.getResources().getDrawable(R.drawable.robot_blue_right)); // blue
 
         drawables.put("cv", currentRenderManager.getResources().getDrawable(R.drawable.cv)); // green goal
         drawables.put("cr", currentRenderManager.getResources().getDrawable(R.drawable.cr)); // ...

@@ -36,8 +36,9 @@ public class MapObjects {
         // m=wall (horizontal, vertical)
         // v=vertical wall
         // h=horizontal wall
-        List<String> objectTypes = Arrays.asList("mh", "mv", "rv", "rj", "rr", "rb", "cv", "cj", "cr", "cb", "cm");
-
+        List<String> objectTypes = Arrays.asList("mh", "mv", // wall (mur)
+                "rv", "rj", "rr", "rb", // robots
+                "cv", "cj", "cr", "cb", "cm"); // targets (cible)
         // Loop for each type of object
         for(final String objectType: objectTypes) {
 
