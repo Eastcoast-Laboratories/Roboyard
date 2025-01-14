@@ -27,8 +27,8 @@ import roboyard.pm.ia.ricochet.RRGameMove;
 public class GridGameScreen extends GameScreen {
     private final Canvas canvasGrid;
 
-    private final int wallThickness = 6; // thickness of walls
-    private final ColorFilter wallColor = new PorterDuffColorFilter(Color.rgb(44, 96, 0), PorterDuff.Mode.SRC_ATOP); // green
+    private final int wallThickness = 16; // thickness of walls
+    // private final ColorFilter wallColor = new PorterDuffColorFilter(Color.rgb(44, 96, 0), PorterDuff.Mode.SRC_ATOP); // green
     private boolean isSolved = false;
     private int solutionMoves = 0; // store the optimal number of moves for the solution globally
     private int NumDifferentSolutionsFound = 0; // store the number of different solution globally
@@ -475,10 +475,11 @@ public class GridGameScreen extends GameScreen {
         currentRenderManager.setTarget(canvasGrid);
 
         drawables.put("grid", currentRenderManager.getResources().getDrawable(R.drawable.grid)); // white background
-        drawables.put("grid_tiles", currentRenderManager.getResources().getDrawable(R.drawable.grid_tiles)); // white background for other than 16x16 boards
+        drawables.put("grid_tiles", currentRenderManager.getResources().getDrawable(R.drawable.grid_tiles)); // white background for 14x16 boards
+        drawables.put("grid_14x16", currentRenderManager.getResources().getDrawable(R.drawable.grid_14x16)); // white background for other than 16x16 boards
         drawables.put("roboyard", currentRenderManager.getResources().getDrawable(R.drawable.roboyard)); // center roboyard in carré
-        drawables.put("mh", currentRenderManager.getResources().getDrawable(R.drawable.mh)); // horizontal lines
-        drawables.put("mv", currentRenderManager.getResources().getDrawable(R.drawable.mv)); // vertical lines
+        drawables.put("mh", currentRenderManager.getResources().getDrawable(R.drawable.mh)); // horizontal lines (hedge)
+        drawables.put("mv", currentRenderManager.getResources().getDrawable(R.drawable.mv)); // vertical lines (hedge)
 
         drawables.put("rv", currentRenderManager.getResources().getDrawable(R.drawable.robot_green_right)); // green robot
         drawables.put("rr", currentRenderManager.getResources().getDrawable(R.drawable.robot_red_right)); // red
@@ -494,6 +495,9 @@ public class GridGameScreen extends GameScreen {
         // white background of grid
         if(boardSizeX == 16 && boardSizeY<=16){
             drawables.get("grid").setBounds(0, 0,(int)( boardSizeX * gridSpace),(int)( boardSizeY * gridSpace));
+            drawables.get("grid").draw(canvasGrid);
+        }else if(boardSizeX == 14 && boardSizeY==16){
+            drawables.get("grid_14x16").setBounds(0, 0,(int)( boardSizeX * gridSpace),(int)( boardSizeY * gridSpace));
             drawables.get("grid").draw(canvasGrid);
         }else{
             // grid with fine lines that gives other sizes some orientation
@@ -520,15 +524,22 @@ public class GridGameScreen extends GameScreen {
             GridElement myp = (GridElement) element;
 
             if (myp.getType().equals("mh")) {
-                drawables.get("mh").setBounds((int)(myp.getX() * gridSpace), (int)(myp.getY() * gridSpace -2), (int)((myp.getX() + 1) * gridSpace), (int)(myp.getY() * gridSpace + wallThickness));
-                drawables.get("mh").setColorFilter(wallColor);
+                drawables.get("mh").setBounds((int)(myp.getX() * gridSpace - 7),
+                        (int)(myp.getY() * gridSpace - 14),
+                        (int)((myp.getX() + 1) * gridSpace + 7),
+                        (int)(myp.getY() * gridSpace + wallThickness - 1));
+                // drawables.get("mh").setColorFilter(wallColor);
                 drawables.get("mh").draw(canvasGrid);
             }
 
             if (myp.getType().equals("mv")) {
                 // vertical lines
-                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - 5), (int)(myp.getY() * gridSpace), (int)(myp.getX() * gridSpace + wallThickness - 3), (int)((myp.getY() + 1) * gridSpace));
-                drawables.get("mv").setColorFilter(wallColor);
+                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - 15),
+                        (int)(myp.getY() * gridSpace - 7),
+                        (int)(myp.getX() * gridSpace + wallThickness - 1),
+                        (int)((myp.getY() + 1) * gridSpace + 7)
+                );
+                // drawables.get("mv").setColorFilter(wallColor);
                 drawables.get("mv").draw(canvasGrid);
             }
         }
