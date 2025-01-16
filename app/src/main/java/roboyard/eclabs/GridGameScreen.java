@@ -26,9 +26,6 @@ import roboyard.pm.ia.ricochet.RRGameMove;
  */
 public class GridGameScreen extends GameScreen {
     private final Canvas canvasGrid;
-
-    private final int wallThickness = 16; // thickness of walls
-    // private final ColorFilter wallColor = new PorterDuffColorFilter(Color.rgb(44, 96, 0), PorterDuff.Mode.SRC_ATOP); // green
     private boolean isSolved = false;
     private int solutionMoves = 0; // store the optimal number of moves for the solution globally
     private int NumDifferentSolutionsFound = 0; // store the number of different solution globally
@@ -498,7 +495,7 @@ public class GridGameScreen extends GameScreen {
             drawables.get("grid").draw(canvasGrid);
         }else if(boardSizeX == 14 && boardSizeY==16){
             drawables.get("grid_14x16").setBounds(0, 0,(int)( boardSizeX * gridSpace),(int)( boardSizeY * gridSpace));
-            drawables.get("grid").draw(canvasGrid);
+            drawables.get("grid_14x16").draw(canvasGrid);
         }else{
             // grid with fine lines that gives other sizes some orientation
             drawables.get("grid_tiles").setBounds(0, 0,(int)( boardSizeX * gridSpace),(int)( boardSizeY * gridSpace));
@@ -519,27 +516,29 @@ public class GridGameScreen extends GameScreen {
             }
         }
 
+        int stretchWall = 12; // strech all walls
+        int offsetWall = -2;
+        int wallThickness = 16; // thickness of walls
+
         // draw horizontal lines
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
 
             if (myp.getType().equals("mh")) {
-                drawables.get("mh").setBounds((int)(myp.getX() * gridSpace - 7),
-                        (int)(myp.getY() * gridSpace - 14),
-                        (int)((myp.getX() + 1) * gridSpace + 7),
-                        (int)(myp.getY() * gridSpace + wallThickness - 1));
-                // drawables.get("mh").setColorFilter(wallColor);
+                drawables.get("mh").setBounds((int)(myp.getX() * gridSpace - stretchWall), // left x
+                        (int)(myp.getY() * gridSpace - 11 + offsetWall), // left y
+                        (int)((myp.getX() + 1) * gridSpace + stretchWall), // right x
+                        (int)(myp.getY() * gridSpace + wallThickness + offsetWall)); // right y
                 drawables.get("mh").draw(canvasGrid);
             }
 
             if (myp.getType().equals("mv")) {
                 // vertical lines
-                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - 15),
-                        (int)(myp.getY() * gridSpace - 7),
-                        (int)(myp.getX() * gridSpace + wallThickness - 1),
-                        (int)((myp.getY() + 1) * gridSpace + 7)
+                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - 11 + offsetWall), // left x
+                        (int)(myp.getY() * gridSpace - stretchWall), // left y
+                        (int)(myp.getX() * gridSpace + wallThickness + offsetWall), // right x
+                        (int)((myp.getY() + 1) * gridSpace + stretchWall) // right y
                 );
-                // drawables.get("mv").setColorFilter(wallColor);
                 drawables.get("mv").draw(canvasGrid);
             }
         }

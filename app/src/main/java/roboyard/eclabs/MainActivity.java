@@ -33,8 +33,9 @@ public class MainActivity extends Activity
 
 
     // used in GridGameScreen, MapGenerator and both solvers:
-    public static final int boardSizeX=16; // TODO: crashes on size <12, solver doesn't work on size larger >16
+    public static final int boardSizeX = 16; // TODO: crashes on size <12, solver doesn't work on size larger >16
     public static final int boardSizeY=16; // test with 12x12 grid works fine
+    // TODO: add option to change this in settings and store the size in savegames
 
     public void init() {
         Display display = getWindowManager().getDefaultDisplay();

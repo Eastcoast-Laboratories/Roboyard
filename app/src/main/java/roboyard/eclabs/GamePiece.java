@@ -16,7 +16,7 @@ public class GamePiece implements IGameObject {
     private int yDraw               = 0;
     private float widthCell         = MainActivity.boardSizeX;
     private float heightCell        = MainActivity.boardSizeY;
-    private int radius              = 32;
+    private int radius;
     private int color               = Color.RED;
     private boolean inMovement      = false;
     private int deltaX              = 0;
@@ -24,8 +24,8 @@ public class GamePiece implements IGameObject {
     private int curMoveSquares      = 0;
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
-    private final int extraSizeForRobotsAndTargets = 1; // robots and targets are 1px larger than the grid and may overlap 1 px
-    private final int toleranceForInputManagerTouch = 1000; // virtual circle around robot to touch
+    private final int extraSizeForRobotsAndTargets = 5; // robots and targets are 4px larger than the grid and may overlap 4 px
+    private final int toleranceForInputManagerTouch = 1555; // virtual circle around robot to touch
 
     private boolean testIfWon       = true;
 
@@ -130,6 +130,7 @@ public class GamePiece implements IGameObject {
     public void load(RenderManager renderManager){
     }
 
+    /** Draw the robots on the screen */
     @Override
     public void draw(RenderManager renderManager){
         //renderManager.setColor(this.color);
