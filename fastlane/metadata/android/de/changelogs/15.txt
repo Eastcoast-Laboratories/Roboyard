@@ -1,1 +1,2 @@
 - Neues Design für die Roboter, Ziele und das Spielfeld
+- Zusätzliche Berührungstoleranz, wenn alle Roboter mehr als ein Quadrat voneinander entfernt sind

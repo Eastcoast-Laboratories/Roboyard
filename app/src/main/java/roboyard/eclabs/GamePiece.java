@@ -24,7 +24,7 @@ public class GamePiece implements IGameObject {
     private int curMoveSquares      = 0;
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
-    private final int extraSizeForRobotsAndTargets = 5; // robots and targets are 4px larger than the grid and may overlap 4 px
+    private final int extraSizeForRobotsAndTargets = 10; // robots and targets are 4px larger than the grid and may overlap 4 px
 
     private boolean testIfWon       = true;
 
