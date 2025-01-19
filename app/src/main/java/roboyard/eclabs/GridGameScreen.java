@@ -22,7 +22,7 @@ import roboyard.pm.ia.ricochet.RRGameMove;
 // import static android.content.Context.MODE_PRIVATE;
 
 /**
- * Created by Alain on 25/02/2015.
+ * This class represents the game screen where the grid is displayed.
  */
 public class GridGameScreen extends GameScreen {
     private final Canvas canvasGrid;
@@ -48,10 +48,10 @@ public class GridGameScreen extends GameScreen {
 
     private String mapPath = "";
 
-    private int xGrid = 0;
-    private int yGrid = 100;
+    private int xGrid;
+    private int yGrid;
 
-    private float gridSpace = 0;
+    private float gridSpace; // gamescreen width / boardSizeX
 
     private int timeCpt = 0;
     private int nbCoups = 0;
@@ -95,8 +95,7 @@ public class GridGameScreen extends GameScreen {
         setDifficulty(ld);
         gridSpace = (float)gameManager.getScreenWidth() / (float)boardSizeX;
         xGrid = 0;
-        yGrid = 133; // distance of the grid from the top
-
+        yGrid = gameManager.getScreenHeight()/7; // distance of the grid from the top
 
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 
@@ -158,7 +157,7 @@ public class GridGameScreen extends GameScreen {
         gmi = new GameMovementInterface();
 
         xGrid = 0;
-        yGrid = 1080/4;
+        yGrid = gameManager.getScreenHeight()/7;
 
         int visibleScreenHeight=gameManager.getScreenHeight(); // bei 720x1280:1184px
 
@@ -166,6 +165,7 @@ public class GridGameScreen extends GameScreen {
         int dy = visibleScreenHeight-y; // 248
         int buttonW = gameManager.getScreenWidth()/4;
 
+        // TODO: make this depending on the screen size:
         float ratioW = ((float)gameManager.getScreenWidth()) /((float)1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
         float ratioH = ((float)visibleScreenHeight) /((float)1920); // bei 720x1280:0.61667 bei 1440x2580:2.45
         //int buttonPosY = (int)(6.5*dy * ratioH);
@@ -179,7 +179,7 @@ public class GridGameScreen extends GameScreen {
         }
 
         // Button Next game (top right)
-        this.instances.add(new GameButtonGeneral((int)(870*ratioW), (int)(0*ratioH), nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
+        this.instances.add(new GameButtonGeneral((int)(870*ratioW), 0, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
 
         // Button Save
         gameManager.getRenderManager().loadImage(R.drawable.transparent);
@@ -516,9 +516,10 @@ public class GridGameScreen extends GameScreen {
             }
         }
 
-        int stretchWall = 12; // strech all walls
-        int offsetWall = -2;
-        int wallThickness = 16; // thickness of walls
+        int pixel = (int)(gridSpace / 45); // equivalent to a pixel on a 720x1280 screen
+        int stretchWall = 12 * pixel; // strech all walls
+        int offsetWall = -2 * pixel;
+        int wallThickness = 16 * pixel; // thickness of walls
 
         // draw horizontal lines
         for (Object element : gridElements) {
@@ -526,7 +527,7 @@ public class GridGameScreen extends GameScreen {
 
             if (myp.getType().equals("mh")) {
                 drawables.get("mh").setBounds((int)(myp.getX() * gridSpace - stretchWall), // left x
-                        (int)(myp.getY() * gridSpace - 11 + offsetWall), // left y
+                        (int)(myp.getY() * gridSpace - stretchWall + offsetWall), // left y
                         (int)((myp.getX() + 1) * gridSpace + stretchWall), // right x
                         (int)(myp.getY() * gridSpace + wallThickness + offsetWall)); // right y
                 drawables.get("mh").draw(canvasGrid);
@@ -534,7 +535,7 @@ public class GridGameScreen extends GameScreen {
 
             if (myp.getType().equals("mv")) {
                 // vertical lines
-                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - 11 + offsetWall), // left x
+                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - stretchWall + offsetWall), // left x
                         (int)(myp.getY() * gridSpace - stretchWall), // left y
                         (int)(myp.getX() * gridSpace + wallThickness + offsetWall), // right x
                         (int)((myp.getY() + 1) * gridSpace + stretchWall) // right y
@@ -765,6 +766,30 @@ public class GridGameScreen extends GameScreen {
         if(p.getxObjective() == x && p.getyObjective() == y && canMove == true) {
             return false;
         } else return canMove != false;
+    }
+
+    public boolean getRobotsTouching() {
+        for(Object currentObject : this.instances)
+        {
+            if(currentObject.getClass() == GamePiece.class)
+            {
+                for(Object currentObject2 : this.instances)
+                {
+                    if(currentObject2.getClass() == GamePiece.class)
+                    {
+                        if(currentObject != currentObject2)
+                        {
+                            // if the difference between currentObject x and currentObject2 x is equal to 1 or -1 or y
+                            if(Math.abs(((GamePiece) currentObject).getX() - ((GamePiece) currentObject2).getX()) <= 1 && Math.abs(((GamePiece) currentObject).getY() - ((GamePiece) currentObject2).getY()) <= 1)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private class ButtonRestart implements IExecutor{

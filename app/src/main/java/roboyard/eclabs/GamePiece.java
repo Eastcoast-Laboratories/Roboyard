@@ -3,19 +3,19 @@ package roboyard.eclabs;
 import android.graphics.Color;
 
 /**
- * Created by Pierre on 25/02/2015.
+ * this class represents a game piece
  */
 public class GamePiece implements IGameObject {
     private int x                   = 0;
     private int y                   = 0;
     private int xObjective          = 0;
     private int yObjective          = 0;
-    private int xGrid               = 400;
+    private int xGrid               = 400; // TODO: find out, what this is for. only used in draw method when creating the robots and targets and results in a slightly larger image due to extraSizeForRobotsAndTargets
     private int yGrid               = 500;
     private int xDraw               = 0;
     private int yDraw               = 0;
-    private float widthCell         = MainActivity.boardSizeX;
-    private float heightCell        = MainActivity.boardSizeY;
+    private float numSquaresX       = MainActivity.boardSizeX;
+    private float numSquaresY       = MainActivity.boardSizeY;
     private int radius;
     private int color               = Color.RED;
     private boolean inMovement      = false;
@@ -25,7 +25,6 @@ public class GamePiece implements IGameObject {
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
     private final int extraSizeForRobotsAndTargets = 5; // robots and targets are 4px larger than the grid and may overlap 4 px
-    private final int toleranceForInputManagerTouch = 1555; // virtual circle around robot to touch
 
     private boolean testIfWon       = true;
 
@@ -118,7 +117,7 @@ public class GamePiece implements IGameObject {
     public void setGridDimensions(int xGrid, int yGrid, float cellSize){
         this.xGrid = xGrid;
         this.yGrid = yGrid;
-        this.widthCell = this.heightCell = cellSize;
+        this.numSquaresX = this.numSquaresY = cellSize;
         this.radius = (int) (cellSize / 2) + extraSizeForRobotsAndTargets;
     }
 
@@ -136,8 +135,8 @@ public class GamePiece implements IGameObject {
         //renderManager.setColor(this.color);
         //display the piece
 
-        xDraw = (int)(this.xGrid+((this.x+((float)deltaX)/10)+0.5f)*this.widthCell);
-        yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.heightCell);
+        xDraw = (int)(this.xGrid+((this.x+((float)deltaX)/10)+0.5f)*this.numSquaresX); // number of Squares + the movement of the robot +0.5f to round to the nearest integer multiplied by the width of the cell
+        yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.numSquaresY);
         // renderManager.drawCircle(xDraw, yDraw, this.radius);
 
         switch (color) {
@@ -188,9 +187,17 @@ public class GamePiece implements IGameObject {
                 dx = xTouch - this.xDraw;
                 dy = yTouch - this.yDraw;
 
-                // TODO: if two robots touch, set tolerance to 0
+                int thisToleranceForInputManagerTouch;
+                // if two robots touch, set tolerance to 0:
+                if(((GridGameScreen)(gameManager.getCurrentScreen())).getRobotsTouching()) {
+                    thisToleranceForInputManagerTouch = 0;
+                } else {
+                    // TODO: if any are only 2 squares apart make it 155 else larger
+                    thisToleranceForInputManagerTouch = 155 * this.radius;
+                }
+
                 //if the user touched the piece, ...
-                if(dx*dx + dy*dy - toleranceForInputManagerTouch <= this.radius*this.radius && inputManager.downOccurred()){
+                if(dx*dx + dy*dy - thisToleranceForInputManagerTouch <= this.radius*this.radius && inputManager.downOccurred()){
                     // TODO: enlarge and put in front with this.radius+=1;
                     //display the movement interface
                     ((GridGameScreen)(gameManager.getCurrentScreen())).activateInterface(this, xDraw, yDraw);
