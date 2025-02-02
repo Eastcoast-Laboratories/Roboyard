@@ -42,7 +42,7 @@ public class GridGameScreen extends GameScreen {
 
     private boolean autoSaved = false;
 
-    private ArrayList gridElements;
+    private ArrayList<GridElement> gridElements;
     private int imageGridID;
     private boolean imageLoaded = false;
 
@@ -300,7 +300,7 @@ public class GridGameScreen extends GameScreen {
 
         if(timeCpt>=40 && autoSaved == false && mustStartNext==false){
             // save autosave in slot 0
-            ArrayList gridElements = getGridElements();
+            ArrayList<GridElement> gridElements = getGridElements();
             String autosaveMapPath=SaveGameScreen.getMapPath(0);
             FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
             FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, MapObjects.createStringFromList(gridElements, false));
@@ -413,7 +413,7 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
-    public ArrayList getGridElements() {
+    public ArrayList<GridElement> getGridElements() {
         return gridElements;
     }
 

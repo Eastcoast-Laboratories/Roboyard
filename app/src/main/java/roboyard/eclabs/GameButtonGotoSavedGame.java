@@ -37,7 +37,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     public void onClick(GameManager gameManager) {
         if (gameManager.getPreviousScreenKey() == 4) {
             // Screen to save or overwrite a savegame
-            ArrayList gridElements = ((GridGameScreen) gameManager.getScreens().get(gameManager.getPreviousScreenKey())).getGridElements();
+            ArrayList<GridElement> gridElements = ((GridGameScreen) gameManager.getScreens().get(gameManager.getPreviousScreenKey())).getGridElements();
             FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
             FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, MapObjects.createStringFromList(gridElements, false));
             addMapsSaved(gameManager);

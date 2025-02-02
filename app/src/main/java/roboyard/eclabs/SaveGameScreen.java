@@ -67,7 +67,7 @@ public class SaveGameScreen extends GameScreen {
         autosaveButtonY = (int) ((45 + ts) * ratioH);
         backButtonX = (int) (814 * ratioW);
         backButtonY = (int) (1650 * ratioH);
-        ArrayList gridElements;
+        ArrayList<GridElement> gridElements;
 
         // load all saved maps to create a unique string from the mapElements
         mapUniqueString = new String[cols * rows];
