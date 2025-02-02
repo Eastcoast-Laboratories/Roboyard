@@ -1,0 +1,1 @@
+- Verhindert das Einfrieren des Solvers bei schnellem Klicken, während die Hinweisnachricht angezeigt wird oder der Solver läuft.

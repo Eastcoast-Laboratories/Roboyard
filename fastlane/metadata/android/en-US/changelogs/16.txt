@@ -1,0 +1,1 @@
+- Prevent solver freeze on rapid clicking while hint message is showing or solver is running.
