@@ -22,9 +22,9 @@ public class MapObjects {
      * Returns a list of all extracted elements
      * Extracts the data from the _data string
      * Returns a list of all extracted elements
-     * @return ArrayList GridElement
+     * @return ArrayList<GridElement> List of grid elements
      */
-    public static ArrayList extractDataFromString(String data)
+    public static ArrayList<GridElement> extractDataFromString(String data)
     {
         int x = 0;
         int y = 0;
