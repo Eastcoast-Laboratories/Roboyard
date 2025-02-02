@@ -3,6 +3,7 @@
 /.idea/workspace.xml
 /.idea/caches/*
 /.idea/libraries
+/.idea/modules
 .DS_Store
 /build
 /dev/images/yard/
