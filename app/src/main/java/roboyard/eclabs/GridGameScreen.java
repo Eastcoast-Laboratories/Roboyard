@@ -815,21 +815,39 @@ public class GridGameScreen extends GameScreen {
 
     private class ButtonSolution implements IExecutor{
         public void execute(){
-            if(numSolutionClicks >= showSolutionAtHint) {
-                GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
-                showSolution(solution);
-                if(NumDifferentSolutionsFound > 1){
-                    // if solution is shown and there are more than 1 solutions found:
-                    if(numDifferentSolutionClicks >= NumDifferentSolutionsFound-1){
-                        numDifferentSolutionClicks = 0;
-                    }else{
-                        numDifferentSolutionClicks++;
+            // Prevent rapid clicking while toast is showing or solver is running
+            if (!isSolved || t == null || t.isAlive()) {
+                return;
+            }
+            
+            // Check if we have valid solutions
+            if (solver == null || solver.getSolutionList() == null || solver.getSolutionList().isEmpty()) {
+                return;
+            }
+
+            if (numSolutionClicks >= showSolutionAtHint) {
+                try {
+                    GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
+                    if (solution != null) {
+                        showSolution(solution);
+                        if (NumDifferentSolutionsFound > 1) {
+                            // if solution is shown and there are more than 1 solutions found:
+                            if (numDifferentSolutionClicks >= NumDifferentSolutionsFound - 1) {
+                                numDifferentSolutionClicks = 0;
+                            } else {
+                                numDifferentSolutionClicks++;
+                            }
+                            gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
+                        }
                     }
-                    gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
+                } catch (Exception e) {
+                    // Reset state if something goes wrong
+                    numSolutionClicks = 0;
+                    numDifferentSolutionClicks = 0;
                 }
-            }else{
+            } else {
                 numSolutionClicks++;
-                if(numSolutionClicks < showSolutionAtHint) {
+                if (numSolutionClicks < showSolutionAtHint) {
                     gameManager.requestToast("Press again to see the next hint.", false);
                 } else {
                     gameManager.requestToast("Press again to see the solution.", false);
