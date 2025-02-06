@@ -1,6 +1,15 @@
 Changelog Deutsch
 =================
 
+### Version 16
+
+- Verhindert das Einfrieren des Solvers bei schnellem Klicken, während die Hinweisnachricht angezeigt wird oder der Solver läuft.
+
+### Version 15
+
+- Neues Design für die Roboter, Ziele und das Spielfeld
+- Zusatzliche Berücknungstoleranz, wenn alle Roboter mehr als ein Quadrat voneinander entfernt sind
+
 ### Version 14
 
 - Level-Games repariert

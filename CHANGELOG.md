@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+### Version 16
+
+- Prevent solver freeze on rapid clicking while hint message is showing or solver is running.
+
+### Version 15
+
+- new desiged robots, targets and game area
+- add extra touch tolerance if all robots are more than one square apart
+
 ### Version 14
 
 - fix game levels
@@ -158,6 +167,24 @@ New in Insane:
 ### Version 1.0
 
 - last french version
+
+### Änderungen
+
+#### Deutsch
+- Neues Design für die Roboter, Ziele und das Spielfeld
+- Zusätzliche Berührungstoleranz, wenn alle Roboter mehr als ein Quadrat voneinander entfernt sind
+- Verhindert das Einfrieren des Solvers bei schnellem Klicken, während die Hinweisnachricht angezeigt wird oder der Solver läuft.
+- Version 16: fix game levels
+- Version 16: show a unique string above every savegame and give it a unique background color
+- Version 15: add distributionSha256Sum to build options
+
+#### Englisch
+- New designed robots, targets, and game area
+- Add extra touch tolerance if all robots are more than one square apart
+- Prevent solver freeze on rapid clicking while hint message is showing or solver is running.
+- Version 16: fix game levels
+- Version 16: show a unique string above every savegame and give it a unique background color
+- Version 15: add distributionSha256Sum to build options
 
 # These are all relevant changes since Version 1.0:
 

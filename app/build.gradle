@@ -8,8 +8,8 @@ android {
         applicationId "de.z11.roboyard"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 53
-        versionName "16"
+        versionCode 54
+        versionName "16.1"
     }
     buildTypes {
         release {
@@ -40,6 +40,12 @@ android {
             // options.compilerArgs <<"-Xlint:deprecation"
             options.compilerArgs <<"-Xlint:unchecked"
         }
+    }
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
     }
 }
 
