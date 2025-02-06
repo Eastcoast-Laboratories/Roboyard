@@ -56,8 +56,8 @@ public class MapGenerator {
 
     public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {
         String[] gameElementTypes = {
-                "rv", "rj", "rr", "rb", // robots
-                "cv", "cj", "cr", "cb", "cm" // wall (mur)
+                "robot_green", "robot_yellow", "robot_red", "robot_blue", // robots
+                "target_green", "target_yellow", "target_red", "target_blue", "target_multi" // targets (cible)
         };
         for (GridElement e: data){
             if(Arrays.asList(gameElementTypes).contains(e.getType())){
@@ -92,8 +92,8 @@ public class MapGenerator {
     public ArrayList<GridElement> addGameElementsToGameMap(ArrayList<GridElement> data ,int[][] horizontalWalls, int[][]verticalWalls){
 
         boolean abandon;
-        int cibleX;
-        int cibleY;
+        int targetX;
+        int targetY;
         Boolean tempTargetMustBeInCorner;
 
         tempTargetMustBeInCorner = targetMustBeInCorner;
@@ -103,31 +103,31 @@ public class MapGenerator {
         }
         do{
             abandon = false;
-            cibleX = getRandom(0, boardSizeX-1);
-            cibleY = getRandom(0, boardSizeY-1);
+            targetX = getRandom(0, boardSizeX-1);
+            targetY = getRandom(0, boardSizeY-1);
 
-            if(tempTargetMustBeInCorner && horizontalWalls[cibleX][cibleY] == 0 && horizontalWalls[cibleX][cibleY+1] == 0)
+            if(tempTargetMustBeInCorner && horizontalWalls[targetX][targetY] == 0 && horizontalWalls[targetX][targetY+1] == 0)
                 abandon = true;
-            if(tempTargetMustBeInCorner && verticalWalls[cibleX][cibleY] == 0 && verticalWalls[cibleX+1][cibleY] == 0)
+            if(tempTargetMustBeInCorner && verticalWalls[targetX][targetY] == 0 && verticalWalls[targetX+1][targetY] == 0)
                 abandon = true;
 
-            if((cibleX == carrePosX && cibleY == carrePosY)
-                    || (cibleX == carrePosX && cibleY == carrePosY+1)
-                    || (cibleX == carrePosX+1 && cibleY == carrePosY)
-                    || (cibleX == carrePosX+1 && cibleY == carrePosY+1))
+            if((targetX == carrePosX && targetY == carrePosY)
+                    || (targetX == carrePosX && targetY == carrePosY+1)
+                    || (targetX == carrePosX+1 && targetY == carrePosY)
+                    || (targetX == carrePosX+1 && targetY == carrePosY+1))
                 abandon = true; // target was in carré
 
         }while(abandon);
 
-        String[] typesOfCibles = {"cj","cr","cb", "cv", "cm"};
+        String[] typesOfCibles = {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
 
         if(allowMulticolorTarget) {
-            data.add(new GridElement(cibleX, cibleY, typesOfCibles[getRandom(0,4)]));
+            data.add(new GridElement(targetX, targetY, typesOfCibles[getRandom(0,4)]));
         } else {
-            data.add(new GridElement(cibleX, cibleY, typesOfCibles[getRandom(0,3)]));
+            data.add(new GridElement(targetX, targetY, typesOfCibles[getRandom(0,3)]));
         }
 
-        String[] typesOfRobots = {"rr", "rb", "rj", "rv"};
+        String[] typesOfRobots = {"robot_red", "robot_blue", "robot_yellow", "robot_green"};
 
         ArrayList<GridElement> robotsTemp = new ArrayList<>();
 
@@ -150,7 +150,7 @@ public class MapGenerator {
 
                 if((cX == carrePosX && cY == carrePosY) || (cX == carrePosX && cY == carrePosY+1) || (cX == carrePosX+1 && cY == carrePosY) || (cX == carrePosX+1 && cY == carrePosY+1))
                     abandon = true; // robot was inside carré
-                if(cX == cibleX && cY == cibleY)
+                if(cX == targetX && cY == targetY)
                     abandon = true; // robot was target
 
             }while(abandon);

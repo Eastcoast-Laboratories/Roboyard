@@ -478,16 +478,16 @@ public class GridGameScreen extends GameScreen {
         drawables.put("mh", currentRenderManager.getResources().getDrawable(R.drawable.mh)); // horizontal lines (hedge)
         drawables.put("mv", currentRenderManager.getResources().getDrawable(R.drawable.mv)); // vertical lines (hedge)
 
-        drawables.put("rv", currentRenderManager.getResources().getDrawable(R.drawable.robot_green_right)); // green robot
-        drawables.put("rr", currentRenderManager.getResources().getDrawable(R.drawable.robot_red_right)); // red
-        drawables.put("rj", currentRenderManager.getResources().getDrawable(R.drawable.robot_yellow_right)); // yellow
-        drawables.put("rb", currentRenderManager.getResources().getDrawable(R.drawable.robot_blue_right)); // blue
+        drawables.put("robot_green", currentRenderManager.getResources().getDrawable(R.drawable.robot_green_right)); // green robot
+        drawables.put("robot_red", currentRenderManager.getResources().getDrawable(R.drawable.robot_red_right)); // red
+        drawables.put("robot_yellow", currentRenderManager.getResources().getDrawable(R.drawable.robot_yellow_right)); // yellow
+        drawables.put("robot_blue", currentRenderManager.getResources().getDrawable(R.drawable.robot_blue_right)); // blue
 
-        drawables.put("cv", currentRenderManager.getResources().getDrawable(R.drawable.cv)); // green goal
-        drawables.put("cr", currentRenderManager.getResources().getDrawable(R.drawable.cr)); // ...
-        drawables.put("cj", currentRenderManager.getResources().getDrawable(R.drawable.cj)); //
-        drawables.put("cb", currentRenderManager.getResources().getDrawable(R.drawable.cb)); //
-        drawables.put("cm", currentRenderManager.getResources().getDrawable(R.drawable.cm)); // multicolor goal
+        drawables.put("target_red", currentRenderManager.getResources().getDrawable(R.drawable.cr)); // ...
+        drawables.put("target_blue", currentRenderManager.getResources().getDrawable(R.drawable.cb)); // ...
+        drawables.put("target_green", currentRenderManager.getResources().getDrawable(R.drawable.cv)); // ...
+        drawables.put("target_yellow", currentRenderManager.getResources().getDrawable(R.drawable.cj)); // ...
+        drawables.put("target_multi", currentRenderManager.getResources().getDrawable(R.drawable.cm)); // ...
 
         // white background of grid
         if(boardSizeX == 16 && boardSizeY<=16){
@@ -510,7 +510,7 @@ public class GridGameScreen extends GameScreen {
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
 
-            if (myp.getType().equals("cr") || myp.getType().equals("cv") || myp.getType().equals("cj") || myp.getType().equals("cb") || myp.getType().equals("cm")) {
+            if (myp.getType().equals("target_red") || myp.getType().equals("target_green") || myp.getType().equals("target_yellow") || myp.getType().equals("target_blue") || myp.getType().equals("target_multi")) {
                 drawables.get(myp.getType()).setBounds((int)(myp.getX() * gridSpace),(int)( myp.getY() * gridSpace),(int)( (myp.getX() + 1) * gridSpace),(int)( (myp.getY()+1) * gridSpace));
                 drawables.get(myp.getType()).draw(canvasGrid);
             }
@@ -568,15 +568,16 @@ public class GridGameScreen extends GameScreen {
 
     public void createRobots()
     {
-        colors.put("rr", Color.RED);
-        colors.put("rb", Color.BLUE);
-        colors.put("rv", Color.GREEN);
-        colors.put("rj", Color.YELLOW);
+        colors.put("robot_red", Color.RED);
+        colors.put("robot_blue", Color.BLUE);
+        colors.put("robot_green", Color.GREEN);
+        colors.put("robot_yellow", Color.YELLOW);
         
-        colors.put("cr", Color.RED);
-        colors.put("cb", Color.BLUE);
-        colors.put("cv", Color.GREEN);
-        colors.put("cj", Color.YELLOW);
+        colors.put("target_red", Color.RED);
+        colors.put("target_blue", Color.BLUE);
+        colors.put("target_green", Color.GREEN);
+        colors.put("target_yellow", Color.YELLOW);
+        colors.put("target_multi", 0);      // no color
 
         ArrayList<GamePiece> aRemove = new ArrayList<>();
         for(Object currentObject : this.instances)
@@ -594,7 +595,7 @@ public class GridGameScreen extends GameScreen {
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
 
-            if (myp.getType().equals("rr") || myp.getType().equals("rv") || myp.getType().equals("rj") || myp.getType().equals("rb")) {
+            if (myp.getType().equals("robot_red") || myp.getType().equals("robot_green") || myp.getType().equals("robot_yellow") || myp.getType().equals("robot_blue")) {
 
                 GamePiece currentPiece = new GamePiece(myp.getX(), myp.getY(), colors.get(myp.getType()));
                 currentPiece.setGridDimensions(xGrid, yGrid, gridSpace);
@@ -698,13 +699,13 @@ public class GridGameScreen extends GameScreen {
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
             {
-                 if (myp.getType().equals("cm") && myp.getX() == p.getX() && myp.getY() == p.getY())
+                 if (myp.getType().equals("target_multi") && myp.getX() == p.getX() && myp.getY() == p.getY())
                 {
                     sayWon();
 
                     return true;
                 }
-                else if((myp.getX() == p.getX()) && (myp.getY() == p.getY()) && (myp.getType().equals("cr") || myp.getType().equals("cv") || myp.getType().equals("cb") || myp.getType().equals("cj")))
+                else if((myp.getX() == p.getX()) && (myp.getY() == p.getY()) && (myp.getType().equals("target_red") || myp.getType().equals("target_green") || myp.getType().equals("target_blue") || myp.getType().equals("target_yellow")))
                 {
                     if(p.getColor() == colors.get((myp.getType())))
                     {
