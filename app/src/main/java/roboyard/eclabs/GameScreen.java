@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by Pierre on 21/01/2015.
  */
 public abstract class GameScreen implements IGameObject {
-    protected final GameManager gameManager;
+    protected static GameManager gameManager = null;
     protected final ArrayList<IGameObject> instances;
 
     public GameScreen(GameManager gameManager){

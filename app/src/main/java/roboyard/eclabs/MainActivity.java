@@ -33,8 +33,8 @@ public class MainActivity extends Activity
 
 
     // used in GridGameScreen, MapGenerator and both solvers:
-    public static final int boardSizeX = 16; // TODO: crashes on size <12, solver doesn't work on size larger >16
-    public static final int boardSizeY=16; // test with 12x12 grid works fine
+    public static int boardSizeX = 14; // TODO: crashes on size <12, solver doesn't work on size larger >16
+    public static int boardSizeY = 16; // test with 12x12 grid works fine
     // TODO: add option to change this in settings and store the size in savegames
 
     public void init() {
@@ -47,6 +47,13 @@ public class MainActivity extends Activity
         sHeight = size.y;
         this.inputManager = new InputManager();
         this.renderManager = new RenderManager(getResources());
+        
+        // Load board size from preferences
+        String sizeX = preferences.getPreferenceValue(this, "boardSizeX");
+        String sizeY = preferences.getPreferenceValue(this, "boardSizeY");
+        boardSizeX = sizeX.equals("") ? 14 : Integer.parseInt(sizeX);
+        boardSizeY = sizeY.equals("") ? 16 : Integer.parseInt(sizeY);
+        
         this.gameManager = new GameManager(this.inputManager, this.renderManager, this.sWidth, this.sHeight, this);
     }
 
@@ -255,5 +262,14 @@ public class MainActivity extends Activity
             interrupt();
             mRunning = false;
         }
+    }
+
+    public void setBoardSize(Context context, int x, int y) {
+        boardSizeX = x;
+        boardSizeY = y;
+        // Save board size to preferences
+        Preferences prefs = new Preferences();
+        prefs.setPreferences(this, "boardSizeX", String.valueOf(x));
+        prefs.setPreferences(this, "boardSizeY", String.valueOf(y));
     }
 }

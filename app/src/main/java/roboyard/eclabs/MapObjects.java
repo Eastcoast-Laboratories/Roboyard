@@ -29,6 +29,16 @@ public class MapObjects {
         int x = 0;
         int y = 0;
 
+        // First check if the save contains board size information
+        Matcher boardSizeMatcher = Pattern.compile("board:(\\d+),(\\d+);").matcher(data);
+        if (boardSizeMatcher.find()) {
+            int boardX = Integer.parseInt(boardSizeMatcher.group(1));
+            int boardY = Integer.parseInt(boardSizeMatcher.group(2));
+            // Update and persist board size for this game
+            MainActivity activity = GridGameScreen.gameManager.getActivity();
+            activity.setBoardSize(activity, boardX, boardY);
+        }
+
         ArrayList<GridElement> elements = new ArrayList<>();
 
         // r=robot (v=green, j=yellow, red, blue)
@@ -89,6 +99,9 @@ public class MapObjects {
     public static String createStringFromList( ArrayList<GridElement> data, boolean shortString)
     {
         StringBuilder content = new StringBuilder();
+
+        // Add board size information
+        content.append("board:").append(MainActivity.boardSizeX).append(",").append(MainActivity.boardSizeY).append(";\n");
 
         // For each element, add a line containing the type as well as the x and y position
         for(GridElement currentElement : data)
