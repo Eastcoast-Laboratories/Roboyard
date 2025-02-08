@@ -581,7 +581,8 @@ public class GridGameScreen extends GameScreen {
             }
         }
 
-        int pixel = (int)(gridSpace / 45); // equivalent to a pixel on a 720x1280 screen
+        // Calculate wall dimensions based on grid size
+        int pixel = Math.max(1, (int)(gridSpace / 45)); // ensure minimum thickness of 1 pixel (equivalent to a pixel on a 720x1280 screen)
         int stretchWall = 12 * pixel; // strech all walls
         int offsetWall = -2 * pixel;
         int wallThickness = 16 * pixel; // thickness of walls
