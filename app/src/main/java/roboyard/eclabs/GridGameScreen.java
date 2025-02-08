@@ -4,14 +4,15 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
@@ -80,8 +81,6 @@ public class GridGameScreen extends GameScreen {
     private GameButtonGeneral buttonSolve;
     private GameButtonGoto buttonSave;
 
-    private final int boardSizeX = MainActivity.boardSizeX;
-    private final int boardSizeY = MainActivity.boardSizeY;
     private final Preferences preferences = new Preferences();
 
     public GridGameScreen(GameManager gameManager){
@@ -93,13 +92,12 @@ public class GridGameScreen extends GameScreen {
             preferences.setPreferences(gameManager.getActivity(),"difficulty", ld);
         }
         setDifficulty(ld);
-        gridSpace = (float)gameManager.getScreenWidth() / (float)boardSizeX;
+        gridSpace = (float)gameManager.getScreenWidth() / (float)MainActivity.getBoardWidth();
         xGrid = 0;
-        yGrid = gameManager.getScreenHeight()/7; // distance of the grid from the top
 
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 
-        bitmapGrid = Bitmap.createBitmap((int)(boardSizeX * gridSpace), (int) (boardSizeY * gridSpace), conf);
+        bitmapGrid = Bitmap.createBitmap((int)(MainActivity.getBoardWidth() * gridSpace), (int) (MainActivity.getBoardHeight() * gridSpace), conf);
         canvasGrid = new Canvas(bitmapGrid);
         currentRenderManager = gameManager.getRenderManager();
 
@@ -311,7 +309,7 @@ public class GridGameScreen extends GameScreen {
 
         if(imageLoaded)
         {
-            gameManager.getRenderManager().drawImage(xGrid, yGrid, (int)(boardSizeX*gridSpace) + xGrid, (int)(boardSizeY*gridSpace) + yGrid,  imageGridID);
+            gameManager.getRenderManager().drawImage(xGrid, yGrid, (int)(MainActivity.getBoardWidth()*gridSpace) + xGrid, (int)(MainActivity.getBoardHeight()*gridSpace) + yGrid,  imageGridID);
         }
         super.draw(renderManager);
         this.gmi.draw(renderManager);
@@ -469,22 +467,25 @@ public class GridGameScreen extends GameScreen {
         timeCpt = 0;
         prevTime = System.currentTimeMillis();
 
-        // Calculate grid space to fit both width and height while maintaining aspect ratio
-        float screenAspectRatio = (float)gameManager.getScreenWidth() / (float)gameManager.getScreenHeight();
-        float gridAspectRatio = (float)MainActivity.boardSizeX / (float)MainActivity.boardSizeY;
+        // Keep fixed top margin, calculate remaining space
+        int topMargin = gameManager.getScreenHeight()/7; // Same as initial yGrid
+        int availableHeight = gameManager.getScreenHeight() - topMargin; // Only subtract top margin
+        int availableWidth = gameManager.getScreenWidth() - (2 * xGrid);   // Subtract side margins
+
+        // Calculate grid space to maximize screen usage
+        float gridSpaceX = (float)availableWidth / (float)MainActivity.getBoardWidth();
+        float gridSpaceY = (float)availableHeight / (float)MainActivity.getBoardHeight();
         
-        float gridSpace;
-        if (screenAspectRatio > gridAspectRatio) {
-            // Screen is wider than grid - use height to determine cell size
-            gridSpace = (float)gameManager.getScreenHeight() / (float)MainActivity.boardSizeY;
-        } else {
-            // Screen is taller than grid - use width to determine cell size
-            gridSpace = (float)gameManager.getScreenWidth() / (float)MainActivity.boardSizeX;
-        }
+        // Use the larger value that still fits both dimensions
+        gridSpace = Math.min(gridSpaceX, gridSpaceY);
 
         // Calculate total board dimensions
-        int totalWidth = (int)(MainActivity.boardSizeX * gridSpace);
-        int totalHeight = (int)(MainActivity.boardSizeY * gridSpace);
+        int totalWidth = (int)(MainActivity.getBoardWidth() * gridSpace);
+        int totalHeight = (int)(MainActivity.getBoardHeight() * gridSpace);
+
+        // Center the grid on screen
+        xGrid = (gameManager.getScreenWidth() - totalWidth) / 2;
+        yGrid = topMargin;
 
         // Clean up old bitmap if it exists
         if (bitmapGrid != null && !bitmapGrid.isRecycled()) {
@@ -498,9 +499,9 @@ public class GridGameScreen extends GameScreen {
 
         currentRenderManager.setTarget(canvasGrid);
 
-        drawables.put("grid", currentRenderManager.getResources().getDrawable(R.drawable.grid)); // white background
-        drawables.put("grid_tiles", currentRenderManager.getResources().getDrawable(R.drawable.grid_tiles)); // white background for 14x16 boards
-        drawables.put("grid_14x16", currentRenderManager.getResources().getDrawable(R.drawable.grid_14x16)); // white background for other than 16x16 boards
+        drawables.put("grid", currentRenderManager.getResources().getDrawable(R.drawable.grid)); // white background for 16x16
+        drawables.put("grid_tiles", currentRenderManager.getResources().getDrawable(R.drawable.grid_tiles)); // white background for variable sizes
+        drawables.put("grid_14x16", currentRenderManager.getResources().getDrawable(R.drawable.grid_14x16)); // white background for 14x16
         drawables.put("roboyard", currentRenderManager.getResources().getDrawable(R.drawable.roboyard)); // center roboyard in carré
         drawables.put("mh", currentRenderManager.getResources().getDrawable(R.drawable.mh)); // horizontal lines (hedge)
         drawables.put("mv", currentRenderManager.getResources().getDrawable(R.drawable.mv)); // vertical lines (hedge)
@@ -518,24 +519,55 @@ public class GridGameScreen extends GameScreen {
 
         // Choose appropriate grid background based on board size
         Drawable gridBackground;
-        if (MainActivity.boardSizeX == 16 && MainActivity.boardSizeY <= 16) {
-            gridBackground = drawables.get("grid");
-        } else if (MainActivity.boardSizeX == 14 && MainActivity.boardSizeY == 16) {
-            gridBackground = drawables.get("grid_14x16");
+        if (MainActivity.getBoardWidth() == 16 && MainActivity.getBoardHeight() <= 16) {
+            gridBackground = drawables.get("grid"); // 16x16 grid
+            // Scale the grid background to match our calculated dimensions
+            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
+            gridBackground.draw(canvasGrid);
+        } else if (MainActivity.getBoardWidth() == 14 && MainActivity.getBoardHeight() == 16) {
+            gridBackground = drawables.get("grid_14x16"); // 14x16 grid
+            // Scale the grid background to match our calculated dimensions
+            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
+            gridBackground.draw(canvasGrid);
         } else {
-            gridBackground = drawables.get("grid_tiles");
+            // Get the 16x16 grid as source
+            Drawable fullGrid = drawables.get("grid");
+
+            // Calculate size of one grid cell in the source image
+            int sourceTotalWidth = fullGrid.getIntrinsicWidth();
+            int sourceTotalHeight = fullGrid.getIntrinsicHeight();
+            float sourceCellWidth = sourceTotalWidth / 16f;  // 16x16 grid
+            float sourceCellHeight = sourceTotalHeight / 16f;
+
+            // Calculate tile size based on board dimensions
+            // We want the tile to be roughly half of the board size
+            float tileSize = 91.5f / MainActivity.getBoardWidth();
+            // Round to nearest 0.5 to ensure clean tiling
+            tileSize = tileSize * 2 / 2f;
+
+            int tileWidth = (int)(Math.round(sourceCellWidth * tileSize));
+            int tileHeight = (int)(Math.round(sourceCellHeight * tileSize));
+
+            // Set bounds for the full grid to show only the corner we want
+            fullGrid.setBounds(0, 0, tileWidth, tileHeight);
+
+            // Tile the grid background with our corner pattern
+            for (int x = 0; x < MainActivity.getBoardWidth(); x += tileSize) {
+                for (int y = 0; y < MainActivity.getBoardHeight(); y += tileSize) {
+                    canvasGrid.save();
+                    canvasGrid.translate(x * gridSpace, y * gridSpace);
+                    fullGrid.draw(canvasGrid);
+                    canvasGrid.restore();
+                }
+            }
         }
-        
-        // Scale the grid background to match our calculated dimensions
-        gridBackground.setBounds(0, 0, totalWidth, totalHeight);
-        gridBackground.draw(canvasGrid);
 
         // Draw Roboyard logo in center
         drawables.get("roboyard").setBounds(
-            (int)((MainActivity.boardSizeX/2 - 1)*gridSpace),
-            (int)((MainActivity.boardSizeY/2 - 1)*gridSpace),
-            (int)((MainActivity.boardSizeX/2 + 1)*gridSpace),
-            (int)((MainActivity.boardSizeY/2 + 1)*gridSpace)
+            (int)((MainActivity.getBoardWidth()/2 - 1)*gridSpace),
+            (int)((MainActivity.getBoardHeight()/2 - 1)*gridSpace),
+            (int)((MainActivity.getBoardWidth()/2 + 1)*gridSpace),
+            (int)((MainActivity.getBoardHeight()/2 + 1)*gridSpace)
         );
         drawables.get("roboyard").draw(canvasGrid);
 

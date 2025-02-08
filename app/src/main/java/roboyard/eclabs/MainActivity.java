@@ -31,11 +31,17 @@ public class MainActivity extends Activity
     private GameManager gameManager;
     private final Preferences preferences = new Preferences();
 
-
-    // used in GridGameScreen, MapGenerator and both solvers:
-    public static int boardSizeX = 14; // TODO: crashes on size <12, solver doesn't work on size larger >16
-    public static int boardSizeY = 16; // test with 12x12 grid works fine
-    // TODO: add option to change this in settings and store the size in savegames
+    // Default board sizes
+    public static final int DEFAULT_BOARD_SIZE_X = 14;
+    public static final int DEFAULT_BOARD_SIZE_Y = 16;
+    
+    // Minimum and maximum board sizes
+    public static final int MIN_BOARD_SIZE = 12; // solver doesn't work below this
+    public static final int MAX_BOARD_SIZE = 16; // solver doesn't work above this
+    
+    // Current board size - can be changed at runtime
+    public static int boardSizeX = DEFAULT_BOARD_SIZE_X;
+    public static int boardSizeY = DEFAULT_BOARD_SIZE_Y;
 
     public void init() {
         Display display = getWindowManager().getDefaultDisplay();
@@ -48,11 +54,8 @@ public class MainActivity extends Activity
         this.inputManager = new InputManager();
         this.renderManager = new RenderManager(getResources());
         
-        // Load board size from preferences
-        String sizeX = preferences.getPreferenceValue(this, "boardSizeX");
-        String sizeY = preferences.getPreferenceValue(this, "boardSizeY");
-        boardSizeX = sizeX.equals("") ? 14 : Integer.parseInt(sizeX);
-        boardSizeY = sizeY.equals("") ? 16 : Integer.parseInt(sizeY);
+        // Reset board size to default
+        resetBoardSizeToDefault(this);
         
         this.gameManager = new GameManager(this.inputManager, this.renderManager, this.sWidth, this.sHeight, this);
     }
@@ -265,11 +268,41 @@ public class MainActivity extends Activity
     }
 
     public void setBoardSize(Context context, int x, int y) {
+        // Validate board size
+        x = Math.max(MIN_BOARD_SIZE, Math.min(x, MAX_BOARD_SIZE));
+        y = Math.max(MIN_BOARD_SIZE, Math.min(y, MAX_BOARD_SIZE));
+        
         boardSizeX = x;
         boardSizeY = y;
         // Save board size to preferences
         Preferences prefs = new Preferences();
         prefs.setPreferences(this, "boardSizeX", String.valueOf(x));
         prefs.setPreferences(this, "boardSizeY", String.valueOf(y));
+    }
+
+    /**
+     * Gets the current board width
+     * @return Current board width
+     */
+    public static int getBoardWidth() {
+        return boardSizeX;
+    }
+
+    /**
+     * Gets the current board height
+     * @return Current board height
+     */
+    public static int getBoardHeight() {
+        return boardSizeY;
+    }
+
+    /**
+     * Reset board size to default values and clear preferences
+     */
+    public void resetBoardSizeToDefault(Activity activity) {
+        boardSizeX = DEFAULT_BOARD_SIZE_X;
+        boardSizeY = DEFAULT_BOARD_SIZE_Y;
+        preferences.setPreferences(activity, "boardSizeX", String.valueOf(boardSizeX));
+        preferences.setPreferences(activity, "boardSizeY", String.valueOf(boardSizeY));
     }
 }

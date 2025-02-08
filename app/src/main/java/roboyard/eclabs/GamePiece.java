@@ -14,8 +14,8 @@ public class GamePiece implements IGameObject {
     private int yGrid               = 500;
     private int xDraw               = 0;
     private int yDraw               = 0;
-    private float numSquaresX       = MainActivity.boardSizeX;
-    private float numSquaresY       = MainActivity.boardSizeY;
+    private float numSquaresX       = MainActivity.getBoardWidth();
+    private float numSquaresY       = MainActivity.getBoardHeight();
     private int radius;
     private int color               = Color.RED;
     private boolean inMovement      = false;

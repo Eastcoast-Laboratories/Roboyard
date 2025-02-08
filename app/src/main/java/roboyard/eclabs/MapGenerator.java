@@ -10,12 +10,10 @@ import java.util.Random;
 public class MapGenerator {
 
     final Random rand;
-    final int boardSizeX=MainActivity.boardSizeX;
-    final int boardSizeY=MainActivity.boardSizeY;
 
     // position of the carré in the middle of the game board
-    int carrePosX = (boardSizeX/2)-1; // horizontal position of the top wall of carré, starting with 0
-    int carrePosY = (boardSizeY/2)-1; // vertical position the left wall of the carré
+    int carrePosX; // horizontal position of the top wall of carré, starting with 0
+    int carrePosY; // vertical position the left wall of the carré
 
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
@@ -28,6 +26,11 @@ public class MapGenerator {
 
     public MapGenerator(){
         rand = new Random();
+        
+        // Initialize carré position based on current board size
+        carrePosX = (MainActivity.getBoardWidth()/2)-1;
+        carrePosY = (MainActivity.getBoardHeight()/2)-1;
+        
         if(GridGameScreen.getLevel().equals("Beginner")){
             generateNewMapEachTime=true;
             // TODO: boardSizeX=12; boardSizeY=12; (still crashes)
@@ -35,8 +38,8 @@ public class MapGenerator {
             if (generateNewMapEachTime) {
                 // random position of carré in the middle
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
-                carrePosX=getRandom(3,boardSizeX-5);
-                carrePosY=getRandom(3,boardSizeY-5);
+                carrePosX=getRandom(3,MainActivity.getBoardWidth()-5);
+                carrePosY=getRandom(3,MainActivity.getBoardHeight()-5);
             }
             allowMulticolorTarget = false;
 
@@ -70,8 +73,8 @@ public class MapGenerator {
     public ArrayList<GridElement> translateArraysToMap(int[][] horizontalWalls, int[][] verticalWalls) {
         ArrayList<GridElement> data = new ArrayList<>();
 
-        for(int x=0; x<=boardSizeX; x++)
-            for(int y=0; y <= boardSizeY; y++)
+        for(int x=0; x<=MainActivity.getBoardWidth(); x++)
+            for(int y=0; y <= MainActivity.getBoardHeight(); y++)
             {
                 if(horizontalWalls[x][y]== 1) {
                     // add all horizontal walls
@@ -103,8 +106,8 @@ public class MapGenerator {
         }
         do{
             abandon = false;
-            targetX = getRandom(0, boardSizeX-1);
-            targetY = getRandom(0, boardSizeY-1);
+            targetX = getRandom(0, MainActivity.getBoardWidth()-1);
+            targetY = getRandom(0, MainActivity.getBoardHeight()-1);
 
             if(tempTargetMustBeInCorner && horizontalWalls[targetX][targetY] == 0 && horizontalWalls[targetX][targetY+1] == 0)
                 abandon = true;
@@ -138,8 +141,8 @@ public class MapGenerator {
         {
             do {
                 abandon = false;
-                cX = getRandom(0, boardSizeX-1);
-                cY = getRandom(0, boardSizeY-1);
+                cX = getRandom(0, MainActivity.getBoardWidth()-1);
+                cY = getRandom(0, MainActivity.getBoardHeight()-1);
 
                 for(GridElement robot:robotsTemp) {
                     if (robot.getX() == cX && robot.getY() == cY) {
@@ -166,8 +169,8 @@ public class MapGenerator {
      * @return Arraylist with all grid elements that belong to the map
      */
     public ArrayList<GridElement> getGeneratedGameMap() {
-        int[][] horizontalWalls = new int[boardSizeX+1][boardSizeY+1];
-        int[][] verticalWalls = new int[boardSizeX+1][boardSizeY+1];
+        int[][] horizontalWalls = new int[MainActivity.getBoardWidth()+1][MainActivity.getBoardHeight()+1];
+        int[][] verticalWalls = new int[MainActivity.getBoardWidth()+1][MainActivity.getBoardHeight()+1];
 
         int temp = 0;
         int countX = 0;
@@ -179,51 +182,51 @@ public class MapGenerator {
             restart = false;
 
             //On initialise avec aucun mur
-            for (int x = 0; x < boardSizeX; x++)
-                for (int y = 0; y < boardSizeY; y++)
+            for (int x = 0; x < MainActivity.getBoardWidth(); x++)
+                for (int y = 0; y < MainActivity.getBoardHeight(); y++)
                     horizontalWalls[x][y] = verticalWalls[x][y] = 0;
 
             //Création des bords
-            for (int x = 0; x < boardSizeX; x++) {
+            for (int x = 0; x < MainActivity.getBoardWidth(); x++) {
                 horizontalWalls[x][0] = 1;
-                horizontalWalls[x][boardSizeY] = 1;
+                horizontalWalls[x][MainActivity.getBoardHeight()] = 1;
             }
-            for (int y = 0; y < boardSizeY; y++) {
+            for (int y = 0; y < MainActivity.getBoardHeight(); y++) {
                 verticalWalls[0][y] = 1;
-                verticalWalls[boardSizeX][y] = 1;
+                verticalWalls[MainActivity.getBoardWidth()][y] = 1;
             }
 
             //Murs près de la bordure gauche
             horizontalWalls[0][getRandom(2, 7)] = 1;
             do {
-                temp = getRandom(boardSizeY/2, boardSizeY-1);
+                temp = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
             }
             while (horizontalWalls[0][temp - 1] == 1 || horizontalWalls[0][temp] == 1 || horizontalWalls[0][temp + 1] == 1);
             horizontalWalls[0][temp] = 1;
 
             //Murs près de la bordure droite
-            horizontalWalls[boardSizeX-1][getRandom(2, 7)] = 1;
+            horizontalWalls[MainActivity.getBoardWidth()-1][getRandom(2, 7)] = 1;
             do {
-                temp = getRandom(boardSizeY/2, boardSizeY-1);
+                temp = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
             }
-            while (horizontalWalls[boardSizeX-1][temp - 1] == 1 || horizontalWalls[boardSizeX-1][temp] == 1 || horizontalWalls[boardSizeX-1][temp + 1] == 1);
-            horizontalWalls[boardSizeX-1][temp] = 1;
+            while (horizontalWalls[MainActivity.getBoardWidth()-1][temp - 1] == 1 || horizontalWalls[MainActivity.getBoardWidth()-1][temp] == 1 || horizontalWalls[MainActivity.getBoardWidth()-1][temp + 1] == 1);
+            horizontalWalls[MainActivity.getBoardWidth()-1][temp] = 1;
 
             //Murs près de la bordure haut
-            verticalWalls[getRandom(2, boardSizeX/2 - 1)][0] = 1;
+            verticalWalls[getRandom(2, MainActivity.getBoardWidth()/2 - 1)][0] = 1;
             do {
-                temp = getRandom(boardSizeX/2, boardSizeX-1);
+                temp = getRandom(MainActivity.getBoardWidth()/2, MainActivity.getBoardWidth()-1);
             }
             while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
             verticalWalls[temp][0] = 1;
 
             //Murs près de la bordure bas
-            verticalWalls[getRandom(2, boardSizeX/2 - 1)][boardSizeY-1] = 1;
+            verticalWalls[getRandom(2, MainActivity.getBoardWidth()/2 - 1)][MainActivity.getBoardHeight()-1] = 1;
             do {
-                temp = getRandom(8, boardSizeX-1);
+                temp = getRandom(8, MainActivity.getBoardWidth()-1);
             }
-            while (verticalWalls[temp - 1][boardSizeY-1] == 1 || verticalWalls[temp][boardSizeY-1] == 1 || verticalWalls[temp + 1][boardSizeY-1] == 1);
-            verticalWalls[temp][boardSizeY-1] = 1;
+            while (verticalWalls[temp - 1][MainActivity.getBoardHeight()-1] == 1 || verticalWalls[temp][MainActivity.getBoardHeight()-1] == 1 || verticalWalls[temp + 1][MainActivity.getBoardHeight()-1] == 1);
+            verticalWalls[temp][MainActivity.getBoardHeight()-1] = 1;
 
             //Dessin du carré du milieu
             horizontalWalls[carrePosX][carrePosY] = horizontalWalls[carrePosX + 1][carrePosY] = 1;
@@ -231,7 +234,7 @@ public class MapGenerator {
             verticalWalls[carrePosX][carrePosY] = verticalWalls[carrePosX][carrePosY + 1] = 1;
             verticalWalls[carrePosX+2][carrePosY] = verticalWalls[carrePosX+2][carrePosY + 1] = 1;
 
-            for (int k = 0; k <= boardSizeX; k++) {
+            for (int k = 0; k <= MainActivity.getBoardWidth(); k++) {
                 boolean abandon = false;
                 int tempX;
                 int tempY;
@@ -244,21 +247,21 @@ public class MapGenerator {
                     abandon = false;
 
                     //Choix de coordonnées aléatoires dans chaque quart de terrain de jeu
-                    if (k < boardSizeX/4) {
-                        tempX = getRandom(1, boardSizeX/2 -1);
-                        tempY = getRandom(1, boardSizeY/2 -1);
-                    } else if (k < 2*boardSizeX/4) {
-                        tempX = getRandom(boardSizeX/2, boardSizeX-1);
-                        tempY = getRandom(1, boardSizeY/2 -1);
-                    } else if (k < 3*boardSizeX/4) {
-                        tempX = getRandom(1, boardSizeX/2 -1);
-                        tempY = getRandom(boardSizeY/2, boardSizeY-1);
-                    } else if (k < boardSizeX) {
-                        tempX = getRandom(boardSizeX/2, boardSizeX-1);
-                        tempY = getRandom(boardSizeY/2, boardSizeY-1);
+                    if (k < MainActivity.getBoardWidth()/4) {
+                        tempX = getRandom(1, MainActivity.getBoardWidth()/2 -1);
+                        tempY = getRandom(1, MainActivity.getBoardHeight()/2 -1);
+                    } else if (k < 2*MainActivity.getBoardWidth()/4) {
+                        tempX = getRandom(MainActivity.getBoardWidth()/2, MainActivity.getBoardWidth()-1);
+                        tempY = getRandom(1, MainActivity.getBoardHeight()/2 -1);
+                    } else if (k < 3*MainActivity.getBoardWidth()/4) {
+                        tempX = getRandom(1, MainActivity.getBoardWidth()/2 -1);
+                        tempY = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
+                    } else if (k < MainActivity.getBoardWidth()) {
+                        tempX = getRandom(MainActivity.getBoardWidth()/2, MainActivity.getBoardWidth()-1);
+                        tempY = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
                     } else {
-                        tempX = getRandom(1, boardSizeX-1);
-                        tempY = getRandom(1, boardSizeY-1);
+                        tempX = getRandom(1, MainActivity.getBoardWidth()-1);
+                        tempY = getRandom(1, MainActivity.getBoardHeight()-1);
                     }
 
                     if (horizontalWalls[tempX][tempY] == 1 // already chosen
@@ -278,12 +281,12 @@ public class MapGenerator {
                         //On compte le nombre de murs dans la même ligne/colonne
                         countX = countY = 0;
                         
-                        for (int x = 1; x < boardSizeX-1; x++) {
+                        for (int x = 1; x < MainActivity.getBoardWidth()-1; x++) {
                             if (horizontalWalls[x][tempY] == 1)
                                 countX++;
                         }
                         
-                        for (int y = 1; y < boardSizeY-1; y++) {
+                        for (int y = 1; y < MainActivity.getBoardHeight()-1; y++) {
                             if (horizontalWalls[tempX][y] == 1)
                                 countY++;
                         }
@@ -322,12 +325,12 @@ public class MapGenerator {
                             //On compte le nombre de murs dans la même ligne/colonne
                             countX = countY = 0;
 
-                            for (int x = 1; x < boardSizeX-1; x++) {
+                            for (int x = 1; x < MainActivity.getBoardWidth()-1; x++) {
                                 if (verticalWalls[x][tempYv] == 1)
                                     countX++;
                             }
 
-                            for (int y = 1; y < boardSizeY-1; y++) {
+                            for (int y = 1; y < MainActivity.getBoardHeight()-1; y++) {
                                 if (verticalWalls[tempXv][y] == 1)
                                     countY++;
                             }
