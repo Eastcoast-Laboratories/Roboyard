@@ -30,11 +30,23 @@ public class LevelChoiceGameScreen extends GameScreen {
      * @param rightScreen : reference to the next level selection game screen (-1 if none)
      */
     public LevelChoiceGameScreen(GameManager gameManager, int firstLev, int lScreen, int rScreen){
-
         super(gameManager);
         this.firstLevel = firstLev;
-        this.leftScreen = lScreen;
-        this.rightScreen = rScreen;
+        
+        // Update navigation based on current page
+        if (firstLev == 0) {  // Beginner page
+            this.leftScreen = -1;
+            this.rightScreen = 35;  // Go to intermediate
+        } else if (firstLev == 35) {  // Intermediate page
+            this.leftScreen = 0;   // Back to beginner
+            this.rightScreen = 70; // Go to advanced
+        } else if (firstLev == 70) {  // Advanced page
+            this.leftScreen = 35;  // Back to intermediate
+            this.rightScreen = 105; // Go to expert
+        } else if (firstLev == 105) {  // Expert page
+            this.leftScreen = 70;  // Back to advanced
+            this.rightScreen = -1;
+        }
 
         createButtons();
     }
@@ -115,7 +127,18 @@ public class LevelChoiceGameScreen extends GameScreen {
     private String getMapPath(int levelInScreen)
     {
         levelInScreen+=firstLevel;
-        return "Maps/generatedMap_"+levelInScreen+".txt";
+        String difficulty;
+        // Determine difficulty based on firstLevel (page number)
+        if (firstLevel == 0) {
+            difficulty = "beginner";
+        } else if (firstLevel == 35) {
+            difficulty = "intermediate";
+        } else if (firstLevel == 70) {
+            difficulty = "advanced";
+        } else {
+            difficulty = "expert";
+        }
+        return "Maps/" + difficulty + "/generatedMap_" + (levelInScreen % 35) + ".txt";
     }
 
     @Override
@@ -130,7 +153,6 @@ public class LevelChoiceGameScreen extends GameScreen {
         int cols = 5;
         int rows = 7;
 
-        //renderManager.setColor(Color.GRAY);
         renderManager.setColor(Color.parseColor("#77ABD6"));
         renderManager.paintScreen();
 
@@ -143,7 +165,18 @@ public class LevelChoiceGameScreen extends GameScreen {
         float ratioW = ((float)gameManager.getScreenWidth()) / ((float)1080);
         float ratioH = ((float)gameManager.getScreenHeight()) / ((float)1920);
 
-        renderManager.drawText((int)(55*ratioW)-10, (int)(55*ratioH), "Select Level");
+        // Show current difficulty in the title
+        String difficulty;
+        if (firstLevel == 0) {
+            difficulty = "Beginner";
+        } else if (firstLevel == 35) {
+            difficulty = "Intermediate";
+        } else if (firstLevel == 70) {
+            difficulty = "Advanced";
+        } else {
+            difficulty = "Expert";
+        }
+        renderManager.drawText((int)(55*ratioW)-10, (int)(55*ratioH), difficulty + " Levels");
 
         int col, row;
         for (int i = 0;  i < cols*rows;  i++) {
