@@ -152,7 +152,7 @@ public class GridGameScreen extends GameScreen {
     @Override
     public void create()
     {
-        gmi = new GameMovementInterface();
+        gmi = new GameMovementInterface(gameManager);
 
         xGrid = 0;
         yGrid = gameManager.getScreenHeight()/7;
@@ -377,8 +377,16 @@ public class GridGameScreen extends GameScreen {
         }
         this.gmi.update(gameManager);
         if(gameManager.getInputManager().backOccurred()){
-            // Ignore back button if movement interface is active
-            if (!this.gmi.isActive()) {
+            // If movement interface is active, trigger the movement
+            if (this.gmi.display) {
+                // if robot is on the left side of the screen, trigger EAST
+                if (this.gmi.getTargetX() == 0) { // column 0
+                    this.gmi.triggerMovement(Constants.EAST);
+                } else {
+                    this.gmi.triggerMovement(Constants.WEST);
+                }
+            } else {
+                // Otherwise handle normal back navigation
                 if(t != null){
                     t.interrupt();
                     moves = null;

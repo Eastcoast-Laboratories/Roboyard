@@ -31,6 +31,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import roboyard.eclabs.Constants;
 import roboyard.eclabs.MainActivity;
 
 public class Board {
@@ -208,10 +209,10 @@ public class Board {
     public final int size;      // width * height
     public final int sizeNumBits;   //number of bits required to store any board position (size - 1)
 
-    public static final int NORTH = 0;  // up
-    public static final int EAST  = 1;  // right
-    public static final int SOUTH = 2;  // down
-    public static final int WEST  = 3;  // left
+    public static final int NORTH = Constants.NORTH;  // up
+    public static final int EAST  = Constants.EAST;  // right
+    public static final int SOUTH = Constants.SOUTH;  // down
+    public static final int WEST  = Constants.WEST;  // left
     
     public final int[] directionIncrement;
     

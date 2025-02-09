@@ -10,20 +10,35 @@ public class GameMovementInterface implements IGameObject {
     private final int img_down        = R.drawable.img_int_down;
     private final int img_right       = R.drawable.img_int_right;
     private final int img_left        = R.drawable.img_int_left;
-    private boolean display     = false;
-    private int x               = 0;
-    private int y               = 0;
+    boolean display                   = false; // true if the interface is active, false otherwise
+    private int x                     = 0;
+    private int y                     = 0;
     private final int minRadius       = 32;
     private final int radius          = 150;
-    private int decision        = -1;
+    private int decision              = -1; // 0: NORTH, 1: EAST, 2: SOUTH, 3: WEST
     private GamePiece target;
+    private GameManager gameManager;
 
+    /**
+     * Check if the interface is active
+     * @return true if the interface is active, false otherwise
+     */
     public boolean isActive() {
         return this.display;
     }
 
-    public GameMovementInterface(){
-        this.scales = new float[4];
+    public void triggerMovement(int direction) {
+        if (this.display && this.target != null) {
+            this.decision = direction;
+            this.display = false;
+            // Directly trigger movement on the target screen
+            ((GridGameScreen)(gameManager.getCurrentScreen())).editDestination(target, this.decision, false);
+        }
+    }
+
+    public GameMovementInterface(GameManager gameManager){
+        this.gameManager = gameManager;
+        this.scales = new float[Constants.SCREEN_RANDOM_GAME];
         this.resetScale();
     }
 
@@ -140,4 +155,20 @@ public class GameMovementInterface implements IGameObject {
     public void setTarget(GamePiece p){
         target = p;
     }
+    
+    /**
+     * Returns the X coordinate of the target of the active movement interface.
+     * @return
+     */
+    public int getTargetX() {
+        return target != null ? target.getX() : -1;
+    }
+    
+    /**
+     * Returns the Y coordinate of the target of the active movement interface.
+     * @return
+     */
+    // public int getTargetY() {
+    //    return target != null ? target.getY() : -1;
+    // }
 }
