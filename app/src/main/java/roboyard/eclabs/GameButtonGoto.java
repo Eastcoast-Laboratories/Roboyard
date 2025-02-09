@@ -29,6 +29,6 @@ public class GameButtonGoto extends GameButton {
 
     @Override
     public void onClick(GameManager gameManager) {
-        gameManager.setGameScreen(this.targetScreen);
+        gameManager.switchScreen(this.targetScreen);
     }
 }

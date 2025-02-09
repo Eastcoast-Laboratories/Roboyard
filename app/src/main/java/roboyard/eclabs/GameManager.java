@@ -49,20 +49,22 @@ public class GameManager {
         // List of all screens
         /* screen 0: start screen
          * screen 1: second start screen (deleted)
-         * screen 2: settings
          * screen 3: credits
          * screen 4: start random game
-         * screen 5-8: start level game
+         * screen 5-8: level selection screens (beginner, intermediate, advanced, expert)
          * screen 9: save games
          */
         this.screens.append(Constants.SCREEN_START, new MainMenuGameScreen(this));
         this.screens.append(Constants.SCREEN_SETTINGS, new SettingsGameScreen(this));
         this.screens.append(Constants.SCREEN_CREDITS, new CreditsGameScreen(this, activity));
         this.screens.append(Constants.SCREEN_RANDOM_GAME, new GridGameScreen(this));
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START,     new LevelChoiceGameScreen(this, 0, -1, 6));
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 1, new LevelChoiceGameScreen(this, 15, 5, 7));
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 2, new LevelChoiceGameScreen(this, 30, 6, 8));
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_END, new LevelChoiceGameScreen(this, 45, 7, -1));
+        
+        // Initialize level selection screens with correct ranges
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START,     new LevelChoiceGameScreen(this, 0, -1, Constants.SCREEN_LEVEL_GAME_START + 1));  // Beginner
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 1, new LevelChoiceGameScreen(this, 35, Constants.SCREEN_LEVEL_GAME_START, Constants.SCREEN_LEVEL_GAME_START + 2));  // Intermediate
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 2, new LevelChoiceGameScreen(this, 70, Constants.SCREEN_LEVEL_GAME_START + 1, Constants.SCREEN_LEVEL_GAME_END));  // Advanced
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_END,       new LevelChoiceGameScreen(this, 105, Constants.SCREEN_LEVEL_GAME_START + 2, -1));  // Expert
+        
         this.screens.append(Constants.SCREEN_SAVE_GAMES, new SaveGameScreen(this));
         // End of list of all screens
 
@@ -179,12 +181,30 @@ public class GameManager {
      * @param nextScreen Index of the new game screen.
      */
     public void setGameScreen(int nextScreen) {
-        // Only update previous screen if we're not already tracking it
-        GameScreen nextGameScreen = this.screens.get(nextScreen);
-        if (nextGameScreen != this.previousScreen && nextGameScreen != this.currentScreen) {
-            this.previousScreen = this.currentScreen;
+        GameScreen nextGameScreen = screens.get(nextScreen);
+        if (nextGameScreen == null) {
+            requestToast("Screen not found: " + nextScreen, true);
+            return;
         }
-        this.currentScreen = nextGameScreen;
+        
+        // Only update previous screen if we're not already tracking it
+        if (nextGameScreen != previousScreen && nextGameScreen != currentScreen) {
+            previousScreen = currentScreen;
+        }
+        currentScreen = nextGameScreen;
+    }
+
+    /**
+     * Switches to a new game screen.
+     *
+     * @param nextScreen Index of the new game screen.
+     */
+    public void switchScreen(int nextScreen) {
+        if (screens.get(nextScreen) == null) {
+            requestToast("Screen not found: " + nextScreen, true);
+            return;
+        }
+        setGameScreen(nextScreen);
     }
 
     /**
