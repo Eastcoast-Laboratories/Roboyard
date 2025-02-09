@@ -35,7 +35,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
      */
     @Override
     public void onClick(GameManager gameManager) {
-        if (gameManager.getPreviousScreenKey() == 4) {
+        if (gameManager.getPreviousScreenKey() == Constants.SCREEN_RANDOM_GAME) {
             // Screen to save or overwrite a savegame
             ArrayList<GridElement> gridElements = ((GridGameScreen) gameManager.getScreens().get(gameManager.getPreviousScreenKey())).getGridElements();
             FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
@@ -50,9 +50,9 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             SaveManager saver = new SaveManager(gameManager.getActivity());
             if (saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
                 super.onClick(gameManager);
-                ((GridGameScreen) (gameManager.getScreens().get(4))).setSavedGame(mapPath);
+                ((GridGameScreen) (gameManager.getScreens().get(Constants.SCREEN_RANDOM_GAME))).setSavedGame(mapPath);
                 // disable the savegame button in the gamescreen
-                ((GridGameScreen) (gameManager.getScreens().get(4))).buttonSaveSetEnabled(false);
+                ((GridGameScreen) (gameManager.getScreens().get(Constants.SCREEN_RANDOM_GAME))).buttonSaveSetEnabled(false);
             }
         }
     }

@@ -382,7 +382,7 @@ public class GridGameScreen extends GameScreen {
                 moves = null;
                 t = null;
             }
-            gameManager.setGameScreen(1);
+            gameManager.setGameScreen(Constants.SCREEN_START);
         }
 
         if(!isSolved && solver.getSolverStatus().isFinished())

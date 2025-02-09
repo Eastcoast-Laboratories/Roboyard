@@ -48,7 +48,7 @@ public class GameManager {
 
         // List of all screens
         /* screen 0: start screen
-         * screen 1: second start screen
+         * screen 1: second start screen (deleted)
          * screen 2: settings
          * screen 3: credits
          * screen 4: start random game
@@ -56,7 +56,6 @@ public class GameManager {
          * screen 9: save games
          */
         this.screens.append(Constants.SCREEN_START, new MainMenuGameScreen(this));
-        this.screens.append(Constants.SCREEN_SECOND_START, new GameOptionsGameScreen(this));
         this.screens.append(Constants.SCREEN_SETTINGS, new SettingsGameScreen(this));
         this.screens.append(Constants.SCREEN_CREDITS, new CreditsGameScreen(this, activity));
         this.screens.append(Constants.SCREEN_RANDOM_GAME, new GridGameScreen(this));
@@ -192,6 +191,12 @@ public class GameManager {
      * @return Key of the previous game screen.
      */
     public int getPreviousScreenKey() {
-        return screens.indexOfValue(this.previousScreen);
+        for (int i = 0; i < screens.size(); i++) {
+            int key = screens.keyAt(i);
+            if (screens.get(key) == this.previousScreen) {
+                return key;
+            }
+        }
+        return Constants.SCREEN_START; // Fallback to main menu
     }
 }
