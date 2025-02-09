@@ -18,6 +18,10 @@ public class GameMovementInterface implements IGameObject {
     private int decision        = -1;
     private GamePiece target;
 
+    public boolean isActive() {
+        return this.display;
+    }
+
     public GameMovementInterface(){
         this.scales = new float[4];
         this.resetScale();

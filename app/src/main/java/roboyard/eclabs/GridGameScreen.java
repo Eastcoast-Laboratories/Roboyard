@@ -377,12 +377,15 @@ public class GridGameScreen extends GameScreen {
         }
         this.gmi.update(gameManager);
         if(gameManager.getInputManager().backOccurred()){
-            if(t != null){
-                t.interrupt();
-                moves = null;
-                t = null;
+            // Ignore back button if movement interface is active
+            if (!this.gmi.isActive()) {
+                if(t != null){
+                    t.interrupt();
+                    moves = null;
+                    t = null;
+                }
+                gameManager.setGameScreen(Constants.SCREEN_START);
             }
-            gameManager.setGameScreen(Constants.SCREEN_START);
         }
 
         if(!isSolved && solver.getSolverStatus().isFinished())
