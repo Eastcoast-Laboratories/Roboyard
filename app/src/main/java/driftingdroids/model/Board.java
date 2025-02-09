@@ -26,6 +26,7 @@ import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -33,7 +34,8 @@ import java.util.zip.Inflater;
 import roboyard.eclabs.MainActivity;
 
 public class Board {
-    
+
+    public static L10N L10N = new L10N();
     public static final int WIDTH_STANDARD = MainActivity.boardSizeX;
     public static final int WIDTH_MIN = 3;
     public static final int WIDTH_MAX = 100;
@@ -373,7 +375,7 @@ public class Board {
                 newBoard.setRobot(robot, newPos, false);
             }
             // copy of some robot didn't succeed, set it on lowest possible position
-            for (int robot = 0;  robot < newBoard.getNumRobots();  ++robot) {
+            for (int robot = 0;  robot < newBoard.robots.length;  ++robot) {
                 if (0 > newBoard.robots[robot]) {
                     for (int pos = 0;  pos < newBoard.size;  ++pos) {
                         if (true == newBoard.setRobot(robot, pos, false)) {
@@ -639,12 +641,7 @@ public class Board {
         final int zipOutLen = 4 + zip.deflate(zipOutput, 4, zipOutput.length-4);    //skip uncompressed length
         //encode base64
         final byte[] b64Input = Arrays.copyOf(zipOutput, zipOutLen);
-        final String b64Output;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            b64Output = Base64.getEncoder().encodeToString(b64Input);
-        }else{
-            b64Output = android.util.Base64.encodeToString(b64Input, android.util.Base64.DEFAULT);
-        }
+        final String b64Output = Base64.getEncoder().encodeToString(b64Input);
         //compute CRC of encoded data
         final CRC32 crc32 = new CRC32();
         crc32.update(b64Output.getBytes(StandardCharsets.UTF_8));
@@ -673,12 +670,7 @@ public class Board {
                 throw new IllegalArgumentException("data CRC mismatch");
             }
             //parse base64 string
-            final byte[] b64Output;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                b64Output = Base64.getDecoder().decode(inputSplit[3]); //throws IllegalArgumentException
-            }else{
-                b64Output = android.util.Base64.decode(inputSplit[3], android.util.Base64.DEFAULT);
-            }
+            final byte[] b64Output = Base64.getDecoder().decode(inputSplit[3]);    //throws IllegalArgumentException
             //unzip/inflate data
             int unzipLen = 0;
             for (int i = 0;  i < 4;  ++i) {
@@ -1176,6 +1168,24 @@ public class Board {
             else                        { dir = Board.SOUTH; }
         }
         return dir;
+    }
+    
+    public static String getColorLongL10N(int color) {
+        if (color < 0) {    //wildcard
+            return L10N.getString("board.color.wildcard.text");
+        } else {
+            return L10N.getString("board.color." + ROBOT_COLOR_NAMES_LONG[color] +".text");
+        }
+    }
+    public static String getColorShortL10N(int color) {
+        if (color < 0) {    //wildcard
+            return L10N.getString("board.color.w.text");
+        } else {
+            return L10N.getString("board.color." + ROBOT_COLOR_NAMES_SHORT[color] +".text");
+        }
+    }
+    public static String getGoalShapeL10N(int shape) {
+        return L10N.getString("board.shape." + GOAL_SHAPE_NAMES[shape] + ".text");
     }
     
     public int getNumRobots() {
