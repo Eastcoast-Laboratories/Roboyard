@@ -45,6 +45,10 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             // redraw save buttons with new state of the saved game
             SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
             saveGameScreen.createButtons();
+            
+            // Keep track of the game screen and explicitly set it as previous
+            gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_RANDOM_GAME));
+            gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
         } else {
             // Screen to select a savegame
             SaveManager saver = new SaveManager(gameManager.getActivity());
