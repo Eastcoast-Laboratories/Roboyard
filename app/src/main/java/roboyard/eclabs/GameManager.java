@@ -195,19 +195,6 @@ public class GameManager {
     }
 
     /**
-     * Switches to a new game screen.
-     *
-     * @param nextScreen Index of the new game screen.
-     */
-    public void switchScreen(int nextScreen) {
-        if (screens.get(nextScreen) == null) {
-            requestToast("Screen not found: " + nextScreen, true);
-            return;
-        }
-        setGameScreen(nextScreen);
-    }
-
-    /**
      * Sets the previous screen directly.
      *
      * @param screen The screen to set as previous screen.
