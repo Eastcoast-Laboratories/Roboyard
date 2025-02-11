@@ -77,9 +77,6 @@ public class LevelChoiceGameScreen extends GameScreen {
      */
     public void createButtons()
     {
-        //int ws2 = this.gameManager.getScreenWidth()/2;
-        //int hs2 = this.gameManager.getScreenHeight()/2;
-
         int stepX = 211;
         int stepY = 222;
         int cols = 5;
@@ -97,6 +94,13 @@ public class LevelChoiceGameScreen extends GameScreen {
         for(GameButtonGotoLevelGame p : aRemove)
         {
             this.instances.remove(p);
+        }
+
+        // Add back button for beginner screen
+        if (firstLevel == 0) {
+            int screenHeight = this.gameManager.getScreenHeight();
+            GameButtonGoto backButton = new GameButtonGoto(33, screenHeight - iconsize - 33, iconsize, iconsize, R.drawable.bt_back_up, R.drawable.bt_back_down, Constants.SCREEN_START);
+            this.instances.add(backButton);
         }
 
         String mapPath = "";

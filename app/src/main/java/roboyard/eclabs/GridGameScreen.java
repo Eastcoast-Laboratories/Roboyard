@@ -176,7 +176,7 @@ public class GridGameScreen extends GameScreen {
             buttonPosY = -50 +y+10*dy/20;
         }
 
-        // Button Next game (top right)
+        // Button Next game (top right) (new randomgame) sets mustStartNext to true
         this.instances.add(new GameButtonGeneral((int)(870*ratioW), 0, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
 
         // Button Save
@@ -218,8 +218,11 @@ public class GridGameScreen extends GameScreen {
     }
 
     @Override
-    public void draw(RenderManager renderManager)
-    {
+    public void draw(RenderManager renderManager) {
+        int levelNum = -1;
+        if (mapPath != null && !mapPath.isEmpty()) {
+            levelNum = extractLevelNumber(mapPath);
+        }
         //renderManager.setColor(Color.argb(255, 255, 228, 0));
         renderManager.setColor(Color.BLACK);
         // ffe400
@@ -228,98 +231,125 @@ public class GridGameScreen extends GameScreen {
 
         //renderManager.setColor(Color.BLACK);
         renderManager.setColor(Color.GRAY);
-        float ratio = ((float)gameManager.getScreenWidth()) /((float)1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
-        int lineHeight = (int)(ratio*55);
-        int lineHeightSmall = (int)(lineHeight*0.8);
+        float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
+        int lineHeight = (int) (ratio * 55);
+        int lineHeightSmall = (int) (lineHeight * 0.8);
         int textPosY = lineHeight;
-        int textPosYSmall = 2*lineHeight-(int)(ratio*4);
-        int textPosYTime = 2*lineHeight+lineHeightSmall+(int)(8/ratio);
+        int textPosYSmall = 2 * lineHeight - (int) (ratio * 4);
+        int textPosYTime = 2 * lineHeight + lineHeightSmall + (int) (8 / ratio);
         renderManager.setTextSize(lineHeight);
-        if(gameManager.getScreenWidth() <=480){
+        if (gameManager.getScreenWidth() <= 480) {
             renderManager.setTextSize(lineHeightSmall);
         }
-        if(isSolved && nbCoups == 0 && NumDifferentSolutionsFound > 1){
+        if (isSolved && nbCoups == 0 && NumDifferentSolutionsFound > 1) {
             // show number of different solutions found
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(10, textPosYSmall, NumDifferentSolutionsFound + " solutions found");
             renderManager.setTextSize(lineHeight);
         }
-        if(nbCoups>0){
+        if (nbCoups > 0) {
             // at least one move was made by hand or by AI
             renderManager.drawText(10, textPosY, "Moves: " + nbCoups);
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(10, textPosYSmall, "Squares: " + numSquares);
-        } else if(isSolved && numSolutionClicks>0){
+        } else if (isSolved && numSolutionClicks > 0) {
             // show solution
-            if(numSolutionClicks-showSolutionAtHint >= 0) {
+            if (numSolutionClicks - showSolutionAtHint >= 0) {
                 renderManager.drawText(10, textPosY, "AI solution: " + solutionMoves + " moves");
             } else {
-                renderManager.drawText(10, textPosY, "AI Hint " + numSolutionClicks + ": < " + (solutionMoves+showSolutionAtHint-numSolutionClicks) + " moves");
+                renderManager.drawText(10, textPosY, "AI Hint " + numSolutionClicks + ": < " + (solutionMoves + showSolutionAtHint - numSolutionClicks) + " moves");
             }
-        } else if(nbCoups==0 && isSolved && solutionMoves < simplePuzzleMinMoves){
+        } else if (nbCoups == 0 && isSolved && solutionMoves < simplePuzzleMinMoves) {
             // too simple ... restart
             renderManager.drawText(10, textPosY, "AI solution: " + solutionMoves + " moves");
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(10, textPosYSmall, "... restarting!");
-            if(timeCpt>5){
+            if (timeCpt > 5) {
                 // show a popup on restart if it took very long to solve but found a too simple solution
                 requestToast = "Finally solved in " + solutionMoves + " moves. Restarting...";
             }
             mustStartNext = true;
-        } else if(nbCoups==0 && isSolved && solutionMoves < goodPuzzleMinMoves){
+        } else if (nbCoups == 0 && isSolved && solutionMoves < goodPuzzleMinMoves) {
             // still simple, show a hint that this is solved with less than ... moves
             // TODO: change font (still crashes):
             //  renderManager.drawText(10, textPosY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
             renderManager.drawText(10, textPosY, "Number of moves < " + goodPuzzleMinMoves);
             showSolutionAtHint = goodPuzzleMinMoves - solutionMoves;
-        } else if(!isSolved){
-            if (timeCpt<1){
+        } else if (!isSolved) {
+            if (timeCpt < 1) {
                 // the first second it pretends to generate the map :)
                 // in real it is still calculating the solution
                 renderManager.drawText(10, textPosY, "Generating map...");
-            }else{
+            } else {
                 // in Beginner mode it will create a new puzzle, if it is not solvable within one second
-                if(getLevel().equals("Beginner")){
+                if (getLevel().equals("Beginner")) {
                     renderManager.drawText(10, textPosY, "Too complicated");
                     renderManager.drawText(10, textPosYSmall, "... restarting!");
                     mustStartNext = true;
-                }else {
+                } else {
                     renderManager.drawText(10, textPosY, "AI solving...");
                 }
             }
         }
-        int seconds = timeCpt%60;
+        int seconds = timeCpt % 60;
         String secondsS = Integer.toString(seconds);
-        if(seconds < 10){
-            secondsS="0" + secondsS;
+        if (seconds < 10) {
+            secondsS = "0" + secondsS;
         }
         renderManager.setTextSize(lineHeightSmall);
         renderManager.drawText(10, textPosYTime, "Time: " + timeCpt / 60 + ":" + secondsS);
 
-        if(timeCpt>=40 && autoSaved == false && mustStartNext==false){
+        if (timeCpt >= 40 && autoSaved == false && mustStartNext == false) {
             // save autosave in slot 0
             ArrayList<GridElement> gridElements = getGridElements();
-            String autosaveMapPath=SaveGameScreen.getMapPath(0);
+            String autosaveMapPath = SaveGameScreen.getMapPath(0);
             FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
             FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, MapObjects.createStringFromList(gridElements, false));
             gameManager.requestToast("Autosaving...", false);
             autoSaved = true;
         }
 
+        // Display level number if it's a level game
+        if (levelNum >= 0) {
+            renderManager.setColor(Color.WHITE);
+            renderManager.setTextSize(lineHeight / 2);
+            // Position text in top right corner with some padding
+            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), "Level " + (levelNum + 1));
+        }
 
-        if(imageLoaded)
-        {
-            gameManager.getRenderManager().drawImage(xGrid, yGrid, (int)(MainActivity.getBoardWidth()*gridSpace) + xGrid, (int)(MainActivity.getBoardHeight()*gridSpace) + yGrid,  imageGridID);
+        if (imageLoaded) {
+            gameManager.getRenderManager().drawImage(xGrid, yGrid, (int) (MainActivity.getBoardWidth() * gridSpace) + xGrid, (int) (MainActivity.getBoardHeight() * gridSpace) + yGrid, imageGridID);
         }
         super.draw(renderManager);
         this.gmi.draw(renderManager);
 
-        if(!requestToast.equals("")){
+        if (!requestToast.equals("")) {
             // show double toast to last longer
             gameManager.requestToast(requestToast, true);
             gameManager.requestToast(requestToast, true);
-            requestToast="";
+            requestToast = "";
         }
+    }
+
+    /**
+     * Extracts the level number from a map path.
+     * @param path The map path (format: generatedMap_X.txt)
+     * @return The level number, or -1 if invalid
+     */
+    private int extractLevelNumber(String path) {
+        if (path == null || path.isEmpty()) {
+            return -1;
+        }
+        try {
+            int start = path.lastIndexOf("_") + 1;
+            int end = path.lastIndexOf(".");
+            if (start > 0 && end > start) {
+                return Integer.parseInt(path.substring(start, end));
+            }
+        } catch (Exception e) {
+            // If parsing fails, return -1
+        }
+        return -1;
     }
 
     public void update(GameManager gameManager){
@@ -343,31 +373,16 @@ public class GridGameScreen extends GameScreen {
                 moves = null;
                 t = null;
             }
-            int integer = -1;
 
-            if(!mapPath.equals(""))
+            int levelNum = extractLevelNumber(mapPath);
+            if(levelNum >=0 && levelNum < 60)
             {
-
-//                int value = 0;
-//                Scanner s = new Scanner(mapPath);
-
-                Scanner in = new Scanner(mapPath).useDelimiter("[^0-9]+");
-                integer = in.nextInt();
-
-                //value = s.nextInt();
-                System.out.println("Value mappath:"+integer);
-            }
-
-            System.out.println("B");
-            if(integer >=0 && integer < 60)
-            {
-                mapPath = "Maps/generatedMap_"+(integer+1)+".txt";
+                mapPath = "Maps/generatedMap_"+(levelNum+1)+".txt";
                 setLevelGame(mapPath);
             } else {
                 // start a game in screen 4
                 setRandomGame();
             }
-            System.out.println("C");
 
             mustStartNext = false;
         }
@@ -447,10 +462,8 @@ public class GridGameScreen extends GameScreen {
     {
         this.mapPath = mapPath;
 
-        System.out.println("SetLevelGame");
         String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
         gridElements = MapObjects.extractDataFromString(saveData);
-        System.out.println("SetLevelGame, gridElements :"+gridElements.size());
         GridGameScreen.setMap(gridElements);
         numSolutionClicks = 0;
         createGrid();
@@ -883,11 +896,14 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
+    /**
+     * Button to Start a new random level
+     * sets mustStartNext to true
+     */
     private class ButtonNext implements IExecutor{
 
         public void execute(){
             mustStartNext = true;
-
         }
     }
 
