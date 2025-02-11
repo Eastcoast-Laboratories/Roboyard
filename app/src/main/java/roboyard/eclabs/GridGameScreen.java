@@ -321,12 +321,12 @@ public class GridGameScreen extends GameScreen {
         }
 
         // Display level number if it's a level game
+        renderManager.setColor(Color.WHITE);
+        renderManager.setTextSize(lineHeight / 2);
         if (levelNum >= 0) {
-            renderManager.setColor(Color.WHITE);
-            renderManager.setTextSize(lineHeight / 2);
-            // Position text in top right corner with some padding
+            // Level number underneath the next button
             renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), "Level " + levelNum);
-        }
+        } 
 
         if (imageLoaded) {
             gameManager.getRenderManager().drawImage(xGrid, yGrid, (int) (MainActivity.getBoardWidth() * gridSpace) + xGrid, (int) (MainActivity.getBoardHeight() * gridSpace) + yGrid, imageGridID);
@@ -892,7 +892,17 @@ public class GridGameScreen extends GameScreen {
      * sets mustStartNext to true
      */
     private class ButtonNext implements IExecutor{
+        private static final long NEXT_BUTTON_COOLDOWN = 500; // 500ms cooldown between next button clicks
+        private long lastNextButtonClickTime = 0;
+
         public void execute() {
+            // Check if enough time has passed since last click
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastNextButtonClickTime < NEXT_BUTTON_COOLDOWN) {
+                return;
+            }
+            lastNextButtonClickTime = currentTime;
+
             int currentLevel = extractLevelNumber(mapPath);
             if (currentLevel >= 1 && currentLevel < 140) {
                 // Next level in sequence
