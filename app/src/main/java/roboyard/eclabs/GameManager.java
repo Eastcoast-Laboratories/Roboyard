@@ -60,10 +60,10 @@ public class GameManager {
         this.screens.append(Constants.SCREEN_RANDOM_GAME, new GridGameScreen(this));
         
         // Initialize level selection screens with correct ranges
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START,     new LevelChoiceGameScreen(this, 0, -1, Constants.SCREEN_LEVEL_GAME_START + 1));  // Beginner
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 1, new LevelChoiceGameScreen(this, 35, Constants.SCREEN_LEVEL_GAME_START, Constants.SCREEN_LEVEL_GAME_START + 2));  // Intermediate
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START + 2, new LevelChoiceGameScreen(this, 70, Constants.SCREEN_LEVEL_GAME_START + 1, Constants.SCREEN_LEVEL_GAME_END));  // Advanced
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_END,       new LevelChoiceGameScreen(this, 105, Constants.SCREEN_LEVEL_GAME_START + 2, -1));  // Expert
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_START,     new LevelChoiceGameScreen(this, 1, -1, Constants.SCREEN_LEVEL_GAME_INTERMEDIATE));  // Beginner
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_INTERMEDIATE, new LevelChoiceGameScreen(this, 36, Constants.SCREEN_LEVEL_GAME_START, Constants.SCREEN_LEVEL_GAME_ADVANCED));  // Intermediate
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_ADVANCED, new LevelChoiceGameScreen(this, 71, Constants.SCREEN_LEVEL_GAME_INTERMEDIATE, Constants.SCREEN_LEVEL_GAME_EXPERT));  // Advanced
+        this.screens.append(Constants.SCREEN_LEVEL_GAME_EXPERT,       new LevelChoiceGameScreen(this, 106, Constants.SCREEN_LEVEL_GAME_ADVANCED, Constants.SCREEN_LEVEL_GAME_START));  // Expert
         
         this.screens.append(Constants.SCREEN_SAVE_GAMES, new SaveGameScreen(this));
         // End of list of all screens

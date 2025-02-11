@@ -177,7 +177,10 @@ public class GridGameScreen extends GameScreen {
         }
 
         // Button Next game (top right) (new randomgame) sets mustStartNext to true
-        this.instances.add(new GameButtonGeneral((int)(870*ratioW), 0, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
+        int currentLevel = extractLevelNumber(mapPath);
+        if (currentLevel < 140) {  // Show next button for random games or levels below 140
+            this.instances.add(new GameButtonGeneral((int)(870*ratioW), 0, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
+        }
 
         // Button Save
         gameManager.getRenderManager().loadImage(R.drawable.transparent);
@@ -247,6 +250,10 @@ public class GridGameScreen extends GameScreen {
             renderManager.drawText(10, textPosYSmall, NumDifferentSolutionsFound + " solutions found");
             renderManager.setTextSize(lineHeight);
         }
+        if(levelNum >= 1 && numSolutionClicks == 0){
+            // in Level game always show the first solution
+            numSolutionClicks = 1;
+        }
         if (nbCoups > 0) {
             // at least one move was made by hand or by AI
             renderManager.drawText(10, textPosY, "Moves: " + nbCoups);
@@ -279,10 +286,14 @@ public class GridGameScreen extends GameScreen {
             if (timeCpt < 1) {
                 // the first second it pretends to generate the map :)
                 // in real it is still calculating the solution
-                renderManager.drawText(10, textPosY, "Generating map...");
+                if (levelNum >= 1){
+                    renderManager.drawText(10, textPosY, "Loading map...");
+                }else{
+                    renderManager.drawText(10, textPosY, "Generating map...");
+                }
             } else {
                 // in Beginner mode it will create a new puzzle, if it is not solvable within one second
-                if (getLevel().equals("Beginner")) {
+                if (getLevel().equals("Beginner") && levelNum< 0) {
                     renderManager.drawText(10, textPosY, "Too complicated");
                     renderManager.drawText(10, textPosYSmall, "... restarting!");
                     mustStartNext = true;
@@ -883,7 +894,7 @@ public class GridGameScreen extends GameScreen {
     private class ButtonNext implements IExecutor{
         public void execute() {
             int currentLevel = extractLevelNumber(mapPath);
-            if (currentLevel >= 0) {
+            if (currentLevel >= 1 && currentLevel < 140) {
                 // Next level in sequence
                 String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
                 setLevelGame(nextMapPath);
