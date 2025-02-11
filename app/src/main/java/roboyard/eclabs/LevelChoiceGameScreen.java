@@ -25,7 +25,7 @@ public class LevelChoiceGameScreen extends GameScreen {
 
     /*
      * Game screen for level selection
-     * @param firstLevel : number of the first map, 0 -> generatedMap_0.txt
+     * @param firstLevel : number of the first map, 1 -> generatedMap_1.txt
      * @param leftScreen : reference to the previous level selection game screen (-1 if none)
      * @param rightScreen : reference to the next level selection game screen (-1 if none)
      */
@@ -34,16 +34,16 @@ public class LevelChoiceGameScreen extends GameScreen {
         this.firstLevel = firstLev;
         
         // Update navigation based on current page
-        if (firstLev == 0) {  // Beginner page
+        if (firstLev == 1) {  // Beginner page (1-35)
             this.leftScreen = -1;
             this.rightScreen = Constants.SCREEN_LEVEL_GAME_START + 1;  // Go to intermediate
-        } else if (firstLev == 35) {  // Intermediate page
+        } else if (firstLev == 36) {  // Intermediate page (36-70)
             this.leftScreen = Constants.SCREEN_LEVEL_GAME_START;   // Back to beginner
             this.rightScreen = Constants.SCREEN_LEVEL_GAME_START + 2; // Go to advanced
-        } else if (firstLev == 70) {  // Advanced page
+        } else if (firstLev == 71) {  // Advanced page (71-105)
             this.leftScreen = Constants.SCREEN_LEVEL_GAME_START + 1;  // Back to intermediate
-            this.rightScreen = Constants.SCREEN_LEVEL_GAME_END; // Go to expert
-        } else if (firstLev == 105) {  // Expert page
+            this.rightScreen = Constants.SCREEN_LEVEL_GAME_START + 3; // Go to expert
+        } else if (firstLev == 106) {  // Expert page (106-140)
             this.leftScreen = Constants.SCREEN_LEVEL_GAME_START + 2;  // Back to advanced
             this.rightScreen = -1;
         }
@@ -97,7 +97,7 @@ public class LevelChoiceGameScreen extends GameScreen {
         }
 
         // Add back button for beginner screen
-        if (firstLevel == 0) {
+        if (firstLevel == 1) {
             int screenHeight = this.gameManager.getScreenHeight();
             GameButtonGoto backButton = new GameButtonGoto(33, screenHeight - iconsize - 33, iconsize, iconsize, R.drawable.bt_back_up, R.drawable.bt_back_down, Constants.SCREEN_START);
             this.instances.add(backButton);
@@ -128,21 +128,9 @@ public class LevelChoiceGameScreen extends GameScreen {
 
     }
 
-    private String getMapPath(int levelInScreen)
-    {
-        levelInScreen+=firstLevel;
-        String difficulty;
-        // Determine difficulty based on firstLevel (page number)
-        if (firstLevel == 0) {
-            difficulty = "beginner";
-        } else if (firstLevel == 35) {
-            difficulty = "intermediate";
-        } else if (firstLevel == 70) {
-            difficulty = "advanced";
-        } else {
-            difficulty = "expert";
-        }
-        return "Maps/" + difficulty + "/generatedMap_" + (levelInScreen % 35) + ".txt";
+    private String getMapPath(int levelInScreen) {
+        int levelNum = firstLevel + levelInScreen;
+        return "Maps/level_" + levelNum + ".txt";
     }
 
     @Override
@@ -171,11 +159,11 @@ public class LevelChoiceGameScreen extends GameScreen {
 
         // Show current difficulty in the title
         String difficulty;
-        if (firstLevel == 0) {
+        if (firstLevel == 1) {
             difficulty = "Beginner";
-        } else if (firstLevel == 35) {
+        } else if (firstLevel == 36) {
             difficulty = "Intermediate";
-        } else if (firstLevel == 70) {
+        } else if (firstLevel == 71) {
             difficulty = "Advanced";
         } else {
             difficulty = "Expert";
@@ -183,11 +171,12 @@ public class LevelChoiceGameScreen extends GameScreen {
         renderManager.drawText((int)(55*ratioW)-10, (int)(55*ratioH), difficulty + " Levels");
 
         int col, row;
-        for (int i = 0;  i < cols*rows;  i++) {
+        for (int i = 0; i < cols*rows; i++) {
             col = i % cols;
             row = (i / cols) % rows;
+            int levelNum = firstLevel + i;
             // write the number of the level:
-            renderManager.drawText((int)((55+(stepX*col))*ratioW)-10, (int)((45+ts+(stepY*row))*ratioH), (i+1) + ".");
+            renderManager.drawText((int)((55+(stepX*col))*ratioW)-10, (int)((45+ts+(stepY*row))*ratioH), levelNum + ".");
         }
         super.draw(renderManager);
     }

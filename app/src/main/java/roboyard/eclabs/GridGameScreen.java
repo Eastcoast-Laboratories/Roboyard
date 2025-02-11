@@ -314,7 +314,7 @@ public class GridGameScreen extends GameScreen {
             renderManager.setColor(Color.WHITE);
             renderManager.setTextSize(lineHeight / 2);
             // Position text in top right corner with some padding
-            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), "Level " + (levelNum + 1));
+            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), "Level " + levelNum);
         }
 
         if (imageLoaded) {
@@ -329,27 +329,6 @@ public class GridGameScreen extends GameScreen {
             gameManager.requestToast(requestToast, true);
             requestToast = "";
         }
-    }
-
-    /**
-     * Extracts the level number from a map path.
-     * @param path The map path (format: generatedMap_X.txt)
-     * @return The level number, or -1 if invalid
-     */
-    private int extractLevelNumber(String path) {
-        if (path == null || path.isEmpty()) {
-            return -1;
-        }
-        try {
-            int start = path.lastIndexOf("_") + 1;
-            int end = path.lastIndexOf(".");
-            if (start > 0 && end > start) {
-                return Integer.parseInt(path.substring(start, end));
-            }
-        } catch (Exception e) {
-            // If parsing fails, return -1
-        }
-        return -1;
     }
 
     public void update(GameManager gameManager){
@@ -377,8 +356,9 @@ public class GridGameScreen extends GameScreen {
             int levelNum = extractLevelNumber(mapPath);
             if(levelNum >=0 && levelNum < 60)
             {
-                mapPath = "Maps/generatedMap_"+(levelNum+1)+".txt";
-                setLevelGame(mapPath);
+                // Next level in sequence
+                String nextMapPath = "Maps/level_" + (levelNum + 1) + ".txt";
+                setLevelGame(nextMapPath);
             } else {
                 // start a game in screen 4
                 setRandomGame();
@@ -901,9 +881,16 @@ public class GridGameScreen extends GameScreen {
      * sets mustStartNext to true
      */
     private class ButtonNext implements IExecutor{
-
-        public void execute(){
-            mustStartNext = true;
+        public void execute() {
+            int currentLevel = extractLevelNumber(mapPath);
+            if (currentLevel >= 0) {
+                // Next level in sequence
+                String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
+                setLevelGame(nextMapPath);
+            } else {
+                // In a random game, generate a new one
+                mustStartNext = true;
+            }
         }
     }
 
@@ -1021,5 +1008,26 @@ public class GridGameScreen extends GameScreen {
                 nbCoups--;
             }
         }
+    }
+
+    /**
+     * Extracts the level number from a map path.
+     * @param path The map path (format: level_X.txt)
+     * @return The level number, or -1 if invalid
+     */
+    private int extractLevelNumber(String path) {
+        if (path == null || path.isEmpty()) {
+            return -1;
+        }
+        try {
+            int start = path.lastIndexOf("_") + 1;
+            int end = path.lastIndexOf(".");
+            if (start > 0 && end > start) {
+                return Integer.parseInt(path.substring(start, end));
+            }
+        } catch (Exception e) {
+            // If parsing fails, return -1
+        }
+        return -1;
     }
 }
