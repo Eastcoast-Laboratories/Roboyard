@@ -326,7 +326,11 @@ public class GridGameScreen extends GameScreen {
         if (levelNum >= 0) {
             // Level number underneath the next button
             renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), "Level " + levelNum);
-        } 
+        } else {
+            // show the unique string for the current map like in the save game
+            String uniqueString = MapObjects.createStringFromList(gridElements, true);
+            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), uniqueString);
+        }
 
         if (imageLoaded) {
             gameManager.getRenderManager().drawImage(xGrid, yGrid, (int) (MainActivity.getBoardWidth() * gridSpace) + xGrid, (int) (MainActivity.getBoardHeight() * gridSpace) + yGrid, imageGridID);
