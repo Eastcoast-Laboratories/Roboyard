@@ -187,7 +187,7 @@ public class GridGameScreen extends GameScreen {
         buttonSave = new GameButtonGoto(0, buttonPosY, buttonW,buttonW, R.drawable.bt_jeu_save_up, R.drawable.bt_jeu_save_down, 9);
         buttonSave.setImageDisabled(R.drawable.transparent);
         // save button will be disabled when playing a saved game
-        buttonSave.setEnabled(true);
+        buttonSave.setEnabled(false);
         this.instances.add(buttonSave);
 
         // Button one step back
@@ -310,20 +310,36 @@ public class GridGameScreen extends GameScreen {
         renderManager.setTextSize(lineHeightSmall);
         renderManager.drawText(10, textPosYTime, "Time: " + timeCpt / 60 + ":" + secondsS);
 
-        if (timeCpt >= 40 && autoSaved == false && mustStartNext == false) {
+        if (timeCpt >= 40 && autoSaved == false && mustStartNext == false && mapPath != null && !mapPath.isEmpty()) {
+            System.out.println("DEBUG: Starting autosave. mapPath=" + mapPath + ", timeCpt=" + timeCpt + ", autoSaved=" + autoSaved + ", mustStartNext=" + mustStartNext);
             // save autosave in slot 0
             ArrayList<GridElement> gridElements = getGridElements();
             String autosaveMapPath = SaveGameScreen.getMapPath(0);
-            FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
-            FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, MapObjects.createStringFromList(gridElements, false));
-            gameManager.requestToast("Autosaving...", false);
-            autoSaved = true;
+            System.out.println("DEBUG: Autosave path=" + autosaveMapPath + ", gridElements size=" + gridElements.size());
+            try {
+                FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
+                String saveData = MapObjects.createStringFromList(gridElements, false);
+                System.out.println("DEBUG: Save data length=" + saveData.length());
+                FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, saveData);
+                // Also add to mapsSaved.txt if not already there
+                SaveManager saver = new SaveManager(gameManager.getActivity());
+                if (!saver.getMapsStateSaved(autosaveMapPath, "mapsSaved.txt")) {
+                    System.out.println("DEBUG: Adding autosave to mapsSaved.txt");
+                    FileReadWrite.writePrivateData(gameManager.getActivity(), "mapsSaved.txt", autosaveMapPath + "\n");
+                }
+                gameManager.requestToast("Autosaving...", false);
+                autoSaved = true;
+                System.out.println("DEBUG: Autosave completed successfully");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error during autosave: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         // Display level number if it's a level game
         renderManager.setColor(Color.WHITE);
         renderManager.setTextSize(lineHeight / 2);
-        if (levelNum >= 0) {
+        if (mapPath != null && mapPath.startsWith("Maps/")) {
             // Level number underneath the next button
             renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 4f), "Level " + levelNum);
         } else {
@@ -359,7 +375,7 @@ public class GridGameScreen extends GameScreen {
             allMoves.clear();
             autoSaved = false;
 
-            buttonSave.setEnabled(true);
+            buttonSave.setEnabled(false);
 
             buttonSolve.setEnabled(false);
             if(t != null){
@@ -444,35 +460,62 @@ public class GridGameScreen extends GameScreen {
 
     public void setSavedGame(String mapPath)
     {
-        this.mapPath = "";
+        System.out.println("DEBUG: Loading saved game from " + mapPath);
+        this.mapPath = mapPath;  // Keep the mapPath to identify it as a saved game
 
-        String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
-        gridElements = MapObjects.extractDataFromString(saveData);
-        GridGameScreen.setMap(gridElements);
-
-        createGrid();
+        try {
+            String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+            System.out.println("DEBUG: Loaded save data length=" + saveData.length());
+            gridElements = MapObjects.extractDataFromString(saveData);
+            System.out.println("DEBUG: Extracted gridElements size=" + gridElements.size());
+            GridGameScreen.setMap(gridElements);
+            createGrid();
+            System.out.println("DEBUG: Saved game loaded successfully");
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error loading saved game: " + e.getMessage());
+            e.printStackTrace();
+            this.mapPath = "";  // Reset mapPath on error
+        }
     }
 
     public void setLevelGame(String mapPath)
     {
+        System.out.println("DEBUG: Loading level game from " + mapPath);
         this.mapPath = mapPath;
 
-        String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
-        gridElements = MapObjects.extractDataFromString(saveData);
-        GridGameScreen.setMap(gridElements);
-        numSolutionClicks = 0;
-        createGrid();
+        try {
+            String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
+            System.out.println("DEBUG: Loaded level data length=" + saveData.length());
+            gridElements = MapObjects.extractDataFromString(saveData);
+            System.out.println("DEBUG: Extracted gridElements size=" + gridElements.size());
+            GridGameScreen.setMap(gridElements);
+            numSolutionClicks = 0;
+            createGrid();
+            buttonSaveSetEnabled(false);  // Disable save button for level games
+            System.out.println("DEBUG: Level game loaded successfully, save button disabled");
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error loading level game: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * creates the grid in screen 4 (game screen)
-     */
     public void setRandomGame() {
+        System.out.println("DEBUG: Starting new random game");
         this.mapPath = "";  //La carte étant générée, elle n'a pas de chemin d'accès
-        MapGenerator generatedMap = new MapGenerator();
-        gridElements = generatedMap.getGeneratedGameMap();
-
-        createGrid();
+        this.autoSaved = false;  // Reset autosave flag for new random game
+        numSolutionClicks = 0;
+        
+        try {
+            MapGenerator generatedMap = new MapGenerator();
+            gridElements = generatedMap.getGeneratedGameMap();
+            System.out.println("DEBUG: Generated gridElements size=" + gridElements.size());
+            createGrid();
+            buttonSaveSetEnabled(true);  // Enable save button only for random games
+            System.out.println("DEBUG: Random game created successfully, save button enabled");
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error creating random game: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void createGrid() {
@@ -907,15 +950,19 @@ public class GridGameScreen extends GameScreen {
             }
             lastNextButtonClickTime = currentTime;
 
-            int currentLevel = extractLevelNumber(mapPath);
-            if (currentLevel >= 1 && currentLevel < 140) {
-                // Next level in sequence
-                String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
-                setLevelGame(nextMapPath);
-            } else {
-                // In a random game, generate a new one
-                mustStartNext = true;
+            // Only proceed to next level if we're in the Maps/ directory
+            if (mapPath != null && mapPath.startsWith("Maps/")) {
+                int currentLevel = extractLevelNumber(mapPath);
+                if (currentLevel >= 1 && currentLevel < 140) {
+                    // Next level in sequence
+                    String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
+                    setLevelGame(nextMapPath);
+                    return;
+                }
             }
+            
+            // For all other cases (random games, saved games, or invalid level), generate a new random game
+            setRandomGame();
         }
     }
 
