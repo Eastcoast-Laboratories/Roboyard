@@ -83,6 +83,8 @@ public class GridGameScreen extends GameScreen {
 
     private final Preferences preferences = new Preferences();
 
+    private boolean isGameWon = false;
+
     public GridGameScreen(GameManager gameManager){
         super(gameManager);
         String ld=preferences.getPreferenceValue(gameManager.getActivity(), "difficulty");
@@ -462,7 +464,7 @@ public class GridGameScreen extends GameScreen {
     {
         System.out.println("DEBUG: Loading saved game from " + mapPath);
         this.mapPath = mapPath;  // Keep the mapPath to identify it as a saved game
-
+        this.isGameWon = false;  // Reset game won flag
         try {
             String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
             System.out.println("DEBUG: Loaded save data length=" + saveData.length());
@@ -482,7 +484,7 @@ public class GridGameScreen extends GameScreen {
     {
         System.out.println("DEBUG: Loading level game from " + mapPath);
         this.mapPath = mapPath;
-
+        this.isGameWon = false;  // Reset game won flag
         try {
             String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
             System.out.println("DEBUG: Loaded level data length=" + saveData.length());
@@ -503,6 +505,7 @@ public class GridGameScreen extends GameScreen {
         System.out.println("DEBUG: Starting new random game");
         this.mapPath = "";  //La carte étant générée, elle n'a pas de chemin d'accès
         this.autoSaved = false;  // Reset autosave flag for new random game
+        this.isGameWon = false;  // Reset game won flag
         numSolutionClicks = 0;
         
         try {
@@ -824,21 +827,23 @@ public class GridGameScreen extends GameScreen {
 
     public boolean win(GamePiece p)
     {
+        if(!p.testIfWon) {
+            return false;  // Don't check win condition if we already won
+        }
+
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
             {
-                 if (myp.getType().equals("target_multi") && myp.getX() == p.getX() && myp.getY() == p.getY())
-                {
+                if (myp.getType().equals("target_multi") && myp.getX() == p.getX() && myp.getY() == p.getY()) {
+                    p.testIfWon = false;  // Prevent further win checks
                     sayWon();
-
                     return true;
                 }
-                else if((myp.getX() == p.getX()) && (myp.getY() == p.getY()) && (myp.getType().equals("target_red") || myp.getType().equals("target_green") || myp.getType().equals("target_blue") || myp.getType().equals("target_yellow")))
-                {
+                else if((myp.getX() == p.getX()) && (myp.getY() == p.getY()) && (myp.getType().equals("target_red") || myp.getType().equals("target_green") || myp.getType().equals("target_blue") || myp.getType().equals("target_yellow"))) {
                     if(p.getColor() == colors.get((myp.getType())))
                     {
+                        p.testIfWon = false;  // Prevent further win checks
                         sayWon();
-
                         return true;
                     }
                 }
@@ -849,6 +854,11 @@ public class GridGameScreen extends GameScreen {
 
     public void sayWon()
     {
+        if(isGameWon) {
+            return;  // Don't show win message again
+        }
+        isGameWon = true;
+
         if(IAMovesNumber > 0)
         {
             gameManager.requestToast("The AI found a solution in "+IAMovesNumber+" moves.", true);

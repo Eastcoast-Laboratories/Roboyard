@@ -26,7 +26,7 @@ public class GamePiece implements IGameObject {
     private final int initialSpeed        = 16;
     private final int extraSizeForRobotsAndTargets = 10; // robots and targets are 4px larger than the grid and may overlap 4 px
 
-    private boolean testIfWon       = true;
+    boolean testIfWon       = true;
 
     private int image               = 0;
 
@@ -169,15 +169,15 @@ public class GamePiece implements IGameObject {
 //            System.out.println(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
             if(inMovement) {
                 ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
+                if(testIfWon) {
+                    if(((GridGameScreen)(gameManager.getCurrentScreen())).win(this)) {
+                        testIfWon = false;  // Only set to false if we actually won
+                    }
+                }
             }
 
             inMovement = false;
 
-            if(testIfWon) {
-                ((GridGameScreen)(gameManager.getCurrentScreen())).win(this);
-                testIfWon = false;
-            }
-//            inMovement = false;
             //if there is user input, ...
             InputManager inputManager = gameManager.getInputManager();
             if(inputManager.eventHasOccurred()){
