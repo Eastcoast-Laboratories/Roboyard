@@ -85,7 +85,7 @@ public class GridGameScreen extends GameScreen {
 
     private boolean isGameWon = false;
 
-    private boolean isRandomGame = false;
+    boolean isRandomGame = false;
 
     public boolean isRandomGame() {
         return isRandomGame;
@@ -100,6 +100,9 @@ public class GridGameScreen extends GameScreen {
             preferences.setPreferences(gameManager.getActivity(),"difficulty", ld);
         }
         setDifficulty(ld);
+        
+        // Initialize with default state
+        isRandomGame = false;  // Start in non-random mode
         gridSpace = (float)gameManager.getScreenWidth() / (float)MainActivity.getBoardWidth();
         xGrid = 0;
 
@@ -466,23 +469,22 @@ public class GridGameScreen extends GameScreen {
         allMoves.get(allMoves.size()-1).setSquaresMoved(currentMovedSquares);
     }
 
-    public void setSavedGame(String mapPath)
-    {
+    public void setSavedGame(String mapPath) {
         System.out.println("DEBUG: Loading saved game from " + mapPath);
         this.mapPath = mapPath;  // Keep the mapPath to identify it as a saved game
         this.isGameWon = false;  // Reset game won flag
+        this.isRandomGame = false;  // Loading a saved game is not a random game
         try {
             String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
-            System.out.println("DEBUG: Loaded save data length=" + saveData.length());
             gridElements = MapObjects.extractDataFromString(saveData);
             System.out.println("DEBUG: Extracted gridElements size=" + gridElements.size());
             GridGameScreen.setMap(gridElements);
             createGrid();
-            System.out.println("DEBUG: Saved game loaded successfully");
+            buttonSaveSetEnabled(false);  // Disable save button for saved games
+            System.out.println("DEBUG: Saved game loaded successfully, save button disabled");
         } catch (Exception e) {
             System.out.println("DEBUG: Error loading saved game: " + e.getMessage());
             e.printStackTrace();
-            this.mapPath = "";  // Reset mapPath on error
         }
     }
 
@@ -1098,17 +1100,8 @@ public class GridGameScreen extends GameScreen {
 
     private class ButtonBack implements IExecutor{
         public void execute(){
-            if(allMoves.size() > 0)
-            {
-                int last=allMoves.size()-1;
-                Move lastMove=allMoves.get(last);
-                numSquares-=lastMove.getSquaresMoved();
-                System.out.println("substract "+lastMove.getSquaresMoved());
-                lastMove.goBack();
-                System.out.println("remove move nr. "+(allMoves.size()-1)+" "+lastMove._x+"/"+lastMove._y);
-                allMoves.remove(last);
-                nbCoups--;
-            }
+            isRandomGame = false; // Reset to load mode when going back to main menu
+            gameManager.setGameScreen(Constants.SCREEN_START);
         }
     }
 

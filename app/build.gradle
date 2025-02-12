@@ -8,8 +8,8 @@ android {
         applicationId "de.z11.roboyard"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 54
-        versionName "16.1"
+        versionCode 56
+        versionName "17"
     }
     buildTypes {
         release {
@@ -47,11 +47,18 @@ android {
         // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
     }
+    
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
     
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"

@@ -11,7 +11,10 @@ public class GameButtonGotoBack extends GameButton {
 
     @Override
     public void onClick(GameManager gameManager) {
-
+        // Reset to load mode when going back to main menu
+        if (gameManager.getScreens().get(Constants.SCREEN_GAME) instanceof GridGameScreen) {
+            ((GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME)).isRandomGame = false;
+        }
         gameManager.setGameScreen(gameManager.getPreviousScreenKey());
     }
 }
