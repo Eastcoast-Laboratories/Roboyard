@@ -142,7 +142,14 @@ public class SaveGameScreen extends GameScreen {
         renderManager.setColor(Color.BLACK);
 
         renderManager.setTextSize((int) (0.4 * ts));
-        renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select Savegame");
+        
+        // Show different text based on save/load mode
+        GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
+        if (gameScreen != null && gameScreen.isRandomGame()) {
+            renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select slot to save map");
+        } else {
+            renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Load map");
+        }
 
         // Draw save slots
         for (int i = 0; i < buttonPositionsX.length; i++) {
