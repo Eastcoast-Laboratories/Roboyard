@@ -515,10 +515,19 @@ public class GridGameScreen extends GameScreen {
         numSolutionClicks = 0;
         
         try {
+            // Reset game state
+            nbCoups = 0;
+            numSquares = 0;
+            currentMovedSquares = 0;
+            allMoves.clear();
+            
             MapGenerator generatedMap = new MapGenerator();
             gridElements = generatedMap.getGeneratedGameMap();
             System.out.println("DEBUG: Generated gridElements size=" + gridElements.size());
+            
             createGrid();
+            createRobots();  // Make sure robots are created immediately
+            
             buttonSaveSetEnabled(true);  // Enable save button only for random games
             System.out.println("DEBUG: Random game created successfully, save button enabled");
         } catch (Exception e) {
@@ -974,13 +983,16 @@ public class GridGameScreen extends GameScreen {
                     String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
                     setLevelGame(nextMapPath);
                     isRandomGame = false;
-                    return;
+                } else {
+                    // For invalid level numbers, generate a new random game
+                    setRandomGame();
+                    isRandomGame = true;
                 }
+            } else {
+                // For random games, saved games, or no map path
+                setRandomGame();
+                isRandomGame = true;
             }
-            
-            // For all other cases (random games, saved games, or invalid level), generate a new random game
-            setRandomGame();
-            isRandomGame = true;
         }
     }
 
