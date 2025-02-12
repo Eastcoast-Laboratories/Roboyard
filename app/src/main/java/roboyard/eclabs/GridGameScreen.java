@@ -962,13 +962,17 @@ public class GridGameScreen extends GameScreen {
     private class ButtonRestart implements IExecutor{
 
         public void execute(){
-            ButtonBack bb = new ButtonBack();
-            while(allMoves.size()>0)
-            {
-                bb.execute();
-            }
+            // Reset game state
             nbCoups = 0;
             numSquares = 0;
+            currentMovedSquares = 0;
+            allMoves.clear();
+            
+            // Recreate grid and robots with current settings
+            createGrid();
+            createRobots();
+            
+            System.out.println("DEBUG: Game restarted");
         }
     }
 
@@ -1111,8 +1115,16 @@ public class GridGameScreen extends GameScreen {
 
     private class ButtonBack implements IExecutor{
         public void execute(){
-            isRandomGame = false; // Reset to load mode when going back to main menu
-            gameManager.setGameScreen(Constants.SCREEN_START);
+            if(allMoves.size() > 0) {
+                int last = allMoves.size()-1;
+                Move lastMove = allMoves.get(last);
+                numSquares -= lastMove.getSquaresMoved();
+                System.out.println("substract "+lastMove.getSquaresMoved());
+                lastMove.goBack();
+                System.out.println("remove move nr. "+(allMoves.size()-1)+" "+lastMove._x+"/"+lastMove._y);
+                allMoves.remove(last);
+                nbCoups--;
+            }
         }
     }
 
