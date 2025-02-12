@@ -36,15 +36,15 @@ public class LevelChoiceGameScreen extends GameScreen {
         // Update navigation based on current page
         if (firstLevel == 1) {  // Beginner page (1-35)
             this.leftScreen = -1;  // No back navigation in beginner
-            this.rightScreen = Constants.SCREEN_LEVEL_GAME_INTERMEDIATE;  // Go to intermediate
+            this.rightScreen = Constants.SCREEN_LEVEL_INTERMEDIATE;  // Go to intermediate
         } else if (firstLevel == 36) {  // Intermediate page (36-70)
-            this.leftScreen = Constants.SCREEN_LEVEL_GAME_START;   // Back to beginner
-            this.rightScreen = Constants.SCREEN_LEVEL_GAME_ADVANCED; // Go to advanced
+            this.leftScreen = Constants.SCREEN_LEVEL_BEGINNER;   // Back to beginner
+            this.rightScreen = Constants.SCREEN_LEVEL_ADVANCED; // Go to advanced
         } else if (firstLevel == 71) {  // Advanced page (71-105)
-            this.leftScreen = Constants.SCREEN_LEVEL_GAME_INTERMEDIATE;  // Back to intermediate
-            this.rightScreen = Constants.SCREEN_LEVEL_GAME_EXPERT; // Go to expert
+            this.leftScreen = Constants.SCREEN_LEVEL_INTERMEDIATE;  // Back to intermediate
+            this.rightScreen = Constants.SCREEN_LEVEL_EXPERT; // Go to expert
         } else if (firstLevel == 106) {  // Expert page (106-140)
-            this.leftScreen = Constants.SCREEN_LEVEL_GAME_ADVANCED;  // Back to advanced
+            this.leftScreen = Constants.SCREEN_LEVEL_ADVANCED;  // Back to advanced
             this.rightScreen = -1;  // No forward navigation in expert
         }
 

@@ -23,7 +23,7 @@ public class MainMenuGameScreen extends GameScreen {
         int ws2 = (int)(((float)this.gameManager.getScreenWidth()-relativeButtonWidth)/2);
 
         // Random Game (large button)
-        this.instances.add(new GameButtonGotoRandomGame(ws2, (int)(ratio*200), relativeButtonWidth, (int)(ratio*buttonSize), R.drawable.bt_start_up_random, R.drawable.bt_start_down_random, Constants.SCREEN_RANDOM_GAME));
+        this.instances.add(new GameButtonGotoRandomGame(ws2, (int)(ratio*200), relativeButtonWidth, (int)(ratio*buttonSize), R.drawable.bt_start_up_random, R.drawable.bt_start_down_random, Constants.SCREEN_GAME));
 
         // Level Selection and Load Saved Game (medium buttons side by side)
         int mediumButtonSize = 330; // 75% of the regular size
@@ -34,7 +34,7 @@ public class MainMenuGameScreen extends GameScreen {
         int mediumY = (int)(ratio*800); // Position below the random game button
 
         // Level Selection and Load Saved Game buttons
-        this.instances.add(new GameButtonGoto(startXMedium, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up, R.drawable.bt_start_down, Constants.SCREEN_LEVEL_GAME_START));
+        this.instances.add(new GameButtonGoto(startXMedium, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up, R.drawable.bt_start_down, Constants.SCREEN_LEVEL_BEGINNER));
         this.instances.add(new GameButtonGoto(startXMedium + mediumButtonWidth + spacing, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up_saved, R.drawable.bt_start_down_saved, Constants.SCREEN_SAVE_GAMES));
 
         // Small buttons at the bottom

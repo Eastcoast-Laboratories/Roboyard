@@ -1,9 +1,5 @@
 package roboyard.eclabs;
 
-import android.util.SparseArray;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -11,7 +7,7 @@ import java.util.ArrayList;
  */
 public class GameButtonGotoSavedGame extends GameButtonGoto {
 
-    private String mapPath = null;
+    private String mapPath;
 
     /**
      * Constructor for GameButtonGotoSavedGame.
@@ -35,7 +31,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
      */
     @Override
     public void onClick(GameManager gameManager) {
-        if (gameManager.getPreviousScreenKey() == Constants.SCREEN_RANDOM_GAME) {
+        if (gameManager.getPreviousScreenKey() == Constants.SCREEN_GAME) {
             // Screen to save or overwrite a savegame
             ArrayList<GridElement> gridElements = ((GridGameScreen) gameManager.getScreens().get(gameManager.getPreviousScreenKey())).getGridElements();
             FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
@@ -47,16 +43,16 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             saveGameScreen.createButtons();
             
             // Keep track of the game screen and explicitly set it as previous
-            gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_RANDOM_GAME));
+            gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
             gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
         } else {
             // Screen to select a savegame
             SaveManager saver = new SaveManager(gameManager.getActivity());
             if (saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
                 super.onClick(gameManager);
-                ((GridGameScreen) (gameManager.getScreens().get(Constants.SCREEN_RANDOM_GAME))).setSavedGame(mapPath);
+                ((GridGameScreen) (gameManager.getScreens().get(Constants.SCREEN_GAME))).setSavedGame(mapPath);
                 // disable the savegame button in the gamescreen
-                ((GridGameScreen) (gameManager.getScreens().get(Constants.SCREEN_RANDOM_GAME))).buttonSaveSetEnabled(false);
+                ((GridGameScreen) (gameManager.getScreens().get(Constants.SCREEN_GAME))).buttonSaveSetEnabled(false);
             }
         }
     }

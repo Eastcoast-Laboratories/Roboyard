@@ -1,7 +1,6 @@
 package roboyard.eclabs;
 
 import android.util.SparseArray;
-import android.widget.Toast;
 
 /**
  * Manages the game screens and provides methods to interact with them.
@@ -57,13 +56,13 @@ public class GameManager {
         this.screens.append(Constants.SCREEN_START, new MainMenuGameScreen(this));
         this.screens.append(Constants.SCREEN_SETTINGS, new SettingsGameScreen(this));
         this.screens.append(Constants.SCREEN_CREDITS, new CreditsGameScreen(this, activity));
-        this.screens.append(Constants.SCREEN_RANDOM_GAME, new GridGameScreen(this));
+        this.screens.append(Constants.SCREEN_GAME, new GridGameScreen(this));
         
         // Initialize level selection screens with correct ranges
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_START,     new LevelChoiceGameScreen(this, 1, -1, Constants.SCREEN_LEVEL_GAME_INTERMEDIATE));  // Beginner
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_INTERMEDIATE, new LevelChoiceGameScreen(this, 36, Constants.SCREEN_LEVEL_GAME_START, Constants.SCREEN_LEVEL_GAME_ADVANCED));  // Intermediate
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_ADVANCED, new LevelChoiceGameScreen(this, 71, Constants.SCREEN_LEVEL_GAME_INTERMEDIATE, Constants.SCREEN_LEVEL_GAME_EXPERT));  // Advanced
-        this.screens.append(Constants.SCREEN_LEVEL_GAME_EXPERT,       new LevelChoiceGameScreen(this, 106, Constants.SCREEN_LEVEL_GAME_ADVANCED, Constants.SCREEN_LEVEL_GAME_START));  // Expert
+        this.screens.append(Constants.SCREEN_LEVEL_BEGINNER,     new LevelChoiceGameScreen(this, 1, -1, Constants.SCREEN_LEVEL_INTERMEDIATE));  // Beginner
+        this.screens.append(Constants.SCREEN_LEVEL_INTERMEDIATE, new LevelChoiceGameScreen(this, 36, Constants.SCREEN_LEVEL_BEGINNER, Constants.SCREEN_LEVEL_ADVANCED));  // Intermediate
+        this.screens.append(Constants.SCREEN_LEVEL_ADVANCED, new LevelChoiceGameScreen(this, 71, Constants.SCREEN_LEVEL_INTERMEDIATE, Constants.SCREEN_LEVEL_EXPERT));  // Advanced
+        this.screens.append(Constants.SCREEN_LEVEL_EXPERT,       new LevelChoiceGameScreen(this, 106, Constants.SCREEN_LEVEL_ADVANCED, Constants.SCREEN_LEVEL_BEGINNER));  // Expert
         
         this.screens.append(Constants.SCREEN_SAVE_GAMES, new SaveGameScreen(this));
         // End of list of all screens
@@ -209,11 +208,14 @@ public class GameManager {
      * @return Key of the previous game screen.
      */
     public int getPreviousScreenKey() {
-        for (int i = 0; i < screens.size(); i++) {
-            int key = screens.keyAt(i);
-            if (screens.get(key) == this.previousScreen) {
-                return key;
-            }
+        if (this.previousScreen instanceof GridGameScreen) {
+            return Constants.SCREEN_GAME;
+        } else if (this.previousScreen instanceof SaveGameScreen) {
+            return Constants.SCREEN_SAVE_GAMES;
+        } else if (this.previousScreen instanceof SettingsGameScreen) {
+            return Constants.SCREEN_SETTINGS;
+        } else if (this.previousScreen instanceof LevelChoiceGameScreen) {
+            return Constants.SCREEN_LEVEL_BEGINNER;
         }
         return Constants.SCREEN_START; // Fallback to main menu
     }

@@ -38,7 +38,7 @@ public class GameMovementInterface implements IGameObject {
 
     public GameMovementInterface(GameManager gameManager){
         this.gameManager = gameManager;
-        this.scales = new float[Constants.SCREEN_RANDOM_GAME];
+        this.scales = new float[Constants.SCREEN_GAME];
         this.resetScale();
     }
 
