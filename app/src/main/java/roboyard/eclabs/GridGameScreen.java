@@ -244,12 +244,12 @@ public class GridGameScreen extends GameScreen {
         renderManager.paintScreen();
 
         //renderManager.setColor(Color.BLACK);
-        renderManager.setColor(Color.GRAY);
+        renderManager.setColor(Color.GREEN);
         float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
-        int lineHeight = (int) (ratio * 55);
+        int lineHeight = (int) (ratio * 65);
         int lineHeightSmall = (int) (lineHeight * 0.8);
         int textPosY = lineHeight;
-        int textPosYSmall = 2 * lineHeight - (int) (ratio * 4);
+        int textPosYSmall = 2 * lineHeight - (int) (ratio * 1);
         int textPosYTime = 2 * lineHeight + lineHeightSmall + (int) (8 / ratio);
         renderManager.setTextSize(lineHeight);
         if (gameManager.getScreenWidth() <= 480) {
@@ -258,6 +258,7 @@ public class GridGameScreen extends GameScreen {
         if (isSolved && nbCoups == 0 && NumDifferentSolutionsFound > 1) {
             // show number of different solutions found
             renderManager.setTextSize(lineHeightSmall);
+            renderManager.setColor(Color.GRAY);
             renderManager.drawText(10, textPosYSmall, NumDifferentSolutionsFound + " solutions found");
             renderManager.setTextSize(lineHeight);
         }
@@ -265,13 +266,17 @@ public class GridGameScreen extends GameScreen {
             // in Level game always show the first solution
             numSolutionClicks = 1;
         }
+        renderManager.setColor(Color.GRAY);
         if (nbCoups > 0) {
             // at least one move was made by hand or by AI
+            renderManager.setColor(Color.GREEN);
             renderManager.drawText(10, textPosY, "Moves: " + nbCoups);
+            renderManager.setColor(Color.GRAY);
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(10, textPosYSmall, "Squares: " + numSquares);
         } else if (isSolved && numSolutionClicks > 0) {
             // show solution
+            renderManager.setColor(Color.GREEN);
             if (numSolutionClicks - showSolutionAtHint >= 0) {
                 renderManager.drawText(10, textPosY, "AI solution: " + solutionMoves + " moves");
             } else {
@@ -279,7 +284,9 @@ public class GridGameScreen extends GameScreen {
             }
         } else if (nbCoups == 0 && isSolved && solutionMoves < simplePuzzleMinMoves) {
             // too simple ... restart
+            renderManager.setColor(Color.GREEN);
             renderManager.drawText(10, textPosY, "AI solution: " + solutionMoves + " moves");
+            renderManager.setColor(Color.GRAY);
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(10, textPosYSmall, "... restarting!");
             if (timeCpt > 5) {
@@ -291,12 +298,14 @@ public class GridGameScreen extends GameScreen {
             // still simple, show a hint that this is solved with less than ... moves
             // TODO: change font (still crashes):
             //  renderManager.drawText(10, textPosY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
+            renderManager.setColor(Color.GREEN);
             renderManager.drawText(10, textPosY, "Number of moves < " + goodPuzzleMinMoves);
             showSolutionAtHint = goodPuzzleMinMoves - solutionMoves;
         } else if (!isSolved) {
             if (timeCpt < 1) {
                 // the first second it pretends to generate the map :)
                 // in real it is still calculating the solution
+                renderManager.setColor(Color.GRAY);
                 if (levelNum >= 1){
                     renderManager.drawText(10, textPosY, "Loading map...");
                 }else{
@@ -304,6 +313,7 @@ public class GridGameScreen extends GameScreen {
                 }
             } else {
                 // in Beginner mode it will create a new puzzle, if it is not solvable within one second
+                renderManager.setColor(Color.GRAY);
                 if (getLevel().equals("Beginner") && levelNum< 0) {
                     renderManager.drawText(10, textPosY, "Too complicated");
                     renderManager.drawText(10, textPosYSmall, "... restarting!");
@@ -319,6 +329,7 @@ public class GridGameScreen extends GameScreen {
             secondsS = "0" + secondsS;
         }
         renderManager.setTextSize(lineHeightSmall);
+        renderManager.setColor(Color.GRAY);
         renderManager.drawText(10, textPosYTime, "Time: " + timeCpt / 60 + ":" + secondsS);
 
         if (timeCpt >= 40 && autoSaved == false && mustStartNext == false && mapPath != null && !mapPath.isEmpty()) {
