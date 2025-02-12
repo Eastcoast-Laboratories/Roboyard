@@ -1,0 +1,6 @@
+- Menü vereinheitlicht auf einer Seite
+- Neue Levels: 35 Anfänger-, 35 Fortgeschrittenen-, Profi- und Experten-Level
+- UI-Verbesserungen: Anzeige von Levelnummern/-namen im Spiel
+- Speicher- und Lade-Funktion: Verbesserte Handhabung von Spielständen
+- Neue Option für Spielfelder mit 12x14, 14x14 oder 14x16 Feldern (14x16 ist der neue Standard)
+- Neues Launcher-Icon

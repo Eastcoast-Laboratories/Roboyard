@@ -1,0 +1,6 @@
+- Unified menu on one page
+- New Levels: 35 beginner-levels, 35 intermediate, advanced and expert levels
+- UI improvements: Display of level numbers/names in-game
+- Save and load functionality: Enhanced handling of save games
+- New option for boards with 12x14, 14x14 or 14x16 squares (14x16 is the new default)
+- New launcher icon
