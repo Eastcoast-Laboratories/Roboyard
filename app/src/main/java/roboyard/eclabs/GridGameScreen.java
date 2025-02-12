@@ -85,6 +85,12 @@ public class GridGameScreen extends GameScreen {
 
     private boolean isGameWon = false;
 
+    private boolean isRandomGame = false;
+
+    public boolean isRandomGame() {
+        return isRandomGame;
+    }
+
     public GridGameScreen(GameManager gameManager){
         super(gameManager);
         String ld=preferences.getPreferenceValue(gameManager.getActivity(), "difficulty");
@@ -967,12 +973,14 @@ public class GridGameScreen extends GameScreen {
                     // Next level in sequence
                     String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
                     setLevelGame(nextMapPath);
+                    isRandomGame = false;
                     return;
                 }
             }
             
             // For all other cases (random games, saved games, or invalid level), generate a new random game
             setRandomGame();
+            isRandomGame = true;
         }
     }
 
