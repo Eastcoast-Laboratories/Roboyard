@@ -3,8 +3,14 @@ package roboyard.pm.ia;
 import java.util.ArrayList;
 
 /**
+ * Represents a solution to a puzzle.
+ * A solution consists of a sequence of moves that lead from the initial state
+ * to a state where a robot reaches its goal position.
+ * 
+ * This class is used by both the game logic and the solver components to
+ * store and manipulate solution sequences.
  *
- * @author usrlocal
+ * @see roboyard.pm.ia.IGameMove
  */
 public class GameSolution {
   

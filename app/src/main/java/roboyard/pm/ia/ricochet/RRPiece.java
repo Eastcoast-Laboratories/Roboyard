@@ -3,8 +3,15 @@ package roboyard.pm.ia.ricochet;
 import java.util.Comparator;
 
 /**
+ * Represents a robot piece in the game.
+ * Each piece has a position (x,y) and a color.
+ * 
+ * This class implements Comparable to allow sorting pieces by their
+ * position and color, which is used for state hashing and comparison.
  *
  * @author Pierre Michel
+ * @see roboyard.pm.ia.ricochet.RRGameState
+ * @see roboyard.pm.ia.ricochet.RRGameMove
  */
 public class RRPiece implements Comparable<RRPiece>{
   

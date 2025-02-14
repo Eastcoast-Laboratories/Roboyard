@@ -9,13 +9,11 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
-// import android.view.MotionEvent;
 
 import java.util.Random;
 
 /**
  * Manages rendering operations such as drawing shapes, images, and text on a canvas.
- * Created by Pierre on 21/01/2015.
  */
 public class RenderManager {
     private Canvas target, mainTarget;

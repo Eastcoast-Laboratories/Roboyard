@@ -65,6 +65,86 @@ See [screens.md](screens.md) for detailed screen documentation.
 - Sound effects
 - Game state serialization
 
+## AI Components (`roboyard.pm.ia`)
+
+The `roboyard.pm.ia` package contains the artificial intelligence (IA - Intelligence Artificielle) components used for solving the game and generating solutions. It consists of:
+
+### Core Components
+- `AGameState`: Abstract base class for representing game states
+- `AWorld`: Abstract base class for the game world
+- `GameSolution`: Class that holds a sequence of moves that solve a puzzle
+- `IEndCondition`: Interface for defining win conditions
+- `IGameMove`: Interface for representing game moves
+
+### Ricochet Robots Implementation (`ricochet/`)
+The `ricochet/` subpackage contains the concrete implementation for the Ricochet Robots game:
+- `RRGameState`: Represents a state in the Ricochet Robots game
+- `RRGameMove`: Represents a move in the game (robot movement)
+- `RRWorld`: Represents the game board and its rules
+- `RREndCondition`: Defines when a puzzle is solved
+- `RRPiece`: Represents a robot piece on the board
+- `RRGridCell`: Represents a cell on the game board
+- `RRGetMap`: Helper class for loading game maps
+
+The AI system is used by the solver (`SolverDD` class) to:
+1. Find solutions to puzzles
+2. Validate that generated random puzzles are solvable
+3. Calculate the minimum number of moves needed
+4. Generate hints and solutions for players
+
+## DriftingDroids Integration (`driftingdroids.model`)
+
+The game integrates the DriftingDroids Ricochet Robots solver (Copyright 2011-2014 Michael Henke, GPL v3) as a high-performance puzzle solver. The integration works as follows:
+
+### Core Components
+- `Board`: Core game board representation with efficient bit operations
+- `Solver` (with `SolverBFS` and `SolverIDDFS` implementations): Advanced pathfinding algorithms
+- `Solution` and `Move`: Represents solutions and individual moves
+- `KeyDepthMap` and variants: Optimized data structures for state space exploration
+
+### Integration Architecture
+The integration between Roboyard's own AI system (`roboyard.pm.ia`) and DriftingDroids is managed through a bridge design pattern:
+
+1. Bridge Component (`roboyard.eclabs.solver.SolverDD`)
+   - Implements Roboyard's `ISolver` interface
+   - Creates and manages the DriftingDroids `Board` and `Solver` instances
+   - Translates between Roboyard's game elements and DriftingDroids' board representation
+   - Converts DriftingDroids `Solution` objects into Roboyard's `GameSolution` format
+
+2. Game Logic Layer (`roboyard.eclabs`)
+   - Uses `SolverDD` through the `ISolver` interface
+   - Handles user interaction and game state management
+   - Remains independent of the actual solver implementation
+
+3. AI Layer (`roboyard.pm.ia`)
+   - Provides game-specific classes (`RRGameMove`, `RRPiece`, etc.)
+   - Includes `RRGetMap` to convert game elements to DriftingDroids format
+   - Defines the solution format (`GameSolution`) used by the game
+
+4. Solver Layer (`driftingdroids.model`)
+   - Provides the core solving algorithms
+   - Works with its own optimized board representation
+   - Returns solutions in its native format
+
+### Data Flow
+1. Game creates grid elements (`GridElement`) to represent the game state
+2. `SolverDD.init()` uses `RRGetMap` to convert these to a DriftingDroids `Board`
+3. DriftingDroids solver finds solutions
+4. `SolverDD.getSolution()` converts DriftingDroids moves to Roboyard's format
+5. Game displays the solution to the player
+
+This architecture allows Roboyard to:
+1. Use the efficient DriftingDroids solver while maintaining its own game logic
+2. Easily swap out the solver implementation if needed
+3. Keep the game code independent of the solver details
+4. Support future puzzle types by implementing new solver bridges
+
+The DriftingDroids solver is particularly used for:
+- Validating randomly generated puzzles
+- Finding optimal (minimum moves) solutions
+- Supporting the hint system
+- Calculating puzzle difficulty
+
 ## Data Flow
 
 1. User Input

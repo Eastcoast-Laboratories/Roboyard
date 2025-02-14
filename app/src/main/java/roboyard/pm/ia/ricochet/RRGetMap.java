@@ -9,9 +9,16 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
-*
-* @author usrlocal
-*/
+ * Utility class for converting between Roboyard's game elements and DriftingDroids board format.
+ * This class serves as the main conversion layer between the two systems, handling:
+ * - Grid cell conversion
+ * - Robot piece placement
+ * - Wall and obstacle mapping
+ * - Goal position translation
+ *
+ * @see driftingdroids.model.Board
+ * @see roboyard.eclabs.GridElement
+ */
 public class RRGetMap {
 
     /**

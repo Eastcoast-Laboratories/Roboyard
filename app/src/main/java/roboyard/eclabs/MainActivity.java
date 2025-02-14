@@ -15,8 +15,6 @@ import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import roboyard.SoundService;

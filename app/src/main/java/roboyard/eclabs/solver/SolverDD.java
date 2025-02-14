@@ -17,7 +17,14 @@ import roboyard.pm.ia.ricochet.RRGetMap;
 import roboyard.pm.ia.ricochet.RRPiece;
 
 /**
- * Created by Pierre on 08/03/2015.
+ * Bridge implementation between Roboyard's solver interface and the DriftingDroids solver.
+ * This class is responsible for:
+ * 1. Converting Roboyard's game state to DriftingDroids board format
+ * 2. Running the DriftingDroids solver to find solutions
+ * 3. Converting DriftingDroids solutions back to Roboyard's format
+ *
+ * @author Pierre Michel
+ * @since 08/03/2015
  */
 public class SolverDD implements ISolver{
 
