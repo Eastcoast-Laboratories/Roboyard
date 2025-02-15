@@ -122,6 +122,20 @@ public class SaveGameScreen extends GameScreen {
         System.out.println("DEBUG: finished loading saved maps");
     }
 
+    public static void clearCachesForMap(String mapPath) {
+        // Clear save data cache
+        saveDataCache.remove(mapPath);
+        
+        // Get and remove the unique string from cache
+        String uniqueString = mapUniqueStringCache.get(mapPath);
+        mapUniqueStringCache.remove(mapPath);
+        
+        // If we had a unique string, also remove its color from cache
+        if (uniqueString != null) {
+            colorCache.remove(uniqueString);
+        }
+    }
+    
     /**
      * Create buttons for saving and loading games.
      */
@@ -146,6 +160,7 @@ public class SaveGameScreen extends GameScreen {
             if (i == 0) {
                 this.instances.add(new GameButtonGotoSavedGame(autosaveButtonX, autosaveButtonY, iconSize * ratioH, iconSize * ratioW, saver.getButtonAutoSaved(mapPath, true), saver.getButtonAutoSaved(mapPath, false), 4, mapPath));
             } else {
+                // System.out.println("DEBUG: Creating button for save slot " + i);
                 this.instances.add(new GameButtonGotoSavedGame(buttonPositionsX[i], buttonPositionsY[i], iconSize * ratioH, iconSize * ratioW, saver.getButtonSaved(mapPath, true), saver.getButtonSaved(mapPath, false), 4, mapPath));
             }
         }
@@ -184,6 +199,7 @@ public class SaveGameScreen extends GameScreen {
             renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select slot to save map");
         } else {
             renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Load map");
+            //+ ((gameScreen.isRandomGame() == true) ? " (random)" : "keins") + "!" + ((gameScreen != null) ? " (gamescreen ist nicht null)" : ""));
         }
 
         // Draw save slots

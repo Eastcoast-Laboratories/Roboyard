@@ -32,21 +32,39 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     @Override
     public void onClick(GameManager gameManager) {
         GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
-        
-        if (gameScreen.isRandomGame() && gameManager.getPreviousScreenKey() == Constants.SCREEN_GAME) {
+        boolean isSavemode = false;
+        if (gameScreen != null && gameScreen.isRandomGame()) {
+            isSavemode = true;
+        }
+        if (isSavemode) {
             // Screen to save or overwrite a savegame
+            // System.out.println("DEBUG: Saving game to slot: " + mapPath);
             ArrayList<GridElement> gridElements = gameScreen.getGridElements();
-            FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
-            FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, MapObjects.createStringFromList(gridElements, false));
-            addMapsSaved(gameManager);
-
-            // Refresh save game screen buttons
-            SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
-            saveGameScreen.createButtons();
+            String saveData = MapObjects.createStringFromList(gridElements, false);
             
-            // Keep track of the game screen and explicitly set it as previous
-            gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
-            gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
+            try {
+                // Write save data directly (will overwrite if file exists)
+                FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
+                FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData);
+                // System.out.println("DEBUG: wrote " + saveData.length() + " bytes to " + mapPath);
+                
+                // Add to saved games list if needed
+                addMapsSaved(gameManager);
+
+                // Refresh save game screen buttons
+                SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
+                if (saveGameScreen != null) {
+                    SaveGameScreen.clearCachesForMap(mapPath);
+                    saveGameScreen.createButtons();
+                    // System.out.println("DEBUG: Refreshed save game screen buttons");
+                }
+                
+                // Keep track of the game screen and explicitly set it as previous
+                gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
+                gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
+            } catch (Exception e) {
+                // System.out.println("DEBUG: Error saving game: " + e.getMessage());
+            }
         } else {
             // Screen to select a savegame
             SaveManager saver = new SaveManager(gameManager.getActivity());
