@@ -3,16 +3,12 @@ package roboyard.eclabs;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.SparseArray;
-import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
@@ -355,12 +351,12 @@ public class GridGameScreen extends GameScreen {
                 FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
                 String saveData = MapObjects.createStringFromList(gridElements, false);
                 System.out.println("DEBUG: Save data length=" + saveData.length());
-                FileReadWrite.writePrivateData(gameManager.getActivity(), autosaveMapPath, saveData);
+                FileReadWrite.appendPrivateData(gameManager.getActivity(), autosaveMapPath, saveData);
                 // Also add to mapsSaved.txt if not already there
                 SaveManager saver = new SaveManager(gameManager.getActivity());
                 if (!saver.getMapsStateSaved(autosaveMapPath, "mapsSaved.txt")) {
                     System.out.println("DEBUG: Adding autosave to mapsSaved.txt");
-                    FileReadWrite.writePrivateData(gameManager.getActivity(), "mapsSaved.txt", autosaveMapPath + "\n");
+                    FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", autosaveMapPath + "\n");
                 }
                 gameManager.requestToast("Autosaving...", false);
                 autoSaved = true;
@@ -936,7 +932,7 @@ public class GridGameScreen extends GameScreen {
 
             if(!saver.getMapsStateSaved(mapPath, "mapsPlayed.txt"))
             {
-                FileReadWrite.writePrivateData(gameManager.getActivity(), "mapsPlayed.txt", mapPath.substring(5)+"\n");
+                FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsPlayed.txt", mapPath.substring(5)+"\n");
             }
         }
     }

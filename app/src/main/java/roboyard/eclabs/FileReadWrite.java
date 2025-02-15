@@ -2,7 +2,6 @@ package roboyard.eclabs;
 
 import android.app.Activity;
 import android.content.Context;
-import android.widget.Toast;
 import android.content.res.Resources;
 
 import java.io.BufferedReader;
@@ -12,9 +11,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-
-import android.content.Context;
-import android.os.Bundle;
 
 /**
  * Created by Alain on 21/01/2015.
@@ -50,92 +46,78 @@ public class FileReadWrite {
         return aBuffer.toString();
     }
 
-    public static String read(String fileLocation)
-    {
-        String txtData = null;
-        StringBuilder aBuffer = new StringBuilder();
-
-        try {
-            File myFile = new File(fileLocation);
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(
-                    new InputStreamReader(fIn));
-            String aDataRow = "";
-            while ((aDataRow = myReader.readLine()) != null) {
-                aBuffer.append(aDataRow).append("\n");
-            }
-
-            myReader.close();
-
-        } catch (Exception e) {
-            System.out.println(e.toString());
-            return null;
-
-        }
-        return aBuffer.toString();
-    }
-
-    /*
-     * Ecrit toute la chaine de caractère dans le fichier souhaité
-     * @param fileLocation : chemin d'accès au fichier
-     * @return contenu du fichier
+    /**
+     * Writes the entire string to the specified file in append mode
+     * The data created with this method is private to the application
+     * Therefore, it is not accessible by the user and is deleted if the application is uninstalled
+     * @param activity
+     * @param fileLocation
+     * @param content
      */
-    public static void write(String fileLocation, String content)
-    {
+    public static void appendPrivateData(Activity activity, String fileLocation, String content) {
+        FileOutputStream fOut = null;
         try {
-            File myFile = new File(fileLocation);
-            myFile.createNewFile();
-            FileOutputStream fOut = new FileOutputStream(myFile);
-            OutputStreamWriter myOutWriter =
-                    new OutputStreamWriter(fOut);
-            myOutWriter.append(content);
-            myOutWriter.close();
-            fOut.close();
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
-
-    }
-
-    /*
- * Ecrit toute la chaine de caractère dans le fichier souhaité
- * Les données crées avec cette méthode sont privées à l'application
- * Elles ne sont donc pas accessible par l'utilisateur et supprimmées en cas de desinstallation de l'application
- * @param fileLocation : chemin d'accès au fichier
- * @return contenu du fichier
- */
-    public static void writePrivateData(Activity activity, String fileLocation, String content)
-    {
-        try {
-            FileOutputStream fOut = activity.openFileOutput(fileLocation, Context.MODE_APPEND);
-
+            fOut = activity.openFileOutput(fileLocation, Context.MODE_APPEND);
             fOut.write(content.getBytes());
-            fOut.close();
-
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Exception in appendPrivateData: " + e.getMessage());
+        } finally {
+            if (fOut != null) {
+                try {
+                    fOut.close();
+                } catch (Exception e) {
+                    System.out.println("Error closing stream: " + e.getMessage());
+                }
+            }
         }
     }
 
-    public static void clearPrivateData(Activity activity, String fileLocation)
-    {
-        String t = "";
+    /**
+     * overwrites the content of a file. Uses PRIVATE mode to overwrite instead of append
+     * @param activity
+     * @param fileLocation
+     * @param content
+     */
+    public static void writePrivateData(Activity activity, String fileLocation, String content) {
+        FileOutputStream fOut = null;
         try {
-            FileOutputStream fOut = activity.openFileOutput(fileLocation, Context.MODE_ENABLE_WRITE_AHEAD_LOGGING);
-
-            fOut.write(t.getBytes());
-            fOut.close();
-
+            fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
+            fOut.write(content.getBytes());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Exception in writePrivateData: " + e.getMessage());
+        } finally {
+            if (fOut != null) {
+                try {
+                    fOut.close();
+                } catch (Exception e) {
+                    System.out.println("Error closing stream: " + e.getMessage());
+                }
+            }
         }
     }
 
-    public static String readPrivateData(Activity activity, String fileLocation)
-    {
-        String txtData = null;
-        String aBuffer = "";
+    public static void clearPrivateData(Activity activity, String fileLocation) {
+        FileOutputStream fOut = null;
+        try {
+            // Use PRIVATE mode to truncate file
+            fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
+            fOut.write(new byte[0]);
+        } catch (Exception e) {
+            System.out.println("Exception in clearPrivateData: " + e.getMessage());
+        } finally {
+            if (fOut != null) {
+                try {
+                    fOut.close();
+                } catch (Exception e) {
+                    System.out.println("Error closing stream: " + e.getMessage());
+                }
+            }
+        }
+    }
 
+    public static String readPrivateData(Activity activity, String fileLocation) {
+        StringBuilder buffer = new StringBuilder();
+        FileInputStream fin = null;
         try {
 
             File file = activity.getApplicationContext().getFileStreamPath(fileLocation);
@@ -143,23 +125,24 @@ public class FileReadWrite {
                 return "";
             }
 
-            FileInputStream fin = activity.openFileInput(fileLocation);
-//            FileInputStream fin = new FileInputStream (new File(fileLocation));
+            fin = activity.openFileInput(fileLocation);
 
             int c;
-            StringBuilder temp= new StringBuilder();
-            while( (c = fin.read()) != -1){
-                temp.append((char) c);
+            while((c = fin.read()) != -1) {
+                buffer.append((char)c);
             }
-
-            aBuffer = temp.toString();
-
         } catch (Exception e) {
-            System.out.println("Exception readPrivateData");
-            System.err.println(e.toString());
+            System.out.println("Exception readPrivateData: " + e.toString());
             return "";
-
+        } finally {
+            if (fin != null) {
+                try {
+                    fin.close();
+                } catch (Exception e) {
+                    System.out.println("Error closing stream: " + e.getMessage());
+                }
+            }
         }
-        return aBuffer;
+        return buffer.toString();
     }
 }

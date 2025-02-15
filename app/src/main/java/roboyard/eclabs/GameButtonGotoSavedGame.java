@@ -44,7 +44,6 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             
             try {
                 // Write save data directly (will overwrite if file exists)
-                FileReadWrite.clearPrivateData(gameManager.getActivity(), mapPath);
                 FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData);
                 // System.out.println("DEBUG: wrote " + saveData.length() + " bytes to " + mapPath);
                 
@@ -85,7 +84,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         if (mapPath.length() > 0) {
             SaveManager saver = new SaveManager(gameManager.getActivity());
             if (!saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
-                FileReadWrite.writePrivateData(gameManager.getActivity(), "mapsSaved.txt", mapPath + "\n");
+                FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", mapPath + "\n");
             }
         }
     }
