@@ -10,6 +10,10 @@ import java.util.regex.Pattern;
 
 public class MapObjects {
 
+    // Compile patterns once as static fields for reuse
+    private static final Pattern BOARD_SIZE_PATTERN = Pattern.compile("board:(\\d+),(\\d+);");
+    private static final Pattern COORDINATE_PATTERN = Pattern.compile("(\\d+),(\\d+);");
+
     /*
      * Constructor of the class
      */
@@ -30,7 +34,7 @@ public class MapObjects {
         int y = 0;
 
         // First check if the save contains board size information
-        Matcher boardSizeMatcher = Pattern.compile("board:(\\d+),(\\d+);").matcher(data);
+        Matcher boardSizeMatcher = BOARD_SIZE_PATTERN.matcher(data);
         if (boardSizeMatcher.find()) {
             int boardX = Integer.parseInt(boardSizeMatcher.group(1));
             int boardY = Integer.parseInt(boardSizeMatcher.group(2));
@@ -49,39 +53,44 @@ public class MapObjects {
         List<String> objectTypes = Arrays.asList("mh", "mv", // wall (mur)
                 "robot_green", "robot_yellow", "robot_red", "robot_blue", // robots
                 "target_green", "target_yellow", "target_red", "target_blue", "target_multi"); // targets (cible)
-        // Loop for each type of object
-        for(final String objectType: objectTypes) {
 
-            List<String> allMatches = new ArrayList<>();
-
-            // Retrieve all the lines corresponding to the type of object sought
-            Matcher m = Pattern.compile(objectType+"\\d+,\\d+;").matcher(data);
-            while (m.find()) {
-                allMatches.add(m.group());
-            }
-
-            for(final String line: allMatches) {
-                String[] values = line.split(",");
-                // Extract x and y coordinates
-                if(values.length>=2) {
-                    String valueX = values[0].replaceAll("[^0-9]", "");
-
-                    if (!valueX.equals("")) {
-                        x = Integer.decode(valueX);
-                    }
-
-                    String valueY = values[1].replaceAll("[^0-9]", "");
-
-                    if (!valueY.equals("")) {
-                        y = Integer.decode(valueY);
-                    }
-
-                    // Create a GridElement corresponding to the current object and add it to the list
-                    GridElement p = new GridElement(x, y, objectType);
-                    elements.add(p);
+        // Process each line of data once
+        // Use negative limit to keep empty strings at end
+        String[] lines = data.split(";", -1);
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+            
+            // Find matching object type
+            String matchedType = null;
+            for (String type : objectTypes) {
+                if (line.startsWith(type)) {
+                    matchedType = type;
+                    break;
                 }
             }
+            
+            if (matchedType != null) {
+                // Extract coordinates using indexOf instead of regex
+                int coordStart = matchedType.length();
+                String coords = line.substring(coordStart).trim();
+                
+                int commaIndex = coords.indexOf(',');
+                if (commaIndex > 0) {
+                    try {
+                        String xStr = coords.substring(0, commaIndex).trim();
+                        String yStr = coords.substring(commaIndex + 1).trim();
+                        x = Integer.parseInt(xStr);
+                        y = Integer.parseInt(yStr);
+                        elements.add(new GridElement(x, y, matchedType));
+                    } catch (NumberFormatException e) {
+                    }
+                } else {
+                }
+            } else {
+            }
         }
+        
         return elements;
     }
 
@@ -128,34 +137,22 @@ public class MapObjects {
      * @return A light color in hexadecimal format
      */
     public static String generateHexColorFromString(String input) {
-        try {
-            // Create a SHA-256 message digest instance
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            // Get the hash bytes for the input string
-            byte[] hashBytes = digest.digest(input.getBytes());
-
-            // Convert the hash bytes to a 6-letter hexadecimal string
-            StringBuilder color = new StringBuilder("#");
-            for (int i = 0; i < 6; i++) {
-                // Convert each byte to a positive integer and take modulo 16 to get a hexadecimal digit
-                int index = Math.abs(hashBytes[i]) % 16;
-                // if it is the first, third or 5th digit, the color should be lighter
-                if (i % 2 == 0 && index <= 4) {
-                    index += 5;
-                }
-                // Map the index to a hexadecimal digit
-                char digit = (char) (index < 10 ? '0' + index : 'A' + index - 10);
-
-                // Append the digit to the color string
-                color.append(digit);
-            }
-            return color.toString();
-        } catch (NoSuchAlgorithmException e) {
-            // Handle NoSuchAlgorithmException if the specified algorithm is not available
-            e.printStackTrace();
-            return null; // or throw an exception
+        if (input == null || input.isEmpty()) {
+            return "#000000";
         }
+        
+        // Simple and fast hash function
+        int hash = 0;
+        for (int i = 0; i < input.length(); i++) {
+            hash = 31 * hash + input.charAt(i);
+        }
+        
+        // Ensure colors are light by setting high base values
+        int red = 128 + Math.abs(hash % 128);        // 128-255
+        int green = 128 + Math.abs((hash >> 8) % 128);  // 128-255
+        int blue = 128 + Math.abs((hash >> 16) % 128);  // 128-255
+        
+        return String.format("#%02X%02X%02X", red, green, blue);
     }
 
     /*

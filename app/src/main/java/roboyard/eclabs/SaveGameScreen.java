@@ -2,6 +2,8 @@ package roboyard.eclabs;
 
 import android.graphics.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Screen for saving and loading games (screen 9)
@@ -19,6 +21,15 @@ public class SaveGameScreen extends GameScreen {
     private int autosaveButtonY;
     private int backButtonX;
     private int backButtonY;
+
+    // Cache for unique string to color mapping to avoid repeated SHA-256 hashing
+    private static Map<String, String> colorCache = new HashMap<>();
+    
+    // Cache for save data to avoid repeated file reads
+    private static Map<String, String> saveDataCache = new HashMap<>();
+    
+    // Cache for map unique strings to avoid recomputing
+    private static Map<String, String> mapUniqueStringCache = new HashMap<>();
 
     public SaveGameScreen(GameManager gameManager) {
         super(gameManager);
@@ -67,24 +78,48 @@ public class SaveGameScreen extends GameScreen {
         autosaveButtonY = (int) ((45 + ts) * ratioH);
         backButtonX = (int) (814 * ratioW);
         backButtonY = (int) (1650 * ratioH);
-        ArrayList<GridElement> gridElements;
 
-        // load all saved maps to create a unique string from the mapElements
+        System.out.println("DEBUG: loading saved maps");
+        
+        ArrayList<GridElement> gridElements = new ArrayList<>(100);  // Pre-allocate with reasonable size
+        
         mapUniqueString = new String[cols * rows];
         mapUniqueColor = new String[cols * rows];
         for (int i = 0; i < cols * rows; i++) {
             String mapPath = getMapPath(i);
             SaveManager saver = new SaveManager(gameManager.getActivity());
             if(saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
-                String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
-                gridElements = MapObjects.extractDataFromString(saveData);
-                mapUniqueString[i] = MapObjects.createStringFromList(gridElements, true);
-                mapUniqueColor[i] = MapObjects.generateHexColorFromString(mapUniqueString[i]);
+                // Check map unique string cache first
+                String uniqueString = mapUniqueStringCache.get(mapPath);
+                if (uniqueString == null) {
+                    // Check save data cache first
+                    String saveData = saveDataCache.get(mapPath);
+                    if (saveData == null) {
+                        saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+                        saveDataCache.put(mapPath, saveData);
+                    }
+                    
+                    gridElements.clear();  // Reuse ArrayList to avoid allocation
+                    gridElements = MapObjects.extractDataFromString(saveData);
+                    uniqueString = MapObjects.createStringFromList(gridElements, true);
+                    mapUniqueStringCache.put(mapPath, uniqueString);
+                }
+                mapUniqueString[i] = uniqueString;
+                
+                // Use cached color if available, otherwise generate and cache it
+                String cachedColor = colorCache.get(uniqueString);
+                if (cachedColor != null) {
+                    mapUniqueColor[i] = cachedColor;
+                } else {
+                    mapUniqueColor[i] = MapObjects.generateHexColorFromString(uniqueString);
+                    colorCache.put(uniqueString, mapUniqueColor[i]);
+                }
             } else {
                 mapUniqueString[i] = "";
                 mapUniqueColor[i] = "#000000";
             }
         }
+        System.out.println("DEBUG: finished loading saved maps");
     }
 
     /**
