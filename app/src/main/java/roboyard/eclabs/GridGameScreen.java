@@ -687,26 +687,37 @@ public class GridGameScreen extends GameScreen {
         int offsetWall = -2 * pixel;
         int wallThickness = 16 * pixel; // thickness of walls
 
-        // draw horizontal lines
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
 
+            // add horizontal lines
             if (myp.getType().equals("mh")) {
                 drawables.get("mh").setBounds((int)(myp.getX() * gridSpace - stretchWall), // left x
-                        (int)(myp.getY() * gridSpace - stretchWall + offsetWall), // left y
-                        (int)((myp.getX() + 1) * gridSpace + stretchWall), // right x
-                        (int)(myp.getY() * gridSpace + wallThickness + offsetWall)); // right y
+                (int)(myp.getY() * gridSpace - stretchWall + offsetWall), // left y
+                (int)((myp.getX() + 1) * gridSpace + stretchWall), // right x
+                (int)(myp.getY() * gridSpace + wallThickness + offsetWall)); // right y
                 drawables.get("mh").draw(canvasGrid);
             }
-
+            
+            // add vertical lines
             if (myp.getType().equals("mv")) {
-                // vertical lines
                 drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - stretchWall + offsetWall), // left x
-                        (int)(myp.getY() * gridSpace - stretchWall), // left y
-                        (int)(myp.getX() * gridSpace + wallThickness + offsetWall), // right x
-                        (int)((myp.getY() + 1) * gridSpace + stretchWall) // right y
+                (int)(myp.getY() * gridSpace - stretchWall), // left y
+                (int)(myp.getX() * gridSpace + wallThickness + offsetWall), // right x
+                (int)((myp.getY() + 1) * gridSpace + stretchWall) // right y
                 );
                 drawables.get("mv").draw(canvasGrid);
+            }
+            
+            // add small robots underneath as marker for each start position
+            if (myp.getType().startsWith("robot_")) {
+                drawables.get(myp.getType()).setBounds(
+                    (int)(myp.getX() * gridSpace),
+                    (int)(myp.getY() * gridSpace),
+                    (int)((myp.getX() + 1) * gridSpace),
+                    (int)((myp.getY() + 1) * gridSpace)
+                    );
+                drawables.get(myp.getType()).draw(canvasGrid);
             }
         }
 
@@ -720,9 +731,8 @@ public class GridGameScreen extends GameScreen {
         imageGridID = currentRenderManager.loadBitmap(bitmapGrid);
         imageLoaded = true;
 
-
+        // add robots
         createRobots();
-
 
         this.solver.init(gridElements);
 
@@ -761,8 +771,8 @@ public class GridGameScreen extends GameScreen {
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
 
-            if (myp.getType().equals("robot_red") || myp.getType().equals("robot_green") || myp.getType().equals("robot_yellow") || myp.getType().equals("robot_blue")) {
-
+            // add robots
+            if (myp.getType().startsWith("robot_")) {
                 GamePiece currentPiece = new GamePiece(myp.getX(), myp.getY(), colors.get(myp.getType()));
                 currentPiece.setGridDimensions(xGrid, yGrid, gridSpace);
 

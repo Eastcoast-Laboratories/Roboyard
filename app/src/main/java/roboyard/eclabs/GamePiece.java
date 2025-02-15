@@ -24,7 +24,7 @@ public class GamePiece implements IGameObject {
     private int curMoveSquares      = 0;
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
-    private final int extraSizeForRobotsAndTargets = 10; // robots and targets are 4px larger than the grid and may overlap 4 px
+    private final int extraSizeForRobotsAndTargets = 33; // robots and targets are some percent larger than the grid and may overlap 4 px
 
     boolean testIfWon       = true;
 
@@ -118,7 +118,7 @@ public class GamePiece implements IGameObject {
         this.xGrid = xGrid;
         this.yGrid = yGrid;
         this.numSquaresX = this.numSquaresY = cellSize;
-        this.radius = (int) (cellSize / 2) + extraSizeForRobotsAndTargets;
+        this.radius = (int) (cellSize / 2) * (100 + extraSizeForRobotsAndTargets)/100;
     }
 
     @Override
