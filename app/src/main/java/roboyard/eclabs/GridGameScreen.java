@@ -47,9 +47,11 @@ public class GridGameScreen extends GameScreen {
 
     private int xGrid;
     private int yGrid;
+    private int boardHeight;
 
     private float gridSpace; // gamescreen width / boardSizeX
-
+    private int gridBottom;
+    private int topMargin = 16;
     private int timeCpt = 0;
     private int nbCoups = 0;
     private int numSquares = 0;
@@ -104,6 +106,8 @@ public class GridGameScreen extends GameScreen {
         isRandomGame = false;  // Start in non-random mode
         gridSpace = (float)gameManager.getScreenWidth() / (float)MainActivity.getBoardWidth();
         xGrid = 0;
+        yGrid = topMargin; // 2px margin from top
+        gridBottom = yGrid + (int)((MainActivity.getBoardHeight() + 1) * gridSpace);
 
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 
@@ -160,36 +164,30 @@ public class GridGameScreen extends GameScreen {
     }
 
     @Override
-    public void create()
-    {
+    public void create() {
         gmi = new GameMovementInterface(gameManager);
 
         xGrid = 0;
-        yGrid = gameManager.getScreenHeight()/7;
+        yGrid = 0;
 
-        int visibleScreenHeight=gameManager.getScreenHeight(); // bei 720x1280:1184px
+        int visibleScreenHeight = gameManager.getScreenHeight(); // bei 720x1280:1184px
 
-        int y = yGrid+gameManager.getScreenWidth();
-        int dy = visibleScreenHeight-y; // 248
-        int buttonW = gameManager.getScreenWidth()/4;
+        int y = yGrid + gameManager.getScreenWidth();
+        int dy = visibleScreenHeight - y; // 248
+        int buttonW = gameManager.getScreenWidth() / 4;
 
         // TODO: make this depending on the screen size:
-        float ratioW = ((float)gameManager.getScreenWidth()) /((float)1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
-        float ratioH = ((float)visibleScreenHeight) /((float)1920); // bei 720x1280:0.61667 bei 1440x2580:2.45
-        //int buttonPosY = (int)(6.5*dy * ratioH);
-        int buttonPosY = y+10*dy/20; // 1060
-        int nextButtonDim=(int)(160*ratioH);
-
-        if(visibleScreenHeight<=1280){
-            // on very low res screens
-            nextButtonDim=(int)(220*ratioH);
-            buttonPosY = -50 +y+10*dy/20;
-        }
+        float ratioW = ((float) gameManager.getScreenWidth()) / ((float) 1080); // at 720x1280:0.6667 at 1440x2580:1.333
+        float ratioH = ((float) visibleScreenHeight) / ((float) 1920); // at 720x1280:0.61667 at 1440x2580:2.45
+        // int buttonPosY = (int)(6.5*dy * ratioH);
+        int buttonPosY = (int) (gameManager.getScreenHeight() * 0.85f); // 1060
+        int nextButtonDim = (int) (220 * ratioH);
 
         // Button Next game (top right) (new randomgame) sets mustStartNext to true
         int currentLevel = extractLevelNumber(mapPath);
-        if (currentLevel < 140) {  // Show next button for random games or levels below 140
-            this.instances.add(new GameButtonGeneral((int)(870*ratioW), 0, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
+        if (currentLevel < 140) { // Show next button for random games or levels below 140
+            boardHeight = (int) (visibleScreenHeight * 0.669);
+            this.instances.add(new GameButtonGeneral((int) (870 * ratioW), boardHeight, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
         }
 
         // Button Save
@@ -247,9 +245,9 @@ public class GridGameScreen extends GameScreen {
         float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
         int lineHeight = (int) (ratio * 65);
         int lineHeightSmall = (int) (lineHeight * 0.8);
-        int textPosY = lineHeight;
-        int textPosYSmall = 2 * lineHeight - (int) (ratio * 1.1f);
-        int textPosYTime = 2 * lineHeight + lineHeightSmall + (int) (8 / ratio);
+        int textPosY = gridBottom + 2; // Add 2px margin below the game grid
+        int textPosYSmall = gridBottom + 2 * lineHeight - (int) (ratio * 53f);
+        int textPosYTime = textPosYSmall + lineHeightSmall + (int) (ratio * 21f);
         renderManager.setTextSize(lineHeight);
         if (gameManager.getScreenWidth() <= 480) {
             renderManager.setTextSize(lineHeightSmall);
@@ -370,13 +368,14 @@ public class GridGameScreen extends GameScreen {
         // Display level number if it's a level game
         renderManager.setColor(textColorNormal);
         renderManager.setTextSize(lineHeight / 2);
+        int levelNamePos =  boardHeight + (int) (lineHeight * 3.3f);
         if (mapPath != null && mapPath.startsWith("Maps/")) {
             // Level number underneath the next button
-            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 165), (int) (lineHeight * 3.3f), "Level " + levelNum);
+            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 165), levelNamePos, "Level " + levelNum);
         } else {
             // show the unique string for the current map like in the save game
             String uniqueString = MapObjects.createStringFromList(gridElements, true);
-            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), (int) (lineHeight * 3.3f), uniqueString);
+            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), levelNamePos, uniqueString);
         }
 
         if (imageLoaded) {
@@ -570,8 +569,7 @@ public class GridGameScreen extends GameScreen {
         prevTime = System.currentTimeMillis();
 
         // Keep fixed top margin, calculate remaining space
-        int topMargin = gameManager.getScreenHeight()/7; // Same as initial yGrid
-        int availableHeight = gameManager.getScreenHeight() - topMargin; // Only subtract top margin
+        int availableHeight = gameManager.getScreenHeight();
         int availableWidth = gameManager.getScreenWidth() - (2 * xGrid);   // Subtract side margins
 
         // Calculate grid space to maximize screen usage
