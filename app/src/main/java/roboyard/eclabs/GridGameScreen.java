@@ -428,6 +428,7 @@ public class GridGameScreen extends GameScreen {
             mustStartNext = false;
         }
         if(System.currentTimeMillis() - prevTime > 1000L){
+            // update time every second
             timeCpt++;
             prevTime = System.currentTimeMillis();
         }
@@ -911,6 +912,9 @@ public class GridGameScreen extends GameScreen {
         else
         {
             gameManager.requestToast("You won in "+nbCoups+" moves, "+numSquares+" squares", true);
+            // Save completion data
+            SaveManager saveManager = new SaveManager(gameManager.getActivity());
+            saveManager.saveMapCompletion(mapPath, solutionMoves, nbCoups, numSquares, timeCpt);
         }
         updatePlayedMaps();
     }

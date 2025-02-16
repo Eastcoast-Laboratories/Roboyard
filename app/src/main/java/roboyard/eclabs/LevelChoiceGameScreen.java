@@ -1,8 +1,10 @@
 package roboyard.eclabs;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Pierre on 21/01/2015.
@@ -12,6 +14,7 @@ public class LevelChoiceGameScreen extends GameScreen {
     private int firstLevel = 0;
     private int leftScreen = -1;
     private int rightScreen = -1;
+    private int totalStars = 0;
 
     public static GameButtonGotoLevelGame getLastButtonUsed() {
         return lastButtonUsed;
@@ -68,6 +71,8 @@ public class LevelChoiceGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.bt_page_gauche_down);
         gameManager.getRenderManager().loadImage(R.drawable.bt_page_gauche_up);
 
+        gameManager.getRenderManager().loadImage(R.drawable.star);
+
         createButtons();
 
     }
@@ -111,7 +116,8 @@ public class LevelChoiceGameScreen extends GameScreen {
             row = (i / cols) % rows;
             int levelNum = firstLevel + i;
             mapPath = getMapPath(i);
-            this.instances.add(new GameButtonGotoLevelGame((55+(stepX*col))*ratioW, (45+ts+(stepY*row))*ratioH, iconsize*ratioH, iconsize*ratioW, saver.getButtonLevels(mapPath, true), saver.getButtonLevels(mapPath, false), 4, mapPath));
+            Boolean played=saver.getMapsStateLevel(mapPath, "mapsPlayed.txt");
+            this.instances.add(new GameButtonGotoLevelGame((55+(stepX*col))*ratioW, (45+ts+(stepY*row))*ratioH, iconsize*ratioH, iconsize*ratioW, saver.getButtonLevels(played, true), saver.getButtonLevels(played, false), 4, mapPath));
         }
 
         // Add navigation buttons at the bottom
@@ -151,13 +157,46 @@ public class LevelChoiceGameScreen extends GameScreen {
     public void load(RenderManager renderManager) {
         super.load(renderManager);
     }
+    
+    private void drawStarsAroundButton(RenderManager renderManager, int centerX, int centerY, int buttonSize, int numstars) {
+        // Make stars slightly smaller (1/5 of button size)
+        int starSize = buttonSize / 4;
+        
+        // Increase radius to place stars further from button
+        float radius = buttonSize * 0.64f;
+        
+        // Draw 3 stars in a circle around the button
+        for (int i = 0; i < numstars; i++) {
+            // Calculate angle for each star (120 degrees apart, offset to start from top)
+            double angle = Math.toRadians(-90 + (i * 30));
+            
+            // Calculate position on the circle
+            int starX = (int)(centerX + radius * Math.cos(angle));
+            int starY = (int)(centerY + radius * Math.sin(angle));
+            
+            // Draw star at this position
+            renderManager.drawImage(
+                starX - starSize/2,
+                starY - starSize/2,
+                starX + starSize/2,
+                starY + starSize/2,
+                R.drawable.star
+            );
+        }
+    }
 
     @Override
     public void draw(RenderManager renderManager) {
+
+        float ratioW = ((float)gameManager.getScreenWidth()) / ((float)1080);
+        float ratioH = ((float)gameManager.getScreenHeight()) / ((float)1920);
+
+        // Calculate button layout
         int stepX = 211;
         int stepY = 222;
         int cols = 5;
         int rows = 7;
+        int buttonSize = (int)(144 * ratioH);
 
         renderManager.setColor(Color.parseColor("#77ABD6"));
         renderManager.paintScreen();
@@ -168,8 +207,6 @@ public class LevelChoiceGameScreen extends GameScreen {
         int ts = hs2/10;
         renderManager.setTextSize((int)(0.5*ts));
 
-        float ratioW = ((float)gameManager.getScreenWidth()) / ((float)1080);
-        float ratioH = ((float)gameManager.getScreenHeight()) / ((float)1920);
 
         // Show current difficulty in the title
         String difficulty;
@@ -185,16 +222,68 @@ public class LevelChoiceGameScreen extends GameScreen {
         renderManager.drawText((int)(55*ratioW)-10, (int)(55*ratioH), difficulty + " Levels");
 
         int col, row;
-        for (int i = 0; i < cols*rows; i++) {
+        int moves;
+        int minMoves;
+        // Draw level buttons and numbers
+		for (int i = 0; i < cols*rows; i++) {
             col = i % cols;
             row = (i / cols) % rows;
             int levelNum = firstLevel + i;
-            // write the number of the level:
+            
+            // Calculate button center position
+            int centerX = (int)((55+(stepX*col))*ratioW) + buttonSize/2;
+            int centerY = (int)((45+ts+(stepY*row))*ratioH) + buttonSize/2;
+            
+            // Draw level number
+            renderManager.setColor(Color.BLACK);
             renderManager.drawText((int)((55+(stepX*col))*ratioW)-10, (int)((45+ts+(stepY*row))*ratioH), levelNum + ".");
+            
+            // Draw button
+            instances.get(i).draw(renderManager);
+
+            // Draw stars if level is completed
+            String mapPath = "Maps/level_" + levelNum + ".txt";
+            SaveManager saver = new SaveManager(gameManager.getActivity());
+            Boolean played=saver.getMapsStateLevel(mapPath, "mapsPlayed.txt");
+            int numStars=0;
+            if (played) {
+                moves = 999999;
+                minMoves = -1;
+                // int solveTime;
+                // read data from file to see your minimum used moves with getMapsStateLevel
+                HashMap<String, Integer> mapData = saver.getMapLevelData(mapPath, 1);
+                if (mapData != null) {
+                    // completion data: minMoves, moves, squares, time
+                    moves = mapData.get("moves");
+                    minMoves = mapData.get("minMoves");
+                    // not used for now solveTime = mapData.get("time");
+                    // not used for now int squares = mapData.get("squares");
+                }
+                if (moves < 999999) {
+                    totalStars++;
+                    //noinspection ReassignedVariable
+                    numStars++;
+                }
+                if (moves <= minMoves + 1) {
+                    totalStars++;
+                    numStars++;
+                }
+                if (moves <= minMoves) {
+                    totalStars++;
+                    numStars++;
+                }
+                if (moves < minMoves) {
+                    // should not happen
+                    totalStars++;
+                    numStars++;
+                }
+                drawStarsAroundButton(renderManager, centerX, centerY, buttonSize, numStars);
+            }
         }
+
         super.draw(renderManager);
     }
-
+ 
     @Override
     public void update(GameManager gameManager) {
         super.update(gameManager);
