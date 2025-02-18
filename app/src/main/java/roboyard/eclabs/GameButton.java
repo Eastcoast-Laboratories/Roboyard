@@ -12,6 +12,13 @@ public abstract class GameButton implements IGameObject {
     private final int w;
     private final int h;
 
+    /** enable or disable the button
+     * @param enabled boolean
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public void setImageUp(int imageUp) {
         this.imageUp = imageUp;
     }
@@ -37,10 +44,6 @@ public abstract class GameButton implements IGameObject {
 
     public void setImageDisabled(int imageDisabled){
         this.imageDisabled = imageDisabled;
-    }
-
-    public void setEnabled(boolean enabled){
-         this.enabled = enabled;
     }
 
     @Override

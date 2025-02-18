@@ -10,4 +10,5 @@ public interface IGameObject {
     void draw(RenderManager renderManager);
     void update(GameManager gameManager);
     void destroy();
+
 }

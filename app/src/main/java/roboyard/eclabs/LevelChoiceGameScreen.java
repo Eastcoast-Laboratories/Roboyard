@@ -18,6 +18,8 @@ public class LevelChoiceGameScreen extends GameScreen {
     private int rightScreen = -1;
     private int totalStars = 0;
 
+    private GameButton nextButton;
+
     public static GameButtonGotoLevelGame getLastButtonUsed() {
         return lastButtonUsed;
     }
@@ -159,14 +161,15 @@ public class LevelChoiceGameScreen extends GameScreen {
             this.instances.add(backButton);
             
             // Show forward button to intermediate (right side only)
-            this.instances.add(new GameButtonGoto(
-                (int)(611*ratioW),
-                (int)((1600+ts)*ratioH), 
-                navButtonWidth, 
-                navButtonHeight, 
-                R.drawable.bt_page_droite_up, 
-                R.drawable.bt_page_droite_down, 
-                rightScreen));
+            nextButton = new GameButtonGoto(
+                    (int)(611*ratioW),
+                    (int)((1600+ts)*ratioH),
+                    navButtonWidth,
+                    navButtonHeight,
+                    R.drawable.bt_page_droite_up,
+                    R.drawable.bt_page_droite_down,
+                    rightScreen);
+            this.instances.add(nextButton);
             return;  // Skip adding any other navigation buttons
         }
         
@@ -188,14 +191,15 @@ public class LevelChoiceGameScreen extends GameScreen {
             // TODO: this.instances.add(new GameButtonGoto((int)(611*ratioW), screenHeight - iconsize - 33, iconsize, iconsize, R.drawable.bt_back_up, R.drawable.bt_back_down, Constants.SCREEN_START));
         } else if (rightScreen >= 0 && firstLevel < 106) {
             // For intermediate and advanced screens, show forward button
-            this.instances.add(new GameButtonGoto(
+            nextButton = new GameButtonGoto(
                 (int)(611*ratioW), 
                 (int)((1600+ts)*ratioH), 
                 navButtonWidth, 
                 navButtonHeight, 
                 R.drawable.bt_page_droite_up, 
                 R.drawable.bt_page_droite_down, 
-                rightScreen));
+                rightScreen);
+            this.instances.add(nextButton);
         }
     }
 
@@ -377,6 +381,14 @@ public class LevelChoiceGameScreen extends GameScreen {
         int starX = (int)((gameManager.getScreenWidth() - 99*ratioW));
         int starY = (int)(55*ratioH);
         renderManager.drawImage(starX, starY, starX + starSize, starY + starSize, R.drawable.star);
+
+        // Enable/disable forward button based on total stars
+        if (totalStars <= 35) {
+            nextButton.setEnabled(false);
+        } else {
+            nextButton.setEnabled(true);
+        }
+
         super.draw(renderManager);
     }
  
