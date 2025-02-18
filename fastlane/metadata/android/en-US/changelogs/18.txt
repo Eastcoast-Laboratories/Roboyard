@@ -1,0 +1,7 @@
+- add 3 stars to each level:
+- one star if solved
+- one star if solved with one move more than the minimum
+- one star if solved with the minimum possible moves
+- draw small robots underneath each robot to keep track of the original position
+- map at the top of the screen and the hints and moves below
+- bugfixes and speed improvement

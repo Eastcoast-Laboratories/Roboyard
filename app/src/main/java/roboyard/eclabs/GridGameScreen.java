@@ -246,9 +246,9 @@ public class GridGameScreen extends GameScreen {
         float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
         int lineHeight = (int) (ratio * 65);
         int lineHeightSmall = (int) (lineHeight * 0.8);
-        int textPosY = gridBottom + 2; // Add 2px margin below the game grid
-        int textPosYSmall = gridBottom + 2 * lineHeight - (int) (ratio * 53f);
-        int textPosYTime = textPosYSmall + lineHeightSmall + (int) (ratio * 21f);
+        int textPosY = (int)(gridBottom + (ratio * 13)); // Add margin below the game grid
+        int textPosYSmall = (int)(gridBottom + 2 * lineHeight - (ratio * 53f));
+        int textPosYTime = (int)(textPosYSmall + lineHeightSmall + (ratio * 21f));
         renderManager.setTextSize(lineHeight);
         if (gameManager.getScreenWidth() <= 480) {
             renderManager.setTextSize(lineHeightSmall);
@@ -605,6 +605,8 @@ public class GridGameScreen extends GameScreen {
         drawables.put("grid", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid, null)); // white background for 16x16
         drawables.put("grid_tiles", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_tiles, null)); // white background for variable sizes
         drawables.put("grid_14x16", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_14x16, null)); // white background for 14x16
+        drawables.put("grid_14x14", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_14x14, null)); // white background for 14x16
+        drawables.put("grid_12x14", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_12x14, null)); // white background for 14x16
         drawables.put("roboyard", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.roboyard, null)); // center roboyard in carré
         drawables.put("mh", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mh, null)); // horizontal lines (hedge)
         drawables.put("mv", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mv, null)); // vertical lines (hedge)
@@ -629,6 +631,16 @@ public class GridGameScreen extends GameScreen {
             gridBackground.draw(canvasGrid);
         } else if (MainActivity.getBoardWidth() == 14 && MainActivity.getBoardHeight() == 16) {
             gridBackground = drawables.get("grid_14x16"); // 14x16 grid
+            // Scale the grid background to match our calculated dimensions
+            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
+            gridBackground.draw(canvasGrid);
+        } else if (MainActivity.getBoardWidth() == 14 && MainActivity.getBoardHeight() == 14) {
+            gridBackground = drawables.get("grid_14x14"); // 14x16 grid
+            // Scale the grid background to match our calculated dimensions
+            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
+            gridBackground.draw(canvasGrid);
+        } else if (MainActivity.getBoardWidth() == 12 && MainActivity.getBoardHeight() == 14) {
+            gridBackground = drawables.get("grid_12x14"); // 14x16 grid
             // Scale the grid background to match our calculated dimensions
             gridBackground.setBounds(0, 0, totalWidth, totalHeight);
             gridBackground.draw(canvasGrid);

@@ -1,0 +1,7 @@
+- Füge 3 Sterne zu jedem Level hinzu:
+- ein Stern, wenn gelöst
+- ein Stern, wenn mit einem Zug mehr als dem Minimum gelöst
+- ein Stern, wenn mit der minimalen Anzahl von Zügen gelöst
+- kleine Roboter unter jedem Roboter, um die Ausgangsposition im Blick zu behalten
+- Spielfeld jetzt oben auf dem Bildschirm und die Hinweise und Züge darunter
+- Fehlerbehebungen und Geschwindigkeitsverbesserungen
