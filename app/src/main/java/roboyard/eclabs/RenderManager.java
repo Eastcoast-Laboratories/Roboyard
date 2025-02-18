@@ -177,4 +177,46 @@ public class RenderManager {
         return new Rect(x, y - textSize, x + bounds.width(), y + bounds.height());
     }
 
+    /**
+     * Saves the current canvas state.
+     */
+    public void save() {
+        this.target.save();
+    }
+
+    /**
+     * Restores the previously saved canvas state.
+     */
+    public void restore() {
+        this.target.restore();
+    }
+
+    /**
+     * Translates the canvas by the specified amount.
+     * @param dx The amount to translate in x direction
+     * @param dy The amount to translate in y direction
+     */
+    public void translate(float dx, float dy) {
+        this.target.translate(dx, dy);
+    }
+
+    /**
+     * Draws a rectangle on the canvas.
+     * @param left The left coordinate
+     * @param top The top coordinate
+     * @param right The right coordinate
+     * @param bottom The bottom coordinate
+     */
+    public void drawRect(float left, float top, float right, float bottom) {
+        this.target.drawRect(left, top, right, bottom, this.brush);
+    }
+
+    /**
+     * Measures the width of text with current text settings.
+     * @param text The text to measure
+     * @return The width of the text in pixels
+     */
+    public float measureText(String text) {
+        return this.brush.measureText(text);
+    }
 }

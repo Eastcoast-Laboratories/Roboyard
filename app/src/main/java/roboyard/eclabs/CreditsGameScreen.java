@@ -17,7 +17,11 @@ import java.util.List;
  * Created by Pierre on 04/02/2015.
  */
 public class CreditsGameScreen extends GameScreen {
-    private List<GameButtonLink> links = new ArrayList<>();
+    private float scrollY = 0;
+    private float lastTouchY = 0;
+    private boolean isDragging = false;
+    private ArrayList<ClickableLink> links = new ArrayList<>();
+    private List<GameButtonLink> gameButtonLinks = new ArrayList<>();
     private Context mContext;
 
     public CreditsGameScreen(GameManager gameManager, Context context) {
@@ -26,6 +30,7 @@ public class CreditsGameScreen extends GameScreen {
     }
 
     int hs2; // Half the screen height
+    float ts; // Text size
 
     /**
      * Creates game objects for the Credits screen.
@@ -34,6 +39,8 @@ public class CreditsGameScreen extends GameScreen {
     public void create() {
         int ws2 = this.gameManager.getScreenWidth() / 2;
         hs2 = this.gameManager.getScreenHeight() / 2;
+        ts = hs2 / 10; // Text size
+        
         // Add back button
         this.instances.add(new GameButtonGoto(7 * ws2 / 4 - 128, 9 * hs2 / 5 - 128, 128, 128, R.drawable.bt_back_up, R.drawable.bt_back_down, 0));
     }
@@ -59,43 +66,69 @@ public class CreditsGameScreen extends GameScreen {
         int versionCode = getVersionCode(mContext);
         String versionName = getVersionName(mContext);
 
-        // Set background color
-        //renderManager.setColor(Color.BLUE);
+        // Clear background
         renderManager.setColor(Color.parseColor("#B0CC99")); // Light green background
         renderManager.paintScreen();
 
-        // Set text color and size
+        // Apply scroll transformation
+        renderManager.save();
+        renderManager.translate(0, scrollY);
+
+        float pos = 1;
         renderManager.setColor(Color.BLACK);
-        int ts = hs2 / 10; // Text size
+        renderManager.setTextSize((int) (1.2 * ts));
+        renderManager.drawText(10, (int) (pos++ * ts), "How to Play");
+        renderManager.setTextSize((int) (0.5 * ts));
+        renderManager.drawText(10, (int) (pos * ts), "• Swipe to move robots");
+        pos+=0.7;
+        renderManager.drawText(10, (int) (pos * ts), "• Robots move until they hit a wall or another robot");
+        pos+=0.7;
+        renderManager.drawText(10, (int) (pos * ts), "• Complete levels to earn stars");
+        pos+=0.7;
+        renderManager.drawText(10, (int) (pos * ts), "• Unlock new levels by earning stars");
 
+        pos++;
+        pos++;
         // Draw credits text
+        renderManager.setColor(Color.BLACK);
         renderManager.setTextSize((int) (1.2 * ts));
-        renderManager.drawText(10, 2 * ts, "Created by");
+        renderManager.drawText(10, (int) (pos++ * ts), "Created by");
         renderManager.setTextSize((int) (0.7 * ts));
-        renderManager.drawText(10, 3 * ts, "Alain Caillaud");
-        renderManager.drawText(10, 4 * ts, "Pierre Michel");
-        renderManager.drawText(10, 5 * ts, "Ruben Barkow-Kuder");
+        renderManager.drawText(10, (int) (pos++ * ts), "Alain Caillaud");
+        renderManager.drawText(10, (int) (pos++ * ts), "Pierre Michel");
+        renderManager.drawText(10, (int) (pos++ * ts), "Ruben Barkow-Kuder");
 
+        pos++; 
         renderManager.setTextSize((int) (1.2 * ts));
-        renderManager.drawText(10, 7 * ts, "Based on");
+        renderManager.drawText(10, (int) (pos++ * ts), "Based on");
         renderManager.setTextSize((int) (0.7 * ts));
-        renderManager.drawText(10, 8 * ts, "Ricochet Robots(r)");
+        renderManager.drawText(10, (int) (pos++ * ts), "Ricochet Robots(r)");
 
-        renderManager.setTextSize((int) (1.2 * ts));
-        renderManager.drawText(10, 10 * ts, "Imprint/privacy policy");
+        pos++;
+        renderManager.setTextSize((int) (0.8 * ts));
+        renderManager.drawText(10, (int) (pos++ * ts), "Imprint/privacy policy");
         renderManager.setTextSize((int) (0.7 * ts));
         links.clear();
-        drawClickableLink(renderManager, 10, 11 * ts, "https://eclabs.de/datenschutz.html");
+        drawClickableLink(renderManager, 10, pos++ * ts, "https://eclabs.de/datenschutz.html");
 
+        pos++;
         renderManager.setColor(Color.BLACK);
         renderManager.setTextSize((int) (1.2 * ts));
-        renderManager.drawText(10, 13 * ts, "Open Source");
+        renderManager.drawText(10, (int) (pos++ * ts), "Open Source");
+        renderManager.setTextSize((int) (0.7 * ts));
+        drawClickableLink(renderManager, 10, pos++ * ts, "https://git.io/fjs5H");
 
-        drawClickableLink(renderManager, 10, 14 * ts, "https://git.io/fjs5H");
+        pos++;
+        renderManager.setTextSize((int) (1.2 * ts));
+        renderManager.drawText(10, (int) (pos++ * ts), "Contact Us");
+        renderManager.setTextSize((int) (0.7 * ts));
+        drawClickableLink(renderManager, 10, pos++ * ts, "https://eclabs.de/contact");
 
         renderManager.setColor(Color.BLACK);
-        renderManager.drawText(10, 17 * ts, "Version: " + versionName + " (Build " + versionCode + ")");
+        renderManager.setTextSize((int) (0.7 * ts));
+        renderManager.drawText(10, (int) (pos++ * ts), "Version: " + versionName + " (Build " + versionCode + ")");
 
+        renderManager.restore();
         super.draw(renderManager);
     }
 
@@ -124,29 +157,17 @@ public class CreditsGameScreen extends GameScreen {
             return ""; // Error occurred, return empty string or handle it accordingly
         }
     }
-    /**
-     * Draws a clickable link.
-     *
-     * @param renderManager The render manager
-     * @param x             The x-coordinate of the link
-     * @param y             The y-coordinate of the link
-     * @param url           The URL of the link
-     */
-    private void drawClickableLink(RenderManager renderManager, int x, int y, String url) {
-        Rect rect = renderManager.drawLinkText(x, y, url, Color.BLUE, (int) (0.7 * (hs2 / 10)));
-        links.add(new GameButtonLink(rect.left, rect.top, rect.right, rect.bottom, url));
+
+    private void drawClickableLink(RenderManager renderManager, float x, float y, String url) {
+        renderManager.setColor(Color.BLUE);
+        renderManager.drawText((int)x, (int)y, url);
+        links.add(new ClickableLink(x, y - 30, x + renderManager.measureText(url), y, url));
     }
 
-    /**
-     * Opens a link in a web browser.
-     *
-     * @param url The URL to open
-     */
     private void openLink(String url) {
-        // Create an intent to open a web browser with the specified URL
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        // Start the activity (open the web browser)
-        gameManager.getActivity().startActivity(browserIntent);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        mContext.startActivity(intent);
     }
 
     /**
@@ -157,12 +178,45 @@ public class CreditsGameScreen extends GameScreen {
     @Override
     public void update(GameManager gameManager) {
         super.update(gameManager);
+        
+        InputManager inputManager = gameManager.getInputManager();
+        if (inputManager.eventHasOccurred()) {
+            float x = inputManager.getTouchX();
+            float y = inputManager.getTouchY();
+            
+            if (inputManager.downOccurred()) {
+                lastTouchY = y;
+                isDragging = true;
+            } else if (inputManager.moveOccurred() && isDragging) {
+                float deltaY = y - lastTouchY;
+                scrollY += deltaY;
+                
+                // Limit scrolling
+                float maxScroll = 30 * ts; // Adjust based on content height
+                scrollY = Math.max(Math.min(scrollY, 0), -maxScroll);
+                
+                lastTouchY = y;
+            } else if (inputManager.upOccurred()) {
+                isDragging = false;
+                
+                // Handle link clicks only if we haven't scrolled much
+                if (Math.abs(y - lastTouchY) < 10) {
+                    for (ClickableLink link : links) {
+                        if (link.contains(x, y - scrollY)) {  // Adjust click position by scroll
+                            openLink(link.getUrl());
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
         InputManager im = gameManager.getInputManager();
         // Handle back button press to return to the main menu
         if (im.backOccurred()) {
             gameManager.setGameScreen(0); // Set the main menu screen
         } else if(im.eventHasOccurred()) {
-            for (GameButtonLink link : links) {
+            for (GameButtonLink link : gameButtonLinks) {
                 boolean linkTouched = (im.getTouchX() >= link.getX() && im.getTouchX() <= link.getW()) && (im.getTouchY() >= link.getY() && im.getTouchY() <= link.getH());
                 if(linkTouched) {
                     openLink(link.getUrl());
@@ -177,5 +231,26 @@ public class CreditsGameScreen extends GameScreen {
     @Override
     public void destroy() {
         super.destroy();
+    }
+}
+
+class ClickableLink {
+    private float x, y, w, h;
+    private String url;
+
+    public ClickableLink(float x, float y, float w, float h, String url) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.url = url;
+    }
+
+    public boolean contains(float x, float y) {
+        return x >= this.x && x <= this.w && y >= this.y && y <= this.h;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }
