@@ -275,6 +275,7 @@ public class SettingsGameScreen extends GameScreen {
         public void execute() {
             MainActivity activity = gameManager.getActivity();
             activity.setBoardSize(activity, width, height);
+            MapGenerator.generateNewMapEachTime = true;
         }
     }
 

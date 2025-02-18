@@ -17,7 +17,7 @@ public class MapGenerator {
 
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
-    Boolean generateNewMapEachTime = false; // TODO: add option in settings
+    static Boolean generateNewMapEachTime = false; // TODO: add option in settings
 
     int maxWallsInOneVerticalCol = 2;
     int maxWallsInOneHorizontalRow = 2;
@@ -31,15 +31,16 @@ public class MapGenerator {
         carrePosX = (MainActivity.getBoardWidth()/2)-1;
         carrePosY = (MainActivity.getBoardHeight()/2)-1;
         
-        if(GridGameScreen.getLevel().equals("Beginner")){
+        if(GridGameScreen.getLevel().equals("Beginner")){ // Difficulty Beginner
             generateNewMapEachTime=true;
             // TODO: boardSizeX=12; boardSizeY=12; (still crashes)
         } else {
             if (generateNewMapEachTime) {
-                // random position of carré in the middle
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
-                carrePosX=getRandom(3,MainActivity.getBoardWidth()-5);
-                carrePosY=getRandom(3,MainActivity.getBoardHeight()-5);
+                // TODO: does not work with the roboyard in the middle, that is not moved to the new random position
+                // random position of carré in the middle
+                // carrePosX=getRandom(3,MainActivity.getBoardWidth()-5);
+                // carrePosY=getRandom(3,MainActivity.getBoardHeight()-5);
             }
             allowMulticolorTarget = false;
 
@@ -359,6 +360,7 @@ public class MapGenerator {
         if(data == null || generateNewMapEachTime){
             data = translateArraysToMap(horizontalWalls, verticalWalls);
             GridGameScreen.setMap(data);
+            generateNewMapEachTime = false;
         } else{
             data = removeGameElementsFromMap(data);
         }
