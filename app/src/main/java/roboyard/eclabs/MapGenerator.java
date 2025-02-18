@@ -2,6 +2,7 @@ package roboyard.eclabs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -63,9 +64,11 @@ public class MapGenerator {
                 "robot_green", "robot_yellow", "robot_red", "robot_blue", // robots
                 "target_green", "target_yellow", "target_red", "target_blue", "target_multi" // targets (cible)
         };
-        for (GridElement e: data){
+        Iterator<GridElement> iterator = data.iterator();
+        while (iterator.hasNext()) {
+            GridElement e = iterator.next();
             if(Arrays.asList(gameElementTypes).contains(e.getType())){
-                data.remove(e);
+                iterator.remove();
             }
         }
         return data;
