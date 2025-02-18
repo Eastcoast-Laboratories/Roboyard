@@ -181,19 +181,16 @@ public class SettingsGameScreen extends GameScreen {
     private class setSoundoff implements IExecutor{
         public void execute() {
             preferences.setPreferences(gameManager.getActivity(),"sound", "off");
-            gameManager.requestToast("The app must restart to change the sound settings...", true);
-            sleep(333);
-            gameManager.requestRestart();
+            gameManager.toggleSound(false);
+            gameManager.requestToast("Sound disabled", true);
         }
     }
-
 
     private class setSoundon implements IExecutor{
         public void execute() {
             preferences.setPreferences(gameManager.getActivity(),"sound", "on");
-            gameManager.requestToast("The app must restart to change the sound settings...", true);
-            sleep(333);
-            gameManager.requestRestart();
+            gameManager.toggleSound(true);
+            gameManager.requestToast("Sound enabled", true);
         }
     }
 

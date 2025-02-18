@@ -219,4 +219,15 @@ public class GameManager {
         }
         return Constants.SCREEN_START; // Fallback to main menu
     }
+
+    /**
+     * Toggles sound on or off.
+     *
+     * @param enabled Flag indicating whether sound should be enabled or disabled.
+     */
+    public void toggleSound(boolean enabled) {
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).toggleSound(enabled);
+        }
+    }
 }

@@ -158,15 +158,24 @@ public class MainActivity extends Activity
     }
 
     public void startSound(){
-        String soundSetting=preferences.getPreferenceValue(gameManager.getActivity(), "sound");
-        if(soundSetting.equals("off") == false) {
+        String soundSetting = preferences.getPreferenceValue(this, "sound");
+        if(!soundSetting.equals("off")) {
             //start service and play music
             startService(new Intent(MainActivity.this, SoundService.class));
         }
     }
+
     public void stopSound(){
         //stop service and stop music
         stopService(new Intent(MainActivity.this, SoundService.class));
+    }
+
+    public void toggleSound(boolean enabled) {
+        if (enabled) {
+            startSound();
+        } else {
+            stopSound();
+        }
     }
 
     public void draw(Canvas pCanvas) {
