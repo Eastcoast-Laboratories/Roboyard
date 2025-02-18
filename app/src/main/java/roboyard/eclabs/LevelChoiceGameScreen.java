@@ -110,6 +110,10 @@ public class LevelChoiceGameScreen extends GameScreen {
         int hs2 = this.gameManager.getScreenHeight()/2;
         int ts = hs2/10;
 
+        // Use minimum of width/height ratio to maintain circular shape
+        float buttonRatio = Math.min(ratioW, ratioH);
+        int buttonSize = (int)(iconsize * buttonRatio);
+
         int col, row;
         for (int i = 0; i < cols*rows; i++) {
             col = i % cols;
@@ -117,11 +121,23 @@ public class LevelChoiceGameScreen extends GameScreen {
             int levelNum = firstLevel + i;
             mapPath = getMapPath(i);
             Boolean played=saver.getMapsStateLevel(mapPath, "mapsPlayed.txt");
-            this.instances.add(new GameButtonGotoLevelGame((55+(stepX*col))*ratioW, (45+ts+(stepY*row))*ratioH, iconsize*ratioH, iconsize*ratioW, saver.getButtonLevels(played, true), saver.getButtonLevels(played, false), 4, mapPath));
+            this.instances.add(new GameButtonGotoLevelGame(
+                (int)((55+(stepX*col))*ratioW), 
+                (int)((45+ts+(stepY*row))*ratioH), 
+                buttonSize,  // Use same size for both width and height
+                buttonSize,
+                saver.getButtonLevels(played, true), 
+                saver.getButtonLevels(played, false), 
+                4, 
+                mapPath));
         }
 
         // Add navigation buttons at the bottom
         int screenHeight = this.gameManager.getScreenHeight();
+        
+        // Calculate navigation button dimensions - scale with screen width
+        int navButtonWidth = (int)(300 * ratioW);  // Reduced from 432 to 300
+        int navButtonHeight = (int)(144 * ratioH);  // Using same height as level buttons
         
         if (firstLevel == 1) {
             // In beginner screen, only show small back button and forward button
@@ -129,14 +145,28 @@ public class LevelChoiceGameScreen extends GameScreen {
             this.instances.add(backButton);
             
             // Show forward button to intermediate (right side only)
-            this.instances.add(new GameButtonGoto((int)(611*ratioW), (int)((1600+ts)*ratioH), (int)(432*ratioH), (int)(200*ratioW), R.drawable.bt_page_droite_up, R.drawable.bt_page_droite_down, rightScreen));
+            this.instances.add(new GameButtonGoto(
+                (int)(611*ratioW), 
+                (int)((1600+ts)*ratioH), 
+                navButtonWidth, 
+                navButtonHeight, 
+                R.drawable.bt_page_droite_up, 
+                R.drawable.bt_page_droite_down, 
+                rightScreen));
             return;  // Skip adding any other navigation buttons
         }
         
         // For all other screens
         if (leftScreen >= 0 && firstLevel >= 36){
             // Show back button to left screen
-            this.instances.add(new GameButtonGoto((int)(77*ratioW), (int)((1600+ts)*ratioH), (int)(432*ratioH), (int)(200*ratioW), R.drawable.bt_page_gauche_up, R.drawable.bt_page_gauche_down, leftScreen));
+            this.instances.add(new GameButtonGoto(
+                (int)(77*ratioW), 
+                (int)((1600+ts)*ratioH), 
+                navButtonWidth, 
+                navButtonHeight, 
+                R.drawable.bt_page_gauche_up, 
+                R.drawable.bt_page_gauche_down, 
+                leftScreen));
         }
         
         if (firstLevel == 106) {
@@ -144,7 +174,14 @@ public class LevelChoiceGameScreen extends GameScreen {
             // TODO: this.instances.add(new GameButtonGoto((int)(611*ratioW), screenHeight - iconsize - 33, iconsize, iconsize, R.drawable.bt_back_up, R.drawable.bt_back_down, Constants.SCREEN_START));
         } else if (rightScreen >= 0 && firstLevel < 106) {
             // For intermediate and advanced screens, show forward button
-            this.instances.add(new GameButtonGoto((int)(611*ratioW), (int)((1600+ts)*ratioH), (int)(432*ratioH), (int)(200*ratioW), R.drawable.bt_page_droite_up, R.drawable.bt_page_droite_down, rightScreen));
+            this.instances.add(new GameButtonGoto(
+                (int)(611*ratioW), 
+                (int)((1600+ts)*ratioH), 
+                navButtonWidth, 
+                navButtonHeight, 
+                R.drawable.bt_page_droite_up, 
+                R.drawable.bt_page_droite_down, 
+                rightScreen));
         }
     }
 
@@ -158,17 +195,25 @@ public class LevelChoiceGameScreen extends GameScreen {
         super.load(renderManager);
     }
     
-    private void drawStarsAroundButton(RenderManager renderManager, int centerX, int centerY, int buttonSize, int numstars) {
-        // Make stars slightly smaller (1/5 of button size)
-        int starSize = buttonSize / 4;
+    private void drawStarsAroundButton(RenderManager renderManager, int centerX, int centerY, int buttonSize, int numstars, int levelNum) {
+        float ratioW = ((float)gameManager.getScreenWidth()) / ((float)1080);
+        float ratioH = ((float)gameManager.getScreenHeight()) / ((float)1920);
+        float buttonRatio = Math.min(ratioW, ratioH);
+        
+        // Make stars slightly smaller (1/4 of button size)
+        int starSize = (int)(buttonSize * buttonRatio / 4);
         
         // Increase radius to place stars further from button
-        float radius = buttonSize * 0.64f;
+        float radius = buttonSize * buttonRatio * 0.7f;
         
-        // Draw 3 stars in a circle around the button
+        // Draw stars in a circle around the button
+        int startAngle = -90;
+        if(levelNum>99) {
+            startAngle = -77;
+        }
         for (int i = 0; i < numstars; i++) {
-            // Calculate angle for each star (120 degrees apart, offset to start from top)
-            double angle = Math.toRadians(-90 + (i * 30));
+            // Calculate angle for each star (30 degrees apart, starting from top)
+            double angle = Math.toRadians(startAngle + (i * 30));
             
             // Calculate position on the circle
             int starX = (int)(centerX + radius * Math.cos(angle));
@@ -196,7 +241,7 @@ public class LevelChoiceGameScreen extends GameScreen {
         int stepY = 222;
         int cols = 5;
         int rows = 7;
-        int buttonSize = (int)(144 * ratioH);
+        int iconsize = 144;
 
         renderManager.setColor(Color.parseColor("#77ABD6"));
         renderManager.paintScreen();
@@ -231,12 +276,14 @@ public class LevelChoiceGameScreen extends GameScreen {
             int levelNum = firstLevel + i;
             
             // Calculate button center position
+            float buttonRatio = Math.min(ratioW, ratioH);
+            int buttonSize = (int)(iconsize * buttonRatio);
             int centerX = (int)((55+(stepX*col))*ratioW) + buttonSize/2;
             int centerY = (int)((45+ts+(stepY*row))*ratioH) + buttonSize/2;
             
             // Draw level number
             renderManager.setColor(Color.BLACK);
-            renderManager.drawText((int)((55+(stepX*col))*ratioW)-10, (int)((45+ts+(stepY*row))*ratioH), levelNum + ".");
+            renderManager.drawText((int)((55+(stepX*col))*ratioW)-40, (int)((40+ts+(stepY*row))*ratioH), levelNum + ".");
             
             // Draw button
             instances.get(i).draw(renderManager);
@@ -277,7 +324,10 @@ public class LevelChoiceGameScreen extends GameScreen {
                     totalStars++;
                     numStars++;
                 }
-                drawStarsAroundButton(renderManager, centerX, centerY, buttonSize, numStars);
+                drawStarsAroundButton(renderManager, centerX, centerY, iconsize, numStars, levelNum);
+                // TODO: show number of total stars in the level selection screen at the top right
+                // TODO: show moves on the button
+                // TODO: show best moves on the button for DEBUG
             }
         }
 

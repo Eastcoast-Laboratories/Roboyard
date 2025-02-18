@@ -368,7 +368,7 @@ public class GridGameScreen extends GameScreen {
         // Display level number if it's a level game
         renderManager.setColor(textColorNormal);
         renderManager.setTextSize(lineHeight / 2);
-        int levelNamePos =  boardHeight + (int) (lineHeight * 3.3f);
+        int levelNamePos =  boardHeight + (int) (lineHeight * 3.5f);
         if (mapPath != null && mapPath.startsWith("Maps/")) {
             // Level number underneath the next button
             renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 165), levelNamePos, "Level " + levelNum);

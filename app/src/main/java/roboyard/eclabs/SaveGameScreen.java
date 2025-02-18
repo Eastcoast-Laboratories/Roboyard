@@ -57,6 +57,10 @@ public class SaveGameScreen extends GameScreen {
         ts = hs2 / 10;
         iconSize = 144;
 
+        // Use minimum of width/height ratio to maintain circular shape
+        float buttonRatio = Math.min(ratioW, ratioH);
+        int buttonSize = (int)(iconSize * buttonRatio);
+
         // Calculate button positions for horizontal and vertical layout
         int stepX = 211; // Horizontal step
         int stepY = 222; // Vertical step
@@ -140,6 +144,9 @@ public class SaveGameScreen extends GameScreen {
      * Create buttons for saving and loading games.
      */
     public void createButtons() {
+
+        int iconsize = 144;
+
         init();
         ArrayList<GameButtonGotoSavedGame> aRemove = new ArrayList<>();
         for (Object currentObject : this.instances) {
@@ -154,19 +161,44 @@ public class SaveGameScreen extends GameScreen {
         String mapPath = "";
         SaveManager saver = new SaveManager(gameManager.getActivity());
 
+        // Use minimum of width/height ratio to maintain circular shape
+        float buttonRatio = Math.min(ratioW, ratioH);
+        int buttonSize = (int)(iconsize * buttonRatio);
+
         // Create buttons for each save slot
         for (int i = 0; i < buttonPositionsX.length; i++) {
             mapPath = getMapPath(i);
             if (i == 0) {
-                this.instances.add(new GameButtonGotoSavedGame(autosaveButtonX, autosaveButtonY, iconSize * ratioH, iconSize * ratioW, saver.getButtonAutoSaved(mapPath, true), saver.getButtonAutoSaved(mapPath, false), 4, mapPath));
+                this.instances.add(new GameButtonGotoSavedGame(
+                    autosaveButtonX, 
+                    autosaveButtonY,
+                    buttonSize,
+                    buttonSize, 
+                    saver.getButtonAutoSaved(mapPath, true), 
+                    saver.getButtonAutoSaved(mapPath, false), 
+                    4, 
+                    mapPath));
             } else {
-                // System.out.println("DEBUG: Creating button for save slot " + i);
-                this.instances.add(new GameButtonGotoSavedGame(buttonPositionsX[i], buttonPositionsY[i], iconSize * ratioH, iconSize * ratioW, saver.getButtonSaved(mapPath, true), saver.getButtonSaved(mapPath, false), 4, mapPath));
+                this.instances.add(new GameButtonGotoSavedGame(
+                    buttonPositionsX[i], 
+                    buttonPositionsY[i], 
+                    buttonSize, 
+                    buttonSize, 
+                    saver.getButtonSaved(mapPath, true), 
+                    saver.getButtonSaved(mapPath, false), 
+                    4, 
+                    mapPath));
             }
         }
 
         // Add back button
-        this.instances.add(new GameButtonGotoBack(backButtonX, backButtonY, (int) (222 * ratioH), (int) (222 * ratioW), R.drawable.bt_back_up, R.drawable.bt_back_down));
+        this.instances.add(new GameButtonGotoBack(
+            backButtonX, 
+            backButtonY, 
+            buttonSize, 
+            buttonSize, 
+            R.drawable.bt_back_up, 
+            R.drawable.bt_back_down));
     }
 
     /**
