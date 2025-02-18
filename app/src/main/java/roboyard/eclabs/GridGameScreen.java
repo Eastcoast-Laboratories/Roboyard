@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -600,23 +601,24 @@ public class GridGameScreen extends GameScreen {
 
         currentRenderManager.setTarget(canvasGrid);
 
-        drawables.put("grid", currentRenderManager.getResources().getDrawable(R.drawable.grid)); // white background for 16x16
-        drawables.put("grid_tiles", currentRenderManager.getResources().getDrawable(R.drawable.grid_tiles)); // white background for variable sizes
-        drawables.put("grid_14x16", currentRenderManager.getResources().getDrawable(R.drawable.grid_14x16)); // white background for 14x16
-        drawables.put("roboyard", currentRenderManager.getResources().getDrawable(R.drawable.roboyard)); // center roboyard in carré
-        drawables.put("mh", currentRenderManager.getResources().getDrawable(R.drawable.mh)); // horizontal lines (hedge)
-        drawables.put("mv", currentRenderManager.getResources().getDrawable(R.drawable.mv)); // vertical lines (hedge)
+        // Load all drawables
+        drawables.put("grid", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid, null)); // white background for 16x16
+        drawables.put("grid_tiles", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_tiles, null)); // white background for variable sizes
+        drawables.put("grid_14x16", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_14x16, null)); // white background for 14x16
+        drawables.put("roboyard", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.roboyard, null)); // center roboyard in carré
+        drawables.put("mh", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mh, null)); // horizontal lines (hedge)
+        drawables.put("mv", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mv, null)); // vertical lines (hedge)
 
-        drawables.put("robot_green", currentRenderManager.getResources().getDrawable(R.drawable.robot_green_right)); // green robot
-        drawables.put("robot_red", currentRenderManager.getResources().getDrawable(R.drawable.robot_red_right)); // red
-        drawables.put("robot_yellow", currentRenderManager.getResources().getDrawable(R.drawable.robot_yellow_right)); // yellow
-        drawables.put("robot_blue", currentRenderManager.getResources().getDrawable(R.drawable.robot_blue_right)); // blue
+        drawables.put("robot_green", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.robot_green_right, null)); // green robot
+        drawables.put("robot_red", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.robot_red_right, null)); // red
+        drawables.put("robot_yellow", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.robot_yellow_right, null)); // yellow
+        drawables.put("robot_blue", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.robot_blue_right, null)); // blue
 
-        drawables.put("target_red", currentRenderManager.getResources().getDrawable(R.drawable.cr)); // ...
-        drawables.put("target_blue", currentRenderManager.getResources().getDrawable(R.drawable.cb)); // ...
-        drawables.put("target_green", currentRenderManager.getResources().getDrawable(R.drawable.cv)); // ...
-        drawables.put("target_yellow", currentRenderManager.getResources().getDrawable(R.drawable.cj)); // ...
-        drawables.put("target_multi", currentRenderManager.getResources().getDrawable(R.drawable.cm)); // ...
+        drawables.put("target_red", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.cr, null)); // ...
+        drawables.put("target_blue", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.cb, null)); // ...
+        drawables.put("target_green", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.cv, null)); // ...
+        drawables.put("target_yellow", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.cj, null)); // ...
+        drawables.put("target_multi", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.cm, null)); // ...
 
         // Choose appropriate grid background based on board size
         Drawable gridBackground;
