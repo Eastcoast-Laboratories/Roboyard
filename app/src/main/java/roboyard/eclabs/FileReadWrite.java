@@ -143,6 +143,7 @@ public class FileReadWrite {
                 }
             }
         }
+        // System.out.println("Map loaded: " + buffer.toString());
         return buffer.toString();
     }
 }

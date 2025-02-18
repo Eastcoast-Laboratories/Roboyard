@@ -117,7 +117,7 @@ public class SaveManager {
                     mapData.put("moves", Integer.parseInt(parts[2]));
                     mapData.put("squares", Integer.parseInt(parts[3]));
                     mapData.put("time", Integer.parseInt(parts[4]));
-                    System.out.println("DEBUG Map read: " + mapPath + ":" + mapData.get("minMoves") + ":" + mapData.get("moves") + ":" + mapData.get("squares") + ":" + mapData.get("time"));
+                    // System.out.println("DEBUG Map read: " + mapPath + ":" + mapData.get("minMoves") + ":" + mapData.get("moves") + ":" + mapData.get("squares") + ":" + mapData.get("time"));
                     return mapData;
                 }
             }

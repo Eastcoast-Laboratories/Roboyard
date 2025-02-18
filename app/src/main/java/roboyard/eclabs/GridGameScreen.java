@@ -464,6 +464,11 @@ public class GridGameScreen extends GameScreen {
             for(IGameMove m : solution.getMoves()){
                 solutionMoves++;
             }
+            // DEBUG: save solutions directly as if played:
+            // SaveManager saveManager = new SaveManager(gameManager.getActivity());
+            // saveManager.saveMapCompletion(mapPath, solutionMoves, 99, 9999, 99999);
+            // FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsPlayed.txt", mapPath.substring(5)+"\n");
+
             /*if(solutionMoves > simplePuzzleMinMoves && solutionMoves < goodPuzzleMinMoves) {
                 // very simple puzzle with max 6 moves
                 gameManager.requestToast("AI sais: this is a simple puzzle.", true);
@@ -919,18 +924,20 @@ public class GridGameScreen extends GameScreen {
         }
         isGameWon = true;
 
+        SaveManager saveManager = new SaveManager(gameManager.getActivity());
         if(IAMovesNumber > 0)
         {
-            gameManager.requestToast("The AI found a solution in "+IAMovesNumber+" moves.", true);
+            gameManager.requestToast("The AI found a solution in " + IAMovesNumber + " moves.", true);
         }
         else
         {
             gameManager.requestToast("You won in "+nbCoups+" moves, "+numSquares+" squares", true);
             // Save completion data
-            SaveManager saveManager = new SaveManager(gameManager.getActivity());
             saveManager.saveMapCompletion(mapPath, solutionMoves, nbCoups, numSquares, timeCpt);
         }
         updatePlayedMaps();
+        LevelChoiceGameScreen.invalidateMapCache(mapPath); // Invalidate only this specific map in the cache
+        // set mapCachHasToBeUpdated in Level
     }
 
     private void updatePlayedMaps()

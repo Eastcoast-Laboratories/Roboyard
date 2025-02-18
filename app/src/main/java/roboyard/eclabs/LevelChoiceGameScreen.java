@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by Pierre on 21/01/2015.
@@ -25,6 +27,10 @@ public class LevelChoiceGameScreen extends GameScreen {
     }
 
     private static GameButtonGotoLevelGame lastButtonUsed = null;
+    private static Set<String> mapsNeedingUpdate = new HashSet<>(); // Track which maps need updates
+
+    private SaveManager saver;
+    private HashMap<String, HashMap<String, Integer>> mapDataCache; // Cache for map data
 
     /*
      * Game screen for level selection
@@ -35,6 +41,10 @@ public class LevelChoiceGameScreen extends GameScreen {
     public LevelChoiceGameScreen(GameManager gameManager, int firstLevel, int leftScreen, int rightScreen){
         super(gameManager);
         this.firstLevel = firstLevel;
+        this.leftScreen = leftScreen;
+        this.rightScreen = rightScreen;
+        saver = new SaveManager(gameManager.getActivity());
+        mapDataCache = new HashMap<>(); // Initialize cache
         
         // Update navigation based on current page
         if (firstLevel == 1) {  // Beginner page (1-35)
@@ -303,51 +313,61 @@ public class LevelChoiceGameScreen extends GameScreen {
             String mapPath = "Maps/level_" + levelNum + ".txt";
             SaveManager saver = new SaveManager(gameManager.getActivity());
             Boolean played=saver.getMapsStateLevel(mapPath, "mapsPlayed.txt");
-
+            
             int numStars=0;
             if (played) {
                 moves = 999999;
                 minMoves = -1;
                 // int solveTime;
                 // read data from file to see your minimum used moves with getMapsStateLevel
-                HashMap<String, Integer> mapData = saver.getMapLevelData(mapPath, 1);
-                if (mapData != null) {
+	            HashMap<String, Integer> mapData = null;
+	            if (!mapsNeedingUpdate.contains(mapPath)) {
+	                mapData = mapDataCache.get(mapPath);
+	            }
+	            if (mapData == null) {
+	                mapData = saver.getMapLevelData(mapPath, 1);
+	                if (mapData != null) {
+	                    mapDataCache.put(mapPath, mapData);
+	                    mapsNeedingUpdate.remove(mapPath); // Remove from update list after refresh
+	                }
+	            }
+				if (mapData != null) {
                     // completion data: minMoves, moves, squares, time
-                    moves = mapData.get("moves");
-                    minMoves = mapData.get("minMoves");
+	                moves = mapData.get("moves");
+	                minMoves = mapData.get("minMoves");
                     // not used for now solveTime = mapData.get("time");
                     // not used for now int squares = mapData.get("squares");
 
-                    // write the number in the center of the button
-                    renderManager.setColor(Color.WHITE);
-                    renderManager.setTextSize((int)(0.3*ts));
-                    renderManager.drawText((int)((150+(stepX*col))*ratioW), (int)((188+ts+(stepY*row))*ratioH), moves + "/" + minMoves);
-                }
-                if (moves < 999999) {
-                    totalStars++;
-                    //noinspection ReassignedVariable
-                    numStars++;
-                }
-                if (moves <= minMoves + 1) {
-                    totalStars++;
-                    numStars++;
-                }
-                if (moves <= minMoves) {
-                    totalStars++;
-                    numStars++;
-                }
-                if (moves < minMoves) {
-                    // should not happen
-                    totalStars++;
-                    numStars++;
-                }
-                drawStarsAroundButton(renderManager, centerX, centerY, iconsize, numStars, levelNum);
-                // TODO: show number of total stars in the level selection screen at the top right
-                // TODO: show moves on the button
-                // TODO: show best moves on the button for DEBUG
-                // the levelselectio screen reads al files in a loop, fix that, only read level files once every time, you enter the levelselection screen 
-            }
-        }
+	                // write the number in the center of the button
+	                renderManager.setColor(Color.WHITE);
+	                renderManager.setTextSize((int)(0.3*ts));
+	                renderManager.drawText((int)((150+(stepX*col))*ratioW), (int)((188+ts+(stepY*row))*ratioH), moves + "/" + minMoves);
+	            }
+	            if (moves < 999999) {
+	                totalStars++;
+	                //noinspection ReassignedVariable
+	                numStars++;
+	            }
+	            if (moves <= minMoves + 1) {
+	                totalStars++;
+	                numStars++;
+	            }
+	            if (moves <= minMoves) {
+	                totalStars++;
+	                numStars++;
+	            }
+	            if (moves < minMoves) {
+	                // should not happen
+	                totalStars++;
+	                numStars++;
+	            }
+	            drawStarsAroundButton(renderManager, centerX, centerY, iconsize, numStars, levelNum);
+	            // TODO: show number of total stars in the level selection screen at the top right
+	            // TODO: show moves on the button
+	            // TODO: show best moves on the button for DEBUG
+	            // the levelselectio screen reads al files in a loop, fix that, only read level files once every time, you enter the levelselection screen 
+	        }
+		}
 
         super.draw(renderManager);
     }
@@ -364,5 +384,9 @@ public class LevelChoiceGameScreen extends GameScreen {
     @Override
     public void destroy() {
         super.destroy();
+    }
+
+    public static void invalidateMapCache(String mapPath) {
+        mapsNeedingUpdate.add(mapPath);
     }
 }
