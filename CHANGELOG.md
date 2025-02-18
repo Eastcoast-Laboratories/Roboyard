@@ -1,6 +1,55 @@
 CHANGELOG
 =========
 
+### Version 18.1
+
+- Gameplay Improvements
+
+  -  Enabled intermediate level at 35 stars instead of the previous threshold.
+  -  Added "How to Play" section to the credits screen.
+
+
+- UI Enhancements
+
+  -  Displayed total stars at the top right of the level selection screen.
+
+
+- Level Adjustments
+
+  - Moved level 30 to the end and shifted all levels from 31 onwards by one down.
+  - Adjusted final level 140 to require a minimum of 26 moves.
+  - General level rearrangements for better progression.
+
+
+- Bug Fixes
+
+  -  Fixed a bug when starting a new random game.
+  -  Ensured a new map is generated each time the board size changes.
+
+
+- Performance Enhancements
+
+  -  Implemented file access caching for faster level loading.
+
+### Version 18
+
+- add 3 stars to each level:
+- one star if solved
+- one star if solved with one move more than the minimum
+- one star if solved with the minimum possible moves
+- draw small robots underneath each robot to keep track of the original position
+- map at the top of the screen and the hints and moves below
+- bugfixes and speed improvement
+
+### Version 17
+
+- Unified menu on one page
+- New Levels: 35 beginner-levels, 35 intermediate, advanced and expert levels
+- UI improvements: Display of level numbers/names in-game
+- Save and load functionality: Enhanced handling of save games
+- New option for boards with 12x14, 14x14 or 14x16 squares (14x16 is the new default)
+- New launcher icon
+
 ### Version 16
 
 - Prevent solver freeze on rapid clicking while hint message is showing or solver is running.
