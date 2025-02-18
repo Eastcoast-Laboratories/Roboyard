@@ -328,6 +328,7 @@ public class LevelChoiceGameScreen extends GameScreen {
                 // TODO: show number of total stars in the level selection screen at the top right
                 // TODO: show moves on the button
                 // TODO: show best moves on the button for DEBUG
+                // the levelselectio screen reads al files in a loop, fix that, only read level files once every time, you enter the levelselection screen 
             }
         }
 
