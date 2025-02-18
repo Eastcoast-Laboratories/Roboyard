@@ -86,7 +86,12 @@ public class LevelChoiceGameScreen extends GameScreen {
         int stepY = 222;
         int cols = 5;
         int rows = 7;
-        int iconsize = 144;
+
+
+        float ratioW = ((float)gameManager.getScreenWidth()) /((float)1080);
+        float ratioH = ((float)gameManager.getScreenHeight()) /((float)1920);
+
+        int iconSize = (int)(125 * ratioH/ratioW);
 
         ArrayList<GameButtonGotoLevelGame> aRemove = new ArrayList<>();
         for(Object currentObject : this.instances)
@@ -104,15 +109,12 @@ public class LevelChoiceGameScreen extends GameScreen {
         String mapPath = "";
         SaveManager saver = new SaveManager(gameManager.getActivity());
 
-        float ratioW = ((float)gameManager.getScreenWidth()) /((float)1080);
-        float ratioH = ((float)gameManager.getScreenHeight()) /((float)1920);
-
         int hs2 = this.gameManager.getScreenHeight()/2;
         int ts = hs2/10;
 
         // Use minimum of width/height ratio to maintain circular shape
         float buttonRatio = Math.min(ratioW, ratioH);
-        int buttonSize = (int)(iconsize * buttonRatio);
+        int buttonSize = (int)(iconSize * buttonRatio);
 
         int col, row;
         for (int i = 0; i < cols*rows; i++) {
@@ -138,15 +140,17 @@ public class LevelChoiceGameScreen extends GameScreen {
         // Calculate navigation button dimensions - scale with screen width
         int navButtonWidth = (int)(300 * ratioW);  // Reduced from 432 to 300
         int navButtonHeight = (int)(144 * ratioH);  // Using same height as level buttons
-        
+        int marginbottom = (int)(22 * ratioH);
+
         if (firstLevel == 1) {
             // In beginner screen, only show small back button and forward button
-            GameButtonGoto backButton = new GameButtonGoto(33, screenHeight - iconsize - 33, iconsize, iconsize, R.drawable.bt_back_up, R.drawable.bt_back_down, Constants.SCREEN_START);
+            int backButtonSize = (int)(199 * ratioH);
+            GameButtonGoto backButton = new GameButtonGoto((int)(30 * ratioW), screenHeight - backButtonSize - marginbottom, backButtonSize, backButtonSize, R.drawable.bt_back_up, R.drawable.bt_back_down, Constants.SCREEN_START);
             this.instances.add(backButton);
             
             // Show forward button to intermediate (right side only)
             this.instances.add(new GameButtonGoto(
-                (int)(611*ratioW), 
+                (int)(611*ratioW),
                 (int)((1600+ts)*ratioH), 
                 navButtonWidth, 
                 navButtonHeight, 
@@ -241,7 +245,13 @@ public class LevelChoiceGameScreen extends GameScreen {
         int stepY = 222;
         int cols = 5;
         int rows = 7;
-        int iconsize = 144;
+        
+        // For lower resolutions (e.g. 720x1280), we need a larger base size
+        float baseIconSize = 99;
+        if (gameManager.getScreenWidth() <= 720) {
+            baseIconSize = 198; // Double the size for lower resolutions
+        }
+        int iconsize = (int)(baseIconSize * ratioH);
 
         renderManager.setColor(Color.parseColor("#77ABD6"));
         renderManager.paintScreen();
@@ -283,15 +293,17 @@ public class LevelChoiceGameScreen extends GameScreen {
             
             // Draw level number
             renderManager.setColor(Color.BLACK);
-            renderManager.drawText((int)((55+(stepX*col))*ratioW)-40, (int)((40+ts+(stepY*row))*ratioH), levelNum + ".");
-            
-            // Draw button
+            renderManager.setTextSize((int)(0.5*ts));
+            renderManager.drawText((int)((22+(stepX*col))*ratioW), (int)((40+ts+(stepY*row))*ratioH), levelNum + ".");
+
+           // Draw button
             instances.get(i).draw(renderManager);
 
             // Draw stars if level is completed
             String mapPath = "Maps/level_" + levelNum + ".txt";
             SaveManager saver = new SaveManager(gameManager.getActivity());
             Boolean played=saver.getMapsStateLevel(mapPath, "mapsPlayed.txt");
+
             int numStars=0;
             if (played) {
                 moves = 999999;
@@ -305,6 +317,11 @@ public class LevelChoiceGameScreen extends GameScreen {
                     minMoves = mapData.get("minMoves");
                     // not used for now solveTime = mapData.get("time");
                     // not used for now int squares = mapData.get("squares");
+
+                    // write the number in the center of the button
+                    renderManager.setColor(Color.WHITE);
+                    renderManager.setTextSize((int)(0.3*ts));
+                    renderManager.drawText((int)((150+(stepX*col))*ratioW), (int)((188+ts+(stepY*row))*ratioH), moves + "/" + minMoves);
                 }
                 if (moves < 999999) {
                     totalStars++;
