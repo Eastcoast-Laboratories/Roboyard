@@ -284,11 +284,12 @@ public class LevelChoiceGameScreen extends GameScreen {
         } else {
             difficulty = "Expert";
         }
-        renderManager.drawText((int)(55*ratioW)-10, (int)(55*ratioH), difficulty + " Levels");
+        renderManager.drawText((int)(55*ratioW), (int)(55*ratioH), difficulty + " Levels");
 
         int col, row;
         int moves;
         int minMoves;
+        totalStars = 0;
         // Draw level buttons and numbers
 		for (int i = 0; i < cols*rows; i++) {
             col = i % cols;
@@ -362,13 +363,20 @@ public class LevelChoiceGameScreen extends GameScreen {
 	                numStars++;
 	            }
 	            drawStarsAroundButton(renderManager, centerX, centerY, iconsize, numStars, levelNum);
-	            // TODO: show number of total stars in the level selection screen at the top right
 	            // TODO: show moves on the button
 	            // TODO: show best moves on the button for DEBUG
 	            // the levelselectio screen reads al files in a loop, fix that, only read level files once every time, you enter the levelselection screen 
 	        }
 		}
-
+        // show number of total stars in the level selection screen at the top right:
+        renderManager.setColor(Color.YELLOW);
+        renderManager.setTextSize((int)(0.5*ts));
+        renderManager.drawText((int)((gameManager.getScreenWidth() - 255*ratioW)), (int)(88*ratioH), totalStars + "/" + (3*cols*rows));
+        // draw a star
+        int starSize = 50;
+        int starX = (int)((gameManager.getScreenWidth() - 99*ratioW));
+        int starY = (int)(55*ratioH);
+        renderManager.drawImage(starX, starY, starX + starSize, starY + starSize, R.drawable.star);
         super.draw(renderManager);
     }
  
