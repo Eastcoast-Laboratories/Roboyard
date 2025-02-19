@@ -245,12 +245,13 @@ public class SaveGameScreen extends GameScreen {
                 if (mapUniqueString[i].length() > 0){
                     // unicode string with 7 filled squares
                     String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
-                    for (int j = 0; j < 8; j++) {
+                    for (int j = 0; j < 14; j++) {
                         renderManager.drawText(buttonPositionsX[i] - moveleft, buttonPositionsY[i] - 5 + j * 15, bar);
                     }
 
                 }
 
+                renderManager.setTextSize((int) (0.37 * ts));
                 renderManager.setColor(Color.parseColor("#000000"));
                 renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
             }

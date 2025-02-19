@@ -935,13 +935,14 @@ public class GridGameScreen extends GameScreen {
             // Save completion data
             saveManager.saveMapCompletion(mapPath, solutionMoves, nbCoups, numSquares, timeCpt);
         }
-        updatePlayedMaps();
         LevelChoiceGameScreen.invalidateMapCache(mapPath); // Invalidate only this specific map in the cache
+        updatePlayedMaps();
         // set mapCachHasToBeUpdated in Level
     }
 
     private void updatePlayedMaps()
     {
+        // System.out.println("DEBUG: updatePlayedMaps: " + mapPath);
         if(mapPath.length() > 0) {
             addMapsPlayed();
             SparseArray<GameScreen> screens = gameManager.getScreens();
@@ -957,8 +958,12 @@ public class GridGameScreen extends GameScreen {
     }
 
 
+    /**
+     * Adds the current map to the list of maps played.
+     */
     public void addMapsPlayed()
     {
+        // System.out.println("DEBUG: addMapsPlayed: " + mapPath);
         if(mapPath.length() > 0)
         {
             SaveManager saver = new SaveManager(gameManager.getActivity());
