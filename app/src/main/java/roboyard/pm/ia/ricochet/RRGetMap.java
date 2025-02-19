@@ -22,110 +22,6 @@ import java.util.HashMap;
 public class RRGetMap {
 
     /**
-     * Create a virtual world in memory for the RR solver (BFS)
-     * adds all game elements to that virtual world so the solver can solve it with the current data
-     *
-     * @param gridElements game elements
-     * @param baseState
-     * @return
-     */
-    public static RRWorld createRRWorld(ArrayList<GridElement> gridElements, RRGameState baseState) {
-        RRWorld currentWorld = new RRWorld();
-
-        ArrayList<GridElement> robots = new ArrayList<>();
-        GridElement cible = null;
-
-        Map<String, Integer> colors = new HashMap<>();
-
-
-
-        colors.put("robot_red", Color.RED);
-        colors.put("robot_blue", Color.BLUE);
-        colors.put("robot_green", Color.GREEN);
-        colors.put("robot_yellow", Color.YELLOW);
-
-        colors.put("target_red", Color.RED);
-        colors.put("target_blue", Color.BLUE);
-        colors.put("target_green", Color.GREEN);
-        colors.put("target_yellow", Color.YELLOW);
-        colors.put("target_multi", 0);      // no color
-
-        for (Object element : gridElements) {
-            GridElement myp = (GridElement) element;
-
-            if (myp.getType().equals("mh")) {
-                currentWorld.setHorizontalWall(myp.getX(), myp.getY());
-            }
-            if (myp.getType().equals("mv")) {
-                currentWorld.setVerticalWall(myp.getX(), myp.getY());
-            }
-            if (myp.getType().equals("target_red") || myp.getType().equals("target_green") ||myp.getType().equals("target_blue") ||myp.getType().equals("target_yellow") ||myp.getType().equals("target_multi")) {
-                cible = myp;
-            }
-            if (myp.getType().equals("robot_red") || myp.getType().equals("robot_green") ||myp.getType().equals("robot_blue") ||myp.getType().equals("robot_yellow")) {
-                robots.add(myp);
-            }
-        }
-
-
-        ArrayList<RRPiece> mainL = new ArrayList<>();
-        ArrayList<RRPiece> secondL = new ArrayList<>();
-
-        String[] types = {"target_red","target_blue","target_green","target_yellow"};
-
-        int cpt = 0;
-
-        assert cible != null;
-        if(cible.getType().equals("target_multi"))
-        {
-            for(GridElement robot : robots)
-            {
-                mainL.add(new RRPiece(robot.getX(), robot.getY(), colors.get(robot.getType()), cpt));
-                cpt++;
-            }
-        }
-        else{
-            for(String type : types)
-            {
-                if(cible.getType().equals(type))
-                {
-                    for(GridElement robot : robots)
-                    {
-                        if(robot.getType().charAt(6) == cible.getType().charAt(7))
-                        {
-                            mainL.add(new RRPiece(robot.getX(), robot.getY(), colors.get(robot.getType()), cpt));
-                            cpt++;
-                        }
-                        else
-                        {
-                            secondL.add(new RRPiece(robot.getX(), robot.getY(), colors.get(robot.getType()), cpt));
-                            cpt++;
-                        }
-                    }
-                }
-            }
-        }
-
-        currentWorld.setObjective(cible.getX(), cible.getY(), colors.get(cible.getType()));
-
-
-        RRPiece[] mainLA, secLA;
-        mainLA = new RRPiece[mainL.size()];
-        for(int i=0; i<mainL.size(); i++){
-            mainLA[i] = mainL.get(i);
-        }
-
-        secLA = new RRPiece[secondL.size()];
-        for(int i=0; i<secondL.size(); i++){
-            secLA[i] = secondL.get(i);
-        }
-
-        baseState.setPieces(mainLA, secLA);
-
-        return currentWorld;
-    }
-
-    /**
      * Create a virtual world in memory for the DD solver (IDDFS)
      * adds all game elements to that virtual world so the solver can solve it with the current data
      *
@@ -135,7 +31,6 @@ public class RRGetMap {
      */
     public static Board createDDWorld(ArrayList<GridElement> gridElements, RRPiece[] pieces) {
 
-        // this must stay at 16, 16, otherwise the solver finds solutions, that are none (tested with 12x14 and 18x18 and MainActivity.boardSizeX, MainActivity.boardSizeY, MainActivity.numRobots)
         Board board = Board.createBoardFreestyle(null, MainActivity.boardSizeX, MainActivity.boardSizeY, MainActivity.numRobots);
         board.removeGoals();
 

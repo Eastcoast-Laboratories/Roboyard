@@ -28,19 +28,7 @@ public class RRGameState extends AGameState {
       this.allPieces.addAll(Arrays.asList(secondaryPieces));
     }
   }
-  
-  public void setPieces(RRPiece[] mainPieces, RRPiece[] secondaryPieces){
-    this.allPieces = new ArrayList<>();
-    this.allPieces.addAll(Arrays.asList(mainPieces));
-    this.allPieces.addAll(Arrays.asList(secondaryPieces));
-    this.mainPieces = mainPieces;
-    this.secondaryPieces = secondaryPieces;
-  }
 
-  public ArrayList<RRPiece> getPieces(){
-    return this.allPieces;
-  }
-  
   @Override
   public String toString(){
     StringBuilder str = new StringBuilder();

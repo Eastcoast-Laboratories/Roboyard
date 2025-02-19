@@ -56,14 +56,6 @@ public class RRPiece implements Comparable<RRPiece>{
     this.x = x;
   }
   
-  public void incX(){
-    this.x++;
-  }
-  
-  public void decX(){
-    this.x--;
-  }
-  
   public int getY(){
     return this.y;
   }
@@ -72,14 +64,6 @@ public class RRPiece implements Comparable<RRPiece>{
     this.y = y;
   }
   
-  public void incY(){
-    this.y++;
-  }
-  
-  public void decY(){
-    this.y--;
-  }
-
   @Override
   public int compareTo(RRPiece o) {
     int a = this.getX()+this.getY();

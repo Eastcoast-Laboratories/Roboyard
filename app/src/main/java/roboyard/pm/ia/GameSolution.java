@@ -22,10 +22,6 @@ public class GameSolution {
         this.moves.add(move);
     }
   
-  public void insertMove(IGameMove move){
-    this.moves.add(0, move);
-  }
-  
   public ArrayList<IGameMove> getMoves(){
     return this.moves;
   }
