@@ -370,7 +370,9 @@ public class GridGameScreen extends GameScreen {
         renderManager.setColor(textColorNormal);
         renderManager.setTextSize(lineHeight / 2);
         int levelNamePos =  boardHeight + (int) (lineHeight * 3.5f);
+        Boolean isLevelGame = false;
         if (mapPath != null && mapPath.startsWith("Maps/")) {
+            isLevelGame = true;
             // Level number underneath the next button
             renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 165), levelNamePos, "Level " + levelNum);
         } else {
@@ -1072,32 +1074,43 @@ public class GridGameScreen extends GameScreen {
                 return;
             }
 
+            Boolean isLevelGame = false;
+            if (mapPath != null && mapPath.startsWith("Maps/")) {
+                isLevelGame = true;
+            }
             if (numSolutionClicks >= showSolutionAtHint) {
-                try {
-                    GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
-                    if (solution != null) {
-                        showSolution(solution);
-                        if (NumDifferentSolutionsFound > 1) {
-                            // if solution is shown and there are more than 1 solutions found:
-                            if (numDifferentSolutionClicks >= NumDifferentSolutionsFound - 1) {
-                                numDifferentSolutionClicks = 0;
-                            } else {
-                                numDifferentSolutionClicks++;
+                // if levelgame, don't show the solution
+                if (!isLevelGame) {
+                    try {
+                        GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
+                        if (solution != null) {
+                            showSolution(solution);
+                            if (NumDifferentSolutionsFound > 1) {
+                                // if solution is shown and there are more than 1 solutions found:
+                                if (numDifferentSolutionClicks >= NumDifferentSolutionsFound - 1) {
+                                    numDifferentSolutionClicks = 0;
+                                } else {
+                                    numDifferentSolutionClicks++;
+                                }
+                                gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
                             }
-                            gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
                         }
+                    } catch (Exception e) {
+                        // Reset state if something goes wrong
+                        numSolutionClicks = 0;
+                        numDifferentSolutionClicks = 0;
                     }
-                } catch (Exception e) {
-                    // Reset state if something goes wrong
-                    numSolutionClicks = 0;
-                    numDifferentSolutionClicks = 0;
                 }
             } else {
                 numSolutionClicks++;
                 if (numSolutionClicks < showSolutionAtHint) {
                     gameManager.requestToast("Press again to see the next hint.", false);
                 } else {
-                    gameManager.requestToast("Press again to see the solution.", false);
+                    if (!isLevelGame) {
+                        gameManager.requestToast("Press again to see the solution.", false);
+                    }else{
+                        gameManager.requestToast("In Level games you have to find the solution.", false);
+                    }
                 }
             }
         }
