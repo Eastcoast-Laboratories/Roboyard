@@ -35,7 +35,7 @@ public class MainActivity extends Activity
     
     // Minimum and maximum board sizes
     public static final int MIN_BOARD_SIZE = 12; // solver doesn't work below this
-    public static final int MAX_BOARD_SIZE = 16; // solver doesn't work above this
+    public static final int MAX_BOARD_SIZE = 22; // solver not tested above this
     
     // Current board size - can be changed at runtime
     public static int boardSizeX = DEFAULT_BOARD_SIZE_X;
