@@ -1,7 +1,6 @@
 package roboyard.eclabs;
 
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +16,7 @@ public class LevelChoiceGameScreen extends GameScreen {
     private int leftScreen = -1;
     private int rightScreen = -1;
     private int totalStars = 0;
-
+    boolean LevelCompleteToastShown = false;
     private GameButton nextButton;
 
     public static GameButtonGotoLevelGame getLastButtonUsed() {
@@ -375,15 +374,25 @@ public class LevelChoiceGameScreen extends GameScreen {
         // show number of total stars in the level selection screen at the top right:
         renderManager.setColor(Color.YELLOW);
         renderManager.setTextSize((int)(0.5*ts));
-        renderManager.drawText((int)((gameManager.getScreenWidth() - 255*ratioW)), (int)(88*ratioH), totalStars + "/" + (3*cols*rows));
+        int of = (cols * rows); // one star for each level
+
+        if(totalStars >= of && totalStars < of + 3 && LevelCompleteToastShown == false) {
+            gameManager.requestToast("Congratulations, you have collected enough stars to unlock the next level", true);
+            LevelCompleteToastShown = true;
+        }
+        if(totalStars>of) {
+            of=of*3; // three stars on each level
+        }
+        int marginRight = 30;
+        renderManager.drawText((int)((gameManager.getScreenWidth() - (166 + marginRight) * ratioW)), (int)(55*ratioH), totalStars + "/" + of);
         // draw a star
-        int starSize = 50;
-        int starX = (int)((gameManager.getScreenWidth() - 99*ratioW));
-        int starY = (int)(55*ratioH);
+        int starSize = (int) (50*ratioH);
+        int starX = (int)((gameManager.getScreenWidth() - (222 + marginRight) * ratioW));
+        int starY = (int)(11*ratioH);
         renderManager.drawImage(starX, starY, starX + starSize, starY + starSize, R.drawable.star);
 
         // Enable/disable forward button based on total stars
-        if (totalStars <= 35) {
+        if (totalStars < 35) {
             nextButton.setEnabled(false);
         } else {
             nextButton.setEnabled(true);
