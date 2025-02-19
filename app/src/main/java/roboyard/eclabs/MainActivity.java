@@ -40,6 +40,7 @@ public class MainActivity extends Activity
     // Current board size - can be changed at runtime
     public static int boardSizeX = DEFAULT_BOARD_SIZE_X;
     public static int boardSizeY = DEFAULT_BOARD_SIZE_Y;
+    public static int numRobots = 4;
 
     public void init() {
         Display display = getWindowManager().getDefaultDisplay();

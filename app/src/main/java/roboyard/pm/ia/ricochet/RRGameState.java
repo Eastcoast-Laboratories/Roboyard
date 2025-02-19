@@ -36,79 +36,9 @@ public class RRGameState extends AGameState {
     this.mainPieces = mainPieces;
     this.secondaryPieces = secondaryPieces;
   }
-  
-  @Override
-  public ArrayList<AGameState> computeDerivedStates(AWorld world) {
-    RRWorld w = ((RRWorld)world);
-    for(RRPiece piece : this.allPieces){
-      w.putPiece(piece, true);
-    }
-    RRGameState ns;
-    for(int i=0; i<this.mainPieces.length; i++){
-      //UP
-      ns = new RRGameState(this, new RRGameMove(this.mainPieces[i], ERRGameMove.UP));
-      w.doMove(ns.mainPieces[i], ns, ERRGameMove.UP);
-      this.derivedStates.add(ns);
-      //DOWN
-      ns = new RRGameState(this, new RRGameMove(this.mainPieces[i], ERRGameMove.DOWN));
-      w.doMove(ns.mainPieces[i], ns, ERRGameMove.DOWN);
-      this.derivedStates.add(ns);
-      //LEFT
-      ns = new RRGameState(this, new RRGameMove(this.mainPieces[i], ERRGameMove.LEFT));
-      w.doMove(ns.mainPieces[i], ns, ERRGameMove.LEFT);
-      this.derivedStates.add(ns);
-      //RIGHT
-      ns = new RRGameState(this, new RRGameMove(this.mainPieces[i], ERRGameMove.RIGHT));
-      w.doMove(ns.mainPieces[i], ns, ERRGameMove.RIGHT);
-      this.derivedStates.add(ns);
-    }
-    
-    for(int i=0; i<this.secondaryPieces.length; i++){
-      //UP
-      ns = new RRGameState(this, new RRGameMove(this.secondaryPieces[i], ERRGameMove.UP));
-      w.doMove(ns.secondaryPieces[i], ns, ERRGameMove.UP);
-      this.derivedStates.add(ns);
-      //DOWN
-      ns = new RRGameState(this, new RRGameMove(this.secondaryPieces[i], ERRGameMove.DOWN));
-      w.doMove(ns.secondaryPieces[i], ns, ERRGameMove.DOWN);
-      this.derivedStates.add(ns);
-      //LEFT
-      ns = new RRGameState(this, new RRGameMove(this.secondaryPieces[i], ERRGameMove.LEFT));
-      w.doMove(ns.secondaryPieces[i], ns, ERRGameMove.LEFT);
-      this.derivedStates.add(ns);
-      //RIGHT
-      ns = new RRGameState(this, new RRGameMove(this.secondaryPieces[i], ERRGameMove.RIGHT));
-      w.doMove(ns.secondaryPieces[i], ns, ERRGameMove.RIGHT);
-      this.derivedStates.add(ns);
-    }
-    for(RRPiece piece : this.allPieces){
-      w.putPiece(piece, false);
-    }
-    return this.derivedStates;
-  }
-  
-  @Override
-  public long computeHash(AWorld world){
-    long ret = 0L;
-    Arrays.sort(this.mainPieces);
-    for(int i=0; i<this.mainPieces.length; i++){
-      ret |= ((long)(mainPieces[i].getX())) << (8*i);
-      ret |= ((long)(mainPieces[i].getY())) << (4 + 8*i);
-    }
-    Arrays.sort(this.secondaryPieces);
-    for(int i=0; i<this.secondaryPieces.length; i++){
-      ret |= ((long)(secondaryPieces[i].getX())) << (32 + 8*i);
-      ret |= ((long)(secondaryPieces[i].getY())) << (36 + 8*i);
-    }
-    return ret;
-  }
-  
+
   public ArrayList<RRPiece> getPieces(){
     return this.allPieces;
-  }
-  
-  public RRPiece[] getMainPieces(){
-    return this.mainPieces;
   }
   
   @Override

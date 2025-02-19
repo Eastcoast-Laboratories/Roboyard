@@ -135,6 +135,7 @@ public class RRGetMap {
      */
     public static Board createDDWorld(ArrayList<GridElement> gridElements, RRPiece[] pieces) {
 
+        // this must stay at 16, 16, otherwise the solver finds solutions, that are none (tested with 12x14 and 18x18 and MainActvity.boardSizeX, MainActvity.boardSizeY, MainActvity.numRobots)
         Board board = Board.createBoardFreestyle(null, 16, 16, 4);
         board.removeGoals();
 
