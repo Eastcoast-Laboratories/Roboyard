@@ -5,6 +5,8 @@ import android.graphics.Paint;
 
 import static android.os.SystemClock.sleep;
 
+import timber.log.Timber;
+
 /**
  * Created by Pierre on 04/02/2015.
  */
@@ -16,10 +18,7 @@ public class SettingsGameScreen extends GameScreen {
     private GameButtonGeneral buttonImpossible = null;
     private GameButtonGeneral buttonSoundOff = null;
     private GameButtonGeneral buttonSoundOn = null;
-    private GameButtonGeneral buttonBoard1 = null;
-    private GameButtonGeneral buttonBoard2 = null;
-    private GameButtonGeneral buttonBoard3 = null;
-    private GameButtonGeneral buttonBoard4 = null;
+    private GameDropdown boardSizeDropdown;
     private int hs2;
     private int ws2;
     private String levelDifficulty="Beginner";
@@ -34,11 +33,14 @@ public class SettingsGameScreen extends GameScreen {
 
     @Override
     public void create() {
+        // Set screen textSize in draw() at the end of the method
         ws2 = this.gameManager.getScreenWidth()/2;
         hs2 = this.gameManager.getScreenHeight()/2;
 
         float ratioW = ((float)gameManager.getScreenWidth()) /((float)1080);
         float ratioH = ((float)gameManager.getScreenHeight()) /((float)1920);
+
+        float displayRatio = gameManager.getScreenHeight() / gameManager.getScreenWidth();
 
         // set levelDifficulty
         int posY = 340;
@@ -53,31 +55,54 @@ public class SettingsGameScreen extends GameScreen {
 
         buttonBeginner = new GameButtonGeneral(x1, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setBeginnner());
         buttonAdvanced = new GameButtonGeneral(x2, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setAdvanced());
-        buttonInsane = new GameButtonGeneral(x3, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setInsane());
-        buttonImpossible = new GameButtonGeneral(x4, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setImpossible());
+
+        posY += 270;
+
+        buttonInsane = new GameButtonGeneral(x1, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setInsane());
+        buttonImpossible = new GameButtonGeneral(x2, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setImpossible());
 
         // set Board Size
-        posY = 1200;
-        buttonBoard1 = new GameButtonGeneral(x1, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setBoardSize(12, 14));
-        buttonBoard2 = new GameButtonGeneral(x2, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setBoardSize(14, 14));
-        buttonBoard3 = new GameButtonGeneral(x3, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setBoardSize(14, 16));
-        buttonBoard4 = new GameButtonGeneral(x4, (int)(posY*ratioH), buttonWidth, buttonHeight, R.drawable.bt_up, R.drawable.bt_down, new setBoardSize(16, 16));
+        posY = 44;
+        Timber.d("ratioW: %f, ratioH: %f, displayRatio: %f", ratioW, ratioH, displayRatio);
+        boardSizeDropdown = new GameDropdown(x3, (int)(posY*ratioH), buttonWidth * 2, buttonHeight);
+        boardSizeDropdown.addOption("12x12", new setBoardSize(12, 12));
+        boardSizeDropdown.addOption("12x14", new setBoardSize(12, 14));
+        if(displayRatio > 1.8) {
+            boardSizeDropdown.addOption("12x16", new setBoardSize(12, 16));
+            boardSizeDropdown.addOption("12x18", new setBoardSize(12, 18));
+        }
+        boardSizeDropdown.addOption("14x14", new setBoardSize(14, 14));
+        boardSizeDropdown.addOption("14x16", new setBoardSize(14, 16));
+        if(displayRatio > 1.8) {
+            boardSizeDropdown.addOption("14x18", new setBoardSize(14, 18));
+        }
+        boardSizeDropdown.addOption("16x16", new setBoardSize(16, 16));
+        boardSizeDropdown.addOption("16x18", new setBoardSize(16, 18));
+        boardSizeDropdown.addOption("16x20", new setBoardSize(16, 20));
+        if(displayRatio > 1.8) {
+            boardSizeDropdown.addOption("16x22", new setBoardSize(16, 22));
+        }
+        boardSizeDropdown.addOption("18x18", new setBoardSize(18, 18));
+        boardSizeDropdown.addOption("18x20", new setBoardSize(18, 20));
+        boardSizeDropdown.addOption("18x22", new setBoardSize(18, 22));
+        this.instances.add(boardSizeDropdown);
 
         // icons from freeiconspng [1](https://www.freeiconspng.com/img/40963), [2](https://www.freeiconspng.com/img/40944)
         // Make sound buttons circular using the minimum of width/height ratio
         float buttonRatio = Math.min(ratioW, ratioH);
         int soundButtonSize = (int)(222 * buttonRatio);
+        posY=1080;
         buttonSoundOn = new GameButtonGeneral(
-            (int)(240*ratioW), 
-            (int)(780*ratioH), 
+            (int)(40*ratioW),
+            (int)(posY*ratioH),
             soundButtonSize, 
             soundButtonSize, 
             R.drawable.bt_sound_on_up, 
             R.drawable.bt_sound_on_down, 
             new setSoundon());
         buttonSoundOff = new GameButtonGeneral(
-            (int)(540*ratioW), 
-            (int)(780*ratioH), 
+            (int)(340*ratioW),
+            (int)(posY*ratioH),
             soundButtonSize, 
             soundButtonSize, 
             R.drawable.bt_sound_off_up, 
@@ -91,13 +116,9 @@ public class SettingsGameScreen extends GameScreen {
         this.instances.add(buttonImpossible);
         this.instances.add(buttonSoundOff);
         this.instances.add(buttonSoundOn);
-        this.instances.add(buttonBoard1);
-        this.instances.add(buttonBoard2);
-        this.instances.add(buttonBoard3);
-        this.instances.add(buttonBoard4);
 
         // Add Button back to main screen
-        this.instances.add(new GameButtonGoto(6*ws2/4-128, 9*hs2/5-128, (int)(222*ratioW), (int)(222*ratioW), R.drawable.bt_back_up, R.drawable.bt_back_down, 0));
+        this.instances.add(new GameButtonGoto(90, 9*hs2/5-128, (int)(222*ratioW), (int)(222*ratioW), R.drawable.bt_back_up, R.drawable.bt_back_down, 0));
 
     }
 
@@ -130,10 +151,20 @@ public class SettingsGameScreen extends GameScreen {
         int x3 = (int)(560*ratioW);  // Third column
         int x4 = (int)(820*ratioW);  // Fourth column
 
+        // Board Size
+        Paint paint = new Paint();
+        paint.setTextSize(textSize/2);
+        renderManager.setTextSize((int) (textSize/1.5));
+        paint.setTextSize(textSize/1.5f);
+        posY = 144;
+        String text = "      Board Size:";
+        float textWidth2 = paint.measureText(text);
+        renderManager.drawText((int)(x1 + buttonWidth - textWidth2/2), (int)(posY*ratioH), text);
+        
         // Difficulty
         // current level difficulty
         levelDifficulty=preferences.getPreferenceValue(gameManager.getActivity(), "difficulty");
-        posY = 140;
+        posY = 300;
         if(!levelDifficulty.equals("")){
             renderManager.drawText(marginL, (int)((posY)*ratioH), "Difficulty: " + levelDifficulty);
         }
@@ -141,64 +172,38 @@ public class SettingsGameScreen extends GameScreen {
         // difficulty text below Buttons (set in create() ):
         posY = 550;
         renderManager.setTextSize(textSize/2);
-        Paint paint = new Paint();
-        paint.setTextSize(textSize/2);
         
         // Center text under each button
-        String text = "Beginner";
-        float textWidth = paint.measureText(text);
+        text = "Beginner";
+        float textWidth = paint.measureText(text)-66;
         renderManager.drawText((int)(x1 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
         
         text = "Advanced";
-        textWidth = paint.measureText(text);
+        textWidth = paint.measureText(text)-55;
         renderManager.drawText((int)(x2 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
-        
-        text = "Insane";
-        textWidth = paint.measureText(text);
-        renderManager.drawText((int)(x3 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
-        
-        text = "Impossible";
-        textWidth = paint.measureText(text);
-        renderManager.drawText((int)(x4 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
 
-        // Board Size
-        renderManager.setTextSize((int) (textSize/1.5));
-        paint.setTextSize(textSize/1.5f);
-        String boardSize = MainActivity.getBoardWidth() + "x" + MainActivity.getBoardHeight();
-        posY = 1160;
-        renderManager.drawText(marginL, (int)((posY)*ratioH), "Board Size: " + boardSize);
-        
-        // Board size text below buttons
-        posY = 1370;
-        renderManager.setTextSize(textSize/2);
-        paint.setTextSize(textSize/2);
-        
-        text = "12x14";
-        textWidth = paint.measureText(text);
+        posY += 277;
+
+        text = "Insane";
+        textWidth = paint.measureText(text)-33;
         renderManager.drawText((int)(x1 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
         
-        text = "14x14";
-        textWidth = paint.measureText(text);
+        text = "Impossible";
+        textWidth = paint.measureText(text)-77;
         renderManager.drawText((int)(x2 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
-        
-        text = "14x16";
-        textWidth = paint.measureText(text);
-        renderManager.drawText((int)(x3 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
-        
-        text = "16x16";
-        textWidth = paint.measureText(text);
-        renderManager.drawText((int)(x4 + buttonWidth/2 - textWidth/2), (int)(posY*ratioH), text);
 
         // Sound Settings
-        posY = 755;
-        renderManager.setTextSize(textSize);
+        posY = 1055;
+        renderManager.setTextSize((int) (textSize*0.8));
         String soundSetting=preferences.getPreferenceValue(gameManager.getActivity(), "sound");
         if(soundSetting.equals("off") == false) {
             soundSetting = "Sound: On";
         } else {
             soundSetting = "Sound: Off";
         }
-        renderManager.drawText((int)(290*ratioW), (int)((posY)*ratioH), soundSetting);
+        renderManager.drawText((int)(90*ratioW), (int)((posY)*ratioH), soundSetting);
+
+        renderManager.setTextSize(textSize/2); // this will be the text-size for the dropdown in create()
 
         super.draw(renderManager);
     }
@@ -263,7 +268,7 @@ public class SettingsGameScreen extends GameScreen {
         }
     }
 
-    private class setBoardSize implements IExecutor {
+    private class setBoardSize implements Runnable {
         private final int width;
         private final int height;
 
@@ -272,10 +277,14 @@ public class SettingsGameScreen extends GameScreen {
             this.height = height;
         }
 
-        public void execute() {
+        @Override
+        public void run() {
             MainActivity activity = gameManager.getActivity();
             activity.setBoardSize(activity, width, height);
+            preferences.setPreferences(gameManager.getActivity(), "width", String.valueOf(width));
+            preferences.setPreferences(gameManager.getActivity(), "height", String.valueOf(height));
             MapGenerator.generateNewMapEachTime = true;
+            gameManager.getInputManager().resetEvents();
         }
     }
 
