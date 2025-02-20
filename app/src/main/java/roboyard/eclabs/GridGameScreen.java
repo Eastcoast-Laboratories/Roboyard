@@ -543,6 +543,7 @@ public class GridGameScreen extends GameScreen {
         this.mapPath = "";  //La carte étant générée, elle n'a pas de chemin d'accès
         this.autoSaved = false;  // Reset autosave flag for new random game
         this.isGameWon = false;  // Reset game won flag
+        this.isRandomGame = true;  // Set random game flag
         numSolutionClicks = 0;
         
         try {
