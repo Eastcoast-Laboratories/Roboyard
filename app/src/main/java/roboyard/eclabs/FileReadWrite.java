@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import timber.log.Timber;
+
 /**
  * Created by Alain on 21/01/2015.
  */
@@ -39,7 +41,7 @@ public class FileReadWrite {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println("Exception readAssets");
+            Timber.d("Exception readAssets");
             return null;
 
         }
@@ -60,13 +62,13 @@ public class FileReadWrite {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_APPEND);
             fOut.write(content.getBytes());
         } catch (Exception e) {
-            System.out.println("Exception in appendPrivateData: " + e.getMessage());
+            Timber.d("Exception in appendPrivateData: " + e.getMessage());
         } finally {
             if (fOut != null) {
                 try {
                     fOut.close();
                 } catch (Exception e) {
-                    System.out.println("Error closing stream: " + e.getMessage());
+                    Timber.d("Error closing stream: " + e.getMessage());
                 }
             }
         }
@@ -84,13 +86,13 @@ public class FileReadWrite {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
             fOut.write(content.getBytes());
         } catch (Exception e) {
-            System.out.println("Exception in writePrivateData: " + e.getMessage());
+            Timber.d("Exception in writePrivateData: " + e.getMessage());
         } finally {
             if (fOut != null) {
                 try {
                     fOut.close();
                 } catch (Exception e) {
-                    System.out.println("Error closing stream: " + e.getMessage());
+                    Timber.d("Error closing stream: " + e.getMessage());
                 }
             }
         }
@@ -103,13 +105,13 @@ public class FileReadWrite {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
             fOut.write(new byte[0]);
         } catch (Exception e) {
-            System.out.println("Exception in clearPrivateData: " + e.getMessage());
+            Timber.d("Exception in clearPrivateData: " + e.getMessage());
         } finally {
             if (fOut != null) {
                 try {
                     fOut.close();
                 } catch (Exception e) {
-                    System.out.println("Error closing stream: " + e.getMessage());
+                    Timber.d("Error closing stream: " + e.getMessage());
                 }
             }
         }
@@ -132,18 +134,18 @@ public class FileReadWrite {
                 buffer.append((char)c);
             }
         } catch (Exception e) {
-            System.out.println("Exception readPrivateData: " + e.toString());
+            Timber.d("Exception readPrivateData: " + e.toString());
             return "";
         } finally {
             if (fin != null) {
                 try {
                     fin.close();
                 } catch (Exception e) {
-                    System.out.println("Error closing stream: " + e.getMessage());
+                    Timber.d("Error closing stream: " + e.getMessage());
                 }
             }
         }
-        // System.out.println("Map loaded: " + buffer.toString());
+        // Timber.d("Map loaded: " + buffer.toString());
         return buffer.toString();
     }
 }

@@ -1,6 +1,7 @@
 package roboyard.eclabs;
 
 import android.app.Activity;
+import timber.log.Timber;
 
 import java.util.HashMap;
 
@@ -77,7 +78,7 @@ public class SaveManager {
                 + moves + ":"
                 + squares + ":" +
                 + solveTimeSeconds + "\n");
-        System.out.println("Map completion data saved:" + mapPath + ":" + minMoves + ":" + moves + ":" + squares + ":" + solveTimeSeconds);
+        Timber.d("Map completion data saved:" + mapPath + ":" + minMoves + ":" + moves + ":" + squares + ":" + solveTimeSeconds);
     }
 
     /**
@@ -117,7 +118,7 @@ public class SaveManager {
                     mapData.put("moves", Integer.parseInt(parts[2]));
                     mapData.put("squares", Integer.parseInt(parts[3]));
                     mapData.put("time", Integer.parseInt(parts[4]));
-                    // System.out.println("DEBUG Map read: " + mapPath + ":" + mapData.get("minMoves") + ":" + mapData.get("moves") + ":" + mapData.get("squares") + ":" + mapData.get("time"));
+                    // Timber.d("DEBUG Map read: " + mapPath + ":" + mapData.get("minMoves") + ":" + mapData.get("moves") + ":" + mapData.get("squares") + ":" + mapData.get("time"));
                     return mapData;
                 }
             }

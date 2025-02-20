@@ -86,7 +86,7 @@ public class MainActivity extends Activity
         ComponentName componentName = intent.getComponent();
         Intent mainIntent = Intent.makeRestartActivityTask(componentName);
         context.startActivity(mainIntent);
-        System.out.println("The app restarts by trigger");
+        Timber.d("The app restarts by trigger");
         Runtime.getRuntime().exit(0);
     }
 

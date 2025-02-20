@@ -2,6 +2,8 @@ package roboyard.eclabs;
 
 import android.graphics.Color;
 
+import timber.log.Timber;
+
 /**
  * this class represents a game piece
  */
@@ -166,7 +168,7 @@ public class GamePiece implements IGameObject {
         //if the piece is not in motion, ...
         if((this.x == this.xObjective) && (this.y == this.yObjective) && (deltaX == 0) && (deltaY == 0)){
 
-//            System.out.println(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
+//            Timber.d(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
             if(inMovement) {
                 ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
                 if(testIfWon) {
@@ -211,7 +213,7 @@ public class GamePiece implements IGameObject {
                 // before move
                 this.curMoveSquares=Math.abs(this.xObjective-this.x)+Math.abs(this.yObjective-this.y);
                 //this.numSquaresMoved+=this.curMoveSquares;
-                System.out.println(" start move with "+this.curMoveSquares+" squares");
+                Timber.d(" start move with "+this.curMoveSquares+" squares");
                 ((GridGameScreen)(gameManager.getCurrentScreen())).setCurrentMovedSquares(this.curMoveSquares);
             }
             inMovement = true;
