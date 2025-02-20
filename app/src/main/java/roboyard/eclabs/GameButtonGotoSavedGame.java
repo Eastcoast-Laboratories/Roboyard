@@ -66,15 +66,18 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             }
         } else {
             // Screen to select a savegame
-            super.onClick(gameManager);
-            gameScreen.setSavedGame(mapPath);
-            // disable the savegame button in the gamescreen
-            gameScreen.buttonSaveSetEnabled(false);
+            SaveManager saver = new SaveManager(gameManager.getActivity());
+            if (saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
+                super.onClick(gameManager);
+                gameScreen.setSavedGame(mapPath);
+                // disable the savegame button in the gamescreen
+                gameScreen.buttonSaveSetEnabled(false);
+            }
         }
     }
 
     /**
-     * Adds the saved game to the list of maps saved only if not already in it
+     * Adds the saved game to the list of maps saved.
      * @param gameManager The GameManager instance.
      */
     public void addMapsSaved(GameManager gameManager) {

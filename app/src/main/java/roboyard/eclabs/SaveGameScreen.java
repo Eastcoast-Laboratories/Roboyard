@@ -247,8 +247,8 @@ public class SaveGameScreen extends GameScreen {
                 if (mapUniqueString[i].length() > 0){
                     // unicode string with 7 filled squares
                     String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
-                    for (int j = 0; j < 14; j++) {
-                        renderManager.drawText(buttonPositionsX[i] - moveleft, buttonPositionsY[i] - 5 + j * 15, bar);
+                    for (int j = 0; j < 8; j++) {
+                        renderManager.drawText(buttonPositionsX[i] - moveleft, (int)(buttonPositionsY[i] + (-11 + j * 22)*ratioH), bar);
                     }
 
                 }
