@@ -38,14 +38,14 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         }
         if (isSavemode) {
             // Screen to save or overwrite a savegame
-            // System.out.println("DEBUG: Saving game to slot: " + mapPath);
+            // Timber.d(" Saving game to slot: " + mapPath);
             ArrayList<GridElement> gridElements = gameScreen.getGridElements();
             String saveData = MapObjects.createStringFromList(gridElements, false);
             
             try {
                 // Write save data directly (will overwrite if file exists)
                 FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData);
-                // System.out.println("DEBUG: wrote " + saveData.length() + " bytes to " + mapPath);
+                // Timber.d(" wrote " + saveData.length() + " bytes to " + mapPath);
                 
                 // Add to saved games list if needed
                 addMapsSaved(gameManager);
@@ -55,14 +55,14 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 if (saveGameScreen != null) {
                     SaveGameScreen.clearCachesForMap(mapPath);
                     saveGameScreen.createButtons();
-                    // System.out.println("DEBUG: Refreshed save game screen buttons");
+                    // Timber.d(" Refreshed save game screen buttons");
                 }
                 
                 // Keep track of the game screen and explicitly set it as previous
                 gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
                 gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
             } catch (Exception e) {
-                // System.out.println("DEBUG: Error saving game: " + e.getMessage());
+                // Timber.d(" Error saving game: " + e.getMessage());
             }
         } else {
             // Screen to select a savegame

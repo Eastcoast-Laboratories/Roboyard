@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import timber.log.Timber;
+
 /**
  * Screen for saving and loading games (screen 9)
  */
@@ -83,7 +85,7 @@ public class SaveGameScreen extends GameScreen {
         backButtonX = (int) (814 * ratioW);
         backButtonY = (int) (1650 * ratioH);
 
-        System.out.println("DEBUG: loading saved maps");
+        Timber.d(" loading saved maps");
         
         ArrayList<GridElement> gridElements = new ArrayList<>(100);  // Pre-allocate with reasonable size
         
@@ -123,7 +125,7 @@ public class SaveGameScreen extends GameScreen {
                 mapUniqueColor[i] = "#000000";
             }
         }
-        System.out.println("DEBUG: finished loading saved maps");
+        Timber.d(" finished loading saved maps");
     }
 
     public static void clearCachesForMap(String mapPath) {

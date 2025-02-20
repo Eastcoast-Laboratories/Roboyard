@@ -16,6 +16,7 @@ import roboyard.eclabs.solver.SolverDD;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
+import timber.log.Timber;
 
 // import static android.content.Context.MODE_PRIVATE;
 
@@ -341,27 +342,27 @@ public class GridGameScreen extends GameScreen {
         renderManager.drawText(10, textPosYTime, "Time: " + timeCpt / 60 + ":" + secondsS);
 
         if (timeCpt >= 40 && autoSaved == false && mustStartNext == false && mapPath != null && !mapPath.isEmpty()) {
-            System.out.println("DEBUG: Starting autosave. mapPath=" + mapPath + ", timeCpt=" + timeCpt + ", autoSaved=" + autoSaved + ", mustStartNext=" + mustStartNext);
+            Timber.d("Starting autosave. mapPath=%s, timeCpt=%d, autoSaved=%b, mustStartNext=%b", mapPath, timeCpt, autoSaved, mustStartNext);
             // save autosave in slot 0
             ArrayList<GridElement> gridElements = getGridElements();
             String autosaveMapPath = SaveGameScreen.getMapPath(0);
-            System.out.println("DEBUG: Autosave path=" + autosaveMapPath + ", gridElements size=" + gridElements.size());
+            Timber.d("Autosave path=%s, gridElements size=%d", autosaveMapPath, gridElements.size());
             try {
                 FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
                 String saveData = MapObjects.createStringFromList(gridElements, false);
-                System.out.println("DEBUG: Save data length=" + saveData.length());
+                Timber.d("Save data length=%d", saveData.length());
                 FileReadWrite.appendPrivateData(gameManager.getActivity(), autosaveMapPath, saveData);
                 // Also add to mapsSaved.txt if not already there
                 SaveManager saver = new SaveManager(gameManager.getActivity());
                 if (!saver.getMapsStateSaved(autosaveMapPath, "mapsSaved.txt")) {
-                    System.out.println("DEBUG: Adding autosave to mapsSaved.txt");
+                    Timber.d("Adding autosave to mapsSaved.txt");
                     FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", autosaveMapPath + "\n");
                 }
                 gameManager.requestToast("Autosaving...", false);
                 autoSaved = true;
-                System.out.println("DEBUG: Autosave completed successfully");
+                Timber.d("Autosave completed successfully");
             } catch (Exception e) {
-                System.out.println("DEBUG: Error during autosave: " + e.getMessage());
+                Timber.d("Error during autosave: %s", e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -493,52 +494,52 @@ public class GridGameScreen extends GameScreen {
 
     public void setCurrentMovedSquares(int movedSquares){
         currentMovedSquares=movedSquares;
-        System.out.println("store "+currentMovedSquares+" moved squares in last Move");
+        Timber.d("store %d moved squares in last Move", currentMovedSquares);
         allMoves.get(allMoves.size()-1).setSquaresMoved(currentMovedSquares);
     }
 
     public void setSavedGame(String mapPath) {
-        System.out.println("DEBUG: Loading saved game from " + mapPath);
+        Timber.d("Loading saved game from %s", mapPath);
         this.mapPath = mapPath;  // Keep the mapPath to identify it as a saved game
         this.isGameWon = false;  // Reset game won flag
         this.isRandomGame = false;  // Loading a saved game is not a random game
         try {
             String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
             gridElements = MapObjects.extractDataFromString(saveData);
-            System.out.println("DEBUG: Extracted gridElements size=" + gridElements.size());
+            Timber.d("Extracted gridElements size=%d", gridElements.size());
             GridGameScreen.setMap(gridElements);
             createGrid();
             buttonSaveSetEnabled(false);  // Disable save button for saved games
-            System.out.println("DEBUG: Saved game loaded successfully, save button disabled");
+            Timber.d("Saved game loaded successfully, save button disabled");
         } catch (Exception e) {
-            System.out.println("DEBUG: Error loading saved game: " + e.getMessage());
+            Timber.d("Error loading saved game: %s", e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void setLevelGame(String mapPath)
     {
-        System.out.println("DEBUG: Loading level game from " + mapPath);
+        Timber.d("Loading level game from %s", mapPath);
         this.mapPath = mapPath;
         this.isGameWon = false;  // Reset game won flag
         try {
             String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
-            System.out.println("DEBUG: Loaded level data length=" + saveData.length());
+            Timber.d("Loaded level data length=%d", saveData.length());
             gridElements = MapObjects.extractDataFromString(saveData);
-            System.out.println("DEBUG: Extracted gridElements size=" + gridElements.size());
+            Timber.d("Extracted gridElements size=%d", gridElements.size());
             GridGameScreen.setMap(gridElements);
             numSolutionClicks = 0;
             createGrid();
             buttonSaveSetEnabled(false);  // Disable save button for level games
-            System.out.println("DEBUG: Level game loaded successfully, save button disabled");
+            Timber.d("Level game loaded successfully, save button disabled");
         } catch (Exception e) {
-            System.out.println("DEBUG: Error loading level game: " + e.getMessage());
+            Timber.d("Error loading level game: %s", e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void setRandomGame() {
-        System.out.println("DEBUG: Starting new random game");
+        Timber.d("Starting new random game");
         this.mapPath = "";  //La carte étant générée, elle n'a pas de chemin d'accès
         this.autoSaved = false;  // Reset autosave flag for new random game
         this.isGameWon = false;  // Reset game won flag
@@ -553,15 +554,15 @@ public class GridGameScreen extends GameScreen {
             
             MapGenerator generatedMap = new MapGenerator();
             gridElements = generatedMap.getGeneratedGameMap();
-            System.out.println("DEBUG: Generated gridElements size=" + gridElements.size());
+            Timber.d("Generated gridElements size=%d", gridElements.size());
             
             createGrid();
             createRobots();  // Make sure robots are created immediately
             
             buttonSaveSetEnabled(true);  // Enable save button only for random games
-            System.out.println("DEBUG: Random game created successfully, save button enabled");
+            Timber.d("Random game created successfully, save button enabled");
         } catch (Exception e) {
-            System.out.println("DEBUG: Error creating random game: " + e.getMessage());
+            Timber.d("Error creating random game: %s", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -944,7 +945,7 @@ public class GridGameScreen extends GameScreen {
 
     private void updatePlayedMaps()
     {
-        // System.out.println("DEBUG: updatePlayedMaps: " + mapPath);
+        // Timber.d(" updatePlayedMaps: " + mapPath);
         if(mapPath.length() > 0) {
             addMapsPlayed();
             SparseArray<GameScreen> screens = gameManager.getScreens();
@@ -965,7 +966,7 @@ public class GridGameScreen extends GameScreen {
      */
     public void addMapsPlayed()
     {
-        // System.out.println("DEBUG: addMapsPlayed: " + mapPath);
+        // Timber.d(" addMapsPlayed: " + mapPath);
         if(mapPath.length() > 0)
         {
             SaveManager saver = new SaveManager(gameManager.getActivity());
@@ -1021,7 +1022,7 @@ public class GridGameScreen extends GameScreen {
             createGrid();
             createRobots();
             
-            System.out.println("DEBUG: Game restarted");
+            Timber.d("Game restarted");
         }
     }
 
@@ -1179,9 +1180,9 @@ public class GridGameScreen extends GameScreen {
                 int last = allMoves.size()-1;
                 Move lastMove = allMoves.get(last);
                 numSquares -= lastMove.getSquaresMoved();
-                System.out.println("substract "+lastMove.getSquaresMoved());
+                Timber.d("substract %d", lastMove.getSquaresMoved());
                 lastMove.goBack();
-                System.out.println("remove move nr. "+(allMoves.size()-1)+" "+lastMove._x+"/"+lastMove._y);
+                Timber.d("remove move nr. %d %d/%d", (allMoves.size()-1), lastMove._x, lastMove._y);
                 allMoves.remove(last);
                 nbCoups--;
             }

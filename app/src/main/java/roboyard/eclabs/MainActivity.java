@@ -13,14 +13,18 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.TextureView;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import roboyard.SoundService;
+import timber.log.Timber;
 
 public class MainActivity extends Activity
         implements TextureView.SurfaceTextureListener {
+    private static final boolean DEBUG = true;  // Set this to false for release builds
     private TextureView mTextureView;
     private MainActivity.RenderingThread mThread;
     private int sWidth, sHeight;
@@ -205,6 +209,10 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
 
         this.init();
 
