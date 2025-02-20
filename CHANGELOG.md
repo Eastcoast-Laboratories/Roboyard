@@ -1,6 +1,22 @@
 CHANGELOG
 =========
 
+### Version 18.2
+
+### New Features
+- Board size can now be selected from a dropdown with more options:
+ - Added board sizes: 12x12, 12x14, 12x16, 12x18, 14x14, 14x16, 14x18, 16x16, 16x18, 16x20, 16x22, 18x18, 18x20 and 18x22.
+- Level games now require finding the solution.
+
+### Improvements
+- Corrected star display at the top of the level screen.
+
+### Bug Fixes
+- Fixed an issue where the first savegame click led to unintended loading.
+- Fixed one-move solution bug in level 36.
+- Fixed support for larger maps beyond 16x16.
+
+
 ### Version 18.1
 
 - Gameplay Improvements
