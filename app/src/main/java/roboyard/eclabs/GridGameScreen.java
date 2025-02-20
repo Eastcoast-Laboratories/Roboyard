@@ -654,34 +654,18 @@ public class GridGameScreen extends GameScreen {
             gridBackground.setBounds(0, 0, totalWidth, totalHeight);
             gridBackground.draw(canvasGrid);
         } else {
-            // Get the 16x16 grid as source
-            Drawable fullGrid = drawables.get("grid");
-
-            // Calculate size of one grid cell in the source image
-            int sourceTotalWidth = fullGrid.getIntrinsicWidth();
-            int sourceTotalHeight = fullGrid.getIntrinsicHeight();
-            float sourceCellWidth = sourceTotalWidth / 16f;  // 16x16 grid
-            float sourceCellHeight = sourceTotalHeight / 16f;
-
-            // Calculate tile size based on board dimensions
-            // We want the tile to be roughly half of the board size
-            float tileSize = 91.5f / MainActivity.getBoardWidth();
-            // Round to nearest 0.5 to ensure clean tiling
-            tileSize = tileSize * 2 / 2f;
-
-            int tileWidth = (int)(Math.round(sourceCellWidth * tileSize));
-            int tileHeight = (int)(Math.round(sourceCellHeight * tileSize));
-
-            // Set bounds for the full grid to show only the corner we want
-            fullGrid.setBounds(0, 0, tileWidth, tileHeight);
-
-            // Tile the grid background with our corner pattern
-            for (int x = 0; x < MainActivity.getBoardWidth(); x += tileSize) {
-                for (int y = 0; y < MainActivity.getBoardHeight(); y += tileSize) {
-                    canvasGrid.save();
-                    canvasGrid.translate(x * gridSpace, y * gridSpace);
+            // all other boards loop the single grid tile, which is for one field
+            Drawable fullGrid = drawables.get("grid_tiles");
+            // Loop through board and draw grid tiles
+            for(int x = 0; x < MainActivity.getBoardWidth(); x++) {
+                for(int y = 0; y < MainActivity.getBoardHeight(); y++) {
+                    fullGrid.setBounds(
+                        (int)(x * gridSpace),
+                        (int)(y * gridSpace),
+                        (int)((x + 1) * gridSpace),
+                        (int)((y + 1) * gridSpace)
+                    );
                     fullGrid.draw(canvasGrid);
-                    canvasGrid.restore();
                 }
             }
         }
