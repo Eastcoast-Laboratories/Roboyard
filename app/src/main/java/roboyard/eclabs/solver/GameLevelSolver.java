@@ -7,6 +7,7 @@ import roboyard.pm.ia.GameSolution;
 import driftingdroids.model.Solution;
 import roboyard.eclabs.solver.SolverDD;
 import roboyard.eclabs.solver.SolverStatus;
+import timber.log.Timber;
 
 /**
  * GameLevelSolver - The main game solver with full solution tracking
@@ -76,7 +77,7 @@ public class GameLevelSolver {
                 mapContent.append(arg).append("\n");
             }
             int moves = solveLevelFromString(mapContent.toString());
-            System.out.println(moves); // Print number of moves, -1 if no solution
+            Timber.d(String.valueOf(moves)); // Print number of moves, -1 if no solution
         }
     }
 }

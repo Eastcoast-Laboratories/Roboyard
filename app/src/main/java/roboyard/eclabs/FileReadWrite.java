@@ -40,7 +40,7 @@ public class FileReadWrite {
             myReader.close();
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Timber.d(e.getMessage());
             Timber.d("Exception readAssets");
             return null;
 

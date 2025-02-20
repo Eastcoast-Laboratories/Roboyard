@@ -19,6 +19,7 @@ package driftingdroids.model;
 
 import java.util.Arrays;
 
+import timber.log.Timber;
 
 
 /**
@@ -64,14 +65,14 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
     public static KeyDepthMapTrieSpecial createInstance(final Board board, final boolean useMoreMemoryForSpeedup) {
         if (useMoreMemoryForSpeedup && (8 == board.sizeNumBits) && ((4 == board.getNumRobots()) || (5 == board.getNumRobots()))) {
             if (Solver.USE_SLOW_SEARCH_MORE_SOLUTIONS) {
-                System.out.println("UseSlowSearchMoreSolutions");
+                Timber.d("UseSlowSearchMoreSolutions");
                 return new KeyDepthMapTrieSpecial8BitEqual(board);
             } else {
                 return new KeyDepthMapTrieSpecial8Bit(board);
             }
         } else {
             if (Solver.USE_SLOW_SEARCH_MORE_SOLUTIONS) {
-                System.out.println("UseSlowSearchMoreSolutions");
+                Timber.d("UseSlowSearchMoreSolutions");
                 return new KeyDepthMapTrieSpecialEqual(board);
             } else {
                 return new KeyDepthMapTrieSpecial(board);

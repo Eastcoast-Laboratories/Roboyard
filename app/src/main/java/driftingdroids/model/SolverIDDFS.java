@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import timber.log.Timber;
 
 
 public class SolverIDDFS extends Solver {
@@ -80,11 +81,11 @@ public class SolverIDDFS extends Solver {
         final long startExecute = System.nanoTime();
         this.lastResultSolutions = new ArrayList<Solution>();
         
-        System.out.println("***** " + this.getClass().getSimpleName() + " *****");
-        System.out.println("options: " + this.getOptionsAsString());
+        Timber.d("***** " + this.getClass().getSimpleName() + " *****");
+        Timber.d("options: " + this.getOptionsAsString());
         
         if (null == this.board.getGoal()) {
-            System.out.println("no goal is set - nothing to solve!");
+            Timber.d("no goal is set - nothing to solve!");
         } else {
             this.states[0] = this.board.getRobotPositions().clone();
             swapGoalLast(this.states[0]);   //goal robot is always the last one.
@@ -92,10 +93,10 @@ public class SolverIDDFS extends Solver {
             this.precomputeMinimumMovesToGoal();
             this.knownStates = new KnownStates();
             
-            System.out.println("startState=" + this.stateString(this.states[0]));
-            System.out.println("solution01=" + this.isSolution01 + "  isSolution01NoSpeedup=" + this.isSolution01NoSpeedup);
-            System.out.println("goalWildcard=" + this.isBoardGoalWildcard);
-            System.out.println(this.knownStates.getInfo());
+            Timber.d("startState=" + this.stateString(this.states[0]));
+            Timber.d("solution01=" + this.isSolution01 + "  isSolution01NoSpeedup=" + this.isSolution01NoSpeedup);
+            Timber.d("goalWildcard=" + this.isBoardGoalWildcard);
+            Timber.d(this.knownStates.getInfo());
             
             this.iddfs();
             
@@ -145,7 +146,7 @@ public class SolverIDDFS extends Solver {
     private void iddfs() throws InterruptedException {
         final long nanoStart = System.nanoTime();
         final boolean doDfsFast = (false == this.isBoardGoalWildcard) && (false == this.isSolution01) && (true == this.optAllowRebounds);
-        System.out.println("doDfsFast=" + doDfsFast);
+        Timber.d("doDfsFast=" + doDfsFast);
         for (this.depthLimit = 2;  MAX_DEPTH > this.depthLimit;  ++this.depthLimit) {
             final long nanoDfs = System.nanoTime();
             if (doDfsFast) {
@@ -154,7 +155,7 @@ public class SolverIDDFS extends Solver {
                 this.dfsRecursion(1, -1, -1, this.states[0], this.directions[0]);
             }
             final long nanoEnd = System.nanoTime();
-            System.out.println("iddfs:  finished depthLimit=" + this.depthLimit +
+            Timber.d("iddfs:  finished depthLimit=" + this.depthLimit +
                     " megaBytes=" + this.knownStates.getMegaBytesAllocated() +
                     " time=" + (nanoEnd - nanoDfs) / 1000000L + "ms" + 
                     " totalTime=" + (nanoEnd - nanoStart) / 1000000L + "ms");
@@ -400,7 +401,7 @@ public class SolverIDDFS extends Solver {
             state0 = state1;
         }
         newSolution = newSolution.finish();
-        System.out.println(newSolution.toMovelistString() + " " + newSolution.toString() + " finalState=" + this.stateString(states[depth]));
+        Timber.d(newSolution.toMovelistString() + " " + newSolution.toString() + " finalState=" + this.stateString(states[depth]));
         if (false == this.lastResultSolutions.contains(newSolution)) {
             this.lastResultSolutions.add(newSolution);
         }

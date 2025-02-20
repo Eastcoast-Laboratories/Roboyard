@@ -32,6 +32,7 @@ import java.util.zip.Inflater;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.MainActivity;
+import timber.log.Timber;
 
 public class Board {
 
@@ -337,7 +338,7 @@ public class Board {
 
     public static Board createBoardFreestyle(final Board oldBoard, final int width, final int height, final int numRobots) {
         if ((width < WIDTH_MIN) || (height < HEIGHT_MIN) || (width*height > SIZE_MAX)) {
-            System.out.println("error in createBoardFreestyle(): invalid parameter: width=" + width + " height=" + height + " size=" + width*height);
+            Timber.d("error in createBoardFreestyle(): invalid parameter: width=" + width + " height=" + height + " size=" + width*height);
             return oldBoard;
         }
         final Board newBoard = new Board(width, height, numRobots);
@@ -462,7 +463,7 @@ public class Board {
                 throw new IllegalArgumentException("robots or goal position are not valid");
             }
         } catch (Exception e) {
-            System.out.println("error while parsing fingerprint(" + idStr +") :  " + e.toString());
+            Timber.d("error while parsing fingerprint(" + idStr +") :  " + e.toString());
             result = null;
         }
         return result;
@@ -695,7 +696,7 @@ public class Board {
                 throw new IllegalArgumentException("uncompressed data length mismatch");
             }
         } catch(Exception e) {
-            System.out.println("error in unb64unzip: " + e.toString());
+            Timber.d("error in unb64unzip: " + e.toString());
             result = null;
         }
         return result;

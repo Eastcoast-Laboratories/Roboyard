@@ -15,6 +15,7 @@ import roboyard.pm.ia.ricochet.ERRGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.pm.ia.ricochet.RRGetMap;
 import roboyard.pm.ia.ricochet.RRPiece;
+import timber.log.Timber;
 
 /**
  * Bridge implementation between Roboyard's solver interface and the DriftingDroids solver.
@@ -64,8 +65,8 @@ public class SolverDD implements ISolver{
             solutions = solver.execute();
             if(solutions.size() != 0){
                 Solution solution = solutions.get(0);
-                System.out.println(solutions.size() + " solution(s) found; first solution:");
-                System.out.println(solution.toString());
+                Timber.d(solutions.size() + " solution(s) found; first solution:");
+                Timber.d(solution.toString());
                 solverStatus = SolverStatus.solved;
             }else{
                 solverStatus = SolverStatus.noSolution;
@@ -117,7 +118,7 @@ public class SolverDD implements ISolver{
             s.addMove(new RRGameMove(pieces[m.robotNumber], mv));
             m = solution.getNextMove();
         }
-        System.out.println();
+        Timber.d("");
         return s;
     }
 
