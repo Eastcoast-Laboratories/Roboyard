@@ -49,11 +49,24 @@ public class GridGameScreen extends GameScreen {
 
     private int xGrid;
     private int yGrid;
-    private int boardHeight;
-
-    private float gridSpace; // gamescreen width / boardSizeX
+    private float gridSpace;
     private int gridBottom;
     private int topMargin = 16;
+    
+    // UI Layout
+    private ScreenLayout layout;
+    private int buttonSize;        // Size of buttons (width=height)
+    private int buttonPosY;        // Y position of bottom button row
+    private int nextButtonPosY;    // Y position of next button
+    private int boardNamePosY;     // Y position of level name text
+    private int solutionTextPosY;  // Y position of solution text area
+    private int lineHeight;        // text line height
+    private int lineHeightSmall;   // Small text line height
+
+
+    // Colors moved to UIConstants
+    private final RenderManager currentRenderManager;
+
     private int timeCpt = 0;
     private int nbCoups = 0;
     private int numSquares = 0;
@@ -73,7 +86,6 @@ public class GridGameScreen extends GameScreen {
 
     private GameMovementInterface gmi;
     private Bitmap bitmapGrid;
-    final RenderManager currentRenderManager;
     final Map<String, Drawable> drawables = new HashMap<>();
     final Map<String, Integer> colors = new HashMap<>();
     private final ArrayList<Move> allMoves= new ArrayList<>();
@@ -89,7 +101,7 @@ public class GridGameScreen extends GameScreen {
 
     private int textColorHighlight = Color.parseColor("#aaaaaa");
     private int textColorNormal = Color.GRAY;
-
+    
     public boolean isRandomGame() {
         return isRandomGame;
     }
@@ -169,6 +181,7 @@ public class GridGameScreen extends GameScreen {
                 GridGameScreen.requestToast = "Level Impossible will generate a fitting puzzle. This can take a while. In case the solver gets stuck, press >>";
             }
         }
+        Timber.d("Level difficulty set to: " + levelDifficulty + " goodPuzzleMinMoves: " + GridGameScreen.goodPuzzleMinMoves + " simplePuzzleMinMoves: " + GridGameScreen.simplePuzzleMinMoves);
     }
 
     public static ArrayList<GridElement> getMap() {
@@ -183,49 +196,96 @@ public class GridGameScreen extends GameScreen {
     public void create() {
         gmi = new GameMovementInterface(gameManager);
 
+        // Initialize screen layout
+        layout = new ScreenLayout(
+            gameManager.getScreenWidth(),
+            gameManager.getScreenHeight(),
+            gameManager.getActivity().getResources().getDisplayMetrics().density
+        );
+
+        // Calculate button and text positions
+        buttonSize = layout.getButtonSize();
+        buttonPosY = layout.y(UIConstants.BOTTOM_BUTTONS_Y);
+        nextButtonPosY = layout.y(UIConstants.BOTTOM_BUTTONS_Y - UIConstants.BUTTON_GAP) - buttonSize;
+        boardNamePosY = nextButtonPosY + buttonSize - layout.y(10);
+        lineHeight = layout.getTextSize(UIConstants.TEXT_SIZE_NORMAL);
+        lineHeightSmall = layout.getTextSize(UIConstants.TEXT_SIZE_SMALL);
+        solutionTextPosY = layout.y(UIConstants.BOTTOM_BUTTONS_Y) - buttonSize + layout.y(77);
+
+        // Initialize grid
         xGrid = 0;
-        yGrid = 0;
+        yGrid = topMargin;
+        gridSpace = (float)layout.getScreenWidth() / (float)MainActivity.getBoardWidth();
+        gridBottom = yGrid + (int)((MainActivity.getBoardHeight() + 1) * gridSpace);
 
-        int visibleScreenHeight = gameManager.getScreenHeight(); // bei 720x1280:1184px
-
-        int y = yGrid + gameManager.getScreenWidth();
-        int dy = visibleScreenHeight - y; // 248
-        int buttonW = gameManager.getScreenWidth() / 4;
-
-        // TODO: make this depending on the screen size:
-        float ratioW = ((float) gameManager.getScreenWidth()) / ((float) 1080); // at 720x1280:0.6667 at 1440x2580:1.333
-        float ratioH = ((float) visibleScreenHeight) / ((float) 1920); // at 720x1280:0.61667 at 1440x2580:2.45
-        // int buttonPosY = (int)(6.5*dy * ratioH);
-        int buttonPosY = (int) (gameManager.getScreenHeight() * 0.85f); // 1060
-        int nextButtonDim = (int) (220 * ratioH);
-
-        // Button Next game (top right) (new randomgame) sets mustStartNext to true
+        // Create buttons
         int currentLevel = extractLevelNumber(mapPath);
         if (currentLevel < 140) { // Show next button for random games or levels below 140
-            boardHeight = (int) (visibleScreenHeight * 0.669);
-            this.instances.add(new GameButtonGeneral((int) (870 * ratioW), boardHeight, nextButtonDim, nextButtonDim, R.drawable.bt_next_up, R.drawable.bt_next_down, new ButtonNext()));
+            this.instances.add(new GameButtonGeneral(
+                layout.x(UIConstants.NEXT_BUTTON_X), 
+                nextButtonPosY,
+                buttonSize, 
+                buttonSize,
+                R.drawable.bt_next_up,
+                R.drawable.bt_next_down,
+                new ButtonNext()
+            ));
         }
 
-        // Button Save
-        gameManager.getRenderManager().loadImage(R.drawable.transparent);
-        buttonSave = new GameButtonGoto(0, buttonPosY, buttonW,buttonW, R.drawable.bt_jeu_save_up, R.drawable.bt_jeu_save_down, 9);
+        // Bottom row buttons
+        // Save button
+        buttonSave = new GameButtonGoto(
+            0, 
+            buttonPosY,
+            buttonSize,
+            buttonSize,
+            R.drawable.bt_jeu_save_up,
+            R.drawable.bt_jeu_save_down,
+            9
+        );
         buttonSave.setImageDisabled(R.drawable.transparent);
-        // save button will be disabled when playing a saved game
         buttonSave.setEnabled(false);
         this.instances.add(buttonSave);
 
-        // Button one step back
-        this.instances.add(new GameButtonGeneral(buttonW, buttonPosY, buttonW,buttonW, R.drawable.bt_jeu_retour_up, R.drawable.bt_jeu_retour_down, new ButtonBack()));
+        // one Step Back button
+        this.instances.add(new GameButtonGeneral(
+            buttonSize,
+            buttonPosY,
+            buttonSize,
+            buttonSize,
+            R.drawable.bt_jeu_retour_up,
+            R.drawable.bt_jeu_retour_down,
+            new ButtonBack()
+        ));
 
-        // Button restart
-        this.instances.add(new GameButtonGeneral(buttonW*2, buttonPosY, buttonW,buttonW, R.drawable.bt_jeu_reset_up, R.drawable.bt_jeu_reset_down, new ButtonRestart()));
+        // Restart button
+        this.instances.add(new GameButtonGeneral(
+            buttonSize * 2,
+            buttonPosY,
+            buttonSize,
+            buttonSize,
+            R.drawable.bt_jeu_reset_up,
+            R.drawable.bt_jeu_reset_down,
+            new ButtonRestart()
+        ));
 
-        // Button Solve
-        gameManager.getRenderManager().loadImage(R.drawable.bt_jeu_resolution_disabled);
-        buttonSolve = new GameButtonGeneral(buttonW*3, buttonPosY, buttonW,buttonW, R.drawable.bt_jeu_resolution_up, R.drawable.bt_jeu_resolution_down, new ButtonSolution());
+        // Solve button
+        buttonSolve = new GameButtonGeneral(
+            buttonSize * 3,
+            buttonPosY,
+            buttonSize,
+            buttonSize,
+            R.drawable.bt_jeu_resolution_up,
+            R.drawable.bt_jeu_resolution_down,
+            new ButtonSolution()
+        );
         buttonSolve.setImageDisabled(R.drawable.bt_jeu_resolution_disabled);
         buttonSolve.setEnabled(false);
         this.instances.add(buttonSolve);
+
+        // Load images
+        gameManager.getRenderManager().loadImage(R.drawable.transparent);
+        gameManager.getRenderManager().loadImage(R.drawable.bt_jeu_resolution_disabled);
 
         this.solver = new SolverDD();
     }
@@ -259,51 +319,51 @@ public class GridGameScreen extends GameScreen {
         //renderManager.setColor(Color.BLACK);
         renderManager.setColor(textColorNormal);
         float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
-        int lineHeight = (int) (ratio * 65);
-        int lineHeightSmall = (int) (lineHeight * 0.8);
+
+        // Text Display underneath the Board
         int textPosY = (int)(gridBottom + (ratio * 13)); // Add margin below the game grid
-        int textPosYSmall = (int)(gridBottom + 2 * lineHeight - (ratio * 53f));
-        int textPosYTime = (int)(textPosYSmall + lineHeightSmall + (ratio * 21f));
+        int textPosYSmall = textPosY + lineHeight;
+
+        // Set text size
         renderManager.setTextSize(lineHeight);
         if (gameManager.getScreenWidth() <= 480) {
             renderManager.setTextSize(lineHeightSmall);
         }
-        if (isSolved && nbCoups == 0 && NumDifferentSolutionsFound > 1) {
-            // show number of different solutions found
-            renderManager.setTextSize(lineHeightSmall);
-            renderManager.setColor(textColorNormal);
-            renderManager.drawText(10, textPosYSmall, NumDifferentSolutionsFound + " solutions found");
-            renderManager.setTextSize(lineHeight);
-        }
-        if(levelNum >= 1 && numSolutionClicks == 0){
-            // in Level game always show the first solution
+
+        if (levelNum >= 1 && numSolutionClicks == 0) {
+            // In Level game always show the first solution
             numSolutionClicks = 1;
         }
-        renderManager.setColor(textColorNormal);
+
+        // Draw moves and solution information
+        renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
+        int posY = solutionTextPosY;
+        renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_NORMAL));
         if (nbCoups > 0) {
-            // at least one move was made by hand or by AI
-            renderManager.setColor(textColorHighlight);
-            renderManager.drawText(10, textPosY, "Moves: " + nbCoups);
-            renderManager.setColor(textColorNormal);
-            renderManager.setTextSize(lineHeightSmall);
-            renderManager.drawText(10, textPosYSmall, "Squares: " + numSquares);
+            // At least one move was made by hand or by AI
+            renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
+            renderManager.drawText(10, posY, "Moves: " + nbCoups);
+            renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
+            renderManager.drawText(10, posY + lineHeight, "Squares: " + numSquares);
         } else if (isSolved && numSolutionClicks > 0) {
-            // show solution
-            renderManager.setColor(textColorHighlight);
+            // Show solution
+            renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
             if (numSolutionClicks - showSolutionAtHint >= 0) {
-                renderManager.drawText(10, textPosY, "AI solution: ");
+                renderManager.drawText(layout.x(10), posY, "AI solution: ");
                 
                 // Draw number in larger font
                 renderManager.setColor(Color.WHITE);
-                renderManager.setTextSize((int) (lineHeight * 1.4f));
-                int larger9 = solutionMoves <= 9?0:27;
-                renderManager.drawText(10 + (int)(ratio * (350 - larger9 )), textPosY+5, String.valueOf(solutionMoves));
+                renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_LARGE));
+                int larger9 = solutionMoves <= 9 ? 0 : 48;
+                renderManager.drawText(layout.x(403), posY + 5, String.valueOf(solutionMoves));
 
-                renderManager.setColor(textColorHighlight);
-                renderManager.setTextSize(lineHeight);
-                renderManager.drawText(10 + (int)(ratio * 415), textPosY, " moves");
+                renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
+                renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_NORMAL));
+                renderManager.drawText(layout.x(449 + larger9), posY, " moves");
             } else {
-                renderManager.drawText(10, textPosY, "AI Hint " + numSolutionClicks + ": < " + (solutionMoves + showSolutionAtHint - numSolutionClicks) + " moves");
+                renderManager.drawText(layout.x(10), posY,
+                    "AI Hint " + numSolutionClicks + ": < " + 
+                    (solutionMoves + showSolutionAtHint - numSolutionClicks) + " moves");
             }
         } else if (nbCoups == 0 && isSolved && solutionMoves < simplePuzzleMinMoves) {
             // too simple ... restart
@@ -326,80 +386,66 @@ public class GridGameScreen extends GameScreen {
             showSolutionAtHint = goodPuzzleMinMoves - solutionMoves;
         } else if (!isSolved) {
             if (timeCpt < 1) {
-                // the first second it pretends to generate the map :)
-                // in real it is still calculating the solution
-                renderManager.setColor(textColorNormal);
-                if (levelNum >= 1){
-                    renderManager.drawText(10, textPosY, "Loading map...");
-                }else{
-                    renderManager.drawText(10, textPosY, "Generating map...");
+                // The first second it pretends to generate the map
+                renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
+                if (levelNum >= 1) {
+                    renderManager.drawText(layout.x(10), posY, "Loading map...");
+                } else {
+                    renderManager.drawText(layout.x(10), posY, "Generating map...");
                 }
             } else {
-                // in Beginner mode it will create a new puzzle, if it is not solvable within one second
-                renderManager.setColor(textColorNormal);
-                if (getLevel().equals("Beginner") && levelNum< 0) {
-                    renderManager.drawText(10, textPosY, "Too complicated");
-                    renderManager.drawText(10, textPosYSmall, "... restarting!");
+                renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
+                if (getLevel().equals("Beginner") && levelNum < 0) {
+                    renderManager.drawText(layout.x(10), posY, "Too complicated");
+                    renderManager.drawText(layout.x(10), posY + lineHeight, "... restarting!");
                     mustStartNext = true;
                 } else {
-                    renderManager.drawText(10, textPosY, "AI solving...");
+                    renderManager.drawText(layout.x(10), posY, "AI solving...");
                 }
             }
         }
+
+        // Draw solution information
+        posY += (lineHeight);
+        if (isSolved && nbCoups == 0 && NumDifferentSolutionsFound > 1) {
+            // Show number of different solutions found
+            renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_SMALL));
+            renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
+            renderManager.drawText(10, posY, NumDifferentSolutionsFound + " solutions found");
+            renderManager.setTextSize(lineHeight);
+        }
+
+        // Draw time
+        posY += (lineHeight);
         int seconds = timeCpt % 60;
         String secondsS = Integer.toString(seconds);
         if (seconds < 10) {
             secondsS = "0" + secondsS;
         }
         renderManager.setTextSize(lineHeightSmall);
-        renderManager.setColor(textColorNormal);
-        renderManager.drawText(10, textPosYTime, "Time: " + timeCpt / 60 + ":" + secondsS);
+        renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
+        renderManager.drawText(10, posY, "Time: " + timeCpt / 60 + ":" + secondsS);
 
-        if (timeCpt >= 40 && autoSaved == false && mustStartNext == false && mapPath != null && !mapPath.isEmpty()) {
-            Timber.d("Starting autosave. mapPath=%s, timeCpt=%d, autoSaved=%b, mustStartNext=%b", mapPath, timeCpt, autoSaved, mustStartNext);
-            // save autosave in slot 0
-            ArrayList<GridElement> gridElements = getGridElements();
-            String autosaveMapPath = SaveGameScreen.getMapPath(0);
-            Timber.d("Autosave path=%s, gridElements size=%d", autosaveMapPath, gridElements.size());
-            try {
-                FileReadWrite.clearPrivateData(gameManager.getActivity(), autosaveMapPath);
-                String saveData = MapObjects.createStringFromList(gridElements, false);
-                Timber.d("Save data length=%d", saveData.length());
-                FileReadWrite.appendPrivateData(gameManager.getActivity(), autosaveMapPath, saveData);
-                // Also add to mapsSaved.txt if not already there
-                SaveManager saver = new SaveManager(gameManager.getActivity());
-                if (!saver.getMapsStateSaved(autosaveMapPath, "mapsSaved.txt")) {
-                    Timber.d("Adding autosave to mapsSaved.txt");
-                    FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", autosaveMapPath + "\n");
-                }
-                gameManager.requestToast("Autosaving...", false);
-                autoSaved = true;
-                Timber.d("Autosave completed successfully");
-            } catch (Exception e) {
-                Timber.d("Error during autosave: %s", e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        // Board Name
-        // Display level number if it's a level game
-        renderManager.setColor(textColorNormal);
+        // Draw level name or unique string
+        renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
         renderManager.setTextSize(lineHeight / 2);
-        int levelNamePos =  boardHeight + (int) (lineHeight * 3.5f);
-        Boolean isLevelGame = false;
-        if (mapPath != null && mapPath.startsWith("Maps/")) {
-            isLevelGame = true;
-            // Level number underneath the next button
-            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 165), levelNamePos, "Level " + levelNum);
-        } else {
-            // show the unique string for the current map like in the save game
-            String uniqueString = MapObjects.createStringFromList(gridElements, true);
-            renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), levelNamePos, uniqueString);
-        }
         
+        int boardNamePosX = layout.x(UIConstants.BOARD_NAME_POS_X);
+        if (mapPath != null && mapPath.startsWith("Maps/")) {
+            // Level number underneath the next button
+            renderManager.drawText(boardNamePosX, boardNamePosY, "Level " + levelNum);
+        } else {
+            // Show the unique string for the current map
+            String uniqueString = MapObjects.createStringFromList(gridElements, true);
+            renderManager.drawText(boardNamePosX - layout.x(2), boardNamePosY, uniqueString);
+        }
+
         // Draw the grid
         if (imageLoaded) {
-            gameManager.getRenderManager().drawImage(xGrid, yGrid, (int) (MainActivity.getBoardWidth() * gridSpace) + xGrid, (int) (MainActivity.getBoardHeight() * gridSpace) + yGrid, imageGridID);
+            renderManager.drawImage(xGrid, yGrid, 
+                (int)(MainActivity.getBoardWidth() * gridSpace) + xGrid,
+                (int)(MainActivity.getBoardHeight() * gridSpace) + yGrid, 
+                imageGridID);
         }
         super.draw(renderManager);
         this.gmi.draw(renderManager);
