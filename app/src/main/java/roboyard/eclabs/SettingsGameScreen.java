@@ -63,28 +63,34 @@ public class SettingsGameScreen extends GameScreen {
 
         // set Board Size
         posY = 44;
-        Timber.d("ratioW: %f, ratioH: %f, displayRatio: %f", ratioW, ratioH, displayRatio);
+        Timber.d("Settings: ratioW: %f, ratioH: %f, displayRatio: %f", ratioW, ratioH, displayRatio);
+        
+        // Create board size dropdown
         boardSizeDropdown = new GameDropdown(x3, (int)(posY*ratioH), buttonWidth * 2, buttonHeight);
-        boardSizeDropdown.addOption("12x12", new setBoardSize(12, 12));
-        boardSizeDropdown.addOption("12x14", new setBoardSize(12, 14));
-        if(displayRatio > 1.8) {
-            boardSizeDropdown.addOption("12x16", new setBoardSize(12, 16));
-            boardSizeDropdown.addOption("12x18", new setBoardSize(12, 18));
+
+        // Define available board sizes
+        int[][] boardSizes = {
+            {12, 12}, {12, 14}, {12, 16}, {12, 18},
+            {14, 14}, {14, 16}, {14, 18},
+            {16, 16}, {16, 18}, {16, 20}, {16, 22},
+            {18, 18}, {18, 20}, {18, 22}
+        };
+
+        float maxBoardRatio = calculateMaxBoardRatio(displayRatio);
+        Timber.d("Settings: Display ratio: %.2f -> Max board ratio: %.2f", displayRatio, maxBoardRatio);
+        
+        // Add board size options that fit the display ratio
+        for (int[] size : boardSizes) {
+            float boardRatio = (float)size[1] / size[0];
+            Timber.d("Settings: Checking board size %dx%d (ratio: %.2f)", size[0], size[1], boardRatio);
+            
+            if (boardRatio <= maxBoardRatio) {
+                String option = size[0] + "x" + size[1];
+                boardSizeDropdown.addOption(option, new setBoardSize(size[0], size[1]));
+                Timber.d("Settings: Added board size option: %s", option);
+            }
         }
-        boardSizeDropdown.addOption("14x14", new setBoardSize(14, 14));
-        boardSizeDropdown.addOption("14x16", new setBoardSize(14, 16));
-        if(displayRatio > 1.8) {
-            boardSizeDropdown.addOption("14x18", new setBoardSize(14, 18));
-        }
-        boardSizeDropdown.addOption("16x16", new setBoardSize(16, 16));
-        boardSizeDropdown.addOption("16x18", new setBoardSize(16, 18));
-        boardSizeDropdown.addOption("16x20", new setBoardSize(16, 20));
-        if(displayRatio > 1.8) {
-            boardSizeDropdown.addOption("16x22", new setBoardSize(16, 22));
-        }
-        boardSizeDropdown.addOption("18x18", new setBoardSize(18, 18));
-        boardSizeDropdown.addOption("18x20", new setBoardSize(18, 20));
-        boardSizeDropdown.addOption("18x22", new setBoardSize(18, 22));
+
         this.instances.add(boardSizeDropdown);
 
         // icons from freeiconspng [1](https://www.freeiconspng.com/img/40963), [2](https://www.freeiconspng.com/img/40944)
@@ -286,6 +292,29 @@ public class SettingsGameScreen extends GameScreen {
             MapGenerator.generateNewMapEachTime = true;
             gameManager.getInputManager().resetEvents();
         }
+    }
+
+    /**
+     * Calculate maximum allowed board ratio based on display ratio.
+     * For display ratio 1.5 -> max board ratio 1.2
+     * For display ratio 2.0 -> max board ratio 1.8
+     * Linear interpolation between these points
+     */
+    private float calculateMaxBoardRatio(float displayRatio) {
+        float minDisplayRatio = 1.5f;
+        float maxDisplayRatio = 2.0f;
+        float minBoardRatio = 1.2f;
+        float maxBoardRatio = 1.5f;
+        
+        // Clamp display ratio to valid range
+        displayRatio = Math.max(minDisplayRatio, Math.min(maxDisplayRatio, displayRatio));
+        
+        // Linear interpolation
+        float t = (displayRatio - minDisplayRatio) / (maxDisplayRatio - minDisplayRatio);
+        float maxRatio = minBoardRatio + t * (maxBoardRatio - minBoardRatio);
+        
+        Timber.d("Settings: in functin Display ratio: %.2f -> Max board ratio: %.2f", displayRatio, maxRatio);
+        return maxRatio;
     }
 
 }

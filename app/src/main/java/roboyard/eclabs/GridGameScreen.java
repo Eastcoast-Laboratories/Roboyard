@@ -94,42 +94,56 @@ public class GridGameScreen extends GameScreen {
         return isRandomGame;
     }
 
+    /**
+     * Constructor for GridGameScreen - creates and initializes the game grid screen
+     * 
+     * @param gameManager The game manager instance that handles game state and resources
+     */
     public GridGameScreen(GameManager gameManager){
         super(gameManager);
-        String ld=preferences.getPreferenceValue(gameManager.getActivity(), "difficulty");
+        
+        // Load difficulty setting from preferences, default to "Beginner" if not set
+        String ld = preferences.getPreferenceValue(gameManager.getActivity(), "difficulty");
         if(ld.equals("")){
             // default difficulty
-            ld="Beginner";
-            preferences.setPreferences(gameManager.getActivity(),"difficulty", ld);
+			ld = "Beginner";
+            preferences.setPreferences(gameManager.getActivity(), "difficulty", ld);
         }
         setDifficulty(ld);
         
         // Initialize with default state
         isRandomGame = false;  // Start in non-random mode
+        
+        // Calculate grid dimensions based on screen size and board width
         gridSpace = (float)gameManager.getScreenWidth() / (float)MainActivity.getBoardWidth();
         xGrid = 0;
-        yGrid = topMargin; // 2px margin from top
+        yGrid = topMargin;  // Add a small margin at the top
         gridBottom = yGrid + (int)((MainActivity.getBoardHeight() + 1) * gridSpace);
 
-        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-
-        bitmapGrid = Bitmap.createBitmap((int)(MainActivity.getBoardWidth() * gridSpace), (int) (MainActivity.getBoardHeight() * gridSpace), conf);
+        // Create bitmap for the game grid
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;  // Use ARGB_8888 for high quality graphics
+        bitmapGrid = Bitmap.createBitmap(
+            (int)(MainActivity.getBoardWidth() * gridSpace), 
+            (int)(MainActivity.getBoardHeight() * gridSpace), 
+            conf
+        );
         canvasGrid = new Canvas(bitmapGrid);
         currentRenderManager = gameManager.getRenderManager();
 
         prevTime = System.currentTimeMillis();
 
+        // Load robot images for all directions
+        // Right-facing robots
         gameManager.getRenderManager().loadImage(R.drawable.robot_yellow_right);
         gameManager.getRenderManager().loadImage(R.drawable.robot_blue_right);
         gameManager.getRenderManager().loadImage(R.drawable.robot_green_right);
         gameManager.getRenderManager().loadImage(R.drawable.robot_red_right);
 
-        // robots facing left:
+        // Left-facing robots
         gameManager.getRenderManager().loadImage(R.drawable.robot_yellow_left);
         gameManager.getRenderManager().loadImage(R.drawable.robot_blue_left);
         gameManager.getRenderManager().loadImage(R.drawable.robot_green_left);
         gameManager.getRenderManager().loadImage(R.drawable.robot_red_left);
-
     }
 
     public static String getLevel() {
@@ -367,6 +381,7 @@ public class GridGameScreen extends GameScreen {
             }
         }
 
+        // Board Name
         // Display level number if it's a level game
         renderManager.setColor(textColorNormal);
         renderManager.setTextSize(lineHeight / 2);
@@ -381,7 +396,8 @@ public class GridGameScreen extends GameScreen {
             String uniqueString = MapObjects.createStringFromList(gridElements, true);
             renderManager.drawText((int) (gameManager.getScreenWidth() - ratio * 155), levelNamePos, uniqueString);
         }
-
+        
+        // Draw the grid
         if (imageLoaded) {
             gameManager.getRenderManager().drawImage(xGrid, yGrid, (int) (MainActivity.getBoardWidth() * gridSpace) + xGrid, (int) (MainActivity.getBoardHeight() * gridSpace) + yGrid, imageGridID);
         }
@@ -731,7 +747,7 @@ public class GridGameScreen extends GameScreen {
 
         currentRenderManager.resetTarget();
 
-        //On supprime l'image de fond si elle existe et on sauvegarde celle que l'on vient de créer
+        // We delete the background image if it exists and save the one we just created
         if(imageLoaded == true)
         {
             currentRenderManager.unloadBitmap(imageGridID);
