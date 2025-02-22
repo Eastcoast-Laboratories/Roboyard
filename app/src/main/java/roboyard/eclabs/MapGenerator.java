@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+import timber.log.Timber;
+
 /**
  * Created by Alain on 04/02/2015.
  */
@@ -20,10 +22,12 @@ public class MapGenerator {
     Boolean allowMulticolorTarget = true;
     static Boolean generateNewMapEachTime = false; // TODO: add option in settings
 
-    int maxWallsInOneVerticalCol = 2;
-    int maxWallsInOneHorizontalRow = 2;
+    // Wall configuration
+    int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column
+    int maxWallsInOneHorizontalRow = 2;  // Maximum number of walls allowed in one horizontal row
+    int wallsPerQuadrant;                // Number of walls to place in each quadrant of the board
 
-    Boolean loneWallsAllowed = false; // TODO: walls that are not attached in a 90 deg. angle
+    Boolean loneWallsAllowed = false; // walls that are not attached in a 90 deg. angle
 
     public MapGenerator(){
         rand = new Random();
@@ -32,9 +36,11 @@ public class MapGenerator {
         carrePosX = (MainActivity.getBoardWidth()/2)-1;
         carrePosY = (MainActivity.getBoardHeight()/2)-1;
 
+        // Calculate walls per quadrant based on board width
+        wallsPerQuadrant = MainActivity.getBoardWidth()/4;  // Default: quarter of board width
+
         if(GridGameScreen.getLevel().equals("Beginner")){ // Difficulty Beginner
             generateNewMapEachTime=true;
-            // TODO: boardSizeX=12; boardSizeY=12; (still crashes)
         } else {
             if(GridGameScreen.getLevel().equals("Advanced")){
                 generateNewMapEachTime=true;
@@ -50,6 +56,7 @@ public class MapGenerator {
 
             maxWallsInOneVerticalCol = 3;
             maxWallsInOneHorizontalRow = 3;
+            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/3.3);
 
             loneWallsAllowed = true;
         }
@@ -61,11 +68,16 @@ public class MapGenerator {
 
             maxWallsInOneVerticalCol = 5;
             maxWallsInOneHorizontalRow = 5;
+            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/3);
+        }
+        if(GridGameScreen.getLevel().equals("Impossible")) {
+            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/2.3);
         }
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
 
         }
+        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
     }
 
     public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {
@@ -248,8 +260,16 @@ public class MapGenerator {
             verticalWalls[carrePosX][carrePosY] = verticalWalls[carrePosX][carrePosY + 1] = 1;
             verticalWalls[carrePosX+2][carrePosY] = verticalWalls[carrePosX+2][carrePosY + 1] = 1;
 
-            // loop to place the walls
-            for (int k = 0; k <= MainActivity.getBoardWidth(); k++) {
+            // Loop to place walls in each quadrant of the board
+            // The board is divided into 4 quadrants, and we try to place an equal number of walls in each
+            // Each wall consists of two parts placed at right angles to form an L-shape
+            // k determines which quadrant we're placing walls in:
+            // k < boardWidth/4:        top-left quadrant
+            // k < 2*boardWidth/4:      top-right quadrant
+            // k < 3*boardWidth/4:      bottom-left quadrant
+            // k < boardWidth:          bottom-right quadrant
+            // k >= boardWidth:          anywhere on board (bonus wall)
+            for (int k = 0; k < wallsPerQuadrant * 4 + 1; k++) {
                 boolean abandon = false;
                 int tempX;
                 int tempY;
@@ -263,18 +283,23 @@ public class MapGenerator {
 
                     //Choice of random coordinates in each quadrant of the game board
                     if (k < MainActivity.getBoardWidth()/4) {
+                        // top-left quadrant
                         tempX = getRandom(1, MainActivity.getBoardWidth()/2 -1);
                         tempY = getRandom(1, MainActivity.getBoardHeight()/2 -1);
                     } else if (k < 2*MainActivity.getBoardWidth()/4) {
+                        // top-right quadrant
                         tempX = getRandom(MainActivity.getBoardWidth()/2, MainActivity.getBoardWidth()-1);
                         tempY = getRandom(1, MainActivity.getBoardHeight()/2 -1);
                     } else if (k < 3*MainActivity.getBoardWidth()/4) {
+                        // bottom-left quadrant
                         tempX = getRandom(1, MainActivity.getBoardWidth()/2 -1);
                         tempY = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
                     } else if (k < MainActivity.getBoardWidth()) {
+                        // bottom-right quadrant
                         tempX = getRandom(MainActivity.getBoardWidth()/2, MainActivity.getBoardWidth()-1);
                         tempY = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
                     } else {
+                        // bonus walls
                         tempX = getRandom(1, MainActivity.getBoardWidth()-1);
                         tempY = getRandom(1, MainActivity.getBoardHeight()-1);
                     }
@@ -360,6 +385,7 @@ public class MapGenerator {
                     }
 
                     if (compteLoop1 > 1000) {
+                        Timber.d("Wall creation restarted, too many loops");
                         restart = true;
                     }
 
