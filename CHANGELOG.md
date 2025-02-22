@@ -1,15 +1,14 @@
 CHANGELOG
 =========
 
-### Version 18.3
-
-- In beginner and advanced level generate a new map each time
-
 ### Version 18.2
 
 ### New Features
+- In beginner and advanced level generate a new map each time
 - Board size can now be selected from a dropdown with more options:
  - Added board sizes: 12x12, 12x14, 12x16, 12x18, 14x14, 14x16, 14x18, 16x16, 16x18, 16x20, 16x22, 18x18, 18x20 and 18x22.
+- lone walls are now also allowed in advanced levels and harder
+- more walls in each difficulty
 - Level games now require finding the solution.
 
 ### Improvements
