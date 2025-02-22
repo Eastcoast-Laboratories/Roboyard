@@ -677,9 +677,6 @@ public class GridGameScreen extends GameScreen {
         // Load all drawables
         drawables.put("grid", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid, null)); // white background for 16x16
         drawables.put("grid_tiles", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_tiles, null)); // white background for variable sizes
-        drawables.put("grid_14x16", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_14x16, null)); // white background for 14x16
-        drawables.put("grid_14x14", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_14x14, null)); // white background for 14x16
-        drawables.put("grid_12x14", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_12x14, null)); // white background for 14x16
         drawables.put("roboyard", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.roboyard, null)); // center roboyard in carré
         drawables.put("mh", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mh, null)); // horizontal lines (hedge)
         drawables.put("mv", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mv, null)); // vertical lines (hedge)
@@ -697,40 +694,19 @@ public class GridGameScreen extends GameScreen {
 
         // Choose appropriate grid background based on board size
         Drawable gridBackground;
-        if (MainActivity.getBoardWidth() == 16 && MainActivity.getBoardHeight() <= 16) {
-            gridBackground = drawables.get("grid"); // 16x16 grid
-            // Scale the grid background to match our calculated dimensions
-            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
-            gridBackground.draw(canvasGrid);
-        } else if (MainActivity.getBoardWidth() == 14 && MainActivity.getBoardHeight() == 16) {
-            gridBackground = drawables.get("grid_14x16"); // 14x16 grid
-            // Scale the grid background to match our calculated dimensions
-            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
-            gridBackground.draw(canvasGrid);
-        } else if (MainActivity.getBoardWidth() == 14 && MainActivity.getBoardHeight() == 14) {
-            gridBackground = drawables.get("grid_14x14"); // 14x16 grid
-            // Scale the grid background to match our calculated dimensions
-            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
-            gridBackground.draw(canvasGrid);
-        } else if (MainActivity.getBoardWidth() == 12 && MainActivity.getBoardHeight() == 14) {
-            gridBackground = drawables.get("grid_12x14"); // 14x16 grid
-            // Scale the grid background to match our calculated dimensions
-            gridBackground.setBounds(0, 0, totalWidth, totalHeight);
-            gridBackground.draw(canvasGrid);
-        } else {
-            // all other boards loop the single grid tile, which is for one field
-            Drawable fullGrid = drawables.get("grid_tiles");
-            // Loop through board and draw grid tiles
-            for(int x = 0; x < MainActivity.getBoardWidth(); x++) {
-                for(int y = 0; y < MainActivity.getBoardHeight(); y++) {
-                    fullGrid.setBounds(
-                        (int)(x * gridSpace),
-                        (int)(y * gridSpace),
-                        (int)((x + 1) * gridSpace),
-                        (int)((y + 1) * gridSpace)
-                    );
-                    fullGrid.draw(canvasGrid);
-                }
+        
+        // all other boards loop the single grid tile, which is for one field
+        Drawable fullGrid = drawables.get("grid_tiles");
+        // Loop through board and draw grid tiles
+        for(int x = 0; x < MainActivity.getBoardWidth(); x++) {
+            for(int y = 0; y < MainActivity.getBoardHeight(); y++) {
+                fullGrid.setBounds(
+                    (int)(x * gridSpace),
+                    (int)(y * gridSpace),
+                    (int)((x + 1) * gridSpace),
+                    (int)((y + 1) * gridSpace)
+                );
+                fullGrid.draw(canvasGrid);
             }
         }
 
