@@ -62,7 +62,7 @@ public class GridGameScreen extends GameScreen {
     private int solutionTextPosY;  // Y position of solution text area
     private int lineHeight;        // text line height
     private int lineHeightSmall;   // Small text line height
-
+    private int textMarginLeft;    // Left margin for text
 
     // Colors moved to UIConstants
     private final RenderManager currentRenderManager;
@@ -211,6 +211,7 @@ public class GridGameScreen extends GameScreen {
         lineHeight = layout.getTextSize(UIConstants.TEXT_SIZE_NORMAL);
         lineHeightSmall = layout.getTextSize(UIConstants.TEXT_SIZE_SMALL);
         solutionTextPosY = layout.y(UIConstants.BOTTOM_BUTTONS_Y) - buttonSize + layout.y(77);
+        textMarginLeft = layout.x(22);
 
         // Initialize grid
         xGrid = 0;
@@ -342,36 +343,37 @@ public class GridGameScreen extends GameScreen {
         if (nbCoups > 0) {
             // At least one move was made by hand or by AI
             renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
-            renderManager.drawText(10, posY, "Moves: " + nbCoups);
+            renderManager.drawText(textMarginLeft, posY, "Moves: " + nbCoups);
             renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
-            renderManager.drawText(10, posY + lineHeight, "Squares: " + numSquares);
+            renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_SMALL));
+            renderManager.drawText(textMarginLeft, posY + lineHeight, "Squares: " + numSquares);
         } else if (isSolved && numSolutionClicks > 0) {
             // Show solution
             renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
             if (numSolutionClicks - showSolutionAtHint >= 0) {
-                renderManager.drawText(layout.x(10), posY, "AI solution: ");
+                renderManager.drawText(textMarginLeft, posY, "AI solution: ");
                 
                 // Draw number in larger font
                 renderManager.setColor(Color.WHITE);
                 renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_LARGE));
-                int larger9 = solutionMoves <= 9 ? 0 : 48;
-                renderManager.drawText(layout.x(403), posY + 5, String.valueOf(solutionMoves));
+                int larger9 = solutionMoves <= 9 ? 0 : 56;
+                renderManager.drawText(layout.x(401), posY + 5, String.valueOf(solutionMoves));
 
                 renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
                 renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_NORMAL));
                 renderManager.drawText(layout.x(449 + larger9), posY, " moves");
             } else {
-                renderManager.drawText(layout.x(10), posY,
+                renderManager.drawText(textMarginLeft, posY,
                     "AI Hint " + numSolutionClicks + ": < " + 
                     (solutionMoves + showSolutionAtHint - numSolutionClicks) + " moves");
             }
         } else if (nbCoups == 0 && isSolved && solutionMoves < simplePuzzleMinMoves) {
             // too simple ... restart
             renderManager.setColor(textColorHighlight);
-            renderManager.drawText(10, textPosY, "AI solution: " + solutionMoves + " moves");
+            renderManager.drawText(textMarginLeft, posY, "AI solution: " + solutionMoves + " moves");
             renderManager.setColor(textColorNormal);
             renderManager.setTextSize(lineHeightSmall);
-            renderManager.drawText(10, textPosYSmall, "... restarting!");
+            renderManager.drawText(textMarginLeft, posY + lineHeightSmall, "... restarting!");
             if (timeCpt > 5) {
                 // show a popup on restart if it took very long to solve but found a too simple solution
                 requestToast = "Finally solved in " + solutionMoves + " moves. Restarting...";
@@ -380,27 +382,27 @@ public class GridGameScreen extends GameScreen {
         } else if (nbCoups == 0 && isSolved && solutionMoves < goodPuzzleMinMoves) {
             // still simple, show a hint that this is solved with less than ... moves
             // TODO: change font (still crashes):
-            //  renderManager.drawText(10, textPosY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
+            //  renderManager.drawText(textMarginLeft, posY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
             renderManager.setColor(textColorHighlight);
-            renderManager.drawText(10, textPosY, "Number of moves < " + goodPuzzleMinMoves);
+            renderManager.drawText(textMarginLeft, posY, "Number of moves < " + goodPuzzleMinMoves);
             showSolutionAtHint = goodPuzzleMinMoves - solutionMoves;
         } else if (!isSolved) {
             if (timeCpt < 1) {
                 // The first second it pretends to generate the map
                 renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
                 if (levelNum >= 1) {
-                    renderManager.drawText(layout.x(10), posY, "Loading map...");
+                    renderManager.drawText(textMarginLeft, posY, "Loading map...");
                 } else {
-                    renderManager.drawText(layout.x(10), posY, "Generating map...");
+                    renderManager.drawText(textMarginLeft, posY, "Generating map...");
                 }
             } else {
                 renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
                 if (getLevel().equals("Beginner") && levelNum < 0) {
-                    renderManager.drawText(layout.x(10), posY, "Too complicated");
-                    renderManager.drawText(layout.x(10), posY + lineHeight, "... restarting!");
+                    renderManager.drawText(textMarginLeft, posY, "Too complicated");
+                    renderManager.drawText(textMarginLeft, posY + lineHeight, "... restarting!");
                     mustStartNext = true;
                 } else {
-                    renderManager.drawText(layout.x(10), posY, "AI solving...");
+                    renderManager.drawText(textMarginLeft, posY, "AI solving...");
                 }
             }
         }
@@ -411,7 +413,7 @@ public class GridGameScreen extends GameScreen {
             // Show number of different solutions found
             renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_SMALL));
             renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
-            renderManager.drawText(10, posY, NumDifferentSolutionsFound + " solutions found");
+            renderManager.drawText(textMarginLeft, posY, NumDifferentSolutionsFound + " solutions found");
             renderManager.setTextSize(lineHeight);
         }
 
@@ -424,7 +426,7 @@ public class GridGameScreen extends GameScreen {
         }
         renderManager.setTextSize(lineHeightSmall);
         renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
-        renderManager.drawText(10, posY, "Time: " + timeCpt / 60 + ":" + secondsS);
+        renderManager.drawText(textMarginLeft, posY, "Time: " + timeCpt / 60 + ":" + secondsS);
 
         // Draw level name or unique string
         renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
