@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+### Version 18.3
+
+- In beginner and advanced level generate a new map each time
+
 ### Version 18.2
 
 ### New Features

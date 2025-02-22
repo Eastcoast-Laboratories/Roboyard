@@ -12,9 +12,9 @@ public class MapGenerator {
 
     final Random rand;
 
-    // position of the carré in the middle of the game board
-    int carrePosX; // horizontal position of the top wall of carré, starting with 0
-    int carrePosY; // vertical position the left wall of the carré
+    // position of the square in the middle of the game board
+    int carrePosX; // horizontal position of the top wall of square, starting with 0
+    int carrePosY; // vertical position of the left wall of the square
 
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
@@ -27,19 +27,22 @@ public class MapGenerator {
 
     public MapGenerator(){
         rand = new Random();
-        
-        // Initialize carré position based on current board size
+
+        // Initialize square position based on current board size
         carrePosX = (MainActivity.getBoardWidth()/2)-1;
         carrePosY = (MainActivity.getBoardHeight()/2)-1;
-        
+
         if(GridGameScreen.getLevel().equals("Beginner")){ // Difficulty Beginner
             generateNewMapEachTime=true;
             // TODO: boardSizeX=12; boardSizeY=12; (still crashes)
         } else {
+            if(GridGameScreen.getLevel().equals("Advanced")){
+                generateNewMapEachTime=true;
+            }
             if (generateNewMapEachTime) {
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
                 // TODO: does not work with the roboyard in the middle, that is not moved to the new random position
-                // random position of carré in the middle
+                // random position of square in the middle
                 // carrePosX=getRandom(3,MainActivity.getBoardWidth()-5);
                 // carrePosY=getRandom(3,MainActivity.getBoardHeight()-5);
             }
@@ -52,10 +55,16 @@ public class MapGenerator {
         }
 
         if(GridGameScreen.getLevel().equals("Insane") || GridGameScreen.getLevel().equals("Impossible")) {
+            generateNewMapEachTime=false; // keep the current map over restarts
+            // generateNewMapEachTime=true; // DEBUG!!! remove to release
             targetMustBeInCorner = false;
 
             maxWallsInOneVerticalCol = 5;
             maxWallsInOneHorizontalRow = 5;
+        }
+        if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
+            // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
+
         }
     }
 
@@ -122,16 +131,16 @@ public class MapGenerator {
                     || (targetX == carrePosX && targetY == carrePosY+1)
                     || (targetX == carrePosX+1 && targetY == carrePosY)
                     || (targetX == carrePosX+1 && targetY == carrePosY+1))
-                abandon = true; // target was in carré
+                abandon = true; // target was in square
 
         }while(abandon);
 
-        String[] typesOfCibles = {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
+        String[] typesOfTargets = {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
 
         if(allowMulticolorTarget) {
-            data.add(new GridElement(targetX, targetY, typesOfCibles[getRandom(0,4)]));
+            data.add(new GridElement(targetX, targetY, typesOfTargets[getRandom(0,4)]));
         } else {
-            data.add(new GridElement(targetX, targetY, typesOfCibles[getRandom(0,3)]));
+            data.add(new GridElement(targetX, targetY, typesOfTargets[getRandom(0,3)]));
         }
 
         String[] typesOfRobots = {"robot_red", "robot_blue", "robot_yellow", "robot_green"};
@@ -156,7 +165,7 @@ public class MapGenerator {
                 }
 
                 if((cX == carrePosX && cY == carrePosY) || (cX == carrePosX && cY == carrePosY+1) || (cX == carrePosX+1 && cY == carrePosY) || (cX == carrePosX+1 && cY == carrePosY+1))
-                    abandon = true; // robot was inside carré
+                    abandon = true; // robot was inside square
                 if(cX == targetX && cY == targetY)
                     abandon = true; // robot was target
 
@@ -169,7 +178,8 @@ public class MapGenerator {
     }
 
     /**
-     * generates a new map
+     * generates a new map. The map is divided into four quadrants, like in the game ricochet robots. and walls are evenly distributed among all quadrants.
+     * for each quadrant there are 2 walls placed at a right-angle to the each border.
      * @return Arraylist with all grid elements that belong to the map
      */
     public ArrayList<GridElement> getGeneratedGameMap() {
@@ -185,12 +195,12 @@ public class MapGenerator {
         do {
             restart = false;
 
-            //On initialise avec aucun mur
+            //We initialize with no walls
             for (int x = 0; x < MainActivity.getBoardWidth(); x++)
                 for (int y = 0; y < MainActivity.getBoardHeight(); y++)
                     horizontalWalls[x][y] = verticalWalls[x][y] = 0;
 
-            //Création des bords
+            //Creation of the borders
             for (int x = 0; x < MainActivity.getBoardWidth(); x++) {
                 horizontalWalls[x][0] = 1;
                 horizontalWalls[x][MainActivity.getBoardHeight()] = 1;
@@ -200,7 +210,7 @@ public class MapGenerator {
                 verticalWalls[MainActivity.getBoardWidth()][y] = 1;
             }
 
-            //Murs près de la bordure gauche
+            // right-angled Walls near the left border
             horizontalWalls[0][getRandom(2, 7)] = 1;
             do {
                 temp = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
@@ -208,7 +218,7 @@ public class MapGenerator {
             while (horizontalWalls[0][temp - 1] == 1 || horizontalWalls[0][temp] == 1 || horizontalWalls[0][temp + 1] == 1);
             horizontalWalls[0][temp] = 1;
 
-            //Murs près de la bordure droite
+            // right-angled Walls near the right border
             horizontalWalls[MainActivity.getBoardWidth()-1][getRandom(2, 7)] = 1;
             do {
                 temp = getRandom(MainActivity.getBoardHeight()/2, MainActivity.getBoardHeight()-1);
@@ -216,7 +226,7 @@ public class MapGenerator {
             while (horizontalWalls[MainActivity.getBoardWidth()-1][temp - 1] == 1 || horizontalWalls[MainActivity.getBoardWidth()-1][temp] == 1 || horizontalWalls[MainActivity.getBoardWidth()-1][temp + 1] == 1);
             horizontalWalls[MainActivity.getBoardWidth()-1][temp] = 1;
 
-            //Murs près de la bordure haut
+            // right-angled Walls near the top border
             verticalWalls[getRandom(2, MainActivity.getBoardWidth()/2 - 1)][0] = 1;
             do {
                 temp = getRandom(MainActivity.getBoardWidth()/2, MainActivity.getBoardWidth()-1);
@@ -224,7 +234,7 @@ public class MapGenerator {
             while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
             verticalWalls[temp][0] = 1;
 
-            //Murs près de la bordure bas
+            // right-angled Walls near the bottom border
             verticalWalls[getRandom(2, MainActivity.getBoardWidth()/2 - 1)][MainActivity.getBoardHeight()-1] = 1;
             do {
                 temp = getRandom(8, MainActivity.getBoardWidth()-1);
@@ -232,12 +242,13 @@ public class MapGenerator {
             while (verticalWalls[temp - 1][MainActivity.getBoardHeight()-1] == 1 || verticalWalls[temp][MainActivity.getBoardHeight()-1] == 1 || verticalWalls[temp + 1][MainActivity.getBoardHeight()-1] == 1);
             verticalWalls[temp][MainActivity.getBoardHeight()-1] = 1;
 
-            //Dessin du carré du milieu
+            //Drawing the middle square (carré)
             horizontalWalls[carrePosX][carrePosY] = horizontalWalls[carrePosX + 1][carrePosY] = 1;
             horizontalWalls[carrePosX][carrePosY+2] = horizontalWalls[carrePosX + 1][carrePosY+2] = 1;
             verticalWalls[carrePosX][carrePosY] = verticalWalls[carrePosX][carrePosY + 1] = 1;
             verticalWalls[carrePosX+2][carrePosY] = verticalWalls[carrePosX+2][carrePosY + 1] = 1;
 
+            // loop to place the walls
             for (int k = 0; k <= MainActivity.getBoardWidth(); k++) {
                 boolean abandon = false;
                 int tempX;
@@ -250,7 +261,7 @@ public class MapGenerator {
                     compteLoop1++;
                     abandon = false;
 
-                    //Choix de coordonnées aléatoires dans chaque quart de terrain de jeu
+                    //Choice of random coordinates in each quadrant of the game board
                     if (k < MainActivity.getBoardWidth()/4) {
                         tempX = getRandom(1, MainActivity.getBoardWidth()/2 -1);
                         tempY = getRandom(1, MainActivity.getBoardHeight()/2 -1);
@@ -282,32 +293,32 @@ public class MapGenerator {
                         ) abandon = true;
 
                     if (!abandon) {
-                        //On compte le nombre de murs dans la même ligne/colonne
+                        //We count the number of walls in the same row/column
                         countX = countY = 0;
-                        
+
                         for (int x = 1; x < MainActivity.getBoardWidth()-1; x++) {
                             if (horizontalWalls[x][tempY] == 1)
                                 countX++;
                         }
-                        
+
                         for (int y = 1; y < MainActivity.getBoardHeight()-1; y++) {
                             if (horizontalWalls[tempX][y] == 1)
                                 countY++;
                         }
-                        
+
                         if (tempY == carrePosY || tempY == carrePosY+2) {
                             countX -= 2;
                         }
-                        if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //Si il y a trop de murs dans la même ligne/colonne, on abandonne
+                        if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
                             abandon = true;
                     }
 
                     if (!abandon) {
-                        //Choix du 2ème mur du coin en cours de dessin
+                        //Choice of the 2nd wall of the corner being drawn
                         tempXv = tempX + getRandom(0, 1);
                         tempYv = tempY - getRandom(0, 1);
 
-                        //On vérifie qu'il ne tombe pas dessus ou près de murs déja existant
+                        //We check that it does not fall on or near existing walls
                         if (verticalWalls[tempXv][tempYv] == 1 || verticalWalls[tempXv - 1][tempYv] == 1 || verticalWalls[tempXv + 1][tempYv] == 1)
                             abandon = true;
                         if (verticalWalls[tempXv][tempYv - 1] == 1 || verticalWalls[tempXv][tempYv + 1] == 1)
@@ -326,7 +337,7 @@ public class MapGenerator {
                             abandon = true;
 
                         if (!abandon) {
-                            //On compte le nombre de murs dans la même ligne/colonne
+                            //We count the number of walls in the same row/column
                             countX = countY = 0;
 
                             for (int x = 1; x < MainActivity.getBoardWidth()-1; x++) {
@@ -342,7 +353,7 @@ public class MapGenerator {
                             if (tempXv == carrePosX || tempXv == carrePosX+2) {
                                 countY -= 2;
                             }
-                            if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //Si il y a trop de murs dans la même ligne/colonne, on abandonne
+                            if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
                                 abandon = true;
                         }
 
@@ -353,8 +364,20 @@ public class MapGenerator {
                     }
 
                 } while (abandon && !restart);
-                horizontalWalls[tempX][tempY] = 1;
-                verticalWalls[tempXv][tempYv] = 1;
+                Boolean skiponewall = false;
+                if(loneWallsAllowed && getRandom(0, 4) == 1) {
+                    skiponewall = true;
+                }
+                if(skiponewall){
+                    if(getRandom(0, 1) == 1){
+                        horizontalWalls[tempX][tempY] = 1;
+                    }else{
+                        verticalWalls[tempXv][tempYv] = 1;
+                    }
+                }else{
+                    horizontalWalls[tempX][tempY] = 1;
+                    verticalWalls[tempXv][tempYv] = 1;
+                }
             }
         }while(restart);
 

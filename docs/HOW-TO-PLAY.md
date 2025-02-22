@@ -14,6 +14,18 @@ Roboyard is an engaging puzzle game where you guide robots through a grid to rea
 - Random games are generated based on the difficulty level in your Settings
 - Practice with randomly generated puzzles to sharpen your problem-solving skills
 
+## Map Generation
+
+The game generates maps differently depending on the difficulty level:
+
+- **Beginner & Advanced Levels**: 
+  - A new random map is generated each time you start a game
+  - This allows for more variety and practice with different configurations
+
+- **Other Levels**:
+  - The same map persists across restarts
+  - This allows you to continue working on solving the same puzzle
+
 ### Level Structure
 - The game is divided into multiple difficulty sections:
   - Beginner (Levels 1-35)
