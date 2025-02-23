@@ -11,7 +11,7 @@ public abstract class GameScreen implements IGameObject {
 
     public GameScreen(GameManager gameManager){
         this.instances = new ArrayList<IGameObject>();
-        this.gameManager = gameManager;
+        GameScreen.gameManager = gameManager;
         this.create();
         this.load(gameManager.getRenderManager());
     }
