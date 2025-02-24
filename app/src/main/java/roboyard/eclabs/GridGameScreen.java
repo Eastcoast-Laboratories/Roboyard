@@ -221,7 +221,9 @@ public class GridGameScreen extends GameScreen {
         gridSpace = (float)layout.getScreenWidth() / (float)MainActivity.getBoardWidth();
         gridBottom = yGrid + (int)((MainActivity.getBoardHeight() + 1) * gridSpace);
 
-        // Create buttons
+        // ----------------- Create buttons
+
+        // Next Button
         int currentLevel = extractLevelNumber(mapPath);
         if (currentLevel < 140) { // Show next button for random games or levels below 140
             this.instances.add(new GameButtonGeneral(
@@ -1067,7 +1069,7 @@ public class GridGameScreen extends GameScreen {
     }
 
     /**
-     * Button to Start a new random level
+     * Button to Start a new random level (next button)
      * sets mustStartNext to true
      */
     private class ButtonNext implements IExecutor{
@@ -1085,7 +1087,7 @@ public class GridGameScreen extends GameScreen {
             // Only proceed to next level if we're in the Maps/ directory
             if (mapPath != null && mapPath.startsWith("Maps/")) {
                 int currentLevel = extractLevelNumber(mapPath);
-                if (currentLevel >= 1 && currentLevel < 140) {
+                if (currentLevel >= 1 && currentLevel < 140 && currentLevel != 35 && currentLevel != 70 && currentLevel != 105) {
                     // Next level in sequence
                     String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
                     setLevelGame(nextMapPath);
