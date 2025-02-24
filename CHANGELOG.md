@@ -7,7 +7,7 @@ CHANGELOG
 - In beginner and advanced level generate a new map each time
 - Board size can now be selected from a dropdown with more options:
  - Added board sizes: 12x12, 12x14, 12x16, 12x18, 14x14, 14x16, 14x18, 16x16, 16x18, 16x20, 16x22, 18x18, 18x20 and 18x22.
-- lone walls are now also allowed in advanced levels and harder
+- lone walls are now also allowed in advanced random games and harder
 - more walls in each difficulty
 - Level games now require finding the solution.
 
@@ -18,6 +18,9 @@ CHANGELOG
 - Fixed an issue where the first savegame click led to unintended loading.
 - Fixed one-move solution bug in level 36.
 - Fixed support for larger maps beyond 16x16.
+- Fix level 74 and 109 where the target was positioned on a robot
+- fix number of hints until solution display (random clicks from 2-5)
+- Treat one-move solutions correctly in solution counter
 
 
 ### Version 18.1

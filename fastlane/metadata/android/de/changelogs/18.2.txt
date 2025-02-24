@@ -1,0 +1,6 @@
+- Bei Beginner und Advanced wird jedes Mal ein neues Spielfeld generiert
+- Spielfeldgröße kann jetzt aus einem Dropdown-Menü mit mehr Optionen gewählt werden:
+ - Neue Spielfeldgrößen: 12x12, 12x14, 12x16, 12x18, 14x14, 14x16, 14x18, 16x16, 16x18, 16x20, 16x22, 18x18, 18x20 und 18x22
+- Einzelne Hecken tauchen jetzt in Zufallsspielen auf ab Advanced
+- Mehr Hecken in jeder Schwierigkeitsstufe
+- In Levelspielen muss die Lösung selbst gefunden werden
