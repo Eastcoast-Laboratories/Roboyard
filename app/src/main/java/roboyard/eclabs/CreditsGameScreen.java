@@ -31,6 +31,7 @@ public class CreditsGameScreen extends GameScreen {
 
     int hs2; // Half the screen height
     float ts; // Text size
+    float ts_large; // Large text size
 
     /**
      * Creates game objects for the Credits screen.
@@ -40,6 +41,7 @@ public class CreditsGameScreen extends GameScreen {
         int ws2 = this.gameManager.getScreenWidth() / 2;
         hs2 = this.gameManager.getScreenHeight() / 2;
         ts = hs2 / 10; // Text size
+        ts_large = ts * 0.9f; // Large text size
         
         // Add back button
         this.instances.add(new GameButtonGoto(7 * ws2 / 4 - 128, 9 * hs2 / 5 - 128, 128, 128, R.drawable.bt_back_up, R.drawable.bt_back_down, 0));
@@ -76,12 +78,14 @@ public class CreditsGameScreen extends GameScreen {
 
         float pos = 1;
         renderManager.setColor(Color.BLACK);
-        renderManager.setTextSize((int) (1.2 * ts));
+        renderManager.setTextSize((int) (ts_large));
         renderManager.drawText(10, (int) (pos++ * ts), "How to Play");
         renderManager.setTextSize((int) (0.5 * ts));
         renderManager.drawText(10, (int) (pos * ts), "• Swipe to move robots");
         pos+=0.7;
-        renderManager.drawText(10, (int) (pos * ts), "• Robots move until they hit a wall or another robot");
+        renderManager.drawText(10, (int) (pos * ts), "• Robots move until they hit a wall or");
+        pos+=0.7;
+        renderManager.drawText(10, (int) (pos * ts), "  another robot");
         pos+=0.7;
         renderManager.drawText(10, (int) (pos * ts), "• Complete levels to earn stars");
         pos+=0.7;
@@ -89,44 +93,43 @@ public class CreditsGameScreen extends GameScreen {
 
         pos++;
         pos++;
-        // Draw credits text
-        renderManager.setColor(Color.BLACK);
-        renderManager.setTextSize((int) (1.2 * ts));
-        renderManager.drawText(10, (int) (pos++ * ts), "Created by");
-        renderManager.setTextSize((int) (0.7 * ts));
-        renderManager.drawText(10, (int) (pos++ * ts), "Alain Caillaud");
-        renderManager.drawText(10, (int) (pos++ * ts), "Pierre Michel");
-        renderManager.drawText(10, (int) (pos++ * ts), "Ruben Barkow-Kuder");
-
-        pos++; 
-        renderManager.setTextSize((int) (1.2 * ts));
+        renderManager.setTextSize((int) (ts_large));
         renderManager.drawText(10, (int) (pos++ * ts), "Based on");
         renderManager.setTextSize((int) (0.7 * ts));
         renderManager.drawText(10, (int) (pos++ * ts), "Ricochet Robots(r)");
 
         pos++;
-        renderManager.setTextSize((int) (0.8 * ts));
+        renderManager.setTextSize((int) (ts_large));
         renderManager.drawText(10, (int) (pos++ * ts), "Imprint/privacy policy");
         renderManager.setTextSize((int) (0.7 * ts));
         links.clear();
-        drawClickableLink(renderManager, 10, pos++ * ts, "https://eclabs.de/datenschutz.html");
+        drawClickableLink(renderManager, 10, pos++ * ts, "https://eclabs.de/ds.html");
 
         pos++;
         renderManager.setColor(Color.BLACK);
-        renderManager.setTextSize((int) (1.2 * ts));
+        renderManager.setTextSize((int) (ts_large));
         renderManager.drawText(10, (int) (pos++ * ts), "Open Source");
         renderManager.setTextSize((int) (0.7 * ts));
         drawClickableLink(renderManager, 10, pos++ * ts, "https://git.io/fjs5H");
+        renderManager.setColor(Color.BLACK);
+        renderManager.setTextSize((int) (0.7 * ts));
+        renderManager.drawText(10, (int) (pos++ * ts), "Version: " + versionName + " (Build " + versionCode + ")");
 
         pos++;
-        renderManager.setTextSize((int) (1.2 * ts));
+        renderManager.setTextSize((int) (ts_large));
         renderManager.drawText(10, (int) (pos++ * ts), "Contact Us");
         renderManager.setTextSize((int) (0.7 * ts));
         drawClickableLink(renderManager, 10, pos++ * ts, "https://eclabs.de/contact");
 
+        pos++;
+        // Draw credits text
         renderManager.setColor(Color.BLACK);
+        renderManager.setTextSize((int) (ts_large));
+        renderManager.drawText(10, (int) (pos++ * ts), "Created by");
         renderManager.setTextSize((int) (0.7 * ts));
-        renderManager.drawText(10, (int) (pos++ * ts), "Version: " + versionName + " (Build " + versionCode + ")");
+        renderManager.drawText(10, (int) (pos++ * ts), "Alain Caillaud");
+        renderManager.drawText(10, (int) (pos++ * ts), "Pierre Michel");
+        renderManager.drawText(10, (int) (pos++ * ts), "Ruben Barkow-Kuder");
 
         renderManager.restore();
         super.draw(renderManager);
