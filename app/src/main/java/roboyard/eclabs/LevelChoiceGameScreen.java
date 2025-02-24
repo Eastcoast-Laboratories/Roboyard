@@ -393,7 +393,9 @@ public class LevelChoiceGameScreen extends GameScreen {
 
         // Enable/disable forward button based on total stars
         if (totalStars < 35) {
-            nextButton.setEnabled(false);
+            nextButton.setEnabled(false); // Disable button
+            // DEBUG: set to true for testing all levels:
+            // nextButton.setEnabled(true); // DEBUG!!!
         } else {
             nextButton.setEnabled(true);
         }
