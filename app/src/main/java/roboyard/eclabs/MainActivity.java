@@ -249,6 +249,8 @@ public class MainActivity extends Activity
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // Ignored
     }
+
+    /** Thread for rendering the game */
     private class RenderingThread extends Thread {
 
         private final TextureView mSurface;
@@ -269,7 +271,7 @@ public class MainActivity extends Activity
                 }
 
                 try {
-                    Thread.sleep(15);
+                    Thread.sleep(15); // this affects the framerate
                 } catch (InterruptedException e) {
                     // Interrupted
                 }

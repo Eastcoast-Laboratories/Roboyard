@@ -30,7 +30,8 @@ public class GridGameScreen extends GameScreen {
     private int NumDifferentSolutionsFound = 0; // store the number of different solution globally
     private int numSolutionClicks = 0; // count how often you clicked on the solution button, each time the shown count goes down by one
     private int numDifferentSolutionClicks = 0; // count how often you clicked on the solution button again to show a different solution
-    private int showSolutionAtHint = 5; // interval between the first hint and the current optimal solution (will be set to random 3..5 later
+    private int showSolutionAtHint; // interval between the first hint and the current optimal solution (will be set to random 3..5 later
+    private int initialSolutionAtHints = 5; // initial value for showSolutionAtHint
 
     private static int goodPuzzleMinMoves = 8; // below this number of moves there is a special hint shown from the start
     private static int simplePuzzleMinMoves = 6; // below this threshold a new puzzle is generated
@@ -194,6 +195,7 @@ public class GridGameScreen extends GameScreen {
 
     @Override
     public void create() {
+        numSolutionClicks = 0;
         gmi = new GameMovementInterface(gameManager);
 
         // Initialize screen layout
@@ -267,7 +269,7 @@ public class GridGameScreen extends GameScreen {
             buttonSize,
             R.drawable.bt_jeu_reset_up,
             R.drawable.bt_jeu_reset_down,
-            new ButtonRestart()
+            new ButtonResetRobots()
         ));
 
         // Solve button
@@ -357,11 +359,11 @@ public class GridGameScreen extends GameScreen {
                 renderManager.setColor(Color.WHITE);
                 renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_LARGE));
                 int larger9 = solutionMoves <= 9 ? 0 : 56;
-                renderManager.drawText(layout.x(401), posY + 5, String.valueOf(solutionMoves));
+                renderManager.drawText(layout.x(404), posY + 5, String.valueOf(solutionMoves));
 
                 renderManager.setColor(UIConstants.TEXT_COLOR_HIGHLIGHT);
                 renderManager.setTextSize(layout.getTextSize(UIConstants.TEXT_SIZE_NORMAL));
-                renderManager.drawText(layout.x(449 + larger9), posY, " moves");
+                renderManager.drawText(layout.x(452 + larger9), posY, " moves");
             } else {
                 renderManager.drawText(textMarginLeft, posY,
                     "AI Hint " + numSolutionClicks + ": < " + 
@@ -385,7 +387,7 @@ public class GridGameScreen extends GameScreen {
             //  renderManager.drawText(textMarginLeft, posY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
             renderManager.setColor(textColorHighlight);
             renderManager.drawText(textMarginLeft, posY, "Number of moves < " + goodPuzzleMinMoves);
-            showSolutionAtHint = goodPuzzleMinMoves - solutionMoves;
+            showSolutionAtHint = goodPuzzleMinMoves - solutionMoves; // this sets the num clicks to the difference of the best solution (e.g. 5) and goodPuzzleMinMoves (e.g. 6 on Beginner)
         } else if (!isSolved) {
             if (timeCpt < 1) {
                 // The first second it pretends to generate the map
@@ -406,6 +408,8 @@ public class GridGameScreen extends GameScreen {
                 }
             }
         }
+
+        // Timber.d("showSolutionAtHint = %d", showSolutionAtHint);
 
         // Draw solution information
         posY += (lineHeight);
@@ -460,16 +464,21 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
+    private void initializeSolutionsAtHints() {
+        showSolutionAtHint = 2 + (int)(Math.random() * ((initialSolutionAtHints - 2) + 1));
+    }
+
     public void update(GameManager gameManager){
         super.update(gameManager);
 
         if(mustStartNext) {
-
+            Timber.d("mustStartNext");
             numSolutionClicks = 0;
             currentMovedSquares = 0;
 
             // show solution as the 2nd to 5th hint
-            showSolutionAtHint = 2 + (int)(Math.random() * ((5 - 2) + 1));
+            initializeSolutionsAtHints();
+
             allMoves.clear();
             autoSaved = false;
 
@@ -581,11 +590,11 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
-    public void setLevelGame(String mapPath)
-    {
+    public void setLevelGame(String mapPath) {
         Timber.d("Loading level game from %s", mapPath);
         this.mapPath = mapPath;
         this.isGameWon = false;  // Reset game won flag
+        initializeSolutionsAtHints();
         try {
             String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
             Timber.d("Loaded level data length=%d", saveData.length());
@@ -609,7 +618,8 @@ public class GridGameScreen extends GameScreen {
         this.isGameWon = false;  // Reset game won flag
         this.isRandomGame = true;  // Set random game flag
         numSolutionClicks = 0;
-        
+        numDifferentSolutionClicks = 0;
+        initializeSolutionsAtHints();
         try {
             // Reset game state
             nbCoups = 0;
@@ -632,6 +642,7 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
+    /** Creates the grid and initializes variables */
     public void createGrid() {
         this.solver = new SolverDD();
 
@@ -1034,7 +1045,11 @@ public class GridGameScreen extends GameScreen {
         return false;
     }
 
-    private class ButtonRestart implements IExecutor{
+    /**
+     * Button to reset all robots back to their 
+     * original positions
+     */
+    private class ButtonResetRobots implements IExecutor{
 
         public void execute(){
             // Reset game state
@@ -1174,7 +1189,7 @@ public class GridGameScreen extends GameScreen {
 
     private void showSolution(GameSolution solution)
     {
-        ButtonRestart br = new ButtonRestart();
+        ButtonResetRobots br = new ButtonResetRobots();
         br.execute();
 
         moves = solution.getMoves();
