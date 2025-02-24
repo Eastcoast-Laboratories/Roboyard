@@ -375,6 +375,7 @@ public class GridGameScreen extends GameScreen {
             // too simple ... restart
             renderManager.setColor(textColorHighlight);
             renderManager.drawText(textMarginLeft, posY, "AI solution: " + solutionMoves + " moves");
+            Timber.d("too simple: solutionMoves = %d", solutionMoves);
             renderManager.setColor(textColorNormal);
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(textMarginLeft, posY + lineHeightSmall, "... restarting!");
@@ -383,7 +384,7 @@ public class GridGameScreen extends GameScreen {
                 requestToast = "Finally solved in " + solutionMoves + " moves. Restarting...";
             }
             mustStartNext = true;
-        } else if (nbCoups == 0 && isSolved && solutionMoves < goodPuzzleMinMoves) {
+        } else if (nbCoups == 0 && isSolved && solutionMoves < goodPuzzleMinMoves && !levelDifficulty.equals("Beginner")) {
             // still simple, show a hint that this is solved with less than ... moves
             // TODO: change font (still crashes):
             //  renderManager.drawText(textMarginLeft, posY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
@@ -541,6 +542,9 @@ public class GridGameScreen extends GameScreen {
             solutionMoves=0;
             for(IGameMove m : solution.getMoves()){
                 solutionMoves++;
+            }
+            if(solver.isSolution01()){
+                solutionMoves=1;
             }
             // DEBUG: save solutions directly as if played:
             // SaveManager saveManager = new SaveManager(gameManager.getActivity());

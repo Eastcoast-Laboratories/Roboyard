@@ -28,4 +28,10 @@ public interface ISolver extends Runnable {
     SolverStatus getSolverStatus();
     GameSolution getSolution(int num);
     List<Solution> getSolutionList();
+    
+    /**
+     * Check if the solution can be reached in one move
+     * @return true if the goal can be reached in one move
+     */
+    boolean isSolution01();
 }

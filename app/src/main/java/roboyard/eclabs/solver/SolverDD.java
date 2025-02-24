@@ -33,12 +33,14 @@ public class SolverDD implements ISolver{
     private Solver solver;
     private List<Solution> solutions;
     private final RRPiece[] pieces;
+    private Board board;
 
     public SolverDD(){
         solver = null;
         solverStatus = SolverStatus.idle;
         solutions = null;
         pieces = new RRPiece[4];
+        board = null;
     }
 
     public void init(ArrayList<GridElement> elements){
@@ -48,7 +50,7 @@ public class SolverDD implements ISolver{
         solverStatus = SolverStatus.idle;
         
         // Initialize new board and solver
-        Board board = RRGetMap.createDDWorld(elements, pieces);
+        board = RRGetMap.createDDWorld(elements, pieces);
         solver = Solver.createInstance(board);
     }
 
@@ -122,4 +124,11 @@ public class SolverDD implements ISolver{
         return s;
     }
 
+    /**
+     * Check if the solution can be reached in one move
+     * @return true if the goal can be reached in one move
+     */
+    public boolean isSolution01() {
+        return board != null && board.isSolution01();
+    }
 }
