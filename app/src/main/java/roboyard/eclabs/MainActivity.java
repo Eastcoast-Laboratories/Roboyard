@@ -46,6 +46,10 @@ public class MainActivity extends Activity
     public static int boardSizeY = DEFAULT_BOARD_SIZE_Y;
     public static int numRobots = 4;
 
+    private static final int HIGH_FPS_SLEEP = 15;  // ~15 FPS
+    private static final int LOW_FPS_SLEEP = 45;  // ~5 FPS / value 100 tested, but thats far too slow reaction on gmi touch
+    private boolean touchActive = false;
+
     public void init() {
         Display display = getWindowManager().getDefaultDisplay();
         // keep screen on:
@@ -111,6 +115,7 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+        touchActive = (e.getAction() != MotionEvent.ACTION_UP);
         synchronized (this.inputManager) {
             switch (e.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -250,6 +255,35 @@ public class MainActivity extends Activity
         // Ignored
     }
 
+    private boolean needsHighFramerate() {
+        if (gameManager == null || gameManager.getCurrentScreen() == null) {
+            return false;
+        }
+
+        // Always high framerate when touch is active
+        if (touchActive) {
+            return true;
+        }
+
+        // Check if any robot is moving
+        for (IGameObject obj : gameManager.getCurrentScreen().getGameObjects()) {
+            if (obj instanceof GamePiece) {
+                GamePiece piece = (GamePiece) obj;
+                if (piece.isInMovement()) {
+                    return true;
+                }
+            }
+            // Check if GMI is active
+            if (obj instanceof GameMovementInterface) {
+                GameMovementInterface gmi = (GameMovementInterface) obj;
+                if (gmi.isActive()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /** Thread for rendering the game */
     private class RenderingThread extends Thread {
 
@@ -271,7 +305,10 @@ public class MainActivity extends Activity
                 }
 
                 try {
-                    Thread.sleep(15); // this affects the framerate
+                    // Adjust sleep time based on game state
+                    int sleepTime = needsHighFramerate() ? HIGH_FPS_SLEEP : LOW_FPS_SLEEP;
+                    Thread.sleep(sleepTime);
+                    Timber.d("tick " + sleepTime + (needsHighFramerate() ? "high" : "low") + " timestamp: " + System.currentTimeMillis());
                 } catch (InterruptedException e) {
                     // Interrupted
                 }

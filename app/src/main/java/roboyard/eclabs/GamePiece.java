@@ -30,6 +30,14 @@ public class GamePiece implements IGameObject {
 
     boolean testIfWon       = true;
 
+    /**
+     * Check if the piece is currently moving
+     * @return true if the piece is in movement
+     */
+    public boolean isInMovement() {
+        return inMovement;
+    }
+
     private int image               = 0;
 
     private int direction; // 0: up, 1: right, 2: down, 3: left

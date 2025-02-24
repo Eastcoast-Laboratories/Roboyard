@@ -46,4 +46,12 @@ public abstract class GameScreen implements IGameObject {
             e.destroy();
         }
     }
+
+    /**
+     * Get all game objects in this screen
+     * @return List of game objects
+     */
+    public ArrayList<IGameObject> getGameObjects() {
+        return instances;
+    }
 }
