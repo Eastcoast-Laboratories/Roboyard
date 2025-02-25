@@ -7,8 +7,8 @@ import android.graphics.Color;
  */
 public abstract class GameButton implements IGameObject {
 
-    private final int x;
-    private final int y;
+    int x;
+    int y;
     private final int w;
     private final int h;
 

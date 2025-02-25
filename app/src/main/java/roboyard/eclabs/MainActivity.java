@@ -308,7 +308,7 @@ public class MainActivity extends Activity
                     // Adjust sleep time based on game state
                     int sleepTime = needsHighFramerate() ? HIGH_FPS_SLEEP : LOW_FPS_SLEEP;
                     Thread.sleep(sleepTime);
-                    Timber.d("tick " + sleepTime + (needsHighFramerate() ? "high" : "low") + " timestamp: " + System.currentTimeMillis());
+                    // Timber.d("tick " + sleepTime + (needsHighFramerate() ? "high" : "low") + " timestamp: " + System.currentTimeMillis());
                 } catch (InterruptedException e) {
                     // Interrupted
                 }

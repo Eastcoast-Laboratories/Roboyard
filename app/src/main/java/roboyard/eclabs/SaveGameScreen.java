@@ -44,6 +44,7 @@ public class SaveGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved_used);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_down_saved);
+        gameManager.getRenderManager().loadImage(R.drawable.share);
         init();
         createButtons();
     }
@@ -170,8 +171,9 @@ public class SaveGameScreen extends GameScreen {
         // Create buttons for each save slot
         for (int i = 0; i < buttonPositionsX.length; i++) {
             mapPath = getMapPath(i);
+            GameButtonGotoSavedGame saveButton;
             if (i == 0) {
-                this.instances.add(new GameButtonGotoSavedGame(
+                saveButton = new GameButtonGotoSavedGame(
                     autosaveButtonX, 
                     autosaveButtonY,
                     buttonSize,
@@ -179,9 +181,9 @@ public class SaveGameScreen extends GameScreen {
                     saver.getButtonAutoSaved(mapPath, true), 
                     saver.getButtonAutoSaved(mapPath, false), 
                     4, 
-                    mapPath));
+                    mapPath);
             } else {
-                this.instances.add(new GameButtonGotoSavedGame(
+                saveButton = new GameButtonGotoSavedGame(
                     buttonPositionsX[i], 
                     buttonPositionsY[i], 
                     buttonSize, 
@@ -189,8 +191,22 @@ public class SaveGameScreen extends GameScreen {
                     saver.getButtonSaved(mapPath, true), 
                     saver.getButtonSaved(mapPath, false), 
                     4, 
-                    mapPath));
+                    mapPath);
             }
+            this.instances.add(saveButton);
+
+            // Add share button for this save slot
+            int shareButtonSize = buttonSize / 4;  // Share button is 1/4 the size of save button
+            GameButtonShareMap shareButton = new GameButtonShareMap(
+                0, 0,  // x,y will be set in update()
+                shareButtonSize, shareButtonSize,
+                R.drawable.share, R.drawable.share,
+                mapPath,
+                i == 0 ? autosaveButtonX : buttonPositionsX[i],
+                i == 0 ? autosaveButtonY : buttonPositionsY[i],
+                buttonSize
+            );
+            this.instances.add(shareButton);
         }
 
         // Add back button
