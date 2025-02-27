@@ -692,7 +692,6 @@ public class GridGameScreen extends GameScreen {
         currentRenderManager.setTarget(canvasGrid);
 
         // Load all drawables
-        drawables.put("grid", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid, null)); // white background for 16x16
         drawables.put("grid_tiles", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.grid_tiles, null)); // white background for variable sizes
         drawables.put("roboyard", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.roboyard, null)); // center roboyard in carré
         drawables.put("mh", ResourcesCompat.getDrawable(currentRenderManager.getResources(), R.drawable.mh, null)); // horizontal lines (hedge)
@@ -991,8 +990,11 @@ public class GridGameScreen extends GameScreen {
         if(mapPath.length() > 0) {
             addMapsPlayed();
             SparseArray<GameScreen> screens = gameManager.getScreens();
-            LevelChoiceGameScreen.getLastButtonUsed().setImageUp(R.drawable.bt_start_up_played);
-            LevelChoiceGameScreen.getLastButtonUsed().setImageDown(R.drawable.bt_start_down_played);
+            GameButton lastButton = LevelChoiceGameScreen.getLastButtonUsed();
+            if (lastButton != null) {
+                lastButton.setImageUp(ResourcesCompat.getDrawable(gameManager.getActivity().getResources(), R.drawable.bt_start_up_played, null));
+                lastButton.setImageDown(ResourcesCompat.getDrawable(gameManager.getActivity().getResources(), R.drawable.bt_start_down_played, null));
+            }
             /*
             for (int i = 0; i < screens.size(); i++) {
                 if (screens.get(i).getClass() == LevelChoiceGameScreen.class) {

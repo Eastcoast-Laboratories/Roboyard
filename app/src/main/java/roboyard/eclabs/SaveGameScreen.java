@@ -23,6 +23,7 @@ public class SaveGameScreen extends GameScreen {
     private int autosaveButtonY;
     private int backButtonX;
     private int backButtonY;
+    private boolean saveMode = false;
 
     // Cache for unique string to color mapping to avoid repeated SHA-256 hashing
     private static Map<String, String> colorCache = new HashMap<>();
@@ -45,6 +46,7 @@ public class SaveGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_down_saved);
         gameManager.getRenderManager().loadImage(R.drawable.share);
+        saveMode = false; // Start in load mode
         init();
         createButtons();
     }
@@ -174,39 +176,54 @@ public class SaveGameScreen extends GameScreen {
             GameButtonGotoSavedGame saveButton;
             if (i == 0) {
                 saveButton = new GameButtonGotoSavedGame(
+                    gameManager.getActivity(),
                     autosaveButtonX, 
                     autosaveButtonY,
                     buttonSize,
                     buttonSize, 
                     saver.getButtonAutoSaved(mapPath, true), 
                     saver.getButtonAutoSaved(mapPath, false), 
-                    4, 
-                    mapPath);
+                    mapPath,
+                    i,
+                    autosaveButtonX,
+                    autosaveButtonY,
+                    buttonSize
+                );
             } else {
                 saveButton = new GameButtonGotoSavedGame(
+                    gameManager.getActivity(),
                     buttonPositionsX[i], 
                     buttonPositionsY[i], 
                     buttonSize, 
                     buttonSize, 
                     saver.getButtonSaved(mapPath, true), 
                     saver.getButtonSaved(mapPath, false), 
-                    4, 
-                    mapPath);
+                    mapPath,
+                    i,
+                    buttonPositionsX[i],
+                    buttonPositionsY[i],
+                    buttonSize
+                );
             }
+            saveButton.create();
             this.instances.add(saveButton);
 
             // Add share button for this save slot
-            int shareButtonSize = buttonSize / 4;  // Share button is 1/4 the size of save button
-            GameButtonShareMap shareButton = new GameButtonShareMap(
-                0, 0,  // x,y will be set in update()
-                shareButtonSize, shareButtonSize,
-                R.drawable.share, R.drawable.share,
-                mapPath,
-                i == 0 ? autosaveButtonX : buttonPositionsX[i],
-                i == 0 ? autosaveButtonY : buttonPositionsY[i],
-                buttonSize
-            );
-            this.instances.add(shareButton);
+            String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+            if (saveData != null && !saveData.isEmpty()) {
+                GameButtonShareMap shareButton = new GameButtonShareMap(
+                    0, 0,  // x,y will be set in update()
+                    buttonSize/4, buttonSize/4, // smaller size
+                    R.drawable.share,
+                    R.drawable.share,
+                    mapPath,
+                    i == 0 ? autosaveButtonX : buttonPositionsX[i],
+                    i == 0 ? autosaveButtonY : buttonPositionsY[i],
+                    buttonSize
+                );
+                shareButton.create();
+                this.instances.add(shareButton);
+            }
         }
 
         // Add back button
@@ -289,5 +306,25 @@ public class SaveGameScreen extends GameScreen {
     @Override
     public void destroy() {
         super.destroy();
+    }
+
+    /**
+     * Returns whether the screen is in save mode.
+     * @return true if in save mode, false if in load mode
+     */
+    public boolean isSaveMode() {
+        return saveMode;
+    }
+
+    /**
+     * Sets whether the screen is in save mode.
+     * @param saveMode true for save mode, false for load mode
+     */
+    public void setSaveMode(boolean saveMode) {
+        if (this.saveMode != saveMode) {
+            this.saveMode = saveMode;
+            // Recreate buttons when mode changes
+            createButtons();
+        }
     }
 }

@@ -219,4 +219,28 @@ public class RenderManager {
     public float measureText(String text) {
         return this.brush.measureText(text);
     }
+
+    /**
+     * Draws a drawable directly to the canvas at the specified coordinates.
+     * @param left Left coordinate
+     * @param top Top coordinate
+     * @param right Right coordinate
+     * @param bottom Bottom coordinate
+     * @param drawable The drawable to draw
+     */
+    public void drawDrawable(int left, int top, int right, int bottom, Drawable drawable) {
+        if (drawable != null) {
+            drawable.setBounds(left, top, right, bottom);
+            drawable.draw(target);
+        }
+    }
+
+    /**
+     * Gets a drawable from the resource map.
+     * @param resourceId The resource ID of the drawable.
+     * @return The drawable, or null if not found.
+     */
+    public Drawable getDrawable(int resourceId) {
+        return this.resourceMap.get(resourceId);
+    }
 }

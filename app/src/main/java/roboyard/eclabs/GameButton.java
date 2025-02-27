@@ -1,6 +1,8 @@
 package roboyard.eclabs;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import androidx.core.content.res.ResourcesCompat;
 
 /**
  * Created by Pierre on 21/01/2015.
@@ -19,15 +21,21 @@ public abstract class GameButton implements IGameObject {
         this.enabled = enabled;
     }
 
-    public void setImageUp(int imageUp) {
-        this.imageUp = imageUp;
+    public void setImageUp(Drawable imageUp) {
+        this.imageUpDrawable = imageUp;
+        this.imageUp = 0; // Clear the resource ID when setting drawable
     }
 
-    public void setImageDown(int imageDown) {
-        this.imageDown = imageDown;
+    public void setImageDown(Drawable imageDown) {
+        this.imageDownDrawable = imageDown;
+        this.imageDown = 0; // Clear the resource ID when setting drawable
     }
 
-    private int imageUp, imageDown, imageDisabled;
+    private int imageUp;
+    private int imageDown;
+    private Drawable imageUpDrawable;
+    private Drawable imageDownDrawable;
+    private int imageDisabled;
     protected boolean btDown, enabled = true;
 
     public GameButton(int x, int y, int w, int h, int imageUp, int imageDown){
@@ -39,7 +47,8 @@ public abstract class GameButton implements IGameObject {
         this.imageDown = imageDown;
         this.imageUp = imageUp;
         this.imageDisabled = imageUp;
-
+        this.imageUpDrawable = null;
+        this.imageDownDrawable = null;
     }
 
     public void setImageDisabled(int imageDisabled){
@@ -53,19 +62,31 @@ public abstract class GameButton implements IGameObject {
 
     @Override
     public void load(RenderManager renderManager) {
-        renderManager.loadImage(this.imageDown);
-        renderManager.loadImage(this.imageUp);
+        if (imageUpDrawable == null) {
+            renderManager.loadImage(this.imageUp);
+            renderManager.loadImage(this.imageDown);
+        }
     }
 
     @Override
     public void draw(RenderManager renderManager) {
         renderManager.setColor(Color.WHITE);
-        if(!this.enabled){
+        if(!enabled){
             renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDisabled);
-        }else if(this.btDown){
-            renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDown);
-        }else{
-            renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageUp);
+            return;
+        }
+        if(btDown){
+            if (imageDownDrawable != null) {
+                renderManager.drawDrawable(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDownDrawable);
+            } else {
+                renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDown);
+            }
+        } else {
+            if (imageUpDrawable != null) {
+                renderManager.drawDrawable(this.x, this.y, this.x + this.w, this.y + this.h, this.imageUpDrawable);
+            } else {
+                renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageUp);
+            }
         }
 
     }
