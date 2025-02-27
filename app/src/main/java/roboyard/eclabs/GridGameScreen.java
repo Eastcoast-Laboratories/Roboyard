@@ -26,7 +26,7 @@ import timber.log.Timber;
 public class GridGameScreen extends GameScreen {
     private Canvas canvasGrid;
     private boolean isSolved = false;
-    private int solutionMoves = 0; // store the optimal number of moves for the solution globally
+    int solutionMoves = 0; // store the optimal number of moves for the solution globally
     private int NumDifferentSolutionsFound = 0; // store the number of different solution globally
     private int numSolutionClicks = 0; // count how often you clicked on the solution button, each time the shown count goes down by one
     private int numDifferentSolutionClicks = 0; // count how often you clicked on the solution button again to show a different solution
@@ -103,6 +103,9 @@ public class GridGameScreen extends GameScreen {
     private int textColorHighlight = Color.parseColor("#aaaaaa");
     private int textColorNormal = Color.GRAY;
     
+    String mapName = "";
+    GameSolution solution;
+
     public boolean isRandomGame() {
         return isRandomGame;
     }
@@ -442,11 +445,12 @@ public class GridGameScreen extends GameScreen {
         int boardNamePosX = layout.x(UIConstants.BOARD_NAME_POS_X);
         if (mapPath != null && mapPath.startsWith("Maps/")) {
             // Level number underneath the next button
-            renderManager.drawText(boardNamePosX, boardNamePosY, "Level " + levelNum);
+            mapName = "Level " + levelNum;
+            renderManager.drawText(boardNamePosX, boardNamePosY, mapName);
         } else {
             // Show the unique string for the current map
-            String uniqueString = MapObjects.createStringFromList(gridElements, true);
-            renderManager.drawText(boardNamePosX - layout.x(2), boardNamePosY, uniqueString);
+            mapName = MapObjects.createStringFromList(gridElements, true);
+            renderManager.drawText(boardNamePosX - layout.x(2), boardNamePosY, mapName);
         }
 
         // Draw the grid
@@ -538,7 +542,7 @@ public class GridGameScreen extends GameScreen {
             isSolved = true;
             buttonSolve.setEnabled(true);
             NumDifferentSolutionsFound=solver.getSolutionList().size();
-            GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
+            solution = solver.getSolution(numDifferentSolutionClicks);
             solutionMoves=0;
             for(IGameMove m : solution.getMoves()){
                 solutionMoves++;

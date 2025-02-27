@@ -16,6 +16,9 @@ import android.graphics.drawable.Drawable;
 import android.app.Activity;
 
 import androidx.core.content.res.ResourcesCompat;
+
+import roboyard.pm.ia.IGameMove;
+import roboyard.pm.ia.ricochet.RRGameMove;
 import timber.log.Timber;
 
 /**
@@ -61,11 +64,40 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             // Screen to save or overwrite a savegame
             // Timber.d(" Saving game to slot: " + mapPath);
             ArrayList<GridElement> gridElements = gameScreen.getGridElements();
-            String saveData = MapObjects.createStringFromList(gridElements, false);
+            
+            // Build save data with additional fields
+            StringBuilder saveData = new StringBuilder();
+            
+            // Add board name
+            saveData.append("name:").append(gameScreen.mapName).append(";");
+            
+            // Add number of moves if available
+            int numMoves = gameScreen.solutionMoves;
+            if (numMoves > 0) {
+                saveData.append("num_moves:").append(numMoves).append(";");
+            }
+            
+            // Add solution if available 
+            if (gameScreen.solution != null) {
+                StringBuilder solutionStr = new StringBuilder("solution:");
+
+//                for (IGameMove move : gameScreen.solution.getMoves()) {
+//                    if (move instanceof RRGameMove) {
+//                        RRGameMove rrMove = (RRGameMove) move;
+//                        solutionStr.append(rrMove.getColor()).append("_")
+//                                 .append(rrMove.getX()).append(",")
+//                                 .append(rrMove.getY()).append(";");
+//                    }
+//                }
+                saveData.append(solutionStr);
+            }
+
+            // Add the grid elements data
+            saveData.append(MapObjects.createStringFromList(gridElements, false));
             
             try {
                 // Write save data directly (will overwrite if file exists)
-                FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData);
+                FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
                 // Timber.d(" wrote " + saveData.length() + " bytes to " + mapPath);
                 
                 // Add to saved games list if needed
