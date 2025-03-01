@@ -80,7 +80,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             // Add solution if available 
             if (gameScreen.solution != null) {
                 StringBuilder solutionStr = new StringBuilder("solution:");
-
+// TODO: add the solution to the share string
 //                for (IGameMove move : gameScreen.solution.getMoves()) {
 //                    if (move instanceof RRGameMove) {
 //                        RRGameMove rrMove = (RRGameMove) move;
