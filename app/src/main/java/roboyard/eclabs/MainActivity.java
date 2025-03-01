@@ -61,8 +61,9 @@ public class MainActivity extends Activity
         this.inputManager = new InputManager();
         this.renderManager = new RenderManager(getResources());
         
-        // Reset board size to default
-        resetBoardSizeToDefault(this);
+        // Load board size from preferences or use default if not set
+        loadBoardSizeFromPreferences(this);
+        Timber.d("Initialized with board size: %dx%d", boardSizeX, boardSizeY);
         
         this.gameManager = new GameManager(this.inputManager, this.renderManager, this.sWidth, this.sHeight, this);
     }
@@ -327,12 +328,16 @@ public class MainActivity extends Activity
         x = Math.max(MIN_BOARD_SIZE, Math.min(x, MAX_BOARD_SIZE));
         y = Math.max(MIN_BOARD_SIZE, Math.min(y, MAX_BOARD_SIZE));
         
+        Timber.d("Setting board size to: %dx%d", x, y);
+        
         boardSizeX = x;
         boardSizeY = y;
         // Save board size to preferences
         Preferences prefs = new Preferences();
         prefs.setPreferences(this, "boardSizeX", String.valueOf(x));
         prefs.setPreferences(this, "boardSizeY", String.valueOf(y));
+        
+        Timber.d("Board size saved to preferences: %dx%d", x, y);
     }
 
     /**
@@ -359,5 +364,29 @@ public class MainActivity extends Activity
         boardSizeY = DEFAULT_BOARD_SIZE_Y;
         preferences.setPreferences(activity, "boardSizeX", String.valueOf(boardSizeX));
         preferences.setPreferences(activity, "boardSizeY", String.valueOf(boardSizeY));
+    }
+
+    /**
+     * Load board size from preferences or use default if not set
+     */
+    public void loadBoardSizeFromPreferences(Activity activity) {
+        String boardSizeXStr = preferences.getPreferenceValue(activity, "boardSizeX");
+        String boardSizeYStr = preferences.getPreferenceValue(activity, "boardSizeY");
+
+        Timber.d("Loading board size from preferences: X=%s, Y=%s", boardSizeXStr, boardSizeYStr);
+
+        if (boardSizeXStr != null && !boardSizeXStr.isEmpty()) {
+            boardSizeX = Integer.parseInt(boardSizeXStr);
+        } else {
+            boardSizeX = DEFAULT_BOARD_SIZE_X;
+        }
+
+        if (boardSizeYStr != null && !boardSizeYStr.isEmpty()) {
+            boardSizeY = Integer.parseInt(boardSizeYStr);
+        } else {
+            boardSizeY = DEFAULT_BOARD_SIZE_Y;
+        }
+        
+        Timber.d("Board size set to: %dx%d", boardSizeX, boardSizeY);
     }
 }

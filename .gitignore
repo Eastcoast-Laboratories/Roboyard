@@ -14,3 +14,4 @@ zzbak~*
 /app/release/baselineProfiles/
 /.idea/other.xml
 /.idea/deploymentTargetSelector.xml
+/.vscode/launch.json

@@ -588,7 +588,8 @@ public class GridGameScreen extends GameScreen {
         this.isRandomGame = false;  // Loading a saved game is not a random game
         try {
             String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
-            gridElements = MapObjects.extractDataFromString(saveData);
+            // Use true for applyBoardSize parameter to apply the board size when actually loading a game
+            gridElements = MapObjects.extractDataFromString(saveData, true);
             Timber.d("Extracted gridElements size=%d", gridElements.size());
             GridGameScreen.setMap(gridElements);
             createGrid();
@@ -608,7 +609,8 @@ public class GridGameScreen extends GameScreen {
         try {
             String saveData = FileReadWrite.readAssets(gameManager.getActivity(), mapPath);
             Timber.d("Loaded level data length=%d", saveData.length());
-            gridElements = MapObjects.extractDataFromString(saveData);
+            // Use true for applyBoardSize parameter to apply the board size when actually loading a level
+            gridElements = MapObjects.extractDataFromString(saveData, true);
             Timber.d("Extracted gridElements size=%d", gridElements.size());
             GridGameScreen.setMap(gridElements);
             numSolutionClicks = 0;

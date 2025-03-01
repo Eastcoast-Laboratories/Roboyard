@@ -39,6 +39,16 @@ public class GameDropdown implements IGameObject {
         options.add(option);
         actions.add(action);
     }
+    
+    /**
+     * Sets the selected index of the dropdown
+     * @param index The index to select
+     */
+    public void setSelectedIndex(int index) {
+        if (index >= 0 && index < options.size()) {
+            selectedIndex = index;
+        }
+    }
 
     @Override
     public void create() {

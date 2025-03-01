@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 public class MapObjects {
 
     // Compile patterns once as static fields for reuse
@@ -21,14 +23,26 @@ public class MapObjects {
 
     }
 
-    /*
+    /**
      * Extract the data from the _data string
      * Returns a list of all extracted elements
-     * Extracts the data from the _data string
-     * Returns a list of all extracted elements
+     * @param data The string containing map data
      * @return ArrayList<GridElement> List of grid elements
      */
     public static ArrayList<GridElement> extractDataFromString(String data)
+    {
+        // By default, don't apply board size when just extracting data (for previews)
+        return extractDataFromString(data, false);
+    }
+
+    /**
+     * Extract the data from the _data string
+     * Returns a list of all extracted elements
+     * @param data The string containing map data
+     * @param applyBoardSize Whether to apply the board size from the save data
+     * @return ArrayList<GridElement> List of grid elements
+     */
+    public static ArrayList<GridElement> extractDataFromString(String data, boolean applyBoardSize)
     {
         int x = 0;
         int y = 0;
@@ -38,9 +52,14 @@ public class MapObjects {
         if (boardSizeMatcher.find()) {
             int boardX = Integer.parseInt(boardSizeMatcher.group(1));
             int boardY = Integer.parseInt(boardSizeMatcher.group(2));
-            // Update and persist board size for this game
-            MainActivity activity = GridGameScreen.gameManager.getActivity();
-            activity.setBoardSize(activity, boardX, boardY);
+            
+            // Only update board size if explicitly requested (when loading a game)
+            if (applyBoardSize) {
+                // Update and persist board size for this game
+                MainActivity activity = GridGameScreen.gameManager.getActivity();
+                Timber.d("Loading board size from save: %dx%d", boardX, boardY);
+                activity.setBoardSize(activity, boardX, boardY);
+            }
         }
 
         ArrayList<GridElement> elements = new ArrayList<>();
