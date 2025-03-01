@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+### Version 19
+- Added minimap display on each save game button for better game identification
+- Implemented share functionality for saved maps
+- Optimized performance by lowering framerate when not actively moving or interacting
+
 ### Version 18.2
 
 ### New Features

@@ -1,0 +1,2 @@
+- Miniaturansicht auf jedem Spielstand-Button hinzugefügt
+- Share-Funktion für gespeicherte Karten

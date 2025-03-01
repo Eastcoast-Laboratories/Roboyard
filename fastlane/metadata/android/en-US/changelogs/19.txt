@@ -1,0 +1,2 @@
+- Added minimap display on each save game button for better game identification
+- Implemented share functionality for saved maps
