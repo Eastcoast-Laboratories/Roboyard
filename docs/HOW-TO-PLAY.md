@@ -16,15 +16,29 @@ Roboyard is an engaging puzzle game where you guide robots through a grid to rea
 
 ## Map Generation
 
-The game generates maps differently depending on the difficulty level:
+The game generates maps differently depending on the difficulty setting:
 
-- **Beginner & Advanced Levels**: 
+- **Beginner Difficulty**:
+  - minimum number of moves for the optimal solution: 6
   - A new random map is generated each time you start a game
-  - This allows for more variety and practice with different configurations
+    - This allows for more variety and practice with different configurations
+  - All walls must be placed at the outer rim or placed as a corner
+  - A multicoloured goal is added, where you are free to choose, which robot to lead to
 
-- **Other Levels**:
+- **Advanced Difficulty**:
+  - minimum number of moves: 8
+  - no multicoloured goals allowed any more
+  - A new random map is generated each time you start a game
+  - There are more walls in the map and not all walls must be placed as a corner
+
+- **Insane Difficulty**:
+  - minimum number of moves: 10
   - The same map persists across restarts
-  - This allows you to continue working on solving the same puzzle
+       (This allows you to continue working on solving the same puzzle)
+  - The goals must not always be placed in a wall-corner any more
+
+- **Impossible Difficulty**:
+  - minimum number of moves: 17
 
 ### Level Structure
 - The game is divided into multiple difficulty sections:
