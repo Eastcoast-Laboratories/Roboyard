@@ -34,6 +34,10 @@ import roboyard.eclabs.Constants;
 import roboyard.eclabs.MainActivity;
 import timber.log.Timber;
 
+/**
+ * Board class represents the game board state including walls, robots, and goals.
+ * Handles board creation, modification, and game state management.
+ */
 public class Board {
 
     public static L10N L10N = new L10N();
@@ -227,6 +231,10 @@ public class Board {
     private int[] robots;               // index=robot, value=position
     private boolean isFreestyleBoard;
 
+    /**
+     * Inner class representing a goal on the board with position, robot, and shape information.
+     * Implements Comparable to allow sorting of goals by robot number, shape, and position.
+     */
     public class Goal implements Comparable<Goal> {
         public final int x, y, position, robotNumber, shape;
         public Goal(int x, int y, int robotNumber, int shape) {
@@ -286,6 +294,11 @@ public class Board {
     }
 
 
+    /**
+     * Gets a list of all goals in a specified quadrant.
+     * @param quadrant Index of the quadrant to get goals from
+     * @return List of goals in the quadrant, sorted by robot number, shape, and position
+     */
     public static List<Goal> getStaticQuadrantGoals(final int quadrant) {
         final List<Goal> result = new ArrayList<>(QUADRANTS[quadrant].goals);
         Collections.sort(result);
@@ -293,6 +306,13 @@ public class Board {
     }
 
 
+    /**
+     * Creates a new board with specified dimensions and number of robots.
+     * Initializes board state including walls, robots, and goals.
+     * @param width Width of the board
+     * @param height Height of the board
+     * @param numRobots Number of robots to place
+     */
     private Board(int width, int height, int numRobots) {
         this.width = width;
         this.height = height;
@@ -314,6 +334,12 @@ public class Board {
     }
 
 
+    /**
+     * Creates an exact copy of an existing board.
+     * Copies all board properties including dimensions, robots, walls, goals, and state.
+     * @param oldBoard Board to clone
+     * @return New board instance that is an exact copy
+     */
     public static Board createClone(final Board oldBoard) {
         // 1. board size, numRobots
         final Board newBoard = new Board(oldBoard.width, oldBoard.height, oldBoard.robots.length);
@@ -336,6 +362,15 @@ public class Board {
     }
 
 
+    /**
+     * Creates a freestyle board with custom dimensions.
+     * Can optionally copy properties from an existing board.
+     * @param oldBoard Optional board to copy properties from
+     * @param width Width of new board
+     * @param height Height of new board
+     * @param numRobots Number of robots on new board
+     * @return New freestyle board instance
+     */
     public static Board createBoardFreestyle(final Board oldBoard, final int width, final int height, final int numRobots) {
         if ((width < WIDTH_MIN) || (height < HEIGHT_MIN) || (width*height > SIZE_MAX)) {
             Timber.d("error in createBoardFreestyle(): invalid parameter: width=" + width + " height=" + height + " size=" + width*height);
@@ -391,6 +426,15 @@ public class Board {
     }
 
 
+    /**
+     * Creates a standard board by combining four quadrants.
+     * @param quadrantNW Northwest quadrant index
+     * @param quadrantNE Northeast quadrant index
+     * @param quadrantSE Southeast quadrant index
+     * @param quadrantSW Southwest quadrant index
+     * @param numRobots Number of robots to place
+     * @return New board composed of specified quadrants
+     */
     public static Board createBoardQuadrants(int quadrantNW, int quadrantNE, int quadrantSE, int quadrantSW, int numRobots) {
         Board b = new Board(WIDTH_STANDARD, HEIGHT_STANDARD, numRobots);
         //add walls and goals
@@ -406,6 +450,11 @@ public class Board {
     }
     
     
+    /**
+     * Creates a board with randomly selected quadrants.
+     * @param numRobots Number of robots to place
+     * @return New board with random quadrant configuration
+     */
     public static Board createBoardRandom(int numRobots) {
         final ArrayList<Integer> indexList = new ArrayList<Integer>();
         for (int i = 0;  i < 4;  ++i) { indexList.add(Integer.valueOf(i)); }
@@ -419,6 +468,12 @@ public class Board {
     }
     
     
+    /**
+     * Creates a board from a game ID string.
+     * Game ID encodes quadrants, robots, and goal information.
+     * @param idStr Game ID string to decode
+     * @return New board based on game ID, or null if invalid
+     */
     public static Board createBoardGameID(final String idStr) {
         Board result = null;
         int index = 0;
@@ -703,6 +758,11 @@ public class Board {
     }
 
     
+    /**
+     * Rotates the board 90 degrees.
+     * @param clockwise If true, rotates clockwise; if false, counterclockwise
+     * @return New board instance with rotated configuration
+     */
     public Board rotate90(final boolean clockwise) {
         final Board newBoard = new Board(this.height, this.width, this.robots.length);
         //quadrants
@@ -799,6 +859,10 @@ public class Board {
     }
     
     
+    /**
+     * Checks if current board configuration is a solution of 0 or 1 move.
+     * @return true if solution, false otherwise
+     */
     public boolean isSolution01() {
         for (int robo = 0;  robo < this.robots.length;  ++robo) {
             if ((this.goal.robotNumber != robo) && (this.goal.robotNumber != -1)) {
@@ -847,6 +911,10 @@ public class Board {
         return false;
     }
     
+    /**
+     * Places robots on the board in default positions.
+     * @param numRobots Number of robots to place
+     */
     public void setRobots(final int numRobots) {
         this.robots = new int[numRobots];
         if (this.isFreestyleBoard()) {
@@ -861,6 +929,10 @@ public class Board {
         }
     }
     
+    /**
+     * Places robots randomly on valid board positions.
+     * Ensures initial position is not an immediate solution.
+     */
     public void setRobotsRandom() {
         do {
             Arrays.fill(this.robots, -1);
@@ -873,6 +945,11 @@ public class Board {
         } while (true == this.isSolution01());
     }
     
+    /**
+     * Sets robot positions from an array.
+     * @param newRobots Array of robot positions
+     * @return true if all positions were valid, false otherwise
+     */
     public boolean setRobots(final int[] newRobots) {
         if (this.robots.length != newRobots.length) { return false; }
         final int[] backup = Arrays.copyOf(this.robots, this.robots.length);
@@ -887,6 +964,13 @@ public class Board {
         return true;
     }
     
+    /**
+     * Places a single robot at specified position.
+     * @param robot Robot index to place
+     * @param position Board position to place robot
+     * @param allowSwapRobots If true, allows swapping with other robots
+     * @return true if placement successful, false otherwise
+     */
     public boolean setRobot(final int robot, final int position, final boolean allowSwapRobots) {
         //invalid robot number?
         //impossible position (out of bounds or obstacle)?
@@ -908,6 +992,10 @@ public class Board {
         }
     }
     
+    /**
+     * Sets a random goal from available goals.
+     * Avoids goals that would make current position a solution.
+     */
     public void setGoalRandom() {
         if (this.goals.isEmpty()) {
             this.goal = null;
@@ -930,6 +1018,11 @@ public class Board {
         }
     }
     
+    /**
+     * Sets active goal at specified position.
+     * @param position Position of goal to activate
+     * @return true if valid goal exists at position, false otherwise
+     */
     public boolean setGoal(final int position) {
         boolean result = false;
         for (Goal g : this.goals) {
@@ -942,6 +1035,13 @@ public class Board {
         return result;
     }
     
+    /**
+     * Adds a new goal to the board.
+     * @param pos Position for goal
+     * @param robot Robot index for goal (-1 for wildcard)
+     * @param shape Shape index for goal
+     * @return This board instance for chaining
+     */
     public Board addGoal(int pos, int robot, int shape) {
         this.removeGoal(pos);
         return this.addGoal(pos%this.width, pos/this.width, robot, shape);
@@ -956,6 +1056,11 @@ public class Board {
         return this;
     }
     
+    /**
+     * Removes goal at specified position.
+     * @param position Position of goal to remove
+     * @return true if goal was removed, false otherwise
+     */
     public boolean removeGoal(final int position) {
         boolean result = false;
         final Iterator<Goal> iter = this.goals.iterator();
@@ -973,6 +1078,9 @@ public class Board {
         return result;
     }
     
+    /**
+     * Removes all goals from the board.
+     */
     public void removeGoals() {
         this.goals.clear();
         this.goal = null;
@@ -1141,10 +1249,19 @@ public class Board {
         return this.robots;
     }
     
+    /**
+     * Gets current active goal.
+     * @return Active goal object
+     */
     public Goal getGoal() {
         return this.goal;
     }
     
+    /**
+     * Gets goal at specified position.
+     * @param position Position to check
+     * @return Goal at position or null if none exists
+     */
     public Goal getGoalAt(final int position) {
         Goal result = null;
         for (Goal g : this.goals) {
@@ -1156,10 +1273,19 @@ public class Board {
         return result;
     }
     
+    /**
+     * Gets quadrant number at specified position.
+     * @param qPos Quadrant position (0=NW, 1=NE, 2=SE, 3=SW)
+     * @return Quadrant number (0-15)
+     */
     public int getQuadrantNum(final int qPos) { //qPos: 0=NW, 1=NE, 2=SE, 3=SW
         return this.quadrants[qPos];
     }
     
+    /**
+     * Gets wall configuration of the board.
+     * @return 2D boolean array representing walls
+     */
     public boolean[][] getWalls() {
         return this.walls;
     }
@@ -1203,9 +1329,16 @@ public class Board {
         return this.robots.length;
     }
     
+    /**
+     * Marks board as freestyle type.
+     */
     public void setFreestyleBoard() {
         this.isFreestyleBoard = true;
     }
+    /**
+     * Checks if board is freestyle type.
+     * @return true if freestyle board, false otherwise
+     */
     public boolean isFreestyleBoard() {
         return this.isFreestyleBoard;
     }
