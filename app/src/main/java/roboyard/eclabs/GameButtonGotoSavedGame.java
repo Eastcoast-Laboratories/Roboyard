@@ -71,7 +71,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             // Add board name
             saveData.append("name:").append(gameScreen.mapName).append(";");
             
-            // Add number of moves if available
+            // Add number of optimal moves if available
             int numMoves = gameScreen.solutionMoves;
             if (numMoves > 0) {
                 saveData.append("num_moves:").append(numMoves).append(";");
@@ -150,8 +150,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 }
             }
         } else {
-            // Disable button if no save data exists
-            // this.setEnabled(false);
+            // nothing to do on empty slots
         }
     }
 
