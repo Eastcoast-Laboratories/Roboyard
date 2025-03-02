@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
 import androidx.core.content.res.ResourcesCompat;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class GridGameScreen extends GameScreen {
     private boolean isGameWon = false;
     private long prevTime;
     private boolean isHistorySaved = false;
-    private static final int HISTORY_SAVE_THRESHOLD = 60; // 1 minute in seconds
+    private static final int HISTORY_SAVE_THRESHOLD = 10; // 10 seconds (reduced from 60)
 
     private int IAMovesNumber = 0;
 
@@ -491,13 +492,13 @@ public class GridGameScreen extends GameScreen {
     public void update(GameManager gameManager){
         super.update(gameManager);
 
-        if(mustStartNext) {
-            Timber.d("mustStartNext");
-            numSolutionClicks = 0;
-            currentMovedSquares = 0;
-
-            // show solution as the 2nd to 5th hint
-            initializeSolutionsAtHints();
+        if(mustStartNext){
+            // Reset the game state
+            timeCpt = 0;
+            nbCoups = 0;
+            numSquares = 0;
+            IAMovesNumber = 0;
+            isHistorySaved = false;
 
             allMoves.clear();
             autoSaved = false;
@@ -524,13 +525,16 @@ public class GridGameScreen extends GameScreen {
 
             mustStartNext = false;
         }
-        if(System.currentTimeMillis() - prevTime > 1000L){
+        
+        // Only update time if the game is not won
+        if(System.currentTimeMillis() - prevTime > 1000L && !isGameWon){
             // update time every second
             timeCpt++;
             prevTime = System.currentTimeMillis();
             
             // Check if we need to save to history
             if (!isHistorySaved && timeCpt >= HISTORY_SAVE_THRESHOLD && !isGameWon) {
+                Timber.d("Time threshold reached (%d seconds), saving to history", timeCpt);
                 saveToHistory();
                 isHistorySaved = true;
             }
@@ -610,11 +614,32 @@ public class GridGameScreen extends GameScreen {
         this.mapPath = mapPath;  // Keep the mapPath to identify it as a saved game
         this.isGameWon = false;  // Reset game won flag
         this.isRandomGame = false;  // Loading a saved game is not a random game
+        
+        if (mapPath == null) {
+            // If mapPath is null, start a new random game instead
+            Timber.d("No saved game path provided, starting random game instead");
+            setRandomGame();
+            return;
+        }
+        
         try {
             String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+            if (saveData == null || saveData.isEmpty()) {
+                Timber.d("Empty save data, starting random game instead");
+                setRandomGame();
+                return;
+            }
+            
             // Use true for applyBoardSize parameter to apply the board size when actually loading a game
             gridElements = MapObjects.extractDataFromString(saveData, true);
             Timber.d("Extracted gridElements size=%d", gridElements.size());
+            
+            if (gridElements.isEmpty()) {
+                Timber.d("No grid elements extracted, starting random game instead");
+                setRandomGame();
+                return;
+            }
+            
             GridGameScreen.setMap(gridElements);
             createGrid();
             buttonSaveSetEnabled(false);  // Disable save button for saved games
@@ -622,6 +647,7 @@ public class GridGameScreen extends GameScreen {
         } catch (Exception e) {
             Timber.d("Error loading saved game: %s", e.getMessage());
             e.printStackTrace();
+            setRandomGame();  // Fall back to random game on error
         }
     }
 
@@ -1001,6 +1027,13 @@ public class GridGameScreen extends GameScreen {
         }
         isGameWon = true;
 
+        // Save to history if we haven't already
+        if (!isHistorySaved) {
+            Timber.d("Game won, saving to history");
+            saveToHistory();
+            isHistorySaved = true;
+        }
+
         SaveManager saveManager = new SaveManager(gameManager.getActivity());
         if(IAMovesNumber > 0)
         {
@@ -1236,6 +1269,10 @@ public class GridGameScreen extends GameScreen {
         ButtonResetRobots br = new ButtonResetRobots();
         br.execute();
 
+        nbCoups = 0;
+        numSquares = 0;
+        allMoves.clear();
+
         moves = solution.getMoves();
         IAMovesNumber = moves.size();
 
@@ -1304,6 +1341,13 @@ public class GridGameScreen extends GameScreen {
             // Initialize history manager if needed
             GameHistoryManager.initialize(gameManager.getActivity());
             
+            // Ensure history directory exists
+            File historyDir = new File(gameManager.getActivity().getFilesDir(), "history");
+            if (!historyDir.exists()) {
+                Timber.d("Creating history directory");
+                historyDir.mkdirs();
+            }
+            
             // Get next available history index
             int historyIndex = GameHistoryManager.getNextHistoryIndex(gameManager.getActivity());
             String historyFileName = "history_" + historyIndex + ".txt";
@@ -1360,8 +1404,15 @@ public class GridGameScreen extends GameScreen {
             GameHistoryManager.addHistoryEntry(gameManager.getActivity(), entry);
             
             Timber.d("Game saved to history: %s", historyPath);
+            
+            // Force a refresh of the SaveGameScreen if it exists
+            GameScreen saveScreen = gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
+            if (saveScreen instanceof SaveGameScreen) {
+                ((SaveGameScreen) saveScreen).refreshScreen();
+            }
         } catch (Exception e) {
             Timber.e("Error saving game to history: %s", e.getMessage());
+            e.printStackTrace();
         }
     }
 

@@ -473,6 +473,19 @@ public class SaveGameScreen extends GameScreen {
         if (gameManager.getInputManager().backOccurred()) {
             gameManager.setGameScreen(gameManager.getPreviousScreenKey());
         }
+        
+        // Check if we're coming from a game screen and ensure we're in load mode
+        int previousScreenKey = gameManager.getPreviousScreenKey();
+        GameScreen previousScreen = gameManager.getScreens().get(previousScreenKey);
+        
+        if (previousScreen instanceof GridGameScreen && 
+            gameManager.getCurrentScreen() == this) {
+            // Set to load mode if we're coming from a game screen
+            if (saveMode) {
+                Timber.d("Coming from game screen, ensuring we're in load mode");
+                setSaveMode(false);
+            }
+        }
     }
 
     @Override
@@ -509,13 +522,16 @@ public class SaveGameScreen extends GameScreen {
     }
     
     /**
-     * Sets whether the screen is in history mode.
-     * @param historyMode true for history mode, false for save/load mode
+     * Set the screen to history mode
      */
     public void setHistoryMode(boolean historyMode) {
         if (this.historyMode != historyMode) {
             this.historyMode = historyMode;
-            // Recreate buttons when mode changes
+            
+            // Clear all existing buttons to prevent color preservation
+            instances.clear(); // TODO: does not work
+            
+            // Recreate all buttons
             createButtons();
         }
     }
@@ -532,5 +548,13 @@ public class SaveGameScreen extends GameScreen {
      */
     public void showHistoryTab() {
         setHistoryMode(true);
+    }
+    
+    /**
+     * Force refresh the screen buttons
+     */
+    public void refreshScreen() {
+        Timber.d("Refreshing SaveGameScreen");
+        createButtons();
     }
 }

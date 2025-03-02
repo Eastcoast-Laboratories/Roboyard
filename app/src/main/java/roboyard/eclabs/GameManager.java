@@ -2,6 +2,8 @@ package roboyard.eclabs;
 
 import android.util.SparseArray;
 
+import timber.log.Timber;
+
 /**
  * Manages the game screens and provides methods to interact with them.
  * Created by Pierre on 04/02/2015.
@@ -141,12 +143,12 @@ public class GameManager {
     }
 
     /**
-     * Returns the currently active game screen.
+     * Gets the current screen.
      *
-     * @return The current GameScreen.
+     * @return The current screen.
      */
     public GameScreen getCurrentScreen() {
-        return this.currentScreen;
+        return currentScreen;
     }
 
     /**
@@ -175,9 +177,9 @@ public class GameManager {
     }
 
     /**
-     * Modifies the current game screen, allowing to switch to another screen.
+     * Sets the current game screen.
      *
-     * @param nextScreen Index of the new game screen.
+     * @param nextScreen The screen to set as current screen.
      */
     public void setGameScreen(int nextScreen) {
         GameScreen nextGameScreen = screens.get(nextScreen);
@@ -190,6 +192,21 @@ public class GameManager {
         if (nextGameScreen != previousScreen && nextGameScreen != currentScreen) {
             previousScreen = currentScreen;
         }
+        
+        // Special handling for SaveGameScreen
+        if (nextGameScreen instanceof SaveGameScreen) {
+            SaveGameScreen saveScreen = (SaveGameScreen) nextGameScreen;
+            
+            // If we're coming from a game screen, ensure we're in load mode
+            if (currentScreen instanceof GridGameScreen) {
+                Timber.d("Setting SaveGameScreen to load mode when coming from game");
+                saveScreen.setSaveMode(false);
+            }
+            
+            // Always refresh the screen when showing it
+            saveScreen.refreshScreen();
+        }
+        
         currentScreen = nextGameScreen;
     }
 
