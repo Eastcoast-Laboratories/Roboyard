@@ -167,6 +167,14 @@ public class RenderManager {
         this.brush.setTextSize(s);
     }
 
+    /**
+     * Get the current text size
+     * @return The current text size
+     */
+    public int getTextSize() {
+        return (int) this.brush.getTextSize();
+    }
+
     public Rect drawLinkText(int x, int y, String text, int color, int textSize) {
         Rect bounds = new Rect();
         brush.setColor(color);
@@ -209,6 +217,20 @@ public class RenderManager {
      */
     public void drawRect(float left, float top, float right, float bottom) {
         this.target.drawRect(left, top, right, bottom, this.brush);
+    }
+
+    /**
+     * Fill a rectangle with the current color
+     * @param left Left coordinate
+     * @param top Top coordinate
+     * @param right Right coordinate
+     * @param bottom Bottom coordinate
+     */
+    public void fillRect(float left, float top, float right, float bottom) {
+        Paint.Style oldStyle = this.brush.getStyle();
+        this.brush.setStyle(Paint.Style.FILL);
+        this.target.drawRect(left, top, right, bottom, this.brush);
+        this.brush.setStyle(oldStyle);
     }
 
     /**

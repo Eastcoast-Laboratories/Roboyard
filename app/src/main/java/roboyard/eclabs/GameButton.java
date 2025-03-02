@@ -121,4 +121,20 @@ public abstract class GameButton implements IGameObject {
     public void destroy(){
 
     }
+
+    /**
+     * Get the width of the button
+     * @return The width
+     */
+    public int getWidth() {
+        return w;
+    }
+    
+    /**
+     * Get the height of the button
+     * @return The height
+     */
+    public int getHeight() {
+        return h;
+    }
 }

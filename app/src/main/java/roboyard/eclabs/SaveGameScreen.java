@@ -3,6 +3,7 @@ package roboyard.eclabs;
 import android.graphics.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -23,7 +24,14 @@ public class SaveGameScreen extends GameScreen {
     private int autosaveButtonY;
     private int backButtonX;
     private int backButtonY;
+    private int saveTabButtonX;
+    private int saveTabButtonY;
+    private int historyTabButtonX;
+    private int historyTabButtonY;
+    private int tabButtonWidth;
+    private int tabButtonHeight;
     private boolean saveMode = false;
+    private boolean historyMode = false; // Flag to indicate if we're in history view mode
 
     // Cache for unique string to color mapping to avoid repeated SHA-256 hashing
     private static Map<String, String> colorCache = new HashMap<>();
@@ -87,6 +95,14 @@ public class SaveGameScreen extends GameScreen {
         autosaveButtonY = (int) ((45 + ts) * ratioH);
         backButtonX = (int) (814 * ratioW);
         backButtonY = (int) (1650 * ratioH);
+        
+        // Calculate positions for tab buttons
+        tabButtonWidth = (int) (200 * ratioW);
+        tabButtonHeight = (int) (80 * ratioH);
+        saveTabButtonX = (int) (100 * ratioW);
+        saveTabButtonY = (int) (20 * ratioH);
+        historyTabButtonX = (int) (320 * ratioW);
+        historyTabButtonY = (int) (20 * ratioH);
 
         Timber.d(" loading saved maps");
         
@@ -149,20 +165,171 @@ public class SaveGameScreen extends GameScreen {
      * Create buttons for saving and loading games.
      */
     public void createButtons() {
-
         int iconsize = 144;
 
         init();
-        ArrayList<GameButtonGotoSavedGame> aRemove = new ArrayList<>();
-        for (Object currentObject : this.instances) {
-            if (currentObject.getClass() == GameButtonGotoSavedGame.class) {
-                aRemove.add((GameButtonGotoSavedGame) currentObject);
+        
+        // Clear all existing buttons
+        ArrayList<IGameObject> objectsToRemove = new ArrayList<>();
+        for (IGameObject currentObject : instances) {
+            if (currentObject instanceof IGameObject) {
+                objectsToRemove.add((IGameObject) currentObject);
             }
         }
-        for (GameButtonGotoSavedGame p : aRemove) {
-            this.instances.remove(p);
+        for (IGameObject obj : objectsToRemove) {
+            instances.remove(obj);
         }
+        
+        // Add tab buttons
+        final SaveGameScreen thisScreen = this;
+        
+        // Saves tab button
+        GameButtonTab savesTabButton = new GameButtonTab(
+            saveTabButtonX, 
+            saveTabButtonY, 
+            tabButtonWidth, 
+            tabButtonHeight, 
+            "Saves", 
+            !historyMode,
+            new Runnable() {
+                @Override
+                public void run() {
+                    thisScreen.showSavesTab();
+                }
+            }
+        );
+        savesTabButton.create();
+        instances.add(savesTabButton);
+        
+        // History tab button
+        GameButtonTab historyTabButton = new GameButtonTab(
+            historyTabButtonX, 
+            historyTabButtonY, 
+            tabButtonWidth, 
+            tabButtonHeight, 
+            "History", 
+            historyMode,
+            new Runnable() {
+                @Override
+                public void run() {
+                    thisScreen.showHistoryTab();
+                }
+            }
+        );
+        historyTabButton.create();
+        instances.add(historyTabButton);
 
+        // Add back button
+        instances.add(new GameButtonGotoBack(
+            backButtonX, 
+            backButtonY, 
+            (int)(iconSize * Math.min(ratioW, ratioH)), 
+            (int)(iconSize * Math.min(ratioW, ratioH)), 
+            R.drawable.bt_back_up, 
+            R.drawable.bt_back_down));
+            
+        if (historyMode) {
+            // Create history buttons
+            createHistoryButtons(iconsize);
+        } else {
+            // Create save/load buttons
+            createSaveButtons(iconsize);
+        }
+    }
+    
+    /**
+     * Create buttons for history mode
+     */
+    private void createHistoryButtons(int iconsize) {
+        // Initialize the history manager
+        GameHistoryManager.initialize(gameManager.getActivity());
+        
+        // Get all history entries
+        List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(gameManager.getActivity());
+        
+        if (historyEntries.isEmpty()) {
+            // We'll show a message in the draw method
+            return;
+        }
+        
+        // Use minimum of width/height ratio to maintain circular shape
+        float buttonRatio = Math.min(ratioW, ratioH);
+        int buttonSize = (int)(iconsize * buttonRatio);
+
+        // Calculate positions for history entries (vertical list)
+        int startY = (int) (120 * ratioH);  // Start below the tabs
+        int stepY = buttonSize + (int) (20 * ratioH);  // Vertical spacing
+        int startX = (int) (55 * ratioW);   // Left margin
+        
+        // Create buttons for each history entry
+        for (int i = 0; i < historyEntries.size(); i++) {
+            GameHistoryEntry entry = historyEntries.get(i);
+            int y = startY + (i * stepY);
+            
+            // Skip if we're going to render off-screen
+            if (y > gameManager.getScreenHeight() - buttonSize) {
+                break;
+            }
+            
+            // Create button for loading the history entry
+            GameButtonGotoHistoryGame historyButton = new GameButtonGotoHistoryGame(
+                startX,
+                y,
+                buttonSize,
+                buttonSize,
+                entry,
+                i
+            );
+            historyButton.create();
+            instances.add(historyButton);
+            
+            // Add action buttons (delete, promote, share)
+            
+            // Delete button
+            int actionButtonSize = buttonSize / 3;
+            int actionX = startX + buttonSize + (int) (150 * ratioW);
+            
+            GameButtonHistoryAction deleteButton = new GameButtonHistoryAction(
+                actionX,
+                y,
+                actionButtonSize,
+                GameButtonHistoryAction.ACTION_DELETE,
+                i,
+                entry
+            );
+            deleteButton.create();
+            instances.add(deleteButton);
+            
+            // Promote button
+            GameButtonHistoryAction promoteButton = new GameButtonHistoryAction(
+                actionX + actionButtonSize + 10,
+                y,
+                actionButtonSize,
+                GameButtonHistoryAction.ACTION_PROMOTE,
+                i,
+                entry
+            );
+            promoteButton.create();
+            instances.add(promoteButton);
+            
+            // Share button
+            GameButtonHistoryAction shareButton = new GameButtonHistoryAction(
+                actionX + (actionButtonSize + 10) * 2,
+                y,
+                actionButtonSize,
+                GameButtonHistoryAction.ACTION_SHARE,
+                i,
+                entry
+            );
+            shareButton.create();
+            instances.add(shareButton);
+        }
+    }
+    
+    /**
+     * Create buttons for save/load mode
+     */
+    private void createSaveButtons(int iconsize) {
         String mapPath = "";
         SaveManager saver = new SaveManager(gameManager.getActivity());
 
@@ -206,7 +373,7 @@ public class SaveGameScreen extends GameScreen {
                 );
             }
             saveButton.create();
-            this.instances.add(saveButton);
+            instances.add(saveButton);
 
             // Add share button for this save slot
             String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
@@ -222,18 +389,9 @@ public class SaveGameScreen extends GameScreen {
                     buttonSize
                 );
                 shareButton.create();
-                this.instances.add(shareButton);
+                instances.add(shareButton);
             }
         }
-
-        // Add back button
-        this.instances.add(new GameButtonGotoBack(
-            backButtonX, 
-            backButtonY, 
-            buttonSize, 
-            buttonSize, 
-            R.drawable.bt_back_up, 
-            R.drawable.bt_back_down));
     }
 
     /**
@@ -260,13 +418,16 @@ public class SaveGameScreen extends GameScreen {
 
         renderManager.setTextSize((int) (0.4 * ts));
         
-        // Show different text based on save/load mode
-        GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
-        if (gameScreen != null && gameScreen.isRandomGame()) {
-            renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select slot to save map");
+        // Show different text based on current mode
+        if (historyMode) {
+            renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Game History");
         } else {
-            renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Load map");
-            //+ ((gameScreen.isRandomGame() == true) ? " (random)" : "keins") + "!" + ((gameScreen != null) ? " (gamescreen ist nicht null)" : ""));
+            GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
+            if (gameScreen != null && gameScreen.isRandomGame()) {
+                renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select slot to save map");
+            } else {
+                renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Load map");
+            }
         }
 
         // Draw save slots
@@ -289,6 +450,17 @@ public class SaveGameScreen extends GameScreen {
                 renderManager.setTextSize((int) (0.37 * ts));
                 renderManager.setColor(Color.parseColor("#000000"));
                 renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
+            }
+        }
+
+        if (historyMode) {
+            // Draw history message if no history entries
+            List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(gameManager.getActivity());
+            if (historyEntries.isEmpty()) {
+                renderManager.setTextSize((int) (0.4 * ts));
+                renderManager.setColor(Color.BLACK);
+                renderManager.drawText((int) (20 * ratioW), (int) (120 * ratioH), 
+                        "No history entries yet. Play a game for at least one minute to create one.");
             }
         }
 
@@ -326,5 +498,39 @@ public class SaveGameScreen extends GameScreen {
             // Recreate buttons when mode changes
             createButtons();
         }
+    }
+    
+    /**
+     * Returns whether the screen is in history mode.
+     * @return true if in history mode, false if in save/load mode
+     */
+    public boolean isHistoryMode() {
+        return historyMode;
+    }
+    
+    /**
+     * Sets whether the screen is in history mode.
+     * @param historyMode true for history mode, false for save/load mode
+     */
+    public void setHistoryMode(boolean historyMode) {
+        if (this.historyMode != historyMode) {
+            this.historyMode = historyMode;
+            // Recreate buttons when mode changes
+            createButtons();
+        }
+    }
+    
+    /**
+     * Switch to saves tab
+     */
+    public void showSavesTab() {
+        setHistoryMode(false);
+    }
+    
+    /**
+     * Switch to history tab
+     */
+    public void showHistoryTab() {
+        setHistoryMode(true);
     }
 }

@@ -362,23 +362,23 @@ Each history entry should display:
 The implementation will proceed in the following order:
 
 1. **Core Data Structure and Storage (Phase 1)**
-   - Create the `GameHistoryEntry` class
-   - Implement the `GameHistoryManager` for handling history entries
-   - Add methods to FileReadWrite for handling history files
-   - Implement JSON serialization/deserialization for history metadata
+   - Create the `GameHistoryEntry` class (done)
+   - Implement the `GameHistoryManager` for handling history entries (done)
+   - Add methods to FileReadWrite for handling history files (done)
+   - Implement JSON serialization/deserialization for history metadata (done)
 
 2. **Time Tracking and Auto-Saving (Phase 2)**
-   - time tracking is already implemented into GridGameScreen - use that timer
-   - Implement automatic saving after 1 minute of gameplay
-   - add a stop of the timer, when the user reached the goal or pressed the back button or the next button. Then update the history save entry with the new time and moves  data.
+   - time tracking is already implemented into GridGameScreen - use that timer (done)
+   - Implement automatic saving after 1 minute of gameplay (done)
+   - add a stop of the timer, when the user reached the goal or pressed the back button or the next button. Then update the history save entry with the new time and moves data. (done)
    - Create minimap previews for history entries
    - Test saving and loading of history entries
 
 3. **UI Implementation (Phase 3)**
    - Create UI assets for tabs and buttons
-   - Modify SaveGameScreen to include history tab
-   - Implement history entry display with metadata
-   - Add action buttons (Load, Save, Delete, Share)
+   - Modify SaveGameScreen to include history tab (done)
+   - Implement history entry display with metadata (done)
+   - Add action buttons (Load, Save, Delete, Share) (done)
 
 4. **Integration and Testing (Phase 4)**
    - Integrate with existing save game functionality

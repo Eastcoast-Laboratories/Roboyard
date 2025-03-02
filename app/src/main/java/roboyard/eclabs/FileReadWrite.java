@@ -148,4 +148,93 @@ public class FileReadWrite {
         // Timber.d("Map loaded: " + buffer.toString());
         return buffer.toString();
     }
+
+    /**
+     * Check if a private data file exists
+     * @param activity
+     * @param fileLocation
+     * @return true if the file exists, false otherwise
+     */
+    public static boolean privateDataExists(Activity activity, String fileLocation) {
+        try {
+            File file = activity.getApplicationContext().getFileStreamPath(fileLocation);
+            return file != null && file.exists();
+        } catch (Exception e) {
+            Timber.d("Exception in privateDataExists: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if a private data file exists
+     * @param activity The activity context
+     * @param fileName The name of the file to check
+     * @return True if the file exists, false otherwise
+     */
+    public static boolean privateDataFileExists(Activity activity, String fileName) {
+        try {
+            File file = new File(activity.getFilesDir(), fileName);
+            return file.exists();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Delete a private data file
+     * @param activity
+     * @param fileLocation
+     * @return true if the file was deleted, false otherwise
+     */
+    public static boolean deletePrivateData(Activity activity, String fileLocation) {
+        try {
+            File file = activity.getApplicationContext().getFileStreamPath(fileLocation);
+            if (file != null && file.exists()) {
+                return file.delete();
+            }
+            return false;
+        } catch (Exception e) {
+            Timber.d("Exception in deletePrivateData: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Create a directory in the app's private storage
+     * @param activity
+     * @param dirName
+     * @return true if the directory was created, false otherwise
+     */
+    public static boolean createPrivateDirectory(Activity activity, String dirName) {
+        try {
+            File dir = new File(activity.getFilesDir(), dirName);
+            if (!dir.exists()) {
+                return dir.mkdir();
+            }
+            return true;
+        } catch (Exception e) {
+            Timber.d("Exception in createPrivateDirectory: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * List all files in a directory in the app's private storage
+     * @param activity
+     * @param dirName
+     * @return array of file names, or null if the directory doesn't exist
+     */
+    public static String[] listPrivateDirectory(Activity activity, String dirName) {
+        try {
+            File dir = new File(activity.getFilesDir(), dirName);
+            if (dir.exists() && dir.isDirectory()) {
+                return dir.list();
+            }
+            return null;
+        } catch (Exception e) {
+            Timber.d("Exception in listPrivateDirectory: " + e.getMessage());
+            return null;
+        }
+    }
 }

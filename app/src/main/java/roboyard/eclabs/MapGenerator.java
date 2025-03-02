@@ -39,10 +39,12 @@ public class MapGenerator {
         // Calculate walls per quadrant based on board width
         wallsPerQuadrant = MainActivity.getBoardWidth()/4;  // Default: quarter of board width
 
-        if(GridGameScreen.getLevel().equals("Beginner")){ // Difficulty Beginner
+        // Check difficulty level
+        int level = GridGameScreen.getLevel();
+        if(level == 0){ // Difficulty Beginner
             generateNewMapEachTime=true;
         } else {
-            if(GridGameScreen.getLevel().equals("Advanced")){
+            if(level == 1){ // Advanced
                 generateNewMapEachTime=true;
             }
             if (generateNewMapEachTime) {
@@ -61,7 +63,7 @@ public class MapGenerator {
             loneWallsAllowed = true;
         }
 
-        if(GridGameScreen.getLevel().equals("Insane") || GridGameScreen.getLevel().equals("Impossible")) {
+        if(level == 2 || level == 3) {
             generateNewMapEachTime=false; // keep the current map over restarts
             // generateNewMapEachTime=true; // DEBUG!!! remove to release
             targetMustBeInCorner = false;
@@ -70,7 +72,7 @@ public class MapGenerator {
             maxWallsInOneHorizontalRow = 5;
             wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/3);
         }
-        if(GridGameScreen.getLevel().equals("Impossible")) {
+        if(level == 3) {
             wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/2.3);
         }
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {

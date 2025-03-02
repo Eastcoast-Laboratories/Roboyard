@@ -70,12 +70,10 @@ public class GridGameScreen extends GameScreen {
 
     private int timeCpt = 0;
     private int nbCoups = 0;
-    private int numSquares = 0;
-    private int currentMovedSquares = 0;
+    private boolean isGameWon = false;
     private long prevTime;
-
-    private static String levelDifficulty="Beginner";
-    private static ArrayList<GridElement> currentMap;
+    private boolean isHistorySaved = false;
+    private static final int HISTORY_SAVE_THRESHOLD = 60; // 1 minute in seconds
 
     private int IAMovesNumber = 0;
 
@@ -96,15 +94,21 @@ public class GridGameScreen extends GameScreen {
 
     private final Preferences preferences = new Preferences();
 
-    private boolean isGameWon = false;
-
-    boolean isRandomGame = false;
+    private boolean isRandomGame = false;
 
     private int textColorHighlight = Color.parseColor("#aaaaaa");
     private int textColorNormal = Color.GRAY;
     
     String mapName = "";
     GameSolution solution;
+
+    private static ArrayList<GridElement> map = new ArrayList<>();
+    private static int levelDifficulty = 0;
+    private static ArrayList<GridElement> currentMap = new ArrayList<>();
+
+    // Variables for tracking moved squares
+    private int currentMovedSquares = 0;
+    private int numSquares = 0;
 
     public boolean isRandomGame() {
         return isRandomGame;
@@ -162,22 +166,26 @@ public class GridGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.robot_red_left);
     }
 
-    public static String getLevel() {
+    public static int getLevel() {
         return GridGameScreen.levelDifficulty;
     }
 
     public static void setDifficulty(String levelDifficulty) {
-        GridGameScreen.levelDifficulty = levelDifficulty;
+        int difficulty = 0;
         if(levelDifficulty.equals("Beginner")) {
+            difficulty = 0;
             GridGameScreen.goodPuzzleMinMoves = 6;
             GridGameScreen.simplePuzzleMinMoves = 4;
         } else if(levelDifficulty.equals("Advanced")) {
+            difficulty = 1;
             GridGameScreen.goodPuzzleMinMoves = 8;
             GridGameScreen.simplePuzzleMinMoves = 6;
         } else if(levelDifficulty.equals("Insane")) {
+            difficulty = 2;
             GridGameScreen.goodPuzzleMinMoves = 10;
             GridGameScreen.simplePuzzleMinMoves = 10;
         } else if(levelDifficulty.equals("Impossible")) {
+            difficulty = 3;
             GridGameScreen.goodPuzzleMinMoves = 17;
             GridGameScreen.simplePuzzleMinMoves = 17;
             for (int i = 0; i < 3; i++) {
@@ -185,6 +193,7 @@ public class GridGameScreen extends GameScreen {
                 GridGameScreen.requestToast = "Level Impossible will generate a fitting puzzle. This can take a while. In case the solver gets stuck, press >>";
             }
         }
+        GridGameScreen.levelDifficulty = difficulty;
         Timber.d("Level difficulty set to: " + levelDifficulty + " goodPuzzleMinMoves: " + GridGameScreen.goodPuzzleMinMoves + " simplePuzzleMinMoves: " + GridGameScreen.simplePuzzleMinMoves);
     }
 
@@ -198,6 +207,10 @@ public class GridGameScreen extends GameScreen {
 
     @Override
     public void create() {
+        Timber.d("GridGameScreen.create()");
+        gridElements = new ArrayList<>();
+        prevTime = System.currentTimeMillis();
+        isHistorySaved = false;
         numSolutionClicks = 0;
         gmi = new GameMovementInterface(gameManager);
 
@@ -387,7 +400,7 @@ public class GridGameScreen extends GameScreen {
                 requestToast = "Finally solved in " + solutionMoves + " moves. Restarting...";
             }
             mustStartNext = true;
-        } else if (nbCoups == 0 && isSolved && solutionMoves < goodPuzzleMinMoves && !levelDifficulty.equals("Beginner")) {
+        } else if (nbCoups == 0 && isSolved && solutionMoves < goodPuzzleMinMoves && getLevel() != 0) {
             // still simple, show a hint that this is solved with less than ... moves
             // TODO: change font (still crashes):
             //  renderManager.drawText(textMarginLeft, posY, "Number of moves < " + goodPuzzleMinMoves, "FiraMono-Bold", gameManager.getActivity());
@@ -405,7 +418,7 @@ public class GridGameScreen extends GameScreen {
                 }
             } else {
                 renderManager.setColor(UIConstants.TEXT_COLOR_NORMAL);
-                if (getLevel().equals("Beginner") && levelNum < 0) {
+                if (getLevel() == 0 && levelNum < 0) {
                     renderManager.drawText(textMarginLeft, posY, "Too complicated");
                     renderManager.drawText(textMarginLeft, posY + lineHeight, "... restarting!");
                     mustStartNext = true;
@@ -515,9 +528,20 @@ public class GridGameScreen extends GameScreen {
             // update time every second
             timeCpt++;
             prevTime = System.currentTimeMillis();
+            
+            // Check if we need to save to history
+            if (!isHistorySaved && timeCpt >= HISTORY_SAVE_THRESHOLD && !isGameWon) {
+                saveToHistory();
+                isHistorySaved = true;
+            }
         }
         this.gmi.update(gameManager);
         if(gameManager.getInputManager().backOccurred()){
+            // Update history entry if it exists before exiting
+            if (isHistorySaved) {
+                updateHistoryEntry();
+            }
+            
             // If movement interface is active, trigger the movement
             if (this.gmi.display) {
                 // if robot is on the left side of the screen, trigger EAST
@@ -872,21 +896,24 @@ public class GridGameScreen extends GameScreen {
 
         for(Object instance : this.instances)
         {
-            if(instance.getClass() == p.getClass() && p != instance && canMove)
+            if(instance.getClass() == GamePiece.class)
             {
-                switch(direction){
-                    case 0:     // haut
-                        canMove = collision((GamePiece) instance, xDestination, yDestination - 1, canMove);
-                        break;
-                    case 1:     // droite
-                        canMove = collision((GamePiece) instance, xDestination+1, yDestination, canMove);
-                        break;
-                    case 2:     // bas
-                        canMove = collision((GamePiece) instance, xDestination, yDestination + 1, canMove);
-                        break;
-                    case 3:     // gauche
-                        canMove = collision((GamePiece) instance, xDestination-1, yDestination, canMove);
-                        break;
+                if(instance != p && canMove)
+                {
+                    switch(direction){
+                        case 0:     // haut
+                            canMove = collision((GamePiece) instance, xDestination, yDestination - 1, canMove);
+                            break;
+                        case 1:     // droite
+                            canMove = collision((GamePiece) instance, xDestination+1, yDestination, canMove);
+                            break;
+                        case 2:     // bas
+                            canMove = collision((GamePiece) instance, xDestination, yDestination + 1, canMove);
+                            break;
+                        case 3:     // gauche
+                            canMove = collision((GamePiece) instance, xDestination-1, yDestination, canMove);
+                            break;
+                    }
                 }
             }
         }
@@ -988,6 +1015,9 @@ public class GridGameScreen extends GameScreen {
         LevelChoiceGameScreen.invalidateMapCache(mapPath); // Invalidate only this specific map in the cache
         updatePlayedMaps();
         // set mapCachHasToBeUpdated in Level
+        if (isHistorySaved) {
+            updateHistoryEntry();
+        }
     }
 
     private void updatePlayedMaps()
@@ -1262,5 +1292,105 @@ public class GridGameScreen extends GameScreen {
             // If parsing fails, return -1
         }
         return -1;
+    }
+
+    /**
+     * Save the current game state to history
+     */
+    private void saveToHistory() {
+        try {
+            Timber.d("Saving game to history after %d seconds of play", timeCpt);
+            
+            // Initialize history manager if needed
+            GameHistoryManager.initialize(gameManager.getActivity());
+            
+            // Get next available history index
+            int historyIndex = GameHistoryManager.getNextHistoryIndex(gameManager.getActivity());
+            String historyFileName = "history_" + historyIndex + ".txt";
+            
+            // Build save data using the same format as regular saves
+            StringBuilder saveData = new StringBuilder();
+            
+            // Add board name
+            String gameName = mapName != null ? mapName : "Game " + historyIndex;
+            saveData.append("name:").append(gameName).append(";");
+            
+            // Add timestamp
+            saveData.append("timestamp:").append(System.currentTimeMillis()).append(";");
+            
+            // Add play duration
+            saveData.append("duration:").append(timeCpt).append(";");
+            
+            // Add number of moves the player made
+            saveData.append("moves:").append(nbCoups).append(";");
+            
+            // Add number of optimal moves if available
+            if (solutionMoves > 0) {
+                saveData.append("num_moves:").append(solutionMoves).append(";");
+            }
+            
+            // Add board size
+            saveData.append("board:").append(MainActivity.getBoardWidth()).append(",")
+                   .append(MainActivity.getBoardHeight()).append(";");
+            
+            // Add the grid elements data using the existing method
+            saveData.append(MapObjects.createStringFromList(gridElements, false));
+            
+            // Write save data
+            String historyPath = "history/" + historyFileName;
+            FileReadWrite.writePrivateData(gameManager.getActivity(), historyPath, saveData.toString());
+            
+            // Create preview image path
+            String previewFileName = "history_" + historyIndex + "_preview.png";
+            String previewPath = "history/" + previewFileName;
+            
+            // Create and save history entry metadata
+            GameHistoryEntry entry = new GameHistoryEntry(
+                historyFileName,
+                gameName,
+                System.currentTimeMillis(),
+                timeCpt,
+                nbCoups,
+                solutionMoves,
+                MainActivity.getBoardWidth() + "x" + MainActivity.getBoardHeight(),
+                previewFileName
+            );
+            
+            // Add entry to history index
+            GameHistoryManager.addHistoryEntry(gameManager.getActivity(), entry);
+            
+            Timber.d("Game saved to history: %s", historyPath);
+        } catch (Exception e) {
+            Timber.e("Error saving game to history: %s", e.getMessage());
+        }
+    }
+
+    private void updateHistoryEntry() {
+        try {
+            // Get history index
+            int historyIndex = GameHistoryManager.getHistoryIndex(gameManager.getActivity(), "history_" + mapPath);
+            if (historyIndex < 0) {
+                Timber.d("No history entry found for game: %s", mapPath);
+                return;
+            }
+            
+            // Update history entry
+            GameHistoryEntry entry = GameHistoryManager.getHistoryEntry(gameManager.getActivity(), historyIndex);
+            if (entry == null) {
+                Timber.d("History entry is null for index: %d", historyIndex);
+                return;
+            }
+            
+            entry.setMovesMade(nbCoups);
+            entry.setOptimalMoves(solutionMoves);
+            entry.setPlayDuration(timeCpt);
+            
+            // Save updated history entry
+            GameHistoryManager.updateHistoryEntry(gameManager.getActivity(), entry);
+            
+            Timber.d("Updated history entry for game: %s", entry.getMapPath());
+        } catch (Exception e) {
+            Timber.e("Error updating history entry: %s", e.getMessage());
+        }
     }
 }
