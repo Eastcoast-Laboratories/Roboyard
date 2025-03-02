@@ -63,8 +63,13 @@ public abstract class GameButton implements IGameObject {
     @Override
     public void load(RenderManager renderManager) {
         if (imageUpDrawable == null) {
-            renderManager.loadImage(this.imageUp);
-            renderManager.loadImage(this.imageDown);
+            // Only load images if they have valid resource IDs
+            if (this.imageUp != 0) {
+                renderManager.loadImage(this.imageUp);
+            }
+            if (this.imageDown != 0) {
+                renderManager.loadImage(this.imageDown);
+            }
         }
     }
 
@@ -72,23 +77,24 @@ public abstract class GameButton implements IGameObject {
     public void draw(RenderManager renderManager) {
         renderManager.setColor(Color.WHITE);
         if(!enabled){
-            renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDisabled);
+            if (this.imageDisabled != 0) {
+                renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDisabled);
+            }
             return;
         }
         if(btDown){
             if (imageDownDrawable != null) {
                 renderManager.drawDrawable(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDownDrawable);
-            } else {
+            } else if (this.imageDown != 0) {
                 renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageDown);
             }
         } else {
             if (imageUpDrawable != null) {
                 renderManager.drawDrawable(this.x, this.y, this.x + this.w, this.y + this.h, this.imageUpDrawable);
-            } else {
+            } else if (this.imageUp != 0) {
                 renderManager.drawImage(this.x, this.y, this.x + this.w, this.y + this.h, this.imageUp);
             }
         }
-
     }
 
 

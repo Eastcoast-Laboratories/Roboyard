@@ -118,10 +118,14 @@ public class FileReadWrite {
     }
 
     public static String readPrivateData(Activity activity, String fileLocation) {
+        if (activity == null) {
+            Timber.d("Activity is null in readPrivateData");
+            return "";
+        }
+        
         StringBuilder buffer = new StringBuilder();
         FileInputStream fin = null;
         try {
-
             File file = activity.getApplicationContext().getFileStreamPath(fileLocation);
             if(file == null || !file.exists()) {
                 return "";
@@ -134,14 +138,14 @@ public class FileReadWrite {
                 buffer.append((char)c);
             }
         } catch (Exception e) {
-            Timber.d("Exception readPrivateData: " + e.toString());
+            Timber.d("Exception readPrivateData: %s", e.toString());
             return "";
         } finally {
             if (fin != null) {
                 try {
                     fin.close();
                 } catch (Exception e) {
-                    Timber.d("Error closing stream: " + e.getMessage());
+                    Timber.d("Error closing stream: %s", e.getMessage());
                 }
             }
         }
@@ -168,15 +172,20 @@ public class FileReadWrite {
     /**
      * Check if a private data file exists
      * @param activity The activity context
-     * @param fileName The name of the file to check
+     * @param filename The name of the file to check
      * @return True if the file exists, false otherwise
      */
-    public static boolean privateDataFileExists(Activity activity, String fileName) {
+    public static boolean privateDataFileExists(Activity activity, String filename) {
+        if (activity == null) {
+            Timber.d("Activity is null in privateDataFileExists");
+            return false;
+        }
+        
         try {
-            File file = new File(activity.getFilesDir(), fileName);
+            File file = new File(activity.getApplicationContext().getFilesDir(), filename);
             return file.exists();
         } catch (Exception e) {
-            e.printStackTrace();
+            Timber.d("Exception in privateDataFileExists: %s", e.getMessage());
             return false;
         }
     }

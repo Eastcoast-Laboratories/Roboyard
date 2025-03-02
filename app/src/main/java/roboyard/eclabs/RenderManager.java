@@ -12,6 +12,8 @@ import android.util.SparseArray;
 
 import java.util.Random;
 
+import timber.log.Timber;
+
 /**
  * Manages rendering operations such as drawing shapes, images, and text on a canvas.
  */
@@ -96,7 +98,13 @@ public class RenderManager {
      * @param image The index of the image to load.
      */
     public void loadImage(int image){
-        this.resourceMap.append(image, this.resources.getDrawable(image));
+        if (image != 0) {
+            try {
+                this.resourceMap.append(image, this.resources.getDrawable(image));
+            } catch (Exception e) {
+                Timber.e("Error loading image resource %d: %s", image, e.getMessage());
+            }
+        }
     }
 
     /**
