@@ -28,6 +28,8 @@ public class SaveGameScreen extends GameScreen {
     private int saveTabButtonY;
     private int historyTabButtonX;
     private int historyTabButtonY;
+    private int loadOrSaveX;
+    private int loadOrSaveY;
     private int tabButtonWidth;
     private int tabButtonHeight;
     private boolean saveMode = false;
@@ -90,6 +92,10 @@ public class SaveGameScreen extends GameScreen {
             buttonPositionsY[i] = (int) ((45 + ts + (stepY * row)) * ratioH);
         }
 
+        // the position of the text "Load map" or "Select slot to save map"
+        loadOrSaveX = (int) ((470) * ratioW);
+        loadOrSaveY = (int) ((38) * ratioH);
+
         // Calculate positions for autosave button and back button
         autosaveButtonX = (int) (55 * ratioW);
         autosaveButtonY = (int) ((45 + ts) * ratioH);
@@ -99,10 +105,11 @@ public class SaveGameScreen extends GameScreen {
         // Calculate positions for tab buttons
         tabButtonWidth = (int) (200 * ratioW);
         tabButtonHeight = (int) (80 * ratioH);
-        saveTabButtonX = (int) (100 * ratioW);
-        saveTabButtonY = (int) (20 * ratioH);
-        historyTabButtonX = (int) (320 * ratioW);
-        historyTabButtonY = (int) (20 * ratioH);
+        saveTabButtonX = (int) (20 * ratioW);
+        saveTabButtonY = (int) (0 * ratioH);
+        historyTabButtonX = (int) (240 * ratioW);
+        historyTabButtonY = (int) (0 * ratioH);
+
 
         Timber.d(" loading saved maps");
         
@@ -420,40 +427,40 @@ public class SaveGameScreen extends GameScreen {
         
         // Show different text based on current mode
         if (historyMode) {
-            renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Game History");
+            renderManager.drawText((int) (loadOrSaveX), (int) (loadOrSaveY * ratioH), "Game History");
         } else {
             GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
             if (gameScreen != null && gameScreen.isRandomGame()) {
-                renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Select slot to save map");
+                renderManager.drawText((int) (loadOrSaveX), (int) (loadOrSaveY * ratioH), "Select slot to save map");
             } else {
-                renderManager.drawText((int) (20 * ratioW), (int) (55 * ratioH), "Load map");
+                renderManager.drawText((int) (loadOrSaveX), (int) (loadOrSaveY * ratioH), "Load map");
             }
         }
 
-        // Draw save slots
-        for (int i = 0; i < buttonPositionsX.length; i++) {
-            if (i == 0) {
-                renderManager.drawText((int) (20 * ratioW), (int) ((42 + ts) * ratioH)-5, "Autosave");
-            } else {
-                renderManager.setColor(Color.parseColor(mapUniqueColor[i]));
-                int moveleft=16;
+        if (!historyMode) {
+            // Draw save slots
+            for (int i = 0; i < buttonPositionsX.length; i++) {
+                if (i == 0) {
+                    renderManager.drawText((int) (20 * ratioW), (int) ((42 + ts) * ratioH)-5, "Autosave");
+                } else {
+                    renderManager.setColor(Color.parseColor(mapUniqueColor[i]));
+                    int moveleft=16;
 
-                if (mapUniqueString[i].length() > 0){
-                    // unicode string with 7 filled squares
-                    String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
-                    for (int j = 0; j < 8; j++) {
-                        renderManager.drawText(buttonPositionsX[i] - moveleft, (int)(buttonPositionsY[i] + (-11 + j * 22)*ratioH), bar);
+                    if (mapUniqueString[i].length() > 0){
+                        // unicode string with 7 filled squares
+                        String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
+                        for (int j = 0; j < 8; j++) {
+                            renderManager.drawText(buttonPositionsX[i] - moveleft, (int)(buttonPositionsY[i] + (-11 + j * 22)*ratioH), bar);
+                        }
+
                     }
 
+                    renderManager.setTextSize((int) (0.37 * ts));
+                    renderManager.setColor(Color.parseColor("#000000"));
+                    renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
                 }
-
-                renderManager.setTextSize((int) (0.37 * ts));
-                renderManager.setColor(Color.parseColor("#000000"));
-                renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
             }
-        }
-
-        if (historyMode) {
+        }else{
             // Draw history message if no history entries
             List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(gameManager.getActivity());
             if (historyEntries.isEmpty()) {
@@ -512,15 +519,7 @@ public class SaveGameScreen extends GameScreen {
             createButtons();
         }
     }
-    
-    /**
-     * Returns whether the screen is in history mode.
-     * @return true if in history mode, false if in save/load mode
-     */
-    public boolean isHistoryMode() {
-        return historyMode;
-    }
-    
+
     /**
      * Set the screen to history mode
      */
