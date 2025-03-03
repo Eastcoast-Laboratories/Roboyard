@@ -111,10 +111,6 @@ public class GridGameScreen extends GameScreen {
     private int currentMovedSquares = 0;
     private int numSquares = 0;
 
-    public boolean isRandomGame() {
-        return isRandomGame;
-    }
-
     /**
      * Constructor for GridGameScreen - creates and initializes the game grid screen
      * 
@@ -1437,5 +1433,21 @@ public class GridGameScreen extends GameScreen {
         } catch (Exception e) {
             Timber.e("Error updating history entry: %s", e.getMessage());
         }
+    }
+
+    /**
+     * Check if this is a random game
+     * @return true if random game, false otherwise
+     */
+    public boolean isRandomGame() {
+        return isRandomGame;
+    }
+    
+    /**
+     * Get the map name
+     * @return The map name
+     */
+    public String getMapName() {
+        return mapPath;
     }
 }

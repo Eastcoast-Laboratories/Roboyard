@@ -273,4 +273,31 @@ public class RenderManager {
     public Drawable getDrawable(int resourceId) {
         return this.resourceMap.get(resourceId);
     }
+
+    /**
+     * Draws a bitmap directly to the canvas at the specified coordinates.
+     * @param bitmap The bitmap to draw
+     * @param left Left coordinate
+     * @param top Top coordinate
+     * @param right Right coordinate
+     * @param bottom Bottom coordinate
+     */
+    public void drawBitmap(Bitmap bitmap, int left, int top, int right, int bottom) {
+        if (bitmap != null) {
+            Rect destRect = new Rect(left, top, right, bottom);
+            this.target.drawBitmap(bitmap, null, destRect, this.brush);
+        }
+    }
+
+    /**
+     * Draws a rounded rectangle directly to the canvas at the specified coordinates.
+     * @param x Left coordinate
+     * @param y Top coordinate
+     * @param i Right coordinate
+     * @param i1 Bottom coordinate
+     * @param cornerRadius The corner radius
+     */
+    public void drawRoundRect(int x, int y, int i, int i1, int cornerRadius) {
+        this.target.drawRoundRect(x, y, i, i1, cornerRadius, cornerRadius, this.brush);
+    }
 }

@@ -13,10 +13,12 @@ public class GameButtonTab extends GameButton {
     private final String text;
     private final boolean isActive;
     private final Runnable onClickAction;
-    
-    private static final int ACTIVE_COLOR = Color.parseColor("#4CAF50");  // Green
-    private static final int INACTIVE_COLOR = Color.parseColor("#AAAAAA"); // Gray
-    private static final int TEXT_COLOR = Color.WHITE;
+
+
+    private static final int ACTIVE_COLOR = Color.BLACK;
+    private static final int INACTIVE_COLOR = Color.WHITE;
+    private static final int ACTIVE_TEXT_COLOR = Color.WHITE;
+    private static final int INACTIVE_TEXT_COLOR = Color.BLACK;
     private static final int CORNER_RADIUS = 10;
     
     /**
@@ -49,14 +51,10 @@ public class GameButtonTab extends GameButton {
     public void draw(RenderManager renderManager) {
         // Draw button background
         renderManager.setColor(isActive ? ACTIVE_COLOR : INACTIVE_COLOR);
-        renderManager.fillRect(x, y, x + this.getWidth(), y + this.getHeight());
-        
-        // Draw button border
-        renderManager.setColor(Color.BLACK);
-        renderManager.drawRect(x, y, x + this.getWidth(), y + this.getHeight());
+        renderManager.drawRoundRect(x, y, x + this.getWidth(), y + this.getHeight(), CORNER_RADIUS);
         
         // Draw text
-        renderManager.setColor(TEXT_COLOR);
+        renderManager.setColor(isActive ? ACTIVE_TEXT_COLOR : INACTIVE_TEXT_COLOR);
         renderManager.setTextSize((int)(this.getHeight() / 2));
         
         // Center text

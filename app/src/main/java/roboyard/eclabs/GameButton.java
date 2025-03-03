@@ -143,4 +143,20 @@ public abstract class GameButton implements IGameObject {
     public int getHeight() {
         return h;
     }
+    
+    /**
+     * Get the X position of the button
+     * @return The X position
+     */
+    public int getPositionX() {
+        return x;
+    }
+    
+    /**
+     * Get the Y position of the button
+     * @return The Y position
+     */
+    public int getPositionY() {
+        return y;
+    }
 }

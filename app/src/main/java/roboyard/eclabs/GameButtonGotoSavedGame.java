@@ -35,6 +35,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     private final int parentButtonSize;
     private ScreenLayout layout;
     private Context context;
+    private boolean isSaveMode;
 
     public GameButtonGotoSavedGame(Context context, int x, int y, int w, int h, int imageUp, int imageDown, String mapPath, int buttonNumber,
                                   int parentButtonX, int parentButtonY, int parentButtonSize) {
@@ -47,6 +48,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         this.parentButtonY = parentButtonY;
         this.parentButtonSize = parentButtonSize;
         this.context = context;
+        this.isSaveMode = false; // Default to load mode
     }
 
     /**
@@ -56,11 +58,9 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     @Override
     public void onClick(GameManager gameManager) {
         GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
-        boolean isSavemode = false;
-        if (gameScreen != null && gameScreen.isRandomGame()) {
-            isSavemode = true;
-        }
-        if (isSavemode) {
+        
+        // Check if we're in save mode
+        if (isSaveMode || (gameScreen != null && gameScreen.isRandomGame())) {
             // Screen to save or overwrite a savegame
             // Timber.d(" Saving game to slot: " + mapPath);
             ArrayList<GridElement> gridElements = gameScreen.getGridElements();
@@ -127,6 +127,24 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 gameScreen.buttonSaveSetEnabled(false);
             }
         }
+    }
+
+    /**
+     * Handles the click event of the button.
+     * @deprecated Use onClick(GameManager) instead
+     */
+    @Deprecated
+    public void onClick() {
+        // Deprecated method, use onClick(GameManager) instead
+        // This is kept for backward compatibility
+    }
+
+    /**
+     * Set whether this button is in save mode
+     * @param saveMode true for save mode, false for load mode
+     */
+    public void setSaveMode(boolean saveMode) {
+        this.isSaveMode = saveMode;
     }
 
     @Override
@@ -313,5 +331,69 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", mapPath + "\n");
             }
         }
+    }
+
+    /**
+     * Get the map path associated with this button
+     * @return the map path
+     */
+    public String getMapPath() {
+        return mapPath;
+    }
+
+    /**
+     * Get the button number associated with this button
+     * @return the button number
+     */
+    public int getButtonNumber() {
+        return buttonNumber;
+    }
+
+    /**
+     * Get the parent button X position associated with this button
+     * @return the parent button X position
+     */
+    public int getParentButtonX() {
+        return parentButtonX;
+    }
+
+    /**
+     * Get the parent button Y position associated with this button
+     * @return the parent button Y position
+     */
+    public int getParentButtonY() {
+        return parentButtonY;
+    }
+
+    /**
+     * Get the parent button size associated with this button
+     * @return the parent button size
+     */
+    public int getParentButtonSize() {
+        return parentButtonSize;
+    }
+
+    /**
+     * Get whether this button is in save mode
+     * @return true if in save mode, false otherwise
+     */
+    public boolean isSaveMode() {
+        return isSaveMode;
+    }
+
+    /**
+     * Get the map name associated with this button
+     * @return the map name
+     */
+    public String getMapName() {
+        return mapPath;
+    }
+    
+    /**
+     * Get the slot ID for this button
+     * @return the slot ID
+     */
+    public int getSlotId() {
+        return buttonNumber;
     }
 }
