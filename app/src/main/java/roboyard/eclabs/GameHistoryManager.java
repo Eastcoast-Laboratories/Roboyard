@@ -41,11 +41,10 @@ public class GameHistoryManager {
             }
 
             // Create empty history index file if it doesn't exist
-            String indexPath = HISTORY_DIR + "/" + HISTORY_INDEX_FILE;
-            if (!FileReadWrite.privateDataExists(activity, indexPath)) {
+            if (!FileReadWrite.privateDataExists(activity, HISTORY_INDEX_FILE)) {
                 JSONObject indexJson = new JSONObject();
                 indexJson.put("historyEntries", new JSONArray());
-                FileReadWrite.writePrivateData(activity, indexPath, indexJson.toString());
+                FileReadWrite.writePrivateData(activity, HISTORY_INDEX_FILE, indexJson.toString());
                 Timber.d("Created empty history index file");
             }
         } catch (Exception e) {
@@ -115,8 +114,7 @@ public class GameHistoryManager {
     public static List<GameHistoryEntry> getHistoryEntries(Activity activity) {
         List<GameHistoryEntry> entries = new ArrayList<>();
         try {
-            String indexPath = HISTORY_DIR + "/" + HISTORY_INDEX_FILE;
-            String indexJson = FileReadWrite.readPrivateData(activity, indexPath);
+            String indexJson = FileReadWrite.readPrivateData(activity, HISTORY_INDEX_FILE);
             
             if (indexJson != null && !indexJson.isEmpty()) {
                 JSONObject root = new JSONObject(indexJson);
@@ -182,13 +180,11 @@ public class GameHistoryManager {
     private static void deleteHistoryFiles(Activity activity, GameHistoryEntry entry) {
         try {
             // Delete map file
-            String mapPath = HISTORY_DIR + "/" + entry.getMapPath();
-            FileReadWrite.deletePrivateData(activity, mapPath);
+            FileReadWrite.deletePrivateData(activity, entry.getMapPath());
             
             // Delete preview image if it exists
             if (entry.getPreviewImagePath() != null) {
-                String previewPath = HISTORY_DIR + "/" + entry.getPreviewImagePath();
-                FileReadWrite.deletePrivateData(activity, previewPath);
+                FileReadWrite.deletePrivateData(activity, entry.getPreviewImagePath());
             }
         } catch (Exception e) {
             Timber.e("Error deleting history files: %s", e.getMessage());
@@ -219,8 +215,7 @@ public class GameHistoryManager {
             
             root.put("historyEntries", entriesArray);
             
-            String indexPath = HISTORY_DIR + "/" + HISTORY_INDEX_FILE;
-            FileReadWrite.writePrivateData(activity, indexPath, root.toString());
+            FileReadWrite.writePrivateData(activity, HISTORY_INDEX_FILE, root.toString());
             
             Timber.d("Saved history index with %d entries", entries.size());
         } catch (Exception e) {
@@ -242,7 +237,7 @@ public class GameHistoryManager {
     public static void promoteToSave(Activity activity, GameHistoryEntry entry, int saveSlot) {
         try {
             // Read the history file
-            String historyPath = HISTORY_DIR + "/" + entry.getMapPath();
+            String historyPath = entry.getMapPath();
             String saveData = FileReadWrite.readPrivateData(activity, historyPath);
             
             if (saveData != null && !saveData.isEmpty()) {
@@ -252,7 +247,7 @@ public class GameHistoryManager {
                 
                 // Copy preview image if it exists
                 if (entry.getPreviewImagePath() != null) {
-                    String previewPath = HISTORY_DIR + "/" + entry.getPreviewImagePath();
+                    String previewPath = entry.getPreviewImagePath();
                     String previewData = FileReadWrite.readPrivateData(activity, previewPath);
                     if (previewData != null && !previewData.isEmpty()) {
                         String savePreviewPath = "map" + saveSlot + "_preview.png";
@@ -374,7 +369,7 @@ public class GameHistoryManager {
             }
             
             // Read history data
-            String historyPath = "history/" + entry.getMapPath();
+            String historyPath = entry.getMapPath();
             String historyData = FileReadWrite.readPrivateData(activity, historyPath);
             if (historyData == null || historyData.isEmpty()) {
                 Timber.e("Failed to read history data: %s", historyPath);

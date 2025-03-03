@@ -1342,11 +1342,7 @@ public class GridGameScreen extends GameScreen {
             GameHistoryManager.initialize(gameManager.getActivity());
             
             // Ensure history directory exists
-            File historyDir = new File(gameManager.getActivity().getFilesDir(), "history");
-            if (!historyDir.exists()) {
-                Timber.d("Creating history directory");
-                historyDir.mkdirs();
-            }
+            FileReadWrite.createPrivateDirectory(gameManager.getActivity(), "history");
             
             // Get next available history index
             int historyIndex = GameHistoryManager.getNextHistoryIndex(gameManager.getActivity());
@@ -1380,13 +1376,11 @@ public class GridGameScreen extends GameScreen {
             // Add the grid elements data using the existing method
             saveData.append(MapObjects.createStringFromList(gridElements, false));
             
-            // Write save data
-            String historyPath = "history/" + historyFileName;
-            FileReadWrite.writePrivateData(gameManager.getActivity(), historyPath, saveData.toString());
+            // Write save data - use just the filename, not the path
+            FileReadWrite.writePrivateData(gameManager.getActivity(), "history_" + historyIndex + ".txt", saveData.toString());
             
             // Create preview image path
             String previewFileName = "history_" + historyIndex + "_preview.png";
-            String previewPath = "history/" + previewFileName;
             
             // Create and save history entry metadata
             GameHistoryEntry entry = new GameHistoryEntry(
@@ -1403,7 +1397,7 @@ public class GridGameScreen extends GameScreen {
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(gameManager.getActivity(), entry);
             
-            Timber.d("Game saved to history: %s", historyPath);
+            Timber.d("Game saved to history: %s", historyFileName);
             
             // Force a refresh of the SaveGameScreen if it exists
             GameScreen saveScreen = gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
