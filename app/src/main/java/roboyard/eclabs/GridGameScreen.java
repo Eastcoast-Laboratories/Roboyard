@@ -420,7 +420,16 @@ public class GridGameScreen extends GameScreen {
                     renderManager.drawText(textMarginLeft, posY + lineHeight, "... restarting!");
                     mustStartNext = true;
                 } else {
-                    renderManager.drawText(textMarginLeft, posY, "AI solving...");
+                    String solvingText;
+                    // create a ascii spinner with thesse chars: . o O o
+                    if (timeCpt % 4 == 0) {
+                        solvingText = "AI solving .";
+                    } else if (timeCpt % 4 == 1 || timeCpt % 4 == 3) {
+                        solvingText = "AI solving o";
+                    } else {
+                        solvingText = "AI solving O";
+                    }
+                    renderManager.drawText(textMarginLeft, posY, solvingText);
                 }
             }
         }
