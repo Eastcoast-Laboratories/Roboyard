@@ -79,14 +79,17 @@ public class FileReadWrite {
      * @param activity
      * @param fileLocation
      * @param content
+     * @return true if write was successful, false otherwise
      */
-    public static void writePrivateData(Activity activity, String fileLocation, String content) {
+    public static boolean writePrivateData(Activity activity, String fileLocation, String content) {
         FileOutputStream fOut = null;
         try {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
             fOut.write(content.getBytes());
+            return true;
         } catch (Exception e) {
             Timber.d("Exception in writePrivateData: " + e.getMessage());
+            return false;
         } finally {
             if (fOut != null) {
                 try {
