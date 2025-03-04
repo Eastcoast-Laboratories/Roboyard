@@ -73,7 +73,7 @@ public class GameButtonGotoHistoryGame extends GameButton {
      */
     public void loadMinimap() {
         if (minimapBitmap == null && activity != null) {
-            String historyPath = "history/" + historyEntry.getMapPath();
+            String historyPath = historyEntry.getMapPath();
             
             // Read the save data from the history entry
             String saveData = FileReadWrite.readPrivateData(activity, historyPath);
@@ -119,7 +119,7 @@ public class GameButtonGotoHistoryGame extends GameButton {
         Timber.d("History game button clicked: %s", historyEntry.getMapName());
         
         Activity activity = gameManager.getActivity();
-        String historyPath = "history/" + historyEntry.getMapPath();
+        String historyPath = historyEntry.getMapPath();
         
         // Read the save data from the history entry
         String saveData = FileReadWrite.readPrivateData(activity, historyPath);

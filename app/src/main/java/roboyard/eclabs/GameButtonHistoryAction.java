@@ -71,7 +71,7 @@ public class GameButtonHistoryAction extends GameButton {
                 
             case ACTION_SHARE:
                 // Share history entry
-                String historyPath = "history/" + historyEntry.getMapPath();
+                String historyPath = historyEntry.getMapPath();
                 String saveData = FileReadWrite.readPrivateData(activity, historyPath);
                 if (saveData != null && !saveData.isEmpty()) {
                     // Use existing share functionality if available
