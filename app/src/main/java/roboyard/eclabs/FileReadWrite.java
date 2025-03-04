@@ -49,20 +49,25 @@ public class FileReadWrite {
     }
 
     /**
-     * Writes the entire string to the specified file in append mode
-     * The data created with this method is private to the application
-     * Therefore, it is not accessible by the user and is deleted if the application is uninstalled
-     * @param activity
-     * @param fileLocation
-     * @param content
+     * Append private data to a file.
+     * @param activity The activity.
+     * @param fileLocation The file location.
+     * @param content The data.
+     * @return True if successful, false otherwise.
      */
-    public static void appendPrivateData(Activity activity, String fileLocation, String content) {
+    public static boolean appendPrivateData(Activity activity, String fileLocation, String content) {
+        if (activity == null) {
+            Timber.d("Activity is null in appendPrivateData for file: %s", fileLocation);
+            return false;
+        }
         FileOutputStream fOut = null;
         try {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_APPEND);
             fOut.write(content.getBytes());
+            return true;
         } catch (Exception e) {
-            Timber.d("Exception in appendPrivateData: " + e.getMessage());
+            Timber.d("Exception in appendPrivateData for file: " + fileLocation + ": " + e.getMessage());
+            return false;
         } finally {
             if (fOut != null) {
                 try {
@@ -82,13 +87,17 @@ public class FileReadWrite {
      * @return true if write was successful, false otherwise
      */
     public static boolean writePrivateData(Activity activity, String fileLocation, String content) {
+        if (activity == null) {
+            Timber.d("Activity is null in writePrivateData for file: %s", fileLocation);
+            return false;
+        }
         FileOutputStream fOut = null;
         try {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
             fOut.write(content.getBytes());
             return true;
         } catch (Exception e) {
-            Timber.d("Exception in writePrivateData: " + e.getMessage());
+            Timber.d("Exception in writePrivateData for file: " + fileLocation + ": " + e.getMessage());
             return false;
         } finally {
             if (fOut != null) {
@@ -120,9 +129,15 @@ public class FileReadWrite {
         }
     }
 
+    /**
+     * Read private data from a file.
+     * @param activity The activity.
+     * @param fileLocation The file location.
+     * @return The data.
+     */
     public static String readPrivateData(Activity activity, String fileLocation) {
         if (activity == null) {
-            Timber.d("Activity is null in readPrivateData");
+            Timber.d("Activity is null in readPrivateData for file: %s", fileLocation);
             return "";
         }
         
