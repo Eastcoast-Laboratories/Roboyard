@@ -42,8 +42,8 @@ public class GameButtonShareMap extends GameButton {
             );
         }
         // Position the share button at the bottom left of the parent button
-        this.x = parentButtonX + layout.x(5);
-        this.y = parentButtonY + parentButtonSize + layout.y(1);
+        this.x = parentButtonX - layout.x(15);
+        this.y = parentButtonY + parentButtonSize - layout.y(33);
 
         // Let parent class handle click detection
         super.update(gameManager);

@@ -32,8 +32,11 @@ public class SaveGameScreen extends GameScreen {
     private int tabButtonWidth;
     private int tabButtonHeight;
     private boolean saveMode = false;
-    private boolean loadMode = true; // Default to load mode
-    private boolean historyMode = false; // Flag to indicate if we're in history view mode
+    private boolean loadMode = true; 
+    private boolean historyMode = false;
+    private int historyButtonSize;
+    boolean dontAutoSwitchTabs = false;
+    private boolean skipModeSwitch = false;
 
     // Cache for unique string to color mapping to avoid repeated SHA-256 hashing
     private static Map<String, String> colorCache = new HashMap<>();
@@ -56,7 +59,7 @@ public class SaveGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_up_saved);
         gameManager.getRenderManager().loadImage(R.drawable.bt_start_down_saved);
         gameManager.getRenderManager().loadImage(R.drawable.share);
-        saveMode = false; // Start in load mode
+        saveMode = false; 
         init();
     }
 
@@ -128,6 +131,8 @@ public class SaveGameScreen extends GameScreen {
         // the position of the text "Load map" or "Select slot to save map"
         loadOrSaveX = (int) ((555) * ratioW);
         loadOrSaveY = (int) ((55) * ratioH);
+
+        historyButtonSize  = 155;
     }
     
     /**
@@ -231,6 +236,7 @@ public class SaveGameScreen extends GameScreen {
                 @Override
                 public void run() {
                     thisScreen.showLoadTab();
+                    dontAutoSwitchTabs = true;
                 }
             }
         );
@@ -265,7 +271,7 @@ public class SaveGameScreen extends GameScreen {
             
         if (historyMode) {
             // Create history buttons
-            createHistoryButtons(iconSize);
+            createHistoryButtons();
         } else {
             // Create save/load buttons
             createSaveButtons(iconSize);
@@ -275,7 +281,7 @@ public class SaveGameScreen extends GameScreen {
     /**
      * Create buttons for history mode
      */
-    private void createHistoryButtons(int iconsize) {
+    private void createHistoryButtons() {
         // Initialize the history manager
         GameHistoryManager.initialize(gameManager.getActivity());
         
@@ -289,7 +295,7 @@ public class SaveGameScreen extends GameScreen {
         
         // Use minimum of width/height ratio to maintain circular shape
         float buttonRatio = Math.min(ratioW, ratioH);
-        int buttonSize = (int)(iconsize * buttonRatio);
+        int buttonSize = (int)(historyButtonSize * buttonRatio);
 
         // Calculate positions for history entries (vertical list)
         int startY = (int) (120 * ratioH);  // Start below the tabs
@@ -319,13 +325,13 @@ public class SaveGameScreen extends GameScreen {
             instances.add(historyButton);
             
             // Explicitly load the minimap
-            historyButton.loadMinimap();
+            historyButton.loadMinimap(); // TODO: does not show
             
             // Add action buttons (delete, promote, share)
             
             // Delete button
-            int actionButtonSize = buttonSize / 3;
-            int actionX = startX + buttonSize + (int) (150 * ratioW);
+            int actionButtonSize = buttonSize / 2;
+            int actionX = startX + buttonSize + (int) (350 * ratioW);
             
             GameButtonHistoryAction deleteButton = new GameButtonHistoryAction(
                 actionX,
@@ -471,7 +477,7 @@ public class SaveGameScreen extends GameScreen {
 
                 renderManager.setTextSize((int) (0.37 * ts));
                 renderManager.setColor(Color.parseColor("#000000"));
-                renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, i + ". " + mapUniqueString[i]);
+                renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, (i+1) + ". " + mapUniqueString[i]);
             }
         }else{
             // Draw history message if no history entries
@@ -492,7 +498,14 @@ public class SaveGameScreen extends GameScreen {
             gameManager.setGameScreen(gameManager.getPreviousScreenKey());
         }
         
-        // Check if we're coming from a game screen and ensure we're in load mode
+        // If we should skip mode switching, don't do any automatic mode changes
+        if (skipModeSwitch) {
+            // Just update the buttons with the current mode
+            updateButtonModes();
+            return;
+        }
+        
+        // Check if we're coming from a game screen and ensure we're in the correct mode
         int previousScreenKey = gameManager.getPreviousScreenKey();
         GameScreen previousScreen = gameManager.getScreens().get(previousScreenKey);
         
@@ -500,21 +513,32 @@ public class SaveGameScreen extends GameScreen {
             gameManager.getCurrentScreen() == this) {
             GridGameScreen gameScreen = (GridGameScreen) previousScreen;
             
-            // If coming from a random game, go to save mode
-            if (gameScreen.isRandomGame()) {
-                if (!saveMode) {
-                    Timber.d("Coming from random game screen, switching to save mode");
-                    showSavesTab();
-                }
-            } else {
-                // Otherwise go to load mode
-                if (!loadMode) {
-                    Timber.d("Coming from game screen, switching to load mode");
-                    showLoadTab();
+            // If coming from a random game AND we haven't already saved a game, go to save mode
+            if(!dontAutoSwitchTabs){
+                if (gameScreen.isRandomGame()) {
+                    if (!saveMode) {
+                        Timber.d("Coming from random game screen, switching to save mode");
+                        showSavesTab();
+                    }
+                } else if(!isLoadMode()){
+                    // Otherwise go to load mode
+                    if (!loadMode) {
+                        Timber.d("Coming from game screen, switching to load mode");
+                        showLoadTab();
+                    }
                 }
             }
+
         }
         
+        // Update button modes
+        updateButtonModes();
+    }
+    
+    /**
+     * Update the save mode on all save buttons
+     */
+    private void updateButtonModes() {
         // Update save mode on all save buttons
         for (IGameObject element : instances) {
             if (element instanceof GameButtonGotoSavedGame) {
@@ -605,6 +629,9 @@ public class SaveGameScreen extends GameScreen {
         loadMode = false;
         historyMode = false;
         
+        // Reset the skip flag when explicitly changing modes
+        skipModeSwitch = false;
+        
         // Update button states
         createButtons();
     }
@@ -616,6 +643,9 @@ public class SaveGameScreen extends GameScreen {
         saveMode = false;
         loadMode = true;
         historyMode = false;
+        
+        // Reset the skip flag when explicitly changing modes
+        skipModeSwitch = false;
         
         // Update button states
         createButtons();
@@ -638,6 +668,38 @@ public class SaveGameScreen extends GameScreen {
      */
     public void refreshScreen() {
         Timber.d("Refreshing SaveGameScreen");
+        // Clear instances and recreate all buttons
+        instances.clear();
         createButtons();
+    }
+    
+    /**
+     * Refresh a specific save slot button
+     * @param slotNumber The slot number to refresh
+     */
+    public void refreshSaveSlot(int slotNumber) {
+        // Find and refresh the specific save slot button
+        for (IGameObject element : instances) {
+            if (element instanceof GameButtonGotoSavedGame) {
+                GameButtonGotoSavedGame saveButton = (GameButtonGotoSavedGame) element;
+                if (saveButton.getButtonNumber() == slotNumber) {
+                    saveButton.create();
+                    break;
+                }
+            }
+        }
+        Timber.d("Refreshed save slot button: %d", slotNumber);
+    }
+    
+    /**
+     * Set the skipModeSwitch flag
+     * @param skip true to skip automatic mode switching, false otherwise
+     */
+    public void setSkipModeSwitch(boolean skip) {
+        skipModeSwitch = skip;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 }

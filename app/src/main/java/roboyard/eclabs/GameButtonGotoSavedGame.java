@@ -17,8 +17,6 @@ import android.app.Activity;
 
 import androidx.core.content.res.ResourcesCompat;
 
-import roboyard.pm.ia.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
 import timber.log.Timber;
 
 /**
@@ -35,7 +33,9 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     private final int parentButtonSize;
     private ScreenLayout layout;
     private Context context;
+    private Activity activity;
     private boolean isSaveMode;
+    private SaveGameScreen saveGameScreen;
 
     public GameButtonGotoSavedGame(Context context, int x, int y, int w, int h, int imageUp, int imageDown, String mapPath, int buttonNumber,
                                   int parentButtonX, int parentButtonY, int parentButtonSize) {
@@ -48,6 +48,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         this.parentButtonY = parentButtonY;
         this.parentButtonSize = parentButtonSize;
         this.context = context;
+        this.activity = (Activity)context;
         this.isSaveMode = false; // Default to load mode
     }
 
@@ -57,8 +58,13 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
      */
     @Override
     public void onClick(GameManager gameManager) {
-        GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
+        // Update activity reference
+        activity = gameManager.getActivity();
         
+        GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
+        SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
+        this.saveGameScreen = saveGameScreen;
+
         // Check if we're in save mode
         if (isSaveMode || (gameScreen != null && gameScreen.isRandomGame())) {
             // Screen to save or overwrite a savegame
@@ -94,28 +100,40 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
 
             // Add the grid elements data
             saveData.append(MapObjects.createStringFromList(gridElements, false));
-            
-            try {
+
+            if(saveData.length()<50){
+                // no game started, since last app start
+            } else try {
                 // Write save data directly (will overwrite if file exists)
                 FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
-                // Timber.d(" wrote " + saveData.length() + " bytes to " + mapPath);
+                Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath);
                 
                 // Add to saved games list if needed
                 addMapsSaved(gameManager);
 
                 // Refresh save game screen buttons
-                SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
                 if (saveGameScreen != null) {
+                    // Clear caches for this map
                     SaveGameScreen.clearCachesForMap(mapPath);
-                    saveGameScreen.createButtons();
-                    // Timber.d(" Refreshed save game screen buttons");
+                    
+                    // Switch to load mode after saving
+                    saveGameScreen.showLoadTab();
+                    
+                    // Set flags to prevent mode switching back
+                    saveGameScreen.dontAutoSwitchTabs = true;
+                    Timber.d(" just saved game");
+                    // Refresh the specific save slot button first
+                    saveGameScreen.refreshSaveSlot(buttonNumber);
+                    
+                    // Then refresh the entire screen to update other UI elements
+                    saveGameScreen.refreshScreen();
                 }
                 
                 // Keep track of the game screen and explicitly set it as previous
                 gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
                 gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
             } catch (Exception e) {
-                // Timber.d(" Error saving game: " + e.getMessage());
+                Timber.d(" Error saving game: " + e.getMessage());
             }
         } else {
             // Screen to select a savegame
@@ -144,14 +162,25 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
      * @param saveMode true for save mode, false for load mode
      */
     public void setSaveMode(boolean saveMode) {
-        this.isSaveMode = saveMode;
+        isSaveMode = saveMode;
+        // Make sure we update the activity reference when changing modes
+        if (saveGameScreen != null && saveGameScreen.getGameManager() != null) {
+            activity = saveGameScreen.getGameManager().getActivity();
+        }
     }
 
     @Override
     public void create() {
         super.create();
         // Check if save file exists and create minimap if it does
-        Activity activity = (Activity)context;
+        if (activity == null && context instanceof Activity) {
+            activity = (Activity)context;
+        }
+
+        if(mapPath == null || mapPath.isEmpty()) {
+            // nothing to do on empty slots
+            return;
+        }
         String saveData = FileReadWrite.readPrivateData(activity, mapPath);
         if (saveData != null && !saveData.isEmpty()) {
             String minimapPath = createMiniMap(saveData, context);
@@ -334,43 +363,20 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     }
 
     /**
-     * Get the map path associated with this button
-     * @return the map path
+     * Set the SaveGameScreen reference
+     * @param saveGameScreen The SaveGameScreen instance
      */
-    public String getMapPath() {
-        return mapPath;
+    public void setSaveGameScreen(SaveGameScreen saveGameScreen) {
+        // This method is used for testing
+        this.saveGameScreen = saveGameScreen;
     }
 
     /**
-     * Get the button number associated with this button
-     * @return the button number
+     * Get the button number for this save slot
+     * @return The button number
      */
     public int getButtonNumber() {
         return buttonNumber;
-    }
-
-    /**
-     * Get the parent button X position associated with this button
-     * @return the parent button X position
-     */
-    public int getParentButtonX() {
-        return parentButtonX;
-    }
-
-    /**
-     * Get the parent button Y position associated with this button
-     * @return the parent button Y position
-     */
-    public int getParentButtonY() {
-        return parentButtonY;
-    }
-
-    /**
-     * Get the parent button size associated with this button
-     * @return the parent button size
-     */
-    public int getParentButtonSize() {
-        return parentButtonSize;
     }
 
     /**

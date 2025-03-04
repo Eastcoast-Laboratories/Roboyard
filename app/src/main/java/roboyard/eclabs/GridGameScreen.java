@@ -423,11 +423,11 @@ public class GridGameScreen extends GameScreen {
                     String solvingText;
                     // create a ascii spinner with thesse chars: . o O o
                     if (timeCpt % 4 == 0) {
-                        solvingText = "AI solving .";
+                        solvingText = "AI solving /";
                     } else if (timeCpt % 4 == 1 || timeCpt % 4 == 3) {
-                        solvingText = "AI solving o";
+                        solvingText = "AI solving –";
                     } else {
-                        solvingText = "AI solving O";
+                        solvingText = "AI solving \\";
                     }
                     renderManager.drawText(textMarginLeft, posY, solvingText);
                 }
@@ -1403,12 +1403,6 @@ public class GridGameScreen extends GameScreen {
             GameHistoryManager.addHistoryEntry(gameManager.getActivity(), entry);
             
             Timber.d("Game saved to history: %s", historyFileName);
-            
-            // Force a refresh of the SaveGameScreen if it exists
-            GameScreen saveScreen = gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
-            if (saveScreen instanceof SaveGameScreen) {
-                ((SaveGameScreen) saveScreen).refreshScreen();
-            }
         } catch (Exception e) {
             Timber.e("Error saving game to history: %s", e.getMessage());
             e.printStackTrace();
@@ -1444,6 +1438,35 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
+    /**
+     * Get the map data as a string
+     * @return The map data string
+     */
+    public String getMapData() {
+        // This method is used for testing
+        // In a real implementation, it would build the map data string from the grid elements
+        StringBuilder saveData = new StringBuilder();
+        
+        // Add board name
+        saveData.append("name:").append(mapName).append(";");
+        
+        // Add number of optimal moves if available
+        if (solutionMoves > 0) {
+            saveData.append("num_moves:").append(solutionMoves).append(";");
+        }
+        
+        // Add solution if available 
+        if (solution != null) {
+            StringBuilder solutionStr = new StringBuilder("solution:");
+            saveData.append(solutionStr);
+        }
+
+        // Add the grid elements data
+        saveData.append(MapObjects.createStringFromList(gridElements, false));
+        
+        return saveData.toString();
+    }
+    
     /**
      * Check if this is a random game
      * @return true if random game, false otherwise

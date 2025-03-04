@@ -199,11 +199,10 @@ public class GameManager {
             
             // If we're coming from a game screen, ensure we're in load mode
             if (currentScreen instanceof GridGameScreen) {
-                Timber.d("Setting SaveGameScreen to load mode when coming from game");
-                saveScreen.setSaveMode(false);
+                Timber.d("Setting SaveGameScreen to save mode when coming from game");
+                saveScreen.setSaveMode(true);
             }
-            
-            // Always refresh the screen when showing it
+            Timber.d("Always refresh the screen when showing it");
             saveScreen.refreshScreen();
         }
         
