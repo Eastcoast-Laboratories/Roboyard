@@ -64,9 +64,13 @@ public class GameButtonHistoryAction extends GameButton {
                 
             case ACTION_PROMOTE:
                 // Promote history entry to save
-                GameHistoryManager.promoteHistoryEntryToSave(activity, historyIndex);
-                // Show toast notification
-                gameManager.requestToast("History entry promoted to save", true);
+                // TODO: check if already in savegames, then show a message toast
+                int saveSlot = GameHistoryManager.promoteHistoryEntryToSave(activity, historyIndex);
+                if(saveSlot >= 0) {
+                    gameManager.requestToast("Map saved in Savegames: " + saveSlot , true);
+                }else {
+                    gameManager.requestToast("Failed to save map", true);
+                }
                 break;
                 
             case ACTION_SHARE:

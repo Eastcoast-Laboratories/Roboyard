@@ -20,7 +20,7 @@ import timber.log.Timber;
 public class GameHistoryManager {
     private static final String HISTORY_DIR = "history";
     private static final String HISTORY_INDEX_FILE = "history_index.json";
-    private static final int MAX_HISTORY_ENTRIES = 20;
+    private static final int MAX_HISTORY_ENTRIES = 12;
 
     /**
      * Initialize the history directory if it doesn't exist
@@ -60,10 +60,10 @@ public class GameHistoryManager {
             // Load existing entries
             List<GameHistoryEntry> entries = getHistoryEntries(activity);
             
-            // Check if we already have an entry with the same mapPath
+            // Check if we already have an entry with the same mapName
             boolean updated = false;
             for (int i = 0; i < entries.size(); i++) {
-                if (entries.get(i).getMapPath().equals(entry.getMapPath())) {
+                if (entries.get(i).getMapName().equals(entry.getMapName())) {
                     // Update existing entry
                     entries.set(i, entry);
                     updated = true;
@@ -231,10 +231,24 @@ public class GameHistoryManager {
 
     /**
      * Get the next available history index
+     * @param activity the activity
+     * @return the next available index
      */
     public static int getNextHistoryIndex(Activity activity) {
         List<GameHistoryEntry> entries = getHistoryEntries(activity);
-        return entries.size();
+        
+        if (entries.isEmpty()) {
+            return 0; // Start with index 0 if no entries exist
+        } else {
+            // Get the highest index and add 1
+            int maxIndex = 0;
+            for (GameHistoryEntry entry : entries) {
+                if (entry.getHistoryIndex() > maxIndex) {
+                    maxIndex = entry.getHistoryIndex();
+                }
+            }
+            return maxIndex + 1;
+        }
     }
 
     /**
@@ -353,24 +367,24 @@ public class GameHistoryManager {
     
     /**
      * Promote a history entry to a save game
+     * @return The save slot number, or -1 if failed
      */
-    public static void promoteHistoryEntryToSave(Activity activity, int historyIndex) {
+    public static int promoteHistoryEntryToSave(Activity activity, int historyIndex) {
         try {
             // Get the history entry
             GameHistoryEntry entry = getHistoryEntry(activity, historyIndex);
             if (entry == null) {
                 Timber.e("History entry not found for index: %d", historyIndex);
-                return;
+                return -1;
             }
             
             // Get the next available save slot (start from 1 to skip autosave)
             int saveSlot = 1;
             while (FileReadWrite.privateDataFileExists(activity, SaveGameScreen.getMapPath(saveSlot))) {
                 saveSlot++;
-                if (saveSlot > 20) {
-                    // Limit to 20 save slots, overwrite the last one
-                    saveSlot = 20;
-                    break;
+                if (saveSlot > 35) {
+                    Timber.e("All slots are full, cannot promote history entry");
+                    return -1;
                 }
             }
             
@@ -379,7 +393,7 @@ public class GameHistoryManager {
             String historyData = FileReadWrite.readPrivateData(activity, historyPath);
             if (historyData == null || historyData.isEmpty()) {
                 Timber.e("Failed to read history data: %s", historyPath);
-                return;
+                return -1;
             }
             
             // Write to save slot
@@ -390,8 +404,11 @@ public class GameHistoryManager {
             
             // Invalidate save cache
             SaveGameScreen.clearCachesForMap(savePath);
+
+            return saveSlot;
         } catch (Exception e) {
             Timber.e("Error promoting history entry to save: %s", e.getMessage());
+            return -1;
         }
     }
 }

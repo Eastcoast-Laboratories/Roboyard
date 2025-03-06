@@ -4,6 +4,8 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 /**
  * Class representing a game history entry.
  * Contains metadata about a game that was automatically saved to history.
@@ -128,5 +130,23 @@ public class GameHistoryEntry {
             int minutes = (playDuration % 3600) / 60;
             return hours + "h" + (minutes > 0 ? " " + minutes + "m" : "");
         }
+    }
+
+    /**
+     * Get the history index from the map path
+     * @return The history index
+     */
+    public int getHistoryIndex() {
+        // e.g. getMapPath() = history_1.txt
+        // extract the number
+        String[] parts = mapPath.split("_");
+        if (parts.length > 1) {
+            try {
+                return Integer.parseInt(parts[1].split("\\.")[0]);
+            } catch (NumberFormatException e) {
+                Timber.e(e, "Failed to parse history index from map path: %s", mapPath);
+            }
+        }
+        return 0;
     }
 }

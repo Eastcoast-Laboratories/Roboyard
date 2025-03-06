@@ -172,11 +172,11 @@ public class GameButtonGotoHistoryGame extends GameButton {
             textY += renderManager.getTextSize() + 5;
             
             // Draw date/time
-            renderManager.drawText(textX, textY, "Date: " + formattedDate);
+            renderManager.drawText(textX, textY, "" + formattedDate);
             textY += renderManager.getTextSize() + 5;
             
             // Draw duration
-            renderManager.drawText(textX, textY, "Duration: " + historyEntry.getFormattedDuration());
+            renderManager.drawText(textX, textY, "Playtime: " + historyEntry.getFormattedDuration());
             textY += renderManager.getTextSize() + 5;
             
             // Draw moves

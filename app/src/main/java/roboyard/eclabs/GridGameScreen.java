@@ -672,6 +672,7 @@ public class GridGameScreen extends GameScreen {
         this.isRandomGame = true;  // Set random game flag
         numSolutionClicks = 0;
         numDifferentSolutionClicks = 0;
+        isHistorySaved = false;
         initializeSolutionsAtHints();
         try {
             // Reset game state
@@ -1028,12 +1029,10 @@ public class GridGameScreen extends GameScreen {
             // Save completion data
             saveManager.saveMapCompletion(mapPath, solutionMoves, nbCoups, numSquares, timeCpt);
 
-            // Save to history if we haven't already
-            if (!isHistorySaved) {
-                Timber.d("Game won, saving to history again");
-                saveToHistory();
-                isHistorySaved = true;
-            }
+            // Save to history
+            Timber.d("Game won, saving to history again");
+            saveToHistory();
+            isHistorySaved = true;
         }
         LevelChoiceGameScreen.invalidateMapCache(mapPath); // Invalidate only this specific map in the cache
         updatePlayedMaps();

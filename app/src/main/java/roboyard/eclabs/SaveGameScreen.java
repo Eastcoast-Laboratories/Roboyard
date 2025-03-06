@@ -299,7 +299,7 @@ public class SaveGameScreen extends GameScreen {
 
         // Calculate positions for history entries (vertical list)
         int startY = (int) (120 * ratioH);  // Start below the tabs
-        int stepY = buttonSize + (int) (20 * ratioH);  // Vertical spacing
+        int stepY = buttonSize + (int) (-5 * ratioH);  // Vertical spacing
         int startX = (int) (55 * ratioW);   // Left margin
         
         // Create buttons for each history entry
