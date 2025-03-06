@@ -144,8 +144,8 @@ public class GameButtonGotoHistoryGame extends GameButton {
         renderManager.fillRect(x, y, x + getWidth(), y + getHeight());
         
         // Draw button border
-        renderManager.setColor(Color.BLACK);
-        renderManager.drawRect(x, y, x + getWidth(), y + getHeight());
+        // renderManager.setColor(Color.BLACK);
+        // renderManager.drawRect(x, y, x + getWidth(), y + getHeight());
         
         // Draw minimap if available
         if (minimapBitmap != null) {

@@ -106,7 +106,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             } else try {
                 // Write save data directly (will overwrite if file exists)
                 FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
-                Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath);
+                Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath + " +1");
                 
                 // Add to saved games list if needed
                 addMapsSaved(gameManager);
@@ -141,8 +141,6 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             if (saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
                 super.onClick(gameManager);
                 gameScreen.setSavedGame(mapPath);
-                // disable the savegame button in the gamescreen
-                gameScreen.buttonSaveSetEnabled(false);
             }
         }
     }
@@ -158,8 +156,8 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     }
 
     /**
-     * Set whether this button is in save mode
-     * @param saveMode true for save mode, false for load mode
+     * Sets the save mode for this button
+     * @param saveMode true if in save mode, false if in load mode
      */
     public void setSaveMode(boolean saveMode) {
         isSaveMode = saveMode;

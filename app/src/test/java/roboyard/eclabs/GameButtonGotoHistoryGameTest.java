@@ -81,9 +81,8 @@ public class GameButtonGotoHistoryGameTest {
         // Test drawing without a minimap
         historyButton.draw(renderManager);
         
-        // Verify that the button background and border are drawn
+        // Verify that the button background is drawn
         verify(renderManager).fillRect(eq(10f), eq(10f), eq(310f), eq(110f));
-        verify(renderManager).drawRect(eq(10f), eq(10f), eq(310f), eq(110f));
         
         // Verify that the text is drawn
         verify(renderManager, atLeastOnce()).drawText(anyInt(), anyInt(), eq("Test Map"));
@@ -103,9 +102,8 @@ public class GameButtonGotoHistoryGameTest {
         // Verify that the minimap is drawn
         verify(renderManager).drawBitmap(eq(minimapBitmap), anyInt(), anyInt(), anyInt(), anyInt());
         
-        // Verify that the button background and border are drawn
+        // Verify that the button background is drawn
         verify(renderManager).fillRect(eq(10f), eq(10f), eq(310f), eq(110f));
-        verify(renderManager).drawRect(eq(10f), eq(10f), eq(310f), eq(110f));
         
         // Verify that the text is drawn
         verify(renderManager, atLeastOnce()).drawText(anyInt(), anyInt(), eq("Test Map"));

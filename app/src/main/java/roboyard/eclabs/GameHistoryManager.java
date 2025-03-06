@@ -1,10 +1,8 @@
 package roboyard.eclabs;
 
 import android.app.Activity;
-import android.content.Context;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -54,8 +52,10 @@ public class GameHistoryManager {
 
     /**
      * Add a new history entry
+     *
+     * @return
      */
-    public static void addHistoryEntry(Activity activity, GameHistoryEntry entry) {
+    public static Boolean addHistoryEntry(Activity activity, GameHistoryEntry entry) {
         try {
             // Load existing entries
             List<GameHistoryEntry> entries = getHistoryEntries(activity);
@@ -100,11 +100,13 @@ public class GameHistoryManager {
             }
             
             // Save updated index
-            saveHistoryIndex(activity, entries);
+            Boolean isSaved = saveHistoryIndex(activity, entries);
             
             Timber.d("Added/updated history entry: %s", entry.getMapPath());
+            return isSaved;
         } catch (Exception e) {
             Timber.e("Error adding history entry: %s", e.getMessage());
+            return false;
         }
     }
 
@@ -193,8 +195,10 @@ public class GameHistoryManager {
 
     /**
      * Save the history index file
+     *
+     * @return
      */
-    private static void saveHistoryIndex(Activity activity, List<GameHistoryEntry> entries) {
+    private static Boolean saveHistoryIndex(Activity activity, List<GameHistoryEntry> entries) {
         try {
             JSONObject root = new JSONObject();
             JSONArray entriesArray = new JSONArray();
@@ -215,11 +219,13 @@ public class GameHistoryManager {
             
             root.put("historyEntries", entriesArray);
             
-            FileReadWrite.writePrivateData(activity, HISTORY_INDEX_FILE, root.toString());
+            Boolean isSaved = FileReadWrite.writePrivateData(activity, HISTORY_INDEX_FILE, root.toString());
             
             Timber.d("Saved history index with %d entries", entries.size());
+            return isSaved;
         } catch (Exception e) {
             Timber.e("Error saving history index: %s", e.getMessage());
+            return false;
         }
     }
 
