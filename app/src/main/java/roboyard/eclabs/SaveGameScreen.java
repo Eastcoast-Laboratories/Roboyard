@@ -390,46 +390,68 @@ public class SaveGameScreen extends GameScreen {
             mapPath = getMapPath(i);
             hasSavegame = (mapUniqueString[i].length() > 0);
 
-            GameButtonGotoSavedGame saveButton;
-            // each save slot
-            saveButton = new GameButtonGotoSavedGame(
-                gameManager.getActivity(),
-                buttonPositionsX[i],
-                buttonPositionsY[i],
-                buttonSize,
-                buttonSize,
-                saver.getButtonSaved(mapPath, true),
-                saver.getButtonSaved(mapPath, false),
-                mapPath,
-                i,
-                buttonPositionsX[i],
-                buttonPositionsY[i],
-                buttonSize
-            );
-            saveButton.create();
-            instances.add(saveButton);
-
-            // Set save mode based on current screen mode
-            saveButton.setSaveMode(saveMode);
-
-            if(hasSavegame && isSaveMode() || !hasSavegame && isLoadMode()) {
-                saveButton.setEnabled(false);
-            }
-            // Add share button for this save slot
-            String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
-            if (saveData != null && !saveData.isEmpty()) {
-                GameButtonShareMap shareButton = new GameButtonShareMap(
-                    0, 0,  // x,y will be set in update()
-                    buttonSize/4, buttonSize/4, // smaller size
-                    R.drawable.share,
-                    R.drawable.share,
+            // Erstelle die Buttons basierend auf dem aktuellen Modus
+            if (saveMode) {
+                // Save-Buttons erstellen
+                GameButtonGotoSavedGame saveButton = new GameButtonGotoSavedGame(
+                    gameManager.getActivity(),
+                    buttonPositionsX[i],
+                    buttonPositionsY[i],
+                    buttonSize,
+                    buttonSize,
+                    saver.getButtonSaved(mapPath, true),
+                    saver.getButtonSaved(mapPath, false),
                     mapPath,
+                    i,
                     buttonPositionsX[i],
                     buttonPositionsY[i],
                     buttonSize
                 );
-                shareButton.create();
-                instances.add(shareButton);
+                saveButton.setSaveMode(true);
+                saveButton.create();
+                instances.add(saveButton);
+                
+                if (hasSavegame) {
+                    saveButton.setEnabled(false);
+                }
+            } else {
+                // Load-Buttons erstellen
+                GameButtonLoadGame loadButton = new GameButtonLoadGame(
+                    gameManager.getActivity(),
+                    buttonPositionsX[i],
+                    buttonPositionsY[i],
+                    buttonSize,
+                    buttonSize,
+                    saver.getButtonSaved(mapPath, true),
+                    saver.getButtonSaved(mapPath, false),
+                    mapPath,
+                    i
+                );
+                loadButton.create();
+                instances.add(loadButton);
+                
+                if (!hasSavegame) {
+                    loadButton.setEnabled(false);
+                }
+            }
+
+            // Add share button for this save slot (only in load mode)
+            if (!saveMode) {
+                String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+                if (saveData != null && !saveData.isEmpty()) {
+                    GameButtonShareMap shareButton = new GameButtonShareMap(
+                        0, 0,  // x,y will be set in update()
+                        buttonSize/4, buttonSize/4, // smaller size
+                        R.drawable.share,
+                        R.drawable.share,
+                        mapPath,
+                        buttonPositionsX[i],
+                        buttonPositionsY[i],
+                        buttonSize
+                    );
+                    shareButton.create();
+                    instances.add(shareButton);
+                }
             }
         }
     }
@@ -687,6 +709,12 @@ public class SaveGameScreen extends GameScreen {
                 GameButtonGotoSavedGame saveButton = (GameButtonGotoSavedGame) element;
                 if (saveButton.getButtonNumber() == slotNumber) {
                     saveButton.create();
+                    break;
+                }
+            } else if (element instanceof GameButtonLoadGame) {
+                GameButtonLoadGame loadButton = (GameButtonLoadGame) element;
+                if (loadButton.getButtonNumber() == slotNumber) {
+                    loadButton.create();
                     break;
                 }
             }
