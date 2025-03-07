@@ -67,7 +67,7 @@ public class GameButtonHistoryAction extends GameButton {
                 // TODO: check if already in savegames, then show a message toast
                 int saveSlot = GameHistoryManager.promoteHistoryEntryToSave(activity, historyIndex);
                 if(saveSlot >= 0) {
-                    gameManager.requestToast("Map saved in Savegames: " + saveSlot , true);
+                    gameManager.requestToast("Map saved in Savegames: " + (saveSlot + 1), true);
                 }else {
                     gameManager.requestToast("Failed to save map", true);
                 }

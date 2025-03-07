@@ -6,14 +6,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.app.Activity;
+import android.view.MotionEvent;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -36,6 +38,9 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     private Activity activity;
     private boolean isSaveMode;
     private SaveGameScreen saveGameScreen;
+    
+    // Statischer Cache für Minimap-Bitmaps, um wiederholtes Laden zu vermeiden
+    private static Map<String, Bitmap> minimapCache = new HashMap<>();
 
     public GameButtonGotoSavedGame(Context context, int x, int y, int w, int h, int imageUp, int imageDown, String mapPath, int buttonNumber,
                                   int parentButtonX, int parentButtonY, int parentButtonSize) {
@@ -122,6 +127,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                     // Set flags to prevent mode switching back
                     saveGameScreen.dontAutoSwitchTabs = true;
                     Timber.d(" just saved game");
+                    Thread.sleep(100);
                     // Refresh the specific save slot button first
                     saveGameScreen.refreshSaveSlot(buttonNumber);
                     
@@ -179,6 +185,19 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             // nothing to do on empty slots
             return;
         }
+        
+        // Versuche zuerst, die Minimap aus dem Cache zu laden
+        Bitmap cachedBitmap = minimapCache.get(mapPath);
+        if (cachedBitmap != null) {
+            // Verwende das gecachte Bitmap
+            Drawable minimapDrawable = new BitmapDrawable(context.getResources(), cachedBitmap);
+            this.setImageUp(minimapDrawable);
+            this.setImageDown(minimapDrawable); // Use same image for down state
+            this.setEnabled(true);
+            return;
+        }
+        
+        // Wenn nicht im Cache, lade es aus der Datei
         String saveData = FileReadWrite.readPrivateData(activity, mapPath);
         if (saveData != null && !saveData.isEmpty()) {
             String minimapPath = createMiniMap(saveData, context);
@@ -186,6 +205,10 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 try {
                     // Load minimap as button image
                     Bitmap bitmap = BitmapFactory.decodeFile(minimapPath);
+                    
+                    // Cache das Bitmap fu00fcr zuku00fcnftige Verwendung
+                    minimapCache.put(mapPath, bitmap);
+                    
                     Drawable minimapDrawable = new BitmapDrawable(context.getResources(), bitmap);
                     this.setImageUp(minimapDrawable);
                     this.setImageDown(minimapDrawable); // Use same image for down state
@@ -358,6 +381,21 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", mapPath + "\n");
             }
         }
+    }
+
+    /**
+     * Clear the minimap cache for a specific map path
+     * @param mapPath The map path to clear from cache
+     */
+    public static void clearMinimapCache(String mapPath) {
+        minimapCache.remove(mapPath);
+    }
+    
+    /**
+     * Clear all minimap caches
+     */
+    public static void clearAllMinimapCaches() {
+        minimapCache.clear();
     }
 
     /**

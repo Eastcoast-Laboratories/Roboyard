@@ -196,6 +196,9 @@ public class SaveGameScreen extends GameScreen {
         if (uniqueString != null) {
             colorCache.remove(uniqueString);
         }
+        
+        // Clear minimap cache in GameButtonGotoSavedGame
+        GameButtonGotoSavedGame.clearMinimapCache(mapPath);
     }
     
     /**

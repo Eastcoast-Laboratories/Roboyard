@@ -185,7 +185,7 @@ public class SaveGameScreenTest {
         saveButton.setSaveMode(true);
         saveButton.setSaveGameScreen(saveGameScreen);
         
-        // Manually switch to load mode to simulate what saveGameToFile would do
+        // Manually switch to load mode to simulate what saving a file would do
         saveGameScreen.showLoadTab();
         
         // Verify final state
