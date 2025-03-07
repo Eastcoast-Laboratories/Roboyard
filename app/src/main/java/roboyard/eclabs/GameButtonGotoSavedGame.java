@@ -70,27 +70,25 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
         this.saveGameScreen = saveGameScreen;
 
-        // Check if we're in save mode
-        if (isSaveMode || (gameScreen != null && gameScreen.isRandomGame())) {
-            // Screen to save or overwrite a savegame
-            // Timber.d(" Saving game to slot: " + mapPath);
-            ArrayList<GridElement> gridElements = gameScreen.getGridElements();
-            
-            // Build save data with additional fields
-            StringBuilder saveData = new StringBuilder();
-            
-            // Add board name
-            saveData.append("name:").append(gameScreen.mapName).append(";");
-            
-            // Add number of optimal moves if available
-            int numMoves = gameScreen.solutionMoves;
-            if (numMoves > 0) {
-                saveData.append("num_moves:").append(numMoves).append(";");
-            }
-            
-            // Add solution if available 
-            if (gameScreen.solution != null) {
-                StringBuilder solutionStr = new StringBuilder("solution:");
+        // Screen to save or overwrite a savegame
+        // Timber.d(" Saving game to slot: " + mapPath);
+        ArrayList<GridElement> gridElements = gameScreen.getGridElements();
+        
+        // Build save data with additional fields
+        StringBuilder saveData = new StringBuilder();
+        
+        // Add board name
+        saveData.append("name:").append(gameScreen.mapName).append(";");
+        
+        // Add number of optimal moves if available
+        int numMoves = gameScreen.solutionMoves;
+        if (numMoves > 0) {
+            saveData.append("num_moves:").append(numMoves).append(";");
+        }
+        
+        // Add solution if available 
+        if (gameScreen.solution != null) {
+            StringBuilder solutionStr = new StringBuilder("solution:");
 // TODO: add the solution to the share string
 //                for (IGameMove move : gameScreen.solution.getMoves()) {
 //                    if (move instanceof RRGameMove) {
@@ -100,57 +98,52 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
 //                                 .append(rrMove.getY()).append(";");
 //                    }
 //                }
-                saveData.append(solutionStr);
-            }
+            saveData.append(solutionStr);
+        }
 
-            // Add the grid elements data
-            saveData.append(MapObjects.createStringFromList(gridElements, false));
+        // Add the grid elements data
+        saveData.append(MapObjects.createStringFromList(gridElements, false));
 
-            if(saveData.length()<50){
-                // no game started, since last app start
-            } else try {
-                // Write save data directly (will overwrite if file exists)
-                FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
-                Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath + " +1");
+        if(saveData.length()<50){
+            // no game started, since last app start
+        } else try {
+            // Write save data directly (will overwrite if file exists)
+            FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
+            Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath + " +1");
+            
+            // Add to saved games list if needed
+            addMapsSaved(gameManager);
+
+            // Refresh save game screen buttons
+            if (saveGameScreen != null) {
+                // Clear caches for this map
+                SaveGameScreen.clearCachesForMap(mapPath);
                 
-                // Add to saved games list if needed
-                addMapsSaved(gameManager);
-
-                // Refresh save game screen buttons
-                if (saveGameScreen != null) {
-                    // Clear caches for this map
-                    SaveGameScreen.clearCachesForMap(mapPath);
-                    
-                    // Switch to load mode after saving
-                    saveGameScreen.showLoadTab();
-                    
-                    // Set flags to prevent mode switching back
-                    saveGameScreen.dontAutoSwitchTabs = true;
-                    Timber.d(" just saved game");
+                // Switch to load mode after saving
+                saveGameScreen.showLoadTab();
+                
+                // Set flags to prevent mode switching back
+                saveGameScreen.dontAutoSwitchTabs = true;
+                Timber.d(" just saved game");
+                try {
                     Thread.sleep(100);
-                    // Refresh the specific save slot button first
-                    saveGameScreen.refreshSaveSlot(buttonNumber);
-                    
-                    // Then refresh the entire screen to update other UI elements
-                    saveGameScreen.refreshScreen();
+                } catch (InterruptedException e) {
+                    Timber.d("Error pausing thread while saving");
                 }
+                // Refresh the specific save slot button first
+                saveGameScreen.refreshSaveSlot(buttonNumber);
                 
-                // Keep track of the game screen and explicitly set it as previous
-                gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
-                gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
-            } catch (Exception e) {
-                Timber.d(" Error saving game: " + e.getMessage());
+                // Then refresh the entire screen to update other UI elements
+                saveGameScreen.refreshScreen();
             }
-        } else {
-            // Screen to select a savegame
-            SaveManager saver = new SaveManager(gameManager.getActivity());
-            if (saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
-                super.onClick(gameManager);
-                gameScreen.setSavedGame(mapPath);
-            }
+            
+            // Keep track of the game screen and explicitly set it as previous
+            gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
+            gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
+        } catch (Exception e) {
+            Timber.d(" Error saving game: " + e.getMessage());
         }
     }
-
     /**
      * Handles the click event of the button.
      * @deprecated Use onClick(GameManager) instead
