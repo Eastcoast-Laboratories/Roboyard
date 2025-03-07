@@ -197,8 +197,9 @@ public class SaveGameScreen extends GameScreen {
             colorCache.remove(uniqueString);
         }
         
-        // Clear minimap cache in GameButtonGotoSavedGame
+        // Clear minimap cache in both button classes
         GameButtonGotoSavedGame.clearMinimapCache(mapPath);
+        GameButtonLoadGame.clearMinimapCache(mapPath);
     }
     
     /**
