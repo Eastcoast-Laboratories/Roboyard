@@ -92,7 +92,7 @@ public class GridGameScreen extends GameScreen {
     private final ArrayList<Move> allMoves= new ArrayList<>();
 
     private GameButtonGeneral buttonSolve;
-    private GameButtonGoto buttonSave;
+    private GameButtonSaveScreen buttonSave;
 
     private final Preferences preferences = new Preferences();
 
@@ -253,14 +253,14 @@ public class GridGameScreen extends GameScreen {
 
         // Bottom row buttons
         // Save button
-        buttonSave = new GameButtonGoto(
+        buttonSave = new GameButtonSaveScreen(
             0, 
             buttonPosY,
             buttonSize,
             buttonSize,
             R.drawable.bt_jeu_save_up,
             R.drawable.bt_jeu_save_down,
-            9
+            Constants.SCREEN_SAVE_GAMES
         );
         this.instances.add(buttonSave);
 
@@ -1417,7 +1417,7 @@ public class GridGameScreen extends GameScreen {
     /**
      * Update an existing history entry with the current game state
      */
-    private void updateHistoryEntry() {
+    void updateHistoryEntry() {
         try {
             // Only update if we have a current history entry
             if (currentHistoryIndex < 0) {
@@ -1508,5 +1508,13 @@ public class GridGameScreen extends GameScreen {
      */
     public String getMapName() {
         return mapName;
+    }
+
+    /**
+     * Check if this game has a history entry
+     * @return true if the game is saved to history, false otherwise
+     */
+    public boolean isHistorySaved() {
+        return isHistorySaved;
     }
 }
