@@ -1451,6 +1451,10 @@ public class GridGameScreen extends GameScreen {
             // Save the updated entry
             GameHistoryManager.updateHistoryEntry(gameManager.getActivity(), entry);
             
+            // Clear the cache for this entry to ensure minimap gets updated too
+            String historyPath = entry.getMapPath();
+            GameButtonGotoHistoryGame.clearMinimapCache(historyPath);
+            
             Timber.d("Updated history entry: history_%d.txt", currentHistoryIndex);
         } catch (Exception e) {
             Timber.e(e, "Error updating history entry");

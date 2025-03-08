@@ -8,7 +8,9 @@ import timber.log.Timber;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Button to load a game from history
@@ -22,6 +24,11 @@ public class GameButtonGotoHistoryGame extends GameButton {
     private static final int BUTTON_COLOR = Color.parseColor("#E0E0E0");
     private static final int TEXT_COLOR = Color.BLACK;
     private static final int HIGHLIGHT_COLOR = Color.parseColor("#BBDEFB");
+    
+    // Static cache for minimaps
+    private static Map<String, Bitmap> minimapCache = new HashMap<>();
+    // Static cache for save data
+    private static Map<String, String> saveDataCache = new HashMap<>();
     
     /**
      * Create a button for a history entry
@@ -75,22 +82,47 @@ public class GameButtonGotoHistoryGame extends GameButton {
         if (minimapBitmap == null && activity != null) {
             String historyPath = historyEntry.getMapPath();
             
-            // Read the save data from the history entry
-            String saveData = FileReadWrite.readPrivateData(activity, historyPath);
-            
-            if (saveData != null && !saveData.isEmpty()) {
-                // Create minimap
-                String minimapPath = GameButtonGotoSavedGame.createMiniMap(saveData, activity);
-                if (minimapPath != null) {
-                    try {
-                        // Load minimap bitmap
-                        minimapBitmap = BitmapFactory.decodeFile(minimapPath);
-                        Timber.d("Loaded minimap for history entry: %s", historyEntry.getMapName());
-                    } catch (Exception e) {
-                        Timber.e(e, "Failed to load minimap for history entry");
+            // Check if minimap is already cached
+            if (minimapCache.containsKey(historyPath)) {
+                minimapBitmap = minimapCache.get(historyPath);
+            } else {
+                // Read the save data from the history entry
+                String saveData = getSaveData(historyPath);
+                
+                if (saveData != null && !saveData.isEmpty()) {
+                    // Create minimap
+                    String minimapPath = GameButtonGotoSavedGame.createMiniMap(saveData, activity);
+                    if (minimapPath != null) {
+                        try {
+                            // Load minimap bitmap
+                            minimapBitmap = BitmapFactory.decodeFile(minimapPath);
+                            Timber.d("Loaded minimap for history entry: %s", historyEntry.getMapName());
+                            // Cache minimap
+                            minimapCache.put(historyPath, minimapBitmap);
+                        } catch (Exception e) {
+                            Timber.e(e, "Failed to load minimap for history entry");
+                        }
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Get the save data for the given history path
+     * @param historyPath The history path
+     * @return The save data
+     */
+    private String getSaveData(String historyPath) {
+        // Check if save data is already cached
+        if (saveDataCache.containsKey(historyPath)) {
+            return saveDataCache.get(historyPath);
+        } else {
+            // Read the save data from the history entry
+            String saveData = FileReadWrite.readPrivateData(activity, historyPath);
+            // Cache save data
+            saveDataCache.put(historyPath, saveData);
+            return saveData;
         }
     }
     
@@ -121,8 +153,8 @@ public class GameButtonGotoHistoryGame extends GameButton {
         Activity activity = gameManager.getActivity();
         String historyPath = historyEntry.getMapPath();
         
-        // Read the save data from the history entry
-        String saveData = FileReadWrite.readPrivateData(activity, historyPath);
+        // Get the save data for the given history path
+        String saveData = getSaveData(historyPath);
         
         if (saveData != null && !saveData.isEmpty()) {
             // Load the game from history
@@ -222,10 +254,33 @@ public class GameButtonGotoHistoryGame extends GameButton {
      * @param bitmap the minimap bitmap
      */
     public void setMinimapBitmap(Bitmap bitmap) {
-        this.minimapBitmap = bitmap;
+        minimapBitmap = bitmap;
     }
     
-    // Getter methods for width and height
+    /**
+     * Clear the minimap cache for a specific map path
+     * @param mapPath The map path to clear from cache
+     */
+    public static void clearMinimapCache(String mapPath) {
+        if (mapPath != null && minimapCache.containsKey(mapPath)) {
+            minimapCache.remove(mapPath);
+            saveDataCache.remove(mapPath);
+            Timber.d("Cleared minimap cache for: %s", mapPath);
+        }
+    }
+    
+    /**
+     * Clear all minimap caches
+     */
+    public static void clearAllMinimapCaches() {
+        minimapCache.clear();
+        saveDataCache.clear();
+        Timber.d("Cleared all minimap caches");
+    }
+    
+    /**
+     * Getter methods for width and height
+     */
     public int getWidth() {
         return super.getWidth();
     }

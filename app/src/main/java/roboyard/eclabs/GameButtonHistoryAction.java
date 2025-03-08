@@ -56,7 +56,12 @@ public class GameButtonHistoryAction extends GameButton {
         switch (actionType) {
             case ACTION_DELETE:
                 // Delete history entry
+                String mapPath = historyEntry.getMapPath();
                 GameHistoryManager.deleteHistoryEntry(activity, historyEntry);
+                
+                // Clear minimap cache for this specific entry
+                GameButtonGotoHistoryGame.clearMinimapCache(mapPath);
+                
                 // Refresh the screen
                 SaveGameScreen saveScreen = (SaveGameScreen) gameManager.getCurrentScreen();
                 saveScreen.createButtons();

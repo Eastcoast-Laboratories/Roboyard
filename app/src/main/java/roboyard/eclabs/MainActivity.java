@@ -65,6 +65,11 @@ public class MainActivity extends Activity
         loadBoardSizeFromPreferences(this);
         Timber.d("Initialized with board size: %dx%d", boardSizeX, boardSizeY);
         
+        // Clear all minimap caches on app start
+        Timber.d("Clearing all minimap caches on app start");
+        GameButtonGotoHistoryGame.clearAllMinimapCaches();
+        GameButtonGotoSavedGame.clearAllMinimapCaches();
+        
         this.gameManager = new GameManager(this.inputManager, this.renderManager, this.sWidth, this.sHeight, this);
     }
 

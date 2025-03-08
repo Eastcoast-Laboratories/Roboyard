@@ -641,6 +641,12 @@ public class SaveGameScreen extends GameScreen {
                 this.loadMode = true;
             }
             
+            // Clear cache when switching to history mode
+            if (historyMode) {
+                // Timber.d("Clearing history minimap caches");
+                // GameButtonGotoHistoryGame.clearAllMinimapCaches();
+            }
+            
             // Clear all existing buttons to prevent color preservation
             instances.clear(); // TODO: does not work
             
@@ -683,12 +689,12 @@ public class SaveGameScreen extends GameScreen {
      * Show the history tab
      */
     public void showHistoryTab() {
-        saveMode = false;
-        loadMode = false;
-        historyMode = true;
-        
-        // Update button states
-        createButtons();
+        if (!historyMode) {
+            setHistoryMode(true);
+            // Timber.d("Switching to history tab, refreshing screen");
+            // GameButtonGotoHistoryGame.clearAllMinimapCaches(); // Clear caches when switching to history tab
+            refreshScreen();
+        }
     }
     
     /**
