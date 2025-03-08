@@ -1,0 +1,4 @@
+- Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.
+- Speicher- und Ladebuttons sind nun getrennt.
+- Der „Speichern“-Button im Spielbildschirm wird immer wieder aktiviert.
+- Ein Lade-Indikator wird nun im Spielfeld angezeigt, wenn die KI rechnet.

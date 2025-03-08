@@ -1,6 +1,12 @@
 Changelog Deutsch
 =================
 
+## Version 20 (2025-03-08)
+- Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.
+- Speicher- und Ladebuttons sind nun getrennt.
+- Der „Speichern“-Button im Spielbildschirm wird immer wieder aktiviert.
+- Ein Lade-Indikator wird nun im Spielfeld angezeigt, wenn die KI rechnet.
+
 ### Version 16
 
 - Verhindert das Einfrieren des Solvers bei schnellem Klicken, während die Hinweisnachricht angezeigt wird oder der Solver läuft.

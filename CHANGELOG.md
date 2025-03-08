@@ -1,5 +1,11 @@
-CHANGELOG
+# Changelog
 =========
+
+## Version 20 (2025-03-08)
+- Game history is now automatically saved before opening the save screen.
+- Save and load buttons are now separate.
+- The "Save" button in the game screen is always reactivated.
+- A loading indicator is now displayed in the game field when the AI is calculating.
 
 ### Version 19
 - Added minimap display on each save game button for better game identification
