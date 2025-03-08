@@ -48,7 +48,7 @@ public class GridGameScreen extends GameScreen {
 
     private String mapPath = "";
 
-    private int currentHistoryIndex = -1; // -1 bedeutet "kein aktueller History-Eintrag"
+    private int currentHistoryIndex = -1; // -1 means "no current history entry"
 
     private int xGrid;
     private int yGrid;
@@ -530,13 +530,15 @@ public class GridGameScreen extends GameScreen {
             if (!isHistorySaved && timeCpt >= HISTORY_SAVE_THRESHOLD && !isGameWon) {
                 gameManager.requestToast("Game saved to history", true);
                 Timber.d("Time threshold reached (%d seconds), saving to history", timeCpt);
-                saveToHistory();
+                boolean saveSuccess = saveToHistory();
                 isHistorySaved = true;
+                Timber.d("History saved, currentHistoryIndex=%d, success=%b", currentHistoryIndex, saveSuccess);
             }
         }
         this.gmi.update(gameManager);
         if(gameManager.getInputManager().backOccurred()){
             // Update history entry if it exists before exiting
+            Timber.d("Back detected, currentHistoryIndex=%d, isHistorySaved=%b", currentHistoryIndex, isHistorySaved);
             if (isHistorySaved) {
                 updateHistoryEntry();
             }
@@ -549,15 +551,19 @@ public class GridGameScreen extends GameScreen {
                 } else {
                     this.gmi.triggerMovement(Constants.WEST);
                 }
-            } else {
-                // Otherwise handle normal back navigation
-                if(t != null){
-                    t.interrupt();
-                    moves = null;
-                    t = null;
-                }
-                gameManager.setGameScreen(Constants.SCREEN_START);
+                // Consume the back event to prevent it from being processed again
+                gameManager.getInputManager().resetEvents();
+                return; // Exit the update method to prevent further processing
             }
+            
+            // Only reach here if gmi is not displayed - handle normal back behavior
+            if(t != null){
+                t.interrupt();
+                moves = null;
+                t = null;
+            }
+            gameManager.setGameScreen(Constants.SCREEN_START);
+            gameManager.getInputManager().resetEvents();
         }
 
         if(!isSolved && solver.getSolverStatus().isFinished())
@@ -1034,8 +1040,8 @@ public class GridGameScreen extends GameScreen {
             // Save to history
             Timber.d("Game won, updating history entry");
             
-            // Wenn das Spiel bereits einen History-Eintrag hat, aktualisieren wir diesen,
-            // ansonsten erstellen wir einen neuen Eintrag
+            // If the game already has a history entry, update it
+            // otherwise create a new entry
             if (isHistorySaved && currentHistoryIndex >= 0) {
                 updateHistoryEntry();
             } else {
@@ -1413,32 +1419,41 @@ public class GridGameScreen extends GameScreen {
      */
     private void updateHistoryEntry() {
         try {
-            // Nur aktualisieren, wenn wir einen aktuellen History-Eintrag haben
+            // Only update if we have a current history entry
             if (currentHistoryIndex < 0) {
-                Timber.d("No current history entry to update");
+                Timber.d("No current history entry to update, currentHistoryIndex=%d", currentHistoryIndex);
+                
+                // We have isHistorySaved=true but no valid index, create a new entry instead
+                if (isHistorySaved) {
+                    Timber.d("History flag is true but index is invalid, creating new history entry");
+                    saveToHistory();
+                }
                 return;
             }
             
-            // Aktualisiere den History-Eintrag
+            // Update the history entry
             GameHistoryEntry entry = GameHistoryManager.getHistoryEntry(
                 gameManager.getActivity(), currentHistoryIndex);
-                
+            
             if (entry == null) {
-                Timber.d("History entry is null for index: %d", currentHistoryIndex);
+                Timber.e("History entry is null for index: %d", currentHistoryIndex);
+                // If entry is null, try to create a new history entry
+                Timber.d("Attempting to create a new history entry instead");
+                saveToHistory();
                 return;
             }
             
-            // Aktualisiere die Werte
+            // Update the values
             entry.setMovesMade(nbCoups);
             entry.setOptimalMoves(solutionMoves);
             entry.setPlayDuration(timeCpt);
-            
-            // Speichere den aktualisierten Eintrag
+
+            // Save the updated entry
             GameHistoryManager.updateHistoryEntry(gameManager.getActivity(), entry);
             
             Timber.d("Updated history entry: history_%d.txt", currentHistoryIndex);
         } catch (Exception e) {
-            Timber.e("Error updating history entry: %s", e.getMessage());
+            Timber.e(e, "Error updating history entry");
         }
     }
 

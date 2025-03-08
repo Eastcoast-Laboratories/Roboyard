@@ -283,9 +283,22 @@ public class GameHistoryManager {
      * Get a history entry by index
      */
     public static GameHistoryEntry getHistoryEntry(Activity activity, int index) {
-        List<GameHistoryEntry> entries = getHistoryEntries(activity);
-        if (index >= 0 && index < entries.size()) {
-            return entries.get(index);
+        try {
+            // Look for entry by its file path, not by array index
+            String targetPath = indexToPath(index);
+            Timber.d("Looking for history entry with path: %s", targetPath);
+            
+            List<GameHistoryEntry> entries = getHistoryEntries(activity);
+            for (GameHistoryEntry entry : entries) {
+                if (entry.getMapPath().equals(targetPath)) {
+                    Timber.d("Found history entry for index %d: %s", index, entry.getMapPath());
+                    return entry;
+                }
+            }
+            
+            Timber.d("No history entry found for index: %d (path: %s)", index, targetPath);
+        } catch (Exception e) {
+            Timber.e("Error getting history entry: %s", e.getMessage());
         }
         return null;
     }
