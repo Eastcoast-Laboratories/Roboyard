@@ -494,16 +494,13 @@ public class SaveGameScreen extends GameScreen {
                 renderManager.setColor(Color.parseColor(mapUniqueColor[i]));
                 int moveleft=16;
 
+                renderManager.setTextSize((int) (0.37 * ts));
                 if (mapUniqueString[i].length() > 0){
                     // unicode string with 7 filled squares
                     String bar = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
-                    for (int j = 0; j < 1; j++) {
-                        renderManager.drawText(buttonPositionsX[i] - moveleft, (int)(buttonPositionsY[i] + (-11 + j * 22)*ratioH), bar);
-                    }
-
+                    renderManager.drawText(buttonPositionsX[i] - moveleft, (int)(buttonPositionsY[i] + (-11)*ratioH), bar);
                 }
 
-                renderManager.setTextSize((int) (0.37 * ts));
                 renderManager.setColor(Color.parseColor("#000000"));
                 renderManager.drawText(buttonPositionsX[i] - moveleft + 1 + (i<10? 8 : 0), buttonPositionsY[i] - 5, (i+1) + ". " + mapUniqueString[i]);
             }
