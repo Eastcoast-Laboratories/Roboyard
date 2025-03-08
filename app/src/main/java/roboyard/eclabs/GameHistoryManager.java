@@ -20,7 +20,7 @@ import timber.log.Timber;
 public class GameHistoryManager {
     private static final String HISTORY_DIR = "history";
     private static final String HISTORY_INDEX_FILE = "history_index.json";
-    private static final int MAX_HISTORY_ENTRIES = 12;
+    private static final int MAX_HISTORY_ENTRIES = 11;
 
     /**
      * Initialize the history directory if it doesn't exist

@@ -264,14 +264,16 @@ public class SaveGameScreen extends GameScreen {
         historyTabButton.create();
         instances.add(historyTabButton);
 
-        // Add back button
-        instances.add(new GameButtonGotoBack(
-            backButtonX, 
-            backButtonY, 
-            (int)(iconSize * Math.min(ratioW, ratioH)), 
-            (int)(iconSize * Math.min(ratioW, ratioH)), 
-            R.drawable.bt_back_up, 
-            R.drawable.bt_back_down));
+        // Add back button only when not in history mode
+        if (!historyMode) {
+            instances.add(new GameButtonGotoBack(
+                backButtonX, 
+                backButtonY, 
+                (int)(iconSize * Math.min(ratioW, ratioH)), 
+                (int)(iconSize * Math.min(ratioW, ratioH)), 
+                R.drawable.bt_back_up, 
+                R.drawable.bt_back_down));
+        }
             
         if (historyMode) {
             // Create history buttons
