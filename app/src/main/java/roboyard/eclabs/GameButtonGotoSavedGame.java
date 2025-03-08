@@ -109,7 +109,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         } else try {
             // Write save data directly (will overwrite if file exists)
             FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
-            Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath + " +1");
+            Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath + " +1" + "stringlength: " + saveData.length());
             
             // Add to saved games list if needed
             addMapsSaved(gameManager);

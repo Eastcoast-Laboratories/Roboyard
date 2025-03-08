@@ -102,7 +102,7 @@ public class GameHistoryManager {
             // Save updated index
             Boolean isSaved = saveHistoryIndex(activity, entries);
             
-            Timber.d("Added/updated history entry: %s", entry.getMapPath());
+            Timber.d("Added history entry: %s", entry.getMapPath());
             return isSaved;
         } catch (Exception e) {
             Timber.e("Error adding history entry: %s", e.getMessage());
@@ -250,68 +250,6 @@ public class GameHistoryManager {
             return maxIndex + 1;
         }
     }
-
-    /**
-     * Promote a history entry to a permanent save
-     */
-    public static void promoteToSave(Activity activity, GameHistoryEntry entry, int saveSlot) {
-        try {
-            // Read the history file
-            String historyPath = entry.getMapPath();
-            String saveData = FileReadWrite.readPrivateData(activity, historyPath);
-            
-            if (saveData != null && !saveData.isEmpty()) {
-                // Write to save slot
-                String savePath = "map" + saveSlot + ".txt";
-                FileReadWrite.writePrivateData(activity, savePath, saveData);
-                
-                // Copy preview image if it exists
-                if (entry.getPreviewImagePath() != null) {
-                    String previewPath = entry.getPreviewImagePath();
-                    String previewData = FileReadWrite.readPrivateData(activity, previewPath);
-                    if (previewData != null && !previewData.isEmpty()) {
-                        String savePreviewPath = "map" + saveSlot + "_preview.png";
-                        FileReadWrite.writePrivateData(activity, savePreviewPath, previewData);
-                    }
-                }
-                
-                Timber.d("Promoted history entry to save slot %d", saveSlot);
-            }
-        } catch (Exception e) {
-            Timber.e("Error promoting history to save: %s", e.getMessage());
-        }
-    }
-
-    /**
-     * Update an existing history entry with new play duration and moves
-     */
-    public static void updateHistoryEntry(Activity activity, String mapPath, 
-                                         int newDuration, int newMoves) {
-        try {
-            // Load existing entries
-            List<GameHistoryEntry> entries = getHistoryEntries(activity);
-            
-            // Find and update the entry
-            boolean updated = false;
-            for (GameHistoryEntry entry : entries) {
-                if (entry.getMapPath().equals(mapPath)) {
-                    entry.setPlayDuration(newDuration);
-                    entry.setMovesMade(newMoves);
-                    updated = true;
-                    break;
-                }
-            }
-            
-            if (updated) {
-                // Save updated index
-                saveHistoryIndex(activity, entries);
-                Timber.d("Updated history entry: %s, duration=%d, moves=%d", 
-                        mapPath, newDuration, newMoves);
-            }
-        } catch (Exception e) {
-            Timber.e("Error updating history entry: %s", e.getMessage());
-        }
-    }
     
     /**
      * Update an existing history entry
@@ -410,5 +348,47 @@ public class GameHistoryManager {
             Timber.e("Error promoting history entry to save: %s", e.getMessage());
             return -1;
         }
+    }
+
+    /**
+     * Konvertiert einen History-Index in einen Dateipfad
+     */
+    public static String indexToPath(int index) {
+        return "history_" + index + ".txt";
+    }
+    
+    /**
+     * Extrahiert den Index aus einem History-Pfad
+     * @return den Index oder -1 bei ungültigem Format
+     */
+    public static int pathToIndex(String path) {
+        if (path == null || !path.startsWith("history_") || !path.endsWith(".txt")) {
+            return -1;
+        }
+        
+        try {
+            return Integer.parseInt(path.substring(8, path.length() - 4));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+    
+    /**
+     * Ermittelt den höchsten History-Index aller vorhandenen Einträge
+     * @return den höchsten Index oder -1 wenn keine Einträge vorhanden
+     */
+    public static int getHighestHistoryIndex(Activity activity) {
+        int highestIndex = -1;
+        List<GameHistoryEntry> entries = getHistoryEntries(activity);
+        
+        for (GameHistoryEntry entry : entries) {
+            String path = entry.getMapPath();
+            int index = pathToIndex(path);
+            if (index > highestIndex) {
+                highestIndex = index;
+            }
+        }
+        
+        return highestIndex;
     }
 }

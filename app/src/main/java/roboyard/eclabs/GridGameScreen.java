@@ -48,6 +48,8 @@ public class GridGameScreen extends GameScreen {
 
     private String mapPath = "";
 
+    private int currentHistoryIndex = -1; // -1 bedeutet "kein aktueller History-Eintrag"
+
     private int xGrid;
     private int yGrid;
     private float gridSpace;
@@ -1030,16 +1032,19 @@ public class GridGameScreen extends GameScreen {
             saveManager.saveMapCompletion(mapPath, solutionMoves, nbCoups, numSquares, timeCpt);
 
             // Save to history
-            Timber.d("Game won, saving to history again");
-            saveToHistory();
-            isHistorySaved = true;
+            Timber.d("Game won, updating history entry");
+            
+            // Wenn das Spiel bereits einen History-Eintrag hat, aktualisieren wir diesen,
+            // ansonsten erstellen wir einen neuen Eintrag
+            if (isHistorySaved && currentHistoryIndex >= 0) {
+                updateHistoryEntry();
+            } else {
+                saveToHistory();
+                isHistorySaved = true;
+            }
         }
         LevelChoiceGameScreen.invalidateMapCache(mapPath); // Invalidate only this specific map in the cache
         updatePlayedMaps();
-        // set mapCachHasToBeUpdated in Level
-        if (isHistorySaved) {
-            updateHistoryEntry();
-        }
     }
 
     private void updatePlayedMaps()
@@ -1322,28 +1327,29 @@ public class GridGameScreen extends GameScreen {
 
     /**
      * Save the current game state to history
-     *
-     * @return boolean
+     * 
+     * @return boolean True if save was successful
      */
-    private boolean saveToHistory() {
+    public boolean saveToHistory() {
         try {
             Timber.d("Saving game to history after %d seconds of play", timeCpt);
             
-            // Initialize history manager if needed
-            GameHistoryManager.initialize(gameManager.getActivity());
+            int historyIndex = GameHistoryManager.getHighestHistoryIndex(gameManager.getActivity()) + 1;
+            String historyFileName = GameHistoryManager.indexToPath(historyIndex);
+
+            // save current history index for later updates
+            currentHistoryIndex = historyIndex;
             
-            // Ensure history directory exists
-            FileReadWrite.createPrivateDirectory(gameManager.getActivity(), "history");
+            // Create game name based on map name or generated index
+            String gameName = mapName;
+            if (gameName == null || gameName.isEmpty()) {
+                gameName = "Game " + historyIndex;
+            }
             
-            // Get next available history index
-            int historyIndex = GameHistoryManager.getNextHistoryIndex(gameManager.getActivity());
-            String historyFileName = "history_" + historyIndex + ".txt";
-            
-            // Build save data using the same format as regular saves
+            // Build JSON data to save
             StringBuilder saveData = new StringBuilder();
             
             // Add board name
-            String gameName = mapName != null ? mapName : "Game " + historyIndex;
             saveData.append("name:").append(gameName).append(";");
             
             // Add timestamp
@@ -1368,7 +1374,7 @@ public class GridGameScreen extends GameScreen {
             saveData.append(MapObjects.createStringFromList(gridElements, false));
             
             // Write save data - use just the filename, not the path
-            FileReadWrite.writePrivateData(gameManager.getActivity(), "history_" + historyIndex + ".txt", saveData.toString());
+            FileReadWrite.writePrivateData(gameManager.getActivity(), historyFileName, saveData.toString());
             
             // Create preview image path
             String previewFileName = "history_" + historyIndex + "_preview.png";
@@ -1385,6 +1391,11 @@ public class GridGameScreen extends GameScreen {
                 previewFileName
             );
             
+            // save original map path if available
+            if (mapPath != null && !mapPath.isEmpty()) {
+                entry.setOriginalMapPath(mapPath);
+            }
+            
             // Add entry to history index
             Boolean historySaved = GameHistoryManager.addHistoryEntry(gameManager.getActivity(), entry);
 
@@ -1397,30 +1408,35 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
+    /**
+     * Update an existing history entry with the current game state
+     */
     private void updateHistoryEntry() {
         try {
-            // Get history index
-            int historyIndex = GameHistoryManager.getHistoryIndex(gameManager.getActivity(), "history_" + mapPath);
-            if (historyIndex < 0) {
-                Timber.d("No history entry found for game: %s", mapPath);
+            // Nur aktualisieren, wenn wir einen aktuellen History-Eintrag haben
+            if (currentHistoryIndex < 0) {
+                Timber.d("No current history entry to update");
                 return;
             }
             
-            // Update history entry
-            GameHistoryEntry entry = GameHistoryManager.getHistoryEntry(gameManager.getActivity(), historyIndex);
+            // Aktualisiere den History-Eintrag
+            GameHistoryEntry entry = GameHistoryManager.getHistoryEntry(
+                gameManager.getActivity(), currentHistoryIndex);
+                
             if (entry == null) {
-                Timber.d("History entry is null for index: %d", historyIndex);
+                Timber.d("History entry is null for index: %d", currentHistoryIndex);
                 return;
             }
             
+            // Aktualisiere die Werte
             entry.setMovesMade(nbCoups);
             entry.setOptimalMoves(solutionMoves);
             entry.setPlayDuration(timeCpt);
             
-            // Save updated history entry
+            // Speichere den aktualisierten Eintrag
             GameHistoryManager.updateHistoryEntry(gameManager.getActivity(), entry);
             
-            Timber.d("Updated history entry for game: %s", entry.getMapPath());
+            Timber.d("Updated history entry: history_%d.txt", currentHistoryIndex);
         } catch (Exception e) {
             Timber.e("Error updating history entry: %s", e.getMessage());
         }
@@ -1436,7 +1452,11 @@ public class GridGameScreen extends GameScreen {
         StringBuilder saveData = new StringBuilder();
         
         // Add board name
-        saveData.append("name:").append(mapName).append(";");
+        String gameName = mapName != null ? mapName : "Game " + currentHistoryIndex;
+        saveData.append("name:").append(gameName).append(";");
+        
+        // Add timestamp
+        saveData.append("timestamp:").append(System.currentTimeMillis()).append(";");
         
         // Add number of optimal moves if available
         if (solutionMoves > 0) {
@@ -1468,6 +1488,6 @@ public class GridGameScreen extends GameScreen {
      * @return The map name
      */
     public String getMapName() {
-        return mapPath;
+        return mapName;
     }
 }

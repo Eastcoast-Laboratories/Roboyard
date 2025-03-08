@@ -19,12 +19,21 @@ public class GameHistoryEntry {
     private int optimalMoves;        // Number of optimal moves (if available)
     private String boardSize;        // Board dimensions
     private String previewImagePath; // Path to a thumbnail image
+    private String originalMapPath;  // Reference to the original map path, if this is a history entry
 
     /**
      * Constructor for a new history entry
      */
     public GameHistoryEntry(String mapPath, String mapName, long timestamp, int playDuration, 
                            int movesMade, int optimalMoves, String boardSize, String previewImagePath) {
+        this(mapPath, mapName, timestamp, playDuration, movesMade, optimalMoves, boardSize, previewImagePath, null);
+    }
+
+    /**
+     * Constructor for a new history entry with original map path
+     */
+    public GameHistoryEntry(String mapPath, String mapName, long timestamp, int playDuration, 
+                           int movesMade, int optimalMoves, String boardSize, String previewImagePath, String originalMapPath) {
         this.mapPath = mapPath;
         this.mapName = mapName;
         this.timestamp = timestamp;
@@ -33,6 +42,7 @@ public class GameHistoryEntry {
         this.optimalMoves = optimalMoves;
         this.boardSize = boardSize;
         this.previewImagePath = previewImagePath;
+        this.originalMapPath = originalMapPath;
     }
 
     /**
@@ -105,6 +115,14 @@ public class GameHistoryEntry {
 
     public void setPreviewImagePath(String previewImagePath) {
         this.previewImagePath = previewImagePath;
+    }
+
+    public String getOriginalMapPath() {
+        return originalMapPath;
+    }
+
+    public void setOriginalMapPath(String originalMapPath) {
+        this.originalMapPath = originalMapPath;
     }
 
     /**
