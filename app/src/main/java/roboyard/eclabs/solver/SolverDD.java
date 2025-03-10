@@ -125,6 +125,13 @@ public class SolverDD implements ISolver{
     }
 
     /**
+     * Cancel the solver execution and set status to noSolution
+     */
+    public void cancel() {
+        this.solverStatus = SolverStatus.noSolution;
+    }
+
+    /**
      * Check if the solution can be reached in one move
      * @return true if the goal can be reached in one move
      */

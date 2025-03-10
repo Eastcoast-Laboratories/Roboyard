@@ -42,7 +42,7 @@ public class MapGenerator {
         // Check difficulty level
         int level = GridGameScreen.getLevel();
         if(level == 0){ // Difficulty Beginner
-            generateNewMapEachTime=true;
+            generateNewMapEachTime=true; // generate a new map each time you start a new game
         } else {
             if(level == 1){ // Advanced
                 generateNewMapEachTime=true;
