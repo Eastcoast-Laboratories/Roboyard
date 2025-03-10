@@ -78,6 +78,9 @@ public class GridGameScreen extends GameScreen {
     private int IAMovesNumber = 0;
 
     private boolean mustStartNext = false;
+    private boolean solverIsCanceled = false;
+    private int showCancleAfter = 10; // show the cancel button after some seconds the AI is not solving the map
+
 
     private ArrayList<IGameMove> moves = null;
 
@@ -445,8 +448,8 @@ public class GridGameScreen extends GameScreen {
                     brailleChar += brailleChars[(brailleIndex + (int)(Math.random() * brailleChars.length)) % brailleChars.length];
                     renderManager.drawText(textMarginLeft, posY,  "AI solving " + brailleChar);
                     
-                    // Show cancel button after 5 seconds if not solved
-                    if (timeCpt >= 10 && !isSolved) {
+                    // Show cancel button if not solved
+                    if (timeCpt >= showCancleAfter && !isSolved) {
                         // Aktiviere den Cancel-Button
                         buttonCancelSolver.setEnabled(true);
                         
@@ -600,6 +603,7 @@ public class GridGameScreen extends GameScreen {
             gameManager.getInputManager().resetEvents();
         }
 
+        // TODO:  isFinished() returns true also on missingData or noSolution (set by cancel())
         if(!isSolved && solver.getSolverStatus().isFinished())
         {
             isSolved = true;
@@ -1350,8 +1354,10 @@ public class GridGameScreen extends GameScreen {
             if (t != null && t.isAlive()) {
                 t.interrupt();
                 if (solver != null) {
-                    // Verwende die cancel()-Methode, um den Solver zu stoppen
+                    // note, cancel() sets the solver status to noSolution which is also isFinished()
                     ((SolverDD)solver).cancel();
+                    solverIsCanceled = true;
+                    solutionMoves = 999; // otherwise the game will go to mustRestart, because the solutionMoves are still there from last map
                 }
             }
             // Keep the solve button disabled

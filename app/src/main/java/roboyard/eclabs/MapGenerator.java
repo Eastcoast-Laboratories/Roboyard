@@ -79,7 +79,7 @@ public class MapGenerator {
             wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/3);
         }
         if(level == DIFFICULTY_IMPOSSIBLE) {
-            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/2.3);
+            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/2.3); // for debug, set to 1.3 with lots of walls
         }
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
