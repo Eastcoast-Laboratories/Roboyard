@@ -101,6 +101,17 @@ public class GridGameScreen extends GameScreen {
     private int textColorHighlight = Color.parseColor("#aaaaaa");
     private int textColorNormal = Color.GRAY;
     
+    // Braille-Zeichen für den animierten Spinner
+    private static final String[] brailleChars = {
+        "\u2840", "\u2841", "\u2842", "\u2843", "\u2844", "\u2845", "\u2846", "\u2847", "\u2848", "\u2849", "\u284a", "\u284b", "\u284c", "\u284d", "\u284e", "\u284f",
+        "\u2850", "\u2851", "\u2852", "\u2853", "\u2854", "\u2855", "\u2856", "\u2857", "\u2858", "\u2859", "\u285a", "\u285b", "\u285c", "\u285d", "\u285e", "\u285f",
+        "\u2860", "\u2861", "\u2862", "\u2863", "\u2864", "\u2865", "\u2866", "\u2867", "\u2868", "\u2869", "\u286a", "\u286b", "\u286c", "\u286d", "\u286e", "\u286f",
+        "\u2870", "\u2871", "\u2872", "\u2873", "\u2874", "\u2875", "\u2876", "\u2877", "\u2878", "\u2879", "\u287a", "\u287b", "\u287c", "\u287d", "\u287e", "\u287f",
+        "\u2880", "\u2881", "\u2882", "\u2883", "\u2884", "\u2885", "\u2886", "\u2887", "\u2888", "\u2889", "\u288a", "\u288b", "\u288c", "\u288d", "\u288e", "\u288f",
+        "\u2890", "\u2891", "\u2892", "\u2893", "\u2894", "\u2895", "\u2896", "\u2897", "\u2898", "\u2899", "\u289a", "\u289b", "\u289c", "\u289d", "\u289e", "\u289f",
+        "\u28a0", "\u28a1", "\u28a2", "\u28a3", "\u28a4", "\u28a5", "\u28a6", "\u28a7", "\u28a8", "\u28a9", "\u28aa", "\u28ab", "\u28ac", "\u28ad", "\u28ae", "\u28af",
+        "\u28b0", "\u28b1", "\u28b2", "\u28b3", "\u28b4", "\u28b5", "\u28b6", "\u28b7", "\u28b8", "\u28b9", "\u28ba", "\u28bb", "\u28bc", "\u28bd", "\u28be", "\u28bf"
+    };
     String mapName = "";
     GameSolution solution;
 
@@ -412,15 +423,15 @@ public class GridGameScreen extends GameScreen {
                     mustStartNext = true;
                 } else {
                     String solvingText;
-                    // create a ascii spinner with thesse chars: . o O o
-                    if (timeCpt % 4 == 0) {
-                        solvingText = "AI solving /";
-                    } else if (timeCpt % 4 == 1 || timeCpt % 4 == 3) {
-                        solvingText = "AI solving –";
-                    } else {
-                        solvingText = "AI solving \\";
-                    }
-                    renderManager.drawText(textMarginLeft, posY, solvingText);
+                    // Display solving message with Braille spinner animation
+                    int brailleIndex = (int) (Math.random() * brailleChars.length) % brailleChars.length;
+                    String brailleChar = brailleChars[brailleIndex];
+                    brailleChar += brailleChars[(brailleIndex + (int)(Math.random() * brailleChars.length)) % brailleChars.length];
+                    brailleChar += brailleChars[(brailleIndex + (int)(Math.random() * brailleChars.length)) % brailleChars.length];
+                    brailleChar += brailleChars[(brailleIndex + (int)(Math.random() * brailleChars.length)) % brailleChars.length];
+                    renderManager.drawText(textMarginLeft, posY,  "AI solving " + brailleChar);
+                    renderManager.setTextSize(lineHeightSmall);
+                    renderManager.drawText(textMarginLeft + layout.x(600), posY, "cancel");
                 }
             }
         }
