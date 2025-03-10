@@ -14,6 +14,12 @@ public class MapGenerator {
 
     final Random rand;
 
+    // Difficulty level constants
+    private static final int DIFFICULTY_BEGINNER = 0;
+    private static final int DIFFICULTY_ADVANCED = 1;
+    private static final int DIFFICULTY_INSANE = 2;
+    private static final int DIFFICULTY_IMPOSSIBLE = 3;
+
     // position of the square in the middle of the game board
     int carrePosX; // horizontal position of the top wall of square, starting with 0
     int carrePosY; // vertical position of the left wall of the square
@@ -41,10 +47,10 @@ public class MapGenerator {
 
         // Check difficulty level
         int level = GridGameScreen.getLevel();
-        if(level == 0){ // Difficulty Beginner
+        if(level == DIFFICULTY_BEGINNER){ // Difficulty Beginner
             generateNewMapEachTime=true; // generate a new map each time you start a new game
         } else {
-            if(level == 1){ // Advanced
+            if(level == DIFFICULTY_ADVANCED){ // Advanced
                 generateNewMapEachTime=true;
             }
             if (generateNewMapEachTime) {
@@ -63,7 +69,7 @@ public class MapGenerator {
             loneWallsAllowed = true;
         }
 
-        if(level == 2 || level == 3) {
+        if(level == DIFFICULTY_INSANE || level == DIFFICULTY_IMPOSSIBLE) {
             generateNewMapEachTime=false; // keep the current map over restarts
             // generateNewMapEachTime=true; // DEBUG!!! remove to release
             targetMustBeInCorner = false;
@@ -411,7 +417,7 @@ public class MapGenerator {
 
         ArrayList<GridElement> data = GridGameScreen.getMap();
 
-        if(data == null || generateNewMapEachTime){
+        if(data == null || data.isEmpty() || generateNewMapEachTime){
             data = translateArraysToMap(horizontalWalls, verticalWalls);
             GridGameScreen.setMap(data);
             generateNewMapEachTime = false;
