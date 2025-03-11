@@ -1,7 +1,9 @@
 # Changelog
 =========
 
-## Version 20 (2025-03-08)
+
+## Version 20 (2025-03-11)
+- add cancle button if AI takes too long for solving after 10s
 - Game history is now automatically saved before opening the save screen.
 - Save and load buttons are now separate.
 - The "Save" button in the game screen is always reactivated.

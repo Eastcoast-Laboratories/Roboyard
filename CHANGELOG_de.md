@@ -1,7 +1,9 @@
 Changelog Deutsch
 =================
 
-## Version 20 (2025-03-08)
+
+## Version 20 (2025-03-11)
+- Es gibt jetzt einen Cancel button, wenn die KI länger als 10s an der lösung rechnet
 - Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.
 - Speicher- und Ladebuttons sind nun getrennt.
 - Der „Speichern“-Button im Spielbildschirm wird immer wieder aktiviert.

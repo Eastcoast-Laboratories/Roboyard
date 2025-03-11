@@ -14,6 +14,7 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
+- Es gibt jetzt einen Cancel button, wenn die KI länger als 10s an der lösung rechnet
 - Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.
 - Speicher- und Ladebuttons sind nun getrennt.
 - Der „Speichern“-Button im Spielbildschirm wird immer wieder aktiviert.
@@ -23,6 +24,7 @@ EOF
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
+- add cancle button if AI takes too long for solving after 10s
 - Game history is now automatically saved before opening the save screen.
 - Save and load buttons are now separate.
 - The "Save" button in the game screen is always reactivated.
@@ -34,12 +36,12 @@ EOF
 # Deutsches Changelog
 DE_CHANGELOG_FILE="$BASE_DIR/de/changelogs/${VERSION_NAME}.txt"
 mkdir -p "$(dirname "$DE_CHANGELOG_FILE")"
-echo "$DE_CHANGES" >> "$DE_CHANGELOG_FILE"
+echo "$DE_CHANGES" > "$DE_CHANGELOG_FILE"
 
 # Englisches Changelog
 EN_CHANGELOG_FILE="$BASE_DIR/en-US/changelogs/${VERSION_NAME}.txt"
 mkdir -p "$(dirname "$EN_CHANGELOG_FILE")"
-echo "$EN_CHANGES" >> "$EN_CHANGELOG_FILE"
+echo "$EN_CHANGES" > "$EN_CHANGELOG_FILE"
 
 # CHANGELOG.md aktualisieren (nur Englisch)
 if [ ! -f "$CHANGELOG_MD" ]; then
