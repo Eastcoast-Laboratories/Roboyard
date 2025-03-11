@@ -42,7 +42,7 @@ public class MapGenerator {
         // Check difficulty level
         int level = GridGameScreen.getLevel();
         if(level == 0){ // Difficulty Beginner
-            generateNewMapEachTime=true;
+            generateNewMapEachTime=true; // generate a new map each time you start a new game
         } else {
             if(level == 1){ // Advanced
                 generateNewMapEachTime=true;
@@ -72,8 +72,8 @@ public class MapGenerator {
             maxWallsInOneHorizontalRow = 5;
             wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/3);
         }
-        if(level == 3) {
-            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/2.3);
+        if(level == DIFFICULTY_IMPOSSIBLE) {
+            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/2.3); // for debug, set to 1.3 with lots of walls
         }
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size

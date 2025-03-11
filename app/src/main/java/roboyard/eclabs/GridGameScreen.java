@@ -40,8 +40,6 @@ public class GridGameScreen extends GameScreen {
 
     private ISolver solver;
 
-    private boolean autoSaved = false;
-
     private ArrayList<GridElement> gridElements;
     private int imageGridID;
     private boolean imageLoaded = false;
@@ -80,6 +78,9 @@ public class GridGameScreen extends GameScreen {
     private int IAMovesNumber = 0;
 
     private boolean mustStartNext = false;
+    private boolean solverIsCanceled = false;
+    private int showCancleAfter = 10; // show the cancel button after some seconds the AI is not solving the map
+
 
     private ArrayList<IGameMove> moves = null;
 
@@ -93,6 +94,7 @@ public class GridGameScreen extends GameScreen {
 
     private GameButtonGeneral buttonSolve;
     private GameButtonSaveScreen buttonSave;
+    private GameButtonGeneral buttonCancelSolver; // Button zum Abbrechen des Solvers
 
     private final Preferences preferences = new Preferences();
 
@@ -311,6 +313,21 @@ public class GridGameScreen extends GameScreen {
         buttonSolve.setEnabled(false);
         this.instances.add(buttonSolve);
 
+        // Cancel Solver button (initially hidden)
+        buttonCancelSolver = new GameButtonGeneral(
+            textMarginLeft + layout.x(600),
+            solutionTextPosY - lineHeightSmall,
+            layout.x(120),
+            lineHeightSmall,
+            R.drawable.transparent,
+            R.drawable.transparent,
+            new ButtonCancelSolver()
+        );
+        buttonCancelSolver.setEnabled(false);
+        buttonCancelSolver.setImageDisabled(R.drawable.transparent);
+
+        this.instances.add(buttonCancelSolver);
+
         // Load images
         gameManager.getRenderManager().loadImage(R.drawable.transparent);
         gameManager.getRenderManager().loadImage(R.drawable.bt_jeu_resolution_disabled);
@@ -430,8 +447,18 @@ public class GridGameScreen extends GameScreen {
                     brailleChar += brailleChars[(brailleIndex + (int)(Math.random() * brailleChars.length)) % brailleChars.length];
                     brailleChar += brailleChars[(brailleIndex + (int)(Math.random() * brailleChars.length)) % brailleChars.length];
                     renderManager.drawText(textMarginLeft, posY,  "AI solving " + brailleChar);
-                    renderManager.setTextSize(lineHeightSmall);
-                    renderManager.drawText(textMarginLeft + layout.x(600), posY, "cancel");
+                    
+                    // Show cancel button if not solved
+                    if (timeCpt >= showCancleAfter && !isSolved) {
+                        // Aktiviere den Cancel-Button
+                        buttonCancelSolver.setEnabled(true);
+                        
+                        // Zeichne den Text für den Cancel-Button
+                        renderManager.setTextSize(lineHeightSmall);
+                        renderManager.drawText(textMarginLeft + layout.x(600), posY, "CANCEL");
+                    } else {
+                        buttonCancelSolver.setEnabled(false);
+                    }
                 }
             }
         }
@@ -508,7 +535,6 @@ public class GridGameScreen extends GameScreen {
             isHistorySaved = false;
 
             allMoves.clear();
-            autoSaved = false;
 
             buttonSolve.setEnabled(false);
             if(t != null){
@@ -577,6 +603,7 @@ public class GridGameScreen extends GameScreen {
             gameManager.getInputManager().resetEvents();
         }
 
+        // TODO:  isFinished() returns true also on missingData or noSolution (set by cancel())
         if(!isSolved && solver.getSolverStatus().isFinished())
         {
             isSolved = true;
@@ -686,7 +713,6 @@ public class GridGameScreen extends GameScreen {
     public void setRandomGame() {
         Timber.d("Starting new random game");
         this.mapPath = "";  //La carte étant générée, elle n'a pas de chemin d'accès
-        this.autoSaved = false;  // Reset autosave flag for new random game
         this.isGameWon = false;  // Reset game won flag
         this.isRandomGame = true;  // Set random game flag
         numSolutionClicks = 0;
@@ -1318,6 +1344,26 @@ public class GridGameScreen extends GameScreen {
                 allMoves.remove(last);
                 nbCoups--;
             }
+        }
+    }
+
+    private class ButtonCancelSolver implements IExecutor {
+        @Override
+        public void execute() {
+            // Cancel the solver algorithm
+            if (t != null && t.isAlive()) {
+                t.interrupt();
+                if (solver != null) {
+                    // note, cancel() sets the solver status to noSolution which is also isFinished()
+                    ((SolverDD)solver).cancel();
+                    solverIsCanceled = true;
+                    solutionMoves = 999; // otherwise the game will go to mustRestart, because the solutionMoves are still there from last map
+                }
+            }
+            // Keep the solve button disabled
+            buttonSolve.setEnabled(false);
+            // Just disable the cancel button
+            buttonCancelSolver.setEnabled(false);
         }
     }
 
