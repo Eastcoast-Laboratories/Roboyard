@@ -867,13 +867,22 @@ public class GridGameScreen extends GameScreen {
             
             // add small robots underneath as marker for each start position
             if (myp.getType().startsWith("robot_")) {
-                drawables.get(myp.getType()).setBounds(
+                Drawable robotDrawable = drawables.get(myp.getType());
+                // Save current alpha
+                int originalAlpha = robotDrawable.getAlpha();
+                // Set 50% transparency (128/255)
+                robotDrawable.setAlpha(128);
+                
+                robotDrawable.setBounds(
                     (int)(myp.getX() * gridSpace),
                     (int)(myp.getY() * gridSpace),
                     (int)((myp.getX() + 1) * gridSpace),
                     (int)((myp.getY() + 1) * gridSpace)
                     );
-                drawables.get(myp.getType()).draw(canvasGrid);
+                robotDrawable.draw(canvasGrid);
+                
+                // Restore original alpha
+                robotDrawable.setAlpha(originalAlpha);
             }
         }
 
