@@ -194,6 +194,7 @@ public class GameButtonGotoHistoryGame extends GameButton {
             
             int textPadding = 10;
             int textX = minimapX + minimapSize + 20;
+            int textX2 = (getWidth() / 2 ) - minimapX + minimapSize + 20; // TODO: larger text in two rows
             int textY = y + textPadding + renderManager.getTextSize();
             
             // Format timestamp

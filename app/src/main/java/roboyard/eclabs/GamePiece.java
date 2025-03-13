@@ -240,13 +240,13 @@ public class GamePiece implements IGameObject {
             // TODO: reset if enlarging worked this.radius=32;
             if(inMovement==false){
                 // before move
+                // Play robot movement sound when robot starts moving
+                playRobotSound(gameManager, "move");
+
                 this.curMoveSquares=Math.abs(this.xObjective-this.x)+Math.abs(this.yObjective-this.y);
                 //this.numSquaresMoved+=this.curMoveSquares;
                 Timber.d(" start move with "+this.curMoveSquares+" squares");
                 ((GridGameScreen)(gameManager.getCurrentScreen())).setCurrentMovedSquares(this.curMoveSquares);
-                
-                // Play robot movement sound when robot starts moving
-                playRobotSound(gameManager, "move");
             }
             inMovement = true;
             testIfWon = true;

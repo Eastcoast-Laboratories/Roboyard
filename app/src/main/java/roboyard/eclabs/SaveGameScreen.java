@@ -350,29 +350,29 @@ public class SaveGameScreen extends GameScreen {
             deleteButton.create();
             instances.add(deleteButton);
             
-            // Promote button
-            GameButtonHistoryAction promoteButton = new GameButtonHistoryAction(
-                actionX + actionButtonSize + 10,
-                y,
-                actionButtonSize,
-                GameButtonHistoryAction.ACTION_PROMOTE,
-                i,
-                entry
-            );
-            promoteButton.create();
-            instances.add(promoteButton);
+            // // Promote button
+            // GameButtonHistoryAction promoteButton = new GameButtonHistoryAction(
+            //     actionX + actionButtonSize + 10,
+            //     y,
+            //     actionButtonSize,
+            //     GameButtonHistoryAction.ACTION_PROMOTE,
+            //     i,
+            //     entry
+            // );
+            // promoteButton.create();
+            // instances.add(promoteButton);
             
-            // Share button
-            GameButtonHistoryAction shareButton = new GameButtonHistoryAction(
-                actionX + (actionButtonSize + 10) * 2,
-                y,
-                actionButtonSize,
-                GameButtonHistoryAction.ACTION_SHARE,
-                i,
-                entry
-            );
-            shareButton.create();
-            instances.add(shareButton);
+            // // Share button
+            // GameButtonHistoryAction shareButton = new GameButtonHistoryAction(
+            //     actionX + (actionButtonSize + 10) * 2,
+            //     y,
+            //     actionButtonSize,
+            //     GameButtonHistoryAction.ACTION_SHARE,
+            //     i,
+            //     entry
+            // );
+            // shareButton.create();
+            // instances.add(shareButton);
         }
     }
     
