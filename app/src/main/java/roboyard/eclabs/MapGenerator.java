@@ -213,9 +213,28 @@ public class MapGenerator {
         int countY = 0;
 
         boolean restart;
+        // Add a counter to limit the number of restarts
+        int restartCount = 0;
+        int maxRestarts = 50; // Maximum number of times we'll restart before relaxing constraints
+        int restartRelaxThreshold = 20; // Number of restarts before we start relaxing constraints
 
+        // Original difficulty constraints
+        int originalMaxWallsInOneHorizontalRow = maxWallsInOneHorizontalRow;
+        int originalMaxWallsInOneVerticalCol = maxWallsInOneVerticalCol;
+        int tolerance = 0;
         do {
             restart = false;
+            
+            // If we've had to restart multiple times, gradually relax the constraints
+            if (restartCount > restartRelaxThreshold) {
+                // this happens on small maps like 12x12
+                // Add 1 to the allowed walls per row/column for each restart beyond 20
+                tolerance = (restartCount - restartRelaxThreshold) / 5;
+                maxWallsInOneHorizontalRow = originalMaxWallsInOneHorizontalRow + tolerance;
+                maxWallsInOneVerticalCol = originalMaxWallsInOneVerticalCol + tolerance;
+                Timber.d("Relaxing wall constraints after %d restarts: h=%d, v=%d", 
+                       restartCount, maxWallsInOneHorizontalRow, maxWallsInOneVerticalCol);
+            }
 
             //We initialize with no walls
             for (int x = 0; x < MainActivity.getBoardWidth(); x++)
@@ -395,7 +414,7 @@ public class MapGenerator {
                     }
 
                     if (compteLoop1 > 1000) {
-                        Timber.d("Wall creation restarted, too many loops");
+                        Timber.d("Wall creation restarted, too many loops (%d), tolerance: %d", restartCount, tolerance);
                         restart = true;
                     }
 
@@ -415,7 +434,7 @@ public class MapGenerator {
                     verticalWalls[tempXv][tempYv] = 1;
                 }
             }
-        }while(restart);
+        }while(restart && restartCount++ < maxRestarts);
 
         ArrayList<GridElement> data = GridGameScreen.getMap();
 
