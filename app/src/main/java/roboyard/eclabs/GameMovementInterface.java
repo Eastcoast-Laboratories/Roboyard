@@ -18,6 +18,7 @@ public class GameMovementInterface implements IGameObject {
     private int decision              = -1; // 0: NORTH, 1: EAST, 2: SOUTH, 3: WEST
     private GamePiece target;
     private GameManager gameManager;
+    private int zIndex               = ZIndexConstants.UI_ELEMENT; // Default z-index for UI elements
 
     /**
      * Check if the interface is active
@@ -133,6 +134,24 @@ public class GameMovementInterface implements IGameObject {
 
     @Override
     public void destroy() {
+    }
+    
+    /**
+     * Get the z-index of this game object
+     * @return The z-index value
+     */
+    @Override
+    public int getZIndex() {
+        return zIndex;
+    }
+    
+    /**
+     * Set the z-index of this game object
+     * @param zIndex The z-index value
+     */
+    @Override
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
     }
 
     public void setPosition(int x, int y){

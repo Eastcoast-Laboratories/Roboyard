@@ -843,26 +843,37 @@ public class GridGameScreen extends GameScreen {
         int offsetWall = -2 * pixel;
         int wallThickness = 16 * pixel; // thickness of walls
 
+        // Remove any existing wall objects
+        ArrayList<IGameObject> objectsToRemove = new ArrayList<>();
+        for (IGameObject obj : this.instances) {
+            if (obj instanceof Wall) {
+                objectsToRemove.add(obj);
+            }
+        }
+        for (IGameObject obj : objectsToRemove) {
+            this.instances.remove(obj);
+        }
+        
+        // Instead of drawing walls to the bitmap, create Wall objects
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
 
-            // add horizontal lines
+            // Create horizontal walls
             if (myp.getType().equals("mh")) {
-                drawables.get("mh").setBounds((int)(myp.getX() * gridSpace - stretchWall), // left x
-                (int)(myp.getY() * gridSpace - stretchWall + offsetWall), // left y
-                (int)((myp.getX() + 1) * gridSpace + stretchWall), // right x
-                (int)(myp.getY() * gridSpace + wallThickness + offsetWall)); // right y
-                drawables.get("mh").draw(canvasGrid);
+                Wall wall = new Wall("mh", myp.getX(), myp.getY());
+                wall.setGridDimensions(xGrid, yGrid, gridSpace);
+                wall.setDrawable(drawables.get("mh"));
+                wall.setZIndex(ZIndexConstants.WALL);
+                this.instances.add(wall);
             }
             
-            // add vertical lines
+            // Create vertical walls
             if (myp.getType().equals("mv")) {
-                drawables.get("mv").setBounds((int)(myp.getX() * gridSpace - stretchWall + offsetWall), // left x
-                (int)(myp.getY() * gridSpace - stretchWall), // left y
-                (int)(myp.getX() * gridSpace + wallThickness + offsetWall), // right x
-                (int)((myp.getY() + 1) * gridSpace + stretchWall) // right y
-                );
-                drawables.get("mv").draw(canvasGrid);
+                Wall wall = new Wall("mv", myp.getX(), myp.getY());
+                wall.setGridDimensions(xGrid, yGrid, gridSpace);
+                wall.setDrawable(drawables.get("mv"));
+                wall.setZIndex(ZIndexConstants.WALL);
+                this.instances.add(wall);
             }
             
             // add small robots underneath as marker for each start position
@@ -896,6 +907,9 @@ public class GridGameScreen extends GameScreen {
         imageGridID = currentRenderManager.loadBitmap(bitmapGrid);
         imageLoaded = true;
 
+        // Mark instances as needing to be sorted
+        markUnsorted();
+        
         // add robots
         createRobots();
 
@@ -940,11 +954,13 @@ public class GridGameScreen extends GameScreen {
             if (myp.getType().startsWith("robot_")) {
                 GamePiece currentPiece = new GamePiece(myp.getX(), myp.getY(), colors.get(myp.getType()));
                 currentPiece.setGridDimensions(xGrid, yGrid, gridSpace);
-
+                currentPiece.setZIndex(ZIndexConstants.ROBOT); // Set z-index for robots
                 this.instances.add(currentPiece);
             }
         }
-
+        
+        // Mark instances as needing to be sorted after adding robots
+        markUnsorted();
     }
 
     public void activateInterface(GamePiece p, int x, int y){
@@ -1595,5 +1611,14 @@ public class GridGameScreen extends GameScreen {
      */
     public boolean isHistorySaved() {
         return isHistorySaved;
+    }
+
+    /**
+     * Mark the instances list as needing to be sorted again
+     * This is called after adding objects or changing z-indices
+     */
+    protected void markUnsorted() {
+        // Call the parent class method to mark instances as needing sorting
+        super.markUnsorted();
     }
 }

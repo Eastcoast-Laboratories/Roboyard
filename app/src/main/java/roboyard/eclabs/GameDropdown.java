@@ -18,6 +18,7 @@ public class GameDropdown implements IGameObject {
     private final int backgroundColor = 0xFF404040;
     private final int textColor = 0xFFFFFFFF;
     private final int highlightColor = 0xFF606060;
+    private int zIndex = ZIndexConstants.UI_ELEMENT; // Default z-index for UI elements
 
     public GameDropdown(int x, int y, int width, int height) {
         this.x = x;
@@ -56,6 +57,7 @@ public class GameDropdown implements IGameObject {
 
     @Override
     public void destroy() {
+        // Nothing to clean up
     }
 
     @Override
@@ -134,5 +136,23 @@ public class GameDropdown implements IGameObject {
                 renderManager.drawText((int)optionX, (int)optionTextY, optionText);
             }
         }
+    }
+
+    /**
+     * Get the z-index of this game object
+     * @return The z-index value
+     */
+    @Override
+    public int getZIndex() {
+        return zIndex;
+    }
+    
+    /**
+     * Set the z-index of this game object
+     * @param zIndex The z-index value
+     */
+    @Override
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
     }
 }

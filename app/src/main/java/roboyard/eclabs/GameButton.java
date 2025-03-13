@@ -13,6 +13,7 @@ public abstract class GameButton implements IGameObject {
     int y;
     private final int w;
     private final int h;
+    private int zIndex = ZIndexConstants.UI_ELEMENT; // Default z-index for UI elements
 
     /** enable or disable the button
      * @param enabled boolean
@@ -158,5 +159,23 @@ public abstract class GameButton implements IGameObject {
      */
     public int getPositionY() {
         return y;
+    }
+    
+    /**
+     * Get the z-index of this game object
+     * @return The z-index value
+     */
+    @Override
+    public int getZIndex() {
+        return zIndex;
+    }
+    
+    /**
+     * Set the z-index of this game object
+     * @param zIndex The z-index value
+     */
+    @Override
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
     }
 }

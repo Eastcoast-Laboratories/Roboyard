@@ -28,6 +28,7 @@ public class GamePiece implements IGameObject {
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
     private final int extraSizeForRobotsAndTargets = 33; // robots and targets are some percent larger than the grid and may overlap 4 px
+    private int zIndex              = ZIndexConstants.ROBOT; // Default z-index for robots
 
     boolean testIfWon       = true;
     
@@ -400,4 +401,21 @@ public class GamePiece implements IGameObject {
     public void destroy(){
     }
 
+    /**
+     * Get the z-index of this game object
+     * @return The z-index value
+     */
+    @Override
+    public int getZIndex() {
+        return zIndex;
+    }
+    
+    /**
+     * Set the z-index of this game object
+     * @param zIndex The z-index value
+     */
+    @Override
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
+    }
 }
