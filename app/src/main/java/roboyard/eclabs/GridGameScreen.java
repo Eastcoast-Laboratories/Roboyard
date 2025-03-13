@@ -870,8 +870,8 @@ public class GridGameScreen extends GameScreen {
                 Drawable robotDrawable = drawables.get(myp.getType());
                 // Save current alpha
                 int originalAlpha = robotDrawable.getAlpha();
-                // Set 50% transparency (128/255)
-                robotDrawable.setAlpha(128);
+                // Set transparency (128/255) == 50%
+                robotDrawable.setAlpha(77);
                 
                 robotDrawable.setBounds(
                     (int)(myp.getX() * gridSpace),
