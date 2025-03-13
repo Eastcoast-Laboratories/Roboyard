@@ -2,12 +2,14 @@ Changelog Deutsch
 =================
 
 
-## Version 20 (2025-03-11)
+## Version 20
 - Es gibt jetzt einen Cancel button, wenn die KI länger als 10s an der lösung rechnet
 - Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.
 - Speicher- und Ladebuttons sind nun getrennt.
 - Der „Speichern“-Button im Spielbildschirm wird immer wieder aktiviert.
 - Ein Lade-Indikator wird nun im Spielfeld angezeigt, wenn die KI rechnet.
+- Option in den Einstellungen, ob jedes mal eine neue Karte generiert wird
+- Sound Effekte für Roboterbewegungen
 
 ### Version 16
 

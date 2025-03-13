@@ -2,12 +2,14 @@
 =========
 
 
-## Version 20 (2025-03-11)
-- add cancle button if AI takes too long for solving after 10s
+## Version 20 (2025-03-13)
+- add cancel button if AI takes too long for solving after 10s
 - Game history is now automatically saved before opening the save screen.
 - Save and load buttons are now separate.
 - The "Save" button in the game screen is always reactivated.
 - A loading indicator is now displayed in the game field when the AI is calculating.
+- Settings option to choose if a new map is generated each game
+- Added sound effects for robot movement
 
 ### Version 19
 - Added minimap display on each save game button for better game identification
