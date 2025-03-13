@@ -18,16 +18,21 @@ public class SettingsGameScreen extends GameScreen {
     private GameButtonGeneral buttonImpossible = null;
     private GameButtonGeneral buttonSoundOff = null;
     private GameButtonGeneral buttonSoundOn = null;
+    private GameButtonGeneral buttonNewMapEachTimeOn = null;
+    private GameButtonGeneral buttonNewMapEachTimeOff = null;
     private GameDropdown boardSizeDropdown;
     private int hs2;
     private int ws2;
     private String levelDifficulty="Beginner";
-    private final Preferences preferences = new Preferences();
+    private Preferences preferences;
     // UI Layout
     private ScreenLayout layout;
+    // Flag to track if we've initialized map generation setting
+    private boolean mapGenerationSettingInitialized = false;
 
     public SettingsGameScreen(GameManager gameManager){
         super(gameManager);
+        preferences = new Preferences();
     }
 
     @Override
@@ -38,6 +43,9 @@ public class SettingsGameScreen extends GameScreen {
             gameManager.getScreenHeight(),
             gameManager.getActivity().getResources().getDisplayMetrics().density
         );
+
+        // Remove map generation initialization from here to avoid NullPointerException
+        // We'll initialize it the first time the settings screen is shown instead
 
         float displayRatio = gameManager.getScreenHeight() / gameManager.getScreenWidth();
 
@@ -50,59 +58,43 @@ public class SettingsGameScreen extends GameScreen {
         int x2 = layout.x(300);  // Second column
         int x3 = layout.x(560);  // Third column
         int x4 = layout.x(820);  // Fourth column
-        
-        // Difficulty buttons - first row
-        int difficultyY = layout.y(340);
-        buttonBeginner = new GameButtonGeneral(
-            x1, difficultyY, buttonWidth, buttonHeight, 
-            R.drawable.bt_up, R.drawable.bt_down, new setBeginnner());
-        buttonAdvanced = new GameButtonGeneral(
-            x2, difficultyY, buttonWidth, buttonHeight, 
-            R.drawable.bt_up, R.drawable.bt_down, new setAdvanced());
-        
-        // Difficulty buttons - second row
-        int difficultyRow2Y = layout.y(610);
-        buttonInsane = new GameButtonGeneral(
-            x1, difficultyRow2Y, buttonWidth, buttonHeight, 
-            R.drawable.bt_up, R.drawable.bt_down, new setInsane());
-        buttonImpossible = new GameButtonGeneral(
-            x2, difficultyRow2Y, buttonWidth, buttonHeight, 
-            R.drawable.bt_up, R.drawable.bt_down, new setImpossible());
-        
+
+        int posY = 88;
+
         // Board size dropdown
         Timber.d("Settings: displayRatio: %f", displayRatio);
-        
+
         // Create board size dropdown
         // Board size dropdown
-        int boardSizeY = layout.y(44);
-        boardSizeDropdown = new GameDropdown(x3, boardSizeY, buttonWidth * 2, layout.y(88));
+        int boardSizeY = layout.y(50);
+        boardSizeDropdown = new GameDropdown(x3, boardSizeY, buttonWidth * 2, layout.y(posY));
 
         // Define available board sizes
         int[][] boardSizes = {
-            {12, 12}, {12, 14}, {12, 16}, {12, 18},
-            {14, 14}, {14, 16}, {14, 18},
-            {16, 16}, {16, 18}, {16, 20}, {16, 22},
-            {18, 18}, {18, 20}, {18, 22}
+                {12, 12}, {12, 14}, {12, 16}, {12, 18},
+                {14, 14}, {14, 16}, {14, 18},
+                {16, 16}, {16, 18}, {16, 20}, {16, 22},
+                {18, 18}, {18, 20}, {18, 22}
         };
 
         float maxBoardRatio = calculateMaxBoardRatio(displayRatio);
         Timber.d("Settings: Display ratio: %.2f -> Max board ratio: %.2f", displayRatio, maxBoardRatio);
-        
+
         int currentBoardSizeX = MainActivity.getBoardWidth();
         int currentBoardSizeY = MainActivity.getBoardHeight();
         String currentBoardSize = currentBoardSizeX + "x" + currentBoardSizeY;
         int selectedIndex = -1;
         int index = 0;
-        
+
         for (int[] size : boardSizes) {
             float boardRatio = (float)size[1] / size[0];
             Timber.d("Settings: Checking board size %dx%d (ratio: %.2f)", size[0], size[1], boardRatio);
-            
+
             if (boardRatio <= maxBoardRatio) {
                 String option = size[0] + "x" + size[1];
                 boardSizeDropdown.addOption(option, new setBoardSize(size[0], size[1]));
                 Timber.d("Settings: Added board size option: %s", option);
-                
+
                 // Check if this is the current board size
                 if (size[0] == currentBoardSizeX && size[1] == currentBoardSizeY) {
                     selectedIndex = index;
@@ -110,34 +102,67 @@ public class SettingsGameScreen extends GameScreen {
                 index++;
             }
         }
-        
+
         // Set the selected option
         if (selectedIndex >= 0) {
             boardSizeDropdown.setSelectedIndex(selectedIndex);
         }
 
+        // Add dropdown to instances
         this.instances.add(boardSizeDropdown);
 
+        // Difficulty buttons - first row
+        posY += 255;
+        int difficultyY = layout.y(posY);
+        buttonBeginner = new GameButtonGeneral(
+            x1, difficultyY, buttonWidth, buttonHeight, 
+            R.drawable.bt_up, R.drawable.bt_down, new setBeginnner());
+        buttonAdvanced = new GameButtonGeneral(
+            x2, difficultyY, buttonWidth, buttonHeight, 
+            R.drawable.bt_up, R.drawable.bt_down, new setAdvanced());
+
+        // Difficulty buttons - second row
+        posY += 244;
+        int difficultyRow2Y = layout.y(posY);
+        buttonInsane = new GameButtonGeneral(
+            x1, difficultyRow2Y, buttonWidth, buttonHeight, 
+            R.drawable.bt_up, R.drawable.bt_down, new setInsane());
+        buttonImpossible = new GameButtonGeneral(
+            x2, difficultyRow2Y, buttonWidth, buttonHeight, 
+            R.drawable.bt_up, R.drawable.bt_down, new setImpossible());
+        
+        // New Map Each Time buttons
+        posY += 353;
+        int newMapY = layout.y(posY);
+        buttonNewMapEachTimeOn = new GameButtonGeneral(
+            x1, newMapY, buttonWidth, buttonHeight, 
+            R.drawable.bt_up, R.drawable.bt_down, new setNewMapEachTimeOn());
+        buttonNewMapEachTimeOff = new GameButtonGeneral(
+            x2, newMapY, buttonWidth, buttonHeight, 
+            R.drawable.bt_up, R.drawable.bt_down, new setNewMapEachTimeOff());
+
+        // Sound buttons
+        posY += 333;
         // Make sound buttons circular
         int soundButtonSize = layout.x(222);
-        int soundY = layout.y(1080);
-        
+        int soundY = layout.y(posY);
+
         buttonSoundOn = new GameButtonGeneral(
             layout.x(40),
             soundY,
-            soundButtonSize, 
-            soundButtonSize, 
-            R.drawable.bt_sound_on_up, 
-            R.drawable.bt_sound_on_down, 
+            soundButtonSize,
+            soundButtonSize,
+            R.drawable.bt_sound_on_up,
+            R.drawable.bt_sound_on_down,
             new setSoundon());
-            
+
         buttonSoundOff = new GameButtonGeneral(
             layout.x(340),
             soundY,
-            soundButtonSize, 
-            soundButtonSize, 
-            R.drawable.bt_sound_off_up, 
-            R.drawable.bt_sound_off_down, 
+            soundButtonSize,
+            soundButtonSize,
+            R.drawable.bt_sound_off_up,
+            R.drawable.bt_sound_off_down,
             new setSoundoff());
 
         // Add Button to set Beginner/Advanced/Insane
@@ -147,6 +172,8 @@ public class SettingsGameScreen extends GameScreen {
         this.instances.add(buttonImpossible);
         this.instances.add(buttonSoundOff);
         this.instances.add(buttonSoundOn);
+        this.instances.add(buttonNewMapEachTimeOn);
+        this.instances.add(buttonNewMapEachTimeOff);
 
         // Add Button back to main screen
         int backButtonSize = layout.x(222);
@@ -198,7 +225,7 @@ public class SettingsGameScreen extends GameScreen {
         float textWidth2 = paint.measureText(text);
         renderManager.drawText(
             x1 + buttonWidth - (int)(textWidth2/2), 
-            layout.y(144), 
+            layout.y(122),
             text);
         
         // Difficulty
@@ -209,33 +236,53 @@ public class SettingsGameScreen extends GameScreen {
         
         // difficulty text below Buttons (set in create() ):
         renderManager.setTextSize(smallTextSize);
-        
+
+        int posY = 522;
         // Center text under each button
         text = "Beginner";
         float textWidth = paint.measureText(text);
         renderManager.drawText(
             x1, 
-            layout.y(522), 
+            layout.y(posY),
             text);
         
         text = "Advanced";
         textWidth = paint.measureText(text);
         renderManager.drawText(
             x2, 
-            layout.y(522), 
+            layout.y(posY),
             text);
 
+        posY += 244;
         renderManager.drawText(
             x1, 
-            layout.y(788), 
+            layout.y(posY),
             "Insane");
         
         renderManager.drawText(
             x2, 
-            layout.y(788), 
+            layout.y(posY),
             "Impossible");
 
+        // New Map Each Time Section
+        posY += 144;
+        renderManager.setTextSize((int) (textSize * 0.7));
+        String newMapSetting = preferences.getPreferenceValue(gameManager.getActivity(), "newMapEachTime");
+        if (newMapSetting == null) {
+            newMapSetting = "true"; // Default value
+            preferences.setPreferences(gameManager.getActivity(), "newMapEachTime", newMapSetting);
+        }
+        String newMapText = newMapSetting.equals("true") ? "New Map Each Time: Yes" : "New Map Each Time: No";
+        renderManager.drawText(layout.x(10), layout.y(posY), newMapText);
+
+        // Button labels for New Map Each Time
+        posY += 200;
+        renderManager.setTextSize(smallTextSize);
+        renderManager.drawText(x1, layout.y(posY), "Yes");
+        renderManager.drawText(x2, layout.y(posY), "No");
+
         // Sound Settings
+        posY += 111;
         renderManager.setTextSize(textSize);
         String soundSetting=preferences.getPreferenceValue(gameManager.getActivity(), "sound");
         if(soundSetting.equals("off") == false) {
@@ -243,9 +290,21 @@ public class SettingsGameScreen extends GameScreen {
         } else {
             soundSetting = "Sound: Off";
         }
-        renderManager.drawText(layout.x(90), layout.y(1055), soundSetting);
+        renderManager.drawText(layout.x(90), layout.y(posY), soundSetting);
         
         renderManager.setTextSize(textSize/2); // this will be the text-size for the dropdown in create()
+
+        if (!mapGenerationSettingInitialized) {
+            // Initialize map generation setting
+            newMapSetting = preferences.getPreferenceValue(gameManager.getActivity(), "newMapEachTime");
+            Timber.d("newMapSetting: %s", newMapSetting);
+            if (newMapSetting == null) {
+                newMapSetting = "true"; // Default value
+                preferences.setPreferences(gameManager.getActivity(), "newMapEachTime", newMapSetting);
+            }
+            MapGenerator.generateNewMapEachTime = newMapSetting.equals("true");
+            mapGenerationSettingInitialized = true;
+        }
 
         super.draw(renderManager);
     }
@@ -298,7 +357,7 @@ public class SettingsGameScreen extends GameScreen {
             int boardArea = boardWidth * boardHeight;
             
             if (boardArea < 256) {
-                gameManager.requestToast("🤔 'Impossible' mode + small board\n    = very long generation time", true);
+                gameManager.requestToast(" 'Impossible' mode + small board\n    = very long generation time", true);
             }
         }
     }
@@ -316,6 +375,24 @@ public class SettingsGameScreen extends GameScreen {
             preferences.setPreferences(gameManager.getActivity(),"sound", "on");
             gameManager.toggleSound(true);
             gameManager.requestToast("Sound enabled", true);
+        }
+    }
+
+    private class setNewMapEachTimeOn implements IExecutor {
+        public void execute() {
+            preferences.setPreferences(gameManager.getActivity(), "newMapEachTime", "true");
+            MapGenerator.generateNewMapEachTime = true;
+            GridGameScreen.setMap(null);
+            gameManager.requestToast("A new map will be generated each game", true);
+        }
+    }
+    
+    private class setNewMapEachTimeOff implements IExecutor {
+        public void execute() {
+            preferences.setPreferences(gameManager.getActivity(), "newMapEachTime", "false");
+            MapGenerator.generateNewMapEachTime = false;
+            GridGameScreen.setMap(null);
+            gameManager.requestToast("The same map will be used if you play a new random game", true);
         }
     }
 

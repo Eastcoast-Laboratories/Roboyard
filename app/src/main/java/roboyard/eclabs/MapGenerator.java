@@ -26,7 +26,7 @@ public class MapGenerator {
 
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
-    static Boolean generateNewMapEachTime = false; // TODO: add option in settings
+    static Boolean generateNewMapEachTime = true; // option in settings
 
     // Wall configuration
     int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column
@@ -48,10 +48,10 @@ public class MapGenerator {
         // Check difficulty level
         int level = GridGameScreen.getLevel();
         if(level == DIFFICULTY_BEGINNER){ // Difficulty Beginner
-            generateNewMapEachTime=true; // generate a new map each time you start a new game
+            // For beginner level
         } else {
             if(level == DIFFICULTY_ADVANCED){ // Advanced
-                generateNewMapEachTime=true;
+                // nothing to do
             }
             if (generateNewMapEachTime) {
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
@@ -70,8 +70,6 @@ public class MapGenerator {
         }
 
         if(level == DIFFICULTY_INSANE || level == DIFFICULTY_IMPOSSIBLE) {
-            generateNewMapEachTime=false; // keep the current map over restarts
-            // generateNewMapEachTime=true; // DEBUG!!! remove to release
             targetMustBeInCorner = false;
 
             maxWallsInOneVerticalCol = 5;
@@ -203,6 +201,10 @@ public class MapGenerator {
      * @return Arraylist with all grid elements that belong to the map
      */
     public ArrayList<GridElement> getGeneratedGameMap() {
+        // We'll check the latest value of generateNewMapEachTime from our static variable
+        // which is already set by SettingsGameScreen when preferences are changed
+        Timber.d("Using generateNewMapEachTime: %s", generateNewMapEachTime);
+        
         int[][] horizontalWalls = new int[MainActivity.getBoardWidth()+1][MainActivity.getBoardHeight()+1];
         int[][] verticalWalls = new int[MainActivity.getBoardWidth()+1][MainActivity.getBoardHeight()+1];
 
@@ -420,7 +422,6 @@ public class MapGenerator {
         if(data == null || data.isEmpty() || generateNewMapEachTime){
             data = translateArraysToMap(horizontalWalls, verticalWalls);
             GridGameScreen.setMap(data);
-            generateNewMapEachTime = false;
         } else{
             data = removeGameElementsFromMap(data);
         }

@@ -65,6 +65,16 @@ public class MainActivity extends Activity
         loadBoardSizeFromPreferences(this);
         Timber.d("Initialized with board size: %dx%d", boardSizeX, boardSizeY);
         
+        // Load map generation preference
+        Preferences preferences = new Preferences();
+        String newMapSetting = preferences.getPreferenceValue(this, "newMapEachTime");
+        if (newMapSetting == null) {
+            newMapSetting = "true"; // Default value
+            preferences.setPreferences(this, "newMapEachTime", newMapSetting);
+        }
+        MapGenerator.generateNewMapEachTime = newMapSetting.equals("true");
+        Timber.d("Initialized generateNewMapEachTime: %s", MapGenerator.generateNewMapEachTime);
+        
         // Clear all minimap caches on app start
         Timber.d("Clearing all minimap caches on app start");
         GameButtonGotoHistoryGame.clearAllMinimapCaches();
@@ -359,16 +369,6 @@ public class MainActivity extends Activity
      */
     public static int getBoardHeight() {
         return boardSizeY;
-    }
-
-    /**
-     * Reset board size to default values and clear preferences
-     */
-    public void resetBoardSizeToDefault(Activity activity) {
-        boardSizeX = DEFAULT_BOARD_SIZE_X;
-        boardSizeY = DEFAULT_BOARD_SIZE_Y;
-        preferences.setPreferences(activity, "boardSizeX", String.valueOf(boardSizeX));
-        preferences.setPreferences(activity, "boardSizeY", String.valueOf(boardSizeY));
     }
 
     /**
