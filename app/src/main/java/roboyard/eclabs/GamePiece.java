@@ -1,6 +1,7 @@
 package roboyard.eclabs;
 
 import android.graphics.Color;
+import android.media.MediaPlayer;
 
 import timber.log.Timber;
 
@@ -29,6 +30,13 @@ public class GamePiece implements IGameObject {
     private final int extraSizeForRobotsAndTargets = 33; // robots and targets are some percent larger than the grid and may overlap 4 px
 
     boolean testIfWon       = true;
+    
+    // Tracks what type of collision last occurred
+    private String lastCollisionType = "none"; // none, hit_robot, hit_wall
+    
+    // Static MediaPlayer to track currently playing sound
+    private static MediaPlayer currentSoundPlayer = null;
+    private static boolean isSoundPlaying = false;
 
     /**
      * Check if the piece is currently moving
@@ -179,13 +187,26 @@ public class GamePiece implements IGameObject {
 //            Timber.d(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
             if(inMovement) {
                 ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
+                Boolean justWon = false;
                 if(testIfWon) {
                     if(((GridGameScreen)(gameManager.getCurrentScreen())).win(this)) {
+                        // Play win sound
+                        playRobotSound(gameManager, "win");
+                        justWon = true;
                         testIfWon = false;  // Only set to false if we actually won
                     }
                 }
-            }
+                // after move check if stopped by wall or robot
 
+                Timber.d(" end move with "+this.curMoveSquares+" squares");
+                
+                // Play appropriate sound based on collision type
+                if (!lastCollisionType.equals("none") && !justWon) {
+                    playRobotSound(gameManager, lastCollisionType);
+                    // Reset collision type
+                    lastCollisionType = "none";
+                }
+            }
             inMovement = false;
 
             //if there is user input, ...
@@ -223,6 +244,9 @@ public class GamePiece implements IGameObject {
                 //this.numSquaresMoved+=this.curMoveSquares;
                 Timber.d(" start move with "+this.curMoveSquares+" squares");
                 ((GridGameScreen)(gameManager.getCurrentScreen())).setCurrentMovedSquares(this.curMoveSquares);
+                
+                // Play robot movement sound when robot starts moving
+                playRobotSound(gameManager, "move");
             }
             inMovement = true;
             testIfWon = true;
@@ -268,6 +292,106 @@ public class GamePiece implements IGameObject {
             if(deltaY < -9) {
                 this.y -= 1;
                 deltaY = 0;
+            }
+        }
+    }
+    
+    /**
+     * Set the type of collision that occurred
+     * @param collisionType The type of collision ("robot" or "wall")
+     */
+    public void setLastCollisionType(String collisionType) {
+        this.lastCollisionType = collisionType;
+    }
+    
+    /**
+     * Get the type of the last collision
+     * @return The last collision type ("none", "robot", or "wall")
+     */
+    public String getLastCollisionType() {
+        return this.lastCollisionType;
+    }
+    
+    /**
+     * Plays the robot movement sound effect
+     *
+     * @param gameManager The game manager instance
+     * @param wichSound The type of sound to play ("move", "hit_wall", or "hit_robot")
+     */
+    private void playRobotSound(GameManager gameManager, String wichSound) {
+        try {
+            // Get the activity from the game manager
+            MainActivity activity = gameManager.getActivity();
+            if (activity != null) {
+                // Check if sound is enabled in preferences
+                Preferences preferences = new Preferences();
+                String soundSetting = preferences.getPreferenceValue(activity, "sound");
+                if (!soundSetting.equals("off")) {
+                    // If a sound is already playing, don't play another one
+                    if (isSoundPlaying && currentSoundPlayer != null && currentSoundPlayer.isPlaying()) {
+                        Timber.d("Not playing sound %s - another sound is already playing", wichSound);
+                        return;
+                    }
+                    
+                    // Stop any previously playing sound
+                    if (currentSoundPlayer != null) {
+                        try {
+                            if (currentSoundPlayer.isPlaying()) {
+                                currentSoundPlayer.stop();
+                            }
+                            currentSoundPlayer.release();
+                            currentSoundPlayer = null;
+                        } catch (Exception e) {
+                            Timber.e(e, "Error stopping previous sound");
+                        }
+                    }
+                    
+                    // Create and play the robot sound
+                    MediaPlayer mp = null;
+                    if(wichSound.equals("move")) {
+                        mp = MediaPlayer.create(activity, R.raw.robot_move);
+                    } else if (wichSound.equals("hit_wall")) {
+                        mp = MediaPlayer.create(activity, R.raw.robot_hit_wall);
+                    } else if (wichSound.equals("hit_robot")) {
+                        mp = MediaPlayer.create(activity, R.raw.robot_hit_robot);
+                    } else if (wichSound.equals("win")) {
+                        mp = MediaPlayer.create(activity, R.raw.robot_win);
+                    } else if (wichSound.equals("lose")) {
+                        // TODO: add sound
+                        // mp = MediaPlayer.create(activity, R.raw.robot_lose);
+                    } else if (wichSound.equals("none")) {
+                        Timber.d("No sound to play");
+                        return;
+                    }
+                    if (mp != null) {
+                        // Set the global current player
+                        currentSoundPlayer = mp;
+                        isSoundPlaying = true;
+                        
+                        // When playback completes, release the player and reset the flag
+                        mp.setOnCompletionListener(mediaPlayer -> {
+                            mediaPlayer.release();
+                            currentSoundPlayer = null;
+                            isSoundPlaying = false;
+                        });
+                        
+                        // Reduce volume to 30% of maximum
+                        float volume = 0.3f;
+                        mp.setVolume(volume, volume);
+                        mp.start();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error playing robot sound");
+            isSoundPlaying = false;
+            if (currentSoundPlayer != null) {
+                try {
+                    currentSoundPlayer.release();
+                } catch (Exception ex) {
+                    // Ignore
+                }
+                currentSoundPlayer = null;
             }
         }
     }

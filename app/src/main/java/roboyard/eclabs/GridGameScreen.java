@@ -644,7 +644,7 @@ public class GridGameScreen extends GameScreen {
 
     public void setCurrentMovedSquares(int movedSquares){
         currentMovedSquares=movedSquares;
-        Timber.d("store %d moved squares in last Move", currentMovedSquares);
+        Timber.d("store %d moved squares in that Move", currentMovedSquares);
         allMoves.get(allMoves.size()-1).setSquaresMoved(currentMovedSquares);
     }
 
@@ -971,38 +971,51 @@ public class GridGameScreen extends GameScreen {
             {
                 if(instance != p && canMove)
                 {
+                    boolean previousCanMove = canMove; // Store previous state
                     switch(direction){
-                        case 0:     // haut
+                        case 0:     // north
                             canMove = collision((GamePiece) instance, xDestination, yDestination - 1, canMove);
                             break;
-                        case 1:     // droite
+                        case 1:     // east
                             canMove = collision((GamePiece) instance, xDestination+1, yDestination, canMove);
                             break;
-                        case 2:     // bas
+                        case 2:     // south
                             canMove = collision((GamePiece) instance, xDestination, yDestination + 1, canMove);
                             break;
-                        case 3:     // gauche
+                        case 3:     // west
                             canMove = collision((GamePiece) instance, xDestination-1, yDestination, canMove);
                             break;
                     }
+                    
+                    // If canMove changed from true to false, a robot collision occurred
+                    if (previousCanMove && !canMove) {
+                        p.setLastCollisionType("hit_robot");
+                    }
+                    // TODO: find out, which robot number/color was hit
                 }
             }
         }
 
-        for (Object element : gridElements) {
-            GridElement myp = (GridElement) element;
+        boolean robotCollision = false;
+        if (!canMove) {
+            robotCollision = true; // We've already detected a robot collision
+        }else{
+            // Check for wall collisions
+            for (Object element : gridElements) {
+                GridElement myp = (GridElement) element;
 
-            if ((myp.getType().equals("mv")) && (direction == 1)) {  // droite
-                canMove = collision(p, myp.getX() - 1, myp.getY(), canMove);
-            }
-            if ((myp.getType().equals("mv")) && (direction == 3)) {  // gauche
-                canMove = collision(p, myp.getX(), myp.getY(), canMove);
-            }
-            if ((myp.getType().equals("mh")) && (direction == 0)) {  // haut
-                canMove = collision(p, myp.getX(), myp.getY(), canMove);
-            }
-            if ((myp.getType().equals("mh")) && (direction == 2)) {  // bas
-                canMove = collision(p, myp.getX(), myp.getY() - 1, canMove);
+                if ((myp.getType().equals("mv")) && (direction == 1)) {  // east
+                    canMove = collision(p, myp.getX() - 1, myp.getY(), canMove);
+                }
+                if ((myp.getType().equals("mv")) && (direction == 3)) {  // west
+                    canMove = collision(p, myp.getX(), myp.getY(), canMove);
+                }
+                if ((myp.getType().equals("mh")) && (direction == 0)) {  // north
+                    canMove = collision(p, myp.getX(), myp.getY(), canMove);
+                }
+                if ((myp.getType().equals("mh")) && (direction == 2)) {  // south
+                    canMove = collision(p, myp.getX(), myp.getY() - 1, canMove);
+                }
             }
         }
 
@@ -1029,6 +1042,11 @@ public class GridGameScreen extends GameScreen {
             editDestination(p, direction, true);
             numSquares++;
         }else{
+            if(robotCollision){
+                p.setLastCollisionType("hit_robot");
+            }else{
+                p.setLastCollisionType("hit_wall");
+            }
             if(moved){
                 nbCoups++;
                 //boolean b = win(p);
