@@ -375,8 +375,8 @@ public class GamePiece implements IGameObject {
                             isSoundPlaying = false;
                         });
                         
-                        // Reduce volume to 30% of maximum
-                        float volume = 0.3f;
+                        // Reduce volume to some % of maximum
+                        float volume = 0.1f;
                         mp.setVolume(volume, volume);
                         mp.start();
                     }

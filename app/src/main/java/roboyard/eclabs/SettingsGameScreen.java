@@ -291,6 +291,15 @@ public class SettingsGameScreen extends GameScreen {
             preferences.setPreferences(gameManager.getActivity(),"difficulty", "Impossible");
             GridGameScreen.setDifficulty("Impossible");
             levelDifficulty="Impossible";
+            
+            // Check if board size is small for impossible difficulty
+            int boardWidth = MainActivity.getBoardWidth();
+            int boardHeight = MainActivity.getBoardHeight();
+            int boardArea = boardWidth * boardHeight;
+            
+            if (boardArea < 256) {
+                gameManager.requestToast("🤔 'Impossible' mode + small board\n    = very long generation time", true);
+            }
         }
     }
 
