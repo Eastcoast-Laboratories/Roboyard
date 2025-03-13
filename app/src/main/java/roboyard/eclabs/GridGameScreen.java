@@ -73,7 +73,7 @@ public class GridGameScreen extends GameScreen {
     private boolean isGameWon = false;
     private long prevTime;
     private boolean isHistorySaved = false;
-    private static final int HISTORY_SAVE_THRESHOLD = 3; // 3 seconds (reduced from 60 seconds)
+    private static final int HISTORY_SAVE_THRESHOLD = 60; // 60 seconds
 
     private int IAMovesNumber = 0;
 
@@ -965,56 +965,51 @@ public class GridGameScreen extends GameScreen {
             allMoves.add(currentMove);
         }
 
-        for(Object instance : this.instances)
-        {
-            if(instance.getClass() == GamePiece.class)
-            {
-                if(instance != p && canMove)
-                {
-                    boolean previousCanMove = canMove; // Store previous state
-                    switch(direction){
-                        case 0:     // north
-                            canMove = collision((GamePiece) instance, xDestination, yDestination - 1, canMove);
-                            break;
-                        case 1:     // east
-                            canMove = collision((GamePiece) instance, xDestination+1, yDestination, canMove);
-                            break;
-                        case 2:     // south
-                            canMove = collision((GamePiece) instance, xDestination, yDestination + 1, canMove);
-                            break;
-                        case 3:     // west
-                            canMove = collision((GamePiece) instance, xDestination-1, yDestination, canMove);
-                            break;
-                    }
-                    
-                    // If canMove changed from true to false, a robot collision occurred
-                    if (previousCanMove && !canMove) {
-                        p.setLastCollisionType("hit_robot");
-                    }
-                    // TODO: find out, which robot number/color was hit
-                }
+        // First check for wall collisions
+        for (Object element : gridElements) {
+            GridElement myp = (GridElement) element;
+
+            if ((myp.getType().equals("mv")) && (direction == 1)) {  // east
+                canMove = collision(p, myp.getX() - 1, myp.getY(), canMove);
+            }
+            if ((myp.getType().equals("mv")) && (direction == 3)) {  // west
+                canMove = collision(p, myp.getX(), myp.getY(), canMove);
+            }
+            if ((myp.getType().equals("mh")) && (direction == 0)) {  // north
+                canMove = collision(p, myp.getX(), myp.getY(), canMove);
+            }
+            if ((myp.getType().equals("mh")) && (direction == 2)) {  // south
+                canMove = collision(p, myp.getX(), myp.getY() - 1, canMove);
             }
         }
 
+        // If no wall collision, then check for robot collisions
         boolean robotCollision = false;
-        if (!canMove) {
-            robotCollision = true; // We've already detected a robot collision
-        }else{
-            // Check for wall collisions
-            for (Object element : gridElements) {
-                GridElement myp = (GridElement) element;
-
-                if ((myp.getType().equals("mv")) && (direction == 1)) {  // east
-                    canMove = collision(p, myp.getX() - 1, myp.getY(), canMove);
-                }
-                if ((myp.getType().equals("mv")) && (direction == 3)) {  // west
-                    canMove = collision(p, myp.getX(), myp.getY(), canMove);
-                }
-                if ((myp.getType().equals("mh")) && (direction == 0)) {  // north
-                    canMove = collision(p, myp.getX(), myp.getY(), canMove);
-                }
-                if ((myp.getType().equals("mh")) && (direction == 2)) {  // south
-                    canMove = collision(p, myp.getX(), myp.getY() - 1, canMove);
+        if (canMove) {
+            for(Object instance : this.instances) {
+                if(instance.getClass() == GamePiece.class) {
+                    if(instance != p && canMove) {
+                        boolean previousCanMove = canMove; // Store previous state
+                        switch(direction){
+                            case 0:     // north
+                                canMove = collision((GamePiece) instance, xDestination, yDestination - 1, canMove);
+                                break;
+                            case 1:     // east
+                                canMove = collision((GamePiece) instance, xDestination+1, yDestination, canMove);
+                                break;
+                            case 2:     // south
+                                canMove = collision((GamePiece) instance, xDestination, yDestination + 1, canMove);
+                                break;
+                            case 3:     // west
+                                canMove = collision((GamePiece) instance, xDestination-1, yDestination, canMove);
+                                break;
+                        }
+                        
+                        // If canMove changed from true to false, a robot collision occurred
+                        if (previousCanMove && !canMove) {
+                            robotCollision = true;
+                        }
+                    }
                 }
             }
         }
