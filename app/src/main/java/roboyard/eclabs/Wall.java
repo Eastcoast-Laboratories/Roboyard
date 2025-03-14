@@ -22,7 +22,6 @@ public class Wall extends AbstractGameObject {
         this.type = type;
         this.x = x;
         this.y = y;
-        this.setZIndex(ZIndexConstants.WALL);
     }
     
     /**
@@ -43,6 +42,30 @@ public class Wall extends AbstractGameObject {
      */
     public void setDrawable(Drawable drawable) {
         this.drawable = drawable;
+    }
+
+    /**
+     * Get the x coordinate of this wall
+     * @return x coordinate
+     */
+    public int getX() {
+        return x;
+    }
+    
+    /**
+     * Get the y coordinate of this wall
+     * @return y coordinate
+     */
+    public int getY() {
+        return y;
+    }
+    
+    /**
+     * Get the wall type ("mh" for horizontal, "mv" for vertical)
+     * @return The wall type string
+     */
+    public String getType() {
+        return type;
     }
     
     @Override
