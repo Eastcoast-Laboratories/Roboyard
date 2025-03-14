@@ -18,7 +18,7 @@ public class GameDropdown implements IGameObject {
     private final int backgroundColor = 0xFF404040;
     private final int textColor = 0xFFFFFFFF;
     private final int highlightColor = 0xFF606060;
-    private int zIndex = ZIndexConstants.UI_ELEMENT; // Default z-index for UI elements
+    private int zIndex = Constants.UI_ELEMENT; // Default z-index for UI elements
 
     public GameDropdown(int x, int y, int width, int height) {
         this.x = x;

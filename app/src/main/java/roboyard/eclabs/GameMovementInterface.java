@@ -18,7 +18,7 @@ public class GameMovementInterface implements IGameObject {
     private int decision              = -1; // 0: NORTH, 1: EAST, 2: SOUTH, 3: WEST
     private GamePiece target;
     private GameManager gameManager;
-    private int zIndex               = ZIndexConstants.UI_ELEMENT; // Default z-index for UI elements
+    private int zIndex               = Constants.UI_ELEMENT; // Default z-index for UI elements
 
     /**
      * Check if the interface is active

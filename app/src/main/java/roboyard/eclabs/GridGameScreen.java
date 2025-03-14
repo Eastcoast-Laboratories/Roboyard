@@ -8,7 +8,10 @@ import android.util.SparseArray;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import roboyard.eclabs.solver.ISolver;
@@ -124,6 +127,12 @@ public class GridGameScreen extends GameScreen {
     // Variables for tracking moved squares
     private int currentMovedSquares = 0;
     private int numSquares = 0;
+
+    // List to store all wall objects for z-index updates
+    private List<Wall> walls = new ArrayList<>();
+    
+    // List to store all robot objects for z-index updates
+    private List<GamePiece> robots = new ArrayList<>();
 
     /**
      * Constructor for GridGameScreen - creates and initializes the game grid screen
@@ -244,7 +253,7 @@ public class GridGameScreen extends GameScreen {
 
         // Initialize grid
         xGrid = 0;
-        yGrid = topMargin;
+        yGrid = layout.x(topMargin);
         gridSpace = (float)layout.getScreenWidth() / (float)MainActivity.getBoardWidth();
         gridBottom = yGrid + (int)((MainActivity.getBoardHeight() + 1) * gridSpace);
 
@@ -347,15 +356,23 @@ public class GridGameScreen extends GameScreen {
         if (mapPath != null && !mapPath.isEmpty()) {
             levelNum = extractLevelNumber(mapPath);
         }
-        //renderManager.setColor(Color.argb(255, 255, 228, 0));
+
+        // Background of the screen with black
         renderManager.setColor(Color.BLACK);
-        // ffe400
-        // ff7c24
         renderManager.paintScreen();
+
+        float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
+
+        //renderManager.setColor(Color.argb(255, 255, 228, 0));
+        renderManager.setColor(Color.parseColor("#a1f558")); // Dark green for the background rectangle
+        // b5f874 is the light green from tile, a1f558 the green dots on the bg, 4ae600 the green of the lines, 00ad00 and 008f00 colors of the hedges
+        // Draw a green rectangle in the upper quarter of the screen
+        int screenWidth = gameManager.getScreenWidth();
+        int gridHeight = (int)(MainActivity.getBoardHeight() * gridSpace);
+        renderManager.drawRoundRect(0, 0, screenWidth,  (gridHeight + layout.x((float) (topMargin + 166 / MainActivity.getBoardWidth() ))), layout.x(9));
 
         //renderManager.setColor(Color.BLACK);
         renderManager.setColor(textColorNormal);
-        float ratio = ((float) gameManager.getScreenWidth()) / ((float) 1080); // bei 720x1280:0.6667 bei 1440x2580:1.333
 
         // Text Display underneath the Board
         int textPosY = (int)(gridBottom + (ratio * 13)); // Add margin below the game grid
@@ -525,7 +542,10 @@ public class GridGameScreen extends GameScreen {
 
     public void update(GameManager gameManager){
         super.update(gameManager);
-
+        
+        // Update wall z-indices whenever robots move
+        updateAllZIndices();
+        
         if(mustStartNext){
             // Reset the game state
             timeCpt = 0;
@@ -863,8 +883,8 @@ public class GridGameScreen extends GameScreen {
                 Wall wall = new Wall("mh", myp.getX(), myp.getY());
                 wall.setGridDimensions(xGrid, yGrid, gridSpace);
                 wall.setDrawable(drawables.get("mh"));
-                wall.setZIndex(ZIndexConstants.WALL);
-                this.instances.add(wall);
+                this.addGameObject(wall);
+                walls.add(wall);
             }
             
             // Create vertical walls
@@ -872,8 +892,8 @@ public class GridGameScreen extends GameScreen {
                 Wall wall = new Wall("mv", myp.getX(), myp.getY());
                 wall.setGridDimensions(xGrid, yGrid, gridSpace);
                 wall.setDrawable(drawables.get("mv"));
-                wall.setZIndex(ZIndexConstants.WALL);
-                this.instances.add(wall);
+                this.addGameObject(wall);
+                walls.add(wall);
             }
             
             // add small robots underneath as marker for each start position
@@ -946,6 +966,9 @@ public class GridGameScreen extends GameScreen {
         {
             this.instances.remove(p);
         }
+        
+        // Clear the robots list
+        robots.clear();
 
         for (Object element : gridElements) {
             GridElement myp = (GridElement) element;
@@ -954,8 +977,8 @@ public class GridGameScreen extends GameScreen {
             if (myp.getType().startsWith("robot_")) {
                 GamePiece currentPiece = new GamePiece(myp.getX(), myp.getY(), colors.get(myp.getType()));
                 currentPiece.setGridDimensions(xGrid, yGrid, gridSpace);
-                currentPiece.setZIndex(ZIndexConstants.ROBOT); // Set z-index for robots
                 this.instances.add(currentPiece);
+                robots.add(currentPiece); // Add to robots list
             }
         }
         
@@ -1611,6 +1634,134 @@ public class GridGameScreen extends GameScreen {
      */
     public boolean isHistorySaved() {
         return isHistorySaved;
+    }
+
+    /**
+     * Updates the z-indices of all game objects based on their position
+     * Objects in the southwest corner have higher z-indices than objects in the northeast
+     */
+    public void updateAllZIndices() {
+        int boardWidth = MainActivity.getBoardWidth();
+        int boardHeight = MainActivity.getBoardHeight();
+        
+        if (boardWidth <= 0 || boardHeight <= 0) {
+            Timber.e("updateAllZIndices: Board dimensions not set properly");
+            return;
+        }
+        
+        // Create a list of all position-based game objects (walls and robots)
+        List<Object> allObjects = new ArrayList<>();
+        allObjects.addAll(walls);
+        allObjects.addAll(robots);
+        
+        // Sort objects by position from southwest (highest z-index) to northeast (lowest z-index)
+        Collections.sort(allObjects, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                // Get positions with adjustments for walls
+                float y1 = getObjectY(o1);
+                float x1 = getObjectX(o1);
+                float y2 = getObjectY(o2);
+                float x2 = getObjectX(o2);
+                
+                // Primary sort by y position (south to north, higher y first)
+                if (y1 != y2) {
+                    return y1 > y2 ? -1 : 1; // Reverse order: higher y (south) comes first
+                }
+                
+                // Secondary sort by x position (west to east, lower x first)
+                if (x1 != x2) {
+                    return x1 < x2 ? -1 : 1;
+                }
+                
+                // If positions are equal, prioritize robots over walls
+                if (o1 instanceof GamePiece && o2 instanceof Wall) {
+                    return -1; // Robot above wall
+                } else if (o1 instanceof Wall && o2 instanceof GamePiece) {
+                    return 1;  // Wall below robot
+                }
+                
+                return 0;
+            }
+        });
+        
+        // Assign z-indices based on sorted order
+        int baseZIndex = Constants.GAME_OBJECT_BASE;
+        for (Object obj : allObjects) {
+            if (obj instanceof Wall) {
+                Wall wall = (Wall) obj;
+                String type = wall.getType();
+                int wallY = wall.getY();
+                int wallX = wall.getX();
+                
+                // Special case: walls on the very north (y=0) get the lowest z-index
+                if ((wallY == 0 && type.equals("mh"))) {
+                    wall.setZIndex(Constants.GAME_OBJECT_BASE - 5000); // Fixed z-index for board edge walls
+                } else {
+                    wall.setZIndex(baseZIndex--);
+                }
+            } else if (obj instanceof GamePiece) {
+                GamePiece robot = (GamePiece) obj;
+                robot.setZIndex(baseZIndex--);
+            }
+        }
+        
+        // Mark the instances list as needing sorting
+        markUnsorted();
+    }
+    
+    /**
+     * Helper method to get y position of an object with wall adjustments (walls between grid cells are represented by an offset of 0.5)
+     * @param obj The object to get the y position for
+     * @return The adjusted y position
+     */
+    private float getObjectY(Object obj) {
+        if (obj instanceof Wall) {
+            Wall wall = (Wall) obj;
+            int y = wall.getY();
+            String type = wall.getType();
+            
+            // Adjust horizontal walls (mh) - they appear between grid cells
+            if (type.equals("mh")) {
+                // North walls (positive y) should appear behind the cell (lower z-index)
+                if (y > 0) {
+                    return y - 0.5f; // Adjust position to north
+                } else {
+                    // South walls should appear in front of the cell (higher z-index)
+                    return y + 0.5f; // Adjust position to south
+                }
+            }
+            return y;
+        } else if (obj instanceof GamePiece) {
+            GamePiece robot = (GamePiece) obj;
+            return robot.getY();
+        }
+        return 0;
+    }
+    
+    // Helper method to get x position of an object with wall adjustments
+    private float getObjectX(Object obj) {
+        if (obj instanceof Wall) {
+            Wall wall = (Wall) obj;
+            int x = wall.getX();
+            String type = wall.getType();
+            
+            // Adjust vertical walls (mv) - they appear between grid cells
+            if (type.equals("mv")) {
+                // East walls (positive x) should appear behind the cell (lower z-index)
+                if (x > 0) {
+                    return x - 0.5f; // Adjust position to east
+                } else {
+                    // West walls should appear in front of the cell (higher z-index)
+                    return x + 0.5f; // Adjust position to west
+                }
+            }
+            return x;
+        } else if (obj instanceof GamePiece) {
+            GamePiece robot = (GamePiece) obj;
+            return robot.getX();
+        }
+        return 0;
     }
 
     /**

@@ -13,7 +13,7 @@ public abstract class GameButton implements IGameObject {
     int y;
     private final int w;
     private final int h;
-    private int zIndex = ZIndexConstants.UI_ELEMENT; // Default z-index for UI elements
+    private int zIndex = Constants.UI_ELEMENT; // Default z-index for UI elements
 
     /** enable or disable the button
      * @param enabled boolean

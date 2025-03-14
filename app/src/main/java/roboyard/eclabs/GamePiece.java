@@ -28,7 +28,9 @@ public class GamePiece implements IGameObject {
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 16;
     private final int extraSizeForRobotsAndTargets = 33; // robots and targets are some percent larger than the grid and may overlap 4 px
-    private int zIndex              = ZIndexConstants.ROBOT; // Default z-index for robots
+    private int robotOffsetX        = 1; // offset for robots and targets to lower overlapping with walls in the west
+    private int robotOffsetY        = 4; // offset for robots and targets to lower overlapping with walls in the south
+    private int zIndex              = Constants.GAME_OBJECT_BASE; // Default z-index for robots
 
     boolean testIfWon       = true;
     
@@ -54,11 +56,13 @@ public class GamePiece implements IGameObject {
     public void setY(int y) {
         this.y = y;
         deltaY = 0;
+        // Z-index will be updated by GridGameScreen.updateAllZIndices()
     }
 
     public void setX(int x) {
         this.x = x;
         deltaX = 0;
+        // Z-index will be updated by GridGameScreen.updateAllZIndices()
     }
 
     public int getColor() {
@@ -131,6 +135,7 @@ public class GamePiece implements IGameObject {
                 image = 0;
                 break;
         }
+        // Z-index will be set by GridGameScreen.updateAllZIndices()
     }
 
     public void setGridDimensions(int xGrid, int yGrid, float cellSize){
@@ -138,6 +143,8 @@ public class GamePiece implements IGameObject {
         this.yGrid = yGrid;
         this.numSquaresX = this.numSquaresY = cellSize;
         this.radius = (int) (cellSize / 2) * (100 + extraSizeForRobotsAndTargets)/100;
+        this.robotOffsetX = (int) (cellSize / 20) * (100 + robotOffsetX)/100; // this is adjusted by 20 so 1 is a reasonable offset
+        this.robotOffsetY = (int) (cellSize / 20) * (100 + robotOffsetY)/100;
     }
 
     @Override
@@ -175,7 +182,8 @@ public class GamePiece implements IGameObject {
                 image = 0;
                 break;
         }
-        renderManager.drawImage(xDraw-this.radius, yDraw-this.radius, xDraw+this.radius, yDraw+this.radius, this.image);
+        renderManager.drawImage(xDraw - this.radius + this.robotOffsetX, yDraw - this.radius - this.robotOffsetY,
+                xDraw + this.radius + this.robotOffsetX, yDraw + this.radius - this.robotOffsetY, this.image);
     }
 
     @Override
