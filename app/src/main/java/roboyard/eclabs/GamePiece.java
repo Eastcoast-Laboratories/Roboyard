@@ -22,8 +22,8 @@ public class GamePiece implements IGameObject {
     private int radius;
     private int color               = Color.RED;
     private boolean inMovement      = false;
-    private int deltaX              = 0;
-    private int deltaY              = 0;
+    private float deltaX              = 0;
+    private float deltaY              = 0;
     private int curMoveSquares      = 0;
     // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 22;
@@ -42,6 +42,9 @@ public class GamePiece implements IGameObject {
     private static MediaPlayer currentSoundPlayer = null;
     private static boolean isSoundPlaying = false;
 
+    private boolean isOvershooting = false;  // Track overshoot state
+    private float overshootAmount = 0.6f;    // Configurable overshoot amount
+    
     /**
      * Check if the piece is currently moving
      * @return true if the piece is in movement
@@ -193,7 +196,6 @@ public class GamePiece implements IGameObject {
 
         //if the piece is not in motion, ...
         if((this.x == this.xObjective) && (this.y == this.yObjective) && (deltaX == 0) && (deltaY == 0)){
-
 //            Timber.d(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
             if(inMovement) {
                 ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
@@ -246,9 +248,46 @@ public class GamePiece implements IGameObject {
             }
 
 
+        } else if((this.x == this.xObjective) && (this.y == this.yObjective) && isOvershooting) {
+            // We're in the overshoot phase, now spring back
+            isOvershooting = false;
+            deltaX = 0;
+            deltaY = 0;
+            
+            // Calculate drawing position without overshoot
+            xDraw = (int)(this.xGrid+((this.x+((float)deltaX)/10)+0.5f)*this.numSquaresX);
+            yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.numSquaresY);
+            
+            // Check if we should trigger the next move in the solution
+            if(inMovement) {
+                ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
+                Boolean justWon = false;
+                if(testIfWon) {
+                    if(((GridGameScreen)(gameManager.getCurrentScreen())).win(this)) {
+                        // Play win sound
+                        playRobotSound(gameManager, "win");
+                        justWon = true;
+                        testIfWon = false;  // Only set to false if we actually won
+                    }
+                }
+                // after move check if stopped by wall or robot
+
+                Timber.d(" end move with "+this.curMoveSquares+" squares");
+                
+                // Play appropriate sound based on collision type
+                if (!lastCollisionType.equals("none") && !justWon) {
+                    playRobotSound(gameManager, lastCollisionType);
+                    // Reset collision type
+                    lastCollisionType = "none";
+                }
+            }
+            inMovement = false;
         }else{ //otherwise (if the piece must move),
             // TODO: reset if enlarging worked this.radius=32;
             if(inMovement==false){
+                // Reset overshoot state when starting a new movement
+                isOvershooting = false;
+                
                 // before move
                 // Play robot movement sound when robot starts moving
                 playRobotSound(gameManager, "move");
@@ -302,21 +341,21 @@ public class GamePiece implements IGameObject {
 
             // Apply accumulated movement when threshold is reached
             // This creates a grid-based movement system where robots move one square at a time
-            if(deltaX > speedThreshold) {  // Enough accumulated movement to move one square right
-                this.x += 1;   // Move one grid square right
-                deltaX = 0;    // Reset accumulated horizontal movement
+            boolean reachedFinalPosition = false;
+            
+            // Handle X-direction movement
+            if(Math.abs(deltaX) > speedThreshold) {  // Enough accumulated movement to move one square horizontally
+                this.x += movingRight ? 1 : -1;   // Move one grid square right or left
+                reachedFinalPosition = (this.x == this.xObjective);
+                deltaX = reachedFinalPosition ? (movingRight ? overshootAmount : -overshootAmount) : 0;
+                if (reachedFinalPosition) isOvershooting = true;
             }
-            if(deltaX < -speedThreshold) {  // Enough accumulated movement to move one square left
-                this.x -= 1;   // Move one grid square left
-                deltaX = 0;    // Reset accumulated horizontal movement
-            }
-            if(deltaY > speedThreshold) {   // Enough accumulated movement to move one square down
-                this.y += 1;   // Move one grid square down
-                deltaY = 0;    // Reset accumulated vertical movement
-            }
-            if(deltaY < -speedThreshold) {  // Enough accumulated movement to move one square up
-                this.y -= 1;   // Move one grid square up
-                deltaY = 0;    // Reset accumulated vertical movement
+            // Handle Y-direction movement
+            else if(Math.abs(deltaY) > speedThreshold) {  // Enough accumulated movement to move one square vertically
+                this.y += movingDown ? 1 : -1;   // Move one grid square down or up
+                reachedFinalPosition = (this.y == this.yObjective);
+                deltaY = reachedFinalPosition ? (movingDown ? overshootAmount : -overshootAmount) : 0;
+                if (reachedFinalPosition) isOvershooting = true;
             }
         }
     }
@@ -441,5 +480,13 @@ public class GamePiece implements IGameObject {
     @Override
     public void setZIndex(int zIndex) {
         this.zIndex = zIndex;
+    }
+    
+    /**
+     * Set the amount of overshoot for the spring effect
+     * @param amount The amount of overshoot (0.5f is subtle, 1.0f is more noticeable)
+     */
+    public void setOvershootAmount(float amount) {
+        this.overshootAmount = amount;
     }
 }
