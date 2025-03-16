@@ -185,6 +185,8 @@ public class SaveGameScreen extends GameScreen {
     }
 
     public static void clearCachesForMap(String mapPath) {
+        Timber.d("[MINIMAP] Clearing all caches for map: %s", mapPath);
+        
         // Clear save data cache
         saveDataCache.remove(mapPath);
         
@@ -200,6 +202,8 @@ public class SaveGameScreen extends GameScreen {
         // Clear minimap cache in both button classes
         GameButtonGotoSavedGame.clearMinimapCache(mapPath);
         GameButtonLoadGame.clearMinimapCache(mapPath);
+        
+        Timber.d("[MINIMAP] Successfully cleared all caches for map: %s", mapPath);
     }
     
     /**
@@ -709,23 +713,27 @@ public class SaveGameScreen extends GameScreen {
      * @param slotNumber The slot number to refresh
      */
     public void refreshSaveSlot(int slotNumber) {
+        Timber.d("[MINIMAP] Refreshing save slot button: %d", slotNumber);
+        
         // Find and refresh the specific save slot button
         for (IGameObject element : instances) {
             if (element instanceof GameButtonGotoSavedGame) {
                 GameButtonGotoSavedGame saveButton = (GameButtonGotoSavedGame) element;
                 if (saveButton.getButtonNumber() == slotNumber) {
                     saveButton.create();
+                    Timber.d("[MINIMAP] Refreshed save button for slot: %d", slotNumber);
                     break;
                 }
             } else if (element instanceof GameButtonLoadGame) {
                 GameButtonLoadGame loadButton = (GameButtonLoadGame) element;
                 if (loadButton.getButtonNumber() == slotNumber) {
                     loadButton.create();
+                    Timber.d("[MINIMAP] Refreshed load button for slot: %d", slotNumber);
                     break;
                 }
             }
         }
-        Timber.d("Refreshed save slot button: %d", slotNumber);
+        Timber.d("[MINIMAP] Refreshed save slot button: %d", slotNumber);
     }
     
     /**

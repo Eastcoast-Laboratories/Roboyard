@@ -12,10 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.MotionEvent;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -39,8 +37,8 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
     private boolean isSaveMode;
     private SaveGameScreen saveGameScreen;
     
-    // Statischer Cache für Minimap-Bitmaps, um wiederholtes Laden zu vermeiden
-    private static Map<String, Bitmap> minimapCache = new HashMap<>();
+    // Use GameButtonLoadGame's cache instead of maintaining a duplicate
+    private static Map<String, Bitmap> minimapCache = GameButtonLoadGame.minimapCache;
 
     public GameButtonGotoSavedGame(Context context, int x, int y, int w, int h, int imageUp, int imageDown, String mapPath, int buttonNumber,
                                   int parentButtonX, int parentButtonY, int parentButtonSize) {
@@ -109,7 +107,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         } else try {
             // Write save data directly (will overwrite if file exists)
             FileReadWrite.writePrivateData(gameManager.getActivity(), mapPath, saveData.toString());
-            Timber.d(" wrote " + gridElements.size() + " gridElements to " + mapPath + " +1" + "stringlength: " + saveData.length());
+            Timber.d("[MINIMAP] Wrote %d grid elements to %s (length: %d)", gridElements.size(), mapPath, saveData.length());
             
             // Add to saved games list if needed
             addMapsSaved(gameManager);
@@ -117,6 +115,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             // Refresh save game screen buttons
             if (saveGameScreen != null) {
                 // Clear caches for this map
+                Timber.d("[MINIMAP] Clearing caches and refreshing UI for map: %s", mapPath);
                 SaveGameScreen.clearCachesForMap(mapPath);
                 
                 // Switch to load mode after saving
@@ -124,16 +123,19 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 
                 // Set flags to prevent mode switching back
                 saveGameScreen.dontAutoSwitchTabs = true;
-                Timber.d(" just saved game");
+                Timber.d("[MINIMAP] Finished saving game, switched to load tab");
+                
+                // Small delay to ensure file write is complete
                 try {
                     Thread.sleep(100);
+                    Timber.d("[MINIMAP] Completed save delay, triggering refresh");
+                    // Force a refresh of the save slot after the delay
+                    saveGameScreen.refreshSaveSlot(buttonNumber);
                 } catch (InterruptedException e) {
-                    Timber.d("Error pausing thread while saving");
+                    Timber.e("[MINIMAP] Error during save delay: %s", e.getMessage());
                 }
-                // Refresh the specific save slot button first
-                saveGameScreen.refreshSaveSlot(buttonNumber);
                 
-                // Then refresh the entire screen to update other UI elements
+                // Refresh the entire screen to update other UI elements
                 saveGameScreen.refreshScreen();
             }
             
@@ -373,51 +375,6 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
             if (!saver.getMapsStateSaved(mapPath, "mapsSaved.txt")) {
                 FileReadWrite.appendPrivateData(gameManager.getActivity(), "mapsSaved.txt", mapPath + "\n");
             }
-        }
-    }
-
-    /**
-     * Save the game to a file
-     * @param gameManager The game manager
-     * @return true if the game was saved successfully, false otherwise
-     */
-    public boolean saveGameToFile(GameManager gameManager) {
-        try {
-            // Update activity reference
-            activity = gameManager.getActivity();
-            
-            GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
-            this.saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
-            
-            // Get save data from game screen
-            String saveData = gameScreen.getMapData();
-            
-            // Save the game data to a file
-            if (FileReadWrite.writePrivateData(activity, mapPath, saveData)) {
-                // Explizit den Minimap-Cache fu00fcr diesen Slot leeren
-                clearMinimapCache(mapPath);
-                
-                // Set flags to prevent mode switching
-                if (saveGameScreen != null) {
-                    // Switch to load mode
-                    saveGameScreen.showLoadTab();
-                    saveGameScreen.setSkipModeSwitch(true);
-                
-                    // Refresh the specific save slot button first
-                    saveGameScreen.refreshSaveSlot(buttonNumber);
-                
-                    // Then refresh the entire screen to update other UI elements
-                    saveGameScreen.refreshScreen();
-                }
-            }
-            
-            // Keep track of the game screen and explicitly set it as previous
-            gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
-            gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
-            return true;
-        } catch (Exception e) {
-            Timber.d(" Error saving game: " + e.getMessage());
-            return false;
         }
     }
 

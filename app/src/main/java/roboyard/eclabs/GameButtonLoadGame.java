@@ -1,8 +1,5 @@
 package roboyard.eclabs;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,13 +7,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.MotionEvent;
-
-import androidx.core.content.res.ResourcesCompat;
 
 import timber.log.Timber;
 
@@ -34,8 +26,8 @@ public class GameButtonLoadGame extends GameButtonGoto {
     private Activity activity;
     private SaveGameScreen saveGameScreen;
     
-    // Static Cache for Minimap Bitmaps, to avoid repeated loading
-    private static Map<String, Bitmap> minimapCache = new HashMap<>();
+    // Static Cache for Minimap Bitmaps, shared with GameButtonGotoSavedGame
+    static Map<String, Bitmap> minimapCache = new HashMap<>();
 
     public GameButtonLoadGame(Context context, int x, int y, int w, int h, int imageUp, int imageDown, String mapPath, int buttonNumber) {
         super(x, y, w, h, imageUp, imageDown, 4); // 4 is the target screen for GridGameScreen
@@ -92,10 +84,13 @@ public class GameButtonLoadGame extends GameButtonGoto {
             return;
         }
         
+        Timber.d("[MINIMAP] Creating load button for map: %s", mapPath);
+        
         // first try to load from cache
         Bitmap cachedBitmap = minimapCache.get(mapPath);
         if (cachedBitmap != null) {
             // Use cached bitmap
+            Timber.d("[MINIMAP] Using cached minimap for: %s", mapPath);
             Drawable minimapDrawable = new BitmapDrawable(context.getResources(), cachedBitmap);
             this.setImageUp(minimapDrawable);
             this.setImageDown(minimapDrawable); // Use same image for down state
@@ -104,6 +99,7 @@ public class GameButtonLoadGame extends GameButtonGoto {
         }
         
         // if not cached, try to load from file
+        Timber.d("[MINIMAP] No cached minimap, loading from file: %s", mapPath);
         String saveData = FileReadWrite.readPrivateData(activity, mapPath);
         if (saveData != null && !saveData.isEmpty()) {
             String minimapPath = GameButtonGotoSavedGame.createMiniMap(saveData, context);
@@ -119,16 +115,19 @@ public class GameButtonLoadGame extends GameButtonGoto {
                     this.setImageUp(minimapDrawable);
                     this.setImageDown(minimapDrawable); // Use same image for down state
                     this.setEnabled(true);
+                    Timber.d("[MINIMAP] Successfully created new minimap for: %s", mapPath);
                 } catch (Exception e) {
-                    Timber.e(e, "Failed to load minimap as button image");
+                    Timber.e(e, "[MINIMAP] Failed to load minimap as button image for: %s", mapPath);
                     // Fallback to default images and enable if save exists
                     this.setEnabled(true);
                 }
             } else {
+                Timber.w("[MINIMAP] Failed to create minimap for: %s", mapPath);
                 // Fallback to default images and enable if save exists
                 this.setEnabled(true);
             }
         } else {
+            Timber.d("[MINIMAP] No save data found for: %s", mapPath);
             // Disable the button if no save data exists
             this.setEnabled(false);
         }
@@ -140,14 +139,6 @@ public class GameButtonLoadGame extends GameButtonGoto {
     }
 
     /**
-     * Set the SaveGameScreen reference
-     * @param saveGameScreen The SaveGameScreen instance
-     */
-    public void setSaveGameScreen(SaveGameScreen saveGameScreen) {
-        this.saveGameScreen = saveGameScreen;
-    }
-
-    /**
      * Get the button number for this load slot
      * @return The button number
      */
@@ -156,33 +147,11 @@ public class GameButtonLoadGame extends GameButtonGoto {
     }
 
     /**
-     * Get the map name associated with this button
-     * @return the map name
-     */
-    public String getMapName() {
-        return mapPath;
-    }
-    
-    /**
-     * Get the slot ID for this button
-     * @return the slot ID
-     */
-    public int getSlotId() {
-        return buttonNumber;
-    }
-    
-    /**
      * Clear the minimap cache for a specific map path
      * @param mapPath The map path to clear from cache
      */
     public static void clearMinimapCache(String mapPath) {
         minimapCache.remove(mapPath);
     }
-    
-    /**
-     * Clear all minimap caches
-     */
-    public static void clearAllMinimapCaches() {
-        minimapCache.clear();
-    }
+
 }
