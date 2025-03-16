@@ -67,9 +67,8 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         GridGameScreen gameScreen = (GridGameScreen) gameManager.getScreens().get(Constants.SCREEN_GAME);
         SaveGameScreen saveGameScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
         this.saveGameScreen = saveGameScreen;
-
-        // Screen to save or overwrite a savegame
-        // Timber.d(" Saving game to slot: " + mapPath);
+        
+        // Collect grid elements from the game screen
         ArrayList<GridElement> gridElements = gameScreen.getGridElements();
         
         // Build save data with additional fields
@@ -134,16 +133,13 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
                 } catch (InterruptedException e) {
                     Timber.e("[MINIMAP] Error during save delay: %s", e.getMessage());
                 }
-                
-                // Refresh the entire screen to update other UI elements
-                saveGameScreen.refreshScreen();
             }
             
             // Keep track of the game screen and explicitly set it as previous
             gameManager.setPreviousScreen(gameManager.getScreens().get(Constants.SCREEN_GAME));
             gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
         } catch (Exception e) {
-            Timber.d(" Error saving game: " + e.getMessage());
+            Timber.e("[MINIMAP] Error saving game: %s", e.getMessage());
         }
     }
     /**

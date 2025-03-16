@@ -72,8 +72,6 @@ public class GameButtonLoadGame extends GameButtonGoto {
 
     @Override
     public void create() {
-        super.create();
-        
         // Check if save file exists and create minimap if it does
         if (activity == null && context instanceof Activity) {
             activity = (Activity)context;
@@ -87,29 +85,24 @@ public class GameButtonLoadGame extends GameButtonGoto {
         
         Timber.d("[MINIMAP] Creating load button for map: %s", mapPath);
         
-        // Initialize with default images first to ensure button works correctly
+        // Always initialize with default images first to ensure button is functional
         this.setImageUp(activity.getResources().getDrawable(defaultImageUp));
         this.setImageDown(activity.getResources().getDrawable(defaultImageDown));
         
-        // first try to load from cache
+        // First try to load from cache
         Bitmap cachedBitmap = minimapCache.get(mapPath);
         if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
             // Use cached bitmap
             Timber.d("[MINIMAP] Using cached minimap for: %s", mapPath);
-            try {
-                Drawable minimapDrawable = new BitmapDrawable(context.getResources(), cachedBitmap);
-                this.setImageUp(minimapDrawable);
-                this.setImageDown(minimapDrawable); // Use same image for down state
-                this.setEnabled(true);
-                Timber.d("[MINIMAP] Loaded cached minimap for button");
-                return;
-            } catch (Exception e) {
-                Timber.e(e, "[MINIMAP] Error loading cached minimap");
-                // Continue to try loading from file
-            }
+            Drawable minimapDrawable = new BitmapDrawable(context.getResources(), cachedBitmap);
+            this.setImageUp(minimapDrawable);
+            this.setImageDown(minimapDrawable); // Use same image for down state
+            this.setEnabled(true);
+            Timber.d("[MINIMAP] Loaded cached minimap for button");
+            return;
         }
         
-        // if not cached, try to load from file
+        // If not cached, try to load from file
         Timber.d("[MINIMAP] No cached minimap, loading from file: %s", mapPath);
         String saveData = FileReadWrite.readPrivateData(activity, mapPath);
         if (saveData != null && !saveData.isEmpty()) {
@@ -118,7 +111,6 @@ public class GameButtonLoadGame extends GameButtonGoto {
                 try {
                     // Load minimap as button image
                     Bitmap bitmap = BitmapFactory.decodeFile(minimapPath);
-                    
                     if (bitmap != null && !bitmap.isRecycled()) {
                         // Cache the bitmap for future use
                         minimapCache.put(mapPath, bitmap);
@@ -130,23 +122,19 @@ public class GameButtonLoadGame extends GameButtonGoto {
                         Timber.d("[MINIMAP] Successfully created new minimap for: %s", mapPath);
                     } else {
                         Timber.e("[MINIMAP] Generated bitmap is null or recycled");
-                        // Fallback to default images and enable if save exists
-                        this.setEnabled(true);
+                        this.setEnabled(true); // Still enable the button if save exists
                     }
                 } catch (Exception e) {
                     Timber.e(e, "[MINIMAP] Failed to load minimap as button image for: %s", mapPath);
-                    // Fallback to default images and enable if save exists
-                    this.setEnabled(true);
+                    this.setEnabled(true); // Still enable the button if save exists
                 }
             } else {
-                Timber.w("[MINIMAP] Failed to create minimap for: %s", mapPath);
-                // Fallback to default images and enable if save exists
-                this.setEnabled(true);
+                Timber.e("[MINIMAP] Failed to create minimap path");
+                this.setEnabled(true); // Still enable the button if save exists
             }
         } else {
             Timber.d("[MINIMAP] No save data found for: %s", mapPath);
-            // Disable the button if no save data exists
-            this.setEnabled(false);
+            this.setEnabled(false); // Disable the button if no save exists
         }
     }
 
