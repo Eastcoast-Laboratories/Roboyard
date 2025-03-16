@@ -260,47 +260,60 @@ public class GamePiece implements IGameObject {
             inMovement = true;
             testIfWon = true;
 
-            deltaValue = initialSpeed; // initial speed of robots
+            // Set initial movement speed for the robot
+            deltaValue = initialSpeed;
 
-            if(this.x < this.xObjective) {
-                for(int i=deltaValue-1; i>0; i--){
-                    if(this.x > this.xObjective - (i+1)) deltaValue = i; // slow down
+            // Calculate absolute distances to target
+            int distanceX = Math.abs(this.xObjective - this.x);
+            int distanceY = Math.abs(this.yObjective - this.y);
+            
+            // Determine movement directions
+            boolean movingRight = this.x < this.xObjective;
+            boolean movingDown = this.y < this.yObjective;
+            
+            // Since robots can only move in one direction at a time (no diagonals),
+            // we only need to calculate and apply movement for the active direction
+            
+            // Calculate the appropriate speed based on distance to target
+            // This creates a deceleration effect as the robot approaches its destination
+            int speed = deltaValue; // Start with maximum speed
+            
+            // Calculate slowdown based on distance to target
+            // Loop through possible speeds (from max-1 down to 1)
+            // and select appropriate speed based on distance
+            for (int i = deltaValue - 1; i > 0; i--) {
+                // If we're within i+1 squares of the target, slow down to speed i
+                if (distanceX + distanceY <= i + 1) {
+                    speed = i;
                 }
-                deltaX += deltaValue;
-            } else if(this.x > this.xObjective) {
-                for(int i=deltaValue-1; i>0; i--) {
-                    if (this.x < this.xObjective + (i+1)) deltaValue = i; // slow down
-                }
-                deltaX -= deltaValue;
             }
-            if(this.y < this.yObjective){
-                for(int i=deltaValue-1; i>0; i--) {
-                    if (this.y > this.yObjective - (i+1)) deltaValue = i; // slow down
-                }
-                deltaY += deltaValue;
-            } else if(this.y > this.yObjective) {
-                for(int i=deltaValue-1; i>0; i--) {
-                    if (this.y < this.yObjective + (i+1)) deltaValue = i; // slow down
-                }
-                deltaY -= deltaValue;
+            
+            // Apply the calculated speed in the appropriate direction
+            if (distanceX > 0) {
+                // Apply horizontal movement
+                deltaX += movingRight ? speed : -speed;
+            } else if (distanceY > 0) {
+                // Apply vertical movement
+                deltaY += movingDown ? speed : -speed;
             }
 
-            // TODO: enable faster than speed 9
-            if(deltaX > 9) {
-                this.x += 1;
-                deltaX = 0;
+            // Apply accumulated movement when threshold is reached
+            // This creates a grid-based movement system where robots move one square at a time
+            if(deltaX > 9) {  // Enough accumulated movement to move one square right
+                this.x += 1;   // Move one grid square right
+                deltaX = 0;    // Reset accumulated horizontal movement
             }
-            if(deltaX < -9) {
-                this.x -= 1;
-                deltaX = 0;
+            if(deltaX < -9) {  // Enough accumulated movement to move one square left
+                this.x -= 1;   // Move one grid square left
+                deltaX = 0;    // Reset accumulated horizontal movement
             }
-            if(deltaY > 9) {
-                this.y += 1;
-                deltaY = 0;
+            if(deltaY > 9) {   // Enough accumulated movement to move one square down
+                this.y += 1;   // Move one grid square down
+                deltaY = 0;    // Reset accumulated vertical movement
             }
-            if(deltaY < -9) {
-                this.y -= 1;
-                deltaY = 0;
+            if(deltaY < -9) {  // Enough accumulated movement to move one square up
+                this.y -= 1;   // Move one grid square up
+                deltaY = 0;    // Reset accumulated vertical movement
             }
         }
     }
