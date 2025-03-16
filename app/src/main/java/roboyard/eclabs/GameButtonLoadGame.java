@@ -80,22 +80,33 @@ public class GameButtonLoadGame extends GameButtonGoto {
         }
 
         if(mapPath == null || mapPath.isEmpty()) {
+            Timber.d("[MINIMAP] Empty map path for load button");
             // nothing to do on empty slots
             return;
         }
         
         Timber.d("[MINIMAP] Creating load button for map: %s", mapPath);
         
+        // Initialize with default images first to ensure button works correctly
+        this.setImageUp(activity.getResources().getDrawable(defaultImageUp));
+        this.setImageDown(activity.getResources().getDrawable(defaultImageDown));
+        
         // first try to load from cache
         Bitmap cachedBitmap = minimapCache.get(mapPath);
-        if (cachedBitmap != null) {
+        if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
             // Use cached bitmap
             Timber.d("[MINIMAP] Using cached minimap for: %s", mapPath);
-            Drawable minimapDrawable = new BitmapDrawable(context.getResources(), cachedBitmap);
-            this.setImageUp(minimapDrawable);
-            this.setImageDown(minimapDrawable); // Use same image for down state
-            this.setEnabled(true);
-            return;
+            try {
+                Drawable minimapDrawable = new BitmapDrawable(context.getResources(), cachedBitmap);
+                this.setImageUp(minimapDrawable);
+                this.setImageDown(minimapDrawable); // Use same image for down state
+                this.setEnabled(true);
+                Timber.d("[MINIMAP] Loaded cached minimap for button");
+                return;
+            } catch (Exception e) {
+                Timber.e(e, "[MINIMAP] Error loading cached minimap");
+                // Continue to try loading from file
+            }
         }
         
         // if not cached, try to load from file
@@ -108,14 +119,20 @@ public class GameButtonLoadGame extends GameButtonGoto {
                     // Load minimap as button image
                     Bitmap bitmap = BitmapFactory.decodeFile(minimapPath);
                     
-                    // Cache the bitmap for future use
-                    minimapCache.put(mapPath, bitmap);
-                    
-                    Drawable minimapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-                    this.setImageUp(minimapDrawable);
-                    this.setImageDown(minimapDrawable); // Use same image for down state
-                    this.setEnabled(true);
-                    Timber.d("[MINIMAP] Successfully created new minimap for: %s", mapPath);
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        // Cache the bitmap for future use
+                        minimapCache.put(mapPath, bitmap);
+                        
+                        Drawable minimapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+                        this.setImageUp(minimapDrawable);
+                        this.setImageDown(minimapDrawable); // Use same image for down state
+                        this.setEnabled(true);
+                        Timber.d("[MINIMAP] Successfully created new minimap for: %s", mapPath);
+                    } else {
+                        Timber.e("[MINIMAP] Generated bitmap is null or recycled");
+                        // Fallback to default images and enable if save exists
+                        this.setEnabled(true);
+                    }
                 } catch (Exception e) {
                     Timber.e(e, "[MINIMAP] Failed to load minimap as button image for: %s", mapPath);
                     // Fallback to default images and enable if save exists

@@ -200,8 +200,12 @@ public class SaveGameScreen extends GameScreen {
         }
         
         // Clear minimap cache in both button classes
-        GameButtonGotoSavedGame.clearMinimapCache(mapPath);
-        GameButtonLoadGame.clearMinimapCache(mapPath);
+        try {
+            GameButtonGotoSavedGame.clearMinimapCache(mapPath);
+            GameButtonLoadGame.clearMinimapCache(mapPath);
+        } catch (Exception e) {
+            Timber.e(e, "[MINIMAP] Error clearing minimap caches: %s", e.getMessage());
+        }
         
         Timber.d("[MINIMAP] Successfully cleared all caches for map: %s", mapPath);
     }
@@ -702,10 +706,28 @@ public class SaveGameScreen extends GameScreen {
      * Force refresh the screen buttons
      */
     public void refreshScreen() {
-        Timber.d("Refreshing SaveGameScreen");
-        // Clear instances and recreate all buttons
-        instances.clear();
-        createButtons();
+        Timber.d("[MINIMAP] Refreshing save game screen");
+        
+        if (!skipModeSwitch) {
+            // Clear all existing buttons and game objects
+            ArrayList<IGameObject> objectsToRemove = new ArrayList<>();
+            for (IGameObject obj : instances) {
+                objectsToRemove.add(obj);
+            }
+            
+            // Remove all objects from instances
+            for (IGameObject obj : objectsToRemove) {
+                instances.remove(obj);
+            }
+            
+            // Reload saved map data
+            loadSavedMaps();
+            
+            // Recreate all buttons
+            createButtons();
+            
+            Timber.d("[MINIMAP] Save game screen fully refreshed");
+        }
     }
     
     /**
@@ -714,21 +736,85 @@ public class SaveGameScreen extends GameScreen {
      */
     public void refreshSaveSlot(int slotNumber) {
         Timber.d("[MINIMAP] Refreshing save slot button: %d", slotNumber);
+        String mapPath = getMapPath(slotNumber);
         
         // Find and refresh the specific save slot button
         for (IGameObject element : instances) {
             if (element instanceof GameButtonGotoSavedGame) {
                 GameButtonGotoSavedGame saveButton = (GameButtonGotoSavedGame) element;
                 if (saveButton.getButtonNumber() == slotNumber) {
-                    saveButton.create();
-                    Timber.d("[MINIMAP] Refreshed save button for slot: %d", slotNumber);
+                    // First remove the button from instances
+                    instances.remove(element);
+                    
+                    // Create a new button with same parameters
+                    float buttonRatio = Math.min(ratioW, ratioH);
+                    int buttonSize = (int)(iconSize * buttonRatio);
+                    SaveManager saver = new SaveManager(gameManager.getActivity());
+                    
+                    GameButtonGotoSavedGame newSaveButton = new GameButtonGotoSavedGame(
+                        gameManager.getActivity(),
+                        buttonPositionsX[slotNumber],
+                        buttonPositionsY[slotNumber],
+                        buttonSize,
+                        buttonSize,
+                        saver.getButtonSaved(mapPath, true),
+                        saver.getButtonSaved(mapPath, false),
+                        mapPath,
+                        slotNumber,
+                        buttonPositionsX[slotNumber],
+                        buttonPositionsY[slotNumber],
+                        buttonSize
+                    );
+                    newSaveButton.setSaveMode(true);
+                    newSaveButton.create();
+                    instances.add(newSaveButton);
+                    Timber.d("[MINIMAP] Replaced save button for slot: %d", slotNumber);
                     break;
                 }
             } else if (element instanceof GameButtonLoadGame) {
                 GameButtonLoadGame loadButton = (GameButtonLoadGame) element;
                 if (loadButton.getButtonNumber() == slotNumber) {
-                    loadButton.create();
-                    Timber.d("[MINIMAP] Refreshed load button for slot: %d", slotNumber);
+                    // First remove the button from instances
+                    instances.remove(element);
+                    
+                    // Create a new button with same parameters
+                    float buttonRatio = Math.min(ratioW, ratioH);
+                    int buttonSize = (int)(iconSize * buttonRatio);
+                    SaveManager saver = new SaveManager(gameManager.getActivity());
+                    
+                    GameButtonLoadGame newLoadButton = new GameButtonLoadGame(
+                        gameManager.getActivity(),
+                        buttonPositionsX[slotNumber],
+                        buttonPositionsY[slotNumber],
+                        buttonSize,
+                        buttonSize,
+                        saver.getButtonSaved(mapPath, true),
+                        saver.getButtonSaved(mapPath, false),
+                        mapPath,
+                        slotNumber
+                    );
+                    newLoadButton.create();
+                    instances.add(newLoadButton);
+                    
+                    // Check if we need to add a share button as well
+                    String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
+                    boolean hasSaveGame = (saveData != null && !saveData.isEmpty());
+                    if (hasSaveGame) {
+                        GameButtonShareMap shareButton = new GameButtonShareMap(
+                            0, 0,  // x,y will be set in update()
+                            buttonSize/4, buttonSize/4, // smaller size
+                            R.drawable.share,
+                            R.drawable.share,
+                            mapPath,
+                            buttonPositionsX[slotNumber],
+                            buttonPositionsY[slotNumber],
+                            buttonSize
+                        );
+                        shareButton.create();
+                        instances.add(shareButton);
+                    }
+                    
+                    Timber.d("[MINIMAP] Replaced load button for slot: %d", slotNumber);
                     break;
                 }
             }

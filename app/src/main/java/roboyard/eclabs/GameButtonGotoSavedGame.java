@@ -102,7 +102,7 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
         // Add the grid elements data
         saveData.append(MapObjects.createStringFromList(gridElements, false));
 
-        if(saveData.length()<50){
+        if(saveData.length() < 50){
             // no game started, since last app start
         } else try {
             // Write save data directly (will overwrite if file exists)
