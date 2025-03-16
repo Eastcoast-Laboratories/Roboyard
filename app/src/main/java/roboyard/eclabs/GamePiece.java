@@ -26,7 +26,8 @@ public class GamePiece implements IGameObject {
     private int deltaY              = 0;
     private int curMoveSquares      = 0;
     // private int numSquaresMoved     = 0;
-    private final int initialSpeed        = 16;
+    private final int initialSpeed        = 22;
+    private final int minSpeed            = 2;
     private final int extraSizeForRobotsAndTargets = 33; // robots and targets are some percent larger than the grid and may overlap 4 px
     private int robotOffsetX        = 1; // offset for robots and targets to lower overlapping with walls in the west
     private int robotOffsetY        = 4; // offset for robots and targets to lower overlapping with walls in the south
@@ -282,9 +283,9 @@ public class GamePiece implements IGameObject {
             // Loop through possible speeds (from max-1 down to 1)
             // and select appropriate speed based on distance
             for (int i = deltaValue - 1; i > 0; i--) {
-                // If we're within i+1 squares of the target, slow down to speed i
-                if (distanceX + distanceY <= i + 1) {
-                    speed = i;
+                // If we're within i squares of the target, slow down to speed i + minSpeed
+                if (distanceX + distanceY <= i){
+                    speed = i + minSpeed - 1;
                 }
             }
             
@@ -297,21 +298,23 @@ public class GamePiece implements IGameObject {
                 deltaY += movingDown ? speed : -speed;
             }
 
+            final int speedThreshold = 9; // 9 is the smoothest option, maybe 10, but above 10 it starts moving back-and forth, below 8 ist moves in shakes
+
             // Apply accumulated movement when threshold is reached
             // This creates a grid-based movement system where robots move one square at a time
-            if(deltaX > 9) {  // Enough accumulated movement to move one square right
+            if(deltaX > speedThreshold) {  // Enough accumulated movement to move one square right
                 this.x += 1;   // Move one grid square right
                 deltaX = 0;    // Reset accumulated horizontal movement
             }
-            if(deltaX < -9) {  // Enough accumulated movement to move one square left
+            if(deltaX < -speedThreshold) {  // Enough accumulated movement to move one square left
                 this.x -= 1;   // Move one grid square left
                 deltaX = 0;    // Reset accumulated horizontal movement
             }
-            if(deltaY > 9) {   // Enough accumulated movement to move one square down
+            if(deltaY > speedThreshold) {   // Enough accumulated movement to move one square down
                 this.y += 1;   // Move one grid square down
                 deltaY = 0;    // Reset accumulated vertical movement
             }
-            if(deltaY < -9) {  // Enough accumulated movement to move one square up
+            if(deltaY < -speedThreshold) {  // Enough accumulated movement to move one square up
                 this.y -= 1;   // Move one grid square up
                 deltaY = 0;    // Reset accumulated vertical movement
             }
