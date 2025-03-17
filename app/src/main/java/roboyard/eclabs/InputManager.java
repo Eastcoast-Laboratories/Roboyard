@@ -159,4 +159,12 @@ public class InputManager {
     public boolean backOccurred(){
         return this.back;
     }
+
+    /**
+     * Consumes the current event to prevent other UI elements from processing it.
+     * This is particularly useful for accessibility features like TalkBack.
+     */
+    public void consumeEvent() {
+        this.eventOccurred = false;
+    }
 }

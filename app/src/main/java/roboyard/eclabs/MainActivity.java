@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -63,6 +64,7 @@ public class MainActivity extends Activity
         sHeight = size.y;
         this.inputManager = new InputManager();
         this.renderManager = new RenderManager(getResources());
+        this.renderManager.setContext(this); // Set context for accessibility features
         
         // Load board size from preferences or use default if not set
         loadBoardSizeFromPreferences(this);

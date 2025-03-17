@@ -1,11 +1,13 @@
 package roboyard.eclabs;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
@@ -23,6 +25,7 @@ public class RenderManager {
     private final Resources resources;
     private final SparseArray<Drawable> resourceMap;
     private final Random random;
+    private Context context; // For accessibility features
 
     /**
      * Constructor for the RenderManager class.
@@ -31,10 +34,27 @@ public class RenderManager {
     public RenderManager(Resources resources){
         this.target = null;
         this.brush = new Paint();
+        this.brush.setAntiAlias(true);
         this.brush.setColor(Color.WHITE);
         this.resources = resources;
         this.resourceMap = new SparseArray<>();
         this.random = new Random();
+    }
+
+    /**
+     * Sets the Android context to be used for accessibility features
+     * @param context The Android context
+     */
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    /**
+     * Gets the Android context for accessibility features
+     * @return The Android context or null if not set
+     */
+    public Context getContext() {
+        return this.context;
     }
 
     /**
@@ -197,14 +217,27 @@ public class RenderManager {
      * Saves the current canvas state.
      */
     public void save() {
-        this.target.save();
+        if (target != null) {
+            target.save();
+        }
     }
 
     /**
      * Restores the previously saved canvas state.
      */
     public void restore() {
-        this.target.restore();
+        if (target != null) {
+            target.restore();
+        }
+    }
+
+    /**
+     * Set the stroke width for drawing
+     * @param width Width of the stroke in pixels
+     */
+    public void setStrokeWidth(float width) {
+        brush.setStrokeWidth(width);
+        brush.setStyle(Paint.Style.STROKE);
     }
 
     /**
@@ -228,17 +261,19 @@ public class RenderManager {
     }
 
     /**
-     * Fill a rectangle with the current color
-     * @param left Left coordinate
-     * @param top Top coordinate
-     * @param right Right coordinate
-     * @param bottom Bottom coordinate
+     * Draws a filled rectangle on the canvas.
+     * @param left The left coordinate of the rectangle.
+     * @param top The top coordinate of the rectangle.
+     * @param right The right coordinate of the rectangle.
+     * @param bottom The bottom coordinate of the rectangle.
      */
     public void fillRect(float left, float top, float right, float bottom) {
-        Paint.Style oldStyle = this.brush.getStyle();
-        this.brush.setStyle(Paint.Style.FILL);
-        this.target.drawRect(left, top, right, bottom, this.brush);
-        this.brush.setStyle(oldStyle);
+        if (target != null) {
+            Paint.Style oldStyle = brush.getStyle();
+            brush.setStyle(Paint.Style.FILL);
+            target.drawRect(left, top, right, bottom, brush);
+            brush.setStyle(oldStyle);
+        }
     }
 
     /**

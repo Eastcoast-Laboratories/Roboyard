@@ -280,7 +280,9 @@ public class SaveGameScreen extends GameScreen {
                 (int)(iconSize * Math.min(ratioW, ratioH)), 
                 (int)(iconSize * Math.min(ratioW, ratioH)), 
                 R.drawable.bt_back_up, 
-                R.drawable.bt_back_down));
+                R.drawable.bt_back_down) {{
+                    setContentDescription("Back to previous screen");
+                }});
         }
             
         if (historyMode) {
@@ -419,6 +421,7 @@ public class SaveGameScreen extends GameScreen {
                     buttonSize
                 );
                 saveButton.setSaveMode(true);
+                saveButton.setContentDescription("Save game to slot " + (i + 1));
                 saveButton.create();
                 instances.add(saveButton);
                 
@@ -438,6 +441,7 @@ public class SaveGameScreen extends GameScreen {
                     mapPath,
                     i
                 );
+                loadButton.setContentDescription("Load saved game from slot " + (i + 1));
                 loadButton.create();
                 instances.add(loadButton);
                 
@@ -460,6 +464,7 @@ public class SaveGameScreen extends GameScreen {
                         buttonPositionsY[i],
                         buttonSize
                     );
+                    shareButton.setContentDescription("Share saved game from slot " + (i + 1));
                     shareButton.create();
                     instances.add(shareButton);
                 }
@@ -759,14 +764,6 @@ public class SaveGameScreen extends GameScreen {
                 }
             }
         }
-    }
-    
-    /**
-     * Set the skipModeSwitch flag
-     * @param skip true to skip automatic mode switching, false otherwise
-     */
-    public void setSkipModeSwitch(boolean skip) {
-        skipModeSwitch = skip;
     }
 
     public GameManager getGameManager() {

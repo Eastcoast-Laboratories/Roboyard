@@ -85,6 +85,9 @@ public class GameButtonLoadGame extends GameButtonGoto {
         
         Timber.d("[MINIMAP] Creating load button for map: %s", mapPath);
         
+        // Set content description for accessibility
+        setContentDescription("Load saved game from slot " + (buttonNumber + 1));
+        
         // Always initialize with default images first to ensure button is functional
         this.setImageUp(activity.getResources().getDrawable(defaultImageUp));
         this.setImageDown(activity.getResources().getDrawable(defaultImageDown));

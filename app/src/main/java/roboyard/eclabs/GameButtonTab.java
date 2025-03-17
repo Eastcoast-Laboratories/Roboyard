@@ -37,6 +37,10 @@ public class GameButtonTab extends GameButton {
         this.text = text;
         this.isActive = isActive;
         this.onClickAction = onClickAction;
+        
+        // Set content description for accessibility
+        String state = isActive ? "active" : "inactive";
+        setContentDescription(text + " tab, currently " + state);
     }
     
     @Override

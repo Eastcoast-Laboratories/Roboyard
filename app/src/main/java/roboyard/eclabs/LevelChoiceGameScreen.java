@@ -142,7 +142,9 @@ public class LevelChoiceGameScreen extends GameScreen {
                 saver.getButtonLevels(played, true), 
                 saver.getButtonLevels(played, false), 
                 4, 
-                mapPath));
+                mapPath,
+                levelNum, // Level number for accessibility
+                "Level " + levelNum)); // Level name for accessibility
         }
 
         // Add navigation buttons at the bottom

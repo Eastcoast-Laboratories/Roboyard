@@ -284,10 +284,11 @@ public class GridGameScreen extends GameScreen {
             R.drawable.bt_jeu_save_down,
             Constants.SCREEN_SAVE_GAMES
         );
+        buttonSave.setAccessibleContentDescription(gameManager.getActivity(), "Save current game");
         this.instances.add(buttonSave);
 
         // one Step Back button
-        this.instances.add(new GameButtonGeneral(
+        GameButtonGeneral backButton = new GameButtonGeneral(
             buttonSize,
             buttonPosY,
             buttonSize,
@@ -295,10 +296,12 @@ public class GridGameScreen extends GameScreen {
             R.drawable.bt_jeu_retour_up,
             R.drawable.bt_jeu_retour_down,
             new ButtonBack()
-        ));
+        );
+        backButton.setAccessibleContentDescription(gameManager.getActivity(), "Undo last move");
+        this.instances.add(backButton);
 
         // Restart button
-        this.instances.add(new GameButtonGeneral(
+        GameButtonGeneral restartButton = new GameButtonGeneral(
             buttonSize * 2,
             buttonPosY,
             buttonSize,
@@ -306,7 +309,9 @@ public class GridGameScreen extends GameScreen {
             R.drawable.bt_jeu_reset_up,
             R.drawable.bt_jeu_reset_down,
             new ButtonResetRobots()
-        ));
+        );
+        restartButton.setAccessibleContentDescription(gameManager.getActivity(), "Reset all robots to starting positions");
+        this.instances.add(restartButton);
 
         // Solve button
         buttonSolve = new GameButtonGeneral(
@@ -318,6 +323,7 @@ public class GridGameScreen extends GameScreen {
             R.drawable.bt_jeu_resolution_down,
             new ButtonSolution()
         );
+        buttonSolve.setAccessibleContentDescription(gameManager.getActivity(), "Find solution");
         buttonSolve.setImageDisabled(R.drawable.bt_jeu_resolution_disabled);
         buttonSolve.setEnabled(false);
         this.instances.add(buttonSolve);
@@ -332,6 +338,7 @@ public class GridGameScreen extends GameScreen {
             R.drawable.transparent,
             new ButtonCancelSolver()
         );
+        buttonCancelSolver.setAccessibleContentDescription(gameManager.getActivity(), "Cancel solution search");
         buttonCancelSolver.setEnabled(false);
         buttonCancelSolver.setImageDisabled(R.drawable.transparent);
 
@@ -1227,6 +1234,9 @@ public class GridGameScreen extends GameScreen {
     private class ButtonResetRobots implements IExecutor{
 
         public void execute(){
+            // Add accessibility announcement
+            gameManager.requestToast("Resetting all robots to starting positions", false);
+            
             // Reset game state
             nbCoups = 0;
             numSquares = 0;
@@ -1308,7 +1318,7 @@ public class GridGameScreen extends GameScreen {
                                 } else {
                                     numDifferentSolutionClicks++;
                                 }
-                                gameManager.requestToast("Press again to see solution " + (numDifferentSolutionClicks + 1), false);
+                                gameManager.announce("Press again to see solution " + (numDifferentSolutionClicks + 1));
                             }
                         }
                     } catch (Exception e) {
@@ -1320,12 +1330,12 @@ public class GridGameScreen extends GameScreen {
             } else {
                 numSolutionClicks++;
                 if (numSolutionClicks < showSolutionAtHint) {
-                    gameManager.requestToast("Press again to see the next hint.", false);
+                    gameManager.announce("Press again to see the next hint.");
                 } else {
                     if (!isLevelGame) {
-                        gameManager.requestToast("Press again to see the solution.", false);
+                        gameManager.announce("Press again to see the solution.");
                     }else{
-                        gameManager.requestToast("In Level games you have to find the solution.", false);
+                        gameManager.announce("In Level games you have to find the solution.");
                     }
                 }
             }
@@ -1404,6 +1414,9 @@ public class GridGameScreen extends GameScreen {
                 Timber.d("remove move nr. %d %d/%d", (allMoves.size()-1), lastMove._x, lastMove._y);
                 allMoves.remove(last);
                 nbCoups--;
+                gameManager.announce("Undoing last move");
+            } else {
+                gameManager.announce("No moves to undo");
             }
         }
     }
@@ -1425,6 +1438,7 @@ public class GridGameScreen extends GameScreen {
             buttonSolve.setEnabled(false);
             // Just disable the cancel button
             buttonCancelSolver.setEnabled(false);
+            gameManager.announce("Solution search canceled");
         }
     }
 
@@ -1708,6 +1722,7 @@ public class GridGameScreen extends GameScreen {
         
         // Mark the instances list as needing sorting
         markUnsorted();
+        
     }
     
     /**

@@ -12,6 +12,13 @@ public class GameButtonGotoBack extends GameButton {
     }
 
     @Override
+    public void create() {
+        super.create();
+        // Set content description for accessibility
+        setContentDescription("Go back to previous screen");
+    }
+
+    @Override
     public void onClick(GameManager gameManager) {
         // Check if we're coming from a game screen
         int previousScreenKey = gameManager.getPreviousScreenKey();

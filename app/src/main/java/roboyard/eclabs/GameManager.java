@@ -246,4 +246,8 @@ public class GameManager {
             ((MainActivity) activity).toggleSound(enabled);
         }
     }
+
+    public void announce(String s) {
+        requestToast(s, false);
+    }
 }

@@ -23,7 +23,9 @@ public class MainMenuGameScreen extends GameScreen {
         int ws2 = (int)(((float)this.gameManager.getScreenWidth()-relativeButtonWidth)/2);
 
         // Random Game (large button)
-        this.instances.add(new GameButtonGotoRandomGame(ws2, (int)(ratio*200), relativeButtonWidth, (int)(ratio*buttonSize), R.drawable.bt_start_up_random, R.drawable.bt_start_down_random, Constants.SCREEN_GAME));
+        GameButtonGotoRandomGame randomGameButton = new GameButtonGotoRandomGame(ws2, (int)(ratio*200), relativeButtonWidth, (int)(ratio*buttonSize), R.drawable.bt_start_up_random, R.drawable.bt_start_down_random, Constants.SCREEN_GAME);
+        randomGameButton.setAccessibleContentDescription(gameManager.getActivity(), "Start new random game");
+        this.instances.add(randomGameButton);
 
         // Level Selection and Load Saved Game (medium buttons side by side)
         int mediumButtonSize = 330; // 75% of the regular size
@@ -34,8 +36,13 @@ public class MainMenuGameScreen extends GameScreen {
         int mediumY = (int)(ratio*800); // Position below the random game button
 
         // Level Selection and Load Saved Game buttons
-        this.instances.add(new GameButtonGoto(startXMedium, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up, R.drawable.bt_start_down, Constants.SCREEN_LEVEL_BEGINNER));
-        this.instances.add(new GameButtonGoto(startXMedium + mediumButtonWidth + spacing, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up_saved, R.drawable.bt_start_down_saved, Constants.SCREEN_SAVE_GAMES));
+        GameButtonGoto levelSelectionButton = new GameButtonGoto(startXMedium, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up, R.drawable.bt_start_down, Constants.SCREEN_LEVEL_BEGINNER);
+        levelSelectionButton.setAccessibleContentDescription(gameManager.getActivity(), "Select level to play");
+        this.instances.add(levelSelectionButton);
+        
+        GameButtonGoto loadSavedGameButton = new GameButtonGoto(startXMedium + mediumButtonWidth + spacing, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up_saved, R.drawable.bt_start_down_saved, Constants.SCREEN_SAVE_GAMES);
+        loadSavedGameButton.setAccessibleContentDescription(gameManager.getActivity(), "Load saved game");
+        this.instances.add(loadSavedGameButton);
 
         // Small buttons at the bottom
         int smallButtonSize = 220; // Half the size of regular buttons
@@ -46,15 +53,71 @@ public class MainMenuGameScreen extends GameScreen {
         int bottomY = (int)(ratio*1400); // Moved up from 1800 to 1400 to be fully visible
 
         // Settings and Credits as small buttons at the bottom
-        this.instances.add(new GameButtonGoto(startXSmall, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_settings_up, R.drawable.bt_settings_down, Constants.SCREEN_SETTINGS));
-        this.instances.add(new GameButtonGoto(startXSmall + smallButtonWidth + smallSpacing, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_credits_up, R.drawable.bt_credits_down, Constants.SCREEN_CREDITS));
+        GameButtonGoto settingsButton = new GameButtonGoto(startXSmall, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_settings_up, R.drawable.bt_settings_down, Constants.SCREEN_SETTINGS);
+        settingsButton.setAccessibleContentDescription(gameManager.getActivity(), "Game settings");
+        this.instances.add(settingsButton);
+        
+        GameButtonGoto creditsButton = new GameButtonGoto(startXSmall + smallButtonWidth + smallSpacing, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_credits_up, R.drawable.bt_credits_down, Constants.SCREEN_CREDITS);
+        creditsButton.setAccessibleContentDescription(gameManager.getActivity(), "View credits");
+        this.instances.add(creditsButton);
     }
 
     @Override
     public void draw(RenderManager renderManager) {
         renderManager.setColor(Color.WHITE);
         renderManager.paintScreen();
-        super.draw(renderManager);
+        
+        // Draw all game instances (buttons, etc.)
+        for (IGameObject instance : instances) {
+            instance.draw(renderManager);
+        }
+        
+        // Draw accessibility debug info separately if needed
+        if (renderManager.getContext() != null && 
+            AccessibilityUtil.isScreenReaderActive(renderManager.getContext())) {
+            // Only show debug info in development, not in production
+            // This ensures the help texts don't interfere with button clicks
+            boolean showDebugInfo = false; // Set to true only during development testing
+            
+            if (showDebugInfo) {
+                for (IGameObject instance : instances) {
+                    if (instance instanceof GameButton) {
+                        GameButton button = (GameButton) instance;
+                        drawContentDescriptionDebug(renderManager, button);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Draws content description debug info for a button
+     * @param renderManager The render manager
+     * @param button The button to draw debug info for
+     */
+    private void drawContentDescriptionDebug(RenderManager renderManager, GameButton button) {
+        String contentDescription = button.getContentDescription();
+        if (contentDescription != null && !contentDescription.isEmpty()) {
+            // Save current drawing state
+            renderManager.save();
+            
+            // Draw a semi-transparent background for better readability
+            renderManager.setColor(Color.argb(120, 0, 0, 0));
+            renderManager.fillRect(button.getPositionX(), 
+                                  button.getPositionY() + button.getHeight(), 
+                                  button.getPositionX() + button.getWidth(), 
+                                  button.getPositionY() + button.getHeight() + 30);
+            
+            // Draw the content description text
+            renderManager.setColor(Color.WHITE);
+            renderManager.setTextSize(16);
+            renderManager.drawText((int)(button.getPositionX() + 5), 
+                                 (int)(button.getPositionY() + button.getHeight() + 20), 
+                                 contentDescription);
+            
+            // Restore previous drawing state
+            renderManager.restore();
+        }
     }
 
     @Override

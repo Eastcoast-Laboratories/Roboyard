@@ -158,15 +158,28 @@ public class GameButtonGotoSavedGame extends GameButtonGoto {
      */
     public void setSaveMode(boolean saveMode) {
         isSaveMode = saveMode;
+        setDefaultContentDescription(); // Update content description when mode changes
         // Make sure we update the activity reference when changing modes
         if (saveGameScreen != null && saveGameScreen.getGameManager() != null) {
             activity = saveGameScreen.getGameManager().getActivity();
         }
     }
 
+    /**
+     * Set default content description based on save mode
+     */
+    private void setDefaultContentDescription() {
+        if (isSaveMode) {
+            setContentDescription("Save game to slot " + (buttonNumber + 1));
+        } else {
+            setContentDescription("Load saved game from slot " + (buttonNumber + 1));
+        }
+    }
+
     @Override
     public void create() {
         super.create();
+        setDefaultContentDescription();
         // Check if save file exists and create minimap if it does
         if (activity == null && context instanceof Activity) {
             activity = (Activity)context;

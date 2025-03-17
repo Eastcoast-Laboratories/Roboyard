@@ -29,6 +29,8 @@ public class GameButtonShareMap extends GameButton {
     @Override
     public void create() {
         super.create();
+        // Set content description for accessibility
+        setContentDescription("Share saved game");
     }
 
     @Override

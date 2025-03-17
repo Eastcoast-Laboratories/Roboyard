@@ -68,6 +68,7 @@ public class SettingsGameScreen extends GameScreen {
         // Board size dropdown
         int boardSizeY = layout.y(50);
         boardSizeDropdown = new GameDropdown(x3, boardSizeY, buttonWidth * 2, layout.y(posY));
+        boardSizeDropdown.setAccessibleContentDescription(gameManager.getActivity(), "Board size selection dropdown");
 
         // Define available board sizes
         int[][] boardSizes = {
@@ -117,9 +118,12 @@ public class SettingsGameScreen extends GameScreen {
         buttonBeginner = new GameButtonGeneral(
             x1, difficultyY, buttonWidth, buttonHeight, 
             R.drawable.bt_up, R.drawable.bt_down, new setBeginnner());
+        buttonBeginner.setAccessibleContentDescription(gameManager.getActivity(), "Set difficulty to Beginner");
+        
         buttonAdvanced = new GameButtonGeneral(
             x2, difficultyY, buttonWidth, buttonHeight, 
             R.drawable.bt_up, R.drawable.bt_down, new setAdvanced());
+        buttonAdvanced.setAccessibleContentDescription(gameManager.getActivity(), "Set difficulty to Advanced");
 
         // Difficulty buttons - second row
         posY += 244;
@@ -127,9 +131,12 @@ public class SettingsGameScreen extends GameScreen {
         buttonInsane = new GameButtonGeneral(
             x1, difficultyRow2Y, buttonWidth, buttonHeight, 
             R.drawable.bt_up, R.drawable.bt_down, new setInsane());
+        buttonInsane.setAccessibleContentDescription(gameManager.getActivity(), "Set difficulty to Insane");
+        
         buttonImpossible = new GameButtonGeneral(
             x2, difficultyRow2Y, buttonWidth, buttonHeight, 
             R.drawable.bt_up, R.drawable.bt_down, new setImpossible());
+        buttonImpossible.setAccessibleContentDescription(gameManager.getActivity(), "Set difficulty to Impossible");
         
         // New Map Each Time buttons
         posY += 353;
@@ -137,9 +144,12 @@ public class SettingsGameScreen extends GameScreen {
         buttonNewMapEachTimeOn = new GameButtonGeneral(
             x1, newMapY, buttonWidth, buttonHeight, 
             R.drawable.bt_up, R.drawable.bt_down, new setNewMapEachTimeOn());
+        buttonNewMapEachTimeOn.setAccessibleContentDescription(gameManager.getActivity(), "Set to generate a new map each game");
+        
         buttonNewMapEachTimeOff = new GameButtonGeneral(
             x2, newMapY, buttonWidth, buttonHeight, 
             R.drawable.bt_up, R.drawable.bt_down, new setNewMapEachTimeOff());
+        buttonNewMapEachTimeOff.setAccessibleContentDescription(gameManager.getActivity(), "Set to use the same map for each new game");
 
         // Sound buttons
         posY += 333;
@@ -155,6 +165,7 @@ public class SettingsGameScreen extends GameScreen {
             R.drawable.bt_sound_on_up,
             R.drawable.bt_sound_on_down,
             new setSoundon());
+        buttonSoundOn.setAccessibleContentDescription(gameManager.getActivity(), "Enable sound");
 
         buttonSoundOff = new GameButtonGeneral(
             layout.x(340),
@@ -164,6 +175,7 @@ public class SettingsGameScreen extends GameScreen {
             R.drawable.bt_sound_off_up,
             R.drawable.bt_sound_off_down,
             new setSoundoff());
+        buttonSoundOff.setAccessibleContentDescription(gameManager.getActivity(), "Disable sound");
 
         // Add Button to set Beginner/Advanced/Insane
         this.instances.add(buttonBeginner);
@@ -177,14 +189,15 @@ public class SettingsGameScreen extends GameScreen {
 
         // Add Button back to main screen
         int backButtonSize = layout.x(222);
-        this.instances.add(new GameButtonGoto(
+        GameButtonGotoBack backButton = new GameButtonGotoBack(
             layout.x(90), 
             layout.y(-255), 
             backButtonSize, 
             backButtonSize, 
             R.drawable.bt_back_up, 
-            R.drawable.bt_back_down, 
-            0));
+            R.drawable.bt_back_down);
+        backButton.setAccessibleContentDescription(gameManager.getActivity(), "Back to main menu");
+        this.instances.add(backButton);
 
     }
 

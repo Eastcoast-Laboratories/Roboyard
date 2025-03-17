@@ -1,11 +1,17 @@
 package roboyard.eclabs;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import timber.log.Timber;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,6 +74,14 @@ public class GameButtonGotoHistoryGame extends GameButton {
     @Override
     public void create() {
         super.create();
+        // Set content description for accessibility
+        String description = "Load game from history: ";
+        if (historyEntry != null && historyEntry.getMapName() != null) {
+            description += historyEntry.getMapName();
+        }
+        description += ", " + getFormattedDate();
+        
+        setContentDescription(description);
         
         // Try to load the minimap immediately if we have an activity
         if (activity != null) {
@@ -288,5 +302,10 @@ public class GameButtonGotoHistoryGame extends GameButton {
     
     public int getHeight() {
         return super.getHeight();
+    }
+    
+    private String getFormattedDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return dateFormat.format(new Date(historyEntry.getTimestamp()));
     }
 }
