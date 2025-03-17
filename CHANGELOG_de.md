@@ -2,6 +2,13 @@ Changelog Deutsch
 =================
 
 
+## Version 20.1 (2025-03-17)
+- Gespeicherte Spiele werden nun sofort im Ladebildschirm als Minimap angezeigt.
+- Performance-Optimierungen: Roboter bewegen sich jetzt schneller.
+- Roboter stoppen ihre Bewegungen mit einem „Feder“-Effekt am Ende.
+- Korrekte Z-Reihenfolge für Wände und Roboter
+
+
 ## Version 20
 - Es gibt jetzt einen Cancel button, wenn die KI länger als 10s an der lösung rechnet
 - Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.

@@ -2,6 +2,13 @@
 =========
 
 
+## Version 20.1 (2025-03-17)
+- Save games are now immediately displayed in the load screen as a minimap.
+- Performance improvements: Robots now move faster.
+- Robots stop with a spring effect at the end of their movement.
+- Correct Z-order for walls and robots
+
+
 ## Version 20 (2025-03-13)
 - add cancel button if AI takes too long for solving after 10s
 - Game history is now automatically saved before opening the save screen.

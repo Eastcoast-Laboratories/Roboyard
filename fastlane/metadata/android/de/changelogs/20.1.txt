@@ -1,0 +1,4 @@
+- Gespeicherte Spiele werden nun sofort im Ladebildschirm als Minimap angezeigt.
+- Performance-Optimierungen: Roboter bewegen sich jetzt schneller.
+- Roboter stoppen ihre Bewegungen mit einem „Feder“-Effekt am Ende.
+- Korrekte Z-Reihenfolge für Wände und Roboter

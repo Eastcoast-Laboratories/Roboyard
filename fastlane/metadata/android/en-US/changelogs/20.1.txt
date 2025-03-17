@@ -1,0 +1,4 @@
+- Save games are now immediately displayed in the load screen as a minimap.
+- Performance improvements: Robots now move faster.
+- Robots stop with a spring effect at the end of their movement.
+- Correct Z-order for walls and robots

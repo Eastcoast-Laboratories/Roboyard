@@ -14,25 +14,19 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
-- Es gibt jetzt einen Cancel button, wenn die KI länger als 10s an der lösung rechnet
-- Spielhistorie wird nun automatisch gespeichert, bevor der Speichern-Bildschirm geöffnet wird.
-- Speicher- und Ladebuttons sind nun getrennt.
-- Der „Speichern“-Button im Spielbildschirm wird immer wieder aktiviert.
-- Ein Lade-Indikator wird nun im Spielfeld angezeigt, wenn die KI rechnet.
-- Option in den Einstellungen, ob jedes mal eine neue Karte generiert wird
-- Sound Effekte für Roboterbewegungen
+- Gespeicherte Spiele werden nun sofort im Ladebildschirm als Minimap angezeigt.
+- Performance-Optimierungen: Roboter bewegen sich jetzt schneller.
+- Roboter stoppen ihre Bewegungen mit einem „Feder“-Effekt am Ende.
+- Korrekte Z-Reihenfolge für Wände und Roboter
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
-- add cancel button if AI takes too long for solving after 10s
-- Game history is now automatically saved before opening the save screen.
-- Save and load buttons are now separate.
-- The "Save" button in the game screen is always reactivated.
-- A loading indicator is now displayed in the game field when the AI is calculating.
-- Settings option to choose if a new map is generated each game
-- Added sound effects for robot movement
+- Save games are now immediately displayed in the load screen as a minimap.
+- Performance improvements: Robots now move faster.
+- Robots stop with a spring effect at the end of their movement.
+- Correct Z-order for walls and robots
 EOF
 )
 
