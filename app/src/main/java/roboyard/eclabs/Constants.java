@@ -1,7 +1,7 @@
 package roboyard.eclabs;
 
 public class Constants {
-    // Screen indices
+    // Screen indices (preserved for compatibility with existing code)
     public static final int SCREEN_START = 0;
     public static final int SCREEN_SETTINGS = 2;
     public static final int SCREEN_CREDITS = 3;
@@ -37,4 +37,41 @@ public class Constants {
 
     // UI elements (highest z-index)
     public static final int UI_ELEMENT = 10000;
+    
+    // Native UI constants
+    public static final String PREFS_NAME = "roboyard_preferences";
+    public static final String PREF_SOUND_ENABLED = "sound_enabled";
+    public static final String PREF_VIBRATION_ENABLED = "vibration_enabled";
+    public static final String PREF_HIGH_CONTRAST = "high_contrast";
+    
+    // Game state cell types
+    public static final int CELL_EMPTY = 0;
+    public static final int CELL_WALL = 1;
+    public static final int CELL_TARGET = 2;
+    
+    // Game difficulty levels
+    public static final int DIFFICULTY_EASY = 0;
+    public static final int DIFFICULTY_NORMAL = 1;
+    public static final int DIFFICULTY_HARD = 2;
+    
+    // Board sizes
+    public static final int BOARD_SIZE_SMALL = 0;
+    public static final int BOARD_SIZE_MEDIUM = 1;
+    public static final int BOARD_SIZE_LARGE = 2;
+    
+    // Color constants
+    public static final int COLOR_RED = 0;
+    public static final int COLOR_GREEN = 1;
+    public static final int COLOR_BLUE = 2;
+    public static final int COLOR_YELLOW = 3;
+    
+    // File and directory paths
+    public static final String SAVE_DIRECTORY = "saves";
+    public static final String AUTO_SAVE_FILENAME = "autosave.dat";
+    public static final String SAVE_FILENAME_PREFIX = "save_";
+    public static final String SAVE_FILENAME_EXTENSION = ".dat";
+    public static final String HISTORY_DIRECTORY = "history";
+    
+    // Accessibility constants
+    public static final long ACCESSIBILITY_FOCUS_DELAY_MS = 500;
 }
