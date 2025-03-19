@@ -2,6 +2,9 @@ package roboyard.eclabs.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 
 import java.io.File;
@@ -16,6 +19,9 @@ import java.util.List;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
+import roboyard.eclabs.GridGameScreen;
+import roboyard.eclabs.MainActivity;
+import roboyard.eclabs.MapGenerator;
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -363,17 +369,15 @@ public class GameState implements Serializable {
     public ArrayList<GridElement> getGridElements() {
         ArrayList<GridElement> elements = new ArrayList<>();
         
-        // Add walls and targets from the board
+        // Add walls
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                // Convert cell type to GridElement type
-                int cellType = board[y][x];
-                String gridElementType;
-                
-                if (cellType == 1) { // Wall
-                    gridElementType = "wall";
-                } else if (cellType == 2) { // Target
-                    int targetColor = targetColors[y][x];
+                if (getCellType(x, y) == Constants.CELL_WALL) {
+                    elements.add(new GridElement(x, y, "wall"));
+                } else if (getCellType(x, y) == Constants.CELL_TARGET) {
+                    String gridElementType;
+                    int targetColor = getTargetColor(x, y);
+                    
                     if (targetColor == 0) {
                         gridElementType = "target_red";
                     } else if (targetColor == 1) {
@@ -383,21 +387,23 @@ public class GameState implements Serializable {
                     } else if (targetColor == 3) {
                         gridElementType = "target_yellow";
                     } else {
-                        gridElementType = "target_multi";
+                        // Fallback
+                        gridElementType = "target_red";
                     }
-                } else { // Empty
-                    gridElementType = "empty";
+                    
+                    elements.add(new GridElement(x, y, gridElementType));
                 }
-                
-                elements.add(new GridElement(x, y, gridElementType));
             }
         }
         
-        // Add robots
+        // Track which robot colors we've already added
+        boolean[] robotColorsAdded = new boolean[4]; // For the 4 standard colors
+        
+        // Add robots from game elements
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
-                int robotColor = element.getColor();
                 String gridElementType;
+                int robotColor = element.getColor();
                 
                 if (robotColor == 0) {
                     gridElementType = "robot_red";
@@ -410,9 +416,46 @@ public class GameState implements Serializable {
                 } else {
                     // Fallback
                     gridElementType = "robot_red";
+                    robotColor = 0;
                 }
                 
                 elements.add(new GridElement(element.getX(), element.getY(), gridElementType));
+                robotColorsAdded[robotColor] = true;
+            }
+        }
+        
+        // The solver requires exactly 4 robots - add placeholder robots for any missing colors
+        // These will be placed in the corners where they won't interfere with gameplay
+        int[] cornerX = {1, width-2, 1, width-2};
+        int[] cornerY = {1, 1, height-2, height-2};
+        int cornerIndex = 0;
+        
+        for (int color = 0; color < 4; color++) {
+            if (!robotColorsAdded[color]) {
+                // Add a placeholder robot off-screen (the solver needs exactly 4 robots)
+                String gridElementType;
+                switch(color) {
+                    case 0: gridElementType = "robot_red"; break;
+                    case 1: gridElementType = "robot_green"; break;
+                    case 2: gridElementType = "robot_blue"; break;
+                    case 3: gridElementType = "robot_yellow"; break;
+                    default: gridElementType = "robot_red"; break;
+                }
+                
+                // Find an unoccupied corner to place the placeholder robot
+                int rx = cornerX[cornerIndex];
+                int ry = cornerY[cornerIndex];
+                cornerIndex = (cornerIndex + 1) % 4;
+                
+                // Make sure the spot is empty
+                while (getCellType(rx, ry) != Constants.CELL_EMPTY || getRobotAt(rx, ry) != null) {
+                    rx = (rx + 1) % (width - 2) + 1; // Keep within bounds, avoiding edges
+                    ry = (ry + 1) % (height - 2) + 1;
+                }
+                
+                // Add the placeholder robot to GridElements but not to gameElements
+                // This ensures the solver works but doesn't affect gameplay
+                elements.add(new GridElement(rx, ry, gridElementType));
             }
         }
         
@@ -491,7 +534,10 @@ public class GameState implements Serializable {
      * Create a random game state
      */
     public static GameState createRandom(int boardSize, int difficulty) {
-        // Determine board dimensions based on size
+        // Set the global difficulty level first so MapGenerator knows which difficulty to use
+        GridGameScreen.setDifficulty(difficultyIntToString(difficulty));
+        
+        // Determine board dimensions based on boardSize
         int width, height;
         switch (boardSize) {
             case 0: // Small
@@ -507,49 +553,57 @@ public class GameState implements Serializable {
                 width = height = 14; // Default to medium
         }
         
+        // Temporarily save the current board size
+        int oldWidth = MainActivity.boardSizeX;
+        int oldHeight = MainActivity.boardSizeY;
+        
+        // Set board dimensions for MapGenerator
+        MainActivity.boardSizeX = width;
+        MainActivity.boardSizeY = height;
+        
         // Create new game state
         GameState state = new GameState(width, height);
         
-        // Add walls around the edges
-        for (int x = 0; x < width; x++) {
-            state.addWall(x, 0);
-            state.addWall(x, height - 1);
-        }
-        for (int y = 0; y < height; y++) {
-            state.addWall(0, y);
-            state.addWall(width - 1, y);
-        }
-        
-        // Add internal walls based on difficulty
-        int numWalls = difficulty * 10; // Easy=10, Medium=20, Hard=30
-        for (int i = 0; i < numWalls; i++) {
-            int x = 1 + (int) (Math.random() * (width - 2));
-            int y = 1 + (int) (Math.random() * (height - 2));
-            state.addWall(x, y);
-        }
-        
-        // Add robots and targets
-        int numRobots = 2 + difficulty; // Easy=3, Medium=4, Hard=5
-        for (int i = 0; i < numRobots; i++) {
-            // Add robot
-            int robotX, robotY;
-            do {
-                robotX = 1 + (int) (Math.random() * (width - 2));
-                robotY = 1 + (int) (Math.random() * (height - 2));
-            } while (state.getCellType(robotX, robotY) != Constants.CELL_EMPTY ||
-                     state.getRobotAt(robotX, robotY) != null);
+        try {
+            // Use the original MapGenerator to generate map elements
+            MapGenerator generator = new MapGenerator();
+            ArrayList<GridElement> gridElements = generator.getGeneratedGameMap();
             
-            state.addRobot(robotX, robotY, i % 4); // Colors: 0=red, 1=green, 2=blue, 3=yellow
-            
-            // Add target
-            int targetX, targetY;
-            do {
-                targetX = 1 + (int) (Math.random() * (width - 2));
-                targetY = 1 + (int) (Math.random() * (height - 2));
-            } while (state.getCellType(targetX, targetY) != Constants.CELL_EMPTY ||
-                     state.getRobotAt(targetX, targetY) != null);
-            
-            state.addTarget(targetX, targetY, i % 4);
+            // Process grid elements to create game state
+            for (GridElement element : gridElements) {
+                String type = element.getType();
+                int x = element.getX();
+                int y = element.getY();
+                
+                // Handle all wall types
+                if (type.equals("mh") || type.equals("mv")) {
+                    // Add horizontal and vertical walls from the MapGenerator
+                    state.addWall(x, y);
+                } else if (type.equals("target_red")) {
+                    state.addTarget(x, y, 0);
+                } else if (type.equals("target_green")) {
+                    state.addTarget(x, y, 1);
+                } else if (type.equals("target_blue")) {
+                    state.addTarget(x, y, 2);
+                } else if (type.equals("target_yellow")) {
+                    state.addTarget(x, y, 3);
+                } else if (type.equals("target_multi")) {
+                    // Multi-color target - we'll use red as default
+                    state.addTarget(x, y, 0);
+                } else if (type.equals("robot_red")) {
+                    state.addRobot(x, y, 0);
+                } else if (type.equals("robot_green")) {
+                    state.addRobot(x, y, 1);
+                } else if (type.equals("robot_blue")) {
+                    state.addRobot(x, y, 2);
+                } else if (type.equals("robot_yellow")) {
+                    state.addRobot(x, y, 3);
+                }
+            }
+        } finally {
+            // Restore original board size
+            MainActivity.boardSizeX = oldWidth;
+            MainActivity.boardSizeY = oldHeight;
         }
         
         state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
@@ -568,5 +622,18 @@ public class GameState implements Serializable {
         state.setLevelId(levelId);
         state.setLevelName("Level " + levelId);
         return state;
+    }
+    
+    /**
+     * Converts difficulty integer to string for the original GridGameScreen class
+     */
+    private static String difficultyIntToString(int difficulty) {
+        switch (difficulty) {
+            case 0: return "Beginner";
+            case 1: return "Advanced";
+            case 2: return "Insane";
+            case 3: return "Impossible";
+            default: return "Beginner";
+        }
     }
 }

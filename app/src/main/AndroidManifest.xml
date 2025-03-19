@@ -5,11 +5,11 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+        android:theme="@style/Theme.AppCompat.NoActionBar"
         android:largeHeap="true"
         android:allowClearUserData="true">
 
-        <activity android:name="roboyard.eclabs.MainActivity"
+        <activity android:name="roboyard.eclabs.ui.MainActivity"
             android:label="@string/app_name"
             android:exported="true">
             <intent-filter>

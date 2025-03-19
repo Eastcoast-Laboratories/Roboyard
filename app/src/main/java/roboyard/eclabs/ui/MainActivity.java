@@ -22,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        // Migrate preferences from old implementation to new
+        PreferencesMigrator.migratePreferences(this);
+        
         // Initialize the GameStateManager as a ViewModel
         gameStateManager = new ViewModelProvider(this).get(GameStateManager.class);
         

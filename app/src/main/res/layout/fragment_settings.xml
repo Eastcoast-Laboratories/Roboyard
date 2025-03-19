@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#000000">
 
     <!-- Title -->
     <TextView
@@ -15,62 +16,205 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
+        android:textColor="#ffffff"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Settings container -->
-    <LinearLayout
-        android:id="@+id/settings_container"
+    <ScrollView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="24dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/back_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_text">
 
-        <!-- Sound setting -->
-        <Switch
-            android:id="@+id/sound_enabled_switch"
+        <LinearLayout
+            android:id="@+id/settings_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sound Effects"
-            android:contentDescription="Enable or disable sound effects"
-            android:padding="16dp"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
+            android:orientation="vertical"
+            android:padding="8dp">
 
-        <!-- Vibration setting -->
-        <Switch
-            android:id="@+id/vibration_enabled_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Vibration"
-            android:contentDescription="Enable or disable vibration feedback"
-            android:padding="16dp"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
+            <!-- Board Size Section -->
+            <TextView
+                android:id="@+id/board_size_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Board Size:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
 
-        <!-- High contrast setting -->
-        <Switch
-            android:id="@+id/high_contrast_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="High Contrast Mode"
-            android:contentDescription="Enable or disable high contrast mode for better visibility"
-            android:padding="16dp"
-            android:textSize="18sp" />
+            <Spinner
+                android:id="@+id/board_size_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="Select board size"
+                android:minHeight="48dp"
+                android:layout_marginBottom="24dp"
+                android:focusable="true"
+                android:clickable="true" />
 
-    </LinearLayout>
+            <!-- Difficulty Section -->
+            <TextView
+                android:id="@+id/difficulty_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Difficulty:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/difficulty_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/difficulty_beginner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Beginner"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Beginner difficulty" />
+
+                <RadioButton
+                    android:id="@+id/difficulty_advanced"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Advanced"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Advanced difficulty" />
+
+                <RadioButton
+                    android:id="@+id/difficulty_insane"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Insane"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Insane difficulty" />
+
+                <RadioButton
+                    android:id="@+id/difficulty_impossible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Impossible"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Impossible difficulty" />
+            </RadioGroup>
+
+            <!-- New Map Section -->
+            <TextView
+                android:id="@+id/new_map_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="New Map Each Time:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/new_map_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/new_map_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yes"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Generate new map each time" />
+
+                <RadioButton
+                    android:id="@+id/new_map_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Don't generate new map each time" />
+            </RadioGroup>
+
+            <!-- Sound Section -->
+            <TextView
+                android:id="@+id/sound_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sound:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/sound_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/sound_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="On"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Turn sound on" />
+
+                <RadioButton
+                    android:id="@+id/sound_off"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Off"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Turn sound off" />
+            </RadioGroup>
+        </LinearLayout>
+    </ScrollView>
 
     <!-- Back button -->
     <Button
         android:id="@+id/back_button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Back"
-        android:contentDescription="Return to the previous screen"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:focusable="true"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,14 +5,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+
+import roboyard.eclabs.R;
 
 /**
  * Custom View that renders the game board grid and handles touch interactions.
@@ -34,6 +38,21 @@ public class GameGridView extends View {
     // For accessibility - track the focused cell
     private int focusedX = -1;
     private int focusedY = -1;
+    
+    // Robot drawables for each color
+    private Drawable redRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight;
+    private Drawable redRobotLeft, yellowRobotLeft, blueRobotLeft, greenRobotLeft;
+    
+    // Wall drawables
+    private Drawable wallHorizontal;
+    private Drawable wallVertical;
+    
+    // Target drawables for each color
+    private Drawable targetRedDrawable;     // cr
+    private Drawable targetGreenDrawable;   // cv
+    private Drawable targetBlueDrawable;    // cb
+    private Drawable targetYellowDrawable;  // cj
+    private Drawable targetMultiDrawable;   // cm
     
     /**
      * Constructor for programmatic creation
@@ -80,6 +99,31 @@ public class GameGridView extends View {
         gridPaint = new Paint();
         gridPaint.setStyle(Paint.Style.STROKE);
         gridPaint.setColor(Color.rgb(40, 40, 70));
+        
+        // Load robot drawables
+        Context context = getContext();
+        redRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_red_right);
+        redRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_red_left);
+        
+        yellowRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_yellow_right);
+        yellowRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_yellow_left);
+        
+        blueRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_blue_right);
+        blueRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_blue_left);
+        
+        greenRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_green_right);
+        greenRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_green_left);
+        
+        // Load wall drawables
+        wallHorizontal = ContextCompat.getDrawable(context, R.drawable.mh);
+        wallVertical = ContextCompat.getDrawable(context, R.drawable.mv);
+        
+        // Load target drawables
+        targetRedDrawable = ContextCompat.getDrawable(context, R.drawable.cr);
+        targetGreenDrawable = ContextCompat.getDrawable(context, R.drawable.cv);
+        targetBlueDrawable = ContextCompat.getDrawable(context, R.drawable.cb);
+        targetYellowDrawable = ContextCompat.getDrawable(context, R.drawable.cj);
+        targetMultiDrawable = ContextCompat.getDrawable(context, R.drawable.cm);
         
         // Set up accessibility support
         setFocusable(true);
@@ -135,6 +179,55 @@ public class GameGridView extends View {
         setMeasuredDimension(newWidth, newHeight);
     }
     
+    /**
+     * Determine if a wall at the given position is horizontal or vertical
+     * @param state Current game state
+     * @param x Wall X position
+     * @param y Wall Y position
+     * @return true if horizontal wall, false if vertical wall
+     */
+    private boolean isHorizontalWall(GameState state, int x, int y) {
+        // Check cells to the left and right
+        boolean hasLeftWall = (x > 0) && (state.getCellType(x-1, y) == 1);
+        boolean hasRightWall = (x < gridWidth-1) && (state.getCellType(x+1, y) == 1);
+        
+        // If has walls on either side, it's likely horizontal
+        if (hasLeftWall || hasRightWall) {
+            return true;
+        }
+        
+        // Otherwise check top and bottom
+        boolean hasTopWall = (y > 0) && (state.getCellType(x, y-1) == 1);
+        boolean hasBottomWall = (y < gridHeight-1) && (state.getCellType(x, y+1) == 1);
+        
+        // If has vertical neighbors, it's likely vertical
+        if (hasTopWall || hasBottomWall) {
+            return false;
+        }
+        
+        // Default to horizontal for isolated walls
+        return true;
+    }
+    
+    /**
+     * Get the appropriate target drawable based on target color
+     * @param targetElement The target game element
+     * @return The drawable to use for this target
+     */
+    private Drawable getTargetDrawable(GameElement targetElement) {
+        if (targetElement == null) {
+            return targetMultiDrawable; // Default to multi-colored target
+        }
+        
+        switch (targetElement.getColor()) {
+            case 0: return targetRedDrawable;
+            case 1: return targetGreenDrawable;
+            case 2: return targetBlueDrawable;
+            case 3: return targetYellowDrawable;
+            default: return targetMultiDrawable;
+        }
+    }
+    
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -158,54 +251,116 @@ public class GameGridView extends View {
                 // Set color based on cell type
                 int cellType = state.getCellType(x, y);
                 if (cellType == 1) { // Wall
-                    cellPaint.setColor(Color.DKGRAY);
+                    Drawable wallDrawable;
+                    if (isHorizontalWall(state, x, y)) {
+                        wallDrawable = wallHorizontal;
+                    } else {
+                        wallDrawable = wallVertical;
+                    }
+                    
+                    if (wallDrawable != null) {
+                        // Draw wall using drawable
+                        wallDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                        wallDrawable.draw(canvas);
+                    } else {
+                        // Fallback to color
+                        cellPaint.setColor(Color.DKGRAY);
+                        canvas.drawRect(left, top, right, bottom, cellPaint);
+                    }
                 } else if (cellType == 2) { // Target
-                    cellPaint.setColor(Color.rgb(60, 60, 90));
+                    // Find the target element for this position to determine color
+                    GameElement targetElement = null;
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_TARGET && 
+                            element.getX() == x && element.getY() == y) {
+                            targetElement = element;
+                            break;
+                        }
+                    }
+                    
+                    Drawable targetDrawable = getTargetDrawable(targetElement);
+                    if (targetDrawable != null) {
+                        // Draw target using drawable
+                        targetDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                        targetDrawable.draw(canvas);
+                    } else {
+                        // Fallback to color
+                        cellPaint.setColor(Color.rgb(60, 60, 90));
+                        canvas.drawRect(left, top, right, bottom, cellPaint);
+                    }
                 } else { // Empty
                     cellPaint.setColor(Color.rgb(30, 30, 60));
+                    canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
                 
                 // Highlight focused cell for accessibility
                 if (x == focusedX && y == focusedY) {
                     cellPaint.setColor(Color.rgb(80, 80, 120));
+                    canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
-                
-                canvas.drawRect(left, top, right, bottom, cellPaint);
                 
                 // Draw grid lines
                 gridPaint.setColor(Color.rgb(40, 40, 70));
-                gridPaint.setStyle(Paint.Style.STROKE);
                 canvas.drawRect(left, top, right, bottom, gridPaint);
-                gridPaint.setStyle(Paint.Style.FILL);
             }
         }
         
         // Draw robots
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
-                float centerX = (element.getX() + 0.5f) * cellSize;
-                float centerY = (element.getY() + 0.5f) * cellSize;
-                float radius = cellSize * 0.4f;
+                float left = element.getX() * cellSize;
+                float top = element.getY() * cellSize;
+                float right = left + cellSize;
+                float bottom = top + cellSize;
                 
-                // Set color based on robot color
+                // Select appropriate robot drawable based on color
+                Drawable robotDrawable = null;
+                
                 switch (element.getColor()) {
-                    case 0: robotPaint.setColor(Color.RED); break;
-                    case 1: robotPaint.setColor(Color.GREEN); break;
-                    case 2: robotPaint.setColor(Color.BLUE); break;
-                    case 3: robotPaint.setColor(Color.YELLOW); break;
-                    default: robotPaint.setColor(Color.MAGENTA); break;
+                    case 0: // RED
+                        robotDrawable = redRobotRight;
+                        break;
+                    case 1: // GREEN
+                        robotDrawable = greenRobotRight;
+                        break;
+                    case 2: // BLUE
+                        robotDrawable = blueRobotRight;
+                        break;
+                    case 3: // YELLOW
+                        robotDrawable = yellowRobotRight;
+                        break;
                 }
                 
                 // Highlight selected robot
                 if (element.isSelected() || (state.getSelectedRobot() == element)) {
-                    // Create a white circle behind the robot to highlight it
+                    // Create a white rectangle behind the robot to highlight it
                     Paint highlightPaint = new Paint();
                     highlightPaint.setColor(Color.WHITE);
-                    highlightPaint.setStyle(Paint.Style.FILL);
-                    canvas.drawCircle(centerX, centerY, radius + 4, highlightPaint);
+                    highlightPaint.setStyle(Paint.Style.STROKE);
+                    highlightPaint.setStrokeWidth(4);
+                    canvas.drawRect(left, top, right, bottom, highlightPaint);
                 }
                 
-                canvas.drawCircle(centerX, centerY, radius, robotPaint);
+                // Draw the robot using the drawable
+                if (robotDrawable != null) {
+                    robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                    robotDrawable.draw(canvas);
+                } else {
+                    // Fallback to circle if drawable not available
+                    float centerX = (element.getX() + 0.5f) * cellSize;
+                    float centerY = (element.getY() + 0.5f) * cellSize;
+                    float radius = cellSize * 0.4f;
+                    
+                    switch (element.getColor()) {
+                        case 0: robotPaint.setColor(Color.RED); break;
+                        case 1: robotPaint.setColor(Color.GREEN); break;
+                        case 2: robotPaint.setColor(Color.BLUE); break;
+                        case 3: robotPaint.setColor(Color.YELLOW); break;
+                        default: robotPaint.setColor(Color.MAGENTA); break;
+                    }
+                    
+                    canvas.drawCircle(centerX, centerY, radius, robotPaint);
+                }
             }
         }
     }

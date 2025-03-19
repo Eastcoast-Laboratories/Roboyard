@@ -225,6 +225,14 @@ public class GridGameScreen extends GameScreen {
         GridGameScreen.currentMap = data;
     }
 
+    public static void setNewMapEachTime(boolean generateNewMap) {
+        // Since our SettingsFragment is in a different package and can't directly access
+        // MapGenerator.generateNewMapEachTime, this method provides a way to set it
+        // from the same package
+        Timber.d("Setting generateNewMapEachTime to: %s", generateNewMap);
+        MapGenerator.generateNewMapEachTime = generateNewMap;
+    }
+
     @Override
     public void create() {
         Timber.d("GridGameScreen.create()");
