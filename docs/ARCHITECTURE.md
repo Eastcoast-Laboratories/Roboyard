@@ -21,7 +21,7 @@ Screens are managed through a screen ID system defined in `Constants.java`:
 - Credits (3)
 - Game Screen (4)
 - Level Selection (5-8)
-- Save/Load Screen (9)
+- Save/Load/History Screen (9)
 
 See [screens.md](screens.md) for detailed screen documentation.
 
@@ -170,7 +170,7 @@ app/src/main/
 │   ├── GameManager.java         # Game management
 │   ├── GridGameScreen.java      # Main game screen
 │   ├── Constants.java           # Game constants
-│   ├── SaveGameScreen.java      # Save/load system
+│   ├── SaveGameScreen.java      # Save/load/history system
 │   └── solver/                  # Game solver
 │       ├── GameLevelSolver.java # Solver core
 │       ├── ISolver.java         # Solver interface
@@ -243,7 +243,7 @@ app/src/main/
 - Game logic
 - Movement validation
 - State management
-- Save/load system
+- Save/load/history system
 
 ### Integration Tests
 - Screen transitions

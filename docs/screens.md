@@ -56,8 +56,8 @@ A series of screens organizing levels by difficulty.
 - Save game option
 - Restart and back buttons
 
-### 6. Save/Load Screen (SCREEN_SAVE_GAMES)
-Manage game saves and loads.
+### 6. Save/Load/History Screen (SCREEN_SAVE_GAMES)
+Manage game saves and loads and history of saved games.
 
 **Features:**
 - Autosave slot
@@ -71,7 +71,7 @@ Manage game saves and loads.
 ### Main Navigation
 - Main Menu → Game Screen (in random game Mode)
 - Main Menu → Level Selection Screens
-- Main Menu → Save/Load Screen (in load-mode)
+- Main Menu → Save/Load/History Screen (in load-mode)
 - Main Menu → Credits Screen
 - Main Menu → Settings Screen
 - All screens → Back to Main Menu screen
@@ -82,17 +82,17 @@ Manage game saves and loads.
 - Level Selection → Back to Main Menu
 
 ### Game Navigation
-- Game Screen → Save/Load Screen (in save-mode)
+- Game Screen → Save/Load/History Screen (in save-mode)
 - Game Screen → Main Menu (via system back button)
-- Save/Load Screen → Game Screen (when loading)
-- Save/Load Screen → Previous Screen (when saving)
+- Save/Load/History Screen → Game Screen (when loading)
+- Save/Load/History Screen → Previous Screen (when saving)
 
 ### Mode-Specific Behavior
 - When Accessed via Game Screen:
-  - Save/Load Screen shows "Select slot to save map"
+  - Save/Load/History Screen shows "Select slot to save map"
   - Save-mode functionality enabled
 - When accessed via Main Menu:
-  - Save/Load Screen shows "Load map"
+  - Save/Load/History Screen shows "Load map"
   - Load-mode functionality enabled
 
 ## Screen Constants
