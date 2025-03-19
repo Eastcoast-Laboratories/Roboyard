@@ -49,6 +49,22 @@ public class Constants {
     public static final int CELL_WALL = 1;
     public static final int CELL_TARGET = 2;
     
+    // Game difficulty levels
+    public static final int DIFFICULTY_EASY = 0;
+    public static final int DIFFICULTY_NORMAL = 1;
+    public static final int DIFFICULTY_HARD = 2;
+    
+    // Board sizes
+    public static final int BOARD_SIZE_SMALL = 0;
+    public static final int BOARD_SIZE_MEDIUM = 1;
+    public static final int BOARD_SIZE_LARGE = 2;
+    
+    // Color constants
+    public static final int COLOR_RED = 0;
+    public static final int COLOR_GREEN = 1;
+    public static final int COLOR_BLUE = 2;
+    public static final int COLOR_YELLOW = 3;
+    
     // File and directory paths
     public static final String SAVE_DIRECTORY = "saves";
     public static final String AUTO_SAVE_FILENAME = "autosave.dat";

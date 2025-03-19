@@ -2,6 +2,8 @@ package roboyard.eclabs.ui;
 
 import android.app.Application;
 import android.content.Context;
+import android.view.MotionEvent;
+
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

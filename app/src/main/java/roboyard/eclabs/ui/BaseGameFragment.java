@@ -1,8 +1,16 @@
 package roboyard.eclabs.ui;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.widget.Toast;
+
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
 /**
  * Base fragment class for all game screens.
@@ -20,27 +28,28 @@ public abstract class BaseGameFragment extends Fragment {
     }
     
     /**
+     * Navigate to another screen using NavDirections
+     * @param directions NavDirections object containing navigation information
+     */
+    protected void navigateTo(NavDirections directions) {
+        Navigation.findNavController(requireView()).navigate(directions);
+    }
+    
+    /**
+     * Navigate to another screen using a navigation action resource ID
+     * This provides an alternative to NavDirections for simpler navigation needs
+     * @param actionId Resource ID of the navigation action
+     */
+    protected void navigateTo(@IdRes int actionId) {
+        Navigation.findNavController(requireView()).navigate(actionId);
+    }
+    
+    /**
      * Shows a toast message
      * @param message Message to display
      */
     protected void showToast(String message) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-    }
-    
-    /**
-     * Navigate to another screen using the Navigation component
-     * @param actionId The navigation action ID from the nav graph
-     */
-    protected void navigateTo(int actionId) {
-        Navigation.findNavController(requireView()).navigate(actionId);
-    }
-    
-    /**
-     * Navigate to another screen with arguments
-     * @param directions NavDirections object with destination and arguments
-     */
-    protected void navigateTo(NavDirections directions) {
-        Navigation.findNavController(requireView()).navigate(directions);
     }
     
     /**

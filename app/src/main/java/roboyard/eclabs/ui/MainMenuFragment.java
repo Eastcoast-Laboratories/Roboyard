@@ -1,5 +1,6 @@
 package roboyard.eclabs.ui;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.navigation.Navigation;
 
 import roboyard.eclabs.R;
 
@@ -50,47 +52,44 @@ public class MainMenuFragment extends BaseGameFragment {
             gameStateManager.startNewGame();
             
             // Navigate to game screen
-            NavDirections action = MainMenuFragmentDirections.actionMainMenuToGamePlay();
-            navigateTo(action);
+            navigateTo(R.id.actionMainMenuToGamePlay);
         });
         
         // Load Game button - go to save game screen in load mode
         loadGameButton.setOnClickListener(v -> {
-            // Navigate to save screen in load mode
-            NavDirections action = MainMenuFragmentDirections.actionMainMenuToSaveGame(false);
-            navigateTo(action);
+            // Navigate to save screen in load mode using action ID instead of NavDirections
+            // to avoid the boolean parameter issue
+            navigateTo(R.id.actionMainMenuToSaveGame);
         });
         
         // Settings button - go to settings screen
         settingsButton.setOnClickListener(v -> {
             // Navigate to settings screen
-            NavDirections action = MainMenuFragmentDirections.actionMainMenuToSettings();
-            navigateTo(action);
+            navigateTo(R.id.actionMainMenuToSettings);
         });
         
         // Help button - go to help screen
         helpButton.setOnClickListener(v -> {
             // Navigate to help screen
-            NavDirections action = MainMenuFragmentDirections.actionMainMenuToHelp();
-            navigateTo(action);
+            navigateTo(R.id.actionMainMenuToHelp);
         });
         
         // Exit button - exit the app
         exitButton.setOnClickListener(v -> {
             // Show confirmation dialog
             new AlertDialog.Builder(requireContext())
-                .setTitle("Exit Game")
-                .setMessage("Are you sure you want to exit the game?")
-                .setPositiveButton("Yes", (dialog, which) -> {
+                .setTitle(R.string.exit_confirm_title)
+                .setMessage(R.string.exit_confirm_message)
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     requireActivity().finish();
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton(android.R.string.no, null)
                 .show();
         });
     }
     
     @Override
     public String getScreenTitle() {
-        return "Main Menu";
+        return getString(R.string.main_menu_title);
     }
 }
