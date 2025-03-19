@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Settings container -->
+    <LinearLayout
+        android:id="@+id/settings_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_text">
+
+        <!-- Sound setting -->
+        <Switch
+            android:id="@+id/sound_enabled_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sound Effects"
+            android:contentDescription="Enable or disable sound effects"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Vibration setting -->
+        <Switch
+            android:id="@+id/vibration_enabled_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vibration"
+            android:contentDescription="Enable or disable vibration feedback"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- High contrast setting -->
+        <Switch
+            android:id="@+id/high_contrast_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="High Contrast Mode"
+            android:contentDescription="Enable or disable high contrast mode for better visibility"
+            android:padding="16dp"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <!-- Back button -->
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:contentDescription="Return to the previous screen"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
