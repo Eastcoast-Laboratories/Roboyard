@@ -38,6 +38,7 @@ public class GameState implements Serializable {
     private String levelName;
     private long startTime;
     private int moveCount;
+    private boolean completed = false;
     
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
@@ -267,6 +268,8 @@ public class GameState implements Serializable {
             }
         }
         
+        // Mark the game as completed
+        completed = true;
         return true;
     }
     
@@ -320,6 +323,22 @@ public class GameState implements Serializable {
     }
     
     /**
+     * Check if the game is completed
+     * @return true if all targets have robots of matching colors on them
+     */
+    public boolean isComplete() {
+        return completed;
+    }
+    
+    /**
+     * Set the completed status
+     * @param completed New completion status
+     */
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+    
+    /**
      * Generate a minimap of the game state
      * This addresses the minimap issue mentioned in the memory
      */
@@ -333,6 +352,23 @@ public class GameState implements Serializable {
      */
     public int[][] getMapData() {
         return board;
+    }
+    
+    /**
+     * Convert the map data to a list of grid elements for backward compatibility
+     * @return List of grid elements
+     */
+    public ArrayList<GridElement> getGridElements() {
+        ArrayList<GridElement> elements = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int cellType = board[y][x];
+                if (cellType != Constants.CELL_EMPTY) {
+                    elements.add(new GridElement(x, y, cellType));
+                }
+            }
+        }
+        return elements;
     }
     
     /**

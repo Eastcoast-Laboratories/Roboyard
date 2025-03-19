@@ -24,6 +24,7 @@ public class GameGridView extends View {
     private Paint robotPaint;
     private Paint targetPaint;
     private Paint textPaint;
+    private Paint gridPaint;
     private float cellSize;
     
     // Grid dimensions
@@ -75,6 +76,10 @@ public class GameGridView extends View {
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
         textPaint.setTextAlign(Paint.Align.CENTER);
+        
+        gridPaint = new Paint();
+        gridPaint.setStyle(Paint.Style.STROKE);
+        gridPaint.setColor(Color.rgb(40, 40, 70));
         
         // Set up accessibility support
         setFocusable(true);
@@ -165,13 +170,13 @@ public class GameGridView extends View {
                     cellPaint.setColor(Color.rgb(80, 80, 120));
                 }
                 
-                canvas.drawRect(left, top, right, bottom, paint);
+                canvas.drawRect(left, top, right, bottom, cellPaint);
                 
                 // Draw grid lines
-                paint.setColor(Color.rgb(40, 40, 70));
-                paint.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(left, top, right, bottom, paint);
-                paint.setStyle(Paint.Style.FILL);
+                gridPaint.setColor(Color.rgb(40, 40, 70));
+                gridPaint.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(left, top, right, bottom, gridPaint);
+                gridPaint.setStyle(Paint.Style.FILL);
             }
         }
         
@@ -193,7 +198,11 @@ public class GameGridView extends View {
                 
                 // Highlight selected robot
                 if (element.isSelected() || (state.getSelectedRobot() == element)) {
-                    canvas.drawCircle(centerX, centerY, radius + 4, Color.WHITE);
+                    // Create a white circle behind the robot to highlight it
+                    Paint highlightPaint = new Paint();
+                    highlightPaint.setColor(Color.WHITE);
+                    highlightPaint.setStyle(Paint.Style.FILL);
+                    canvas.drawCircle(centerX, centerY, radius + 4, highlightPaint);
                 }
                 
                 canvas.drawCircle(centerX, centerY, radius, robotPaint);
