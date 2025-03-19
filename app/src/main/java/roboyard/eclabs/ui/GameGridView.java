@@ -254,13 +254,13 @@ public class GameGridView extends View {
                     // Try to move the robot
                     boolean moved = state.moveRobotTo(selectedRobot, gridX, gridY);
                     if (moved) {
-                        // Update move count
-                        int newMoveCount = gameStateManager.getMoveCount().getValue() + 1;
-                        gameStateManager.getMoveCount().setValue(newMoveCount);
+                        // Update move count using proper method
+                        gameStateManager.incrementMoveCount();
+                        int newMoveCount = gameStateManager.getMoveCount().getValue();
                         
                         // Check if game is complete
                         if (state.checkCompletion()) {
-                            gameStateManager.getIsGameComplete().setValue(true);
+                            gameStateManager.setGameComplete(true);
                             announceForAccessibility("Goal reached! Game complete in " + newMoveCount + " moves");
                         } else {
                             announceForAccessibility(getRobotDescription(selectedRobot) + " moved");

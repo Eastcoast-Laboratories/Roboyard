@@ -1,12 +1,9 @@
 package roboyard.eclabs;
 
-import java.io.Serializable;
-
 /**
  * Represents an element in a grid.
  */
-public class GridElement implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class GridElement {
 
     /** The x-coordinate of the grid element. */
     private int x;
@@ -14,8 +11,8 @@ public class GridElement implements Serializable {
     /** The y-coordinate of the grid element. */
     private int y;
 
-    /** The type of the grid element (0=empty, 1=wall, 2=target). */
-    private int type;
+    /** The type of the grid element. */
+    private String type;
 
     /**
      * Constructs a grid element with the specified coordinates and type.
@@ -24,7 +21,7 @@ public class GridElement implements Serializable {
      * @param y The y-coordinate of the grid element.
      * @param objectType The type of the grid element.
      */
-    public GridElement(int x, int y, int objectType) {
+    public GridElement(int x, int y, String objectType) {
         this.setX(x);
         this.setY(y);
         this.setType(objectType);
@@ -69,18 +66,18 @@ public class GridElement implements Serializable {
     /**
      * Gets the type of the grid element.
      *
-     * @return The type of the grid element (0=empty, 1=wall, 2=target).
+     * @return The type of the grid element.
      */
-    public int getType() {
+    public String getType() {
         return this.type;
     }
 
     /**
      * Sets the type of the grid element.
      *
-     * @param objectType The type to set (0=empty, 1=wall, 2=target).
+     * @param objectType The type to set.
      */
-    public void setType(int objectType) {
+    public void setType(String objectType) {
         this.type = objectType;
     }
 }

@@ -6,12 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Observer;
+import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.R;
+import roboyard.pm.ia.IGameMove;
 
 /**
  * Main game play screen implementing proper accessibility support.
@@ -68,43 +73,33 @@ public class GamePlayFragment extends BaseGameFragment {
     private void setupButtons() {
         // Hint button - show next move
         hintButton.setOnClickListener(v -> {
-            GameMove hint = gameStateManager.getHint();
-            if (hint != null) {
+            IGameMove hintIMove = gameStateManager.getHint();
+            if (hintIMove != null && hintIMove instanceof GameMove) {
+                GameMove hint = (GameMove) hintIMove;
                 // Highlight the suggested move somehow
-                showToast("Move " + hint.getRobotColorName() + " robot to row " + hint.getToY() + ", column " + hint.getToX());
+                showToast("Move " + hint.getRobotColorName() + " robot to row " + 
+                         hint.getToY() + ", column " + hint.getToX());
             } else {
                 showToast("No hint available");
             }
         });
         
-        // Reset button - restart the current game
+        // Reset button - reset the current level
         resetButton.setOnClickListener(v -> {
-            GameState currentState = gameStateManager.getCurrentState().getValue();
-            if (currentState != null) {
-                int levelId = currentState.getLevelId();
-                if (levelId >= 0) {
-                    // Reset level game
-                    gameStateManager.loadLevel(levelId);
-                } else {
-                    // Reset random game
-                    gameStateManager.startNewGame();
-                }
-                showToast("Game reset");
-            }
+            // Reset current level
+            gameStateManager.loadLevel(gameStateManager.getCurrentState().getValue().getLevelId());
         });
         
-        // Save button - go to save game screen
+        // Save button - go to save screen
         saveButton.setOnClickListener(v -> {
-            // Use Navigation component to navigate to save screen in save mode
-            NavDirections action = GamePlayFragmentDirections.actionGamePlayToSaveGame(true);
-            navigateTo(action);
+            // Navigate to save screen
+            Navigation.findNavController(requireView()).navigate(R.id.saveGameFragment);
         });
         
-        // Menu button - return to main menu
+        // Menu button - go back to main menu
         menuButton.setOnClickListener(v -> {
-            // Use Navigation component to navigate to main menu
-            NavDirections action = GamePlayFragmentDirections.actionGamePlayToMainMenu();
-            navigateTo(action);
+            // Navigate to main menu
+            Navigation.findNavController(requireView()).navigate(R.id.mainMenuFragment);
         });
     }
     
@@ -142,28 +137,36 @@ public class GamePlayFragment extends BaseGameFragment {
      * Show dialog when game is complete
      */
     private void showGameCompleteDialog(int moveCount) {
-        // Create AlertDialog for game completion
         new AlertDialog.Builder(requireContext())
-            .setTitle("Puzzle Complete!")
-            .setMessage("You solved the puzzle in " + moveCount + " moves!")
-            .setPositiveButton("Back to Menu", (dialog, which) -> {
-                NavDirections action = GamePlayFragmentDirections.actionGamePlayToMainMenu();
-                navigateTo(action);
+            .setTitle("Level Complete!")
+            .setMessage("You completed the level in " + moveCount + " moves.")
+            .setPositiveButton("Main Menu", (dialog, which) -> {
+                // Navigate to main menu
+                Navigation.findNavController(requireView()).navigate(R.id.mainMenuFragment);
             })
             .setNegativeButton("Play Again", (dialog, which) -> {
-                GameState state = gameStateManager.getCurrentState().getValue();
-                if (state != null && state.getLevelId() >= 0) {
-                    gameStateManager.loadLevel(state.getLevelId());
-                } else {
-                    gameStateManager.startNewGame();
-                }
+                // Reset level
+                gameStateManager.loadLevel(gameStateManager.getCurrentState().getValue().getLevelId());
             })
-            .setNeutralButton("Save Game", (dialog, which) -> {
-                NavDirections action = GamePlayFragmentDirections.actionGamePlayToSaveGame(true);
-                navigateTo(action);
+            .setNeutralButton("Save", (dialog, which) -> {
+                // Navigate to save screen
+                Navigation.findNavController(requireView()).navigate(R.id.saveGameFragment);
             })
             .setCancelable(false)
             .show();
+    }
+    
+    /**
+     * Get robot color name based on robot ID
+     */
+    private String getRobotColorName(int robotId) {
+        switch (robotId) {
+            case 0: return "Red";
+            case 1: return "Green";
+            case 2: return "Blue";
+            case 3: return "Yellow";
+            default: return "Unknown";
+        }
     }
     
     @Override

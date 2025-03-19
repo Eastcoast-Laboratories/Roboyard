@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.Constants;
+import roboyard.eclabs.GridElement;
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -355,19 +356,66 @@ public class GameState implements Serializable {
     }
     
     /**
-     * Convert the map data to a list of grid elements for backward compatibility
-     * @return List of grid elements
+     * Get a list of GridElements representing the current board state
+     * This is used by the solver to find a solution
+     * @return List of GridElements
      */
     public ArrayList<GridElement> getGridElements() {
         ArrayList<GridElement> elements = new ArrayList<>();
+        
+        // Add walls and targets from the board
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                // Convert cell type to GridElement type
                 int cellType = board[y][x];
-                if (cellType != Constants.CELL_EMPTY) {
-                    elements.add(new GridElement(x, y, cellType));
+                String gridElementType;
+                
+                if (cellType == 1) { // Wall
+                    gridElementType = "wall";
+                } else if (cellType == 2) { // Target
+                    int targetColor = targetColors[y][x];
+                    if (targetColor == 0) {
+                        gridElementType = "target_red";
+                    } else if (targetColor == 1) {
+                        gridElementType = "target_green";
+                    } else if (targetColor == 2) {
+                        gridElementType = "target_blue";
+                    } else if (targetColor == 3) {
+                        gridElementType = "target_yellow";
+                    } else {
+                        gridElementType = "target_multi";
+                    }
+                } else { // Empty
+                    gridElementType = "empty";
                 }
+                
+                elements.add(new GridElement(x, y, gridElementType));
             }
         }
+        
+        // Add robots
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                int robotColor = element.getColor();
+                String gridElementType;
+                
+                if (robotColor == 0) {
+                    gridElementType = "robot_red";
+                } else if (robotColor == 1) {
+                    gridElementType = "robot_green";
+                } else if (robotColor == 2) {
+                    gridElementType = "robot_blue";
+                } else if (robotColor == 3) {
+                    gridElementType = "robot_yellow";
+                } else {
+                    // Fallback
+                    gridElementType = "robot_red";
+                }
+                
+                elements.add(new GridElement(element.getX(), element.getY(), gridElementType));
+            }
+        }
+        
         return elements;
     }
     

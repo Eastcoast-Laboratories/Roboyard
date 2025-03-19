@@ -8,8 +8,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -289,21 +293,20 @@ public class SaveGameFragment extends BaseGameFragment {
                 if (saveMode) {
                     // Save current game to this slot
                     if (gameStateManager.saveGame(saveSlot.getSlotId())) {
-                        showToast("Game saved to slot " + saveSlot.getSlotId());
+                        Toast.makeText(requireContext(), "Game saved to slot " + saveSlot.getSlotId(), Toast.LENGTH_SHORT).show();
                         // Refresh the slot to update minimap
                         refreshSaveSlot(saveSlot.getSlotId());
                     } else {
-                        showToast("Failed to save game");
+                        Toast.makeText(requireContext(), "Failed to save game", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     // Load game from this slot
                     if (saveSlot.getDate() != null) { // Only load if slot has a save
                         gameStateManager.loadGame(saveSlot.getSlotId());
                         // Navigate to game screen
-                        NavDirections action = SaveGameFragmentDirections.actionSaveGameToGamePlay();
-                        navigateTo(action);
+                        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.gamePlayFragment);
                     } else {
-                        showToast("No saved game in this slot");
+                        Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -383,8 +386,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 // Load this history entry
                 gameStateManager.loadHistoryEntry(entry.getId());
                 // Navigate to game screen
-                NavDirections action = SaveGameFragmentDirections.actionSaveGameToGamePlay();
-                navigateTo(action);
+                Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.gamePlayFragment);
             });
         }
         

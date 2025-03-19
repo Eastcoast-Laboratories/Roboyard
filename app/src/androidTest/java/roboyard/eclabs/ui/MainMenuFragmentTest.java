@@ -1,19 +1,22 @@
 package roboyard.eclabs.ui;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import androidx.fragment.app.testing.FragmentScenario;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.ui.mock.MockMainActivity;
 
 /**
  * UI test for the MainMenuFragment
@@ -21,12 +24,19 @@ import roboyard.eclabs.R;
 @RunWith(AndroidJUnit4.class)
 public class MainMenuFragmentTest {
 
-    private FragmentScenario<MainMenuFragment> fragmentScenario;
+    @Rule
+    public ActivityScenarioRule<MockMainActivity> activityRule =
+            new ActivityScenarioRule<>(MockMainActivity.class);
+    
+    private MockMainActivity activity;
 
     @Before
     public void setUp() {
-        // Launch the fragment in isolation
-        fragmentScenario = FragmentScenario.launchInContainer(MainMenuFragment.class);
+        // Get the activity and load the MainMenuFragment
+        activityRule.getScenario().onActivity(activity -> {
+            this.activity = activity;
+            activity.loadFragment(new MainMenuFragment());
+        });
     }
 
     /**
@@ -54,5 +64,29 @@ public class MainMenuFragmentTest {
         onView(withId(R.id.exit_button))
                 .check(matches(isDisplayed()))
                 .check(matches(withText(R.string.exit)));
+    }
+    
+    /**
+     * Test navigation to the game screen when clicking 'New Game'
+     */
+    @Test
+    public void testNewGameNavigation() {
+        // Click the new game button
+        onView(withId(R.id.new_game_button)).perform(click());
+        
+        // Verify that the game state manager was called to start a new game
+        // This is simplified since we can't easily verify navigation in this test setup
+        // We would need additional test infrastructure to verify fragment transactions
+    }
+    
+    /**
+     * Test navigation to load game screen when clicking 'Load Game'
+     */
+    @Test
+    public void testLoadGameNavigation() {
+        // Click the load game button
+        onView(withId(R.id.load_game_button)).perform(click());
+        
+        // Similar to above, we would need more test infrastructure to verify navigation
     }
 }

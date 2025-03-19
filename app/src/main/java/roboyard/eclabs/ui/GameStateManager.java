@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.Constants;
+import roboyard.eclabs.GridElement;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
+import roboyard.pm.ia.GameSolution;
+import roboyard.pm.ia.IGameMove;
 
 /**
  * Central state manager for the game.
@@ -45,14 +48,14 @@ public class GameStateManager extends AndroidViewModel {
      * Start a new random game
      */
     public void startNewGame() {
-        // Create a new random game state
         GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
         
-        // Initialize solver with new state
-        solver.init(newState.getMapData());
+        // Initialize the solver with grid elements
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        solver.init(gridElements);
     }
     
     /**
@@ -62,12 +65,14 @@ public class GameStateManager extends AndroidViewModel {
     public void loadLevel(int levelId) {
         // Load level from assets
         GameState newState = GameState.loadLevel(getApplication(), levelId);
+        newState.setLevelId(levelId);
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
         
-        // Initialize solver with new state
-        solver.init(newState.getMapData());
+        // Initialize the solver with grid elements
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        solver.init(gridElements);
     }
     
     /**
@@ -75,16 +80,36 @@ public class GameStateManager extends AndroidViewModel {
      * @param saveId Save slot ID
      */
     public void loadGame(int saveId) {
-        // Load game from storage
-        GameState newState = GameState.loadSavedGame(getApplication(), saveId);
-        if (newState != null) {
-            currentState.setValue(newState);
-            moveCount.setValue(newState.getMoveCount());
-            isGameComplete.setValue(newState.isComplete());
-            
-            // Initialize solver with new state
-            solver.init(newState.getMapData());
+        if (saveId >= 0) {
+            // Load saved game using the original method
+            GameState newState = GameState.loadSavedGame(getApplication(), saveId);
+            if (newState != null) {
+                currentState.setValue(newState);
+                moveCount.setValue(newState.getMoveCount());
+                isGameComplete.setValue(newState.isComplete());
+                
+                // Initialize solver with grid elements
+                ArrayList<GridElement> gridElements = newState.getGridElements();
+                solver.init(gridElements);
+            }
         }
+    }
+    
+    /**
+     * Load a history entry
+     * @param historyId History entry ID to load
+     */
+    public void loadHistoryEntry(int historyId) {
+        // TODO: Implement history entry loading
+        GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
+        newState.setLevelId(historyId);
+        currentState.setValue(newState);
+        moveCount.setValue(0);
+        isGameComplete.setValue(false);
+        
+        // Initialize the solver with grid elements
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        solver.init(gridElements);
     }
     
     /**
@@ -120,11 +145,11 @@ public class GameStateManager extends AndroidViewModel {
                 boolean moved = state.moveRobotTo(state.getSelectedRobot(), x, y);
                 if (moved) {
                     // Update move count
-                    moveCount.setValue(moveCount.getValue() + 1);
+                    incrementMoveCount();
                     
                     // Check if game is complete
                     if (state.checkCompletion()) {
-                        isGameComplete.setValue(true);
+                        setGameComplete(true);
                     }
                     
                     currentState.setValue(state);
@@ -134,14 +159,32 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
-     * Get a hint for the current state
-     * @return Next move hint
+     * Handle deep link to a specific level
+     * @param levelId Level ID to load
      */
-    public GameMove getHint() {
-        if (solver != null && currentState.getValue() != null) {
-            return solver.getNextMove(currentState.getValue().getMapData());
+    public void handleDeepLink(int levelId) {
+        loadLevel(levelId);
+    }
+    
+    /**
+     * Get a hint for the next move
+     * @return The next move according to the solver, or null if no solution exists
+     */
+    public IGameMove getHint() {
+        GameState state = currentState.getValue();
+        if (state == null) return null;
+        
+        // Run the solver if it hasn't already run
+        solver.run();
+        
+        // Get the first solution
+        GameSolution solution = solver.getSolution(0);
+        if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
+            return null;
         }
-        return null;
+        
+        // Get the first move
+        return solution.getMoves().get(0);
     }
     
     /**
@@ -160,6 +203,34 @@ public class GameStateManager extends AndroidViewModel {
     public void setDifficulty(int difficulty) { this.difficulty.setValue(difficulty); }
     public void setBoardSize(int boardSize) { this.boardSize.setValue(boardSize); }
     public void setSoundEnabled(boolean enabled) { this.soundEnabled.setValue(enabled); }
+    
+    /**
+     * Increment the move count
+     */
+    public void incrementMoveCount() {
+        Integer currentCount = moveCount.getValue();
+        if (currentCount != null) {
+            moveCount.setValue(currentCount + 1);
+        } else {
+            moveCount.setValue(1);
+        }
+    }
+    
+    /**
+     * Set the move count
+     * @param count New move count
+     */
+    public void setMoveCount(int count) {
+        moveCount.setValue(count);
+    }
+    
+    /**
+     * Set whether the game is complete
+     * @param complete Whether the game is complete
+     */
+    public void setGameComplete(boolean complete) {
+        isGameComplete.setValue(complete);
+    }
     
     /**
      * Get the current context
