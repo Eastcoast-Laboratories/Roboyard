@@ -24,6 +24,8 @@ public class GameButtonModernSave extends GameButtonModernUI {
     @Override
     public void onClick(GameManager gameManager) {
         // Get current screen
+        Timber.d("[Save button] clicked - starting onClick handling");
+
         if (gameManager.getCurrentScreen() instanceof GridGameScreen) {
             GridGameScreen gridGameScreen = (GridGameScreen) gameManager.getCurrentScreen();
             
@@ -35,6 +37,7 @@ public class GameButtonModernSave extends GameButtonModernUI {
         }
         
         // Continue with normal button behavior (open modern UI)
+        Timber.d("[Save button] continuing to parent onClick implementation");
         super.onClick(gameManager);
     }
 }

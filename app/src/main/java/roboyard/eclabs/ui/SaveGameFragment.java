@@ -298,6 +298,21 @@ public class SaveGameFragment extends BaseGameFragment {
                         Toast.makeText(requireContext(), "Game saved to slot " + saveSlot.getSlotId(), Toast.LENGTH_SHORT).show();
                         // Refresh the slot to update minimap
                         refreshSaveSlot(saveSlot.getSlotId());
+                        
+                        // Switch to load mode after successful save
+                        saveMode = false;
+                        titleText.setText("Load game");
+                        
+                        // Rebuild tabs for load mode
+                        setupTabs();
+                        
+                        // Select the first tab (Load tab) in load mode
+                        if (tabLayout != null && tabLayout.getTabCount() > 0) {
+                            TabLayout.Tab loadTab = tabLayout.getTabAt(0);
+                            if (loadTab != null) {
+                                loadTab.select();
+                            }
+                        }
                     } else {
                         Toast.makeText(requireContext(), "Failed to save game", Toast.LENGTH_SHORT).show();
                     }
@@ -305,8 +320,9 @@ public class SaveGameFragment extends BaseGameFragment {
                     // Load game from this slot
                     if (saveSlot.getDate() != null) { // Only load if slot has a save
                         gameStateManager.loadGame(saveSlot.getSlotId());
-                        // Navigate to game screen
-                        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.gamePlayFragment);
+                        // Navigate to game screen using the correct action
+                        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+                                .navigate(R.id.actionSaveGameToGamePlay);
                     } else {
                         Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
                     }

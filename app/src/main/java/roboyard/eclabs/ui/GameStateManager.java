@@ -305,7 +305,7 @@ public class GameStateManager extends AndroidViewModel {
             // Choose the appropriate action based on the current fragment
             if (currentDestId == R.id.gameCanvasFragment) {
                 Timber.d("Navigating from GameCanvasFragment to SaveGame");
-                navController.navigate(R.id.actionGameCanvasToSaveGame, args);
+                navController.navigate(R.id.actionGameToSaveGame, args);
             } else if (currentDestId == R.id.gamePlayFragment) {
                 Timber.d("Navigating from GamePlayFragment to SaveGame");
                 navController.navigate(R.id.actionGamePlayToSaveGame, args);

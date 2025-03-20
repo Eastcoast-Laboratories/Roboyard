@@ -1,6 +1,7 @@
 package roboyard.eclabs;
 
 import android.content.Intent;
+import timber.log.Timber;
 
 /**
  * Base class for buttons that launch the modern UI components via FragmentHostActivity
@@ -27,23 +28,43 @@ public class GameButtonModernUI extends GameButton {
     public void onClick(GameManager gameManager) {
         if (!this.enabled) return;
         
-        if (gameManager.getActivity() instanceof MainActivity) {
-            MainActivity activity = (MainActivity) gameManager.getActivity();
-            
-            switch (screenType) {
-                case "settings":
-                    activity.openSettingsScreen();
-                    break;
-                case "save":
-                    activity.openSaveScreen();
-                    break;
-                case "load":
-                    activity.openLoadScreen();
-                    break;
-                case "help":
-                    activity.openHelpScreen();
-                    break;
-            }
+        Timber.d("GameButtonModernUI: onClick called for screenType: %s", screenType);
+        
+        if (gameManager == null) {
+            Timber.e("GameButtonModernUI: gameManager is null!");
+            return;
+        }
+        
+        MainActivity activity = gameManager.getActivity();
+        if (activity == null) {
+            Timber.e("GameButtonModernUI: gameManager.getActivity() returned null!");
+            return;
+        }
+        
+        if (!(activity instanceof MainActivity)) {
+            Timber.e("GameButtonModernUI: activity is not an instance of MainActivity! Class: %s", activity.getClass().getName());
+            return;
+        }
+        
+        Timber.d("GameButtonModernUI: got valid MainActivity instance");
+        
+        switch (screenType) {
+            case "settings":
+                Timber.d("GameButtonModernUI: opening settings screen");
+                activity.openSettingsScreen();
+                break;
+            case "save":
+                Timber.d("GameButtonModernUI: opening save screen");
+                activity.openSaveScreen();
+                break;
+            case "load":
+                Timber.d("GameButtonModernUI: opening load screen");
+                activity.openLoadScreen();
+                break;
+            case "help":
+                Timber.d("GameButtonModernUI: opening help screen");
+                activity.openHelpScreen();
+                break;
         }
     }
 }

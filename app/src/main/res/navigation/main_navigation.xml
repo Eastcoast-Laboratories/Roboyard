@@ -22,7 +22,12 @@
             app:destination="@id/helpFragment" />
         <action
             android:id="@+id/actionMainMenuToSaveGame"
-            app:destination="@id/saveGameFragment" />
+            app:destination="@id/saveGameFragment">
+            <argument
+                android:name="saveMode"
+                app:argType="boolean"
+                android:defaultValue="false" />
+        </action>
     </fragment>
 
     <!-- Game Canvas Fragment (using old game logic) -->
