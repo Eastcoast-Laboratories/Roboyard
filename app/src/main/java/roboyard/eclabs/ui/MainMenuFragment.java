@@ -25,7 +25,7 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button loadGameButton;
     private Button settingsButton;
     private Button helpButton;
-    private Button exitButton;
+    // private Button exitButton; // Can be removed since we're not using it anymore
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -37,28 +37,11 @@ public class MainMenuFragment extends BaseGameFragment {
         // Rename the button to "New Random Game"
         newRandomGameButton.setText(R.string.new_random_game);
         
-        // Create level game button
-        levelGameButton = new Button(requireContext());
-        levelGameButton.setId(View.generateViewId());
-        levelGameButton.setText(R.string.level_game);
-        
-        // Clone the layout parameters from the new game button for consistency
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        if (newRandomGameButton.getLayoutParams() != null) {
-            layoutParams = newRandomGameButton.getLayoutParams();
-        }
-        levelGameButton.setLayoutParams(layoutParams);
-        
-        // Add the button after the new random game button
-        ViewGroup buttonContainer = (ViewGroup) newRandomGameButton.getParent();
-        buttonContainer.addView(levelGameButton, buttonContainer.indexOfChild(newRandomGameButton) + 1);
-        
+        // Use existing level game button from XML layout
+        levelGameButton = view.findViewById(R.id.level_game_button);
         loadGameButton = view.findViewById(R.id.load_game_button);
         settingsButton = view.findViewById(R.id.settings_button);
         helpButton = view.findViewById(R.id.help_button);
-        exitButton = view.findViewById(R.id.exit_button);
         
         // Set up button listeners with proper accessibility support
         setupButtons();
@@ -117,7 +100,8 @@ public class MainMenuFragment extends BaseGameFragment {
             navigateTo(R.id.actionMainMenuToHelp);
         });
         
-        // Exit button - exit the app
+        // Exit button - exit the app (commented out since we removed the exit button)
+        /* 
         exitButton.setOnClickListener(v -> {
             // Show confirmation dialog
             new AlertDialog.Builder(requireContext())
@@ -129,6 +113,7 @@ public class MainMenuFragment extends BaseGameFragment {
                 .setNegativeButton(android.R.string.no, null)
                 .show();
         });
+        */
     }
     
     @Override

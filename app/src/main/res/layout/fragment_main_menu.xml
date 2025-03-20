@@ -3,82 +3,181 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="#F5F5F5">
 
-    <!-- Title -->
-    <TextView
-        android:id="@+id/main_menu_title"
+    <!-- Colorful border using tiled wall graphics -->
+    <ImageView
+        android:id="@+id/top_wall"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/main_menu_title"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        android:layout_marginTop="32dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Button container -->
-    <LinearLayout
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Top wall" />
+    
+    <ImageView
+        android:id="@+id/left_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Left wall" />
+    
+    <ImageView
+        android:id="@+id/right_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Right wall" />
+    
+    <ImageView
+        android:id="@+id/bottom_wall"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="48dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
-        app:layout_constraintWidth_max="300dp">
+        android:contentDescription="Bottom wall" />
 
-        <!-- New Game button -->
-        <Button
-            android:id="@+id/new_game_button"
-            android:layout_width="match_parent"
+    <!-- Content area with padding -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/top_wall"
+        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintEnd_toStartOf="@id/right_wall">
+        
+        <!-- Title centered but moved higher up -->
+        <TextView
+            android:id="@+id/main_menu_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/new_game"
-            android:contentDescription="@string/new_game_description"
-            android:padding="16dp"
-            android:layout_marginBottom="16dp" />
+            android:text="@string/main_menu_title"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:textColor="#212121"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Load Game button -->
-        <Button
-            android:id="@+id/load_game_button"
-            android:layout_width="match_parent"
+        <!-- Blue Robot Image above buttons -->
+        <ImageView
+            android:id="@+id/robot_blue_image"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/robot_blue_right"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
+            android:contentDescription="Blue robot" />
+            
+        <!-- Button container moved below robot -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/load_game"
-            android:contentDescription="@string/load_game_description"
-            android:padding="16dp"
-            android:layout_marginBottom="16dp" />
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/robot_blue_image"
+            app:layout_constraintWidth_max="300dp">
 
-        <!-- Settings button -->
-        <Button
-            android:id="@+id/settings_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/settings"
-            android:contentDescription="@string/settings_description"
-            android:padding="16dp"
-            android:layout_marginBottom="16dp" />
+            <!-- New Random Game button - Green with round corners and black outline -->
+            <Button
+                android:id="@+id/new_game_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/new_random_game"
+                android:contentDescription="@string/new_random_game_description"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@drawable/button_rounded_green_outline" />
 
-        <!-- Help button -->
-        <Button
-            android:id="@+id/help_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/help"
-            android:contentDescription="@string/help_description"
-            android:padding="16dp"
-            android:layout_marginBottom="16dp" />
+            <!-- Level Game button - Blue with round corners and black outline -->
+            <Button
+                android:id="@+id/level_game_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/level_game"
+                android:contentDescription="@string/level_game_description"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@drawable/button_rounded_blue_outline" />
+                
+            <!-- How to Play button - Yellow with round corners and black outline -->
+            <Button
+                android:id="@+id/help_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/help"
+                android:contentDescription="@string/help_description"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@drawable/button_rounded_yellow_outline" />
+                
+            <!-- Load Game button - red with round corners and black outline -->
+            <Button
+                android:id="@+id/load_game_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/load_game"
+                android:contentDescription="@string/load_game_description"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@drawable/button_rounded_red_outline" />
 
-        <!-- Exit button -->
-        <Button
-            android:id="@+id/exit_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/exit"
-            android:contentDescription="@string/exit_description"
-            android:padding="16dp" />
+            <!-- Settings button - Gray with round corners and black outline -->
+            <Button
+                android:id="@+id/settings_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings"
+                android:contentDescription="@string/settings_description"
+                android:padding="16dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@drawable/button_rounded_gray_outline" />
 
-    </LinearLayout>
-
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
