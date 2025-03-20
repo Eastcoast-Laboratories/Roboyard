@@ -7,6 +7,8 @@ import android.view.MotionEvent;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,10 @@ import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
+
+import roboyard.eclabs.R;
+
+import timber.log.Timber;
 
 /**
  * Central state manager for the game.
@@ -37,21 +43,33 @@ public class GameStateManager extends AndroidViewModel {
     
     // Solver
     private ISolver solver;
+    private Context context;
     
     public GameStateManager(Application application) {
         super(application);
         // Initialize solver
         solver = new SolverDD();
+        context = application.getApplicationContext();
     }
     
     /**
      * Start a new random game
      */
     public void startNewGame() {
+        Timber.d("GameStateManager: startNewGame() called");
+        
+        // Create a new random game state
         GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
+        Timber.d("GameStateManager: Created new random GameState");
+        
         currentState.setValue(newState);
+        Timber.d("GameStateManager: Set currentState LiveData value with new state");
+        
         moveCount.setValue(0);
+        Timber.d("GameStateManager: Reset moveCount to 0");
+        
         isGameComplete.setValue(false);
+        Timber.d("GameStateManager: Reset isGameComplete to false");
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
@@ -185,6 +203,132 @@ public class GameStateManager extends AndroidViewModel {
         
         // Get the first move
         return solution.getMoves().get(0);
+    }
+    
+    /**
+     * Navigate to specific level screen (beginner, intermediate, advanced, expert)
+     * @param screenId Screen ID from Constants (SCREEN_LEVEL_BEGINNER, etc)
+     */
+    public void navigateToLevelScreen(int screenId) {
+        // Store the selected level screen for the GamePlayFragment to use
+        MutableLiveData<Integer> levelScreen = new MutableLiveData<>(screenId);
+        
+        // The GamePlayFragment will check this value and load the appropriate level screen
+        // This corresponds to the Constants.SCREEN_LEVEL_BEGINNER etc. values
+        switch (screenId) {
+            case Constants.SCREEN_LEVEL_BEGINNER:
+                // Load first beginner level (level 1)
+                loadLevel(1);
+                break;
+            case Constants.SCREEN_LEVEL_INTERMEDIATE:
+                // Load first intermediate level (level 36)
+                loadLevel(36);
+                break;
+            case Constants.SCREEN_LEVEL_ADVANCED:
+                // Load first advanced level (level 71)
+                loadLevel(71);
+                break;
+            case Constants.SCREEN_LEVEL_EXPERT:
+                // Load first expert level (level 106)
+                loadLevel(106);
+                break;
+            default:
+                // Default to beginner level 1
+                loadLevel(1);
+                break;
+        }
+    }
+    
+    /**
+     * Navigate to main menu
+     */
+    public void navigateToMainMenu() {
+        Timber.d("GameStateManager: navigateToMainMenu() called");
+        // Use the NavController to navigate to the main menu fragment
+        NavController navController = Navigation.findNavController(
+                androidx.fragment.app.FragmentActivity.class.cast(context), R.id.nav_host_fragment);
+        navController.navigate(R.id.actionGlobalMainMenu);
+    }
+    
+    /**
+     * Navigate to settings screen
+     */
+    public void navigateToSettings() {
+        Timber.d("GameStateManager: navigateToSettings() called");
+        // Use the NavController to navigate to the settings fragment
+        NavController navController = Navigation.findNavController(
+                androidx.fragment.app.FragmentActivity.class.cast(context), R.id.nav_host_fragment);
+        navController.navigate(R.id.actionGlobalSettings);
+    }
+    
+    /**
+     * Navigate to save screen
+     * @param saveMode True for save mode, false for load mode
+     */
+    public void navigateToSaveScreen(boolean saveMode) {
+        Timber.d("GameStateManager: navigateToSaveScreen() called with saveMode=%s", saveMode);
+        
+        // Get the current fragment that is calling this method
+        androidx.fragment.app.FragmentActivity activity = androidx.fragment.app.FragmentActivity.class.cast(context);
+        
+        // Check if we're on the main thread
+        if (android.os.Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            // We're on the main thread, safe to navigate
+            performNavigation(activity, saveMode);
+        } else {
+            // We're on a background thread, post navigation to main thread
+            Timber.d("GameStateManager: Posting navigation to main thread");
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                Timber.d("GameStateManager: Now on main thread, proceeding with navigation");
+                performNavigation(activity, saveMode);
+            });
+        }
+    }
+    
+    /**
+     * Perform the actual navigation on the main thread
+     */
+    private void performNavigation(androidx.fragment.app.FragmentActivity activity, boolean saveMode) {
+        try {
+            // Create a bundle to pass the save mode parameter
+            android.os.Bundle args = new android.os.Bundle();
+            args.putBoolean("saveMode", saveMode);
+            
+            // Find the NavController for the current fragment
+            androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(
+                    activity, R.id.nav_host_fragment);
+            
+            // Get the current destination ID
+            int currentDestId = navController.getCurrentDestination().getId();
+            Timber.d("Current destination ID: %d", currentDestId);
+            
+            // Choose the appropriate action based on the current fragment
+            if (currentDestId == R.id.gameCanvasFragment) {
+                Timber.d("Navigating from GameCanvasFragment to SaveGame");
+                navController.navigate(R.id.actionGameCanvasToSaveGame, args);
+            } else if (currentDestId == R.id.gamePlayFragment) {
+                Timber.d("Navigating from GamePlayFragment to SaveGame");
+                navController.navigate(R.id.actionGamePlayToSaveGame, args);
+            } else {
+                // For other fragments, use the global action
+                Timber.d("Using global action to navigate to SaveGame");
+                navController.navigate(R.id.actionGlobalSaveGame, args);
+            }
+        } catch (Exception e) {
+            // Log any navigation errors
+            Timber.e(e, "Navigation error");
+        }
+    }
+    
+    /**
+     * Update the context to a valid activity context for fragment navigation
+     * @param activityContext The activity context
+     */
+    public void updateContext(Context activityContext) {
+        if (activityContext instanceof androidx.fragment.app.FragmentActivity) {
+            Timber.d("GameStateManager: Updating context to activity: %s", activityContext.getClass().getSimpleName());
+            this.context = activityContext;
+        }
     }
     
     /**

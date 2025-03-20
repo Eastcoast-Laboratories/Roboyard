@@ -23,10 +23,16 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+
 import roboyard.SoundService;
+import roboyard.eclabs.ui.FragmentHostActivity;
 import timber.log.Timber;
 
-public class MainActivity extends Activity
+public class MainActivity extends FragmentActivity
         implements TextureView.SurfaceTextureListener {
     private static final boolean DEBUG = true;  // Set this to false for release builds
     private TextureView mTextureView;
@@ -54,7 +60,77 @@ public class MainActivity extends Activity
     private static final int LOW_FPS_SLEEP = 45;  // ~5 FPS / value 100 tested, but thats far too slow reaction on gmi touch
     private boolean touchActive = false;
 
-    public void init() {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Hide the status bar
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
+        setContentView(R.layout.activity_main);
+        
+        initScreenSize();
+        initGameSettings();
+        
+        // Setup navigation
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        if (navHostFragment != null) {
+            NavController navController = navHostFragment.getNavController();
+            // Additional navigation setup if needed
+        }
+        
+        FrameLayout content = new FrameLayout(this);
+
+        mTextureView = new TextureView(this);
+        mTextureView.setSurfaceTextureListener(this);
+        mTextureView.setOpaque(false);
+
+        content.addView(mTextureView, new FrameLayout.LayoutParams(sWidth, sHeight));
+        setContentView(content);
+
+        startSound();
+        
+        // Check if we need to show the load screen after restart
+        SharedPreferences prefs = getSharedPreferences("RoboYard", Context.MODE_PRIVATE);
+        boolean showLoadScreen = prefs.getBoolean("show_load_screen_on_restart", false);
+        final int lastSavedSlot = prefs.getInt("last_saved_slot", -1);
+        
+        if (showLoadScreen && lastSavedSlot >= 0) {
+            // Clear the flag immediately to prevent loops
+            prefs.edit().putBoolean("show_load_screen_on_restart", false).apply();
+            Timber.d("[MINIMAP] Detected restart flag, navigating to load screen for slot %d", lastSavedSlot);
+            
+            // Need to delay slightly to let the game fully initialize
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                // Navigate to the save/load screen
+                if (gameManager != null) {
+                    // First clear all caches to ensure fresh state
+                    GameButtonGotoSavedGame.clearAllMinimapCaches();
+                    
+                    // Get the save game screen and refresh it entirely
+                    SaveGameScreen saveScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
+                    if (saveScreen != null) {
+                        // Refresh the whole screen to recreate all buttons
+                        saveScreen.refreshScreen();
+                        
+                        // Go to the save game screen
+                        gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
+                        
+                        // Show the load tab
+                        saveScreen.showLoadTab();
+                        saveScreen.dontAutoSwitchTabs = true;
+                        
+                        Timber.d("[MINIMAP] Navigated to load screen after app restart");
+                    }
+                }
+            }, 500); // Short delay to ensure game is initialized
+        }
+    }
+    
+    /**
+     * Initialize screen size information
+     */
+    private void initScreenSize() {
         Display display = getWindowManager().getDefaultDisplay();
         // keep screen on:
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -62,16 +138,17 @@ public class MainActivity extends Activity
         display.getSize(size);
         sWidth = size.x;
         sHeight = size.y;
-        this.inputManager = new InputManager();
-        this.renderManager = new RenderManager(getResources());
-        this.renderManager.setContext(this); // Set context for accessibility features
-        
+    }
+    
+    /**
+     * Initialize game settings from preferences
+     */
+    private void initGameSettings() {
         // Load board size from preferences or use default if not set
         loadBoardSizeFromPreferences(this);
         Timber.d("Initialized with board size: %dx%d", boardSizeX, boardSizeY);
         
         // Load map generation preference
-        Preferences preferences = new Preferences();
         String newMapSetting = preferences.getPreferenceValue(this, "newMapEachTime");
         if (newMapSetting == null) {
             newMapSetting = "true"; // Default value
@@ -85,6 +162,9 @@ public class MainActivity extends Activity
         GameButtonGotoHistoryGame.clearAllMinimapCaches();
         GameButtonGotoSavedGame.clearAllMinimapCaches();
         
+        this.inputManager = new InputManager();
+        this.renderManager = new RenderManager(getResources());
+        this.renderManager.setContext(this); // Set context for accessibility features
         this.gameManager = new GameManager(this.inputManager, this.renderManager, this.sWidth, this.sHeight, this);
     }
 
@@ -233,63 +313,6 @@ public class MainActivity extends Activity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (DEBUG) {
-            Timber.plant(new Timber.DebugTree());
-        }
-
-        this.init();
-
-        FrameLayout content = new FrameLayout(this);
-
-        mTextureView = new TextureView(this);
-        mTextureView.setSurfaceTextureListener(this);
-        mTextureView.setOpaque(false);
-
-        content.addView(mTextureView, new FrameLayout.LayoutParams(sWidth, sHeight));
-        setContentView(content);
-
-        startSound();
-        
-        // Check if we need to show the load screen after restart
-        SharedPreferences prefs = getSharedPreferences("RoboYard", Context.MODE_PRIVATE);
-        boolean showLoadScreen = prefs.getBoolean("show_load_screen_on_restart", false);
-        final int lastSavedSlot = prefs.getInt("last_saved_slot", -1);
-        
-        if (showLoadScreen && lastSavedSlot >= 0) {
-            // Clear the flag immediately to prevent loops
-            prefs.edit().putBoolean("show_load_screen_on_restart", false).apply();
-            Timber.d("[MINIMAP] Detected restart flag, navigating to load screen for slot %d", lastSavedSlot);
-            
-            // Need to delay slightly to let the game fully initialize
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                // Navigate to the save/load screen
-                if (gameManager != null) {
-                    // First clear all caches to ensure fresh state
-                    GameButtonGotoSavedGame.clearAllMinimapCaches();
-                    
-                    // Get the save game screen and refresh it entirely
-                    SaveGameScreen saveScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
-                    if (saveScreen != null) {
-                        // Refresh the whole screen to recreate all buttons
-                        saveScreen.refreshScreen();
-                        
-                        // Go to the save game screen
-                        gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
-                        
-                        // Show the load tab
-                        saveScreen.showLoadTab();
-                        saveScreen.dontAutoSwitchTabs = true;
-                        
-                        Timber.d("[MINIMAP] Navigated to load screen after app restart");
-                    }
-                }
-            }, 500); // Short delay to ensure game is initialized
-        }
-    }
-    @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mThread = new RenderingThread(mTextureView);
         mThread.start();
@@ -310,6 +333,48 @@ public class MainActivity extends Activity
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // Ignored
+    }
+
+    /**
+     * Opens the modern UI settings screen
+     * This provides a bridge between the old game logic and the new UI
+     */
+    public void openSettingsScreen() {
+        Intent intent = new Intent(this, FragmentHostActivity.class);
+        intent.putExtra("screen", "settings");
+        startActivity(intent);
+    }
+    
+    /**
+     * Opens the modern UI save game screen
+     * This provides a bridge between the old game logic and the new UI
+     */
+    public void openSaveScreen() {
+        Intent intent = new Intent(this, FragmentHostActivity.class);
+        intent.putExtra("screen", "save");
+        intent.putExtra("saveMode", true);
+        startActivity(intent);
+    }
+    
+    /**
+     * Opens the modern UI load game screen
+     * This provides a bridge between the old game logic and the new UI
+     */
+    public void openLoadScreen() {
+        Intent intent = new Intent(this, FragmentHostActivity.class);
+        intent.putExtra("screen", "save");
+        intent.putExtra("saveMode", false);
+        startActivity(intent);
+    }
+    
+    /**
+     * Opens the modern UI help/credits screen
+     * This provides a bridge between the old game logic and the new UI
+     */
+    public void openHelpScreen() {
+        Intent intent = new Intent(this, FragmentHostActivity.class);
+        intent.putExtra("screen", "help");
+        startActivity(intent);
     }
 
     private boolean needsHighFramerate() {

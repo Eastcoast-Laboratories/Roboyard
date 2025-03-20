@@ -96,7 +96,7 @@ public class GridGameScreen extends GameScreen {
     private final ArrayList<Move> allMoves= new ArrayList<>();
 
     private GameButtonGeneral buttonSolve;
-    private GameButtonSaveScreen buttonSave;
+    private GameButtonModernSave buttonSave;
     private GameButtonGeneral buttonCancelSolver; // Button zum Abbrechen des Solvers
 
     private final Preferences preferences = new Preferences();
@@ -141,6 +141,7 @@ public class GridGameScreen extends GameScreen {
      */
     public GridGameScreen(GameManager gameManager){
         super(gameManager);
+        Timber.d("GridGameScreen: Constructor called");
         
         // Load difficulty setting from preferences, default to "Beginner" if not set
         String ld = preferences.getPreferenceValue(gameManager.getActivity(), "difficulty");
@@ -184,6 +185,7 @@ public class GridGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.robot_blue_left);
         gameManager.getRenderManager().loadImage(R.drawable.robot_green_left);
         gameManager.getRenderManager().loadImage(R.drawable.robot_red_left);
+        Timber.d("GridGameScreen: Game manager set");
     }
 
     public static int getLevel() {
@@ -282,15 +284,14 @@ public class GridGameScreen extends GameScreen {
         }
 
         // Bottom row buttons
-        // Save button
-        buttonSave = new GameButtonSaveScreen(
+        // Save button - Use modern UI button
+        buttonSave = new GameButtonModernSave(
             0, 
             buttonPosY,
             buttonSize,
             buttonSize,
             R.drawable.bt_jeu_save_up,
-            R.drawable.bt_jeu_save_down,
-            Constants.SCREEN_SAVE_GAMES
+            R.drawable.bt_jeu_save_down
         );
         buttonSave.setAccessibleContentDescription(gameManager.getActivity(), "Save current game");
         this.instances.add(buttonSave);
@@ -435,11 +436,12 @@ public class GridGameScreen extends GameScreen {
                     "AI Hint " + numSolutionClicks + ": < " + 
                     (solutionMoves + showSolutionAtHint - numSolutionClicks) + " moves");
             }
-        } else if (nbCoups == 0 && isSolved && solutionMoves < simplePuzzleMinMoves) {
+        } else if (nbCoups == 0 && isSolved && solutionMoves < simplePuzzleMinMoves && isRandomGame) {
+            // Only reject simple solutions for random games
             // too simple ... restart
             renderManager.setColor(textColorHighlight);
             renderManager.drawText(textMarginLeft, posY, "AI solution: " + solutionMoves + " moves");
-            Timber.d("too simple: solutionMoves = %d", solutionMoves);
+            // Timber.d("[RESTART] Setting mustStartNext = true - Solution too simple, solutionMoves = %d", solutionMoves);
             renderManager.setColor(textColorNormal);
             renderManager.setTextSize(lineHeightSmall);
             renderManager.drawText(textMarginLeft, posY + lineHeightSmall, "... restarting!");
@@ -469,6 +471,7 @@ public class GridGameScreen extends GameScreen {
                 if (getLevel() == 0 && levelNum < 0) {
                     renderManager.drawText(textMarginLeft, posY, "Too complicated");
                     renderManager.drawText(textMarginLeft, posY + lineHeight, "... restarting!");
+                    // Timber.d("[RESTART] Setting mustStartNext = true - Game too complicated");
                     mustStartNext = true;
                 } else {
                     String solvingText;
@@ -562,6 +565,9 @@ public class GridGameScreen extends GameScreen {
         updateAllZIndices();
         
         if(mustStartNext){
+            // Timber.d("[RESTART] mustStartNext triggered a restart with following state:");
+            // Timber.d("[RESTART]   - isRandomGame=%b, mapPath=%s", isRandomGame, mapPath);
+            // Timber.d("[RESTART]   - isSolved=%b, solutionMoves=%d, nbCoups=%d", isSolved, solutionMoves, nbCoups);
             // Reset the game state
             timeCpt = 0;
             nbCoups = 0;
@@ -579,17 +585,22 @@ public class GridGameScreen extends GameScreen {
             }
 
             int levelNum = extractLevelNumber(mapPath);
+            // Timber.d("[RESTART] extractLevelNumber(\"%s\") returned %d", mapPath, levelNum);
             if(levelNum >=0 && levelNum < 60)
             {
                 // Next level in sequence
                 String nextMapPath = "Maps/level_" + (levelNum + 1) + ".txt";
+                // Timber.d("[RESTART] Loading next level: %s", nextMapPath);
                 setLevelGame(nextMapPath);
             } else {
                 // start a game in screen 4
+                // Timber.d("[RESTART] Starting random game from mustStartNext");
                 setRandomGame();
             }
 
             mustStartNext = false;
+        }else{
+            // Timber.d("mustStartNext not called");   
         }
         
         // Only update time if the game is not won
@@ -746,8 +757,8 @@ public class GridGameScreen extends GameScreen {
     }
 
     public void setRandomGame() {
-        Timber.d("Starting new random game");
-        this.mapPath = "";  //La carte étant générée, elle n'a pas de chemin d'accès
+        // Timber.d("[RESTART] Beginning of setRandomGame, previous isRandomGame=%b, previous mapPath=%s", isRandomGame, mapPath);
+        this.mapPath = "random";  // Set a non-empty path with a recognizable value instead of empty string
         this.isGameWon = false;  // Reset game won flag
         this.isRandomGame = true;  // Set random game flag
         numSolutionClicks = 0;
@@ -777,6 +788,7 @@ public class GridGameScreen extends GameScreen {
 
     /** Creates the grid and initializes variables */
     public void createGrid() {
+        // Timber.d("[RESTART] Beginning of createGrid, isRandomGame=%b, mapPath=%s", isRandomGame, mapPath);
         this.solver = new SolverDD();
 
         IAMovesNumber = 0;
@@ -1242,9 +1254,6 @@ public class GridGameScreen extends GameScreen {
     private class ButtonResetRobots implements IExecutor{
 
         public void execute(){
-            // Add accessibility announcement
-            gameManager.requestToast("Resetting all robots to starting positions", false);
-            
             // Reset game state
             nbCoups = 0;
             numSquares = 0;
@@ -1265,12 +1274,13 @@ public class GridGameScreen extends GameScreen {
      */
     private class ButtonNext implements IExecutor{
         private static final long NEXT_BUTTON_COOLDOWN = 500; // 500ms cooldown between next button clicks
-        private long lastNextButtonClickTime = 0;
+        private static long lastNextButtonClickTime = 0; // Make this static so it's shared across all instances
 
         public void execute() {
             // Check if enough time has passed since last click
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastNextButtonClickTime < NEXT_BUTTON_COOLDOWN) {
+                // Timber.d("[RESTART] ButtonNext: Ignoring click due to cooldown (last=%d, current=%d, diff=%d)", lastNextButtonClickTime, currentTime, currentTime - lastNextButtonClickTime);
                 return;
             }
             lastNextButtonClickTime = currentTime;
@@ -1278,18 +1288,22 @@ public class GridGameScreen extends GameScreen {
             // Only proceed to next level if we're in the Maps/ directory
             if (mapPath != null && mapPath.startsWith("Maps/")) {
                 int currentLevel = extractLevelNumber(mapPath);
+                // Timber.d("[RESTART] ButtonNext: mapPath=%s, currentLevel=%d", mapPath, currentLevel);
                 if (currentLevel >= 1 && currentLevel < 140 && currentLevel != 35 && currentLevel != 70 && currentLevel != 105) {
                     // Next level in sequence
                     String nextMapPath = "Maps/level_" + (currentLevel + 1) + ".txt";
+                    // Timber.d("[RESTART] ButtonNext: Loading next level: %s", nextMapPath);
                     setLevelGame(nextMapPath);
                     isRandomGame = false;
                 } else {
                     // For invalid level numbers, generate a new random game
+                    // Timber.d("[RESTART] ButtonNext: Invalid level number, generating random game");
                     setRandomGame();
                     isRandomGame = true;
                 }
             } else {
                 // For random games, saved games, or no map path
+                // Timber.d("[RESTART] ButtonNext: Not in Maps/ directory (mapPath=%s, isRandomGame=%b), generating random game", mapPath, isRandomGame);
                 setRandomGame();
                 isRandomGame = true;
             }
@@ -1422,9 +1436,6 @@ public class GridGameScreen extends GameScreen {
                 Timber.d("remove move nr. %d %d/%d", (allMoves.size()-1), lastMove._x, lastMove._y);
                 allMoves.remove(last);
                 nbCoups--;
-                gameManager.announce("Undoing last move");
-            } else {
-                gameManager.announce("No moves to undo");
             }
         }
     }
@@ -1439,7 +1450,7 @@ public class GridGameScreen extends GameScreen {
                     // note, cancel() sets the solver status to noSolution which is also isFinished()
                     ((SolverDD)solver).cancel();
                     solverIsCanceled = true;
-                    solutionMoves = 999; // otherwise the game will go to mustRestart, because the solutionMoves are still there from last map
+                    solutionMoves = 999; // otherwise the game will go to mustStartNext, because the solutionMoves are still there from last map
                 }
             }
             // Keep the solve button disabled

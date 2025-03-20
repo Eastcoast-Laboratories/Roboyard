@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/mainMenuFragment">
+
+    <!-- Main Menu Fragment -->
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="roboyard.eclabs.ui.MainMenuFragment"
+        android:label="Main Menu"
+        tools:layout="@layout/fragment_main_menu">
+        <action
+            android:id="@+id/actionMainMenuToGamePlay"
+            app:destination="@id/gameCanvasFragment" />
+        <action
+            android:id="@+id/actionMainMenuToSettings"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/actionMainMenuToHelp"
+            app:destination="@id/helpFragment" />
+        <action
+            android:id="@+id/actionMainMenuToSaveGame"
+            app:destination="@id/saveGameFragment" />
+    </fragment>
+
+    <!-- Game Canvas Fragment (using old game logic) -->
+    <fragment
+        android:id="@+id/gameCanvasFragment"
+        android:name="roboyard.eclabs.ui.GameCanvasFragment"
+        android:label="Game"
+        tools:layout="@layout/fragment_game_canvas">
+        <action
+            android:id="@+id/actionGameToMainMenu"
+            app:destination="@id/mainMenuFragment" />
+        <action
+            android:id="@+id/actionGameToSaveGame"
+            app:destination="@id/saveGameFragment" />
+    </fragment>
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="roboyard.eclabs.ui.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/actionSettingsToMainMenu"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
+
+    <!-- Help Fragment -->
+    <fragment
+        android:id="@+id/helpFragment"
+        android:name="roboyard.eclabs.ui.HelpFragment"
+        android:label="Help"
+        tools:layout="@layout/fragment_help">
+        <action
+            android:id="@+id/actionHelpToMainMenu"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
+
+    <!-- Save Game Fragment -->
+    <fragment
+        android:id="@+id/saveGameFragment"
+        android:name="roboyard.eclabs.ui.SaveGameFragment"
+        android:label="Save Game"
+        tools:layout="@layout/fragment_save_game">
+        <action
+            android:id="@+id/actionSaveGameToMainMenu"
+            app:destination="@id/mainMenuFragment" />
+        <action
+            android:id="@+id/actionSaveGameToGamePlay"
+            app:destination="@id/gameCanvasFragment" />
+        <argument
+            android:name="saveMode"
+            app:argType="boolean"
+            android:defaultValue="true" />
+    </fragment>
+
+</navigation>

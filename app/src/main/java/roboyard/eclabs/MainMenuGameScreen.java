@@ -35,12 +35,13 @@ public class MainMenuGameScreen extends GameScreen {
         int startXMedium = (gameManager.getScreenWidth() - totalMediumWidth) / 2;
         int mediumY = (int)(ratio*800); // Position below the random game button
 
-        // Level Selection and Load Saved Game buttons
+        // Level Selection and Modern Load Saved Game buttons
         GameButtonGoto levelSelectionButton = new GameButtonGoto(startXMedium, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up, R.drawable.bt_start_down, Constants.SCREEN_LEVEL_BEGINNER);
         levelSelectionButton.setAccessibleContentDescription(gameManager.getActivity(), "Select level to play");
         this.instances.add(levelSelectionButton);
         
-        GameButtonGoto loadSavedGameButton = new GameButtonGoto(startXMedium + mediumButtonWidth + spacing, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up_saved, R.drawable.bt_start_down_saved, Constants.SCREEN_SAVE_GAMES);
+        // Use the modern UI button for loading games
+        GameButtonModernLoad loadSavedGameButton = new GameButtonModernLoad(startXMedium + mediumButtonWidth + spacing, mediumY, mediumButtonWidth, (int)(ratio*mediumButtonSize), R.drawable.bt_start_up_saved, R.drawable.bt_start_down_saved);
         loadSavedGameButton.setAccessibleContentDescription(gameManager.getActivity(), "Load saved game");
         this.instances.add(loadSavedGameButton);
 
@@ -52,12 +53,12 @@ public class MainMenuGameScreen extends GameScreen {
         int startXSmall = (gameManager.getScreenWidth() - totalSmallWidth) / 2;
         int bottomY = (int)(ratio*1400); // Moved up from 1800 to 1400 to be fully visible
 
-        // Settings and Credits as small buttons at the bottom
-        GameButtonGoto settingsButton = new GameButtonGoto(startXSmall, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_settings_up, R.drawable.bt_settings_down, Constants.SCREEN_SETTINGS);
+        // Replace old buttons with modern UI buttons
+        GameButtonModernSettings settingsButton = new GameButtonModernSettings(startXSmall, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_settings_up, R.drawable.bt_settings_down);
         settingsButton.setAccessibleContentDescription(gameManager.getActivity(), "Game settings");
         this.instances.add(settingsButton);
         
-        GameButtonGoto creditsButton = new GameButtonGoto(startXSmall + smallButtonWidth + smallSpacing, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_credits_up, R.drawable.bt_credits_down, Constants.SCREEN_CREDITS);
+        GameButtonModernHelp creditsButton = new GameButtonModernHelp(startXSmall + smallButtonWidth + smallSpacing, bottomY, smallButtonWidth, (int)(ratio*smallButtonSize), R.drawable.bt_credits_up, R.drawable.bt_credits_down);
         creditsButton.setAccessibleContentDescription(gameManager.getActivity(), "View credits");
         this.instances.add(creditsButton);
     }

@@ -244,6 +244,9 @@ public class GamePiece implements IGameObject {
                     // TODO: enlarge and put in front with this.radius+=1;
                     //display the movement interface
                     ((GridGameScreen)(gameManager.getCurrentScreen())).activateInterface(this, xDraw, yDraw);
+                    
+                    // Reset input events to prevent the same touch from being processed multiple times
+                    inputManager.resetEvents();
                 }
             }
 

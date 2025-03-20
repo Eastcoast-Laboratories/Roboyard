@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 import roboyard.eclabs.R;
+import timber.log.Timber;
 
 /**
  * SaveGameFragment handles saving, loading, and viewing history of games.
@@ -292,6 +293,7 @@ public class SaveGameFragment extends BaseGameFragment {
             holder.itemView.setOnClickListener(v -> {
                 if (saveMode) {
                     // Save current game to this slot
+                    Timber.d("Saving game to slot " + saveSlot.getSlotId());
                     if (gameStateManager.saveGame(saveSlot.getSlotId())) {
                         Toast.makeText(requireContext(), "Game saved to slot " + saveSlot.getSlotId(), Toast.LENGTH_SHORT).show();
                         // Refresh the slot to update minimap

@@ -4,18 +4,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Pierre on 21/01/2015.
  */
 public abstract class GameScreen implements IGameObject {
     protected static GameManager gameManager = null;
-    protected final ArrayList<IGameObject> instances;
+    protected List<IGameObject> instances;
     private int zIndex = 0;
     private boolean instancesSorted = false;
 
+    // Queue for objects to add/remove after updates complete
+    private List<IGameObject> pendingAdditions = new ArrayList<>();
+    private List<IGameObject> pendingRemovals = new ArrayList<>();
+    private boolean processingUpdates = false;
+
     public GameScreen(GameManager gameManager){
-        this.instances = new ArrayList<IGameObject>();
+        this.instances = new CopyOnWriteArrayList<>();
         GameScreen.gameManager = gameManager;
         this.create();
         this.load(gameManager.getRenderManager());
@@ -67,9 +73,12 @@ public abstract class GameScreen implements IGameObject {
 
     @Override
     public void update(GameManager gameManager) {
+        processingUpdates = true;
         for(IGameObject e : this.instances){
             e.update(gameManager);
         }
+        processingUpdates = false;
+        processPendingChanges();
     }
 
     @Override
@@ -83,7 +92,7 @@ public abstract class GameScreen implements IGameObject {
      * Get all game objects in this screen
      * @return List of game objects
      */
-    public ArrayList<IGameObject> getGameObjects() {
+    public List<IGameObject> getGameObjects() {
         return instances;
     }
     
@@ -92,7 +101,38 @@ public abstract class GameScreen implements IGameObject {
      * @param object The object to add
      */
     public void addGameObject(IGameObject object) {
-        this.instances.add(object);
+        if (processingUpdates) {
+            pendingAdditions.add(object);
+        } else {
+            this.instances.add(object);
+            markUnsorted(); // Mark for re-sorting
+        }
+    }
+    
+    /**
+     * Remove a game object from this screen
+     * @param object The object to remove
+     */
+    public void removeGameObject(IGameObject object) {
+        if (processingUpdates) {
+            pendingRemovals.add(object);
+        } else {
+            this.instances.remove(object);
+            markUnsorted(); // Mark for re-sorting
+        }
+    }
+    
+    private void processPendingChanges() {
+        for (IGameObject object : pendingAdditions) {
+            this.instances.add(object);
+        }
+        pendingAdditions.clear();
+        
+        for (IGameObject object : pendingRemovals) {
+            this.instances.remove(object);
+        }
+        pendingRemovals.clear();
+        
         markUnsorted(); // Mark for re-sorting
     }
     

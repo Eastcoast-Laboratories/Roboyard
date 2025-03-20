@@ -5,6 +5,26 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainMenuFragment">
 
+    <!-- Global actions that can be used from any fragment -->
+    <action
+        android:id="@+id/actionGlobalMainMenu"
+        app:destination="@id/mainMenuFragment"
+        app:popUpTo="@id/mainMenuFragment"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/actionGlobalSettings"
+        app:destination="@id/settingsFragment" />
+
+    <action
+        android:id="@+id/actionGlobalSaveGame"
+        app:destination="@id/saveGameFragment">
+        <argument
+            android:name="saveMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </action>
+
     <!-- Main Menu Fragment -->
     <fragment
         android:id="@+id/mainMenuFragment"
@@ -43,6 +63,27 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/actionGamePlayToSaveGame"
+            app:destination="@id/saveGameFragment">
+            <argument
+                android:name="saveMode"
+                app:argType="boolean"
+                android:defaultValue="true" />
+        </action>
+    </fragment>
+
+    <!-- Game Canvas Fragment -->
+    <fragment
+        android:id="@+id/gameCanvasFragment"
+        android:name="roboyard.eclabs.ui.GameCanvasFragment"
+        android:label="Game"
+        tools:layout="@layout/fragment_game_canvas">
+        <action
+            android:id="@+id/actionGameCanvasToMainMenu"
+            app:destination="@id/mainMenuFragment"
+            app:popUpTo="@id/mainMenuFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/actionGameCanvasToSaveGame"
             app:destination="@id/saveGameFragment">
             <argument
                 android:name="saveMode"

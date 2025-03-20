@@ -365,10 +365,13 @@ public class SettingsFragment extends BaseGameFragment {
         
         // Back button
         backButton.setOnClickListener(v -> {
-            // Navigate back using Constants.SCREEN_START like in the original
-            Activity activity = getActivity();
-            if (activity instanceof MainActivity) {
-                // Just use back press which is already implemented to handle screens properly
+            // Use the navigation component to go back
+            if (requireActivity() instanceof FragmentHostActivity) {
+                // For the modern UI, use the navigation controller
+                androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(requireView());
+                navController.navigateUp();
+            } else if (requireActivity() instanceof MainActivity) {
+                // For legacy UI, use the back press
                 requireActivity().onBackPressed();
             }
         });

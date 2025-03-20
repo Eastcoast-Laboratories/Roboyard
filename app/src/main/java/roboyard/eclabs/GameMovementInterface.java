@@ -34,6 +34,9 @@ public class GameMovementInterface implements IGameObject {
             this.display = false;
             // Directly trigger movement on the target screen
             ((GridGameScreen)(gameManager.getCurrentScreen())).editDestination(target, this.decision, false);
+            
+            // Reset the input manager events to ensure clean state for next interaction
+            gameManager.getInputManager().resetEvents();
         }
     }
 
