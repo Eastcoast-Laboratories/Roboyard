@@ -16,6 +16,7 @@ import java.util.Map;
 
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
+import roboyard.eclabs.ui.GameStateManager;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
@@ -694,45 +695,75 @@ public class GridGameScreen extends GameScreen {
         allMoves.get(allMoves.size()-1).setSquaresMoved(currentMovedSquares);
     }
 
-    public void setSavedGame(String mapPath) {
-        Timber.d("Loading saved game from %s", mapPath);
-        this.mapPath = mapPath;  // Keep the mapPath to identify it as a saved game
-        this.isGameWon = false;  // Reset game won flag
-        this.isRandomGame = false;  // Loading a saved game is not a random game
-        
+    public Boolean setSavedGame(String mapPath) {
+        // Check if map path is valid
         if (mapPath == null) {
-            // If mapPath is null, start a new random game instead
-            Timber.d("No saved game path provided, starting random game instead");
-            setRandomGame();
-            return;
+            Timber.e("No saved game path provided, cannot load save");
+            return false;
         }
         
-        try {
-            String saveData = FileReadWrite.readPrivateData(gameManager.getActivity(), mapPath);
-            if (saveData == null || saveData.isEmpty()) {
-                Timber.d("Empty save data, starting random game instead");
-                setRandomGame();
-                return;
-            }
-            
-            // Use true for applyBoardSize parameter to apply the board size when actually loading a game
-            gridElements = MapObjects.extractDataFromString(saveData, true);
-            Timber.d("Extracted gridElements size=%d", gridElements.size());
-            
-            if (gridElements.isEmpty()) {
-                Timber.d("No grid elements extracted, starting random game instead");
-                setRandomGame();
-                return;
-            }
-            
-            GridGameScreen.setMap(gridElements);
-            createGrid();
-            Timber.d("Saved game loaded successfully, save button disabled");
-        } catch (Exception e) {
-            Timber.d("Error loading saved game: %s", e.getMessage());
-            e.printStackTrace();
-            setRandomGame();  // Fall back to random game on error
+        // Read the saved game file
+        String mapData = FileReadWrite.loadAbsoluteData(mapPath);
+        if (mapData == null || mapData.isEmpty()) {
+            Timber.e("Failed to load save data from %s", mapPath);
+            return false;
         }
+        
+        // Extract metadata (map name, time, moves) from save data
+        GameStateManager gameStateManager = new GameStateManager(gameManager.getActivity().getApplication());
+        Map<String, String> metadata = gameStateManager.extractMetadataFromSaveData(mapData);
+        if (metadata != null && !metadata.isEmpty()) {
+            // Set map name if available
+            if (metadata.containsKey("MAPNAME")) {
+                this.mapName = metadata.get("MAPNAME");
+                Timber.d("Loaded map name: %s", this.mapName);
+            }
+            
+            // Set time count if available
+            if (metadata.containsKey("TIME")) {
+                try {
+                    this.timeCpt = Integer.parseInt(metadata.get("TIME"));
+                    Timber.d("Loaded time count: %d", this.timeCpt);
+                } catch (NumberFormatException e) {
+                    Timber.e("Invalid time count format: %s", metadata.get("TIME"));
+                }
+            }
+            
+            // Set move count if available
+            if (metadata.containsKey("MOVES")) {
+                try {
+                    this.nbCoups = Integer.parseInt(metadata.get("MOVES"));
+                    Timber.d("Loaded move count: %d", this.nbCoups);
+                } catch (NumberFormatException e) {
+                    Timber.e("Invalid move count format: %s", metadata.get("MOVES"));
+                }
+            }
+        }
+        
+        // Skip metadata line if present
+        if (mapData.startsWith("#")) {
+            int newlineIndex = mapData.indexOf('\n');
+            if (newlineIndex >= 0) {
+                mapData = mapData.substring(newlineIndex + 1);
+            }
+        }
+        
+        // Extract grid elements from map data
+        ArrayList<GridElement> gridElements = MapObjects.extractDataFromString(mapData, true);
+        if (gridElements.isEmpty()) {
+            Timber.e("No grid elements found in save data");
+            return false;
+        }
+        
+        // Clear existing elements and add loaded elements
+        this.gridElements.clear();
+        this.gridElements.addAll(gridElements);
+        
+        // Load the map
+        loadMap();
+        
+        Timber.d("Successfully loaded saved game from %s", mapPath);
+        return true;
     }
 
     public void setLevelGame(String mapPath) {
@@ -1480,6 +1511,44 @@ public class GridGameScreen extends GameScreen {
             // If parsing fails, return -1
         }
         return -1;
+    }
+
+    /**
+     * Get the time counter value
+     * @return Current time counter
+     */
+    public int getTimeCount() {
+        return this.timeCpt;
+    }
+    
+    /**
+     * Get the move count 
+     * @return Current move count
+     */
+    public int getMoveCount() {
+        return this.nbCoups;
+    }
+    
+    /**
+     * Load the map from the current grid elements 
+     */
+    private void loadMap() {
+        // Clear the board
+        instances.clear();
+        allMoves.clear();
+        nbCoups = 0;
+        
+        // Set up the grid from grid elements
+        createGrid();
+        
+        // Add robots based on grid elements
+        createRobots();
+        
+        // Initialize the solver with the grid elements
+        this.solver.init(gridElements);
+        
+        // Update the UI
+        markUnsorted();
     }
 
     /**

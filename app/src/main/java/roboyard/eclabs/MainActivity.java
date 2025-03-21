@@ -484,6 +484,14 @@ public class MainActivity extends FragmentActivity
         return false;
     }
 
+    /**
+     * Get the game manager instance
+     * @return The current GameManager instance
+     */
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
     /** Thread for rendering the game */
     private class RenderingThread extends Thread {
 

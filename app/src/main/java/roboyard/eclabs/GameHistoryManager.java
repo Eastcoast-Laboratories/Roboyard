@@ -404,4 +404,112 @@ public class GameHistoryManager {
         
         return highestIndex;
     }
+
+    /**
+     * Delete a history entry by path
+     * @param activity The activity context
+     * @param mapPath The map path to delete
+     * @return true if the history entry was deleted successfully
+     */
+    public static boolean deleteHistoryEntry(Activity activity, String mapPath) {
+        try {
+            Timber.d("Attempting to delete history entry: %s", mapPath);
+            
+            // Initialize if needed
+            initialize(activity);
+            
+            // Extract file name from path if it's a full path
+            String fileName = mapPath;
+            if (mapPath.contains("/")) {
+                fileName = mapPath.substring(mapPath.lastIndexOf("/") + 1);
+            }
+            
+            // Load existing history entries
+            List<GameHistoryEntry> historyEntries = getHistoryEntries(activity);
+            if (historyEntries == null) {
+                Timber.e("Failed to load history entries");
+                return false;
+            }
+            
+            // Find the entry to delete
+            GameHistoryEntry entryToDelete = null;
+            for (GameHistoryEntry entry : historyEntries) {
+                String entryPath = entry.getMapPath();
+                String entryFileName = entryPath;
+                if (entryPath.contains("/")) {
+                    entryFileName = entryPath.substring(entryPath.lastIndexOf("/") + 1);
+                }
+                
+                // Match by either full path or just filename
+                if (entryPath.equals(mapPath) || entryFileName.equals(fileName)) {
+                    entryToDelete = entry;
+                    Timber.d("Found entry to delete: %s", entry.getMapName());
+                    break;
+                }
+            }
+            
+            if (entryToDelete == null) {
+                Timber.e("History entry not found for path: %s", mapPath);
+                return false;
+            }
+            
+            // Remove the entry from the list
+            historyEntries.remove(entryToDelete);
+            
+            // Delete the actual file - try both the given path and the path from the entry
+            boolean fileDeleted = false;
+            
+            // Try with the mapPath parameter
+            File historyFile = new File(mapPath);
+            if (historyFile.exists()) {
+                fileDeleted = historyFile.delete();
+                if (fileDeleted) {
+                    Timber.d("Deleted history file at path: %s", mapPath);
+                } else {
+                    Timber.e("Failed to delete history file: %s", mapPath);
+                }
+            }
+            
+            // If that didn't work, try with the entry's path
+            if (!fileDeleted && !entryToDelete.getMapPath().equals(mapPath)) {
+                File entryFile = new File(entryToDelete.getMapPath());
+                if (entryFile.exists()) {
+                    fileDeleted = entryFile.delete();
+                    if (fileDeleted) {
+                        Timber.d("Deleted history file at entry path: %s", entryToDelete.getMapPath());
+                    } else {
+                        Timber.e("Failed to delete history file at entry path: %s", entryToDelete.getMapPath());
+                    }
+                }
+            }
+            
+            // Try with the file in the history directory
+            if (!fileDeleted) {
+                File historyDir = new File(activity.getFilesDir(), HISTORY_DIR);
+                File fileInHistoryDir = new File(historyDir, fileName);
+                if (fileInHistoryDir.exists()) {
+                    fileDeleted = fileInHistoryDir.delete();
+                    if (fileDeleted) {
+                        Timber.d("Deleted history file in history directory: %s", fileInHistoryDir.getAbsolutePath());
+                    } else {
+                        Timber.e("Failed to delete history file in history directory: %s", fileInHistoryDir.getAbsolutePath());
+                    }
+                }
+            }
+            
+            // Update the history index regardless of file deletion success
+            boolean indexUpdated = saveHistoryIndex(activity, historyEntries);
+            if (!indexUpdated) {
+                Timber.e("Failed to update history index after deletion");
+                return false;
+            }
+            
+            Timber.d("Successfully deleted history entry: %s", mapPath);
+            return true;
+        } catch (Exception e) {
+            Timber.e("Error deleting history entry: %s - %s", mapPath, e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

@@ -1,7 +1,12 @@
 package roboyard.eclabs.ui;
 
 import android.app.Application;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.MotionEvent;
 
 import androidx.lifecycle.AndroidViewModel;
@@ -14,19 +19,25 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import roboyard.eclabs.Constants;
+import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.GameScreen;
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.GridGameScreen;
+import roboyard.eclabs.MapObjects;
+import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.MapObjects;
 
 import timber.log.Timber;
 
@@ -50,6 +61,11 @@ public class GameStateManager extends AndroidViewModel {
     // Solver
     private ISolver solver;
     private Context context;
+    
+    // Minimap
+    private String currentMapName = "";
+    private long startTime = 0;
+    private Bitmap minimap = null;
     
     public GameStateManager(Application application) {
         super(application);
@@ -176,12 +192,27 @@ public class GameStateManager extends AndroidViewModel {
      * @return True if save was successful
      */
     public boolean saveGame(int saveId) {
-        // Get the current GridGameScreen instance from the legacy UI if available
-        MainActivity mainActivity = getMainActivity();
-        if (mainActivity != null && mainActivity.getGameManager() != null 
-                && mainActivity.getGameManager().getCurrentScreen() instanceof GridGameScreen) {
-            GridGameScreen gameScreen = (GridGameScreen) mainActivity.getGameManager().getCurrentScreen();
-            
+        Timber.d("Attempting to save game to slot %d", saveId);
+        
+        // First try to get the current GridGameScreen instance from the legacy UI
+        GridGameScreen gameScreen = null;
+        GameManager gameManager = getGameManager();
+        
+        if (gameManager != null && gameManager.getCurrentScreen() instanceof GridGameScreen) {
+            gameScreen = (GridGameScreen) gameManager.getCurrentScreen();
+            Timber.d("Retrieved GridGameScreen from GameManager");
+        } else {
+            // Try with MainActivity
+            MainActivity mainActivity = getMainActivity();
+            if (mainActivity != null && mainActivity.getGameManager() != null 
+                    && mainActivity.getGameManager().getCurrentScreen() instanceof GridGameScreen) {
+                gameScreen = (GridGameScreen) mainActivity.getGameManager().getCurrentScreen();
+                Timber.d("Retrieved GridGameScreen from MainActivity");
+            }
+        }
+        
+        // If we found a game screen, use it to save
+        if (gameScreen != null) {
             // Use the GridGameScreen's data to save the game
             Timber.d("Using GridGameScreen data to save game to slot %d", saveId);
             String saveData = createSaveDataFromGridGameScreen(gameScreen);
@@ -194,77 +225,90 @@ public class GameStateManager extends AndroidViewModel {
                 filename = Constants.SAVE_FILENAME_PREFIX + saveId + Constants.SAVE_FILENAME_EXTENSION;
             }
             
-            // Save the data to file
+            // Save the data to file using FileReadWrite utility
             try {
-                // Create saves directory if it doesn't exist
-                File savesDir = new File(getApplication().getFilesDir(), Constants.SAVE_DIRECTORY);
-                if (!savesDir.exists()) {
-                    savesDir.mkdirs();
+                boolean success = FileReadWrite.writeStringToFile(
+                        (Activity) context, saveData, Constants.SAVE_DIRECTORY, filename);
+                
+                if (success) {
+                    Timber.d("Game saved successfully to slot %d", saveId);
+                    return true;
+                } else {
+                    Timber.e("Failed to save game to slot %d", saveId);
+                    return false;
                 }
-                
-                // Create and write to the file
-                File saveFile = new File(savesDir, filename);
-                FileOutputStream fos = new FileOutputStream(saveFile);
-                fos.write(saveData.getBytes());
-                fos.close();
-                
-                Timber.d("Game saved successfully to slot %d", saveId);
-                return true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Timber.e("Error saving game to slot %d: %s", saveId, e.getMessage());
+                e.printStackTrace();
                 return false;
             }
+        } else {
+            Timber.e("Cannot find GridGameScreen to save from");
         }
         
         // Fallback to using GameState if GridGameScreen is not available
         GameState state = currentState.getValue();
         if (state != null) {
+            Timber.d("Falling back to using GameState to save game");
             return state.saveToFile(getApplication(), saveId);
         }
+        
+        Timber.e("Failed to save game: No valid GameState or GridGameScreen available");
         return false;
     }
     
     /**
-     * Create save data string from a GridGameScreen instance
+     * Create save data from the current game state
+     * @param gameScreen The current GridGameScreen
+     * @return The save data as a string
      */
     private String createSaveDataFromGridGameScreen(GridGameScreen gameScreen) {
         StringBuilder saveData = new StringBuilder();
         
-        // Add board name
+        // Add metadata as a comment line
         String mapName = gameScreen.getMapName();
-        if (mapName == null || mapName.isEmpty()) {
-            mapName = "Saved Game";
-        }
-        saveData.append("name:").append(mapName).append(";");
+        int timeCount = gameScreen.getTimeCount();
+        int moveCount = gameScreen.getMoveCount();
         
-        // Add timestamp
-        saveData.append("timestamp:").append(System.currentTimeMillis()).append(";");
+        // Format: #MAPNAME:name;TIME:seconds;MOVES:count;
+        saveData.append("#MAPNAME:").append(mapName).append(";");
+        saveData.append("TIME:").append(timeCount).append(";");
+        saveData.append("MOVES:").append(moveCount).append(";\n");
         
-        // Add play duration
-        saveData.append("duration:").append(gameScreen.getTimeCpt()).append(";");
-        
-        // Add number of moves
-        saveData.append("moves:").append(gameScreen.getNbCoups()).append(";");
-        
-        // Add board size
-        saveData.append("board:").append(MainActivity.getBoardWidth()).append(",")
-               .append(MainActivity.getBoardHeight()).append(";");
-        
-        // Add the grid elements data
-        saveData.append(gameScreen.getGridElementsAsString());
+        // Add the map data
+        List<GridElement> gridElements = gameScreen.getGridElements();
+        saveData.append(MapObjects.createDataString(gridElements));
         
         return saveData.toString();
     }
     
     /**
-     * Helper method to get the MainActivity instance
+     * Extract metadata from save data
+     * @param saveData The save data string
+     * @return A map containing the metadata or null if no metadata was found
      */
-    private MainActivity getMainActivity() {
-        Context context = getApplication();
-        if (context instanceof MainActivity) {
-            return (MainActivity) context;
+    public static Map<String, String> extractMetadataFromSaveData(String saveData) {
+        Map<String, String> metadata = new HashMap<>();
+        
+        // Check if the save data has a metadata line
+        if (saveData != null && saveData.startsWith("#")) {
+            // Extract the first line
+            int endOfFirstLine = saveData.indexOf('\n');
+            if (endOfFirstLine > 0) {
+                String metadataLine = saveData.substring(1, endOfFirstLine);
+                
+                // Parse metadata entries (MAPNAME:name;TIME:seconds;MOVES:count;)
+                String[] entries = metadataLine.split(";");
+                for (String entry : entries) {
+                    String[] keyValue = entry.split(":");
+                    if (keyValue.length == 2) {
+                        metadata.put(keyValue[0], keyValue[1]);
+                    }
+                }
+            }
         }
-        return null;
+        
+        return metadata;
     }
     
     /**
@@ -456,6 +500,45 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
+     * Helper method to get the MainActivity instance
+     */
+    private MainActivity getMainActivity() {
+        Context context = getApplication();
+        if (context instanceof MainActivity) {
+            return (MainActivity) context;
+        }
+        return null;
+    }
+    
+    /**
+     * Get the GameManager instance from MainActivity
+     * Note: This will only work if the application context is MainActivity
+     * @return GameManager instance or null if not available
+     */
+    public GameManager getGameManager() {
+        if (context instanceof MainActivity) {
+            return ((MainActivity) context).getGameManager();
+        } else if (context != null) {
+            // Try to get the Application Context in case we have a wrapped context
+            Context appContext = context.getApplicationContext();
+            if (appContext instanceof MainActivity) {
+                return ((MainActivity) appContext).getGameManager();
+            }
+            
+            // If we have an activity context, try to cast it directly
+            if (context instanceof Activity) {
+                Activity activity = (Activity) context;
+                if (activity instanceof MainActivity) {
+                    return ((MainActivity) activity).getGameManager();
+                }
+            }
+        }
+        
+        Timber.w("Cannot get GameManager: application context is not MainActivity");
+        return null;
+    }
+    
+    /**
      * Getters for LiveData to observe
      */
     public LiveData<GameState> getCurrentState() { return currentState; }
@@ -508,17 +591,202 @@ public class GameStateManager extends AndroidViewModel {
     }
 
     /**
-     * Get the GameManager instance from MainActivity
-     * Note: This will only work if the application context is MainActivity
-     * @return GameManager instance or null if not available
+     * Load a saved game from a specific slot
+     * @param context The context
+     * @param slotId The save slot ID
+     * @return True if successful, false otherwise
      */
-    public GameManager getGameManager() {
-        Context context = getApplication();
-        if (context instanceof MainActivity) {
-            MainActivity mainActivity = (MainActivity) context;
-            return mainActivity.getGameManager();
+    public boolean loadSavedGame(Context context, int slotId) {
+        try {
+            // Get save file path
+            String savePath = FileReadWrite.getSaveGamePath((Activity) context, slotId);
+            String saveData = FileReadWrite.loadAbsoluteData(savePath);
+            
+            if (saveData != null && !saveData.isEmpty()) {
+                // Extract metadata
+                Map<String, String> metadata = extractMetadataFromSaveData(saveData);
+                
+                // Store metadata for access by other methods
+                if (metadata != null) {
+                    if (metadata.containsKey("MAPNAME")) {
+                        this.currentMapName = metadata.get("MAPNAME");
+                    }
+                    
+                    if (metadata.containsKey("TIME")) {
+                        try {
+                            this.startTime = Long.parseLong(metadata.get("TIME"));
+                        } catch (NumberFormatException e) {
+                            Timber.e("Invalid time format: %s", metadata.get("TIME"));
+                        }
+                    }
+                }
+                
+                // Create minimap for this save
+                try {
+                    this.minimap = createMinimapFromSaveData(context, saveData);
+                } catch (Exception e) {
+                    Timber.e(e, "Error creating minimap for slot %d", slotId);
+                }
+                
+                return true;
+            }
+            
+            return false;
+        } catch (Exception e) {
+            Timber.e(e, "Error loading saved game from slot %d", slotId);
+            return false;
         }
-        Timber.w("Cannot get GameManager: application context is not MainActivity");
-        return null;
+    }
+    
+    /**
+     * Get the level name
+     * @return The current level name
+     */
+    public String getLevelName() {
+        return currentMapName;
+    }
+    
+    /**
+     * Get the start time
+     * @return The start time as a long value
+     */
+    public long getStartTime() {
+        return startTime;
+    }
+    
+    /**
+     * Create a minimap from save data
+     * @param context The context
+     * @param saveData The save data
+     * @return The minimap bitmap
+     */
+    private Bitmap createMinimapFromSaveData(Context context, String saveData) {
+        // Skip metadata line if present
+        if (saveData.startsWith("#")) {
+            int newlineIndex = saveData.indexOf('\n');
+            if (newlineIndex >= 0) {
+                saveData = saveData.substring(newlineIndex + 1);
+            }
+        }
+        
+        // Extract grid elements
+        List<GridElement> elements = MapObjects.extractDataFromString(saveData, true);
+        
+        // Create a simple minimap
+        return createMinimap(context, elements, 100, 100);
+    }
+    
+    /**
+     * Get a minimap for the current game state
+     * @param context The context
+     * @param width The minimap width
+     * @param height The minimap height
+     * @return The minimap bitmap
+     */
+    public Bitmap getMiniMap(Context context, int width, int height) {
+        if (minimap != null) {
+            return minimap;
+        }
+        
+        // If no minimap is available, create a placeholder
+        Bitmap placeholder = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(placeholder);
+        canvas.drawColor(Color.LTGRAY);
+        return placeholder;
+    }
+    
+    /**
+     * Create a minimap from grid elements
+     * @param context The context
+     * @param elements The grid elements
+     * @param width The minimap width
+     * @param height The minimap height
+     * @return The minimap bitmap
+     */
+    private Bitmap createMinimap(Context context, List<GridElement> elements, int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.WHITE);
+        
+        // If no elements, return empty bitmap
+        if (elements == null || elements.isEmpty()) {
+            return bitmap;
+        }
+        
+        // Determine grid bounds
+        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+        int maxX = 0, maxY = 0;
+        
+        for (GridElement element : elements) {
+            int x = element.getX();
+            int y = element.getY();
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        }
+        
+        // Calculate scaling
+        float gridWidth = maxX - minX + 2; // Add padding
+        float gridHeight = maxY - minY + 2;
+        float scaleX = width / gridWidth;
+        float scaleY = height / gridHeight;
+        float scale = Math.min(scaleX, scaleY);
+        
+        // Draw elements
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        
+        for (GridElement element : elements) {
+            int x = element.getX() - minX + 1; // Add padding
+            int y = element.getY() - minY + 1;
+            float left = x * scale;
+            float top = y * scale;
+            float right = (x + 1) * scale;
+            float bottom = (y + 1) * scale;
+            
+            if (element.getType().startsWith("robot_")) {
+                // Draw robots
+                if (element.getType().contains("red")) {
+                    paint.setColor(Color.RED);
+                } else if (element.getType().contains("blue")) {
+                    paint.setColor(Color.BLUE);
+                } else if (element.getType().contains("green")) {
+                    paint.setColor(Color.GREEN);
+                } else if (element.getType().contains("yellow")) {
+                    paint.setColor(Color.YELLOW);
+                } else {
+                    paint.setColor(Color.GRAY);
+                }
+                canvas.drawCircle((left + right) / 2, (top + bottom) / 2, scale / 2, paint);
+            } else if (element.getType().startsWith("target_")) {
+                // Draw targets
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(2);
+                if (element.getType().contains("red")) {
+                    paint.setColor(Color.RED);
+                } else if (element.getType().contains("blue")) {
+                    paint.setColor(Color.BLUE);
+                } else if (element.getType().contains("green")) {
+                    paint.setColor(Color.GREEN);
+                } else if (element.getType().contains("yellow")) {
+                    paint.setColor(Color.YELLOW);
+                } else {
+                    paint.setColor(Color.GRAY);
+                }
+                canvas.drawRect(left, top, right, bottom, paint);
+                paint.setStyle(Paint.Style.FILL);
+            } else if (element.getType().startsWith("m")) {
+                // Draw walls
+                paint.setColor(Color.DKGRAY);
+                if (element.getType().equals("mh")) { // Horizontal wall
+                    canvas.drawRect(left, top + scale/3, right, bottom - scale/3, paint);
+                } else if (element.getType().equals("mv")) { // Vertical wall
+                    canvas.drawRect(left + scale/3, top, right - scale/3, bottom, paint);
+                }
+            }
+        }
+        
+        return bitmap;
     }
 }

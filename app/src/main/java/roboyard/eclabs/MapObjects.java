@@ -113,6 +113,32 @@ public class MapObjects {
         return elements;
     }
 
+    /**
+     * Create a data string from a list of grid elements
+     * @param elements List of grid elements to serialize
+     * @return String representation of the grid elements
+     */
+    public static String createDataString(List<GridElement> elements) {
+        StringBuilder dataString = new StringBuilder();
+        
+        // Add board size information if available
+        int boardWidth = MainActivity.getBoardWidth();
+        int boardHeight = MainActivity.getBoardHeight();
+        dataString.append("board:").append(boardWidth).append(",").append(boardHeight).append(";");
+        
+        // Process each grid element
+        for (GridElement element : elements) {
+            String type = element.getType();
+            int x = element.getX();
+            int y = element.getY();
+            
+            // Append the element type and coordinates
+            dataString.append(type).append(x).append(",").append(y).append(";");
+        }
+        
+        return dataString.toString();
+    }
+
     /*
      * Generate a string containing all the information from the list
      * @param data List of GridElement containing all the content of the map

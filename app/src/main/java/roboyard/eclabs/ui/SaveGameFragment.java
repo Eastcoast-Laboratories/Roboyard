@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,11 +29,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-import roboyard.eclabs.R;
-import roboyard.eclabs.GameHistoryManager;
 import roboyard.eclabs.GameHistoryEntry;
-import roboyard.eclabs.GameButtonGotoHistoryGame;
+import roboyard.eclabs.GameHistoryManager;
+import roboyard.eclabs.R;
+import roboyard.eclabs.FileReadWrite;
 import timber.log.Timber;
 
 /**
@@ -59,6 +61,8 @@ public class SaveGameFragment extends BaseGameFragment {
     // Mode (save or load)
     private boolean saveMode;
     
+    private GameStateManager gameStateManager;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +72,9 @@ public class SaveGameFragment extends BaseGameFragment {
             SaveGameFragmentArgs args = SaveGameFragmentArgs.fromBundle(getArguments());
             saveMode = args.getSaveMode();
         }
+        
+        // Initialize the GameStateManager
+        gameStateManager = new GameStateManager(requireActivity().getApplication());
     }
     
     @Override
@@ -81,12 +88,8 @@ public class SaveGameFragment extends BaseGameFragment {
         saveSlotRecyclerView = view.findViewById(R.id.save_slot_recycler_view);
         backButton = view.findViewById(R.id.back_button);
         
-        // Set up title based on mode
-        if (saveMode) {
-            titleText.setText("Select slot to save game");
-        } else {
-            titleText.setText("Load game");
-        }
+        // Set title based on mode
+        updateTitle();
         
         // Set up tabs
         setupTabs();
@@ -104,40 +107,72 @@ public class SaveGameFragment extends BaseGameFragment {
     }
     
     /**
+     * Update title based on the selected tab
+     */
+    private void updateTitle() {
+        if (tabLayout != null) {
+            int selectedTab = tabLayout.getSelectedTabPosition();
+            switch (selectedTab) {
+                case TAB_SAVE:
+                    titleText.setText("Select slot to save game");
+                    break;
+                case TAB_LOAD:
+                    titleText.setText("Select game to load");
+                    break;
+                case TAB_HISTORY:
+                    titleText.setText("Game history");
+                    break;
+            }
+        } else {
+            // Initial title based on save/load mode
+            titleText.setText(saveMode ? "Select slot to save game" : "Select game to load");
+        }
+    }
+    
+    /**
      * Set up the tabs for save/load/history
      */
     private void setupTabs() {
-        // Remove existing tabs
-        tabLayout.removeAllTabs();
-        
-        // Add tabs based on mode
-        if (saveMode) {
-            // In save mode, show save and history tabs
-            tabLayout.addTab(tabLayout.newTab().setText("Save").setContentDescription("Save game tab"));
-            tabLayout.addTab(tabLayout.newTab().setText("History").setContentDescription("Game history tab"));
-        } else {
-            // In load mode, show load and history tabs
-            tabLayout.addTab(tabLayout.newTab().setText("Load").setContentDescription("Load game tab"));
-            tabLayout.addTab(tabLayout.newTab().setText("History").setContentDescription("Game history tab"));
+        // Clear existing tabs
+        if (tabLayout != null) {
+            tabLayout.removeAllTabs();
+            
+            // Add tabs based on mode
+            if (saveMode) {
+                // Save mode tabs: Save (0) and History (1)
+                tabLayout.addTab(tabLayout.newTab().setText("Save"));
+                tabLayout.addTab(tabLayout.newTab().setText("History"));
+            } else {
+                // Load mode tabs: Load (0) and History (1)
+                tabLayout.addTab(tabLayout.newTab().setText("Load"));
+                tabLayout.addTab(tabLayout.newTab().setText("History"));
+            }
+            
+            // Set up tab selection listener
+            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    updateTabContent(tab.getPosition());
+                    updateTitle();
+                }
+                
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                    // Not needed
+                }
+                
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                    // Not needed
+                }
+            });
+            
+            // Select the initial tab
+            TabLayout.Tab tab = tabLayout.getTabAt(0);
+            if (tab != null) {
+                tab.select();
+            }
         }
-        
-        // Set up tab selection listener
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                updateTabContent(tab.getPosition());
-            }
-            
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                // Not needed
-            }
-            
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                // Not needed
-            }
-        });
     }
     
     /**
@@ -173,18 +208,22 @@ public class SaveGameFragment extends BaseGameFragment {
             if (tabPosition == 0) {
                 // Save tab
                 saveSlotRecyclerView.setAdapter(saveSlotAdapter);
+                loadSaveSlots();
             } else {
                 // History tab
                 saveSlotRecyclerView.setAdapter(historyAdapter);
+                loadHistoryEntries();
             }
         } else {
             // Load mode tabs: Load (0) or History (1)
             if (tabPosition == 0) {
                 // Load tab
                 saveSlotRecyclerView.setAdapter(saveSlotAdapter);
+                loadSaveSlots();
             } else {
                 // History tab
                 saveSlotRecyclerView.setAdapter(historyAdapter);
+                loadHistoryEntries();
             }
         }
     }
@@ -200,21 +239,47 @@ public class SaveGameFragment extends BaseGameFragment {
         
         // Add regular save slots (1-34)
         for (int i = 1; i <= 34; i++) {
-            // Check if save exists
-            GameState savedState = GameState.loadSavedGame(requireContext(), i);
-            if (savedState != null) {
-                // Slot has a saved game
-                String name = savedState.getLevelName();
-                Date date = new Date(savedState.getStartTime());
-                Bitmap minimap = savedState.getMiniMap(requireContext(), 100, 100);
-                saveSlots.add(new SaveSlotInfo(i, name, date, minimap));
-            } else {
-                // Empty slot
-                saveSlots.add(new SaveSlotInfo(i, "Empty Slot " + i, null, null));
+            try {
+                // Get save file path
+                String savePath = FileReadWrite.getSaveGamePath(requireActivity(), i);
+                java.io.File saveFile = new java.io.File(savePath);
+                
+                if (saveFile.exists()) {
+                    // Load save data to extract metadata
+                    String saveData = FileReadWrite.loadAbsoluteData(savePath);
+                    String name = "Slot " + i;
+                    Date date = new Date(saveFile.lastModified());
+                    Bitmap minimap = null;
+                    
+                    // Extract metadata if available
+                    if (saveData != null && !saveData.isEmpty()) {
+                        Map<String, String> metadata = gameStateManager.extractMetadataFromSaveData(saveData);
+                        if (metadata != null && metadata.containsKey("MAPNAME")) {
+                            name = metadata.get("MAPNAME");
+                            Timber.d("Found map name in slot %d: %s", i, name);
+                        }
+                        
+                        // Create minimap
+                        try {
+                            minimap = createMinimapFromPath(requireContext(), savePath, 100, 100);
+                        } catch (Exception e) {
+                            Timber.e(e, "Error creating minimap for slot %d", i);
+                        }
+                    }
+                    
+                    // Add save slot with metadata
+                    saveSlots.add(new SaveSlotInfo(i, name, date, minimap));
+                } else {
+                    // Empty slot
+                    saveSlots.add(new SaveSlotInfo(i, "Empty Slot " + i, null, null));
+                }
+            } catch (Exception e) {
+                Timber.e(e, "Error loading save slot %d", i);
+                saveSlots.add(new SaveSlotInfo(i, "Error: Slot " + i, null, null));
             }
         }
         
-        // Update adapter
+        // Update the adapter
         saveSlotAdapter.updateSaveSlots(saveSlots);
     }
     
@@ -303,11 +368,11 @@ public class SaveGameFragment extends BaseGameFragment {
      * This addresses the issue mentioned in the memory about minimaps not being displayed
      */
     public void refreshSaveSlot(int slotId) {
-        GameState savedState = GameState.loadSavedGame(requireContext(), slotId);
-        if (savedState != null) {
-            String name = savedState.getLevelName();
-            Date date = new Date(savedState.getStartTime());
-            Bitmap minimap = savedState.getMiniMap(requireContext(), 100, 100);
+        gameStateManager.loadSavedGame(requireContext(), slotId);
+        if (gameStateManager != null) {
+            String name = gameStateManager.getLevelName();
+            Date date = new Date(gameStateManager.getStartTime());
+            Bitmap minimap = gameStateManager.getMiniMap(requireContext(), 100, 100);
             saveSlotAdapter.updateSaveSlot(slotId, name, date, minimap);
         }
     }
@@ -463,6 +528,9 @@ public class SaveGameFragment extends BaseGameFragment {
             // Set moves
             holder.movesText.setText(entry.getMoves() + " moves");
             
+            // Set duration
+            holder.durationText.setText(entry.getSize() + " seconds");
+            
             // Set minimap if available
             if (entry.getMinimap() != null) {
                 holder.minimapView.setImageBitmap(entry.getMinimap());
@@ -479,11 +547,41 @@ public class SaveGameFragment extends BaseGameFragment {
                 if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
                     Timber.d("Loading history entry: %s", entry.getMapPath());
                     gameStateManager.loadHistoryEntry(entry.getMapPath());
-                    // Navigate to game screen
-                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.gamePlayFragment);
+                    // Navigate to game screen using the correct action
+                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.actionSaveGameToGamePlay);
                 } else {
                     Timber.e("Cannot load history entry: map path is empty");
                     Toast.makeText(requireContext(), "Cannot load history entry", Toast.LENGTH_SHORT).show();
+                }
+            });
+            
+            // Set delete button click listener
+            holder.deleteButton.setOnClickListener(v -> {
+                // Delete this history entry
+                if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
+                    Timber.d("Deleting history entry: %s", entry.getMapPath());
+                    
+                    // Store the file path and position before deleting
+                    final String mapPath = entry.getMapPath();
+                    
+                    // Disable the button to prevent multiple clicks
+                    holder.deleteButton.setEnabled(false);
+                    
+                    boolean success = GameHistoryManager.deleteHistoryEntry(requireActivity(), mapPath);
+                    
+                    if (success) {
+                        // Reload all history entries instead of trying to remove a specific one
+                        // This avoids IndexOutOfBoundsException
+                        loadHistoryEntries();
+                        Toast.makeText(requireContext(), "History entry deleted", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Re-enable the button if deletion failed
+                        holder.deleteButton.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed to delete history entry", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Timber.e("Cannot delete history entry: map path is empty");
+                    Toast.makeText(requireContext(), "Cannot delete history entry", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -525,14 +623,18 @@ public class SaveGameFragment extends BaseGameFragment {
         TextView nameText;
         TextView dateText;
         TextView movesText;
+        TextView durationText;
         ImageView minimapView;
+        ImageButton deleteButton;
         
         public HistoryViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.name_text);
             dateText = itemView.findViewById(R.id.date_text);
             movesText = itemView.findViewById(R.id.moves_text);
+            durationText = itemView.findViewById(R.id.duration_text);
             minimapView = itemView.findViewById(R.id.minimap_view);
+            deleteButton = itemView.findViewById(R.id.delete_button);
         }
     }
     
