@@ -90,6 +90,7 @@ dependencies {
     
     // Fragment testing
     implementation 'androidx.fragment:fragment:1.6.2'
+    implementation 'androidx.navigation:navigation-runtime:2.8.9'
     debugImplementation 'androidx.fragment:fragment-testing:1.6.2'
     
     // Lifecycle components

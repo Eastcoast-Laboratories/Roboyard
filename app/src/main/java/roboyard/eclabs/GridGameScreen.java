@@ -76,7 +76,7 @@ public class GridGameScreen extends GameScreen {
     private boolean isGameWon = false;
     private long prevTime;
     private boolean isHistorySaved = false;
-    private static final int HISTORY_SAVE_THRESHOLD = 60; // 60 seconds
+    private static final int HISTORY_SAVE_THRESHOLD = 2; // 60 seconds
 
     private int IAMovesNumber = 0;
 
@@ -1009,7 +1009,7 @@ public class GridGameScreen extends GameScreen {
             }
         }
         
-        // Mark instances as needing to be sorted after adding robots
+        // Mark instances as needing sorting after adding robots
         markUnsorted();
     }
 
@@ -1667,6 +1667,30 @@ public class GridGameScreen extends GameScreen {
      */
     public boolean isHistorySaved() {
         return isHistorySaved;
+    }
+
+    /**
+     * Get the current game time in seconds
+     * @return int The current game time in seconds
+     */
+    public int getTimeCpt() {
+        return timeCpt;
+    }
+    
+    /**
+     * Get the current number of moves
+     * @return int The current number of moves
+     */
+    public int getNbCoups() {
+        return nbCoups;
+    }
+    
+    /**
+     * Get the grid elements as a string that can be saved
+     * @return String The grid elements in string format
+     */
+    public String getGridElementsAsString() {
+        return MapObjects.createStringFromList(gridElements, false);
     }
 
     /**

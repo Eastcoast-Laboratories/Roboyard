@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
 
 /**
@@ -16,7 +17,16 @@ public class MainActivity extends AppCompatActivity {
     
     private GameStateManager gameStateManager;
     private NavController navController;
-    
+
+    // Forward to the regular MainActivity's static methods
+    public static int getBoardWidth() {
+        return roboyard.eclabs.MainActivity.getBoardWidth();
+    }
+
+    public static int getBoardHeight() {
+        return roboyard.eclabs.MainActivity.getBoardHeight();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,5 +63,9 @@ public class MainActivity extends AppCompatActivity {
      */
     public GameStateManager getGameStateManager() {
         return gameStateManager;
+    }
+
+    public GameManager getGameManager() {
+        return gameStateManager.getGameManager();
     }
 }

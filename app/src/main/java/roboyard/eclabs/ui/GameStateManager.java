@@ -10,11 +10,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.Constants;
+import roboyard.eclabs.GameManager;
+import roboyard.eclabs.GameScreen;
 import roboyard.eclabs.GridElement;
+import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
 import roboyard.pm.ia.GameSolution;
@@ -131,16 +137,134 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
-     * Save current game
+     * Load a history entry by its path
+     * @param mapPath Path to the history entry map file
+     */
+    public void loadHistoryEntry(String mapPath) {
+        Timber.d("Loading history entry: %s", mapPath);
+        
+        // Get the GameManager if available
+        GameManager gameManager = getGameManager();
+        if (gameManager == null) {
+            Timber.e("Cannot load history entry: GameManager is null");
+            return;
+        }
+        
+        // Get the current screen
+        GameScreen currentScreen = gameManager.getCurrentScreen();
+        
+        // If it's already a GridGameScreen, use it; otherwise switch to the game screen
+        if (currentScreen instanceof GridGameScreen) {
+            GridGameScreen gridScreen = (GridGameScreen) currentScreen;
+            // Load the saved game
+            gridScreen.setSavedGame(mapPath);
+            Timber.d("Loaded history entry into existing GridGameScreen");
+        } else {
+            // First switch to the game screen
+            gameManager.setGameScreen(Constants.SCREEN_GAME);
+            
+            // Then get the game screen and load the saved game
+            GridGameScreen gridScreen = (GridGameScreen) gameManager.getCurrentScreen();
+            gridScreen.setSavedGame(mapPath);
+            Timber.d("Loaded history entry into GridGameScreen");
+        }
+    }
+    
+    /**
+     * Save the current game state to a file
      * @param saveId Save slot ID
      * @return True if save was successful
      */
     public boolean saveGame(int saveId) {
+        // Get the current GridGameScreen instance from the legacy UI if available
+        MainActivity mainActivity = getMainActivity();
+        if (mainActivity != null && mainActivity.getGameManager() != null 
+                && mainActivity.getGameManager().getCurrentScreen() instanceof GridGameScreen) {
+            GridGameScreen gameScreen = (GridGameScreen) mainActivity.getGameManager().getCurrentScreen();
+            
+            // Use the GridGameScreen's data to save the game
+            Timber.d("Using GridGameScreen data to save game to slot %d", saveId);
+            String saveData = createSaveDataFromGridGameScreen(gameScreen);
+            
+            // Determine filename based on slot ID
+            String filename;
+            if (saveId == 0) {
+                filename = Constants.AUTO_SAVE_FILENAME;
+            } else {
+                filename = Constants.SAVE_FILENAME_PREFIX + saveId + Constants.SAVE_FILENAME_EXTENSION;
+            }
+            
+            // Save the data to file
+            try {
+                // Create saves directory if it doesn't exist
+                File savesDir = new File(getApplication().getFilesDir(), Constants.SAVE_DIRECTORY);
+                if (!savesDir.exists()) {
+                    savesDir.mkdirs();
+                }
+                
+                // Create and write to the file
+                File saveFile = new File(savesDir, filename);
+                FileOutputStream fos = new FileOutputStream(saveFile);
+                fos.write(saveData.getBytes());
+                fos.close();
+                
+                Timber.d("Game saved successfully to slot %d", saveId);
+                return true;
+            } catch (IOException e) {
+                Timber.e("Error saving game to slot %d: %s", saveId, e.getMessage());
+                return false;
+            }
+        }
+        
+        // Fallback to using GameState if GridGameScreen is not available
         GameState state = currentState.getValue();
         if (state != null) {
             return state.saveToFile(getApplication(), saveId);
         }
         return false;
+    }
+    
+    /**
+     * Create save data string from a GridGameScreen instance
+     */
+    private String createSaveDataFromGridGameScreen(GridGameScreen gameScreen) {
+        StringBuilder saveData = new StringBuilder();
+        
+        // Add board name
+        String mapName = gameScreen.getMapName();
+        if (mapName == null || mapName.isEmpty()) {
+            mapName = "Saved Game";
+        }
+        saveData.append("name:").append(mapName).append(";");
+        
+        // Add timestamp
+        saveData.append("timestamp:").append(System.currentTimeMillis()).append(";");
+        
+        // Add play duration
+        saveData.append("duration:").append(gameScreen.getTimeCpt()).append(";");
+        
+        // Add number of moves
+        saveData.append("moves:").append(gameScreen.getNbCoups()).append(";");
+        
+        // Add board size
+        saveData.append("board:").append(MainActivity.getBoardWidth()).append(",")
+               .append(MainActivity.getBoardHeight()).append(";");
+        
+        // Add the grid elements data
+        saveData.append(gameScreen.getGridElementsAsString());
+        
+        return saveData.toString();
+    }
+    
+    /**
+     * Helper method to get the MainActivity instance
+     */
+    private MainActivity getMainActivity() {
+        Context context = getApplication();
+        if (context instanceof MainActivity) {
+            return (MainActivity) context;
+        }
+        return null;
     }
     
     /**
@@ -381,5 +505,20 @@ public class GameStateManager extends AndroidViewModel {
      */
     public Context getContext() {
         return getApplication().getApplicationContext();
+    }
+
+    /**
+     * Get the GameManager instance from MainActivity
+     * Note: This will only work if the application context is MainActivity
+     * @return GameManager instance or null if not available
+     */
+    public GameManager getGameManager() {
+        Context context = getApplication();
+        if (context instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) context;
+            return mainActivity.getGameManager();
+        }
+        Timber.w("Cannot get GameManager: application context is not MainActivity");
+        return null;
     }
 }

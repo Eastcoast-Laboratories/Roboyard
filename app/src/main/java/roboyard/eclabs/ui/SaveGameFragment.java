@@ -1,6 +1,10 @@
 package roboyard.eclabs.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +30,9 @@ import java.util.List;
 import java.util.Locale;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.GameHistoryManager;
+import roboyard.eclabs.GameHistoryEntry;
+import roboyard.eclabs.GameButtonGotoHistoryGame;
 import timber.log.Timber;
 
 /**
@@ -215,13 +222,80 @@ public class SaveGameFragment extends BaseGameFragment {
      * Load history entries from storage
      */
     private void loadHistoryEntries() {
-        List<HistoryEntry> historyEntries = new ArrayList<>();
+        try {
+            // Load history entries
+            List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(requireActivity());
+            
+            // If we have history entries, add them to the adapter
+            if (historyEntries != null && !historyEntries.isEmpty()) {
+                List<HistoryEntry> entries = new ArrayList<>();
+                for (GameHistoryEntry entry : historyEntries) {
+                    // Create a history item with data from the entry
+                    String name = entry.getMapName();
+                    // Format date manually since getFormattedDate() might not exist
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                    String date = sdf.format(new Date(entry.getTimestamp()));
+                    int moves = entry.getMovesMade();
+                    String mapPath = entry.getMapPath();
+                    
+                    // Create a bitmap from the map file
+                    Bitmap minimap = null;
+                    try {
+                        // Create a bitmap for the map minimap
+                        minimap = createMinimapFromPath(requireContext(), mapPath, 100, 100);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error creating minimap");
+                    }
+                    
+                    // Create a history item and add it to the adapter
+                    HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves, entry.getBoardSize(), mapPath, minimap);
+                    entries.add(historyEntry);
+                }
+                
+                // Update the adapter
+                historyAdapter.updateHistoryEntries(entries);
+                historyAdapter.notifyDataSetChanged();
+            } else {
+                // No history entries
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error loading history entries");
+        }
+    }
+    
+    /**
+     * Helper method to create a minimap bitmap from a map path
+     */
+    private Bitmap createMinimapFromPath(Context context, String mapPath, int width, int height) {
+        // Create a simple placeholder bitmap for the minimap
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
         
-        // TODO: Load actual history entries from storage
-        // This is a placeholder - in the real implementation we would load from a database or file
+        // Fill with light blue background
+        canvas.drawColor(Color.rgb(200, 230, 255));
         
-        // Update adapter
-        historyAdapter.updateHistoryEntries(historyEntries);
+        // Draw a simple grid pattern
+        Paint paint = new Paint();
+        paint.setColor(Color.rgb(150, 200, 240));
+        paint.setStrokeWidth(2);
+        
+        // Draw grid lines
+        for (int i = 0; i < width; i += width/10) {
+            canvas.drawLine(i, 0, i, height, paint);
+        }
+        for (int i = 0; i < height; i += height/10) {
+            canvas.drawLine(0, i, width, i, paint);
+        }
+        
+        // Draw a robot icon (simple circle)
+        paint.setColor(Color.rgb(255, 100, 100));
+        canvas.drawCircle(width/3f, height/3f, width/15f, paint);
+        
+        // Draw a target icon (simple square)
+        paint.setColor(Color.rgb(100, 255, 100));
+        canvas.drawRect(width/2f, height/2f, width/2f + width/10f, height/2f + height/10f, paint);
+        
+        return bitmap;
     }
     
     /**
@@ -401,10 +475,16 @@ public class SaveGameFragment extends BaseGameFragment {
             
             // Set click listener
             holder.itemView.setOnClickListener(v -> {
-                // Load this history entry
-                gameStateManager.loadHistoryEntry(entry.getId());
-                // Navigate to game screen
-                Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.gamePlayFragment);
+                // Load this history entry using the map path
+                if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
+                    Timber.d("Loading history entry: %s", entry.getMapPath());
+                    gameStateManager.loadHistoryEntry(entry.getMapPath());
+                    // Navigate to game screen
+                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.gamePlayFragment);
+                } else {
+                    Timber.e("Cannot load history entry: map path is empty");
+                    Toast.makeText(requireContext(), "Cannot load history entry", Toast.LENGTH_SHORT).show();
+                }
             });
         }
         
@@ -482,24 +562,30 @@ public class SaveGameFragment extends BaseGameFragment {
      * HistoryEntry class to hold history entry information
      */
     private static class HistoryEntry {
-        private final int id;
         private final String name;
         private final Date date;
         private final int moves;
+        private final String size;
+        private final String mapPath;
         private final Bitmap minimap;
+        private final int id;
         
-        public HistoryEntry(int id, String name, Date date, int moves, Bitmap minimap) {
-            this.id = id;
+        public HistoryEntry(String name, Date date, int moves, String size, String mapPath, Bitmap minimap) {
             this.name = name;
             this.date = date;
             this.moves = moves;
+            this.size = size;
+            this.mapPath = mapPath;
             this.minimap = minimap;
+            this.id = 0; // default id
         }
         
         public int getId() { return id; }
         public String getName() { return name; }
         public Date getDate() { return date; }
         public int getMoves() { return moves; }
+        public String getSize() { return size; }
+        public String getMapPath() { return mapPath; }
         public Bitmap getMinimap() { return minimap; }
     }
 }
