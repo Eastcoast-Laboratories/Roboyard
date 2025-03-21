@@ -533,25 +533,9 @@ public class GameState implements Serializable {
     /**
      * Create a random game state
      */
-    public static GameState createRandom(int boardSize, int difficulty) {
+    public static GameState createRandom(int width, int height, int difficulty) {
         // Set the global difficulty level first so MapGenerator knows which difficulty to use
         GridGameScreen.setDifficulty(difficultyIntToString(difficulty));
-        
-        // Determine board dimensions based on boardSize
-        int width, height;
-        switch (boardSize) {
-            case 0: // Small
-                width = height = 10;
-                break;
-            case 1: // Medium
-                width = height = 14;
-                break;
-            case 2: // Large
-                width = height = 18;
-                break;
-            default:
-                width = height = 14; // Default to medium
-        }
         
         // Temporarily save the current board size
         int oldWidth = MainActivity.boardSizeX;
@@ -618,7 +602,7 @@ public class GameState implements Serializable {
         // For now, just create a random level with fixed seed
         // TODO: Implement proper level loading from assets
         
-        GameState state = createRandom(1, 1); // Medium board, medium difficulty
+        GameState state = createRandom(14, 14, 1); // Medium board, medium difficulty
         state.setLevelId(levelId);
         state.setLevelName("Level " + levelId);
         return state;
@@ -635,5 +619,51 @@ public class GameState implements Serializable {
             case 3: return "Impossible";
             default: return "Beginner";
         }
+    }
+    
+    /**
+     * Serialize the game state to a string representation for saving to a file
+     * @return String representation of the game state
+     */
+    public String serialize() {
+        StringBuilder saveData = new StringBuilder();
+        
+        // Add metadata as a comment line
+        // Format: #MAPNAME:name;TIME:seconds;MOVES:count;
+        saveData.append("#MAPNAME:").append(levelName).append(";");
+        saveData.append("TIME:").append(System.currentTimeMillis() - startTime).append(";");
+        saveData.append("MOVES:").append(moveCount).append(";\n");
+        
+        // Add board dimensions
+        saveData.append("WIDTH:").append(width).append(";\n");
+        saveData.append("HEIGHT:").append(height).append(";\n");
+        
+        // Add board data
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int cellType = board[y][x];
+                saveData.append(cellType);
+                
+                // If it's a target, add the color
+                if (cellType == Constants.CELL_TARGET) {
+                    saveData.append(":").append(targetColors[y][x]);
+                }
+                
+                saveData.append(",");
+            }
+            saveData.append("\n");
+        }
+        
+        // Add robots
+        saveData.append("ROBOTS:\n");
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                saveData.append(element.getX()).append(",")
+                       .append(element.getY()).append(",")
+                       .append(element.getColor()).append("\n");
+            }
+        }
+        
+        return saveData.toString();
     }
 }

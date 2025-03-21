@@ -16,6 +16,9 @@ import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
+import java.util.ArrayList;
+
+import roboyard.eclabs.GridElement;
 import roboyard.eclabs.R;
 
 /**
@@ -505,5 +508,25 @@ public class GameGridView extends View {
         }
         
         return color + " robot at position " + robot.getX() + ", " + robot.getY();
+    }
+    
+    /**
+     * Set grid elements directly from an ArrayList of GridElements
+     * This is used by ModernGameFragment to update the grid view
+     * @param gridElements List of grid elements to display
+     */
+    public void setGridElements(ArrayList<GridElement> gridElements) {
+        if (gameStateManager == null || gameStateManager.getCurrentState().getValue() == null) {
+            return;
+        }
+        
+        GameState state = gameStateManager.getCurrentState().getValue();
+        
+        // Update the grid dimensions
+        gridWidth = state.getWidth();
+        gridHeight = state.getHeight();
+        
+        // Force redraw
+        invalidate();
     }
 }

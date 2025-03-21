@@ -176,6 +176,20 @@
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="20sp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/button_rounded_gray_outline" />
+
+            <!-- Modern UI Game button - Purple with round corners and black outline -->
+            <Button
+                android:id="@+id/modern_ui_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Modern UI Game"
+                android:contentDescription="Play the game with the modern UI"
+                android:padding="16dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:background="@drawable/button_rounded_gray_outline" />
 
         </LinearLayout>

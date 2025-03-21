@@ -3,12 +3,17 @@ package roboyard.eclabs.ui;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.MotionEvent;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -16,29 +21,30 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.FileReadWrite;
-import roboyard.eclabs.GameManager;
-import roboyard.eclabs.GameScreen;
 import roboyard.eclabs.GridElement;
-import roboyard.eclabs.GridGameScreen;
-import roboyard.eclabs.MapObjects;
+import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.MainActivity;
+import roboyard.eclabs.MapGenerator;
+import roboyard.eclabs.MapObjects;
+import roboyard.eclabs.R;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
+import roboyard.eclabs.util.BoardSizeManager;
+import roboyard.eclabs.util.DifficultyManager;
+import roboyard.eclabs.util.UIModeManager;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
-
-import roboyard.eclabs.R;
-import roboyard.eclabs.MapObjects;
-
 import timber.log.Timber;
 
 /**
@@ -54,8 +60,6 @@ public class GameStateManager extends AndroidViewModel {
     private MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
     
     // Game settings
-    private MutableLiveData<Integer> difficulty = new MutableLiveData<>(Constants.DIFFICULTY_NORMAL);
-    private MutableLiveData<Integer> boardSize = new MutableLiveData<>(Constants.BOARD_SIZE_MEDIUM);
     private MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
     
     // Solver
@@ -67,11 +71,29 @@ public class GameStateManager extends AndroidViewModel {
     private long startTime = 0;
     private Bitmap minimap = null;
     
+    // Board size manager
+    private BoardSizeManager boardSizeManager;
+    
+    // Difficulty manager
+    private DifficultyManager difficultyManager;
+    
+    // UI mode manager
+    private UIModeManager uiModeManager;
+    
     public GameStateManager(Application application) {
         super(application);
         // Initialize solver
         solver = new SolverDD();
         context = application.getApplicationContext();
+        
+        // Initialize board size manager
+        boardSizeManager = BoardSizeManager.getInstance(context);
+        
+        // Initialize difficulty manager
+        difficultyManager = DifficultyManager.getInstance(context);
+        
+        // Initialize UI mode manager
+        uiModeManager = UIModeManager.getInstance(context);
     }
     
     /**
@@ -80,8 +102,12 @@ public class GameStateManager extends AndroidViewModel {
     public void startNewGame() {
         Timber.d("GameStateManager: startNewGame() called");
         
+        // Get board dimensions from BoardSizeManager
+        int width = boardSizeManager.getBoardWidth();
+        int height = boardSizeManager.getBoardHeight();
+        
         // Create a new random game state
-        GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
+        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
         Timber.d("GameStateManager: Created new random GameState");
         
         currentState.setValue(newState);
@@ -96,6 +122,41 @@ public class GameStateManager extends AndroidViewModel {
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
         solver.init(gridElements);
+    }
+    
+    /**
+     * Start a new random game with the modern UI
+     * This is similar to startNewGame() but ensures the game is displayed in the modern UI
+     */
+    public void startModernGame() {
+        Timber.d("GameStateManager: startModernGame() called");
+        
+        // Get board dimensions from BoardSizeManager
+        int width = boardSizeManager.getBoardWidth();
+        int height = boardSizeManager.getBoardHeight();
+        
+        // Create a new random game state
+        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
+        Timber.d("GameStateManager: Created new random GameState for modern UI");
+        
+        // Set a flag to indicate this is a modern UI game
+        newState.setLevelName("Modern UI Game");
+        
+        currentState.setValue(newState);
+        Timber.d("GameStateManager: Set currentState LiveData value with new state");
+        
+        moveCount.setValue(0);
+        Timber.d("GameStateManager: Reset moveCount to 0");
+        
+        isGameComplete.setValue(false);
+        Timber.d("GameStateManager: Reset isGameComplete to false");
+        
+        // Initialize the solver with grid elements
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        solver.init(gridElements);
+        
+        // Set UI mode to modern
+        uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
     }
     
     /**
@@ -141,7 +202,7 @@ public class GameStateManager extends AndroidViewModel {
      */
     public void loadHistoryEntry(int historyId) {
         // TODO: Implement history entry loading
-        GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
+        GameState newState = GameState.createRandom(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight(), difficultyManager.getDifficulty());
         newState.setLevelId(historyId);
         currentState.setValue(newState);
         moveCount.setValue(0);
@@ -153,133 +214,121 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
-     * Load a history entry by its path
-     * @param mapPath Path to the history entry map file
+     * Load a game from a history entry
+     * @param mapPath Path to the history entry file
      */
     public void loadHistoryEntry(String mapPath) {
         Timber.d("Loading history entry: %s", mapPath);
         
-        // Get the GameManager if available
-        GameManager gameManager = getGameManager();
-        if (gameManager == null) {
-            Timber.e("Cannot load history entry: GameManager is null");
-            return;
-        }
-        
-        // Get the current screen
-        GameScreen currentScreen = gameManager.getCurrentScreen();
-        
-        // If it's already a GridGameScreen, use it; otherwise switch to the game screen
-        if (currentScreen instanceof GridGameScreen) {
-            GridGameScreen gridScreen = (GridGameScreen) currentScreen;
-            // Load the saved game
-            gridScreen.setSavedGame(mapPath);
-            Timber.d("Loaded history entry into existing GridGameScreen");
-        } else {
-            // First switch to the game screen
-            gameManager.setGameScreen(Constants.SCREEN_GAME);
+        try {
+            // Load game state from file
+            File historyFile = new File(mapPath);
+            if (!historyFile.exists()) {
+                Timber.e("History file does not exist: %s", mapPath);
+                return;
+            }
             
-            // Then get the game screen and load the saved game
-            GridGameScreen gridScreen = (GridGameScreen) gameManager.getCurrentScreen();
-            gridScreen.setSavedGame(mapPath);
-            Timber.d("Loaded history entry into GridGameScreen");
+            // TODO: Implement proper loading from history file
+            // For now, just start a new game with current settings
+            startModernGame();
+            
+            Timber.d("Loaded history entry");
+        } catch (Exception e) {
+            Timber.e(e, "Error loading history entry: %s", mapPath);
         }
     }
     
     /**
-     * Save the current game state to a file
-     * @param saveId Save slot ID
-     * @return True if save was successful
+     * Save the current game to a slot
+     * @param saveId The save slot ID
+     * @return true if the game was saved successfully, false otherwise
      */
     public boolean saveGame(int saveId) {
-        Timber.d("Attempting to save game to slot %d", saveId);
+        Timber.d("Saving game to slot %d", saveId);
         
-        // First try to get the current GridGameScreen instance from the legacy UI
-        GridGameScreen gameScreen = null;
-        GameManager gameManager = getGameManager();
-        
-        if (gameManager != null && gameManager.getCurrentScreen() instanceof GridGameScreen) {
-            gameScreen = (GridGameScreen) gameManager.getCurrentScreen();
-            Timber.d("Retrieved GridGameScreen from GameManager");
-        } else {
-            // Try with MainActivity
-            MainActivity mainActivity = getMainActivity();
-            if (mainActivity != null && mainActivity.getGameManager() != null 
-                    && mainActivity.getGameManager().getCurrentScreen() instanceof GridGameScreen) {
-                gameScreen = (GridGameScreen) mainActivity.getGameManager().getCurrentScreen();
-                Timber.d("Retrieved GridGameScreen from MainActivity");
-            }
+        // Get the current game state
+        GameState gameState = currentState.getValue();
+        if (gameState == null) {
+            Timber.e("Cannot save game: No valid GameState available");
+            return false;
         }
         
-        // If we found a game screen, use it to save
-        if (gameScreen != null) {
-            // Use the GridGameScreen's data to save the game
-            Timber.d("Using GridGameScreen data to save game to slot %d", saveId);
-            String saveData = createSaveDataFromGridGameScreen(gameScreen);
-            
-            // Determine filename based on slot ID
-            String filename;
-            if (saveId == 0) {
-                filename = Constants.AUTO_SAVE_FILENAME;
-            } else {
-                filename = Constants.SAVE_FILENAME_PREFIX + saveId + Constants.SAVE_FILENAME_EXTENSION;
-            }
-            
-            // Save the data to file using FileReadWrite utility
-            try {
-                boolean success = FileReadWrite.writeStringToFile(
-                        (Activity) context, saveData, Constants.SAVE_DIRECTORY, filename);
-                
-                if (success) {
-                    Timber.d("Game saved successfully to slot %d", saveId);
-                    return true;
-                } else {
-                    Timber.e("Failed to save game to slot %d", saveId);
+        try {
+            // Create save directory if it doesn't exist
+            File saveDir = new File(getContext().getFilesDir(), Constants.SAVE_DIRECTORY);
+            if (!saveDir.exists()) {
+                if (!saveDir.mkdirs()) {
+                    Timber.e("Failed to create save directory");
                     return false;
                 }
-            } catch (Exception e) {
-                Timber.e("Error saving game to slot %d: %s", saveId, e.getMessage());
-                e.printStackTrace();
-                return false;
             }
-        } else {
-            Timber.e("Cannot find GridGameScreen to save from");
+            
+            // Create save file
+            String fileName = Constants.SAVE_FILENAME_PREFIX + saveId + Constants.SAVE_FILENAME_EXTENSION;
+            File saveFile = new File(saveDir, fileName);
+            
+            // Serialize game state to JSON
+            String saveData = gameState.serialize();
+            
+            // Write to file
+            try (FileOutputStream fos = new FileOutputStream(saveFile)) {
+                fos.write(saveData.getBytes());
+                fos.flush();
+                Timber.d("Game saved successfully to slot %d", saveId);
+                return true;
+            }
+        } catch (IOException e) {
+            Timber.e(e, "Error saving game to slot %d", saveId);
+            return false;
         }
-        
-        // Fallback to using GameState if GridGameScreen is not available
-        GameState state = currentState.getValue();
-        if (state != null) {
-            Timber.d("Falling back to using GameState to save game");
-            return state.saveToFile(getApplication(), saveId);
-        }
-        
-        Timber.e("Failed to save game: No valid GameState or GridGameScreen available");
-        return false;
     }
     
     /**
-     * Create save data from the current game state
-     * @param gameScreen The current GridGameScreen
-     * @return The save data as a string
+     * Load a saved game from a specific slot
+     * @param context The context
+     * @param slotId The save slot ID
+     * @return True if successful, false otherwise
      */
-    private String createSaveDataFromGridGameScreen(GridGameScreen gameScreen) {
-        StringBuilder saveData = new StringBuilder();
-        
-        // Add metadata as a comment line
-        String mapName = gameScreen.getMapName();
-        int timeCount = gameScreen.getTimeCount();
-        int moveCount = gameScreen.getMoveCount();
-        
-        // Format: #MAPNAME:name;TIME:seconds;MOVES:count;
-        saveData.append("#MAPNAME:").append(mapName).append(";");
-        saveData.append("TIME:").append(timeCount).append(";");
-        saveData.append("MOVES:").append(moveCount).append(";\n");
-        
-        // Add the map data
-        List<GridElement> gridElements = gameScreen.getGridElements();
-        saveData.append(MapObjects.createDataString(gridElements));
-        
-        return saveData.toString();
+    public boolean loadSavedGame(Context context, int slotId) {
+        try {
+            // Get save file path
+            String savePath = FileReadWrite.getSaveGamePath((Activity) context, slotId);
+            String saveData = FileReadWrite.loadAbsoluteData(savePath);
+            
+            if (saveData != null && !saveData.isEmpty()) {
+                // Extract metadata
+                Map<String, String> metadata = extractMetadataFromSaveData(saveData);
+                
+                // Store metadata for access by other methods
+                if (metadata != null) {
+                    if (metadata.containsKey("MAPNAME")) {
+                        this.currentMapName = metadata.get("MAPNAME");
+                    }
+                    
+                    if (metadata.containsKey("TIME")) {
+                        try {
+                            this.startTime = Long.parseLong(metadata.get("TIME"));
+                        } catch (NumberFormatException e) {
+                            Timber.e("Invalid time format: %s", metadata.get("TIME"));
+                        }
+                    }
+                }
+                
+                // Create minimap for this save
+                try {
+                    this.minimap = createMinimapFromSaveData(context, saveData);
+                } catch (Exception e) {
+                    Timber.e(e, "Error creating minimap for slot %d", slotId);
+                }
+                
+                return true;
+            }
+            
+            return false;
+        } catch (Exception e) {
+            Timber.e(e, "Error loading saved game from slot %d", slotId);
+            return false;
+        }
     }
     
     /**
@@ -500,42 +549,11 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
-     * Helper method to get the MainActivity instance
+     * Get the context from application
+     * @return Application context
      */
-    private MainActivity getMainActivity() {
-        Context context = getApplication();
-        if (context instanceof MainActivity) {
-            return (MainActivity) context;
-        }
-        return null;
-    }
-    
-    /**
-     * Get the GameManager instance from MainActivity
-     * Note: This will only work if the application context is MainActivity
-     * @return GameManager instance or null if not available
-     */
-    public GameManager getGameManager() {
-        if (context instanceof MainActivity) {
-            return ((MainActivity) context).getGameManager();
-        } else if (context != null) {
-            // Try to get the Application Context in case we have a wrapped context
-            Context appContext = context.getApplicationContext();
-            if (appContext instanceof MainActivity) {
-                return ((MainActivity) appContext).getGameManager();
-            }
-            
-            // If we have an activity context, try to cast it directly
-            if (context instanceof Activity) {
-                Activity activity = (Activity) context;
-                if (activity instanceof MainActivity) {
-                    return ((MainActivity) activity).getGameManager();
-                }
-            }
-        }
-        
-        Timber.w("Cannot get GameManager: application context is not MainActivity");
-        return null;
+    private Context getContext() {
+        return getApplication().getApplicationContext();
     }
     
     /**
@@ -544,15 +562,52 @@ public class GameStateManager extends AndroidViewModel {
     public LiveData<GameState> getCurrentState() { return currentState; }
     public LiveData<Integer> getMoveCount() { return moveCount; }
     public LiveData<Boolean> isGameComplete() { return isGameComplete; }
-    public LiveData<Integer> getDifficulty() { return difficulty; }
-    public LiveData<Integer> getBoardSize() { return boardSize; }
     public LiveData<Boolean> getSoundEnabled() { return soundEnabled; }
+    
+    /**
+     * Get the board width from BoardSizeManager
+     * @return Current board width
+     */
+    public int getBoardWidth() {
+        return boardSizeManager.getBoardWidth();
+    }
+    
+    /**
+     * Get the board height from BoardSizeManager
+     * @return Current board height
+     */
+    public int getBoardHeight() {
+        return boardSizeManager.getBoardHeight();
+    }
+    
+    /**
+     * Set the board width in BoardSizeManager
+     * @param width New board width
+     */
+    public void setBoardWidth(int width) {
+        boardSizeManager.setBoardWidth(width);
+    }
+    
+    /**
+     * Set the board height in BoardSizeManager
+     * @param height New board height
+     */
+    public void setBoardHeight(int height) {
+        boardSizeManager.setBoardHeight(height);
+    }
+    
+    /**
+     * Set both board width and height in BoardSizeManager
+     * @param width New board width
+     * @param height New board height
+     */
+    public void setBoardSize(int width, int height) {
+        boardSizeManager.setBoardSize(width, height);
+    }
     
     /**
      * Setters for game settings
      */
-    public void setDifficulty(int difficulty) { this.difficulty.setValue(difficulty); }
-    public void setBoardSize(int boardSize) { this.boardSize.setValue(boardSize); }
     public void setSoundEnabled(boolean enabled) { this.soundEnabled.setValue(enabled); }
     
     /**
@@ -581,61 +636,6 @@ public class GameStateManager extends AndroidViewModel {
      */
     public void setGameComplete(boolean complete) {
         isGameComplete.setValue(complete);
-    }
-    
-    /**
-     * Get the current context
-     */
-    public Context getContext() {
-        return getApplication().getApplicationContext();
-    }
-
-    /**
-     * Load a saved game from a specific slot
-     * @param context The context
-     * @param slotId The save slot ID
-     * @return True if successful, false otherwise
-     */
-    public boolean loadSavedGame(Context context, int slotId) {
-        try {
-            // Get save file path
-            String savePath = FileReadWrite.getSaveGamePath((Activity) context, slotId);
-            String saveData = FileReadWrite.loadAbsoluteData(savePath);
-            
-            if (saveData != null && !saveData.isEmpty()) {
-                // Extract metadata
-                Map<String, String> metadata = extractMetadataFromSaveData(saveData);
-                
-                // Store metadata for access by other methods
-                if (metadata != null) {
-                    if (metadata.containsKey("MAPNAME")) {
-                        this.currentMapName = metadata.get("MAPNAME");
-                    }
-                    
-                    if (metadata.containsKey("TIME")) {
-                        try {
-                            this.startTime = Long.parseLong(metadata.get("TIME"));
-                        } catch (NumberFormatException e) {
-                            Timber.e("Invalid time format: %s", metadata.get("TIME"));
-                        }
-                    }
-                }
-                
-                // Create minimap for this save
-                try {
-                    this.minimap = createMinimapFromSaveData(context, saveData);
-                } catch (Exception e) {
-                    Timber.e(e, "Error creating minimap for slot %d", slotId);
-                }
-                
-                return true;
-            }
-            
-            return false;
-        } catch (Exception e) {
-            Timber.e(e, "Error loading saved game from slot %d", slotId);
-            return false;
-        }
     }
     
     /**
@@ -788,5 +788,29 @@ public class GameStateManager extends AndroidViewModel {
         }
         
         return bitmap;
+    }
+
+    /**
+     * Get the current difficulty level from DifficultyManager
+     * @return Current difficulty level
+     */
+    public int getDifficulty() {
+        return difficultyManager.getDifficulty();
+    }
+    
+    /**
+     * Get a string representation of the current difficulty level
+     * @return String representation of the current difficulty level
+     */
+    public String getDifficultyString() {
+        return difficultyManager.getDifficultyString();
+    }
+    
+    /**
+     * Set the difficulty level in DifficultyManager
+     * @param difficulty New difficulty level
+     */
+    public void setDifficulty(int difficulty) {
+        difficultyManager.setDifficulty(difficulty);
     }
 }

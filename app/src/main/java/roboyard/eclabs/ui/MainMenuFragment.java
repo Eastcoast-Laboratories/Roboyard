@@ -25,6 +25,7 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button loadGameButton;
     private Button settingsButton;
     private Button helpButton;
+    private Button modernUIButton; // New button for modern UI game
     // private Button exitButton; // Can be removed since we're not using it anymore
     
     @Override
@@ -42,6 +43,7 @@ public class MainMenuFragment extends BaseGameFragment {
         loadGameButton = view.findViewById(R.id.load_game_button);
         settingsButton = view.findViewById(R.id.settings_button);
         helpButton = view.findViewById(R.id.help_button);
+        modernUIButton = view.findViewById(R.id.modern_ui_button); // Initialize modern UI button
         
         // Set up button listeners with proper accessibility support
         setupButtons();
@@ -98,6 +100,18 @@ public class MainMenuFragment extends BaseGameFragment {
         helpButton.setOnClickListener(v -> {
             // Navigate to help screen
             navigateTo(R.id.actionMainMenuToHelp);
+        });
+        
+        // Modern UI button - start a modern UI game
+        modernUIButton.setOnClickListener(v -> {
+            // Start a new modern UI game
+            Timber.d("MainMenuFragment: Calling gameStateManager.startModernGame()");
+            gameStateManager.startModernGame();
+            
+            // Navigate to modern game screen
+            Timber.d("MainMenuFragment: Navigating to modern game screen with actionMainMenuToModernGame");
+            navigateTo(R.id.actionMainMenuToModernGame);
+            Timber.d("MainMenuFragment: Navigation to modern game completed");
         });
         
         // Exit button - exit the app (commented out since we removed the exit button)

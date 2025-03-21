@@ -28,6 +28,9 @@
                 app:argType="boolean"
                 android:defaultValue="false" />
         </action>
+        <action
+            android:id="@+id/actionMainMenuToModernGame"
+            app:destination="@id/modernGameFragment" />
     </fragment>
 
     <!-- Game Canvas Fragment (using old game logic) -->
@@ -82,6 +85,17 @@
             android:name="saveMode"
             app:argType="boolean"
             android:defaultValue="true" />
+    </fragment>
+
+    <!-- Modern Game Fragment -->
+    <fragment
+        android:id="@+id/modernGameFragment"
+        android:name="roboyard.eclabs.ui.ModernGameFragment"
+        android:label="Modern Game"
+        tools:layout="@layout/fragment_modern_game">
+        <action
+            android:id="@+id/actionModernGameToMainMenu"
+            app:destination="@id/mainMenuFragment" />
     </fragment>
 
 </navigation>

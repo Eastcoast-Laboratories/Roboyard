@@ -65,7 +65,17 @@ public class MainActivity extends AppCompatActivity {
         return gameStateManager;
     }
 
+    /**
+     * LEGACY COMPATIBILITY METHOD
+     * This method is provided for backward compatibility with code that still uses GameManager
+     * In the new architecture, we don't use GameManager anymore
+     * @return null - GameManager is no longer used
+     * @deprecated Use getGameStateManager() instead
+     */
+    @Deprecated
     public GameManager getGameManager() {
-        return gameStateManager.getGameManager();
+        // Return null as we don't use GameManager anymore
+        // Legacy code should be updated to use GameStateManager
+        return null;
     }
 }
