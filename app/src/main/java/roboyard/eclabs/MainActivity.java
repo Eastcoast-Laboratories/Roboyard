@@ -531,10 +531,9 @@ public class MainActivity extends FragmentActivity
         
         boardSizeX = x;
         boardSizeY = y;
-        // Save board size to preferences
-        Preferences prefs = new Preferences();
-        prefs.setPreferences(this, "boardSizeX", String.valueOf(x));
-        prefs.setPreferences(this, "boardSizeY", String.valueOf(y));
+        // Save board size to preferences using the existing preferences instance
+        preferences.setPreferences(this, "boardSizeX", String.valueOf(x));
+        preferences.setPreferences(this, "boardSizeY", String.valueOf(y));
         
         Timber.d("Board size saved to preferences: %dx%d", x, y);
     }

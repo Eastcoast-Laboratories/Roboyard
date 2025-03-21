@@ -296,13 +296,21 @@ public class SettingsFragment extends BaseGameFragment {
                 // Get the context to pass to setBoardSize
                 Context context = requireContext();
                 
-                // Update board size with context parameter
+                // Get reference to MainActivity or update static values directly
                 if (context instanceof MainActivity) {
+                    // For legacy UI, use the MainActivity instance
                     MainActivity mainActivity = (MainActivity) context;
                     mainActivity.setBoardSize(context, width, height);
                 } else {
-                    // Log warning if context is not MainActivity
-                    Timber.w("Cannot update board size: context is not MainActivity");
+                    // For modern UI, update the static values directly
+                    MainActivity.boardSizeX = width;
+                    MainActivity.boardSizeY = height;
+                    
+                    // Save to preferences directly
+                    preferences.setPreferences(requireActivity(), "boardSizeX", String.valueOf(width));
+                    preferences.setPreferences(requireActivity(), "boardSizeY", String.valueOf(height));
+                    
+                    Timber.d("Settings: Board size updated to %dx%d (direct update)", width, height);
                 }
                 
                 // Save to preferences (like in the original)
