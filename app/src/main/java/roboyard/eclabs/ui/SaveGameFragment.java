@@ -17,13 +17,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,8 +76,13 @@ public class SaveGameFragment extends BaseGameFragment {
             saveMode = args.getSaveMode();
         }
         
-        // Initialize the GameStateManager
-        gameStateManager = new GameStateManager(requireActivity().getApplication());
+        // Get the existing GameStateManager from ViewModelProvider instead of creating a new one
+        gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
+        Timber.d("SaveGameFragment: Retrieved GameStateManager from ViewModelProvider");
+        
+        // Debug current game state
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        Timber.d("SaveGameFragment: Current GameState is %s", currentState != null ? "available" : "null");
     }
     
     @Override
@@ -99,8 +107,20 @@ public class SaveGameFragment extends BaseGameFragment {
         
         // Set up back button
         backButton.setOnClickListener(v -> {
-            // Navigate back
-            requireActivity().onBackPressed();
+            try {
+                Timber.d("Back button pressed in SaveGameFragment");
+                
+                // Get the OnBackPressedDispatcher and trigger back press
+                OnBackPressedDispatcher dispatcher = getActivity().getOnBackPressedDispatcher();
+                dispatcher.onBackPressed();
+            
+            } catch (Exception e) {
+                Timber.e("Exception in back button handler: %s", e.getMessage());
+                // Last resort fallback
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
+            }
         });
         
         return view;

@@ -159,6 +159,9 @@ public class GameStateManager extends AndroidViewModel {
         GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
         Timber.d("GameStateManager: Created new random GameState for modern UI");
         
+        // Set reference to this GameStateManager in the new state
+        newState.setGameStateManager(this);
+        
         // Verify the dimensions of the created game state
         if (newState != null) {
             Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState has dimensions: %dx%d", 
@@ -202,6 +205,10 @@ public class GameStateManager extends AndroidViewModel {
         // Load level from assets
         GameState newState = GameState.loadLevel(getApplication(), levelId);
         newState.setLevelId(levelId);
+        
+        // Set reference to this GameStateManager in the new state
+        newState.setGameStateManager(this);
+        
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
@@ -220,6 +227,9 @@ public class GameStateManager extends AndroidViewModel {
             // Load saved game using the original method
             GameState newState = GameState.loadSavedGame(getApplication(), saveId);
             if (newState != null) {
+                // Set reference to this GameStateManager in the new state
+                newState.setGameStateManager(this);
+                
                 currentState.setValue(newState);
                 moveCount.setValue(newState.getMoveCount());
                 isGameComplete.setValue(newState.isComplete());
@@ -239,6 +249,10 @@ public class GameStateManager extends AndroidViewModel {
         // TODO: Implement history entry loading
         GameState newState = GameState.createRandom(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight(), difficultyManager.getDifficulty());
         newState.setLevelId(historyId);
+        
+        // Set reference to this GameStateManager in the new state
+        newState.setGameStateManager(this);
+        
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
@@ -285,6 +299,9 @@ public class GameStateManager extends AndroidViewModel {
         GameState gameState = currentState.getValue();
         if (gameState == null) {
             Timber.e("Cannot save game: No valid GameState available");
+            // Try to debug why the current state is null
+            Timber.d("Current state: %s", currentState == null ? "null MutableLiveData" : "MutableLiveData exists but value is null");
+            Timber.d("Has saved state history: %s", stateHistory.isEmpty() ? "no" : "yes, with " + stateHistory.size() + " entries");
             return false;
         }
         
@@ -443,18 +460,13 @@ public class GameStateManager extends AndroidViewModel {
                     squaresMovedHistory.add(squaresMoved.getValue());
                     
                     // Check if game is complete
-                    if (state.checkCompletion()) {
+                    boolean isComplete = state.checkCompletion();
+                    if (isComplete) {
+                        // Set the game as complete - this will trigger the observers
+                        // in ModernGameFragment that show the toast notification
                         setGameComplete(true);
-                        
-                        // Show toast with move count - need to run on UI thread
-                        if (context instanceof Activity) {
-                            ((Activity) context).runOnUiThread(() -> {
-                                Toast.makeText(context, 
-                                    "Target reached in " + moveCount.getValue() + " moves and " + 
-                                    squaresMoved.getValue() + " squares moved!", 
-                                    Toast.LENGTH_LONG).show();
-                            });
-                        }
+                        Timber.d("Game completed! Moves: %d, Squares moved: %d", 
+                            moveCount.getValue(), squaresMoved.getValue());
                     }
                     
                     currentState.setValue(state);
@@ -553,10 +565,32 @@ public class GameStateManager extends AndroidViewModel {
      * @param saveMode True for save mode, false for load mode
      */
     public void navigateToSaveScreen(boolean saveMode) {
-        Timber.d("GameStateManager: navigateToSaveScreen() called with saveMode=%s", saveMode);
+        Timber.d("Navigating to save screen, saveMode=%s", saveMode);
+        // Check if we have a valid state before navigation
+        GameState currentGameState = currentState.getValue();
+        Timber.d("Current state before navigation: %s", currentGameState != null ? "valid" : "null");
         
-        // Get the current fragment that is calling this method
-        androidx.fragment.app.FragmentActivity activity = androidx.fragment.app.FragmentActivity.class.cast(context);
+        if (currentGameState == null) {
+            Timber.e("Cannot navigate to save screen: No valid GameState available");
+            // Show a toast notification
+            Toast.makeText(context, "No game available to save", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // We should only proceed if the context is a FragmentActivity
+        if (!(context instanceof androidx.fragment.app.FragmentActivity)) {
+            Timber.e("Cannot navigate to save screen: context is not a FragmentActivity");
+            // Toast to inform the user
+            if (context != null) {
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(context, "Cannot navigate to save screen", Toast.LENGTH_SHORT).show();
+                });
+            }
+            return;
+        }
+        
+        // Get the current activity context
+        androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) context;
         
         // Check if we're on the main thread
         if (android.os.Looper.getMainLooper().getThread() == Thread.currentThread()) {
@@ -763,6 +797,23 @@ public class GameStateManager extends AndroidViewModel {
      * @param complete Whether the game is complete
      */
     public void setGameComplete(boolean complete) {
+        Timber.d("GameStateManager: setGameComplete(%s)", complete);
+        if (complete) {
+            // If game is newly completed, show toast notification
+            if (Boolean.FALSE.equals(isGameComplete.getValue())) {
+                // Show toast on the main thread
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    try {
+                        Toast.makeText(context, 
+                            "Target reached in " + moveCount.getValue() + " moves and " + 
+                            squaresMoved.getValue() + " squares moved!", 
+                            Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Timber.e(e, "Error showing completion toast");
+                    }
+                });
+            }
+        }
         isGameComplete.setValue(complete);
     }
     

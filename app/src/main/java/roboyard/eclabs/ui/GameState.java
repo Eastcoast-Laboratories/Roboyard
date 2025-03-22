@@ -53,6 +53,7 @@ public class GameState implements Serializable {
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
     private transient int lastSquaresMoved; // Number of squares moved in the last successful robot move
+    private transient GameStateManager gameStateManager;
     
     // Store initial robot positions for reset functionality
     private Map<Integer, int[]> initialRobotPositions;
@@ -342,7 +343,10 @@ public class GameState implements Serializable {
         this.lastSquaresMoved = squaresMoved;
         
         // Check if the game is completed
-        checkCompletion();
+        if (checkCompletion()) {
+            // Game is completed, let the GameStateManager handle the notification
+            // This will be handled in GameStateManager.handleGridTouch method
+        }
         
         return true;
     }
@@ -386,23 +390,29 @@ public class GameState implements Serializable {
     }
     
     /**
-     * Check if the game is complete (all robots on matching targets)
+     * Check if the game is complete (all robots on their target positions).
+     * 
+     * @return true if all robots are on their correct targets.
      */
     public boolean checkCompletion() {
+        // For each game element that is a robot, check if it's on a target of matching color
         for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                int x = element.getX();
-                int y = element.getY();
-                int color = element.getColor();
-                
-                // Check if robot is on a matching target
-                if (getCellType(x, y) != Constants.CELL_TARGET || getTargetColor(x, y) != color) {
-                    return false;
-                }
+            // Only check robots
+            if (element.getType() != GameElement.TYPE_ROBOT) {
+                continue;
+            }
+            
+            int x = element.getX();
+            int y = element.getY();
+            int color = element.getColor();
+            
+            // Check if the robot is on a target of matching color
+            if (getCellType(x, y) != Constants.CELL_TARGET || getTargetColor(x, y) != color) {
+                return false;
             }
         }
         
-        // Mark the game as completed
+        // All robots are on their targets
         completed = true;
         return true;
     }
@@ -906,5 +916,13 @@ public class GameState implements Serializable {
                 initialRobotPositions.put(element.getColor(), position);
             }
         }
+    }
+    
+    /**
+     * Set the GameStateManager reference
+     * @param manager The GameStateManager to use
+     */
+    public void setGameStateManager(GameStateManager manager) {
+        this.gameStateManager = manager;
     }
 }

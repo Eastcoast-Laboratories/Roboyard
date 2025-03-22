@@ -12,9 +12,8 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -45,17 +44,40 @@ public class ModernGameFragment extends BaseGameFragment {
     private Button restartButton;
     private Button menuButton;
     
+    // Class member to track if a robot is currently selected
+    private boolean isRobotSelected = false;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Handle back button/gesture - prevent accidental back navigation during gameplay
+        // Handle back button/gesture with improved behavior
         requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Show a toast notification asking to use UI buttons instead
-                Toast.makeText(requireContext(), "Please use the UI buttons for navigation", Toast.LENGTH_SHORT).show();
-                // Do not allow back navigation during gameplay to prevent accidental exits
+                // Get the game state manager
+                GameStateManager gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
+                GameState gameState = gameStateManager.getCurrentState().getValue();
+                
+                // Check if a robot is currently selected/active
+                if (gameState != null && gameState.getSelectedRobot() != null) {
+                    // A robot is active, cancel selection instead of going back
+                    Timber.d("Back pressed with active robot - canceling robot selection");
+                    gameState.setSelectedRobot(null);
+                    isRobotSelected = false;
+                    
+                    // Refresh the view if it's initialized
+                    if (gameGridView != null) {
+                        gameGridView.invalidate();
+                    }
+                    
+                    Toast.makeText(requireContext(), "Robot movement canceled", Toast.LENGTH_SHORT).show();
+                } else {
+                    // No robot is active, allow normal back navigation
+                    Timber.d("Back pressed without active robot - allowing navigation");
+                    this.remove(); // Remove this callback
+                    requireActivity().onBackPressed(); // Continue with back navigation
+                }
             }
         });
     }
@@ -162,8 +184,27 @@ public class ModernGameFragment extends BaseGameFragment {
         saveMapButton = view.findViewById(R.id.save_map_button);
         saveMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Save map button clicked");
-            // Navigate to save screen
-            gameStateManager.navigateToSaveScreen(true);
+            try {
+                // Create a new SaveGameFragment instance
+                SaveGameFragment saveFragment = new SaveGameFragment();
+                
+                // Create a bundle with the saveMode argument
+                Bundle args = new Bundle();
+                args.putBoolean("saveMode", true);
+                saveFragment.setArguments(args);
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, saveFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to save screen completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to save screen");
+                Toast.makeText(requireContext(), "Cannot navigate to save screen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Restart button - restart the current game
