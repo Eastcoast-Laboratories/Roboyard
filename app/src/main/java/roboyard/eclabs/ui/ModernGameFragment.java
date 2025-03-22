@@ -34,9 +34,13 @@ public class ModernGameFragment extends BaseGameFragment {
     
     private GameGridView gameGridView;
     private TextView moveCountTextView;
+    private TextView squaresMovedTextView;
     private TextView difficultyTextView;
     private TextView boardSizeTextView;
+    private Button backButton;
+    private Button resetRobotsButton;
     private Button hintButton;
+    private Button saveMapButton;
     private Button restartButton;
     private Button menuButton;
     
@@ -58,6 +62,7 @@ public class ModernGameFragment extends BaseGameFragment {
         // Initialize UI components
         gameGridView = view.findViewById(R.id.game_grid_view);
         moveCountTextView = view.findViewById(R.id.move_count_text);
+        squaresMovedTextView = view.findViewById(R.id.squares_moved_text);
         difficultyTextView = view.findViewById(R.id.difficulty_text);
         boardSizeTextView = view.findViewById(R.id.board_size_text);
         
@@ -79,6 +84,7 @@ public class ModernGameFragment extends BaseGameFragment {
         // Observe game state changes
         gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), this::updateGameState);
         gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
+        gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
         gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), this::updateGameComplete);
         
         // Update difficulty text
@@ -97,12 +103,46 @@ public class ModernGameFragment extends BaseGameFragment {
      * Set up button click listeners
      */
     private void setupButtons(View view) {
+        // Back button - undo the last robot movement
+        backButton = view.findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> {
+            Timber.d("ModernGameFragment: Back button clicked");
+            // Undo the last move
+            if (gameStateManager.undoLastMove()) {
+                Toast.makeText(requireContext(), "Move undone", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), "Nothing to undo", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        // Reset robots button - reset robots to starting positions without changing the map
+        resetRobotsButton = view.findViewById(R.id.reset_robots_button);
+        resetRobotsButton.setOnClickListener(v -> {
+            Timber.d("ModernGameFragment: Reset robots button clicked");
+            // Reset the robots
+            gameStateManager.resetRobots();
+            Toast.makeText(requireContext(), "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
+        });
+        
         // Hint button - get a hint for the next move
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Hint button clicked");
             // Get a hint from the game state manager
             gameStateManager.getHint();
+        });
+        
+        // Save map button - save the current map for later use
+        saveMapButton = view.findViewById(R.id.save_map_button);
+        saveMapButton.setOnClickListener(v -> {
+            Timber.d("ModernGameFragment: Save map button clicked");
+            // Save the current map
+            boolean saved = gameStateManager.saveCurrentMap();
+            if (!saved) {
+                Toast.makeText(requireContext(), "Error saving map", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), "Map saved successfully", Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Restart button - restart the current game
@@ -138,6 +178,10 @@ public class ModernGameFragment extends BaseGameFragment {
     
     private void updateMoveCount(int moveCount) {
         moveCountTextView.setText("Moves: " + moveCount);
+    }
+    
+    private void updateSquaresMoved(int squaresMoved) {
+        squaresMovedTextView.setText("Squares moved: " + squaresMoved);
     }
     
     private void updateDifficulty() {
@@ -180,7 +224,8 @@ public class ModernGameFragment extends BaseGameFragment {
         // Create a dialog to show game completion
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
         builder.setTitle("Game Complete!");
-        builder.setMessage("You completed the game in " + gameStateManager.getMoveCount().getValue() + " moves.");
+        builder.setMessage("You completed the game in " + gameStateManager.getMoveCount().getValue() + 
+                " moves, and moved " + gameStateManager.getSquaresMoved().getValue() + " squares total.");
         builder.setPositiveButton("New Game", (dialog, which) -> {
             // Start a new game
             gameStateManager.startModernGame();

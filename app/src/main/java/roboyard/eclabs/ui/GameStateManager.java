@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
@@ -20,13 +21,21 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,7 +54,7 @@ import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
-import roboyard.eclabs.GameLogic; // Added import for GameLogic
+import roboyard.eclabs.GameLogic; 
 import timber.log.Timber;
 
 /**
@@ -58,7 +67,12 @@ public class GameStateManager extends AndroidViewModel {
     // Game state
     private MutableLiveData<GameState> currentState = new MutableLiveData<>();
     private MutableLiveData<Integer> moveCount = new MutableLiveData<>(0);
+    private MutableLiveData<Integer> squaresMoved = new MutableLiveData<>(0); 
     private MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
+    
+    // Move history for undo functionality
+    private ArrayList<GameState> stateHistory = new ArrayList<>();
+    private ArrayList<Integer> squaresMovedHistory = new ArrayList<>();
     
     // Game settings
     private MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
@@ -159,17 +173,18 @@ public class GameStateManager extends AndroidViewModel {
         // Set a flag to indicate this is a modern UI game
         newState.setLevelName("Modern UI Game");
         
-        // Check the actual board size of the created game state
-        //Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState with actual size: %dx%d",                 newState.getBoardWidth(), newState.getBoardHeight());
+        // Store initial robot positions for reset functionality
+        newState.storeInitialRobotPositions();
         
+        // Reset the state history and move counts
+        stateHistory.clear();
+        squaresMovedHistory.clear();
         currentState.setValue(newState);
-        Timber.d("GameStateManager: Set currentState LiveData value with new state");
-        
         moveCount.setValue(0);
-        Timber.d("GameStateManager: Reset moveCount to 0");
-        
+        squaresMoved.setValue(0);
         isGameComplete.setValue(false);
-        Timber.d("GameStateManager: Reset isGameComplete to false");
+        
+        Timber.d("GameStateManager: Reset move counts and state history");
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
@@ -402,9 +417,44 @@ public class GameStateManager extends AndroidViewModel {
                     // Update move count
                     incrementMoveCount();
                     
+                    // Get how many squares were moved and update counter
+                    int squaresMovedInThisMove = state.getLastSquaresMoved();
+                    addSquaresMoved(squaresMovedInThisMove);
+                    
+                    // Create a copy of the state for history
+                    GameState stateCopy = null;
+                    try {
+                        // Serialize and deserialize for deep copy
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        ObjectOutputStream oos = new ObjectOutputStream(bos);
+                        oos.writeObject(state);
+                        oos.flush();
+                        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                        ObjectInputStream ois = new ObjectInputStream(bis);
+                        stateCopy = (GameState) ois.readObject();
+                        ois.close();
+                    } catch (Exception e) {
+                        Timber.e(e, "Error creating a deep copy of GameState for history");
+                        stateCopy = state; // Fallback to reference copy if deep copy fails
+                    }
+                    
+                    // Add current state to history
+                    stateHistory.add(stateCopy);
+                    squaresMovedHistory.add(squaresMoved.getValue());
+                    
                     // Check if game is complete
                     if (state.checkCompletion()) {
                         setGameComplete(true);
+                        
+                        // Show toast with move count - need to run on UI thread
+                        if (context instanceof Activity) {
+                            ((Activity) context).runOnUiThread(() -> {
+                                Toast.makeText(context, 
+                                    "Target reached in " + moveCount.getValue() + " moves and " + 
+                                    squaresMoved.getValue() + " squares moved!", 
+                                    Toast.LENGTH_LONG).show();
+                            });
+                        }
                     }
                     
                     currentState.setValue(state);
@@ -581,6 +631,7 @@ public class GameStateManager extends AndroidViewModel {
      */
     public LiveData<GameState> getCurrentState() { return currentState; }
     public LiveData<Integer> getMoveCount() { return moveCount; }
+    public LiveData<Integer> getSquaresMoved() { return squaresMoved; }
     public LiveData<Boolean> isGameComplete() { return isGameComplete; }
     public LiveData<Boolean> getSoundEnabled() { return soundEnabled; }
     
@@ -641,9 +692,43 @@ public class GameStateManager extends AndroidViewModel {
         Integer currentCount = moveCount.getValue();
         if (currentCount != null) {
             moveCount.setValue(currentCount + 1);
-        } else {
-            moveCount.setValue(1);
         }
+    }
+    
+    /**
+     * Undo the last move if possible
+     * @return true if a move was undone, false otherwise
+     */
+    public boolean undoLastMove() {
+        // Check if there's anything to undo
+        if (stateHistory.isEmpty()) {
+            return false;
+        }
+        
+        // Get the previous state and restore it
+        GameState previousState = stateHistory.remove(stateHistory.size() - 1);
+        if (previousState != null) {
+            // Also restore the squares moved count
+            if (!squaresMovedHistory.isEmpty()) {
+                squaresMoved.setValue(squaresMovedHistory.remove(squaresMovedHistory.size() - 1));
+            }
+            
+            // Restore the state
+            currentState.setValue(previousState);
+            
+            // Decrement move count
+            int moves = moveCount.getValue();
+            moveCount.setValue(Math.max(0, moves - 1));
+            
+            // Reset game complete flag if it was set
+            if (isGameComplete.getValue()) {
+                isGameComplete.setValue(false);
+            }
+            
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -652,6 +737,25 @@ public class GameStateManager extends AndroidViewModel {
      */
     public void setMoveCount(int count) {
         moveCount.setValue(count);
+    }
+    
+    /**
+     * Add squares moved to the counter
+     * @param squares Number of squares moved
+     */
+    public void addSquaresMoved(int squares) {
+        Integer current = squaresMoved.getValue();
+        if (current != null) {
+            squaresMoved.setValue(current + squares);
+        }
+    }
+    
+    /**
+     * Reset squares moved counter
+     */
+    public void resetSquaresMoved() {
+        squaresMoved.setValue(0);
+        squaresMovedHistory.clear();
     }
     
     /**
@@ -771,43 +875,23 @@ public class GameStateManager extends AndroidViewModel {
             
             if (element.getType().startsWith("robot_")) {
                 // Draw robots
-                if (element.getType().contains("red")) {
-                    paint.setColor(Color.RED);
-                } else if (element.getType().contains("blue")) {
-                    paint.setColor(Color.BLUE);
-                } else if (element.getType().contains("green")) {
-                    paint.setColor(Color.GREEN);
-                } else if (element.getType().contains("yellow")) {
-                    paint.setColor(Color.YELLOW);
-                } else {
-                    paint.setColor(Color.GRAY);
-                }
+                paint.setColor(Color.RED);
                 canvas.drawCircle((left + right) / 2, (top + bottom) / 2, scale / 2, paint);
             } else if (element.getType().startsWith("target_")) {
                 // Draw targets
                 paint.setStyle(Paint.Style.STROKE);
                 paint.setStrokeWidth(2);
-                if (element.getType().contains("red")) {
-                    paint.setColor(Color.RED);
-                } else if (element.getType().contains("blue")) {
-                    paint.setColor(Color.BLUE);
-                } else if (element.getType().contains("green")) {
-                    paint.setColor(Color.GREEN);
-                } else if (element.getType().contains("yellow")) {
-                    paint.setColor(Color.YELLOW);
-                } else {
-                    paint.setColor(Color.GRAY);
-                }
+                paint.setColor(Color.RED);
                 canvas.drawRect(left, top, right, bottom, paint);
                 paint.setStyle(Paint.Style.FILL);
-            } else if (element.getType().startsWith("m")) {
+            } else if (element.getType().equals("mv")) {
                 // Draw walls
                 paint.setColor(Color.DKGRAY);
-                if (element.getType().equals("mh")) { // Horizontal wall
-                    canvas.drawRect(left, top + scale/3, right, bottom - scale/3, paint);
-                } else if (element.getType().equals("mv")) { // Vertical wall
-                    canvas.drawRect(left + scale/3, top, right - scale/3, bottom, paint);
-                }
+                canvas.drawRect(left + scale/3, top, right - scale/3, bottom, paint);
+            } else if (element.getType().equals("mh")) {
+                // Draw walls
+                paint.setColor(Color.DKGRAY);
+                canvas.drawRect(left, top + scale/3, right, bottom - scale/3, paint);
             }
         }
         
@@ -836,5 +920,159 @@ public class GameStateManager extends AndroidViewModel {
      */
     public void setDifficulty(int difficulty) {
         difficultyManager.setDifficulty(difficulty);
+    }
+
+    /**
+     * Save the current map for later use
+     * @return true if the map was saved successfully, false otherwise
+     */
+    public boolean saveCurrentMap() {
+        GameState state = currentState.getValue();
+        if (state == null) {
+            return false;
+        }
+        
+        try {
+            // Create a timestamp for the map name
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String mapName = "custom_map_" + timestamp;
+            
+            // Get the save directory
+            File appDir = new File(context.getFilesDir(), "maps");
+            if (!appDir.exists()) {
+                appDir.mkdirs();
+            }
+            
+            // Create the map file
+            File mapFile = new File(appDir, mapName + ".map");
+            
+            // Write the current state to the map file
+            FileWriter writer = new FileWriter(mapFile);
+            
+            // Write metadata
+            writer.write("#MAPNAME:" + mapName + ";TIME:" + System.currentTimeMillis() + ";\n");
+            
+            // Write board dimensions
+            writer.write(state.getWidth() + " " + state.getHeight() + "\n");
+            
+            // Write the grid elements (walls, robots, targets)
+            ArrayList<GridElement> elements = state.getGridElements();
+            for (GridElement element : elements) {
+                // Format: type x y [color]
+                StringBuilder line = new StringBuilder();
+                
+                // Add type code based on element type
+                String type = element.getType();
+                if (type.startsWith("robot_")) {
+                    line.append("rb");
+                } else if (type.startsWith("target_")) {
+                    line.append("tg");
+                } else if (type.equals("mv")) {
+                    line.append("mv");
+                } else if (type.equals("mh")) {
+                    line.append("mh");
+                } else {
+                    continue; // Skip unknown elements
+                }
+                
+                // Add position
+                line.append(" ").append(element.getX())
+                    .append(" ").append(element.getY());
+                
+                // Add color for robots and targets
+                if (type.startsWith("robot_") || type.startsWith("target_")) {
+                    // Extract color from type (e.g., "robot_red" -> "red")
+                    String color = type.substring(type.indexOf("_") + 1);
+                    int colorCode = 0; // Default to black
+                    
+                    // Convert color string to code
+                    if (color.equals("red")) {
+                        colorCode = 1;
+                    } else if (color.equals("green")) {
+                        colorCode = 2;
+                    } else if (color.equals("blue")) {
+                        colorCode = 3;
+                    } else if (color.equals("yellow")) {
+                        colorCode = 4;
+                    }
+                    
+                    line.append(" ").append(colorCode);
+                }
+                
+                // Write the line
+                writer.write(line.toString() + "\n");
+            }
+            
+            writer.close();
+            
+            // Show a toast notification
+            if (context instanceof Activity) {
+                ((Activity) context).runOnUiThread(() -> {
+                    Toast.makeText(context, "Map saved as " + mapName, Toast.LENGTH_SHORT).show();
+                });
+            }
+            
+            Timber.d("GameStateManager: Map saved as %s", mapName);
+            return true;
+        } catch (IOException e) {
+            Timber.e(e, "Error saving map");
+            return false;
+        }
+    }
+
+    /**
+     * Reset robots to their starting positions without changing the map
+     * This keeps the same map but resets robot positions and move counters
+     */
+    public void resetRobots() {
+        GameState currentGameState = currentState.getValue();
+        if (currentGameState == null) {
+            return;
+        }
+        
+        try {
+            // Create a copy of the current state for reset
+            GameState resetState = null;
+            try {
+                // Serialize and deserialize for deep copy
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(bos);
+                oos.writeObject(currentGameState);
+                oos.flush();
+                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                ObjectInputStream ois = new ObjectInputStream(bis);
+                resetState = (GameState) ois.readObject();
+                ois.close();
+            } catch (Exception e) {
+                Timber.e(e, "Error creating a deep copy of GameState for reset");
+                return; // Can't proceed without a valid copy
+            }
+            
+            // Reset robot positions by moving them back to original positions
+            resetState.resetRobotPositions();
+            
+            // Reset counters
+            moveCount.setValue(0);
+            squaresMoved.setValue(0);
+            isGameComplete.setValue(false);
+            
+            // Clear history
+            stateHistory.clear();
+            squaresMovedHistory.clear();
+            
+            // Update state
+            currentState.setValue(resetState);
+            
+            // Show a toast notification
+            if (context instanceof Activity) {
+                ((Activity) context).runOnUiThread(() -> {
+                    Toast.makeText(context, "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
+                });
+            }
+            
+            Timber.d("GameStateManager: Robots reset to starting positions");
+        } catch (Exception e) {
+            Timber.e(e, "Error resetting robots");
+        }
     }
 }

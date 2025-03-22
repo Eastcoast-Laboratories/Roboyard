@@ -15,7 +15,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
@@ -50,7 +52,11 @@ public class GameState implements Serializable {
     
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
+    private transient int lastSquaresMoved; // Number of squares moved in the last successful robot move
     
+    // Store initial robot positions for reset functionality
+    private Map<Integer, int[]> initialRobotPositions;
+
     /**
      * Create a new game state with specified dimensions
      */
@@ -250,6 +256,20 @@ public class GameState implements Serializable {
         int currentY = startY;
         boolean hitObstacle = false;
         
+        // Track squares moved for this move
+        int squaresMoved = 0;
+        
+        // Prevent sliding in from screen edges - must check if starting position is adjacent to edge
+        if (dx > 0 && startX == 0) { // Moving right from left edge
+            return false;
+        } else if (dx < 0 && startX == width - 1) { // Moving left from right edge
+            return false;
+        } else if (dy > 0 && startY == 0) { // Moving down from top edge
+            return false;
+        } else if (dy < 0 && startY == height - 1) { // Moving up from bottom edge
+            return false;
+        }
+        
         while (!hitObstacle) {
             // CRITICAL: First check for wall collision at current position before moving
             // This is needed to properly handle the wall being between cells
@@ -299,6 +319,7 @@ public class GameState implements Serializable {
             // Move to the next cell if no obstacles
             currentX = nextX;
             currentY = nextY;
+            squaresMoved++; // Increment squares moved counter
         }
         
         // Update robot position to the final position
@@ -317,10 +338,21 @@ public class GameState implements Serializable {
         // Increment move count
         moveCount++;
         
+        // Store the number of squares moved for this move
+        this.lastSquaresMoved = squaresMoved;
+        
         // Check if the game is completed
         checkCompletion();
         
         return true;
+    }
+    
+    /**
+     * Get the number of squares moved in the last successful robot move
+     * @return Number of squares moved
+     */
+    public int getLastSquaresMoved() {
+        return lastSquaresMoved;
     }
     
     /**
@@ -811,5 +843,68 @@ public class GameState implements Serializable {
         }
         
         return saveData.toString();
+    }
+    
+    /**
+     * Reset robot positions to their starting positions
+     * This keeps the same map but moves robots back to where they started
+     */
+    public void resetRobotPositions() {
+        // Store initial robot positions if not already stored
+        if (initialRobotPositions == null || initialRobotPositions.isEmpty()) {
+            // Can't reset if we don't have initial positions
+            return;
+        }
+        
+        // Get current robot elements
+        List<GameElement> currentRobots = new ArrayList<>();
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                currentRobots.add(element);
+            }
+        }
+        
+        // Skip if no robots found
+        if (currentRobots.isEmpty()) {
+            return;
+        }
+        
+        // Reset each robot to its initial position
+        for (GameElement robot : currentRobots) {
+            int robotColor = robot.getColor();
+            if (initialRobotPositions.containsKey(robotColor)) {
+                int[] position = initialRobotPositions.get(robotColor);
+                robot.setX(position[0]);
+                robot.setY(position[1]);
+            }
+        }
+        
+        // Reset selected robot
+        selectedRobot = null;
+        
+        // Reset move count
+        moveCount = 0;
+        
+        // Reset completion flag
+        completed = false;
+    }
+
+    /**
+     * Store initial robot positions for reset functionality
+     */
+    public void storeInitialRobotPositions() {
+        // Initialize the map if it doesn't exist
+        if (initialRobotPositions == null) {
+            initialRobotPositions = new HashMap<>();
+        }
+        
+        // Loop through all game elements to find robots
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                // Store the robot's position by its color
+                int[] position = new int[] { element.getX(), element.getY() };
+                initialRobotPositions.put(element.getColor(), position);
+            }
+        }
     }
 }

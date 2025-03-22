@@ -405,57 +405,51 @@ public class GameGridView extends View {
             return false;
         }
         
-        // Handle the touch event
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Handle touch down - select robot
-                GameState state = gameStateManager.getCurrentState().getValue();
-                if (state != null) {
-                    GameElement robot = state.getRobotAt(gridX, gridY);
-                    if (robot != null) {
-                        // Select this robot
-                        state.setSelectedRobot(robot);
-                        announceForAccessibility("Selected " + getRobotDescription(robot));
-                        invalidate();
-                        return true;
-                    }
-                }
-                break;
+        // Capture action for accessibility announcements
+        int action = event.getAction();
+        GameState state = gameStateManager.getCurrentState().getValue();
+        
+        // Handle accessibility announcements for selection and movement
+        if (action == MotionEvent.ACTION_DOWN && state != null) {
+            GameElement robot = state.getRobotAt(gridX, gridY);
+            if (robot != null) {
+                announceForAccessibility("Selected " + getRobotDescription(robot));
+            }
+        } else if (action == MotionEvent.ACTION_UP && state != null) {
+            GameElement selectedRobot = state.getSelectedRobot();
+            if (selectedRobot != null) {
+                int oldX = selectedRobot.getX();
+                int oldY = selectedRobot.getY();
                 
-            case MotionEvent.ACTION_UP:
-                // Handle touch up - move selected robot
-                state = gameStateManager.getCurrentState().getValue();
-                if (state != null && state.getSelectedRobot() != null) {
-                    GameElement selectedRobot = state.getSelectedRobot();
-                    
-                    // Try to move the robot
-                    boolean moved = state.moveRobotTo(selectedRobot, gridX, gridY);
-                    if (moved) {
-                        // Update move count using proper method
-                        gameStateManager.incrementMoveCount();
-                        int newMoveCount = gameStateManager.getMoveCount().getValue();
-                        
-                        // Check if game is complete
-                        if (state.checkCompletion()) {
-                            gameStateManager.setGameComplete(true);
-                            announceForAccessibility("Goal reached! Game complete in " + newMoveCount + " moves");
-                        } else {
-                            announceForAccessibility(getRobotDescription(selectedRobot) + " moved");
-                        }
-                        
-                        invalidate();
-                        return true;
+                // Let GameStateManager handle the touch which will update counters properly
+                gameStateManager.handleGridTouch(gridX, gridY, action);
+                
+                // Check if robot moved by comparing old and new positions
+                if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
+                    if (state.checkCompletion()) {
+                        announceForAccessibility("Goal reached! Game complete in " + 
+                            gameStateManager.getMoveCount().getValue() + " moves and " +
+                            gameStateManager.getSquaresMoved().getValue() + " squares moved");
+                    } else {
+                        announceForAccessibility(getRobotDescription(selectedRobot) + " moved");
                     }
                 }
-                break;
+            } else {
+                // No robot selected, just handle the touch
+                gameStateManager.handleGridTouch(gridX, gridY, action);
+            }
+        } else {
+            // Other actions, just handle the touch
+            gameStateManager.handleGridTouch(gridX, gridY, action);
         }
         
-        return super.onTouchEvent(event);
+        // Redraw the view
+        invalidate();
+        
+        // Consume the event
+        return true;
     }
     
-    /**
-     * Handle hover events for accessibility (TalkBack)
-     */
     @Override
     public boolean dispatchHoverEvent(MotionEvent event) {
         // For TalkBack exploration
