@@ -8,29 +8,38 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
+import timber.log.Timber;
 
 /**
  * Main activity for the game, hosts the fragment-based UI.
  * Acts as the container for all game fragments and provides access to the GameStateManager.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainFragmentActivity extends AppCompatActivity {
     
     private GameStateManager gameStateManager;
     private NavController navController;
 
     // Forward to the regular MainActivity's static methods
     public static int getBoardWidth() {
-        return roboyard.eclabs.MainActivity.getBoardWidth();
+        int width = roboyard.eclabs.MainActivity.getBoardWidth();
+        Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity.getBoardWidth() called, returning: %d", width);
+        return width;
     }
 
     public static int getBoardHeight() {
-        return roboyard.eclabs.MainActivity.getBoardHeight();
+        int height = roboyard.eclabs.MainActivity.getBoardHeight();
+        Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity.getBoardHeight() called, returning: %d", height);
+        return height;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        // Log the board size at startup
+        Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity onCreate - Current board size: %dx%d", 
+                 getBoardWidth(), getBoardHeight());
         
         // Migrate preferences from old implementation to new
         PreferencesMigrator.migratePreferences(this);

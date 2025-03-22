@@ -154,12 +154,23 @@ public class ModernGameFragment extends BaseGameFragment {
     }
     
     private void updateBoardSizeText() {
-        // Get board size from BoardSizeManager
-        BoardSizeManager boardSizeManager = BoardSizeManager.getInstance(requireContext());
-        int boardWidth = boardSizeManager.getBoardWidth();
-        int boardHeight = boardSizeManager.getBoardHeight();
+        // Get the current game state
+        GameState currentState = gameStateManager.getCurrentState().getValue();
         
-        boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
+        // If there's an active game state, use its dimensions
+        if (currentState != null) {
+            int boardWidth = currentState.getWidth();
+            int boardHeight = currentState.getHeight();
+            Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
+            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
+        } else {
+            // If no game state yet, get from BoardSizeManager
+            BoardSizeManager boardSizeManager = BoardSizeManager.getInstance(requireContext());
+            int boardWidth = boardSizeManager.getBoardWidth();
+            int boardHeight = boardSizeManager.getBoardHeight();
+            Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", boardWidth, boardHeight);
+            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
+        }
     }
     
     /**

@@ -539,9 +539,19 @@ public class MainActivity extends FragmentActivity
         
         boardSizeX = x;
         boardSizeY = y;
+        
         // Save board size to preferences using the existing preferences instance
         preferences.setPreferences(this, "boardSizeX", String.valueOf(x));
         preferences.setPreferences(this, "boardSizeY", String.valueOf(y));
+        
+        // Also update BoardSizeManager to ensure consistency
+        try {
+            roboyard.eclabs.util.BoardSizeManager boardSizeManager = roboyard.eclabs.util.BoardSizeManager.getInstance(context);
+            boardSizeManager.setBoardSize(x, y);
+            Timber.d("[BOARD_SIZE_DEBUG] Updated BoardSizeManager with size: %dx%d", x, y);
+        } catch (Exception e) {
+            Timber.e(e, "[BOARD_SIZE_DEBUG] Error updating BoardSizeManager");
+        }
         
         Timber.d("Board size saved to preferences: %dx%d", x, y);
     }
@@ -581,6 +591,21 @@ public class MainActivity extends FragmentActivity
             boardSizeY = Integer.parseInt(boardSizeYStr);
         } else {
             boardSizeY = DEFAULT_BOARD_SIZE_Y;
+        }
+        
+        // Also sync with BoardSizeManager to ensure consistency
+        try {
+            roboyard.eclabs.util.BoardSizeManager boardSizeManager = roboyard.eclabs.util.BoardSizeManager.getInstance(activity);
+            
+            // Only set if necessary (to avoid circular updates)
+            if (boardSizeManager.getBoardWidth() != boardSizeX || boardSizeManager.getBoardHeight() != boardSizeY) {
+                Timber.d("[BOARD_SIZE_DEBUG] MainActivity.loadBoardSizeFromPreferences - Syncing with BoardSizeManager: %dx%d", boardSizeX, boardSizeY);
+                boardSizeManager.setBoardSize(boardSizeX, boardSizeY);
+            } else {
+                Timber.d("[BOARD_SIZE_DEBUG] MainActivity.loadBoardSizeFromPreferences - BoardSizeManager already in sync: %dx%d", boardSizeX, boardSizeY);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[BOARD_SIZE_DEBUG] Error syncing with BoardSizeManager");
         }
         
         Timber.d("Board size set to: %dx%d", boardSizeX, boardSizeY);

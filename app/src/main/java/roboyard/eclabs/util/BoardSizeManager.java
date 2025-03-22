@@ -2,6 +2,7 @@ package roboyard.eclabs.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import timber.log.Timber;
 
 /**
  * Manages board size preferences for both legacy canvas-based UI
@@ -9,13 +10,16 @@ import android.content.SharedPreferences;
  * This ensures consistent board dimensions across both implementations.
  */
 public class BoardSizeManager {
-    private static final String PREFS_NAME = "RoboyardBoardPrefs";
-    private static final String KEY_BOARD_WIDTH = "board_width";
-    private static final String KEY_BOARD_HEIGHT = "board_height";
+    // Use the same preference file as MainActivity
+    private static final String PREFS_NAME = "RoboYard";
+    
+    // Use the same keys as MainActivity
+    private static final String KEY_BOARD_WIDTH = "boardSizeX";
+    private static final String KEY_BOARD_HEIGHT = "boardSizeY";
     
     // Default board dimensions
     private static final int DEFAULT_BOARD_WIDTH = 14;
-    private static final int DEFAULT_BOARD_HEIGHT = 14;
+    private static final int DEFAULT_BOARD_HEIGHT = 16;
     
     private static BoardSizeManager instance;
     private final SharedPreferences prefs;
@@ -45,7 +49,24 @@ public class BoardSizeManager {
      * @return Current board width
      */
     public int getBoardWidth() {
-        return prefs.getInt(KEY_BOARD_WIDTH, DEFAULT_BOARD_WIDTH);
+        // Get the value from string preference (MainActivity saves as String)
+        String widthStr = prefs.getString(KEY_BOARD_WIDTH, null);
+        Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardWidth() string preference: %s", widthStr);
+        
+        int width = DEFAULT_BOARD_WIDTH;
+        if (widthStr != null && !widthStr.isEmpty()) {
+            try {
+                width = Integer.parseInt(widthStr);
+                Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardWidth() parsed string: %d", width);
+            } catch (NumberFormatException e) {
+                Timber.e(e, "[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardWidth() parse error, using default: %d", width);
+            }
+        } else {
+            Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardWidth() using default (empty string): %d", width);
+        }
+        
+        Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardWidth() returning: %d", width);
+        return width;
     }
     
     /**
@@ -53,56 +74,57 @@ public class BoardSizeManager {
      * @return Current board height
      */
     public int getBoardHeight() {
-        return prefs.getInt(KEY_BOARD_HEIGHT, DEFAULT_BOARD_HEIGHT);
-    }
-    
-    /**
-     * Set the board width
-     * @param width Board width to set
-     */
-    public void setBoardWidth(int width) {
-        if (width < 8 || width > 20) {
-            throw new IllegalArgumentException("Board width must be between 8 and 20");
+        // Get the value from string preference (MainActivity saves as String)
+        String heightStr = prefs.getString(KEY_BOARD_HEIGHT, null);
+        Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardHeight() string preference: %s", heightStr);
+        
+        int height = DEFAULT_BOARD_HEIGHT;
+        if (heightStr != null && !heightStr.isEmpty()) {
+            try {
+                height = Integer.parseInt(heightStr);
+                Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardHeight() parsed string: %d", height);
+            } catch (NumberFormatException e) {
+                Timber.e(e, "[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardHeight() parse error, using default: %d", height);
+            }
+        } else {
+            Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardHeight() using default (empty string): %d", height);
         }
         
-        prefs.edit().putInt(KEY_BOARD_WIDTH, width).apply();
+        Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.getBoardHeight() returning: %d", height);
+        return height;
     }
     
     /**
-     * Set the board height
-     * @param height Board height to set
-     */
-    public void setBoardHeight(int height) {
-        if (height < 8 || height > 20) {
-            throw new IllegalArgumentException("Board height must be between 8 and 20");
-        }
-        
-        prefs.edit().putInt(KEY_BOARD_HEIGHT, height).apply();
-    }
-    
-    /**
-     * Set both board width and height
-     * @param width Board width to set
-     * @param height Board height to set
+     * Set the board dimensions
+     * @param width New board width
+     * @param height New board height
      */
     public void setBoardSize(int width, int height) {
-        if (width < 8 || width > 20) {
-            throw new IllegalArgumentException("Board width must be between 8 and 20");
-        }
-        if (height < 8 || height > 20) {
-            throw new IllegalArgumentException("Board height must be between 8 and 20");
-        }
-        
+        Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.setBoardSize() setting: %dx%d", width, height);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(KEY_BOARD_WIDTH, width);
-        editor.putInt(KEY_BOARD_HEIGHT, height);
+        
+        // Save both as strings to be consistent with MainActivity
+        editor.putString(KEY_BOARD_WIDTH, String.valueOf(width));
+        editor.putString(KEY_BOARD_HEIGHT, String.valueOf(height));
         editor.apply();
     }
     
     /**
-     * Reset board size to default dimensions
+     * Set the board dimensions and also update MainActivity static fields
+     * for backward compatibility
+     * @param width New board width
+     * @param height New board height
      */
-    public void resetToDefaults() {
-        setBoardSize(DEFAULT_BOARD_WIDTH, DEFAULT_BOARD_HEIGHT);
+    public void setBoardSizeWithLegacyUpdate(int width, int height) {
+        setBoardSize(width, height);
+        
+        // Update MainActivity static fields for backward compatibility
+        try {
+            roboyard.eclabs.MainActivity.boardSizeX = width;
+            roboyard.eclabs.MainActivity.boardSizeY = height;
+            Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.setBoardSizeWithLegacyUpdate() updated MainActivity: %dx%d", width, height);
+        } catch (Exception e) {
+            Timber.e(e, "[BOARD_SIZE_DEBUG] BoardSizeManager.setBoardSizeWithLegacyUpdate() error updating MainActivity");
+        }
     }
 }

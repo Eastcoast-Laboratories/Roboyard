@@ -135,12 +135,31 @@ public class GameStateManager extends AndroidViewModel {
         int width = boardSizeManager.getBoardWidth();
         int height = boardSizeManager.getBoardHeight();
         
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Retrieved board size from BoardSizeManager: %dx%d", width, height);
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Current MainActivity board size: %dx%d", 
+                MainActivity.boardSizeX, MainActivity.boardSizeY);
+        
         // Create a new random game state
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Before calling createRandom with size: %dx%d", width, height);
         GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
         Timber.d("GameStateManager: Created new random GameState for modern UI");
         
+        // Verify the dimensions of the created game state
+        if (newState != null) {
+            Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState has dimensions: %dx%d", 
+                    newState.getWidth(), newState.getHeight());
+            
+            // Check if dimensions match what was requested
+            if (newState.getWidth() != width || newState.getHeight() != height) {
+                Timber.w("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - WARNING: Created game dimensions don't match requested dimensions!");
+            }
+        }
+        
         // Set a flag to indicate this is a modern UI game
         newState.setLevelName("Modern UI Game");
+        
+        // Check the actual board size of the created game state
+        //Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState with actual size: %dx%d",                 newState.getBoardWidth(), newState.getBoardHeight());
         
         currentState.setValue(newState);
         Timber.d("GameStateManager: Set currentState LiveData value with new state");
@@ -585,7 +604,9 @@ public class GameStateManager extends AndroidViewModel {
      * @param width New board width
      */
     public void setBoardWidth(int width) {
-        boardSizeManager.setBoardWidth(width);
+        // Use setBoardSize with current height
+        boardSizeManager.setBoardSize(width, getBoardHeight());
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.setBoardWidth() - Set width to %d", width);
     }
     
     /**
@@ -593,7 +614,9 @@ public class GameStateManager extends AndroidViewModel {
      * @param height New board height
      */
     public void setBoardHeight(int height) {
-        boardSizeManager.setBoardHeight(height);
+        // Use setBoardSize with current width
+        boardSizeManager.setBoardSize(getBoardWidth(), height);
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.setBoardHeight() - Set height to %d", height);
     }
     
     /**

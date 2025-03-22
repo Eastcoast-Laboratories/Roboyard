@@ -631,21 +631,44 @@ public class GameState implements Serializable {
         // Set the global difficulty level first so MapGenerator knows which difficulty to use
         GridGameScreen.setDifficulty(difficultyIntToString(difficulty));
         
-        // Temporarily save the current board size
-        int oldWidth = MainActivity.boardSizeX;
-        int oldHeight = MainActivity.boardSizeY;
+        // Log initial board size and requested size
+        Log.d(TAG, "[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
+        Log.d(TAG, "[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " + 
+              MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
-        // Set board dimensions for MapGenerator
+        // Save current board dimensions to preferences and set them for MapGenerator
         MainActivity.boardSizeX = width;
         MainActivity.boardSizeY = height;
         
-        // Create new game state
+        // Ensure we're not limiting to a minimum of 14
+        if (width < 14) {
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] Note: Using board width smaller than 14: " + width);
+        }
+        if (height < 14) {
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] Note: Using board height smaller than 14: " + height);
+        }
+        
+        // Log the board size being used for map generation
+        Log.d(TAG, "[BOARD_SIZE_DEBUG] MainActivity.boardSize after setting: " + 
+              MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+        
+        // Create new game state with specified dimensions
         GameState state = new GameState(width, height);
         
         try {
-            // Use the original MapGenerator to generate map elements
+            // Use the MapGenerator to generate map elements with current board size
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] Before creating MapGenerator: " + 
+                  MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+                  
             MapGenerator generator = new MapGenerator();
+            
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] After creating MapGenerator: " + 
+                  MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+                  
             ArrayList<GridElement> gridElements = generator.getGeneratedGameMap();
+            
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] After getGeneratedGameMap: " + 
+                  MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
             
             // Process grid elements to create game state
             for (GridElement element : gridElements) {
@@ -683,8 +706,8 @@ public class GameState implements Serializable {
             }
         } finally {
             // Restore original board size
-            MainActivity.boardSizeX = oldWidth;
-            MainActivity.boardSizeY = oldHeight;
+            MainActivity.boardSizeX = width;
+            MainActivity.boardSizeY = height;
         }
         
         state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
