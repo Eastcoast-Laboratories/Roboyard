@@ -45,6 +45,7 @@ import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
+import roboyard.eclabs.GameLogic; // Added import for GameLogic
 import timber.log.Timber;
 
 /**

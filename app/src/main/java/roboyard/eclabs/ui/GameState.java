@@ -22,6 +22,7 @@ import roboyard.eclabs.GridElement;
 import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.MapGenerator;
+import roboyard.eclabs.GameLogic;
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -628,15 +629,16 @@ public class GameState implements Serializable {
      * Create a random game state
      */
     public static GameState createRandom(int width, int height, int difficulty) {
-        // Set the global difficulty level first so MapGenerator knows which difficulty to use
-        GridGameScreen.setDifficulty(difficultyIntToString(difficulty));
+        // Set the global difficulty level first so difficulty is consistent
+        String difficultyString = difficultyIntToString(difficulty);
+        GridGameScreen.setDifficulty(difficultyString);
         
         // Log initial board size and requested size
         Log.d(TAG, "[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
         Log.d(TAG, "[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " + 
               MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
-        // Save current board dimensions to preferences and set them for MapGenerator
+        // Save current board dimensions and set them for game generation
         MainActivity.boardSizeX = width;
         MainActivity.boardSizeY = height;
         
@@ -656,19 +658,27 @@ public class GameState implements Serializable {
         GameState state = new GameState(width, height);
         
         try {
-            // Use the MapGenerator to generate map elements with current board size
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] Before creating MapGenerator: " + 
-                  MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+            // Use GameLogic directly instead of MapGenerator
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] Creating GameLogic with dimensions: " + 
+                  width + "x" + height);
                   
-            MapGenerator generator = new MapGenerator();
+            // Convert difficulty string to GameLogic difficulty constant
+            int gameLogicDifficulty;
+            switch(difficulty) {
+                case 0: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_BEGINNER; break;
+                case 1: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_ADVANCED; break;
+                case 2: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_INSANE; break;
+                case 3: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_IMPOSSIBLE; break;
+                default: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_ADVANCED; break;
+            }
             
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] After creating MapGenerator: " + 
-                  MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
-                  
-            ArrayList<GridElement> gridElements = generator.getGeneratedGameMap();
+            // Create GameLogic instance with appropriate dimensions and difficulty
+            roboyard.eclabs.GameLogic gameLogic = new roboyard.eclabs.GameLogic(width, height, gameLogicDifficulty);
             
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] After getGeneratedGameMap: " + 
-                  MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+            // Generate a new game map
+            ArrayList<GridElement> gridElements = gameLogic.generateGameMap(null);
+            
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] GameLogic generated " + gridElements.size() + " grid elements");
             
             // Process grid elements to create game state
             for (GridElement element : gridElements) {
@@ -684,16 +694,32 @@ public class GameState implements Serializable {
                     // Add vertical wall (between columns)
                     state.addVerticalWall(x, y);
                 } else if (type.equals("target_red")) {
+                    // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
                     state.addTarget(x, y, 0);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(0); // Red
+                    state.getGameElements().add(target);
                 } else if (type.equals("target_green")) {
                     state.addTarget(x, y, 1);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(1); // Green
+                    state.getGameElements().add(target);
                 } else if (type.equals("target_blue")) {
                     state.addTarget(x, y, 2);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(2); // Blue
+                    state.getGameElements().add(target);
                 } else if (type.equals("target_yellow")) {
                     state.addTarget(x, y, 3);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(3); // Yellow
+                    state.getGameElements().add(target);
                 } else if (type.equals("target_multi")) {
                     // Multi-color target - we'll use red as default
                     state.addTarget(x, y, 0);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(0); // Red (default for multi)
+                    state.getGameElements().add(target);
                 } else if (type.equals("robot_red")) {
                     state.addRobot(x, y, 0);
                 } else if (type.equals("robot_green")) {
