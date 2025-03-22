@@ -118,7 +118,7 @@ public class ModernGameFragment extends BaseGameFragment {
         menuButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Menu button clicked");
             // Navigate back to main menu
-            navigateTo(R.id.actionGamePlayToMainMenu);
+            navigateTo(R.id.actionModernGameToMainMenu);
         });
     }
     
@@ -176,7 +176,7 @@ public class ModernGameFragment extends BaseGameFragment {
         });
         builder.setNegativeButton("Main Menu", (dialog, which) -> {
             // Navigate back to main menu
-            navigateTo(R.id.actionGamePlayToMainMenu);
+            navigateTo(R.id.actionModernGameToMainMenu);
         });
         builder.setCancelable(false);
         builder.show();
