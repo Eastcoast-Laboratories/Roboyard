@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -43,6 +44,21 @@ public class ModernGameFragment extends BaseGameFragment {
     private Button saveMapButton;
     private Button restartButton;
     private Button menuButton;
+    
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Handle back button/gesture - prevent accidental back navigation during gameplay
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Show a toast notification asking to use UI buttons instead
+                Toast.makeText(requireContext(), "Please use the UI buttons for navigation", Toast.LENGTH_SHORT).show();
+                // Do not allow back navigation during gameplay to prevent accidental exits
+            }
+        });
+    }
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -85,7 +101,17 @@ public class ModernGameFragment extends BaseGameFragment {
         gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), this::updateGameState);
         gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
         gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
-        gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), this::updateGameComplete);
+        
+        // Observe game completion status
+        gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
+            if (isComplete) {
+                // When game is complete, show toast with moves and squares moved
+                Toast.makeText(requireContext(), 
+                    "Target reached in " + gameStateManager.getMoveCount().getValue() + " moves and " + 
+                    gameStateManager.getSquaresMoved().getValue() + " squares moved!", 
+                    Toast.LENGTH_LONG).show();
+            }
+        });
         
         // Update difficulty text
         updateDifficulty();
@@ -132,17 +158,12 @@ public class ModernGameFragment extends BaseGameFragment {
             gameStateManager.getHint();
         });
         
-        // Save map button - save the current map for later use
+        // Save map button - navigate to save screen
         saveMapButton = view.findViewById(R.id.save_map_button);
         saveMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Save map button clicked");
-            // Save the current map
-            boolean saved = gameStateManager.saveCurrentMap();
-            if (!saved) {
-                Toast.makeText(requireContext(), "Error saving map", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(), "Map saved successfully", Toast.LENGTH_SHORT).show();
-            }
+            // Navigate to save screen
+            gameStateManager.navigateToSaveScreen(true);
         });
         
         // Restart button - restart the current game
@@ -190,13 +211,6 @@ public class ModernGameFragment extends BaseGameFragment {
         difficultyTextView.setText("Difficulty: " + difficultyString);
     }
     
-    private void updateGameComplete(boolean isComplete) {
-        if (isComplete) {
-            // Show game complete dialog
-            showGameCompleteDialog();
-        }
-    }
-    
     private void updateBoardSizeText() {
         // Get the current game state
         GameState currentState = gameStateManager.getCurrentState().getValue();
@@ -215,27 +229,6 @@ public class ModernGameFragment extends BaseGameFragment {
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", boardWidth, boardHeight);
             boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
         }
-    }
-    
-    /**
-     * Show a dialog when the game is complete
-     */
-    private void showGameCompleteDialog() {
-        // Create a dialog to show game completion
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
-        builder.setTitle("Game Complete!");
-        builder.setMessage("You completed the game in " + gameStateManager.getMoveCount().getValue() + 
-                " moves, and moved " + gameStateManager.getSquaresMoved().getValue() + " squares total.");
-        builder.setPositiveButton("New Game", (dialog, which) -> {
-            // Start a new game
-            gameStateManager.startModernGame();
-        });
-        builder.setNegativeButton("Main Menu", (dialog, which) -> {
-            // Navigate back to main menu
-            navigateTo(R.id.actionModernGameToMainMenu);
-        });
-        builder.setCancelable(false);
-        builder.show();
     }
     
     /**
