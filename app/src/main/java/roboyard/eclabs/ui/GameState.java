@@ -250,46 +250,52 @@ public class GameState implements Serializable {
         boolean hitObstacle = false;
         
         while (!hitObstacle) {
-            int nextX = currentX + dx;
-            int nextY = currentY + dy;
-            
-            // Check for wall collisions based on movement direction
-            if (dx > 0) { // Moving right/east
+            // CRITICAL: First check for wall collision at current position before moving
+            // This is needed to properly handle the wall being between cells
+            if (dx > 0) { // Moving right/east - check for vertical wall at current position
+                if (hasVerticalWall(currentX +1, currentY)) {
+                    // Stop at current position, can't go past the wall
+                    hitObstacle = true;
+                    break;
+                }
+            } else if (dx < 0) { // Moving left/west - check for vertical wall at position to the left
                 if (hasVerticalWall(currentX, currentY)) {
+                    // Stop at current position, can't go past the wall
                     hitObstacle = true;
                     break;
                 }
-            } else if (dx < 0) { // Moving left/west
-                if (hasVerticalWall(currentX - 1, currentY)) {
+            } else if (dy > 0) { // Moving down/south - check for horizontal wall at current position
+                if (hasHorizontalWall(currentX, currentY + 1)) {
+                    // Stop at current position, can't go past the wall
                     hitObstacle = true;
                     break;
                 }
-            } else if (dy > 0) { // Moving down/south
+            } else if (dy < 0) { // Moving up/north - check for horizontal wall at position above
                 if (hasHorizontalWall(currentX, currentY)) {
-                    hitObstacle = true;
-                    break;
-                }
-            } else if (dy < 0) { // Moving up/north
-                if (hasHorizontalWall(currentX, currentY - 1)) {
+                    // Stop at current position, can't go past the wall
                     hitObstacle = true;
                     break;
                 }
             }
             
-            // Check for robot collision
+            // Now calculate next position
+            int nextX = currentX + dx;
+            int nextY = currentY + dy;
+            
+            // Check if we'd move out of bounds
+            if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
+                hitObstacle = true;
+                break;
+            }
+            
+            // Check for robot collision at next position
             GameElement obstacleRobot = getRobotAt(nextX, nextY);
             if (obstacleRobot != null) {
                 hitObstacle = true;
                 break;
             }
             
-            // Check if we're at the edge of the board
-            if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
-                hitObstacle = true;
-                break;
-            }
-            
-            // Move to the next cell
+            // Move to the next cell if no obstacles
             currentX = nextX;
             currentY = nextY;
         }
