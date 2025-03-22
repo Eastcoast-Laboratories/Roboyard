@@ -243,7 +243,7 @@ public class GameGridView extends View {
         gridWidth = state.getWidth();
         gridHeight = state.getHeight();
         
-        // Draw grid cells
+        // Draw grid cells - board background
         for (int y = 0; y < gridHeight; y++) {
             for (int x = 0; x < gridWidth; x++) {
                 float left = x * cellSize;
@@ -251,64 +251,88 @@ public class GameGridView extends View {
                 float right = left + cellSize;
                 float bottom = top + cellSize;
                 
-                // Set color based on cell type
-                int cellType = state.getCellType(x, y);
-                if (cellType == 1) { // Wall
-                    Drawable wallDrawable;
-                    if (isHorizontalWall(state, x, y)) {
-                        wallDrawable = wallHorizontal;
-                    } else {
-                        wallDrawable = wallVertical;
-                    }
-                    
-                    if (wallDrawable != null) {
-                        // Draw wall using drawable
-                        wallDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                        wallDrawable.draw(canvas);
-                    } else {
-                        // Fallback to color
-                        cellPaint.setColor(Color.DKGRAY);
-                        canvas.drawRect(left, top, right, bottom, cellPaint);
-                    }
-                } else if (cellType == 2) { // Target
-                    // Find the target element for this position to determine color
-                    GameElement targetElement = null;
-                    for (GameElement element : state.getGameElements()) {
-                        if (element.getType() == GameElement.TYPE_TARGET && 
-                            element.getX() == x && element.getY() == y) {
-                            targetElement = element;
-                            break;
-                        }
-                    }
-                    
-                    Drawable targetDrawable = getTargetDrawable(targetElement);
-                    if (targetDrawable != null) {
-                        // Draw target using drawable
-                        targetDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                        targetDrawable.draw(canvas);
-                    } else {
-                        // Fallback to color
-                        cellPaint.setColor(Color.rgb(60, 60, 90));
-                        canvas.drawRect(left, top, right, bottom, cellPaint);
-                    }
-                } else { // Empty
-                    cellPaint.setColor(Color.rgb(30, 30, 60));
-                    canvas.drawRect(left, top, right, bottom, cellPaint);
-                }
+                // Draw empty cell background
+                cellPaint.setColor(Color.rgb(30, 30, 60));
+                canvas.drawRect(left, top, right, bottom, cellPaint);
+                
+                // Draw grid lines
+                gridPaint.setColor(Color.rgb(40, 40, 70));
+                canvas.drawRect(left, top, right, bottom, gridPaint);
                 
                 // Highlight focused cell for accessibility
                 if (x == focusedX && y == focusedY) {
                     cellPaint.setColor(Color.rgb(80, 80, 120));
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
-                
-                // Draw grid lines
-                gridPaint.setColor(Color.rgb(40, 40, 70));
-                canvas.drawRect(left, top, right, bottom, gridPaint);
             }
         }
         
-        // Draw robots
+        // Draw targets
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                float left = element.getX() * cellSize;
+                float top = element.getY() * cellSize;
+                float right = left + cellSize;
+                float bottom = top + cellSize;
+                
+                Drawable targetDrawable = getTargetDrawable(element);
+                if (targetDrawable != null) {
+                    // Draw target using drawable
+                    targetDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                    targetDrawable.draw(canvas);
+                } else {
+                    // Fallback to color
+                    cellPaint.setColor(Color.rgb(60, 60, 90));
+                    canvas.drawRect(left, top, right, bottom, cellPaint);
+                }
+            }
+        }
+        
+        // Draw walls between cells, not on cells
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                // Horizontal walls are drawn between rows (separating cells vertically)
+                int x = element.getX();
+                int y = element.getY();
+                
+                float left = x * cellSize;
+                float top = y * cellSize; // Top of the lower cell
+                float right = left + cellSize;
+                float wallThickness = cellSize / 8; // Thinner walls look better
+                
+                // Draw horizontal wall - between y and y+1
+                cellPaint.setColor(Color.DKGRAY);
+                canvas.drawRect(left, top - wallThickness/2, right, top + wallThickness/2, cellPaint);
+                
+                if (wallHorizontal != null) {
+                    wallHorizontal.setBounds((int)left, (int)(top - wallThickness/2), 
+                                             (int)right, (int)(top + wallThickness/2));
+                    wallHorizontal.draw(canvas);
+                }
+            } 
+            else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                // Vertical walls are drawn between columns (separating cells horizontally)
+                int x = element.getX();
+                int y = element.getY();
+                
+                float left = x * cellSize; // Left of the right cell
+                float top = y * cellSize;
+                float bottom = top + cellSize;
+                float wallThickness = cellSize / 8;
+                
+                // Draw vertical wall - between x and x+1
+                cellPaint.setColor(Color.DKGRAY);
+                canvas.drawRect(left - wallThickness/2, top, left + wallThickness/2, bottom, cellPaint);
+                
+                if (wallVertical != null) {
+                    wallVertical.setBounds((int)(left - wallThickness/2), (int)top, 
+                                           (int)(left + wallThickness/2), (int)bottom);
+                    wallVertical.draw(canvas);
+                }
+            }
+        }
+        
+        // Draw robots (on top of walls and targets)
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
                 float left = element.getX() * cellSize;
@@ -349,20 +373,15 @@ public class GameGridView extends View {
                     robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
                     robotDrawable.draw(canvas);
                 } else {
-                    // Fallback to circle if drawable not available
-                    float centerX = (element.getX() + 0.5f) * cellSize;
-                    float centerY = (element.getY() + 0.5f) * cellSize;
-                    float radius = cellSize * 0.4f;
-                    
+                    // Fallback to colored circle
                     switch (element.getColor()) {
                         case 0: robotPaint.setColor(Color.RED); break;
                         case 1: robotPaint.setColor(Color.GREEN); break;
                         case 2: robotPaint.setColor(Color.BLUE); break;
                         case 3: robotPaint.setColor(Color.YELLOW); break;
-                        default: robotPaint.setColor(Color.MAGENTA); break;
+                        default: robotPaint.setColor(Color.WHITE); break;
                     }
-                    
-                    canvas.drawCircle(centerX, centerY, radius, robotPaint);
+                    canvas.drawCircle(left + cellSize/2, top + cellSize/2, cellSize/3, robotPaint);
                 }
             }
         }

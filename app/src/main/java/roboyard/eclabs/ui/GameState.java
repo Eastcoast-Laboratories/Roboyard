@@ -132,6 +132,22 @@ public class GameState implements Serializable {
     }
     
     /**
+     * Add a horizontal wall at the specified coordinates
+     */
+    public void addHorizontalWall(int x, int y) {
+        GameElement wall = new GameElement(GameElement.TYPE_HORIZONTAL_WALL, x, y);
+        gameElements.add(wall);
+    }
+    
+    /**
+     * Add a vertical wall at the specified coordinates
+     */
+    public void addVerticalWall(int x, int y) {
+        GameElement wall = new GameElement(GameElement.TYPE_VERTICAL_WALL, x, y);
+        gameElements.add(wall);
+    }
+    
+    /**
      * Add a target at the specified coordinates
      */
     public void addTarget(int x, int y, int color) {
@@ -203,59 +219,131 @@ public class GameState implements Serializable {
         int startX = robot.getX();
         int startY = robot.getY();
         
-        // Determine movement direction
-        int dirX = 0;
-        int dirY = 0;
-        
-        if (targetX > startX) dirX = 1;
-        else if (targetX < startX) dirX = -1;
-        
-        if (targetY > startY) dirY = 1;
-        else if (targetY < startY) dirY = -1;
-        
-        // Can only move in one direction at a time
-        if (dirX != 0 && dirY != 0) {
+        // Check if the target position is in bounds
+        if (targetX < 0 || targetX >= width || targetY < 0 || targetY >= height) {
             return false;
         }
         
-        // Can't stay in place
-        if (dirX == 0 && dirY == 0) {
+        // Can only move in straight lines (horizontally or vertically)
+        boolean isHorizontalMove = (startY == targetY);
+        boolean isVerticalMove = (startX == targetX);
+        if (!isHorizontalMove && !isVerticalMove) {
             return false;
         }
         
-        // Move in the direction until hitting an obstacle
-        int newX = startX;
-        int newY = startY;
+        // Calculate move direction
+        int dx = 0;
+        int dy = 0;
+        if (isHorizontalMove) {
+            dx = (targetX > startX) ? 1 : -1; // Moving right or left
+        } else {
+            dy = (targetY > startY) ? 1 : -1; // Moving down or up
+        }
         
-        while (true) {
-            int nextX = newX + dirX;
-            int nextY = newY + dirY;
+        // Determine the final position after collision checking
+        int finalX = startX;
+        int finalY = startY;
+        
+        // Move until hitting a wall or another robot
+        int currentX = startX;
+        int currentY = startY;
+        boolean hitObstacle = false;
+        
+        while (!hitObstacle) {
+            int nextX = currentX + dx;
+            int nextY = currentY + dy;
             
-            // Check if out of bounds or hit a wall
-            if (getCellType(nextX, nextY) == Constants.CELL_WALL) {
+            // Check for wall collisions based on movement direction
+            if (dx > 0) { // Moving right/east
+                if (hasVerticalWall(currentX, currentY)) {
+                    hitObstacle = true;
+                    break;
+                }
+            } else if (dx < 0) { // Moving left/west
+                if (hasVerticalWall(currentX - 1, currentY)) {
+                    hitObstacle = true;
+                    break;
+                }
+            } else if (dy > 0) { // Moving down/south
+                if (hasHorizontalWall(currentX, currentY)) {
+                    hitObstacle = true;
+                    break;
+                }
+            } else if (dy < 0) { // Moving up/north
+                if (hasHorizontalWall(currentX, currentY - 1)) {
+                    hitObstacle = true;
+                    break;
+                }
+            }
+            
+            // Check for robot collision
+            GameElement obstacleRobot = getRobotAt(nextX, nextY);
+            if (obstacleRobot != null) {
+                hitObstacle = true;
                 break;
             }
             
-            // Check if another robot is in the way
-            if (getRobotAt(nextX, nextY) != null) {
+            // Check if we're at the edge of the board
+            if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
+                hitObstacle = true;
                 break;
             }
             
-            // Move to the next position
-            newX = nextX;
-            newY = nextY;
+            // Move to the next cell
+            currentX = nextX;
+            currentY = nextY;
         }
         
-        // If we didn't move, return false
-        if (newX == startX && newY == startY) {
+        // Update robot position to the final position
+        finalX = currentX;
+        finalY = currentY;
+        
+        // If the robot didn't move, return false
+        if (finalX == startX && finalY == startY) {
             return false;
         }
         
-        // Move the robot
-        robot.setX(newX);
-        robot.setY(newY);
+        // Move the robot to the final position
+        robot.setX(finalX);
+        robot.setY(finalY);
+        
+        // Increment move count
+        moveCount++;
+        
+        // Check if the game is completed
+        checkCompletion();
         
         return true;
+    }
+    
+    /**
+     * Check if there is a vertical wall at the specified position
+     * Vertical walls separate columns (they're placed between x and x+1)
+     */
+    private boolean hasVerticalWall(int x, int y) {
+        // Check vertical walls from the game elements
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
+                element.getX() == x && element.getY() == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Check if there is a horizontal wall at the specified position
+     * Horizontal walls separate rows (they're placed between y and y+1)
+     */
+    private boolean hasHorizontalWall(int x, int y) {
+        // Check horizontal walls from the game elements
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
+                element.getX() == x && element.getY() == y) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -560,9 +648,12 @@ public class GameState implements Serializable {
                 int y = element.getY();
                 
                 // Handle all wall types
-                if (type.equals("mh") || type.equals("mv")) {
-                    // Add horizontal and vertical walls from the MapGenerator
-                    state.addWall(x, y);
+                if (type.equals("mh")) {
+                    // Add horizontal wall (between rows)
+                    state.addHorizontalWall(x, y);
+                } else if (type.equals("mv")) {
+                    // Add vertical wall (between columns)
+                    state.addVerticalWall(x, y);
                 } else if (type.equals("target_red")) {
                     state.addTarget(x, y, 0);
                 } else if (type.equals("target_green")) {

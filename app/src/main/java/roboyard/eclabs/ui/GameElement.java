@@ -11,6 +11,8 @@ public class GameElement implements Serializable {
     // Element types
     public static final int TYPE_ROBOT = 1;
     public static final int TYPE_TARGET = 2;
+    public static final int TYPE_HORIZONTAL_WALL = 3; // Horizontal wall between rows (mh)
+    public static final int TYPE_VERTICAL_WALL = 4;   // Vertical wall between columns (mv)
     
     // Element properties
     private int type;
@@ -103,5 +105,9 @@ public class GameElement implements Serializable {
      */
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public boolean isRobot() {
+        return type == TYPE_ROBOT;
     }
 }
