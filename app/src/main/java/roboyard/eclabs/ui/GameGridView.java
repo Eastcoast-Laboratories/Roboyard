@@ -9,8 +9,11 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
+
 import androidx.core.content.ContextCompat;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
@@ -57,6 +60,10 @@ public class GameGridView extends View {
     private Drawable targetYellowDrawable;  // cj
     private Drawable targetMultiDrawable;   // cm
     
+    // Robot animation configuration
+    private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
+    private boolean enableRobotAnimation = true; // Can be toggled in settings
+
     /**
      * Constructor for programmatic creation
      */
@@ -366,22 +373,78 @@ public class GameGridView extends View {
                     highlightPaint.setStyle(Paint.Style.STROKE);
                     highlightPaint.setStrokeWidth(4);
                     canvas.drawRect(left, top, right, bottom, highlightPaint);
-                }
-                
-                // Draw the robot using the drawable
-                if (robotDrawable != null) {
-                    robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                    robotDrawable.draw(canvas);
-                } else {
-                    // Fallback to colored circle
-                    switch (element.getColor()) {
-                        case 0: robotPaint.setColor(Color.RED); break;
-                        case 1: robotPaint.setColor(Color.GREEN); break;
-                        case 2: robotPaint.setColor(Color.BLUE); break;
-                        case 3: robotPaint.setColor(Color.YELLOW); break;
-                        default: robotPaint.setColor(Color.WHITE); break;
+                    
+                    // Scale selected robot by 50% if animations are enabled
+                    if (enableRobotAnimation) {
+                        // Calculate the center point of the robot
+                        float centerX = left + cellSize / 2;
+                        float centerY = top + cellSize / 2;
+                        
+                        // Save canvas state before scaling
+                        canvas.save();
+                        
+                        // Scale from the center of the robot
+                        canvas.scale(SELECTED_ROBOT_SCALE, SELECTED_ROBOT_SCALE, centerX, centerY);
+                        
+                        // Calculate the scaled bounds
+                        float scaledSize = cellSize / SELECTED_ROBOT_SCALE;
+                        float scaledLeft = centerX - scaledSize / 2;
+                        float scaledTop = centerY - scaledSize / 2;
+                        float scaledRight = centerX + scaledSize / 2;
+                        float scaledBottom = centerY + scaledSize / 2;
+                        
+                        // Draw the robot at the scaled position
+                        if (robotDrawable != null) {
+                            robotDrawable.setBounds((int)scaledLeft, (int)scaledTop, (int)scaledRight, (int)scaledBottom);
+                            robotDrawable.draw(canvas);
+                        } else {
+                            // Fallback to colored circle
+                            switch (element.getColor()) {
+                                case 0: robotPaint.setColor(Color.RED); break;
+                                case 1: robotPaint.setColor(Color.GREEN); break;
+                                case 2: robotPaint.setColor(Color.BLUE); break;
+                                case 3: robotPaint.setColor(Color.YELLOW); break;
+                            }
+                            canvas.drawCircle(centerX, centerY, scaledSize / 2.5f, robotPaint);
+                        }
+                        
+                        // Restore canvas to original state
+                        canvas.restore();
+                    } else {
+                        // Regular drawing without scaling if animations disabled
+                        if (robotDrawable != null) {
+                            robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                            robotDrawable.draw(canvas);
+                        } else {
+                            // Fallback to colored circle
+                            float centerX = left + cellSize / 2;
+                            float centerY = top + cellSize / 2;
+                            switch (element.getColor()) {
+                                case 0: robotPaint.setColor(Color.RED); break;
+                                case 1: robotPaint.setColor(Color.GREEN); break;
+                                case 2: robotPaint.setColor(Color.BLUE); break;
+                                case 3: robotPaint.setColor(Color.YELLOW); break;
+                            }
+                            canvas.drawCircle(centerX, centerY, cellSize / 2.5f, robotPaint);
+                        }
                     }
-                    canvas.drawCircle(left + cellSize/2, top + cellSize/2, cellSize/3, robotPaint);
+                } else {
+                    // Draw unselected robot normally
+                    if (robotDrawable != null) {
+                        robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                        robotDrawable.draw(canvas);
+                    } else {
+                        // Fallback to colored circle
+                        float centerX = left + cellSize / 2;
+                        float centerY = top + cellSize / 2;
+                        switch (element.getColor()) {
+                            case 0: robotPaint.setColor(Color.RED); break;
+                            case 1: robotPaint.setColor(Color.GREEN); break;
+                            case 2: robotPaint.setColor(Color.BLUE); break;
+                            case 3: robotPaint.setColor(Color.YELLOW); break;
+                        }
+                        canvas.drawCircle(centerX, centerY, cellSize / 2.5f, robotPaint);
+                    }
                 }
             }
         }

@@ -63,15 +63,44 @@ public class ModernGameFragment extends BaseGameFragment {
                 if (gameState != null && gameState.getSelectedRobot() != null) {
                     // A robot is active, cancel selection instead of going back
                     Timber.d("Back pressed with active robot - canceling robot selection");
-                    gameState.setSelectedRobot(null);
-                    isRobotSelected = false;
                     
-                    // Refresh the view if it's initialized
-                    if (gameGridView != null) {
-                        gameGridView.invalidate();
+                    // Move robot away from the edge if it's at one
+                    GameElement robot = gameState.getSelectedRobot();
+                    int robotX = robot.getX();
+                    int robotY = robot.getY();
+                    int boardWidth = gameState.getWidth();
+                    int boardHeight = gameState.getHeight();
+                    
+                    // Check if robot is at an edge and move it inward
+                    boolean moved = false;
+                    if (robotX == 0) { // Left edge
+                        moved = gameState.moveRobotTo(robot, 1, robotY);
+                        Timber.d("Moving robot from left edge inward: %s", moved ? "success" : "failed");
+                    } else if (robotX == boardWidth - 1) { // Right edge
+                        moved = gameState.moveRobotTo(robot, boardWidth - 2, robotY);
+                        Timber.d("Moving robot from right edge inward: %s", moved ? "success" : "failed");
+                    } else if (robotY == 0) { // Top edge
+                        moved = gameState.moveRobotTo(robot, robotX, 1);
+                        Timber.d("Moving robot from top edge inward: %s", moved ? "success" : "failed");
+                    } else if (robotY == boardHeight - 1) { // Bottom edge
+                        moved = gameState.moveRobotTo(robot, robotX, boardHeight - 2);
+                        Timber.d("Moving robot from bottom edge inward: %s", moved ? "success" : "failed");
                     }
                     
-                    Toast.makeText(requireContext(), "Robot movement canceled", Toast.LENGTH_SHORT).show();
+                    if (moved) {
+                        Toast.makeText(requireContext(), "Robot moved away from edge", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Deselect the robot if it couldn't be moved
+                        gameState.setSelectedRobot(null);
+                        isRobotSelected = false;
+                        
+                        // Refresh the view if it's initialized
+                        if (gameGridView != null) {
+                            gameGridView.invalidate();
+                        }
+                        
+                        Toast.makeText(requireContext(), "Robot movement canceled", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     // No robot is active, allow normal back navigation
                     Timber.d("Back pressed without active robot - allowing navigation");
