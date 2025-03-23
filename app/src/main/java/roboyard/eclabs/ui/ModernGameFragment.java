@@ -344,6 +344,9 @@ public class ModernGameFragment extends BaseGameFragment {
         boardSizeTextView = view.findViewById(R.id.board_size_text);
         timerTextView = view.findViewById(R.id.game_timer);
         
+        // Initialize sound manager
+        soundManager = SoundManager.getInstance(requireContext());
+        
         // Initialize accessibility controls
         btnToggleAccessibilityControls = view.findViewById(R.id.btn_toggle_accessibility);
         accessibilityControlsContainer = view.findViewById(R.id.accessibility_container);
@@ -407,7 +410,7 @@ public class ModernGameFragment extends BaseGameFragment {
                         stopTimer();
                         Toast.makeText(requireContext(), 
                             "Target reached in " + state.getMoveCount() + " moves!", 
-                            Toast.LENGTH_LONG).show();
+                            Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -417,6 +420,9 @@ public class ModernGameFragment extends BaseGameFragment {
             if (isComplete != null && isComplete) {
                 Timber.d("ModernGameFragment: Game completed from LiveData");
                 stopTimer();
+                
+                // Play win sound
+                playSound("win");
                 
                 Toast.makeText(requireContext(), 
                     "Target reached in " + gameStateManager.getMoveCount().getValue() + " moves and " + 
@@ -521,14 +527,6 @@ public class ModernGameFragment extends BaseGameFragment {
             Timber.d("ModernGameFragment: Restart button clicked");
             // Start a new game
             gameStateManager.startModernGame();
-            resetAndStartTimer();
-        });
-        
-        // New game button - start a new game
-        Button newGameButton = view.findViewById(R.id.new_game_button);
-        newGameButton.setOnClickListener(v -> {
-            // Start a new game
-            gameStateManager.startModernGame();
             // Reset timer
             stopTimer();
             startTimer();
@@ -586,10 +584,16 @@ public class ModernGameFragment extends BaseGameFragment {
     
     /**
      * Move the selected robot in the specified direction
+     * 
+     * Note: This method is only called by the accessibility directional buttons
+     * (btnMoveNorth, btnMoveSouth, btnMoveEast, btnMoveWest) and not by normal touch
+     * interactions on the GameGridView, which handles movement directly.
+     * 
      * @param dx Horizontal movement (-1 = left, 1 = right)
      * @param dy Vertical movement (-1 = up, 1 = down)
      */
     private void moveRobotInDirection(int dx, int dy) {
+        Timber.d("Moving robot in direction: dx=%d, dy=%d", dx, dy);
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null || state.getSelectedRobot() == null) {
             announceAccessibility("No robot selected");
@@ -658,6 +662,7 @@ public class ModernGameFragment extends BaseGameFragment {
             gameStateManager.setSquaresMoved(gameStateManager.getSquaresMoved().getValue() + dist);
             
             // Play the appropriate sound effect
+            Timber.d("[SOUND] Playing sound " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));
             if (hitRobot) {
                 playSound("hit_robot");
             } else if (hitWall) {
@@ -709,40 +714,141 @@ public class ModernGameFragment extends BaseGameFragment {
      * Announce the possible moves for the selected robot in each direction
      * @param robot The selected robot
      */
-    private void announcePossibleMoves(GameElement robot) {
-        if (robot == null || gameStateManager == null) {
+    public void announcePossibleMoves(GameElement robot) {
+        if (robot == null) {
             return;
         }
+        
+        Timber.d("Announcing possible moves for %s robot", getRobotColorName(robot));
         
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null) {
             return;
         }
         
-        Map<String, Integer> moves = state.calculatePossibleMoves(robot.getColor());
-        if (moves.isEmpty()) {
-            return;
+        int x = robot.getX();
+        int y = robot.getY();
+        
+        // Build the announcement message with detailed information about possible moves
+        StringBuilder announcement = new StringBuilder();
+        announcement.append("Possible moves: ");
+        
+        // Check east movement (right)
+        int eastDistance = 0;
+        String eastObstacle = "edge";
+        int obstacleX = x;
+        for (int i = x + 1; i < state.getWidth(); i++) {
+            if (state.canRobotMoveTo(robot, i, y)) {
+                eastDistance++;
+                obstacleX = i;
+            } else {
+                // Found an obstacle
+                GameElement robotAtPosition = state.getRobotAt(i, y);
+                if (robotAtPosition != null) {
+                    eastObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    
+                    // Check if the robot is at its target
+                    if (state.isRobotAtTarget(robotAtPosition)) {
+                        eastObstacle += " with target reached";
+                    }
+                } else {
+                    eastObstacle = "wall";
+                }
+                break;
+            }
+        }
+        if (eastDistance > 0) {
+            announcement.append(eastDistance).append(" squares east until ").append(eastObstacle).append(", ");
+        } else {
+            announcement.append("no movement east, ");
         }
         
-        // Build the message about possible moves
-        StringBuilder message = new StringBuilder();
-        message.append(getRobotColorName(robot)).append(" robot can move: ");
+        // Check west movement (left)
+        int westDistance = 0;
+        String westObstacle = "edge";
+        for (int i = x - 1; i >= 0; i--) {
+            if (state.canRobotMoveTo(robot, i, y)) {
+                westDistance++;
+            } else {
+                // Found an obstacle
+                GameElement robotAtPosition = state.getRobotAt(i, y);
+                if (robotAtPosition != null) {
+                    westObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    
+                    // Check if the robot is at its target
+                    if (state.isRobotAtTarget(robotAtPosition)) {
+                        westObstacle += " with target reached";
+                    }
+                } else {
+                    westObstacle = "wall";
+                }
+                break;
+            }
+        }
+        if (westDistance > 0) {
+            announcement.append(westDistance).append(" squares west until ").append(westObstacle).append(", ");
+        } else {
+            announcement.append("no movement west, ");
+        }
         
-        if (moves.get("north") > 0) {
-            message.append(moves.get("north")).append(" spaces north, ");
+        // Check north movement (up)
+        int northDistance = 0;
+        String northObstacle = "edge";
+        for (int i = y - 1; i >= 0; i--) {
+            if (state.canRobotMoveTo(robot, x, i)) {
+                northDistance++;
+            } else {
+                // Found an obstacle
+                GameElement robotAtPosition = state.getRobotAt(x, i);
+                if (robotAtPosition != null) {
+                    northObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    
+                    // Check if the robot is at its target
+                    if (state.isRobotAtTarget(robotAtPosition)) {
+                        northObstacle += " with target reached";
+                    }
+                } else {
+                    northObstacle = "wall";
+                }
+                break;
+            }
         }
-        if (moves.get("south") > 0) {
-            message.append(moves.get("south")).append(" spaces south, ");
-        }
-        if (moves.get("east") > 0) {
-            message.append(moves.get("east")).append(" spaces east, ");
-        }
-        if (moves.get("west") > 0) {
-            message.append(moves.get("west")).append(" spaces west");
+        if (northDistance > 0) {
+            announcement.append(northDistance).append(" squares north until ").append(northObstacle).append(", ");
+        } else {
+            announcement.append("no movement north, ");
         }
         
-        // Announce the possible moves
-        announceAccessibility(message.toString());
+        // Check south movement (down)
+        int southDistance = 0;
+        String southObstacle = "edge";
+        for (int i = y + 1; i < state.getHeight(); i++) {
+            if (state.canRobotMoveTo(robot, x, i)) {
+                southDistance++;
+            } else {
+                // Found an obstacle
+                GameElement robotAtPosition = state.getRobotAt(x, i);
+                if (robotAtPosition != null) {
+                    southObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    
+                    // Check if the robot is at its target
+                    if (state.isRobotAtTarget(robotAtPosition)) {
+                        southObstacle += " with target reached";
+                    }
+                } else {
+                    southObstacle = "wall";
+                }
+                break;
+            }
+        }
+        if (southDistance > 0) {
+            announcement.append(southDistance).append(" squares south until ").append(southObstacle);
+        } else {
+            announcement.append("no movement south");
+        }
+        
+        // Announce the message
+        announceAccessibility(announcement.toString());
     }
     
     /**
@@ -906,7 +1012,7 @@ public class ModernGameFragment extends BaseGameFragment {
      * Play a sound effect
      * @param soundType Type of sound to play ("move", "hit_wall", "hit_robot", "win")
      */
-    private void playSound(String soundType) {
+    public void playSound(String soundType) {
         if (soundManager != null) {
             Timber.d("ModernGameFragment: Playing sound %s", soundType);
             soundManager.playSound(soundType);

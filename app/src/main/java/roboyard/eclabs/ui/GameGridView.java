@@ -437,60 +437,82 @@ public class GameGridView extends View {
         // Draw robots (on top of walls and targets)
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
-                // Check if this is the selected robot
-                boolean isSelected = (state.getSelectedRobot() == element);
-                drawRobot(canvas, element, isSelected ? SELECTED_ROBOT_SCALE : 1.0f);
+                // Draw the robot using the drawable
+                drawRobotWithGraphics(canvas, element, state);
             }
         }
     }
     
     /**
-     * Draw a robot on the canvas
+     * Draw a robot on the canvas using its original graphics
      * @param canvas Canvas to draw on
      * @param robot Robot to draw
-     * @param scale Scale factor for the robot (1.0 = normal size)
+     * @param state Current game state
      */
-    private void drawRobot(Canvas canvas, GameElement robot, float scale) {
+    private void drawRobotWithGraphics(Canvas canvas, GameElement robot, GameState state) {
         int x = robot.getX();
         int y = robot.getY();
         
-        // Calculate the center of the cell
-        float centerX = x * cellSize + cellSize / 2;
-        float centerY = y * cellSize + cellSize / 2;
+        float left = x * cellSize;
+        float top = y * cellSize;
+        float right = left + cellSize;
+        float bottom = top + cellSize;
         
-        // Calculate the radius for the robot (slightly smaller than the cell)
-        float radius = cellSize / 2 * 0.8f;
+        // Select appropriate robot drawable based on color
+        Drawable robotDrawable = null;
         
-        // Apply scale to the radius
-        float scaledRadius = radius * scale;
-        
-        // Get the robot color
-        int color = getColorForRobot(robot);
-        
-        // Draw the robot
-        robotPaint.setColor(color);
-        canvas.drawCircle(centerX, centerY, scaledRadius, robotPaint);
-        
-        // Draw a border/outline
-        robotPaint.setStyle(Paint.Style.STROKE);
-        robotPaint.setColor(Color.BLACK);
-        robotPaint.setStrokeWidth(2);
-        canvas.drawCircle(centerX, centerY, scaledRadius, robotPaint);
-        robotPaint.setStyle(Paint.Style.FILL);
-    }
-    
-    /**
-     * Get the color for a robot based on its color index
-     * @param robot The robot to get the color for
-     * @return The color to use for the robot
-     */
-    private int getColorForRobot(GameElement robot) {
         switch (robot.getColor()) {
-            case 0: return Color.RED;
-            case 1: return Color.GREEN;
-            case 2: return Color.BLUE;
-            case 3: return Color.YELLOW;
-            default: return Color.GRAY;
+            case 0: // RED
+                robotDrawable = redRobotRight;
+                break;
+            case 1: // GREEN
+                robotDrawable = greenRobotRight;
+                break;
+            case 2: // BLUE
+                robotDrawable = blueRobotRight;
+                break;
+            case 3: // YELLOW
+                robotDrawable = yellowRobotRight;
+                break;
+        }
+        
+        // Get the current scale from robotScaleMap, or use default scale based on selection
+        float scale = 1.0f;
+        if (robotScaleMap.containsKey(robot)) {
+            // Use the animated scale if available
+            scale = robotScaleMap.get(robot);
+        } else {
+            // Otherwise use default scale based on selection state
+            boolean isSelected = (state.getSelectedRobot() == robot);
+            if (isSelected) {
+                scale = SELECTED_ROBOT_SCALE;
+                // Initialize the scale in the map for future animations
+                robotScaleMap.put(robot, scale);
+            }
+        }
+        
+        if (robotDrawable != null) {
+            // Calculate center point
+            float centerX = left + cellSize / 2;
+            float centerY = top + cellSize / 2;
+            
+            // Calculate scaled dimensions
+            float scaledWidth = cellSize * scale;
+            float scaledHeight = cellSize * scale;
+            
+            // Calculate new bounds with center preserved
+            float scaledLeft = centerX - scaledWidth / 2;
+            float scaledTop = centerY - scaledHeight / 2;
+            float scaledRight = centerX + scaledWidth / 2;
+            float scaledBottom = centerY + scaledHeight / 2;
+            
+            robotDrawable.setBounds(
+                (int) scaledLeft,
+                (int) scaledTop,
+                (int) scaledRight,
+                (int) scaledBottom
+            );
+            robotDrawable.draw(canvas);
         }
     }
     
@@ -538,6 +560,57 @@ public class GameGridView extends View {
                 // Check if robot moved by comparing old and new positions
                 Timber.d("[GOAL DEBUG] Selected robot moved from " + oldX + ", " + oldY + " to " + selectedRobot.getX() + ", " + selectedRobot.getY());
                 if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
+                    // Shrink the robot back to normal size when it starts moving
+                    if (robotScaleMap.containsKey(selectedRobot) && robotScaleMap.get(selectedRobot) > 1.0f) {
+                        animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), 1.0f);
+                    }
+                    
+                    // Calculate if robot hit a wall or another robot
+                    boolean hitWall = false;
+                    boolean hitRobot = false;
+                    int dx = selectedRobot.getX() - oldX;
+                    int dy = selectedRobot.getY() - oldY;
+                    
+                    // Determine if we hit something
+                    if (dx != 0) {
+                        // Moving horizontally
+                        int nextX = selectedRobot.getX() + (dx > 0 ? 1 : -1);
+                        if (nextX >= 0 && nextX < state.getWidth()) {
+                            GameElement robotAtPosition = state.getRobotAt(nextX, selectedRobot.getY());
+                            if (robotAtPosition != null) {
+                                hitRobot = true;
+                            } else if (!state.canRobotMoveTo(selectedRobot, nextX, selectedRobot.getY())) {
+                                hitWall = true;
+                            }
+                        }
+                    } else if (dy != 0) {
+                        // Moving vertically
+                        int nextY = selectedRobot.getY() + (dy > 0 ? 1 : -1);
+                        if (nextY >= 0 && nextY < state.getHeight()) {
+                            GameElement robotAtPosition = state.getRobotAt(selectedRobot.getX(), nextY);
+                            if (robotAtPosition != null) {
+                                hitRobot = true;
+                            } else if (!state.canRobotMoveTo(selectedRobot, selectedRobot.getX(), nextY)) {
+                                hitWall = true;
+                            }
+                        }
+                    }
+                    
+                    // Play the appropriate sound effect based on what happened
+                    Timber.d("[SOUND] Playing sound from GameGridView: " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));
+                    if (fragment instanceof ModernGameFragment) {
+                        if (hitRobot) {
+                            ((ModernGameFragment) fragment).playSound("hit_robot");
+                        } else if (hitWall) {
+                            ((ModernGameFragment) fragment).playSound("hit_wall");
+                        } else {
+                            ((ModernGameFragment) fragment).playSound("move");
+                        }
+                        
+                        // Also announce possible moves after movement
+                        ((ModernGameFragment) fragment).announcePossibleMoves(selectedRobot);
+                    }
+                    
                     if (state.checkCompletion()) {
                         Timber.d("[GOAL DEBUG] Goal reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
                         

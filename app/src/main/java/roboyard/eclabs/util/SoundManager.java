@@ -39,10 +39,10 @@ public class SoundManager {
      * @param soundType Type of sound: "move", "hit_wall", "hit_robot", "win", "lose"
      */
     public void playSound(String soundType) {
-        Timber.d("Playing sound: %s", soundType);
+        Timber.d("[SOUND] Attempting to play sound: %s", soundType);
         // Skip if another sound is playing
         if (isSoundPlaying && currentPlayer != null && currentPlayer.isPlaying()) {
-            Timber.d("Not playing sound %s - another sound is already playing", soundType);
+            Timber.d("[SOUND] Not playing sound %s - another sound is already playing", soundType);
             return;
         }
         
@@ -55,59 +55,64 @@ public class SoundManager {
         // Get the sound resource ID
         switch (soundType) {
             case "move":
+                Timber.d("[SOUND] Selected robot_move sound");
                 soundResId = R.raw.robot_move;
                 break;
             case "hit_wall":
+                Timber.d("[SOUND] Selected robot_hit_wall sound");
                 soundResId = R.raw.robot_hit_wall;
                 break;
             case "hit_robot":
+                Timber.d("[SOUND] Selected robot_hit_robot sound");
                 soundResId = R.raw.robot_hit_robot;
                 break;
             case "win":
+                Timber.d("[SOUND] Selected robot_win sound");
                 soundResId = R.raw.robot_win;
                 break;
             case "lose":
+                Timber.d("[SOUND] Selected robot_hit_wall sound as fallback for lose");
                 // We'll use hit_wall sound for now as a fallback
                 soundResId = R.raw.robot_hit_wall;
                 break;
             case "none":
-                Timber.d("No sound to play");
+                Timber.d("[SOUND] No sound to play");
                 return;
             default:
-                Timber.d("Unknown sound type: %s", soundType);
+                Timber.e("[SOUND] Unknown sound type: %s", soundType);
                 return;
         }
         
         if (soundResId != 0) {
             try {
+                Timber.d("[SOUND] Creating MediaPlayer for sound ID: %d", soundResId);
                 // Create the media player for this sound
-                MediaPlayer mp = new MediaPlayer();
-                AssetFileDescriptor afd = context.getResources().openRawResourceFd(soundResId);
-                if (afd == null) {
-                    Timber.e("Failed to open resource: %d", soundResId);
+                MediaPlayer mp = MediaPlayer.create(context, soundResId);
+                if (mp == null) {
+                    Timber.e("[SOUND] Failed to create MediaPlayer for sound: %s", soundType);
                     return;
                 }
-                
-                mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                afd.close();
-                mp.prepare();
                 
                 // Set the global current player
                 currentPlayer = mp;
                 isSoundPlaying = true;
                 
                 // Play the sound
+                Timber.d("[SOUND] Starting playback for sound: %s", soundType);
                 mp.start();
                 
                 // When playback completes, release the player and reset the flag
                 mp.setOnCompletionListener(mediaPlayer -> {
+                    Timber.d("[SOUND] Completed playback for sound: %s", soundType);
                     mediaPlayer.release();
                     currentPlayer = null;
                     isSoundPlaying = false;
                 });
             } catch (Exception e) {
-                Timber.e(e, "Error playing sound: %s", soundType);
+                Timber.e(e, "[SOUND] Error playing sound: %s", soundType);
             }
+        } else {
+            Timber.e("[SOUND] No valid sound resource ID for type: %s", soundType);
         }
     }
     
