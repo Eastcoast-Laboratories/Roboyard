@@ -1,6 +1,10 @@
 package roboyard.eclabs.ui;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,10 +47,32 @@ public class ModernGameFragment extends BaseGameFragment {
     private Button saveMapButton;
     private Button restartButton;
     private Button menuButton;
+    private TextView timerTextView;
     
     // Class member to track if a robot is currently selected
     private boolean isRobotSelected = false;
-
+    
+    // Timer variables
+    private long startTime = 0L;
+    private Handler timerHandler = new Handler(Looper.getMainLooper());
+    private boolean timerRunning = false;
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = SystemClock.elapsedRealtime() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+            
+            // Format time as mm:ss
+            String timeStr = String.format(Locale.getDefault(), "Time: %02d:%02d", minutes, seconds);
+            timerTextView.setText(timeStr);
+            
+            // Continue updating the timer
+            timerHandler.postDelayed(this, 500); // Update every half-second
+        }
+    };
+    
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,8 +158,10 @@ public class ModernGameFragment extends BaseGameFragment {
         squaresMovedTextView = view.findViewById(R.id.squares_moved_text);
         difficultyTextView = view.findViewById(R.id.difficulty_text);
         boardSizeTextView = view.findViewById(R.id.board_size_text);
+        timerTextView = view.findViewById(R.id.game_timer);
         
         // Set up the game grid view
+        gameGridView.setFragment(this);
         gameGridView.setGameStateManager(gameStateManager);
         
         // Set up the UI mode manager
@@ -154,9 +182,25 @@ public class ModernGameFragment extends BaseGameFragment {
         gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
         
         // Observe game completion status
+        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
+            if (state != null) {
+                if (state.isComplete() || state.checkCompletion()) {
+                    Timber.d("Game completed detected from state check");
+                    if (timerRunning) {
+                        stopTimer();
+                        Toast.makeText(requireContext(), 
+                            "Target reached in " + state.getMoveCount() + " moves!", 
+                            Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+        
         gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
-            if (isComplete) {
-                // When game is complete, show toast with moves and squares moved
+            if (isComplete != null && isComplete) {
+                Timber.d("ModernGameFragment: Game completed from LiveData");
+                stopTimer();
+                
                 Toast.makeText(requireContext(), 
                     "Target reached in " + gameStateManager.getMoveCount().getValue() + " moves and " + 
                     gameStateManager.getSquaresMoved().getValue() + " squares moved!", 
@@ -173,6 +217,7 @@ public class ModernGameFragment extends BaseGameFragment {
         // Start a new game if there's no current game state
         if (gameStateManager.getCurrentState().getValue() == null) {
             gameStateManager.startModernGame();
+            startTimer();
         }
     }
     
@@ -242,6 +287,7 @@ public class ModernGameFragment extends BaseGameFragment {
             Timber.d("ModernGameFragment: Restart button clicked");
             // Start a new game
             gameStateManager.startModernGame();
+            resetAndStartTimer();
         });
         
         // Menu button - go back to main menu
@@ -308,5 +354,50 @@ public class ModernGameFragment extends BaseGameFragment {
     @Override
     public String getScreenTitle() {
         return "Modern Game";
+    }
+    
+    /**
+     * Start the timer
+     */
+    private void startTimer() {
+        if (!timerRunning) {
+            startTime = SystemClock.elapsedRealtime();
+            timerHandler.postDelayed(timerRunnable, 0);
+            timerRunning = true;
+        }
+    }
+    
+    /**
+     * Stop the timer
+     */
+    private void stopTimer() {
+        if (timerRunning) {
+            timerHandler.removeCallbacks(timerRunnable);
+            timerRunning = false;
+        }
+    }
+    
+    /**
+     * Reset and start the timer
+     */
+    private void resetAndStartTimer() {
+        stopTimer();
+        startTimer();
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Pause timer when fragment is paused
+        stopTimer();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Resume timer when fragment is resumed if game is in progress and not solved
+        if (gameStateManager.getCurrentState().getValue() != null && !gameStateManager.isGameComplete().getValue()) {
+            startTimer();
+        }
     }
 }

@@ -18,11 +18,15 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.R;
+import timber.log.Timber;
 
 /**
  * Custom View that renders the game board grid and handles touch interactions.
@@ -62,36 +66,43 @@ public class GameGridView extends View {
     
     // Robot animation configuration
     private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
+    private static final float FOCUSED_ROBOT_SCALE = 1.3f; // 30% larger when focused but not selected
     private boolean enableRobotAnimation = true; // Can be toggled in settings
+    private HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
+    private GameElement focusedRobot = null; // Currently focused (hovered) robot
+    private android.view.animation.DecelerateInterpolator easeInterpolator = new android.view.animation.DecelerateInterpolator(1.5f); // Ease function
+    private android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private long animationDuration = 300; // Animation duration in ms
+    private Fragment fragment;
 
     /**
      * Constructor for programmatic creation
      */
     public GameGridView(Context context) {
         super(context);
-        init();
+        init(context);
     }
     
     /**
-     * Constructor for XML inflation
+     * Constructor from XML layout
      */
     public GameGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
     
     /**
-     * Constructor for XML inflation with style
+     * Constructor from XML layout with style
      */
     public GameGridView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
     }
     
     /**
      * Initialize paint objects and accessibility support
      */
-    private void init() {
+    private void init(Context context) {
         // Initialize paints
         cellPaint = new Paint();
         cellPaint.setStyle(Paint.Style.FILL);
@@ -111,7 +122,6 @@ public class GameGridView extends View {
         gridPaint.setColor(Color.rgb(40, 40, 70));
         
         // Load robot drawables
-        Context context = getContext();
         redRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_red_right);
         redRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_red_left);
         
@@ -158,17 +168,89 @@ public class GameGridView extends View {
     }
     
     /**
+     * Set the fragment that contains this view
+     * @param fragment Owner fragment
+     */
+    public void setFragment(Fragment fragment) {
+        this.fragment = fragment;
+        
+        // If gameStateManager already exists, update observation
+        if (gameStateManager != null && fragment != null) {
+            setupRobotAnimationObservers();
+        }
+    }
+    
+    /**
      * Set the game state manager
      * @param manager Game state manager
      */
     public void setGameStateManager(GameStateManager manager) {
         this.gameStateManager = manager;
+        
+        // If fragment is available, set up animations
+        if (fragment != null) {
+            setupRobotAnimationObservers();
+        }
+        
+        // Update width and height based on state
         if (gameStateManager != null && gameStateManager.getCurrentState().getValue() != null) {
             GameState state = gameStateManager.getCurrentState().getValue();
             gridWidth = state.getWidth();
             gridHeight = state.getHeight();
         }
         invalidate();
+    }
+    
+    /**
+     * Set up robot animation observers
+     */
+    private void setupRobotAnimationObservers() {
+        if (fragment != null && gameStateManager != null) {
+            gameStateManager.getCurrentState().observe(fragment.getViewLifecycleOwner(), state -> {
+                if (state != null) {
+                    GameElement selectedRobot = state.getSelectedRobot();
+                    
+                    // Update robot scales based on selection
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_ROBOT) {
+                            if (element == selectedRobot) {
+                                // Robot selected - animate growth
+                                animateRobotScale(element, 1.0f, SELECTED_ROBOT_SCALE);
+                            } else if (robotScaleMap.containsKey(element) && robotScaleMap.get(element) > 1.0f) {
+                                // Robot deselected - animate shrinking
+                                animateRobotScale(element, robotScaleMap.get(element), 1.0f);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * Animate robot scaling with easing function
+     * @param robot The robot to animate
+     * @param fromScale Starting scale
+     * @param toScale Target scale
+     */
+    private void animateRobotScale(GameElement robot, float fromScale, float toScale) {
+        if (robot == null || !enableRobotAnimation) return;
+        
+        // Initialize scale if not present
+        if (!robotScaleMap.containsKey(robot)) {
+            robotScaleMap.put(robot, fromScale);
+        }
+        
+        // Create value animator with easing
+        android.animation.ValueAnimator animator = android.animation.ValueAnimator.ofFloat(fromScale, toScale);
+        animator.setDuration(animationDuration);
+        animator.setInterpolator(easeInterpolator); // Apply ease function
+        animator.addUpdateListener(animation -> {
+            float scale = (float) animation.getAnimatedValue();
+            robotScaleMap.put(robot, scale);
+            invalidate(); // Redraw view
+        });
+        animator.start();
     }
     
     @Override
@@ -365,87 +447,70 @@ public class GameGridView extends View {
                         break;
                 }
                 
-                // Highlight selected robot
-                if (element.isSelected() || (state.getSelectedRobot() == element)) {
-                    // Create a white rectangle behind the robot to highlight it
+                // Get current scale for this robot (default to 1.0 if not set)
+                float robotScale = robotScaleMap.containsKey(element) ? 
+                        robotScaleMap.get(element) : 1.0f;
+                
+                // Highlight and scale selected or focused robot
+                boolean isSelected = element.isSelected() || (state.getSelectedRobot() == element);
+                boolean isFocused = (element == focusedRobot);
+                
+                if (isSelected || isFocused) {
+                    // Create a highlight rectangle around the robot
                     Paint highlightPaint = new Paint();
-                    highlightPaint.setColor(Color.WHITE);
+                    highlightPaint.setColor(isSelected ? Color.WHITE : Color.LTGRAY);
                     highlightPaint.setStyle(Paint.Style.STROKE);
-                    highlightPaint.setStrokeWidth(4);
+                    highlightPaint.setStrokeWidth(isSelected ? 4 : 2);
                     canvas.drawRect(left, top, right, bottom, highlightPaint);
                     
-                    // Scale selected robot by 50% if animations are enabled
+                    // If robot isn't already being animated to proper scale, start animation
                     if (enableRobotAnimation) {
-                        // Calculate the center point of the robot
-                        float centerX = left + cellSize / 2;
-                        float centerY = top + cellSize / 2;
-                        
-                        // Save canvas state before scaling
-                        canvas.save();
-                        
-                        // Scale from the center of the robot
-                        canvas.scale(SELECTED_ROBOT_SCALE, SELECTED_ROBOT_SCALE, centerX, centerY);
-                        
-                        // Calculate the scaled bounds
-                        float scaledSize = cellSize / SELECTED_ROBOT_SCALE;
-                        float scaledLeft = centerX - scaledSize / 2;
-                        float scaledTop = centerY - scaledSize / 2;
-                        float scaledRight = centerX + scaledSize / 2;
-                        float scaledBottom = centerY + scaledSize / 2;
-                        
-                        // Draw the robot at the scaled position
-                        if (robotDrawable != null) {
-                            robotDrawable.setBounds((int)scaledLeft, (int)scaledTop, (int)scaledRight, (int)scaledBottom);
-                            robotDrawable.draw(canvas);
-                        } else {
-                            // Fallback to colored circle
-                            switch (element.getColor()) {
-                                case 0: robotPaint.setColor(Color.RED); break;
-                                case 1: robotPaint.setColor(Color.GREEN); break;
-                                case 2: robotPaint.setColor(Color.BLUE); break;
-                                case 3: robotPaint.setColor(Color.YELLOW); break;
-                            }
-                            canvas.drawCircle(centerX, centerY, scaledSize / 2.5f, robotPaint);
-                        }
-                        
-                        // Restore canvas to original state
-                        canvas.restore();
-                    } else {
-                        // Regular drawing without scaling if animations disabled
-                        if (robotDrawable != null) {
-                            robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                            robotDrawable.draw(canvas);
-                        } else {
-                            // Fallback to colored circle
-                            float centerX = left + cellSize / 2;
-                            float centerY = top + cellSize / 2;
-                            switch (element.getColor()) {
-                                case 0: robotPaint.setColor(Color.RED); break;
-                                case 1: robotPaint.setColor(Color.GREEN); break;
-                                case 2: robotPaint.setColor(Color.BLUE); break;
-                                case 3: robotPaint.setColor(Color.YELLOW); break;
-                            }
-                            canvas.drawCircle(centerX, centerY, cellSize / 2.5f, robotPaint);
+                        float targetScale = isSelected ? SELECTED_ROBOT_SCALE : FOCUSED_ROBOT_SCALE;
+                        if (robotScale < targetScale) {
+                            animateRobotScale(element, robotScale, targetScale);
                         }
                     }
-                } else {
-                    // Draw unselected robot normally
-                    if (robotDrawable != null) {
-                        robotDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                        robotDrawable.draw(canvas);
-                    } else {
-                        // Fallback to colored circle
-                        float centerX = left + cellSize / 2;
-                        float centerY = top + cellSize / 2;
-                        switch (element.getColor()) {
-                            case 0: robotPaint.setColor(Color.RED); break;
-                            case 1: robotPaint.setColor(Color.GREEN); break;
-                            case 2: robotPaint.setColor(Color.BLUE); break;
-                            case 3: robotPaint.setColor(Color.YELLOW); break;
-                        }
-                        canvas.drawCircle(centerX, centerY, cellSize / 2.5f, robotPaint);
-                    }
+                } else if (robotScale > 1.0f && enableRobotAnimation) {
+                    // Robot not selected or focused but still enlarged - animate back to normal
+                    animateRobotScale(element, robotScale, 1.0f);
                 }
+                
+                // Calculate the center point of the robot
+                float centerX = left + cellSize / 2;
+                float centerY = top + cellSize / 2;
+                
+                // Save canvas state before scaling
+                canvas.save();
+                
+                // Apply current scale from the center of the robot
+                canvas.scale(robotScale, robotScale, centerX, centerY);
+                
+                // Calculate the scaled bounds
+                float scaledSize = cellSize / robotScale;
+                float scaledLeft = centerX - scaledSize / 2;
+                float scaledTop = centerY - scaledSize / 2;
+                float scaledRight = centerX + scaledSize / 2;
+                float scaledBottom = centerY + scaledSize / 2;
+                
+                // Draw the robot using the drawable
+                if (robotDrawable != null) {
+                    robotDrawable.setBounds((int)scaledLeft, (int)scaledTop, 
+                            (int)scaledRight, (int)scaledBottom);
+                    robotDrawable.draw(canvas);
+                } else {
+                    // Fallback to colored circle
+                    float radius = scaledSize / 2.5f;
+                    switch (element.getColor()) {
+                        case 0: robotPaint.setColor(Color.RED); break;
+                        case 1: robotPaint.setColor(Color.GREEN); break;
+                        case 2: robotPaint.setColor(Color.BLUE); break;
+                        case 3: robotPaint.setColor(Color.YELLOW); break;
+                    }
+                    canvas.drawCircle(centerX, centerY, radius, robotPaint);
+                }
+                
+                // Restore canvas to original state
+                canvas.restore();
             }
         }
     }
@@ -488,12 +553,19 @@ public class GameGridView extends View {
                 gameStateManager.handleGridTouch(gridX, gridY, action);
                 
                 // Check if robot moved by comparing old and new positions
+                Timber.d("[GOAL DEBUG] Selected robot moved from " + oldX + ", " + oldY + " to " + selectedRobot.getX() + ", " + selectedRobot.getY());
                 if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
                     if (state.checkCompletion()) {
+                        Timber.d("[GOAL DEBUG] Goal reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
+                        
+                        // Critical fix: Tell the GameStateManager the game is complete
+                        gameStateManager.setGameComplete(true);
+                        
                         announceForAccessibility("Goal reached! Game complete in " + 
                             gameStateManager.getMoveCount().getValue() + " moves and " +
                             gameStateManager.getSquaresMoved().getValue() + " squares moved");
                     } else {
+                        Timber.d("[GOAL DEBUG] Robot moved");
                         announceForAccessibility(getRobotDescription(selectedRobot) + " moved");
                     }
                 }
@@ -525,6 +597,11 @@ public class GameGridView extends View {
         
         // Ensure coordinates are within bounds
         if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
+            // Clear focused robot when moving out of bounds
+            if (focusedRobot != null) {
+                focusedRobot = null;
+                invalidate();
+            }
             return super.dispatchHoverEvent(event);
         }
         
@@ -535,33 +612,57 @@ public class GameGridView extends View {
             if (focusedX != gridX || focusedY != gridY) {
                 focusedX = gridX;
                 focusedY = gridY;
-                invalidate();
                 
-                // Announce what's at this position
+                // Check for robot at this position
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
-                    GameElement robot = state.getRobotAt(gridX, gridY);
-                    if (robot != null) {
-                        announceForAccessibility(getRobotDescription(robot));
-                    } else {
-                        int cellType = state.getCellType(gridX, gridY);
-                        if (cellType == 1) {
-                            announceForAccessibility("Wall at position " + gridX + ", " + gridY);
-                        } else if (cellType == 2) {
-                            announceForAccessibility("Target at position " + gridX + ", " + gridY);
-                        } else {
-                            announceForAccessibility("Empty space at position " + gridX + ", " + gridY);
+                    GameElement previousFocusedRobot = focusedRobot;
+                    focusedRobot = state.getRobotAt(gridX, gridY);
+                    
+                    // Animate the newly focused robot to grow
+                    if (focusedRobot != null && enableRobotAnimation) {
+                        // Only animate if this isn't the selected robot (which is already scaled larger)
+                        if (state.getSelectedRobot() != focusedRobot) {
+                            float currentScale = robotScaleMap.containsKey(focusedRobot) ? 
+                                    robotScaleMap.get(focusedRobot) : 1.0f;
+                            if (currentScale < FOCUSED_ROBOT_SCALE) {
+                                animateRobotScale(focusedRobot, currentScale, FOCUSED_ROBOT_SCALE);
+                            }
                         }
+                    }
+                    
+                    // Shrink the previously focused robot if it's not the new focus or selected
+                    if (previousFocusedRobot != null && previousFocusedRobot != focusedRobot && 
+                            state.getSelectedRobot() != previousFocusedRobot && enableRobotAnimation) {
+                        float currentScale = robotScaleMap.containsKey(previousFocusedRobot) ? 
+                                robotScaleMap.get(previousFocusedRobot) : 1.0f;
+                        if (currentScale > 1.0f) {
+                            animateRobotScale(previousFocusedRobot, currentScale, 1.0f);
+                        }
+                    }
+                    
+                    invalidate();
+                    
+                    // Announce what's at this position
+                    if (focusedRobot != null) {
+                        announceForAccessibility(getRobotDescription(focusedRobot));
                     }
                 }
             }
-            
-            return true;
         } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
-            // Clear focus when exiting
-            focusedX = -1;
-            focusedY = -1;
-            invalidate();
+            // When hover exits, shrink any focused robot that isn't selected
+            if (focusedRobot != null) {
+                GameState state = gameStateManager.getCurrentState().getValue();
+                if (state != null && state.getSelectedRobot() != focusedRobot && enableRobotAnimation) {
+                    float currentScale = robotScaleMap.containsKey(focusedRobot) ? 
+                            robotScaleMap.get(focusedRobot) : 1.0f;
+                    if (currentScale > 1.0f) {
+                        animateRobotScale(focusedRobot, currentScale, 1.0f);
+                    }
+                }
+                focusedRobot = null;
+                invalidate();
+            }
         }
         
         return super.dispatchHoverEvent(event);

@@ -25,6 +25,7 @@ import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.MapGenerator;
 import roboyard.eclabs.GameLogic;
+import timber.log.Timber;
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -384,26 +385,53 @@ public class GameState implements Serializable {
      * @return true if all robots are on their correct targets.
      */
     public boolean checkCompletion() {
-        // For each game element that is a robot, check if it's on a target of matching color
+        // Timber.d("[GOAL DEBUG] Checking game completion...");
+        
+        // Count how many robots we need to find on targets
+        int robotCount = 0;
+        int matchedRobots = 0;
+        
+        // First find all robots and check if they're on a target of matching color
         for (GameElement element : gameElements) {
-            // Only check robots
-            if (element.getType() != GameElement.TYPE_ROBOT) {
-                continue;
-            }
-            
-            int x = element.getX();
-            int y = element.getY();
-            int color = element.getColor();
-            
-            // Check if the robot is on a target of matching color
-            if (getCellType(x, y) != Constants.CELL_TARGET || getTargetColor(x, y) != color) {
-                return false;
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                robotCount++;
+                
+                int robotX = element.getX();
+                int robotY = element.getY();
+                int robotColor = element.getColor();
+                
+                // Timber.d("[GOAL DEBUG] Robot %d at (%d, %d)", robotColor, robotX, robotY);
+                
+                // Now check all targets to see if there's a matching target at this position
+                for (GameElement targetElement : gameElements) {
+                    if (targetElement.getType() == GameElement.TYPE_TARGET) {
+                        int targetX = targetElement.getX();
+                        int targetY = targetElement.getY();
+                        int targetColor = targetElement.getColor();
+                        
+                        // Timber.d("[GOAL DEBUG] Target %d at (%d, %d)", targetColor, targetX, targetY);
+                        
+                        // Check if coordinates match and colors match
+                        if (robotX == targetX && robotY == targetY && robotColor == targetColor) {
+                            // Timber.d("[GOAL DEBUG] Robot matched with target at (%d, %d)!", robotX, robotY);
+                            matchedRobots++;
+                            break; // Found a match for this robot, stop checking targets
+                        }
+                    }
+                }
             }
         }
         
-        // All robots are on their targets
-        completed = true;
-        return true;
+        // Timber.d("[GOAL DEBUG] Found %d/%d robots on matching targets", matchedRobots, robotCount);
+        
+        // Game is complete if all robots are matched with targets
+        if (matchedRobots > 0) {
+            // Timber.d("[GOAL DEBUG] Game complete! All robots are on matching targets.");
+            completed = true;
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**
