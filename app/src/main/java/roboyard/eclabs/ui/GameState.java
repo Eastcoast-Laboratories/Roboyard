@@ -942,4 +942,68 @@ public class GameState implements Serializable {
     public void setGameStateManager(GameStateManager manager) {
         this.gameStateManager = manager;
     }
+
+    public boolean canRobotMoveTo(GameElement robot, int nextX, int nextY) {
+        // Check if the target position is within the board boundaries
+        if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
+            return false;
+        }
+        
+        // Check if there's already another robot at the target position
+        GameElement otherRobot = getRobotAt(nextX, nextY);
+        if (otherRobot != null && otherRobot != robot) {
+            return false;
+        }
+        
+        // Check current robot position
+        int currentX = robot.getX();
+        int currentY = robot.getY();
+        
+        // Check for walls in the movement path
+        // Moving horizontally
+        if (currentY == nextY) {
+            // Moving east
+            if (currentX < nextX) {
+                // Check for vertical walls between current position and target
+                for (int x = currentX; x < nextX; x++) {
+                    if (hasVerticalWall(x, currentY)) {
+                        return false;
+                    }
+                }
+            }
+            // Moving west
+            else if (currentX > nextX) {
+                // Check for vertical walls between current position and target
+                for (int x = nextX; x < currentX; x++) {
+                    if (hasVerticalWall(x, currentY)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // Moving vertically
+        else if (currentX == nextX) {
+            // Moving south
+            if (currentY < nextY) {
+                // Check for horizontal walls between current position and target
+                for (int y = currentY; y < nextY; y++) {
+                    if (hasHorizontalWall(currentX, y)) {
+                        return false;
+                    }
+                }
+            }
+            // Moving north
+            else if (currentY > nextY) {
+                // Check for horizontal walls between current position and target
+                for (int y = nextY; y < currentY; y++) {
+                    if (hasHorizontalWall(currentX, y)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        // If we've made it this far, the move is valid
+        return true;
+    }
 }

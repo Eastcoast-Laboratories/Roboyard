@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.view.AccessibilityDelegateCompat;
@@ -74,6 +75,12 @@ public class GameGridView extends View {
     private android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private long animationDuration = 300; // Animation duration in ms
     private Fragment fragment;
+    
+    // For hover events
+    private int lastHoverX = -1;
+    private int lastHoverY = -1;
+    private int highlightedX = -1;
+    private int highlightedY = -1;
 
     /**
      * Constructor for programmatic creation
@@ -353,6 +360,12 @@ public class GameGridView extends View {
                     cellPaint.setColor(Color.rgb(80, 80, 120));
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
+                
+                // Highlight hovered cell
+                if (x == highlightedX && y == highlightedY) {
+                    cellPaint.setColor(Color.rgb(80, 80, 120));
+                    canvas.drawRect(left, top, right, bottom, cellPaint);
+                }
             }
         }
         
@@ -541,7 +554,11 @@ public class GameGridView extends View {
         if (action == MotionEvent.ACTION_DOWN && state != null) {
             GameElement robot = state.getRobotAt(gridX, gridY);
             if (robot != null) {
+                // Use the rich description that includes goal information
                 announceForAccessibility("Selected " + getRobotDescription(robot));
+            } else {
+                // For empty spaces, announce what's at this position
+                announceForAccessibility(getPositionDescription(gridX, gridY));
             }
         } else if (action == MotionEvent.ACTION_UP && state != null) {
             GameElement selectedRobot = state.getSelectedRobot();
@@ -566,7 +583,7 @@ public class GameGridView extends View {
                             gameStateManager.getSquaresMoved().getValue() + " squares moved");
                     } else {
                         Timber.d("[GOAL DEBUG] Robot moved");
-                        announceForAccessibility(getRobotDescription(selectedRobot) + " moved");
+                        announceForAccessibility(getRobotDescription(selectedRobot));
                     }
                 }
             } else {
@@ -587,85 +604,71 @@ public class GameGridView extends View {
     
     @Override
     public boolean dispatchHoverEvent(MotionEvent event) {
-        // For TalkBack exploration
-        float x = event.getX();
-        float y = event.getY();
+        // Use the AccessibilityManager to check if TalkBack is enabled
+        AccessibilityManager accessibilityManager = (AccessibilityManager) getContext()
+                .getSystemService(Context.ACCESSIBILITY_SERVICE);
         
-        // Convert to grid coordinates
-        int gridX = (int) (x / cellSize);
-        int gridY = (int) (y / cellSize);
-        
-        // Ensure coordinates are within bounds
-        if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
-            // Clear focused robot when moving out of bounds
-            if (focusedRobot != null) {
-                focusedRobot = null;
+        if (accessibilityManager != null && accessibilityManager.isTouchExplorationEnabled() && 
+                gameStateManager != null) {
+            float x = event.getX();
+            float y = event.getY();
+            
+            // Convert touch coordinates to grid coordinates
+            int gridX = (int) (x / cellSize);
+            int gridY = (int) (y / cellSize);
+            
+            // Ensure coordinates are within bounds
+            if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
+                return super.dispatchHoverEvent(event);
+            }
+            
+            if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER ||
+                    event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+                
+                // Only trigger announcements when first entering a cell or when cell changes
+                if (lastHoverX != gridX || lastHoverY != gridY) {
+                    lastHoverX = gridX;
+                    lastHoverY = gridY;
+                    
+                    // Check if there's a robot at this position
+                    GameState state = gameStateManager.getCurrentState().getValue();
+                    if (state != null) {
+                        GameElement focusedRobot = state.getRobotAt(gridX, gridY);
+                        
+                        // Highlight the position
+                        highlightedX = gridX;
+                        highlightedY = gridY;
+                        invalidate();
+                        
+                        // Announce what's at this position
+                        String description = getPositionDescription(gridX, gridY);
+                        announceForAccessibility(description);
+                        Timber.d("[TALKBACK] Hover over cell %d,%d: %s", gridX, gridY, description);
+                    }
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+                // Clear highlighted cell when the hover exits the view
+                highlightedX = -1;
+                highlightedY = -1;
                 invalidate();
             }
+            
+            // Let the accessibility framework process the event
             return super.dispatchHoverEvent(event);
         }
         
-        if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER ||
-            event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
-            
-            // Update focused cell if changed
-            if (focusedX != gridX || focusedY != gridY) {
-                focusedX = gridX;
-                focusedY = gridY;
-                
-                // Check for robot at this position
-                GameState state = gameStateManager.getCurrentState().getValue();
-                if (state != null) {
-                    GameElement previousFocusedRobot = focusedRobot;
-                    focusedRobot = state.getRobotAt(gridX, gridY);
-                    
-                    // Animate the newly focused robot to grow
-                    if (focusedRobot != null && enableRobotAnimation) {
-                        // Only animate if this isn't the selected robot (which is already scaled larger)
-                        if (state.getSelectedRobot() != focusedRobot) {
-                            float currentScale = robotScaleMap.containsKey(focusedRobot) ? 
-                                    robotScaleMap.get(focusedRobot) : 1.0f;
-                            if (currentScale < FOCUSED_ROBOT_SCALE) {
-                                animateRobotScale(focusedRobot, currentScale, FOCUSED_ROBOT_SCALE);
-                            }
-                        }
-                    }
-                    
-                    // Shrink the previously focused robot if it's not the new focus or selected
-                    if (previousFocusedRobot != null && previousFocusedRobot != focusedRobot && 
-                            state.getSelectedRobot() != previousFocusedRobot && enableRobotAnimation) {
-                        float currentScale = robotScaleMap.containsKey(previousFocusedRobot) ? 
-                                robotScaleMap.get(previousFocusedRobot) : 1.0f;
-                        if (currentScale > 1.0f) {
-                            animateRobotScale(previousFocusedRobot, currentScale, 1.0f);
-                        }
-                    }
-                    
-                    invalidate();
-                    
-                    // Announce what's at this position
-                    if (focusedRobot != null) {
-                        announceForAccessibility(getRobotDescription(focusedRobot));
-                    }
-                }
-            }
-        } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
-            // When hover exits, shrink any focused robot that isn't selected
-            if (focusedRobot != null) {
-                GameState state = gameStateManager.getCurrentState().getValue();
-                if (state != null && state.getSelectedRobot() != focusedRobot && enableRobotAnimation) {
-                    float currentScale = robotScaleMap.containsKey(focusedRobot) ? 
-                            robotScaleMap.get(focusedRobot) : 1.0f;
-                    if (currentScale > 1.0f) {
-                        animateRobotScale(focusedRobot, currentScale, 1.0f);
-                    }
-                }
-                focusedRobot = null;
-                invalidate();
-            }
-        }
-        
         return super.dispatchHoverEvent(event);
+    }
+    
+    /**
+     * Announce a message for accessibility and log it
+     * @param message Message to announce
+     */
+    @Override
+    public void announceForAccessibility(CharSequence message) {
+        super.announceForAccessibility(message);
+        // Log the message to console for debugging
+        Timber.d("[TALKBACK] %s", message);
     }
     
     /**
@@ -684,7 +687,107 @@ public class GameGridView extends View {
             case 3: color = "Yellow"; break;
         }
         
+        // Find the robot's goal if available
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state != null) {
+            for (GameElement element : state.getGameElements()) {
+                if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
+                    return color + " robot at position " + robot.getX() + ", " + robot.getY() + 
+                           ". Its goal is at position " + element.getX() + ", " + element.getY();
+                }
+            }
+        }
+        
         return color + " robot at position " + robot.getX() + ", " + robot.getY();
+    }
+    
+    /**
+     * Get description of what's at a grid position for accessibility
+     */
+    private String getPositionDescription(int x, int y) {
+        if (gameStateManager == null || gameStateManager.getCurrentState().getValue() == null) {
+            return "Position " + x + ", " + y;
+        }
+        
+        GameState state = gameStateManager.getCurrentState().getValue();
+        StringBuilder description = new StringBuilder();
+        description.append("Position " + x + ", " + y + ": ");
+        
+        // Check for robot
+        GameElement robot = state.getRobotAt(x, y);
+        if (robot != null) {
+            String color = "Unknown";
+            switch (robot.getColor()) {
+                case 0: color = "Red"; break;
+                case 1: color = "Green"; break;
+                case 2: color = "Blue"; break;
+                case 3: color = "Yellow"; break;
+            }
+            description.append(color + " robot. ");
+            
+            // Find the robot's goal
+            for (GameElement element : state.getGameElements()) {
+                if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
+                    description.append("Its goal is at position " + element.getX() + ", " + element.getY() + ". ");
+                    break;
+                }
+            }
+        }
+        
+        // Check for target
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
+                String color = "Unknown";
+                switch (element.getColor()) {
+                    case 0: color = "Red"; break;
+                    case 1: color = "Green"; break;
+                    case 2: color = "Blue"; break;
+                    case 3: color = "Yellow"; break;
+                    default: color = "Multi-colored";
+                }
+                description.append(color + " goal. ");
+                break;
+            }
+        }
+        
+        // Check for walls
+        boolean hasNorthWall = false;
+        boolean hasSouthWall = false;
+        boolean hasEastWall = false;
+        boolean hasWestWall = false;
+        
+        // Check if there's a horizontal wall above this cell
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
+                element.getX() == x && element.getY() == y) {
+                hasSouthWall = true;
+            }
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
+                element.getX() == x && element.getY() == y-1) {
+                hasNorthWall = true;
+            }
+            if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
+                element.getX() == x && element.getY() == y) {
+                hasEastWall = true;
+            }
+            if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
+                element.getX() == x-1 && element.getY() == y) {
+                hasWestWall = true;
+            }
+        }
+        
+        // Add wall description
+        if (hasNorthWall || hasSouthWall || hasEastWall || hasWestWall) {
+            description.append("Walls on: ");
+            if (hasNorthWall) description.append("North ");
+            if (hasSouthWall) description.append("South ");
+            if (hasEastWall) description.append("East ");
+            if (hasWestWall) description.append("West ");
+        } else if (robot == null) {
+            description.append("Empty space");
+        }
+        
+        return description.toString();
     }
     
     /**

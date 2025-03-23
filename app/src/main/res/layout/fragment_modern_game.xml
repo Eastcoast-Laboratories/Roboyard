@@ -25,7 +25,7 @@
         android:padding="16dp"
         android:background="#EEEEEE"
         app:layout_constraintTop_toBottomOf="@id/game_grid_view"
-        app:layout_constraintBottom_toTopOf="@id/button_container">
+        app:layout_constraintBottom_toTopOf="@id/accessibility_container">
 
         <TextView
             android:id="@+id/game_timer"
@@ -96,7 +96,31 @@
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
+        
+        <Button
+            android:id="@+id/btn_toggle_accessibility"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accessibility Controls"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:background="@drawable/button_rounded_blue_outline"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/board_size_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Accessibility controls container (initially invisible) -->
+    <include
+        android:id="@+id/accessibility_container"
+        layout="@layout/accessibility_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/game_info_container"
+        app:layout_constraintBottom_toTopOf="@id/button_container" />
 
     <!-- Buttons at the bottom -->
     <LinearLayout

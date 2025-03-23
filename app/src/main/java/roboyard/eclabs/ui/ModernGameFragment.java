@@ -30,6 +30,12 @@ import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.UIModeManager;
 import timber.log.Timber;
 
+// Added imports for accessibility
+import androidx.core.view.accessibility.AccessibilityManagerCompat;
+import android.view.accessibility.AccessibilityManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+
 /**
  * Modern UI implementation of the game screen.
  * This provides a cleaner, more Android-native UI compared to the canvas-based version.
@@ -52,6 +58,17 @@ public class ModernGameFragment extends BaseGameFragment {
     // Class member to track if a robot is currently selected
     private boolean isRobotSelected = false;
     
+    // TalkBack accessibility controls
+    private ViewGroup accessibilityControlsContainer;
+    private Button btnMoveNorth;
+    private Button btnMoveSouth;
+    private Button btnMoveEast;
+    private Button btnMoveWest;
+    private TextView txtSelectedRobot;
+    private TextView txtRobotGoal;
+    private Button btnToggleAccessibilityControls;
+    private boolean accessibilityControlsVisible = false;
+    
     // Timer variables
     private long startTime = 0L;
     private Handler timerHandler = new Handler(Looper.getMainLooper());
@@ -72,6 +89,155 @@ public class ModernGameFragment extends BaseGameFragment {
             timerHandler.postDelayed(this, 500); // Update every half-second
         }
     };
+    
+    /**
+     * Check if TalkBack is enabled
+     * @return true if TalkBack is enabled
+     */
+    private boolean isTalkBackEnabled() {
+        AccessibilityManager am = (AccessibilityManager) requireContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
+        return am != null && am.isEnabled() && am.isTouchExplorationEnabled();
+    }
+    
+    /**
+     * Update directional button text and colors based on selected robot
+     */
+    private void updateDirectionalButtons(GameElement selectedRobot) {
+        if (selectedRobot == null) {
+            btnMoveNorth.setText("North");
+            btnMoveSouth.setText("South");
+            btnMoveEast.setText("East");
+            btnMoveWest.setText("West");
+            
+            // Reset colors
+            btnMoveNorth.setBackgroundResource(R.drawable.button_rounded_blue_outline);
+            btnMoveSouth.setBackgroundResource(R.drawable.button_rounded_blue_outline);
+            btnMoveEast.setBackgroundResource(R.drawable.button_rounded_blue_outline);
+            btnMoveWest.setBackgroundResource(R.drawable.button_rounded_blue_outline);
+            return;
+        }
+        
+        // Set the color based on the robot
+        int backgroundColor = getColorForRobot(selectedRobot);
+        ColorStateList colorStateList = ColorStateList.valueOf(backgroundColor);
+        
+        String robotColorName = getRobotColorName(selectedRobot);
+        
+        btnMoveNorth.setText(robotColorName + " North");
+        btnMoveSouth.setText(robotColorName + " South");
+        btnMoveEast.setText(robotColorName + " East");
+        btnMoveWest.setText(robotColorName + " West");
+        
+        // Set button backgrounds to match robot color
+        btnMoveNorth.setBackgroundTintList(colorStateList);
+        btnMoveSouth.setBackgroundTintList(colorStateList);
+        btnMoveEast.setBackgroundTintList(colorStateList);
+        btnMoveWest.setBackgroundTintList(colorStateList);
+        
+        // Log the button information
+        Timber.d("[TALKBACK] Direction buttons updated for %s robot", robotColorName);
+    }
+    
+    /**
+     * Get color for a robot
+     */
+    private int getColorForRobot(GameElement robot) {
+        if (robot == null) return Color.BLUE;
+        
+        switch (robot.getColor()) {
+            case 0: return Color.RED;
+            case 1: return Color.GREEN;
+            case 2: return Color.BLUE;
+            case 3: return Color.YELLOW;
+            default: return Color.BLUE;
+        }
+    }
+    
+    /**
+     * Get color name for a robot
+     */
+    private String getRobotColorName(GameElement robot) {
+        if (robot == null) return "";
+        
+        switch (robot.getColor()) {
+            case 0: return "Red";
+            case 1: return "Green";
+            case 2: return "Blue";
+            case 3: return "Yellow";
+            default: return "";
+        }
+    }
+    
+    /**
+     * Find target for a specific robot
+     */
+    private GameElement findTargetForRobot(GameElement robot, GameState state) {
+        if (robot == null || state == null) return null;
+        
+        // Find the target with the same color as the robot
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
+                return element;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Update the robot selection information in the UI
+     * @param robot The selected robot
+     */
+    private void updateRobotSelectionInfo(GameElement robot) {
+        if (robot == null) {
+            if (txtSelectedRobot != null) {
+                txtSelectedRobot.setText("No robot selected");
+            }
+            if (txtRobotGoal != null) {
+                txtRobotGoal.setText("");
+            }
+            announceAccessibility("No robot selected");
+            return;
+        }
+        
+        // Get robot color and position
+        String colorName = getRobotColorName(robot);
+        int x = robot.getX();
+        int y = robot.getY();
+        
+        // Update selected robot text
+        if (txtSelectedRobot != null) {
+            txtSelectedRobot.setText("Selected: " + colorName + " robot at (" + x + ", " + y + ")");
+        }
+        
+        // Find the robot's goal
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state != null) {
+            for (GameElement element : state.getGameElements()) {
+                if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
+                    int goalX = element.getX();
+                    int goalY = element.getY();
+                    
+                    // Update goal text
+                    if (txtRobotGoal != null) {
+                        txtRobotGoal.setText("Goal: (" + goalX + ", " + goalY + ")");
+                    }
+                    
+                    // Announce selection and goal via TalkBack
+                    String message = "Selected " + colorName + " robot at (" + x + ", " + y + "). ";
+                    message += "Its goal is at (" + goalX + ", " + goalY + ")";
+                    announceAccessibility(message);
+                    return;
+                }
+            }
+            
+            // No goal found for this robot
+            if (txtRobotGoal != null) {
+                txtRobotGoal.setText("No goal for this robot");
+            }
+            announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + "). No goal found.");
+        }
+    }
     
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -160,6 +326,28 @@ public class ModernGameFragment extends BaseGameFragment {
         boardSizeTextView = view.findViewById(R.id.board_size_text);
         timerTextView = view.findViewById(R.id.game_timer);
         
+        // Initialize accessibility controls
+        btnToggleAccessibilityControls = view.findViewById(R.id.btn_toggle_accessibility);
+        accessibilityControlsContainer = view.findViewById(R.id.accessibility_container);
+        
+        if (accessibilityControlsContainer != null) {
+            txtSelectedRobot = accessibilityControlsContainer.findViewById(R.id.txt_selected_robot);
+            txtRobotGoal = accessibilityControlsContainer.findViewById(R.id.txt_robot_goal);
+            btnMoveNorth = accessibilityControlsContainer.findViewById(R.id.btn_move_north);
+            btnMoveSouth = accessibilityControlsContainer.findViewById(R.id.btn_move_south);
+            btnMoveEast = accessibilityControlsContainer.findViewById(R.id.btn_move_east);
+            btnMoveWest = accessibilityControlsContainer.findViewById(R.id.btn_move_west);
+            
+            // Set up directional button click listeners
+            setupAccessibilityControls();
+        }
+        
+        // Check for TalkBack and show accessibility controls toggle if needed
+        if (isTalkBackEnabled()) {
+            btnToggleAccessibilityControls.setVisibility(View.VISIBLE);
+            btnToggleAccessibilityControls.setOnClickListener(v -> toggleAccessibilityControls());
+        }
+        
         // Set up the game grid view
         gameGridView.setFragment(this);
         gameGridView.setGameStateManager(gameStateManager);
@@ -180,6 +368,17 @@ public class ModernGameFragment extends BaseGameFragment {
         gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), this::updateGameState);
         gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
         gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
+        
+        // Observe selected robot changes for accessibility
+        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
+            if (state != null) {
+                GameElement selectedRobot = state.getSelectedRobot();
+                if (isTalkBackEnabled()) {
+                    updateRobotSelectionInfo(selectedRobot);
+                    updateDirectionalButtons(selectedRobot);
+                }
+            }
+        });
         
         // Observe game completion status
         gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
@@ -299,13 +498,143 @@ public class ModernGameFragment extends BaseGameFragment {
         });
     }
     
-    private void updateGameState(GameState gameState) {
-        if (gameState == null) {
+    /**
+     * Set up accessibility controls
+     */
+    private void setupAccessibilityControls() {
+        // Set up directional button click listeners
+        btnMoveNorth.setOnClickListener(v -> moveRobotInDirection(0, -1));
+        btnMoveSouth.setOnClickListener(v -> moveRobotInDirection(0, 1));
+        btnMoveEast.setOnClickListener(v -> moveRobotInDirection(1, 0));
+        btnMoveWest.setOnClickListener(v -> moveRobotInDirection(-1, 0));
+    }
+    
+    /**
+     * Toggle accessibility controls visibility
+     */
+    private void toggleAccessibilityControls() {
+        accessibilityControlsVisible = !accessibilityControlsVisible;
+        accessibilityControlsContainer.setVisibility(
+                accessibilityControlsVisible ? View.VISIBLE : View.GONE);
+        
+        // Update the text on the toggle button
+        btnToggleAccessibilityControls.setText(
+                accessibilityControlsVisible ? "Hide Controls" : "Accessibility Controls");
+        
+        // Announce to screen reader
+        if (accessibilityControlsVisible) {
+            announceAccessibility("Accessibility controls shown");
+            
+            // Update with current selection info
+            GameState state = gameStateManager.getCurrentState().getValue();
+            if (state != null) {
+                GameElement selectedRobot = state.getSelectedRobot();
+                updateRobotSelectionInfo(selectedRobot);
+                updateDirectionalButtons(selectedRobot);
+            }
+        } else {
+            announceAccessibility("Accessibility controls hidden");
+        }
+    }
+    
+    /**
+     * Move the selected robot in the given direction
+     * @param dx X direction (1 = East, -1 = West, 0 = no change)
+     * @param dy Y direction (1 = South, -1 = North, 0 = no change)
+     */
+    private void moveRobotInDirection(int dx, int dy) {
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null || state.getSelectedRobot() == null) {
+            announceAccessibility("No robot selected");
+            return;
+        }
+        
+        GameElement robot = state.getSelectedRobot();
+        int startX = robot.getX();
+        int startY = robot.getY();
+        
+        // Find the farthest position the robot can move in the specified direction
+        int endX = startX;
+        int endY = startY;
+        
+        // Keep moving until we hit a wall or the edge of the board
+        while (true) {
+            int nextX = endX + dx;
+            int nextY = endY + dy;
+            
+            // Check bounds
+            if (nextX < 0 || nextX >= state.getWidth() || nextY < 0 || nextY >= state.getHeight()) {
+                break; // Hit edge of board
+            }
+            
+            // Check for walls or other robots in the way
+            boolean canMove = state.canRobotMoveTo(robot, nextX, nextY);
+            if (!canMove) {
+                break; // Hit obstacle
+            }
+            
+            // Valid move, update position
+            endX = nextX;
+            endY = nextY;
+        }
+        
+        // If we found a valid move, execute it
+        if (endX != startX || endY != startY) {
+            boolean moved = state.moveRobotTo(robot, endX, endY);
+            if (moved) {
+                // Update move counter
+                int moveCount = gameStateManager.getMoveCount().getValue() != null ?
+                        gameStateManager.getMoveCount().getValue() : 0;
+                gameStateManager.setMoveCount(moveCount + 1);
+                
+                // Update squares moved
+                int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
+                int squaresMoved = gameStateManager.getSquaresMoved().getValue() != null ?
+                        gameStateManager.getSquaresMoved().getValue() : 0;
+                gameStateManager.setSquaresMoved(squaresMoved + dist);
+                
+                // Announce the move
+                announceAccessibility(getRobotColorName(robot) + 
+                        " robot moved to " + endX + ", " + endY);
+                
+                // Check for goal completion
+                if (state.checkCompletion()) {
+                    gameStateManager.setGameComplete(true);
+                    announceAccessibility("Goal reached! Game complete in " + 
+                            gameStateManager.getMoveCount().getValue() + " moves and " +
+                            gameStateManager.getSquaresMoved().getValue() + " squares moved");
+                }
+            }
+        } else {
+            announceAccessibility("Cannot move in this direction");
+        }
+    }
+    
+    /**
+     * Helper method to log and announce accessibility messages
+     * This ensures accessibility messages are both announced via TalkBack and logged to console
+     * @param message The message to announce
+     */
+    private void announceAccessibility(String message) {
+        // Log to console with [TALKBACK] prefix
+        Timber.d("[TALKBACK] %s", message);
+        
+        // Announce via TalkBack if available
+        if (gameGridView != null) {
+            gameGridView.announceForAccessibility(message);
+        }
+    }
+    
+    /**
+     * Update the game state
+     */
+    private void updateGameState(GameState state) {
+        if (state == null) {
             return;
         }
         
         // Update the game grid view with the new game state
-        ArrayList<GridElement> gridElements = gameState.getGridElements();
+        ArrayList<GridElement> gridElements = state.getGridElements();
         gameGridView.setGridElements(gridElements);
         gameGridView.invalidate(); // Force redraw
         

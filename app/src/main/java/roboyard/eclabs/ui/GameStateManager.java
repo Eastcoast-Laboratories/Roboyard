@@ -793,6 +793,14 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
+     * Set the squares moved count
+     * @param squares Number of squares moved
+     */
+    public void setSquaresMoved(int squares) {
+        squaresMoved.setValue(squares);
+    }
+    
+    /**
      * Set whether the game is complete
      * @param complete Whether the game is complete
      */
