@@ -67,7 +67,7 @@ public class GameGridView extends View {
     
     // Robot animation configuration
     private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
-    private static final float FOCUSED_ROBOT_SCALE = 1.3f; // 30% larger when focused but not selected
+    private static final float FOCUSED_ROBOT_SCALE = 1.2f; // 20% larger when focused but not selected
     private boolean enableRobotAnimation = true; // Can be toggled in settings
     private HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private GameElement focusedRobot = null; // Currently focused (hovered) robot
@@ -437,94 +437,60 @@ public class GameGridView extends View {
         // Draw robots (on top of walls and targets)
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
-                float left = element.getX() * cellSize;
-                float top = element.getY() * cellSize;
-                float right = left + cellSize;
-                float bottom = top + cellSize;
-                
-                // Select appropriate robot drawable based on color
-                Drawable robotDrawable = null;
-                
-                switch (element.getColor()) {
-                    case 0: // RED
-                        robotDrawable = redRobotRight;
-                        break;
-                    case 1: // GREEN
-                        robotDrawable = greenRobotRight;
-                        break;
-                    case 2: // BLUE
-                        robotDrawable = blueRobotRight;
-                        break;
-                    case 3: // YELLOW
-                        robotDrawable = yellowRobotRight;
-                        break;
-                }
-                
-                // Get current scale for this robot (default to 1.0 if not set)
-                float robotScale = robotScaleMap.containsKey(element) ? 
-                        robotScaleMap.get(element) : 1.0f;
-                
-                // Highlight and scale selected or focused robot
-                boolean isSelected = element.isSelected() || (state.getSelectedRobot() == element);
-                boolean isFocused = (element == focusedRobot);
-                
-                if (isSelected || isFocused) {
-                    // Create a highlight rectangle around the robot
-                    Paint highlightPaint = new Paint();
-                    highlightPaint.setColor(isSelected ? Color.WHITE : Color.LTGRAY);
-                    highlightPaint.setStyle(Paint.Style.STROKE);
-                    highlightPaint.setStrokeWidth(isSelected ? 4 : 2);
-                    canvas.drawRect(left, top, right, bottom, highlightPaint);
-                    
-                    // If robot isn't already being animated to proper scale, start animation
-                    if (enableRobotAnimation) {
-                        float targetScale = isSelected ? SELECTED_ROBOT_SCALE : FOCUSED_ROBOT_SCALE;
-                        if (robotScale < targetScale) {
-                            animateRobotScale(element, robotScale, targetScale);
-                        }
-                    }
-                } else if (robotScale > 1.0f && enableRobotAnimation) {
-                    // Robot not selected or focused but still enlarged - animate back to normal
-                    animateRobotScale(element, robotScale, 1.0f);
-                }
-                
-                // Calculate the center point of the robot
-                float centerX = left + cellSize / 2;
-                float centerY = top + cellSize / 2;
-                
-                // Save canvas state before scaling
-                canvas.save();
-                
-                // Apply current scale from the center of the robot
-                canvas.scale(robotScale, robotScale, centerX, centerY);
-                
-                // Calculate the scaled bounds
-                float scaledSize = cellSize / robotScale;
-                float scaledLeft = centerX - scaledSize / 2;
-                float scaledTop = centerY - scaledSize / 2;
-                float scaledRight = centerX + scaledSize / 2;
-                float scaledBottom = centerY + scaledSize / 2;
-                
-                // Draw the robot using the drawable
-                if (robotDrawable != null) {
-                    robotDrawable.setBounds((int)scaledLeft, (int)scaledTop, 
-                            (int)scaledRight, (int)scaledBottom);
-                    robotDrawable.draw(canvas);
-                } else {
-                    // Fallback to colored circle
-                    float radius = scaledSize / 2.5f;
-                    switch (element.getColor()) {
-                        case 0: robotPaint.setColor(Color.RED); break;
-                        case 1: robotPaint.setColor(Color.GREEN); break;
-                        case 2: robotPaint.setColor(Color.BLUE); break;
-                        case 3: robotPaint.setColor(Color.YELLOW); break;
-                    }
-                    canvas.drawCircle(centerX, centerY, radius, robotPaint);
-                }
-                
-                // Restore canvas to original state
-                canvas.restore();
+                // Check if this is the selected robot
+                boolean isSelected = (state.getSelectedRobot() == element);
+                drawRobot(canvas, element, isSelected ? SELECTED_ROBOT_SCALE : 1.0f);
             }
+        }
+    }
+    
+    /**
+     * Draw a robot on the canvas
+     * @param canvas Canvas to draw on
+     * @param robot Robot to draw
+     * @param scale Scale factor for the robot (1.0 = normal size)
+     */
+    private void drawRobot(Canvas canvas, GameElement robot, float scale) {
+        int x = robot.getX();
+        int y = robot.getY();
+        
+        // Calculate the center of the cell
+        float centerX = x * cellSize + cellSize / 2;
+        float centerY = y * cellSize + cellSize / 2;
+        
+        // Calculate the radius for the robot (slightly smaller than the cell)
+        float radius = cellSize / 2 * 0.8f;
+        
+        // Apply scale to the radius
+        float scaledRadius = radius * scale;
+        
+        // Get the robot color
+        int color = getColorForRobot(robot);
+        
+        // Draw the robot
+        robotPaint.setColor(color);
+        canvas.drawCircle(centerX, centerY, scaledRadius, robotPaint);
+        
+        // Draw a border/outline
+        robotPaint.setStyle(Paint.Style.STROKE);
+        robotPaint.setColor(Color.BLACK);
+        robotPaint.setStrokeWidth(2);
+        canvas.drawCircle(centerX, centerY, scaledRadius, robotPaint);
+        robotPaint.setStyle(Paint.Style.FILL);
+    }
+    
+    /**
+     * Get the color for a robot based on its color index
+     * @param robot The robot to get the color for
+     * @return The color to use for the robot
+     */
+    private int getColorForRobot(GameElement robot) {
+        switch (robot.getColor()) {
+            case 0: return Color.RED;
+            case 1: return Color.GREEN;
+            case 2: return Color.BLUE;
+            case 3: return Color.YELLOW;
+            default: return Color.GRAY;
         }
     }
     

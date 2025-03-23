@@ -20,7 +20,10 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
@@ -35,6 +38,9 @@ import androidx.core.view.accessibility.AccessibilityManagerCompat;
 import android.view.accessibility.AccessibilityManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+
+// Sound manager import
+import roboyard.eclabs.util.SoundManager;
 
 /**
  * Modern UI implementation of the game screen.
@@ -89,6 +95,9 @@ public class ModernGameFragment extends BaseGameFragment {
             timerHandler.postDelayed(this, 500); // Update every half-second
         }
     };
+    
+    // Sound manager for game sound effects
+    private SoundManager soundManager;
     
     /**
      * Check if TalkBack is enabled
@@ -227,6 +236,9 @@ public class ModernGameFragment extends BaseGameFragment {
                     String message = "Selected " + colorName + " robot at (" + x + ", " + y + "). ";
                     message += "Its goal is at (" + goalX + ", " + goalY + ")";
                     announceAccessibility(message);
+                    
+                    // Announce possible moves
+                    announcePossibleMoves(robot);
                     return;
                 }
             }
@@ -236,6 +248,9 @@ public class ModernGameFragment extends BaseGameFragment {
                 txtRobotGoal.setText("No goal for this robot");
             }
             announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + "). No goal found.");
+            
+            // Announce possible moves even if there's no goal
+            announcePossibleMoves(robot);
         }
     }
     
@@ -243,6 +258,9 @@ public class ModernGameFragment extends BaseGameFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize the sound manager
+        soundManager = SoundManager.getInstance(requireContext());
+        
         // Handle back button/gesture with improved behavior
         requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -413,11 +431,28 @@ public class ModernGameFragment extends BaseGameFragment {
         // Set up buttons
         setupButtons(view);
         
-        // Start a new game if there's no current game state
-        if (gameStateManager.getCurrentState().getValue() == null) {
+        // Initialize a new game
+        initializeGame();
+    }
+    
+    /**
+     * Initialize a new game
+     */
+    private void initializeGame() {
+        // Check if we have a gameStateManager
+        if (gameStateManager == null) {
+            gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
+        }
+        
+        // Start the timer
+        if (gameStateManager.getMoveCount().getValue() != null && 
+            gameStateManager.getMoveCount().getValue() == 0) {
             gameStateManager.startModernGame();
             startTimer();
         }
+        
+        // Announce game start
+        announceGameStart();
     }
     
     /**
@@ -489,6 +524,18 @@ public class ModernGameFragment extends BaseGameFragment {
             resetAndStartTimer();
         });
         
+        // New game button - start a new game
+        Button newGameButton = view.findViewById(R.id.new_game_button);
+        newGameButton.setOnClickListener(v -> {
+            // Start a new game
+            gameStateManager.startModernGame();
+            // Reset timer
+            stopTimer();
+            startTimer();
+            // Announce the robots and their positions
+            announceGameStart();
+        });
+        
         // Menu button - go back to main menu
         menuButton = view.findViewById(R.id.menu_button);
         menuButton.setOnClickListener(v -> {
@@ -538,9 +585,9 @@ public class ModernGameFragment extends BaseGameFragment {
     }
     
     /**
-     * Move the selected robot in the given direction
-     * @param dx X direction (1 = East, -1 = West, 0 = no change)
-     * @param dy Y direction (1 = South, -1 = North, 0 = no change)
+     * Move the selected robot in the specified direction
+     * @param dx Horizontal movement (-1 = left, 1 = right)
+     * @param dy Vertical movement (-1 = up, 1 = down)
      */
     private void moveRobotInDirection(int dx, int dy) {
         GameState state = gameStateManager.getCurrentState().getValue();
@@ -553,59 +600,92 @@ public class ModernGameFragment extends BaseGameFragment {
         int startX = robot.getX();
         int startY = robot.getY();
         
-        // Find the farthest position the robot can move in the specified direction
+        // Find the farthest position the robot can move in this direction
         int endX = startX;
         int endY = startY;
+        boolean hitWall = false;
+        boolean hitRobot = false;
         
-        // Keep moving until we hit a wall or the edge of the board
-        while (true) {
-            int nextX = endX + dx;
-            int nextY = endY + dy;
-            
-            // Check bounds
-            if (nextX < 0 || nextX >= state.getWidth() || nextY < 0 || nextY >= state.getHeight()) {
-                break; // Hit edge of board
-            }
-            
-            // Check for walls or other robots in the way
-            boolean canMove = state.canRobotMoveTo(robot, nextX, nextY);
-            if (!canMove) {
-                break; // Hit obstacle
-            }
-            
-            // Valid move, update position
-            endX = nextX;
-            endY = nextY;
-        }
-        
-        // If we found a valid move, execute it
-        if (endX != startX || endY != startY) {
-            boolean moved = state.moveRobotTo(robot, endX, endY);
-            if (moved) {
-                // Update move counter
-                int moveCount = gameStateManager.getMoveCount().getValue() != null ?
-                        gameStateManager.getMoveCount().getValue() : 0;
-                gameStateManager.setMoveCount(moveCount + 1);
-                
-                // Update squares moved
-                int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
-                int squaresMoved = gameStateManager.getSquaresMoved().getValue() != null ?
-                        gameStateManager.getSquaresMoved().getValue() : 0;
-                gameStateManager.setSquaresMoved(squaresMoved + dist);
-                
-                // Announce the move
-                announceAccessibility(getRobotColorName(robot) + 
-                        " robot moved to " + endX + ", " + endY);
-                
-                // Check for goal completion
-                if (state.checkCompletion()) {
-                    gameStateManager.setGameComplete(true);
-                    announceAccessibility("Goal reached! Game complete in " + 
-                            gameStateManager.getMoveCount().getValue() + " moves and " +
-                            gameStateManager.getSquaresMoved().getValue() + " squares moved");
+        // Check for movement in X direction
+        if (dx != 0) {
+            int step = dx > 0 ? 1 : -1;
+            for (int i = startX + step; i >= 0 && i < state.getWidth(); i += step) {
+                if (state.canRobotMoveTo(robot, i, startY)) {
+                    endX = i;
+                } else {
+                    // Check if we hit a robot or a wall
+                    GameElement robotAtPosition = state.getRobotAt(i, startY);
+                    if (robotAtPosition != null) {
+                        hitRobot = true;
+                    } else {
+                        hitWall = true;
+                    }
+                    break;
                 }
             }
+        }
+        
+        // Check for movement in Y direction
+        if (dy != 0) {
+            int step = dy > 0 ? 1 : -1;
+            for (int i = startY + step; i >= 0 && i < state.getHeight(); i += step) {
+                if (state.canRobotMoveTo(robot, startX, i)) {
+                    endY = i;
+                } else {
+                    // Check if we hit a robot or a wall
+                    GameElement robotAtPosition = state.getRobotAt(startX, i);
+                    if (robotAtPosition != null) {
+                        hitRobot = true;
+                    } else {
+                        hitWall = true;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Calculate the distance moved
+        int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
+        
+        // Did the robot move?
+        if (dist > 0) {
+            // Update the robot's position in the game state
+            robot.setX(endX);
+            robot.setY(endY);
+            
+            // Update the game state
+            gameStateManager.setMoveCount(gameStateManager.getMoveCount().getValue() + 1);
+            gameStateManager.setSquaresMoved(gameStateManager.getSquaresMoved().getValue() + dist);
+            
+            // Play the appropriate sound effect
+            if (hitRobot) {
+                playSound("hit_robot");
+            } else if (hitWall) {
+                playSound("hit_wall");
+            } else {
+                playSound("move");
+            }
+            
+            // Announce the move
+            announceAccessibility(getRobotColorName(robot) + 
+                    " robot moved to " + endX + ", " + endY);
+            
+            // Check for goal completion
+            if (state.isRobotAtTarget(robot)) {
+                gameStateManager.setGameComplete(true);
+                announceAccessibility("Goal reached! Game complete in " + 
+                        gameStateManager.getMoveCount().getValue() + " moves and " +
+                        gameStateManager.getSquaresMoved().getValue() + " squares moved");
+                
+                // Play win sound
+                playSound("win");
+            } else {
+                // After the move, announce possible moves in the new position
+                announcePossibleMoves(robot);
+            }
         } else {
+            // Did not move, play wall hit sound
+            playSound("hit_wall");
             announceAccessibility("Cannot move in this direction");
         }
     }
@@ -622,6 +702,107 @@ public class ModernGameFragment extends BaseGameFragment {
         // Announce via TalkBack if available
         if (gameGridView != null) {
             gameGridView.announceForAccessibility(message);
+        }
+    }
+    
+    /**
+     * Announce the possible moves for the selected robot in each direction
+     * @param robot The selected robot
+     */
+    private void announcePossibleMoves(GameElement robot) {
+        if (robot == null || gameStateManager == null) {
+            return;
+        }
+        
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) {
+            return;
+        }
+        
+        Map<String, Integer> moves = state.calculatePossibleMoves(robot.getColor());
+        if (moves.isEmpty()) {
+            return;
+        }
+        
+        // Build the message about possible moves
+        StringBuilder message = new StringBuilder();
+        message.append(getRobotColorName(robot)).append(" robot can move: ");
+        
+        if (moves.get("north") > 0) {
+            message.append(moves.get("north")).append(" spaces north, ");
+        }
+        if (moves.get("south") > 0) {
+            message.append(moves.get("south")).append(" spaces south, ");
+        }
+        if (moves.get("east") > 0) {
+            message.append(moves.get("east")).append(" spaces east, ");
+        }
+        if (moves.get("west") > 0) {
+            message.append(moves.get("west")).append(" spaces west");
+        }
+        
+        // Announce the possible moves
+        announceAccessibility(message.toString());
+    }
+    
+    /**
+     * Announce all robots and targets at the start of the game
+     */
+    private void announceGameStart() {
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) {
+            return;
+        }
+        
+        // Build a list of all robots and their corresponding targets
+        StringBuilder gameStartMessage = new StringBuilder("Game started with ");
+        List<GameElement> robots = new ArrayList<>();
+        Map<Integer, GameElement> targets = new HashMap<>();
+        
+        // First collect all robots and targets
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                robots.add(element);
+            } else if (element.getType() == GameElement.TYPE_TARGET) {
+                targets.put(element.getColor(), element);
+            }
+        }
+        
+        // Then build the message
+        gameStartMessage.append(robots.size()).append(" robots. ");
+        
+        for (GameElement robot : robots) {
+            String colorName = getRobotColorName(robot);
+            int x = robot.getX();
+            int y = robot.getY();
+            
+            gameStartMessage.append(colorName).append(" robot at position ").append(x).append(", ").append(y);
+            
+            // Add target information if available
+            GameElement target = targets.get(robot.getColor());
+            if (target != null) {
+                gameStartMessage.append(" with target at ").append(target.getX()).append(", ").append(target.getY());
+            }
+            
+            gameStartMessage.append(". ");
+        }
+        
+        // Announce the game start message
+        announceAccessibility(gameStartMessage.toString());
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        // Announce game start on resume
+        if (gameStateManager != null && gameStateManager.getCurrentState().getValue() != null) {
+            announceGameStart();
+        }
+        
+        // Resume timer when fragment is resumed if game is in progress and not solved
+        if (gameStateManager.getCurrentState().getValue() != null && !gameStateManager.isGameComplete().getValue()) {
+            startTimer();
         }
     }
     
@@ -721,12 +902,16 @@ public class ModernGameFragment extends BaseGameFragment {
         stopTimer();
     }
     
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Resume timer when fragment is resumed if game is in progress and not solved
-        if (gameStateManager.getCurrentState().getValue() != null && !gameStateManager.isGameComplete().getValue()) {
-            startTimer();
+    /**
+     * Play a sound effect
+     * @param soundType Type of sound to play ("move", "hit_wall", "hit_robot", "win")
+     */
+    private void playSound(String soundType) {
+        if (soundManager != null) {
+            Timber.d("ModernGameFragment: Playing sound %s", soundType);
+            soundManager.playSound(soundType);
+        } else {
+            Timber.e("ModernGameFragment: SoundManager is null, cannot play sound %s", soundType);
         }
     }
 }

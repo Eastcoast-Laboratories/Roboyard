@@ -1006,4 +1006,103 @@ public class GameState implements Serializable {
         // If we've made it this far, the move is valid
         return true;
     }
+
+    /**
+     * Calculate how far a robot can move in each direction
+     * @param robotId Robot ID to check movement for
+     * @return Map with directions ("north", "south", "east", "west") as keys and distance as values
+     */
+    public Map<String, Integer> calculatePossibleMoves(int robotId) {
+        Map<String, Integer> moves = new HashMap<>();
+        GameElement robot = findRobotById(robotId);
+        if (robot == null) {
+            return moves;
+        }
+        
+        int x = robot.getX();
+        int y = robot.getY();
+        
+        // Calculate distance in each direction
+        // North (up)
+        int northDist = 0;
+        for (int i = y - 1; i >= 0; i--) {
+            if (canRobotMoveTo(robot, x, i)) {
+                northDist++;
+            } else {
+                break;
+            }
+        }
+        moves.put("north", northDist);
+        
+        // South (down)
+        int southDist = 0;
+        for (int i = y + 1; i < height; i++) {
+            if (canRobotMoveTo(robot, x, i)) {
+                southDist++;
+            } else {
+                break;
+            }
+        }
+        moves.put("south", southDist);
+        
+        // East (right)
+        int eastDist = 0;
+        for (int i = x + 1; i < width; i++) {
+            if (canRobotMoveTo(robot, i, y)) {
+                eastDist++;
+            } else {
+                break;
+            }
+        }
+        moves.put("east", eastDist);
+        
+        // West (left)
+        int westDist = 0;
+        for (int i = x - 1; i >= 0; i--) {
+            if (canRobotMoveTo(robot, i, y)) {
+                westDist++;
+            } else {
+                break;
+            }
+        }
+        moves.put("west", westDist);
+        
+        return moves;
+    }
+
+    private GameElement findRobotById(int robotId) {
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotId) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if a robot has reached its target
+     * @param robot The robot to check
+     * @return True if the robot is at its matching target, false otherwise
+     */
+    public boolean isRobotAtTarget(GameElement robot) {
+        if (robot == null || robot.getType() != GameElement.TYPE_ROBOT) {
+            return false;
+        }
+        
+        int robotX = robot.getX();
+        int robotY = robot.getY();
+        int robotColor = robot.getColor();
+        
+        // Find matching target
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET && 
+                element.getColor() == robotColor &&
+                element.getX() == robotX &&
+                element.getY() == robotY) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }
