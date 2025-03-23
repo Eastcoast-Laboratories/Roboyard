@@ -551,8 +551,30 @@ public class GameGridView extends View {
         } else if (action == MotionEvent.ACTION_UP && state != null) {
             GameElement selectedRobot = state.getSelectedRobot();
             if (selectedRobot != null) {
-                int oldX = selectedRobot.getX();
-                int oldY = selectedRobot.getY();
+                int robotX = selectedRobot.getX();
+                int robotY = selectedRobot.getY();
+                
+                // Store original position for change detection
+                int oldX = robotX;
+                int oldY = robotY;
+                
+                // If the click is not on the same row or column as the robot,
+                // determine which direction (row or column) is closest
+                if (robotX != gridX && robotY != gridY) {
+                    // Calculate horizontal and vertical distances from robot to clicked point
+                    int horizontalDistance = Math.abs(gridX - robotX);
+                    int verticalDistance = Math.abs(gridY - robotY);
+                    
+                    if (horizontalDistance <= verticalDistance) {
+                        // Horizontal movement is closer/preferred - keep robot's Y but use clicked X
+                        gridY = robotY;
+                    } else {
+                        // Vertical movement is closer/preferred - keep robot's X but use clicked Y
+                        gridX = robotX;
+                    }
+                    
+                    Timber.d("Adjusted movement to nearest direction: (%d,%d)", gridX, gridY);
+                }
                 
                 // Let GameStateManager handle the touch which will update counters properly
                 gameStateManager.handleGridTouch(gridX, gridY, action);
