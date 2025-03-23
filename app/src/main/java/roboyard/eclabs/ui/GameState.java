@@ -260,17 +260,6 @@ public class GameState implements Serializable {
         // Track squares moved for this move
         int squaresMoved = 0;
         
-        // Prevent sliding in from screen edges - must check if starting position is adjacent to edge
-        if (dx > 0 && startX == 0) { // Moving right from left edge
-            return false;
-        } else if (dx < 0 && startX == width - 1) { // Moving left from right edge
-            return false;
-        } else if (dy > 0 && startY == 0) { // Moving down from top edge
-            return false;
-        } else if (dy < 0 && startY == height - 1) { // Moving up from bottom edge
-            return false;
-        }
-        
         while (!hitObstacle) {
             // CRITICAL: First check for wall collision at current position before moving
             // This is needed to properly handle the wall being between cells
