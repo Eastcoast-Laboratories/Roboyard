@@ -35,8 +35,8 @@ public class MainMenuFragment extends BaseGameFragment {
         
         // Set up UI elements
         newRandomGameButton = view.findViewById(R.id.new_game_button);
-        // Rename the button to "New Random Game"
-        newRandomGameButton.setText(R.string.new_random_game);
+        // Set the correct text for Legacy Game button
+        newRandomGameButton.setText(R.string.legacy_game);
         
         // Use existing level game button from XML layout
         levelGameButton = view.findViewById(R.id.level_game_button);

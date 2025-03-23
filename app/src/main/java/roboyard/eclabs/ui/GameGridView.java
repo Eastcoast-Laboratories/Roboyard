@@ -67,8 +67,7 @@ public class GameGridView extends View {
     
     // Robot animation configuration
     private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
-    private static final float FOCUSED_ROBOT_SCALE = 1.2f; // 20% larger when focused but not selected
-    private boolean enableRobotAnimation = true; // Can be toggled in settings
+    private boolean enableRobotAnimation = true;
     private HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private GameElement focusedRobot = null; // Currently focused (hovered) robot
     private android.view.animation.DecelerateInterpolator easeInterpolator = new android.view.animation.DecelerateInterpolator(1.5f); // Ease function
@@ -558,7 +557,7 @@ public class GameGridView extends View {
                 int oldX = robotX;
                 int oldY = robotY;
                 
-                // If the click is not on the same row or column as the robot,
+                // If the click is not on the same row AND not on the same column as the robot,
                 // determine which direction (row or column) is closest
                 if (robotX != gridX && robotY != gridY) {
                     // Calculate horizontal and vertical distances from robot to clicked point
@@ -575,6 +574,7 @@ public class GameGridView extends View {
                     
                     Timber.d("Adjusted movement to nearest direction: (%d,%d)", gridX, gridY);
                 }
+                // If click is already in same row or column, no adjustment needed - we keep the valid direction
                 
                 // Let GameStateManager handle the touch which will update counters properly
                 gameStateManager.handleGridTouch(gridX, gridY, action);
