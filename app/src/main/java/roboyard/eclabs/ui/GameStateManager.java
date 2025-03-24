@@ -49,12 +49,15 @@ import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
+import roboyard.eclabs.solver.SolverStatus;
 import roboyard.eclabs.util.BoardSizeManager;
+import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.DifficultyManager;
+import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.pm.ia.GameSolution;
+import roboyard.eclabs.GameLogic;
 import roboyard.pm.ia.IGameMove;
-import roboyard.eclabs.GameLogic; 
 import timber.log.Timber;
 
 /**
@@ -1133,5 +1136,139 @@ public class GameStateManager extends AndroidViewModel {
         } catch (Exception e) {
             Timber.e(e, "Error resetting robots");
         }
+    }
+
+    /**
+     * Asynchronously calculates the solution for the current game state
+     * and returns the result via callback
+     * 
+     * @param callback The callback to receive the solution when it's ready
+     */
+    public void calculateSolutionAsync(final SolutionCallback callback) {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        
+        // Show progress indicator
+        if (callback != null) {
+            callback.onSolutionCalculationStarted();
+        }
+        
+        executor.execute(() -> {
+            // Initialize the solver with the current game state
+            GameState state = currentState.getValue();
+            if (state == null) {
+                if (callback != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> 
+                        callback.onSolutionCalculationFailed("No active game state"));
+                }
+                return;
+            }
+            
+            solver.init(state.getGridElements());
+            
+            try {
+                // Run the solver
+                solver.run();
+                
+                // Check if a solution was found
+                if (solver.getSolverStatus() == SolverStatus.solved) {
+                    // Get the solution
+                    GameSolution solution = solver.getSolution(0);
+                    Timber.d("Solution found with %d moves", solution.getMoves().size());
+                    
+                    // Notify on the main thread
+                    if (callback != null) {
+                        new Handler(Looper.getMainLooper()).post(() -> 
+                            callback.onSolutionCalculationCompleted(solution));
+                    }
+                } else {
+                    // No solution found
+                    Timber.d("No solution found, status: %s", solver.getSolverStatus());
+                    if (callback != null) {
+                        new Handler(Looper.getMainLooper()).post(() -> 
+                            callback.onSolutionCalculationFailed("No solution found"));
+                    }
+                }
+            } catch (Exception e) {
+                Timber.e(e, "Error calculating solution");
+                if (callback != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> 
+                        callback.onSolutionCalculationFailed(e.getMessage()));
+                }
+            }
+        });
+        
+        executor.shutdown();
+    }
+    
+    /**
+     * Callback interface for solution calculation
+     */
+    public interface SolutionCallback {
+        /**
+         * Called when the solution calculation starts
+         */
+        void onSolutionCalculationStarted();
+        
+        /**
+         * Called when the solution calculation completes successfully
+         * @param solution The calculated solution
+         */
+        void onSolutionCalculationCompleted(GameSolution solution);
+        
+        /**
+         * Called when the solution calculation fails
+         * @param errorMessage The error message
+         */
+        void onSolutionCalculationFailed(String errorMessage);
+    }
+    
+    /**
+     * Shows a spinner animation while a solution is being calculated.
+     * This method can be used by any UI implementation to show a standardized
+     * loading indicator during solver processing.
+     * 
+     * @param callback A callback that will receive the Braille spinner character
+     *                 updates for display
+     * @param show True to show the spinner, false to hide it
+     * @return The BrailleSpinner instance (so the caller can store and stop it later)
+     */
+    public BrailleSpinner showSpinner(BrailleSpinner.SpinnerListener callback, boolean show) {
+        if (show) {
+            BrailleSpinner spinner = new BrailleSpinner();
+            spinner.setSpinnerListener(callback);
+            spinner.start();
+            return spinner;
+        } else if (callback != null) {
+            // Just send an empty character to hide it
+            callback.onSpinnerUpdate("");
+        }
+        return null;
+    }
+    
+    /**
+     * Animate a solution by moving robots according to the solution steps.
+     * This implementation uses the utility SolutionAnimator and provides
+     * a standard way to display solution animations in any UI.
+     * 
+     * @param solution The solution to animate
+     * @param listener The listener to receive animation events
+     * @return The SolutionAnimator instance (so the caller can store and control it)
+     */
+    public SolutionAnimator animateSolution(GameSolution solution, SolutionAnimator.AnimationListener listener) {
+        if (solution == null || solution.getMoves().isEmpty()) {
+            Timber.w("Cannot animate null or empty solution");
+            if (listener != null) {
+                listener.onAnimationComplete();
+            }
+            return null;
+        }
+        
+        Timber.d("Animating solution with %d moves", solution.getMoves().size());
+        
+        // Create and configure animator
+        SolutionAnimator animator = new SolutionAnimator();
+        animator.setAnimationListener(listener);
+        animator.animateSolution(solution);
+        return animator;
     }
 }
