@@ -10,12 +10,12 @@
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="46dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/game_info_container"
-        app:layout_constraintHeight_percent="0.78" />
+        app:layout_constraintHeight_percent="0.75" />
 
     <!-- Game information below the grid - reduced padding and better spacing -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="4dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:background="#EEEEEE"
         app:layout_constraintTop_toBottomOf="@id/game_grid_view"
         app:layout_constraintBottom_toTopOf="@id/accessibility_container">
@@ -113,7 +113,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="12dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent">
 
