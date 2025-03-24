@@ -356,9 +356,15 @@ public class GameGridView extends View {
                 float right = left + cellSize;
                 float bottom = top + cellSize;
                 
-                // Draw empty cell background
-                cellPaint.setColor(Color.rgb(30, 30, 60));
-                canvas.drawRect(left, top, right, bottom, cellPaint);
+                // Draw grid tile background
+                if (gridTileDrawable != null) {
+                    gridTileDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                    gridTileDrawable.draw(canvas);
+                } else {
+                    // Fallback to colored background if drawable is not available
+                    cellPaint.setColor(Color.rgb(30, 30, 60));
+                    canvas.drawRect(left, top, right, bottom, cellPaint);
+                }
                 
                 // Draw grid lines
                 gridPaint.setColor(Color.rgb(40, 40, 70));
@@ -560,6 +566,17 @@ public class GameGridView extends View {
         } else if (action == MotionEvent.ACTION_UP && state != null) {
             GameElement selectedRobot = state.getSelectedRobot();
             if (selectedRobot != null) {
+                // Check if user tapped on the currently selected robot to deselect it
+                if (gridX == selectedRobot.getX() && gridY == selectedRobot.getY()) {
+                    // User tapped on the currently selected robot, deselect it
+                    Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
+                    state.setSelectedRobot(null);
+                    animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, 1.0f); // Animate back to normal size
+                    announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
+                    invalidate();
+                    return true;
+                }
+                
                 // Check if the user clicked on another robot - if so, select it instead of moving
                 GameElement clickedRobot = state.getRobotAt(gridX, gridY);
                 if (clickedRobot != null && clickedRobot != selectedRobot) {
