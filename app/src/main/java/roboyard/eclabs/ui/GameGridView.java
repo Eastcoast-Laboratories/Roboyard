@@ -71,9 +71,13 @@ public class GameGridView extends View {
     private HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private GameElement focusedRobot = null; // Currently focused (hovered) robot
     private android.view.animation.DecelerateInterpolator easeInterpolator = new android.view.animation.DecelerateInterpolator(1.5f); // Ease function
-    private android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-    private long animationDuration = 300; // Animation duration in ms
-    private Fragment fragment;
+    private android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
+    private long animationDuration = 300; // Animation duration in milliseconds
+    
+    // Grid background
+    private Drawable gridTileDrawable; // Grid tile background
+    
+    private Fragment fragment; // Parent fragment
     
     // For hover events
     private int lastHoverX = -1;
@@ -112,32 +116,35 @@ public class GameGridView extends View {
         // Initialize paints
         cellPaint = new Paint();
         cellPaint.setStyle(Paint.Style.FILL);
+        cellPaint.setAntiAlias(true);
         
         robotPaint = new Paint();
         robotPaint.setStyle(Paint.Style.FILL);
+        robotPaint.setAntiAlias(true);
         
         targetPaint = new Paint();
         targetPaint.setStyle(Paint.Style.FILL);
+        targetPaint.setAntiAlias(true);
         
         textPaint = new Paint();
+        textPaint.setTextSize(40);
         textPaint.setColor(Color.WHITE);
         textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setAntiAlias(true);
         
         gridPaint = new Paint();
         gridPaint.setStyle(Paint.Style.STROKE);
-        gridPaint.setColor(Color.rgb(40, 40, 70));
+        gridPaint.setStrokeWidth(1);
         
         // Load robot drawables
         redRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_red_right);
-        redRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_red_left);
-        
         yellowRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_yellow_right);
-        yellowRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_yellow_left);
-        
         blueRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_blue_right);
-        blueRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_blue_left);
-        
         greenRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_green_right);
+        
+        redRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_red_left);
+        yellowRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_yellow_left);
+        blueRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_blue_left);
         greenRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_green_left);
         
         // Load wall drawables
@@ -150,6 +157,9 @@ public class GameGridView extends View {
         targetBlueDrawable = ContextCompat.getDrawable(context, R.drawable.cb);
         targetYellowDrawable = ContextCompat.getDrawable(context, R.drawable.cj);
         targetMultiDrawable = ContextCompat.getDrawable(context, R.drawable.cm);
+        
+        // Load grid tile background
+        gridTileDrawable = ContextCompat.getDrawable(context, R.drawable.grid_tiles);
         
         // Set up accessibility support
         setFocusable(true);
@@ -550,6 +560,15 @@ public class GameGridView extends View {
         } else if (action == MotionEvent.ACTION_UP && state != null) {
             GameElement selectedRobot = state.getSelectedRobot();
             if (selectedRobot != null) {
+                // Check if the user clicked on another robot - if so, select it instead of moving
+                GameElement clickedRobot = state.getRobotAt(gridX, gridY);
+                if (clickedRobot != null && clickedRobot != selectedRobot) {
+                    // User clicked on a different robot, select it instead of moving
+                    Timber.d("Selecting a different robot at (%d,%d)", gridX, gridY);
+                    gameStateManager.handleGridTouch(gridX, gridY, action);
+                    return true;
+                }
+                
                 int robotX = selectedRobot.getX();
                 int robotY = selectedRobot.getY();
                 
@@ -558,21 +577,76 @@ public class GameGridView extends View {
                 int oldY = robotY;
                 
                 // If the click is not on the same row AND not on the same column as the robot,
-                // determine which direction (row or column) is closest
+                // use a more intuitive direction detection algorithm based on position relative to robot
                 if (robotX != gridX && robotY != gridY) {
-                    // Calculate horizontal and vertical distances from robot to clicked point
-                    int horizontalDistance = Math.abs(gridX - robotX);
-                    int verticalDistance = Math.abs(gridY - robotY);
+                    // Calculate relative position from robot
+                    int deltaX = gridX - robotX; // Positive: east, Negative: west
+                    int deltaY = gridY - robotY; // Positive: south, Negative: north
                     
-                    if (horizontalDistance <= verticalDistance) {
-                        // Horizontal movement is closer/preferred - keep robot's Y but use clicked X
+                    // Absolute values of the deltas to determine distance
+                    int absDeltaX = Math.abs(deltaX);
+                    int absDeltaY = Math.abs(deltaY);
+                    
+                    // Determine primary direction based on the position pattern as requested:
+                    // North: directly above or within 2 cols to the side and at least 2 rows up
+                    //        or within 3 rows up and 2 cols to the side
+                    // South: directly below or within 2 cols to the side and at least 2 rows down
+                    //        or within 3 rows down and 2 cols to the side
+                    // East:  directly to the right or within 2 rows and at least 2 cols right
+                    //        or within 3 cols right and 2 rows up/down
+                    // West:  directly to the left or within 2 rows and at least 2 cols left
+                    //        or within 3 cols left and 2 rows up/down
+                    
+                    boolean moveNorth = (deltaY < 0) && 
+                                     ((absDeltaX == 0) || 
+                                      (absDeltaX <= 2 && absDeltaY >= 2) || 
+                                      (absDeltaX <= 2 && absDeltaY >= 3));
+                    
+                    boolean moveSouth = (deltaY > 0) && 
+                                     ((absDeltaX == 0) || 
+                                      (absDeltaX <= 2 && absDeltaY >= 2) || 
+                                      (absDeltaX <= 2 && absDeltaY >= 3));
+                    
+                    boolean moveEast = (deltaX > 0) && 
+                                    ((absDeltaY == 0) || 
+                                     (absDeltaY <= 2 && absDeltaX >= 2) || 
+                                     (absDeltaY <= 2 && absDeltaX >= 3));
+                    
+                    boolean moveWest = (deltaX < 0) && 
+                                    ((absDeltaY == 0) || 
+                                     (absDeltaY <= 2 && absDeltaX >= 2) || 
+                                     (absDeltaY <= 2 && absDeltaX >= 3));
+                    
+                    // Determine the primary direction - priority: north, south, east, west
+                    if (moveNorth) {
+                        // North direction
+                        gridX = robotX;
+                        // Keep the y-coordinate as it is (it's already north of the robot)
+                    } else if (moveSouth) {
+                        // South direction
+                        gridX = robotX;
+                        // Keep the y-coordinate as it is (it's already south of the robot)
+                    } else if (moveEast) {
+                        // East direction
+                        // Keep the x-coordinate as it is (it's already east of the robot)
+                        gridY = robotY;
+                    } else if (moveWest) {
+                        // West direction
+                        // Keep the x-coordinate as it is (it's already west of the robot)
                         gridY = robotY;
                     } else {
-                        // Vertical movement is closer/preferred - keep robot's X but use clicked Y
-                        gridX = robotX;
+                        // If no clear direction, use absolute distance as fallback
+                        if (absDeltaX <= absDeltaY) {
+                            // Vertical movement is preferred
+                            gridX = robotX;
+                        } else {
+                            // Horizontal movement is preferred
+                            gridY = robotY;
+                        }
                     }
                     
-                    Timber.d("Adjusted movement to nearest direction: (%d,%d)", gridX, gridY);
+                    Timber.d("Adjusted movement to direction: (%d,%d), deltaX=%d, deltaY=%d", 
+                            gridX, gridY, deltaX, deltaY);
                 }
                 // If click is already in same row or column, no adjustment needed - we keep the valid direction
                 

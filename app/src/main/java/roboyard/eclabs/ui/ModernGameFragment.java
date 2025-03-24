@@ -88,7 +88,7 @@ public class ModernGameFragment extends BaseGameFragment {
             seconds = seconds % 60;
             
             // Format time as mm:ss
-            String timeStr = String.format(Locale.getDefault(), "Time: %02d:%02d", minutes, seconds);
+            String timeStr = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
             timerTextView.setText(timeStr);
             
             // Continue updating the timer
