@@ -21,7 +21,6 @@ import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.eclabs.util.SolverManager;
-import roboyard.eclabs.util.GameMoveManager;
 import roboyard.eclabs.util.SolutionMetrics;
 import timber.log.Timber;
 
@@ -47,7 +46,6 @@ public class GridGameScreen extends GameScreen {
 
     private ISolver solver; // Original solver instance, keeping for compatibility
     private SolverManager solverManager; // New solver manager
-    private GameMoveManager gameMoveManager; // New game move manager
 
     private ArrayList<GridElement> gridElements;
     private int imageGridID;
@@ -181,7 +179,6 @@ public class GridGameScreen extends GameScreen {
         
         // Initialize our utility managers
         solverManager = new SolverManager();
-        gameMoveManager = new GameMoveManager();
         
         // Set up the solver manager listener
         solverManager.setListener(new SolverManager.SolverListener() {
@@ -193,19 +190,6 @@ public class GridGameScreen extends GameScreen {
             @Override
             public void onSolverCancelled() {
                 handleSolverCancelled();
-            }
-        });
-        
-        // Set up the game move manager listener
-        gameMoveManager.setMoveListener(new GameMoveManager.MoveListener() {
-            @Override
-            public void onMoveExecuted(int robotId, int direction) {
-                executeRobotMove(robotId, direction);
-            }
-            
-            @Override
-            public void onAllMovesExecuted() {
-                // Empty implementation, handled elsewhere
             }
         });
         
@@ -1982,27 +1966,5 @@ public class GridGameScreen extends GameScreen {
         solverIsCanceled = true;
         solutionMoves = 999; // Prevent game from moving to next level
         gameManager.announce("Solution search canceled");
-    }
-    
-    /**
-     * Execute a robot move based on robot ID and direction
-     * @param robotId The ID of the robot to move
-     * @param direction The direction to move the robot
-     */
-    private void executeRobotMove(int robotId, int direction) {
-        Timber.d("executeRobotMove: Trying to move robot with ID " + robotId + " in direction " + direction);
-        
-        // Find the robot with the matching ID/color
-        for (Object currentObject : this.instances) {
-            if (currentObject instanceof GamePiece) {
-                GamePiece piece = (GamePiece) currentObject;
-                if (piece.getColor() == robotId) {
-                    Timber.d("executeRobotMove: Found matching robot at position (" + piece.getX() + "," + piece.getY() + "), executing move");
-                    // Execute the move using the existing editDestination method
-                    editDestination(piece, direction, false);
-                    break;
-                }
-            }
-        }
     }
 }
