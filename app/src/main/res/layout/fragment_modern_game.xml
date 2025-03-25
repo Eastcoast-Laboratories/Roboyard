@@ -144,7 +144,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_blue_outline"
-                android:text="Reset Robots"
+                android:text="Reset"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
 
