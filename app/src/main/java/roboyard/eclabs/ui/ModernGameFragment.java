@@ -1082,17 +1082,26 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Initialize a new game
      */
     private void initializeGame() {
+        Timber.d("[SOLUTION SOLVER] ModernGameFragment: initializeGame() called");
+        
         // Check if we have a gameStateManager
         if (gameStateManager == null) {
             gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
         }
         
-        // Start the timer
-        if (gameStateManager.getMoveCount().getValue() != null && 
-            gameStateManager.getMoveCount().getValue() == 0) {
-            gameStateManager.startModernGame();
-            startTimer();
+        // Get the game state
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        if (currentState == null) {
+            Timber.d("[SOLUTION SOLVER] ModernGameFragment: No game state exists, this should not happen!");
+            // crash the app
+            throw new RuntimeException("No game state exists");
+        } else {
+            Timber.d("[SOLUTION SOLVER] ModernGameFragment: Using existing game state with %d robots",
+                      currentState.getRobots().size());
         }
+        
+        // Start the timer
+        startTimer();
         
         // Announce game start
         announceGameStart();
