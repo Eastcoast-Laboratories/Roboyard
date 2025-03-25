@@ -548,7 +548,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Restart button - restart the current game
         restartButton = view.findViewById(R.id.restart_button);
         restartButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Restart button clicked");
+            Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
             // Start a new game
             gameStateManager.startModernGame();
             // Reset timer
@@ -1093,7 +1093,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         GameState currentState = gameStateManager.getCurrentState().getValue();
         if (currentState == null) {
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: No game state exists, this should not happen!");
-            // crash the app
+            // crash the app, we should never get here, there should be only one game state, this is a bug. it gets created in MainMenuFragment, when you click on the start button
             throw new RuntimeException("No game state exists");
         } else {
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: Using existing game state with %d robots",

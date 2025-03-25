@@ -531,12 +531,23 @@ public class GameState implements Serializable {
     public ArrayList<GridElement> getGridElements() {
         ArrayList<GridElement> elements = new ArrayList<>();
         
-        // Add walls
+        // Add wall cells
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (getCellType(x, y) == Constants.CELL_WALL) {
-                    elements.add(new GridElement(x, y, "wall"));
-                } else if (getCellType(x, y) == Constants.CELL_TARGET) {
+                // Add horizontal walls (mh) - for each cell, check if there's a horizontal wall on its north side
+                if (hasHorizontalWall(x, y)) {
+                    elements.add(new GridElement(x, y, "mh"));
+                    Timber.d("[SOLUTION_SOLVER] Adding horizontal wall at (%d,%d)", x, y);
+                }
+                
+                // Add vertical walls (mv) - for each cell, check if there's a vertical wall on its west side
+                if (hasVerticalWall(x, y)) {
+                    elements.add(new GridElement(x, y, "mv"));
+                    Timber.d("[SOLUTION_SOLVER] Adding vertical wall at (%d,%d)", x, y);
+                }
+                
+                // Add targets
+                if (getCellType(x, y) == Constants.CELL_TARGET) {
                     String gridElementType;
                     int targetColor = getTargetColor(x, y);
                     

@@ -321,8 +321,6 @@ public class GameStateManager extends AndroidViewModel {
             }
             
             // TODO: Implement proper loading from history file
-            // For now, just start a new game with current settings
-            startModernGame();
             
             Timber.d("Loaded history entry");
         } catch (Exception e) {
