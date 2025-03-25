@@ -44,7 +44,8 @@ import roboyard.eclabs.util.SoundManager;
 
 /**
  * Modern UI implementation of the game screen.
- * This provides a cleaner, more Android-native UI compared to the canvas-based version.
+ * all Android-native UI
+ * the layout is defined in the xml file app/src/main/res/layout/fragment_modern_game.xml
  */
 public class ModernGameFragment extends BaseGameFragment {
     
@@ -158,7 +159,7 @@ public class ModernGameFragment extends BaseGameFragment {
             case 1: return Color.GREEN;
             case 2: return Color.BLUE;
             case 3: return Color.YELLOW;
-            default: return Color.BLUE;
+            default: return Color.DKGRAY;
         }
     }
     

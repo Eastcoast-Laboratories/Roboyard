@@ -3,38 +3,38 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#000000">
 
     <!-- Game grid view at the top - with increased top margin -->
     <roboyard.eclabs.ui.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="33dp"
         app:layout_constraintBottom_toTopOf="@id/game_info_container"
-        app:layout_constraintHeight_percent="0.75" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Game information below the grid - reduced padding and better spacing -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/game_info_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="4dp"
         android:layout_marginBottom="16dp"
-        android:background="#EEEEEE"
-        app:layout_constraintTop_toBottomOf="@id/game_grid_view"
-        app:layout_constraintBottom_toTopOf="@id/accessibility_container">
+        android:background="#000000"
+        android:padding="4dp"
+        app:layout_constraintBottom_toTopOf="@id/accessibility_container"
+        app:layout_constraintTop_toBottomOf="@id/game_grid_view">
 
         <TextView
             android:id="@+id/move_count_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Moves: 0"
+            android:textColor="#EEEEEE"
             android:textSize="16sp"
-            android:textColor="#212121"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,10 +42,10 @@
             android:id="@+id/squares_moved_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Squares moved: 0"
-            android:textSize="16sp"
-            android:textColor="#212121"
             android:layout_marginTop="2dp"
+            android:text="Squares moved: 0"
+            android:textColor="#EEEEEE"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/move_count_text" />
 
@@ -53,10 +53,10 @@
             android:id="@+id/difficulty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Difficulty: Normal"
-            android:textSize="16sp"
-            android:textColor="#212121"
             android:layout_marginTop="2dp"
+            android:text="Difficulty: Normal"
+            android:textColor="#EEEEEE"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/squares_moved_text" />
 
@@ -64,37 +64,37 @@
             android:id="@+id/board_size_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Board: 14x14"
-            android:textSize="16sp"
-            android:textColor="#212121"
             android:layout_marginTop="2dp"
+            android:text="Board: 14x14"
+            android:textColor="#EEEEEE"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
-        
+
         <!-- Timer -->
         <TextView
             android:id="@+id/game_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
+            android:textColor="#EEEEEE"
             android:textSize="36sp"
-            android:textColor="#212121"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBaseline_toBaselineOf="@id/board_size_text" />
-        
+            app:layout_constraintBaseline_toBaselineOf="@id/board_size_text"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <Button
             android:id="@+id/btn_toggle_accessibility"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_rounded_blue_outline"
             android:text="Accessibility Controls"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
-            android:background="@drawable/button_rounded_blue_outline"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/board_size_text"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/board_size_text" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Accessibility controls container (initially invisible) -->
@@ -104,97 +104,98 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/game_info_container"
-        app:layout_constraintBottom_toTopOf="@id/button_container" />
+        app:layout_constraintBottom_toTopOf="@id/button_container"
+        app:layout_constraintTop_toBottomOf="@id/game_info_container" />
 
     <!-- Buttons at the bottom -->
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp"
         android:layout_marginTop="8dp"
         android:gravity="center"
+        android:orientation="vertical"
+        android:background="#000000"
+        android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
             android:gravity="center"
-            android:layout_marginBottom="8dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/back_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
+                android:background="@drawable/button_rounded_blue_outline"
                 android:text="Back"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/button_rounded_blue_outline"
-                android:layout_marginEnd="8dp" />
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/reset_robots_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
+                android:background="@drawable/button_rounded_blue_outline"
                 android:text="Reset Robots"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/button_rounded_blue_outline"
-                android:layout_marginEnd="8dp" />
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/hint_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/button_rounded_blue_outline"
                 android:text="Hint"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/button_rounded_blue_outline" />
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/save_map_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
+                android:background="@drawable/button_rounded_red_outline"
                 android:text="Save Map"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/button_rounded_red_outline"
-                android:layout_marginEnd="8dp" />
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/restart_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
+                android:background="@drawable/button_rounded_green_outline"
                 android:text="New Game"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/button_rounded_green_outline"
-                android:layout_marginEnd="8dp" />
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/menu_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/button_rounded_gray_outline"
                 android:text="Menu"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/button_rounded_gray_outline" />
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
