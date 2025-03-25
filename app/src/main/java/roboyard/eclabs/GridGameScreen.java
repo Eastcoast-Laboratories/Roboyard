@@ -20,6 +20,9 @@ import roboyard.eclabs.ui.GameStateManager;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.eclabs.util.SolverManager;
+import roboyard.eclabs.util.GameMoveManager;
+import roboyard.eclabs.util.SolutionMetrics;
 import timber.log.Timber;
 
 // import static android.content.Context.MODE_PRIVATE;
@@ -42,7 +45,9 @@ public class GridGameScreen extends GameScreen {
 
     private static String requestToast = ""; // this can be set from outside to set the text for a popup
 
-    private ISolver solver;
+    private ISolver solver; // Original solver instance, keeping for compatibility
+    private SolverManager solverManager; // New solver manager
+    private GameMoveManager gameMoveManager; // New game move manager
 
     private ArrayList<GridElement> gridElements;
     private int imageGridID;
@@ -173,7 +178,37 @@ public class GridGameScreen extends GameScreen {
         currentRenderManager = gameManager.getRenderManager();
 
         prevTime = System.currentTimeMillis();
-
+        
+        // Initialize our utility managers
+        solverManager = new SolverManager();
+        gameMoveManager = new GameMoveManager();
+        
+        // Set up the solver manager listener
+        solverManager.setListener(new SolverManager.SolverListener() {
+            @Override
+            public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
+                handleSolverFinished(success, solutionMoves, numSolutions);
+            }
+            
+            @Override
+            public void onSolverCancelled() {
+                handleSolverCancelled();
+            }
+        });
+        
+        // Set up the game move manager listener
+        gameMoveManager.setMoveListener(new GameMoveManager.MoveListener() {
+            @Override
+            public void onMoveExecuted(int robotId, int direction) {
+                executeRobotMove(robotId, direction);
+            }
+            
+            @Override
+            public void onAllMovesExecuted() {
+                // Empty implementation, handled elsewhere
+            }
+        });
+        
         // Load robot images for all directions
         // Right-facing robots
         gameManager.getRenderManager().loadImage(R.drawable.robot_yellow_right);
@@ -820,8 +855,10 @@ public class GridGameScreen extends GameScreen {
     /** Creates the grid and initializes variables */
     public void createGrid() {
         // Timber.d("[RESTART] Beginning of createGrid, isRandomGame=%b, mapPath=%s", isRandomGame, mapPath);
-        this.solver = new SolverDD();
-
+        this.solver = new SolverDD(); // Keep for backward compatibility
+        // Initialize our SolverManager
+        // No need to re-initialize solverManager here
+        
         IAMovesNumber = 0;
         isSolved = false;
 
@@ -990,13 +1027,12 @@ public class GridGameScreen extends GameScreen {
         
         // add robots
         createRobots();
-
+        solverManager.initialize(gridElements);
         this.solver.init(gridElements);
-
+        
         buttonSolve.setEnabled(false);
         t = new Thread(solver, "solver");
         t.start();
-
     }
 
     public void createRobots()
@@ -1546,6 +1582,7 @@ public class GridGameScreen extends GameScreen {
         
         // Initialize the solver with the grid elements
         this.solver.init(gridElements);
+        solverManager.initialize(gridElements);
         
         // Update the UI
         markUnsorted();
@@ -1898,5 +1935,56 @@ public class GridGameScreen extends GameScreen {
     protected void markUnsorted() {
         // Call the parent class method to mark instances as needing sorting
         super.markUnsorted();
+    }
+
+    /**
+     * Helper method to handle solver completion events
+     * @param success Whether a solution was found
+     * @param solutionMoves Number of moves in the solution
+     * @param numSolutions Number of different solutions found
+     */
+    private void handleSolverFinished(boolean success, int solutionMoves, int numSolutions) {
+        if (success) {
+            isSolved = true;
+            buttonSolve.setEnabled(true);
+            NumDifferentSolutionsFound = numSolutions;
+            this.solutionMoves = solutionMoves;
+            // Get the first solution
+            solution = solverManager.getSolution(numDifferentSolutionClicks);
+        } else {
+            isSolved = false;
+            buttonSolve.setEnabled(true);
+            gameManager.announce("No solution found");
+        }
+    }
+    
+    /**
+     * Helper method to handle solver cancellation
+     */
+    private void handleSolverCancelled() {
+        buttonSolve.setEnabled(false);
+        buttonCancelSolver.setEnabled(false);
+        solverIsCanceled = true;
+        solutionMoves = 999; // Prevent game from moving to next level
+        gameManager.announce("Solution search canceled");
+    }
+    
+    /**
+     * Execute a robot move based on robot ID and direction
+     * @param robotId The ID of the robot to move
+     * @param direction The direction to move the robot
+     */
+    private void executeRobotMove(int robotId, int direction) {
+        // Find the robot with the matching ID/color
+        for (Object currentObject : this.instances) {
+            if (currentObject instanceof GamePiece) {
+                GamePiece piece = (GamePiece) currentObject;
+                if (piece.getColor() == robotId) {
+                    // Execute the move using the existing editDestination method
+                    editDestination(piece, direction, false);
+                    break;
+                }
+            }
+        }
     }
 }
