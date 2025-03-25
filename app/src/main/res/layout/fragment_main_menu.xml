@@ -54,145 +54,151 @@
         app:layout_constraintStart_toStartOf="parent"
         android:contentDescription="Bottom wall" />
 
-    <!-- Content area with padding -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Scrollable content area with padding -->
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="16dp"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/top_wall"
         app:layout_constraintBottom_toTopOf="@id/bottom_wall"
         app:layout_constraintStart_toEndOf="@id/left_wall"
         app:layout_constraintEnd_toStartOf="@id/right_wall">
         
-        <!-- Title centered but moved higher up -->
-        <TextView
-            android:id="@+id/main_menu_title"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/main_menu_title"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_marginTop="16dp"
-            android:textColor="#212121"
-            android:shadowColor="#80000000"
-            android:shadowDx="1"
-            android:shadowDy="1"
-            android:shadowRadius="2"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- Blue Robot Image above buttons -->
-        <ImageView
-            android:id="@+id/robot_blue_image"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/robot_blue_right"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
-            android:contentDescription="Blue robot" />
+            android:padding="16dp">
             
-        <!-- Button container moved below robot -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/robot_blue_image"
-            app:layout_constraintWidth_max="300dp">
-
-            <!-- Modern UI Game button - green with round corners and black outline -->
-            <Button
-                android:id="@+id/modern_ui_button"
-                android:layout_width="match_parent"
+            <!-- Title centered but moved higher up -->
+            <TextView
+                android:id="@+id/main_menu_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/new_random_game"
-                android:contentDescription="@string/new_random_game_description"
-                android:padding="16dp"
-                android:textColor="#FFFFFF"
+                android:text="@string/main_menu_title"
+                android:textSize="32sp"
                 android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@drawable/button_rounded_green_outline" />
-                
-            <!-- Legacy Game button - Green with round corners and black outline -->
-            <Button
-                android:id="@+id/new_game_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/legacy_game"
-                android:contentDescription="@string/legacy_game_description"
-                android:padding="16dp"
+                android:textAlignment="center"
+                android:gravity="center"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@drawable/button_rounded_green_outline" />
-                
-            <!-- Level Game button - Blue with round corners and black outline -->
-            <Button
-                android:id="@+id/level_game_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/level_game"
-                android:contentDescription="@string/level_game_description"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@drawable/button_rounded_blue_outline" />
-                
-            <!-- How to Play button - Yellow with round corners and black outline -->
-            <Button
-                android:id="@+id/help_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/help"
-                android:contentDescription="@string/help_description"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@drawable/button_rounded_yellow_outline" />
-                
-            <!-- Load Game button - red with round corners and black outline -->
-            <Button
-                android:id="@+id/load_game_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/load_game"
-                android:contentDescription="@string/load_game_description"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@drawable/button_rounded_red_outline" />
+                android:textColor="#212121"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Settings button - Gray with round corners and black outline -->
-            <Button
-                android:id="@+id/settings_button"
-                android:layout_width="match_parent"
+            <!-- Blue Robot Image above buttons -->
+            <ImageView
+                android:id="@+id/robot_blue_image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/robot_blue_right"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
+                android:contentDescription="Blue robot" />
+                
+            <!-- Button container moved below robot -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/settings"
-                android:contentDescription="@string/settings_description"
-                android:padding="16dp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/button_rounded_gray_outline" />
+                android:orientation="vertical"
+                android:layout_marginTop="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/robot_blue_image"
+                app:layout_constraintWidth_max="300dp">
 
-        </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- Modern UI Game button - green with round corners and black outline -->
+                <Button
+                    android:id="@+id/modern_ui_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/new_random_game"
+                    android:contentDescription="@string/new_random_game_description"
+                    android:padding="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_green_outline" />
+                    
+                <!-- Legacy Game button - Green with round corners and black outline -->
+                <Button
+                    android:id="@+id/new_game_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/legacy_game"
+                    android:contentDescription="@string/legacy_game_description"
+                    android:padding="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_green_outline" />
+                    
+                <!-- Level Game button - Blue with round corners and black outline -->
+                <Button
+                    android:id="@+id/level_game_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/level_game"
+                    android:contentDescription="@string/level_game_description"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_blue_outline" />
+                    
+                <!-- How to Play button - Yellow with round corners and black outline -->
+                <Button
+                    android:id="@+id/help_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/help"
+                    android:contentDescription="@string/help_description"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_yellow_outline" />
+                    
+                <!-- Load Game button - red with round corners and black outline -->
+                <Button
+                    android:id="@+id/load_game_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/load_game"
+                    android:contentDescription="@string/load_game_description"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_red_outline" />
+
+                <!-- Settings button - Gray with round corners and black outline -->
+                <Button
+                    android:id="@+id/settings_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings"
+                    android:contentDescription="@string/settings_description"
+                    android:padding="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/button_rounded_gray_outline" />
+
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
