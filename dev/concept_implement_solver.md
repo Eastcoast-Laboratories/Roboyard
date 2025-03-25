@@ -43,17 +43,7 @@
         - The SolverDD class implements ISolver interface
         - Already reusable through the GameStateManager which initializes it
         - This component is ready for reuse without modification
-    2. Braille Block Spinner:
-        - Found in GridGameScreen.java lines 110-119
-        - Uses Unicode Braille characters (\u2840 to \u28bf) for a tactile-like spinner animation
-        - Can be extracted into a utility class for both old and new UIs
-        - Code shows random selection of Braille characters to create an animated spinner effect
-    3. Solution Animation Logic:
-        - Methods showSolution() and doMovesInMemory() in GridGameScreen.java
-        - showSolution() resets robots and executes moves one by one
-        - doMovesInMemory() handles the actual robot movement by translating solver directions
-        - This animation logic could be extracted into a reusable component
-    4. GameMove Representation:
+    2. GameMove Representation:
         - Already used across both implementations
         - Represents a single robot move with start/end positions, robot ID, direction and distance
         - The old game converts these into visual robot movements

@@ -497,47 +497,4 @@ public class GameLogic {
         return data;
     }
 
-    /**
-     * Check if a board is solvable and get metrics about its solution
-     * @param gridElements The grid elements to check
-     * @return SolutionMetrics object containing information about the solution
-     */
-    public SolutionMetrics checkSolutionDifficulty(ArrayList<GridElement> gridElements) {
-        SolutionMetrics metrics = new SolutionMetrics();
-        
-        try {
-            // Initialize the solver
-            SolverDD solver = new SolverDD();
-            solver.init(gridElements);
-            
-            // Run the solver
-            solver.run();
-            
-            // Get solution information
-            if (solver.getSolverStatus() == SolverStatus.solved) {
-                metrics.hasSolution = true;
-                
-                // Check for number of solutions
-                List<Solution> solutions = solver.getSolutionList();
-                metrics.numberOfSolutions = solutions != null ? solutions.size() : 0;
-                
-                // Get the best solution
-                if (metrics.numberOfSolutions > 0) {
-                    GameSolution solution = solver.getSolution(0);
-                    metrics.moveCount = solution.getMoves().size();
-                    
-                    // Check if it's a one-move solution
-                    if (solver.isSolution01()) {
-                        metrics.moveCount = 1;
-                    }
-                }
-            } else {
-                metrics.hasSolution = false;
-            }
-        } catch (Exception e) {
-            Timber.e(e, "Error checking solution difficulty");
-        }
-        
-        return metrics;
-    }
 }
