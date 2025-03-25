@@ -110,4 +110,5 @@ public class GameElement implements Serializable {
     public boolean isRobot() {
         return type == TYPE_ROBOT;
     }
+
 }

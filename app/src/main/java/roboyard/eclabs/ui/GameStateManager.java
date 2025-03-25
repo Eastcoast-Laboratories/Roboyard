@@ -187,51 +187,43 @@ public class GameStateManager extends AndroidViewModel {
     public void startModernGame() {
         Timber.d("GameStateManager: startModernGame() called");
         
-        // Get board dimensions from BoardSizeManager
+        // If solver is already running, don't create a new game state to avoid mismatch
+        if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
+            Timber.d("[SOLUTION SOLVER] startModernGame: Solver already running, not creating new game state");
+            return;
+        }
+        
+        // Get board size from the manager
         int width = boardSizeManager.getBoardWidth();
         int height = boardSizeManager.getBoardHeight();
-        
         Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Retrieved board size from BoardSizeManager: %dx%d", width, height);
         Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Current MainActivity board size: %dx%d", 
                 MainActivity.boardSizeX, MainActivity.boardSizeY);
         
         // Create a new random game state
         Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Before calling createRandom with size: %dx%d", width, height);
-        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
+        
+        // Create a new random GameState for the modern UI
+        GameState state = GameState.createRandom(width, height, difficultyManager.getDifficulty());
         Timber.d("GameStateManager: Created new random GameState for modern UI");
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState has dimensions: %dx%d", 
+                state.getWidth(), state.getHeight());
         
-        // Set reference to this GameStateManager in the new state
-        newState.setGameStateManager(this);
+        // Set the current state
+        currentState.setValue(state);
+        currentMapName = "Random-" + System.currentTimeMillis();
         
-        // Verify the dimensions of the created game state
-        if (newState != null) {
-            Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState has dimensions: %dx%d", 
-                    newState.getWidth(), newState.getHeight());
-            
-            // Check if dimensions match what was requested
-            if (newState.getWidth() != width || newState.getHeight() != height) {
-                Timber.w("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - WARNING: Created game dimensions don't match requested dimensions!");
-            }
-        }
-        
-        // Set a flag to indicate this is a modern UI game
-        newState.setLevelName("Modern UI Game");
-        
-        // Store initial robot positions for reset functionality
-        newState.storeInitialRobotPositions();
-        
-        // Reset the state history and move counts
+        // Reset move counts and history
+        setMoveCount(0);
+        setSquaresMoved(0);
+        setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
-        currentState.setValue(newState);
-        moveCount.setValue(0);
-        squaresMoved.setValue(0);
-        isGameComplete.setValue(false);
-        
+        startTime = System.currentTimeMillis();
         Timber.d("GameStateManager: Reset move counts and state history");
         
         // Initialize the solver with grid elements
-        ArrayList<GridElement> gridElements = newState.getGridElements();
+        ArrayList<GridElement> gridElements = state.getGridElements();
         solver.initialize(gridElements);
         
         // Reset solution state
@@ -1217,6 +1209,27 @@ public class GameStateManager extends AndroidViewModel {
             return;
         }
         
+        // Log the current game state details
+        ArrayList<GridElement> elements = state.getGridElements();
+        Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Current GameState hash: %d", state.hashCode());
+        Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Current map has %d elements", elements.size());
+        
+        // Log robot positions
+        List<GameElement> robots = state.getRobots();
+        for (GameElement robot : robots) {
+            Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Robot ID %d (color %d) at position (%d, %d)", 
+                  robot.getColor(), robot.getColor(), robot.getX(), robot.getY());
+        }
+        
+        // Log target position
+        GameElement target = state.getTarget();
+        if (target != null) {
+            Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Target for robot Color %d (color %d) at position (%d, %d)",
+                  target.getColor(), target.getColor(), target.getX(), target.getY());
+        } else {
+            Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: No target found in current game state");
+        }
+        
         // Set solver running state
         isSolverRunning.setValue(true);
         
@@ -1225,7 +1238,7 @@ public class GameStateManager extends AndroidViewModel {
         
         try {
             Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Initializing solver with current game state");
-            solver.initialize(state.getGridElements());
+            solver.initialize(elements);
             
             // Run the solver on a background thread
             ExecutorService executor = Executors.newSingleThreadExecutor();

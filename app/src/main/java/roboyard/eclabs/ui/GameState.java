@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
+import timber.log.Timber;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,6 +36,12 @@ import timber.log.Timber;
 public class GameState implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String TAG = "GameState";
+    
+    // Element type constants
+    public static final int ELEMENT_EMPTY = 0;
+    public static final int ELEMENT_WALL = 1;
+    public static final int ELEMENT_TARGET = 2;
+    public static final int ELEMENT_ROBOT = 3;
     
     // Board properties
     private int width;
@@ -1070,9 +1078,62 @@ public class GameState implements Serializable {
         return moves;
     }
 
-    private GameElement findRobotById(int robotId) {
+    /**
+     * Find a robot by its ID
+     * @param robotId The robot ID to find
+     * @return The robot game element or null if not found
+     */
+    public GameElement findRobotById(int robotId) {
+        // First try to find by exact color match
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotId) {
+                return element;
+            }
+        }
+        
+        // If no exact match, try finding robots by RGB color constants
+        // Common Android color constants
+        if (robotId == -16777216) { // Color.BLACK
+            return findRobotByColor(0); // Assuming BLACK is represented as 0 in our system
+        } else if (robotId == -16711936) { // Color.GREEN
+            return findRobotByColor(2); // Assuming GREEN is represented as 2 in our system
+        } else if (robotId == -256) { // Color.BLUE
+            return findRobotByColor(1); // Assuming BLUE is represented as 1 in our system
+        } else if (robotId == -65536) { // Color.RED
+            return findRobotByColor(3); // Assuming RED is represented as 3 in our system
+        } else if (robotId == -16711681) { // Color.CYAN
+            return findRobotByColor(4); // Assuming CYAN is represented as 4 in our system
+        } else if (robotId == -16776961) { // Color.YELLOW
+            return findRobotByColor(5); // Assuming YELLOW is represented as 5 in our system
+        }
+        
+        // If still not found, log detailed information
+        boolean hasRobots = false;
+        StringBuilder robotInfo = new StringBuilder("Available robots: ");
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                hasRobots = true;
+                robotInfo.append("[ID: ").append(element.getColor()).append(" at ").append(element.getX()).append(",").append(element.getY()).append("] ");
+            }
+        }
+        
+        if (hasRobots) {
+            Timber.d("findRobotById: Could not find robot with ID %d. %s", robotId, robotInfo.toString());
+        } else {
+            Timber.d("findRobotById: No robots found in the game state!");
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Helper method to find a robot by color index
+     * @param colorIndex The color index to search for
+     * @return The robot game element or null if not found
+     */
+    private GameElement findRobotByColor(int colorIndex) {
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == colorIndex) {
                 return element;
             }
         }
@@ -1104,5 +1165,24 @@ public class GameState implements Serializable {
         }
         
         return false;
+    }
+
+    public List<GameElement> getRobots() {
+        List<GameElement> robots = new ArrayList<>();
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                robots.add(element);
+            }
+        }
+        return robots;
+    }
+
+    public GameElement getTarget() {
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                return element;
+            }
+        }
+        return null;
     }
 }
