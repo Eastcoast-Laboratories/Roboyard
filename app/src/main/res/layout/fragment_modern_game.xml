@@ -5,28 +5,29 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Game grid view at the top - with increased top margin -->
+    <!-- Game grid view at the top with increased margin (90dp) -->
     <roboyard.eclabs.ui.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="93dp"
         app:layout_constraintBottom_toTopOf="@id/game_info_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.75"
+        app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Game information below the grid - reduced padding and better spacing -->
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_chainStyle="packed" />
+    
+    <!-- Game information above the buttons -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/game_info_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:background="#000000"
-        android:padding="4dp"
-        app:layout_constraintBottom_toTopOf="@id/accessibility_container"
-        app:layout_constraintTop_toBottomOf="@id/game_grid_view">
+        android:padding="2dp"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintTop_toBottomOf="@id/game_grid_view"
+        app:layout_constraintBottom_toTopOf="@id/accessibility_container">
 
         <TextView
             android:id="@+id/move_count_text"
@@ -42,7 +43,7 @@
             android:id="@+id/squares_moved_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
             android:text="Squares moved: 0"
             android:textColor="#EEEEEE"
             android:textSize="16sp"
@@ -53,7 +54,7 @@
             android:id="@+id/difficulty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
             android:text="Difficulty: Normal"
             android:textColor="#EEEEEE"
             android:textSize="16sp"
@@ -64,7 +65,7 @@
             android:id="@+id/board_size_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
             android:text="Board: 14x14"
             android:textColor="#EEEEEE"
             android:textSize="16sp"
@@ -86,7 +87,7 @@
             android:id="@+id/btn_toggle_accessibility"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:background="@drawable/button_rounded_blue_outline"
             android:text="Accessibility Controls"
             android:textColor="#FFFFFF"
@@ -104,25 +105,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/button_container"
-        app:layout_constraintTop_toBottomOf="@id/game_info_container" />
+        app:layout_constraintTop_toBottomOf="@id/game_info_container"
+        app:layout_constraintBottom_toTopOf="@id/button_container" />
 
-    <!-- Buttons at the bottom -->
+    <!-- Buttons fixed at the bottom of the screen -->
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="center"
         android:orientation="vertical"
         android:background="#000000"
-        android:padding="12dp"
+        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             android:gravity="center"
             android:orientation="horizontal">
 
