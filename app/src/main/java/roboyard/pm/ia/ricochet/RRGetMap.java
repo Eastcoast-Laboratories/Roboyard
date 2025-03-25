@@ -4,7 +4,10 @@ import android.graphics.Color;
 
 import driftingdroids.model.Board;
 import roboyard.eclabs.*;
+import timber.log.Timber;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -30,6 +33,36 @@ public class RRGetMap {
      * @return
      */
     public static Board createDDWorld(ArrayList<GridElement> gridElements, RRPiece[] pieces) {
+
+        // Calculate actual board dimensions from grid elements
+        int maxX = 0;
+        int maxY = 0;
+        // create an ascii map of the board
+        String[][] asciiMap = new String[22][22];
+        for (GridElement element : gridElements) {
+            if (element.getX() > maxX) maxX = element.getX();
+            if (element.getY() > maxY) maxY = element.getY();
+            asciiMap[element.getX()][element.getY()] = element.toChar();
+        }
+        for (int i = 0; i < 22; i++) {
+            for (int j = 0; j < 22; j++) {
+                if (asciiMap[i][j] == null) {
+                    asciiMap[i][j] = " ";
+                }
+            }
+        }
+        for (int i = 0; i < 22; i++) {
+            Timber.d("[SOLUTION_SOLVER] createDDWorld: Ascii map " + (i<10?"0"+i:i) + ": " + Arrays.toString(asciiMap[i]));
+        }
+        // Add 1 to get width/height from max coordinates
+        int boardWidth = maxX + 1;
+        int boardHeight = maxY + 1;
+        
+        // Log the actual board dimensions we're using
+        Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (MainActivity dimensions: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY + ")");
+
+        // maybe Create board with the correct dimensions, not static MainActivity dimensions
+        // Board board = Board.createBoardFreestyle(null, boardWidth, boardHeight, MainActivity.numRobots);
 
         Board board = Board.createBoardFreestyle(null, MainActivity.boardSizeX, MainActivity.boardSizeY, MainActivity.numRobots);
         board.removeGoals();
