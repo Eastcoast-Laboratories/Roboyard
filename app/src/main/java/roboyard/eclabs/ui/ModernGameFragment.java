@@ -31,6 +31,11 @@ import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.UIModeManager;
+import roboyard.pm.ia.IGameMove;
+import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.pm.ia.ricochet.ERRGameMove;
+import roboyard.eclabs.util.SoundManager;
+
 import timber.log.Timber;
 
 // Added imports for accessibility
@@ -38,9 +43,6 @@ import androidx.core.view.accessibility.AccessibilityManagerCompat;
 import android.view.accessibility.AccessibilityManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-
-// Sound manager import
-import roboyard.eclabs.util.SoundManager;
 
 /**
  * Modern UI implementation of the game screen.
@@ -61,6 +63,7 @@ public class ModernGameFragment extends BaseGameFragment {
     private Button restartButton;
     private Button menuButton;
     private TextView timerTextView;
+    private TextView statusTextView;
     
     // Class member to track if a robot is currently selected
     private boolean isRobotSelected = false;
@@ -344,6 +347,7 @@ public class ModernGameFragment extends BaseGameFragment {
         difficultyTextView = view.findViewById(R.id.difficulty_text);
         boardSizeTextView = view.findViewById(R.id.board_size_text);
         timerTextView = view.findViewById(R.id.game_timer);
+        statusTextView = view.findViewById(R.id.status_text_view);
         
         // Initialize sound manager
         soundManager = SoundManager.getInstance(requireContext());
@@ -487,12 +491,31 @@ public class ModernGameFragment extends BaseGameFragment {
             Toast.makeText(requireContext(), "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
         });
         
-        // Hint button - get a hint for the next move
+        // Hint button - get hint from the solver
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Hint button clicked");
             // Get a hint from the game state manager
-            gameStateManager.getHint();
+            IGameMove hintMove = gameStateManager.getHint();
+            
+            if (hintMove != null && hintMove instanceof RRGameMove) {
+                // Cast to RRGameMove to access the proper methods
+                RRGameMove rrMove = (RRGameMove) hintMove;
+                
+                // Convert the robotic move to human-readable text
+                String robotColor = getRobotColorName(rrMove.getColor());
+                String direction = getDirectionName(rrMove.getDirection());
+                
+                // Update the status text with the hint
+                String hintText = String.format("Move the %s robot %s", 
+                        robotColor, direction);
+                statusTextView.setText(hintText);
+                statusTextView.setVisibility(View.VISIBLE);
+            } else {
+                // No solution found
+                statusTextView.setText("No solution found for this puzzle.");
+                statusTextView.setVisibility(View.VISIBLE);
+            }
         });
         
         // Save map button - navigate to save screen
@@ -799,7 +822,7 @@ public class ModernGameFragment extends BaseGameFragment {
             if (state.canRobotMoveTo(robot, x, i)) {
                 northDistance++;
             } else {
-                // Found an obstacle
+                // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
                     northObstacle = getRobotColorName(robotAtPosition) + " robot";
@@ -827,7 +850,7 @@ public class ModernGameFragment extends BaseGameFragment {
             if (state.canRobotMoveTo(robot, x, i)) {
                 southDistance++;
             } else {
-                // Found an obstacle
+                // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
                     southObstacle = getRobotColorName(robotAtPosition) + " robot";
@@ -1019,6 +1042,39 @@ public class ModernGameFragment extends BaseGameFragment {
             soundManager.playSound(soundType);
         } else {
             Timber.e("ModernGameFragment: SoundManager is null, cannot play sound %s", soundType);
+        }
+    }
+    
+    /**
+     * Get the direction name from a move direction
+     * @param direction Direction constant from ERRGameMove
+     * @return Human-readable direction name
+     */
+    private String getDirectionName(int direction) {
+        switch (direction) {
+            case 1: // ERRGameMove.UP.getDirection()
+                return "up";
+            case 4: // ERRGameMove.DOWN.getDirection()
+                return "down";
+            case 2: // ERRGameMove.RIGHT.getDirection()
+                return "right";
+            case 8: // ERRGameMove.LEFT.getDirection()
+                return "left";
+            default: 
+                return "unknown direction";
+        }
+    }
+    
+    /**
+     * Get color name for a robot ID
+     */
+    private String getRobotColorName(int robotId) {
+        switch (robotId) {
+            case 0: return "Red";
+            case 1: return "Green";
+            case 2: return "Blue";
+            case 3: return "Yellow";
+            default: return "Unknown";
         }
     }
 }
