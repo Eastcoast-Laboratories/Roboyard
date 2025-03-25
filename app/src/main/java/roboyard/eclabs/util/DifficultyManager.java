@@ -76,11 +76,5 @@ public class DifficultyManager {
                 return "Normal";
         }
     }
-    
-    /**
-     * Reset difficulty to default (DIFFICULTY_NORMAL)
-     */
-    public void resetToDefault() {
-        setDifficulty(DIFFICULTY_NORMAL);
-    }
+
 }

@@ -675,9 +675,7 @@ public class GridGameScreen extends GameScreen {
             NumDifferentSolutionsFound=solverManager.getNumDifferentSolutionsFound();
             solutionMoves=solverManager.getSolutionMoves();
             solution = solverManager.getSolution(numDifferentSolutionClicks);
-            if(solverManager.isSolution01()){
-                solutionMoves=1;
-            }
+            
             // DEBUG: save solutions directly as if played:
             // SaveManager saveManager = new SaveManager(gameManager.getActivity());
             // saveManager.saveMapCompletion(mapPath, solutionMoves, 99, 9999, 99999);
