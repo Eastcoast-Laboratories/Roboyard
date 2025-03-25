@@ -45,6 +45,14 @@ public class GamePiece implements IGameObject {
     private boolean isOvershooting = false;  // Track overshoot state
     private float overshootAmount = 0.6f;    // Configurable overshoot amount
     
+    // Add movement state constants
+    private static final String MOVEMENT_STATE_IDLE = "IDLE";
+    private static final String MOVEMENT_STATE_MOVING = "MOVING";
+    private static final String MOVEMENT_STATE_COMPLETED = "COMPLETED";
+    private String movementState = MOVEMENT_STATE_IDLE;
+    private long moveStartTime;
+    private int moveDistance;
+
     /**
      * Check if the piece is currently moving
      * @return true if the piece is in movement
@@ -196,8 +204,21 @@ public class GamePiece implements IGameObject {
 
         //if the piece is not in motion, ...
         if((this.x == this.xObjective) && (this.y == this.yObjective) && (deltaX == 0) && (deltaY == 0)){
-            // Timber.d("GamePiece.update: Robot " + color + " is not moving, inMovement=" + inMovement);
+            // Update movement state if needed
+            if (movementState != MOVEMENT_STATE_IDLE) {
+                Timber.d("GamePiece.update: Robot " + color + " state change: " + movementState + " -> " + MOVEMENT_STATE_IDLE);
+                movementState = MOVEMENT_STATE_IDLE;
+                
+                // Log movement statistics if completing a move
+                if (inMovement) {
+                    long moveDuration = System.currentTimeMillis() - moveStartTime;
+                    Timber.d("GamePiece.update: Robot " + color + " completed move - Distance: " + moveDistance + 
+                             ", Squares: " + curMoveSquares + ", Duration: " + moveDuration + "ms");
+                }
+            }
+            
             if(inMovement) {
+                movementState = MOVEMENT_STATE_COMPLETED;
                 Timber.d("GamePiece.update: Robot " + color + " finished move, calling doMovesInMemory");
                 ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
                 Boolean justWon = false;
@@ -207,21 +228,22 @@ public class GamePiece implements IGameObject {
                         playRobotSound(gameManager, "win");
                         justWon = true;
                         testIfWon = false;  // Only set to false if we actually won
+                        Timber.d("GamePiece.update: Robot " + color + " won the game!");
                     }
                 }
                 // after move check if stopped by wall or robot
 
-                Timber.d(" end move with "+this.curMoveSquares+" squares");
+                Timber.d("GamePiece.update: End move with "+this.curMoveSquares+" squares");
                 
                 // Play appropriate sound based on collision type
                 if (!lastCollisionType.equals("none") && !justWon) {
                     playRobotSound(gameManager, lastCollisionType);
+                    Timber.d("GamePiece.update: Robot " + color + " collision with " + lastCollisionType);
                     // Reset collision type
                     lastCollisionType = "none";
                 }
             }
             inMovement = false;
-            // Timber.d("GamePiece.update: Robot " + color + " setting inMovement=false");
 
             //if there is user input, ...
             InputManager inputManager = gameManager.getInputManager();
@@ -491,5 +513,33 @@ public class GamePiece implements IGameObject {
      */
     public void setOvershootAmount(float amount) {
         this.overshootAmount = amount;
+    }
+
+    /**
+     * Sets the destination for the robot to move to
+     * @param xx X coordinate to move to
+     * @param yy Y coordinate to move to
+     */
+    public void setObjective(int xx, int yy) {
+        // Calculate movement statistics
+        moveDistance = calculateDistance(x, y, xx, yy);
+        moveStartTime = System.currentTimeMillis();
+        movementState = MOVEMENT_STATE_MOVING;
+        
+        // Set movement objective
+        xObjective = xx;
+        yObjective = yy;
+        inMovement = true;
+        curMoveSquares = 0;
+        
+        Timber.d("GamePiece.setObjective: Robot " + color + " moving from (" + x + "," + y + ") to (" + 
+                 xx + "," + yy + "), distance: " + moveDistance);
+    }
+    
+    /**
+     * Calculate Manhattan distance between two points
+     */
+    private int calculateDistance(int x1, int y1, int x2, int y2) {
+        return Math.abs(x2 - x1) + Math.abs(y2 - y1);
     }
 }

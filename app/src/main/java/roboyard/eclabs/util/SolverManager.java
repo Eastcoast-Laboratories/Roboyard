@@ -16,7 +16,7 @@ import timber.log.Timber;
  * This class encapsulates the solver functionality in a UI-agnostic way,
  * making it reusable across different UI implementations.
  */
-public class SolverManager {
+public class SolverManager implements Runnable {
     private ISolver solver;
     private Thread solverThread;
     private boolean isSolved = false;
@@ -76,7 +76,7 @@ public class SolverManager {
             return;
         }
         
-        solverThread = new Thread(solver, "solver");
+        solverThread = new Thread(this, "solver");
         solverThread.start();
     }
     
@@ -162,6 +162,39 @@ public class SolverManager {
      */
     public int getNumDifferentSolutionsFound() {
         return numDifferentSolutionsFound;
+    }
+    
+    /**
+     * Gets the list of solutions
+     * @return The list of solutions
+     */
+    public List<Solution> getSolutionList() {
+        return solver.getSolutionList();
+    }
+    
+    /**
+     * Checks if the solution is a single move solution
+     * @return True if the solution is a single move, false otherwise
+     */
+    public boolean isSolution01() {
+        return solver.isSolution01();
+    }
+    
+    /**
+     * Cancels the solver
+     */
+    public void cancel() {
+        if (solver instanceof SolverDD) {
+            ((SolverDD)solver).cancel();
+        }
+    }
+    
+    /**
+     * Runnable implementation for executing solver in a thread
+     */
+    @Override
+    public void run() {
+        solver.run();
     }
     
     /**

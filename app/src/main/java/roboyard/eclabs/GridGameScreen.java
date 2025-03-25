@@ -44,7 +44,6 @@ public class GridGameScreen extends GameScreen {
 
     private static String requestToast = ""; // this can be set from outside to set the text for a popup
 
-    private ISolver solver; // Original solver instance, keeping for compatibility
     private SolverManager solverManager; // New solver manager
 
     private ArrayList<GridElement> gridElements;
@@ -350,7 +349,7 @@ public class GridGameScreen extends GameScreen {
             buttonSize,
             R.drawable.bt_jeu_resolution_up,
             R.drawable.bt_jeu_resolution_down,
-            new ButtonSolution()
+            new ButtonSolve()
         );
         buttonSolve.setAccessibleContentDescription(gameManager.getActivity(), "Find solution");
         buttonSolve.setImageDisabled(R.drawable.bt_jeu_resolution_disabled);
@@ -377,7 +376,6 @@ public class GridGameScreen extends GameScreen {
         gameManager.getRenderManager().loadImage(R.drawable.transparent);
         gameManager.getRenderManager().loadImage(R.drawable.bt_jeu_resolution_disabled);
 
-        this.solver = new SolverDD();
     }
 
     @Override
@@ -670,17 +668,14 @@ public class GridGameScreen extends GameScreen {
         }
 
         // TODO:  isFinished() returns true also on missingData or noSolution (set by cancel())
-        if(!isSolved && solver.getSolverStatus().isFinished())
+        if(!isSolved && solverManager.checkSolverStatus())
         {
             isSolved = true;
             buttonSolve.setEnabled(true);
-            NumDifferentSolutionsFound=solver.getSolutionList().size();
-            solution = solver.getSolution(numDifferentSolutionClicks);
-            solutionMoves=0;
-            for(IGameMove m : solution.getMoves()){
-                solutionMoves++;
-            }
-            if(solver.isSolution01()){
+            NumDifferentSolutionsFound=solverManager.getNumDifferentSolutionsFound();
+            solutionMoves=solverManager.getSolutionMoves();
+            solution = solverManager.getSolution(numDifferentSolutionClicks);
+            if(solverManager.isSolution01()){
                 solutionMoves=1;
             }
             // DEBUG: save solutions directly as if played:
@@ -839,10 +834,6 @@ public class GridGameScreen extends GameScreen {
     /** Creates the grid and initializes variables */
     public void createGrid() {
         // Timber.d("[RESTART] Beginning of createGrid, isRandomGame=%b, mapPath=%s", isRandomGame, mapPath);
-        this.solver = new SolverDD(); // Keep for backward compatibility
-        // Initialize our SolverManager
-        // No need to re-initialize solverManager here
-        
         IAMovesNumber = 0;
         isSolved = false;
 
@@ -1012,10 +1003,9 @@ public class GridGameScreen extends GameScreen {
         // add robots
         createRobots();
         solverManager.initialize(gridElements);
-        this.solver.init(gridElements);
         
         buttonSolve.setEnabled(false);
-        t = new Thread(solver, "solver");
+        t = new Thread(solverManager, "solver");
         t.start();
     }
 
@@ -1363,41 +1353,56 @@ public class GridGameScreen extends GameScreen {
         }
     }
 
-    private class ButtonSolution implements IExecutor{
+    private class ButtonSolve implements IExecutor{
         public void execute(){
             // Prevent rapid clicking while toast is showing or solver is running
             if (!isSolved || t == null || t.isAlive()) {
+                gameManager.announce("Looking for solution...");
                 return;
             }
             
+            Timber.d("ButtonSolve.execute: NumDifferentSolutionsFound=%d, numDifferentSolutionClicks=%d", NumDifferentSolutionsFound, numDifferentSolutionClicks);
+            
             // Check if we have valid solutions
-            if (solver == null || solver.getSolutionList() == null || solver.getSolutionList().isEmpty()) {
+            if (solverManager == null || solverManager.getSolutionList() == null || solverManager.getSolutionList().isEmpty()) {
                 return;
             }
 
-            Boolean isLevelGame = false;
-            if (mapPath != null && mapPath.startsWith("Maps/")) {
-                isLevelGame = true;
-            }
+            boolean isLevelGameLocal = (mapPath != null && mapPath.startsWith("Maps/"));
+
             if (numSolutionClicks >= showSolutionAtHint) {
+                Timber.d("ButtonSolve.execute: Showing solution, numSolutionClicks=%d", numSolutionClicks);
+                
                 // if levelgame, don't show the solution
-                if (!isLevelGame) {
+                if (!isLevelGameLocal) {
                     try {
-                        GameSolution solution = solver.getSolution(numDifferentSolutionClicks);
+                        GameSolution solution = solverManager.getSolution(numDifferentSolutionClicks);
                         if (solution != null) {
                             showSolution(solution);
                             if (NumDifferentSolutionsFound > 1) {
-                                // if solution is shown and there are more than 1 solutions found:
-                                if (numDifferentSolutionClicks >= NumDifferentSolutionsFound - 1) {
-                                    numDifferentSolutionClicks = 0;
-                                } else {
-                                    numDifferentSolutionClicks++;
-                                }
-                                gameManager.announce("Press again to see solution " + (numDifferentSolutionClicks + 1));
+                                gameManager.announce("Solution " + (numDifferentSolutionClicks + 1) + " of " + NumDifferentSolutionsFound);
                             }
+                            numDifferentSolutionClicks = (numDifferentSolutionClicks + 1) % NumDifferentSolutionsFound;
                         }
                     } catch (Exception e) {
-                        // Reset state if something goes wrong
+                        Timber.e(e, "Error showing solution");
+                        numDifferentSolutionClicks = 0;
+                    }
+                } else {
+                    // Level game logic
+                    boolean unlocked = false;  
+                    try {
+                        GameSolution solution = solverManager.getSolution(numDifferentSolutionClicks);
+                        if (solution != null && unlocked) {
+                            showSolution(solution);
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "Error showing solution in level game");
+                        numDifferentSolutionClicks = 0;
+                        numSolutionClicks = 0;
+                    }
+                    
+                    if (!unlocked) {
                         numSolutionClicks = 0;
                         numDifferentSolutionClicks = 0;
                     }
@@ -1407,7 +1412,7 @@ public class GridGameScreen extends GameScreen {
                 if (numSolutionClicks < showSolutionAtHint) {
                     gameManager.announce("Press again to see the next hint.");
                 } else {
-                    if (!isLevelGame) {
+                    if (!isLevelGameLocal) {
                         gameManager.announce("Press again to see the solution.");
                     }else{
                         gameManager.announce("In Level games you have to find the solution.");
@@ -1434,6 +1439,7 @@ public class GridGameScreen extends GameScreen {
                     RRGameMove rrMove = (RRGameMove) move;
                     Timber.d("doMovesInMemory: Move details - Robot: " + rrMove.getColor() + ", Direction: " + rrMove.getDirection());
 
+                    boolean robotFound = false;
                     for (Object currentObject : this.instances)
                     {
                         if(currentObject.getClass() == GamePiece.class)
@@ -1441,10 +1447,16 @@ public class GridGameScreen extends GameScreen {
                             GamePiece robot = (GamePiece) currentObject;
                             if(robot.getColor() == rrMove.getColor())
                             {
-                                Timber.d("doMovesInMemory: Found matching robot, executing move");
+                                Timber.d("doMovesInMemory: Found matching robot at position (" + robot.getX() + "," + robot.getY() + "), executing move");
                                 editDestination(robot, translateIADirectionToGameDirection(rrMove.getDirection()), false);
+                                robotFound = true;
+                                break; // Found the right robot, no need to continue the loop
                             }
                         }
+                    }
+                    
+                    if (!robotFound) {
+                        Timber.w("doMovesInMemory: No matching robot found for color " + rrMove.getColor());
                     }
                 }
                 moves.remove(0);
@@ -1512,9 +1524,9 @@ public class GridGameScreen extends GameScreen {
             // Cancel the solver algorithm
             if (t != null && t.isAlive()) {
                 t.interrupt();
-                if (solver != null) {
+                if (solverManager != null) {
                     // note, cancel() sets the solver status to noSolution which is also isFinished()
-                    ((SolverDD)solver).cancel();
+                    solverManager.cancel();
                     solverIsCanceled = true;
                     solutionMoves = 999; // otherwise the game will go to mustStartNext, because the solutionMoves are still there from last map
                 }
@@ -1580,7 +1592,6 @@ public class GridGameScreen extends GameScreen {
         createRobots();
         
         // Initialize the solver with the grid elements
-        this.solver.init(gridElements);
         solverManager.initialize(gridElements);
         
         // Update the UI
