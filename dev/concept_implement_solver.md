@@ -5,7 +5,10 @@
 2. Create a new method in GameStateManager:
    - showNextHint() that handles the hint logic progression
    
-3. When the hint button is clicked:
+3. Calculate Solution right after Map generation
+   - when you start a new game, the map is generated and the first thing that happens should be, that the map data is sent to the solver, to find out how many moves are optinḿal for the map. this solution should be kept in ram for later and when you click on hint, just go throuht the solution steps already retreived. as long as the solver has not found any solution the hint button should change text to "cancel" until the solution is found or "no solution" if the solver stopped without solution 
+
+4. When the hint button is clicked:
   - in the preferences definable, how many hints, you want to see before showing the solution
    - First 2-4 clicks: Show individual random hints: e.g. if the solution is 5:
     - first hint: less than 7
@@ -19,10 +22,10 @@
     - Last click: Show the full solution path by moving the robots one by one move to the target
     - Subsequent clicks: Cycle through alternative solutions if available
    
-4. Visually display hints:
+5. Visually display hints:
    - Add a visual indicator on the GameGridView for highlighted hint cells by altering the saturation of the background graphic
    
-5. Update hint button text:
+6. Update hint button text:
    - Change from "Hint" to "Solution" after showing all hints
    - Change to "Next Solution" when cycling through solutions
 

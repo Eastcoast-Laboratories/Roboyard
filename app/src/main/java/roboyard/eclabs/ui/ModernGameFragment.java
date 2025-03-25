@@ -35,6 +35,7 @@ import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.pm.ia.ricochet.ERRGameMove;
 import roboyard.eclabs.util.SoundManager;
+import roboyard.pm.ia.GameSolution;
 
 import timber.log.Timber;
 
@@ -49,7 +50,7 @@ import android.graphics.Color;
  * all Android-native UI
  * the layout is defined in the xml file app/src/main/res/layout/fragment_modern_game.xml
  */
-public class ModernGameFragment extends BaseGameFragment {
+public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
     
     private GameGridView gameGridView;
     private TextView moveCountTextView;
@@ -329,7 +330,6 @@ public class ModernGameFragment extends BaseGameFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_modern_game, container, false);
-        
         return view;
     }
     
@@ -387,85 +387,55 @@ public class ModernGameFragment extends BaseGameFragment {
         int boardWidth = boardSizeManager.getBoardWidth();
         int boardHeight = boardSizeManager.getBoardHeight();
         
-        // Update board size text
+        // Update difficulty and board size text
+        updateDifficulty();
         updateBoardSizeText();
         
-        // Observe game state changes
-        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), this::updateGameState);
-        gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
-        gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
-        
-        // Observe selected robot changes for accessibility
-        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
-            if (state != null) {
-                GameElement selectedRobot = state.getSelectedRobot();
-                if (isTalkBackEnabled()) {
-                    updateRobotSelectionInfo(selectedRobot);
-                    updateDirectionalButtons(selectedRobot);
-                }
-            }
-        });
-        
-        // Observe game completion status
-        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
-            if (state != null) {
-                if (state.isComplete() || state.checkCompletion()) {
-                    Timber.d("Game completed detected from state check");
-                    if (timerRunning) {
-                        stopTimer();
-                        Toast.makeText(requireContext(), 
-                            "Target reached in " + state.getMoveCount() + " moves!", 
-                            Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        });
-        
-        gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
-            if (isComplete != null && isComplete) {
-                Timber.d("ModernGameFragment: Game completed from LiveData");
-                stopTimer();
-                
-                // Play win sound
-                playSound("win");
-                
-                Toast.makeText(requireContext(), 
-                    "Target reached in " + gameStateManager.getMoveCount().getValue() + " moves and " + 
-                    gameStateManager.getSquaresMoved().getValue() + " squares moved!", 
-                    Toast.LENGTH_LONG).show();
-            }
-        });
-        
-        // Update difficulty text
-        updateDifficulty();
-        
-        // Set up buttons
+        // Set up observers for game state
+        setupObservers();
+
+        // Set up button click listeners
         setupButtons(view);
         
-        // Initialize a new game
+        // Initialize the game
         initializeGame();
     }
     
     /**
-     * Initialize a new game
+     * Set up observers for game state
      */
-    private void initializeGame() {
-        // Check if we have a gameStateManager
-        if (gameStateManager == null) {
-            gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
-        }
+    private void setupObservers() {
+        // Observe current game state
+        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), this::updateGameState);
         
-        // Start the timer
-        if (gameStateManager.getMoveCount().getValue() != null && 
-            gameStateManager.getMoveCount().getValue() == 0) {
-            gameStateManager.startModernGame();
-            startTimer();
-        }
+        // Observe move count
+        gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
         
-        // Announce game start
-        announceGameStart();
+        // Observe squares moved
+        gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
+        
+        // Observe game completion
+        gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
+            if (isComplete) {
+                playSound("win");
+            }
+        });
+        
+        // Observe solver running state to update hint button text
+        gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
+            if (isRunning) {
+                // Change hint button text to "Cancel" while calculating
+                hintButton.setText("Cancel");
+                statusTextView.setText("Calculating solution...");
+                statusTextView.setVisibility(View.VISIBLE);
+            } else {
+                // Reset hint button text
+                hintButton.setText("Hint");
+                statusTextView.setVisibility(View.GONE);
+            }
+        });
     }
-    
+
     /**
      * Set up button click listeners
      */
@@ -495,12 +465,39 @@ public class ModernGameFragment extends BaseGameFragment {
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Hint button clicked");
+            
+            // Check if solver is currently running
+            if (Boolean.TRUE.equals(gameStateManager.isSolverRunning().getValue())) {
+                // If solver is running, pressing the button should cancel
+                Timber.d("ModernGameFragment: Cancelling solver");
+                gameStateManager.cancelSolver();
+                statusTextView.setText("Hint calculation cancelled");
+                statusTextView.setVisibility(View.VISIBLE);
+                return;
+            }
+            
+            // Check if we have a precomputed solution
+            if (!gameStateManager.hasSolution()) {
+                Timber.d("ModernGameFragment: No precomputed solution available");
+                statusTextView.setText("Calculating solution... Please wait a moment and try again.");
+                statusTextView.setVisibility(View.VISIBLE);
+                
+                // Start calculating a solution
+                gameStateManager.calculateSolutionAsync(this);
+                return;
+            }
+            
             // Get a hint from the game state manager
             IGameMove hintMove = gameStateManager.getHint();
+            Timber.d("ModernGameFragment: Received hint move: %s", hintMove);
             
             if (hintMove != null && hintMove instanceof RRGameMove) {
                 // Cast to RRGameMove to access the proper methods
                 RRGameMove rrMove = (RRGameMove) hintMove;
+                
+                // Log the details of the move
+                Timber.d("ModernGameFragment: Robot color: %d, Direction: %d", 
+                        rrMove.getColor(), rrMove.getDirection());
                 
                 // Convert the robotic move to human-readable text
                 String robotColor = getRobotColorName(rrMove.getColor());
@@ -511,10 +508,13 @@ public class ModernGameFragment extends BaseGameFragment {
                         robotColor, direction);
                 statusTextView.setText(hintText);
                 statusTextView.setVisibility(View.VISIBLE);
+                
+                Timber.d("ModernGameFragment: Displayed hint: %s", hintText);
             } else {
                 // No solution found
-                statusTextView.setText("No solution found for this puzzle.");
+                statusTextView.setText("No solution available");
                 statusTextView.setVisibility(View.VISIBLE);
+                Timber.d("ModernGameFragment: No valid hint move available");
             }
         });
         
@@ -1076,5 +1076,67 @@ public class ModernGameFragment extends BaseGameFragment {
             case 3: return "Yellow";
             default: return "Unknown";
         }
+    }
+    
+    /**
+     * Initialize a new game
+     */
+    private void initializeGame() {
+        // Check if we have a gameStateManager
+        if (gameStateManager == null) {
+            gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
+        }
+        
+        // Start the timer
+        if (gameStateManager.getMoveCount().getValue() != null && 
+            gameStateManager.getMoveCount().getValue() == 0) {
+            gameStateManager.startModernGame();
+            startTimer();
+        }
+        
+        // Announce game start
+        announceGameStart();
+    }
+
+    @Override
+    public void onSolutionCalculationStarted() {
+        Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationStarted");
+        requireActivity().runOnUiThread(() -> {
+            // Update hint button text to "Cancel"
+            hintButton.setText("Cancel");
+            statusTextView.setText("Calculating solution...");
+            statusTextView.setVisibility(View.VISIBLE);
+            Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show calculation in progress");
+        });
+    }
+
+    @Override
+    public void onSolutionCalculationCompleted(GameSolution solution) {
+        Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationCompleted - solution: %s", solution);
+        if (solution != null && solution.getMoves() != null) {
+            Timber.d("[SOLUTION SOLVER] ModernGameFragment: Solution has %d moves", solution.getMoves().size());
+        } else {
+            Timber.w("[SOLUTION SOLVER] ModernGameFragment: Solution or moves is null!");
+        }
+        
+        requireActivity().runOnUiThread(() -> {
+            // Reset hint button text back to "Hint"
+            hintButton.setText("Hint");
+            statusTextView.setText("Hint ready! Press hint button again.");
+            statusTextView.setVisibility(View.VISIBLE);
+            Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show hint is ready");
+        });
+    }
+
+    @Override
+    public void onSolutionCalculationFailed(String errorMessage) {
+        Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationFailed - %s", errorMessage);
+        requireActivity().runOnUiThread(() -> {
+            // Reset hint button text back to "Hint"
+            hintButton.setText("Hint");
+            statusTextView.setText("Could not find a solution: " + errorMessage);
+            statusTextView.setVisibility(View.VISIBLE);
+            Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show error");
+        });
     }
 }

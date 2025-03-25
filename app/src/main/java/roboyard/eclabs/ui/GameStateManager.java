@@ -77,6 +77,7 @@ public class GameStateManager extends AndroidViewModel {
     
     // Game settings
     private MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
+    private MutableLiveData<Boolean> isSolverRunning = new MutableLiveData<>(false);
     
     // Solver
     private SolverManager solver;
@@ -95,6 +96,10 @@ public class GameStateManager extends AndroidViewModel {
     
     // UI mode manager
     private UIModeManager uiModeManager;
+    
+    // Solution state
+    private GameSolution currentSolution = null;
+    private int currentSolutionStep = 0;
     
     public GameStateManager(Application application) {
         super(application);
@@ -160,9 +165,19 @@ public class GameStateManager extends AndroidViewModel {
         isGameComplete.setValue(false);
         Timber.d("GameStateManager: Reset isGameComplete to false");
         
-        // Initialize the solver with grid elements
-        ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.initialize(gridElements);
+        // Clear the state history
+        stateHistory.clear();
+        squaresMovedHistory.clear();
+        
+        // Reset solver status and solution
+        currentSolution = null;
+        currentSolutionStep = 0;
+        
+        // Start calculating the solution automatically
+        calculateSolutionAsync(null);
+        
+        startTime = System.currentTimeMillis();
+        Timber.d("GameStateManager: startNewGame() complete");
     }
     
     /**
@@ -219,8 +234,18 @@ public class GameStateManager extends AndroidViewModel {
         ArrayList<GridElement> gridElements = newState.getGridElements();
         solver.initialize(gridElements);
         
+        // Reset solution state
+        currentSolution = null;
+        currentSolutionStep = 0;
+        
+        // Start calculating the solution automatically
+        calculateSolutionAsync(null);
+        
         // Set UI mode to modern
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
+        
+        // Record start time
+        startTime = System.currentTimeMillis();
     }
     
     /**
@@ -514,29 +539,26 @@ public class GameStateManager extends AndroidViewModel {
      * @return The next move according to the solver, or null if no solution exists
      */
     public IGameMove getHint() {
-        GameState state = currentState.getValue();
-        if (state == null) return null;
-        
-        try {
-            // Initialize the solver with the current game state
-            solver.initialize(state.getGridElements());
-            
-            // Run the solver synchronously for hints
-            solver.run();
-            
-            // Check if a solution was found
-            if (solver.getNumDifferentSolutionsFound() > 0) {
-                // Get the solution
-                GameSolution solution = solver.getCurrentSolution();
-                if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
-                    return solution.getMoves().get(0);
-                }
-            }
-        } catch (Exception e) {
-            Timber.e(e, "Error getting hint");
+        if (currentSolution == null || currentSolution.getMoves() == null || 
+            currentSolutionStep >= currentSolution.getMoves().size()) {
+            Timber.d("getHint: No precomputed solution available");
+            return null;
         }
         
-        return null;
+        // Get the next move from the solution
+        IGameMove nextMove = currentSolution.getMoves().get(currentSolutionStep);
+        currentSolutionStep++;
+        
+        return nextMove;
+    }
+    
+    /**
+     * Check if a valid solution is available
+     * @return true if a solution is available, false otherwise
+     */
+    public boolean hasSolution() {
+        return currentSolution != null && currentSolution.getMoves() != null && 
+               currentSolutionStep < currentSolution.getMoves().size();
     }
     
     /**
@@ -703,6 +725,7 @@ public class GameStateManager extends AndroidViewModel {
     public LiveData<Integer> getSquaresMoved() { return squaresMoved; }
     public LiveData<Boolean> isGameComplete() { return isGameComplete; }
     public LiveData<Boolean> getSoundEnabled() { return soundEnabled; }
+    public LiveData<Boolean> isSolverRunning() { return isSolverRunning; }
     
     /**
      * Get the board width from BoardSizeManager
@@ -1177,86 +1200,141 @@ public class GameStateManager extends AndroidViewModel {
      * @param callback The callback to receive the solution when it's ready
      */
     public void calculateSolutionAsync(final SolutionCallback callback) {
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
-        
-        // Show progress indicator
-        if (callback != null) {
-            callback.onSolutionCalculationStarted();
+        // Don't start a new calculation if one is already running
+        if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
+            Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Solver already running, ignoring duplicate request");
+            return;
         }
         
-        executor.execute(() -> {
-            // Initialize the solver with the current game state
-            GameState state = currentState.getValue();
-            if (state == null) {
-                if (callback != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> 
-                        callback.onSolutionCalculationFailed("No active game state"));
-                }
-                return;
-            }
+        // Store the callback
+        this.solutionCallback = callback;
+        Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Stored callback: %s", callback);
+        
+        GameState state = currentState.getValue();
+        if (state == null) {
+            Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Current state is null");
+            onSolutionCalculationFailed("No game state available");
+            return;
+        }
+        
+        // Set solver running state
+        isSolverRunning.setValue(true);
+        
+        // Signal that calculation has started
+        onSolutionCalculationStarted();
+        
+        try {
+            Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Initializing solver with current game state");
+            solver.initialize(state.getGridElements());
             
-            try {
-                // Store the callback for later use
-                this.solutionCallback = callback;
-                
-                // Initialize solver with current state
-                solver.initialize(state.getGridElements());
-                
-                // Run solver in a background thread
-                Thread solverThread = new Thread(solver, "solver-thread");
-                solverThread.start();
-                
-                // The listener will handle completion
-            } catch (Exception e) {
-                Timber.e(e, "Error calculating solution");
-                if (callback != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> 
-                        callback.onSolutionCalculationFailed("Error: " + e.getMessage()));
+            // Run the solver on a background thread
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute(() -> {
+                try {
+                    Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Running solver on background thread");
+                    solver.run();
+                    // Note: The solver will call the listener methods (onSolverFinished)
+                    // when it completes, so we don't need to do anything more here
+                } catch (Exception e) {
+                    Timber.e(e, "[SOLUTION SOLVER] Error running solver");
+                    // Handle on main thread
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        onSolutionCalculationFailed("Error: " + e.getMessage());
+                    });
                 }
-            }
-        });
+            });
+            executor.shutdown();
+        } catch (Exception e) {
+            Timber.e(e, "[SOLUTION SOLVER] Error initializing solver");
+            onSolutionCalculationFailed("Error: " + e.getMessage());
+        }
     }
-    
-    // Field to store the current solution callback
-    private SolutionCallback solutionCallback;
-    
+
     /**
      * Called when the solution calculation starts
      */
     private void onSolutionCalculationStarted() {
+        Timber.d("[SOLUTION SOLVER] onSolutionCalculationStarted");
+        currentSolution = null;
+        currentSolutionStep = 0;
+        
+        // Notify callback if provided
         if (solutionCallback != null) {
+            Timber.d("[SOLUTION SOLVER] onSolutionCalculationStarted: Notifying callback: %s", solutionCallback);
             solutionCallback.onSolutionCalculationStarted();
+        } else {
+            Timber.w("[SOLUTION SOLVER] onSolutionCalculationStarted: No callback to notify");
         }
     }
-    
+
     /**
      * Called when the solution calculation completes successfully
      * @param solution The calculated solution
      */
     private void onSolutionCalculationCompleted(GameSolution solution) {
+        Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: solution=%s", solution);
+        
+        // Add more detailed logging about the solution
+        if (solution != null && solution.getMoves() != null) {
+            Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
+        } else {
+            Timber.w("[SOLUTION SOLVER] onSolutionCalculationCompleted: Solution or moves is null!");
+        }
+        
+        // Store the solution for later use with getHint()
+        currentSolution = solution;
+        currentSolutionStep = 0;
+        
+        // Update solver status
+        isSolverRunning.setValue(false);
+        
+        // Notify the callback if provided
         if (solutionCallback != null) {
+            Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: Notifying callback: %s", solutionCallback);
             solutionCallback.onSolutionCalculationCompleted(solution);
-            solutionCallback = null; // Clear the reference
+            solutionCallback = null; // Clear callback after use
+        } else {
+            Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: No callback provided");
         }
     }
-    
+
     /**
      * Called when the solution calculation fails
      * @param errorMessage The error message
      */
     private void onSolutionCalculationFailed(String errorMessage) {
+        Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed: %s", errorMessage);
+        
+        // Clear any partial solution
+        currentSolution = null;
+        currentSolutionStep = 0;
+        
+        // Update solver status
+        isSolverRunning.setValue(false);
+        
+        // Notify the callback if provided
         if (solutionCallback != null) {
+            Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed: Notifying callback: %s", solutionCallback);
             solutionCallback.onSolutionCalculationFailed(errorMessage);
-            solutionCallback = null; // Clear the reference
+            solutionCallback = null; // Clear callback after use
+        } else {
+            Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed: No callback provided");
         }
     }
-    
+
     /**
      * Cancel any running solver operation
      */
     public void cancelSolver() {
-        solver.cancel();
+        Timber.d("[SOLUTION SOLVER] cancelSolver called");
+        if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
+            solver.cancel();
+            // The solver will call onSolverCancelled() via the listener
+        }
     }
+    
+    // Field to store the current solution callback
+    private SolutionCallback solutionCallback;
     
     /**
      * Callback interface for solution calculation

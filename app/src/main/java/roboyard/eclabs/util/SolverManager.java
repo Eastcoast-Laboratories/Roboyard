@@ -194,7 +194,69 @@ public class SolverManager implements Runnable {
      */
     @Override
     public void run() {
-        solver.run();
+        Timber.d("[SOLUTION SOLVER] SolverManager.run() - Starting solver");
+        try {
+            startSolverInternal();
+        } catch (Exception e) {
+            Timber.e(e, "[SOLUTION SOLVER] Error running solver");
+        }
+    }
+    
+    /**
+     * Internal implementation of the solver start logic
+     */
+    private void startSolverInternal() {
+        try {
+            Timber.d("[SOLUTION SOLVER] Starting solver with status: %s", solver.getSolverStatus());
+            solver.run();
+            // Check if the solver found a solution
+            if (solver.getSolverStatus().isFinished()) {
+                // Process solver results
+                int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
+                Timber.d("[SOLUTION SOLVER] Solver finished, found %d solutions", numSolutions);
+                
+                boolean success = numSolutions > 0;
+                if (success) {
+                    // Get the first solution and process it
+                    currentSolution = solver.getSolution(0);
+                    int moveCount = 0;
+                    if (currentSolution != null && currentSolution.getMoves() != null) {
+                        moveCount = currentSolution.getMoves().size();
+                        Timber.d("[SOLUTION SOLVER] First solution has %d moves: %s", 
+                            moveCount, currentSolution.getMoves());
+                    } else {
+                        Timber.w("[SOLUTION SOLVER] Solution or moves is null!");
+                    }
+                    
+                    // Call the listener with the results
+                    if (listener != null) {
+                        Timber.d("[SOLUTION SOLVER] Notifying listener of successful solution");
+                        listener.onSolverFinished(true, moveCount, numSolutions);
+                    } else {
+                        Timber.w("[SOLUTION SOLVER] Listener is null, cannot notify of solution");
+                    }
+                } else {
+                    // No solution found
+                    Timber.d("[SOLUTION SOLVER] No solution found");
+                    if (listener != null) {
+                        listener.onSolverFinished(false, 0, 0);
+                    } else {
+                        Timber.w("[SOLUTION SOLVER] Listener is null, cannot notify of failure");
+                    }
+                }
+            } else {
+                Timber.d("[SOLUTION SOLVER] Solver did not finish properly, status: %s", 
+                    solver.getSolverStatus());
+                if (listener != null) {
+                    listener.onSolverCancelled();
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[SOLUTION SOLVER] Exception in solver processing");
+            if (listener != null) {
+                listener.onSolverCancelled();
+            }
+        }
     }
     
     /**
