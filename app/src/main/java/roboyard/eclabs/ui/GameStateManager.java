@@ -47,9 +47,7 @@ import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.MapGenerator;
 import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
-import roboyard.eclabs.solver.ISolver;
-import roboyard.eclabs.solver.SolverDD;
-import roboyard.eclabs.solver.SolverStatus;
+import roboyard.eclabs.util.SolverManager;
 import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.DifficultyManager;
@@ -81,7 +79,7 @@ public class GameStateManager extends AndroidViewModel {
     private MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
     
     // Solver
-    private ISolver solver;
+    private SolverManager solver;
     private Context context;
     
     // Minimap
@@ -101,7 +99,32 @@ public class GameStateManager extends AndroidViewModel {
     public GameStateManager(Application application) {
         super(application);
         // Initialize solver
-        solver = new SolverDD();
+        solver = new SolverManager();
+        
+        // Set solver listener to handle results
+        solver.setListener(new SolverManager.SolverListener() {
+            @Override
+            public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
+                // Process on main thread
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (success) {
+                        GameSolution solution = solver.getCurrentSolution();
+                        onSolutionCalculationCompleted(solution);
+                    } else {
+                        onSolutionCalculationFailed("No solution found");
+                    }
+                });
+            }
+            
+            @Override
+            public void onSolverCancelled() {
+                // Process on main thread
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    onSolutionCalculationFailed("Solver was cancelled");
+                });
+            }
+        });
+        
         context = application.getApplicationContext();
         
         // Initialize board size manager
@@ -139,7 +162,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.init(gridElements);
+        solver.initialize(gridElements);
     }
     
     /**
@@ -194,7 +217,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.init(gridElements);
+        solver.initialize(gridElements);
         
         // Set UI mode to modern
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
@@ -218,7 +241,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.init(gridElements);
+        solver.initialize(gridElements);
     }
     
     /**
@@ -239,7 +262,7 @@ public class GameStateManager extends AndroidViewModel {
                 
                 // Initialize solver with grid elements
                 ArrayList<GridElement> gridElements = newState.getGridElements();
-                solver.init(gridElements);
+                solver.initialize(gridElements);
             }
         }
     }
@@ -262,7 +285,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.init(gridElements);
+        solver.initialize(gridElements);
     }
     
     /**
@@ -494,17 +517,26 @@ public class GameStateManager extends AndroidViewModel {
         GameState state = currentState.getValue();
         if (state == null) return null;
         
-        // Run the solver if it hasn't already run
-        solver.run();
-        
-        // Get the first solution
-        GameSolution solution = solver.getSolution(0);
-        if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
-            return null;
+        try {
+            // Initialize the solver with the current game state
+            solver.initialize(state.getGridElements());
+            
+            // Run the solver synchronously for hints
+            solver.run();
+            
+            // Check if a solution was found
+            if (solver.getNumDifferentSolutionsFound() > 0) {
+                // Get the solution
+                GameSolution solution = solver.getCurrentSolution();
+                if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
+                    return solution.getMoves().get(0);
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error getting hint");
         }
         
-        // Get the first move
-        return solution.getMoves().get(0);
+        return null;
     }
     
     /**
@@ -1163,41 +1195,67 @@ public class GameStateManager extends AndroidViewModel {
                 return;
             }
             
-            solver.init(state.getGridElements());
-            
             try {
-                // Run the solver
-                solver.run();
+                // Store the callback for later use
+                this.solutionCallback = callback;
                 
-                // Check if a solution was found
-                if (solver.getSolverStatus() == SolverStatus.solved) {
-                    // Get the solution
-                    GameSolution solution = solver.getSolution(0);
-                    Timber.d("Solution found with %d moves", solution.getMoves().size());
-                    
-                    // Notify on the main thread
-                    if (callback != null) {
-                        new Handler(Looper.getMainLooper()).post(() -> 
-                            callback.onSolutionCalculationCompleted(solution));
-                    }
-                } else {
-                    // No solution found
-                    Timber.d("No solution found, status: %s", solver.getSolverStatus());
-                    if (callback != null) {
-                        new Handler(Looper.getMainLooper()).post(() -> 
-                            callback.onSolutionCalculationFailed("No solution found"));
-                    }
-                }
+                // Initialize solver with current state
+                solver.initialize(state.getGridElements());
+                
+                // Run solver in a background thread
+                Thread solverThread = new Thread(solver, "solver-thread");
+                solverThread.start();
+                
+                // The listener will handle completion
             } catch (Exception e) {
                 Timber.e(e, "Error calculating solution");
                 if (callback != null) {
                     new Handler(Looper.getMainLooper()).post(() -> 
-                        callback.onSolutionCalculationFailed(e.getMessage()));
+                        callback.onSolutionCalculationFailed("Error: " + e.getMessage()));
                 }
             }
         });
-        
-        executor.shutdown();
+    }
+    
+    // Field to store the current solution callback
+    private SolutionCallback solutionCallback;
+    
+    /**
+     * Called when the solution calculation starts
+     */
+    private void onSolutionCalculationStarted() {
+        if (solutionCallback != null) {
+            solutionCallback.onSolutionCalculationStarted();
+        }
+    }
+    
+    /**
+     * Called when the solution calculation completes successfully
+     * @param solution The calculated solution
+     */
+    private void onSolutionCalculationCompleted(GameSolution solution) {
+        if (solutionCallback != null) {
+            solutionCallback.onSolutionCalculationCompleted(solution);
+            solutionCallback = null; // Clear the reference
+        }
+    }
+    
+    /**
+     * Called when the solution calculation fails
+     * @param errorMessage The error message
+     */
+    private void onSolutionCalculationFailed(String errorMessage) {
+        if (solutionCallback != null) {
+            solutionCallback.onSolutionCalculationFailed(errorMessage);
+            solutionCallback = null; // Clear the reference
+        }
+    }
+    
+    /**
+     * Cancel any running solver operation
+     */
+    public void cancelSolver() {
+        solver.cancel();
     }
     
     /**
