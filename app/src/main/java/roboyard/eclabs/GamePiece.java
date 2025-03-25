@@ -196,8 +196,9 @@ public class GamePiece implements IGameObject {
 
         //if the piece is not in motion, ...
         if((this.x == this.xObjective) && (this.y == this.yObjective) && (deltaX == 0) && (deltaY == 0)){
-//            Timber.d(" GamePiece "+color + " x = "+ x + " y = " + y + " xObj = "+xObjective+ " yObj = "+yObjective + " deltaX = "+deltaX + " deltaY = "+deltaY);
+            // Timber.d("GamePiece.update: Robot " + color + " is not moving, inMovement=" + inMovement);
             if(inMovement) {
+                Timber.d("GamePiece.update: Robot " + color + " finished move, calling doMovesInMemory");
                 ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
                 Boolean justWon = false;
                 if(testIfWon) {
@@ -220,6 +221,7 @@ public class GamePiece implements IGameObject {
                 }
             }
             inMovement = false;
+            // Timber.d("GamePiece.update: Robot " + color + " setting inMovement=false");
 
             //if there is user input, ...
             InputManager inputManager = gameManager.getInputManager();
@@ -249,9 +251,7 @@ public class GamePiece implements IGameObject {
                     inputManager.resetEvents();
                 }
             }
-
-
-        } else if((this.x == this.xObjective) && (this.y == this.yObjective) && isOvershooting) {
+        }else if((this.x == this.xObjective) && (this.y == this.yObjective) && isOvershooting) {
             // We're in the overshoot phase, now spring back
             isOvershooting = false;
             deltaX = 0;

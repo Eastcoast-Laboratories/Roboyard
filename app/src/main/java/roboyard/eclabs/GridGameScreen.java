@@ -1088,6 +1088,8 @@ public class GridGameScreen extends GameScreen {
 
     public void editDestination(GamePiece p, int direction, Boolean moved)
     {
+        Timber.d("editDestination: Robot color=" + p.getColor() + ", direction=" + direction + ", moved=" + moved);
+        
         int xDestination = p.getxObjective();
         int yDestination = p.getyObjective();
 
@@ -1433,36 +1435,47 @@ public class GridGameScreen extends GameScreen {
 
     public void doMovesInMemory()
     {
+        Timber.d("doMovesInMemory: Called, moves size: " + (moves != null ? moves.size() : "null"));
 
         if(moves != null)
         {
 
             if(moves.size() > 0)
             {
-
                 IGameMove move = moves.get(0);
+                Timber.d("doMovesInMemory: Executing move: " + move);
 
                 if(move.getClass() == RRGameMove.class)
                 {
+                    RRGameMove rrMove = (RRGameMove) move;
+                    Timber.d("doMovesInMemory: Move details - Robot: " + rrMove.getColor() + ", Direction: " + rrMove.getDirection());
 
                     for (Object currentObject : this.instances)
                     {
                         if(currentObject.getClass() == GamePiece.class)
                         {
-                            if(((GamePiece)currentObject).getColor() == ((RRGameMove) move).getColor())
+                            GamePiece robot = (GamePiece) currentObject;
+                            if(robot.getColor() == rrMove.getColor())
                             {
-                                editDestination(((GamePiece) currentObject), translateIADirectionToGameDirection(((RRGameMove) move).getDirection()), false);
+                                Timber.d("doMovesInMemory: Found matching robot, executing move");
+                                editDestination(robot, translateIADirectionToGameDirection(rrMove.getDirection()), false);
                             }
                         }
                     }
                 }
                 moves.remove(0);
+                Timber.d("doMovesInMemory: Move removed, remaining moves: " + moves.size());
+            } else {
+                Timber.d("doMovesInMemory: No moves to execute");
             }
+        } else {
+            Timber.d("doMovesInMemory: Moves list is null");
         }
     }
 
     private void showSolution(GameSolution solution)
     {
+        Timber.d("showSolution: Starting to show solution");
         ButtonResetRobots br = new ButtonResetRobots();
         br.execute();
 
@@ -1472,7 +1485,9 @@ public class GridGameScreen extends GameScreen {
 
         moves = solution.getMoves();
         IAMovesNumber = moves.size();
-
+        Timber.d("showSolution: Solution loaded with " + IAMovesNumber + " moves");
+        
+        Timber.d("showSolution: Calling doMovesInMemory to start the movement chain");
         doMovesInMemory();
     }
 
@@ -1975,11 +1990,14 @@ public class GridGameScreen extends GameScreen {
      * @param direction The direction to move the robot
      */
     private void executeRobotMove(int robotId, int direction) {
+        Timber.d("executeRobotMove: Trying to move robot with ID " + robotId + " in direction " + direction);
+        
         // Find the robot with the matching ID/color
         for (Object currentObject : this.instances) {
             if (currentObject instanceof GamePiece) {
                 GamePiece piece = (GamePiece) currentObject;
                 if (piece.getColor() == robotId) {
+                    Timber.d("executeRobotMove: Found matching robot at position (" + piece.getX() + "," + piece.getY() + "), executing move");
                     // Execute the move using the existing editDestination method
                     editDestination(piece, direction, false);
                     break;
