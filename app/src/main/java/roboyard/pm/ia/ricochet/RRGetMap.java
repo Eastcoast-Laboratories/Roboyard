@@ -44,20 +44,21 @@ public class RRGetMap {
             if (element.getY() > maxY) maxY = element.getY();
             asciiMap[element.getX()][element.getY()] = element.toChar();
         }
-        for (int i = 0; i < 22; i++) {
-            for (int j = 0; j < 22; j++) {
-                if (asciiMap[i][j] == null) {
-                    asciiMap[i][j] = " ";
-                }
-            }
-        }
-        for (int i = 0; i < 22; i++) {
+
+        for (int y = 0; y < 22; y++) {
             // glue all elements in asciiMap[i] into a string
             StringBuilder sb = new StringBuilder();
-            for (int j = 0; j < 22; j++) {
-                sb.append(asciiMap[i][j]);
+            for (int x = 0; x < 22; x++) {
+                if (asciiMap[x][y] == null) {
+                    asciiMap[x][y] = " ";
+                }
+                sb.append(asciiMap[x][y]);
             }
-            Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (i<10?"0"+i:i) + ": " + sb.toString());
+            // stop, if sb is a string with just spaces
+            if (sb.toString().trim().isEmpty()) {
+                break;
+            }
+            Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (y<10?"0"+y:y) + ": " + sb);
         }
         // Add 1 to get width/height from max coordinates
         int boardWidth = maxX + 1;

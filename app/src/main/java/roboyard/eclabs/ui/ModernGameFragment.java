@@ -496,7 +496,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 RRGameMove rrMove = (RRGameMove) hintMove;
                 
                 // Log the details of the move
-                Timber.d("ModernGameFragment: Robot color: %d, Direction: %d", 
+                Timber.d("[HINT] ModernGameFragment: Robot color: %d, Direction: %d", 
                         rrMove.getColor(), rrMove.getDirection());
                 
                 // Convert the robotic move to human-readable text
