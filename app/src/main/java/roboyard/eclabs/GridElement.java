@@ -99,9 +99,9 @@ public class GridElement {
     public String toChar() {
         switch (this.type) {
             case "mh":
-                return "|";
+                return "-";  // Horizontal wall
             case "mv":
-                return "-";
+                return "|";  // Vertical wall
             case "robot_red":
                 return "r";
             case "robot_green":

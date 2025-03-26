@@ -52,7 +52,12 @@ public class RRGetMap {
             }
         }
         for (int i = 0; i < 22; i++) {
-            Timber.d("[SOLUTION_SOLVER] createDDWorld: Ascii map " + (i<10?"0"+i:i) + ": " + Arrays.toString(asciiMap[i]));
+            // glue all elements in asciiMap[i] into a string
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < 22; j++) {
+                sb.append(asciiMap[i][j]);
+            }
+            Timber.d("[Ascii map] " + (i<10?"0"+i:i) + ": " + sb.toString());
         }
         // Add 1 to get width/height from max coordinates
         int boardWidth = maxX + 1;
