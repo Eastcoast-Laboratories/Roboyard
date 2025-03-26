@@ -425,6 +425,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Set up button click listeners
      */
     private void setupButtons(View view) {
+        // (Button text: "Back")
         // Back button - undo the last robot movement
         backButton = view.findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
@@ -437,6 +438,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
+        // Button text: "Reset"
         // Reset robots button - reset robots to starting positions without changing the map
         resetRobotsButton = view.findViewById(R.id.reset_robots_button);
         resetRobotsButton.setOnClickListener(v -> {
@@ -446,6 +448,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Toast.makeText(requireContext(), "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
         });
         
+        // (Button text: "Hint")
         // Hint button - get hint from the solver
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
@@ -461,14 +464,44 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 return;
             }
             
-            // Check if we have a precomputed solution
-            if (!gameStateManager.hasSolution()) {
-                Timber.d("ModernGameFragment: No precomputed solution available");
+            // Check if we have a solution object at all
+            GameSolution solution = gameStateManager.getCurrentSolution();
+            if (solution == null || solution.getMoves() == null) {
+                Timber.d("ModernGameFragment: No solution available, calculating...");
                 statusTextView.setText("Calculating solution... Please wait a moment and try again.");
                 statusTextView.setVisibility(View.VISIBLE);
                 
                 // Start calculating a solution
                 gameStateManager.calculateSolutionAsync(this);
+                return;
+            }
+            
+            // Check if we've already shown all available hints
+            int currentStep = gameStateManager.getCurrentSolutionStep();
+            int totalMoves = solution.getMoves().size();
+            
+            if (currentStep >= totalMoves) {
+                Timber.d("ModernGameFragment: All hints have been shown (%d/%d), resetting to first hint", currentStep, totalMoves);
+                // Reset the solution step counter to show the first hint again
+                gameStateManager.resetSolutionStep();
+                
+                // Now get the first hint
+                IGameMove hintMove = gameStateManager.getHint();
+                
+                if (hintMove != null && hintMove instanceof RRGameMove) {
+                    // Cast to RRGameMove to access the proper methods
+                    RRGameMove rrMove = (RRGameMove) hintMove;
+                    
+                    // Convert the robotic move to human-readable text
+                    String robotColor = getRobotColorName(rrMove.getColor());
+                    String direction = getDirectionName(rrMove.getDirection());
+                    
+                    // Update the status text with the hint (now showing hint 1 again)
+                    String hintText = String.format("Hint 1/%d: Move the %s robot %s", 
+                            totalMoves, robotColor, direction);
+                    statusTextView.setText(hintText);
+                    statusTextView.setVisibility(View.VISIBLE);
+                }
                 return;
             }
             
@@ -492,9 +525,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.d("[HINT] Robot color ID: %d, mapped to color name: %s", 
                         rrMove.getColor(), robotColor);
                 
-                // Update the status text with the hint
-                String hintText = String.format("Move the %s robot %s", 
-                        robotColor, direction);
+                // Update the status text with the hint number and the hint itself
+                String hintText = String.format("Hint %d/%d: Move the %s robot %s", 
+                        currentStep, totalMoves, robotColor, direction);
                 statusTextView.setText(hintText);
                 statusTextView.setVisibility(View.VISIBLE);
                 
@@ -507,6 +540,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
+        // (Button text: "Save Map")
         // Save map button - navigate to save screen
         saveMapButton = view.findViewById(R.id.save_map_button);
         saveMapButton.setOnClickListener(v -> {
@@ -534,6 +568,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
+        // (Button text: "New Game")
         // Restart button - restart the current game
         restartButton = view.findViewById(R.id.restart_button);
         restartButton.setOnClickListener(v -> {
@@ -543,10 +578,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Reset timer
             stopTimer();
             startTimer();
+            // Clear any hint text from the status display
+            statusTextView.setText("");
+            statusTextView.setVisibility(View.GONE);
             // Announce the robots and their positions
             announceGameStart();
         });
         
+        // (Button text: "Menu")
         // Menu button - go back to main menu
         menuButton = view.findViewById(R.id.menu_button);
         menuButton.setOnClickListener(v -> {
@@ -1079,10 +1118,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Standard index-based mapping
         switch (robotId) {
-            case 0: return "Red";
-            case 1: return "Green";
-            case 2: return "Blue";
-            case 3: return "Yellow";
+            case Constants.COLOR_RED: return "Red";
+            case Constants.COLOR_GREEN: return "Green";
+            case Constants.COLOR_BLUE: return "Blue";
+            case Constants.COLOR_YELLOW: return "Yellow";
             default: return "Unknown: " + robotId;
         }
     }
@@ -1124,6 +1163,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: Using existing game state with %d robots",
                       currentState.getRobots().size());
         }
+        
+        // Clear any previous hint or status text
+        statusTextView.setText("");
+        statusTextView.setVisibility(View.GONE);
         
         // Start the timer
         startTimer();

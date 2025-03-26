@@ -68,15 +68,16 @@ public class RRGetMap {
         colors2.put("robot_yellow", Color.YELLOW);
 
         // Robot and target indices for game logic
-        colors.put("robot_red", 0);
-        colors.put("robot_blue", 1);
-        colors.put("robot_green", 2);
-        colors.put("robot_yellow", 3);
+        // Using Constants class values
+        colors.put("robot_red", Constants.COLOR_RED);        // Constants.COLOR_RED
+        colors.put("robot_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
+        colors.put("robot_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
+        colors.put("robot_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW
 
-        colors.put("target_red", 0);
-        colors.put("target_blue", 1);
-        colors.put("target_green", 2);
-        colors.put("target_yellow", 3);
+        colors.put("target_red", Constants.COLOR_RED);        // Constants.COLOR_RED
+        colors.put("target_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
+        colors.put("target_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
+        colors.put("target_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW
         colors.put("target_multi", -1);
 
         int robotCounter = 0;

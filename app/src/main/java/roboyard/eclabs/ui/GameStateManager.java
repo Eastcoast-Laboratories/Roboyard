@@ -183,6 +183,12 @@ public class GameStateManager extends AndroidViewModel {
         currentSolution = null;
         currentSolutionStep = 0;
         
+        // Initialize the solver with grid elements from the new state
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        // Force solver reinitialization for the new game
+        getSolverManager().resetInitialization();
+        getSolverManager().initialize(gridElements);
+        
         // Start calculating the solution automatically
         calculateSolutionAsync(null);
         
@@ -234,6 +240,8 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = state.getGridElements();
+        // Force solver reinitialization for the new game
+        getSolverManager().resetInitialization();
         getSolverManager().initialize(gridElements);
         
         // Reset solution state
@@ -1352,6 +1360,30 @@ public class GameStateManager extends AndroidViewModel {
             getSolverManager().cancel();
             // The solver will call onSolverCancelled() via the listener
         }
+    }
+    
+    /**
+     * Get the current solution
+     * @return The current solution or null if none is available
+     */
+    public GameSolution getCurrentSolution() {
+        return currentSolution;
+    }
+    
+    /**
+     * Get the current solution step (hint number)
+     * @return The current solution step (0-indexed)
+     */
+    public int getCurrentSolutionStep() {
+        return currentSolutionStep;
+    }
+    
+    /**
+     * Reset the solution step counter to show hints from the beginning
+     */
+    public void resetSolutionStep() {
+        Timber.d("GameStateManager: Resetting solution step counter");
+        currentSolutionStep = 0;
     }
     
     // Field to store the current solution callback
