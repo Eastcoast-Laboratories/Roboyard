@@ -135,7 +135,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         int backgroundColor = getColorForRobot(selectedRobot);
         ColorStateList colorStateList = ColorStateList.valueOf(backgroundColor);
         
-        String robotColorName = getRobotColorName(selectedRobot);
+        String robotColorName = getRobotColorNameByGridElement(selectedRobot);
         
         btnMoveNorth.setText(robotColorName + " North");
         btnMoveSouth.setText(robotColorName + " South");
@@ -164,21 +164,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             case 2: return Color.BLUE;
             case 3: return Color.YELLOW;
             default: return Color.DKGRAY;
-        }
-    }
-    
-    /**
-     * Get color name for a robot
-     */
-    private String getRobotColorName(GameElement robot) {
-        if (robot == null) return "";
-        
-        switch (robot.getColor()) {
-            case 0: return "Red";
-            case 1: return "Green";
-            case 2: return "Blue";
-            case 3: return "Yellow";
-            default: return "";
         }
     }
     
@@ -215,7 +200,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
         
         // Get robot color and position
-        String colorName = getRobotColorName(robot);
+        String colorName = getRobotColorNameByGridElement(robot);
         int x = robot.getX();
         int y = robot.getY();
         
@@ -503,6 +488,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 String robotColor = getRobotColorName(rrMove.getColor());
                 String direction = getDirectionName(rrMove.getDirection());
                 
+                // Log details for debugging
+                Timber.d("[HINT] Robot color ID: %d, mapped to color name: %s", 
+                        rrMove.getColor(), robotColor);
+                
                 // Update the status text with the hint
                 String hintText = String.format("Move the %s robot %s", 
                         robotColor, direction);
@@ -696,7 +685,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             
             // Announce the move
-            announceAccessibility(getRobotColorName(robot) + 
+            announceAccessibility(getRobotColorNameByGridElement(robot) + 
                     " robot moved to " + endX + ", " + endY);
             
             // Check for goal completion
@@ -743,7 +732,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             return;
         }
         
-        Timber.d("Announcing possible moves for %s robot", getRobotColorName(robot));
+        Timber.d("Announcing possible moves for %s robot", getRobotColorNameByGridElement(robot));
         
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null) {
@@ -769,7 +758,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Found an obstacle
                 GameElement robotAtPosition = state.getRobotAt(i, y);
                 if (robotAtPosition != null) {
-                    eastObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    eastObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -797,7 +786,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Found an obstacle
                 GameElement robotAtPosition = state.getRobotAt(i, y);
                 if (robotAtPosition != null) {
-                    westObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    westObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -825,7 +814,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
-                    northObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    northObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -853,7 +842,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
-                    southObstacle = getRobotColorName(robotAtPosition) + " robot";
+                    southObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -902,7 +891,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStartMessage.append(robots.size()).append(" robots. ");
         
         for (GameElement robot : robots) {
-            String colorName = getRobotColorName(robot);
+            String colorName = getRobotColorNameByGridElement(robot);
             int x = robot.getX();
             int y = robot.getY();
             
@@ -1069,12 +1058,48 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Get color name for a robot ID
      */
     private String getRobotColorName(int robotId) {
+        // Log the color ID for debugging purposes
+        Timber.d("[HINT_DEBUG] getRobotColorName called with ID: %d", robotId);
+        
+        // Check if the robotId is an Android RGB color value rather than an index
+        if (robotId < 0) { // RGB colors as integers are usually negative in Android
+            Timber.d("[HINT] Detected RGB color value instead of index: %d", robotId);
+            // Map common Android color constants to their names
+            if (robotId == Color.RED) return "Red";
+            if (robotId == Color.GREEN) return "Green";
+            if (robotId == Color.BLUE) return "Blue";
+            if (robotId == Color.YELLOW) return "Yellow";
+            
+            // Convert to standard 0-3 index based on RGB value
+            if ((robotId & 0xFF0000) != 0) return "Red";
+            if ((robotId & 0x00FF00) != 0) return "Green";
+            if ((robotId & 0x0000FF) != 0) return "Blue";
+            if ((robotId & 0xFFFF00) == 0xFFFF00) return "Yellow";
+        }
+        
+        // Standard index-based mapping
         switch (robotId) {
             case 0: return "Red";
             case 1: return "Green";
             case 2: return "Blue";
             case 3: return "Yellow";
-            default: return "Unknown";
+            default: return "Unknown: " + robotId;
+        }
+    }
+
+     /**
+     * Get color name for a robot
+     */
+    private String getRobotColorNameByGridElement(GameElement robot) {
+        if (robot == null) return "";
+        
+        int c = robot.getColor();
+        switch (c) {
+            case 0: return "Red";
+            case 1: return "Green";
+            case 2: return "Blue";
+            case 3: return "Yellow";
+            default: return "Unknown: " + c;
         }
     }
     

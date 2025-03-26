@@ -110,7 +110,11 @@ public class RRGetMap {
             // Handle robots of different colors
             if (type.equals("robot_red") || type.equals("robot_green") || 
                 type.equals("robot_blue") || type.equals("robot_yellow")) {
-                pieces[colors.get(type)] = new RRPiece(x, y, colors2.get(type), robotCounter);
+                // FIXED: Use the color index (0-3) from colors map instead of the RGB color value from colors2
+                // Old code created piece with actual RGB color instead of index: new RRPiece(x, y, colors2.get(type), robotCounter)
+                Timber.d("[HINT] Creating robot piece for %s with colorIndex=%d instead of RGB color %d", 
+                        type, colors.get(type), colors2.get(type));
+                pieces[colors.get(type)] = new RRPiece(x, y, colors.get(type), robotCounter);
                 robotCounter++;
             }
         }
