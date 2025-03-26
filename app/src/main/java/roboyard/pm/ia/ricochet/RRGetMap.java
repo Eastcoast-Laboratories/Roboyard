@@ -130,40 +130,124 @@ public class RRGetMap {
      * @param gridElements The grid elements to display in ASCII format
      */
     private static void generateAsciiMap(ArrayList<GridElement> gridElements) {
-        String[][] asciiMap = new String[22][22];
+        // Create a double-width ASCII map to separate walls from robots/targets
+        // For each grid cell (x,y), we'll use:
+        // - asciiMap[x*2][y] for vertical walls
+        // - asciiMap[x*2+1][y] for robots and targets
+        String[][] asciiMap = new String[44][22]; // Double width to handle separate positions
         
-        // First pass: place all elements on the ASCII map
+        // Track cells that have both a robot and a horizontal wall
+        Map<String, String> cellContents = new HashMap<>();
+        
+        // First pass: collect all elements by position to handle overlaps
         for (GridElement element : gridElements) {
-            // Special handling for walls to better represent their position in ASCII
-            if (element.getType().equals("mh") || element.getType().equals("mv")) {
-                if (element.getType().equals("mh")) {
-                    // Horizontal walls connect cells horizontally - place the wall character 
-                    // between the cells in the ASCII map representation
-                    asciiMap[element.getX()][element.getY()] = "-";
-                } else { // mv - vertical wall
-                    // Vertical walls connect cells vertically
-                    asciiMap[element.getX()][element.getY()] = "|";
+            int x = element.getX();
+            int y = element.getY();
+            String key = x + "," + y;
+            
+            if (element.getType().equals("mh")) {
+                // Remember this position has a horizontal wall
+                String prevContent = cellContents.getOrDefault(key, "");
+                cellContents.put(key, prevContent + "mh,");
+            } else if (element.getType().equals("mv")) {
+                // Vertical walls go in their own position
+                asciiMap[x*2][y] = "|";
+            } else {
+                // Remember this position has a robot or target
+                String prevContent = cellContents.getOrDefault(key, "");
+                cellContents.put(key, prevContent + element.getType() + ",");
+            }
+        }
+        
+        // Process collected cell contents to handle overlaps
+        for (Map.Entry<String, String> entry : cellContents.entrySet()) {
+            String[] coords = entry.getKey().split(",");
+            int x = Integer.parseInt(coords[0]);
+            int y = Integer.parseInt(coords[1]);
+            String contents = entry.getValue();
+            
+            boolean hasHorizontalWall = contents.contains("mh,");
+            
+            // Handle special cases for robot + horizontal wall combinations
+            if (hasHorizontalWall) {
+                if (contents.contains("robot_yellow")) {
+                    // Yellow robot with horizontal wall - use combining overline
+                    asciiMap[x*2+1][y] = "y̅"; // y with overline
+                } else if (contents.contains("robot_red")) {
+                    asciiMap[x*2+1][y] = "r̅"; // r with overline
+                } else if (contents.contains("robot_blue")) {
+                    asciiMap[x*2+1][y] = "b̅"; // b with overline
+                } else if (contents.contains("robot_green")) {
+                    asciiMap[x*2+1][y] = "g̅"; // g with overline
+                } else if (contents.contains("target_")) {
+                    // Target with horizontal wall
+                    if (contents.contains("target_yellow")) {
+                        asciiMap[x*2+1][y] = "Y̅"; // Y with overline
+                    } else if (contents.contains("target_red")) {
+                        asciiMap[x*2+1][y] = "R̅"; // R with overline
+                    } else if (contents.contains("target_blue")) {
+                        asciiMap[x*2+1][y] = "B̅"; // B with overline
+                    } else if (contents.contains("target_green")) {
+                        asciiMap[x*2+1][y] = "G̅"; // G with overline
+                    } else if (contents.contains("target_multi")) {
+                        asciiMap[x*2+1][y] = "M̅"; // M with overline
+                    }
+                } else {
+                    // Just a horizontal wall
+                    asciiMap[x*2+1][y] = "-";
                 }
             } else {
-                // For other elements (robots, targets) just place them directly
-                asciiMap[element.getX()][element.getY()] = element.toChar();
+                // No horizontal wall, just set the character based on element type
+                if (contents.contains("robot_yellow")) {
+                    asciiMap[x*2+1][y] = "y";
+                } else if (contents.contains("robot_red")) {
+                    asciiMap[x*2+1][y] = "r";
+                } else if (contents.contains("robot_blue")) {
+                    asciiMap[x*2+1][y] = "b";
+                } else if (contents.contains("robot_green")) {
+                    asciiMap[x*2+1][y] = "g";
+                } else if (contents.contains("target_yellow")) {
+                    asciiMap[x*2+1][y] = "Y";
+                } else if (contents.contains("target_red")) {
+                    asciiMap[x*2+1][y] = "R";
+                } else if (contents.contains("target_blue")) {
+                    asciiMap[x*2+1][y] = "B";
+                } else if (contents.contains("target_green")) {
+                    asciiMap[x*2+1][y] = "G";
+                } else if (contents.contains("target_multi")) {
+                    asciiMap[x*2+1][y] = "M";
+                }
             }
         }
 
         // Second pass: render the map row by row
         for (int y = 0; y < 22; y++) {
-            // glue all elements in asciiMap[i] into a string
             StringBuilder sb = new StringBuilder();
+            boolean hasContent = false;
+            
             for (int x = 0; x < 22; x++) {
-                if (asciiMap[x][y] == null) {
-                    asciiMap[x][y] = " ";
+                // Add vertical wall position
+                if (asciiMap[x*2][y] == null) {
+                    sb.append(" ");
+                } else {
+                    sb.append(asciiMap[x*2][y]);
+                    hasContent = true;
                 }
-                sb.append(asciiMap[x][y]);
+                
+                // Add robot/target or horizontal wall position
+                if (asciiMap[x*2+1][y] == null) {
+                    sb.append(" ");
+                } else {
+                    sb.append(asciiMap[x*2+1][y]);
+                    hasContent = true;
+                }
             }
-            // stop, if sb is a string with just spaces
-            if (sb.toString().trim().isEmpty()) {
+            
+            // Skip empty rows
+            if (!hasContent) {
                 break;
             }
+            
             Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (y<10?"0"+y:y) + ": " + sb);
         }
     }
