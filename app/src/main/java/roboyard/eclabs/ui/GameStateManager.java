@@ -3,18 +3,15 @@ package roboyard.eclabs.ui;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -24,7 +21,6 @@ import androidx.navigation.Navigation;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,7 +40,6 @@ import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.MainActivity;
-import roboyard.eclabs.MapGenerator;
 import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.SolverManager;
@@ -54,7 +49,6 @@ import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.pm.ia.GameSolution;
-import roboyard.eclabs.GameLogic;
 import roboyard.pm.ia.IGameMove;
 import timber.log.Timber;
 
@@ -740,6 +734,7 @@ public class GameStateManager extends AndroidViewModel {
      * @return Current board width
      */
     public int getBoardWidth() {
+        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.getBoardWidth() called, returning: %d", boardSizeManager.getBoardWidth());
         return boardSizeManager.getBoardWidth();
     }
     
@@ -750,36 +745,7 @@ public class GameStateManager extends AndroidViewModel {
     public int getBoardHeight() {
         return boardSizeManager.getBoardHeight();
     }
-    
-    /**
-     * Set the board width in BoardSizeManager
-     * @param width New board width
-     */
-    public void setBoardWidth(int width) {
-        // Use setBoardSize with current height
-        boardSizeManager.setBoardSize(width, getBoardHeight());
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.setBoardWidth() - Set width to %d", width);
-    }
-    
-    /**
-     * Set the board height in BoardSizeManager
-     * @param height New board height
-     */
-    public void setBoardHeight(int height) {
-        // Use setBoardSize with current width
-        boardSizeManager.setBoardSize(getBoardWidth(), height);
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.setBoardHeight() - Set height to %d", height);
-    }
-    
-    /**
-     * Set both board width and height in BoardSizeManager
-     * @param width New board width
-     * @param height New board height
-     */
-    public void setBoardSize(int width, int height) {
-        boardSizeManager.setBoardSize(width, height);
-    }
-    
+
     /**
      * Setters for game settings
      */

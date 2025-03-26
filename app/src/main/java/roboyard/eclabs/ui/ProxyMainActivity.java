@@ -116,7 +116,7 @@ public class ProxyMainActivity extends MainActivity {
 //    }
     
     // Methods for dealing with the application context safely
-    public void setBoardSize(Context context, int width, int height) {
+    public void setAndSaveBoardSizeToPreferences(Context context, int width, int height) {
         // Proxy to GameStateManager or appropriate context
         Timber.d("Setting board size: %dx%d", width, height);
         // Implementation depends on how this is used in the game

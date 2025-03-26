@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,7 +19,6 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.Preferences;
@@ -49,6 +47,9 @@ public class SettingsFragment extends BaseGameFragment {
     
     private Preferences preferences;
     private List<int[]> validBoardSizes;
+    
+    // Add a flag to track if this is the first selection event
+    private boolean isInitialBoardSizeSelection = true;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -112,8 +113,42 @@ public class SettingsFragment extends BaseGameFragment {
         List<String> boardSizeOptions = new ArrayList<>();
         validBoardSizes = new ArrayList<>();
         
+        // IMPORTANT FIX: Load board size directly from preferences instead of using MainActivity static variables
+        // This ensures we get the correct values even if MainActivity static variables haven't been initialized yet
+        String boardSizeXStr = preferences.getPreferenceValue(requireActivity(), "boardSizeX");
+        String boardSizeYStr = preferences.getPreferenceValue(requireActivity(), "boardSizeY");
+        
+        // Default to MainActivity's static values if preferences don't exist
         int currentBoardSizeX = MainActivity.getBoardWidth();
         int currentBoardSizeY = MainActivity.getBoardHeight();
+        
+        // Override with values from preferences if they exist
+        if (boardSizeXStr != null && !boardSizeXStr.isEmpty()) {
+            try {
+                int prefWidth = Integer.parseInt(boardSizeXStr);
+                currentBoardSizeX = prefWidth;
+                Timber.d("[BOARD_SIZE_DEBUG] Settings: Loaded board width from preferences: %d", currentBoardSizeX);
+            } catch (NumberFormatException e) {
+                Timber.e(e, "[BOARD_SIZE_DEBUG] Settings: Error parsing board width from preferences");
+            }
+        } else {
+            Timber.d("[BOARD_SIZE_DEBUG] Settings: No board width in preferences, using MainActivity value: %d", currentBoardSizeX);
+        }
+        
+        if (boardSizeYStr != null && !boardSizeYStr.isEmpty()) {
+            try {
+                int prefHeight = Integer.parseInt(boardSizeYStr);
+                currentBoardSizeY = prefHeight;
+                Timber.d("[BOARD_SIZE_DEBUG] Settings: Loaded board height from preferences: %d", currentBoardSizeY);
+            } catch (NumberFormatException e) {
+                Timber.e(e, "[BOARD_SIZE_DEBUG] Settings: Error parsing board height from preferences");
+            }
+        } else {
+            Timber.d("[BOARD_SIZE_DEBUG] Settings: No board height in preferences, using MainActivity value: %d", currentBoardSizeY);
+        }
+        
+        Timber.d("[BOARD_SIZE_DEBUG] Settings: Using board size for spinner selection: %dx%d", currentBoardSizeX, currentBoardSizeY);
+        
         int selectedIndex = -1;
         int index = 0;
         
@@ -287,20 +322,27 @@ public class SettingsFragment extends BaseGameFragment {
                     return;
                 }
                 
+                // Skip the first automatic selection event when the spinner is initialized
+                if (isInitialBoardSizeSelection) {
+                    Timber.d("[BOARD_SIZE_DEBUG] Settings: Ignoring initial board size selection event");
+                    isInitialBoardSizeSelection = false;
+                    return;
+                }
+                
                 int[] selectedSize = validBoardSizes.get(position);
                 int width = selectedSize[0];
                 int height = selectedSize[1];
                 
-                Timber.d("Settings: Selected board size: %dx%d", width, height);
+                Timber.d("[BOARD_SIZE_DEBUG] Settings: User selected board size: %dx%d", width, height);
                 
-                // Get the context to pass to setBoardSize
+                // Get the context to pass to setAndSaveBoardSizeToPreferences
                 Context context = requireContext();
                 
                 // Get reference to MainActivity or update static values directly
                 if (context instanceof MainActivity) {
                     // For legacy UI, use the MainActivity instance
                     MainActivity mainActivity = (MainActivity) context;
-                    mainActivity.setBoardSize(context, width, height);
+                    mainActivity.setAndSaveBoardSizeToPreferences(context, width, height);
                 } else {
                     // For modern UI, update the static values directly
                     MainActivity.boardSizeX = width;
@@ -310,10 +352,9 @@ public class SettingsFragment extends BaseGameFragment {
                     preferences.setPreferences(requireActivity(), "boardSizeX", String.valueOf(width));
                     preferences.setPreferences(requireActivity(), "boardSizeY", String.valueOf(height));
                     
-                    Timber.d("Settings: Board size updated to %dx%d (direct update)", width, height);
+                    Timber.d("[BOARD_SIZE_DEBUG] Settings: Board size updated to %dx%d (direct update)", width, height);
                 }
-                
-                // Save to preferences (like in the original)
+
                 preferences.setPreferences(requireActivity(), "boardSizeX", String.valueOf(width));
                 preferences.setPreferences(requireActivity(), "boardSizeY", String.valueOf(height));
             }

@@ -58,7 +58,7 @@ public class MapObjects {
                 // Update and persist board size for this game
                 MainActivity activity = GridGameScreen.gameManager.getActivity();
                 Timber.d("Loading board size from save: %dx%d", boardX, boardY);
-                activity.setBoardSize(activity, boardX, boardY);
+                activity.setAndSaveBoardSizeToPreferences(activity, boardX, boardY);
             }
         }
 

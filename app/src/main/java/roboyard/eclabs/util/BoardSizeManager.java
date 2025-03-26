@@ -108,23 +108,5 @@ public class BoardSizeManager {
         editor.putString(KEY_BOARD_HEIGHT, String.valueOf(height));
         editor.apply();
     }
-    
-    /**
-     * Set the board dimensions and also update MainActivity static fields
-     * for backward compatibility
-     * @param width New board width
-     * @param height New board height
-     */
-    public void setBoardSizeWithLegacyUpdate(int width, int height) {
-        setBoardSize(width, height);
-        
-        // Update MainActivity static fields for backward compatibility
-        try {
-            roboyard.eclabs.MainActivity.boardSizeX = width;
-            roboyard.eclabs.MainActivity.boardSizeY = height;
-            Timber.d("[BOARD_SIZE_DEBUG] BoardSizeManager.setBoardSizeWithLegacyUpdate() updated MainActivity: %dx%d", width, height);
-        } catch (Exception e) {
-            Timber.e(e, "[BOARD_SIZE_DEBUG] BoardSizeManager.setBoardSizeWithLegacyUpdate() error updating MainActivity");
-        }
-    }
+
 }

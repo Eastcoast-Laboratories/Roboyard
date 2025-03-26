@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -17,15 +16,12 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.TextureView;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import roboyard.SoundService;
@@ -44,8 +40,8 @@ public class MainActivity extends FragmentActivity
     private final Preferences preferences = new Preferences();
 
     // Default board sizes
-    public static final int DEFAULT_BOARD_SIZE_X = 14;
-    public static final int DEFAULT_BOARD_SIZE_Y = 16;
+    public static final int DEFAULT_BOARD_SIZE_X = 12;
+    public static final int DEFAULT_BOARD_SIZE_Y = 14;
     
     // Minimum and maximum board sizes
     public static final int MIN_BOARD_SIZE = 12; // solver doesn't work below this
@@ -530,7 +526,7 @@ public class MainActivity extends FragmentActivity
         }
     }
 
-    public void setBoardSize(Context context, int x, int y) {
+    public void setAndSaveBoardSizeToPreferences(Context context, int x, int y) {
         // Validate board size
         x = Math.max(MIN_BOARD_SIZE, Math.min(x, MAX_BOARD_SIZE));
         y = Math.max(MIN_BOARD_SIZE, Math.min(y, MAX_BOARD_SIZE));
@@ -553,7 +549,7 @@ public class MainActivity extends FragmentActivity
             Timber.e(e, "[BOARD_SIZE_DEBUG] Error updating BoardSizeManager");
         }
         
-        Timber.d("Board size saved to preferences: %dx%d", x, y);
+        Timber.d("[BOARD_SIZE_DEBUG] Board size saved to preferences: %dx%d", x, y);
     }
 
     /**
@@ -584,6 +580,7 @@ public class MainActivity extends FragmentActivity
         if (boardSizeXStr != null && !boardSizeXStr.isEmpty()) {
             boardSizeX = Integer.parseInt(boardSizeXStr);
         } else {
+            Timber.d("[BOARD_SIZE_DEBUG] MainActivity.loadBoardSizeFromPreferences - Using default board size: %dx%d", DEFAULT_BOARD_SIZE_X, DEFAULT_BOARD_SIZE_Y);
             boardSizeX = DEFAULT_BOARD_SIZE_X;
         }
 

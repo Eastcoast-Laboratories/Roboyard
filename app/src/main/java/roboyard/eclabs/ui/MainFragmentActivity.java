@@ -41,9 +41,6 @@ public class MainFragmentActivity extends AppCompatActivity {
         Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity onCreate - Current board size: %dx%d", 
                  getBoardWidth(), getBoardHeight());
         
-        // Migrate preferences from old implementation to new
-        PreferencesMigrator.migratePreferences(this);
-        
         // Initialize the GameStateManager as a ViewModel
         gameStateManager = new ViewModelProvider(this).get(GameStateManager.class);
         

@@ -3,8 +3,6 @@ package roboyard.eclabs;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import static android.os.SystemClock.sleep;
-
 import timber.log.Timber;
 
 /**
@@ -421,7 +419,7 @@ public class SettingsGameScreen extends GameScreen {
         @Override
         public void run() {
             MainActivity activity = gameManager.getActivity();
-            activity.setBoardSize(activity, width, height);
+            activity.setAndSaveBoardSizeToPreferences(activity, width, height);
             // Use consistent key names with loadBoardSizeFromPreferences
             preferences.setPreferences(gameManager.getActivity(), "boardSizeX", String.valueOf(width));
             preferences.setPreferences(gameManager.getActivity(), "boardSizeY", String.valueOf(height));

@@ -814,9 +814,8 @@ public class GameState implements Serializable {
                 }
             }
         } finally {
-            // Restore original board size
-            MainActivity.boardSizeX = width;
-            MainActivity.boardSizeY = height;
+            // Keep the board size set to what was requested
+            // Do not restore to previous values
         }
         
         state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
