@@ -57,7 +57,7 @@ public class RRGetMap {
             for (int j = 0; j < 22; j++) {
                 sb.append(asciiMap[i][j]);
             }
-            Timber.d("[Ascii map] " + (i<10?"0"+i:i) + ": " + sb.toString());
+            Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (i<10?"0"+i:i) + ": " + sb.toString());
         }
         // Add 1 to get width/height from max coordinates
         int boardWidth = maxX + 1;

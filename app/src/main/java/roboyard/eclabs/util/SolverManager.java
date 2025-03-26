@@ -47,6 +47,7 @@ public class SolverManager implements Runnable {
      * Creates a new SolverManager instance
      */
     public SolverManager() {
+        Timber.d("[SOLUTION_SOLVER] new SolverManager(): Creating DD World");
         this.solver = new SolverDD();
     }
     

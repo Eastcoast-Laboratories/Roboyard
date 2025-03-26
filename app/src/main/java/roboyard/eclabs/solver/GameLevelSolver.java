@@ -52,6 +52,7 @@ public class GameLevelSolver {
         }
         
         // Create and initialize solver
+        Timber.d("[SOLUTION_SOLVER] GameLevelSolver.solveLevelFromString(): Creating solver which is Creating DD World");
         SolverDD solver = new SolverDD();
         solver.init(elements);
         

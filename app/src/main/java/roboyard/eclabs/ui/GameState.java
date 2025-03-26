@@ -572,13 +572,13 @@ public class GameState implements Serializable {
         // Add right border walls (vertical walls on the right edge of the grid)
         for (int y = 0; y < height; y++) {
             elements.add(new GridElement(width-1, y, "mv"));
-            Timber.d("[SOLUTION_SOLVER] Adding right border wall at (%d,%d)", width-1, y);
+            // Timber.d("[SOLUTION_SOLVER] Adding right border wall at (%d,%d)", width-1, y);
         }
         
         // Add bottom border walls (horizontal walls on the bottom edge of the grid)
         for (int x = 0; x < width; x++) {
             elements.add(new GridElement(x, height-1, "mh"));
-            Timber.d("[SOLUTION_SOLVER] Adding bottom border wall at (%d,%d)", x, height-1);
+            // Timber.d("[SOLUTION_SOLVER] Adding bottom border wall at (%d,%d)", x, height-1);
         }
         
         // Track which robot colors we've already added
