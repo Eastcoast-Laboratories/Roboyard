@@ -748,27 +748,20 @@ public class GameState implements Serializable {
         GameState state = new GameState(width, height);
         
         try {
-            // Use GameLogic directly instead of MapGenerator
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] Creating GameLogic with dimensions: " + 
+            // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " + 
                   width + "x" + height);
                   
-            // Convert difficulty string to GameLogic difficulty constant
-            int gameLogicDifficulty;
-            switch(difficulty) {
-                case 0: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_BEGINNER; break;
-                case 1: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_ADVANCED; break;
-                case 2: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_INSANE; break;
-                case 3: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_IMPOSSIBLE; break;
-                default: gameLogicDifficulty = roboyard.eclabs.GameLogic.DIFFICULTY_ADVANCED; break;
-            }
+            // Create MapGenerator instance
+            MapGenerator mapGenerator = new MapGenerator();
             
-            // Create GameLogic instance with appropriate dimensions and difficulty
-            roboyard.eclabs.GameLogic gameLogic = new roboyard.eclabs.GameLogic(width, height, gameLogicDifficulty);
+            // Set difficulty in MapGenerator if needed
+            // This is handled by the GridGameScreen.setDifficulty call above
             
-            // Generate a new game map
-            ArrayList<GridElement> gridElements = gameLogic.generateGameMap(null);
+            // Generate a new game map using the same method as the old canvas-based game
+            ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
             
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] GameLogic generated " + gridElements.size() + " grid elements");
+            Log.d(TAG, "[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
             
             // Process grid elements to create game state
             for (GridElement element : gridElements) {
