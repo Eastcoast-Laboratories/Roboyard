@@ -37,29 +37,12 @@ public class RRGetMap {
         // Calculate actual board dimensions from grid elements
         int maxX = 0;
         int maxY = 0;
-        // create an ascii map of the board
-        String[][] asciiMap = new String[22][22];
+        
         for (GridElement element : gridElements) {
             if (element.getX() > maxX) maxX = element.getX();
             if (element.getY() > maxY) maxY = element.getY();
-            asciiMap[element.getX()][element.getY()] = element.toChar();
         }
-
-        for (int y = 0; y < 22; y++) {
-            // glue all elements in asciiMap[i] into a string
-            StringBuilder sb = new StringBuilder();
-            for (int x = 0; x < 22; x++) {
-                if (asciiMap[x][y] == null) {
-                    asciiMap[x][y] = " ";
-                }
-                sb.append(asciiMap[x][y]);
-            }
-            // stop, if sb is a string with just spaces
-            if (sb.toString().trim().isEmpty()) {
-                break;
-            }
-            Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (y<10?"0"+y:y) + ": " + sb);
-        }
+        
         // Add 1 to get width/height from max coordinates
         int boardWidth = maxX + 1;
         int boardHeight = maxY + 1;
@@ -67,9 +50,10 @@ public class RRGetMap {
         // Log the actual board dimensions we're using
         Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (MainActivity dimensions: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY + ")");
 
-        // maybe Create board with the correct dimensions, not static MainActivity dimensions
-        // Board board = Board.createBoardFreestyle(null, boardWidth, boardHeight, MainActivity.numRobots);
-
+        // Generate and log the ASCII map for debugging
+        generateAsciiMap(gridElements);
+        
+        // Create the board with the current dimensions
         Board board = Board.createBoardFreestyle(null, MainActivity.boardSizeX, MainActivity.boardSizeY, MainActivity.numRobots);
         board.removeGoals();
 
@@ -139,5 +123,48 @@ public class RRGetMap {
         }
 
         return board;
+    }
+    
+    /**
+     * Generates an ASCII representation of the game board for debugging purposes
+     * @param gridElements The grid elements to display in ASCII format
+     */
+    private static void generateAsciiMap(ArrayList<GridElement> gridElements) {
+        String[][] asciiMap = new String[22][22];
+        
+        // First pass: place all elements on the ASCII map
+        for (GridElement element : gridElements) {
+            // Special handling for walls to better represent their position in ASCII
+            if (element.getType().equals("mh") || element.getType().equals("mv")) {
+                if (element.getType().equals("mh")) {
+                    // Horizontal walls connect cells horizontally - place the wall character 
+                    // between the cells in the ASCII map representation
+                    asciiMap[element.getX()][element.getY()] = "-";
+                } else { // mv - vertical wall
+                    // Vertical walls connect cells vertically
+                    asciiMap[element.getX()][element.getY()] = "|";
+                }
+            } else {
+                // For other elements (robots, targets) just place them directly
+                asciiMap[element.getX()][element.getY()] = element.toChar();
+            }
+        }
+
+        // Second pass: render the map row by row
+        for (int y = 0; y < 22; y++) {
+            // glue all elements in asciiMap[i] into a string
+            StringBuilder sb = new StringBuilder();
+            for (int x = 0; x < 22; x++) {
+                if (asciiMap[x][y] == null) {
+                    asciiMap[x][y] = " ";
+                }
+                sb.append(asciiMap[x][y]);
+            }
+            // stop, if sb is a string with just spaces
+            if (sb.toString().trim().isEmpty()) {
+                break;
+            }
+            Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (y<10?"0"+y:y) + ": " + sb);
+        }
     }
 }
