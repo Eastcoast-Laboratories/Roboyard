@@ -103,32 +103,7 @@ public class GameStateManager extends AndroidViewModel {
     
     public GameStateManager(Application application) {
         super(application);
-        // Initialize solver
-        solver = new SolverManager();
-        
-        // Set solver listener to handle results
-        solver.setListener(new SolverManager.SolverListener() {
-            @Override
-            public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
-                // Process on main thread
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    if (success) {
-                        GameSolution solution = solver.getCurrentSolution();
-                        onSolutionCalculationCompleted(solution);
-                    } else {
-                        onSolutionCalculationFailed("No solution found");
-                    }
-                });
-            }
-            
-            @Override
-            public void onSolverCancelled() {
-                // Process on main thread
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    onSolutionCalculationFailed("Solver was cancelled");
-                });
-            }
-        });
+        // We'll use lazy initialization for solver now - do not create it here
         
         context = application.getApplicationContext();
         
@@ -140,6 +115,41 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize UI mode manager
         uiModeManager = UIModeManager.getInstance(context);
+    }
+    
+    /**
+     * Get the solver manager instance using the singleton pattern
+     */
+    private SolverManager getSolverManager() {
+        Timber.d("[SOLUTION_SOLVER] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
+        SolverManager solverManager = SolverManager.getInstance();
+        
+        // Set solver listener if not already set
+        if (solverManager.getListener() == null) {
+            solverManager.setListener(new SolverManager.SolverListener() {
+                @Override
+                public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
+                    // Process on main thread
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        if (success) {
+                            GameSolution solution = solverManager.getCurrentSolution();
+                            onSolutionCalculationCompleted(solution);
+                        } else {
+                            onSolutionCalculationFailed("No solution found");
+                        }
+                    });
+                }
+                
+                @Override
+                public void onSolverCancelled() {
+                    // Process on main thread
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        onSolutionCalculationFailed("Solver was cancelled");
+                    });
+                }
+            });
+        }
+        return solverManager;
     }
     
     /**
@@ -224,7 +234,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = state.getGridElements();
-        solver.initialize(gridElements);
+        getSolverManager().initialize(gridElements);
         
         // Reset solution state
         currentSolution = null;
@@ -258,7 +268,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.initialize(gridElements);
+        getSolverManager().initialize(gridElements);
     }
     
     /**
@@ -279,7 +289,7 @@ public class GameStateManager extends AndroidViewModel {
                 
                 // Initialize solver with grid elements
                 ArrayList<GridElement> gridElements = newState.getGridElements();
-                solver.initialize(gridElements);
+                getSolverManager().initialize(gridElements);
             }
         }
     }
@@ -302,7 +312,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
-        solver.initialize(gridElements);
+        getSolverManager().initialize(gridElements);
     }
     
     /**
@@ -1236,14 +1246,14 @@ public class GameStateManager extends AndroidViewModel {
         
         try {
             Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Initializing solver with current game state");
-            solver.initialize(elements);
+            getSolverManager().initialize(elements);
             
             // Run the solver on a background thread
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.execute(() -> {
                 try {
                     Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Running solver on background thread");
-                    solver.run();
+                    getSolverManager().run();
                     // Note: The solver will call the listener methods (onSolverFinished)
                     // when it completes, so we don't need to do anything more here
                 } catch (Exception e) {
@@ -1339,7 +1349,7 @@ public class GameStateManager extends AndroidViewModel {
     public void cancelSolver() {
         Timber.d("[SOLUTION SOLVER] cancelSolver called");
         if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
-            solver.cancel();
+            getSolverManager().cancel();
             // The solver will call onSolverCancelled() via the listener
         }
     }

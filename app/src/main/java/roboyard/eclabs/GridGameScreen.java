@@ -177,7 +177,7 @@ public class GridGameScreen extends GameScreen {
         prevTime = System.currentTimeMillis();
         
         // Initialize our utility managers
-        solverManager = new SolverManager();
+        solverManager = SolverManager.getInstance();
         
         // Set up the solver manager listener
         solverManager.setListener(new SolverManager.SolverListener() {

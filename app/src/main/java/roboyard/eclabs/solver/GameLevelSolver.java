@@ -32,6 +32,20 @@ import timber.log.Timber;
  * - Achievement tracking
  */
 public class GameLevelSolver {
+    // Single static solver instance to be used across the entire app
+    private static SolverDD solverInstance;
+    
+    /**
+     * Get the singleton SolverDD instance, creating it if necessary
+     */
+    public static synchronized SolverDD getSolverInstance() {
+        if (solverInstance == null) {
+            Timber.d("[SOLUTION_SOLVER] GameLevelSolver.getSolverInstance(): Creating SolverDD instance");
+            solverInstance = new SolverDD();
+        }
+        return solverInstance;
+    }
+    
     public static int solveLevelFromString(String mapContent) {
         // Parse map content into GridElements
         ArrayList<GridElement> elements = new ArrayList<>();
@@ -51,9 +65,9 @@ public class GameLevelSolver {
             }
         }
         
-        // Create and initialize solver
-        Timber.d("[SOLUTION_SOLVER] GameLevelSolver.solveLevelFromString(): Creating solver which is Creating DD World");
-        SolverDD solver = new SolverDD();
+        // Get the solver instance and initialize it
+        Timber.d("[SOLUTION_SOLVER] GameLevelSolver.solveLevelFromString(): Using singleton solver instance");
+        SolverDD solver = getSolverInstance();
         solver.init(elements);
         
         // Run solver

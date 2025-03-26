@@ -5,6 +5,7 @@ import java.util.List;
 
 import driftingdroids.model.Solution;
 import roboyard.eclabs.GridElement;
+import roboyard.eclabs.solver.GameLevelSolver;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
 import roboyard.eclabs.solver.SolverStatus;
@@ -15,8 +16,12 @@ import timber.log.Timber;
  * A utility class that manages the initialization and execution of the game solver.
  * This class encapsulates the solver functionality in a UI-agnostic way,
  * making it reusable across different UI implementations.
+ * Implements the singleton pattern to ensure only one solver instance exists.
  */
 public class SolverManager implements Runnable {
+    // Singleton instance
+    private static SolverManager instance = null;
+    
     private ISolver solver;
     private Thread solverThread;
     private boolean isSolved = false;
@@ -24,6 +29,8 @@ public class SolverManager implements Runnable {
     private int numDifferentSolutionsFound = 0;
     private GameSolution currentSolution;
     private SolverListener listener;
+    // Track initialization state
+    private boolean isInitialized = false;
 
     /**
      * Interface for receiving solver events
@@ -44,11 +51,24 @@ public class SolverManager implements Runnable {
     }
     
     /**
-     * Creates a new SolverManager instance
+     * Gets the singleton instance of SolverManager, creating it if necessary
+     * @return The singleton instance
      */
-    public SolverManager() {
-        Timber.d("[SOLUTION_SOLVER] new SolverManager(): Creating DD World");
-        this.solver = new SolverDD();
+    public static synchronized SolverManager getInstance() {
+        if (instance == null) {
+            Timber.d("[SOLUTION_SOLVER] SolverManager.getInstance(): Creating singleton instance");
+            instance = new SolverManager();
+        }
+        return instance;
+    }
+    
+    /**
+     * Private constructor to enforce singleton pattern
+     */
+    private SolverManager() {
+        Timber.d("[SOLUTION_SOLVER] SolverManager(): Getting solver from GameLevelSolver");
+        // Use the solver instance from GameLevelSolver to avoid creating duplicate instances
+        this.solver = GameLevelSolver.getSolverInstance();
     }
     
     /**
@@ -60,12 +80,34 @@ public class SolverManager implements Runnable {
     }
     
     /**
-     * Initializes the solver with the given grid elements
+     * Gets the current listener
+     * @return The current listener, or null if none is set
+     */
+    public SolverListener getListener() {
+        return this.listener;
+    }
+    
+    /**
+     * Initializes the solver with the given grid elements if not already initialized with the same elements
      * @param gridElements The grid elements to initialize the solver with
      */
-    public void initialize(ArrayList<GridElement> gridElements) {
-        this.solver.init(gridElements);
-        this.isSolved = false;
+    public synchronized void initialize(ArrayList<GridElement> gridElements) {
+        if (!isInitialized) {
+            Timber.d("[SOLUTION_SOLVER] SolverManager.initialize(): Initializing solver with %d elements", gridElements.size());
+            this.solver.init(gridElements);
+            this.isSolved = false;
+            this.isInitialized = true;
+        } else {
+            Timber.d("[SOLUTION_SOLVER] SolverManager.initialize(): Solver already initialized, skipping");
+        }
+    }
+    
+    /**
+     * Resets the initialization state to force re-initialization on next call
+     */
+    public void resetInitialization() {
+        Timber.d("[SOLUTION_SOLVER] SolverManager.resetInitialization(): Resetting initialization state");
+        this.isInitialized = false;
     }
     
     /**
