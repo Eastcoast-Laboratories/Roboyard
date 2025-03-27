@@ -241,16 +241,64 @@ public class GameGridView extends View {
     private void storeRobotStartingPositions(GameState state) {
         if (state == null) return;
         
-        // Clear existing positions
-        robotStartingPositions.clear();
+        // Check if this is a new game by comparing robot positions with stored positions
+        boolean isNewGame = false;
         
-        // Store positions of all robots
-        for (GameElement element : state.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                robotStartingPositions.put(element.getColor(), new int[] {element.getX(), element.getY()});
-                Timber.d("Stored starting position for robot color %d at (%d,%d)", 
-                        element.getColor(), element.getX(), element.getY());
+        // If we have no stored positions yet, this must be the first game
+        if (robotStartingPositions.isEmpty()) {
+            isNewGame = true;
+        } else {
+            // Compare current robot positions with stored starting positions
+            // If any robot is at a different position than what we have stored,
+            // and it matches its initial position in the GameState, it's a new game
+            for (GameElement element : state.getGameElements()) {
+                if (element.getType() == GameElement.TYPE_ROBOT) {
+                    int color = element.getColor();
+                    int x = element.getX();
+                    int y = element.getY();
+                    
+                    // If we have this color stored and the position is different
+                    if (robotStartingPositions.containsKey(color)) {
+                        int[] storedPos = robotStartingPositions.get(color);
+                        // If current position doesn't match stored starting position
+                        if (storedPos[0] != x || storedPos[1] != y) {
+                            // Check if this is a new game (robot at its initial position)
+                            // or just a moved robot in the current game
+                            if (state.initialRobotPositions != null && 
+                                state.initialRobotPositions.containsKey(color)) {
+                                int[] initialPos = state.initialRobotPositions.get(color);
+                                if (initialPos[0] == x && initialPos[1] == y) {
+                                    // Robot is at its initial position in GameState but different
+                                    // from our stored position - this is a new game
+                                    isNewGame = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        // We don't have this color stored yet, so store it
+                        isNewGame = true;
+                        break;
+                    }
+                }
             }
+        }
+        
+        // Only clear and update if this is a new game
+        if (isNewGame) {
+            // Clear existing positions
+            robotStartingPositions.clear();
+            
+            // Store positions of all robots
+            for (GameElement element : state.getGameElements()) {
+                if (element.getType() == GameElement.TYPE_ROBOT) {
+                    robotStartingPositions.put(element.getColor(), new int[] {element.getX(), element.getY()});
+                    Timber.d("Stored starting position for robot color %d at (%d,%d)", 
+                            element.getColor(), element.getX(), element.getY());
+                }
+            }
+            
+            Timber.d("Updated robot starting positions for new game");
         }
     }
     
@@ -261,6 +309,10 @@ public class GameGridView extends View {
         if (fragment != null && gameStateManager != null) {
             gameStateManager.getCurrentState().observe(fragment.getViewLifecycleOwner(), state -> {
                 if (state != null) {
+                    // Store the starting positions of robots whenever the game state changes
+                    // This ensures that starting positions are updated when a new game is created
+                    storeRobotStartingPositions(state);
+                    
                     GameElement selectedRobot = state.getSelectedRobot();
                     
                     // Update robot scales based on selection

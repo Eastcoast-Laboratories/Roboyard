@@ -56,7 +56,7 @@ public class GameState implements Serializable {
     private transient GameStateManager gameStateManager;
     
     // Store initial robot positions for reset functionality
-    private Map<Integer, int[]> initialRobotPositions;
+    Map<Integer, int[]> initialRobotPositions;
 
     /**
      * Create a new game state with specified dimensions
@@ -1601,6 +1601,11 @@ public class GameState implements Serializable {
         }
 
         state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
+        
+        // Store initial robot positions for reset functionality
+        state.storeInitialRobotPositions();
+        Timber.d("[ROBOTS] Stored initial robot positions for new random game");
+        
         return state;
     }
 }
