@@ -68,10 +68,13 @@ public class MainMenuFragment extends BaseGameFragment {
             // Create a new SaveGameFragment instance
             SaveGameFragment saveGameFragment = new SaveGameFragment();
             
-            // Set the mode to load
+            // Set the mode to load - set both parameters to ensure it works
             Bundle args = new Bundle();
             args.putString("mode", "load");
+            args.putBoolean("saveMode", false);  // Explicitly set to false (load mode)
             saveGameFragment.setArguments(args);
+            
+            Timber.d("MainMenuFragment: Navigating to SaveGameFragment in LOAD mode");
             
             // Navigate to the save game fragment
             navigateToDirect(saveGameFragment);

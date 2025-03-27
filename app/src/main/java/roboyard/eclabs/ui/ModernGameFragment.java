@@ -555,10 +555,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Create a new SaveGameFragment instance
                 SaveGameFragment saveFragment = new SaveGameFragment();
                 
-                // Create a bundle with the saveMode argument
+                // Create a bundle with both saveMode arguments to ensure proper operation
                 Bundle args = new Bundle();
                 args.putBoolean("saveMode", true);
+                args.putString("mode", "save");  // Also set the string mode parameter
                 saveFragment.setArguments(args);
+                
+                Timber.d("ModernGameFragment: Navigating to SaveGameFragment in SAVE mode");
                 
                 // Perform the fragment transaction
                 requireActivity().getSupportFragmentManager()

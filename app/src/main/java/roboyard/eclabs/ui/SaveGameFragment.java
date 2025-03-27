@@ -67,11 +67,27 @@ public class SaveGameFragment extends BaseGameFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Default to load mode
+        saveMode = false;
+        
         // Get arguments to determine if we're in save or load mode
         if (getArguments() != null) {
-            SaveGameFragmentArgs args = SaveGameFragmentArgs.fromBundle(getArguments());
-            saveMode = args.getSaveMode();
+            // First check for a direct string mode parameter (used by MainMenuFragment)
+            if (getArguments().containsKey("mode")) {
+                String mode = getArguments().getString("mode", "load");
+                saveMode = "save".equals(mode);
+                Timber.d("SaveGameFragment: Got mode=%s from direct bundle, saveMode=%s", mode, saveMode);
+            }
+            // Then check for a direct boolean saveMode parameter
+            else if (getArguments().containsKey("saveMode")) {
+                saveMode = getArguments().getBoolean("saveMode", false);
+                Timber.d("SaveGameFragment: Got saveMode=%s from direct bundle", saveMode);
+            }
+            // Don't attempt to use SafeGameFragmentArgs as it seems to be causing issues
+            // This avoids the "Cannot resolve symbol 'SaveGameFragmentArgs'" error in the IDE
         }
+        
+        Timber.d("SaveGameFragment: Final saveMode=%s", saveMode);
         
         // Get the existing GameStateManager from ViewModelProvider instead of creating a new one
         gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
@@ -92,9 +108,6 @@ public class SaveGameFragment extends BaseGameFragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         saveSlotRecyclerView = view.findViewById(R.id.save_slot_recycler_view);
         backButton = view.findViewById(R.id.back_button);
-        
-        // Set title based on mode
-        updateTitle();
         
         // Set up tabs
         setupTabs();
@@ -159,10 +172,12 @@ public class SaveGameFragment extends BaseGameFragment {
                 // Save mode tabs: Save (0) and History (1)
                 tabLayout.addTab(tabLayout.newTab().setText("Save"));
                 tabLayout.addTab(tabLayout.newTab().setText("History"));
+                Timber.d("SaveGameFragment: Setting up tabs for SAVE mode");
             } else {
                 // Load mode tabs: Load (0) and History (1)
                 tabLayout.addTab(tabLayout.newTab().setText("Load"));
                 tabLayout.addTab(tabLayout.newTab().setText("History"));
+                Timber.d("SaveGameFragment: Setting up tabs for LOAD mode");
             }
             
             // Set up tab selection listener
@@ -187,6 +202,7 @@ public class SaveGameFragment extends BaseGameFragment {
             // Select the initial tab
             TabLayout.Tab tab = tabLayout.getTabAt(0);
             if (tab != null) {
+                Timber.d("SaveGameFragment: Selecting initial tab: %s", saveMode ? "SAVE" : "LOAD");
                 tab.select();
             }
         }
@@ -205,15 +221,14 @@ public class SaveGameFragment extends BaseGameFragment {
         historyAdapter = new HistoryAdapter();
         
         // Set initial adapter based on mode
-        if (saveMode) {
-            saveSlotRecyclerView.setAdapter(saveSlotAdapter);
-        } else {
-            saveSlotRecyclerView.setAdapter(saveSlotAdapter);
-        }
+        saveSlotRecyclerView.setAdapter(saveSlotAdapter);
         
         // Load data
         loadSaveSlots();
         loadHistoryEntries();
+        
+        // Update title to match initial mode
+        updateTitle();
     }
     
     /**

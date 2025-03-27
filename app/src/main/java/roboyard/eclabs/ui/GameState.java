@@ -733,6 +733,10 @@ public class GameState implements Serializable {
             long timePlayed = 0;
             int moveCount = 0;
             
+            boolean inRobotsSection = false;
+            boolean inInitialPositionsSection = false;
+            boolean boardDataStarted = false;
+            
             // Parse metadata from the first line if it starts with #
             if (lines.length > 0 && lines[0].startsWith("#")) {
                 String metadataLine = lines[0];
@@ -767,7 +771,6 @@ public class GameState implements Serializable {
             state.startTime = System.currentTimeMillis() - timePlayed;
             
             // Parse board data
-            boolean boardDataStarted = false;
             int boardLine = 0;
             int wallsAdded = 0;
             int targetsAdded = 0;
@@ -780,55 +783,46 @@ public class GameState implements Serializable {
                     continue;
                 }
                 
-                if (line.startsWith("ROBOTS:")) {
-                    Timber.d("Found ROBOTS section at line %d", i);
-                    // Start parsing robots
-                    for (int j = i + 1; j < lines.length; j++) {
-                        String robotLine = lines[j];
-                        if (robotLine.trim().isEmpty() || robotLine.startsWith("INITIAL_POSITIONS:")) {
-                            break;
-                        }
-                        
-                        String[] robotData = robotLine.split(",");
-                        if (robotData.length >= 3) {
-                            int x = Integer.parseInt(robotData[0]);
-                            int y = Integer.parseInt(robotData[1]);
-                            int color = Integer.parseInt(robotData[2]);
-                            state.addRobot(x, y, color);
-                            Timber.d("Added robot at (%d,%d) with color %d", x, y, color);
-                        }
-                    }
+                // Check for section markers
+                if (line.equals("ROBOTS:")) {
+                    inRobotsSection = true;
+                    inInitialPositionsSection = false;
+                    boardDataStarted = false; // Exit board data mode
+                    continue;
+                } else if (line.equals("INITIAL_POSITIONS:")) {
+                    inRobotsSection = false;
+                    inInitialPositionsSection = true;
+                    boardDataStarted = false; // Exit board data mode
+                    continue;
+                } else if (line.equals("WALLS:")) {
+                    // New section for wall data
+                    inRobotsSection = false;
+                    inInitialPositionsSection = false;
+                    boardDataStarted = false; // Exit board data mode
+                    Timber.d("Entering WALLS section");
                     continue;
                 }
                 
-                if (line.startsWith("INITIAL_POSITIONS:")) {
-                    Timber.d("Found INITIAL_POSITIONS section at line %d", i);
-                    // Initialize the initialRobotPositions map if it doesn't exist
-                    if (state.initialRobotPositions == null) {
-                        state.initialRobotPositions = new HashMap<>();
-                    }
-                    
-                    // Start parsing initial positions
-                    for (int j = i + 1; j < lines.length; j++) {
-                        String positionLine = lines[j];
-                        if (positionLine.trim().isEmpty()) {
-                            break;
-                        }
+                // Process WALLS section data
+                if (!inRobotsSection && !inInitialPositionsSection && !boardDataStarted && line.contains(",") && 
+                        (line.startsWith("H,") || line.startsWith("V,"))) {
+                    // Format: type,x,y
+                    String[] wallData = line.split(",");
+                    if (wallData.length >= 3) {
+                        String wallType = wallData[0];
+                        int x = Integer.parseInt(wallData[1]);
+                        int y = Integer.parseInt(wallData[2]);
                         
-                        String[] positionData = positionLine.split(",");
-                        if (positionData.length >= 3) {
-                            int x = Integer.parseInt(positionData[0]);
-                            int y = Integer.parseInt(positionData[1]);
-                            int color = Integer.parseInt(positionData[2]);
-                            state.initialRobotPositions.put(color, new int[]{x, y});
-                            Timber.d("Added initial position for robot color %d at (%d,%d)", color, x, y);
+                        if ("H".equals(wallType)) {
+                            state.addHorizontalWall(x, y);
+                            wallsAdded++;
+                            Timber.d("Added horizontal wall at (%d,%d) from WALLS section", x, y);
+                        } else if ("V".equals(wallType)) {
+                            state.addVerticalWall(x, y);
+                            wallsAdded++;
+                            Timber.d("Added vertical wall at (%d,%d) from WALLS section", x, y);
                         }
                     }
-                    continue;
-                }
-                
-                // Skip dimension lines and empty lines
-                if (line.startsWith("WIDTH:") || line.startsWith("HEIGHT:") || line.trim().isEmpty()) {
                     continue;
                 }
                 
@@ -843,8 +837,9 @@ public class GameState implements Serializable {
                     String[] cells = line.split(",");
                     Timber.d("Parsing board line %d with %d cells", boardLine, cells.length);
                     
-                    for (int x = -1; x < Math.min(width, cells.length); x++) {
+                    for (int x = 0; x < Math.min(width, cells.length); x++) {
                         String cellData = cells[x];
+                        
                         // Don't skip empty cells, they might be important for column 0
                         if (cellData.isEmpty()) {
                             Timber.d("Empty cell data at (%d,%d), treating as empty cell", x, boardLine);
@@ -891,6 +886,42 @@ public class GameState implements Serializable {
                         }
                     }
                     boardLine++;
+                }
+                
+                // Process ROBOTS section data
+                if (inRobotsSection && line.contains(",")) {
+                    String[] robotData = line.split(",");
+                    if (robotData.length >= 3) {
+                        int x = Integer.parseInt(robotData[0]);
+                        int y = Integer.parseInt(robotData[1]);
+                        int color = Integer.parseInt(robotData[2]);
+                        state.addRobot(x, y, color);
+                        Timber.d("Added robot at (%d,%d) with color %d", x, y, color);
+                    }
+                    continue;
+                }
+
+                // Process INITIAL_POSITIONS section data
+                if (inInitialPositionsSection && line.contains(",")) {
+                    // Initialize the initialRobotPositions map if it doesn't exist
+                    if (state.initialRobotPositions == null) {
+                        state.initialRobotPositions = new HashMap<>();
+                    }
+                    
+                    String[] positionData = line.split(",");
+                    if (positionData.length >= 3) {
+                        int x = Integer.parseInt(positionData[0]);
+                        int y = Integer.parseInt(positionData[1]);
+                        int color = Integer.parseInt(positionData[2]);
+                        state.initialRobotPositions.put(color, new int[]{x, y});
+                        Timber.d("Added initial position for robot color %d at (%d,%d)", color, x, y);
+                    }
+                    continue;
+                }
+                
+                // Skip dimension lines and empty lines
+                if (line.startsWith("WIDTH:") || line.startsWith("HEIGHT:") || line.trim().isEmpty()) {
+                    continue;
                 }
             }
             
@@ -1137,13 +1168,15 @@ public class GameState implements Serializable {
         
         // Add board data
         for (int y = 0; y < height; y++) {
+            // Serialize the cell contents including walls
             for (int x = 0; x < width; x++) {
                 int cellType = board[y][x];
-                saveData.append(cellType);
                 
-                // If it's a target, add the color
+                // If the cell is a target, append the target color
                 if (cellType == Constants.TYPE_TARGET) {
-                    saveData.append(":").append(targetColors[y][x]);
+                    saveData.append(cellType).append(":").append(targetColors[y][x]);
+                } else {
+                    saveData.append(cellType);
                 }
                 
                 saveData.append(",");
@@ -1152,29 +1185,57 @@ public class GameState implements Serializable {
             saveData.append("\n");
         }
         
-        // Add current robot positions
-        saveData.append("ROBOTS:\n");
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                saveData.append(element.getX()).append(",")
-                       .append(element.getY()).append(",")
-                       .append(element.getColor()).append("\n");
-                Timber.d("Serializing robot at (%d,%d) with color %d", element.getX(), element.getY(), element.getColor());
+        // Add dedicated WALLS section to ensure all walls are properly serialized
+        saveData.append("WALLS:\n");
+        // Save horizontal walls
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (hasHorizontalWall(x, y)) {
+                    saveData.append("H,").append(x).append(",").append(y).append("\n");
+                    Timber.d("Serializing horizontal wall at (%d,%d)", x, y);
+                }
+            }
+        }
+        // Save vertical walls
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (hasVerticalWall(x, y)) {
+                    saveData.append("V,").append(x).append(",").append(y).append("\n");
+                    Timber.d("Serializing vertical wall at (%d,%d)", x, y);
+                }
             }
         }
         
-        // Add initial robot positions if available
-        if (initialRobotPositions != null && !initialRobotPositions.isEmpty()) {
-            saveData.append("INITIAL_POSITIONS:\n");
-            for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
-                int robotColor = entry.getKey();
-                int[] position = entry.getValue();
-                saveData.append(position[0]).append(",")
-                       .append(position[1]).append(",")
-                       .append(robotColor).append("\n");
-                Timber.d("Serializing initial position for robot color %d at (%d, %d)", 
-                        robotColor, position[0], position[1]);
-            }
+        // Make sure initial robot positions are stored
+        if (initialRobotPositions == null || initialRobotPositions.isEmpty()) {
+            storeInitialRobotPositions();
+            Timber.d("Initial robot positions were not stored, storing them now");
+        }
+        
+        // Add initial robot positions as the ROBOTS section
+        // This ensures that when a game is loaded, robots are placed at their initial positions
+        saveData.append("ROBOTS:\n");
+        for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
+            int robotColor = entry.getKey();
+            int[] position = entry.getValue();
+            saveData.append(position[0]).append(",")
+                   .append(position[1]).append(",")
+                   .append(robotColor).append("\n");
+            Timber.d("Serializing initial position for robot color %d at (%d, %d)", 
+                    robotColor, position[0], position[1]);
+        }
+        
+        // Add current robot positions as INITIAL_POSITIONS section for reference
+        // This maintains compatibility with the existing code
+        saveData.append("INITIAL_POSITIONS:\n");
+        for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
+            int robotColor = entry.getKey();
+            int[] position = entry.getValue();
+            saveData.append(position[0]).append(",")
+                   .append(position[1]).append(",")
+                   .append(robotColor).append("\n");
+            Timber.d("Serializing initial position for robot color %d at (%d, %d)", 
+                    robotColor, position[0], position[1]);
         }
         
         return saveData.toString();
