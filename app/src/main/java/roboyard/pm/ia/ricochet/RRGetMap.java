@@ -81,6 +81,7 @@ public class RRGetMap {
         colors.put("target_multi", -1);
 
         int robotCounter = 0;
+        boolean targetFound = false;
 
         // Process each grid element (walls, targets, robots)
         for (Object element : gridElements) {
@@ -107,15 +108,22 @@ public class RRGetMap {
                 type.equals("target_blue") || type.equals("target_yellow") || 
                 type.equals("target_multi")) {
                 board.addGoal(position, colors.get(type), 1);
+                targetFound = true;
+                
+                // Set this as the active goal
+                board.setGoal(position);
+                Timber.d("[SOLUTION_SOLVER] Setting goal at position %d for robot color %d", position, colors.get(type));
             }
             // Handle robots of different colors
             if (type.equals("robot_red") || type.equals("robot_green") || 
                 type.equals("robot_blue") || type.equals("robot_yellow")) {
                 // FIXED: Use the color index (0-3) from colors map instead of the RGB color value from colors2
                 // Old code created piece with actual RGB color instead of index: new RRPiece(x, y, colors2.get(type), robotCounter)
+                int colorIndex = colors.get(type);
                 Timber.d("[HINT] Creating robot piece for %s with colorIndex=%d instead of RGB color %d", 
-                        type, colors.get(type), colors2.get(type));
-                pieces[colors.get(type)] = new RRPiece(x, y, colors.get(type), robotCounter);
+                        type, colorIndex, colors2.get(type));
+                pieces[colorIndex] = new RRPiece(x, y, colorIndex, robotCounter);
+                
                 robotCounter++;
             }
         }
@@ -125,6 +133,12 @@ public class RRGetMap {
         for(int i = 0; i < 4; i++) {
             int position = pieces[i].getY() * board.width + pieces[i].getX();
             board.setRobot(i, position, false);
+        }
+        
+        // If no target was found, throw an exception
+        // This prevents the NullPointerException in Board.isSolution01()
+        if (!targetFound) {
+            throw new RuntimeException("[SOLUTION_SOLVER] No target found in level");
         }
 
         return board;

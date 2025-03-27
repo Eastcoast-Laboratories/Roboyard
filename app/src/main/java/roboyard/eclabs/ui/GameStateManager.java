@@ -115,7 +115,7 @@ public class GameStateManager extends AndroidViewModel {
      * Get the solver manager instance using the singleton pattern
      */
     private SolverManager getSolverManager() {
-        Timber.d("[SOLUTION_SOLVER] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
+        Timber.d("[SOLUTION SOLVER] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
         SolverManager solverManager = SolverManager.getInstance();
         
         // Set solver listener if not already set
@@ -284,10 +284,10 @@ public class GameStateManager extends AndroidViewModel {
         stateHistory.clear();
         squaresMovedHistory.clear();
         
-        // Initialize the solver with grid elements
+        // Initialize the solver with the grid elements from the loaded level
         ArrayList<GridElement> gridElements = state.getGridElements();
-        // Force solver reinitialization for the new game
-        getSolverManager().resetInitialization();
+        Timber.d("[SOLUTION SOLVER] Initializing solver with %d grid elements from level %d", 
+                gridElements.size(), levelId);
         getSolverManager().initialize(gridElements);
         
         // Reset solution state

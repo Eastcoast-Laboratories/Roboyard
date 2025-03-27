@@ -9,10 +9,13 @@ import android.util.Log;
 
 import timber.log.Timber;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -830,27 +833,162 @@ public class GameState implements Serializable {
      * Load a level from assets
      */
     public static GameState loadLevel(Context context, int levelId) {
-        // This would load level data from assets or a database
-        // For now, just create a random level with fixed seed
-        // TODO: Implement proper level loading from assets
+        Timber.d("Loading level %d from assets", levelId);
         
-        GameState state = createRandom(14, 14, 1); // Medium board, medium difficulty
-        state.setLevelId(levelId);
-        state.setLevelName("Level " + levelId);
-        return state;
+        try {
+            // Construct the level file path
+            String levelFilePath = "Maps/level_" + levelId + ".txt";
+            
+            // Read the level file content
+            String levelContent = "";
+            try (InputStream is = context.getAssets().open(levelFilePath);
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                levelContent = sb.toString();
+                Timber.d("Successfully read level file: %s", levelFilePath);
+            }
+            
+            // Parse the level content
+            GameState state = parseLevel(context, levelContent, levelId);
+            state.setLevelId(levelId);
+            state.setLevelName("Level " + levelId);
+            
+            // Initialize the solver with the grid elements
+            Timber.d("Level %d loaded successfully with %d grid elements", 
+                     levelId, state.getGridElements().size());
+            
+            return state;
+            
+        } catch (IOException e) {
+            Timber.e(e, "Error loading level %d: %s", levelId, e.getMessage());
+            // Don't fall back to random level - throw an exception instead
+            throw new RuntimeException("Failed to load level " + levelId, e);
+        }
     }
     
     /**
-     * Converts difficulty integer to string for the original GridGameScreen class
+     * Parse level content from a level file
      */
-    private static String difficultyIntToString(int difficulty) {
-        switch (difficulty) {
-            case 0: return "Beginner";
-            case 1: return "Advanced";
-            case 2: return "Insane";
-            case 3: return "Impossible";
-            default: return "Beginner";
+    private static GameState parseLevel(Context context, String levelContent, int levelId) {
+        // Default board size
+        int width = 14;
+        int height = 14;
+        
+        // Create a new game state
+        GameState state = new GameState(width, height);
+        
+        // Track if we have at least one target
+        boolean hasTarget = false;
+        
+        // Parse the level content line by line
+        String[] lines = levelContent.split("\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+            
+            // Parse board dimensions
+            if (line.startsWith("board:")) {
+                String[] parts = line.substring(6, line.length() - 1).split(",");
+                if (parts.length == 2) {
+                    width = Integer.parseInt(parts[0]);
+                    height = Integer.parseInt(parts[1]);
+                    state = new GameState(width, height);
+                    Timber.d("[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d", levelId, width, height);
+                }
+                continue;
+            }
+            
+            // Parse horizontal walls (mh)
+            if (line.startsWith("mh")) {
+                String[] parts = line.substring(2, line.length() - 1).split(",");
+                if (parts.length == 2) {
+                    int x = Integer.parseInt(parts[0]);
+                    int y = Integer.parseInt(parts[1]);
+                    state.addHorizontalWall(x, y);
+                    Timber.d("[SOLUTION_SOLVER] Adding horizontal wall at (%d,%d)", x, y);
+                }
+                continue;
+            }
+            
+            // Parse vertical walls (mv)
+            if (line.startsWith("mv")) {
+                String[] parts = line.substring(2, line.length() - 1).split(",");
+                if (parts.length == 2) {
+                    int x = Integer.parseInt(parts[0]);
+                    int y = Integer.parseInt(parts[1]);
+                    state.addVerticalWall(x, y);
+                    Timber.d("[SOLUTION_SOLVER] Adding vertical wall at (%d,%d)", x, y);
+                }
+                continue;
+            }
+            
+            // Parse targets
+            if (line.startsWith("target_")) {
+                String color = line.substring(7, line.indexOf(";"));
+                String[] parts = line.substring(line.indexOf("_") + 1 + color.length(), line.length() - 1).split(",");
+                if (parts.length == 2) {
+                    int x = Integer.parseInt(parts[0]);
+                    int y = Integer.parseInt(parts[1]);
+                    int colorId = -1;
+                    
+                    if (color.equals("red")) colorId = 0;
+                    else if (color.equals("green")) colorId = 1;
+                    else if (color.equals("blue")) colorId = 2;
+                    else if (color.equals("yellow")) colorId = 3;
+                    
+                    if (colorId >= 0) {
+                        state.addTarget(x, y, colorId);
+                        GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                        target.setColor(colorId);
+                        state.getGameElements().add(target);
+                        hasTarget = true;
+                        Timber.d("[SOLUTION_SOLVER] Adding %s target at (%d,%d)", color, x, y);
+                    }
+                }
+                continue;
+            }
+            
+            // Parse robots
+            if (line.startsWith("robot_")) {
+                String color = line.substring(6, line.indexOf(";"));
+                String[] parts = line.substring(line.indexOf("_") + 1 + color.length(), line.length() - 1).split(",");
+                if (parts.length == 2) {
+                    int x = Integer.parseInt(parts[0]);
+                    int y = Integer.parseInt(parts[1]);
+                    int colorId = -1;
+                    
+                    if (color.equals("red")) colorId = 0;
+                    else if (color.equals("green")) colorId = 1;
+                    else if (color.equals("blue")) colorId = 2;
+                    else if (color.equals("yellow")) colorId = 3;
+                    
+                    if (colorId >= 0) {
+                        GameElement robot = new GameElement(GameElement.TYPE_ROBOT, x, y);
+                        robot.setColor(colorId);
+                        state.getGameElements().add(robot);
+                        Timber.d("[SOLUTION_SOLVER] Adding %s robot at (%d,%d)", color, x, y);
+                    }
+                }
+                continue;
+            }
         }
+        
+        // If no target was found, add a default target for the first robot
+        // This prevents the NullPointerException in the solver
+        if (!hasTarget && !state.getGameElements().isEmpty()) {
+            Timber.e("[SOLUTION_SOLVER] No target found in level");
+            throw new IllegalStateException("Level has no target, cannot create a valid game state");
+        }
+        
+        // Store initial robot positions for reset functionality
+        state.storeInitialRobotPositions();
+        
+        return state;
     }
     
     /**
@@ -1203,5 +1341,18 @@ public class GameState implements Serializable {
             }
         }
         return null;
+    }
+    
+    /**
+     * Converts difficulty integer to string for the original GridGameScreen class
+     */
+    private static String difficultyIntToString(int difficulty) {
+        switch (difficulty) {
+            case 0: return "Beginner";
+            case 1: return "Advanced";
+            case 2: return "Insane";
+            case 3: return "Impossible";
+            default: return "Beginner";
+        }
     }
 }

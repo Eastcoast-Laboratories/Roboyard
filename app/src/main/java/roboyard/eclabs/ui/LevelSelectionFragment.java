@@ -96,7 +96,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Start a new game with the selected level
         gameStateManager.startLevelGame(levelId);
         
-        // Create a new ModernGameFragment instance
+        // For modern UI, use ModernGameFragment
         ModernGameFragment gameFragment = new ModernGameFragment();
         navigateToDirect(gameFragment);
     }
