@@ -1003,9 +1003,6 @@ public class GameState implements Serializable {
                             
                             if (colorId >= 0) {
                                 state.addRobot(x, y, colorId);
-                                GameElement robot = new GameElement(GameElement.TYPE_ROBOT, x, y);
-                                robot.setColor(colorId);
-                                state.getGameElements().add(robot);
                                 Timber.d("[LEVEL LOADING] Adding %s robot at (%d,%d)", color, x, y);
                             }
                         } catch (NumberFormatException e) {
