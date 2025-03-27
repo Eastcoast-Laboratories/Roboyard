@@ -19,7 +19,6 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
@@ -295,7 +294,6 @@ public class SettingsFragment extends BaseGameFragment {
         // Since we can't directly access the field, use GridGameScreen helper method
         // which has package access to MapGenerator
         preferences.setPreferences(requireActivity(), "newMapEachTime", String.valueOf(value));
-        GridGameScreen.setNewMapEachTime(value);
     }
     
     /**
@@ -384,8 +382,6 @@ public class SettingsFragment extends BaseGameFragment {
             
             // Save difficulty setting and update game
             preferences.setPreferences(requireActivity(), "difficulty", difficulty);
-            // This also updates GridGameScreen's difficulty setting
-            GridGameScreen.setDifficulty(difficulty);
         });
         
         // New map radio group

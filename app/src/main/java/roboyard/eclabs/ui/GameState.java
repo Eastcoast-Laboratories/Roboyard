@@ -23,7 +23,6 @@ import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
-import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.MapGenerator;
 
@@ -1441,10 +1440,10 @@ public class GameState implements Serializable {
      */
     private static String difficultyIntToString(int difficulty) {
         switch (difficulty) {
-            case 0: return "Beginner";
-            case 1: return "Advanced";
-            case 2: return "Insane";
-            case 3: return "Impossible";
+            case Constants.DIFFICULTY_EASY: return "Beginner";
+            case Constants.DIFFICULTY_MEDIUM: return "Intermediate";
+            case Constants.DIFFICULTY_HARD: return "Advanced";
+            case Constants.DIFFICULTY_EXPERT: return "Expert";
             default: return "Beginner";
         }
     }
@@ -1455,7 +1454,6 @@ public class GameState implements Serializable {
     public static GameState createRandom(int width, int height, int difficulty) {
         // Set the global difficulty level first so difficulty is consistent
         String difficultyString = difficultyIntToString(difficulty);
-        GridGameScreen.setDifficulty(difficultyString);
         
         // Log initial board size and requested size
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
@@ -1489,9 +1487,6 @@ public class GameState implements Serializable {
             // Create MapGenerator instance
             MapGenerator mapGenerator = new MapGenerator();
             
-            // Set difficulty in MapGenerator if needed
-            // This is handled by the GridGameScreen.setDifficulty call above
-            
             // Generate a new game map using the same method as the old canvas-based game
             ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
 
@@ -1513,30 +1508,15 @@ public class GameState implements Serializable {
                 } else if (type.equals("target_red")) {
                     // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
                     state.addTarget(x, y, 0);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(0); // Red
-                    state.getGameElements().add(target);
                 } else if (type.equals("target_green")) {
                     state.addTarget(x, y, 1);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(1); // Green
-                    state.getGameElements().add(target);
                 } else if (type.equals("target_blue")) {
                     state.addTarget(x, y, 2);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(2); // Blue
-                    state.getGameElements().add(target);
                 } else if (type.equals("target_yellow")) {
                     state.addTarget(x, y, 3);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(3); // Yellow
-                    state.getGameElements().add(target);
                 } else if (type.equals("target_multi")) {
                     // Multi-color target - we'll use red as default
                     state.addTarget(x, y, 0);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(0); // Red (default for multi)
-                    state.getGameElements().add(target);
                 } else if (type.equals("robot_red")) {
                     state.addRobot(x, y, 0);
                 } else if (type.equals("robot_green")) {

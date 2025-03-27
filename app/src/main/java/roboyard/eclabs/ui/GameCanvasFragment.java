@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.InputManager;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.RenderManager;
@@ -26,9 +25,10 @@ import timber.log.Timber;
  */
 public class GameCanvasFragment extends BaseGameFragment {
 
-    private GridGameScreen gridGameScreen;
-    private GameSurfaceView gameSurfaceView;
     private GameManager gameManager;
+    private GameSurfaceView gameSurfaceView;
+    private InputManager inputManager;
+    private RenderManager renderManager;
     private int levelScreenType = Constants.SCREEN_GAME; // Default to standard game screen
     
     @Override
@@ -53,9 +53,9 @@ public class GameCanvasFragment extends BaseGameFragment {
         Timber.d("GameCanvasFragment: Screen dimensions: %d x %d", screenWidth, screenHeight);
         
         Timber.d("GameCanvasFragment: Creating InputManager and RenderManager");
-        InputManager inputManager = new InputManager();
+        inputManager = new InputManager();
         // Create RenderManager with the correct constructor parameters and ensure it has a context
-        RenderManager renderManager = new RenderManager(requireActivity().getResources());
+        renderManager = new RenderManager(requireActivity().getResources());
         // Set the context for accessibility features
         renderManager.setContext(requireContext());
         
@@ -112,10 +112,6 @@ public class GameCanvasFragment extends BaseGameFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Timber.d("GameCanvasFragment: onViewCreated() called");
-        
-        // Initialize the old GridGameScreen
-        Timber.d("GameCanvasFragment: Creating GridGameScreen");
-        gridGameScreen = new GridGameScreen(gameManager);
         
         // Set the screen based on the passed argument or default value
         if (levelScreenType != Constants.SCREEN_GAME) {
