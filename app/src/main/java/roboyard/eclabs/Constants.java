@@ -43,10 +43,12 @@ public class Constants {
     public static final String PREF_SOUND_ENABLED = "sound_enabled";
     
     // Game state cell types
-    public static final int CELL_EMPTY = 0;
-    public static final int CELL_WALL = 1;
-    public static final int CELL_TARGET = 2;
-    
+    public static final int TYPE_EMPTY = 0;
+    public static final int TYPE_ROBOT = 1;
+    public static final int TYPE_TARGET = 2;
+    public static final int TYPE_HORIZONTAL_WALL = 3;
+    public static final int TYPE_VERTICAL_WALL = 4;
+
     // Color constants
     public static final int COLOR_RED = 0;
     public static final int COLOR_GREEN = 1;

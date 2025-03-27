@@ -2,9 +2,6 @@ package roboyard.eclabs.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.Log;
 
 import timber.log.Timber;
@@ -29,8 +26,6 @@ import roboyard.eclabs.GridElement;
 import roboyard.eclabs.GridGameScreen;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.MapGenerator;
-import roboyard.eclabs.GameLogic;
-import timber.log.Timber;
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -39,12 +34,6 @@ import timber.log.Timber;
 public class GameState implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String TAG = "GameState";
-    
-    // Element type constants
-    public static final int ELEMENT_EMPTY = 0;
-    public static final int ELEMENT_WALL = 1;
-    public static final int ELEMENT_TARGET = 2;
-    public static final int ELEMENT_ROBOT = 3;
     
     // Board properties
     private int width;
@@ -111,7 +100,7 @@ public class GameState implements Serializable {
      */
     public int getCellType(int x, int y) {
         if (x < 0 || y < 0 || x >= width || y >= height) {
-            return Constants.CELL_WALL; // Treat out-of-bounds as walls
+            return Constants.TYPE_VERTICAL_WALL; // Treat out-of-bounds as vertical walls
         }
         return board[y][x];
     }
@@ -145,13 +134,6 @@ public class GameState implements Serializable {
     }
     
     /**
-     * Add a wall at the specified coordinates
-     */
-    public void addWall(int x, int y) {
-        setCellType(x, y, Constants.CELL_WALL);
-    }
-    
-    /**
      * Add a horizontal wall at the specified coordinates
      */
     public void addHorizontalWall(int x, int y) {
@@ -171,7 +153,7 @@ public class GameState implements Serializable {
      * Add a target at the specified coordinates
      */
     public void addTarget(int x, int y, int color) {
-        setCellType(x, y, Constants.CELL_TARGET);
+        setCellType(x, y, Constants.TYPE_TARGET);
         setTargetColor(x, y, color);
     }
     
@@ -548,7 +530,7 @@ public class GameState implements Serializable {
                 }
                 
                 // Add targets
-                if (getCellType(x, y) == Constants.CELL_TARGET) {
+                if (getCellType(x, y) == Constants.TYPE_TARGET) {
                     String gridElementType;
                     int targetColor = getTargetColor(x, y);
                     
@@ -636,7 +618,7 @@ public class GameState implements Serializable {
                 cornerIndex = (cornerIndex + 1) % 4;
                 
                 // Make sure the spot is empty
-                while (getCellType(rx, ry) != Constants.CELL_EMPTY || getRobotAt(rx, ry) != null) {
+                while (getCellType(rx, ry) != Constants.TYPE_EMPTY || getRobotAt(rx, ry) != null) {
                     rx = (rx + 1) % (width - 2) + 1; // Keep within bounds, avoiding edges
                     ry = (ry + 1) % (height - 2) + 1;
                 }
@@ -1062,7 +1044,7 @@ public class GameState implements Serializable {
                 saveData.append(cellType);
                 
                 // If it's a target, add the color
-                if (cellType == Constants.CELL_TARGET) {
+                if (cellType == Constants.TYPE_TARGET) {
                     saveData.append(":").append(targetColors[y][x]);
                 }
                 

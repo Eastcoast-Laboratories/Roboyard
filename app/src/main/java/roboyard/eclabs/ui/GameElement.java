@@ -2,6 +2,8 @@ package roboyard.eclabs.ui;
 
 import java.io.Serializable;
 
+import roboyard.eclabs.Constants;
+
 /**
  * Represents a game element such as a robot or target.
  */
@@ -9,10 +11,10 @@ public class GameElement implements Serializable {
     private static final long serialVersionUID = 1L;
     
     // Element types
-    public static final int TYPE_ROBOT = 1;
-    public static final int TYPE_TARGET = 2;
-    public static final int TYPE_HORIZONTAL_WALL = 3; // Horizontal wall between rows (mh)
-    public static final int TYPE_VERTICAL_WALL = 4;   // Vertical wall between columns (mv)
+    public static final int TYPE_ROBOT = Constants.TYPE_ROBOT;
+    public static final int TYPE_TARGET = Constants.TYPE_TARGET;
+    public static final int TYPE_HORIZONTAL_WALL = Constants.TYPE_HORIZONTAL_WALL; // Horizontal wall between rows (mh)
+    public static final int TYPE_VERTICAL_WALL = Constants.TYPE_VERTICAL_WALL;   // Vertical wall between columns (mv)
     
     // Element properties
     private int type;
