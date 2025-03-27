@@ -30,9 +30,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -94,6 +96,11 @@ public class GameStateManager extends AndroidViewModel {
     // Solution state
     private GameSolution currentSolution = null;
     private int currentSolutionStep = 0;
+    
+    // Track hint usage for level completion statistics
+    private int hintsShown = 0;
+    // Track unique robots used for level completion statistics
+    private Set<Integer> robotsUsed = new HashSet<>();
     
     public GameStateManager(Application application) {
         super(application);
@@ -188,6 +195,8 @@ public class GameStateManager extends AndroidViewModel {
         
         startTime = System.currentTimeMillis();
         Timber.d("GameStateManager: startNewGame() complete");
+        
+        resetStatistics();
     }
     
     /**
@@ -250,6 +259,8 @@ public class GameStateManager extends AndroidViewModel {
         
         // Record start time
         startTime = System.currentTimeMillis();
+        
+        resetStatistics();
     }
     
     /**
@@ -304,6 +315,8 @@ public class GameStateManager extends AndroidViewModel {
         startTime = System.currentTimeMillis();
         
         Timber.d("GameStateManager: startLevelGame() complete for level %d", levelId);
+        
+        resetStatistics();
     }
     
     /**
@@ -545,7 +558,13 @@ public class GameStateManager extends AndroidViewModel {
                     int squaresMovedInThisMove = state.getLastSquaresMoved();
                     addSquaresMoved(squaresMovedInThisMove);
                     
-                    // Create a copy of the state for history
+                    // Track which robot was used (for level completion statistics)
+                    GameElement robot = state.getSelectedRobot();
+                    if (robot != null && robot.getColor() >= 0) {
+                        robotsUsed.add(robot.getColor());
+                    }
+                    
+                    // Store a copy of the state in history
                     GameState stateCopy = null;
                     try {
                         // Serialize and deserialize for deep copy
@@ -595,17 +614,17 @@ public class GameStateManager extends AndroidViewModel {
      * @return The next move according to the solver, or null if no solution exists
      */
     public IGameMove getHint() {
-        if (currentSolution == null || currentSolution.getMoves() == null || 
-            currentSolutionStep >= currentSolution.getMoves().size()) {
-            Timber.d("getHint: No precomputed solution available");
-            return null;
+        if (currentSolution != null && currentSolution.getMoves() != null && 
+            currentSolutionStep < currentSolution.getMoves().size()) {
+            
+            // Increment hint counter for level completion statistics
+            hintsShown++;
+            
+            IGameMove move = currentSolution.getMoves().get(currentSolutionStep);
+            currentSolutionStep++;
+            return move;
         }
-        
-        // Get the next move from the solution
-        IGameMove nextMove = currentSolution.getMoves().get(currentSolutionStep);
-        currentSolutionStep++;
-        
-        return nextMove;
+        return null;
     }
     
     /**
@@ -891,24 +910,61 @@ public class GameStateManager extends AndroidViewModel {
      * @param complete Whether the game is complete
      */
     public void setGameComplete(boolean complete) {
-        Timber.d("GameStateManager: setGameComplete(%s)", complete);
-        if (complete) {
-            // If game is newly completed, show toast notification
-            if (Boolean.FALSE.equals(isGameComplete.getValue())) {
-                // Show toast on the main thread
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    try {
-                        Toast.makeText(context, 
-                            "Target reached in " + moveCount.getValue() + " moves and " + 
-                            squaresMoved.getValue() + " squares moved!", 
-                            Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        Timber.e(e, "Error showing completion toast");
-                    }
+        GameState state = currentState.getValue();
+        if (state != null) {
+            Timber.d("Setting game complete: %s for level %d", complete, state.getLevelId());
+            state.setCompleted(complete);
+            isGameComplete.setValue(complete);
+            
+            // Save level completion data if this is a level game
+            if (complete && state.getLevelId() > 0) {
+                Timber.d("Game completed, saving level completion data for level %d", state.getLevelId());
+                saveLevelCompletionData(state);
+                
+                // Show a toast to indicate the level was completed
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    Toast.makeText(context, "Level " + state.getLevelId() + " completed!", Toast.LENGTH_SHORT).show();
                 });
             }
         }
-        isGameComplete.setValue(complete);
+    }
+    
+    /**
+     * Save level completion data when a level is completed
+     * @param state The completed game state
+     */
+    private void saveLevelCompletionData(GameState state) {
+        int levelId = state.getLevelId();
+        if (levelId <= 0) {
+            Timber.d("Not saving completion data - not a level game (levelId=%d)", levelId);
+            return; // Not a level game
+        }
+        
+        Timber.d("Saving completion data for level %d", levelId);
+        
+        // Get the level completion manager
+        LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
+        
+        // Get or create completion data for this level
+        LevelCompletionData data = manager.getLevelCompletionData(levelId);
+        
+        // Update completion data
+        data.setCompleted(true);
+        data.setHintsShown(hintsShown);
+        data.setTimeNeeded(System.currentTimeMillis() - startTime);
+        data.setMovesNeeded(moveCount.getValue() != null ? moveCount.getValue() : 0);
+        data.setRobotsUsed(robotsUsed.size());
+        data.setSquaresSurpassed(squaresMoved.getValue() != null ? squaresMoved.getValue() : 0);
+        
+        // Set optimal moves if we have a solution
+        if (currentSolution != null && currentSolution.getMoves() != null) {
+            data.setOptimalMoves(currentSolution.getMoves().size());
+        }
+        
+        // Save the data
+        manager.saveLevelCompletionData(data);
+        
+        Timber.d("Saved level completion data: %s", data);
     }
     
     /**
@@ -1479,5 +1535,17 @@ public class GameStateManager extends AndroidViewModel {
         animator.setAnimationListener(listener);
         animator.animateSolution(solution);
         return animator;
+    }
+    
+    /**
+     * Reset statistics for a new game
+     */
+    private void resetStatistics() {
+        hintsShown = 0;
+        robotsUsed.clear();
+        startTime = System.currentTimeMillis();
+        moveCount.setValue(0);
+        squaresMoved.setValue(0);
+        isGameComplete.setValue(false);
     }
 }

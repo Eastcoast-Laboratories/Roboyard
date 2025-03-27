@@ -713,7 +713,7 @@ public class GameState implements Serializable {
                 return state;
             }
         } catch (IOException | ClassNotFoundException e) {
-            Log.e(TAG, "Error loading game from slot " + slotId, e);
+            Timber.tag(TAG).e(e, "Error loading game from slot %s", slotId);
             return null;
         }
     }
@@ -727,9 +727,9 @@ public class GameState implements Serializable {
         GridGameScreen.setDifficulty(difficultyString);
         
         // Log initial board size and requested size
-        Log.d(TAG, "[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
-        Log.d(TAG, "[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " + 
-              MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " +
+                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
         // Save current board dimensions and set them for game generation
         MainActivity.boardSizeX = width;
@@ -737,23 +737,23 @@ public class GameState implements Serializable {
         
         // Ensure we're not limiting to a minimum of 14
         if (width < 14) {
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] Note: Using board width smaller than 14: " + width);
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board width smaller than 14: %s", width);
         }
         if (height < 14) {
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] Note: Using board height smaller than 14: " + height);
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board height smaller than 14: %s", height);
         }
         
         // Log the board size being used for map generation
-        Log.d(TAG, "[BOARD_SIZE_DEBUG] MainActivity.boardSize after setting: " + 
-              MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MainActivity.boardSize after setting: " +
+                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
         // Create new game state with specified dimensions
         GameState state = new GameState(width, height);
         
         try {
             // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " + 
-                  width + "x" + height);
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
+                    width + "x" + height);
                   
             // Create MapGenerator instance
             MapGenerator mapGenerator = new MapGenerator();
@@ -763,8 +763,8 @@ public class GameState implements Serializable {
             
             // Generate a new game map using the same method as the old canvas-based game
             ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
-            
-            Log.d(TAG, "[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
+
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
             
             // Process grid elements to create game state
             for (GridElement element : gridElements) {

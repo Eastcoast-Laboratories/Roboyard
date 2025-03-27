@@ -99,6 +99,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime:2.7.0'
     
+    // Gson for JSON serialization/deserialization
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.3.1'
