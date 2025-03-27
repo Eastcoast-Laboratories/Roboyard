@@ -67,12 +67,16 @@ public class GameGridView extends View {
     
     // Robot animation configuration
     private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
+    private static final float DEFAULT_ROBOT_SCALE = 1.1f; // 10% larger by default
     private final boolean enableRobotAnimation = true;
     private final HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private final GameElement focusedRobot = null; // Currently focused (hovered) robot
     private final android.view.animation.DecelerateInterpolator easeInterpolator = new android.view.animation.DecelerateInterpolator(1.5f); // Ease function
     private final android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
     private final long animationDuration = 300; // Animation duration in milliseconds
+    
+    // Store starting positions of robots
+    private final HashMap<Integer, int[]> robotStartingPositions = new HashMap<>(); // Map robot color to starting position [x,y]
     
     // Grid background
     private Drawable gridTileDrawable; 
@@ -216,8 +220,31 @@ public class GameGridView extends View {
             GameState state = gameStateManager.getCurrentState().getValue();
             gridWidth = state.getWidth();
             gridHeight = state.getHeight();
+            
+            // Store starting positions of robots when game state is first set
+            storeRobotStartingPositions(state);
         }
         invalidate();
+    }
+    
+    /**
+     * Store the starting positions of all robots in the game
+     * @param state Current game state
+     */
+    private void storeRobotStartingPositions(GameState state) {
+        if (state == null) return;
+        
+        // Clear existing positions
+        robotStartingPositions.clear();
+        
+        // Store positions of all robots
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                robotStartingPositions.put(element.getColor(), new int[] {element.getX(), element.getY()});
+                Timber.d("Stored starting position for robot color %d at (%d,%d)", 
+                        element.getColor(), element.getX(), element.getY());
+            }
+        }
     }
     
     /**
@@ -472,6 +499,45 @@ public class GameGridView extends View {
             }
         }
         
+        // Draw starting positions of robots
+        for (int color : robotStartingPositions.keySet()) {
+            int[] position = robotStartingPositions.get(color);
+            int x = position[0];
+            int y = position[1];
+            
+            float left = x * cellSize;
+            float top = y * cellSize;
+            float right = left + cellSize;
+            float bottom = top + cellSize;
+            
+            // Select appropriate robot drawable based on color
+            Drawable robotDrawable = null;
+            
+            switch (color) {
+                case 0: // RED
+                    robotDrawable = redRobotRight;
+                    break;
+                case 1: // GREEN
+                    robotDrawable = greenRobotRight;
+                    break;
+                case 2: // BLUE
+                    robotDrawable = blueRobotRight;
+                    break;
+                case 3: // YELLOW
+                    robotDrawable = yellowRobotRight;
+                    break;
+            }
+            
+            if (robotDrawable != null) {
+                // Create a copy of the drawable to avoid affecting the original
+                Drawable markerDrawable = robotDrawable.getConstantState().newDrawable().mutate();
+                // Draw robot using drawable
+                markerDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                markerDrawable.setAlpha(76); // Set alpha to 30% for transparency
+                markerDrawable.draw(canvas);
+            }
+        }
+        
         // Draw robots (on top of walls and targets)
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
@@ -515,7 +581,7 @@ public class GameGridView extends View {
         }
         
         // Get the current scale from robotScaleMap, or use default scale based on selection
-        float scale = 1.0f;
+        float scale = DEFAULT_ROBOT_SCALE;
         if (robotScaleMap.containsKey(robot)) {
             // Use the animated scale if available
             scale = robotScaleMap.get(robot);
@@ -526,6 +592,9 @@ public class GameGridView extends View {
                 scale = SELECTED_ROBOT_SCALE;
                 // Initialize the scale in the map for future animations
                 robotScaleMap.put(robot, scale);
+            } else {
+                // Initialize the scale in the map for future animations
+                robotScaleMap.put(robot, DEFAULT_ROBOT_SCALE);
             }
         }
         
@@ -544,13 +613,16 @@ public class GameGridView extends View {
             float scaledRight = centerX + scaledWidth / 2;
             float scaledBottom = centerY + scaledHeight / 2;
             
-            robotDrawable.setBounds(
+            // Create a copy of the drawable to ensure we don't affect other instances
+            Drawable robotDrawableCopy = robotDrawable.getConstantState().newDrawable().mutate();
+            robotDrawableCopy.setBounds(
                 (int) scaledLeft,
                 (int) scaledTop,
                 (int) scaledRight,
                 (int) scaledBottom
             );
-            robotDrawable.draw(canvas);
+            robotDrawableCopy.setAlpha(255); // Ensure full opacity for the actual robots
+            robotDrawableCopy.draw(canvas);
         }
     }
     
@@ -594,7 +666,7 @@ public class GameGridView extends View {
                     // User tapped on the currently selected robot, deselect it
                     Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
                     state.setSelectedRobot(null);
-                    animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, 1.0f); // Animate back to normal size
+                    animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
                     announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
                     invalidate();
                     return true;
@@ -696,9 +768,9 @@ public class GameGridView extends View {
                 // Check if robot moved by comparing old and new positions
                 Timber.d("[GOAL DEBUG] Selected robot moved from " + oldX + ", " + oldY + " to " + selectedRobot.getX() + ", " + selectedRobot.getY());
                 if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
-                    // Shrink the robot back to normal size when it starts moving
-                    if (robotScaleMap.containsKey(selectedRobot) && robotScaleMap.get(selectedRobot) > 1.0f) {
-                        animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), 1.0f);
+                    // Shrink the robot back to default size when it starts moving
+                    if (robotScaleMap.containsKey(selectedRobot) && robotScaleMap.get(selectedRobot) > DEFAULT_ROBOT_SCALE) {
+                        animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), DEFAULT_ROBOT_SCALE);
                     }
                     
                     // Calculate if robot hit a wall or another robot
