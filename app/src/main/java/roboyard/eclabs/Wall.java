@@ -13,6 +13,9 @@ public class Wall extends AbstractGameObject {
     private int xGrid, yGrid;
     private Drawable drawable;
     
+    // Wall configuration - matches GameGridView
+    private static final float WALL_THICKNESS_FACTOR = 0.375f; // 3x thicker walls
+    
     /**
      * Create a new wall
      * @param type Wall type ("mh" for horizontal, "mv" for vertical)
@@ -87,7 +90,7 @@ public class Wall extends AbstractGameObject {
         int pixel = Math.max(1, (int)(gridSpace / 45)); // ensure minimum thickness of 1 pixel
         int stretchWall = 12 * pixel; // stretch all walls
         int offsetWall = -2 * pixel;
-        int wallThickness = 16 * pixel; // thickness of walls
+        int wallThickness = (int)(gridSpace * WALL_THICKNESS_FACTOR); // 3x thicker
         
         // Calculate bounds based on wall type
         int left, top, right, bottom;

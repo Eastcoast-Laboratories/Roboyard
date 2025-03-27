@@ -75,6 +75,9 @@ public class GameGridView extends View {
     private final android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
     private final long animationDuration = 300; // Animation duration in milliseconds
     
+    // Wall configuration
+    private static float WALL_THICKNESS_FACTOR = 0.375f; // Default is cellSize / 8 * 3 (3 times thicker)
+    
     // Store starting positions of robots
     private final HashMap<Integer, int[]> robotStartingPositions = new HashMap<>(); // Map robot color to starting position [x,y]
     
@@ -526,16 +529,17 @@ public class GameGridView extends View {
                 float left = x * cellSize;
                 float top = y * cellSize; // Top of the lower cell
                 float right = left + cellSize;
-                float wallThickness = cellSize / 8; // Thinner walls look better
+                float wallThickness = cellSize * WALL_THICKNESS_FACTOR; // 3 times thicker than before
                 
                 // Draw horizontal wall - between y and y+1
-                cellPaint.setColor(Color.DKGRAY);
-                canvas.drawRect(left, top - wallThickness/2, right, top + wallThickness/2, cellPaint);
-                
                 if (wallHorizontal != null) {
                     wallHorizontal.setBounds((int)left, (int)(top - wallThickness/2), 
                                              (int)right, (int)(top + wallThickness/2));
                     wallHorizontal.draw(canvas);
+                } else {
+                    // Fallback to simple rectangle if drawable not available
+                    cellPaint.setColor(Color.DKGRAY);
+                    canvas.drawRect(left, top - wallThickness/2, right, top + wallThickness/2, cellPaint);
                 }
             } 
             else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
@@ -546,16 +550,17 @@ public class GameGridView extends View {
                 float left = x * cellSize; // Left of the right cell
                 float top = y * cellSize;
                 float bottom = top + cellSize;
-                float wallThickness = cellSize / 8;
+                float wallThickness = cellSize * WALL_THICKNESS_FACTOR; // 3 times thicker than before
                 
                 // Draw vertical wall - between x and x+1
-                cellPaint.setColor(Color.DKGRAY);
-                canvas.drawRect(left - wallThickness/2, top, left + wallThickness/2, bottom, cellPaint);
-                
                 if (wallVertical != null) {
                     wallVertical.setBounds((int)(left - wallThickness/2), (int)top, 
                                            (int)(left + wallThickness/2), (int)bottom);
                     wallVertical.draw(canvas);
+                } else {
+                    // Fallback to simple rectangle if drawable not available
+                    cellPaint.setColor(Color.DKGRAY);
+                    canvas.drawRect(left - wallThickness/2, top, left + wallThickness/2, bottom, cellPaint);
                 }
             }
         }

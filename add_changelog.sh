@@ -14,19 +14,19 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
-- Gespeicherte Spiele werden nun sofort im Ladebildschirm als Minimap angezeigt.
-- Performance-Optimierungen: Roboter bewegen sich jetzt schneller.
-- Roboter stoppen ihre Bewegungen mit einem „Feder“-Effekt am Ende.
-- Korrekte Z-Reihenfolge für Wände und Roboter
+- Überarbeitete Benutzeroberfläche mit klareren Icons und besserer Lesbarkeit
+- Barrierefreiheit für blinde Spieler
+- Screenreader-Optimierungen & Sprachhinweise
+- Button zum Wechseln zwischen Robotern mit Audio-Feedback und Screenreader-Unterstuetzung
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
-- Save games are now immediately displayed in the load screen as a minimap.
-- Performance improvements: Robots now move faster.
-- Robots stop with a spring effect at the end of their movement.
-- Correct Z-order for walls and robots
+- Improved user interface with clearer icons and better readability
+- Accessibility for blind players
+- Screenreader optimizations & language hints
+- Button to switch between robots with audio feedback and screenreader support
 EOF
 )
 
