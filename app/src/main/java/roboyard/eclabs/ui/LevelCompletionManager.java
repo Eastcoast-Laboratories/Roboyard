@@ -21,7 +21,7 @@ public class LevelCompletionManager {
     
     private static LevelCompletionManager instance;
     private Map<Integer, LevelCompletionData> completionDataMap;
-    private Context context;
+    private final Context context;
     
     private LevelCompletionManager(Context context) {
         this.context = context.getApplicationContext();

@@ -35,13 +35,13 @@ public class GameState implements Serializable {
     private static final String TAG = "GameState";
     
     // Board properties
-    private int width;
-    private int height;
-    private int[][] board; // 0=empty, 1=wall, 2=target
-    private int[][] targetColors; // Color index for targets, -1 if no target
+    private final int width;
+    private final int height;
+    private final int[][] board; // 0=empty, 1=wall, 2=target
+    private final int[][] targetColors; // Color index for targets, -1 if no target
     
     // Game elements (robots and targets)
-    private List<GameElement> gameElements;
+    private final List<GameElement> gameElements;
     
     // Game information
     private int levelId;
@@ -1478,60 +1478,55 @@ public class GameState implements Serializable {
         
         // Create new game state with specified dimensions
         GameState state = new GameState(width, height);
-        
-        try {
-            // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
-                    width + "x" + height);
-                  
-            // Create MapGenerator instance
-            MapGenerator mapGenerator = new MapGenerator();
-            
-            // Generate a new game map using the same method as the old canvas-based game
-            ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
 
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
-            
-            // Process grid elements to create game state
-            for (GridElement element : gridElements) {
-                String type = element.getType();
-                int x = element.getX();
-                int y = element.getY();
-                
-                // Handle all wall types
-                if (type.equals("mh")) {
-                    // Add horizontal wall (between rows)
-                    state.addHorizontalWall(x, y);
-                } else if (type.equals("mv")) {
-                    // Add vertical wall (between columns)
-                    state.addVerticalWall(x, y);
-                } else if (type.equals("target_red")) {
-                    // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
-                    state.addTarget(x, y, 0);
-                } else if (type.equals("target_green")) {
-                    state.addTarget(x, y, 1);
-                } else if (type.equals("target_blue")) {
-                    state.addTarget(x, y, 2);
-                } else if (type.equals("target_yellow")) {
-                    state.addTarget(x, y, 3);
-                } else if (type.equals("target_multi")) {
-                    // Multi-color target - we'll use red as default
-                    state.addTarget(x, y, 0);
-                } else if (type.equals("robot_red")) {
-                    state.addRobot(x, y, 0);
-                } else if (type.equals("robot_green")) {
-                    state.addRobot(x, y, 1);
-                } else if (type.equals("robot_blue")) {
-                    state.addRobot(x, y, 2);
-                } else if (type.equals("robot_yellow")) {
-                    state.addRobot(x, y, 3);
-                }
+        // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
+                width + "x" + height);
+
+        // Create MapGenerator instance
+        MapGenerator mapGenerator = new MapGenerator();
+
+        // Generate a new game map using the same method as the old canvas-based game
+        ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
+
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
+
+        // Process grid elements to create game state
+        for (GridElement element : gridElements) {
+            String type = element.getType();
+            int x = element.getX();
+            int y = element.getY();
+
+            // Handle all wall types
+            if (type.equals("mh")) {
+                // Add horizontal wall (between rows)
+                state.addHorizontalWall(x, y);
+            } else if (type.equals("mv")) {
+                // Add vertical wall (between columns)
+                state.addVerticalWall(x, y);
+            } else if (type.equals("target_red")) {
+                // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
+                state.addTarget(x, y, 0);
+            } else if (type.equals("target_green")) {
+                state.addTarget(x, y, 1);
+            } else if (type.equals("target_blue")) {
+                state.addTarget(x, y, 2);
+            } else if (type.equals("target_yellow")) {
+                state.addTarget(x, y, 3);
+            } else if (type.equals("target_multi")) {
+                // Multi-color target - we'll use red as default
+                state.addTarget(x, y, 0);
+            } else if (type.equals("robot_red")) {
+                state.addRobot(x, y, 0);
+            } else if (type.equals("robot_green")) {
+                state.addRobot(x, y, 1);
+            } else if (type.equals("robot_blue")) {
+                state.addRobot(x, y, 2);
+            } else if (type.equals("robot_yellow")) {
+                state.addRobot(x, y, 3);
             }
-        } finally {
-            // Keep the board size set to what was requested
-            // Do not restore to previous values
         }
-        
+
         state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
         return state;
     }

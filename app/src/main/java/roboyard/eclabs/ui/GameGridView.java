@@ -47,8 +47,8 @@ public class GameGridView extends View {
     private int gridHeight = 14;
     
     // For accessibility - track the focused cell
-    private int focusedX = -1;
-    private int focusedY = -1;
+    private final int focusedX = -1;
+    private final int focusedY = -1;
     
     // Robot drawables for each color
     private Drawable redRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight;
@@ -67,12 +67,12 @@ public class GameGridView extends View {
     
     // Robot animation configuration
     private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
-    private boolean enableRobotAnimation = true;
-    private HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
-    private GameElement focusedRobot = null; // Currently focused (hovered) robot
-    private android.view.animation.DecelerateInterpolator easeInterpolator = new android.view.animation.DecelerateInterpolator(1.5f); // Ease function
-    private android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
-    private long animationDuration = 300; // Animation duration in milliseconds
+    private final boolean enableRobotAnimation = true;
+    private final HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
+    private final GameElement focusedRobot = null; // Currently focused (hovered) robot
+    private final android.view.animation.DecelerateInterpolator easeInterpolator = new android.view.animation.DecelerateInterpolator(1.5f); // Ease function
+    private final android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
+    private final long animationDuration = 300; // Animation duration in milliseconds
     
     // Grid background
     private Drawable gridTileDrawable; 
@@ -312,12 +312,9 @@ public class GameGridView extends View {
         boolean hasBottomWall = (y < gridHeight-1) && (state.getCellType(x, y+1) == 1);
         
         // If has vertical neighbors, it's likely vertical
-        if (hasTopWall || hasBottomWall) {
-            return false;
-        }
+        return !hasTopWall && !hasBottomWall;
         
         // Default to horizontal for isolated walls
-        return true;
     }
     
     /**

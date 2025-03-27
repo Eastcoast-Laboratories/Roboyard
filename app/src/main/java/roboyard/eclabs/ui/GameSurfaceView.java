@@ -18,7 +18,7 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     private final GameManager gameManager;
     private GameRenderThread renderThread;
-    private boolean isRunning = false;
+    private final boolean isRunning = false;
 
     public GameSurfaceView(Context context, GameManager gameManager) {
         super(context);

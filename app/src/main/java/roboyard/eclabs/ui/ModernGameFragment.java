@@ -84,9 +84,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     
     // Timer variables
     private long startTime = 0L;
-    private Handler timerHandler = new Handler(Looper.getMainLooper());
+    private final Handler timerHandler = new Handler(Looper.getMainLooper());
     private boolean timerRunning = false;
-    private Runnable timerRunnable = new Runnable() {
+    private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
             long millis = SystemClock.elapsedRealtime() - startTime;
@@ -516,10 +516,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             IGameMove hintMove = gameStateManager.getHint();
             Timber.d("[HINT] Received hint move: %s", hintMove);
             
-            if (hintMove != null && hintMove instanceof RRGameMove) {
+            if (hintMove != null && hintMove instanceof RRGameMove rrMove) {
                 // Cast to RRGameMove to access the proper methods
-                RRGameMove rrMove = (RRGameMove) hintMove;
-                
+
                 // Log the details of the move
                 Timber.d("[HINT] Robot color: %d, Direction: %d", 
                         rrMove.getColor(), rrMove.getDirection());

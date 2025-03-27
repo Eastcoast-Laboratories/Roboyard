@@ -62,18 +62,18 @@ import timber.log.Timber;
 public class GameStateManager extends AndroidViewModel {
     
     // Game state
-    private MutableLiveData<GameState> currentState = new MutableLiveData<>();
-    private MutableLiveData<Integer> moveCount = new MutableLiveData<>(0);
-    private MutableLiveData<Integer> squaresMoved = new MutableLiveData<>(0); 
-    private MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
+    private final MutableLiveData<GameState> currentState = new MutableLiveData<>();
+    private final MutableLiveData<Integer> moveCount = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> squaresMoved = new MutableLiveData<>(0);
+    private final MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
     
     // Move history for undo functionality
-    private ArrayList<GameState> stateHistory = new ArrayList<>();
-    private ArrayList<Integer> squaresMovedHistory = new ArrayList<>();
+    private final ArrayList<GameState> stateHistory = new ArrayList<>();
+    private final ArrayList<Integer> squaresMovedHistory = new ArrayList<>();
     
     // Game settings
-    private MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
-    private MutableLiveData<Boolean> isSolverRunning = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
+    private final MutableLiveData<Boolean> isSolverRunning = new MutableLiveData<>(false);
     
     // Solver
     private SolverManager solver;
@@ -85,13 +85,13 @@ public class GameStateManager extends AndroidViewModel {
     private Bitmap minimap = null;
     
     // Board size manager
-    private BoardSizeManager boardSizeManager;
+    private final BoardSizeManager boardSizeManager;
     
     // Difficulty manager
-    private DifficultyManager difficultyManager;
+    private final DifficultyManager difficultyManager;
     
     // UI mode manager
-    private UIModeManager uiModeManager;
+    private final UIModeManager uiModeManager;
     
     // Solution state
     private GameSolution currentSolution = null;
@@ -100,7 +100,7 @@ public class GameStateManager extends AndroidViewModel {
     // Track hint usage for level completion statistics
     private int hintsShown = 0;
     // Track unique robots used for level completion statistics
-    private Set<Integer> robotsUsed = new HashSet<>();
+    private final Set<Integer> robotsUsed = new HashSet<>();
     
     public GameStateManager(Application application) {
         super(application);
@@ -677,7 +677,7 @@ public class GameStateManager extends AndroidViewModel {
         Timber.d("GameStateManager: navigateToMainMenu() called");
         // Use the NavController to navigate to the main menu fragment
         NavController navController = Navigation.findNavController(
-                androidx.fragment.app.FragmentActivity.class.cast(context), R.id.nav_host_fragment);
+                (androidx.fragment.app.FragmentActivity) context, R.id.nav_host_fragment);
         navController.navigate(R.id.actionGlobalMainMenu);
     }
     
@@ -688,7 +688,7 @@ public class GameStateManager extends AndroidViewModel {
         Timber.d("GameStateManager: navigateToSettings() called");
         // Use the NavController to navigate to the settings fragment
         NavController navController = Navigation.findNavController(
-                androidx.fragment.app.FragmentActivity.class.cast(context), R.id.nav_host_fragment);
+                (androidx.fragment.app.FragmentActivity) context, R.id.nav_host_fragment);
         navController.navigate(R.id.actionGlobalSettings);
     }
     
@@ -710,7 +710,7 @@ public class GameStateManager extends AndroidViewModel {
         }
 
         // We should only proceed if the context is a FragmentActivity
-        if (!(context instanceof androidx.fragment.app.FragmentActivity)) {
+        if (!(context instanceof androidx.fragment.app.FragmentActivity activity)) {
             Timber.e("Cannot navigate to save screen: context is not a FragmentActivity");
             // Toast to inform the user
             if (context != null) {
@@ -722,8 +722,7 @@ public class GameStateManager extends AndroidViewModel {
         }
         
         // Get the current activity context
-        androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) context;
-        
+
         // Check if we're on the main thread
         if (android.os.Looper.getMainLooper().getThread() == Thread.currentThread()) {
             // We're on the main thread, safe to navigate
@@ -1201,7 +1200,7 @@ public class GameStateManager extends AndroidViewModel {
                 }
                 
                 // Write the line
-                writer.write(line.toString() + "\n");
+                writer.write(line + "\n");
             }
             
             writer.close();

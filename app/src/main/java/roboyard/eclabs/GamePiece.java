@@ -173,8 +173,8 @@ public class GamePiece implements IGameObject {
         //renderManager.setColor(this.color);
         //display the piece
 
-        xDraw = (int)(this.xGrid+((this.x+((float)deltaX)/10)+0.5f)*this.numSquaresX); // number of Squares + the movement of the robot +0.5f to round to the nearest integer multiplied by the width of the cell
-        yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.numSquaresY);
+        xDraw = (int)(this.xGrid+((this.x+ deltaX /10)+0.5f)*this.numSquaresX); // number of Squares + the movement of the robot +0.5f to round to the nearest integer multiplied by the width of the cell
+        yDraw = (int)(this.yGrid+((this.y+ deltaY /10)+0.5f)*this.numSquaresY);
         // renderManager.drawCircle(xDraw, yDraw, this.radius);
 
         switch (color) {
@@ -280,8 +280,8 @@ public class GamePiece implements IGameObject {
             deltaY = 0;
             
             // Calculate drawing position without overshoot
-            xDraw = (int)(this.xGrid+((this.x+((float)deltaX)/10)+0.5f)*this.numSquaresX);
-            yDraw = (int)(this.yGrid+((this.y+((float)deltaY)/10)+0.5f)*this.numSquaresY);
+            xDraw = (int)(this.xGrid+((this.x+ deltaX /10)+0.5f)*this.numSquaresX);
+            yDraw = (int)(this.yGrid+((this.y+ deltaY /10)+0.5f)*this.numSquaresY);
             
             // Check if we should trigger the next move in the solution
             if(inMovement) {
@@ -309,7 +309,7 @@ public class GamePiece implements IGameObject {
             inMovement = false;
         }else{ //otherwise (if the piece must move),
             // TODO: reset if enlarging worked this.radius=32;
-            if(inMovement==false){
+            if(!inMovement){
                 // Reset overshoot state when starting a new movement
                 isOvershooting = false;
                 

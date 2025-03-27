@@ -20,7 +20,7 @@ public class ProxyMainActivity extends MainActivity {
     
     private final FragmentActivity hostActivity;
     private final GameStateManager gameStateManager;
-    private Context appContext;
+    private final Context appContext;
     
     public ProxyMainActivity(FragmentActivity hostActivity, GameStateManager gameStateManager) {
         // Note: This calls MainActivity's constructor which may do some initialization

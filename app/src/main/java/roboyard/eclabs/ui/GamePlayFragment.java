@@ -74,8 +74,7 @@ public class GamePlayFragment extends BaseGameFragment {
         // Hint button - show next move
         hintButton.setOnClickListener(v -> {
             IGameMove hintIMove = gameStateManager.getHint();
-            if (hintIMove != null && hintIMove instanceof GameMove) {
-                GameMove hint = (GameMove) hintIMove;
+            if (hintIMove != null && hintIMove instanceof GameMove hint) {
                 // Highlight the suggested move somehow
                 showToast("Move " + hint.getRobotColorName() + " robot to row " + 
                          hint.getToY() + ", column " + hint.getToX());

@@ -270,7 +270,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     
                     // Extract metadata if available
                     if (saveData != null && !saveData.isEmpty()) {
-                        Map<String, String> metadata = gameStateManager.extractMetadataFromSaveData(saveData);
+                        Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
                         if (metadata != null && metadata.containsKey("MAPNAME")) {
                             name = metadata.get("MAPNAME");
                             Timber.d("Found map name in slot %d: %s", i, name);

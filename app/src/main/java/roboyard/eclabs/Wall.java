@@ -6,8 +6,9 @@ import android.graphics.drawable.Drawable;
  * Wall game object for drawing walls on top of other elements
  */
 public class Wall extends AbstractGameObject {
-    private String type; // "mh" or "mv" for horizontal/vertical
-    private int x, y;
+    private final String type; // "mh" or "mv" for horizontal/vertical
+    private final int x;
+    private final int y;
     private float gridSpace;
     private int xGrid, yGrid;
     private Drawable drawable;

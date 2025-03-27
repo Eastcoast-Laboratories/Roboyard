@@ -18,8 +18,8 @@ public class GameMove {
     public static final int DIRECTION_SOUTH = 2;
     public static final int DIRECTION_WEST = 3;
     
-    private int robotId;
-    private int direction;
+    private final int robotId;
+    private final int direction;
     private int startX;
     private int startY;
     private int endX;

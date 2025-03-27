@@ -25,13 +25,13 @@ public class BrailleSpinner {
             "⠏"  // Frame 10
     };
     
-    private Handler handler;
+    private final Handler handler;
     private int currentFrame = 0;
     private boolean isSpinning = false;
     private int updateIntervalMs = 100;
     private SpinnerListener spinnerListener;
     private String currentText = "";
-    private Runnable runnable;
+    private final Runnable runnable;
     
     /**
      * Interface for receiving spinner updates

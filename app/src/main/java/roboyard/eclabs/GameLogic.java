@@ -29,8 +29,8 @@ public class GameLogic {
     public static final int DIFFICULTY_IMPOSSIBLE = 3;
 
     // position of the square in the middle of the game board
-    private int carrePosX; // horizontal position of the top wall of square, starting with 0
-    private int carrePosY; // vertical position of the left wall of the square
+    private final int carrePosX; // horizontal position of the top wall of square, starting with 0
+    private final int carrePosY; // vertical position of the left wall of the square
 
     private Boolean targetMustBeInCorner = true;
     private Boolean allowMulticolorTarget = true;
@@ -44,11 +44,11 @@ public class GameLogic {
     private Boolean loneWallsAllowed = false; // walls that are not attached in a 90 deg. angle
     
     // Board dimensions
-    private int boardWidth;
-    private int boardHeight;
+    private final int boardWidth;
+    private final int boardHeight;
     
     // Current difficulty level
-    private int currentLevel;
+    private final int currentLevel;
     
     /**
      * Constructor for GameLogic with specified board dimensions and difficulty level
@@ -106,7 +106,7 @@ public class GameLogic {
 
             maxWallsInOneVerticalCol = 5;
             maxWallsInOneHorizontalRow = 5;
-            wallsPerQuadrant = (int) (boardWidth/3);
+            wallsPerQuadrant = boardWidth/3;
         }
         
         if(level == DIFFICULTY_IMPOSSIBLE) {

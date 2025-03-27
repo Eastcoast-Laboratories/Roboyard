@@ -47,36 +47,32 @@ public class HelpFragment extends BaseGameFragment {
      */
     private void loadHelpContent() {
         // Set help text with formatting
-        StringBuilder helpContent = new StringBuilder();
-        helpContent.append("How to Play Roboyard\n\n");
-        helpContent.append("Goal\n");
-        helpContent.append("Move the colored robots to their matching colored targets. ");
-        helpContent.append("Once a robot reaches a target, it's locked in place. ");
-        helpContent.append("The game is completed when all robots are on their matching targets.\n\n");
-        
-        helpContent.append("Movement\n");
-        helpContent.append("- Tap on a robot to select it.\n");
-        helpContent.append("- Tap on an empty cell to move the selected robot in that direction.\n");
-        helpContent.append("- Robots will move in straight lines until they hit a wall, another robot, or the edge of the board.\n\n");
-        
-        helpContent.append("Controls\n");
-        helpContent.append("- Hint: Shows a suggested move.\n");
-        helpContent.append("- Reset: Restarts the current level.\n");
-        helpContent.append("- Save: Saves your current game progress.\n");
-        helpContent.append("- Menu: Returns to the main menu.\n\n");
-        
-        helpContent.append("Accessibility\n");
-        helpContent.append("This game is fully compatible with TalkBack screen reader. ");
-        helpContent.append("Use explore by touch to hear information about the game elements and buttons. ");
-        helpContent.append("Double-tap to activate buttons or select robots.\n\n");
-        
-        helpContent.append("Tips\n");
-        helpContent.append("- Try to solve puzzles in the minimum number of moves.\n");
-        helpContent.append("- Sometimes you need to move robots to specific positions to clear paths for other robots.\n");
-        helpContent.append("- If you're stuck, use the Hint feature to get a suggestion.\n");
+
+        String helpContent = "How to Play Roboyard\n\n" +
+                "Goal\n" +
+                "Move the colored robots to their matching colored targets. " +
+                "Once a robot reaches a target, it's locked in place. " +
+                "The game is completed when all robots are on their matching targets.\n\n" +
+                "Movement\n" +
+                "- Tap on a robot to select it.\n" +
+                "- Tap on an empty cell to move the selected robot in that direction.\n" +
+                "- Robots will move in straight lines until they hit a wall, another robot, or the edge of the board.\n\n" +
+                "Controls\n" +
+                "- Hint: Shows a suggested move.\n" +
+                "- Reset: Restarts the current level.\n" +
+                "- Save: Saves your current game progress.\n" +
+                "- Menu: Returns to the main menu.\n\n" +
+                "Accessibility\n" +
+                "This game is fully compatible with TalkBack screen reader. " +
+                "Use explore by touch to hear information about the game elements and buttons. " +
+                "Double-tap to activate buttons or select robots.\n\n" +
+                "Tips\n" +
+                "- Try to solve puzzles in the minimum number of moves.\n" +
+                "- Sometimes you need to move robots to specific positions to clear paths for other robots.\n" +
+                "- If you're stuck, use the Hint feature to get a suggestion.\n";
         
         // Set the text
-        helpText.setText(helpContent.toString());
+        helpText.setText(helpContent);
     }
     
     @Override

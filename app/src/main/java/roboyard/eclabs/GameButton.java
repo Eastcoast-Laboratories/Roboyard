@@ -173,7 +173,7 @@ public abstract class GameButton implements IGameObject {
             // Draw the content description text
             renderManager.setColor(Color.WHITE);
             renderManager.setTextSize(16);
-            renderManager.drawText((int)(this.x + 5), (int)(this.y + this.h + 20), contentDescription);
+            renderManager.drawText(this.x + 5, this.y + this.h + 20, contentDescription);
             
             // Restore previous drawing state
             renderManager.restore();

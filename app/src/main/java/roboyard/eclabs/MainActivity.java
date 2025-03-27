@@ -437,15 +437,13 @@ public class MainActivity extends FragmentActivity
 
         // Check if any robot is moving
         for (IGameObject obj : gameManager.getCurrentScreen().getGameObjects()) {
-            if (obj instanceof GamePiece) {
-                GamePiece piece = (GamePiece) obj;
+            if (obj instanceof GamePiece piece) {
                 if (piece.isInMovement()) {
                     return true;
                 }
             }
             // Check if GMI is active
-            if (obj instanceof GameMovementInterface) {
-                GameMovementInterface gmi = (GameMovementInterface) obj;
+            if (obj instanceof GameMovementInterface gmi) {
                 if (gmi.isActive()) {
                     return true;
                 }

@@ -199,7 +199,7 @@ public class GameManager {
      */
     public void toggleSound(boolean enabled) {
         if (activity instanceof MainActivity) {
-            ((MainActivity) activity).toggleSound(enabled);
+            activity.toggleSound(enabled);
         }
     }
 

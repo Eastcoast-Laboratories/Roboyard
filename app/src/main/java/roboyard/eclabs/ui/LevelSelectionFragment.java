@@ -30,7 +30,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private RecyclerView levelRecyclerView;
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
-    private List<Integer> availableLevels = new ArrayList<>();
+    private final List<Integer> availableLevels = new ArrayList<>();
     private LevelCompletionManager completionManager;
     
     /**

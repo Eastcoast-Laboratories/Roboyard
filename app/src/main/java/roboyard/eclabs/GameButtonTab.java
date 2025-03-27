@@ -59,7 +59,7 @@ public class GameButtonTab extends GameButton {
         
         // Draw text
         renderManager.setColor(isActive ? ACTIVE_TEXT_COLOR : INACTIVE_TEXT_COLOR);
-        renderManager.setTextSize((int)(this.getHeight() / 2));
+        renderManager.setTextSize(this.getHeight() / 2);
         
         // Center text
         float textWidth = renderManager.measureText(text);

@@ -14,7 +14,7 @@ import timber.log.Timber;
 public class GridGameScreen extends GameScreen {
     private static String levelDifficulty = "Beginner";
     private static boolean newMapEachTime = true;
-    private static int level = 1;
+    private static final int level = 1;
     public String mapName = "Dummy Map";
     public int solutionMoves = 0;
     public Object solution = null;

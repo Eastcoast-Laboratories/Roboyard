@@ -17,7 +17,7 @@ public class GameElement implements Serializable {
     public static final int TYPE_VERTICAL_WALL = Constants.TYPE_VERTICAL_WALL;   // Vertical wall between columns (mv)
     
     // Element properties
-    private int type;
+    private final int type;
     private int x;
     private int y;
     private int color; // 0=red, 1=green, 2=blue, 3=yellow

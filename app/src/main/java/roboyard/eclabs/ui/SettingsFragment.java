@@ -337,9 +337,8 @@ public class SettingsFragment extends BaseGameFragment {
                 Context context = requireContext();
                 
                 // Get reference to MainActivity or update static values directly
-                if (context instanceof MainActivity) {
+                if (context instanceof MainActivity mainActivity) {
                     // For legacy UI, use the MainActivity instance
-                    MainActivity mainActivity = (MainActivity) context;
                     mainActivity.setAndSaveBoardSizeToPreferences(context, width, height);
                 } else {
                     // For modern UI, update the static values directly

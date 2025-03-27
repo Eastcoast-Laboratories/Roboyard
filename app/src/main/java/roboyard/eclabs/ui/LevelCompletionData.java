@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class LevelCompletionData implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    private int levelId;
+    private final int levelId;
     private boolean completed;
     private int hintsShown;
     private long timeNeeded; // in milliseconds

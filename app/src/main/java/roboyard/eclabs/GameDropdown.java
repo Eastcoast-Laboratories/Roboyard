@@ -85,7 +85,6 @@ public class GameDropdown implements IGameObject {
                     if (touchY >= y && touchY <= y + height) {
                         isOpen = true;
                         input.resetEvents();
-                        return;
                     }
                 } else {
                     // Check option clicks
@@ -98,7 +97,6 @@ public class GameDropdown implements IGameObject {
                         }
                         isOpen = false;
                         input.resetEvents();
-                        return;
                     } else {
                         isOpen = false;
                     }

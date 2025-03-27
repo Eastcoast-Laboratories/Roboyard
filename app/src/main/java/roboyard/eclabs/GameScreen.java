@@ -16,8 +16,8 @@ public abstract class GameScreen implements IGameObject {
     private boolean instancesSorted = false;
 
     // Queue for objects to add/remove after updates complete
-    private List<IGameObject> pendingAdditions = new ArrayList<>();
-    private List<IGameObject> pendingRemovals = new ArrayList<>();
+    private final List<IGameObject> pendingAdditions = new ArrayList<>();
+    private final List<IGameObject> pendingRemovals = new ArrayList<>();
     private boolean processingUpdates = false;
 
     public GameScreen(GameManager gameManager){

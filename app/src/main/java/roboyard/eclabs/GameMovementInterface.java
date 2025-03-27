@@ -17,7 +17,7 @@ public class GameMovementInterface implements IGameObject {
     private final int radius          = 150;
     private int decision              = -1; // 0: NORTH, 1: EAST, 2: SOUTH, 3: WEST
     private GamePiece target;
-    private GameManager gameManager;
+    private final GameManager gameManager;
     private int zIndex               = Constants.UI_ELEMENT; // Default z-index for UI elements
 
     /**

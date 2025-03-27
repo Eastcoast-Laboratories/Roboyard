@@ -21,7 +21,7 @@ public class SolutionAnimator {
     private List<IGameMove> moves;
     private int currentMoveIndex = 0;
     private boolean isAnimating = false;
-    private Handler handler;
+    private final Handler handler;
     private int animationDelayMs = 500;
     private AnimationListener listener;
     
@@ -201,8 +201,7 @@ public class SolutionAnimator {
             int robotId = -1;
             int direction = -1;
             
-            if (move instanceof RRGameMove) {
-                RRGameMove rrMove = (RRGameMove) move;
+            if (move instanceof RRGameMove rrMove) {
                 robotId = rrMove.getColor();
                 direction = translateIADirectionToGameDirection(rrMove.getDirection());
             } else {

@@ -16,10 +16,10 @@ public class MinimapGenerator {
     private static MinimapGenerator instance;
     
     // Paint objects for different map elements
-    private Paint wallPaint;
-    private Paint emptyPaint;
-    private Paint targetPaint;
-    private Paint robotPaint;
+    private final Paint wallPaint;
+    private final Paint emptyPaint;
+    private final Paint targetPaint;
+    private final Paint robotPaint;
     
     /**
      * Get the singleton instance of MinimapGenerator

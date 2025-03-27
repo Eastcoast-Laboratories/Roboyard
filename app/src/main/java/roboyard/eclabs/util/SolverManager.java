@@ -22,7 +22,7 @@ public class SolverManager implements Runnable {
     // Singleton instance
     private static SolverManager instance = null;
     
-    private ISolver solver;
+    private final ISolver solver;
     private Thread solverThread;
     private boolean isSolved = false;
     private int solutionMoves = 0;

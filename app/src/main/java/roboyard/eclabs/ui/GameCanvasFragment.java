@@ -61,10 +61,9 @@ public class GameCanvasFragment extends BaseGameFragment {
         
         // We need to check if our activity is a MainActivity or comes from FragmentHostActivity
         Timber.d("GameCanvasFragment: Checking host activity type: %s", requireActivity().getClass().getSimpleName());
-        if (requireActivity() instanceof MainActivity) {
+        if (requireActivity() instanceof MainActivity mainActivity) {
             // If we're in the original MainActivity, we can use it directly
             Timber.d("GameCanvasFragment: Running in MainActivity");
-            MainActivity mainActivity = (MainActivity) requireActivity();
             gameManager = new GameManager(inputManager, renderManager, screenWidth, screenHeight, mainActivity);
             Timber.d("GameCanvasFragment: Created GameManager with MainActivity");
         } else {

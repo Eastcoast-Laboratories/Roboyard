@@ -13,7 +13,7 @@ import roboyard.eclabs.R;
  */
 public class SoundManager {
     private static SoundManager instance;
-    private Context context;
+    private final Context context;
     private MediaPlayer currentPlayer;
     private boolean isSoundPlaying = false;
     

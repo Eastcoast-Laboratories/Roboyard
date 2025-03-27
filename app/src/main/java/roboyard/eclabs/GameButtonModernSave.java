@@ -26,9 +26,8 @@ public class GameButtonModernSave extends GameButtonModernUI {
         // Get current screen
         Timber.d("[Save button] clicked - starting onClick handling");
 
-        if (gameManager.getCurrentScreen() instanceof GridGameScreen) {
-            GridGameScreen gridGameScreen = (GridGameScreen) gameManager.getCurrentScreen();
-            
+        if (gameManager.getCurrentScreen() instanceof GridGameScreen gridGameScreen) {
+
             // If we have an active history entry, update it before exiting
             if (gridGameScreen.isHistorySaved()) {
                 Timber.d("Updating history entry before exiting to save screen");
