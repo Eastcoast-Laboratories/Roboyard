@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text sizes for tall screens (high height-to-width ratio) -->
+    <dimen name="status_text_size">32sp</dimen>
+    <dimen name="status_text_padding">0dp</dimen>
+</resources>
