@@ -139,6 +139,7 @@ public class GameState implements Serializable {
     public void addHorizontalWall(int x, int y) {
         GameElement wall = new GameElement(GameElement.TYPE_HORIZONTAL_WALL, x, y);
         gameElements.add(wall);
+        setCellType(x, y, Constants.TYPE_HORIZONTAL_WALL);
     }
     
     /**
@@ -147,12 +148,16 @@ public class GameState implements Serializable {
     public void addVerticalWall(int x, int y) {
         GameElement wall = new GameElement(GameElement.TYPE_VERTICAL_WALL, x, y);
         gameElements.add(wall);
+        setCellType(x, y, Constants.TYPE_VERTICAL_WALL);
     }
     
     /**
      * Add a target at the specified coordinates
      */
     public void addTarget(int x, int y, int color) {
+        GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+        target.setColor(color); // Set the color on the target element
+        gameElements.add(target);
         setCellType(x, y, Constants.TYPE_TARGET);
         setTargetColor(x, y, color);
     }
@@ -670,150 +675,207 @@ public class GameState implements Serializable {
      * Load a saved game from a file
      */
     public static GameState loadSavedGame(Context context, int slotId) {
+        Timber.d("Attempting to load game from slot %d with filename: %s", slotId, Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION);
+        
         try {
-            // Determine filename based on slot ID
-            String filename;
-            if (slotId == 0) {
-                filename = Constants.AUTO_SAVE_FILENAME;
-            } else {
-                filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
-            }
-            
-            Timber.d("Attempting to load game from slot %d with filename: %s", slotId, filename);
-            
-            // Get file
+            // Get save directory
             File savesDir = new File(context.getFilesDir(), Constants.SAVE_DIRECTORY);
-            File saveFile = new File(savesDir, filename);
-            
             Timber.d("Save directory path: %s, exists: %b", savesDir.getAbsolutePath(), savesDir.exists());
-            Timber.d("Save file path: %s, exists: %b, size: %d bytes", 
-                    saveFile.getAbsolutePath(), 
-                    saveFile.exists(), 
-                    saveFile.exists() ? saveFile.length() : 0);
             
-            // Check if file exists
+            // Get save file
+            String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
+            File saveFile = new File(savesDir, filename);
+            Timber.d("Save file path: %s, exists: %b, size: %d bytes", saveFile.getAbsolutePath(), saveFile.exists(), saveFile.length());
+            
             if (!saveFile.exists()) {
-                Timber.e("Save file does not exist for slot %d", slotId);
+                Timber.e("Save file does not exist");
                 return null;
             }
             
-            // Read object from file
-            try (FileInputStream fis = new FileInputStream(saveFile);
-                 ObjectInputStream ois = new ObjectInputStream(fis)) {
-                GameState state = (GameState) ois.readObject();
-                return state;
+            // Read the file as text
+            StringBuilder content = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(saveFile)))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line).append("\n");
+                }
             }
-        } catch (IOException | ClassNotFoundException e) {
-            Timber.tag(TAG).e(e, "Error loading game from slot %s", slotId);
+            
+            String saveData = content.toString();
+            Timber.d("Read %d characters from save file", saveData.length());
+            
+            // Parse the save data
+            return parseFromSaveData(saveData, context);
+            
+        } catch (IOException e) {
+            Timber.tag(TAG).e(e, "IOException while loading game from slot %d: %s", slotId, e.getMessage());
+            return null;
+        } catch (Exception e) {
+            Timber.tag(TAG).e(e, "Unexpected error loading game from slot %d: %s", slotId, e.getMessage());
             return null;
         }
     }
     
     /**
-     * Create a random game state
+     * Parse a game state from save data
+     * @param saveData The save data string
+     * @param context The context
+     * @return The parsed game state or null if parsing failed
      */
-    public static GameState createRandom(int width, int height, int difficulty) {
-        // Set the global difficulty level first so difficulty is consistent
-        String difficultyString = difficultyIntToString(difficulty);
-        GridGameScreen.setDifficulty(difficultyString);
-        
-        // Log initial board size and requested size
-        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
-        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " +
-                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
-        
-        // Save current board dimensions and set them for game generation
-        MainActivity.boardSizeX = width;
-        MainActivity.boardSizeY = height;
-        
-        // Ensure we're not limiting to a minimum of 14
-        if (width < 14) {
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board width smaller than 14: %s", width);
-        }
-        if (height < 14) {
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board height smaller than 14: %s", height);
-        }
-        
-        // Log the board size being used for map generation
-        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MainActivity.boardSize after setting: " +
-                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
-        
-        // Create new game state with specified dimensions
-        GameState state = new GameState(width, height);
-        
+    private static GameState parseFromSaveData(String saveData, Context context) {
         try {
-            // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
-                    width + "x" + height);
-                  
-            // Create MapGenerator instance
-            MapGenerator mapGenerator = new MapGenerator();
+            String[] lines = saveData.split("\n");
+            Timber.d("Parsing save data with %d lines", lines.length);
             
-            // Set difficulty in MapGenerator if needed
-            // This is handled by the GridGameScreen.setDifficulty call above
+            // Default values
+            int width = 8;
+            int height = 8;
+            String mapName = "Loaded Game";
+            long timePlayed = 0;
+            int moveCount = 0;
             
-            // Generate a new game map using the same method as the old canvas-based game
-            ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
-
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
-            
-            // Process grid elements to create game state
-            for (GridElement element : gridElements) {
-                String type = element.getType();
-                int x = element.getX();
-                int y = element.getY();
+            // Parse metadata from the first line if it starts with #
+            if (lines.length > 0 && lines[0].startsWith("#")) {
+                String metadataLine = lines[0];
+                String[] metadata = metadataLine.substring(1).split(";");
                 
-                // Handle all wall types
-                if (type.equals("mh")) {
-                    // Add horizontal wall (between rows)
-                    state.addHorizontalWall(x, y);
-                } else if (type.equals("mv")) {
-                    // Add vertical wall (between columns)
-                    state.addVerticalWall(x, y);
-                } else if (type.equals("target_red")) {
-                    // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
-                    state.addTarget(x, y, 0);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(0); // Red
-                    state.getGameElements().add(target);
-                } else if (type.equals("target_green")) {
-                    state.addTarget(x, y, 1);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(1); // Green
-                    state.getGameElements().add(target);
-                } else if (type.equals("target_blue")) {
-                    state.addTarget(x, y, 2);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(2); // Blue
-                    state.getGameElements().add(target);
-                } else if (type.equals("target_yellow")) {
-                    state.addTarget(x, y, 3);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(3); // Yellow
-                    state.getGameElements().add(target);
-                } else if (type.equals("target_multi")) {
-                    // Multi-color target - we'll use red as default
-                    state.addTarget(x, y, 0);
-                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                    target.setColor(0); // Red (default for multi)
-                    state.getGameElements().add(target);
-                } else if (type.equals("robot_red")) {
-                    state.addRobot(x, y, 0);
-                } else if (type.equals("robot_green")) {
-                    state.addRobot(x, y, 1);
-                } else if (type.equals("robot_blue")) {
-                    state.addRobot(x, y, 2);
-                } else if (type.equals("robot_yellow")) {
-                    state.addRobot(x, y, 3);
+                for (String item : metadata) {
+                    if (item.startsWith("MAPNAME:")) {
+                        mapName = item.substring("MAPNAME:".length());
+                    } else if (item.startsWith("TIME:")) {
+                        timePlayed = Long.parseLong(item.substring("TIME:".length()));
+                    } else if (item.startsWith("MOVES:")) {
+                        moveCount = Integer.parseInt(item.substring("MOVES:".length()));
+                    }
                 }
             }
-        } finally {
-            // Keep the board size set to what was requested
-            // Do not restore to previous values
+            
+            // Look for WIDTH and HEIGHT in the file
+            for (String line : lines) {
+                if (line.startsWith("WIDTH:")) {
+                    width = Integer.parseInt(line.substring("WIDTH:".length()).trim().replace(";", ""));
+                    Timber.d("Found WIDTH: %d", width);
+                } else if (line.startsWith("HEIGHT:")) {
+                    height = Integer.parseInt(line.substring("HEIGHT:".length()).trim().replace(";", ""));
+                    Timber.d("Found HEIGHT: %d", height);
+                }
+            }
+            
+            // Create the game state with the parsed dimensions
+            GameState state = new GameState(width, height);
+            state.setLevelName(mapName);
+            state.setMoveCount(moveCount);
+            state.startTime = System.currentTimeMillis() - timePlayed;
+            
+            // Parse board data
+            boolean boardDataStarted = false;
+            int boardLine = 0;
+            int wallsAdded = 0;
+            int targetsAdded = 0;
+            
+            // Skip metadata and dimension lines
+            for (int i = 1; i < lines.length; i++) {
+                String line = lines[i];
+                
+                if (line.startsWith("WIDTH:") || line.startsWith("HEIGHT:")) {
+                    continue;
+                }
+                
+                if (line.startsWith("ROBOTS:")) {
+                    Timber.d("Found ROBOTS section at line %d", i);
+                    // Start parsing robots
+                    for (int j = i + 1; j < lines.length; j++) {
+                        String robotLine = lines[j];
+                        if (robotLine.trim().isEmpty()) {
+                            continue;
+                        }
+                        
+                        String[] robotData = robotLine.split(",");
+                        if (robotData.length >= 3) {
+                            int x = Integer.parseInt(robotData[0]);
+                            int y = Integer.parseInt(robotData[1]);
+                            int color = Integer.parseInt(robotData[2]);
+                            state.addRobot(x, y, color);
+                            Timber.d("Added robot at (%d,%d) with color %d", x, y, color);
+                        }
+                    }
+                    break;
+                }
+                
+                // Skip dimension lines and empty lines
+                if (line.startsWith("WIDTH:") || line.startsWith("HEIGHT:") || line.trim().isEmpty()) {
+                    continue;
+                }
+                
+                // If we haven't started parsing board data yet, and this line contains commas, it's board data
+                if (!boardDataStarted && line.contains(",")) {
+                    boardDataStarted = true;
+                    Timber.d("Started parsing board data at line %d", i);
+                }
+                
+                if (boardDataStarted && boardLine < height) {
+                    // Parse this line of board data
+                    String[] cells = line.split(",");
+                    Timber.d("Parsing board line %d with %d cells", boardLine, cells.length);
+                    
+                    for (int x = -1; x < Math.min(width, cells.length); x++) {
+                        String cellData = cells[x];
+                        // Don't skip empty cells, they might be important for column 0
+                        if (cellData.isEmpty()) {
+                            Timber.d("Empty cell data at (%d,%d), treating as empty cell", x, boardLine);
+                            continue;
+                        }
+                        
+                        try {
+                            if (cellData.contains(":")) {
+                                // This is a target cell with color
+                                String[] targetParts = cellData.split(":");
+                                int cellType = Integer.parseInt(targetParts[0]);
+                                int targetColor = Integer.parseInt(targetParts[1]);
+                                
+                                Timber.d("Found target cell at (%d,%d) with type %d and color %d", x, boardLine, cellType, targetColor);
+                                
+                                if (cellType == Constants.TYPE_TARGET) {
+                                    state.addTarget(x, boardLine, targetColor);
+                                    targetsAdded++;
+                                    Timber.d("Added target at (%d,%d) with color %d", x, boardLine, targetColor);
+                                } else {
+                                    Timber.d("[LOAD/SAVE] unexpected target cellType: %d", cellType);
+                                }
+                            } else {
+                                int cellType = Integer.parseInt(cellData);
+                                Timber.d("Found cell at (%d,%d) with type %d", x, boardLine, cellType);
+                                
+                                if (cellType == Constants.TYPE_HORIZONTAL_WALL) {
+                                    state.addHorizontalWall(x, boardLine);
+                                    wallsAdded++;
+                                    Timber.d("Added horizontal wall at (%d,%d)", x, boardLine);
+                                } else if (cellType == Constants.TYPE_VERTICAL_WALL) {
+                                    state.addVerticalWall(x, boardLine);
+                                    wallsAdded++;
+                                    Timber.d("Added vertical wall at (%d,%d)", x, boardLine);
+                                } else if (cellType == Constants.TYPE_EMPTY) {
+                                    // Empty cell, nothing to do
+                                } else if (cellType != Constants.TYPE_TARGET && cellType != Constants.TYPE_ROBOT) {
+                                    // Only log unknown cell types that aren't targets or robots
+                                    Timber.d("[LOAD/SAVE] unknown cellType: %d at (%d,%d)", cellType, x, boardLine);
+                                }
+                            }
+                        } catch (NumberFormatException e) {
+                            Timber.e("Error parsing cell data '%s' at (%d,%d): %s", cellData, x, boardLine, e.getMessage());
+                        }
+                    }
+                    boardLine++;
+                }
+            }
+            
+            Timber.d("Successfully parsed game state from save data: %d walls, %d targets", wallsAdded, targetsAdded);
+            return state;
+            
+        } catch (Exception e) {
+            Timber.e(e, "Error parsing save data: %s", e.getMessage());
+            return null;
         }
-        
-        state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
-        return state;
     }
     
     /**
@@ -1049,6 +1111,7 @@ public class GameState implements Serializable {
                 }
                 
                 saveData.append(",");
+                Timber.d("Serializing cell at (%d,%d) with type %d", x, y, cellType);
             }
             saveData.append("\n");
         }
@@ -1060,6 +1123,7 @@ public class GameState implements Serializable {
                 saveData.append(element.getX()).append(",")
                        .append(element.getY()).append(",")
                        .append(element.getColor()).append("\n");
+                Timber.d("Serializing robot at (%d,%d) with color %d", element.getX(), element.getY(), element.getColor());
             }
         }
         
@@ -1383,5 +1447,112 @@ public class GameState implements Serializable {
             case 3: return "Impossible";
             default: return "Beginner";
         }
+    }
+    
+    /**
+     * Create a random game state
+     */
+    public static GameState createRandom(int width, int height, int difficulty) {
+        // Set the global difficulty level first so difficulty is consistent
+        String difficultyString = difficultyIntToString(difficulty);
+        GridGameScreen.setDifficulty(difficultyString);
+        
+        // Log initial board size and requested size
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " +
+                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+        
+        // Save current board dimensions and set them for game generation
+        MainActivity.boardSizeX = width;
+        MainActivity.boardSizeY = height;
+        
+        // Ensure we're not limiting to a minimum of 14
+        if (width < 14) {
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board width smaller than 14: %s", width);
+        }
+        if (height < 14) {
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board height smaller than 14: %s", height);
+        }
+        
+        // Log the board size being used for map generation
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MainActivity.boardSize after setting: " +
+                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+        
+        // Create new game state with specified dimensions
+        GameState state = new GameState(width, height);
+        
+        try {
+            // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
+                    width + "x" + height);
+                  
+            // Create MapGenerator instance
+            MapGenerator mapGenerator = new MapGenerator();
+            
+            // Set difficulty in MapGenerator if needed
+            // This is handled by the GridGameScreen.setDifficulty call above
+            
+            // Generate a new game map using the same method as the old canvas-based game
+            ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
+
+            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");
+            
+            // Process grid elements to create game state
+            for (GridElement element : gridElements) {
+                String type = element.getType();
+                int x = element.getX();
+                int y = element.getY();
+                
+                // Handle all wall types
+                if (type.equals("mh")) {
+                    // Add horizontal wall (between rows)
+                    state.addHorizontalWall(x, y);
+                } else if (type.equals("mv")) {
+                    // Add vertical wall (between columns)
+                    state.addVerticalWall(x, y);
+                } else if (type.equals("target_red")) {
+                    // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
+                    state.addTarget(x, y, 0);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(0); // Red
+                    state.getGameElements().add(target);
+                } else if (type.equals("target_green")) {
+                    state.addTarget(x, y, 1);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(1); // Green
+                    state.getGameElements().add(target);
+                } else if (type.equals("target_blue")) {
+                    state.addTarget(x, y, 2);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(2); // Blue
+                    state.getGameElements().add(target);
+                } else if (type.equals("target_yellow")) {
+                    state.addTarget(x, y, 3);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(3); // Yellow
+                    state.getGameElements().add(target);
+                } else if (type.equals("target_multi")) {
+                    // Multi-color target - we'll use red as default
+                    state.addTarget(x, y, 0);
+                    GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                    target.setColor(0); // Red (default for multi)
+                    state.getGameElements().add(target);
+                } else if (type.equals("robot_red")) {
+                    state.addRobot(x, y, 0);
+                } else if (type.equals("robot_green")) {
+                    state.addRobot(x, y, 1);
+                } else if (type.equals("robot_blue")) {
+                    state.addRobot(x, y, 2);
+                } else if (type.equals("robot_yellow")) {
+                    state.addRobot(x, y, 3);
+                }
+            }
+        } finally {
+            // Keep the board size set to what was requested
+            // Do not restore to previous values
+        }
+        
+        state.setLevelName("Random Game " + System.currentTimeMillis() % 1000);
+        return state;
     }
 }
