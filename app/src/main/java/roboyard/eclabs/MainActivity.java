@@ -96,30 +96,6 @@ public class MainActivity extends FragmentActivity
             prefs.edit().putBoolean("show_load_screen_on_restart", false).apply();
             Timber.d("[MINIMAP] Detected restart flag, navigating to load screen for slot %d", lastSavedSlot);
             
-            // Need to delay slightly to let the game fully initialize
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                // Navigate to the save/load screen
-                if (gameManager != null) {
-                    // First clear all caches to ensure fresh state
-                    GameButtonGotoSavedGame.clearAllMinimapCaches();
-                    
-                    // Get the save game screen and refresh it entirely
-                    SaveGameScreen saveScreen = (SaveGameScreen) gameManager.getScreens().get(Constants.SCREEN_SAVE_GAMES);
-                    if (saveScreen != null) {
-                        // Refresh the whole screen to recreate all buttons
-                        saveScreen.refreshScreen();
-                        
-                        // Go to the save game screen
-                        gameManager.setGameScreen(Constants.SCREEN_SAVE_GAMES);
-                        
-                        // Show the load tab
-                        saveScreen.showLoadTab();
-                        saveScreen.dontAutoSwitchTabs = true;
-                        
-                        Timber.d("[MINIMAP] Navigated to load screen after app restart");
-                    }
-                }
-            }, 500); // Short delay to ensure game is initialized
         }
     }
     
@@ -155,9 +131,7 @@ public class MainActivity extends FragmentActivity
         
         // Clear all minimap caches on app start
         Timber.d("Clearing all minimap caches on app start");
-        GameButtonGotoHistoryGame.clearAllMinimapCaches();
-        GameButtonGotoSavedGame.clearAllMinimapCaches();
-        
+
         this.inputManager = new InputManager();
         this.renderManager = new RenderManager(getResources());
         this.renderManager.setContext(this); // Set context for accessibility features

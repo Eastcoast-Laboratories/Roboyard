@@ -317,53 +317,6 @@ public class GameHistoryManager {
     }
     
     /**
-     * Promote a history entry to a save game
-     * @return The save slot number, or -1 if failed
-     */
-    public static int promoteHistoryEntryToSave(Activity activity, int historyIndex) {
-        try {
-            // Get the history entry
-            GameHistoryEntry entry = getHistoryEntry(activity, historyIndex);
-            if (entry == null) {
-                Timber.e("History entry not found for index: %d", historyIndex);
-                return -1;
-            }
-            
-            // Get the next available save slot (start from 1 to skip autosave)
-            int saveSlot = 1;
-            while (FileReadWrite.privateDataFileExists(activity, SaveGameScreen.getMapPath(saveSlot))) {
-                saveSlot++;
-                if (saveSlot > 35) {
-                    Timber.e("All slots are full, cannot promote history entry");
-                    return -1;
-                }
-            }
-            
-            // Read history data
-            String historyPath = entry.getMapPath();
-            String historyData = FileReadWrite.readPrivateData(activity, historyPath);
-            if (historyData == null || historyData.isEmpty()) {
-                Timber.e("Failed to read history data: %s", historyPath);
-                return -1;
-            }
-            
-            // Write to save slot
-            String savePath = SaveGameScreen.getMapPath(saveSlot);
-            FileReadWrite.writePrivateData(activity, savePath, historyData);
-            
-            Timber.d("Promoted history entry %s to save slot %d", entry.getMapPath(), saveSlot);
-            
-            // Invalidate save cache
-            SaveGameScreen.clearCachesForMap(savePath);
-
-            return saveSlot;
-        } catch (Exception e) {
-            Timber.e("Error promoting history entry to save: %s", e.getMessage());
-            return -1;
-        }
-    }
-
-    /**
      * Konvertiert einen History-Index in einen Dateipfad
      */
     public static String indexToPath(int index) {

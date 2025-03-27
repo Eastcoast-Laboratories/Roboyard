@@ -17,60 +17,7 @@ import timber.log.Timber;
  */
 public class SolutionAnimationTest {
     
-    /**
-     * Demo of how to use the new classes with the old canvas game
-     * @param gridGameScreen The existing game screen instance
-     */
-    public static void runDemo(GridGameScreen gridGameScreen) {
-        // Create the adapter that connects our new components with the old game
-        CanvasSolutionDisplayManager displayManager = new CanvasSolutionDisplayManager(gridGameScreen);
-        
-        // Register a listener to get events during solution animation
-        displayManager.setListener(new SolutionDisplayManager.SolutionDisplayListener() {
-            @Override
-            public void onSolutionAnimationStart() {
-                Timber.d("Solution animation started");
-            }
-            
-            @Override
-            public void onSolutionAnimationStep(int robotId, int direction, int moveIndex, int totalMoves) {
-                Timber.d("Move %d/%d: Robot %d moving in direction %d", 
-                        moveIndex, totalMoves, robotId, direction);
-            }
-            
-            @Override
-            public void onSolutionAnimationComplete() {
-                Timber.d("Solution animation completed");
-            }
-            
-            @Override
-            public void onSolutionAnimationStopped() {
-                Timber.d("Solution animation was stopped");
-            }
-        });
-        
-        // Show the loading spinner while calculating a solution
-        displayManager.showSpinner(true);
-        
-        // Simulating solution calculation...
-        // In a real implementation, you would use the solver to calculate
-        // the solution and pass it to displaySolution when ready
-        
-        // Get a solution (in this example, we're just assuming we have one)
-        GameSolution solution = null; // In real code, get this from the solver
-        
-        // Once the solution is ready, hide the spinner
-        displayManager.showSpinner(false);
-        
-        // If a solution was found, display it
-        if (solution != null) {
-            displayManager.displaySolution(solution);
-        }
-        
-        // If you need to stop the animation before it's complete:
-        // displayManager.stopSolutionAnimation();
-    }
-    
+
     /**
      * Example of using SolutionAnimator directly if needed
      */
