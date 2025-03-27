@@ -4,11 +4,14 @@ import android.os.Bundle;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.NavigationUI;
 
 import roboyard.eclabs.R;
+import timber.log.Timber;
 
 /**
  * Activity that hosts the modern UI fragments for settings, save/load, and help screens.
@@ -61,9 +64,16 @@ public class FragmentHostActivity extends AppCompatActivity {
     
     @Override
     public void onBackPressed() {
-        // If we can't navigate up in the navigation graph, finish the activity
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        if (!navController.navigateUp()) {
+        // Use the FragmentManager to handle back navigation instead of NavController
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            // Pop the back stack if there are fragments in it
+            fragmentManager.popBackStack();
+            Timber.d("Popped fragment from back stack");
+        } else {
+            // If no fragments in back stack, finish the activity
+            Timber.d("No fragments in back stack, finishing activity");
             finish();
         }
     }
