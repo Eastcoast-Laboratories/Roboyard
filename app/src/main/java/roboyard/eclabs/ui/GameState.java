@@ -697,12 +697,21 @@ public class GameState implements Serializable {
                 filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
             }
             
+            Timber.d("Attempting to load game from slot %d with filename: %s", slotId, filename);
+            
             // Get file
             File savesDir = new File(context.getFilesDir(), Constants.SAVE_DIRECTORY);
             File saveFile = new File(savesDir, filename);
             
+            Timber.d("Save directory path: %s, exists: %b", savesDir.getAbsolutePath(), savesDir.exists());
+            Timber.d("Save file path: %s, exists: %b, size: %d bytes", 
+                    saveFile.getAbsolutePath(), 
+                    saveFile.exists(), 
+                    saveFile.exists() ? saveFile.length() : 0);
+            
             // Check if file exists
             if (!saveFile.exists()) {
+                Timber.e("Save file does not exist for slot %d", slotId);
                 return null;
             }
             

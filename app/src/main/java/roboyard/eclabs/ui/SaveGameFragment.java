@@ -474,10 +474,23 @@ public class SaveGameFragment extends BaseGameFragment {
                         Toast.makeText(requireContext(), "Failed to save game", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    // Load game from this slot
                     if (saveSlot.getDate() != null) { // Only load if slot has a save
+                        // Load the game first
                         gameStateManager.loadGame(saveSlot.getSlotId());
-                        navigateToDirect(new GameCanvasFragment());
+                        
+                        // Verify that the game state was loaded successfully
+                        if (gameStateManager.getCurrentState().getValue() != null) {
+                            // Set UI mode to modern
+                            UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
+                            
+                            // Navigate to the modern game fragment
+                            ModernGameFragment gameFragment = new ModernGameFragment();
+                            navigateToDirect(gameFragment);
+                        } else {
+                            // Show error if game state couldn't be loaded
+                            Toast.makeText(requireContext(), "Error loading saved game", Toast.LENGTH_SHORT).show();
+                            Timber.e("Failed to load game state from slot %d", saveSlot.getSlotId());
+                        }
                     } else {
                         Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
                     }
@@ -559,11 +572,24 @@ public class SaveGameFragment extends BaseGameFragment {
             
             // Set click listener
             holder.itemView.setOnClickListener(v -> {
-                // Load this history entry using the map path
                 if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
                     Timber.d("Loading history entry: %s", entry.getMapPath());
+                    // Load the history entry
                     gameStateManager.loadHistoryEntry(entry.getMapPath());
-                    navigateToDirect(new GameCanvasFragment());
+                    
+                    // Verify that the game state was loaded successfully
+                    if (gameStateManager.getCurrentState().getValue() != null) {
+                        // Set UI mode to modern
+                        UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
+                        
+                        // Navigate to the modern game fragment
+                        ModernGameFragment gameFragment = new ModernGameFragment();
+                        navigateToDirect(gameFragment);
+                    } else {
+                        // Show error if game state couldn't be loaded
+                        Toast.makeText(requireContext(), "Error loading history entry", Toast.LENGTH_SHORT).show();
+                        Timber.e("Failed to load game state from history: %s", entry.getMapPath());
+                    }
                 } else {
                     Timber.e("Cannot load history entry: map path is empty");
                     Toast.makeText(requireContext(), "Cannot load history entry", Toast.LENGTH_SHORT).show();
