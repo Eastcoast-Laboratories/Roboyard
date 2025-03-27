@@ -540,13 +540,11 @@ public class GameState implements Serializable {
                 // Add horizontal walls (mh) - for each cell, check if there's a horizontal wall on its north side
                 if (hasHorizontalWall(x, y)) {
                     elements.add(new GridElement(x, y, "mh"));
-                    Timber.d("[SOLUTION_SOLVER] Adding horizontal wall at (%d,%d)", x, y);
                 }
                 
                 // Add vertical walls (mv) - for each cell, check if there's a vertical wall on its west side
                 if (hasVerticalWall(x, y)) {
                     elements.add(new GridElement(x, y, "mv"));
-                    Timber.d("[SOLUTION_SOLVER] Adding vertical wall at (%d,%d)", x, y);
                 }
                 
                 // Add targets
@@ -576,14 +574,12 @@ public class GameState implements Serializable {
         for (int y = 0; y < height; y++) {
             // TODO: if not already, then add right border wall
             // elements.add(new GridElement(width - 1, y, "mv"));
-            // Timber.d("[SOLUTION_SOLVER] Adding right border wall at (%d,%d)", width-1, y);
         }
         
         // Add bottom border walls (horizontal walls on the bottom edge of the grid)
         for (int x = 0; x < width; x++) {
             // TODO: if not already, then add bottom border wall
             // elements.add(new GridElement(x, height - 1, "mh"));
-            // Timber.d("[SOLUTION_SOLVER] Adding bottom border wall at (%d,%d)", x, height-1);
         }
 
         // TODO: if not already, then add left and top border walls
@@ -910,7 +906,6 @@ public class GameState implements Serializable {
                     int x = Integer.parseInt(parts[0]);
                     int y = Integer.parseInt(parts[1]);
                     state.addHorizontalWall(x, y);
-                    Timber.d("[SOLUTION_SOLVER] Adding horizontal wall at (%d,%d)", x, y);
                 }
                 continue;
             }
@@ -922,66 +917,112 @@ public class GameState implements Serializable {
                     int x = Integer.parseInt(parts[0]);
                     int y = Integer.parseInt(parts[1]);
                     state.addVerticalWall(x, y);
-                    Timber.d("[SOLUTION_SOLVER] Adding vertical wall at (%d,%d)", x, y);
                 }
                 continue;
             }
             
             // Parse targets
             if (line.startsWith("target_")) {
-                String color = line.substring(7, line.indexOf(";"));
-                String[] parts = line.substring(line.indexOf("_") + 1 + color.length(), line.length() - 1).split(",");
-                if (parts.length == 2) {
-                    int x = Integer.parseInt(parts[0]);
-                    int y = Integer.parseInt(parts[1]);
-                    int colorId = -1;
-                    
-                    if (color.equals("red")) colorId = 0;
-                    else if (color.equals("green")) colorId = 1;
-                    else if (color.equals("blue")) colorId = 2;
-                    else if (color.equals("yellow")) colorId = 3;
-                    
-                    if (colorId >= 0) {
-                        state.addTarget(x, y, colorId);
-                        GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                        target.setColor(colorId);
-                        state.getGameElements().add(target);
-                        hasTarget = true;
-                        Timber.d("[SOLUTION_SOLVER] Adding %s target at (%d,%d)", color, x, y);
+                // Format: target_color8,11;
+                // Extract color name (e.g., "yellow" from "target_yellow8,11;")
+                String colorPart = line.substring(7, line.indexOf(";"));
+                
+                // Find the first digit to separate color from coordinates
+                int digitPos = -1;
+                for (int i = 0; i < colorPart.length(); i++) {
+                    if (Character.isDigit(colorPart.charAt(i))) {
+                        digitPos = i;
+                        break;
                     }
+                }
+                
+                if (digitPos != -1) {
+                    String color = colorPart.substring(0, digitPos);
+                    String coordsStr = colorPart.substring(digitPos);
+                    String[] coords = coordsStr.split(",");
+                    
+                    if (coords.length == 2) {
+                        try {
+                            int x = Integer.parseInt(coords[0]);
+                            int y = Integer.parseInt(coords[1]);
+                            int colorId = -1;
+                            
+                            if (color.equals("red")) colorId = 0;
+                            else if (color.equals("green")) colorId = 1;
+                            else if (color.equals("blue")) colorId = 2;
+                            else if (color.equals("yellow")) colorId = 3;
+                            
+                            if (colorId >= 0) {
+                                state.addTarget(x, y, colorId);
+                                GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                                target.setColor(colorId);
+                                state.getGameElements().add(target);
+                                hasTarget = true;
+                                Timber.d("[LEVEL LOADING] Adding %s target at (%d,%d)", color, x, y);
+                            }
+                        } catch (NumberFormatException e) {
+                            Timber.e(e, "[LEVEL LOADING] Error parsing target coordinates: %s", line);
+                        }
+                    }
+                } else {
+                    Timber.e("[LEVEL LOADING] Error parsing target line, no digits found: %s", line);
                 }
                 continue;
             }
             
             // Parse robots
             if (line.startsWith("robot_")) {
-                String color = line.substring(6, line.indexOf(";"));
-                String[] parts = line.substring(line.indexOf("_") + 1 + color.length(), line.length() - 1).split(",");
-                if (parts.length == 2) {
-                    int x = Integer.parseInt(parts[0]);
-                    int y = Integer.parseInt(parts[1]);
-                    int colorId = -1;
-                    
-                    if (color.equals("red")) colorId = 0;
-                    else if (color.equals("green")) colorId = 1;
-                    else if (color.equals("blue")) colorId = 2;
-                    else if (color.equals("yellow")) colorId = 3;
-                    
-                    if (colorId >= 0) {
-                        GameElement robot = new GameElement(GameElement.TYPE_ROBOT, x, y);
-                        robot.setColor(colorId);
-                        state.getGameElements().add(robot);
-                        Timber.d("[SOLUTION_SOLVER] Adding %s robot at (%d,%d)", color, x, y);
+                // Format: robot_color6,1;
+                // Extract color name (e.g., "red" from "robot_red6,1;")
+                String colorPart = line.substring(6, line.indexOf(";"));
+                
+                // Find the first digit to separate color from coordinates
+                int digitPos = -1;
+                for (int i = 0; i < colorPart.length(); i++) {
+                    if (Character.isDigit(colorPart.charAt(i))) {
+                        digitPos = i;
+                        break;
                     }
+                }
+                
+                if (digitPos != -1) {
+                    String color = colorPart.substring(0, digitPos);
+                    String coordsStr = colorPart.substring(digitPos);
+                    String[] coords = coordsStr.split(",");
+                    
+                    if (coords.length == 2) {
+                        try {
+                            int x = Integer.parseInt(coords[0]);
+                            int y = Integer.parseInt(coords[1]);
+                            int colorId = -1;
+                            
+                            if (color.equals("red")) colorId = 0;
+                            else if (color.equals("green")) colorId = 1;
+                            else if (color.equals("blue")) colorId = 2;
+                            else if (color.equals("yellow")) colorId = 3;
+                            
+                            if (colorId >= 0) {
+                                state.addRobot(x, y, colorId);
+                                GameElement robot = new GameElement(GameElement.TYPE_ROBOT, x, y);
+                                robot.setColor(colorId);
+                                state.getGameElements().add(robot);
+                                Timber.d("[LEVEL LOADING] Adding %s robot at (%d,%d)", color, x, y);
+                            }
+                        } catch (NumberFormatException e) {
+                            Timber.e(e, "[LEVEL LOADING] Error parsing robot coordinates: %s", line);
+                        }
+                    }
+                } else {
+                    Timber.e("[LEVEL LOADING] Error parsing robot line, no digits found: %s", line);
                 }
                 continue;
             }
         }
         
-        // If no target was found, add a default target for the first robot
+        // If no target was found, throw an exception
         // This prevents the NullPointerException in the solver
         if (!hasTarget && !state.getGameElements().isEmpty()) {
-            Timber.e("[SOLUTION_SOLVER] No target found in level");
+            Timber.e("[LEVEL LOADING] No target found in level");
             throw new IllegalStateException("Level has no target, cannot create a valid game state");
         }
         
