@@ -352,6 +352,10 @@ public class GameStateManager extends AndroidViewModel {
                 // Set reference to this GameStateManager in the new state
                 newState.setGameStateManager(this);
                 
+                // Ensure robots are reset to their initial positions
+                newState.resetRobotPositions();
+                Timber.d("GameStateManager: Robots reset to initial positions after loading saved game");
+                
                 currentState.setValue(newState);
                 moveCount.setValue(newState.getMoveCount());
                 isGameComplete.setValue(newState.isComplete());

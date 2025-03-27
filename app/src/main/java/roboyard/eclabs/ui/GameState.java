@@ -785,8 +785,8 @@ public class GameState implements Serializable {
                     // Start parsing robots
                     for (int j = i + 1; j < lines.length; j++) {
                         String robotLine = lines[j];
-                        if (robotLine.trim().isEmpty()) {
-                            continue;
+                        if (robotLine.trim().isEmpty() || robotLine.startsWith("INITIAL_POSITIONS:")) {
+                            break;
                         }
                         
                         String[] robotData = robotLine.split(",");
@@ -798,7 +798,33 @@ public class GameState implements Serializable {
                             Timber.d("Added robot at (%d,%d) with color %d", x, y, color);
                         }
                     }
-                    break;
+                    continue;
+                }
+                
+                if (line.startsWith("INITIAL_POSITIONS:")) {
+                    Timber.d("Found INITIAL_POSITIONS section at line %d", i);
+                    // Initialize the initialRobotPositions map if it doesn't exist
+                    if (state.initialRobotPositions == null) {
+                        state.initialRobotPositions = new HashMap<>();
+                    }
+                    
+                    // Start parsing initial positions
+                    for (int j = i + 1; j < lines.length; j++) {
+                        String positionLine = lines[j];
+                        if (positionLine.trim().isEmpty()) {
+                            break;
+                        }
+                        
+                        String[] positionData = positionLine.split(",");
+                        if (positionData.length >= 3) {
+                            int x = Integer.parseInt(positionData[0]);
+                            int y = Integer.parseInt(positionData[1]);
+                            int color = Integer.parseInt(positionData[2]);
+                            state.initialRobotPositions.put(color, new int[]{x, y});
+                            Timber.d("Added initial position for robot color %d at (%d,%d)", color, x, y);
+                        }
+                    }
+                    continue;
                 }
                 
                 // Skip dimension lines and empty lines
@@ -866,6 +892,17 @@ public class GameState implements Serializable {
                     }
                     boardLine++;
                 }
+            }
+            
+            // If we have initial positions but no robots have been reset to them yet,
+            // reset the robots to their initial positions
+            if (state.initialRobotPositions != null && !state.initialRobotPositions.isEmpty()) {
+                state.resetRobotPositions();
+                Timber.d("Reset robots to their initial positions after loading");
+            } else {
+                // If we don't have initial positions saved in the file, store the current positions as initial
+                state.storeInitialRobotPositions();
+                Timber.d("No initial positions found in save file, storing current positions as initial");
             }
             
             Timber.d("Successfully parsed game state from save data: %d walls, %d targets", wallsAdded, targetsAdded);
@@ -1115,7 +1152,7 @@ public class GameState implements Serializable {
             saveData.append("\n");
         }
         
-        // Add robots
+        // Add current robot positions
         saveData.append("ROBOTS:\n");
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
@@ -1123,6 +1160,20 @@ public class GameState implements Serializable {
                        .append(element.getY()).append(",")
                        .append(element.getColor()).append("\n");
                 Timber.d("Serializing robot at (%d,%d) with color %d", element.getX(), element.getY(), element.getColor());
+            }
+        }
+        
+        // Add initial robot positions if available
+        if (initialRobotPositions != null && !initialRobotPositions.isEmpty()) {
+            saveData.append("INITIAL_POSITIONS:\n");
+            for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
+                int robotColor = entry.getKey();
+                int[] position = entry.getValue();
+                saveData.append(position[0]).append(",")
+                       .append(position[1]).append(",")
+                       .append(robotColor).append("\n");
+                Timber.d("Serializing initial position for robot color %d at (%d, %d)", 
+                        robotColor, position[0], position[1]);
             }
         }
         
