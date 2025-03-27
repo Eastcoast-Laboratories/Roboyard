@@ -840,30 +840,42 @@ public class GameStateManager extends AndroidViewModel {
     public boolean undoLastMove() {
         // Check if there's anything to undo
         if (stateHistory.isEmpty()) {
+            Timber.d("[ROBOTS] undoLastMove: No history to undo, stateHistory is empty");
             return false;
         }
         
         // Get the previous state and restore it
         GameState previousState = stateHistory.remove(stateHistory.size() - 1);
+        Timber.d("[ROBOTS] undoLastMove: Removed previous state from history, remaining history size: %d", stateHistory.size());
+        
         if (previousState != null) {
             // Also restore the squares moved count
             if (!squaresMovedHistory.isEmpty()) {
-                squaresMoved.setValue(squaresMovedHistory.remove(squaresMovedHistory.size() - 1));
+                int previousSquaresMoved = squaresMovedHistory.remove(squaresMovedHistory.size() - 1);
+                squaresMoved.setValue(previousSquaresMoved);
+                Timber.d("[ROBOTS] undoLastMove: Restored squares moved to: %d", previousSquaresMoved);
+            } else {
+                Timber.d("[ROBOTS] undoLastMove: No squares moved history to restore");
             }
             
             // Restore the state
             currentState.setValue(previousState);
+            Timber.d("[ROBOTS] undoLastMove: Restored previous game state");
             
             // Decrement move count
             int moves = moveCount.getValue();
             moveCount.setValue(Math.max(0, moves - 1));
+            Timber.d("[ROBOTS] undoLastMove: Decremented move count to: %d", Math.max(0, moves - 1));
             
             // Reset game complete flag if it was set
             if (isGameComplete.getValue()) {
                 isGameComplete.setValue(false);
+                Timber.d("[ROBOTS] undoLastMove: Reset game complete flag");
             }
             
             return true;
+        } else {
+            Timber.e("[ROBOTS] undoLastMove: Previous state was null, this should not happen");
         }
         
         return false;
@@ -1225,8 +1237,11 @@ public class GameStateManager extends AndroidViewModel {
      * This keeps the same map but resets robot positions and move counters
      */
     public void resetRobots() {
+        Timber.d("[ROBOTS] resetRobots: Attempting to reset robots to starting positions");
+        
         GameState currentGameState = currentState.getValue();
         if (currentGameState == null) {
+            Timber.e("[ROBOTS] resetRobots: Current game state is null, cannot reset robots");
             return;
         }
         
@@ -1243,25 +1258,31 @@ public class GameStateManager extends AndroidViewModel {
                 ObjectInputStream ois = new ObjectInputStream(bis);
                 resetState = (GameState) ois.readObject();
                 ois.close();
+                Timber.d("[ROBOTS] resetRobots: Successfully created deep copy of current game state");
             } catch (Exception e) {
-                Timber.e(e, "Error creating a deep copy of GameState for reset");
+                Timber.e(e, "[ROBOTS] resetRobots: Error creating a deep copy of GameState for reset");
                 return; // Can't proceed without a valid copy
             }
             
             // Reset robot positions by moving them back to original positions
+            Timber.d("[ROBOTS] resetRobots: Calling resetRobotPositions on the game state");
             resetState.resetRobotPositions();
             
             // Reset counters
             moveCount.setValue(0);
             squaresMoved.setValue(0);
             isGameComplete.setValue(false);
+            Timber.d("[ROBOTS] resetRobots: Reset move count, squares moved, and game complete flag");
             
             // Clear history
+            int historySize = stateHistory.size();
             stateHistory.clear();
             squaresMovedHistory.clear();
+            Timber.d("[ROBOTS] resetRobots: Cleared state history (previous size: %d)", historySize);
             
             // Update state
             currentState.setValue(resetState);
+            Timber.d("[ROBOTS] resetRobots: Updated current state with reset state");
             
             // Show a toast notification
             if (context instanceof Activity) {
@@ -1270,12 +1291,12 @@ public class GameStateManager extends AndroidViewModel {
                 });
             }
             
-            Timber.d("GameStateManager: Robots reset to starting positions");
+            Timber.d("[ROBOTS] resetRobots: Robots successfully reset to starting positions");
         } catch (Exception e) {
-            Timber.e(e, "Error resetting robots");
+            Timber.e(e, "[ROBOTS] resetRobots: Error resetting robots");
         }
     }
-
+    
     /**
      * Asynchronously calculates the solution for the current game state
      * and returns the result via callback

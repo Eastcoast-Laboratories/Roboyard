@@ -1136,9 +1136,11 @@ public class GameState implements Serializable {
     public void resetRobotPositions() {
         // Store initial robot positions if not already stored
         if (initialRobotPositions == null || initialRobotPositions.isEmpty()) {
-            // Can't reset if we don't have initial positions
+            Timber.e("[ROBOTS] resetRobotPositions: Cannot reset, initialRobotPositions is null or empty");
             return;
         }
+        
+        Timber.d("[ROBOTS] resetRobotPositions: Starting reset with %d stored initial positions", initialRobotPositions.size());
         
         // Get current robot elements
         List<GameElement> currentRobots = new ArrayList<>();
@@ -1150,16 +1152,25 @@ public class GameState implements Serializable {
         
         // Skip if no robots found
         if (currentRobots.isEmpty()) {
+            Timber.e("[ROBOTS] resetRobotPositions: No robots found in current game state");
             return;
         }
+        
+        Timber.d("[ROBOTS] resetRobotPositions: Found %d robots to reset", currentRobots.size());
         
         // Reset each robot to its initial position
         for (GameElement robot : currentRobots) {
             int robotColor = robot.getColor();
+            Timber.d("[ROBOTS] resetRobotPositions: Processing robot with color %d", robotColor);
+            
             if (initialRobotPositions.containsKey(robotColor)) {
                 int[] position = initialRobotPositions.get(robotColor);
+                Timber.d("[ROBOTS] resetRobotPositions: Resetting robot color %d from (%d, %d) to (%d, %d)", 
+                        robotColor, robot.getX(), robot.getY(), position[0], position[1]);
                 robot.setX(position[0]);
                 robot.setY(position[1]);
+            } else {
+                Timber.e("[ROBOTS] resetRobotPositions: No initial position found for robot color %d", robotColor);
             }
         }
         
@@ -1171,6 +1182,8 @@ public class GameState implements Serializable {
         
         // Reset completion flag
         completed = false;
+        
+        Timber.d("[ROBOTS] resetRobotPositions: Reset complete");
     }
 
     /**
@@ -1180,16 +1193,25 @@ public class GameState implements Serializable {
         // Initialize the map if it doesn't exist
         if (initialRobotPositions == null) {
             initialRobotPositions = new HashMap<>();
+            Timber.d("[ROBOTS] storeInitialRobotPositions: Created new initialRobotPositions map");
+        } else {
+            Timber.d("[ROBOTS] storeInitialRobotPositions: Using existing initialRobotPositions map with %d entries", initialRobotPositions.size());
         }
         
+        int robotCount = 0;
         // Loop through all game elements to find robots
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
                 // Store the robot's position by its color
                 int[] position = new int[] { element.getX(), element.getY() };
                 initialRobotPositions.put(element.getColor(), position);
+                Timber.d("[ROBOTS] storeInitialRobotPositions: Stored robot color %d at position (%d, %d)", 
+                        element.getColor(), position[0], position[1]);
+                robotCount++;
             }
         }
+        
+        Timber.d("[ROBOTS] storeInitialRobotPositions: Stored positions for %d robots", robotCount);
     }
     
     /**
