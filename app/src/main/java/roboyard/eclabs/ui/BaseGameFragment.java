@@ -12,6 +12,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import roboyard.eclabs.R;
+import timber.log.Timber;
+
 /**
  * Base fragment class for all game screens.
  * Provides common functionality and access to the GameStateManager.
@@ -42,6 +45,46 @@ public abstract class BaseGameFragment extends Fragment {
      */
     protected void navigateTo(@IdRes int actionId) {
         Navigation.findNavController(requireView()).navigate(actionId);
+    }
+    
+    /**
+     * Navigate to another screen using direct fragment transaction
+     * This method should be used instead of Navigation component when mixing navigation approaches
+     * @param fragment The fragment to navigate to
+     * @param addToBackStack Whether to add the transaction to the back stack
+     * @param tag Optional tag for the fragment transaction
+     */
+    protected void navigateToDirect(Fragment fragment, boolean addToBackStack, String tag) {
+        try {
+            // Create the transaction
+            androidx.fragment.app.FragmentTransaction transaction = requireActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment);
+            
+            // Add to back stack if requested
+            if (addToBackStack) {
+                transaction.addToBackStack(tag);
+            }
+            
+            // Commit the transaction
+            transaction.commit();
+            
+            // Log success
+            Timber.d("Navigation to %s completed using fragment transaction", 
+                    fragment.getClass().getSimpleName());
+        } catch (Exception e) {
+            // Log error
+            Timber.e(e, "Error navigating to %s", fragment.getClass().getSimpleName());
+        }
+    }
+    
+    /**
+     * Simplified version of navigateToDirect that adds to back stack with null tag
+     * @param fragment The fragment to navigate to
+     */
+    protected void navigateToDirect(Fragment fragment) {
+        navigateToDirect(fragment, true, null);
     }
     
     /**

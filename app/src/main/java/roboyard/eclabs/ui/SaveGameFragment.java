@@ -19,8 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -479,9 +477,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     // Load game from this slot
                     if (saveSlot.getDate() != null) { // Only load if slot has a save
                         gameStateManager.loadGame(saveSlot.getSlotId());
-                        // Navigate to game screen using the correct action
-                        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-                                .navigate(R.id.actionSaveGameToGamePlay);
+                        navigateToDirect(new GameCanvasFragment());
                     } else {
                         Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
                     }
@@ -567,8 +563,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
                     Timber.d("Loading history entry: %s", entry.getMapPath());
                     gameStateManager.loadHistoryEntry(entry.getMapPath());
-                    // Navigate to game screen using the correct action
-                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.actionSaveGameToGamePlay);
+                    navigateToDirect(new GameCanvasFragment());
                 } else {
                     Timber.e("Cannot load history entry: map path is empty");
                     Toast.makeText(requireContext(), "Cannot load history entry", Toast.LENGTH_SHORT).show();

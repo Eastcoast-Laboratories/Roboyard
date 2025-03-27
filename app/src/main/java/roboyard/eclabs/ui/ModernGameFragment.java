@@ -533,7 +533,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         rrMove.getColor(), robotColor);
                 
                 // Update the status text with the hint number and the hint itself
-                String hintText = String.format("Hint %d/%d: Move the %s robot %s", 
+                String hintText = String.format("%d/%d: Move the %s robot %s",
                         currentStep + 1, totalMoves, robotColor, direction);
                 statusTextView.setText(hintText);
                 statusTextView.setVisibility(View.VISIBLE);
@@ -598,22 +598,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         menuButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Menu button clicked");
             
-            try {
-                // Create a new MainMenuFragment instance
-                MainMenuFragment menuFragment = new MainMenuFragment();
-                
-                // Perform the fragment transaction
-                requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.nav_host_fragment, menuFragment)
-                    .addToBackStack(null)
-                    .commit();
-                
-                Timber.d("Navigation to main menu completed using fragment transaction");
-            } catch (Exception e) {
-                Timber.e(e, "Error navigating to main menu");
-                Toast.makeText(requireContext(), "Cannot navigate to main menu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            // Create a new MainMenuFragment instance
+            MainMenuFragment menuFragment = new MainMenuFragment();
+            navigateToDirect(menuFragment);
         });
         
         // Next Level button - go to the next level when a level is completed

@@ -96,22 +96,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Start a new game with the selected level
         gameStateManager.startLevelGame(levelId);
         
-        try {
-            // Create a new ModernGameFragment instance
-            ModernGameFragment gameFragment = new ModernGameFragment();
-            
-            // Perform the fragment transaction
-            requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.nav_host_fragment, gameFragment)
-                .addToBackStack(null)
-                .commit();
-            
-            Timber.d("Navigation to modern game screen completed using fragment transaction");
-        } catch (Exception e) {
-            Timber.e(e, "Error navigating to modern game screen");
-            Toast.makeText(requireContext(), "Cannot navigate to game: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        // Create a new ModernGameFragment instance
+        ModernGameFragment gameFragment = new ModernGameFragment();
+        navigateToDirect(gameFragment);
     }
     
     @Override
