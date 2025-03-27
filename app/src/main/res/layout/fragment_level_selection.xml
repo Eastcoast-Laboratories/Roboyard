@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- Colorful border using tiled wall graphics -->
+    <ImageView
+        android:id="@+id/top_wall"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Top wall" />
+    
+    <ImageView
+        android:id="@+id/left_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Left wall" />
+    
+    <ImageView
+        android:id="@+id/right_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Right wall" />
+    
+    <ImageView
+        android:id="@+id/bottom_wall"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="Bottom wall" />
+
+    <!-- Scrollable content area with padding -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/top_wall"
+        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintEnd_toStartOf="@id/right_wall">
+        
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+            
+            <!-- Title centered at the top -->
+            <TextView
+                android:id="@+id/level_selection_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/level_selection_title"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:layout_marginTop="16dp"
+                android:textColor="#212121"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- RecyclerView for level grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/level_recycler_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/level_selection_title" />
+                
+            <!-- Back button at the bottom -->
+            <Button
+                android:id="@+id/back_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/back"
+                android:contentDescription="@string/back_description"
+                android:padding="16dp"
+                android:layout_marginTop="24dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@drawable/button_rounded_gray_outline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/level_recycler_view"
+                app:layout_constraintWidth_max="300dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

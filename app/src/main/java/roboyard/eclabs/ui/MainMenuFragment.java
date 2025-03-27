@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.navigation.Navigation;
@@ -22,6 +23,7 @@ public class MainMenuFragment extends BaseGameFragment {
     
     private Button newRandomGameButton;
     private Button levelGameButton;
+    private Button legacyLevelButton;
     private Button loadGameButton;
     private Button settingsButton;
     private Button helpButton;
@@ -40,6 +42,7 @@ public class MainMenuFragment extends BaseGameFragment {
         
         // Use existing level game button from XML layout
         levelGameButton = view.findViewById(R.id.level_game_button);
+        legacyLevelButton = view.findViewById(R.id.legacy_level_button);
         loadGameButton = view.findViewById(R.id.load_game_button);
         settingsButton = view.findViewById(R.id.settings_button);
         helpButton = view.findViewById(R.id.help_button);
@@ -69,37 +72,121 @@ public class MainMenuFragment extends BaseGameFragment {
             Timber.d("MainMenuFragment: Navigation to game play completed");
         });
         
-        // Level Game button - go to level selection screen
+        // Level Game button - go to level selection screen in modern UI
         levelGameButton.setOnClickListener(v -> {
-            // Navigate to the level selection screen
+            // Navigate to the level selection screen in modern UI
+            Timber.d("MainMenuFragment: Level Game button clicked");
+            
+            try {
+                // Create a new LevelSelectionFragment instance
+                LevelSelectionFragment levelFragment = new LevelSelectionFragment();
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, levelFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to level selection screen completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to level selection screen");
+                Toast.makeText(requireContext(), "Cannot navigate to level selection: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        // Legacy Level button - go to legacy level selection screen
+        legacyLevelButton.setOnClickListener(v -> {
+            // Navigate to the legacy level selection screen
+            Timber.d("MainMenuFragment: Legacy Level button clicked");
             Bundle args = new Bundle();
             args.putInt("levelScreen", Constants.SCREEN_LEVEL_BEGINNER); // Level selection screen 1
             
             // First call GameStateManager to perform any needed state setup
             gameStateManager.navigateToLevelScreen(Constants.SCREEN_LEVEL_BEGINNER);
             
-            // Then use navigation with arguments to pass the level screen type to GameCanvasFragment
-            androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(v);
-            navController.navigate(R.id.actionMainMenuToGamePlay, args);
+            try {
+                // Create a new GameCanvasFragment instance and pass the arguments
+                GameCanvasFragment gameCanvasFragment = new GameCanvasFragment();
+                gameCanvasFragment.setArguments(args);
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, gameCanvasFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to legacy game screen completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to legacy game screen");
+                Toast.makeText(requireContext(), "Cannot navigate to legacy game: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Load Game button - go to save game screen in load mode
         loadGameButton.setOnClickListener(v -> {
-            // Navigate to save screen in load mode using action ID instead of NavDirections
-            // to avoid the boolean parameter issue
-            navigateTo(R.id.actionMainMenuToSaveGame);
+            try {
+                // Create a new SaveGameFragment instance
+                SaveGameFragment saveGameFragment = new SaveGameFragment();
+                
+                // Set the load mode argument
+                Bundle args = new Bundle();
+                args.putBoolean("isLoadMode", true);
+                saveGameFragment.setArguments(args);
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, saveGameFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to save game screen in load mode completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to save game screen");
+                Toast.makeText(requireContext(), "Cannot navigate to save game screen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Settings button - go to settings screen
         settingsButton.setOnClickListener(v -> {
-            // Navigate to settings screen
-            navigateTo(R.id.actionMainMenuToSettings);
+            try {
+                // Create a new SettingsFragment instance
+                SettingsFragment settingsFragment = new SettingsFragment();
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, settingsFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to settings screen completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to settings screen");
+                Toast.makeText(requireContext(), "Cannot navigate to settings: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Help button - go to help screen
         helpButton.setOnClickListener(v -> {
-            // Navigate to help screen
-            navigateTo(R.id.actionMainMenuToHelp);
+            try {
+                // Create a new HelpFragment instance
+                HelpFragment helpFragment = new HelpFragment();
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, helpFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to help screen completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to help screen");
+                Toast.makeText(requireContext(), "Cannot navigate to help: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Modern UI button - start a modern UI game
@@ -108,10 +195,22 @@ public class MainMenuFragment extends BaseGameFragment {
             Timber.d("MainMenuFragment: Calling gameStateManager.startModernGame()");
             gameStateManager.startModernGame();
             
-            // Navigate to modern game screen
-            Timber.d("MainMenuFragment: Navigating to modern game screen with actionMainMenuToModernGame");
-            navigateTo(R.id.actionMainMenuToModernGame);
-            Timber.d("MainMenuFragment: Navigation to modern game completed");
+            try {
+                // Create a new ModernGameFragment instance
+                ModernGameFragment gameFragment = new ModernGameFragment();
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, gameFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to modern game screen completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to modern game screen");
+                Toast.makeText(requireContext(), "Cannot navigate to game: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Exit button - exit the app (commented out since we removed the exit button)

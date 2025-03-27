@@ -253,6 +253,60 @@ public class GameStateManager extends AndroidViewModel {
     }
     
     /**
+     * Start a level game with the modern UI
+     * @param levelId Level ID to load
+     */
+    public void startLevelGame(int levelId) {
+        Timber.d("GameStateManager: startLevelGame() called with levelId: %d", levelId);
+        
+        // If solver is already running, don't create a new game state to avoid mismatch
+        if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
+            Timber.d("[SOLUTION SOLVER] startLevelGame: Solver already running, not creating new game state");
+            return;
+        }
+        
+        // Load level from assets
+        GameState state = GameState.loadLevel(getApplication(), levelId);
+        state.setLevelId(levelId);
+        state.setLevelName("Level " + levelId);
+        
+        // Set reference to this GameStateManager in the new state
+        state.setGameStateManager(this);
+        
+        // Set the current state
+        currentState.setValue(state);
+        currentMapName = "Level-" + levelId;
+        
+        // Reset move counts and history
+        setMoveCount(0);
+        setSquaresMoved(0);
+        setGameComplete(false);
+        stateHistory.clear();
+        squaresMovedHistory.clear();
+        
+        // Initialize the solver with grid elements
+        ArrayList<GridElement> gridElements = state.getGridElements();
+        // Force solver reinitialization for the new game
+        getSolverManager().resetInitialization();
+        getSolverManager().initialize(gridElements);
+        
+        // Reset solution state
+        currentSolution = null;
+        currentSolutionStep = 0;
+        
+        // Start calculating the solution automatically
+        calculateSolutionAsync(null);
+        
+        // Set UI mode to modern
+        uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
+        
+        // Record start time
+        startTime = System.currentTimeMillis();
+        
+        Timber.d("GameStateManager: startLevelGame() complete for level %d", levelId);
+    }
+    
+    /**
      * Load a specific level
      * @param levelId Level ID to load
      */

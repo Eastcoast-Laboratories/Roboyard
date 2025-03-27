@@ -51,6 +51,9 @@
         <action
             android:id="@+id/actionMainMenuToModernGame"
             app:destination="@id/modernGameFragment" />
+        <action
+            android:id="@+id/actionMainMenuToLevelSelection"
+            app:destination="@id/levelSelectionFragment" />
     </fragment>
 
     <!-- Game Play Fragment -->
@@ -114,6 +117,25 @@
                 app:argType="boolean"
                 android:defaultValue="true" />
         </action>
+        <action
+            android:id="@+id/actionModernGameToNextLevel"
+            app:destination="@id/modernGameFragment" />
+    </fragment>
+
+    <!-- Level Selection Fragment -->
+    <fragment
+        android:id="@+id/levelSelectionFragment"
+        android:name="roboyard.eclabs.ui.LevelSelectionFragment"
+        android:label="Level Selection"
+        tools:layout="@layout/fragment_level_selection">
+        <action
+            android:id="@+id/actionLevelSelectionToMainMenu"
+            app:destination="@id/mainMenuFragment"
+            app:popUpTo="@id/mainMenuFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/actionLevelSelectionToModernGame"
+            app:destination="@id/modernGameFragment" />
     </fragment>
 
     <!-- Save Game Fragment -->

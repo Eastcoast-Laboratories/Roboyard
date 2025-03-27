@@ -213,5 +213,18 @@
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
         </LinearLayout>
+        
+        <!-- Next Level button (initially invisible) -->
+        <Button
+            android:id="@+id/next_level_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_rounded_green_outline"
+            android:text="@string/next_level"
+            android:contentDescription="@string/next_level_description"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:visibility="gone" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -64,6 +64,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button saveMapButton;
     private Button restartButton;
     private Button menuButton;
+    private Button nextLevelButton;
     private TextView timerTextView;
     private TextView statusTextView;
     
@@ -404,6 +405,26 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
             if (isComplete) {
                 playSound("win");
+                
+                // Show the Next Level button if this is a level game
+                GameState state = gameStateManager.getCurrentState().getValue();
+                if (state != null && state.getLevelId() > 0) {
+                    // This is a level game, show the Next Level button
+                    nextLevelButton.setVisibility(View.VISIBLE);
+                    
+                    // Update status text to show level complete message
+                    statusTextView.setText(getString(R.string.level_complete));
+                    statusTextView.setVisibility(View.VISIBLE);
+                    
+                    // Announce level completion for accessibility
+                    String completionMessage = getString(R.string.level_complete) + 
+                            " Level " + state.getLevelId() + " completed in " + 
+                            gameStateManager.getMoveCount().getValue() + " moves.";
+                    announceAccessibility(completionMessage);
+                }
+            } else {
+                // Hide the Next Level button when game is not complete
+                nextLevelButton.setVisibility(View.GONE);
             }
         });
         
@@ -576,8 +597,54 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         menuButton = view.findViewById(R.id.menu_button);
         menuButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Menu button clicked");
-            // Navigate back to main menu
-            navigateTo(R.id.actionModernGameToMainMenu);
+            
+            try {
+                // Create a new MainMenuFragment instance
+                MainMenuFragment menuFragment = new MainMenuFragment();
+                
+                // Perform the fragment transaction
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, menuFragment)
+                    .addToBackStack(null)
+                    .commit();
+                
+                Timber.d("Navigation to main menu completed using fragment transaction");
+            } catch (Exception e) {
+                Timber.e(e, "Error navigating to main menu");
+                Toast.makeText(requireContext(), "Cannot navigate to main menu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        // Next Level button - go to the next level when a level is completed
+        nextLevelButton = view.findViewById(R.id.next_level_button);
+        nextLevelButton.setOnClickListener(v -> {
+            Timber.d("ModernGameFragment: Next Level button clicked");
+            // Get the current level ID
+            GameState state = gameStateManager.getCurrentState().getValue();
+            if (state != null) {
+                int currentLevelId = state.getLevelId();
+                int nextLevelId = currentLevelId + 1;
+                Timber.d("ModernGameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
+                
+                // Start the next level
+                gameStateManager.startLevelGame(nextLevelId);
+                
+                // Reset timer
+                stopTimer();
+                startTimer();
+                
+                // Hide the Next Level button
+                nextLevelButton.setVisibility(View.GONE);
+                
+                // Clear any hint text from the status display
+                statusTextView.setText("");
+                statusTextView.setVisibility(View.GONE);
+                
+                // Announce the new level
+                announceAccessibility("Starting level " + nextLevelId);
+                announceGameStart();
+            }
         });
     }
     

@@ -13,6 +13,8 @@
     <string name="legacy_game_description">Play the game with the classic legacy interface</string>
     <string name="level_game">Level Game</string>
     <string name="level_game_description">Play predefined game levels</string>
+    <string name="legacy_level_game">Legacy Level</string>
+    <string name="legacy_level_game_description">Play predefined levels with the classic interface</string>
     <string name="load_game">Load Game</string>
     <string name="load_game_description">Load a saved game</string>
     <string name="settings">Settings</string>
@@ -27,6 +29,18 @@
     <string name="save_load_game_screen_title">Save/Load Game</string>
     <string name="settings_screen_title">Settings</string>
     <string name="help_screen_title">Help</string>
+    <string name="level_selection_title">Select Level</string>
+    
+    <!-- Level Selection Screen -->
+    <string name="level_button_description">Level %1$d</string>
+    <string name="back">Back</string>
+    <string name="back_description">Return to previous screen</string>
+    <string name="next_level">Next Level</string>
+    <string name="next_level_description">Go to the next level</string>
+    <string name="optimal_moves">Optimal: %1$d moves</string>
+    <string name="your_moves">Your moves: %1$d</string>
+    <string name="level_complete">Level Complete!</string>
+    <string name="level_stars_description">You earned %1$d stars</string>
     
     <!-- Accessibility -->
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>

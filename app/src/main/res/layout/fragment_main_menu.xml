@@ -156,6 +156,20 @@
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_blue_outline" />
                     
+                <!-- Legacy Level Game button - Blue with round corners and black outline -->
+                <Button
+                    android:id="@+id/legacy_level_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/legacy_level_game"
+                    android:contentDescription="@string/legacy_level_game_description"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_blue_outline" />
+                    
                 <!-- How to Play button - Yellow with round corners and black outline -->
                 <Button
                     android:id="@+id/help_button"
