@@ -77,6 +77,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button btnMoveSouth;
     private Button btnMoveEast;
     private Button btnMoveWest;
+    private Button btnSelectRobot; // New button for TalkBack robot selection
     private TextView txtSelectedRobot;
     private TextView txtRobotGoal;
     private Button btnToggleAccessibilityControls;
@@ -350,6 +351,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             btnMoveSouth = accessibilityControlsContainer.findViewById(R.id.btn_move_south);
             btnMoveEast = accessibilityControlsContainer.findViewById(R.id.btn_move_east);
             btnMoveWest = accessibilityControlsContainer.findViewById(R.id.btn_move_west);
+            btnSelectRobot = accessibilityControlsContainer.findViewById(R.id.btn_select_robot); // New button for TalkBack robot selection
             
             // Set up directional button click listeners
             setupAccessibilityControls();
@@ -646,6 +648,64 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         btnMoveSouth.setOnClickListener(v -> moveRobotInDirection(0, 1));
         btnMoveEast.setOnClickListener(v -> moveRobotInDirection(1, 0));
         btnMoveWest.setOnClickListener(v -> moveRobotInDirection(-1, 0));
+        
+        // Set up robot selection button
+        if (btnSelectRobot != null) {
+            btnSelectRobot.setOnClickListener(v -> cycleThroughRobots());
+        }
+    }
+    
+    /**
+     * Cycle through available robots for TalkBack accessibility
+     * This allows users to quickly switch between robots using a dedicated button
+     */
+    private void cycleThroughRobots() {
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) {
+            announceAccessibility("No game in progress");
+            return;
+        }
+        
+        // Create a list of all robots in the game
+        List<GameElement> robots = new ArrayList<>();
+        for (GameElement element : state.getGameElements()) {
+            if (element.isRobot()) {
+                robots.add(element);
+            }
+        }
+        
+        if (robots.isEmpty()) {
+            announceAccessibility("No robots available");
+            return;
+        }
+        
+        // Find current robot index
+        int currentIndex = -1;
+        GameElement selectedRobot = state.getSelectedRobot();
+        if (selectedRobot != null) {
+            for (int i = 0; i < robots.size(); i++) {
+                if (robots.get(i).getColor() == selectedRobot.getColor()) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Select next robot in the list
+        int nextIndex = (currentIndex + 1) % robots.size();
+        GameElement nextRobot = robots.get(nextIndex);
+        state.setSelectedRobot(nextRobot);
+        
+        // Update UI with the new selection
+        updateRobotSelectionInfo(nextRobot);
+        updateDirectionalButtons(nextRobot);
+        
+        // Play a sound to indicate selection changed
+        playSound("move");
+        
+        // Announce the newly selected robot
+        String colorName = getRobotColorNameByGridElement(nextRobot);
+        announceAccessibility("Selected " + colorName + " robot");
     }
     
     /**
@@ -950,45 +1010,42 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void announceGameStart() {
         GameState state = gameStateManager.getCurrentState().getValue();
-        if (state == null) {
-            return;
+        if (state == null) return;
+        
+        StringBuilder announcement = new StringBuilder();
+        announcement.append("Game started. ");
+        
+        // Check if TalkBack is enabled
+        if (isTalkBackEnabled()) {
+            announcement.append("Accessibility mode is active. ");
+            announcement.append("Use the Select Next Robot button to cycle through robots. ");
+            announcement.append("Then use directional buttons to move the selected robot. ");
         }
         
-        // Build a list of all robots and their corresponding targets
-        StringBuilder gameStartMessage = new StringBuilder("Game started with ");
-        List<GameElement> robots = new ArrayList<>();
-        Map<Integer, GameElement> targets = new HashMap<>();
-        
-        // First collect all robots and targets
+        // Announce robots
+        int robotCount = 0;
         for (GameElement element : state.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                robots.add(element);
-            } else if (element.getType() == GameElement.TYPE_TARGET) {
-                targets.put(element.getColor(), element);
+            if (element.isRobot()) {
+                robotCount++;
+                String color = getRobotColorNameByGridElement(element);
+                announcement.append(color).append(" robot at position ");
+                announcement.append(element.getX()).append(",").append(element.getY()).append(". ");
             }
         }
         
-        // Then build the message
-        gameStartMessage.append(robots.size()).append(" robots. ");
+        announcement.append("Total robots: ").append(robotCount).append(". ");
         
-        for (GameElement robot : robots) {
-            String colorName = getRobotColorNameByGridElement(robot);
-            int x = robot.getX();
-            int y = robot.getY();
-            
-            gameStartMessage.append(colorName).append(" robot at position ").append(x).append(", ").append(y);
-            
-            // Add target information if available
-            GameElement target = targets.get(robot.getColor());
-            if (target != null) {
-                gameStartMessage.append(" with target at ").append(target.getX()).append(", ").append(target.getY());
+        // Announce targets
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                String color = getRobotColorName(element.getColor());
+                announcement.append(color).append(" target at position ");
+                announcement.append(element.getX()).append(",").append(element.getY()).append(". ");
             }
-            
-            gameStartMessage.append(". ");
         }
         
-        // Announce the game start message
-        announceAccessibility(gameStartMessage.toString());
+        // Make the announcement
+        announceAccessibility(announcement.toString());
     }
     
     @Override

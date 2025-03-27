@@ -94,4 +94,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Robot Selection Button -->
+    <Button
+        android:id="@+id/btn_select_robot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Next Robot"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:background="@drawable/button_rounded_purple"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Cycle through available robots"
+        app:layout_constraintTop_toBottomOf="@id/direction_controls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

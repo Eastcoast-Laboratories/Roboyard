@@ -1,7 +1,6 @@
 # TODO
-
-- image of roboyard in the middle is not showing up
-- save games should save the starting positions instead f the current positions
+- the back button for one move does not work properly, only the first move is moved back, than nothing happens any more
+- when directly starting the load screen after app restart, loading crashes
 - show a big 90% transparent blue robot in the background of the whole app
 - walls on menu are not tiled 
 - walls on level selection adding
@@ -15,3 +14,4 @@
 - only show the next level button when solved
 - no hints button in level game
 - auto save to history after 60 seconds
+
