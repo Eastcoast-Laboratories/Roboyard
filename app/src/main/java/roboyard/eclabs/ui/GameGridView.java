@@ -75,8 +75,8 @@ public class GameGridView extends View {
     private long animationDuration = 300; // Animation duration in milliseconds
     
     // Grid background
-    private Drawable gridTileDrawable; // Grid tile background
-    
+    private Drawable gridTileDrawable; 
+    private Drawable backgroundLogo; // Background logo
     private Fragment fragment; // Parent fragment
     
     // For hover events
@@ -160,6 +160,9 @@ public class GameGridView extends View {
         
         // Load grid tile background
         gridTileDrawable = ContextCompat.getDrawable(context, R.drawable.grid_tiles);
+        
+        // Load background logo
+        backgroundLogo = ContextCompat.getDrawable(context, R.drawable.roboyard);
         
         // Set up accessibility support
         setFocusable(true);
@@ -347,6 +350,29 @@ public class GameGridView extends View {
         GameState state = gameStateManager.getCurrentState().getValue();
         gridWidth = state.getWidth();
         gridHeight = state.getHeight();
+        
+        // Draw the Roboyard logo in the center of the board
+        if (backgroundLogo != null) {
+            // Calculate the center of the board
+            float boardWidth = gridWidth * cellSize;
+            float boardHeight = gridHeight * cellSize;
+            float centerX = boardWidth / 2;
+            float centerY = boardHeight / 2;
+            
+            // Calculate logo size (60% of the smaller dimension)
+            float logoSize = Math.min(boardWidth, boardHeight) * 0.6f;
+            float halfLogoSize = logoSize / 2;
+            
+            // Set bounds for the logo centered on the board
+            backgroundLogo.setBounds(
+                (int)(centerX - halfLogoSize),
+                (int)(centerY - halfLogoSize),
+                (int)(centerX + halfLogoSize),
+                (int)(centerY + halfLogoSize)
+            );
+            
+            backgroundLogo.draw(canvas);
+        }
         
         // Draw grid cells - board background
         for (int y = 0; y < gridHeight; y++) {
