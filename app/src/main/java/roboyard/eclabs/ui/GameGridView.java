@@ -167,6 +167,13 @@ public class GameGridView extends View {
         
         // Load background logo
         backgroundLogo = ContextCompat.getDrawable(context, R.drawable.roboyard);
+        if (backgroundLogo != null) {
+            // Ensure the drawable is properly configured
+            backgroundLogo.setAlpha(255); // Full opacity
+            Timber.d("Roboyard logo loaded successfully");
+        } else {
+            Timber.e("Failed to load Roboyard logo drawable");
+        }
         
         // Set up accessibility support
         setFocusable(true);
@@ -375,30 +382,7 @@ public class GameGridView extends View {
         gridWidth = state.getWidth();
         gridHeight = state.getHeight();
         
-        // Draw the Roboyard logo in the center of the board
-        if (backgroundLogo != null) {
-            // Calculate the center of the board
-            float boardWidth = gridWidth * cellSize;
-            float boardHeight = gridHeight * cellSize;
-            float centerX = boardWidth / 2;
-            float centerY = boardHeight / 2;
-            
-            // Calculate logo size (60% of the smaller dimension)
-            float logoSize = Math.min(boardWidth, boardHeight) * 0.6f;
-            float halfLogoSize = logoSize / 2;
-            
-            // Set bounds for the logo centered on the board
-            backgroundLogo.setBounds(
-                (int)(centerX - halfLogoSize),
-                (int)(centerY - halfLogoSize),
-                (int)(centerX + halfLogoSize),
-                (int)(centerY + halfLogoSize)
-            );
-            
-            backgroundLogo.draw(canvas);
-        }
-        
-        // Draw grid cells - board background
+        // Draw grid cells - board background first
         for (int y = 0; y < gridHeight; y++) {
             for (int x = 0; x < gridWidth; x++) {
                 float left = x * cellSize;
@@ -432,6 +416,31 @@ public class GameGridView extends View {
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
             }
+        }
+        
+        // Draw the Roboyard logo in the center of the board AFTER the background tiles
+        // but BEFORE the walls and other game elements
+        if (backgroundLogo != null) {
+            // Calculate the center of the board
+            float boardWidth = gridWidth * cellSize;
+            float boardHeight = gridHeight * cellSize;
+            float centerX = boardWidth / 2;
+            float centerY = boardHeight / 2;
+            
+            // Make the logo exactly 2x2 squares in size
+            float logoSize = cellSize * 2; // Exactly 2 cells wide and high
+            
+            // Set bounds for the logo centered on the board - the center of the logo should be at the center of the board
+            backgroundLogo.setBounds(
+                (int)(centerX - logoSize/2),
+                (int)(centerY - logoSize/2),
+                (int)(centerX + logoSize/2),
+                (int)(centerY + logoSize/2)
+            );
+            
+            // Draw the logo with full opacity
+            backgroundLogo.setAlpha(255);
+            backgroundLogo.draw(canvas);
         }
         
         // Draw targets
