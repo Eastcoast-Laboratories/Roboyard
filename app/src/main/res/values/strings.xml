@@ -7,14 +7,10 @@
     
     <!-- Main Menu Strings -->
     <string name="main_menu_title">Roboyard</string>
-    <string name="new_random_game">New Random Game</string>
-    <string name="new_random_game_description">Start a new random game</string>
-    <string name="legacy_game">Legacy Game</string>
-    <string name="legacy_game_description">Play the game with the classic legacy interface</string>
+    <string name="new_random_game">New Game</string>
+    <string name="new_random_game_description">Start a new game</string>
     <string name="level_game">Level Game</string>
     <string name="level_game_description">Play predefined game levels</string>
-    <string name="legacy_level_game">Legacy Level</string>
-    <string name="legacy_level_game_description">Play predefined levels with the classic interface</string>
     <string name="load_game">Load Game</string>
     <string name="load_game_description">Load a saved game</string>
     <string name="settings">Settings</string>
@@ -63,5 +59,9 @@
     <string name="load_confirm_message">Load this saved game?</string>
     <string name="save_success">Game saved successfully</string>
     <string name="load_success">Game loaded successfully</string>
+    
+    <!-- Game Buttons -->
+    <string name="hint_button">💡 Hint</string>
+    <string name="cancel_hint_button">❌ Cancel</string>
 
 </resources>

@@ -434,12 +434,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
-                hintButton.setText("Cancel");
+                hintButton.setText(R.string.cancel_hint_button);
                 statusTextView.setText("Calculating solution...");
                 statusTextView.setVisibility(View.VISIBLE);
             } else {
                 // Reset hint button text
-                hintButton.setText("Hint");
+                hintButton.setText(R.string.hint_button);
                 statusTextView.setVisibility(View.GONE);
             }
         });
@@ -1279,7 +1279,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationStarted");
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
-            hintButton.setText("Cancel");
+            hintButton.setText(R.string.cancel_hint_button);
             statusTextView.setText("Calculating solution...");
             statusTextView.setVisibility(View.VISIBLE);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show calculation in progress");
@@ -1297,7 +1297,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
-            hintButton.setText("Hint");
+            hintButton.setText(R.string.hint_button);
             statusTextView.setText("Hint ready! Press hint button again.");
             statusTextView.setVisibility(View.VISIBLE);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show hint is ready");
@@ -1309,7 +1309,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationFailed - %s", errorMessage);
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
-            hintButton.setText("Hint");
+            hintButton.setText(R.string.hint_button);
             statusTextView.setText("Could not find a solution: " + errorMessage);
             statusTextView.setVisibility(View.VISIBLE);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show error");

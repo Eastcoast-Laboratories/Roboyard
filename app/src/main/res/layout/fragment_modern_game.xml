@@ -170,7 +170,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_blue_outline"
-                android:text="Hint"
+                android:text="@string/hint_button"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
         </LinearLayout>
