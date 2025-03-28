@@ -33,3 +33,8 @@
 - Impossible mode
   - solutions with at least 17 moves
   - five lines allowed in the same row/column
+
+For future TalkBack enhancements, we could also:
+    1. Add a preference setting to customize the order of information in TalkBack announcements
+    2. Create custom button sounds to provide audio feedback for different actions
+    3. Add a high-contrast mode for better visibility

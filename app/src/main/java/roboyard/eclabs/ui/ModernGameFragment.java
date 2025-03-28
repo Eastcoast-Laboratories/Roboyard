@@ -1022,25 +1022,68 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             announcement.append("Then use directional buttons to move the selected robot. ");
         }
         
-        // Announce robots
+        // Announce robots with concise format
         int robotCount = 0;
         for (GameElement element : state.getGameElements()) {
             if (element.isRobot()) {
                 robotCount++;
                 String color = getRobotColorNameByGridElement(element);
-                announcement.append(color).append(" robot at position ");
-                announcement.append(element.getX()).append(",").append(element.getY()).append(". ");
+                int x = element.getX();
+                int y = element.getY();
+                
+                // Find walls - check each direction
+                List<String> walls = new ArrayList<>();
+                
+                // Check east wall
+                if (!state.canRobotMoveTo(element, x + 1, y) && x + 1 < state.getWidth() && 
+                    state.getRobotAt(x + 1, y) == null) {
+                    walls.add("east");
+                }
+                
+                // Check west wall
+                if (!state.canRobotMoveTo(element, x - 1, y) && x - 1 >= 0 && 
+                    state.getRobotAt(x - 1, y) == null) {
+                    walls.add("west");
+                }
+                
+                // Check north wall
+                if (!state.canRobotMoveTo(element, x, y - 1) && y - 1 >= 0 && 
+                    state.getRobotAt(x, y - 1) == null) {
+                    walls.add("north");
+                }
+                
+                // Check south wall
+                if (!state.canRobotMoveTo(element, x, y + 1) && y + 1 < state.getHeight() && 
+                    state.getRobotAt(x, y + 1) == null) {
+                    walls.add("south");
+                }
+                
+                // Build the concise description "[Robot color], [coordinates], [walls directions]"
+                announcement.append(color).append(" robot, ")
+                          .append(x).append("-").append(y);
+                
+                // Add walls if present
+                if (!walls.isEmpty()) {
+                    announcement.append(", walls ");
+                    for (int i = 0; i < walls.size(); i++) {
+                        announcement.append(walls.get(i));
+                        if (i < walls.size() - 1) {
+                            announcement.append(", ");
+                        }
+                    }
+                }
+                announcement.append(". ");
             }
         }
         
         announcement.append("Total robots: ").append(robotCount).append(". ");
         
-        // Announce targets
+        // Announce targets with concise format
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 String color = getRobotColorName(element.getColor());
-                announcement.append(color).append(" target at position ");
-                announcement.append(element.getX()).append(",").append(element.getY()).append(". ");
+                announcement.append(color).append(" target, ")
+                          .append(element.getX()).append("-").append(element.getY()).append(". ");
             }
         }
         
