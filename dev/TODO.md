@@ -15,3 +15,5 @@
 - no hints button in level game
 - auto save to history after 60 seconds
 - win message and stop timer also in random game
+- add sound effects for buttons
+- add sound effect background for game

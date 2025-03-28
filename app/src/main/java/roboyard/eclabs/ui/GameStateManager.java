@@ -158,45 +158,8 @@ public class GameStateManager extends AndroidViewModel {
      */
     public void startNewGame() {
         Timber.d("GameStateManager: startNewGame() called");
-        
-        // Get board dimensions from BoardSizeManager
-        int width = boardSizeManager.getBoardWidth();
-        int height = boardSizeManager.getBoardHeight();
-        
-        // Create a new random game state
-        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
-        Timber.d("GameStateManager: Created new random GameState");
-        
-        currentState.setValue(newState);
-        Timber.d("GameStateManager: Set currentState LiveData value with new state");
-        
-        moveCount.setValue(0);
-        Timber.d("GameStateManager: Reset moveCount to 0");
-        
-        isGameComplete.setValue(false);
-        Timber.d("GameStateManager: Reset isGameComplete to false");
-        
-        // Clear the state history
-        stateHistory.clear();
-        squaresMovedHistory.clear();
-        
-        // Reset solver status and solution
-        currentSolution = null;
-        currentSolutionStep = 0;
-        
-        // Initialize the solver with grid elements from the new state
-        ArrayList<GridElement> gridElements = newState.getGridElements();
-        // Force solver reinitialization for the new game
-        getSolverManager().resetInitialization();
-        getSolverManager().initialize(gridElements);
-        
-        // Start calculating the solution automatically
-        calculateSolutionAsync(null);
-        
-        startTime = System.currentTimeMillis();
-        Timber.d("GameStateManager: startNewGame() complete");
-        
-        resetStatistics();
+
+        startModernGame();
     }
     
     /**
@@ -1404,10 +1367,21 @@ public class GameStateManager extends AndroidViewModel {
         Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: solution=%s", solution);
         
         // Add more detailed logging about the solution
-        if (solution != null && solution.getMoves() != null) {
-            Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
+        int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
+        if (moveCount > 0) {
+            Timber.d("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
+            // If solution requires less than 4 moves and we're not in level mode,
+            // automatically start a new game because this one is too easy
+            GameState state = currentState.getValue();
+            boolean isLevelMode = (state != null && state.getLevelId() > 0);
+            
+            if (moveCount < 14 && !isLevelMode) {
+                Timber.d("[SOLUTION SOLVER][MOVES] Solution has only %d moves, starting new game", moveCount);
+                startNewGame();
+                return;
+            }
         } else {
-            Timber.w("[SOLUTION SOLVER] onSolutionCalculationCompleted: Solution or moves is null!");
+            Timber.w("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
         }
         
         // Store the solution for later use with getHint()

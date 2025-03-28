@@ -1288,11 +1288,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     @Override
     public void onSolutionCalculationCompleted(GameSolution solution) {
-        Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationCompleted - solution: %s", solution);
+        Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted - solution: %s", solution);
         if (solution != null && solution.getMoves() != null) {
-            Timber.d("[SOLUTION SOLVER] ModernGameFragment: Solution has %d moves", solution.getMoves().size());
+            Timber.d("[SOLUTION SOLVER][MOVES] Solution has %d moves", solution.getMoves().size());
+            
+            // Check if solution has less than 4 moves and not in level mode
+            int moveCount = solution.getMoves().size();
+            GameState currentState = gameStateManager.getCurrentState().getValue();
+            boolean isLevelMode = (currentState != null && currentState.getLevelId() > 0);
         } else {
-            Timber.w("[SOLUTION SOLVER] ModernGameFragment: Solution or moves is null!");
+            Timber.w("[SOLUTION SOLVER][MOVES] Solution or moves is null!");
         }
         
         requireActivity().runOnUiThread(() -> {
@@ -1300,13 +1305,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             hintButton.setText(R.string.hint_button);
             statusTextView.setText("Hint ready! Press hint button again.");
             statusTextView.setVisibility(View.VISIBLE);
-            Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show hint is ready");
+            Timber.d("[SOLUTION SOLVER] UI updated to show hint is ready");
         });
     }
 
     @Override
     public void onSolutionCalculationFailed(String errorMessage) {
-        Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationFailed - %s", errorMessage);
+        Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed - %s", errorMessage);
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
             hintButton.setText(R.string.hint_button);
