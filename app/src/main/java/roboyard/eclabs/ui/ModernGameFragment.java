@@ -447,15 +447,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Observe solver running state to update hint button text
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
-                // Change hint button text to "Cancel" while generating
+                // Change hint button text to "Cancel" while calculating
                 hintButton.setText(R.string.cancel_hint_button);
-                statusTextView.setText("Generating...");
+                statusTextView.setText("Calculating solution...");
                 statusTextView.setVisibility(View.VISIBLE);
             } else {
                 // Reset hint button text
                 hintButton.setText(R.string.hint_button);
-                // Keep the text view visible and don't clear text
-                // The text will be updated when solution is calculated or failed
+                // statusTextView.setVisibility(View.GONE);
             }
         });
     }
@@ -506,8 +505,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Check if we have a solution object at all
             GameSolution solution = gameStateManager.getCurrentSolution();
             if (solution == null || solution.getMoves() == null || solution.getMoves().size() == 0) {
-                Timber.d("[HINT] No solution available, generating...");
-                statusTextView.setText("Generating...");
+                Timber.d("[HINT] No solution available, calculating...");
+                statusTextView.setText("Calculating solution...");
                 statusTextView.setVisibility(View.VISIBLE);
                 
                 // Start calculating a solution
@@ -515,45 +514,51 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 return;
             }
             
-            // We have a solution, so provide a hint about the next step
-            // Get current step number (which hints have been shown so far)
-            int step = gameStateManager.getCurrentSolutionStep();
+            // Check if we've already shown all available hints
+            int currentStep = gameStateManager.getCurrentSolutionStep();
+            int totalMoves = solution.getMoves().size();
             
-            // Check if we've shown all the hints already
-            if (step >= solution.getMoves().size()) {
-                // Reset to beginning of solution
+            if (currentStep >= totalMoves) {
+                String hint = "All hints have been shown (" + currentStep + "/" + totalMoves + "), resetting to first hint";
+                Timber.d("[HINT] Displayed hint: " + hint);
+                statusTextView.setText(hint);
+                statusTextView.setVisibility(View.VISIBLE);
+                // Reset the solution step counter to show the first hint again
                 gameStateManager.resetSolutionStep();
-                step = 0;
+                return;
             }
             
-            // Get the next move from the solution
-            IGameMove nextMove = solution.getMoves().get(step);
+            // Get a hint from the game state manager
+            IGameMove hintMove = gameStateManager.getHint();
+            Timber.d("[HINT] Received hint move: %s", hintMove);
             
-            if (nextMove instanceof RRGameMove rrMove) {
-                // Format the hint message based on the move
+            if (hintMove != null && hintMove instanceof RRGameMove rrMove) {
+                // Cast to RRGameMove to access the proper methods
+
+                // Log the details of the move
+                Timber.d("[HINT] Robot color: %d, Direction: %d", 
+                        rrMove.getColor(), rrMove.getDirection());
+                
+                // Convert the robotic move to human-readable text
                 String robotColor = getRobotColorName(rrMove.getColor());
                 String direction = getDirectionName(rrMove.getDirection());
-                String hint = String.format("Move the %s robot %s", robotColor, direction);
                 
-                // Show the hint
-                statusTextView.setText(hint);
+                // Log details for debugging
+                Timber.d("[HINT] Robot color ID: %d, mapped to color name: %s", 
+                        rrMove.getColor(), robotColor);
+                
+                // Update the status text with the hint number and the hint itself
+                String hintText = String.format("%d/%d: Move the %s robot %s",
+                        currentStep + 1, totalMoves, robotColor, direction);
+                statusTextView.setText(hintText);
                 statusTextView.setVisibility(View.VISIBLE);
                 
-                // Announce for accessibility
-                announceAccessibility(hint);
-                
-                // Manually increment the solution step counter
-                gameStateManager.resetSolutionStep();
-                gameStateManager.getCurrentSolutionStep(); // Get current step
-                // Set the solution step to the next step
-                for (int i = 0; i <= step; i++) {
-                    gameStateManager.resetSolutionStep(); // Reset and increment in a loop
-                }
+                Timber.d("[HINT] Displayed hint: %s", hintText);
             } else {
-                // Fallback if the move is not of the expected type
-                String hint = "Press hint again for the next move";
-                statusTextView.setText(hint);
+                // No solution found
+                statusTextView.setText("No solution available");
                 statusTextView.setVisibility(View.VISIBLE);
+                Timber.d("[HINT] No valid hint move available");
             }
         });
         
@@ -1413,7 +1418,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setText(R.string.cancel_hint_button);
-            statusTextView.setText("Generating...");
+            statusTextView.setText("Calculating solution...");
             statusTextView.setVisibility(View.VISIBLE);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show calculation in progress");
         });
@@ -1436,7 +1441,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
             hintButton.setText(R.string.hint_button);
-            statusTextView.setText("Solution ready! Press hint");
+            statusTextView.setText("Hint ready! Press hint button again.");
             statusTextView.setVisibility(View.VISIBLE);
             Timber.d("[SOLUTION SOLVER] UI updated to show hint is ready");
         });
@@ -1448,7 +1453,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
             hintButton.setText(R.string.hint_button);
-            statusTextView.setText("No solution found. Try a different move.");
+            statusTextView.setText("Could not find a solution: " + errorMessage);
             statusTextView.setVisibility(View.VISIBLE);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show error");
         });
