@@ -44,7 +44,7 @@ public class MainActivity extends FragmentActivity
     public static final int DEFAULT_BOARD_SIZE_Y = 14;
     
     // Minimum and maximum board sizes
-    public static final int MIN_BOARD_SIZE = 12; // solver doesn't work below this
+    public static final int MIN_BOARD_SIZE = 8; // solver doesn't work below this
     public static final int MAX_BOARD_SIZE = 22; // solver not tested above this
     
     // Current board size - can be changed at runtime

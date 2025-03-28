@@ -98,6 +98,7 @@ public class SettingsFragment extends BaseGameFragment {
         
         // Define all possible board sizes - exactly as in the original game
         int[][] boardSizes = {
+                {8, 8},
                 {12, 12}, {12, 14}, {12, 16}, {12, 18},
                 {14, 14}, {14, 16}, {14, 18},
                 {16, 16}, {16, 18}, {16, 20}, {16, 22},

@@ -44,11 +44,24 @@ public class GameLogic {
     private Boolean loneWallsAllowed = false; // walls that are not attached in a 90 deg. angle
     
     // Board dimensions
-    private final int boardWidth;
-    private final int boardHeight;
+    private int boardWidth;
+    private int boardHeight;
     
     // Current difficulty level
     private final int currentLevel;
+    
+    // Configuration for the simplified board generation
+    private boolean placeWallsInCorners = true;
+    private boolean placeWallsOnEdges = true;
+    private boolean placeWallsInMiddleSquare = false;
+    private boolean placeBorderPerpendicularWalls = true;
+    private boolean placeWallsOnOuterBorders = true;
+    private int minCornerWalls = 4;
+    private int minEdgeWalls = 4;
+    private int minBorderPerpendicularWalls = 4;
+    private int minOuterBorderWalls = 4;
+    private int minTotalWalls = 10;
+    private int maxTotalWalls = 20;
     
     /**
      * Constructor for GameLogic with specified board dimensions and difficulty level
@@ -75,7 +88,9 @@ public class GameLogic {
         carrePosY = (boardHeight/2)-1;
 
         // Calculate walls per quadrant based on board width
-        wallsPerQuadrant = boardWidth/4;  // Default: quarter of board width
+        // Ensure at least 1 wall per quadrant, but not more than board width / 4
+        wallsPerQuadrant = Math.max(1, boardWidth/4);  // Default: quarter of board width
+        Timber.d("[GAME LOGIC] Board size: %dx%d, walls per quadrant: %d", boardWidth, boardHeight, wallsPerQuadrant);
 
         // Apply difficulty settings
         applyDifficultySettings(difficultyLevel);
@@ -117,13 +132,20 @@ public class GameLogic {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
         
-        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + boardWidth + "x" + boardHeight);
+        Timber.d("maxWallsInOneVerticalCol: " + maxWallsInOneVerticalCol + " maxWallsInOneHorizontalRow: " + maxWallsInOneHorizontalRow + " wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + boardWidth + "x" + boardHeight);
     }
 
     /**
      * Get a random number between min and max (inclusive)
+     * Adds safety checks to ensure min <= max
      */
     public int getRandom(int min, int max) {
+        // Add safety check to prevent IllegalArgumentException
+        if (min > max) {
+            Timber.w("[GAME LOGIC] Invalid random range: min(%d) > max(%d). returning max(%d).", min, max, max);
+            return max;
+        }
+        
         return rand.nextInt((max - min) + 1) + min;
     }
     
@@ -260,8 +282,14 @@ public class GameLogic {
     public ArrayList<GridElement> generateGameMap(ArrayList<GridElement> existingMap) {
         Timber.d("Using generateNewMapEachTime: %s", generateNewMapEachTime);
         
-        int[][] horizontalWalls = new int[boardWidth+1][boardHeight+1];
-        int[][] verticalWalls = new int[boardWidth+1][boardHeight+1];
+        // For small boards (8x8), use a simplified approach with predefined wall patterns
+        if (boardWidth <= 8 && boardHeight <= 8) {
+            Timber.d("[GAME LOGIC] Using simplified wall generation for small board (%dx%d)", boardWidth, boardHeight);
+            return generateSimpleGameMap(existingMap);
+        }
+        
+        int[][] horizontalWalls = new int[boardWidth][boardHeight];
+        int[][] verticalWalls = new int[boardWidth][boardHeight];
 
         int temp = 0;
         int countX = 0;
@@ -322,22 +350,25 @@ public class GameLogic {
             while (horizontalWalls[boardWidth-1][temp - 1] == 1 || horizontalWalls[boardWidth-1][temp] == 1 || horizontalWalls[boardWidth-1][temp + 1] == 1);
             horizontalWalls[boardWidth-1][temp] = 1;
 
-            // right-angled Walls near the top border
-            verticalWalls[getRandom(2, boardWidth/2 - 1)][0] = 1;
-            do {
-                temp = getRandom(boardWidth/2, boardWidth-1);
-            }
-            while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
-            verticalWalls[temp][0] = 1;
+            if(boardWidth > 8) {
+                // right-angled Walls near the top border
+                Timber.d("[GAME LOGIC] Placing right-angled Walls near the top border");
+                verticalWalls[getRandom(2, boardWidth/2 - 1)][0] = 1;
+                do {
+                    temp = getRandom(boardWidth/2, boardWidth-1);
+                }
+                while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
+                verticalWalls[temp][0] = 1;
 
-            // right-angled Walls near the bottom border
-            verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight-1] = 1;
-            do {
-                temp = getRandom(8, boardWidth-1);
-            }
-            while (verticalWalls[temp - 1][boardHeight-1] == 1 || verticalWalls[temp][boardHeight-1] == 1 || verticalWalls[temp + 1][boardHeight-1] == 1);
-            verticalWalls[temp][boardHeight-1] = 1;
+                // right-angled Walls near the bottom border
+                Timber.d("[GAME LOGIC] Placing right-angled Walls near the bottom border");
+                verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight-1] = 1;
+                do {
+                    temp = getRandom(8, boardWidth-1);
+                } while (verticalWalls[temp - 1][boardHeight-1] == 1 || verticalWalls[temp][boardHeight-1] == 1 || verticalWalls[temp + 1][boardHeight-1] == 1);
 
+                verticalWalls[temp][boardHeight-1] = 1;
+            }
             //Drawing the middle square (carré)
             horizontalWalls[carrePosX][carrePosY] = horizontalWalls[carrePosX + 1][carrePosY] = 1;
             horizontalWalls[carrePosX][carrePosY+2] = horizontalWalls[carrePosX + 1][carrePosY+2] = 1;
@@ -382,19 +413,26 @@ public class GameLogic {
                         tempY = getRandom(1, boardHeight-1);
                     }
 
-                    if (horizontalWalls[tempX][tempY] == 1 // already chosen
-                        || horizontalWalls[tempX - 1][tempY] == 1 // left
-                        || horizontalWalls[tempX + 1][tempY] == 1 // right
-                        || horizontalWalls[tempX][tempY - 1] == 1 // directly above
-                        || horizontalWalls[tempX][tempY + 1] == 1 // directly below
-                        ) abandon = true;
+                    if(boardWidth > 8) {
+                        if (horizontalWalls[tempX][tempY] == 1 // already chosen
+                            || horizontalWalls[tempX - 1][tempY] == 1 // left
+                            || horizontalWalls[tempX + 1][tempY] == 1 // right
+                            || horizontalWalls[tempX][tempY - 1] == 1 // directly above
+                            || horizontalWalls[tempX][tempY + 1] == 1 // directly below
+                            ){
+                                // Timber.d("[GAME LOGIC] Wall placement failed 8 - abandoning map");
+                                abandon = true;
+                        }
 
-                    if (verticalWalls[tempX][tempY] == 1 // already chosen
-                        || verticalWalls[tempX + 1][tempY] == 1 // left
-                        || verticalWalls[tempX][tempY - 1] == 1 // above
-                        || verticalWalls[tempX + 1][tempY - 1] == 1 // diagonal right-above
-                        ) abandon = true;
-
+                        if (verticalWalls[tempX][tempY] == 1 // already chosen
+                            || verticalWalls[tempX + 1][tempY] == 1 // left
+                            || verticalWalls[tempX][tempY - 1] == 1 // above
+                            || verticalWalls[tempX + 1][tempY - 1] == 1 // diagonal right-above
+                            ){
+                                // Timber.d("[GAME LOGIC] Wall placement failed 7 - abandoning map");
+                                abandon = true;
+                        }
+                    }
                     if (!abandon) {
                         //We count the number of walls in the same row/column
                         countX = countY = 0;
@@ -412,62 +450,47 @@ public class GameLogic {
                         if (tempY == carrePosY || tempY == carrePosY+2) {
                             countX -= 2;
                         }
-                        if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
+                        if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol){
+                            // Timber.d("[GAME LOGIC] There are too many walls in the same row/column, we abandon");
                             abandon = true;
-                    }
-
-                    if (!abandon) {
-                        //Choice of the 2nd wall of the corner being drawn
-                        tempXv = tempX + getRandom(0, 1);
-                        tempYv = tempY - getRandom(0, 1);
-
-                        //We check that it does not fall on or near existing walls
-                        if (verticalWalls[tempXv][tempYv] == 1 || verticalWalls[tempXv - 1][tempYv] == 1 || verticalWalls[tempXv + 1][tempYv] == 1)
-                            abandon = true;
-                        if (verticalWalls[tempXv][tempYv - 1] == 1 || verticalWalls[tempXv][tempYv + 1] == 1)
-                            abandon = true;
-
-                        if (horizontalWalls[tempXv][tempYv] == 1 || horizontalWalls[tempXv - 1][tempYv] == 1)
-                            abandon = true;
-
-                        if (horizontalWalls[tempXv][tempYv - 1] == 1 || horizontalWalls[tempXv - 1][tempYv - 1] == 1)
-                            abandon = true;
-
-                        if (verticalWalls[tempXv - 1][tempYv - 1] == 1 || verticalWalls[tempXv - 1][tempYv + 1] == 1)
-                            abandon = true;
-
-                        if (verticalWalls[tempXv + 1][tempYv + 1] == 1 || verticalWalls[tempXv + 1][tempYv - 1] == 1)
-                            abandon = true;
-
-                        if (!abandon) {
-                            //We count the number of walls in the same row/column
-                            countX = countY = 0;
-
-                            for (int x = 1; x < boardWidth-1; x++) {
-                                if (verticalWalls[x][tempYv] == 1)
-                                    countX++;
-                            }
-
-                            for (int y = 1; y < boardHeight-1; y++) {
-                                if (verticalWalls[tempXv][y] == 1)
-                                    countY++;
-                            }
-
-                            if (tempXv == carrePosX || tempXv == carrePosX+2) {
-                                countY -= 2;
-                            }
-                            if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
-                                abandon = true;
                         }
                     }
 
+                    if (!abandon) {
+                        //We count the number of walls in the same row/column
+                        countX = countY = 0;
+
+                        for (int x = 1; x < boardWidth-1; x++) {
+                            if (verticalWalls[x][tempYv] == 1)
+                                countX++;
+                        }
+
+                        for (int y = 1; y < boardHeight-1; y++) {
+                            if (verticalWalls[tempXv][y] == 1)
+                                countY++;
+                        }
+
+                        if (tempXv == carrePosX || tempXv == carrePosX+2) {
+                            countY -= 2;
+                        }
+                        if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
+                        {
+                            Timber.d("[GAME LOGIC] Too many walls in the same row/column - abandoning map");
+                            abandon = true;
+                        }
+                        // Check if there are walls at all
+                        if(countX == 0 && countY == 0) {
+                            Timber.d("[GAME LOGIC] No walls - abandoning map");
+                            abandon = true;
+                        }
+                    }
                     if (compteLoop1 > 1000) {
-                        Timber.d("Wall creation restarted, too many loops (%d), tolerance: %d", restartCount, tolerance);
+                        Timber.d("[GAME LOGIC] Wall creation restarted, too many loops (%d), tolerance: %d", restartCount, tolerance);
                         restart = true;
                     }
-
+                    Timber.d("[GAME LOGIC] Wall creation restarted, abandon:" + abandon + " restart: " + restart);
                 } while (abandon && !restart);
-                Boolean skiponewall = false;
+                boolean skiponewall = false;
                 if(loneWallsAllowed && getRandom(0, 4) == 1) {
                     skiponewall = true;
                 }
@@ -497,4 +520,428 @@ public class GameLogic {
         return data;
     }
 
+    /**
+     * Generate a simplified game map for small boards (8x8)
+     */
+    private ArrayList<GridElement> generateSimpleGameMap(ArrayList<GridElement> existingMap) {
+        // Create a simple wall pattern for small boards
+        int[][] horizontalWalls = new int[boardWidth+1][boardHeight+1];
+        int[][] verticalWalls = new int[boardWidth+1][boardHeight+1];
+
+        // Clear the existing map data to start fresh
+        ArrayList<GridElement> data = new ArrayList<>();
+        if (existingMap != null) {
+            data.addAll(removeGameElementsFromMap(existingMap));
+        }
+
+        // Create borders (these are automatically added by the game but we'll define them anyway)
+        // Important: In an 8x8 board, valid indices are 0-7, with the borders at -1, 0, boardWidth, and boardHeight
+        for (int x = 0; x < boardWidth; x++) {
+            horizontalWalls[x][0] = 1;
+            horizontalWalls[x][boardHeight] = 1;
+        }
+        for (int y = 0; y < boardHeight; y++) {
+            verticalWalls[0][y] = 1;
+            verticalWalls[boardWidth][y] = 1;
+        }
+        
+        // Determine the number of additional walls based on difficulty (10-20 walls total)
+        // We already placed 8 walls for the center square (which we'll place later), so add between 2-12 more
+        int baseWallCount = 4; // Base number of additional walls
+        int difficultyBonus = currentLevel * 3; // Difficulty adds 0, 3, 6, or 9 walls
+        int randomBonus = getRandom(0, 3); // Add 0-3 random walls regardless of difficulty
+        
+        int additionalWalls = baseWallCount + difficultyBonus + randomBonus;
+        int wallsToPlace = Math.min(additionalWalls, maxTotalWalls - 8);
+        wallsToPlace = Math.max(wallsToPlace, minTotalWalls - 8); // Ensure minimum walls
+        
+        Timber.d("[GAME LOGIC] Adding %d additional walls (total: %d) for difficulty level %d", 
+                wallsToPlace, wallsToPlace + 8, currentLevel);
+        
+        // Add walls directly on the outer borders (top and left)
+        int outerBorderWallsPlaced = 0;
+        if (placeWallsOnOuterBorders) {
+            // Create arrays to hold wall positions for outer borders
+            int[][] outerWallPositions = new int[16][2];
+            boolean[] isVerticalWall = new boolean[16];
+            
+            // Top border positions (horizontal walls at y=0)
+            // For horizontal walls at the top border: indices are x=0-6, y=0
+            outerWallPositions[0] = new int[]{0, 0}; isVerticalWall[0] = false;
+            outerWallPositions[1] = new int[]{1, 0}; isVerticalWall[1] = false;
+            outerWallPositions[2] = new int[]{2, 0}; isVerticalWall[2] = false;
+            outerWallPositions[3] = new int[]{3, 0}; isVerticalWall[3] = false;
+            outerWallPositions[4] = new int[]{4, 0}; isVerticalWall[4] = false;
+            outerWallPositions[5] = new int[]{5, 0}; isVerticalWall[5] = false;
+            
+            // Left border positions (vertical walls at x=0)
+            // For vertical walls at the left border: indices are x=0, y=0-6
+            outerWallPositions[6] = new int[]{0, 0}; isVerticalWall[6] = true;
+            outerWallPositions[7] = new int[]{0, 1}; isVerticalWall[7] = true;
+            outerWallPositions[8] = new int[]{0, 2}; isVerticalWall[8] = true;
+            outerWallPositions[9] = new int[]{0, 3}; isVerticalWall[9] = true;
+            outerWallPositions[10] = new int[]{0, 4}; isVerticalWall[10] = true;
+            outerWallPositions[11] = new int[]{0, 5}; isVerticalWall[11] = true;
+            
+            // Some additional bottom and right outer walls for variety
+            outerWallPositions[12] = new int[]{0, boardHeight-1}; isVerticalWall[12] = false;
+            outerWallPositions[13] = new int[]{4, boardHeight-1}; isVerticalWall[13] = false;
+            outerWallPositions[14] = new int[]{boardWidth-1, 0}; isVerticalWall[14] = true;
+            outerWallPositions[15] = new int[]{boardWidth-1, 4}; isVerticalWall[15] = true;
+            
+            // Shuffle the wall positions
+            shuffleArrayWithFlags(outerWallPositions, isVerticalWall);
+            
+            // Place outer border walls
+            for (int i = 0; i < outerWallPositions.length && outerBorderWallsPlaced < minOuterBorderWalls && wallsToPlace > 0; i++) {
+                int[] pos = outerWallPositions[i];
+                boolean isVertical = isVerticalWall[i];
+                int x = pos[0];
+                int y = pos[1];
+                
+                // Directly place walls - no need for extra boundary checks as these are the outer walls
+                if (!isVertical) { // Horizontal wall
+                    horizontalWalls[x][y] = 1;
+                    Timber.d("[GAME LOGIC] Placed horizontal wall on outer border at (%d,%d)", x, y);
+                } else { // Vertical wall
+                    verticalWalls[x][y] = 1;
+                    Timber.d("[GAME LOGIC] Placed vertical wall on outer border at (%d,%d)", x, y);
+                }
+                
+                outerBorderWallsPlaced++;
+                wallsToPlace--;
+            }
+            
+            Timber.d("[GAME LOGIC] Placed %d walls directly on outer borders", outerBorderWallsPlaced);
+        }
+        
+        // Add perpendicular walls extending inward from the border walls
+        int borderPerpendicularWallsPlaced = 0;
+        if (placeBorderPerpendicularWalls) {
+            // Create arrays to hold wall positions
+            int[][] wallPositions = new int[16][2];
+            boolean[] isVerticalWall = new boolean[16];
+            
+            // Top border with vertical walls extending down
+            wallPositions[0] = new int[]{1, 0}; isVerticalWall[0] = true;
+            wallPositions[1] = new int[]{2, 0}; isVerticalWall[1] = true;
+            wallPositions[2] = new int[]{5, 0}; isVerticalWall[2] = true;
+            wallPositions[3] = new int[]{6, 0}; isVerticalWall[3] = true;
+            
+            // Bottom border with vertical walls extending up
+            wallPositions[4] = new int[]{1, boardHeight}; isVerticalWall[4] = true;
+            wallPositions[5] = new int[]{2, boardHeight}; isVerticalWall[5] = true;
+            wallPositions[6] = new int[]{5, boardHeight}; isVerticalWall[6] = true;
+            wallPositions[7] = new int[]{6, boardHeight}; isVerticalWall[7] = true;
+            
+            // Left border with horizontal walls extending right
+            wallPositions[8] = new int[]{0, 1}; isVerticalWall[8] = false;
+            wallPositions[9] = new int[]{0, 2}; isVerticalWall[9] = false;
+            wallPositions[10] = new int[]{0, 5}; isVerticalWall[10] = false;
+            wallPositions[11] = new int[]{0, 6}; isVerticalWall[11] = false;
+            
+            // Right border with horizontal walls extending left
+            wallPositions[12] = new int[]{boardWidth, 1}; isVerticalWall[12] = false;
+            wallPositions[13] = new int[]{boardWidth, 2}; isVerticalWall[13] = false;
+            wallPositions[14] = new int[]{boardWidth, 5}; isVerticalWall[14] = false;
+            wallPositions[15] = new int[]{boardWidth, 6}; isVerticalWall[15] = false;
+            
+            // Shuffle the wall positions (keeping track of wall type)
+            shuffleArrayWithFlags(wallPositions, isVerticalWall);
+            
+            // Place perpendicular walls at the borders until we meet the minimum
+            for (int i = 0; i < wallPositions.length && borderPerpendicularWallsPlaced < minBorderPerpendicularWalls && wallsToPlace > 0; i++) {
+                int[] pos = wallPositions[i];
+                boolean isVertical = isVerticalWall[i];
+                
+                // Determine the actual position to place the wall
+                int x = pos[0];
+                int y = pos[1];
+                
+                // For walls extending from borders, we need to adjust the position
+                // to place them one cell inward from the border
+                if (y == 0 && isVertical) { // Top border, vertical wall extending down
+                    y = 1; // Place one cell down from top border
+                } else if (y == boardHeight && isVertical) { // Bottom border, vertical wall extending up
+                    y = boardHeight - 1; // Place one cell up from bottom border
+                } else if (x == 0 && !isVertical) { // Left border, horizontal wall extending right
+                    x = 1; // Place one cell right from left border
+                } else if (x == boardWidth && !isVertical) { // Right border, horizontal wall extending left
+                    x = boardWidth - 1; // Place one cell left from right border
+                }
+                
+                // Check if the position is valid and empty
+                boolean canPlace = false;
+                if (!isVertical) { // Horizontal wall
+                    canPlace = (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight && horizontalWalls[x][y] == 0);
+                } else { // Vertical wall
+                    canPlace = (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight && verticalWalls[x][y] == 0);
+                }
+                
+                if (canPlace) {
+                    if (!isVertical) { // Place horizontal wall
+                        horizontalWalls[x][y] = 1;
+                    } else { // Place vertical wall
+                        verticalWalls[x][y] = 1;
+                    }
+                    borderPerpendicularWallsPlaced++;
+                    wallsToPlace--; // Decrement the wallsToPlace counter
+                    Timber.d("[GAME LOGIC] Placed %s wall perpendicular to border at (%d,%d)", 
+                            !isVertical ? "horizontal" : "vertical", x, y);
+                }
+            }
+            
+            Timber.d("[GAME LOGIC] Placed %d perpendicular walls at borders", borderPerpendicularWallsPlaced);
+        }
+        
+        // Create a center square similar to the original game but simpler
+        int centerX = boardWidth / 2 - 1;
+        int centerY = boardHeight / 2 - 1;
+        horizontalWalls[centerX][centerY] = horizontalWalls[centerX + 1][centerY] = 1;
+        horizontalWalls[centerX][centerY+2] = horizontalWalls[centerX + 1][centerY+2] = 1;
+        verticalWalls[centerX][centerY] = verticalWalls[centerX][centerY + 1] = 1;
+        verticalWalls[centerX+2][centerY] = verticalWalls[centerX+2][centerY + 1] = 1;
+        
+        // 1. First place corner walls (where walls touch at corners)
+        int cornerWallsPlaced = 0;
+        if (placeWallsInCorners) {
+            // Define corner wall pairs (horizontal wall, connecting vertical wall)
+            int[][][] cornerPositions = {
+                // Top-left corner walls
+                {{1, 1}, {1, 1}}, {{2, 1}, {2, 1}},
+                // Top-right corner walls
+                {{5, 1}, {6, 1}}, {{6, 1}, {6, 1}},
+                // Bottom-left corner walls
+                {{1, 6}, {1, 5}}, {{2, 6}, {2, 5}},
+                // Bottom-right corner walls
+                {{5, 6}, {6, 5}}, {{6, 6}, {6, 5}}
+            };
+            
+            // Shuffle corner positions
+            shuffle3DArray(cornerPositions);
+            
+            // Place corner walls until we meet the minimum
+            for (int i = 0; i < cornerPositions.length && cornerWallsPlaced < minCornerWalls; i++) {
+                int[] hPos = cornerPositions[i][0];
+                int[] vPos = cornerPositions[i][1];
+                
+                // Only place if positions are empty
+                if (horizontalWalls[hPos[0]][hPos[1]] == 0 && verticalWalls[vPos[0]][vPos[1]] == 0) {
+                    horizontalWalls[hPos[0]][hPos[1]] = 1;
+                    verticalWalls[vPos[0]][vPos[1]] = 1;
+                    cornerWallsPlaced += 2; // We placed two walls
+                    wallsToPlace -= 2;
+                    Timber.d("[GAME LOGIC] Placed corner walls at H(%d,%d) and V(%d,%d)", 
+                            hPos[0], hPos[1], vPos[0], vPos[1]);
+                }
+            }
+        }
+        
+        // 2. Next place edge walls
+        int edgeWallsPlaced = 0;
+        if (placeWallsOnEdges && wallsToPlace > 0) {
+            // Define edge wall positions (alternating horizontal and vertical)
+            int[][] edgePositions = {
+                // Top edge (horizontal walls)
+                {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0},
+                // Bottom edge (horizontal walls)
+                {1, boardHeight-1}, {2, boardHeight-1}, {3, boardHeight-1}, 
+                {4, boardHeight-1}, {5, boardHeight-1}, {6, boardHeight-1},
+                // Left edge (vertical walls)
+                {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6},
+                // Right edge (vertical walls)
+                {boardWidth-1, 1}, {boardWidth-1, 2}, {boardWidth-1, 3}, 
+                {boardWidth-1, 4}, {boardWidth-1, 5}, {boardWidth-1, 6}
+            };
+            
+            boolean[] isVertical = {
+                false, false, false, false, false, false, 
+                false, false, false, false, false, false,
+                true, true, true, true, true, true,
+                true, true, true, true, true, true
+            };
+            
+            // Shuffle edge positions (keeping track of which are vertical)
+            shuffleArrayWithFlags(edgePositions, isVertical);
+            
+            // Place edge walls until we meet the minimum
+            for (int i = 0; i < edgePositions.length && edgeWallsPlaced < minEdgeWalls && wallsToPlace > 0; i++) {
+                int[] pos = edgePositions[i];
+                boolean vertical = isVertical[i];
+                
+                // Ensure the positions are within bounds
+                if (pos[0] >= 0 && pos[0] < boardWidth && pos[1] >= 0 && pos[1] < boardHeight) {
+                    // Only place if position is empty
+                    if ((vertical && verticalWalls[pos[0]][pos[1]] == 0) || 
+                        (!vertical && horizontalWalls[pos[0]][pos[1]] == 0)) {
+                            
+                        if (vertical) {
+                            verticalWalls[pos[0]][pos[1]] = 1;
+                        } else {
+                            horizontalWalls[pos[0]][pos[1]] = 1;
+                        }
+                        
+                        edgeWallsPlaced++;
+                        wallsToPlace--;
+                        Timber.d("[GAME LOGIC] Placed %s edge wall at (%d,%d)", 
+                                vertical ? "vertical" : "horizontal", pos[0], pos[1]);
+                    }
+                }
+            }
+            
+            Timber.d("[GAME LOGIC] Placed %d edge walls", edgeWallsPlaced);
+        }
+        
+        // 3. Finally, place any remaining walls in non-corner, non-edge, non-center positions
+        if (wallsToPlace > 0) {
+            // Define potential wall positions that won't block the game
+            // Avoid the center square (carré) which is at positions (3,3), (3,4), (4,3), (4,4)
+            int[][] potentialHorizontalWalls = {
+                {1, 2}, {2, 2}, {5, 2}, {6, 2},  // Top area positions
+                {1, 5}, {2, 5}, {5, 5}, {6, 5},  // Bottom area positions
+                {2, 1}, {2, 6}, {5, 1}, {5, 6},  // Side area positions
+                {3, 1}, {4, 1}, {3, 6}, {4, 6},  // Mid-edge positions
+                {1, 3}, {1, 4}, {6, 3}, {6, 4},  // More side positions
+                {2, 3}, {2, 4}, {5, 3}, {5, 4}   // Near center positions
+            };
+            
+            int[][] potentialVerticalWalls = {
+                {1, 2}, {1, 5}, {6, 2}, {6, 5},  // Corner area positions
+                {2, 1}, {2, 6}, {5, 1}, {5, 6},  // Edge-adjacent positions
+                {1, 3}, {1, 4}, {6, 3}, {6, 4},  // More side positions
+                {2, 2}, {2, 5}, {5, 2}, {5, 5},  // Internal corner positions
+                {2, 3}, {2, 4}, {5, 3}, {5, 4}   // Near center positions
+            };
+
+            // Shuffle both arrays
+            shuffleArray(potentialHorizontalWalls);
+            shuffleArray(potentialVerticalWalls);
+            
+            // Place walls alternating between horizontal and vertical
+            int additionalWallsPlaced = 0;
+            int maxAttempts = potentialHorizontalWalls.length + potentialVerticalWalls.length;
+            
+            for (int i = 0; i < maxAttempts && additionalWallsPlaced < wallsToPlace; i++) {
+                if (i % 2 == 0 && i/2 < potentialHorizontalWalls.length) {
+                    // Place horizontal wall
+                    int x = potentialHorizontalWalls[i/2][0];
+                    int y = potentialHorizontalWalls[i/2][1];
+                    
+                    // Skip if in center square and we don't want walls there
+                    if (!placeWallsInMiddleSquare && isCenterSquare(x, y)) {
+                        continue;
+                    }
+                    
+                    // Ensure the indices are valid for our array size
+                    if (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight) {
+                        // Only place if position is empty
+                        if (horizontalWalls[x][y] == 0) {
+                            horizontalWalls[x][y] = 1;
+                            additionalWallsPlaced++;
+                            Timber.d("[GAME LOGIC] Placed horizontal wall at %d,%d", x, y);
+                        }
+                    }
+                } else if (i % 2 == 1 && (i-1)/2 < potentialVerticalWalls.length) {
+                    // Place vertical wall
+                    int x = potentialVerticalWalls[(i-1)/2][0];
+                    int y = potentialVerticalWalls[(i-1)/2][1];
+                    
+                    // Skip if in center square and we don't want walls there
+                    if (!placeWallsInMiddleSquare && isCenterSquare(x, y)) {
+                        continue;
+                    }
+                    
+                    // Ensure the indices are valid for our array size
+                    if (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight) {
+                        // Only place if position is empty
+                        if (verticalWalls[x][y] == 0) {
+                            verticalWalls[x][y] = 1;
+                            additionalWallsPlaced++;
+                            Timber.d("[GAME LOGIC] Placed vertical wall at %d,%d", x, y);
+                        }
+                    }
+                }
+            }
+            
+            Timber.d("[GAME LOGIC] Placed %d additional walls beyond corners and edges", additionalWallsPlaced);
+        }
+
+        // Add game elements (robots and targets)
+        ArrayList<GridElement> result = translateArraysToMap(horizontalWalls, verticalWalls);
+        result = addGameElementsToGameMap(result, horizontalWalls, verticalWalls);
+
+        return result;
+    }
+    
+    /**
+     * Check if a position is within the center square (carré)
+     */
+    private boolean isCenterSquare(int x, int y) {
+        int centerX = boardWidth / 2 - 1;
+        int centerY = boardHeight / 2 - 1;
+        return (x >= centerX && x <= centerX + 2 && y >= centerY && y <= centerY + 2);
+    }
+    
+    /**
+     * Shuffle an array using Fisher-Yates algorithm
+     */
+    private void shuffleArray(int[][] array) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = rand.nextInt(i + 1);
+            // Simple swap
+            int[] temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+    }
+    
+    /**
+     * Shuffle an array along with a corresponding array of flags
+     * Both arrays must be the same length
+     */
+    private void shuffleArrayWithFlags(int[][] array, boolean[] flags) {
+        if (array.length != flags.length) {
+            Timber.e("[GAME LOGIC] Cannot shuffle arrays of different lengths");
+            return;
+        }
+        
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = rand.nextInt(i + 1);
+            // Swap the position arrays
+            int[] tempArray = array[index];
+            array[index] = array[i];
+            array[i] = tempArray;
+            
+            // Swap the corresponding flags
+            boolean tempFlag = flags[index];
+            flags[index] = flags[i];
+            flags[i] = tempFlag;
+        }
+    }
+    
+    /**
+     * Shuffle a 3D array using Fisher-Yates algorithm
+     */
+    private void shuffle3DArray(int[][][] array) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = rand.nextInt(i + 1);
+            // Simple swap
+            int[][] temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+    }
+    
+    /**
+     * Shuffle an array of objects with their associated data
+     */
+    private void shuffleArrayWithObject(Object[][] array) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = rand.nextInt(i + 1);
+            // Simple swap
+            Object[] temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+    }
 }
