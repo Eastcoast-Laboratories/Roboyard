@@ -452,7 +452,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             } else {
                 // Reset hint button text
                 hintButton.setText(R.string.hint_button);
-                statusTextView.setVisibility(View.GONE);
+                // Don't update the status text here - let callbacks handle it appropriately
+                // This prevents text flashing/flickering between states
             }
         });
     }
@@ -1459,7 +1460,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[STATUS TEXT] Updating status text: '%s', visible: %b", message, isVisible);
         if (statusTextView != null) {
             statusTextView.setText(message);
-            statusTextView.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+            statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
         }
     }
 }
