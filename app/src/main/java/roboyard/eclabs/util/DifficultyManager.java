@@ -1,7 +1,5 @@
 package roboyard.eclabs.util;
 
-import static roboyard.eclabs.GameLogic.DIFFICULTY_ADVANCED;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -48,40 +46,43 @@ public class DifficultyManager {
     
     /**
      * Get the current difficulty level
-     * @return Current difficulty level (DIFFICULTY_ADVANCED, DIFFICULTY_BEGINNER, or DIFFICULTY_INSANE)
+     * @return Current difficulty level (DIFFICULTY_BEGINNER, DIFFICULTY_INTERMEDIATE, DIFFICULTY_INSANE, or DIFFICULTY_IMPOSSIBLE)
      */
     public int getDifficulty() {
         Timber.d("[DIFFICULTY][SOLUTION SOLVER][MOVES] Getting difficulty level: %d, default to %d", prefs.getInt(KEY_DIFFICULTY, DIFFICULTY_BEGINNER), DIFFICULTY_BEGINNER);
-        return prefs.getInt(KEY_DIFFICULTY, DIFFICULTY_BEGINNER); // Default to normal difficulty
+        return prefs.getInt(KEY_DIFFICULTY, DIFFICULTY_BEGINNER); // Default to beginner difficulty
     }
     
     /**
      * Set the difficulty level
-     * @param difficulty Difficulty level to set (DIFFICULTY_ADVANCED, DIFFICULTY_BEGINNER, or DIFFICULTY_INSANE)
+     * @param difficulty Difficulty level to set (DIFFICULTY_BEGINNER, DIFFICULTY_INTERMEDIATE, DIFFICULTY_INSANE, or DIFFICULTY_IMPOSSIBLE)
      */
     public void setDifficulty(int difficulty) {
-        if (difficulty < DIFFICULTY_ADVANCED || difficulty > DIFFICULTY_INSANE) {
+        if (difficulty < DIFFICULTY_BEGINNER || difficulty > DIFFICULTY_IMPOSSIBLE) {
             throw new IllegalArgumentException("Invalid difficulty level: " + difficulty);
         }
         
+        Timber.d("[DIFFICULTY] Setting difficulty to %d", difficulty);
         prefs.edit().putInt(KEY_DIFFICULTY, difficulty).apply();
     }
     
     /**
      * Get a string representation of the current difficulty level
-     * @return String representation of the current difficulty level ("Easy", "Normal", or "Hard")
+     * @return String representation of the current difficulty level ("Beginner", "Intermediate", etc.)
      */
     public String getDifficultyString() {
-        switch (getDifficulty()) {
-            case DIFFICULTY_ADVANCED:
-                return "Easy";
+        int difficulty = getDifficulty();
+        switch (difficulty) {
             case DIFFICULTY_BEGINNER:
-                return "Normal";
+                return "Beginner";
+            case DIFFICULTY_INTERMEDIATE:
+                return "Intermediate";
             case DIFFICULTY_INSANE:
-                return "Hard";
+                return "Insane";
+            case DIFFICULTY_IMPOSSIBLE:
+                return "Impossible";
             default:
-                return "Normal";
+                return "Beginner";
         }
     }
-
 }
