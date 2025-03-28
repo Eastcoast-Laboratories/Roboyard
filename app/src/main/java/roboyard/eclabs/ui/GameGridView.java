@@ -76,7 +76,8 @@ public class GameGridView extends View {
     private final long animationDuration = 300; // Animation duration in milliseconds
     
     // Wall configuration
-    private static float WALL_THICKNESS_FACTOR = 0.375f; // Default is cellSize / 8 * 3 (3 times thicker)
+    private static float WALL_THICKNESS_FACTOR = 0.675f; // Default is cellSize / 8 * 3 (3 times thicker)
+    private static float WALL_OFFSET_FACTOR = 0.3f; // walls are a bit longer than the cellsoverlap)
     
     // Store starting positions of robots
     private final HashMap<Integer, int[]> robotStartingPositions = new HashMap<>(); // Map robot color to starting position [x,y]
@@ -525,42 +526,40 @@ public class GameGridView extends View {
                 // Horizontal walls are drawn between rows (separating cells vertically)
                 int x = element.getX();
                 int y = element.getY();
-                
-                float left = x * cellSize;
+
+                float offset = cellSize * WALL_OFFSET_FACTOR; // Offset to overlap the edges of the grid crossings
+                float left = x * cellSize - offset; // Left of the right cell
                 float top = y * cellSize; // Top of the lower cell
-                float right = left + cellSize;
-                float wallThickness = cellSize * WALL_THICKNESS_FACTOR; // 3 times thicker than before
-                
+                float right = left + cellSize + 2 * offset;
+                float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
+
                 // Draw horizontal wall - between y and y+1
                 if (wallHorizontal != null) {
                     wallHorizontal.setBounds((int)left, (int)(top - wallThickness/2), 
                                              (int)right, (int)(top + wallThickness/2));
                     wallHorizontal.draw(canvas);
                 } else {
-                    // Fallback to simple rectangle if drawable not available
-                    cellPaint.setColor(Color.DKGRAY);
-                    canvas.drawRect(left, top - wallThickness/2, right, top + wallThickness/2, cellPaint);
+                    Timber.d("Horizontal wall drawable not available");
                 }
             } 
             else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
                 // Vertical walls are drawn between columns (separating cells horizontally)
                 int x = element.getX();
                 int y = element.getY();
-                
+
+                float offset = cellSize * WALL_OFFSET_FACTOR; // Offset to overlap the edges of
                 float left = x * cellSize; // Left of the right cell
-                float top = y * cellSize;
-                float bottom = top + cellSize;
-                float wallThickness = cellSize * WALL_THICKNESS_FACTOR; // 3 times thicker than before
+                float top = y * cellSize - offset;
+                float bottom = top + cellSize + 2 * offset;
+                float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
                 
                 // Draw vertical wall - between x and x+1
                 if (wallVertical != null) {
-                    wallVertical.setBounds((int)(left - wallThickness/2), (int)top, 
+                    wallVertical.setBounds((int)(left - wallThickness/2), (int)top,
                                            (int)(left + wallThickness/2), (int)bottom);
                     wallVertical.draw(canvas);
                 } else {
-                    // Fallback to simple rectangle if drawable not available
-                    cellPaint.setColor(Color.DKGRAY);
-                    canvas.drawRect(left - wallThickness/2, top, left + wallThickness/2, bottom, cellPaint);
+                    Timber.d("Vertical wall drawable not available");
                 }
             }
         }

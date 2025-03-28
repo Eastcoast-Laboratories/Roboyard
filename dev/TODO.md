@@ -14,4 +14,4 @@
 - only show the next level button when solved
 - no hints button in level game
 - auto save to history after 60 seconds
-
+- win message and stop timer also in random game

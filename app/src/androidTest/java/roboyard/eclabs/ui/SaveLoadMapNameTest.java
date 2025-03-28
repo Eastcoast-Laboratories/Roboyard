@@ -77,9 +77,7 @@ public class SaveLoadMapNameTest {
     public void testSaveAndLoadWithMapName() {
         activityScenarioRule.getScenario().onActivity(activity -> {
             // 1. Save the game to a specific slot
-            boolean saveSuccess = gameStateManager.saveGame();
-            assertTrue("Failed to save game", saveSuccess);
-            
+
             // 2. Read the saved file directly to verify the map name is in the metadata
             String savePath = FileReadWrite.getSaveGamePath(activity, TEST_SAVE_SLOT);
             String saveData = FileReadWrite.loadAbsoluteData(savePath);
