@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import roboyard.eclabs.Constants;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
@@ -231,23 +232,29 @@ public class SettingsFragment extends BaseGameFragment {
         }
         
         // Set difficulty radio button
+        int difficultyLevel; // Default to DIFFICULTY_BEGINNER
         switch (difficulty) {
-            case "Beginner":
-                difficultyBeginner.setChecked(true);
-                break;
             case "Advanced":
                 difficultyAdvanced.setChecked(true);
+                difficultyLevel = Constants.DIFFICULTY_INTERMEDIATE;
                 break;
             case "Insane":
                 difficultyInsane.setChecked(true);
+                difficultyLevel = Constants.DIFFICULTY_INSANE;
                 break;
             case "Impossible":
                 difficultyImpossible.setChecked(true);
+                difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE;
                 break;
             default:
                 difficultyBeginner.setChecked(true);
+                difficultyLevel = Constants.DIFFICULTY_BEGINNER;
                 break;
         }
+        
+        // Important: Update DifficultyManager with the numeric difficulty level
+        roboyard.eclabs.util.DifficultyManager.getInstance(requireActivity()).setDifficulty(difficultyLevel);
+        Timber.d("[DIFFICULTY] Loaded difficulty: %s (level %d)", difficulty, difficultyLevel);
         
         // Load new map setting
         String newMapEachTime = preferences.getPreferenceValue(requireActivity(), "newMapEachTime");
@@ -380,22 +387,32 @@ public class SettingsFragment extends BaseGameFragment {
         // Difficulty radio group
         difficultyRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             String difficulty;
+            int difficultyLevel;
             if (checkedId == R.id.difficulty_beginner) {
                 difficulty = "Beginner";
+                difficultyLevel = 0; // DIFFICULTY_BEGINNER
             } else if (checkedId == R.id.difficulty_advanced) {
                 difficulty = "Advanced";
+                difficultyLevel = 1; // DIFFICULTY_INTERMEDIATE
             } else if (checkedId == R.id.difficulty_insane) {
                 difficulty = "Insane";
+                difficultyLevel = 2; // DIFFICULTY_INSANE
             } else if (checkedId == R.id.difficulty_impossible) {
                 difficulty = "Impossible";
+                difficultyLevel = 3; // DIFFICULTY_IMPOSSIBLE
                 // Show warning toast for impossible difficulty
                 showImpossibleDifficultyToast();
             } else {
                 difficulty = "Beginner";
+                difficultyLevel = 0; // DIFFICULTY_BEGINNER
             }
             
-            // Save difficulty setting and update game
+            // Save difficulty setting as a string in preferences
             preferences.setPreferences(requireActivity(), "difficulty", difficulty);
+            
+            // Also update the numeric difficulty value in DifficultyManager
+            roboyard.eclabs.util.DifficultyManager.getInstance(requireActivity()).setDifficulty(difficultyLevel);
+            Timber.d("[DIFFICULTY] Set difficulty to: %s (level %d)", difficulty, difficultyLevel);
         });
         
         // New map radio group
