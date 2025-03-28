@@ -28,6 +28,7 @@ import java.util.Map;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.MainActivity;
+import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.DifficultyManager;
@@ -337,6 +338,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         timerTextView = view.findViewById(R.id.game_timer);
         statusTextView = view.findViewById(R.id.status_text_view);
         
+        // Prevent automatic selection of gameGridView by setting focusable to false
+        gameGridView.setFocusable(false);
+        
         // Initialize sound manager
         soundManager = SoundManager.getInstance(requireContext());
         
@@ -357,8 +361,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             setupAccessibilityControls();
         }
         
-        // Check for TalkBack and show accessibility controls toggle if needed
-        if (isTalkBackEnabled()) {
+        // Check for TalkBack OR accessibility preference enabled to show the button
+        boolean accessibilityModeEnabled = false;
+        
+        // Check settings preference
+        Preferences preferences = new Preferences();
+        String accessibilityPref = preferences.getPreferenceValue(requireActivity(), "accessibilityMode");
+        if (accessibilityPref != null && accessibilityPref.equals("true")) {
+            accessibilityModeEnabled = true;
+        }
+        
+        // Show button if either TalkBack or accessibility mode is enabled
+        if (isTalkBackEnabled() || accessibilityModeEnabled) {
             btnToggleAccessibilityControls.setVisibility(View.VISIBLE);
             btnToggleAccessibilityControls.setOnClickListener(v -> toggleAccessibilityControls());
         }
@@ -653,6 +667,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (btnSelectRobot != null) {
             btnSelectRobot.setOnClickListener(v -> cycleThroughRobots());
         }
+        
+        // Set up announce positions button
+        Button btnAnnouncePositions = accessibilityControlsContainer.findViewById(R.id.btn_announce_positions);
+        if (btnAnnouncePositions != null) {
+            btnAnnouncePositions.setOnClickListener(v -> announceGameStart());
+        }
     }
     
     /**
@@ -758,6 +778,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         int startX = robot.getX();
         int startY = robot.getY();
         
+        // Ensure starting position is valid and within bounds
+        if (startX < 0 || startX >= state.getWidth() || startY < 0 || startY >= state.getHeight()) {
+            Timber.e("Robot position outside game boundaries: %d, %d", startX, startY);
+            // Reset robot to a valid position on the board
+            startX = Math.max(0, Math.min(startX, state.getWidth() - 1));
+            startY = Math.max(0, Math.min(startY, state.getHeight() - 1));
+            robot.setX(startX);
+            robot.setY(startY);
+            gameGridView.invalidate();
+            announceAccessibility("Robot repositioned to valid location");
+        }
+        
         // Find the farthest position the robot can move in this direction
         int endX = startX;
         int endY = startY;
@@ -767,17 +799,43 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Check for movement in X direction
         if (dx != 0) {
             int step = dx > 0 ? 1 : -1;
+            // Allow movement to any valid cell including 0 and 1
             for (int i = startX + step; i >= 0 && i < state.getWidth(); i += step) {
-                if (state.canRobotMoveTo(robot, i, startY)) {
+                boolean canMove = true;
+                
+                // Check if there's a wall between the current position and the next position
+                if (dx > 0) { // Moving right
+                    // Check for vertical wall at the current position
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
+                            element.getX() == i+2 && element.getY() == startY) {
+                            canMove = false;
+                            hitWall = true;
+                            break;
+                        }
+                    }
+                } else { // Moving left
+                    // Check for vertical wall at the previous position
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
+                            element.getX() == i+1 && element.getY() == startY) {
+                            canMove = false;
+                            hitWall = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Check for robot at the position
+                GameElement robotAtPosition = state.getRobotAt(i, startY);
+                if (robotAtPosition != null) {
+                    canMove = false;
+                    hitRobot = true;
+                }
+                
+                if (canMove) {
                     endX = i;
                 } else {
-                    // Check if we hit a robot or a wall
-                    GameElement robotAtPosition = state.getRobotAt(i, startY);
-                    if (robotAtPosition != null) {
-                        hitRobot = true;
-                    } else {
-                        hitWall = true;
-                    }
                     break;
                 }
             }
@@ -786,20 +844,54 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Check for movement in Y direction
         if (dy != 0) {
             int step = dy > 0 ? 1 : -1;
+            // Allow movement to any valid cell including 0 and 1
             for (int i = startY + step; i >= 0 && i < state.getHeight(); i += step) {
-                if (state.canRobotMoveTo(robot, startX, i)) {
+                boolean canMove = true;
+                
+                // Check if there's a wall between the current position and the next position
+                if (dy > 0) { // Moving down
+                    // Check for horizontal wall at the current position
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
+                            element.getX() == startX && element.getY() == i+2) {
+                            canMove = false;
+                            hitWall = true;
+                            break;
+                        }
+                    }
+                } else { // Moving up
+                    // Check for horizontal wall at the previous position
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
+                            element.getX() == startX && element.getY() == i+1) {
+                            canMove = false;
+                            hitWall = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Check for robot at the position
+                GameElement robotAtPosition = state.getRobotAt(startX, i);
+                if (robotAtPosition != null) {
+                    canMove = false;
+                    hitRobot = true;
+                }
+                
+                if (canMove) {
                     endY = i;
                 } else {
-                    // Check if we hit a robot or a wall
-                    GameElement robotAtPosition = state.getRobotAt(startX, i);
-                    if (robotAtPosition != null) {
-                        hitRobot = true;
-                    } else {
-                        hitWall = true;
-                    }
                     break;
                 }
             }
+        }
+        
+        // Ensure final position is within bounds
+        if (endX < 0 || endX >= state.getWidth() || endY < 0 || endY >= state.getHeight()) {
+            Timber.e("Calculated end position outside game boundaries: %d, %d", endX, endY);
+            // Restrict to valid bounds
+            endX = Math.max(0, Math.min(endX, state.getWidth() - 1));
+            endY = Math.max(0, Math.min(endY, state.getHeight() - 1));
         }
         
         // Calculate the distance moved
@@ -814,6 +906,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Update the game state
             gameStateManager.setMoveCount(gameStateManager.getMoveCount().getValue() + 1);
             gameStateManager.setSquaresMoved(gameStateManager.getSquaresMoved().getValue() + dist);
+            
+            // FIX: Actually update the UI to show the robot movement
+            gameGridView.invalidate();
             
             // Play the appropriate sound effect
             Timber.d("[SOUND] Playing sound " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));

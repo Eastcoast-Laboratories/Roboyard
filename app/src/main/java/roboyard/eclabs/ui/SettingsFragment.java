@@ -42,6 +42,9 @@ public class SettingsFragment extends BaseGameFragment {
     private RadioGroup soundRadioGroup;
     private RadioButton soundOn;
     private RadioButton soundOff;
+    private RadioGroup accessibilityRadioGroup;
+    private RadioButton accessibilityOn;
+    private RadioButton accessibilityOff;
     private Button backButton;
     
     private Preferences preferences;
@@ -71,6 +74,9 @@ public class SettingsFragment extends BaseGameFragment {
         soundRadioGroup = view.findViewById(R.id.sound_radio_group);
         soundOn = view.findViewById(R.id.sound_on);
         soundOff = view.findViewById(R.id.sound_off);
+        accessibilityRadioGroup = view.findViewById(R.id.accessibility_radio_group);
+        accessibilityOn = view.findViewById(R.id.accessibility_on);
+        accessibilityOff = view.findViewById(R.id.accessibility_off);
         backButton = view.findViewById(R.id.back_button);
         
         // Set up board size options - this must happen first
@@ -276,6 +282,14 @@ public class SettingsFragment extends BaseGameFragment {
             soundOff.setChecked(true);
             toggleSound(requireActivity(), false);
         }
+        
+        // Set accessibility mode radio group
+        String accessibilityPref = preferences.getPreferenceValue(requireActivity(), "accessibilityMode");
+        if (accessibilityPref != null && accessibilityPref.equals("true")) {
+            accessibilityRadioGroup.check(R.id.accessibility_on);
+        } else {
+            accessibilityRadioGroup.check(R.id.accessibility_off);
+        }
     }
     
     /**
@@ -408,17 +422,19 @@ public class SettingsFragment extends BaseGameFragment {
             toggleSound(requireActivity(), soundEnabled);
         });
         
+        // Accessibility mode radio group
+        accessibilityRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            boolean accessibilityEnabled = checkedId == R.id.accessibility_on;
+            String accessibilityMode = accessibilityEnabled ? "true" : "false";
+            
+            // Save accessibility mode setting
+            preferences.setPreferences(requireActivity(), "accessibilityMode", accessibilityMode);
+        });
+        
         // Back button
         backButton.setOnClickListener(v -> {
-            // Use the navigation component to go back
-            if (requireActivity() instanceof FragmentHostActivity) {
-                // For the modern UI, use the navigation controller
-                androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(requireView());
-                navController.navigateUp();
-            } else if (requireActivity() instanceof MainActivity) {
-                // For legacy UI, use the back press
-                requireActivity().onBackPressed();
-            }
+            // Simply use the activity's onBackPressed method for safe navigation
+            requireActivity().onBackPressed();
         });
     }
     

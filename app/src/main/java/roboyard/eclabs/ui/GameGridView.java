@@ -525,11 +525,11 @@ public class GameGridView extends View {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 // Horizontal walls are drawn between rows (separating cells vertically)
                 int x = element.getX();
-                int y = element.getY();
+                int y = element.getY(); 
 
-                float offset = cellSize * WALL_OFFSET_FACTOR; // Offset to overlap the edges of the grid crossings
-                float left = x * cellSize - offset; // Left of the right cell
-                float top = y * cellSize; // Top of the lower cell
+                float offset = cellSize * WALL_OFFSET_FACTOR; 
+                float left = x * cellSize - offset; 
+                float top = y * cellSize; 
                 float right = left + cellSize + 2 * offset;
                 float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
 
@@ -544,11 +544,11 @@ public class GameGridView extends View {
             } 
             else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
                 // Vertical walls are drawn between columns (separating cells horizontally)
-                int x = element.getX();
+                int x = element.getX(); 
                 int y = element.getY();
 
-                float offset = cellSize * WALL_OFFSET_FACTOR; // Offset to overlap the edges of
-                float left = x * cellSize; // Left of the right cell
+                float offset = cellSize * WALL_OFFSET_FACTOR; 
+                float left = x * cellSize; 
                 float top = y * cellSize - offset;
                 float bottom = top + cellSize + 2 * offset;
                 float wallThickness = cellSize * WALL_THICKNESS_FACTOR;

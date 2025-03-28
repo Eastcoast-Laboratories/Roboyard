@@ -327,11 +327,11 @@ public class GameLogic {
             //Creation of the borders
             for (int x = 0; x < boardWidth; x++) {
                 horizontalWalls[x][0] = 1;
-                horizontalWalls[x][boardHeight] = 1;
+                horizontalWalls[x][boardHeight-1] = 1; // Fix: Use boardHeight-1 instead of boardHeight
             }
             for (int y = 0; y < boardHeight; y++) {
                 verticalWalls[0][y] = 1;
-                verticalWalls[boardWidth][y] = 1;
+                verticalWalls[boardWidth-1][y] = 1; // Fix: Use boardWidth-1 instead of boardWidth
             }
 
             // right-angled Walls near the left border
@@ -596,6 +596,8 @@ public class GameLogic {
             for (int i = 0; i < outerWallPositions.length && outerBorderWallsPlaced < minOuterBorderWalls && wallsToPlace > 0; i++) {
                 int[] pos = outerWallPositions[i];
                 boolean isVertical = isVerticalWall[i];
+                
+                // Determine the actual position to place the wall
                 int x = pos[0];
                 int y = pos[1];
                 

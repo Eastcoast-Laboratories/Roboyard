@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#F5F5F5"
+    android:background="#303030"
     android:padding="8dp">
 
     <TextView
@@ -14,6 +14,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
+        android:textColor="#FFFFFF"
         android:contentDescription="Selected robot information"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -24,11 +25,12 @@
         android:text="Goal: Not selected"
         android:textSize="16sp"
         android:gravity="center"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="4dp"
         android:contentDescription="Selected robot goal information"
         app:layout_constraintTop_toBottomOf="@id/txt_selected_robot"/>
 
-    <!-- Direction controls arranged in a more compact grid -->
+    <!-- Direction controls arranged in a more compact grid with side buttons -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/direction_controls"
         android:layout_width="match_parent"
@@ -36,19 +38,49 @@
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/txt_robot_goal">
 
-        <!-- North button -->
-        <Button
-            android:id="@+id/btn_move_north"
-            android:layout_width="120dp"
-            android:layout_height="48dp"
-            android:text="North"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:background="@drawable/button_rounded_blue_outline"
-            android:layout_marginBottom="4dp"
+        <!-- Top row with 3 buttons: Announce, North, Select -->
+        <LinearLayout
+            android:id="@+id/top_row_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
+            
+            <!-- Announce Positions Button (small) -->
+            <Button
+                android:id="@+id/btn_announce_positions"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:text="Announce"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_purple"
+                android:layout_marginEnd="8dp" />
+            
+            <!-- North button -->
+            <Button
+                android:id="@+id/btn_move_north"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:text="North"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:background="@drawable/button_rounded_blue_outline" />
+                
+            <!-- Select Robot Button (small) -->
+            <Button
+                android:id="@+id/btn_select_robot"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:text="Next Robot"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_purple"
+                android:layout_marginStart="28dp" />
+        </LinearLayout>
 
         <!-- West and East buttons in the same row -->
         <LinearLayout
@@ -57,7 +89,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="4dp"
-            app:layout_constraintTop_toBottomOf="@id/btn_move_north"
+            app:layout_constraintTop_toBottomOf="@id/top_row_buttons"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
             
@@ -98,17 +130,4 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Robot Selection Button -->
-    <Button
-        android:id="@+id/btn_select_robot"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select Next Robot"
-        android:textColor="#FFFFFF"
-        android:background="@drawable/button_rounded_purple"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/direction_controls"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

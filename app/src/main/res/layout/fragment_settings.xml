@@ -202,6 +202,48 @@
                     android:clickable="true"
                     android:contentDescription="Turn sound off" />
             </RadioGroup>
+
+            <!-- Accessibility Mode Section -->
+            <TextView
+                android:id="@+id/accessibility_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Accessibility Mode:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/accessibility_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/accessibility_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="On"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Enable accessibility mode" />
+
+                <RadioButton
+                    android:id="@+id/accessibility_off"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Off"
+                    android:textSize="16sp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Disable accessibility mode" />
+            </RadioGroup>
+
         </LinearLayout>
     </ScrollView>
 
