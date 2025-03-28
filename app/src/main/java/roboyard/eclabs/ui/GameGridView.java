@@ -527,6 +527,7 @@ public class GameGridView extends View {
                 int x = element.getX();
                 int y = element.getY(); 
 
+                // Special handling for border walls to ensure they're visible
                 float offset = cellSize * WALL_OFFSET_FACTOR; 
                 float left = x * cellSize - offset; 
                 float top = y * cellSize; 
@@ -535,6 +536,12 @@ public class GameGridView extends View {
 
                 // Draw horizontal wall - between y and y+1
                 if (wallHorizontal != null) {
+                    // Handle the border case for bottom border correctly
+                    if (y == state.getHeight()) {
+                        // Bottom border wall at edge of board
+                        top = state.getHeight() * cellSize;
+                    }
+                    
                     wallHorizontal.setBounds((int)left, (int)(top - wallThickness/2), 
                                              (int)right, (int)(top + wallThickness/2));
                     wallHorizontal.draw(canvas);
@@ -555,6 +562,12 @@ public class GameGridView extends View {
                 
                 // Draw vertical wall - between x and x+1
                 if (wallVertical != null) {
+                    // Handle the border case for right border correctly
+                    if (x == state.getWidth()) {
+                        // Right border wall at edge of board
+                        left = state.getWidth() * cellSize;
+                    }
+                    
                     wallVertical.setBounds((int)(left - wallThickness/2), (int)top,
                                            (int)(left + wallThickness/2), (int)bottom);
                     wallVertical.draw(canvas);

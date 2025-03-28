@@ -325,46 +325,46 @@ public class GameLogic {
                     horizontalWalls[x][y] = verticalWalls[x][y] = 0;
 
             //Creation of the borders
-            for (int x = 0; x < boardWidth+1; x++) {
-                horizontalWalls[x][0] = 1;
-                horizontalWalls[x][boardHeight] = 1; 
+            for (int x = 0; x < boardWidth; x++) {
+                horizontalWalls[x][0] = 1;  // Top border
+                horizontalWalls[x][boardHeight] = 1;  // Bottom border (important: use boardHeight to place at edge)
             }
-            for (int y = 0; y < boardHeight+1; y++) {
-                verticalWalls[0][y] = 1;
-                verticalWalls[boardWidth][y] = 1; 
+            for (int y = 0; y < boardHeight; y++) {
+                verticalWalls[0][y] = 1;  // Left border
+                verticalWalls[boardWidth][y] = 1;  // Right border (important: use boardWidth to place at edge)
             }
 
             // right-angled Walls near the left border
             horizontalWalls[0][getRandom(2, 7)] = 1;
             do {
-                temp = getRandom(boardHeight/2, boardHeight-1);
+                temp = getRandom(boardHeight/2, boardHeight-2);  // Adjust to ensure walls are visible
             }
             while (horizontalWalls[0][temp - 1] == 1 || horizontalWalls[0][temp] == 1 || horizontalWalls[0][temp + 1] == 1);
             horizontalWalls[0][temp] = 1;
 
             // right-angled Walls near the right border
-            horizontalWalls[boardWidth][getRandom(2, 7)] = 1;
+            horizontalWalls[boardWidth-1][getRandom(2, 7)] = 1;  // Position one cell to the left of border
             do {
-                temp = getRandom(boardHeight/2, boardHeight-1);
+                temp = getRandom(boardHeight/2, boardHeight-2);  // Adjust to ensure walls are visible
             }
-            while (horizontalWalls[boardWidth][temp - 1] == 1 || horizontalWalls[boardWidth][temp] == 1 || horizontalWalls[boardWidth][temp + 1] == 1);
-            horizontalWalls[boardWidth][temp] = 1;
+            while (horizontalWalls[boardWidth-1][temp - 1] == 1 || horizontalWalls[boardWidth-1][temp] == 1 || horizontalWalls[boardWidth-1][temp + 1] == 1);
+            horizontalWalls[boardWidth-1][temp] = 1;
 
             // right-angled Walls near the top border
             verticalWalls[getRandom(2, boardWidth/2 - 1)][0] = 1;
             do {
-                temp = getRandom(boardWidth/2, boardWidth-1);
+                temp = getRandom(boardWidth/2, boardWidth-2);  // Adjust to ensure walls are visible
             }
             while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
             verticalWalls[temp][0] = 1;
 
             // right-angled Walls near the bottom border
-            verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight] = 1;
+            verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight-1] = 1;  // Position one cell above the border
             do {
-                temp = getRandom(8, boardWidth-1);
+                temp = getRandom(8, boardWidth-2);  // Adjust to ensure walls are visible
             }
-            while (verticalWalls[temp - 1][boardHeight] == 1 || verticalWalls[temp][boardHeight] == 1 || verticalWalls[temp + 1][boardHeight] == 1);
-            verticalWalls[temp][boardHeight] = 1;
+            while (verticalWalls[temp - 1][boardHeight-1] == 1 || verticalWalls[temp][boardHeight-1] == 1 || verticalWalls[temp + 1][boardHeight-1] == 1);
+            verticalWalls[temp][boardHeight-1] = 1;
 
             //Drawing the middle square (carré)
             horizontalWalls[carrePosX][carrePosY] = horizontalWalls[carrePosX + 1][carrePosY] = 1;
@@ -375,7 +375,7 @@ public class GameLogic {
             // Loop to place walls in each quadrant of the board
             // The board is divided into 4 quadrants, and we try to place an equal number of walls in each
             // Each wall consists of two parts placed at right angles to form an L-shape
-            for (int k = 0; k < wallsPerQuadrant * 4 + 1; k++) {
+            for (int k = 0; k < wallsPerQuadrant * 4 + boardWidth / 2; k++) {
                 boolean abandon = false;
                 int tempX;
                 int tempY;
@@ -388,26 +388,26 @@ public class GameLogic {
                     abandon = false;
 
                     //Choice of random coordinates in each quadrant of the game board
-                    if (k < boardWidth/4) {
+                    if (k < wallsPerQuadrant) {
                         // top-left quadrant
-                        tempX = getRandom(1, boardWidth/2 -1);
-                        tempY = getRandom(1, boardHeight/2 -1);
-                    } else if (k < 2*boardWidth/4) {
+                        tempX = getRandom(1, boardWidth/2 - 1);
+                        tempY = getRandom(1, boardHeight/2 - 1);
+                    } else if (k < wallsPerQuadrant * 2) {
                         // top-right quadrant
-                        tempX = getRandom(boardWidth/2, boardWidth-1);
-                        tempY = getRandom(1, boardHeight/2 -1);
-                    } else if (k < 3*boardWidth/4) {
+                        tempX = getRandom(boardWidth/2, boardWidth-2); // Use boardWidth-2 to stay visible
+                        tempY = getRandom(1, boardHeight/2 - 1);
+                    } else if (k < wallsPerQuadrant * 3) {
                         // bottom-left quadrant
                         tempX = getRandom(1, boardWidth/2 -1);
-                        tempY = getRandom(boardHeight/2, boardHeight-1);
-                    } else if (k < boardWidth) {
+                        tempY = getRandom(boardHeight/2, boardHeight-2); // Use boardHeight-2 to stay visible
+                    } else if (k < wallsPerQuadrant * 4) {
                         // bottom-right quadrant
-                        tempX = getRandom(boardWidth/2, boardWidth-1);
-                        tempY = getRandom(boardHeight/2, boardHeight-1);
+                        tempX = getRandom(boardWidth/2, boardWidth-2); // Use boardWidth-2 to stay visible
+                        tempY = getRandom(boardHeight/2, boardHeight-2); // Use boardHeight-2 to stay visible
                     } else {
                         // bonus walls
-                        tempX = getRandom(1, boardWidth-1);
-                        tempY = getRandom(1, boardHeight-1);
+                        tempX = getRandom(1, boardWidth-2); // Use boardWidth-2 to stay visible
+                        tempY = getRandom(1, boardHeight-2); // Use boardHeight-2 to stay visible
                     }
 
                     if (horizontalWalls[tempX][tempY] == 1 // already chosen
@@ -702,14 +702,6 @@ public class GameLogic {
             
             Timber.d("[GAME LOGIC] Placed %d perpendicular walls at borders", borderPerpendicularWallsPlaced);
         }
-        
-        // Create a center square similar to the original game but simpler
-        int centerX = boardWidth / 2 - 1;
-        int centerY = boardHeight / 2 - 1;
-        horizontalWalls[centerX][centerY] = horizontalWalls[centerX + 1][centerY] = 1;
-        horizontalWalls[centerX][centerY+2] = horizontalWalls[centerX + 1][centerY+2] = 1;
-        verticalWalls[centerX][centerY] = verticalWalls[centerX][centerY + 1] = 1;
-        verticalWalls[centerX+2][centerY] = verticalWalls[centerX+2][centerY + 1] = 1;
         
         // 1. First place corner walls (where walls touch at corners)
         int cornerWallsPlaced = 0;
