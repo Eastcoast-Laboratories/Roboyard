@@ -59,7 +59,18 @@ import timber.log.Timber;
  * Handles game state, navigation, and communication between fragments.
  * This replaces the previous GameManager with a more Android-native approach.
  */
-public class GameStateManager extends AndroidViewModel {
+public class GameStateManager extends AndroidViewModel implements SolverManager.SolverListener {
+    
+        
+    // Minimum required moves for each difficulty level (as per documentation)
+    private static final int MIN_MOVES_BEGINNER = 11;      // 4-6 moves for beginner
+    private static final int MIN_MOVES_INTERMEDIATE = 6;    // 6-8 moves for normal
+    private static final int MIN_MOVES_INSANE = 10;     // 10+ moves for hard
+    private static final int MIN_MOVES_IMPOSSIBLE = 17; // 17+ moves for impossible
+    
+    private boolean validateDifficulty = true;
+    private int regenerationCount = 0;
+    private static final int MAX_AUTO_REGENERATIONS = 999;
     
     // Game state
     private final MutableLiveData<GameState> currentState = new MutableLiveData<>();
@@ -127,28 +138,7 @@ public class GameStateManager extends AndroidViewModel {
         
         // Set solver listener if not already set
         if (solverManager.getListener() == null) {
-            solverManager.setListener(new SolverManager.SolverListener() {
-                @Override
-                public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
-                    // Process on main thread
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        if (success) {
-                            GameSolution solution = solverManager.getCurrentSolution();
-                            onSolutionCalculationCompleted(solution);
-                        } else {
-                            onSolutionCalculationFailed("No solution found");
-                        }
-                    });
-                }
-                
-                @Override
-                public void onSolverCancelled() {
-                    // Process on main thread
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        onSolutionCalculationFailed("Solver was cancelled");
-                    });
-                }
-            });
+            solverManager.setListener(this);
         }
         return solverManager;
     }
@@ -169,61 +159,70 @@ public class GameStateManager extends AndroidViewModel {
     public void startModernGame() {
         Timber.d("GameStateManager: startModernGame() called");
         
-        // If solver is already running, don't create a new game state to avoid mismatch
-        if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
-            Timber.d("[SOLUTION SOLVER] startModernGame: Solver already running, not creating new game state");
-            return;
-        }
+        // Reset statistics first 
+        resetStatistics();
         
-        // Get board size from the manager
+        // Reset regeneration counter
+        regenerationCount = 0;
+        
+        // Get board dimensions from BoardSizeManager
         int width = boardSizeManager.getBoardWidth();
         int height = boardSizeManager.getBoardHeight();
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Retrieved board size from BoardSizeManager: %dx%d", width, height);
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Current MainActivity board size: %dx%d", 
-                MainActivity.boardSizeX, MainActivity.boardSizeY);
         
-        // Create a new random game state
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Before calling createRandom with size: %dx%d", width, height);
-        
-        // Create a new random GameState for the modern UI
-        GameState state = GameState.createRandom(width, height, difficultyManager.getDifficulty());
-        Timber.d("GameStateManager: Created new random GameState for modern UI");
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.startModernGame - Created GameState has dimensions: %dx%d", 
-                state.getWidth(), state.getHeight());
-        
-        // Set the current state
-        currentState.setValue(state);
-        currentMapName = "Random-" + System.currentTimeMillis();
-        
-        // Reset move counts and history
-        setMoveCount(0);
-        setSquaresMoved(0);
-        setGameComplete(false);
-        stateHistory.clear();
-        squaresMovedHistory.clear();
-        startTime = System.currentTimeMillis();
-        Timber.d("GameStateManager: Reset move counts and state history");
-        
-        // Initialize the solver with grid elements
-        ArrayList<GridElement> gridElements = state.getGridElements();
-        // Force solver reinitialization for the new game
-        getSolverManager().resetInitialization();
-        getSolverManager().initialize(gridElements);
-        
-        // Reset solution state
-        currentSolution = null;
-        currentSolutionStep = 0;
-        
-        // Start calculating the solution automatically
-        calculateSolutionAsync(null);
+        createValidGame(width, height);
         
         // Set UI mode to modern
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
         
-        // Record start time
+        Timber.d("GameStateManager: startModernGame() complete");
+    }
+    
+    /**
+     * Creates a valid game with at least MIN_REQUIRED_MOVES difficulty
+     * @param width Width of the board
+     * @param height Height of the board
+     */
+    private void createValidGame(int width, int height) {
+        Timber.d("GameStateManager: createValidGame() called");
+        
+        // Create a new random game state
+        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
+        Timber.d("GameStateManager: Created new random GameState");
+        
+        // Set the game state
+        currentState.setValue(newState);
+        moveCount.setValue(0);
+        isGameComplete.setValue(false);
+        
+        // Clear the state history
+        stateHistory.clear();
+        squaresMovedHistory.clear();
+        
+        // Reset solver status and solution
+        currentSolution = null;
+        currentSolutionStep = 0;
+        
+        // Initialize the solver with grid elements from the new state
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        getSolverManager().resetInitialization();
+        getSolverManager().initialize(gridElements);
+        
         startTime = System.currentTimeMillis();
         
-        resetStatistics();
+        // Start calculating the solution, but use our internal validation callback
+        if (validateDifficulty) {
+            // Temporarily set validateDifficulty to false to prevent infinite recursion
+            // if all generated puzzles are too easy
+            validateDifficulty = false;
+            
+            // Calculate solution with our own callback to validate difficulty
+            Timber.d("GameStateManager: Validating puzzle difficulty...");
+            calculateSolutionAsync(new DifficultyValidationCallback(width, height));
+        } else {
+            // Regular game initialization, don't validate difficulty
+            validateDifficulty = true; // Reset for next time
+            calculateSolutionAsync(null);
+        }
     }
     
     /**
@@ -1370,15 +1369,30 @@ public class GameStateManager extends AndroidViewModel {
         int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
         if (moveCount > 0) {
             Timber.d("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
-            // If solution requires less than 4 moves and we're not in level mode,
+            // If solution requires fewer moves than required minimum and we're not in level mode,
             // automatically start a new game because this one is too easy
             GameState state = currentState.getValue();
             boolean isLevelMode = (state != null && state.getLevelId() > 0);
+            int minRequiredMoves = getMinimumRequiredMoves();
             
-            if (moveCount < 14 && !isLevelMode) {
-                Timber.d("[SOLUTION SOLVER][MOVES] Solution has only %d moves, starting new game", moveCount);
-                startNewGame();
+            if (moveCount < minRequiredMoves && !isLevelMode && regenerationCount < MAX_AUTO_REGENERATIONS) {
+                Timber.d("[SOLUTION SOLVER][MOVES] Solution has only %d moves (minimum required: %d), starting new game (regeneration %d/%d)", 
+                        moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                regenerationCount++;
+                
+                // Force reset the solver state before starting a new game
+                SolverManager solverManager = getSolverManager();
+                solverManager.resetInitialization();
+                solverManager.cancelSolver(); // Cancel any running solver process
+                
+                // Create a new game after a short delay to ensure the solver is fully reset
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    createValidGame(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight());
+                }, 100);
                 return;
+            } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
+                Timber.d("[SOLUTION SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.", MAX_AUTO_REGENERATIONS);
+                regenerationCount = 0; // Reset for next time
             }
         } else {
             Timber.w("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
@@ -1431,7 +1445,7 @@ public class GameStateManager extends AndroidViewModel {
     public void cancelSolver() {
         Timber.d("[SOLUTION SOLVER] cancelSolver called");
         if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
-            getSolverManager().cancel();
+            getSolverManager().cancelSolver();
             // The solver will call onSolverCancelled() via the listener
         }
     }
@@ -1545,5 +1559,103 @@ public class GameStateManager extends AndroidViewModel {
         moveCount.setValue(0);
         squaresMoved.setValue(0);
         isGameComplete.setValue(false);
+    }
+    
+    /**
+     * Gets the minimum required moves based on current difficulty setting
+     * @return minimum number of moves required for current difficulty
+     */
+    private int getMinimumRequiredMoves() {
+        int difficulty = difficultyManager.getDifficulty();
+        int minMoves = 0;
+        switch (difficulty) {
+            case DifficultyManager.DIFFICULTY_INTERMEDIATE:
+                minMoves = MIN_MOVES_INTERMEDIATE;
+                break;
+            case DifficultyManager.DIFFICULTY_INSANE:
+                minMoves = MIN_MOVES_INSANE;
+                break;
+            case DifficultyManager.DIFFICULTY_IMPOSSIBLE:
+                minMoves = MIN_MOVES_IMPOSSIBLE;
+                break;
+            default:
+                minMoves = MIN_MOVES_BEGINNER; // Default to beginner if unknown difficulty
+        }
+        Timber.d("[SOLUTION SOLVER][MOVES] Minimum required moves for difficulty %d: %d", difficulty, minMoves);
+        return minMoves;
+    }
+    
+    /**
+     * Callback to validate puzzle difficulty and regenerate if needed
+     */
+    private class DifficultyValidationCallback implements SolutionCallback {
+        private final int width;
+        private final int height;
+        private int attemptCount = 0;
+        private static final int MAX_ATTEMPTS = 5;
+        
+        public DifficultyValidationCallback(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+        
+        @Override
+        public void onSolutionCalculationStarted() {
+            Timber.d("DifficultyValidationCallback: Calculation started, attempt %d", attemptCount + 1);
+        }
+        
+        @Override
+        public void onSolutionCalculationCompleted(GameSolution solution) {
+            attemptCount++;
+            int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
+            int requiredMoves = getMinimumRequiredMoves();
+            
+            Timber.d("DifficultyValidationCallback: Found solution with %d moves (minimum required: %d)", 
+                    moveCount, requiredMoves);
+            
+            if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
+                // Puzzle too easy, generate a new one
+                Timber.d("DifficultyValidationCallback: Puzzle too easy (%d moves), generating new one", moveCount);
+                createValidGame(width, height);
+            } else {
+                // Puzzle is good enough or we've tried too many times
+                Timber.d("DifficultyValidationCallback: Accepted puzzle with %d moves after %d attempts", 
+                        moveCount, attemptCount);
+                validateDifficulty = true; // Reset validation flag
+                // Store the solution
+                currentSolution = solution;
+                currentSolutionStep = 0;
+                isSolverRunning.setValue(false);
+            }
+        }
+        
+        @Override
+        public void onSolutionCalculationFailed(String errorMessage) {
+            Timber.w("DifficultyValidationCallback: Solution calculation failed: %s", errorMessage);
+            // Just accept the current puzzle even if we couldn't solve it
+            validateDifficulty = true;
+            isSolverRunning.setValue(false);
+        }
+    }
+    
+    @Override
+    public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
+        // Process on main thread
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (success) {
+                GameSolution solution = getSolverManager().getCurrentSolution();
+                onSolutionCalculationCompleted(solution);
+            } else {
+                onSolutionCalculationFailed("No solution found");
+            }
+        });
+    }
+    
+    @Override
+    public void onSolverCancelled() {
+        // Process on main thread
+        new Handler(Looper.getMainLooper()).post(() -> {
+            onSolutionCalculationFailed("Solver was cancelled");
+        });
     }
 }

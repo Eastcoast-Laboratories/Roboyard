@@ -17,3 +17,19 @@
 - win message and stop timer also in random game
 - add sound effects for buttons
 - add sound effect background for game
+# Difficulty
+- Beginner
+  - show any puzzles with solutions with at least 4-6 moves
+  - goals are always in corners with two walls
+- Advanced
+  - solutions with at least 6-8 moves
+  - keep initial playing field when starting the next game
+  - keep playing field when loading a saved game
+  - three lines allowed in the same row/column
+  - no multi-color target
+- Insane mode
+  - solutions with at least 10 moves
+  - five lines allowed in the same row/column
+- Impossible mode
+  - solutions with at least 17 moves
+  - five lines allowed in the same row/column

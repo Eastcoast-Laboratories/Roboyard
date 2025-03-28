@@ -13,7 +13,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -1574,10 +1573,10 @@ public class GameState implements Serializable {
      */
     private static String difficultyIntToString(int difficulty) {
         switch (difficulty) {
-            case Constants.DIFFICULTY_EASY: return "Beginner";
-            case Constants.DIFFICULTY_MEDIUM: return "Intermediate";
-            case Constants.DIFFICULTY_HARD: return "Advanced";
-            case Constants.DIFFICULTY_EXPERT: return "Expert";
+            case Constants.DIFFICULTY_BEGINNER: return "Beginner";
+            case Constants.DIFFICULTY_INTERMEDIATE: return "Intermediate";
+            case Constants.DIFFICULTY_INSANE: return "Advanced";
+            case Constants.DIFFICULTY_IMPOSSIBLE: return "Expert";
             default: return "Beginner";
         }
     }

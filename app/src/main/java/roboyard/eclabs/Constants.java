@@ -50,10 +50,10 @@ public class Constants {
     public static final int TYPE_VERTICAL_WALL = 4;
     
     // Difficulty levels
-    public static final int DIFFICULTY_EASY = 0;
-    public static final int DIFFICULTY_MEDIUM = 1;
-    public static final int DIFFICULTY_HARD = 2;
-    public static final int DIFFICULTY_EXPERT = 3;
+    public static final int DIFFICULTY_BEGINNER = 0;
+    public static final int DIFFICULTY_INTERMEDIATE = 1;
+    public static final int DIFFICULTY_INSANE = 2;
+    public static final int DIFFICULTY_IMPOSSIBLE = 3;
 
     // Color constants
     public static final int COLOR_RED = 0;
