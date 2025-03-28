@@ -6,4 +6,10 @@
     <!-- Text sizes -->
     <dimen name="status_text_size">16sp</dimen>
     <dimen name="status_text_padding">8dp</dimen>
+    
+    <!-- Game buttons dimensions -->
+    <dimen name="game_button_height">48dp</dimen>
+    <dimen name="game_button_text_size">14sp</dimen>
+    <dimen name="game_button_margin">8dp</dimen>
+    <dimen name="game_button_padding">4dp</dimen>
 </resources>
