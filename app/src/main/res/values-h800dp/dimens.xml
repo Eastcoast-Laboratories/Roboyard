@@ -2,7 +2,7 @@
 <resources>
     <!-- Text sizes for tall screens (high height-to-width ratio) -->
     <dimen name="status_text_size">32sp</dimen>
-    <dimen name="status_text_padding">0dp</dimen>
+    <dimen name="status_text_padding">5dp</dimen>
     
     <!-- Tall screens - larger text for buttons -->
     <dimen name="game_button_height">52dp</dimen>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Status text size for tablets (slightly smaller than default) -->
+    <dimen name="status_text_size">16sp</dimen>
+</resources>

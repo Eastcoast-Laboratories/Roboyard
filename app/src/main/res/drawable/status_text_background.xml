@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Light green background -->
+    <solid android:color="#b5f874" />
+    
+    <!-- Dark green thick border -->
+    <stroke
+        android:width="3dp"
+        android:color="#008f00" />
+    
+    <!-- Rounded corners -->
+    <corners android:radius="8dp" />
+</shape>

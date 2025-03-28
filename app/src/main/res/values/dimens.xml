@@ -4,7 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     
     <!-- Text sizes -->
-    <dimen name="status_text_size">16sp</dimen>
+    <dimen name="status_text_size">18sp</dimen>
     <dimen name="status_text_padding">8dp</dimen>
     
     <!-- Game buttons dimensions -->
