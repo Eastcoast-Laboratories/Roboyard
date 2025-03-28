@@ -212,8 +212,8 @@ public class RRGetMap {
                         asciiMap[x*2+1][y] = "M̅"; // M with overline
                     }
                 } else {
-                    // Just a horizontal wall
-                    asciiMap[x*2+1][y] = "-";
+                    // Just a horizontal wall an overline
+                    asciiMap[x*2+1][y] = "‾"; // UTF8 overline
                 }
             } else {
                 // No horizontal wall, just set the character based on element type
