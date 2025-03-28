@@ -288,8 +288,8 @@ public class GameLogic {
             return generateSimpleGameMap(existingMap);
         }
         
-        int[][] horizontalWalls = new int[boardWidth][boardHeight];
-        int[][] verticalWalls = new int[boardWidth][boardHeight];
+        int[][] horizontalWalls = new int[boardWidth+1][boardHeight+1];
+        int[][] verticalWalls = new int[boardWidth+1][boardHeight+1];
 
         int temp = 0;
         int countX = 0;
@@ -320,18 +320,18 @@ public class GameLogic {
             }
 
             //We initialize with no walls
-            for (int x = 0; x < boardWidth; x++)
-                for (int y = 0; y < boardHeight; y++)
+            for (int x = 0; x < boardWidth+1; x++)
+                for (int y = 0; y < boardHeight+1; y++)
                     horizontalWalls[x][y] = verticalWalls[x][y] = 0;
 
             //Creation of the borders
-            for (int x = 0; x < boardWidth; x++) {
+            for (int x = 0; x < boardWidth+1; x++) {
                 horizontalWalls[x][0] = 1;
-                horizontalWalls[x][boardHeight-1] = 1; // Fix: Use boardHeight-1 instead of boardHeight
+                horizontalWalls[x][boardHeight] = 1; 
             }
-            for (int y = 0; y < boardHeight; y++) {
+            for (int y = 0; y < boardHeight+1; y++) {
                 verticalWalls[0][y] = 1;
-                verticalWalls[boardWidth-1][y] = 1; // Fix: Use boardWidth-1 instead of boardWidth
+                verticalWalls[boardWidth][y] = 1; 
             }
 
             // right-angled Walls near the left border
@@ -343,12 +343,12 @@ public class GameLogic {
             horizontalWalls[0][temp] = 1;
 
             // right-angled Walls near the right border
-            horizontalWalls[boardWidth-1][getRandom(2, 7)] = 1;
+            horizontalWalls[boardWidth][getRandom(2, 7)] = 1;
             do {
                 temp = getRandom(boardHeight/2, boardHeight-1);
             }
-            while (horizontalWalls[boardWidth-1][temp - 1] == 1 || horizontalWalls[boardWidth-1][temp] == 1 || horizontalWalls[boardWidth-1][temp + 1] == 1);
-            horizontalWalls[boardWidth-1][temp] = 1;
+            while (horizontalWalls[boardWidth][temp - 1] == 1 || horizontalWalls[boardWidth][temp] == 1 || horizontalWalls[boardWidth][temp + 1] == 1);
+            horizontalWalls[boardWidth][temp] = 1;
 
             // right-angled Walls near the top border
             verticalWalls[getRandom(2, boardWidth/2 - 1)][0] = 1;
@@ -359,12 +359,12 @@ public class GameLogic {
             verticalWalls[temp][0] = 1;
 
             // right-angled Walls near the bottom border
-            verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight-1] = 1;
+            verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight] = 1;
             do {
                 temp = getRandom(8, boardWidth-1);
             }
-            while (verticalWalls[temp - 1][boardHeight-1] == 1 || verticalWalls[temp][boardHeight-1] == 1 || verticalWalls[temp + 1][boardHeight-1] == 1);
-            verticalWalls[temp][boardHeight-1] = 1;
+            while (verticalWalls[temp - 1][boardHeight] == 1 || verticalWalls[temp][boardHeight] == 1 || verticalWalls[temp + 1][boardHeight] == 1);
+            verticalWalls[temp][boardHeight] = 1;
 
             //Drawing the middle square (carré)
             horizontalWalls[carrePosX][carrePosY] = horizontalWalls[carrePosX + 1][carrePosY] = 1;
@@ -427,12 +427,12 @@ public class GameLogic {
                         //We count the number of walls in the same row/column
                         countX = countY = 0;
 
-                        for (int x = 1; x < boardWidth-1; x++) {
+                        for (int x = 1; x < boardWidth; x++) {
                             if (horizontalWalls[x][tempY] == 1)
                                 countX++;
                         }
 
-                        for (int y = 1; y < boardHeight-1; y++) {
+                        for (int y = 1; y < boardHeight; y++) {
                             if (horizontalWalls[tempX][y] == 1)
                                 countY++;
                         }
@@ -473,12 +473,12 @@ public class GameLogic {
                             //We count the number of walls in the same row/column
                             countX = countY = 0;
 
-                            for (int x = 1; x < boardWidth-1; x++) {
+                            for (int x = 1; x < boardWidth; x++) {
                                 if (verticalWalls[x][tempYv] == 1)
                                     countX++;
                             }
 
-                            for (int y = 1; y < boardHeight-1; y++) {
+                            for (int y = 1; y < boardHeight; y++) {
                                 if (verticalWalls[tempXv][y] == 1)
                                     countY++;
                             }
@@ -543,11 +543,11 @@ public class GameLogic {
 
         // Create borders (these are automatically added by the game but we'll define them anyway)
         // Important: In an 8x8 board, valid indices are 0-7, with the borders at -1, 0, boardWidth, and boardHeight
-        for (int x = 0; x < boardWidth; x++) {
+        for (int x = 0; x < boardWidth+1; x++) {
             horizontalWalls[x][0] = 1;
             horizontalWalls[x][boardHeight] = 1;
         }
-        for (int y = 0; y < boardHeight; y++) {
+        for (int y = 0; y < boardHeight+1; y++) {
             verticalWalls[0][y] = 1;
             verticalWalls[boardWidth][y] = 1;
         }
@@ -591,10 +591,10 @@ public class GameLogic {
             outerWallPositions[11] = new int[]{0, 5}; isVerticalWall[11] = true;
             
             // Some additional bottom and right outer walls for variety
-            outerWallPositions[12] = new int[]{0, boardHeight-1}; isVerticalWall[12] = false;
-            outerWallPositions[13] = new int[]{4, boardHeight-1}; isVerticalWall[13] = false;
-            outerWallPositions[14] = new int[]{boardWidth-1, 0}; isVerticalWall[14] = true;
-            outerWallPositions[15] = new int[]{boardWidth-1, 4}; isVerticalWall[15] = true;
+            outerWallPositions[12] = new int[]{0, boardHeight}; isVerticalWall[12] = false;
+            outerWallPositions[13] = new int[]{4, boardHeight}; isVerticalWall[13] = false;
+            outerWallPositions[14] = new int[]{boardWidth, 0}; isVerticalWall[14] = true;
+            outerWallPositions[15] = new int[]{boardWidth, 4}; isVerticalWall[15] = true;
             
             // Shuffle the wall positions
             shuffleArrayWithFlags(outerWallPositions, isVerticalWall);
@@ -682,9 +682,9 @@ public class GameLogic {
                 // Check if the position is valid and empty
                 boolean canPlace = false;
                 if (!isVertical) { // Horizontal wall
-                    canPlace = (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight && horizontalWalls[x][y] == 0);
+                    canPlace = (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1 && horizontalWalls[x][y] == 0);
                 } else { // Vertical wall
-                    canPlace = (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight && verticalWalls[x][y] == 0);
+                    canPlace = (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1 && verticalWalls[x][y] == 0);
                 }
                 
                 if (canPlace) {
@@ -754,13 +754,13 @@ public class GameLogic {
                 // Top edge (horizontal walls)
                 {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0},
                 // Bottom edge (horizontal walls)
-                {1, boardHeight-1}, {2, boardHeight-1}, {3, boardHeight-1}, 
-                {4, boardHeight-1}, {5, boardHeight-1}, {6, boardHeight-1},
+                {1, boardHeight}, {2, boardHeight}, {3, boardHeight}, 
+                {4, boardHeight}, {5, boardHeight}, {6, boardHeight},
                 // Left edge (vertical walls)
                 {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6},
                 // Right edge (vertical walls)
-                {boardWidth-1, 1}, {boardWidth-1, 2}, {boardWidth-1, 3}, 
-                {boardWidth-1, 4}, {boardWidth-1, 5}, {boardWidth-1, 6}
+                {boardWidth, 1}, {boardWidth, 2}, {boardWidth, 3}, 
+                {boardWidth, 4}, {boardWidth, 5}, {boardWidth, 6}
             };
             
             boolean[] isVertical = {
@@ -779,7 +779,7 @@ public class GameLogic {
                 boolean vertical = isVertical[i];
                 
                 // Ensure the positions are within bounds
-                if (pos[0] >= 0 && pos[0] < boardWidth && pos[1] >= 0 && pos[1] < boardHeight) {
+                if (pos[0] >= 0 && pos[0] < boardWidth+1 && pos[1] >= 0 && pos[1] < boardHeight+1) {
                     // Only place if position is empty
                     if ((vertical && verticalWalls[pos[0]][pos[1]] == 0) || 
                         (!vertical && horizontalWalls[pos[0]][pos[1]] == 0)) {
@@ -806,20 +806,31 @@ public class GameLogic {
             // Define potential wall positions that won't block the game
             // Avoid the center square (carré) which is at positions (3,3), (3,4), (4,3), (4,4)
             int[][] potentialHorizontalWalls = {
-                {1, 2}, {2, 2}, {5, 2}, {6, 2},  // Top area positions
-                {1, 5}, {2, 5}, {5, 5}, {6, 5},  // Bottom area positions
-                {2, 1}, {2, 6}, {5, 1}, {5, 6},  // Side area positions
-                {3, 1}, {4, 1}, {3, 6}, {4, 6},  // Mid-edge positions
-                {1, 3}, {1, 4}, {6, 3}, {6, 4},  // More side positions
-                {2, 3}, {2, 4}, {5, 3}, {5, 4}   // Near center positions
+                // Top area positions
+                {1, 2}, {2, 2}, {5, 2}, {6, 2},  
+                // Bottom area positions
+                {1, 5}, {2, 5}, {5, 5}, {6, 5},  
+                // Side area positions
+                {2, 1}, {2, 6}, {5, 1}, {5, 6},  
+                // Mid-edge positions
+                {3, 1}, {4, 1}, {3, 6}, {4, 6},  
+                // More side positions
+                {1, 3}, {1, 4}, {6, 3}, {6, 4},  
+                // Near center positions
+                {2, 3}, {2, 4}, {5, 3}, {5, 4}   
             };
             
             int[][] potentialVerticalWalls = {
-                {1, 2}, {1, 5}, {6, 2}, {6, 5},  // Corner area positions
-                {2, 1}, {2, 6}, {5, 1}, {5, 6},  // Edge-adjacent positions
-                {1, 3}, {1, 4}, {6, 3}, {6, 4},  // More side positions
-                {2, 2}, {2, 5}, {5, 2}, {5, 5},  // Internal corner positions
-                {2, 3}, {2, 4}, {5, 3}, {5, 4}   // Near center positions
+                // Corner area positions
+                {1, 2}, {1, 5}, {6, 2}, {6, 5},  
+                // Edge-adjacent positions
+                {2, 1}, {2, 6}, {5, 1}, {5, 6},  
+                // More side positions
+                {1, 3}, {1, 4}, {6, 3}, {6, 4},  
+                // Internal corner positions
+                {2, 2}, {2, 5}, {5, 2}, {5, 5},  
+                // Near center positions
+                {2, 3}, {2, 4}, {5, 3}, {5, 4}   
             };
 
             // Shuffle both arrays
@@ -842,7 +853,7 @@ public class GameLogic {
                     }
                     
                     // Ensure the indices are valid for our array size
-                    if (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight) {
+                    if (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1) {
                         // Only place if position is empty
                         if (horizontalWalls[x][y] == 0) {
                             horizontalWalls[x][y] = 1;
@@ -861,7 +872,7 @@ public class GameLogic {
                     }
                     
                     // Ensure the indices are valid for our array size
-                    if (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight) {
+                    if (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1) {
                         // Only place if position is empty
                         if (verticalWalls[x][y] == 0) {
                             verticalWalls[x][y] = 1;
