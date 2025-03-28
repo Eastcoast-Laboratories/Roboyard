@@ -63,10 +63,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
         
     // Minimum required moves for each difficulty level (as per documentation)
-    private static final int MIN_MOVES_BEGINNER = 4;      // 4-6 moves for beginner
-    private static final int MIN_MOVES_INTERMEDIATE = 6;    // 6-8 moves for normal
-    private static final int MIN_MOVES_INSANE = 10;     // 10+ moves for hard
-    private static final int MIN_MOVES_IMPOSSIBLE = 17; // 17+ moves for impossible
+    private static final int MIN_MOVES_BEGINNER = 4;      // 4-6 moves
+    private static final int MAX_MOVES_BEGINNER = 6;    // 4-6 moves
+    private static final int MIN_MOVES_ADVANCED = 6;    // 6-8 moves
+    private static final int MAX_MOVES_ADVANCED = 8;    // 6-8 moves
+    private static final int MIN_MOVES_INSANE = 10;     // 10+ moves
+    private static final int MIN_MOVES_IMPOSSIBLE = 17; // 17+ moves
     
     private boolean validateDifficulty = true;
     private int regenerationCount = 0;
@@ -1360,6 +1362,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Called when the solution calculation completes successfully
+     * This is the SolverManager.Listener implementation that's called by SolverManager when the solver finishes.
+     * This method stores the solution and notifies any registered callback.
+     * 
      * @param solution The calculated solution
      */
     private void onSolutionCalculationCompleted(GameSolution solution) {
@@ -1414,7 +1419,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: No callback provided");
         }
     }
-
+    
     /**
      * Called when the solution calculation fails
      * @param errorMessage The error message
@@ -1570,7 +1575,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int minMoves = 0;
         switch (difficulty) {
             case DifficultyManager.DIFFICULTY_INTERMEDIATE:
-                minMoves = MIN_MOVES_INTERMEDIATE;
+                minMoves = MIN_MOVES_ADVANCED;
                 break;
             case DifficultyManager.DIFFICULTY_INSANE:
                 minMoves = MIN_MOVES_INSANE;
@@ -1584,6 +1589,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION SOLVER][MOVES] Minimum required moves for difficulty %d: %d", difficulty, minMoves);
         return minMoves;
     }
+
+    private int getMaximumRequiredMoves() {
+        int difficulty = difficultyManager.getDifficulty();
+        int maxMoves = 9999;
+        switch (difficulty) {
+            case DifficultyManager.DIFFICULTY_INTERMEDIATE:
+                maxMoves = MAX_MOVES_ADVANCED;
+                break;
+            case DifficultyManager.DIFFICULTY_INSANE:
+            case DifficultyManager.DIFFICULTY_IMPOSSIBLE:
+                break;
+            default:
+                maxMoves = MAX_MOVES_BEGINNER;
+        }
+        Timber.d("[SOLUTION SOLVER][MOVES] Maximum required moves for difficulty %d: %d", difficulty, maxMoves);
+        return maxMoves;
+    }
     
     /**
      * Callback to validate puzzle difficulty and regenerate if needed
@@ -1592,7 +1614,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         private final int width;
         private final int height;
         private int attemptCount = 0;
-        private static final int MAX_ATTEMPTS = 5;
+        private static final int MAX_ATTEMPTS = 999;
         
         public DifficultyValidationCallback(int width, int height) {
             this.width = width;
@@ -1609,17 +1631,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             attemptCount++;
             int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
             int requiredMoves = getMinimumRequiredMoves();
+            int maxMoves = getMaximumRequiredMoves();
             
-            Timber.d("DifficultyValidationCallback: Found solution with %d moves (minimum required: %d)", 
-                    moveCount, requiredMoves);
+            Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
+                    moveCount, requiredMoves, maxMoves);
             
             if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
                 // Puzzle too easy, generate a new one
-                Timber.d("DifficultyValidationCallback: Puzzle too easy (%d moves), generating new one", moveCount);
+                Timber.d("[DifficultyValidationCallback]: Puzzle too easy (%d moves), generating new one", moveCount);
+                createValidGame(width, height);
+            } else if (moveCount > maxMoves && attemptCount < MAX_ATTEMPTS) {
+                // Puzzle too hard, generate a new one
+                Timber.d("[DifficultyValidationCallback]: Puzzle too hard (%d moves), generating new one", moveCount);
                 createValidGame(width, height);
             } else {
                 // Puzzle is good enough or we've tried too many times
-                Timber.d("DifficultyValidationCallback: Accepted puzzle with %d moves after %d attempts", 
+                Timber.d("[DifficultyValidationCallback]: Accepted puzzle with %d moves after %d attempts",
                         moveCount, attemptCount);
                 validateDifficulty = true; // Reset validation flag
                 // Store the solution

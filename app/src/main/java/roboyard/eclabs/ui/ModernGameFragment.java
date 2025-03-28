@@ -429,8 +429,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     nextLevelButton.setVisibility(View.VISIBLE);
                     
                     // Update status text to show level complete message
-                    statusTextView.setText(getString(R.string.level_complete));
-                    statusTextView.setVisibility(View.VISIBLE);
+                    updateStatusText(getString(R.string.level_complete), true);
                     
                     // Announce level completion for accessibility
                     String completionMessage = getString(R.string.level_complete) + 
@@ -449,12 +448,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
                 hintButton.setText(R.string.cancel_hint_button);
-                statusTextView.setText("Calculating solution...");
-                statusTextView.setVisibility(View.VISIBLE);
+                updateStatusText("Calculating solution...", true);
             } else {
                 // Reset hint button text
                 hintButton.setText(R.string.hint_button);
-                // statusTextView.setVisibility(View.GONE);
+                statusTextView.setVisibility(View.GONE);
             }
         });
     }
@@ -497,8 +495,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // If solver is running, pressing the button should cancel
                 Timber.d("ModernGameFragment: Cancelling solver");
                 gameStateManager.cancelSolver();
-                statusTextView.setText("Hint calculation cancelled");
-                statusTextView.setVisibility(View.VISIBLE);
+                updateStatusText("Hint calculation cancelled", true);
                 return;
             }
             
@@ -506,8 +503,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             GameSolution solution = gameStateManager.getCurrentSolution();
             if (solution == null || solution.getMoves() == null || solution.getMoves().size() == 0) {
                 Timber.d("[HINT] No solution available, calculating...");
-                statusTextView.setText("Calculating solution...");
-                statusTextView.setVisibility(View.VISIBLE);
+                updateStatusText("Calculating solution...", true);
                 
                 // Start calculating a solution
                 gameStateManager.calculateSolutionAsync(this);
@@ -521,8 +517,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (currentStep >= totalMoves) {
                 String hint = "All hints have been shown (" + currentStep + "/" + totalMoves + "), resetting to first hint";
                 Timber.d("[HINT] Displayed hint: " + hint);
-                statusTextView.setText(hint);
-                statusTextView.setVisibility(View.VISIBLE);
+                updateStatusText(hint, true);
                 // Reset the solution step counter to show the first hint again
                 gameStateManager.resetSolutionStep();
                 return;
@@ -550,14 +545,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Update the status text with the hint number and the hint itself
                 String hintText = String.format("%d/%d: Move the %s robot %s",
                         currentStep + 1, totalMoves, robotColor, direction);
-                statusTextView.setText(hintText);
-                statusTextView.setVisibility(View.VISIBLE);
+                updateStatusText(hintText, true);
                 
                 Timber.d("[HINT] Displayed hint: %s", hintText);
             } else {
                 // No solution found
-                statusTextView.setText("No solution available");
-                statusTextView.setVisibility(View.VISIBLE);
+                updateStatusText("No solution available", true);
                 Timber.d("[HINT] No valid hint move available");
             }
         });
@@ -604,8 +597,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             stopTimer();
             startTimer();
             // Clear any hint text from the status display
-            statusTextView.setText("");
-            statusTextView.setVisibility(View.GONE);
+            updateStatusText("", false);
             // Announce the robots and their positions
             announceGameStart();
         });
@@ -643,8 +635,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 nextLevelButton.setVisibility(View.GONE);
                 
                 // Clear any hint text from the status display
-                statusTextView.setText("");
-                statusTextView.setVisibility(View.GONE);
+                updateStatusText("", false);
                 
                 // Announce the new level
                 announceAccessibility("Starting level " + nextLevelId);
@@ -1402,8 +1393,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
         
         // Clear any previous hint or status text
-        statusTextView.setText("");
-        statusTextView.setVisibility(View.GONE);
+        updateStatusText("", false);
         
         // Start the timer
         startTimer();
@@ -1418,15 +1408,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setText(R.string.cancel_hint_button);
-            statusTextView.setText("Calculating solution...");
-            statusTextView.setVisibility(View.VISIBLE);
+            updateStatusText("Calculating solution...", true);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show calculation in progress");
         });
     }
 
     @Override
     public void onSolutionCalculationCompleted(GameSolution solution) {
-        Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted - solution: %s", solution);
+        Timber.d("[SOLUTION CALLBACK] ModernGameFragment.onSolutionCalculationCompleted ENTERED");
         if (solution != null && solution.getMoves() != null) {
             Timber.d("[SOLUTION SOLVER][MOVES] Solution has %d moves", solution.getMoves().size());
             
@@ -1435,15 +1424,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             GameState currentState = gameStateManager.getCurrentState().getValue();
             boolean isLevelMode = (currentState != null && currentState.getLevelId() > 0);
         } else {
-            Timber.w("[SOLUTION SOLVER][MOVES] Solution or moves is null!");
+            Timber.w("[SOLUTION CALLBACK] Solution or moves is null!");
         }
         
+        // Force UI update on main thread with the correct message
+        Timber.d("[SOLUTION CALLBACK] About to run on UI thread");
         requireActivity().runOnUiThread(() -> {
+            Timber.d("[SOLUTION CALLBACK] Now running on UI thread");
             // Reset hint button text back to "Hint"
             hintButton.setText(R.string.hint_button);
-            statusTextView.setText("Hint ready! Press hint button again.");
-            statusTextView.setVisibility(View.VISIBLE);
-            Timber.d("[SOLUTION SOLVER] UI updated to show hint is ready");
+            // Make sure status text is set and visible
+            updateStatusText("Solution ready! Press hint", true);
+            Timber.d("[SOLUTION CALLBACK] *** SOLUTION IS READY - UI UPDATED ***");
         });
     }
 
@@ -1453,9 +1445,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
             hintButton.setText(R.string.hint_button);
-            statusTextView.setText("Could not find a solution: " + errorMessage);
-            statusTextView.setVisibility(View.VISIBLE);
+            updateStatusText("Could not find a solution: " + errorMessage, true);
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show error");
         });
+    }
+    
+    /**
+     * Helper method to update the status text with a consistent approach
+     * @param message The message to display
+     * @param isVisible Whether to make the status text visible
+     */
+    private void updateStatusText(String message, boolean isVisible) {
+        Timber.d("[STATUS TEXT] Updating status text: '%s', visible: %b", message, isVisible);
+        if (statusTextView != null) {
+            statusTextView.setText(message);
+            statusTextView.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        }
     }
 }
