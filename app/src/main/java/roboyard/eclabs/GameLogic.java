@@ -44,8 +44,8 @@ public class GameLogic {
     private Boolean loneWallsAllowed = false; // walls that are not attached in a 90 deg. angle
     
     // Board dimensions
-    private int boardWidth;
-    private int boardHeight;
+    private final int boardWidth;
+    private final int boardHeight;
     
     // Current difficulty level
     private final int currentLevel;
@@ -350,25 +350,22 @@ public class GameLogic {
             while (horizontalWalls[boardWidth-1][temp - 1] == 1 || horizontalWalls[boardWidth-1][temp] == 1 || horizontalWalls[boardWidth-1][temp + 1] == 1);
             horizontalWalls[boardWidth-1][temp] = 1;
 
-            if(boardWidth > 8) {
-                // right-angled Walls near the top border
-                Timber.d("[GAME LOGIC] Placing right-angled Walls near the top border");
-                verticalWalls[getRandom(2, boardWidth/2 - 1)][0] = 1;
-                do {
-                    temp = getRandom(boardWidth/2, boardWidth-1);
-                }
-                while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
-                verticalWalls[temp][0] = 1;
-
-                // right-angled Walls near the bottom border
-                Timber.d("[GAME LOGIC] Placing right-angled Walls near the bottom border");
-                verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight-1] = 1;
-                do {
-                    temp = getRandom(8, boardWidth-1);
-                } while (verticalWalls[temp - 1][boardHeight-1] == 1 || verticalWalls[temp][boardHeight-1] == 1 || verticalWalls[temp + 1][boardHeight-1] == 1);
-
-                verticalWalls[temp][boardHeight-1] = 1;
+            // right-angled Walls near the top border
+            verticalWalls[getRandom(2, boardWidth/2 - 1)][0] = 1;
+            do {
+                temp = getRandom(boardWidth/2, boardWidth-1);
             }
+            while (verticalWalls[temp - 1][0] == 1 || verticalWalls[temp][0] == 1 || verticalWalls[temp + 1][0] == 1);
+            verticalWalls[temp][0] = 1;
+
+            // right-angled Walls near the bottom border
+            verticalWalls[getRandom(2, boardWidth/2 - 1)][boardHeight-1] = 1;
+            do {
+                temp = getRandom(8, boardWidth-1);
+            }
+            while (verticalWalls[temp - 1][boardHeight-1] == 1 || verticalWalls[temp][boardHeight-1] == 1 || verticalWalls[temp + 1][boardHeight-1] == 1);
+            verticalWalls[temp][boardHeight-1] = 1;
+
             //Drawing the middle square (carré)
             horizontalWalls[carrePosX][carrePosY] = horizontalWalls[carrePosX + 1][carrePosY] = 1;
             horizontalWalls[carrePosX][carrePosY+2] = horizontalWalls[carrePosX + 1][carrePosY+2] = 1;
@@ -413,26 +410,19 @@ public class GameLogic {
                         tempY = getRandom(1, boardHeight-1);
                     }
 
-                    if(boardWidth > 8) {
-                        if (horizontalWalls[tempX][tempY] == 1 // already chosen
-                            || horizontalWalls[tempX - 1][tempY] == 1 // left
-                            || horizontalWalls[tempX + 1][tempY] == 1 // right
-                            || horizontalWalls[tempX][tempY - 1] == 1 // directly above
-                            || horizontalWalls[tempX][tempY + 1] == 1 // directly below
-                            ){
-                                // Timber.d("[GAME LOGIC] Wall placement failed 8 - abandoning map");
-                                abandon = true;
-                        }
+                    if (horizontalWalls[tempX][tempY] == 1 // already chosen
+                        || horizontalWalls[tempX - 1][tempY] == 1 // left
+                        || horizontalWalls[tempX + 1][tempY] == 1 // right
+                        || horizontalWalls[tempX][tempY - 1] == 1 // directly above
+                        || horizontalWalls[tempX][tempY + 1] == 1 // directly below
+                        ) abandon = true;
 
-                        if (verticalWalls[tempX][tempY] == 1 // already chosen
-                            || verticalWalls[tempX + 1][tempY] == 1 // left
-                            || verticalWalls[tempX][tempY - 1] == 1 // above
-                            || verticalWalls[tempX + 1][tempY - 1] == 1 // diagonal right-above
-                            ){
-                                // Timber.d("[GAME LOGIC] Wall placement failed 7 - abandoning map");
-                                abandon = true;
-                        }
-                    }
+                    if (verticalWalls[tempX][tempY] == 1 // already chosen
+                        || verticalWalls[tempX + 1][tempY] == 1 // left
+                        || verticalWalls[tempX][tempY - 1] == 1 // above
+                        || verticalWalls[tempX + 1][tempY - 1] == 1 // diagonal right-above
+                        ) abandon = true;
+
                     if (!abandon) {
                         //We count the number of walls in the same row/column
                         countX = countY = 0;
@@ -457,38 +447,55 @@ public class GameLogic {
                     }
 
                     if (!abandon) {
-                        //We count the number of walls in the same row/column
-                        countX = countY = 0;
+                        //Choice of the 2nd wall of the corner being drawn
+                        tempXv = tempX + getRandom(0, 1);
+                        tempYv = tempY - getRandom(0, 1);
 
-                        for (int x = 1; x < boardWidth-1; x++) {
-                            if (verticalWalls[x][tempYv] == 1)
-                                countX++;
-                        }
-
-                        for (int y = 1; y < boardHeight-1; y++) {
-                            if (verticalWalls[tempXv][y] == 1)
-                                countY++;
-                        }
-
-                        if (tempXv == carrePosX || tempXv == carrePosX+2) {
-                            countY -= 2;
-                        }
-                        if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
-                        {
-                            Timber.d("[GAME LOGIC] Too many walls in the same row/column - abandoning map");
+                        //We check that it does not fall on or near existing walls
+                        if (verticalWalls[tempXv][tempYv] == 1 || verticalWalls[tempXv - 1][tempYv] == 1 || verticalWalls[tempXv + 1][tempYv] == 1)
                             abandon = true;
-                        }
-                        // Check if there are walls at all
-                        if(countX == 0 && countY == 0) {
-                            Timber.d("[GAME LOGIC] No walls - abandoning map");
+                        if (verticalWalls[tempXv][tempYv - 1] == 1 || verticalWalls[tempXv][tempYv + 1] == 1)
                             abandon = true;
+
+                        if (horizontalWalls[tempXv][tempYv] == 1 || horizontalWalls[tempXv - 1][tempYv] == 1)
+                            abandon = true;
+
+                        if (horizontalWalls[tempXv][tempYv - 1] == 1 || horizontalWalls[tempXv - 1][tempYv - 1] == 1)
+                            abandon = true;
+
+                        if (verticalWalls[tempXv - 1][tempYv - 1] == 1 || verticalWalls[tempXv - 1][tempYv + 1] == 1)
+                            abandon = true;
+
+                        if (verticalWalls[tempXv + 1][tempYv + 1] == 1 || verticalWalls[tempXv + 1][tempYv - 1] == 1)
+                            abandon = true;
+
+                        if (!abandon) {
+                            //We count the number of walls in the same row/column
+                            countX = countY = 0;
+
+                            for (int x = 1; x < boardWidth-1; x++) {
+                                if (verticalWalls[x][tempYv] == 1)
+                                    countX++;
+                            }
+
+                            for (int y = 1; y < boardHeight-1; y++) {
+                                if (verticalWalls[tempXv][y] == 1)
+                                    countY++;
+                            }
+
+                            if (tempXv == carrePosX || tempXv == carrePosX+2) {
+                                countY -= 2;
+                            }
+                            if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) //If there are too many walls in the same row/column, we abandon
+                                abandon = true;
                         }
                     }
+
                     if (compteLoop1 > 1000) {
-                        Timber.d("[GAME LOGIC] Wall creation restarted, too many loops (%d), tolerance: %d", restartCount, tolerance);
+                        Timber.d("Wall creation restarted, too many loops (%d), tolerance: %d", restartCount, tolerance);
                         restart = true;
                     }
-                    Timber.d("[GAME LOGIC] Wall creation restarted, abandon:" + abandon + " restart: " + restart);
+
                 } while (abandon && !restart);
                 boolean skiponewall = false;
                 if(loneWallsAllowed && getRandom(0, 4) == 1) {
