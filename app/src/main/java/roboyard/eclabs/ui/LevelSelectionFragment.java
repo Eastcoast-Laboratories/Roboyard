@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -56,7 +57,22 @@ public class LevelSelectionFragment extends BaseGameFragment {
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
         
         // Set up RecyclerView with grid layout (3 columns)
-        levelRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
+        levelRecyclerView.setLayoutManager(layoutManager);
+        
+        // Add a custom ItemDecoration to reduce spacing between grid items
+        levelRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull android.graphics.Rect outRect, @NonNull View view, 
+                                       @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                // Set very minimal margins (1dp) to maintain minimal separation
+                int spacing = 1; // 1dp
+                outRect.left = spacing;
+                outRect.right = spacing;
+                outRect.top = spacing;
+                outRect.bottom = spacing;
+            }
+        });
         
         // Get the level completion manager
         completionManager = LevelCompletionManager.getInstance(requireContext());
@@ -322,8 +338,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
          */
         static class LevelViewHolder extends RecyclerView.ViewHolder {
             private final Button levelButton;
-            private final ImageView completedStar;
-            private final TextView starsTextView;
+            private final ImageView starOne;
+            private final ImageView starTwo;
+            private final ImageView starThree;
+            private final LinearLayout statsOverlay;
+            private final TextView movesText;
+            private final TextView timeText;
             
             /**
              * Constructor for the LevelViewHolder.
@@ -334,8 +354,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
             public LevelViewHolder(@NonNull View itemView) {
                 super(itemView);
                 levelButton = itemView.findViewById(R.id.level_button);
-                completedStar = itemView.findViewById(R.id.level_completed_star);
-                starsTextView = itemView.findViewById(R.id.level_stars);
+                starOne = itemView.findViewById(R.id.level_star_1);
+                starTwo = itemView.findViewById(R.id.level_star_2);
+                starThree = itemView.findViewById(R.id.level_star_3);
+                statsOverlay = itemView.findViewById(R.id.stats_overlay);
+                movesText = itemView.findViewById(R.id.level_moves_text);
+                timeText = itemView.findViewById(R.id.level_time_text);
             }
             
             /**
@@ -343,8 +367,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
              * This method:
              * 1. Sets the level number on the button
              * 2. Sets a click listener to handle level selection
-             * 3. Shows or hides the completion star based on the level's completion status
-             * 4. Shows the number of stars earned for this level
+             * 3. Shows the appropriate number of stars for completed levels
+             * 4. Shows the statistics directly on the button for completed levels
              * 5. Enables or disables the button based on whether the level is unlocked
              * 
              * @param levelId The ID of the level to display
@@ -359,21 +383,44 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 levelButton.setText(String.valueOf(levelId));
                 levelButton.setContentDescription("Level " + levelId);
                 
-                // Set click listener
-                levelButton.setOnClickListener(v -> listener.onLevelSelected(levelId));
+                // Get the completion data if the level is completed
+                final LevelCompletionData completionData = isCompleted ?
+                        LevelCompletionManager.getInstance(itemView.getContext())
+                            .getLevelCompletionData(levelId) : null;
                 
-                // Show/hide completion star
-                completedStar.setVisibility(isCompleted ? View.VISIBLE : View.GONE);
+                // Show stars based on stars earned
+                starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
+                starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
+                starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
                 
-                // Show stars earned
-                if (starsTextView != null) {
-                    if (isCompleted && starsEarned > 0) {
-                        starsTextView.setText(String.valueOf(starsEarned));
-                        starsTextView.setVisibility(View.VISIBLE);
-                    } else {
-                        starsTextView.setVisibility(View.GONE);
-                    }
+                // Show statistics directly on button for completed levels
+                if (completionData != null) {
+                    // Format moves/robots: "1/3 robots:2"
+                    String movesRobots = String.format("%d/%d robots:%d", 
+                            completionData.getMovesNeeded(),
+                            completionData.getOptimalMoves(),
+                            completionData.getRobotsUsed());
+                    movesText.setText(movesRobots);
+                    
+                    // Format time/fields: "0:12 fields:10"
+                    long timeMs = completionData.getTimeNeeded();
+                    long seconds = timeMs / 1000;
+                    long minutes = seconds / 60;
+                    seconds = seconds % 60;
+                    String timeFields = String.format("%d:%02d fields:%d", 
+                            minutes, seconds, 
+                            completionData.getSquaresSurpassed());
+                    timeText.setText(timeFields);
+                    
+                    // Show the stats overlay
+                    statsOverlay.setVisibility(View.VISIBLE);
+                } else {
+                    // Hide the stats overlay for non-completed levels
+                    statsOverlay.setVisibility(View.GONE);
                 }
+                
+                // Set click listener for level button - always just select the level
+                levelButton.setOnClickListener(v -> listener.onLevelSelected(levelId));
                 
                 // Enable/disable button based on unlock status
                 levelButton.setEnabled(isUnlocked);

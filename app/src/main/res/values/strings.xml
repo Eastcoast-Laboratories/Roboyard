@@ -41,8 +41,10 @@
     <string name="level_locked">You need %1$d more stars to unlock this level</string>
     <string name="random_game_complete">Level Complete!</string>
     <string name="new_random_game_button">New Game</string>
-    
-    <!-- Accessibility -->
+    <string name="level_moves_format">Moves: %1$d/%2$d</string>
+    <string name="level_time_format">Time: %1$d:%2$02d</string>
+    <string name="level_squares_format">Squares: %1$d</string>
+    <string name="level_robots_format">Robots: %1$d</string>
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>
     <string name="target_description">Target at position %1$d, %2$d</string>
     <string name="grid_description">Game grid</string>

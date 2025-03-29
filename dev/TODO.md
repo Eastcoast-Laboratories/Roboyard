@@ -81,4 +81,4 @@
 
 # current
 - stalls, when youplay level 2 and 
-- winning a level this still shows only 0 stars earned if there was already saved one star in the settings from an older version of the game
+- winning a level this still shows only 0 stars earned if there was already saved one star in the settings from an older version of the game. It also still shows the old stars
