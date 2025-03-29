@@ -184,6 +184,19 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/button_rounded_gray_outline" />
 
+                <!-- Level Design Editor button - Purple with round corners and black outline -->
+                <Button
+                    android:id="@+id/level_editor_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Level Design Editor"
+                    android:contentDescription="Create or edit game levels"
+                    android:padding="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@drawable/button_rounded_purple_outline" />
+
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

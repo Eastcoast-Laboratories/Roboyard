@@ -21,6 +21,7 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button loadGameButton;
     private Button settingsButton;
     private Button helpButton;
+    private Button levelEditorButton;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -35,6 +36,7 @@ public class MainMenuFragment extends BaseGameFragment {
         loadGameButton = view.findViewById(R.id.load_game_button);
         settingsButton = view.findViewById(R.id.settings_button);
         helpButton = view.findViewById(R.id.help_button);
+        levelEditorButton = view.findViewById(R.id.level_editor_button);
         
         // Set up button listeners
         setupButtons();
@@ -92,6 +94,17 @@ public class MainMenuFragment extends BaseGameFragment {
             // Create a new HelpFragment instance
             HelpFragment helpFragment = new HelpFragment();
             navigateToDirect(helpFragment);
+        });
+        
+        // Level Design Editor button - go to level design editor
+        levelEditorButton.setOnClickListener(v -> {
+            // Create the Level Design Editor fragment with a new level (ID 0)
+            LevelDesignEditorFragment editorFragment = LevelDesignEditorFragment.newInstance(0);
+            
+            // Navigate to the editor fragment using the same pattern as other buttons
+            navigateToDirect(editorFragment);
+            
+            Timber.d("MainMenuFragment: Opening Level Design Editor");
         });
     }
     
