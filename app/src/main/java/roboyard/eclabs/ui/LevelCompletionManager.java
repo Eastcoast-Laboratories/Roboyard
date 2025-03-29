@@ -55,42 +55,60 @@ public class LevelCompletionManager {
     public void saveLevelCompletionData(LevelCompletionData data) {
         int levelId = data.getLevelId();
         
+        Timber.d("[LEVEL_COMPLETION] Saving data for level %d - Stars: %d, Moves: %d, Time: %d, Squares: %d",
+                levelId, data.getStars(), data.getMovesNeeded(), data.getTimeNeeded(), data.getSquaresSurpassed());
+        
         // Check if we already have data for this level
         if (completionDataMap.containsKey(levelId)) {
             LevelCompletionData existingData = completionDataMap.get(levelId);
+            
+            Timber.d("[LEVEL_COMPLETION] Existing data - Stars: %d, Moves: %d, Time: %d, Squares: %d",
+                    existingData.getStars(), existingData.getMovesNeeded(), 
+                    existingData.getTimeNeeded(), existingData.getSquaresSurpassed());
             
             // Always mark as completed if the new data says it's completed
             if (data.isCompleted()) {
                 existingData.setCompleted(true);
             }
             
-            // Check if star count has changed
-            boolean starsChanged = data.getStars() > existingData.getStars();
-            
             // Only update stars if new value is greater
-            if (starsChanged) {
+            boolean starsImproved = data.getStars() > existingData.getStars();
+            
+            if (starsImproved) {
+                Timber.d("[LEVEL_COMPLETION] Stars improved from %d to %d - updating stars and related metrics",
+                        existingData.getStars(), data.getStars());
+                
                 // If stars have improved, update stars and related metrics
                 existingData.setStars(data.getStars());
                 existingData.setHintsShown(data.getHintsShown());
                 existingData.setRobotsUsed(data.getRobotsUsed());
                 existingData.setOptimalMoves(data.getOptimalMoves());
+            } else {
+                Timber.d("[LEVEL_COMPLETION] Stars not improved (%d vs %d) - not updating stars",
+                        data.getStars(), existingData.getStars());
             }
             
             // Only update moves if it's lower (better) than existing value
             // Or if there was no previous value (movesNeeded == 0)
             if (existingData.getMovesNeeded() == 0 || data.getMovesNeeded() < existingData.getMovesNeeded()) {
+                Timber.d("[LEVEL_COMPLETION] Moves improved from %d to %d", 
+                        existingData.getMovesNeeded(), data.getMovesNeeded());
                 existingData.setMovesNeeded(data.getMovesNeeded());
             }
             
             // Only update time if it's lower (faster) than existing value
             // Or if there was no previous value (timeNeeded == 0)
             if (existingData.getTimeNeeded() == 0 || data.getTimeNeeded() < existingData.getTimeNeeded()) {
+                Timber.d("[LEVEL_COMPLETION] Time improved from %d to %d", 
+                        existingData.getTimeNeeded(), data.getTimeNeeded());
                 existingData.setTimeNeeded(data.getTimeNeeded());
             }
             
             // Only update squares surpassed if it's lower (more efficient) than existing value
             // Or if there was no previous value (squaresSurpassed == 0)
             if (existingData.getSquaresSurpassed() == 0 || data.getSquaresSurpassed() < existingData.getSquaresSurpassed()) {
+                Timber.d("[LEVEL_COMPLETION] Squares improved from %d to %d", 
+                        existingData.getSquaresSurpassed(), data.getSquaresSurpassed());
                 existingData.setSquaresSurpassed(data.getSquaresSurpassed());
             }
             
@@ -98,6 +116,7 @@ public class LevelCompletionManager {
             completionDataMap.put(levelId, existingData);
         } else {
             // No existing data, just add the new data directly
+            Timber.d("[LEVEL_COMPLETION] No existing data for level %d, adding new data", levelId);
             completionDataMap.put(levelId, data);
         }
         

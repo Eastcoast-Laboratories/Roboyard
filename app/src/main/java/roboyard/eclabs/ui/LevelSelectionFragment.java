@@ -410,10 +410,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
                     levelNameText.setText("Level " + levelId);
                     levelNameText.setVisibility(View.VISIBLE); // Ensure visibility
                     
-                    // Format moves/robots: "1/3 robots:2"
+                    // Format moves/robots: "optimal/moves robots:count" (swapped from moves/optimal to optimal/moves)
                     String movesRobots = String.format("%d/%d robots:%d", 
-                            completionData.getMovesNeeded(),
                             completionData.getOptimalMoves(),
+                            completionData.getMovesNeeded(),
                             completionData.getRobotsUsed());
                     movesText.setText(movesRobots);
                     movesText.setVisibility(View.VISIBLE); // Ensure visibility
