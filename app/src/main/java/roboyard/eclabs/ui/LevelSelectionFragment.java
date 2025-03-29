@@ -342,6 +342,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             private final ImageView starTwo;
             private final ImageView starThree;
             private final LinearLayout statsOverlay;
+            private final TextView levelNameText;
             private final TextView movesText;
             private final TextView timeText;
             
@@ -358,6 +359,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 starTwo = itemView.findViewById(R.id.level_star_2);
                 starThree = itemView.findViewById(R.id.level_star_3);
                 statsOverlay = itemView.findViewById(R.id.stats_overlay);
+                levelNameText = itemView.findViewById(R.id.level_name_text);
                 movesText = itemView.findViewById(R.id.level_moves_text);
                 timeText = itemView.findViewById(R.id.level_time_text);
             }
@@ -365,7 +367,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             /**
              * Binds data to this ViewHolder.
              * This method:
-             * 1. Sets the level number on the button
+             * 1. Sets the level number on the button (only visible for non-completed levels)
              * 2. Sets a click listener to handle level selection
              * 3. Shows the appropriate number of stars for completed levels
              * 4. Shows the statistics directly on the button for completed levels
@@ -379,7 +381,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
              */
             public void bind(int levelId, OnLevelSelectedListener listener, boolean isCompleted, 
                             int starsEarned, boolean isUnlocked) {
-                // Set level number
+                // Set level number (only visible for non-completed levels)
                 levelButton.setText(String.valueOf(levelId));
                 levelButton.setContentDescription("Level " + levelId);
                 
@@ -393,8 +395,14 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
                 starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
                 
-                // Show statistics directly on button for completed levels
+                // Handle stats display
                 if (completionData != null) {
+                    // Hide the level number text when showing stats
+                    levelButton.setText("");
+                    
+                    // Set level name
+                    levelNameText.setText("Level " + levelId);
+                    
                     // Format moves/robots: "1/3 robots:2"
                     String movesRobots = String.format("%d/%d robots:%d", 
                             completionData.getMovesNeeded(),
@@ -412,14 +420,14 @@ public class LevelSelectionFragment extends BaseGameFragment {
                             completionData.getSquaresSurpassed());
                     timeText.setText(timeFields);
                     
-                    // Show the stats overlay
+                    // Make the stats overlay visible
                     statsOverlay.setVisibility(View.VISIBLE);
                 } else {
-                    // Hide the stats overlay for non-completed levels
+                    // Hide stats overlay for non-completed levels
                     statsOverlay.setVisibility(View.GONE);
                 }
                 
-                // Set click listener for level button - always just select the level
+                // Set click listener for level button
                 levelButton.setOnClickListener(v -> listener.onLevelSelected(levelId));
                 
                 // Enable/disable button based on unlock status

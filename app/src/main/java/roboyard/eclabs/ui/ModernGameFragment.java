@@ -1317,7 +1317,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int boardWidth = currentState.getWidth();
             int boardHeight = currentState.getHeight();
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
-            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
+            
+            // Check if this is a level game and include level name
+            if (currentState.getLevelId() > 0) {
+                // For level game - display board size with level name/number
+                String levelText = "Level " + currentState.getLevelId();
+                boardSizeTextView.setText(String.format(Locale.getDefault(), "%s\nBoard: %dx%d", levelText, boardWidth, boardHeight));
+            } else {
+                // For random game - display just the board size
+                boardSizeTextView.setText(String.format(Locale.getDefault(), "Random Game\nBoard: %dx%d", boardWidth, boardHeight));
+            }
         } else {
             // If no game state yet, get from BoardSizeManager
             BoardSizeManager boardSizeManager = BoardSizeManager.getInstance(requireContext());

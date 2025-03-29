@@ -972,13 +972,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public int calculateStars(int playerMoves, int optimalMoves, int hintsUsed) {
         if (optimalMoves <= 0) {
+        	Timber.d("[stars] No optimal solution available");
             return 0; // No optimal solution available
         }
         
         // Calculate stars based on the rules
-        if (playerMoves == optimalMoves && hintsUsed == 0) {
-            // Optimal solution and no hints
-            return 3;
+        if (playerMoves > optimalMoves) {
+            // hyper-Optimal solution for impossible cases
+            return 4;
+        } else if (playerMoves == optimalMoves && hintsUsed == 0) {
+            // Optimal solution (or better) and no hints
+            Timber.d("[stars] optimal solution! 3 stars");
+			return 3;
         } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) || 
                   (playerMoves == optimalMoves && hintsUsed == 1)) {
             // One move more than optimal with no hints OR optimal with one hint
