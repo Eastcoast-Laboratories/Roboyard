@@ -184,10 +184,12 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/button_rounded_gray_outline" />
 
-                <!-- Level Design Editor button - Purple with round corners and black outline -->
+                <!-- hidden Level Design Editor button - Purple with round corners and black outline -->
+                <!-- a hidden button to the Level Design Editor is a long press on the title in the level selection screen -->
                 <Button
                     android:id="@+id/level_editor_button"
                     android:layout_width="match_parent"
+                    android:visibility="gone"
                     android:layout_height="wrap_content"
                     android:text="Level Design Editor"
                     android:contentDescription="Create or edit game levels"

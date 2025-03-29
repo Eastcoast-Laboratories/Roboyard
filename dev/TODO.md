@@ -97,6 +97,13 @@ the editor is now showing an empty grid and nochting visual happens, when clicki
 
 next run.....
 
+it is still not working, i cannot select anything now add any object. look for a fast fix for that
+
+next run.....
+
+und schon gehts ;)
+
+
 
 
 # Accessibility-Verbesserungen
