@@ -429,10 +429,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         // This is a level game, show the Next Level button
                         nextLevelButton.setVisibility(View.VISIBLE);
                         
-                        // Update status text to show level complete message
-                        updateStatusText(getString(R.string.level_complete), true);
-                        
-                        // Show the number of stars earned
+                        // Get stars for display
                         int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
                                 gameStateManager.getMoveCount().getValue() : 0;
                         int optimalMoves = 0;
@@ -442,14 +439,31 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         }
                         int hintsUsed = state.getHintCount();
                         int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
+                        
+                        // Create stars string with UTF-8 stars
+                        StringBuilder starString = new StringBuilder();
+                        for (int i = 0; i < stars; i++) {
+                            starString.append("★ ");
+                        }
+                        
+                        // Update status text to show level complete message with stars
+                        updateStatusText(getString(R.string.level_complete) + " " + starString.toString().trim(), true);
+                        
                         String starsMessage = getString(R.string.level_stars_description, stars);
                         Toast.makeText(requireContext(), starsMessage, Toast.LENGTH_LONG).show();
                         
                         // Announce level completion for accessibility
                         String completionMessage = getString(R.string.level_complete) + 
                                 " Level " + state.getLevelId() + " completed in " + 
-                                gameStateManager.getMoveCount().getValue() + " moves. " +
-                                starsMessage;
+                                gameStateManager.getMoveCount().getValue() + " moves. ";
+                        
+                        // Add a verbal description of stars for accessibility
+                        if (stars == 1) {
+                            completionMessage += "You earned 1 star.";
+                        } else {
+                            completionMessage += "You earned " + stars + " stars.";
+                        }
+                        
                         announceAccessibility(completionMessage);
                     } else {
                         // This is a random game
