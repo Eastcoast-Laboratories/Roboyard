@@ -434,8 +434,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                                 gameStateManager.getMoveCount().getValue() : 0;
                         int optimalMoves = 0;
                         GameSolution solution = gameStateManager.getCurrentSolution();
-                        if (solution != null && solution.getMoves() != null) {
+                        if (solution != null && solution.getMoves() != null && solution.getMoves().size() > 0) {
                             optimalMoves = solution.getMoves().size();
+                            Timber.d("Solution object hash (completion): %s", System.identityHashCode(solution));
                         }
                         int hintsUsed = state.getHintCount();
                         int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
@@ -588,6 +589,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Get a hint from the game state manager
             IGameMove hintMove = gameStateManager.getHint();
             Timber.d("[HINT] Received hint move: %s", hintMove);
+            GameSolution solution2 = gameStateManager.getCurrentSolution();
+            Timber.d("Solution object hash (hint): %s", System.identityHashCode(solution2));
             
             if (hintMove != null && hintMove instanceof RRGameMove rrMove) {
                 // Cast to RRGameMove to access the proper methods
