@@ -70,6 +70,33 @@ public class LevelCompletionManager {
     }
     
     /**
+     * Get the number of stars earned for a specific level
+     * @param levelId The level ID to check
+     * @return The number of stars earned (0-3)
+     */
+    public int getStarsForLevel(int levelId) {
+        LevelCompletionData data = getLevelCompletionData(levelId);
+        int stars = data.getStars();
+        Timber.d("Getting stars for level %d: %d", levelId, stars);
+        return stars;
+    }
+    
+    /**
+     * Get the total number of stars earned across all levels
+     * @return The total number of stars
+     */
+    public int getTotalStars() {
+        int totalStars = 0;
+        for (LevelCompletionData data : completionDataMap.values()) {
+            if (data.isCompleted()) {
+                totalStars += data.getStars();
+            }
+        }
+        Timber.d("Total stars earned across all levels: %d", totalStars);
+        return totalStars;
+    }
+    
+    /**
      * Load all completion data from SharedPreferences
      */
     private void loadCompletionData() {

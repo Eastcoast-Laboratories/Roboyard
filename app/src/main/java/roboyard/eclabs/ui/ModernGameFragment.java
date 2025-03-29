@@ -422,24 +422,56 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (isComplete) {
                 playSound("win");
                 
-                // Show the Next Level button if this is a level game
+                // Get the current game state
                 GameState state = gameStateManager.getCurrentState().getValue();
-                if (state != null && state.getLevelId() > 0) {
-                    // This is a level game, show the Next Level button
-                    nextLevelButton.setVisibility(View.VISIBLE);
-                    
-                    // Update status text to show level complete message
-                    updateStatusText(getString(R.string.level_complete), true);
-                    
-                    // Announce level completion for accessibility
-                    String completionMessage = getString(R.string.level_complete) + 
-                            " Level " + state.getLevelId() + " completed in " + 
-                            gameStateManager.getMoveCount().getValue() + " moves.";
-                    announceAccessibility(completionMessage);
+                if (state != null) {
+                    if (state.getLevelId() > 0) {
+                        // This is a level game, show the Next Level button
+                        nextLevelButton.setVisibility(View.VISIBLE);
+                        
+                        // Update status text to show level complete message
+                        updateStatusText(getString(R.string.level_complete), true);
+                        
+                        // Show the number of stars earned
+                        int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
+                                gameStateManager.getMoveCount().getValue() : 0;
+                        int optimalMoves = 0;
+                        GameSolution solution = gameStateManager.getCurrentSolution();
+                        if (solution != null && solution.getMoves() != null) {
+                            optimalMoves = solution.getMoves().size();
+                        }
+                        int hintsUsed = state.getHintCount();
+                        int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
+                        String starsMessage = getString(R.string.level_stars_description, stars);
+                        Toast.makeText(requireContext(), starsMessage, Toast.LENGTH_LONG).show();
+                        
+                        // Announce level completion for accessibility
+                        String completionMessage = getString(R.string.level_complete) + 
+                                " Level " + state.getLevelId() + " completed in " + 
+                                gameStateManager.getMoveCount().getValue() + " moves. " +
+                                starsMessage;
+                        announceAccessibility(completionMessage);
+                    } else {
+                        // This is a random game
+                        updateStatusText(getString(R.string.random_game_complete), true);
+                        
+                        // Show new game button instead of next level
+                        nextLevelButton.setText(R.string.new_random_game_button);
+                        nextLevelButton.setVisibility(View.VISIBLE);
+                        
+                        // Show completion message
+                        String completionMessage = getString(R.string.random_game_complete) +
+                                " Completed in " + gameStateManager.getMoveCount().getValue() + " moves.";
+                        announceAccessibility(completionMessage);
+                        Toast.makeText(requireContext(), completionMessage, Toast.LENGTH_LONG).show();
+                    }
                 }
             } else {
                 // Hide the Next Level button when game is not complete
                 nextLevelButton.setVisibility(View.GONE);
+                
+                // Reset button text just in case it was changed
+                nextLevelButton.setText(R.string.next_level);
             }
         });
         
@@ -457,7 +489,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
     }
-
+    
     /**
      * Set up button click listeners
      */
@@ -490,6 +522,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Hint button clicked");
+            
+            // Check if this is a level game and limit hints
+            GameState currentState = gameStateManager.getCurrentState().getValue();
+            if (currentState != null && currentState.getLevelId() > 0) {
+                // This is a level game, check hint count
+                int hintCount = currentState.getHintCount();
+                if (hintCount >= 2) {
+                    // Maximum hints reached
+                    Toast.makeText(requireContext(), "Maximum hints (2) used for this level", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
             
             // Check if solver is currently running
             if (Boolean.TRUE.equals(gameStateManager.isSolverRunning().getValue())) {
@@ -548,6 +592,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         currentStep + 1, totalMoves, robotColor, direction);
                 updateStatusText(hintText, true);
                 
+                // Increment hint count for level games
+                if (currentState != null && currentState.getLevelId() > 0) {
+                    currentState.incrementHintCount();
+                    Timber.d("Hint count increased to %d for level %d", currentState.getHintCount(), currentState.getLevelId());
+                }
+                
                 Timber.d("[HINT] Displayed hint: %s", hintText);
             } else {
                 // No solution found
@@ -590,6 +640,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // (Button text: "New Game")
         // Restart button - restart the current game
         restartButton = view.findViewById(R.id.restart_button);
+        // Hide the restart button in level games
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        if (currentState != null && currentState.getLevelId() > 0) {
+            restartButton.setVisibility(View.GONE);
+        } else {
+            restartButton.setVisibility(View.VISIBLE);
+        }
+        
         restartButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
             // Start a new game
@@ -619,28 +677,54 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         nextLevelButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Next Level button clicked");
             // Get the current level ID
-            GameState state = gameStateManager.getCurrentState().getValue();
-            if (state != null) {
-                int currentLevelId = state.getLevelId();
-                int nextLevelId = currentLevelId + 1;
-                Timber.d("ModernGameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
-                
-                // Start the next level
-                gameStateManager.startLevelGame(nextLevelId);
-                
-                // Reset timer
-                stopTimer();
-                startTimer();
-                
-                // Hide the Next Level button
-                nextLevelButton.setVisibility(View.GONE);
-                
-                // Clear any hint text from the status display
-                updateStatusText("", false);
-                
-                // Announce the new level
-                announceAccessibility("Starting level " + nextLevelId);
-                announceGameStart();
+            GameState gameState = gameStateManager.getCurrentState().getValue();
+            if (gameState != null) {
+                if (gameState.getLevelId() > 0) {
+                    // Level game - go to next level
+                    int currentLevelId = gameState.getLevelId();
+                    int nextLevelId = currentLevelId + 1;
+                    Timber.d("ModernGameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
+                    
+                    // Start the next level
+                    gameStateManager.startLevelGame(nextLevelId);
+                    
+                    // Reset timer
+                    stopTimer();
+                    startTimer();
+                    
+                    // Hide the Next Level button
+                    nextLevelButton.setVisibility(View.GONE);
+                    
+                    // Clear any hint text from the status display
+                    updateStatusText("", false);
+                    
+                    // Announce the new level
+                    announceAccessibility("Starting level " + nextLevelId);
+                    announceGameStart();
+                    
+                    // Hide restart button for level games
+                    restartButton.setVisibility(View.GONE);
+                } else {
+                    // Random game - start a new random game
+                    gameStateManager.startModernGame();
+                    
+                    // Reset timer
+                    stopTimer();
+                    startTimer();
+                    
+                    // Hide the Next Level button
+                    nextLevelButton.setVisibility(View.GONE);
+                    
+                    // Clear any hint text from the status display
+                    updateStatusText("", false);
+                    
+                    // Announce new game
+                    announceAccessibility("Starting new random game");
+                    announceGameStart();
+                    
+                    // Show restart button for random games
+                    restartButton.setVisibility(View.VISIBLE);
+                }
             }
         });
     }

@@ -936,14 +936,70 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         data.setSquaresSurpassed(squaresMoved.getValue() != null ? squaresMoved.getValue() : 0);
         
         // Set optimal moves if we have a solution
+        int optimalMoves = 0;
         if (currentSolution != null && currentSolution.getMoves() != null) {
-            data.setOptimalMoves(currentSolution.getMoves().size());
+            optimalMoves = currentSolution.getMoves().size();
+            data.setOptimalMoves(optimalMoves);
         }
+        
+        // Calculate stars based on the criteria
+        int playerMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
+        int starCount = calculateStars(playerMoves, optimalMoves, hintsShown);
+        data.setStars(starCount);
+        
+        Timber.d("Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars", 
+                levelId, playerMoves, optimalMoves, hintsShown, starCount);
         
         // Save the data
         manager.saveLevelCompletionData(data);
         
         Timber.d("Saved level completion data: %s", data);
+    }
+    
+    /**
+     * Calculate star rating based on player performance
+     * 
+     * Star rules:
+     * - 3 stars: Optimal solution and no hints
+     * - 2 stars: One move more than optimal solution and no hints, OR optimal solution with one hint
+     * - 1 star: Optimal solution with two hints, OR two moves more than optimal with no hints
+     * - 0 stars: All other cases
+     * 
+     * @param playerMoves Number of moves used by player
+     * @param optimalMoves Optimal number of moves from solver
+     * @param hintsUsed Number of hints used
+     * @return Number of stars earned (0-3)
+     */
+    public int calculateStars(int playerMoves, int optimalMoves, int hintsUsed) {
+        if (optimalMoves <= 0) {
+            return 0; // No optimal solution available
+        }
+        
+        // Calculate stars based on the rules
+        if (playerMoves == optimalMoves && hintsUsed == 0) {
+            // Optimal solution and no hints
+            return 3;
+        } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) || 
+                  (playerMoves == optimalMoves && hintsUsed == 1)) {
+            // One move more than optimal with no hints OR optimal with one hint
+            return 2;
+        } else if ((playerMoves == optimalMoves && hintsUsed == 2) || 
+                  (playerMoves == optimalMoves + 2 && hintsUsed == 0)) {
+            // Optimal with two hints OR two moves more than optimal with no hints
+            return 1;
+        }
+        
+        // All other cases
+        return 0;
+    }
+    
+    /**
+     * Get the total number of stars earned across all levels
+     * @return Total number of stars
+     */
+    public int getTotalStars() {
+        LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
+        return manager.getTotalStars();
     }
     
     /**

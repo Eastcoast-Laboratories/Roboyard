@@ -30,8 +30,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private RecyclerView levelRecyclerView;
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
+    private TextView starsTextView;
     private final List<Integer> availableLevels = new ArrayList<>();
     private LevelCompletionManager completionManager;
+    private int totalStars = 0;
     
     /**
      * Creates the view for this fragment.
@@ -50,6 +52,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         
         // Set up UI elements
         titleTextView = view.findViewById(R.id.level_selection_title);
+        starsTextView = view.findViewById(R.id.stars_count_text);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
         
         // Set up RecyclerView with grid layout (3 columns)
@@ -58,14 +61,48 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Get the level completion manager
         completionManager = LevelCompletionManager.getInstance(requireContext());
         
+        // Get total stars
+        totalStars = completionManager.getTotalStars();
+        
         // Load available levels
         loadAvailableLevels();
         
+        // Display total stars
+        if (starsTextView != null) {
+            starsTextView.setText(getString(R.string.stars_count, totalStars));
+        }
+        
         // Set up adapter
-        levelAdapter = new LevelAdapter(availableLevels, this::onLevelSelected, completionManager);
+        levelAdapter = new LevelAdapter(availableLevels, this::onLevelSelected, completionManager, totalStars);
         levelRecyclerView.setAdapter(levelAdapter);
         
+        // Auto-scroll to the latest unlocked level
+        scrollToLatestUnlockedLevel();
+        
         return view;
+    }
+    
+    /**
+     * Scroll to the latest unlocked level automatically
+     */
+    private void scrollToLatestUnlockedLevel() {
+        for (int i = 0; i < availableLevels.size(); i++) {
+            int levelId = availableLevels.get(i);
+            if (levelId > totalStars + 1) {
+                // This is the first locked level, scroll to the previous one (the last unlocked)
+                if (i > 0) {
+                    final int position = Math.max(0, i - 1);
+                    levelRecyclerView.post(() -> levelRecyclerView.smoothScrollToPosition(position));
+                }
+                return;
+            }
+        }
+        
+        // If we reached here, all levels are unlocked, scroll to the last one
+        if (!availableLevels.isEmpty()) {
+            final int lastPosition = availableLevels.size() - 1;
+            levelRecyclerView.post(() -> levelRecyclerView.smoothScrollToPosition(lastPosition));
+        }
     }
     
     /**
@@ -83,10 +120,22 @@ public class LevelSelectionFragment extends BaseGameFragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Update total stars
+        totalStars = completionManager.getTotalStars();
+        
+        // Update the stars text view
+        if (starsTextView != null) {
+            starsTextView.setText(getString(R.string.stars_count, totalStars));
+        }
+        
         // Refresh the adapter to update completion stars when returning to this screen
         if (levelAdapter != null) {
+            levelAdapter.updateTotalStars(totalStars);
             levelAdapter.notifyDataSetChanged();
         }
+        
+        // Auto-scroll to the latest unlocked level
+        scrollToLatestUnlockedLevel();
     }
     
     /**
@@ -141,6 +190,15 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private void onLevelSelected(int levelId) {
         Timber.d("Selected level: %d", levelId);
         
+        // Check if the level is unlocked (requires stars <= level number - 1)
+        if (levelId > totalStars + 1) {
+            int starsNeeded = levelId - 1 - totalStars;
+            Toast.makeText(requireContext(), 
+                    getString(R.string.level_locked, starsNeeded),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         // Start a new game with the selected level
         gameStateManager.startLevelGame(levelId);
         
@@ -172,6 +230,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         private final List<Integer> levels;
         private final OnLevelSelectedListener listener;
         private final LevelCompletionManager completionManager;
+        private int totalStars;
         
         /**
          * Interface for handling level selection events.
@@ -191,12 +250,22 @@ public class LevelSelectionFragment extends BaseGameFragment {
          * @param levels List of level IDs to display in the grid
          * @param listener Listener to handle level selection events
          * @param completionManager Manager that tracks which levels have been completed
+         * @param totalStars Total number of stars earned so far
          */
         public LevelAdapter(List<Integer> levels, OnLevelSelectedListener listener, 
-                          LevelCompletionManager completionManager) {
+                          LevelCompletionManager completionManager, int totalStars) {
             this.levels = levels;
             this.listener = listener;
             this.completionManager = completionManager;
+            this.totalStars = totalStars;
+        }
+        
+        /**
+         * Update the total stars count (used when refreshing after returning from gameplay)
+         * @param totalStars New total stars count
+         */
+        public void updateTotalStars(int totalStars) {
+            this.totalStars = totalStars;
         }
         
         /**
@@ -228,8 +297,13 @@ public class LevelSelectionFragment extends BaseGameFragment {
         public void onBindViewHolder(@NonNull LevelViewHolder holder, int position) {
             int levelId = levels.get(position);
             boolean isCompleted = completionManager.isLevelCompleted(levelId);
-            Timber.d("Binding level %d, completed: %s", levelId, isCompleted);
-            holder.bind(levelId, listener, isCompleted);
+            int starsEarned = completionManager.getStarsForLevel(levelId);
+            boolean isUnlocked = levelId <= totalStars + 1; // Level is unlocked if (stars earned + 1) >= level number
+            
+            Timber.d("Binding level %d, completed: %s, stars: %d, unlocked: %s", 
+                    levelId, isCompleted, starsEarned, isUnlocked);
+            
+            holder.bind(levelId, listener, isCompleted, starsEarned, isUnlocked);
         }
         
         /**
@@ -249,6 +323,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         static class LevelViewHolder extends RecyclerView.ViewHolder {
             private final Button levelButton;
             private final ImageView completedStar;
+            private final TextView starsTextView;
             
             /**
              * Constructor for the LevelViewHolder.
@@ -260,6 +335,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 super(itemView);
                 levelButton = itemView.findViewById(R.id.level_button);
                 completedStar = itemView.findViewById(R.id.level_completed_star);
+                starsTextView = itemView.findViewById(R.id.level_stars);
             }
             
             /**
@@ -268,26 +344,40 @@ public class LevelSelectionFragment extends BaseGameFragment {
              * 1. Sets the level number on the button
              * 2. Sets a click listener to handle level selection
              * 3. Shows or hides the completion star based on the level's completion status
-             * 
-             * If stars are not showing when they should be, check:
-             * - That the star drawable resource exists in the drawable folder
-             * - That LevelCompletionManager is properly initialized and loading data
-             * - That GameStateManager is correctly saving completion data when levels are completed
-             * - That the Gson library is included in the project dependencies
+             * 4. Shows the number of stars earned for this level
+             * 5. Enables or disables the button based on whether the level is unlocked
              * 
              * @param levelId The ID of the level to display
              * @param listener The listener to handle level selection events
              * @param isCompleted Whether the level has been completed
+             * @param starsEarned Number of stars earned for this level (0-3)
+             * @param isUnlocked Whether the level is unlocked
              */
-            public void bind(int levelId, OnLevelSelectedListener listener, boolean isCompleted) {
+            public void bind(int levelId, OnLevelSelectedListener listener, boolean isCompleted, 
+                            int starsEarned, boolean isUnlocked) {
+                // Set level number
                 levelButton.setText(String.valueOf(levelId));
                 levelButton.setContentDescription("Level " + levelId);
+                
+                // Set click listener
                 levelButton.setOnClickListener(v -> listener.onLevelSelected(levelId));
                 
-                // Show star if level is completed
-                Timber.d("Setting star visibility for level %d: %s", levelId, 
-                        isCompleted ? "VISIBLE" : "GONE");
+                // Show/hide completion star
                 completedStar.setVisibility(isCompleted ? View.VISIBLE : View.GONE);
+                
+                // Show stars earned
+                if (starsTextView != null) {
+                    if (isCompleted && starsEarned > 0) {
+                        starsTextView.setText(String.valueOf(starsEarned));
+                        starsTextView.setVisibility(View.VISIBLE);
+                    } else {
+                        starsTextView.setVisibility(View.GONE);
+                    }
+                }
+                
+                // Enable/disable button based on unlock status
+                levelButton.setEnabled(isUnlocked);
+                levelButton.setAlpha(isUnlocked ? 1.0f : 0.5f); // Visual feedback for locked levels
             }
         }
     }

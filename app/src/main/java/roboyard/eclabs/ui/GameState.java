@@ -48,6 +48,7 @@ public class GameState implements Serializable {
     private long startTime;
     private int moveCount;
     private boolean completed = false;
+    private int hintCount = 0; // Track the number of hints used in this game
     
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
@@ -1159,7 +1160,8 @@ public class GameState implements Serializable {
         // Format: #MAPNAME:name;TIME:seconds;MOVES:count;
         saveData.append("#MAPNAME:").append(levelName).append(";");
         saveData.append("TIME:").append(System.currentTimeMillis() - startTime).append(";");
-        saveData.append("MOVES:").append(moveCount).append(";\n");
+        saveData.append("MOVES:").append(moveCount).append(";");
+        saveData.append("HINTS:").append(hintCount).append(";\n");
         
         // Add board dimensions
         saveData.append("WIDTH:").append(width).append(";\n");
@@ -1667,5 +1669,20 @@ public class GameState implements Serializable {
         Timber.d("[ROBOTS] Stored initial robot positions for new random game");
         
         return state;
+    }
+    
+    /**
+     * Get the number of hints used in this game
+     * @return The hint count
+     */
+    public int getHintCount() {
+        return hintCount;
+    }
+    
+    /**
+     * Increment the hint count
+     */
+    public void incrementHintCount() {
+        hintCount++;
     }
 }

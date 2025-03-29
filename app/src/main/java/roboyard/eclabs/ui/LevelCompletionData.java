@@ -16,6 +16,7 @@ public class LevelCompletionData implements Serializable {
     private int optimalMoves;
     private int robotsUsed;
     private int squaresSurpassed;
+    private int stars; // Number of stars earned (0-3)
     
     public LevelCompletionData(int levelId) {
         this.levelId = levelId;
@@ -26,6 +27,7 @@ public class LevelCompletionData implements Serializable {
         this.optimalMoves = 0;
         this.robotsUsed = 0;
         this.squaresSurpassed = 0;
+        this.stars = 0;
     }
     
     public int getLevelId() {
@@ -88,6 +90,14 @@ public class LevelCompletionData implements Serializable {
         this.squaresSurpassed = squaresSurpassed;
     }
     
+    public int getStars() {
+        return stars;
+    }
+    
+    public void setStars(int stars) {
+        this.stars = Math.max(0, Math.min(3, stars)); // Ensure stars are between 0-3
+    }
+    
     @Override
     public String toString() {
         return "LevelCompletionData{" +
@@ -99,6 +109,7 @@ public class LevelCompletionData implements Serializable {
                 ", optimalMoves=" + optimalMoves +
                 ", robotsUsed=" + robotsUsed +
                 ", squaresSurpassed=" + squaresSurpassed +
+                ", stars=" + stars +
                 '}';
     }
 }

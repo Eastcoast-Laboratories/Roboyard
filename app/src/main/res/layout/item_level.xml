@@ -23,12 +23,28 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/star"
-        android:visibility="visible"
+        android:visibility="gone"
         android:elevation="10dp"
         android:translationZ="10dp"
         android:layout_margin="4dp"
         app:layout_constraintEnd_toEndOf="@id/level_button"
         app:layout_constraintTop_toTopOf="@id/level_button"
         android:contentDescription="Level completed" />
+        
+    <TextView
+        android:id="@+id/level_stars"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:background="@drawable/star"
+        android:elevation="10dp"
+        android:translationZ="10dp"
+        android:visibility="gone"
+        android:layout_margin="4dp"
+        app:layout_constraintEnd_toEndOf="@id/level_button"
+        app:layout_constraintBottom_toBottomOf="@id/level_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

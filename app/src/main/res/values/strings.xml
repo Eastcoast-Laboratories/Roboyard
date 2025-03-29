@@ -37,6 +37,10 @@
     <string name="your_moves">Your moves: %1$d</string>
     <string name="level_complete">Level Complete!</string>
     <string name="level_stars_description">You earned %1$d stars</string>
+    <string name="stars_count">%1$d Stars</string>
+    <string name="level_locked">You need %1$d more stars to unlock this level</string>
+    <string name="random_game_complete">Level Complete!</string>
+    <string name="new_random_game_button">New Game</string>
     
     <!-- Accessibility -->
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>
