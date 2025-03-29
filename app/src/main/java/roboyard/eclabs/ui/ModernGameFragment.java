@@ -531,6 +531,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 if (hintCount >= 2) {
                     // Maximum hints reached
                     Toast.makeText(requireContext(), "Maximum hints (2) used for this level", Toast.LENGTH_SHORT).show();
+                    // Disable the hint button visually
+                    hintButton.setEnabled(false);
+                    hintButton.setAlpha(0.5f);
                     return;
                 }
             }
@@ -596,6 +599,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 if (currentState != null && currentState.getLevelId() > 0) {
                     currentState.incrementHintCount();
                     Timber.d("Hint count increased to %d for level %d", currentState.getHintCount(), currentState.getLevelId());
+                    
+                    // If we've now reached the maximum hints, disable the hint button
+                    if (currentState.getHintCount() >= 2) {
+                        hintButton.setEnabled(false);
+                        hintButton.setAlpha(0.5f);
+                        Toast.makeText(requireContext(), "Maximum hints (2) used for this level", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 
                 Timber.d("[HINT] Displayed hint: %s", hintText);

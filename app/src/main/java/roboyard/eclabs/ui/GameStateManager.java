@@ -959,16 +959,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     /**
      * Calculate star rating based on player performance
      * 
-     * Star rules:
-     * - 3 stars: Optimal solution and no hints
-     * - 2 stars: One move more than optimal solution and no hints, OR optimal solution with one hint
+     * Star allocation rules:
+     * - 4 stars: Hyper-optimal solution (better than solver's optimal solution)
+     * - 3 stars: Optimal solution (same as solver) with no hints
+     * - 2 stars: One move more than optimal with no hints, OR optimal with one hint
      * - 1 star: Optimal solution with two hints, OR two moves more than optimal with no hints
      * - 0 stars: All other cases
      * 
      * @param playerMoves Number of moves used by player
      * @param optimalMoves Optimal number of moves from solver
      * @param hintsUsed Number of hints used
-     * @return Number of stars earned (0-3)
+     * @return Number of stars earned (0-4)
      */
     public int calculateStars(int playerMoves, int optimalMoves, int hintsUsed) {
         if (optimalMoves <= 0) {
@@ -977,8 +978,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         
         // Calculate stars based on the rules
-        if (playerMoves > optimalMoves) {
-            // hyper-Optimal solution for impossible cases
+        if (playerMoves < optimalMoves) {
+            // hyper-Optimal solution (better than solver's solution)
+            Timber.d("[stars] hyper-optimal solution! 4 stars");
             return 4;
         } else if (playerMoves == optimalMoves && hintsUsed == 0) {
             // Optimal solution (or better) and no hints
@@ -992,10 +994,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                   (playerMoves == optimalMoves + 2 && hintsUsed == 0)) {
             // Optimal with two hints OR two moves more than optimal with no hints
             return 1;
+        } else {
+            // All other cases
+            return 0;
         }
-        
-        // All other cases
-        return 0;
     }
     
     /**
