@@ -898,7 +898,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Save level completion data if this is a level game
             if (complete && state.getLevelId() > 0) {
                 Timber.d("[SAVE] [STARS] Game completed, saving level completion data for level %d", state.getLevelId());
-                saveLevelCompletionData(state);
+                LevelCompletionData data = saveLevelCompletionData(state);
+                
+                // Now save the prepared data
+                if (data != null) {
+                    LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
+                    manager.saveLevelCompletionData(data);
+                    Timber.d("Saved level completion data: %s", data);
+                }
                 
                 // Show a toast to indicate the level was completed
                 new Handler(Looper.getMainLooper()).post(() -> {
@@ -911,15 +918,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     /**
      * Save level completion data when a level is completed
      * @param state The completed game state
+     * @return The prepared LevelCompletionData object (does not save it)
      */
-    private void saveLevelCompletionData(GameState state) {
+    private LevelCompletionData saveLevelCompletionData(GameState state) {
         int levelId = state.getLevelId();
         if (levelId <= 0) {
             Timber.d("Not saving completion data - not a level game (levelId=%d)", levelId);
-            return; // Not a level game
+            return null; // Not a level game
         }
         
-        Timber.d("Saving completion data for level %d", levelId);
+        Timber.d("Preparing completion data for level %d", levelId);
         
         // Get the level completion manager
         LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
@@ -950,11 +958,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[STARS] gameStateManager: Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars", 
                 levelId, playerMoves, optimalMoves, hintsShown, starCount);
         
-        // Save the data
-        Timber.d("[SAVE] [STARS] Saving level completion data for level %d", levelId);
-        manager.saveLevelCompletionData(data);
-        
-        Timber.d("Saved level completion data: %s", data);
+        // Return the prepared data without saving it
+        Timber.d("Prepared level completion data: %s", data);
+        return data;
     }
     
     /**
