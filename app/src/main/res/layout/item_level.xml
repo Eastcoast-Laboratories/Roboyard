@@ -48,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#000000"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:text="1/3 robots:2"
                     android:lines="1" />
@@ -58,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#000000"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:text="0:12 fields:10"
                     android:lines="1" />
@@ -68,7 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#000000"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:text="Level 1"
                     android:lines="1" />
@@ -76,37 +76,45 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <!-- Horizontal stars strip in top-right corner -->
+    <!-- Horizontal stars strip with 4 stars -->
     <LinearLayout
         android:id="@+id/stars_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="14dp"
         android:layout_marginTop="14dp"
-        app:layout_constraintEnd_toEndOf="@id/level_button_container"
+        app:layout_constraintStart_toStartOf="@id/level_button_container"
         app:layout_constraintTop_toTopOf="@id/level_button_container">
 
         <ImageView
             android:id="@+id/level_star_1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="22dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="4dp"
             android:src="@drawable/star"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/level_star_2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="12dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="4dp"
             android:src="@drawable/star"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/level_star_3"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="4dp"
+            android:src="@drawable/star"
+            android:visibility="gone" />
+            
+        <ImageView
+            android:id="@+id/level_star_4"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:src="@drawable/star"
             android:visibility="gone" />
 

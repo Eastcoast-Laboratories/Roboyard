@@ -91,10 +91,10 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
                 
-            <!-- Stars counter with reduced height (55dp) -->
+            <!-- Stars counter with reduced height (55dp) and full width -->
             <TextView
                 android:id="@+id/stars_count_text"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="55dp"
                 android:text="@string/stars_count"
                 android:textSize="18sp"

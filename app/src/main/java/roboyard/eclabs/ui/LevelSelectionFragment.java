@@ -341,6 +341,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             private final ImageView starOne;
             private final ImageView starTwo;
             private final ImageView starThree;
+            private final ImageView starFour;
             private final LinearLayout statsOverlay;
             private final TextView levelNameText;
             private final TextView movesText;
@@ -358,6 +359,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 starOne = itemView.findViewById(R.id.level_star_1);
                 starTwo = itemView.findViewById(R.id.level_star_2);
                 starThree = itemView.findViewById(R.id.level_star_3);
+                starFour = itemView.findViewById(R.id.level_star_4);
                 statsOverlay = itemView.findViewById(R.id.stats_overlay);
                 levelNameText = itemView.findViewById(R.id.level_name_text);
                 movesText = itemView.findViewById(R.id.level_moves_text);
@@ -394,6 +396,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
                 starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
                 starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
+                starFour.setVisibility(starsEarned >= 4 ? View.VISIBLE : View.GONE);
                 
                 // Handle stats display
                 if (completionData != null) {

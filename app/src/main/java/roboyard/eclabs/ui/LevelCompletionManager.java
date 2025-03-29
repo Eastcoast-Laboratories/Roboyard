@@ -49,11 +49,59 @@ public class LevelCompletionManager {
     }
     
     /**
-     * Save completion data for a level
+     * Save completion data for a level, only updating values that are better than existing ones
      * @param data The completion data to save
      */
     public void saveLevelCompletionData(LevelCompletionData data) {
-        completionDataMap.put(data.getLevelId(), data);
+        int levelId = data.getLevelId();
+        
+        // Check if we already have data for this level
+        if (completionDataMap.containsKey(levelId)) {
+            LevelCompletionData existingData = completionDataMap.get(levelId);
+            
+            // Always mark as completed if the new data says it's completed
+            if (data.isCompleted()) {
+                existingData.setCompleted(true);
+            }
+            
+            // Check if star count has changed
+            boolean starsChanged = data.getStars() > existingData.getStars();
+            
+            // Only update stars if new value is greater
+            if (starsChanged) {
+                // If stars have improved, update stars and related metrics
+                existingData.setStars(data.getStars());
+                existingData.setHintsShown(data.getHintsShown());
+                existingData.setRobotsUsed(data.getRobotsUsed());
+                existingData.setOptimalMoves(data.getOptimalMoves());
+            }
+            
+            // Only update moves if it's lower (better) than existing value
+            // Or if there was no previous value (movesNeeded == 0)
+            if (existingData.getMovesNeeded() == 0 || data.getMovesNeeded() < existingData.getMovesNeeded()) {
+                existingData.setMovesNeeded(data.getMovesNeeded());
+            }
+            
+            // Only update time if it's lower (faster) than existing value
+            // Or if there was no previous value (timeNeeded == 0)
+            if (existingData.getTimeNeeded() == 0 || data.getTimeNeeded() < existingData.getTimeNeeded()) {
+                existingData.setTimeNeeded(data.getTimeNeeded());
+            }
+            
+            // Only update squares surpassed if it's lower (more efficient) than existing value
+            // Or if there was no previous value (squaresSurpassed == 0)
+            if (existingData.getSquaresSurpassed() == 0 || data.getSquaresSurpassed() < existingData.getSquaresSurpassed()) {
+                existingData.setSquaresSurpassed(data.getSquaresSurpassed());
+            }
+            
+            // Use the updated existing data
+            completionDataMap.put(levelId, existingData);
+        } else {
+            // No existing data, just add the new data directly
+            completionDataMap.put(levelId, data);
+        }
+        
+        // Save changes to SharedPreferences
         saveCompletionData();
     }
     
