@@ -897,7 +897,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             
             // Save level completion data if this is a level game
             if (complete && state.getLevelId() > 0) {
-                Timber.d("Game completed, saving level completion data for level %d", state.getLevelId());
+                Timber.d("[SAVE] [STARS] Game completed, saving level completion data for level %d", state.getLevelId());
                 saveLevelCompletionData(state);
                 
                 // Show a toast to indicate the level was completed
@@ -947,10 +947,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int starCount = calculateStars(playerMoves, optimalMoves, hintsShown);
         data.setStars(starCount);
         
-        Timber.d("Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars", 
+        Timber.d("[STARS] gameStateManager: Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars", 
                 levelId, playerMoves, optimalMoves, hintsShown, starCount);
         
         // Save the data
+        Timber.d("[SAVE] [STARS] Saving level completion data for level %d", levelId);
         manager.saveLevelCompletionData(data);
         
         Timber.d("Saved level completion data: %s", data);

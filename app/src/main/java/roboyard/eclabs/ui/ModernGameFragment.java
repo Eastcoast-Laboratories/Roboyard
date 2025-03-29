@@ -441,6 +441,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         int hintsUsed = state.getHintCount();
                         int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
                         
+                        Timber.d("[STARS] gameStateManager: Calculated stars: %d", stars);
+
                         // Create stars string with UTF-8 stars
                         StringBuilder starString = new StringBuilder();
                         for (int i = 0; i < stars; i++) {
