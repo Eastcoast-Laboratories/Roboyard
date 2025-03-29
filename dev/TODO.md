@@ -83,6 +83,22 @@ also preselect and load level 1 when opening the editor
 
 and the editor still dont work: inothing happens when click on the editor field, this is the  log:
 
+next run.....
+
+the editor is now showing an empty grid and nochting visual happens, when clickin in it. it shludl show the current level 1 but it seems empty.
+
+- pressing the APPLY button generates successfull some walls in the dimensions, but thetop wall at 0 is missing and the bottom walls are one too far north.
+
+- loading another level changes nothing (tested level 10)
+
+- copy to clipboard works fine now
+
+- add more debug when clicking the edit buttons and the erase button.
+
+next run.....
+
+
+
 # Accessibility-Verbesserungen
 - TalkBack-Unterstützung sprache einstellbar machen (Englisch ermöglichen).  
 1. Add a preference setting to customize the order of information in TalkBack announcements
@@ -107,4 +123,10 @@ backgrounnd: i plan to migrate soo to another framework, that needs UI and logic
 - make a list of all complete files that could be moved into the logic/ folder
 - make a list of classes, that has to be separated from UI files into new classes in the logic/ folder.
 - at the moment there is a ui/ folder and a util/ folder, but those are not sorted good, i need to resort everything before migrating
+
+continue and create a full document, that shows:
+- what files i have to move
+- what files have to get which methods extracted
+- which files can be deleted completely.
+also explain problems or mixed classes, where it is not clear
 

@@ -37,6 +37,7 @@ import androidx.fragment.app.Fragment;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +155,7 @@ public class LevelDesignEditorFragment extends Fragment {
         setupButtonListeners();
         
         // Set up mode selection
-        setupModeSelection();
+        setupEditModeRadioGroup();
         
         // Load the initial level
         if (currentLevelId == 0) {
@@ -212,37 +213,35 @@ public class LevelDesignEditorFragment extends Fragment {
         });
     }
     
-    private void setupModeSelection() {
-        // Set up radio buttons for edit modes
-        RadioButton robotButton = requireView().findViewById(R.id.mode_robot_radio);
-        RadioButton targetButton = requireView().findViewById(R.id.mode_target_radio);
-        RadioButton wallHButton = requireView().findViewById(R.id.mode_wall_h_radio);
-        RadioButton wallVButton = requireView().findViewById(R.id.mode_wall_v_radio);
-        RadioButton eraseButton = requireView().findViewById(R.id.mode_erase_radio);
+    private void setupEditModeRadioGroup() {
+        RadioGroup editModeGroup = requireView().findViewById(R.id.edit_mode_radio_group);
         
-        robotButton.setChecked(true); // Default selection
-        
-        editModeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+        editModeGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.mode_robot_radio) {
                 currentEditMode = EDIT_MODE_ROBOT;
                 robotColorRadioGroup.setVisibility(View.VISIBLE);
                 targetColorRadioGroup.setVisibility(View.GONE);
+                Timber.d("Edit mode set to ROBOT");
             } else if (checkedId == R.id.mode_target_radio) {
                 currentEditMode = EDIT_MODE_TARGET;
                 robotColorRadioGroup.setVisibility(View.GONE);
                 targetColorRadioGroup.setVisibility(View.VISIBLE);
+                Timber.d("Edit mode set to TARGET");
             } else if (checkedId == R.id.mode_wall_h_radio) {
                 currentEditMode = EDIT_MODE_WALL_H;
                 robotColorRadioGroup.setVisibility(View.GONE);
                 targetColorRadioGroup.setVisibility(View.GONE);
+                Timber.d("Edit mode set to HORIZONTAL WALL");
             } else if (checkedId == R.id.mode_wall_v_radio) {
                 currentEditMode = EDIT_MODE_WALL_V;
                 robotColorRadioGroup.setVisibility(View.GONE);
                 targetColorRadioGroup.setVisibility(View.GONE);
+                Timber.d("Edit mode set to VERTICAL WALL");
             } else if (checkedId == R.id.mode_erase_radio) {
                 currentEditMode = EDIT_MODE_ERASE;
                 robotColorRadioGroup.setVisibility(View.GONE);
                 targetColorRadioGroup.setVisibility(View.GONE);
+                Timber.d("Edit mode set to ERASE");
             }
         });
     }
@@ -509,34 +508,80 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void loadLevel(int levelId) {
-        currentLevelId = levelId;
-        levelIdTextView.setText("Level ID: " + levelId);
+        Timber.d("Loading level %d", levelId);
+        
+        // If loading level 0, create a new level
+        if (levelId == 0) {
+            createNewLevel(12, 14);
+            Timber.d("Created new blank level with board size 12x14");
+            return;
+        }
         
         try {
-            String levelContent;
+            String levelFileName = String.format("level%d.txt", levelId);
+            Timber.d("Attempting to load level file: %s", levelFileName);
             
-            if (levelId <= 140) {
-                // Load built-in level from assets
-                InputStream is = requireContext().getAssets().open("Maps/level_" + levelId + ".txt");
-                Scanner scanner = new Scanner(is).useDelimiter("\\A");
-                levelContent = scanner.hasNext() ? scanner.next() : "";
+            // Try to load the level from internal storage first (custom levels)
+            File levelFile = new File(requireContext().getFilesDir(), "level_" + levelId + ".txt");
+            if (levelFile.exists()) {
+                // Load the custom level from internal storage
+                FileInputStream fis = new FileInputStream(levelFile);
+                Scanner scanner = new Scanner(fis);
+                StringBuilder content = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    content.append(scanner.nextLine()).append("\n");
+                }
                 scanner.close();
-                is.close();
+                fis.close();
+                
+                // Parse the level content
+                currentState = parseLevelContent(content.toString());
+                Timber.d("Loaded custom level %d from internal storage with %d elements", 
+                        levelId, currentState.getGameElements().size());
             } else {
-                // Load custom level from internal storage
-                File file = new File(requireContext().getFilesDir(), "custom_level_" + levelId + ".txt");
-                Scanner scanner = new Scanner(file).useDelimiter("\\A");
-                levelContent = scanner.hasNext() ? scanner.next() : "";
+                // Load the built-in level from assets
+                String assetPath = "Maps/" + levelFileName;
+                Timber.d("Loading built-in level from asset: %s", assetPath);
+                
+                InputStream inputStream = requireContext().getAssets().open(assetPath);
+                Scanner scanner = new Scanner(inputStream);
+                StringBuilder content = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    content.append(scanner.nextLine()).append("\n");
+                }
                 scanner.close();
+                inputStream.close();
+                
+                // Dump the content of the level file for debugging
+                String levelContent = content.toString();
+                Timber.d("Level content (first 100 chars): %s", 
+                        levelContent.length() > 100 ? levelContent.substring(0, 100) : levelContent);
+                
+                // Parse the level content
+                currentState = parseLevelContent(levelContent);
+                Timber.d("Loaded built-in level %d from assets with %d elements, board size %dx%d", 
+                        levelId, currentState.getGameElements().size(), 
+                        currentState.getWidth(), currentState.getHeight());
             }
             
-            // Parse level content and update the editor
-            parseLevelContent(levelContent);
+            currentLevelId = levelId;
+            
+            // Update UI with the loaded level
+            EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
+            EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
+            widthEdit.setText(String.valueOf(currentState.getWidth()));
+            heightEdit.setText(String.valueOf(currentState.getHeight()));
             
         } catch (IOException e) {
-            Toast.makeText(requireContext(), "Error loading level", Toast.LENGTH_SHORT).show();
-            Timber.e(e, "Error loading level %d", levelId);
+            Timber.e(e, "Error loading level %d: %s", levelId, e.getMessage());
+            Toast.makeText(requireContext(), "Error loading level " + levelId, Toast.LENGTH_SHORT).show();
+            
+            // Create a new level as fallback
+            createNewLevel(12, 14);
         }
+        
+        // Update the UI
+        updateUI();
     }
     
     private void createNewLevel(int width, int height) {
@@ -579,76 +624,6 @@ public class LevelDesignEditorFragment extends Fragment {
         createNewLevel(width, height);
     }
     
-    private void parseLevelContent(String content) {
-        // Extract board dimensions and create new game state
-        Pattern boardPattern = Pattern.compile("board:(\\d+),(\\d+);");
-        Matcher boardMatcher = boardPattern.matcher(content);
-        
-        int width = 12; // Default
-        int height = 14; // Default
-        
-        if (boardMatcher.find()) {
-            width = Integer.parseInt(boardMatcher.group(1));
-            height = Integer.parseInt(boardMatcher.group(2));
-        }
-        
-        // Create a new state with these dimensions
-        currentState = new GameState(width, height);
-        
-        // Update UI with board size
-        boardWidthEditText.setText(String.valueOf(width));
-        boardHeightEditText.setText(String.valueOf(height));
-        
-        // Parse robots
-        // Format: robot:x,y,color;
-        Pattern robotPattern = Pattern.compile("robot:(\\d+),(\\d+),(\\d+);");
-        Matcher robotMatcher = robotPattern.matcher(content);
-        
-        while (robotMatcher.find()) {
-            int x = Integer.parseInt(robotMatcher.group(1));
-            int y = Integer.parseInt(robotMatcher.group(2));
-            int color = Integer.parseInt(robotMatcher.group(3));
-            currentState.addRobot(x, y, color);
-        }
-        
-        // Parse targets
-        // Format: target:x,y,color;
-        Pattern targetPattern = Pattern.compile("target:(\\d+),(\\d+),(\\d+);");
-        Matcher targetMatcher = targetPattern.matcher(content);
-        
-        while (targetMatcher.find()) {
-            int x = Integer.parseInt(targetMatcher.group(1));
-            int y = Integer.parseInt(targetMatcher.group(2));
-            int color = Integer.parseInt(targetMatcher.group(3));
-            currentState.addTarget(x, y, color);
-        }
-        
-        // Parse horizontal walls
-        // Format: mh:x,y;
-        Pattern mhPattern = Pattern.compile("mh:(\\d+),(\\d+);");
-        Matcher mhMatcher = mhPattern.matcher(content);
-        
-        while (mhMatcher.find()) {
-            int x = Integer.parseInt(mhMatcher.group(1));
-            int y = Integer.parseInt(mhMatcher.group(2));
-            currentState.addHorizontalWall(x, y);
-        }
-        
-        // Parse vertical walls
-        // Format: mv:x,y;
-        Pattern mvPattern = Pattern.compile("mv:(\\d+),(\\d+);");
-        Matcher mvMatcher = mvPattern.matcher(content);
-        
-        while (mvMatcher.find()) {
-            int x = Integer.parseInt(mvMatcher.group(1));
-            int y = Integer.parseInt(mvMatcher.group(2));
-            currentState.addVerticalWall(x, y);
-        }
-        
-        // Update the UI
-        updateUI();
-    }
-    
     private void updateUI() {
         // Get the board preview container
         FrameLayout boardPreviewContainer = requireView().findViewById(R.id.board_preview_container);
@@ -657,7 +632,21 @@ public class LevelDesignEditorFragment extends Fragment {
         boardPreviewContainer.removeAllViews();
         
         // Create a new view to draw the board and elements
-        GameBoardView boardView = new GameBoardView(requireContext(), currentState);
+        GameBoardView boardView = new GameBoardView(requireContext());
+        
+        // Set layout parameters to make the board take up the entire container
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT);
+        boardView.setLayoutParams(params);
+        
+        // Enable hardwareAccelerated mode for better performance
+        boardView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        
+        Timber.d("Adding board view to container. Board dimensions: %dx%d", 
+                currentState.getWidth(), currentState.getHeight());
+        
+        // Add the board view to the container
         boardPreviewContainer.addView(boardView);
         
         // Update level ID text
@@ -770,6 +759,9 @@ public class LevelDesignEditorFragment extends Fragment {
         currentState.addRobot(x, y, currentRobotColor);
         Toast.makeText(requireContext(), String.format("Added %s robot at (%d, %d)", 
             getColorName(currentRobotColor), x, y), Toast.LENGTH_SHORT).show();
+            
+        // Immediately update UI
+        updateUI();
     }
     
     private void addTargetAt(int x, int y) {
@@ -780,6 +772,9 @@ public class LevelDesignEditorFragment extends Fragment {
         currentState.addTarget(x, y, currentTargetColor);
         Toast.makeText(requireContext(), String.format("Added %s target at (%d, %d)", 
             getColorName(currentTargetColor), x, y), Toast.LENGTH_SHORT).show();
+            
+        // Immediately update UI
+        updateUI();
     }
     
     private void addHorizontalWallAt(int x, int y) {
@@ -797,6 +792,9 @@ public class LevelDesignEditorFragment extends Fragment {
             Toast.makeText(requireContext(), String.format("Added horizontal wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         }
+        
+        // Immediately update UI
+        updateUI();
     }
     
     private void addVerticalWallAt(int x, int y) {
@@ -814,6 +812,9 @@ public class LevelDesignEditorFragment extends Fragment {
             Toast.makeText(requireContext(), String.format("Added vertical wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         }
+        
+        // Immediately update UI
+        updateUI();
     }
     
     private void eraseAt(int x, int y) {
@@ -825,6 +826,9 @@ public class LevelDesignEditorFragment extends Fragment {
             Toast.makeText(requireContext(), String.format("Nothing to erase at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         }
+        
+        // Immediately update UI
+        updateUI();
     }
     
     private boolean removeElementsAt(int x, int y) {
@@ -883,6 +887,12 @@ public class LevelDesignEditorFragment extends Fragment {
     private void handleBoardClick(int x, int y) {
         Timber.d("Handling board click at: (%d, %d), mode: %d", x, y, currentEditMode);
         
+        // First check if the coordinates are valid
+        if (x < 0 || y < 0 || x >= currentState.getWidth() || y >= currentState.getHeight()) {
+            Timber.w("Board click coordinates out of bounds: (%d, %d)", x, y);
+            return;
+        }
+        
         // Handle the click based on current edit mode
         switch (currentEditMode) {
             case EDIT_MODE_ROBOT:
@@ -902,25 +912,111 @@ public class LevelDesignEditorFragment extends Fragment {
                 break;
         }
         
-        // Update the UI
-        updateUI();
+        // Note: We don't need to call updateUI() here anymore because each element
+        // placement method now calls updateUI() directly
+    }
+    
+    private GameState parseLevelContent(String content) {
+        Timber.d("Parsing level content: %d characters", content.length());
+        
+        // Split the content by lines
+        String[] lines = content.split("\\n");
+        
+        if (lines.length < 1) {
+            Timber.e("Invalid level format: empty content");
+            return new GameState(12, 14); // Default to 12x14 board
+        }
+        
+        // First line contains board dimensions
+        String[] dimensions = lines[0].trim().split("\\s+");
+        if (dimensions.length < 2) {
+            Timber.e("Invalid level format: first line should have width and height");
+            return new GameState(12, 14); // Default to 12x14 board
+        }
+        
+        // Parse board dimensions
+        int width = 12;
+        int height = 14;
+        try {
+            width = Integer.parseInt(dimensions[0]);
+            height = Integer.parseInt(dimensions[1]);
+            Timber.d("Parsed board dimensions: %dx%d", width, height);
+        } catch (NumberFormatException e) {
+            Timber.e(e, "Error parsing board dimensions");
+        }
+        
+        // Create a new GameState with the parsed dimensions
+        GameState state = new GameState(width, height);
+        
+        // Keep track of how many elements we add
+        int elementCount = 0;
+        
+        // Process remaining lines to add walls, robots, and targets
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.isEmpty()) continue;
+            
+            String[] parts = line.split("\\s+");
+            if (parts.length < 3) continue;
+            
+            try {
+                int x = Integer.parseInt(parts[1]);
+                int y = Integer.parseInt(parts[2]);
+                
+                if (parts[0].startsWith("wall")) {
+                    // Wall: wall h/v x y
+                    if (parts[0].equals("wall_h")) {
+                        state.setCellType(x, y, Constants.TYPE_HORIZONTAL_WALL);
+                        Timber.d("Added horizontal wall at (%d, %d)", x, y);
+                        elementCount++;
+                    } else if (parts[0].equals("wall_v")) {
+                        state.setCellType(x, y, Constants.TYPE_VERTICAL_WALL);
+                        Timber.d("Added vertical wall at (%d, %d)", x, y);
+                        elementCount++;
+                    }
+                } else if (parts[0].startsWith("robot") && parts.length >= 4) {
+                    // Robot: robot colorIndex x y
+                    int color = Integer.parseInt(parts[3]);
+                    state.addRobot(x, y, color);
+                    Timber.d("Added robot at (%d, %d) with color %d", x, y, color);
+                    elementCount++;
+                } else if (parts[0].startsWith("target") && parts.length >= 4) {
+                    // Target: target colorIndex x y
+                    int color = Integer.parseInt(parts[3]);
+                    state.addTarget(x, y, color);
+                    Timber.d("Added target at (%d, %d) with color %d", x, y, color);
+                    elementCount++;
+                }
+            } catch (NumberFormatException e) {
+                Timber.e(e, "Error parsing line: %s", line);
+            } catch (Exception e) {
+                Timber.e(e, "Error processing line: %s", line);
+            }
+        }
+        
+        Timber.d("Successfully parsed level content. Added %d elements to board size %dx%d", 
+                elementCount, width, height);
+        
+        return state;
     }
     
     /**
      * Custom view to display the game board for editing
      */
     private class GameBoardView extends View {
-        private GameState gameState;
-        private Paint robotPaint = new Paint();
-        private Paint targetPaint = new Paint();
-        private Paint wallPaint = new Paint();
-        private Paint gridPaint = new Paint();
-        private Paint textPaint = new Paint();
+        private final Paint robotPaint = new Paint();
+        private final Paint targetPaint = new Paint();
+        private final Paint wallPaint = new Paint();
+        private final Paint gridPaint = new Paint();
+        private final Paint textPaint = new Paint();
         private int cellSize = 0;
         
-        public GameBoardView(Context context, GameState gameState) {
+        public GameBoardView(Context context) {
             super(context);
-            this.gameState = gameState;
+            
+            // Make view clickable and focusable to properly receive touch events
+            setClickable(true);
+            setFocusable(true);
             
             // Initialize paints
             robotPaint.setStyle(Paint.Style.FILL);
@@ -943,8 +1039,8 @@ public class LevelDesignEditorFragment extends Fragment {
             
             int width = getWidth();
             int height = getHeight();
-            int boardWidth = gameState.getWidth();
-            int boardHeight = gameState.getHeight();
+            int boardWidth = currentState.getWidth();
+            int boardHeight = currentState.getHeight();
             
             // Calculate cell size based on available space and board dimensions
             int cellWidth = width / boardWidth;
@@ -954,6 +1050,9 @@ public class LevelDesignEditorFragment extends Fragment {
             // Center the board
             int offsetX = (width - (cellSize * boardWidth)) / 2;
             int offsetY = (height - (cellSize * boardHeight)) / 2;
+            
+            // Draw background
+            canvas.drawColor(Color.WHITE);
             
             // Draw grid
             for (int x = 0; x <= boardWidth; x++) {
@@ -969,7 +1068,7 @@ public class LevelDesignEditorFragment extends Fragment {
             // Draw walls
             for (int y = 0; y < boardHeight; y++) {
                 for (int x = 0; x < boardWidth; x++) {
-                    int cellType = gameState.getCellType(x, y);
+                    int cellType = currentState.getCellType(x, y);
                     
                     if (cellType == Constants.TYPE_HORIZONTAL_WALL) {
                         canvas.drawRect(offsetX + x * cellSize, offsetY + y * cellSize - cellSize/8, 
@@ -982,7 +1081,7 @@ public class LevelDesignEditorFragment extends Fragment {
             }
             
             // Draw game elements (robots and targets)
-            for (GameElement element : gameState.getGameElements()) {
+            for (GameElement element : currentState.getGameElements()) {
                 int x = element.getX();
                 int y = element.getY();
                 int centerX = offsetX + (x * cellSize) + (cellSize / 2);
@@ -1019,29 +1118,40 @@ public class LevelDesignEditorFragment extends Fragment {
         
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // Log all touch events to help debug
+                Timber.d("Touch event detected: %s at (%f, %f)", 
+                       event.getAction() == MotionEvent.ACTION_DOWN ? "DOWN" : "UP",
+                       event.getX(), event.getY());
+                
                 int width = getWidth();
                 int height = getHeight();
-                int boardWidth = gameState.getWidth();
-                int boardHeight = gameState.getHeight();
+                int boardWidth = currentState.getWidth();
+                int boardHeight = currentState.getHeight();
                 
-                // Calculate board coordinates from touch position
-                float touchX = event.getX();
-                float touchY = event.getY();
+                // Calculate cell size based on available space and board dimensions
+                int cellWidth = width / boardWidth;
+                int cellHeight = height / boardHeight;
+                int cellSize = Math.min(cellWidth, cellHeight);
                 
                 // Calculate offsets (same as in onDraw)
                 int offsetX = (width - (cellSize * boardWidth)) / 2;
                 int offsetY = (height - (cellSize * boardHeight)) / 2;
                 
                 // Convert touch coordinates to board coordinates
+                float touchX = event.getX();
+                float touchY = event.getY();
                 int boardX = (int)((touchX - offsetX) / cellSize);
                 int boardY = (int)((touchY - offsetY) / cellSize);
                 
                 // Check if the touch is within board bounds
                 if (boardX >= 0 && boardX < boardWidth && boardY >= 0 && boardY < boardHeight) {
-                    Timber.d("GameBoardView touch converted to board coordinates: (%d, %d)", boardX, boardY);
+                    Timber.d("Valid board touch at: (%d, %d)", boardX, boardY);
                     handleBoardClick(boardX, boardY);
-                    return true;
+                    invalidate(); // Redraw the view
+                    return true; // Indicate the touch was handled
+                } else {
+                    Timber.d("Touch outside board bounds at: (%d, %d)", boardX, boardY);
                 }
             }
             return super.onTouchEvent(event);
