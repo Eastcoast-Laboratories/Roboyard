@@ -66,48 +66,46 @@ public class LevelCompletionManager {
                     existingData.getStars(), existingData.getMovesNeeded(), 
                     existingData.getTimeNeeded(), existingData.getSquaresSurpassed());
             
-            // Always mark as completed if the new data says it's completed
-            if (data.isCompleted()) {
-                existingData.setCompleted(true);
-            }
-            
             // Only update stars if new value is greater
             boolean starsImproved = data.getStars() > existingData.getStars();
-            
+            boolean starsAtLeastSame = data.getStars() >= existingData.getStars();
+
             if (starsImproved) {
                 Timber.d("[LEVEL_COMPLETION] Stars improved from %d to %d - updating stars and related metrics",
                         existingData.getStars(), data.getStars());
-                
+
                 // If stars have improved, update stars and related metrics
                 existingData.setStars(data.getStars());
-                existingData.setHintsShown(data.getHintsShown());
-                existingData.setRobotsUsed(data.getRobotsUsed());
                 existingData.setOptimalMoves(data.getOptimalMoves());
             } else {
                 Timber.d("[LEVEL_COMPLETION] Stars not improved (%d vs %d) - not updating stars",
                         data.getStars(), existingData.getStars());
             }
-            
-            // Only update moves if it's lower (better) than existing value
-            // Or if there was no previous value (movesNeeded == 0)
-            if (existingData.getMovesNeeded() == 0 || data.getMovesNeeded() < existingData.getMovesNeeded()) {
-                Timber.d("[LEVEL_COMPLETION] Moves improved from %d to %d", 
+
+            // Only update hintsShown and robotsUsed if stars are at least the same
+            if (data.isCompleted() && starsAtLeastSame) {
+                existingData.setCompleted(true);
+                existingData.setHintsShown(data.getHintsShown());
+                existingData.setRobotsUsed(data.getRobotsUsed());
+            }
+
+            // Always update moves if it's lower (better) than existing value
+            if (data.isCompleted() && (existingData.getMovesNeeded() == 0 || data.getMovesNeeded() < existingData.getMovesNeeded())) {
+                Timber.d("[LEVEL_COMPLETION] Moves improved from %d to %d",
                         existingData.getMovesNeeded(), data.getMovesNeeded());
                 existingData.setMovesNeeded(data.getMovesNeeded());
             }
-            
-            // Only update time if it's lower (faster) than existing value
-            // Or if there was no previous value (timeNeeded == 0)
-            if (existingData.getTimeNeeded() == 0 || data.getTimeNeeded() < existingData.getTimeNeeded()) {
-                Timber.d("[LEVEL_COMPLETION] Time improved from %d to %d", 
+
+            // Always update time if it's lower (faster) than existing value
+            if (data.isCompleted() && (existingData.getTimeNeeded() == 0 || data.getTimeNeeded() < existingData.getTimeNeeded())) {
+                Timber.d("[LEVEL_COMPLETION] Time improved from %d to %d",
                         existingData.getTimeNeeded(), data.getTimeNeeded());
                 existingData.setTimeNeeded(data.getTimeNeeded());
             }
-            
-            // Only update squares surpassed if it's lower (more efficient) than existing value
-            // Or if there was no previous value (squaresSurpassed == 0)
-            if (existingData.getSquaresSurpassed() == 0 || data.getSquaresSurpassed() < existingData.getSquaresSurpassed()) {
-                Timber.d("[LEVEL_COMPLETION] Squares improved from %d to %d", 
+
+            // Always update squares if it's more (better) than existing value
+            if (data.isCompleted() && data.getSquaresSurpassed() > existingData.getSquaresSurpassed()) {
+                Timber.d("[LEVEL_COMPLETION] Squares improved from %d to %d",
                         existingData.getSquaresSurpassed(), data.getSquaresSurpassed());
                 existingData.setSquaresSurpassed(data.getSquaresSurpassed());
             }
