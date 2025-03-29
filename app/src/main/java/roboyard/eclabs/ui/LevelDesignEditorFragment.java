@@ -1,17 +1,30 @@
 package roboyard.eclabs.ui;
 
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -19,14 +32,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import timber.log.Timber;
-
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -35,6 +50,8 @@ import java.util.regex.Pattern;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.R;
+
+import timber.log.Timber;
 
 /**
  * Level Design Editor Fragment
@@ -139,13 +156,18 @@ public class LevelDesignEditorFragment extends Fragment {
         // Set up mode selection
         setupModeSelection();
         
-        // Load initial level if editing existing
-        if (currentLevelId > 0) {
+        // Load the initial level
+        if (currentLevelId == 0) {
+            // Default to level 1 if no level was specified
+            currentLevelId = 1;
             loadLevel(currentLevelId);
+            // Update the spinner selection to match level 1
+            editLevelSpinner.setSelection(1); // Second item (level 1)
         } else {
-            // Create blank level with default size
-            createNewLevel(12, 14);
+            loadLevel(currentLevelId);
         }
+        
+        Timber.d("LevelDesignEditorFragment: onViewCreated, loaded level %d", currentLevelId);
     }
     
     private void setupColorRadioButtons() {
@@ -290,8 +312,24 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void setupMapTouchEvents() {
-        // For simplicity, we'll be implementing this in the next phase
-        Timber.d("Map touch events will be implemented separately");
+        // The touch events are now handled directly in the GameBoardView class
+        // So we just need to ensure the board preview container is set up properly
+        FrameLayout boardPreview = requireView().findViewById(R.id.board_preview_container);
+        
+        // Clear any existing views
+        boardPreview.removeAllViews();
+        
+        // Initial setup message - will be replaced when updateUI() is called
+        TextView placeholderText = new TextView(requireContext());
+        placeholderText.setText("Board is loading...");
+        placeholderText.setTextColor(Color.parseColor("#666666"));
+        placeholderText.setGravity(android.view.Gravity.CENTER);
+        placeholderText.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        boardPreview.addView(placeholderText);
+        
+        Timber.d("Map touch events set up via GameBoardView");
     }
     
     private void setupButtonListeners() {
@@ -325,12 +363,132 @@ public class LevelDesignEditorFragment extends Fragment {
         });
         
         // Export button
-        exportButton.setOnClickListener(v -> {
-            // Show the level text format
-            String levelText = generateLevelText();
-            levelTextView.setText(levelText);
-            levelTextView.setVisibility(View.VISIBLE);
+        exportButton.setOnClickListener(v -> showLevelText());
+    }
+    
+    private void showLevelText() {
+        String levelText = generateLevelText();
+        
+        // Create a dialog for displaying level text with copy and share options
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Level Text Format");
+        
+        // Create a layout for the dialog content
+        LinearLayout container = new LinearLayout(requireContext());
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(20, 20, 20, 20);
+        
+        // Create a selectable TextView for the level text
+        EditText textView = new EditText(requireContext());
+        textView.setText(levelText);
+        textView.setTextIsSelectable(true);
+        textView.setTextColor(Color.parseColor("#666666"));
+        textView.setPadding(20, 20, 20, 20);
+        textView.setBackgroundColor(Color.parseColor("#F0F0F0"));
+        textView.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+        textView.setMinLines(10);
+        textView.setMaxLines(15);
+        
+        // Set layout params for the text view (make it fill width and have a reasonable height)
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        textView.setLayoutParams(textParams);
+        container.addView(textView);
+        
+        // Add a "Copy to Clipboard" button
+        Button copyButton = new Button(requireContext());
+        copyButton.setText("Copy to Clipboard");
+        copyButton.setOnClickListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) 
+                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Level Data", levelText);
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(requireContext(), "Level data copied to clipboard", Toast.LENGTH_SHORT).show();
         });
+        
+        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        buttonParams.setMargins(0, 20, 0, 20);
+        copyButton.setLayoutParams(buttonParams);
+        container.addView(copyButton);
+        
+        // Add a TextView for the share link
+        TextView shareInfoText = new TextView(requireContext());
+        shareInfoText.setText("Share Link:");
+        shareInfoText.setTextColor(Color.parseColor("#666666"));
+        container.addView(shareInfoText);
+        
+        // Add a TextView for the share URL
+        TextView shareUrlText = new TextView(requireContext());
+        try {
+            String encodedLevelText = URLEncoder.encode(levelText, "UTF-8");
+            String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedLevelText;
+            shareUrlText.setText(shareUrl);
+            shareUrlText.setTextIsSelectable(true);
+            shareUrlText.setTextColor(Color.parseColor("#0000FF"));
+            shareUrlText.setPadding(20, 10, 20, 20);
+        } catch (UnsupportedEncodingException e) {
+            Timber.e(e, "Error encoding level text");
+            shareUrlText.setText("Error creating share URL");
+        }
+        container.addView(shareUrlText);
+        
+        // Add a name input field (optional for sharing)
+        EditText nameEditText = new EditText(requireContext());
+        nameEditText.setHint("Enter your name (optional)");
+        nameEditText.setTextColor(Color.parseColor("#666666"));
+        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        nameParams.setMargins(0, 20, 0, 0);
+        nameEditText.setLayoutParams(nameParams);
+        container.addView(nameEditText);
+        
+        // Set the container as the dialog view
+        builder.setView(container);
+        
+        // Add share and close buttons
+        builder.setPositiveButton("Share Online", (dialog, which) -> {
+            String userName = nameEditText.getText().toString().trim();
+            shareLevelOnline(levelText, userName);
+        });
+        
+        builder.setNegativeButton("Close", null);
+        
+        // Show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    
+    private void shareLevelOnline(String levelText, String userName) {
+        try {
+            // URL encode the level text
+            String encodedLevelText = URLEncoder.encode(levelText, "UTF-8");
+            
+            // Add user name to the data if provided
+            if (!TextUtils.isEmpty(userName)) {
+                encodedLevelText += "&name=" + URLEncoder.encode(userName, "UTF-8");
+            }
+            
+            // Create the share URL
+            String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedLevelText;
+            
+            // Create an intent to open the URL
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
+            startActivity(intent);
+            
+            Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
+            Timber.d("Sharing level with URL: %s", shareUrl);
+            
+        } catch (UnsupportedEncodingException e) {
+            Timber.e(e, "Error encoding level text");
+            Toast.makeText(requireContext(), "Error creating share URL", Toast.LENGTH_SHORT).show();
+        } catch (ActivityNotFoundException e) {
+            Timber.e(e, "No browser available to open URL");
+            Toast.makeText(requireContext(), "No browser available to open URL", Toast.LENGTH_SHORT).show();
+        }
     }
     
     private boolean levelExists(int levelId) {
@@ -492,11 +650,28 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void updateUI() {
-        // This would refresh the map display based on currentState
-        // For the initial implementation we'll just show a message
-        Toast.makeText(requireContext(), "Level loaded with " + 
-                       currentState.getWidth() + "x" + currentState.getHeight() + " board", 
-                       Toast.LENGTH_SHORT).show();
+        // Get the board preview container
+        FrameLayout boardPreviewContainer = requireView().findViewById(R.id.board_preview_container);
+        
+        // Clear existing views except the placeholder text
+        boardPreviewContainer.removeAllViews();
+        
+        // Create a new view to draw the board and elements
+        GameBoardView boardView = new GameBoardView(requireContext(), currentState);
+        boardPreviewContainer.addView(boardView);
+        
+        // Update level ID text
+        TextView levelIdText = requireView().findViewById(R.id.level_id_text);
+        if (currentLevelId > 0) {
+            levelIdText.setText("Editing Level: " + currentLevelId);
+        } else {
+            levelIdText.setText("New Level");
+        }
+        
+        Timber.d("Updated UI with current state: %d elements, board size: %dx%d", 
+                currentState.getGameElements().size(),
+                currentState.getWidth(),
+                currentState.getHeight());
     }
     
     private String generateLevelText() {
@@ -584,6 +759,292 @@ public class LevelDesignEditorFragment extends Fragment {
         } catch (IOException e) {
             Toast.makeText(requireContext(), "Error saving level", Toast.LENGTH_SHORT).show();
             Timber.e(e, "Error saving level %d", currentLevelId);
+        }
+    }
+    
+    private void addRobotAt(int x, int y) {
+        Timber.d("Adding robot at (%d, %d) with color %d", x, y, currentRobotColor);
+        // Check if there's already something at this position and remove it
+        removeElementsAt(x, y);
+        // Add a new robot
+        currentState.addRobot(x, y, currentRobotColor);
+        Toast.makeText(requireContext(), String.format("Added %s robot at (%d, %d)", 
+            getColorName(currentRobotColor), x, y), Toast.LENGTH_SHORT).show();
+    }
+    
+    private void addTargetAt(int x, int y) {
+        Timber.d("Adding target at (%d, %d) with color %d", x, y, currentTargetColor);
+        // Check if there's already something at this position and remove it
+        removeElementsAt(x, y);
+        // Add a new target
+        currentState.addTarget(x, y, currentTargetColor);
+        Toast.makeText(requireContext(), String.format("Added %s target at (%d, %d)", 
+            getColorName(currentTargetColor), x, y), Toast.LENGTH_SHORT).show();
+    }
+    
+    private void addHorizontalWallAt(int x, int y) {
+        Timber.d("Adding horizontal wall at (%d, %d)", x, y);
+        // Check if there's already a wall at this position
+        if (currentState.getCellType(x, y) == Constants.TYPE_HORIZONTAL_WALL) {
+            // Remove it (toggle behavior)
+            removeElementsAt(x, y);
+            Toast.makeText(requireContext(), String.format("Removed horizontal wall at (%d, %d)", 
+                x, y), Toast.LENGTH_SHORT).show();
+        } else {
+            // Add a new horizontal wall
+            removeElementsAt(x, y);
+            currentState.addHorizontalWall(x, y);
+            Toast.makeText(requireContext(), String.format("Added horizontal wall at (%d, %d)", 
+                x, y), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void addVerticalWallAt(int x, int y) {
+        Timber.d("Adding vertical wall at (%d, %d)", x, y);
+        // Check if there's already a wall at this position
+        if (currentState.getCellType(x, y) == Constants.TYPE_VERTICAL_WALL) {
+            // Remove it (toggle behavior)
+            removeElementsAt(x, y);
+            Toast.makeText(requireContext(), String.format("Removed vertical wall at (%d, %d)", 
+                x, y), Toast.LENGTH_SHORT).show();
+        } else {
+            // Add a new vertical wall
+            removeElementsAt(x, y);
+            currentState.addVerticalWall(x, y);
+            Toast.makeText(requireContext(), String.format("Added vertical wall at (%d, %d)", 
+                x, y), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void eraseAt(int x, int y) {
+        Timber.d("Erasing at (%d, %d)", x, y);
+        if (removeElementsAt(x, y)) {
+            Toast.makeText(requireContext(), String.format("Erased element at (%d, %d)", 
+                x, y), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(requireContext(), String.format("Nothing to erase at (%d, %d)", 
+                x, y), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private boolean removeElementsAt(int x, int y) {
+        boolean removed = false;
+        List<GameElement> elements = new ArrayList<>(currentState.getGameElements());
+        
+        // Create a new list without the elements at the specified position
+        for (GameElement element : elements) {
+            if (element.getX() == x && element.getY() == y) {
+                currentState.getGameElements().remove(element);
+                removed = true;
+            }
+        }
+        
+        // Also clear cell type if it was a wall or target
+        if (currentState.getCellType(x, y) != 0) {
+            currentState.setCellType(x, y, 0);
+            removed = true;
+        }
+        
+        return removed;
+    }
+    
+    private String getColorName(int colorIndex) {
+        switch (colorIndex) {
+            case 0: return "Red";
+            case 1: return "Green";
+            case 2: return "Blue";
+            case 3: return "Yellow";
+            default: return "Unknown";
+        }
+    }
+    
+    private int getCurrentBoardWidth() {
+        EditText widthEditText = requireView().findViewById(R.id.board_width_edit_text);
+        String widthStr = widthEditText.getText().toString();
+        try {
+            return Integer.parseInt(widthStr);
+        } catch (NumberFormatException e) {
+            Timber.e(e, "Error parsing board width");
+            return 12; // Default width
+        }
+    }
+    
+    private int getCurrentBoardHeight() {
+        EditText heightEditText = requireView().findViewById(R.id.board_height_edit_text);
+        String heightStr = heightEditText.getText().toString();
+        try {
+            return Integer.parseInt(heightStr);
+        } catch (NumberFormatException e) {
+            Timber.e(e, "Error parsing board height");
+            return 14; // Default height
+        }
+    }
+    
+    private void handleBoardClick(int x, int y) {
+        Timber.d("Handling board click at: (%d, %d), mode: %d", x, y, currentEditMode);
+        
+        // Handle the click based on current edit mode
+        switch (currentEditMode) {
+            case EDIT_MODE_ROBOT:
+                addRobotAt(x, y);
+                break;
+            case EDIT_MODE_TARGET:
+                addTargetAt(x, y);
+                break;
+            case EDIT_MODE_WALL_H:
+                addHorizontalWallAt(x, y);
+                break;
+            case EDIT_MODE_WALL_V:
+                addVerticalWallAt(x, y);
+                break;
+            case EDIT_MODE_ERASE:
+                eraseAt(x, y);
+                break;
+        }
+        
+        // Update the UI
+        updateUI();
+    }
+    
+    /**
+     * Custom view to display the game board for editing
+     */
+    private class GameBoardView extends View {
+        private GameState gameState;
+        private Paint robotPaint = new Paint();
+        private Paint targetPaint = new Paint();
+        private Paint wallPaint = new Paint();
+        private Paint gridPaint = new Paint();
+        private Paint textPaint = new Paint();
+        private int cellSize = 0;
+        
+        public GameBoardView(Context context, GameState gameState) {
+            super(context);
+            this.gameState = gameState;
+            
+            // Initialize paints
+            robotPaint.setStyle(Paint.Style.FILL);
+            targetPaint.setStyle(Paint.Style.FILL);
+            wallPaint.setStyle(Paint.Style.FILL);
+            wallPaint.setColor(Color.BLACK);
+            
+            gridPaint.setStyle(Paint.Style.STROKE);
+            gridPaint.setColor(Color.LTGRAY);
+            gridPaint.setStrokeWidth(1);
+            
+            textPaint.setColor(Color.WHITE);
+            textPaint.setTextSize(20);
+            textPaint.setTextAlign(Paint.Align.CENTER);
+        }
+        
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            
+            int width = getWidth();
+            int height = getHeight();
+            int boardWidth = gameState.getWidth();
+            int boardHeight = gameState.getHeight();
+            
+            // Calculate cell size based on available space and board dimensions
+            int cellWidth = width / boardWidth;
+            int cellHeight = height / boardHeight;
+            cellSize = Math.min(cellWidth, cellHeight);
+            
+            // Center the board
+            int offsetX = (width - (cellSize * boardWidth)) / 2;
+            int offsetY = (height - (cellSize * boardHeight)) / 2;
+            
+            // Draw grid
+            for (int x = 0; x <= boardWidth; x++) {
+                canvas.drawLine(offsetX + x * cellSize, offsetY, 
+                               offsetX + x * cellSize, offsetY + boardHeight * cellSize, gridPaint);
+            }
+            
+            for (int y = 0; y <= boardHeight; y++) {
+                canvas.drawLine(offsetX, offsetY + y * cellSize, 
+                               offsetX + boardWidth * cellSize, offsetY + y * cellSize, gridPaint);
+            }
+            
+            // Draw walls
+            for (int y = 0; y < boardHeight; y++) {
+                for (int x = 0; x < boardWidth; x++) {
+                    int cellType = gameState.getCellType(x, y);
+                    
+                    if (cellType == Constants.TYPE_HORIZONTAL_WALL) {
+                        canvas.drawRect(offsetX + x * cellSize, offsetY + y * cellSize - cellSize/8, 
+                                      offsetX + (x+1) * cellSize, offsetY + y * cellSize + cellSize/8, wallPaint);
+                    } else if (cellType == Constants.TYPE_VERTICAL_WALL) {
+                        canvas.drawRect(offsetX + x * cellSize - cellSize/8, offsetY + y * cellSize, 
+                                      offsetX + x * cellSize + cellSize/8, offsetY + (y+1) * cellSize, wallPaint);
+                    }
+                }
+            }
+            
+            // Draw game elements (robots and targets)
+            for (GameElement element : gameState.getGameElements()) {
+                int x = element.getX();
+                int y = element.getY();
+                int centerX = offsetX + (x * cellSize) + (cellSize / 2);
+                int centerY = offsetY + (y * cellSize) + (cellSize / 2);
+                int radius = cellSize / 3;
+                
+                // Get color based on the element's color index
+                int colorValue = getColorForIndex(element.getColor());
+                
+                if (element.getType() == GameElement.TYPE_ROBOT) {
+                    robotPaint.setColor(colorValue);
+                    canvas.drawCircle(centerX, centerY, radius, robotPaint);
+                    // Draw "R" label
+                    canvas.drawText("R", centerX, centerY + radius/2, textPaint);
+                } else if (element.getType() == GameElement.TYPE_TARGET) {
+                    targetPaint.setColor(colorValue);
+                    canvas.drawRect(centerX - radius, centerY - radius, 
+                                 centerX + radius, centerY + radius, targetPaint);
+                    // Draw "T" label
+                    canvas.drawText("T", centerX, centerY + radius/2, textPaint);
+                }
+            }
+        }
+        
+        private int getColorForIndex(int colorIndex) {
+            switch (colorIndex) {
+                case 0: return Color.RED;
+                case 1: return Color.GREEN;
+                case 2: return Color.BLUE;
+                case 3: return Color.YELLOW;
+                default: return Color.WHITE;
+            }
+        }
+        
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int width = getWidth();
+                int height = getHeight();
+                int boardWidth = gameState.getWidth();
+                int boardHeight = gameState.getHeight();
+                
+                // Calculate board coordinates from touch position
+                float touchX = event.getX();
+                float touchY = event.getY();
+                
+                // Calculate offsets (same as in onDraw)
+                int offsetX = (width - (cellSize * boardWidth)) / 2;
+                int offsetY = (height - (cellSize * boardHeight)) / 2;
+                
+                // Convert touch coordinates to board coordinates
+                int boardX = (int)((touchX - offsetX) / cellSize);
+                int boardY = (int)((touchY - offsetY) / cellSize);
+                
+                // Check if the touch is within board bounds
+                if (boardX >= 0 && boardX < boardWidth && boardY >= 0 && boardY < boardHeight) {
+                    Timber.d("GameBoardView touch converted to board coordinates: (%d, %d)", boardX, boardY);
+                    handleBoardClick(boardX, boardY);
+                    return true;
+                }
+            }
+            return super.onTouchEvent(event);
         }
     }
 }

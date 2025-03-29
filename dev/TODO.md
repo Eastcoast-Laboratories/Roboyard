@@ -64,6 +64,25 @@
   - Speicherung erfolgt im **gleichen Format** wie die bestehenden Levels 1 bis 140.  
 - **Vorschau-Funktion** für gespeicherte Levels im selben Level speicher Format als txt
 
+yes, but not a preview, the 141+ levels should be added to the level screen then in an unlocked state already at the bottom of the scereen with a new headline "ciustom levels" also we need a view where the user can select the whole level as text output in the sae format, i want to use it to design new levels and need the same text format as the existing levels
+
+next run.....
+
+this looks fine, but i cannot edit the level, when i select level 1 it just sais "tap to edit" but nothing happens. add some debug and fix it.
+
+- and i cannot select the output in the textbox to copy paste it.
+- add a button to send the content to https://ronboyard.z11.de/share/data=<here the urlencoded content>
+
+- also make the text color 666666 in the edit and in the export box.
+
+next run.....
+
+i corrected the link, but ther should be a textbox to copy paste the content of the data for the map first, underneath there should be the share link.
+
+also preselect and load level 1 when opening the editor
+
+and the editor still dont work: inothing happens when click on the editor field, this is the  log:
+
 # Accessibility-Verbesserungen
 - TalkBack-Unterstützung sprache einstellbar machen (Englisch ermöglichen).  
 1. Add a preference setting to customize the order of information in TalkBack announcements
@@ -82,3 +101,10 @@
 # current
 - stalls, when youplay level 2 and 
 - winning a level this still shows only 0 stars earned if there was already saved one star in the settings from an older version of the game. It also still shows the old stars
+
+backgrounnd: i plan to migrate soo to another framework, that needs UI and logic separated
+- search through all java files  and classes in the eclabs/ and the ricochet/ folder (ignore /var/www/Roboyard/app/src/main/java/driftingdroids completely, because it is a foreign class)
+- make a list of all complete files that could be moved into the logic/ folder
+- make a list of classes, that has to be separated from UI files into new classes in the logic/ folder.
+- at the moment there is a ui/ folder and a util/ folder, but those are not sorted good, i need to resort everything before migrating
+

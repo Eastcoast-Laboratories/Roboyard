@@ -68,6 +68,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:text="12"
+                android:textColor="#666666"
                 android:gravity="center" />
 
             <TextView
@@ -83,6 +84,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:text="14"
+                android:textColor="#666666"
                 android:gravity="center" />
 
             <Button
@@ -214,6 +216,7 @@
             android:layout_marginBottom="4dp" />
 
         <FrameLayout
+            android:id="@+id/board_preview_container"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginBottom="16dp"
@@ -270,9 +273,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:background="#F0F0F0"
-            android:fontFamily="monospace"
-            android:textSize="12sp"
+            android:background="#f0f0f0"
+            android:textColor="#666666"
+            android:textIsSelectable="true"
+            android:layout_marginTop="8dp"
             android:visibility="gone" />
 
     </LinearLayout>
