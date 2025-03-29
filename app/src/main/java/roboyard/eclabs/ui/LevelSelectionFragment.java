@@ -400,8 +400,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
                     // Hide the level number text when showing stats
                     levelButton.setText("");
                     
+                    // Explicitly set the statsOverlay to VISIBLE
+                    statsOverlay.setVisibility(View.VISIBLE);
+                    
                     // Set level name
                     levelNameText.setText("Level " + levelId);
+                    levelNameText.setVisibility(View.VISIBLE); // Ensure visibility
                     
                     // Format moves/robots: "1/3 robots:2"
                     String movesRobots = String.format("%d/%d robots:%d", 
@@ -409,6 +413,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                             completionData.getOptimalMoves(),
                             completionData.getRobotsUsed());
                     movesText.setText(movesRobots);
+                    movesText.setVisibility(View.VISIBLE); // Ensure visibility
                     
                     // Format time/fields: "0:12 fields:10"
                     long timeMs = completionData.getTimeNeeded();
@@ -419,12 +424,17 @@ public class LevelSelectionFragment extends BaseGameFragment {
                             minutes, seconds, 
                             completionData.getSquaresSurpassed());
                     timeText.setText(timeFields);
+                    timeText.setVisibility(View.VISIBLE); // Ensure visibility
                     
-                    // Make the stats overlay visible
-                    statsOverlay.setVisibility(View.VISIBLE);
+                    // Log debug information
+                    // Timber.d("Level %d stats - Name: %s, Moves: %s, Time: %s", 
+                    //         levelId, levelNameText.getText(), movesText.getText(), timeText.getText());
                 } else {
-                    // Hide stats overlay for non-completed levels
+                    // If not completed, make sure the stats overlay is hidden
                     statsOverlay.setVisibility(View.GONE);
+                    levelNameText.setVisibility(View.GONE);
+                    movesText.setVisibility(View.GONE);
+                    timeText.setVisibility(View.GONE);
                 }
                 
                 // Set click listener for level button

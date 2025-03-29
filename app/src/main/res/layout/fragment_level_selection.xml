@@ -91,22 +91,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
                 
-            <!-- Stars counter -->
+            <!-- Stars counter with reduced height (55dp) -->
             <TextView
                 android:id="@+id/stars_count_text"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="55dp"
                 android:text="@string/stars_count"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textAlignment="center"
+                android:gravity="center"
                 android:drawableStart="@drawable/star"
                 android:drawablePadding="8dp"
                 android:background="@drawable/button_rounded_blue_outline"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
                 android:layout_marginTop="8dp"
                 android:textColor="#FFFFFF"
                 app:layout_constraintEnd_toEndOf="parent"
