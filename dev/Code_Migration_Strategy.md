@@ -19,7 +19,7 @@ Location:`app/src/main/java/roboyard/eclabs`
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
 |`GamePiece.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`GameScreen.java`           | Move to UI components | `roboyard.ui.components` | Base class for UI screens
+|`GameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
 |`GridGameScreen.java`       | Move to UI components | `roboyard.ui.components` | Extends `GameScreen` (UI placeholder)
 |`InputManager.java`         | Move to UI components | `roboyard.ui.components` | Handles touch events
 |`MainActivity.java`         | Move to UI activities | `roboyard.ui.activities` | Android Activity class

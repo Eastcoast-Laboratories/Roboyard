@@ -1,8 +1,8 @@
 package roboyard.ui.components;
-import roboyard.eclabs.GameScreen;
+import roboyard.ui.components.GameScreen;
 import roboyard.ui.components.GamePiece;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.GameScreen;
+import roboyard.ui.components.GameScreen;
 import roboyard.eclabs.GridGameScreen;
 import roboyard.ui.components.GamePiece;
 import roboyard.eclabs.Constants;

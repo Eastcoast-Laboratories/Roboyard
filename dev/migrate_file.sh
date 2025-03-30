@@ -170,7 +170,7 @@ EOF
     done
     
     # Now add imports to specific files that we know need them
-    for known_file in "app/src/main/java/roboyard/eclabs/GridGameScreen.java" "app/src/main/java/roboyard/logic/core/Move.java" "app/src/main/java/roboyard/eclabs/MainActivity.java"; do
+    for known_file in "app/src/main/java/roboyard/eclabs/GridGameScreen.java" "app/src/main/java/roboyard/logic/core/Move.java" "app/src/main/java/roboyard/eclabs/MainActivity.java" "app/src/main/java/roboyard/eclabs/GameManager.java" "app/src/main/java/roboyard/eclabs/MapObjects.java"; do
         if [ -f "$known_file" ]; then
             echo "Adding import to known dependency: $known_file"
             if ! grep -q "import.*$BASE_FILENAME" "$known_file"; then

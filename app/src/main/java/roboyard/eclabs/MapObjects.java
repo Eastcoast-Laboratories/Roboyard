@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.components.GameScreen;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -7,6 +8,8 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import roboyard.eclabs.GridElement;
 
 import timber.log.Timber;
 

@@ -1,4 +1,7 @@
-package roboyard.eclabs;
+package roboyard.ui.components;
+import roboyard.eclabs.RenderManager;
+import roboyard.eclabs.IGameObject;
+import roboyard.eclabs.GameManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by Pierre on 21/01/2015.
  */
 public abstract class GameScreen implements IGameObject {
-    protected static GameManager gameManager = null;
+    public static GameManager gameManager = null;
     protected List<IGameObject> instances;
     private int zIndex = 0;
     private boolean instancesSorted = false;
