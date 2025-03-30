@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.ui.components;
 
 /**
  * Helper class for calculating screen positions and sizes.

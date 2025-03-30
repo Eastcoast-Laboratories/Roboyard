@@ -19,7 +19,7 @@ Location:`app/src/main/java/roboyard/eclabs`
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
 |`RenderManager.java`        | Move to UI components | `roboyard.ui.components` | Direct OpenGL ES rendering
-|`ScreenLayout.java`         | Move to UI components | `roboyard.ui.components` | Manages UI layout coordinates
+|`ScreenLayout.java`         | (done) UI components | `roboyard.ui.components` ||`ScreenLayout.java`         | Move to UI components | `roboyard.ui.components` | Manages UI layout coordinates|
 |`GameButton*.java`          | Move to UI components | `roboyard.ui.components` | Directly renders UI elements
 
 already done

@@ -196,6 +196,22 @@ EOF
         fi
     done
     
+    # Enhanced parameter type handling
+    echo "Checking for class used as method parameter type..."
+    POTENTIAL_METHOD_PARAMS=$(find app/src/main/java -name "*.java" -type f | grep -v "$TARGET")
+    for file in $POTENTIAL_METHOD_PARAMS; do
+        # Check if the file contains method declarations with the class as a parameter
+        if grep -q "\b$BASE_FILENAME\b[[:space:]]\+[a-zA-Z0-9_]\+" "$file"; then
+            echo "Found $BASE_FILENAME used as parameter type in $file"
+            
+            # Add import if not already present
+            if ! grep -q "import.*$BASE_FILENAME" "$file"; then
+                echo "Adding import for parameter type in $file"
+                sed -i "/^package/a import $TARGET_PACKAGE.$BASE_FILENAME;" "$file"
+            fi
+        fi
+    done
+    
     # Now add imports to specific files that we know need them
     for known_file in "app/src/main/java/roboyard/eclabs/GridGameScreen.java" "app/src/main/java/roboyard/logic/core/Move.java" "app/src/main/java/roboyard/eclabs/MainActivity.java" "app/src/main/java/roboyard/eclabs/GameManager.java" "app/src/main/java/roboyard/eclabs/MapObjects.java"; do
         if [ -f "$known_file" ]; then
@@ -226,11 +242,49 @@ EOF
         fi
     done
     
+    # Add automatic access modifier handling for package-private fields/methods
+    echo "Checking for potential package access issues..."
+    # First identify all package-private static members in classes that might need public access
+    POTENTIAL_FILES=$(find app/src/main/java -name "*.java" -type f -not -path "*/$TARGET_PACKAGE/*")
+    for file in $POTENTIAL_FILES; do
+        # Get the classname of the file
+        CLASS_NAME=$(basename "$file" .java)
+        
+        # Check if the migrated file accesses static members of this class that might be package-private
+        if grep -q "$CLASS_NAME\.\w\+" "$TARGET"; then
+            # Look for package-private static fields or methods in that file
+            PACKAGE_PRIVATE_STATIC=$(grep -oE "static [^p][^u][^b][^l][^i][^c].*[a-zA-Z0-9_]+\s*[=(]" "$file" | sed 's/.*\s\([a-zA-Z0-9_]\+\)\s*[=(].*/\1/')
+            
+            if [ -n "$PACKAGE_PRIVATE_STATIC" ]; then
+                echo "Found potential package-private static members in $file that may need to be made public"
+                
+                # For each package-private static member, check if it's accessed by the migrated file
+                for member in $PACKAGE_PRIVATE_STATIC; do
+                    if grep -q "$CLASS_NAME\.$member" "$TARGET"; then
+                        echo "Making $member in $CLASS_NAME public for cross-package access"
+                        # Replace static <type> with public static <type>
+                        sed -i "s/static\s\+\([a-zA-Z0-9_.<>]\+\)\s\+$member/public static \1 $member/g" "$file"
+                    fi
+                done
+            fi
+        fi
+    done
+    
     # Update migration strategy document
     echo "\nUpdating migration strategy document..."
     if [ -f "dev/Code_Migration_Strategy.md" ]; then
-        ESCAPED_FILENAME="$(echo $FILENAME | sed 's/\./\\./g')"
-        sed -i "s/|\`$ESCAPED_FILENAME\`.*| Move to.*| \`$TARGET_PACKAGE\` |.*/|\`$FILENAME\`         | (done) UI components | \`$TARGET_PACKAGE\` | Migrated successfully|/g" "dev/Code_Migration_Strategy.md"
+        ESCAPED_FILENAME=$(echo "$FILENAME" | sed 's/\./\\./g')
+        
+        # Get the existing description from the file
+        DESCRIPTION=$(grep -E "\|\`$ESCAPED_FILENAME\`" "dev/Code_Migration_Strategy.md" | sed -E 's/.*\| ([^|]*)\|$/\1/')
+        
+        # If no description found, use default
+        if [ -z "$DESCRIPTION" ]; then
+            DESCRIPTION=" Migrated successfully"
+        fi
+        
+        # Update the migration strategy document, preserving the description
+        sed -i "s/|\`$ESCAPED_FILENAME\`.*| Move to.*| \`$TARGET_PACKAGE\` |.*/|\`$FILENAME\`         | (done) UI components | \`$TARGET_PACKAGE\` |$DESCRIPTION|/g" "dev/Code_Migration_Strategy.md"
     fi
 else
     echo "Source file $SOURCE not found"
