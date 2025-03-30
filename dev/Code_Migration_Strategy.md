@@ -18,7 +18,6 @@ Location:`app/src/main/java/roboyard/eclabs`
 ## 2. UI Layer Files (Move to UI Package)
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
-|`GameMovementInterface.java`| Move to UI components | `roboyard.ui.components` | Depends on `GridGameScreen` and Android resources
 |`GamePiece.java`            | Move to UI components | `roboyard.ui.components` | Uses `MediaPlayer`, RenderManager, and Android colors
 |`GameScreen.java`           | Move to UI components | `roboyard.ui.components` | Base class for UI screens
 |`GridGameScreen.java`       | Move to UI components | `roboyard.ui.components` | Extends `GameScreen` (UI placeholder)
@@ -32,6 +31,7 @@ already done
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
 |`GameDropdown.java`         | (done)  UI components | `roboyard.ui.components` | Android Spinner adapter dependency
+|`GameMovementInterface.java`| (done) UI components | `roboyard.ui.components` | Migrated successfully|
 
 
 ## 4. Files to Delete

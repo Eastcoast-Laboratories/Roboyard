@@ -1,4 +1,16 @@
-package roboyard.eclabs;
+package roboyard.ui.components;
+import roboyard.eclabs.GameScreen;
+import roboyard.eclabs.GamePiece;
+import roboyard.eclabs.GameManager;
+import roboyard.eclabs.GameScreen;
+import roboyard.eclabs.GridGameScreen;
+import roboyard.eclabs.GamePiece;
+import roboyard.eclabs.Constants;
+import roboyard.eclabs.IGameObject;
+import roboyard.eclabs.RenderManager;
+import roboyard.eclabs.InputManager;
+import roboyard.eclabs.GameManager;
+import roboyard.eclabs.R;
 
 /**
  * Created by Pierre on 04/03/2015.
