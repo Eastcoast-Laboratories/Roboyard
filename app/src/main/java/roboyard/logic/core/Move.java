@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.components.GamePiece;
 
 /**
  * Created by Alain on 25/03/2015.

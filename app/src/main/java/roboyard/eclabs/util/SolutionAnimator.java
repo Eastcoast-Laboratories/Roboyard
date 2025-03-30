@@ -6,7 +6,7 @@ import android.os.Looper;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.eclabs.GamePiece;
+import roboyard.ui.components.GamePiece;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;

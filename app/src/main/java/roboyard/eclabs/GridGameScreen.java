@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.components.GamePiece;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

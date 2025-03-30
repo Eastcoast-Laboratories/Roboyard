@@ -18,7 +18,7 @@ Location:`app/src/main/java/roboyard/eclabs`
 ## 2. UI Layer Files (Move to UI Package)
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
-|`GamePiece.java`            | Move to UI components | `roboyard.ui.components` | Uses `MediaPlayer`, RenderManager, and Android colors
+|`GamePiece.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
 |`GameScreen.java`           | Move to UI components | `roboyard.ui.components` | Base class for UI screens
 |`GridGameScreen.java`       | Move to UI components | `roboyard.ui.components` | Extends `GameScreen` (UI placeholder)
 |`InputManager.java`         | Move to UI components | `roboyard.ui.components` | Handles touch events
