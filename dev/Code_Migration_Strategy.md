@@ -5,46 +5,17 @@ Preparing for Framework Migration with UI/Logic Separation
 **When moving any file, the package declaration inside the file must be updated!**
 A file physically moved to `roboyard/logic/core/` must have its package declaration changed from `package roboyard.eclabs;` to `package roboyard.logic.core;`.
 
-## 1. Remaining Files to Move to `logic/` Folder
-Location:`app/src/main/java/roboyard/eclabs`
-| File                      | Action               | Target Package       | Description
-|---------------------------|----------------------|----------------------|------------
-|`AbstractGameObject.java`  | (done)               | `roboyard.logic.core`| Base class for game objects with no UI dependencies
-|`IGameObject.java`         | (done)               | `roboyard.logic.core`| Game object lifecycle interface
-|`MapGenerator.java`        | (done)               | `roboyard.logic.core`| Board generation algorithm
-|`Move.java`                | (done)               | `roboyard.logic.core`| Move representation (robot ID, direction, distance)
-|`IExecutor.java`           | (done)               | `roboyard.logic.core`| Generic execution interface
-
-## 2. UI Layer Files (Move to UI Package)
-| File                       | Action                | Target Package           | Description
-|----------------------------|----------------------|---------------------------|------------
-|`GameButton*.java`          | Move to UI components | `roboyard.ui.components` | Directly renders UI elements
-
-already done
-| File                       | Action                | Target Package           | Description
-|----------------------------|----------------------|---------------------------|------------
-|`RenderManager.java`         | (done) UI components | `roboyard.ui.components` | Direct OpenGL ES rendering|
-|`ScreenLayout.java`         | (done) UI components | `roboyard.ui.components` | Manages UI layout coordinates|
-|`MainActivity.java`         | (done) UI components | `roboyard.ui.activities` | Android Activity class
-|`InputManager.java`         | (done) UI components | `roboyard.ui.components` | Handles touch events
-|`GamePiece.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`GameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`GridGameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`GameDropdown.java`         | (done)  UI components | `roboyard.ui.components` | Android Spinner adapter dependency
-|`GameMovementInterface.java`| (done) UI components | `roboyard.ui.components` | Migrated successfully|
-
-
 ## 4. Files to Delete
 | File                             | Reason                         | Verification Needed |
 |----------------------------------|--------------------------------|---------------------|
-|`GridGameScreen.java`             | Marked as dummy implementation | Confirm unused via call hierarchy analysis |
 | Deprecated`GameButton`variants   | Unused legacy UI components    | Run Android Lint check |
 
 ## 5. Files Requiring Refactoring
 | File                      | Action                               | Target Package            | Description
 |---------------------------|--------------------------------------|---------------------------|------------
+|`GridGameScreen.java`      | Split and rename                     | `roboyard.logic.core`     | Extract core game state/rules to `GameStateManager.java`
+|                           |                                      | `roboyard.ui.components`  | Rename UI portion to `GridGameView.java` 
 |`AccessibilityUtil.java`   | Split UI/Logic functionality         | `roboyard.logic.utils`    | Keep `isScreenReaderActive()` in logic layer
-|                           |                                      | `roboyard.ui.utils`       | Move `announceForAccessibility()` to UI layer
 |`FileReadWrite.java`       | Extract interface, move implementation| `roboyard.logic.utils`   | Extract generic I/O methods to interface
 |                           |                                      | `roboyard.ui.utils`       | Keep Android-specific methods in UI
 |`GameHistoryManager.java`  | Extract logic part                   | `roboyard.logic.core`     | Move JSON serialization logic to logic layer
