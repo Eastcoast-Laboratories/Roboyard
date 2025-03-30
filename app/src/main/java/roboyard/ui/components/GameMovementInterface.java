@@ -3,7 +3,7 @@ import roboyard.ui.components.GameScreen;
 import roboyard.ui.components.GamePiece;
 import roboyard.eclabs.GameManager;
 import roboyard.ui.components.GameScreen;
-import roboyard.eclabs.GridGameScreen;
+import roboyard.ui.components.GridGameScreen;
 import roboyard.ui.components.GamePiece;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.IGameObject;

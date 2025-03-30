@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.components.GridGameScreen;
 
 import java.util.ArrayList;
 import java.util.Arrays;

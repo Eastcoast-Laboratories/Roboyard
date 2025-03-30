@@ -169,6 +169,33 @@ EOF
         fi
     done
     
+    # Special handling for static references
+    echo "Checking for static references to $BASE_FILENAME..."
+    for file in $(find app/src/main/java -name "*.java" -type f | grep -v "$TARGET"); do
+        # Check for static references to the class (ClassName.method or ClassName.field)
+        if grep -q "$BASE_FILENAME\." "$file"; then
+            echo "Found static reference to $BASE_FILENAME in $file"
+            
+            # Add import if not already present
+            if ! grep -q "import.*$BASE_FILENAME" "$file"; then
+                echo "Adding import for static reference in $file"
+                sed -i "/^package/a import $TARGET_PACKAGE.$BASE_FILENAME;" "$file"
+            fi
+        fi
+    done
+    
+    # Special handling for instanceof pattern matching (Java 14+)
+    echo "Checking for instanceof pattern matching with $BASE_FILENAME..."
+    find app/src/main/java -name "*.java" -type f | xargs grep -l "instanceof $BASE_FILENAME [a-zA-Z]" 2>/dev/null | while read -r file; do
+        echo "Found instanceof pattern matching with $BASE_FILENAME in $file"
+        
+        # Add import if not already present
+        if ! grep -q "import.*$BASE_FILENAME" "$file"; then
+            echo "Adding import for instanceof pattern matching in $file"
+            sed -i "/^package/a import $TARGET_PACKAGE.$BASE_FILENAME;" "$file"
+        fi
+    done
+    
     # Now add imports to specific files that we know need them
     for known_file in "app/src/main/java/roboyard/eclabs/GridGameScreen.java" "app/src/main/java/roboyard/logic/core/Move.java" "app/src/main/java/roboyard/eclabs/MainActivity.java" "app/src/main/java/roboyard/eclabs/GameManager.java" "app/src/main/java/roboyard/eclabs/MapObjects.java"; do
         if [ -f "$known_file" ]; then

@@ -5,7 +5,7 @@ import roboyard.eclabs.Move;
 import roboyard.eclabs.MainActivity;
 import roboyard.eclabs.InputManager;
 import roboyard.eclabs.IGameObject;
-import roboyard.eclabs.GridGameScreen;
+import roboyard.ui.components.GridGameScreen;
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.MainActivity;
