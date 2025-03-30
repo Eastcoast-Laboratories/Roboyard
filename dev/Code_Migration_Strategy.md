@@ -18,13 +18,13 @@ Location:`app/src/main/java/roboyard/eclabs`
 ## 2. UI Layer Files (Move to UI Package)
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
-|`RenderManager.java`        | Move to UI components | `roboyard.ui.components` | Direct OpenGL ES rendering
-|`ScreenLayout.java`         | (done) UI components | `roboyard.ui.components` ||`ScreenLayout.java`         | Move to UI components | `roboyard.ui.components` | Manages UI layout coordinates|
 |`GameButton*.java`          | Move to UI components | `roboyard.ui.components` | Directly renders UI elements
 
 already done
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
+|`RenderManager.java`         | (done) UI components | `roboyard.ui.components` | Direct OpenGL ES rendering|
+|`ScreenLayout.java`         | (done) UI components | `roboyard.ui.components` | Manages UI layout coordinates|
 |`MainActivity.java`         | (done) UI components | `roboyard.ui.activities` | Android Activity class
 |`InputManager.java`         | (done) UI components | `roboyard.ui.components` | Handles touch events
 |`GamePiece.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|

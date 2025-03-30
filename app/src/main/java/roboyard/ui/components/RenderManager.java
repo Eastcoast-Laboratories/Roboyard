@@ -1,4 +1,6 @@
-package roboyard.eclabs;
+package roboyard.ui.components;
+import android.graphics.Canvas;
+import android.content.Context;
 
 import android.content.Context;
 import android.content.res.Resources;

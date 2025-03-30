@@ -1,5 +1,5 @@
 package roboyard.ui.components;
-import roboyard.eclabs.RenderManager;
+import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.Preferences;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.IGameObject;

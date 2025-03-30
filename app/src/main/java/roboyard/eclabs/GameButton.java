@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.components.RenderManager;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;

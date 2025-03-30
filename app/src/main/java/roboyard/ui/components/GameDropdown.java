@@ -1,7 +1,7 @@
 package roboyard.ui.components;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.RenderManager;
+import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.IGameObject;
 import roboyard.eclabs.util.AccessibilityUtil;
 

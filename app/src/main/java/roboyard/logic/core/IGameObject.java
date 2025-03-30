@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.components.RenderManager;
 
 /**
  * Created by Pierre on 21/01/2015.

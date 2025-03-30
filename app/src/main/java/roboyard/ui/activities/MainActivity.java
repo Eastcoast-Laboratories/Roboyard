@@ -1,6 +1,6 @@
 package roboyard.ui.activities;
 import roboyard.SoundService;
-import roboyard.eclabs.RenderManager;
+import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.Move;
 import roboyard.eclabs.MapGenerator;
