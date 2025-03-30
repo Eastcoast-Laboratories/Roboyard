@@ -1,6 +1,4 @@
 package roboyard.eclabs;
-import roboyard.ui.components.GridGameScreen;
-import roboyard.ui.components.GameScreen;
 import roboyard.ui.components.GamePiece;
 import roboyard.ui.components.GameMovementInterface;
 
@@ -14,8 +12,6 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -30,6 +26,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import roboyard.SoundService;
 import roboyard.eclabs.ui.FragmentHostActivity;
+import roboyard.ui.components.InputManager;
 import timber.log.Timber;
 
 public class MainActivity extends FragmentActivity

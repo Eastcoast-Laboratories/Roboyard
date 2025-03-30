@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.ui.components;
 
 /**
  * Created by Pierre on 17/01/2015.

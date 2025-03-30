@@ -9,19 +9,15 @@ A file physically moved to `roboyard/logic/core/` must have its package declarat
 Location:`app/src/main/java/roboyard/eclabs`
 | File                      | Action               | Target Package       | Description
 |---------------------------|----------------------|----------------------|------------
-|`AbstractGameObject.java`  | Move directly        | `roboyard.logic.core`| Base class for game objects with no UI dependencies
-|`IGameObject.java`         | Move directly        | `roboyard.logic.core`| Game object lifecycle interface
-|`MapGenerator.java`        | Move directly        | `roboyard.logic.core`| Board generation algorithm
-|`Move.java`                | Move directly        | `roboyard.logic.core`| Move representation (robot ID, direction, distance)
-|`IExecutor.java`           | Move directly        | `roboyard.logic.core`| Generic execution interface
+|`AbstractGameObject.java`  | (done)               | `roboyard.logic.core`| Base class for game objects with no UI dependencies
+|`IGameObject.java`         | (done)               | `roboyard.logic.core`| Game object lifecycle interface
+|`MapGenerator.java`        | (done)               | `roboyard.logic.core`| Board generation algorithm
+|`Move.java`                | (done)               | `roboyard.logic.core`| Move representation (robot ID, direction, distance)
+|`IExecutor.java`           | (done)               | `roboyard.logic.core`| Generic execution interface
 
 ## 2. UI Layer Files (Move to UI Package)
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
-|`GamePiece.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`GameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`GridGameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
-|`InputManager.java`         | Move to UI components | `roboyard.ui.components` | Handles touch events
 |`MainActivity.java`         | Move to UI activities | `roboyard.ui.activities` | Android Activity class
 |`RenderManager.java`        | Move to UI components | `roboyard.ui.components` | Direct OpenGL ES rendering
 |`ScreenLayout.java`         | Move to UI components | `roboyard.ui.components` | Manages UI layout coordinates
@@ -30,6 +26,10 @@ Location:`app/src/main/java/roboyard/eclabs`
 already done
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
+|`InputManager.java`         | (done) UI components | `roboyard.ui.components` | Handles touch events
+|`GamePiece.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
+|`GameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
+|`GridGameScreen.java`         | (done) UI components | `roboyard.ui.components` | Migrated successfully|
 |`GameDropdown.java`         | (done)  UI components | `roboyard.ui.components` | Android Spinner adapter dependency
 |`GameMovementInterface.java`| (done) UI components | `roboyard.ui.components` | Migrated successfully|
 

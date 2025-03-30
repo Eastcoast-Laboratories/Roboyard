@@ -1,20 +1,16 @@
 package roboyard.ui.components;
 import roboyard.eclabs.RenderManager;
 import roboyard.eclabs.Preferences;
-import roboyard.eclabs.Move;
 import roboyard.eclabs.MainActivity;
-import roboyard.eclabs.InputManager;
 import roboyard.eclabs.IGameObject;
-import roboyard.ui.components.GridGameScreen;
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.MainActivity;
+
 import android.media.MediaPlayer;
-import android.app.Activity;
+
 import roboyard.eclabs.R;
 
 import android.graphics.Color;
-import android.media.MediaPlayer;
 
 import timber.log.Timber;
 

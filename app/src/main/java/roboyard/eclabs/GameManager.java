@@ -1,10 +1,9 @@
 package roboyard.eclabs;
-import roboyard.ui.components.GridGameScreen;
 import roboyard.ui.components.GameScreen;
 
 import android.util.SparseArray;
 
-import timber.log.Timber;
+import roboyard.ui.components.InputManager;
 
 /**
  * Manages the game screens and provides methods to interact with them.

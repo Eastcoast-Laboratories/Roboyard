@@ -48,7 +48,7 @@ public class LegacyCodeTracker {
             // Legacy managers
             "roboyard.eclabs.ScreenManager",
             "roboyard.eclabs.RenderManager",
-            "roboyard.eclabs.InputManager",
+            "roboyard.ui.components.InputManager",
             
             // Legacy main activity
             "roboyard.eclabs.MainActivity"

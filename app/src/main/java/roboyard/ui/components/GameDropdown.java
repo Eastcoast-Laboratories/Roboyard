@@ -1,13 +1,12 @@
 package roboyard.ui.components;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.InputManager;
 import roboyard.eclabs.RenderManager;
 import roboyard.eclabs.IGameObject;
 import roboyard.eclabs.util.AccessibilityUtil;
 
 import android.graphics.Paint;
-import android.graphics.Rect;
+
 import java.util.ArrayList;
 import java.util.List;
 import android.content.Context; // Import Context

@@ -2,12 +2,9 @@ package roboyard.eclabs;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.content.Context;
-import androidx.core.content.res.ResourcesCompat;
 
-import timber.log.Timber;
+import roboyard.ui.components.InputManager;
 
 /**
  * Created by Pierre on 21/01/2015.
