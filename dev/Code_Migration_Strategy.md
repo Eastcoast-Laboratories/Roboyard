@@ -18,8 +18,6 @@ Location:`app/src/main/java/roboyard/eclabs`
 ## 2. UI Layer Files (Move to UI Package)
 | File                       | Action                | Target Package           | Description
 |----------------------------|----------------------|---------------------------|------------
-|`GameButton*.java`          | Move to UI components | `roboyard.ui.components` | Directly renders UI elements
-|`GameDropdown.java`         | Move to UI components | `roboyard.ui.components` | Android Spinner adapter dependency
 |`GameMovementInterface.java`| Move to UI components | `roboyard.ui.components` | Depends on `GridGameScreen` and Android resources
 |`GamePiece.java`            | Move to UI components | `roboyard.ui.components` | Uses `MediaPlayer`, RenderManager, and Android colors
 |`GameScreen.java`           | Move to UI components | `roboyard.ui.components` | Base class for UI screens
@@ -28,6 +26,12 @@ Location:`app/src/main/java/roboyard/eclabs`
 |`MainActivity.java`         | Move to UI activities | `roboyard.ui.activities` | Android Activity class
 |`RenderManager.java`        | Move to UI components | `roboyard.ui.components` | Direct OpenGL ES rendering
 |`ScreenLayout.java`         | Move to UI components | `roboyard.ui.components` | Manages UI layout coordinates
+|`GameButton*.java`          | Move to UI components | `roboyard.ui.components` | Directly renders UI elements
+
+already done
+| File                       | Action                | Target Package           | Description
+|----------------------------|----------------------|---------------------------|------------
+|`GameDropdown.java`         | (done)  UI components | `roboyard.ui.components` | Android Spinner adapter dependency
 
 
 ## 4. Files to Delete
