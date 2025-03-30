@@ -3,6 +3,7 @@ package roboyard.eclabs;
 import android.content.Context;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.View;
 
 /**
  * Utility class for accessibility features, particularly for TalkBack support
@@ -32,16 +33,16 @@ public class AccessibilityUtil {
     }
     
     /**
-     * Sets a content description on a GameButton only if a screen reader is active
+     * Sets a content description on a View only if a screen reader is active
      * @param context The application context
-     * @param button The button to set the content description on
+     * @param view The view to set the content description on
      * @param description The content description to set
      */
-    public static void setContentDescription(Context context, GameButton button, String description) {
-        if (button == null) return;
+    public static void setContentDescription(Context context, View view, String description) {
+        if (view == null) return;
         
         if (isScreenReaderActive(context)) {
-            button.setContentDescription(description);
+            view.setContentDescription(description);
         }
     }
     
