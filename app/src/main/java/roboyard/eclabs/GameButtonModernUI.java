@@ -1,6 +1,7 @@
 package roboyard.eclabs;
 
 import android.content.Intent;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 /**

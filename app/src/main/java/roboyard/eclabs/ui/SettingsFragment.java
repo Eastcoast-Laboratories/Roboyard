@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import timber.log.Timber;

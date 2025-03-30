@@ -27,7 +27,7 @@ import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;

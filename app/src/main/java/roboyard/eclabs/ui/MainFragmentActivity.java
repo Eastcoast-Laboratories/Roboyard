@@ -1,4 +1,5 @@
 package roboyard.eclabs.ui;
+import roboyard.ui.activities.MainActivity;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,13 +22,13 @@ public class MainFragmentActivity extends AppCompatActivity {
 
     // Forward to the regular MainActivity's static methods
     public static int getBoardWidth() {
-        int width = roboyard.eclabs.MainActivity.getBoardWidth();
+        int width = roboyard.ui.activities.MainActivity.getBoardWidth();
         Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity.getBoardWidth() called, returning: %d", width);
         return width;
     }
 
     public static int getBoardHeight() {
-        int height = roboyard.eclabs.MainActivity.getBoardHeight();
+        int height = roboyard.ui.activities.MainActivity.getBoardHeight();
         Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity.getBoardHeight() called, returning: %d", height);
         return height;
     }

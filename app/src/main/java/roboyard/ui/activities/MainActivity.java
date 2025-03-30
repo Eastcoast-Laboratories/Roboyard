@@ -1,4 +1,20 @@
-package roboyard.eclabs;
+package roboyard.ui.activities;
+import roboyard.SoundService;
+import roboyard.eclabs.RenderManager;
+import roboyard.eclabs.Preferences;
+import roboyard.eclabs.Move;
+import roboyard.eclabs.MapGenerator;
+import roboyard.ui.components.InputManager;
+import roboyard.eclabs.IGameObject;
+import roboyard.ui.components.GamePiece;
+import roboyard.ui.components.GameMovementInterface;
+import roboyard.eclabs.GameManager;
+import roboyard.eclabs.ui.FragmentHostActivity;
+import roboyard.eclabs.util.BoardSizeManager;
+import android.graphics.Canvas;
+import android.app.Activity;
+import android.content.Context;
+import roboyard.eclabs.R;
 import roboyard.ui.components.GamePiece;
 import roboyard.ui.components.GameMovementInterface;
 

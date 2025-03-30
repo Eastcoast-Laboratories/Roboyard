@@ -22,7 +22,7 @@ import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.MapGenerator;
 
 /**

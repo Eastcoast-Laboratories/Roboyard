@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GridGameScreen;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class MapGenerator {
 
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
-    static Boolean generateNewMapEachTime = true; // option in settings
+    public static Boolean generateNewMapEachTime = true; // option in settings
 
     // Wall configuration
     int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column

@@ -41,7 +41,7 @@ import java.util.concurrent.Executors;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.FileReadWrite;
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.SolverManager;

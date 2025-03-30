@@ -9,7 +9,7 @@ import android.view.MenuItem;
 
 import androidx.fragment.app.FragmentActivity;
 
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 /**

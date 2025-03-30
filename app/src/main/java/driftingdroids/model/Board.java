@@ -31,7 +31,7 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 /**
