@@ -22,8 +22,9 @@ import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
-import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.MapGenerator;
+import roboyard.eclabs.util.MapIdGenerator;
+import roboyard.ui.activities.MainActivity;
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -49,6 +50,7 @@ public class GameState implements Serializable {
     private int moveCount;
     private boolean completed = false;
     private int hintCount = 0; // Track the number of hints used in this game
+    private String uniqueMapId = ""; // 5-letter unique ID for map identification
     
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
@@ -1300,106 +1302,6 @@ public class GameState implements Serializable {
     }
 
     /**
-     * Store initial robot positions for reset functionality
-     */
-    public void storeInitialRobotPositions() {
-        // Initialize the map if it doesn't exist
-        if (initialRobotPositions == null) {
-            initialRobotPositions = new HashMap<>();
-            Timber.d("[ROBOTS] storeInitialRobotPositions: Created new initialRobotPositions map");
-        } else {
-            Timber.d("[ROBOTS] storeInitialRobotPositions: Using existing initialRobotPositions map with %d entries", initialRobotPositions.size());
-        }
-        
-        int robotCount = 0;
-        // Loop through all game elements to find robots
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                // Store the robot's position by its color
-                int[] position = new int[] { element.getX(), element.getY() };
-                initialRobotPositions.put(element.getColor(), position);
-                Timber.d("[ROBOTS] storeInitialRobotPositions: Stored robot color %d at position (%d, %d)", 
-                        element.getColor(), position[0], position[1]);
-                robotCount++;
-            }
-        }
-        
-        Timber.d("[ROBOTS] storeInitialRobotPositions: Stored positions for %d robots", robotCount);
-    }
-    
-    /**
-     * Set the GameStateManager reference
-     * @param manager The GameStateManager to use
-     */
-    public void setGameStateManager(GameStateManager manager) {
-        this.gameStateManager = manager;
-    }
-
-    public boolean canRobotMoveTo(GameElement robot, int nextX, int nextY) {
-        // Check if the target position is within the board boundaries
-        if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
-            return false;
-        }
-        
-        // Check if there's already another robot at the target position
-        GameElement otherRobot = getRobotAt(nextX, nextY);
-        if (otherRobot != null && otherRobot != robot) {
-            return false;
-        }
-        
-        // Check current robot position
-        int currentX = robot.getX();
-        int currentY = robot.getY();
-        
-        // Check for walls in the movement path
-        // Moving horizontally
-        if (currentY == nextY) {
-            // Moving east
-            if (currentX < nextX) {
-                // Check for vertical walls between current position and target
-                for (int x = currentX; x < nextX; x++) {
-                    if (hasVerticalWall(x, currentY)) {
-                        return false;
-                    }
-                }
-            }
-            // Moving west
-            else if (currentX > nextX) {
-                // Check for vertical walls between current position and target
-                for (int x = nextX; x < currentX; x++) {
-                    if (hasVerticalWall(x, currentY)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        // Moving vertically
-        else if (currentX == nextX) {
-            // Moving south
-            if (currentY < nextY) {
-                // Check for horizontal walls between current position and target
-                for (int y = currentY; y < nextY; y++) {
-                    if (hasHorizontalWall(currentX, y)) {
-                        return false;
-                    }
-                }
-            }
-            // Moving north
-            else if (currentY > nextY) {
-                // Check for horizontal walls between current position and target
-                for (int y = nextY; y < currentY; y++) {
-                    if (hasHorizontalWall(currentX, y)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        
-        // If we've made it this far, the move is valid
-        return true;
-    }
-
-    /**
      * Calculate how far a robot can move in each direction
      * @param robotId Robot ID to check movement for
      * @return Map with directions ("north", "south", "east", "west") as keys and distance as values
@@ -1668,6 +1570,14 @@ public class GameState implements Serializable {
         state.storeInitialRobotPositions();
         Timber.d("[ROBOTS] Stored initial robot positions for new random game");
         
+        // Generate a unique map ID for this random game
+        ArrayList<GridElement> stateGridElements = state.getGridElements();
+        String uniqueId = MapIdGenerator.generateUniqueId(stateGridElements);
+        state.setUniqueMapId(uniqueId);
+        state.setLevelName(uniqueId); // Use the unique ID as the level name
+        
+        Timber.d("GameState: Created random game with unique ID: %s", uniqueId);
+        
         return state;
     }
     
@@ -1684,5 +1594,121 @@ public class GameState implements Serializable {
      */
     public void incrementHintCount() {
         hintCount++;
+    }
+    
+    /**
+     * Get the unique map ID for this game
+     * @return The 5-letter unique map ID
+     */
+    public String getUniqueMapId() {
+        return uniqueMapId;
+    }
+    
+    /**
+     * Set the unique map ID for this game
+     * @param uniqueMapId The 5-letter unique map ID
+     */
+    public void setUniqueMapId(String uniqueMapId) {
+        this.uniqueMapId = uniqueMapId;
+    }
+    
+    /**
+     * Store initial robot positions for reset functionality
+     */
+    public void storeInitialRobotPositions() {
+        // Initialize the map if it doesn't exist
+        if (initialRobotPositions == null) {
+            initialRobotPositions = new HashMap<>();
+            Timber.d("[ROBOTS] storeInitialRobotPositions: Created new initialRobotPositions map");
+        } else {
+            Timber.d("[ROBOTS] storeInitialRobotPositions: Using existing initialRobotPositions map with %d entries", initialRobotPositions.size());
+        }
+        
+        int robotCount = 0;
+        // Loop through all game elements to find robots
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                // Store the robot's position by its color
+                int[] position = new int[] { element.getX(), element.getY() };
+                initialRobotPositions.put(element.getColor(), position);
+                Timber.d("[ROBOTS] storeInitialRobotPositions: Stored robot color %d at position (%d, %d)", 
+                        element.getColor(), position[0], position[1]);
+                robotCount++;
+            }
+        }
+        
+        Timber.d("[ROBOTS] storeInitialRobotPositions: Stored positions for %d robots", robotCount);
+    }
+    
+    /**
+     * Set the GameStateManager reference
+     * @param manager The GameStateManager to use
+     */
+    public void setGameStateManager(GameStateManager manager) {
+        this.gameStateManager = manager;
+    }
+
+    public boolean canRobotMoveTo(GameElement robot, int nextX, int nextY) {
+        // Check if the target position is within the board boundaries
+        if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
+            return false;
+        }
+        
+        // Check if there's already another robot at the target position
+        GameElement otherRobot = getRobotAt(nextX, nextY);
+        if (otherRobot != null && otherRobot != robot) {
+            return false;
+        }
+        
+        // Check current robot position
+        int currentX = robot.getX();
+        int currentY = robot.getY();
+        
+        // Check for walls in the movement path
+        // Moving horizontally
+        if (currentY == nextY) {
+            // Moving east
+            if (currentX < nextX) {
+                // Check for vertical walls between current position and target
+                for (int x = currentX; x < nextX; x++) {
+                    if (hasVerticalWall(x, currentY)) {
+                        return false;
+                    }
+                }
+            }
+            // Moving west
+            else if (currentX > nextX) {
+                // Check for vertical walls between current position and target
+                for (int x = nextX; x < currentX; x++) {
+                    if (hasVerticalWall(x, currentY)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // Moving vertically
+        else if (currentX == nextX) {
+            // Moving south
+            if (currentY < nextY) {
+                // Check for horizontal walls between current position and target
+                for (int y = currentY; y < nextY; y++) {
+                    if (hasHorizontalWall(currentX, y)) {
+                        return false;
+                    }
+                }
+            }
+            // Moving north
+            else if (currentY > nextY) {
+                // Check for horizontal walls between current position and target
+                for (int y = nextY; y < currentY; y++) {
+                    if (hasHorizontalWall(currentX, y)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        // If we've made it this far, the move is valid
+        return true;
     }
 }

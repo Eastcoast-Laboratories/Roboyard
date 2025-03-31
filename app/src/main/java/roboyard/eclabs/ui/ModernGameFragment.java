@@ -59,6 +59,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private TextView squaresMovedTextView;
     private TextView difficultyTextView;
     private TextView boardSizeTextView;
+    private TextView uniqueMapIdTextView; // Added for unique map ID display
     private Button backButton;
     private Button resetRobotsButton;
     private Button hintButton;
@@ -335,6 +336,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         squaresMovedTextView = view.findViewById(R.id.squares_moved_text);
         difficultyTextView = view.findViewById(R.id.difficulty_text);
         boardSizeTextView = view.findViewById(R.id.board_size_text);
+        uniqueMapIdTextView = view.findViewById(R.id.unique_map_id_text); // Initialize unique map ID text view
         timerTextView = view.findViewById(R.id.game_timer);
         statusTextView = view.findViewById(R.id.status_text_view);
         
@@ -1321,6 +1323,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Update board size text
         updateBoardSizeText();
+        
+        // Update unique map ID text
+        updateUniqueMapIdText(state);
     }
     
     private void updateMoveCount(int moveCount) {
@@ -1583,6 +1588,20 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (statusTextView != null) {
             statusTextView.setText(message);
             statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
+        }
+    }
+    
+    private void updateUniqueMapIdText(GameState state) {
+        if (state == null) {
+            return;
+        }
+        
+        // Get the unique map ID
+        String uniqueMapId = state.getUniqueMapId();
+        
+        // Update the unique map ID text view
+        if (uniqueMapIdTextView != null) {
+            uniqueMapIdTextView.setText("Unique Map ID: " + uniqueMapId);
         }
     }
 }
