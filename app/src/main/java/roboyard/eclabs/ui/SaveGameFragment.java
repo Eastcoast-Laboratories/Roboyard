@@ -173,12 +173,12 @@ public class SaveGameFragment extends BaseGameFragment {
             if (saveMode) {
                 // Save mode tabs: Save (0) and History (1)
                 tabLayout.addTab(tabLayout.newTab().setText("Save"));
-                tabLayout.addTab(tabLayout.newTab().setText("History"));
+                tabLayout.addTab(tabLayout.newTab().setText(""));
                 Timber.d("SaveGameFragment: Setting up tabs for SAVE mode");
             } else {
                 // Load mode tabs: Load (0) and History (1)
                 tabLayout.addTab(tabLayout.newTab().setText("Load"));
-                tabLayout.addTab(tabLayout.newTab().setText("History"));
+                tabLayout.addTab(tabLayout.newTab().setText(""));
                 Timber.d("SaveGameFragment: Setting up tabs for LOAD mode");
             }
             
