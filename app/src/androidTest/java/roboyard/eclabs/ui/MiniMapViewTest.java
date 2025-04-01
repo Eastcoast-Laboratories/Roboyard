@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -17,12 +16,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import roboyard.eclabs.MinimapGenerator;
 import roboyard.eclabs.GameState;
 import roboyard.eclabs.GameElement;
+import roboyard.logic.core.GameState;
 
 /**
  * Tests for the MiniMapView component.

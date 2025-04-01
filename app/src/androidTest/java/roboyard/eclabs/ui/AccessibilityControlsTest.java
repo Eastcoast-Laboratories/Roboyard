@@ -1,12 +1,10 @@
 package roboyard.eclabs.ui;
 
 import android.content.Context;
-import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.lifecycle.MutableLiveData;
 
@@ -20,10 +18,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import roboyard.eclabs.R;
-import roboyard.eclabs.ui.GameElement;
-import roboyard.eclabs.ui.GameState;
-import roboyard.eclabs.ui.GameStateManager;
-import roboyard.eclabs.ui.ModernGameFragment;
+import roboyard.logic.core.GameState;
+import roboyard.ui.components.GameGridView;
+import roboyard.ui.components.GameStateManager;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;

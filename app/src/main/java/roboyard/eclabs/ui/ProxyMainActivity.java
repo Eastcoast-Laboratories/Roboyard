@@ -1,6 +1,5 @@
 package roboyard.eclabs.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -10,6 +9,7 @@ import android.view.MenuItem;
 import androidx.fragment.app.FragmentActivity;
 
 import roboyard.ui.activities.MainActivity;
+import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 /**

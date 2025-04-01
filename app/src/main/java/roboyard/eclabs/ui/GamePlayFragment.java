@@ -6,17 +6,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import roboyard.eclabs.Constants;
 import roboyard.eclabs.R;
+import roboyard.logic.core.GameState;
 import roboyard.pm.ia.IGameMove;
+import roboyard.ui.components.GameGridView;
 
 /**
  * Main game play screen implementing proper accessibility support.

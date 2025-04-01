@@ -18,15 +18,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 import roboyard.eclabs.FileReadWrite;
-import roboyard.eclabs.GridElement;
 import roboyard.eclabs.MainActivity;
-import roboyard.eclabs.MapObjects;
 
-import timber.log.Timber;
+import roboyard.ui.components.GameStateManager;
 
 /**
  * Test for verifying that saved games correctly maintain the unique map name

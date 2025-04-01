@@ -6,7 +6,7 @@
     android:background="#000000">
 
     <!-- Game grid view at the top with increased margin (90dp) -->
-    <roboyard.eclabs.ui.GameGridView
+    <roboyard.ui.components.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"

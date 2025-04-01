@@ -1,17 +1,13 @@
-package roboyard.eclabs.ui;
+package roboyard.ui.components;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -20,13 +16,15 @@ import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.R;
+import roboyard.eclabs.ui.GameElement;
+import roboyard.eclabs.ui.ModernGameFragment;
+import roboyard.logic.core.GameState;
 import timber.log.Timber;
 
 /**

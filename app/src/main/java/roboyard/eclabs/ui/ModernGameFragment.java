@@ -15,34 +15,29 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.GridElement;
-import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;
-import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.UIModeManager;
+import roboyard.logic.core.GameState;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.pm.ia.ricochet.ERRGameMove;
 import roboyard.eclabs.util.SoundManager;
 import roboyard.pm.ia.GameSolution;
 
+import roboyard.ui.components.GameGridView;
+import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 // Added imports for accessibility
-import androidx.core.view.accessibility.AccessibilityManagerCompat;
 import android.view.accessibility.AccessibilityManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;

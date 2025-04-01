@@ -3,8 +3,8 @@ package roboyard.eclabs.ui.mock;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import roboyard.eclabs.ui.GameState;
-import roboyard.eclabs.ui.GameStateManager;
+import roboyard.logic.core.GameState;
+import roboyard.ui.components.GameStateManager;
 
 /**
  * Mock implementation of GameStateManager for testing.

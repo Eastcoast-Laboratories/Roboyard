@@ -1,5 +1,4 @@
 package roboyard.eclabs.ui;
-import roboyard.ui.activities.MainActivity;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +8,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
+import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 /**

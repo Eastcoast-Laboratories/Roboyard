@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import roboyard.logic.core.GameState;
+
 /**
  * Utility class to generate minimap thumbnails of game boards.
  * This addresses the minimap display issue mentioned in the memory.

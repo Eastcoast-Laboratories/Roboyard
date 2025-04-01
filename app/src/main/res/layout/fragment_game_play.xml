@@ -7,7 +7,7 @@
     android:padding="16dp">
 
     <!-- Game grid takes up most of the screen -->
-    <roboyard.eclabs.ui.GameGridView
+    <roboyard.ui.components.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="0dp"
         android:layout_height="0dp"

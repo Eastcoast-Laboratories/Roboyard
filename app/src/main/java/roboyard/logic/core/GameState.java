@@ -1,9 +1,12 @@
-package roboyard.eclabs.ui;
+package roboyard.logic.core;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import roboyard.eclabs.ui.GameElement;
+import roboyard.eclabs.ui.MinimapGenerator;
+import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 import java.io.BufferedReader;
@@ -58,7 +61,7 @@ public class GameState implements Serializable {
     private transient GameStateManager gameStateManager;
     
     // Store initial robot positions for reset functionality
-    Map<Integer, int[]> initialRobotPositions;
+    public Map<Integer, int[]> initialRobotPositions;
 
     /**
      * Create a new game state with specified dimensions

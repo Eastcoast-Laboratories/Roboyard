@@ -1,15 +1,13 @@
 package roboyard.eclabs.ui.mock;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.ViewModelProvider;
 
-import roboyard.eclabs.ui.GameStateManager;
+import roboyard.ui.components.GameStateManager;
 
 /**
  * Mock MainActivity for testing fragments without needing the full application context.

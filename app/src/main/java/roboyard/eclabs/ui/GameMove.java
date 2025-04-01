@@ -2,6 +2,8 @@ package roboyard.eclabs.ui;
 
 import java.io.Serializable;
 
+import roboyard.logic.core.GameState;
+
 /**
  * Represents a move in the game, including the robot being moved and its start/end positions.
  * Used for recording moves, providing hints, and implementing undo functionality.

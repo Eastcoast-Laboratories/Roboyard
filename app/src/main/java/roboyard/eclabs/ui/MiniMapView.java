@@ -11,6 +11,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import roboyard.logic.core.GameState;
+
 //import roboyard.eclabs.GameState;
 
 /**
