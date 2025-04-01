@@ -214,7 +214,7 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/restart_button"
+                android:id="@+id/new_map_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/game_button_height"
                 android:layout_marginEnd="@dimen/game_button_margin"

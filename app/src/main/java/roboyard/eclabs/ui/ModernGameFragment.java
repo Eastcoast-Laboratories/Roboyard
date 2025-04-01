@@ -59,7 +59,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button resetRobotsButton;
     private Button hintButton;
     private Button saveMapButton;
-    private Button restartButton;
+    private Button newMapButton;
     private Button menuButton;
     private Button nextLevelButton;
     private TextView timerTextView;
@@ -515,6 +515,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Set up button click listeners
      */
     private void setupButtons(View view) {
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        boolean isLevelGame;
+        if (currentState != null && currentState.getLevelId() > 0) {
+            isLevelGame = true;
+        } else {
+            isLevelGame = false;
+        }
+
         // (Button text: "Back")
         // Back button - undo the last robot movement
         backButton = view.findViewById(R.id.back_button);
@@ -543,8 +551,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Hint button clicked");
-            GameState currentState = gameStateManager.getCurrentState().getValue();
-            
+
             // Check if we have a solution object at all
             GameSolution solution = gameStateManager.getCurrentSolution();
             if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
@@ -557,8 +564,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             
             // Debug the current solution
-            boolean isLevelGame = currentState != null && currentState.getLevelId() > 0;
-            Timber.d("[HINT_DEBUG] Current solution hash: %d, move count: %d, level id: %d", 
+            Timber.d("[HINT_DEBUG] Current solution hash: %d, move count: %d, level id: %d",
                     System.identityHashCode(solution), 
                     solution.getMoves().size(),
                     currentState != null ? currentState.getLevelId() : -1);
@@ -613,8 +619,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // LEVEL GAMES > 10: No hints at all (button should already be disabled)
             if (isLevelGame && !isFirstTenLevels) {
                 updateStatusText("No hints available for this level", true);
-                hintButton.setEnabled(false);
-                hintButton.setAlpha(0.5f);
+                hintButton.setEnabled(false); // TODO: this has no effect
+                hintButton.setAlpha(0.5f); // TODO: this has no effect
                 return;
             }
             
@@ -677,18 +683,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
-        // TODO: rename Button to newMapButton (text: "New Game")
-        // Restart button - restart the current game
-        restartButton = view.findViewById(R.id.restart_button);
-        // Hide the restart button in level games
-        GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState != null && currentState.getLevelId() > 0) {
-            restartButton.setVisibility(View.GONE);
+        // (Button text: "New Game")
+        newMapButton = view.findViewById(R.id.new_map_button);
+        // Hide the restart and save button in level games
+        if(isLevelGame) {
+            newMapButton.setVisibility(View.GONE);
+            saveMapButton.setVisibility(View.GONE);
         } else {
-            restartButton.setVisibility(View.VISIBLE);
+            newMapButton.setVisibility(View.VISIBLE);
+            saveMapButton.setVisibility(View.VISIBLE);
         }
         
-        restartButton.setOnClickListener(v -> {
+        newMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
             // Start a new game
             gameStateManager.startModernGame();
@@ -758,7 +764,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     announceGameStart();
                     
                     // Hide restart button for level games
-                    restartButton.setVisibility(View.GONE);
+                    newMapButton.setVisibility(View.GONE);
                 } else {
                     // Random game - start a new random game
                     gameStateManager.startModernGame();
@@ -785,7 +791,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     announceGameStart();
                     
                     // Show restart button for random games
-                    restartButton.setVisibility(View.VISIBLE);
+                    newMapButton.setVisibility(View.VISIBLE);
                 }
             }
         });
