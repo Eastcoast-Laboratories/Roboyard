@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.logic.core;
 
 /**
  * Represents an element in a grid.

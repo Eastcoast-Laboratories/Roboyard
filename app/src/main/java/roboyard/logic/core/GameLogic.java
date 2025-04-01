@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.Random;
 
 import driftingdroids.model.Solution;
-import roboyard.eclabs.GridElement;
-import roboyard.eclabs.solver.ISolver;
-import roboyard.eclabs.solver.SolverDD;
-import roboyard.eclabs.solver.SolverStatus;
-import roboyard.eclabs.util.SolutionMetrics;
 import roboyard.pm.ia.GameSolution;
 import timber.log.Timber;
 

@@ -20,11 +20,11 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import roboyard.eclabs.GridElement;
 import roboyard.eclabs.R;
 import roboyard.eclabs.ui.GameElement;
 import roboyard.eclabs.ui.ModernGameFragment;
 import roboyard.logic.core.GameState;
+import roboyard.logic.core.GridElement;
 import timber.log.Timber;
 
 /**

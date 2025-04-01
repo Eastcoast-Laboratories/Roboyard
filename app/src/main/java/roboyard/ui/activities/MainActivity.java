@@ -1,9 +1,9 @@
 package roboyard.ui.activities;
 import roboyard.SoundService;
+import roboyard.logic.core.MapGenerator;
 import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.Move;
-import roboyard.eclabs.MapGenerator;
 import roboyard.ui.components.InputManager;
 import roboyard.eclabs.IGameObject;
 import roboyard.ui.components.GamePiece;

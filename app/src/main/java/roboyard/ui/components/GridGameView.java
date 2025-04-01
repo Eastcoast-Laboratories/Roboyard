@@ -1,9 +1,9 @@
 package roboyard.ui.components;
-import roboyard.eclabs.GridElement;
 import roboyard.eclabs.GameManager;
 
 import java.util.ArrayList;
 
+import roboyard.logic.core.GridElement;
 import timber.log.Timber;
 
 /**

@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.GridElement;
-import roboyard.eclabs.MapGenerator;
 import roboyard.eclabs.util.MapIdGenerator;
 import roboyard.ui.activities.MainActivity;
 

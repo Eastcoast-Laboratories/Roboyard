@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Locale;
 
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.GridElement;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.logic.core.GameState;
+import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.eclabs.util.SoundManager;

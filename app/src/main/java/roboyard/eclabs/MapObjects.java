@@ -1,4 +1,5 @@
 package roboyard.eclabs;
+import roboyard.logic.core.GridElement;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GridGameView;
 

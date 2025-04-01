@@ -39,7 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import roboyard.eclabs.Constants;
-import roboyard.eclabs.GridElement;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.ui.GameElement;
 import roboyard.logic.core.GameState;
@@ -53,6 +52,7 @@ import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.UIModeManager;
+import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import timber.log.Timber;

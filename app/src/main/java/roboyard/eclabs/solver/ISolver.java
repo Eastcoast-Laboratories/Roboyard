@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import driftingdroids.model.*;
-import roboyard.eclabs.GridElement;
+import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.GameSolution;
 
 /**

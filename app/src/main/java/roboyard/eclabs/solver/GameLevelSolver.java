@@ -2,7 +2,8 @@ package roboyard.eclabs.solver;
 
 import java.util.ArrayList;
 import java.util.List;
-import roboyard.eclabs.GridElement;
+
+import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.GameSolution;
 import driftingdroids.model.Solution;
 import roboyard.eclabs.solver.SolverDD;
