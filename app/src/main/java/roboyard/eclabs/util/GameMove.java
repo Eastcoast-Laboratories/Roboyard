@@ -1,7 +1,7 @@
 package roboyard.eclabs.util;
 
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 
 /**
  * A class representing a single robot move in the game.

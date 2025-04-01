@@ -30,7 +30,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 

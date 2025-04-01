@@ -14,8 +14,6 @@ A file physically moved to `roboyard/logic/core/` must have its package declarat
 | File                      | Action                               | Target Package            | Description
 |---------------------------|--------------------------------------|---------------------------|------------
 |`GridGameScreen.java`      | rename to `GridGameView.java` (`roboyard.ui.components`) then Extract core game state/rules to `GameStateManager.java` (`roboyard.logic.core`)
-|                           |                                      | `roboyard.ui.components`  | Rename UI portion  
-|`AccessibilityUtil.java`   | Split UI/Logic functionality         | `roboyard.logic.utils`    | Keep `isScreenReaderActive()` in logic layer
 |`FileReadWrite.java`       | Extract interface, move implementation| `roboyard.logic.utils`   | Extract generic I/O methods to interface
 |                           |                                      | `roboyard.ui.utils`       | Keep Android-specific methods in UI
 |`GameHistoryManager.java`  | Extract logic part                   | `roboyard.logic.core`     | Move JSON serialization logic to logic layer
@@ -89,7 +87,7 @@ src/
 
     4. Update Imports in All Files:
         ◦ After each move, all imports must be updated
-        ◦ Example: Replace `import roboyard.eclabs.Constants;` with `import roboyard.logic.core.Constants;`
+        ◦ Example: Replace `import roboyard.logic.core.Constants;` with `import roboyard.logic.core.Constants;`
         ◦ The script `update_imports.sh` can be used to automate this
 
     5. Validate via Build after each step:

@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.logic.core;
 
 public class Constants {
     // Screen indices (preserved for compatibility with existing code)

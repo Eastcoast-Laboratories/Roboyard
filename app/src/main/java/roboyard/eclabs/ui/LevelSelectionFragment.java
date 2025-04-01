@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
 import timber.log.Timber;
 

@@ -1,6 +1,6 @@
 package roboyard.ui.components;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.eclabs.IGameObject;
 import roboyard.eclabs.R;
 

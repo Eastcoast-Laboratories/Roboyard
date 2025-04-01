@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;

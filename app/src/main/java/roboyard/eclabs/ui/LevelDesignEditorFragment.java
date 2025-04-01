@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
 
 import roboyard.logic.core.GameState;

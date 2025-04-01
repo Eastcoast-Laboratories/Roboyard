@@ -19,7 +19,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;

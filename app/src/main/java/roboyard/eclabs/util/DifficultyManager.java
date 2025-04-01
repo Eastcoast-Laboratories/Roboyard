@@ -3,7 +3,7 @@ package roboyard.eclabs.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import timber.log.Timber;
 
 /**

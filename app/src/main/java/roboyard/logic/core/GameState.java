@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.eclabs.util.MapIdGenerator;
 import roboyard.ui.activities.MainActivity;
 

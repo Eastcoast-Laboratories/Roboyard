@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.ui.GameElement;
 import roboyard.logic.core.GameState;

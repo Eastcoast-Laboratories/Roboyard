@@ -1,4 +1,5 @@
 package roboyard.pm.ia.ricochet;
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.GridElement;
 import roboyard.ui.activities.MainActivity;
 

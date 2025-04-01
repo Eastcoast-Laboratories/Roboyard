@@ -3,7 +3,7 @@ import roboyard.eclabs.Preferences;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.IGameObject;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 
 import android.media.MediaPlayer;
 

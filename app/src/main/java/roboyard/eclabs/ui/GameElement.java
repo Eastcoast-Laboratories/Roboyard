@@ -2,7 +2,7 @@ package roboyard.eclabs.ui;
 
 import java.io.Serializable;
 
-import roboyard.eclabs.Constants;
+import roboyard.logic.core.Constants;
 
 /**
  * Represents a game element such as a robot or target.
