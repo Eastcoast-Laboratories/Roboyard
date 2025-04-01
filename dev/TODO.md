@@ -2,8 +2,6 @@
 - show a big 90% transparent blue robot in the background of the whole app
 - walls on menu are not tiled 
 - add outer walls on level selection 
-- auto save to history after 60 seconds
-- win stop timer also in random game
 - add sound effects for buttons
 - add sound effect background for game
 
@@ -38,6 +36,7 @@
 - Rückgängig-Funktion ("Back"-Methode) reparieren:  
   - im Moment Geht nur so viele Schritte zurück, wieviel verschiedene Roboter bereits bewegt wurden, also pro roboter auswahl geht ein back schritt verloren im moment.  
 
+
 # achievements
 - add achievement system
 
@@ -47,7 +46,23 @@
 - add a "retry" button to the level game screen
 
 # current
-- new map each time is not working. if set, there is generated a new map anyway, all the walls should stay the same, just new robot and target positions on "new game"
-
 - the solver is sometimes not working any more (always shows cancel)
 - winning a level: this overwrites the old saved stars and data, so you can "loose" stars this way if you play a level again with less stars
+
+- auto save to history after 60 seconds (2s for now) seems to work, but nothing shown in the histroy tab
+
+- new map each time is not working. if set, there is generated a new map anyway, all the walls should stay the same, just new robot and target positions on "new game"
+
+- when loading a game, the map name is not shown
+
+- win stop timer also in random game
+
+- add some pre-hints to the hints:
+- first 2-4 hints are saing "The AI found a solution in less than max+1 to max+3 moves"
+- the next hint;  "The AI found a solution in X moves"
+ - when this last pre-hint is shown, also announce this as toast message
+- then the next hints are as now: "1/X move the X Robot X"
+- dont show this pre-hints in the first 10 level games
+
+
+- extract the credits screen content from git id 12d084d4 and add it to the main menu at the very bottom left corner of the screen, but not as button, but as just an underlined text. (clickable) the fragment for the credits screen should contain the text from the old credist screen with clickable buttons
