@@ -106,10 +106,18 @@ public class SettingsFragment extends BaseGameFragment {
         // Define all possible board sizes - exactly as in the original game
         int[][] boardSizes = {
                 {8, 8},
-                {12, 12}, {12, 14}, {12, 16}, {12, 18},
-                {14, 14}, {14, 16}, {14, 18},
-                {16, 16}, {16, 18}, {16, 20}, {16, 22},
-                {18, 18}, {18, 20}, {18, 22}
+                {8, 12}, 
+                {10, 10}, // board ratio: 1.0
+                {10, 12}, // board ratio: 1.2
+                {10, 14}, // board ratio: 1.4
+                {12, 12}, // board ratio: 1.0
+                {12, 14}, {12, 16}, {12, 18},
+                {14, 14}, // board ratio: 1.0
+                {14, 16}, {14, 18},
+                {16, 16}, // board ratio: 1.0
+                {16, 18}, {16, 20}, {16, 22},
+                {18, 18}, // board ratio: 1.0
+                {18, 20}, {18, 22}
         };
         
         // Calculate max board ratio (same formula as original)
