@@ -92,6 +92,14 @@ public class GameGridView extends View {
     private int highlightedX = -1;
     private int highlightedY = -1;
 
+    // Touch tracking for sliding gestures
+    private float startTouchX = -1;
+    private float startTouchY = -1;
+    private int touchStartGridX = -1;
+    private int touchStartGridY = -1;
+    private GameElement touchedRobot = null;
+    private static final float MIN_SWIPE_DISTANCE = 30.0f; // Minimum distance in pixels to consider it a swipe
+
     /**
      * Constructor for programmatic creation
      */
@@ -739,205 +747,284 @@ public class GameGridView extends View {
         int action = event.getAction();
         GameState state = gameStateManager.getCurrentState().getValue();
         
-        // Handle accessibility announcements for selection and movement
-        if (action == MotionEvent.ACTION_DOWN && state != null) {
-            GameElement robot = state.getRobotAt(gridX, gridY);
-            if (robot != null) {
-                // Use the rich description that includes goal information
-                announceForAccessibility("Selected " + getRobotDescription(robot));
-            } else {
-                // For empty spaces, announce what's at this position
-                announceForAccessibility(getPositionDescription(gridX, gridY));
-            }
-        } else if (action == MotionEvent.ACTION_UP && state != null) {
-            GameElement selectedRobot = state.getSelectedRobot();
-            if (selectedRobot != null) {
-                // Check if user tapped on the currently selected robot to deselect it
-                if (gridX == selectedRobot.getX() && gridY == selectedRobot.getY()) {
-                    // User tapped on the currently selected robot, deselect it
-                    Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
-                    state.setSelectedRobot(null);
-                    animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
-                    announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
-                    invalidate();
-                    return true;
-                }
-                
-                // Check if the user clicked on another robot - if so, select it instead of moving
-                GameElement clickedRobot = state.getRobotAt(gridX, gridY);
-                if (clickedRobot != null && clickedRobot != selectedRobot) {
-                    // User clicked on a different robot, select it instead of moving
-                    Timber.d("Selecting a different robot at (%d,%d)", gridX, gridY);
-                    gameStateManager.handleGridTouch(gridX, gridY, action);
-                    return true;
-                }
-                
-                int robotX = selectedRobot.getX();
-                int robotY = selectedRobot.getY();
-                
-                // Store original position for change detection
-                int oldX = robotX;
-                int oldY = robotY;
-                
-                // If the click is not on the same row AND not on the same column as the robot,
-                // use a more intuitive direction detection algorithm based on position relative to robot
-                if (robotX != gridX && robotY != gridY) {
-                    // Calculate relative position from robot
-                    int deltaX = gridX - robotX; // Positive: east, Negative: west
-                    int deltaY = gridY - robotY; // Positive: south, Negative: north
+        // Handle sliding gestures and regular taps
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                if (state != null) {
+                    // Store initial touch position
+                    startTouchX = x;
+                    startTouchY = y;
+                    touchStartGridX = gridX;
+                    touchStartGridY = gridY;
                     
-                    // Absolute values of the deltas to determine distance
-                    int absDeltaX = Math.abs(deltaX);
-                    int absDeltaY = Math.abs(deltaY);
+                    // Check if a robot was touched
+                    touchedRobot = state.getRobotAt(gridX, gridY);
                     
-                    // Determine primary direction based on the position pattern as requested:
-                    // North: directly above or within 2 cols to the side and at least 2 rows up
-                    //        or within 3 rows up and 2 cols to the side
-                    // South: directly below or within 2 cols to the side and at least 2 rows down
-                    //        or within 3 rows down and 2 cols to the side
-                    // East:  directly to the right or within 2 rows and at least 2 cols right
-                    //        or within 3 cols right and 2 rows up/down
-                    // West:  directly to the left or within 2 rows and at least 2 cols left
-                    //        or within 3 cols left and 2 rows up/down
-                    
-                    boolean moveNorth = (deltaY < 0) && 
-                                     ((absDeltaX == 0) || 
-                                      (absDeltaX <= 2 && absDeltaY >= 2) || 
-                                      (absDeltaX <= 2 && absDeltaY >= 3));
-                    
-                    boolean moveSouth = (deltaY > 0) && 
-                                     ((absDeltaX == 0) || 
-                                      (absDeltaX <= 2 && absDeltaY >= 2) || 
-                                      (absDeltaX <= 2 && absDeltaY >= 3));
-                    
-                    boolean moveEast = (deltaX > 0) && 
-                                    ((absDeltaY == 0) || 
-                                     (absDeltaY <= 2 && absDeltaX >= 2) || 
-                                     (absDeltaY <= 2 && absDeltaX >= 3));
-                    
-                    boolean moveWest = (deltaX < 0) && 
-                                    ((absDeltaY == 0) || 
-                                     (absDeltaY <= 2 && absDeltaX >= 2) || 
-                                     (absDeltaY <= 2 && absDeltaX >= 3));
-                    
-                    // Determine the primary direction - priority: north, south, east, west
-                    if (moveNorth) {
-                        // North direction
-                        gridX = robotX;
-                        // Keep the y-coordinate as it is (it's already north of the robot)
-                    } else if (moveSouth) {
-                        // South direction
-                        gridX = robotX;
-                        // Keep the y-coordinate as it is (it's already south of the robot)
-                    } else if (moveEast) {
-                        // East direction
-                        // Keep the x-coordinate as it is (it's already east of the robot)
-                        gridY = robotY;
-                    } else if (moveWest) {
-                        // West direction
-                        // Keep the x-coordinate as it is (it's already west of the robot)
-                        gridY = robotY;
+                    // Announce selection for accessibility
+                    if (touchedRobot != null) {
+                        announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
                     } else {
-                        // If no clear direction, use absolute distance as fallback
-                        if (absDeltaX <= absDeltaY) {
-                            // Vertical movement is preferred
-                            gridX = robotX;
-                        } else {
-                            // Horizontal movement is preferred
-                            gridY = robotY;
-                        }
+                        announceForAccessibility(getPositionDescription(gridX, gridY));
                     }
-                    
-                    Timber.d("Adjusted movement to direction: (%d,%d), deltaX=%d, deltaY=%d", 
-                            gridX, gridY, deltaX, deltaY);
                 }
-                // If click is already in same row or column, no adjustment needed - we keep the valid direction
+                return true;
                 
-                // Let GameStateManager handle the touch which will update counters properly
-                gameStateManager.handleGridTouch(gridX, gridY, action);
-                
-                // Check if robot moved by comparing old and new positions
-                Timber.d("[GOAL DEBUG] Selected robot moved from " + oldX + ", " + oldY + " to " + selectedRobot.getX() + ", " + selectedRobot.getY());
-                if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
-                    // Shrink the robot back to default size when it starts moving
-                    if (robotScaleMap.containsKey(selectedRobot) && robotScaleMap.get(selectedRobot) > DEFAULT_ROBOT_SCALE) {
-                        animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), DEFAULT_ROBOT_SCALE);
-                    }
+            case MotionEvent.ACTION_MOVE:
+                // Only process if we have a valid starting point and a touched robot
+                if (startTouchX >= 0 && startTouchY >= 0 && touchedRobot != null && state != null) {
+                    // Calculate the distance moved
+                    float deltaX = x - startTouchX;
+                    float deltaY = y - startTouchY;
+                    float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                     
-                    // Calculate if robot hit a wall or another robot
-                    boolean hitWall = false;
-                    boolean hitRobot = false;
-                    int dx = selectedRobot.getX() - oldX;
-                    int dy = selectedRobot.getY() - oldY;
-                    
-                    // Determine if we hit something
-                    if (dx != 0) {
-                        // Moving horizontally
-                        int nextX = selectedRobot.getX() + (dx > 0 ? 1 : -1);
-                        if (nextX >= 0 && nextX < state.getWidth()) {
-                            GameElement robotAtPosition = state.getRobotAt(nextX, selectedRobot.getY());
-                            if (robotAtPosition != null) {
-                                hitRobot = true;
-                            } else if (!state.canRobotMoveTo(selectedRobot, nextX, selectedRobot.getY())) {
-                                hitWall = true;
+                    // Only process if the distance exceeds the minimum swipe threshold
+                    if (distance >= MIN_SWIPE_DISTANCE) {
+                        // Determine the dominant direction (horizontal or vertical)
+                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                            // Horizontal swipe
+                            gridY = touchedRobot.getY(); // Lock to robot's row
+                            if (deltaX > 0) {
+                                // Swipe right
+                                gridX = gridWidth - 1; // Far right of grid
+                            } else {
+                                // Swipe left
+                                gridX = 0; // Far left of grid
+                            }
+                        } else {
+                            // Vertical swipe
+                            gridX = touchedRobot.getX(); // Lock to robot's column
+                            if (deltaY > 0) {
+                                // Swipe down
+                                gridY = gridHeight - 1; // Bottom of grid
+                            } else {
+                                // Swipe up
+                                gridY = 0; // Top of grid
                             }
                         }
-                    } else if (dy != 0) {
-                        // Moving vertically
-                        int nextY = selectedRobot.getY() + (dy > 0 ? 1 : -1);
-                        if (nextY >= 0 && nextY < state.getHeight()) {
-                            GameElement robotAtPosition = state.getRobotAt(selectedRobot.getX(), nextY);
-                            if (robotAtPosition != null) {
-                                hitRobot = true;
-                            } else if (!state.canRobotMoveTo(selectedRobot, selectedRobot.getX(), nextY)) {
-                                hitWall = true;
-                            }
-                        }
-                    }
-                    
-                    // Play the appropriate sound effect based on what happened
-                    Timber.d("[SOUND] Playing sound from GameGridView: " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));
-                    if (fragment instanceof ModernGameFragment) {
-                        if (hitRobot) {
-                            ((ModernGameFragment) fragment).playSound("hit_robot");
-                        } else if (hitWall) {
-                            ((ModernGameFragment) fragment).playSound("hit_wall");
-                        } else {
-                            ((ModernGameFragment) fragment).playSound("move");
-                        }
                         
-                        // Also announce possible moves after movement
-                        ((ModernGameFragment) fragment).announcePossibleMoves(selectedRobot);
-                    }
-                    
-                    if (state.checkCompletion()) {
-                        Timber.d("[GOAL DEBUG] Goal reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
+                        // Select the robot
+                        state.setSelectedRobot(touchedRobot);
                         
-                        // Critical fix: Tell the GameStateManager the game is complete
-                        gameStateManager.setGameComplete(true);
+                        // Trigger the move
+                        gameStateManager.handleGridTouch(gridX, gridY, MotionEvent.ACTION_UP);
                         
-                        announceForAccessibility("Goal reached! Game complete in " + 
-                            gameStateManager.getMoveCount().getValue() + " moves and " +
-                            gameStateManager.getSquaresMoved().getValue() + " squares moved");
-                    } else {
-                        Timber.d("[GOAL DEBUG] Robot moved");
-                        announceForAccessibility(getRobotDescription(selectedRobot));
+                        // Reset tracking variables to prevent further processing in ACTION_UP
+                        startTouchX = -1;
+                        startTouchY = -1;
+                        touchedRobot = null;
+                        
+                        return true;
                     }
                 }
-            } else {
-                // No robot selected, just handle the touch
-                gameStateManager.handleGridTouch(gridX, gridY, action);
-            }
-        } else {
-            // Other actions, just handle the touch
-            gameStateManager.handleGridTouch(gridX, gridY, action);
+                return true;
+                
+            case MotionEvent.ACTION_UP:
+                if (state != null) {
+                    // Check if this was a tap (no significant movement)
+                    boolean isTap = (startTouchX >= 0 && 
+                                    Math.abs(x - startTouchX) < MIN_SWIPE_DISTANCE && 
+                                    Math.abs(y - startTouchY) < MIN_SWIPE_DISTANCE);
+                    
+                    // Reset tracking variables
+                    float oldStartX = startTouchX;
+                    float oldStartY = startTouchY;
+                    int oldTouchStartGridX = touchStartGridX;
+                    int oldTouchStartGridY = touchStartGridY;
+                    GameElement oldTouchedRobot = touchedRobot;
+                    
+                    startTouchX = -1;
+                    startTouchY = -1;
+                    touchStartGridX = -1;
+                    touchStartGridY = -1;
+                    touchedRobot = null;
+                    
+                    // Handle tap behavior
+                    if (isTap) {
+                        GameElement selectedRobot = state.getSelectedRobot();
+                        
+                        // Check if user tapped on the currently selected robot to deselect it
+                        if (selectedRobot != null && gridX == selectedRobot.getX() && gridY == selectedRobot.getY()) {
+                            // User tapped on the currently selected robot, deselect it
+                            Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
+                            state.setSelectedRobot(null);
+                            animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
+                            announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
+                            invalidate();
+                            return true;
+                        }
+                        
+                        // Check if the user clicked on another robot - if so, select it instead of moving
+                        GameElement clickedRobot = state.getRobotAt(gridX, gridY);
+                        if (clickedRobot != null && (selectedRobot == null || clickedRobot != selectedRobot)) {
+                            // User clicked on a different robot, select it
+                            Timber.d("Selecting a different robot at (%d,%d)", gridX, gridY);
+                            gameStateManager.handleGridTouch(gridX, gridY, action);
+                            return true;
+                        }
+                        
+                        // Handle regular movement logic for selected robot
+                        if (selectedRobot != null) {
+                            int robotX = selectedRobot.getX();
+                            int robotY = selectedRobot.getY();
+                            
+                            // Store original position for change detection
+                            int oldX = robotX;
+                            int oldY = robotY;
+                            
+                            // If the click is not on the same row AND not on the same column as the robot,
+                            // use a more intuitive direction detection algorithm based on position relative to robot
+                            if (robotX != gridX && robotY != gridY) {
+                                // Calculate relative position from robot
+                                int deltaX = gridX - robotX; // Positive: east, Negative: west
+                                int deltaY = gridY - robotY; // Positive: south, Negative: north
+                                
+                                // Absolute values of the deltas to determine distance
+                                int absDeltaX = Math.abs(deltaX);
+                                int absDeltaY = Math.abs(deltaY);
+                                
+                                boolean moveNorth = (deltaY < 0) && 
+                                             ((absDeltaX == 0) || 
+                                              (absDeltaX <= 2 && absDeltaY >= 2) || 
+                                              (absDeltaX <= 2 && absDeltaY >= 3));
+                                
+                                boolean moveSouth = (deltaY > 0) && 
+                                             ((absDeltaX == 0) || 
+                                              (absDeltaX <= 2 && absDeltaY >= 2) || 
+                                              (absDeltaX <= 2 && absDeltaY >= 3));
+                                
+                                boolean moveEast = (deltaX > 0) && 
+                                            ((absDeltaY == 0) || 
+                                             (absDeltaY <= 2 && absDeltaX >= 2) || 
+                                             (absDeltaY <= 2 && absDeltaX >= 3));
+                                
+                                boolean moveWest = (deltaX < 0) && 
+                                            ((absDeltaY == 0) || 
+                                             (absDeltaY <= 2 && absDeltaX >= 2) || 
+                                             (absDeltaY <= 2 && absDeltaX >= 3));
+                                
+                                // Determine the primary direction - priority: north, south, east, west
+                                if (moveNorth) {
+                                    // North direction
+                                    gridX = robotX;
+                                    // Keep the y-coordinate as it is (it's already north of the robot)
+                                } else if (moveSouth) {
+                                    // South direction
+                                    gridX = robotX;
+                                    // Keep the y-coordinate as it is (it's already south of the robot)
+                                } else if (moveEast) {
+                                    // East direction
+                                    gridY = robotY;
+                                    // Keep the x-coordinate as it is (it's already east of the robot)
+                                } else if (moveWest) {
+                                    // West direction
+                                    gridY = robotY;
+                                    // Keep the x-coordinate as it is (it's already west of the robot)
+                                }
+                                
+                                Timber.d("Adjusted movement to direction: (%d,%d), deltaX=%d, deltaY=%d", 
+                                        gridX, gridY, deltaX, deltaY);
+                            }
+                            
+                            // Let GameStateManager handle the touch which will update counters properly
+                            gameStateManager.handleGridTouch(gridX, gridY, action);
+                            
+                            // Check if robot moved by comparing old and new positions
+                            Timber.d("[GOAL DEBUG] Selected robot moved from " + oldX + ", " + oldY + " to " + selectedRobot.getX() + ", " + selectedRobot.getY());
+                            if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
+                                handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
+                            }
+                        } else {
+                            // No robot selected, just handle the touch
+                            gameStateManager.handleGridTouch(gridX, gridY, action);
+                        }
+                    }
+                    return true;
+                }
+                break;
+                
+            case MotionEvent.ACTION_CANCEL:
+                // Reset tracking variables
+                startTouchX = -1;
+                startTouchY = -1;
+                touchStartGridX = -1;
+                touchStartGridY = -1;
+                touchedRobot = null;
+                return true;
         }
         
-        // Redraw the view
-        invalidate();
-        
-        // Consume the event
+        // Fall back to original behavior for other actions
+// TODO: not a boolean      return gameStateManager.handleGridTouch(gridX, gridY, action);
         return true;
+    }
+    
+    /**
+     * Handle effects after a robot has moved (sound, animation, game completion check)
+     */
+    private void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
+        // Shrink the robot back to default size when it starts moving
+        if (robotScaleMap.containsKey(selectedRobot) && robotScaleMap.get(selectedRobot) > DEFAULT_ROBOT_SCALE) {
+            animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), DEFAULT_ROBOT_SCALE);
+        }
+        
+        // Calculate if robot hit a wall or another robot
+        boolean hitWall = false;
+        boolean hitRobot = false;
+        int dx = selectedRobot.getX() - oldX;
+        int dy = selectedRobot.getY() - oldY;
+        
+        // Determine if we hit something
+        if (dx != 0) {
+            // Moving horizontally
+            int nextX = selectedRobot.getX() + (dx > 0 ? 1 : -1);
+            if (nextX >= 0 && nextX < state.getWidth()) {
+                GameElement robotAtPosition = state.getRobotAt(nextX, selectedRobot.getY());
+                if (robotAtPosition != null) {
+                    hitRobot = true;
+                } else if (!state.canRobotMoveTo(selectedRobot, nextX, selectedRobot.getY())) {
+                    hitWall = true;
+                }
+            }
+        } else if (dy != 0) {
+            // Moving vertically
+            int nextY = selectedRobot.getY() + (dy > 0 ? 1 : -1);
+            if (nextY >= 0 && nextY < state.getHeight()) {
+                GameElement robotAtPosition = state.getRobotAt(selectedRobot.getX(), nextY);
+                if (robotAtPosition != null) {
+                    hitRobot = true;
+                } else if (!state.canRobotMoveTo(selectedRobot, selectedRobot.getX(), nextY)) {
+                    hitWall = true;
+                }
+            }
+        }
+        
+        // Play the appropriate sound effect based on what happened
+        Timber.d("[SOUND] Playing sound from GameGridView: " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));
+        if (fragment instanceof ModernGameFragment) {
+            if (hitRobot) {
+                ((ModernGameFragment) fragment).playSound("hit_robot");
+            } else if (hitWall) {
+                ((ModernGameFragment) fragment).playSound("hit_wall");
+            } else {
+                ((ModernGameFragment) fragment).playSound("move");
+            }
+            
+            // Also announce possible moves after movement
+            ((ModernGameFragment) fragment).announcePossibleMoves(selectedRobot);
+        }
+        
+        if (state.checkCompletion()) {
+            Timber.d("[GOAL DEBUG] Goal reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
+            
+            // Critical fix: Tell the GameStateManager the game is complete
+            gameStateManager.setGameComplete(true);
+            
+            announceForAccessibility("Goal reached! Game complete in " + 
+                gameStateManager.getMoveCount().getValue() + " moves and " +
+                gameStateManager.getSquaresMoved().getValue() + " squares moved");
+        } else {
+            Timber.d("[GOAL DEBUG] Robot moved");
+            announceForAccessibility(getRobotDescription(selectedRobot));
+        }
     }
     
     @Override

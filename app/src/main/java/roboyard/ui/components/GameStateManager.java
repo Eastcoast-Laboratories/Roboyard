@@ -467,11 +467,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     /**
      * Handle a touch on the game grid
-     * @param x Grid X coordinate
-     * @param y Grid Y coordinate
+     *
+     * @param x      Grid X coordinate
+     * @param y      Grid Y coordinate
      * @param action Touch action type
+     * @return
      */
-    public void handleGridTouch(int x, int y, int action) {
+    public boolean handleGridTouch(int x, int y, int action) {
         GameState state = currentState.getValue();
         if (state != null && action == MotionEvent.ACTION_UP) {
             // Find if a robot was touched
@@ -532,6 +534,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
+        return true;
     }
     
     /**
