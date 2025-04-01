@@ -1,5 +1,4 @@
 package roboyard.ui.components;
-import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.Preferences;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.IGameObject;
@@ -77,13 +76,13 @@ public class GamePiece implements IGameObject {
     public void setY(int y) {
         this.y = y;
         deltaY = 0;
-        // Z-index will be updated by GridGameScreen.updateAllZIndices()
+        // Z-index will be updated by GridGameView.updateAllZIndices()
     }
 
     public void setX(int x) {
         this.x = x;
         deltaX = 0;
-        // Z-index will be updated by GridGameScreen.updateAllZIndices()
+        // Z-index will be updated by GridGameView.updateAllZIndices()
     }
 
     public int getColor() {
@@ -156,7 +155,7 @@ public class GamePiece implements IGameObject {
                 image = 0;
                 break;
         }
-        // Z-index will be set by GridGameScreen.updateAllZIndices()
+        // Z-index will be set by GridGameView.updateAllZIndices()
     }
 
     public void setGridDimensions(int xGrid, int yGrid, float cellSize){
@@ -229,10 +228,10 @@ public class GamePiece implements IGameObject {
             if(inMovement) {
                 movementState = MOVEMENT_STATE_COMPLETED;
                 Timber.d("GamePiece.update: Robot " + color + " finished move, calling doMovesInMemory");
-                ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
+                ((GridGameView)(gameManager.getCurrentScreen())).doMovesInMemory();
                 Boolean justWon = false;
                 if(testIfWon) {
-                    if(((GridGameScreen)(gameManager.getCurrentScreen())).win(this)) {
+                    if(((GridGameView)(gameManager.getCurrentScreen())).win(this)) {
                         // Play win sound
                         playRobotSound(gameManager, "win");
                         justWon = true;
@@ -265,7 +264,7 @@ public class GamePiece implements IGameObject {
 
                 int thisToleranceForInputManagerTouch;
                 // if two robots touch, set tolerance to 0:
-                if(((GridGameScreen)(gameManager.getCurrentScreen())).getRobotsTouching()) {
+                if(((GridGameView)(gameManager.getCurrentScreen())).getRobotsTouching()) {
                     thisToleranceForInputManagerTouch = 0;
                 } else {
                     // TODO: if any are only 2 squares apart make it 155 else larger
@@ -276,7 +275,7 @@ public class GamePiece implements IGameObject {
                 if(dx*dx + dy*dy - thisToleranceForInputManagerTouch <= this.radius*this.radius && inputManager.downOccurred()){
                     // TODO: enlarge and put in front with this.radius+=1;
                     //display the movement interface
-                    ((GridGameScreen)(gameManager.getCurrentScreen())).activateInterface(this, xDraw, yDraw);
+                    ((GridGameView)(gameManager.getCurrentScreen())).activateInterface(this, xDraw, yDraw);
                     
                     // Reset input events to prevent the same touch from being processed multiple times
                     inputManager.resetEvents();
@@ -294,10 +293,10 @@ public class GamePiece implements IGameObject {
             
             // Check if we should trigger the next move in the solution
             if(inMovement) {
-                ((GridGameScreen)(gameManager.getCurrentScreen())).doMovesInMemory();
+                ((GridGameView)(gameManager.getCurrentScreen())).doMovesInMemory();
                 Boolean justWon = false;
                 if(testIfWon) {
-                    if(((GridGameScreen)(gameManager.getCurrentScreen())).win(this)) {
+                    if(((GridGameView)(gameManager.getCurrentScreen())).win(this)) {
                         // Play win sound
                         playRobotSound(gameManager, "win");
                         justWon = true;
@@ -329,7 +328,7 @@ public class GamePiece implements IGameObject {
                 this.curMoveSquares=Math.abs(this.xObjective-this.x)+Math.abs(this.yObjective-this.y);
                 //this.numSquaresMoved+=this.curMoveSquares;
                 Timber.d(" start move with "+this.curMoveSquares+" squares");
-                ((GridGameScreen)(gameManager.getCurrentScreen())).setCurrentMovedSquares(this.curMoveSquares);
+                ((GridGameView)(gameManager.getCurrentScreen())).setCurrentMovedSquares(this.curMoveSquares);
             }
             inMovement = true;
             testIfWon = true;

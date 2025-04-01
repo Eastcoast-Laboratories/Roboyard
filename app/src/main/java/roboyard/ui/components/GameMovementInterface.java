@@ -2,7 +2,6 @@ package roboyard.ui.components;
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.Constants;
 import roboyard.eclabs.IGameObject;
-import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.R;
 
 /**
@@ -38,7 +37,7 @@ public class GameMovementInterface implements IGameObject {
             this.decision = direction;
             this.display = false;
             // Directly trigger movement on the target screen
-            ((GridGameScreen)(gameManager.getCurrentScreen())).editDestination(target, this.decision, false);
+            ((GridGameView)(gameManager.getCurrentScreen())).editDestination(target, this.decision, false);
             
             // Reset the input manager events to ensure clean state for next interaction
             gameManager.getInputManager().resetEvents();
@@ -107,7 +106,7 @@ public class GameMovementInterface implements IGameObject {
                     if(this.decision >=0){
                         // the decision of direction to move is made - start moving now
                         //acquérir & transmettre destination du pion
-                        ((GridGameScreen)(gameManager.getCurrentScreen())).editDestination(target, this.decision, false);
+                        ((GridGameView)(gameManager.getCurrentScreen())).editDestination(target, this.decision, false);
                     }
                 }else if(inputManager.moveOccurred()){ //sinon, si l'utilisateur bouge son doigt, gérer déplacement...
                     int dx, dy;

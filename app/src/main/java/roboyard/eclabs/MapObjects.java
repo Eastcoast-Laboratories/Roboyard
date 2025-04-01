@@ -1,9 +1,6 @@
 package roboyard.eclabs;
-import roboyard.ui.components.RenderManager;
-import roboyard.ui.components.ScreenLayout;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GridGameScreen;
-import roboyard.ui.components.GameScreen;
+import roboyard.ui.components.GridGameView;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,8 +9,6 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import roboyard.eclabs.GridElement;
 
 import timber.log.Timber;
 
@@ -63,7 +58,7 @@ public class MapObjects {
             // Only update board size if explicitly requested (when loading a game)
             if (applyBoardSize) {
                 // Update and persist board size for this game
-                MainActivity activity = GridGameScreen.gameManager.getActivity();
+                MainActivity activity = GridGameView.gameManager.getActivity();
                 Timber.d("Loading board size from save: %dx%d", boardX, boardY);
                 activity.setAndSaveBoardSizeToPreferences(activity, boardX, boardY);
             }

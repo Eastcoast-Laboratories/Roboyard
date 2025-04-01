@@ -313,7 +313,7 @@ public class SettingsFragment extends BaseGameFragment {
      * This is necessary because the field is package-private
      */
     private void setGenerateNewMapEachTimeSetting(boolean value) {
-        // Since we can't directly access the field, use GridGameScreen helper method
+        // Since we can't directly access the field, use GridGameView helper method
         // which has package access to MapGenerator
         preferences.setPreferences(requireActivity(), "newMapEachTime", String.valueOf(value));
     }

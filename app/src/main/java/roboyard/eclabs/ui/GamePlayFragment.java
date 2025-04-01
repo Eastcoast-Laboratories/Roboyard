@@ -20,7 +20,7 @@ import roboyard.pm.ia.IGameMove;
 
 /**
  * Main game play screen implementing proper accessibility support.
- * Replaces the GridGameScreen from the canvas-based implementation.
+ * Replaces the GridGameView from the canvas-based implementation.
  */
 public class GamePlayFragment extends BaseGameFragment {
     

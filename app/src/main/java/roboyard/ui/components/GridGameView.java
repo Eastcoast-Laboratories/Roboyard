@@ -1,12 +1,6 @@
 package roboyard.ui.components;
 import roboyard.eclabs.GridElement;
 import roboyard.eclabs.GameManager;
-import android.graphics.Canvas;
-import roboyard.ui.components.GameScreen;
-import roboyard.ui.components.GamePiece;
-
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 
 import java.util.ArrayList;
 
@@ -16,7 +10,7 @@ import timber.log.Timber;
  * Dummy class to satisfy references in the codebase.
  * This class replaces the legacy canvas-based implementation.
  */
-public class GridGameScreen extends GameScreen {
+public class GridGameView extends GameScreen {
     private static String levelDifficulty = "Beginner";
     private static boolean newMapEachTime = true;
     private static final int level = 1;
@@ -24,9 +18,9 @@ public class GridGameScreen extends GameScreen {
     public int solutionMoves = 0;
     public Object solution = null;
     
-    public GridGameScreen(GameManager gameManager) {
+    public GridGameView(GameManager gameManager) {
         super(gameManager);
-        Timber.d("Dummy GridGameScreen created");
+        Timber.d("Dummy GridGameView created");
     }
     
     public void create() {
@@ -35,16 +29,16 @@ public class GridGameScreen extends GameScreen {
     
     public static void setDifficulty(String difficulty) {
         levelDifficulty = difficulty;
-        Timber.d("Dummy GridGameScreen: Difficulty set to %s", difficulty);
+        Timber.d("Dummy GridGameView: Difficulty set to %s", difficulty);
     }
     
     public static void setNewMapEachTime(boolean value) {
         newMapEachTime = value;
-        Timber.d("Dummy GridGameScreen: NewMapEachTime set to %s", value);
+        Timber.d("Dummy GridGameView: NewMapEachTime set to %s", value);
     }
     
     public static void setMap(Object map) {
-        Timber.d("Dummy GridGameScreen: Map set");
+        Timber.d("Dummy GridGameView: Map set");
     }
     
     public static int getLevel() {
@@ -60,15 +54,15 @@ public class GridGameScreen extends GameScreen {
     }
     
     public void setRandomGame() {
-        Timber.d("Dummy GridGameScreen: Random game set");
+        Timber.d("Dummy GridGameView: Random game set");
     }
     
     public void setSavedGame(String mapPath) {
-        Timber.d("Dummy GridGameScreen: Saved game set to %s", mapPath);
+        Timber.d("Dummy GridGameView: Saved game set to %s", mapPath);
     }
     
     public void setLevelGame(String mapPath) {
-        Timber.d("Dummy GridGameScreen: Level game set to %s", mapPath);
+        Timber.d("Dummy GridGameView: Level game set to %s", mapPath);
     }
     
     public boolean isRandomGame() {
@@ -80,37 +74,37 @@ public class GridGameScreen extends GameScreen {
     }
     
     public void updateHistoryEntry() {
-        Timber.d("Dummy GridGameScreen: History entry updated");
+        Timber.d("Dummy GridGameView: History entry updated");
     }
     
     public void editDestination(GamePiece target, int decision, boolean value) {
-        Timber.d("Dummy GridGameScreen: Edit destination");
+        Timber.d("Dummy GridGameView: Edit destination");
     }
     
     public boolean win(Object robot) {
-        Timber.d("Dummy GridGameScreen: Win check");
+        Timber.d("Dummy GridGameView: Win check");
         return false;
     }
     
     public boolean getRobotsTouching() {
-        Timber.d("Dummy GridGameScreen: Robots touching check");
+        Timber.d("Dummy GridGameView: Robots touching check");
         return false;
     }
     
     public void activateInterface(Object robot, float x, float y) {
-        Timber.d("Dummy GridGameScreen: Interface activated");
+        Timber.d("Dummy GridGameView: Interface activated");
     }
     
     public void doMovesInMemory() {
-        Timber.d("Dummy GridGameScreen: Moves in memory");
+        Timber.d("Dummy GridGameView: Moves in memory");
     }
     
     public void setCurrentMovedSquares(int squares) {
-        Timber.d("Dummy GridGameScreen: Current moved squares set to %d", squares);
+        Timber.d("Dummy GridGameView: Current moved squares set to %d", squares);
     }
     
     public void loadMap() {
-        Timber.d("Dummy GridGameScreen: Map loaded");
+        Timber.d("Dummy GridGameView: Map loaded");
     }
     
     // GameScreen abstract methods

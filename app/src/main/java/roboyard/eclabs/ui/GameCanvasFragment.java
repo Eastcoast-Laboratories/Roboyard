@@ -19,7 +19,7 @@ import roboyard.ui.components.RenderManager;
 import timber.log.Timber;
 
 /**
- * This fragment hosts the original GridGameScreen with its canvas rendering.
+ * This fragment hosts the original GridGameView with its canvas rendering.
  * It allows the old game logic to remain untouched while integrating with
  * the new fragment-based UI architecture.
  */

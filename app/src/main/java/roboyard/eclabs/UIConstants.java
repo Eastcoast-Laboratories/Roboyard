@@ -21,7 +21,7 @@ public class UIConstants {
     // Spacing
     public static final float BUTTON_GAP = 10;           // Gap between buttons
 
-    // Colors (moved from GridGameScreen)
+    // Colors (moved from GridGameView)
     public static final int TEXT_COLOR_HIGHLIGHT = 0xFFAAAAAA;  // Light gray
     public static final int TEXT_COLOR_NORMAL = 0xFF808080;     // Gray
 }

@@ -1,5 +1,4 @@
 package roboyard.eclabs.util;
-import roboyard.ui.components.GridGameScreen;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -7,7 +6,6 @@ import android.os.Looper;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.ui.components.GamePiece;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
@@ -15,7 +13,7 @@ import timber.log.Timber;
 
 /**
  * A utility class that handles the animation of solutions.
- * This class extracts the solution animation logic from the GridGameScreen
+ * This class extracts the solution animation logic from the GridGameView
  * to make it reusable across different UI implementations.
  */
 public class SolutionAnimator {
@@ -100,7 +98,7 @@ public class SolutionAnimator {
     
     /**
      * Returns the next move to be executed.
-     * This method is designed to work with existing legacy code from GridGameScreen.
+     * This method is designed to work with existing legacy code from GridGameView.
      * @return The next move, or null if there are no more moves
      */
     public IGameMove getNextMove() {

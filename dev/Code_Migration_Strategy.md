@@ -13,8 +13,8 @@ A file physically moved to `roboyard/logic/core/` must have its package declarat
 ## 5. Files Requiring Refactoring
 | File                      | Action                               | Target Package            | Description
 |---------------------------|--------------------------------------|---------------------------|------------
-|`GridGameScreen.java`      | Split and rename                     | `roboyard.logic.core`     | Extract core game state/rules to `GameStateManager.java`
-|                           |                                      | `roboyard.ui.components`  | Rename UI portion to `GridGameView.java` 
+|`GridGameScreen.java`      | rename to `GridGameView.java` (`roboyard.ui.components`) then Extract core game state/rules to `GameStateManager.java` (`roboyard.logic.core`)
+|                           |                                      | `roboyard.ui.components`  | Rename UI portion  
 |`AccessibilityUtil.java`   | Split UI/Logic functionality         | `roboyard.logic.utils`    | Keep `isScreenReaderActive()` in logic layer
 |`FileReadWrite.java`       | Extract interface, move implementation| `roboyard.logic.utils`   | Extract generic I/O methods to interface
 |                           |                                      | `roboyard.ui.utils`       | Keep Android-specific methods in UI

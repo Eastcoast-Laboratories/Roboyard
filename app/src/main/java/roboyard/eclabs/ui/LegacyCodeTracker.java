@@ -31,7 +31,7 @@ public class LegacyCodeTracker {
         return new String[] {
             // Main screens
             "roboyard.eclabs.MainScreen",
-            "roboyard.eclabs.GridGameScreen",
+            "roboyard.eclabs.GridGameView",
             "roboyard.eclabs.SaveGameScreen",
             "roboyard.eclabs.SettingsScreen",
             "roboyard.eclabs.HelpScreen",

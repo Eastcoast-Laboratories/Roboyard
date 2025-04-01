@@ -1473,7 +1473,7 @@ public class GameState implements Serializable {
     }
     
     /**
-     * Converts difficulty integer to string for the original GridGameScreen class
+     * Converts difficulty integer to string for the original GridGameView class
      */
     private static String difficultyIntToString(int difficulty) {
         switch (difficulty) {

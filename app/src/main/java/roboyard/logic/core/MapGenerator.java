@@ -1,10 +1,8 @@
 package roboyard.eclabs;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GridGameScreen;
+import roboyard.ui.components.GridGameView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Random;
 
 import timber.log.Timber;
@@ -52,7 +50,7 @@ public class MapGenerator {
         wallsPerQuadrant = MainActivity.getBoardWidth()/4;  // Default: quarter of board width
 
         // Check difficulty level
-        int level = GridGameScreen.getLevel();
+        int level = GridGameView.getLevel();
         if(level == DIFFICULTY_BEGINNER){ // Difficulty Beginner
             // For beginner level
         } else {
@@ -129,7 +127,7 @@ public class MapGenerator {
         // which is already set by SettingsGameScreen when preferences are changed
         Timber.d("Using generateNewMapEachTime: %s", generateNewMapEachTime);
         
-        ArrayList<GridElement> data = GridGameScreen.getMap();
+        ArrayList<GridElement> data = GridGameView.getMap();
         
         // Synchronize static settings with GameLogic
         GameLogic.setGenerateNewMapEachTime(generateNewMapEachTime);
@@ -138,7 +136,7 @@ public class MapGenerator {
         data = gameLogic.generateGameMap(data);
         
         // Store the map for future use
-        GridGameScreen.setMap(data);
+        GridGameView.setMap(data);
         
         return data;
     }
