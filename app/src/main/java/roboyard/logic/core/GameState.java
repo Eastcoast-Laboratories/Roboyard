@@ -71,7 +71,7 @@ public class GameState implements Serializable {
         this.targetColors = new int[height][width];
         this.gameElements = new ArrayList<>();
         this.levelId = -1;
-        this.levelName = "Random Game";
+        this.levelName = "XXXXX";
         this.startTime = System.currentTimeMillis();
         this.moveCount = 0;
         
