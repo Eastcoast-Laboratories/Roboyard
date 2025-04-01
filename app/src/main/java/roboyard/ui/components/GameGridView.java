@@ -64,8 +64,9 @@ public class GameGridView extends View {
     private Drawable targetMultiDrawable;   // cm
     
     // Robot animation configuration
-    private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger
-    private static final float DEFAULT_ROBOT_SCALE = 1.1f; // 10% larger by default
+    private static final float INITIAL_SELECTED_ROBOT_SCALE = 1.8f; // much larger when clicked
+    private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger, when still selected
+    private static final float DEFAULT_ROBOT_SCALE = 1.3f; // a bit larger as a cell by default
     private final boolean enableRobotAnimation = true;
     private final HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private final GameElement focusedRobot = null; // Currently focused (hovered) robot

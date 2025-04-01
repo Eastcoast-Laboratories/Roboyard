@@ -57,7 +57,10 @@
 
 - win stop timer also in random game
 
-- add some pre-hints to the hints:
+- @ModernGameFragment.java#L622-624 hintbutton.setenabled(false) hat keinen effect
+
+
+# pre-hints:
 1. For random games:
   ◦ Show numPreHints (2-4) hints saying "The AI found a solution in less than [solution+numPreHints] moves" and decreasing
   ◦ Show a final exact hint "The AI found a solution in X moves" with toast notification
