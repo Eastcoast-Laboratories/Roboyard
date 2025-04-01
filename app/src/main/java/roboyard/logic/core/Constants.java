@@ -60,6 +60,7 @@ public class Constants {
     public static final int COLOR_GREEN = 1;
     public static final int COLOR_BLUE = 2;
     public static final int COLOR_YELLOW = 3;
+    public static final int COLOR_SILVER = 5; // 4 is already taken for the multi target
     
     // File and directory paths
     public static final String SAVE_DIRECTORY = "saves";

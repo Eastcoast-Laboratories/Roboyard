@@ -179,13 +179,13 @@ public class LevelDesignEditorFragment extends Fragment {
         
         robotColorRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.robot_red_radio) {
-                currentRobotColor = 0;
+                currentRobotColor = Constants.COLOR_RED;
             } else if (checkedId == R.id.robot_green_radio) {
-                currentRobotColor = 1;
+                currentRobotColor = Constants.COLOR_GREEN;
             } else if (checkedId == R.id.robot_blue_radio) {
-                currentRobotColor = 2;
+                currentRobotColor = Constants.COLOR_BLUE;
             } else if (checkedId == R.id.robot_yellow_radio) {
-                currentRobotColor = 3;
+                currentRobotColor = Constants.COLOR_YELLOW;
             }
         });
         
