@@ -15,18 +15,14 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
 - Überarbeitete Benutzeroberfläche mit klareren Icons und besserer Lesbarkeit
-- Barrierefreiheit für blinde Spieler
-- Screenreader-Optimierungen & Sprachhinweise
-- Button zum Wechseln zwischen Robotern mit Audio-Feedback und Screenreader-Unterstuetzung
+- Neue Tap-to-move-Methode, um Roboter schneller zu bewegen
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
 - Improved user interface with clearer icons and better readability
-- Accessibility for blind players
-- Screenreader optimizations & language hints
-- Button to switch between robots with audio feedback and screenreader support
+- New tap-to-move method to move Robots faster
 EOF
 )
 

@@ -1,11 +1,15 @@
 package roboyard.eclabs.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +28,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -411,6 +417,52 @@ public class SaveGameFragment extends BaseGameFragment {
         }
     }
     
+    /**
+     * Share a save slot via URL
+     * @param slotId The save slot ID
+     */
+    private void shareSaveSlot(int slotId) {
+        try {
+            // Get save file path
+            String savePath = FileReadWrite.getSaveGamePath(requireActivity(), slotId);
+            java.io.File saveFile = new java.io.File(savePath);
+            
+            if (saveFile.exists()) {
+                // Load save data
+                String saveData = FileReadWrite.loadAbsoluteData(savePath);
+                
+                if (saveData != null && !saveData.isEmpty()) {
+                    // URL encode the save data
+                    String encodedData = URLEncoder.encode(saveData, "UTF-8");
+                    
+                    // Create the share URL
+                    String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedData;
+                    
+                    // Create an intent to open the URL
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
+                    startActivity(intent);
+                    
+                    Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
+                    Timber.d("Sharing save slot %d with URL: %s", slotId, shareUrl);
+                } else {
+                    Toast.makeText(requireContext(), "No data to share", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
+            }
+            
+        } catch (UnsupportedEncodingException e) {
+            Timber.e(e, "Error encoding save data");
+            Toast.makeText(requireContext(), "Error creating share URL", Toast.LENGTH_SHORT).show();
+        } catch (ActivityNotFoundException e) {
+            Timber.e(e, "No browser available to open URL");
+            Toast.makeText(requireContext(), "No browser available to open URL", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Timber.e(e, "Error sharing save slot");
+            Toast.makeText(requireContext(), "Error sharing save slot", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
     @Override
     public String getScreenTitle() {
         return saveMode ? "Save Game" : "Load Game";
@@ -512,6 +564,17 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                 }
             });
+            
+            // Set share button click listener - only enable for slots with data
+            if (saveSlot.getDate() != null) {
+                holder.shareButton.setVisibility(View.VISIBLE);
+                holder.shareButton.setOnClickListener(v -> {
+                    // Share the save slot via URL
+                    shareSaveSlot(saveSlot.getSlotId());
+                });
+            } else {
+                holder.shareButton.setVisibility(View.GONE);
+            }
         }
         
         @Override
@@ -664,12 +727,14 @@ public class SaveGameFragment extends BaseGameFragment {
         TextView nameText;
         TextView dateText;
         ImageView minimapView;
+        ImageButton shareButton;
         
         public SaveSlotViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.name_text);
             dateText = itemView.findViewById(R.id.date_text);
             minimapView = itemView.findViewById(R.id.minimap_view);
+            shareButton = itemView.findViewById(R.id.share_button);
         }
     }
     
