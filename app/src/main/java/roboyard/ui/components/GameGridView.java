@@ -64,9 +64,9 @@ public class GameGridView extends View {
     private Drawable targetMultiDrawable;   // cm
     
     // Robot animation configuration
-    private static final float INITIAL_SELECTED_ROBOT_SCALE = 1.8f; // much larger when clicked
-    private static final float SELECTED_ROBOT_SCALE = 1.5f; // 50% larger, when still selected
-    private static final float DEFAULT_ROBOT_SCALE = 1.3f; // a bit larger as a cell by default
+    private static final float INITIAL_SELECTED_ROBOT_SCALE = 1.5f; // much larger when clicked
+    private static final float SELECTED_ROBOT_SCALE = 1.3f; // 50% larger, when still selected
+    private static final float DEFAULT_ROBOT_SCALE = 1.1f; // a bit larger as a cell by default
     private final boolean enableRobotAnimation = true;
     private final HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private final GameElement focusedRobot = null; // Currently focused (hovered) robot
@@ -322,11 +322,25 @@ public class GameGridView extends View {
                     for (GameElement element : state.getGameElements()) {
                         if (element.getType() == GameElement.TYPE_ROBOT) {
                             if (element == selectedRobot) {
-                                // Robot selected - animate growth
-                                animateRobotScale(element, 1.0f, SELECTED_ROBOT_SCALE);
-                            } else if (robotScaleMap.containsKey(element) && robotScaleMap.get(element) > 1.0f) {
-                                // Robot deselected - animate shrinking
-                                animateRobotScale(element, robotScaleMap.get(element), 1.0f);
+                                // If this is the first selection of this robot
+                                if (!robotScaleMap.containsKey(element) || robotScaleMap.get(element) == DEFAULT_ROBOT_SCALE || robotScaleMap.get(element) == INITIAL_SELECTED_ROBOT_SCALE) {
+                                    // Robot first selected - animate to initial large scale
+                                    animateRobotScale(element, DEFAULT_ROBOT_SCALE, INITIAL_SELECTED_ROBOT_SCALE);
+                                } else if (robotScaleMap.get(element) == INITIAL_SELECTED_ROBOT_SCALE && state.getMoveCount() > 0) {
+                                    // After first move, shrink to regular selected scale
+                                    animateRobotScale(element, INITIAL_SELECTED_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
+                                } else if (robotScaleMap.get(element) < SELECTED_ROBOT_SCALE) {
+                                    // If somehow the robot is selected but has a scale smaller than SELECTED_ROBOT_SCALE
+                                    // This can happen after game reloads or when reselecting a previously moved robot
+                                    animateRobotScale(element, robotScaleMap.get(element), SELECTED_ROBOT_SCALE);
+                                }
+                                // Otherwise keep current scale if it's already at SELECTED_ROBOT_SCALE
+                            } else if (robotScaleMap.containsKey(element) && robotScaleMap.get(element) > DEFAULT_ROBOT_SCALE) {
+                                // Robot deselected - animate shrinking back to DEFAULT_ROBOT_SCALE (not 1.0f)
+                                animateRobotScale(element, robotScaleMap.get(element), DEFAULT_ROBOT_SCALE);
+                            } else if (!robotScaleMap.containsKey(element)) {
+                                // Initialize unselected robot with default scale
+                                robotScaleMap.put(element, DEFAULT_ROBOT_SCALE);
                             }
                         }
                     }
