@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.Preferences;
@@ -82,7 +83,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     // Hint managing
     private int maxPreHints = 3; // Maximum number of pre-hints
-    private int numPreHints = 3; // Number of pre-hints to show (will be set based on game type)
+    private int numPreHints = ThreadLocalRandom.current().nextInt(2, 5); // Randomize between 2-4 by default
     private int totalPossibleHints = 0; // Total possible hints including pre-hints
     private int currentHintStep = 0; // Current hint step (includes pre-hints and regular hints)
     private boolean showingPreHints = true; // Whether we're showing pre-hints (false after reset)
@@ -1615,6 +1616,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         } else {
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: Using existing game state with %d robots",
                       currentState.getRobots().size());
+            
+            // Check if this is a random game (not a level) and randomize pre-hints
+            if (currentState.getLevelId() <= 0) {
+                // Randomize pre-hints for random games when we initialize
+                int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
+                Timber.d("[HINT] Randomizing pre-hints during initializeGame: %d", randomHintCount);
+                numPreHints = randomHintCount;
+            }
         }
         
         // Clear any previous hint or status text
@@ -1640,7 +1649,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     @Override
     public void onSolutionCalculationCompleted(GameSolution solution) {
-        Timber.d("ModernGameFragment: Solution calculation completed. Solution has %d moves",
+        Timber.d("[HINT] Solution calculation completed. Solution has %d moves",
                 solution.getMoves().size());
         
         // Initialize hints variables
@@ -1649,8 +1658,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         boolean isLevelGame = currentState != null && currentState.getLevelId() > 0;
         boolean isFirstTenLevels = isLevelGame && currentState.getLevelId() <= 10;
         
+        Timber.d("[HINT] Game state analysis: currentState=%s, levelId=%d, isLevelGame=%b", 
+                currentState != null ? "present" : "null",
+                currentState != null ? currentState.getLevelId() : -1,
+                isLevelGame);
+        
         // Set number of pre-hints based on game type
         if (isLevelGame) {
+            Timber.d("[HINT] Level game detected - no pre-hints");
             numPreHints = 0; // No pre-hints for level games
             if (isFirstTenLevels) {
                 // For levels 1-10, allow two normal hints (handled in hint click)
@@ -1662,7 +1677,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         } else {
             // Random game - Show pre-hints
-            numPreHints = 3; // Could randomize between 2-4 in the future
+            Timber.d("[HINT] Random game detected - randomizing pre-hints");
+            // randomize between 2-4:
+            int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
+            Timber.d("[HINT] Randomized hint count: %d", randomHintCount);
+            numPreHints = randomHintCount;
             hintButton.setEnabled(true);
         }
         
@@ -1677,7 +1696,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Reset hint button text back to "Hint"
         hintButton.setText(R.string.hint_button);
         updateStatusText("AI found a solution!", true);
-        Timber.d("ModernGameFragment: UI updated to show solution found");
+        Timber.d("[HINT] UI updated to show solution found");
     }
 
     @Override

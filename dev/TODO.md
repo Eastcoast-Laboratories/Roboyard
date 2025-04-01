@@ -59,6 +59,4 @@
 
 - @ModernGameFragment.java#L622-624 hintbutton.setenabled(false) hat keinen effect
 
-
-- at the moment, you can onlly move a robot by selecting it and then touching anywhere on the board to move it in that direction. 
- - keep that, and add an alternative movement possibility to also move a robot by touching it and sliding it to the desired direction
+- randomize number of pre-hints before showing the solution not only on each app start but on each new game 
