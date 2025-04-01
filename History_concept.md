@@ -73,7 +73,7 @@ Add to the `GridGameScreen` class: (done)
 private long gameStartTime;
 private int totalPlayTime = 0;
 private boolean isHistorySaved = false;
-private static final int HISTORY_SAVE_THRESHOLD = 60; // 1 minute in seconds
+private static final int HISTORY_SAVE_THRESHOLD = 600; // 1 minute in seconds (threshhold for saving to history)
 
 // Call this when game starts or loads
 private void startGameTimer() {
