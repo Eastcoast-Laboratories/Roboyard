@@ -46,6 +46,9 @@ public class GameLogic {
     // Current difficulty level
     private final int currentLevel;
     
+    // Configuration for multiple targets
+    private int targetCount = 1; // Default to 1 target per color
+    
     // Configuration for the simplified board generation
     private boolean placeWallsInCorners = true;
     private boolean placeWallsOnEdges = true;
@@ -153,13 +156,6 @@ public class GameLogic {
     }
     
     /**
-     * Get whether to generate a new map each time
-     */
-    public static boolean getGenerateNewMapEachTime() {
-        return generateNewMapEachTime;
-    }
-
-    /**
      * Removes game elements (robots and targets) from a map
      */
     public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {
@@ -203,72 +199,98 @@ public class GameLogic {
      */
     public ArrayList<GridElement> addGameElementsToGameMap(ArrayList<GridElement> data, int[][] horizontalWalls, int[][] verticalWalls) {
         boolean abandon;
-        int targetX;
-        int targetY;
-        Boolean tempTargetMustBeInCorner;
-
-        tempTargetMustBeInCorner = targetMustBeInCorner;
-        if(!targetMustBeInCorner && getRandom(0,1) != 1){
-            // 50% probability that the target is in a corner
-            tempTargetMustBeInCorner=true;
-        }
-        do{
-            abandon = false;
-            targetX = getRandom(0, boardWidth-1);
-            targetY = getRandom(0, boardHeight-1);
-
-            if(tempTargetMustBeInCorner && horizontalWalls[targetX][targetY] == 0 && horizontalWalls[targetX][targetY+1] == 0)
-                abandon = true;
-            if(tempTargetMustBeInCorner && verticalWalls[targetX][targetY] == 0 && verticalWalls[targetX+1][targetY] == 0)
-                abandon = true;
-
-            if((targetX == carrePosX && targetY == carrePosY)
-                    || (targetX == carrePosX && targetY == carrePosY+1)
-                    || (targetX == carrePosX+1 && targetY == carrePosY)
-                    || (targetX == carrePosX+1 && targetY == carrePosY+1))
-                abandon = true; // target was in square
-
-        }while(abandon);
-
         String[] typesOfTargets = {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
-
-        if(allowMulticolorTarget) {
-            data.add(new GridElement(targetX, targetY, typesOfTargets[getRandom(0,4)]));
-        } else {
-            data.add(new GridElement(targetX, targetY, typesOfTargets[getRandom(0,3)]));
-        }
-
         String[] typesOfRobots = {"robot_red", "robot_blue", "robot_yellow", "robot_green"};
 
-        ArrayList<GridElement> robotsTemp = new ArrayList<>();
-
-        int cX;
-        int cY;
-
-        for(String currentRobotType : typesOfRobots)
-        {
+        // Store all positions of game elements to avoid overlapping
+        ArrayList<GridElement> allElements = new ArrayList<>();
+        
+        // Create targets based on targetCount setting
+        // We'll create targets for each color (or multi-color)
+        int targetTypesCount = allowMulticolorTarget ? 5 : 4; // Include or exclude multi-color target
+        
+        for (int targetType = 0; targetType < targetTypesCount; targetType++) {
+            // For each target type, create targetCount targets
+            for (int count = 0; count < targetCount; count++) {
+                int targetX, targetY;
+                Boolean tempTargetMustBeInCorner = targetMustBeInCorner;
+                
+                // 50% probability that the target is in a corner if targetMustBeInCorner is false
+                if (!targetMustBeInCorner && getRandom(0, 1) != 1) {
+                    tempTargetMustBeInCorner = true;
+                }
+                
+                do {
+                    abandon = false;
+                    targetX = getRandom(0, boardWidth - 1);
+                    targetY = getRandom(0, boardHeight - 1);
+                    
+                    // Check corner walls if required
+                    if (tempTargetMustBeInCorner && horizontalWalls[targetX][targetY] == 0 && horizontalWalls[targetX][targetY + 1] == 0)
+                        abandon = true;
+                    if (tempTargetMustBeInCorner && verticalWalls[targetX][targetY] == 0 && verticalWalls[targetX + 1][targetY] == 0)
+                        abandon = true;
+                    
+                    // Check if in the center square
+                    if ((targetX == carrePosX && targetY == carrePosY)
+                            || (targetX == carrePosX && targetY == carrePosY + 1)
+                            || (targetX == carrePosX + 1 && targetY == carrePosY)
+                            || (targetX == carrePosX + 1 && targetY == carrePosY + 1))
+                        abandon = true; // target was in square
+                    
+                    // Check if position is already occupied by another element
+                    for (GridElement element : allElements) {
+                        if (element.getX() == targetX && element.getY() == targetY) {
+                            abandon = true;
+                            break;
+                        }
+                    }
+                    
+                } while (abandon);
+                
+                // Create and add the target
+                GridElement newTarget = new GridElement(targetX, targetY, typesOfTargets[targetType]);
+                data.add(newTarget);
+                allElements.add(newTarget);
+                
+                Timber.d("Added target %s at position %d,%d", typesOfTargets[targetType], targetX, targetY);
+            }
+        }
+        
+        // Create robots
+        for (String currentRobotType : typesOfRobots) {
+            int cX, cY;
+            
             do {
                 abandon = false;
-                cX = getRandom(0, boardWidth-1);
-                cY = getRandom(0, boardHeight-1);
-
-                for(GridElement robot:robotsTemp) {
-                    if (robot.getX() == cX && robot.getY() == cY) {
+                cX = getRandom(0, boardWidth - 1);
+                cY = getRandom(0, boardHeight - 1);
+                
+                // Check if position is already occupied
+                for (GridElement element : allElements) {
+                    if (element.getX() == cX && element.getY() == cY) {
                         abandon = true;
                         break;
                     }
                 }
-
-                if((cX == carrePosX && cY == carrePosY) || (cX == carrePosX && cY == carrePosY+1) || (cX == carrePosX+1 && cY == carrePosY) || (cX == carrePosX+1 && cY == carrePosY+1))
+                
+                // Check if in the center square
+                if ((cX == carrePosX && cY == carrePosY) 
+                        || (cX == carrePosX && cY == carrePosY + 1) 
+                        || (cX == carrePosX + 1 && cY == carrePosY) 
+                        || (cX == carrePosX + 1 && cY == carrePosY + 1))
                     abandon = true; // robot was inside square
-                if(cX == targetX && cY == targetY)
-                    abandon = true; // robot was target
-
-            }while(abandon);
-            robotsTemp.add(new GridElement(cX, cY, currentRobotType));
+                
+            } while (abandon);
+            
+            // Create and add the robot
+            GridElement newRobot = new GridElement(cX, cY, currentRobotType);
+            data.add(newRobot);
+            allElements.add(newRobot);
+            
+            Timber.d("Added robot %s at position %d,%d", currentRobotType, cX, cY);
         }
-        data.addAll(robotsTemp);
-
+        
         return data;
     }
 
@@ -665,7 +687,7 @@ public class GameLogic {
             // Place perpendicular walls at the borders until we meet the minimum
             for (int i = 0; i < wallPositions.length && borderPerpendicularWallsPlaced < minBorderPerpendicularWalls && wallsToPlace > 0; i++) {
                 int[] pos = wallPositions[i];
-                boolean isVertical = isVerticalWall[i];
+                boolean vertical = isVerticalWall[i];
                 
                 // Determine the actual position to place the wall
                 int x = pos[0];
@@ -673,26 +695,26 @@ public class GameLogic {
                 
                 // For walls extending from borders, we need to adjust the position
                 // to place them one cell inward from the border
-                if (y == 0 && isVertical) { // Top border, vertical wall extending down
+                if (y == 0 && vertical) { // Top border, vertical wall extending down
                     y = 1; // Place one cell down from top border
-                } else if (y == boardHeight && isVertical) { // Bottom border, vertical wall extending up
+                } else if (y == boardHeight && vertical) { // Bottom border, vertical wall extending up
                     y = boardHeight - 1; // Place one cell up from bottom border
-                } else if (x == 0 && !isVertical) { // Left border, horizontal wall extending right
+                } else if (x == 0 && !vertical) { // Left border, horizontal wall extending right
                     x = 1; // Place one cell right from left border
-                } else if (x == boardWidth && !isVertical) { // Right border, horizontal wall extending left
+                } else if (x == boardWidth && !vertical) { // Right border, horizontal wall extending left
                     x = boardWidth - 1; // Place one cell left from right border
                 }
                 
                 // Check if the position is valid and empty
                 boolean canPlace = false;
-                if (!isVertical) { // Horizontal wall
+                if (!vertical) { // Horizontal wall
                     canPlace = (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1 && horizontalWalls[x][y] == 0);
                 } else { // Vertical wall
                     canPlace = (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1 && verticalWalls[x][y] == 0);
                 }
                 
                 if (canPlace) {
-                    if (!isVertical) { // Place horizontal wall
+                    if (!vertical) { // Place horizontal wall
                         horizontalWalls[x][y] = 1;
                     } else { // Place vertical wall
                         verticalWalls[x][y] = 1;
@@ -700,7 +722,7 @@ public class GameLogic {
                     borderPerpendicularWallsPlaced++;
                     wallsToPlace--; // Decrement the wallsToPlace counter
                     Timber.d("[GAME LOGIC] Placed %s wall perpendicular to border at (%d,%d)", 
-                            !isVertical ? "horizontal" : "vertical", x, y);
+                            !vertical ? "horizontal" : "vertical", x, y);
                 }
             }
             
@@ -1120,7 +1142,7 @@ public class GameLogic {
                 boolean vertical = isVertical[i];
                 
                 // Ensure the positions are within bounds
-                if (pos[0] >= 0 && pos[0] < boardWidth && pos[1] >= 0 && pos[1] < boardHeight) {
+                if (pos[0] >= 0 && pos[0] < boardWidth+1 && pos[1] >= 0 && pos[1] < boardHeight+1) {
                     // Only place if position is empty
                     if ((vertical && verticalWalls[pos[0]][pos[1]] == 0) || 
                         (!vertical && horizontalWalls[pos[0]][pos[1]] == 0)) {
@@ -1291,5 +1313,23 @@ public class GameLogic {
             array[index] = array[i];
             array[i] = temp;
         }
+    }
+
+    /**
+     * Set the number of targets per color to be generated on the map
+     * @param count Number of targets (1-4)
+     */
+    public void setTargetCount(int count) {
+        // Ensure count is between 1 and 4
+        this.targetCount = Math.max(1, Math.min(4, count));
+        Timber.d("Target count set to %d", this.targetCount);
+    }
+
+    /**
+     * Get the current target count setting
+     * @return Number of targets per color (1-4)
+     */
+    public int getTargetCount() {
+        return targetCount;
     }
 }

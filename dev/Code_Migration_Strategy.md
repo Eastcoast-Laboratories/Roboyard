@@ -103,3 +103,17 @@ When identical or similar classes exist in multiple packages (e.g., `GameGridVie
 3. **Unification**: Choose one location and update all references
 
 This strategy ensures a clean separation between UI and logic components while avoiding compilation errors from duplicate class declarations.
+
+
+prompt:
+
+try solving this with minimal code changes.
+
+Create a single comprehensive script that does all the needed changes in one go in /var/tmp/ that:
+
+- Resets the code with `git reset --hard` and `git clean -fd` at the start
+- Creates backup of the original files
+- Creates the fix
+- Builds the project to verify changes
+- Does NOT commit at the end, but suggests a commit message
+- Delete the backup after completion

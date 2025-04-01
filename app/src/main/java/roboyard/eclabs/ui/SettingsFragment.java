@@ -46,6 +46,7 @@ public class SettingsFragment extends BaseGameFragment {
     private RadioGroup accessibilityRadioGroup;
     private RadioButton accessibilityOn;
     private RadioButton accessibilityOff;
+    private Spinner targetCountSpinner;
     private Button backButton;
     
     private Preferences preferences;
@@ -78,6 +79,7 @@ public class SettingsFragment extends BaseGameFragment {
         accessibilityRadioGroup = view.findViewById(R.id.accessibility_radio_group);
         accessibilityOn = view.findViewById(R.id.accessibility_on);
         accessibilityOff = view.findViewById(R.id.accessibility_off);
+        targetCountSpinner = view.findViewById(R.id.target_count_spinner);
         backButton = view.findViewById(R.id.back_button);
         
         // Set up board size options - this must happen first
@@ -234,77 +236,109 @@ public class SettingsFragment extends BaseGameFragment {
     private void loadSettings() {
         // Load difficulty setting
         String difficulty = preferences.getPreferenceValue(requireActivity(), "difficulty");
-        if (difficulty == null || difficulty.isEmpty()) {
-            difficulty = "Beginner"; // Default
-            preferences.setPreferences(requireActivity(), "difficulty", difficulty);
-        }
-        
-        // Set difficulty radio button
-        int difficultyLevel; // Default to DIFFICULTY_BEGINNER
-        switch (difficulty) {
-            case "Advanced":
-                difficultyAdvanced.setChecked(true);
-                difficultyLevel = Constants.DIFFICULTY_INTERMEDIATE;
-                break;
-            case "Insane":
-                difficultyInsane.setChecked(true);
-                difficultyLevel = Constants.DIFFICULTY_INSANE;
-                break;
-            case "Impossible":
-                difficultyImpossible.setChecked(true);
-                difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE;
-                break;
-            default:
-                difficultyBeginner.setChecked(true);
-                difficultyLevel = Constants.DIFFICULTY_BEGINNER;
-                break;
-        }
-        
-        // Important: Update DifficultyManager with the numeric difficulty level
-        roboyard.eclabs.util.DifficultyManager.getInstance(requireActivity()).setDifficulty(difficultyLevel);
-        Timber.d("[DIFFICULTY] Loaded difficulty: %s (level %d)", difficulty, difficultyLevel);
-        
-        // Load new map setting
-        String newMapEachTime = preferences.getPreferenceValue(requireActivity(), "newMapEachTime");
-        if (newMapEachTime == null || newMapEachTime.isEmpty()) {
-            newMapEachTime = "true"; // Default
-            preferences.setPreferences(requireActivity(), "newMapEachTime", newMapEachTime);
-        }
-        
-        // Set new map radio button
-        if (newMapEachTime.equals("true")) {
-            newMapYes.setChecked(true);
-            // Update MapGenerator via helper method
-            setGenerateNewMapEachTimeSetting(true);
-        } else {
-            newMapNo.setChecked(true);
-            // Update MapGenerator via helper method
-            setGenerateNewMapEachTimeSetting(false);
+        if (difficulty != null) {
+            switch (difficulty) {
+                case "Beginner":
+                    difficultyRadioGroup.check(R.id.difficulty_beginner);
+                    break;
+                case "Advanced":
+                    difficultyRadioGroup.check(R.id.difficulty_advanced);
+                    break;
+                case "Insane":
+                    difficultyRadioGroup.check(R.id.difficulty_insane);
+                    break;
+                case "Impossible":
+                    difficultyRadioGroup.check(R.id.difficulty_impossible);
+                    break;
+            }
         }
         
         // Load sound setting
         String sound = preferences.getPreferenceValue(requireActivity(), "sound");
-        if (sound == null || sound.isEmpty()) {
-            sound = "on"; // Default
-            preferences.setPreferences(requireActivity(), "sound", sound);
+        if (sound != null) {
+            if (sound.equalsIgnoreCase("true")) {
+                soundRadioGroup.check(R.id.sound_on);
+            } else {
+                soundRadioGroup.check(R.id.sound_off);
+            }
         }
         
-        // Set sound radio button
-        if (sound.equals("on")) {
-            soundOn.setChecked(true);
-            toggleSound(requireActivity(), true);
-        } else {
-            soundOff.setChecked(true);
-            toggleSound(requireActivity(), false);
+        // Load accessibility setting
+        String accessibility = preferences.getPreferenceValue(requireActivity(), "accessibility");
+        if (accessibility != null) {
+            if (accessibility.equalsIgnoreCase("true")) {
+                accessibilityRadioGroup.check(R.id.accessibility_on);
+            } else {
+                accessibilityRadioGroup.check(R.id.accessibility_off);
+            }
         }
         
-        // Set accessibility mode radio group
-        String accessibilityPref = preferences.getPreferenceValue(requireActivity(), "accessibilityMode");
-        if (accessibilityPref != null && accessibilityPref.equals("true")) {
-            accessibilityRadioGroup.check(R.id.accessibility_on);
-        } else {
-            accessibilityRadioGroup.check(R.id.accessibility_off);
+        // Load new map setting
+        String newMapSetting = preferences.getPreferenceValue(requireActivity(), "generate_new_map");
+        if (newMapSetting != null) {
+            if (newMapSetting.equalsIgnoreCase("true")) {
+                newMapRadioGroup.check(R.id.new_map_yes);
+            } else {
+                newMapRadioGroup.check(R.id.new_map_no);
+            }
         }
+        
+        // Load target count setting
+        setupTargetCountSpinner();
+        String targetCount = preferences.getPreferenceValue(requireActivity(), "target_count");
+        if (targetCount != null) {
+            try {
+                int count = Integer.parseInt(targetCount);
+                // Adjust for 0-based index of spinner
+                int spinnerPosition = count - 1;
+                if (spinnerPosition >= 0 && spinnerPosition < targetCountSpinner.getCount()) {
+                    targetCountSpinner.setSelection(spinnerPosition);
+                }
+            } catch (NumberFormatException e) {
+                Timber.e(e, "Error parsing target count from preferences");
+            }
+        }
+    }
+    
+    /**
+     * Set up the target count spinner with values from 1 to 4
+     */
+    private void setupTargetCountSpinner() {
+        // Create list of target count options (1-4)
+        List<String> targetCountOptions = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) {
+            targetCountOptions.add(String.valueOf(i));
+        }
+        
+        // Create adapter for the spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                targetCountOptions
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        targetCountSpinner.setAdapter(adapter);
+        
+        // Default to 1 target if no preference exists
+        String savedTargetCount = preferences.getPreferenceValue(requireActivity(), "target_count");
+        int defaultPosition = 0; // 1 target (index 0)
+        
+        if (savedTargetCount != null && !savedTargetCount.isEmpty()) {
+            try {
+                int count = Integer.parseInt(savedTargetCount);
+                // Adjust for 0-based index
+                defaultPosition = count - 1;
+                // Ensure it's within valid range
+                defaultPosition = Math.max(0, Math.min(defaultPosition, 3));
+            } catch (NumberFormatException e) {
+                Timber.e(e, "Error parsing saved target count");
+            }
+        } else {
+            // If no preference exists, save the default
+            preferences.setPreferences(requireActivity(), "target_count", "1");
+        }
+        
+        targetCountSpinner.setSelection(defaultPosition);
     }
     
     /**
@@ -437,14 +471,29 @@ public class SettingsFragment extends BaseGameFragment {
         
         // Sound radio group
         soundRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            boolean soundEnabled = checkedId == R.id.sound_on;
-            String sound = soundEnabled ? "on" : "off";
-            
-            // Save sound setting
-            preferences.setPreferences(requireActivity(), "sound", sound);
-            
-            // Toggle sound state
-            toggleSound(requireActivity(), soundEnabled);
+            if (checkedId == R.id.sound_on) {
+                preferences.setPreferences(requireActivity(), "sound", "true");
+                toggleSound(requireActivity(), true);
+            } else if (checkedId == R.id.sound_off) {
+                preferences.setPreferences(requireActivity(), "sound", "false");
+                toggleSound(requireActivity(), false);
+            }
+        });
+        
+        // Target count spinner
+        targetCountSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                // Add 1 to position because spinner is 0-indexed, but we want to store 1-4
+                int targetCount = position + 1;
+                Timber.d("Target count selected: %d", targetCount);
+                preferences.setPreferences(requireActivity(), "target_count", String.valueOf(targetCount));
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                // Do nothing
+            }
         });
         
         // Accessibility mode radio group

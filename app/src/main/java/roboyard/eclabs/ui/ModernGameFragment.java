@@ -42,6 +42,7 @@ import timber.log.Timber;
 import android.view.accessibility.AccessibilityManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 
 /**
  * Modern UI implementation of the game screen.
@@ -63,6 +64,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button newMapButton;
     private Button menuButton;
     private Button nextLevelButton;
+    private Button optimalMovesButton; // Button to display optimal number of moves
     private TextView timerTextView;
     private TextView statusTextView;
     
@@ -342,6 +344,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         uniqueMapIdTextView = view.findViewById(R.id.unique_map_id_text); // Initialize unique map ID text view
         timerTextView = view.findViewById(R.id.game_timer);
         statusTextView = view.findViewById(R.id.status_text_view);
+        optimalMovesButton = view.findViewById(R.id.optimal_moves_button);
         
         // Prevent automatic selection of gameGridView by setting focusable to false
         gameGridView.setFocusable(false);
@@ -425,6 +428,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Observe game completion
         gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
             if (isComplete) {
+                // Stop the timer for both level and random games when completed
+                stopTimer();
+                
                 playSound("win");
                 
                 // Get the current game state
@@ -703,12 +709,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             stopTimer();
             startTimer();
             
+            // Randomize pre-hints count for the new game
+            numPreHints = ThreadLocalRandom.current().nextInt(2, 5);
+            Timber.d("[HINT] Randomized pre-hints for new game: %d", numPreHints);
+            
             // Reset hint system for new game
             gameStateManager.resetSolutionStep();
             showingPreHints = true;
             hintButton.setEnabled(true);
             hintButton.setAlpha(1.0f);
             Timber.d("[HINT] Reset hint system for new random game via New Game button");
+            
+            // Hide the optimal moves button when starting a new game
+            if (optimalMovesButton != null) {
+                optimalMovesButton.setVisibility(View.GONE);
+            }
             
             // Clear any hint text from the status display
             updateStatusText("", false);
@@ -1585,6 +1600,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Update the status text
                 updateStatusText(hintMessage, true);
                 Timber.d("[HINT] Displayed hint: %s", hintMessage);
+                
+                // Show the optimal moves button after the first normal hint is shown
+                if (hintIndex == 0) {
+                    Timber.d("[HINT] First normal hint shown, displaying optimal moves button");
+                    updateOptimalMovesButton(totalMoves, true);
+                }
             } else {
                 // Error in hint system
                 Timber.e("[HINT] Failed to get a valid hint move");
@@ -1617,12 +1638,38 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[SOLUTION SOLVER] ModernGameFragment: Using existing game state with %d robots",
                       currentState.getRobots().size());
             
+            // Get target count from preferences
+            Preferences preferences = new Preferences();
+            String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
+            int targetCount = 1; // Default to 1 if preference doesn't exist
+            
+            if (targetCountStr != null && !targetCountStr.isEmpty()) {
+                try {
+                    targetCount = Integer.parseInt(targetCountStr);
+                    // Ensure value is within valid range
+                    targetCount = Math.max(1, Math.min(4, targetCount));
+                    Timber.d("[TARGET COUNT] Using target count from preferences: %d", targetCount);
+                } catch (NumberFormatException e) {
+                    Timber.e(e, "[TARGET COUNT] Error parsing target count preference");
+                }
+            } else {
+                Timber.d("[TARGET COUNT] No target count preference found, using default: %d", targetCount);
+            }
+            
+            // Set target count on current game state
+            currentState.setTargetCount(targetCount);
+            
             // Check if this is a random game (not a level) and randomize pre-hints
             if (currentState.getLevelId() <= 0) {
                 // Randomize pre-hints for random games when we initialize
                 int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
                 Timber.d("[HINT] Randomizing pre-hints during initializeGame: %d", randomHintCount);
                 numPreHints = randomHintCount;
+                
+                // Auto-calculate solution for random games
+                // This ensures onSolutionCalculationCompleted gets called
+                Timber.d("[HINT] Auto-calculating solution for random game");
+                gameStateManager.calculateSolutionAsync(this);
             }
         }
         
@@ -1697,6 +1744,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintButton.setText(R.string.hint_button);
         updateStatusText("AI found a solution!", true);
         Timber.d("[HINT] UI updated to show solution found");
+        
+        // Initialize the optimal moves button value
+        updateOptimalMovesButton(solution.getMoves().size(), false);
     }
 
     @Override
@@ -1739,6 +1789,49 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             uniqueMapIdTextView.setText(levelText);
         } else if (uniqueMapIdTextView != null) {
             uniqueMapIdTextView.setText("" + uniqueMapId);
+        }
+    }
+    
+    private void updateOptimalMovesButton(int optimalMoves, boolean showButton) {
+        if (optimalMovesButton != null) {
+            optimalMovesButton.setText(String.valueOf(optimalMoves));
+            optimalMovesButton.setVisibility(showButton ? View.VISIBLE : View.GONE);
+            
+            // Change button background color based on move count (cycle through 5 colors)
+            int colorIndex = optimalMoves % 5;
+            int backgroundColor;
+            
+            switch (colorIndex) {
+                case 0: // Red
+                    backgroundColor = Color.parseColor("#F44336");
+                    break;
+                case 1: // Green
+                    backgroundColor = Color.parseColor("#4CAF50");
+                    break;
+                case 2: // Yellow
+                    backgroundColor = Color.parseColor("#FFEB3B");
+                    optimalMovesButton.setTextColor(Color.BLACK); // Black text on yellow background
+                    return; // Return early to keep black text
+                case 3: // Blue
+                    backgroundColor = Color.parseColor("#2196F3");
+                    break;
+                case 4: // Gray
+                    backgroundColor = Color.parseColor("#9E9E9E");
+                    break;
+                default:
+                    backgroundColor = Color.parseColor("#1976D2"); // Default blue
+                    break;
+            }
+            
+            // Create drawable with the selected color but keep white border
+            GradientDrawable drawable = new GradientDrawable();
+            drawable.setShape(GradientDrawable.RECTANGLE);
+            drawable.setColor(backgroundColor);
+            drawable.setCornerRadius(32 * getResources().getDisplayMetrics().density); // 32dp corner radius
+            drawable.setStroke(4 * (int) getResources().getDisplayMetrics().density, Color.WHITE); // 4dp white border
+            
+            optimalMovesButton.setBackground(drawable);
+            optimalMovesButton.setTextColor(Color.WHITE); // Reset to white text for most colors
         }
     }
 }

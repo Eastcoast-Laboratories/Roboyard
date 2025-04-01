@@ -1,6 +1,5 @@
 package roboyard.logic.core;
 
-
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GridGameView;
 
@@ -33,6 +32,7 @@ public class MapGenerator {
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
     public static Boolean generateNewMapEachTime = true; // option in settings
+    private int targetCount = 1; // Default to 1 target per color
 
     // Wall configuration
     int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column
@@ -59,6 +59,7 @@ public class MapGenerator {
             if(level == DIFFICULTY_ADVANCED){ // Advanced
                 // nothing to do
             }
+            
             if (generateNewMapEachTime) {
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
                 // TODO: does not work with the roboyard in the middle, that is not moved to the new random position
@@ -66,13 +67,19 @@ public class MapGenerator {
                 // carrePosX=getRandom(3,MainActivity.getBoardWidth()-5);
                 // carrePosY=getRandom(3,MainActivity.getBoardHeight()-5);
             }
-            allowMulticolorTarget = false;
-
-            maxWallsInOneVerticalCol = 3;
-            maxWallsInOneHorizontalRow = 3;
-            wallsPerQuadrant = (int) (MainActivity.getBoardWidth()/3.3);
-
-            loneWallsAllowed = true;
+            
+            if(level == DIFFICULTY_INSANE){ // Insane
+                allowMulticolorTarget = false;
+                // target must be in corner is left to "true"
+            }
+            
+            if(level == DIFFICULTY_IMPOSSIBLE){ // Impossible
+                // Get a completely different wall layout then the target is harder to reach
+                loneWallsAllowed = true;
+                maxWallsInOneVerticalCol = 3;
+                maxWallsInOneHorizontalRow = 3;
+                targetMustBeInCorner = false;
+            }
         }
 
         if(level == DIFFICULTY_INSANE || level == DIFFICULTY_IMPOSSIBLE) {
@@ -87,7 +94,6 @@ public class MapGenerator {
         }
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
-
         }
         
         // Initialize GameLogic with the same configuration
@@ -97,6 +103,36 @@ public class MapGenerator {
         GameLogic.setGenerateNewMapEachTime(generateNewMapEachTime);
         
         Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+    }
+    
+    /**
+     * Sets the number of targets per color for map generation
+     * @param count Number of targets per color (1-4)
+     */
+    public void setTargetCount(int count) {
+        this.targetCount = Math.max(1, Math.min(4, count));
+        
+        // Pass the target count to the GameLogic if it exists
+        if (gameLogic != null) {
+            gameLogic.setTargetCount(this.targetCount);
+        }
+        
+        Timber.d("MapGenerator target count set to %d", this.targetCount);
+    }
+    
+    /**
+     * Gets the current target count setting
+     * @return Number of targets per color (1-4)
+     */
+    public int getTargetCount() {
+        return targetCount;
+    }
+
+    /**
+     * gets the value of generateNewMapEachTime
+     */
+    public static boolean getGenerateNewMapEachTime() {
+        return generateNewMapEachTime;
     }
 
     public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {

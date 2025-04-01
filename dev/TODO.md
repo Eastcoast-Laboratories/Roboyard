@@ -60,3 +60,5 @@
 - @ModernGameFragment.java#L622-624 hintbutton.setenabled(false) hat keinen effect
 
 - randomize number of pre-hints before showing the solution not only on each app start but on each new game 
+
+-add a button in the middle underneath the text view for the hints with a large number of optimal moves that is hidden at first and once the first normal hint is shown it is made visible . the number should have a color depending on the number, cycle through red,green, yellow, blue, gray by modulo 5 and with a white thick border

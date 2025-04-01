@@ -170,6 +170,28 @@
                     />
             </RadioGroup>
 
+            <!-- Target Count Section -->
+            <TextView
+                android:id="@+id/target_count_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Number of Targets:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/target_count_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="Select number of targets"
+                android:minHeight="48dp"
+                android:layout_marginBottom="24dp"
+                android:focusable="true"
+                android:clickable="true" />
+
             <!-- Sound Section -->
             <TextView
                 android:id="@+id/sound_label"
