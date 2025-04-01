@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.ui.components;
 
 import android.content.Context;
 import android.view.accessibility.AccessibilityEvent;
@@ -31,7 +31,8 @@ public class AccessibilityUtil {
             return false;
         }
     }
-    
+
+
     /**
      * Sets a content description on a View only if a screen reader is active
      * @param context The application context

@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.logic.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import driftingdroids.model.Solution;
+import roboyard.eclabs.GridElement;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
 import roboyard.eclabs.solver.SolverStatus;
