@@ -530,7 +530,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("ModernGameFragment: Back button clicked");
             // Undo the last move
             if (gameStateManager.undoLastMove()) {
-                Toast.makeText(requireContext(), "Move undone", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(requireContext(), "Move undone", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(requireContext(), "Nothing to undo", Toast.LENGTH_SHORT).show();
             }
