@@ -79,7 +79,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private TextView txtRobotGoal;
     private Button btnToggleAccessibilityControls;
     private boolean accessibilityControlsVisible = false;
-    
+
+    // Hint managing
+    private int maxPreHints = 3; // Maximum number of pre-hints
+    private int numPreHints = 3; // Number of pre-hints to show (will be set based on game type)
+    private int totalPossibleHints = 0; // Total possible hints including pre-hints
+    private int currentHintStep = 0; // Current hint step (includes pre-hints and regular hints)
+    private boolean showingPreHints = true; // Whether we're showing pre-hints (false after reset)
+
     // Timer variables
     private long startTime = 0L;
     private final Handler timerHandler = new Handler(Looper.getMainLooper());
@@ -494,7 +501,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
                 hintButton.setText(R.string.cancel_hint_button);
-                updateStatusText("Calculating solution...", true);
+                updateStatusText("AI calculating solution...", true);
             } else {
                 // Reset hint button text
                 hintButton.setText(R.string.hint_button);
@@ -532,104 +539,111 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         });
         
         // (Button text: "Hint")
-        // Hint button - get hint from the solver
+        // Hint button - show a hint for the current game
         hintButton = view.findViewById(R.id.hint_button);
         hintButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Hint button clicked");
-            
-            // Check if this is a level game and limit hints
             GameState currentState = gameStateManager.getCurrentState().getValue();
-            if (currentState != null && currentState.getLevelId() > 0) {
-                // This is a level game, check hint count
-                int hintCount = currentState.getHintCount();
-                if (hintCount >= 2) {
-                    // Maximum hints reached
-                    Toast.makeText(requireContext(), "Maximum hints (2) used for this level", Toast.LENGTH_SHORT).show();
-                    // Disable the hint button visually
-                    hintButton.setEnabled(false);
-                    hintButton.setAlpha(0.5f);
-                    return;
-                }
-            }
-            
-            // Check if solver is currently running
-            if (Boolean.TRUE.equals(gameStateManager.isSolverRunning().getValue())) {
-                // If solver is running, pressing the button should cancel
-                Timber.d("ModernGameFragment: Cancelling solver");
-                gameStateManager.cancelSolver();
-                updateStatusText("Hint calculation cancelled", true);
-                return;
-            }
             
             // Check if we have a solution object at all
             GameSolution solution = gameStateManager.getCurrentSolution();
-            if (solution == null || solution.getMoves() == null || solution.getMoves().size() == 0) {
+            if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
                 Timber.d("[HINT] No solution available, calculating...");
-                updateStatusText("Calculating solution...", true);
+                updateStatusText("AI calculating solution...", true);
                 
                 // Start calculating a solution
                 gameStateManager.calculateSolutionAsync(this);
                 return;
             }
             
-            // Check if we've already shown all available hints
-            int currentStep = gameStateManager.getCurrentSolutionStep();
-            int totalMoves = solution.getMoves().size();
+            // Debug the current solution
+            boolean isLevelGame = currentState != null && currentState.getLevelId() > 0;
+            Timber.d("[HINT_DEBUG] Current solution hash: %d, move count: %d, level id: %d", 
+                    System.identityHashCode(solution), 
+                    solution.getMoves().size(),
+                    currentState != null ? currentState.getLevelId() : -1);
             
-            if (currentStep >= totalMoves) {
-                String hint = "All hints have been shown (" + currentStep + "/" + totalMoves + "), resetting to first hint";
-                Timber.d("[HINT] Displayed hint: " + hint);
-                updateStatusText(hint, true);
-                // Reset the solution step counter to show the first hint again
-                gameStateManager.resetSolutionStep();
+            // Debug the first few moves in the solution
+            int moveCount = Math.min(solution.getMoves().size(), 3); // Log up to first 3 moves
+            for (int i = 0; i < moveCount; i++) {
+                IGameMove move = solution.getMoves().get(i);
+                if (move instanceof RRGameMove rrMove) {
+                    Timber.d("[HINT_DEBUG] Solution move %d: Color=%d, Direction=%d", 
+                            i, rrMove.getColor(), rrMove.getDirection());
+                }
+            }
+            
+            // Get total moves for the solution
+            int totalMoves = solution.getMoves().size();
+            boolean isFirstTenLevels = isLevelGame && currentState.getLevelId() <= 10;
+            
+            // Check the current hint step - this is a global counter including pre-hints and regular hints
+            currentHintStep = gameStateManager.getCurrentSolutionStep();
+            Timber.d("[HINT] Total solution moves: %d, current hint step: %d, numPreHints: %d", 
+                    totalMoves, currentHintStep, numPreHints);
+            
+            // LEVEL GAMES - First 10 levels: Show up to 2 normal hints then disable
+            if (isLevelGame && isFirstTenLevels) {
+                // For levels 1-10, just show the first two normal hints
+                if (currentHintStep >= 2) {
+                    // All allowed hints shown for level game
+                    updateStatusText("No more hints available for this level", true);
+                    
+                    // Disable the hint button
+                    hintButton.setEnabled(false);
+                    hintButton.setAlpha(0.5f);
+                    return;
+                }
+                
+                // Show normal hint (no pre-hints)
+                showNormalHint(solution, currentState, totalMoves, currentHintStep);
+                
+                // Increment hint counter 
+                gameStateManager.incrementSolutionStep();
+                
+                // Disable hint button after showing 2 hints for level games 1-10
+                if (currentHintStep >= 1) {  // We already incremented, so check for 1
+                    hintButton.setEnabled(false);
+                    hintButton.setAlpha(0.5f);
+                }
+                
                 return;
             }
             
-            // Get a hint from the game state manager
-            IGameMove hintMove = gameStateManager.getHint();
-            Timber.d("[HINT] Received hint move: %s", hintMove);
-            GameSolution solution2 = gameStateManager.getCurrentSolution();
-            Timber.d("Solution object hash (hint): %s", System.identityHashCode(solution2));
-            
-            if (hintMove != null && hintMove instanceof RRGameMove rrMove) {
-                // Cast to RRGameMove to access the proper methods
-
-                // Log the details of the move
-                Timber.d("[HINT] Robot color: %d, Direction: %d", 
-                        rrMove.getColor(), rrMove.getDirection());
-                
-                // Convert the robotic move to human-readable text
-                String robotColor = getRobotColorName(rrMove.getColor());
-                String direction = getDirectionName(rrMove.getDirection());
-                
-                // Log details for debugging
-                Timber.d("[HINT] Robot color ID: %d, mapped to color name: %s", 
-                        rrMove.getColor(), robotColor);
-                
-                // Update the status text with the hint number and the hint itself
-                String hintText = String.format("%d/%d: Move the %s robot %s",
-                        currentStep + 1, totalMoves, robotColor, direction);
-                updateStatusText(hintText, true);
-                
-                // Increment hint count for level games
-                if (currentState != null && currentState.getLevelId() > 0) {
-                    currentState.incrementHintCount();
-                    Timber.d("Hint count increased to %d for level %d", currentState.getHintCount(), currentState.getLevelId());
-                    
-                    // If we've now reached the maximum hints, disable the hint button
-                    if (currentState.getHintCount() >= 2) {
-                        hintButton.setEnabled(false);
-                        hintButton.setAlpha(0.5f);
-                        Toast.makeText(requireContext(), "Maximum hints (2) used for this level", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                
-                Timber.d("[HINT] Displayed hint: %s", hintText);
-            } else {
-                // No solution found
-                updateStatusText("No solution available", true);
-                Timber.d("[HINT] No valid hint move available");
+            // LEVEL GAMES > 10: No hints at all (button should already be disabled)
+            if (isLevelGame && !isFirstTenLevels) {
+                updateStatusText("No hints available for this level", true);
+                hintButton.setEnabled(false);
+                hintButton.setAlpha(0.5f);
+                return;
             }
+            
+            // RANDOM GAMES
+            // Check if all hints have been shown
+            totalPossibleHints = totalMoves + numPreHints;
+            if (currentHintStep >= totalPossibleHints) {
+                // All hints shown - restart hint system
+                String hintMsg = "All AI hints have been shown (" + totalMoves + ")";
+                updateStatusText(hintMsg, true);
+                Timber.d("[HINT] %s", hintMsg);
+                
+                // Reset hint counter but skip pre-hints on reset
+                gameStateManager.resetSolutionStep();
+                showingPreHints = true;  // TODO: Skip pre-hints on reset
+                return;
+            }
+            
+            // Show pre-hints for random games (if we haven't shown them all yet)
+            if (showingPreHints && currentHintStep < numPreHints) {
+                showPreHint(solution, totalMoves, currentHintStep);
+                gameStateManager.incrementSolutionStep();
+                return;
+            }
+            
+            // Show normal hints
+            int normalHintIndex = showingPreHints ? currentHintStep - numPreHints : currentHintStep;
+            showNormalHint(solution, currentState, totalMoves, normalHintIndex);
+            gameStateManager.incrementSolutionStep();
         });
         
         // (Button text: "Save Map")
@@ -663,7 +677,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
-        // (Button text: "New Game")
+        // TODO: rename Button to newMapButton (text: "New Game")
         // Restart button - restart the current game
         restartButton = view.findViewById(R.id.restart_button);
         // Hide the restart button in level games
@@ -681,6 +695,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Reset timer
             stopTimer();
             startTimer();
+            
+            // Reset hint system for new game
+            gameStateManager.resetSolutionStep();
+            showingPreHints = true;
+            hintButton.setEnabled(true);
+            hintButton.setAlpha(1.0f);
+            Timber.d("[HINT] Reset hint system for new random game via New Game button");
+            
             // Clear any hint text from the status display
             updateStatusText("", false);
             // Announce the robots and their positions
@@ -718,6 +740,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     stopTimer();
                     startTimer();
                     
+                    // Reset hint system for next level
+                    gameStateManager.resetSolutionStep();
+                    showingPreHints = true;
+                    hintButton.setEnabled(true);
+                    hintButton.setAlpha(1.0f);
+                    Timber.d("[HINT] Reset hint system for next level");
+                    
                     // Hide the Next Level button
                     nextLevelButton.setVisibility(View.GONE);
                     
@@ -737,6 +766,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Reset timer
                     stopTimer();
                     startTimer();
+                    
+                    // Reset hint system for new random game
+                    gameStateManager.resetSolutionStep();
+                    showingPreHints = true;
+                    hintButton.setEnabled(true);
+                    hintButton.setAlpha(1.0f);
+                    Timber.d("[HINT] Reset hint system for new random game");
                     
                     // Hide the Next Level button
                     nextLevelButton.setVisibility(View.GONE);
@@ -1439,26 +1475,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Get color name for a robot ID
      */
     private String getRobotColorName(int robotId) {
-        // Log the color ID for debugging purposes
         Timber.d("[HINT_DEBUG] getRobotColorName called with ID: %d", robotId);
         
-        // Check if the robotId is an Android RGB color value rather than an index
-        if (robotId < 0) { // RGB colors as integers are usually negative in Android
-            Timber.d("[HINT] Detected RGB color value instead of index: %d", robotId);
-            // Map common Android color constants to their names
-            if (robotId == Color.RED) return "Red";
-            if (robotId == Color.GREEN) return "Green";
-            if (robotId == Color.BLUE) return "Blue";
-            if (robotId == Color.YELLOW) return "Yellow";
-            
-            // Convert to standard 0-3 index based on RGB value
-            if ((robotId & 0xFF0000) != 0) return "Red";
-            if ((robotId & 0x00FF00) != 0) return "Green";
-            if ((robotId & 0x0000FF) != 0) return "Blue";
-            if ((robotId & 0xFFFF00) == 0xFFFF00) return "Yellow";
-        }
-        
-        // Standard index-based mapping
         switch (robotId) {
             case Constants.COLOR_RED: return "Red";
             case Constants.COLOR_GREEN: return "Green";
@@ -1467,8 +1485,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             default: return "Unknown: " + robotId;
         }
     }
-
-     /**
+    
+    /**
      * Get color name for a robot
      */
     private String getRobotColorNameByGridElement(GameElement robot) {
@@ -1481,6 +1499,93 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             case 2: return "Blue";
             case 3: return "Yellow";
             default: return "Unknown: " + c;
+        }
+    }
+    
+    /**
+     * Shows a pre-hint message based on the current hint step
+     * @param solution Current game solution
+     * @param totalMoves Total number of moves in the solution
+     * @param currentHintStep Current hint step (0-based index)
+     */
+    private void showPreHint(GameSolution solution, int totalMoves, int currentHintStep) {
+        String preHintText;
+        
+        // Always show numPreHints pre-hints, decreasing from solution+numPreHints to solution+1
+        // For example, if solution is 7 moves and numPreHints is 4, show:
+        // "less than 11", "less than 10", "less than 9", "less than 8", then "exactly 7"
+        int offset = numPreHints - currentHintStep;
+        if (offset > 0) {
+            // Regular pre-hints show "less than X+offset moves"
+            int hintValue = totalMoves + offset;
+            preHintText = "The AI found a solution in less than " + hintValue + " moves";
+            Timber.d("[HINT] Showing pre-hint %d/%d: less than %d moves", 
+                    currentHintStep + 1, numPreHints, hintValue);
+        } else {
+            // Last pre-hint shows the exact move count with toast notification
+            preHintText = "The AI found a solution in " + totalMoves + " moves";
+            Timber.d("[HINT] Showing final pre-hint: exactly %d moves", totalMoves);
+            
+            // Show an additional toast message for the last pre-hint
+            Toast.makeText(requireContext(), 
+                "Solution found: " + totalMoves + " moves", 
+                Toast.LENGTH_SHORT).show();
+        }
+        
+        // Display the pre-hint
+        updateStatusText(preHintText, true);
+        Timber.d("[HINT] Displayed pre-hint: %s", preHintText);
+    }
+    
+    /**
+     * Shows a normal hint with robot movement information
+     * @param solution Current game solution
+     * @param currentState Current game state
+     * @param totalMoves Total number of moves in the solution
+     * @param hintIndex Index of the hint to show (0-based)
+     */
+    private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
+        // Validate that the hint index is within bounds
+        if (hintIndex < 0 || hintIndex >= totalMoves) {
+            Timber.e("[HINT] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
+            updateStatusText("All hints have been shown", true);
+            return;
+        }
+        
+        try {
+            // Get the specific move for this hint
+            IGameMove hintMove = solution.getMoves().get(hintIndex);
+            Timber.d("[HINT] Showing normal hint #%d: %s", hintIndex + 1, hintMove);
+            
+            if (hintMove instanceof RRGameMove rrMove) {
+                // Get the robot's color name - use the color from the move
+                String robotColorName = getRobotColorName(rrMove.getColor());
+                
+                // Get the direction name
+                String directionName = getDirectionName(rrMove.getDirection());
+                
+                // Calculate the hint number to display (1-based)
+                int displayHintNumber = hintIndex + 1;
+                
+                // Log details to help with debugging
+                Timber.d("[HINT_DEBUG] Robot color: %d, Direction: %d, Solution hash: %d", 
+                        rrMove.getColor(), rrMove.getDirection(), System.identityHashCode(solution));
+                
+                // Create the hint message
+                String hintMessage = displayHintNumber + "/" + totalMoves + ": Move the " + 
+                        robotColorName + " robot " + directionName.toLowerCase();
+                
+                // Update the status text
+                updateStatusText(hintMessage, true);
+                Timber.d("[HINT] Displayed hint: %s", hintMessage);
+            } else {
+                // Error in hint system
+                Timber.e("[HINT] Failed to get a valid hint move");
+                updateStatusText("No valid hint available", true);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[HINT] Error displaying normal hint #%d", hintIndex + 1);
+            updateStatusText("Error displaying hint", true);
         }
     }
     
@@ -1518,49 +1623,65 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     @Override
     public void onSolutionCalculationStarted() {
-        Timber.d("[SOLUTION SOLVER] ModernGameFragment: onSolutionCalculationStarted");
+        Timber.d("ModernGameFragment: Solution calculation started");
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setText(R.string.cancel_hint_button);
-            updateStatusText("Calculating solution...", true);
-            Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show calculation in progress");
+            updateStatusText("AI is thinking...", true);
+            Timber.d("ModernGameFragment: UI updated to show calculation in progress");
         });
     }
 
     @Override
     public void onSolutionCalculationCompleted(GameSolution solution) {
-        Timber.d("[SOLUTION CALLBACK] ModernGameFragment.onSolutionCalculationCompleted ENTERED");
-        if (solution != null && solution.getMoves() != null) {
-            Timber.d("[SOLUTION SOLVER][MOVES] Solution has %d moves", solution.getMoves().size());
-            
-            // Check if solution has less than 4 moves and not in level mode
-            int moveCount = solution.getMoves().size();
-            GameState currentState = gameStateManager.getCurrentState().getValue();
-            boolean isLevelMode = (currentState != null && currentState.getLevelId() > 0);
+        Timber.d("ModernGameFragment: Solution calculation completed. Solution has %d moves",
+                solution.getMoves().size());
+        
+        // Initialize hints variables
+        totalPossibleHints = solution.getMoves().size();
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        boolean isLevelGame = currentState != null && currentState.getLevelId() > 0;
+        boolean isFirstTenLevels = isLevelGame && currentState.getLevelId() <= 10;
+        
+        // Set number of pre-hints based on game type
+        if (isLevelGame) {
+            numPreHints = 0; // No pre-hints for level games
+            if (isFirstTenLevels) {
+                // For levels 1-10, allow two normal hints (handled in hint click)
+                hintButton.setEnabled(true);
+            } else {
+                // For levels > 10, disable hint button immediately
+                hintButton.setEnabled(false);
+                hintButton.setAlpha(0.5f);
+            }
         } else {
-            Timber.w("[SOLUTION CALLBACK] Solution or moves is null!");
+            // Random game - Show pre-hints
+            numPreHints = 3; // Could randomize between 2-4 in the future
+            hintButton.setEnabled(true);
         }
         
-        // Force UI update on main thread with the correct message
-        Timber.d("[SOLUTION CALLBACK] About to run on UI thread");
-        requireActivity().runOnUiThread(() -> {
-            Timber.d("[SOLUTION CALLBACK] Now running on UI thread");
-            // Reset hint button text back to "Hint"
-            hintButton.setText(R.string.hint_button);
-            // Make sure status text is set and visible
-            updateStatusText("Solution ready! Press hint", true);
-            Timber.d("[SOLUTION CALLBACK] *** SOLUTION IS READY - UI UPDATED ***");
-        });
+        // Reset hint counter and show pre-hints initially
+        currentHintStep = 0;
+        showingPreHints = true;
+        
+        // Log hint setup
+        Timber.d("[HINT] Hint system initialized: totalMoves=%d, numPreHints=%d, isLevelGame=%b", 
+                totalPossibleHints, numPreHints, isLevelGame);
+        
+        // Reset hint button text back to "Hint"
+        hintButton.setText(R.string.hint_button);
+        updateStatusText("AI found a solution!", true);
+        Timber.d("ModernGameFragment: UI updated to show solution found");
     }
 
     @Override
     public void onSolutionCalculationFailed(String errorMessage) {
-        Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed - %s", errorMessage);
+        Timber.d("ModernGameFragment: Solution calculation failed - %s", errorMessage);
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
             hintButton.setText(R.string.hint_button);
             updateStatusText("Could not find a solution: " + errorMessage, true);
-            Timber.d("[SOLUTION SOLVER] ModernGameFragment: UI updated to show error");
+            Timber.d("ModernGameFragment: UI updated to show error");
         });
     }
     

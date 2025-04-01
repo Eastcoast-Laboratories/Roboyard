@@ -158,76 +158,33 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
     
     /**
-     * Start a new random game with the modern UI
-     * This is similar to startNewGame() but ensures the game is displayed in the modern UI
+     * Start a new modern game
      */
     public void startModernGame() {
         Timber.d("GameStateManager: startModernGame() called");
         
-        // Reset statistics first 
-        resetStatistics();
+        // Reset any existing solver state to ensure a clean calculation for the new game
+        SolverManager solverManager = getSolverManager();
+        solverManager.resetInitialization();
+        solverManager.cancelSolver(); // Cancel any running solver process
+        
+        // Clear any existing solution to prevent it from being reused
+        currentSolution = null;
+        currentSolutionStep = 0;
         
         // Reset regeneration counter
         regenerationCount = 0;
         
-        // Get board dimensions from BoardSizeManager
-        int width = boardSizeManager.getBoardWidth();
-        int height = boardSizeManager.getBoardHeight();
-        
-        createValidGame(width, height);
+        // Create a new valid game (will regenerate if solution is too simple)
+        createValidGame(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight());
         
         // Set UI mode to modern
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
         
-        Timber.d("GameStateManager: startModernGame() complete");
-    }
-    
-    /**
-     * Creates a valid game with at least MIN_REQUIRED_MOVES difficulty
-     * @param width Width of the board
-     * @param height Height of the board
-     */
-    private void createValidGame(int width, int height) {
-        Timber.d("GameStateManager: createValidGame() called");
-        
-        // Create a new random game state
-        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
-        Timber.d("GameStateManager: Created new random GameState");
-        
-        // Set the game state
-        currentState.setValue(newState);
-        moveCount.setValue(0);
-        isGameComplete.setValue(false);
-        
-        // Clear the state history
-        stateHistory.clear();
-        squaresMovedHistory.clear();
-        
-        // Reset solver status and solution
-        currentSolution = null;
-        currentSolutionStep = 0;
-        
-        // Initialize the solver with grid elements from the new state
-        ArrayList<GridElement> gridElements = newState.getGridElements();
-        getSolverManager().resetInitialization();
-        getSolverManager().initialize(gridElements);
-        
+        // Record start time
         startTime = System.currentTimeMillis();
         
-        // Start calculating the solution, but use our internal validation callback
-        if (validateDifficulty) {
-            // Temporarily set validateDifficulty to false to prevent infinite recursion
-            // if all generated puzzles are too easy
-            validateDifficulty = false;
-            
-            // Calculate solution with our own callback to validate difficulty
-            Timber.d("GameStateManager: Validating puzzle difficulty...");
-            calculateSolutionAsync(new DifficultyValidationCallback(width, height));
-        } else {
-            // Regular game initialization, don't validate difficulty
-            validateDifficulty = true; // Reset for next time
-            calculateSolutionAsync(null);
-        }
+        Timber.d("GameStateManager: startModernGame() complete");
     }
     
     /**
@@ -242,6 +199,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[SOLUTION SOLVER] startLevelGame: Solver already running, not creating new game state");
             return;
         }
+        
+        // Reset any existing solver state to ensure a clean calculation for the new level
+        SolverManager solverManager = getSolverManager();
+        solverManager.resetInitialization();
+        solverManager.cancelSolver(); // Cancel any running solver process
+        
+        // Clear any existing solution to prevent it from being reused
+        currentSolution = null;
+        currentSolutionStep = 0;
         
         // Load level from assets
         GameState state = GameState.loadLevel(getApplication(), levelId);
@@ -267,10 +233,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION SOLVER] Initializing solver with %d grid elements from level %d", 
                 gridElements.size(), levelId);
         getSolverManager().initialize(gridElements);
-        
-        // Reset solution state
-        currentSolution = null;
-        currentSolutionStep = 0;
         
         // Start calculating the solution automatically
         calculateSolutionAsync(null);
@@ -592,7 +554,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             hintsShown++;
             
             IGameMove move = currentSolution.getMoves().get(currentSolutionStep);
-            currentSolutionStep++;
+            incrementSolutionStep();
             return move;
         }
         return null;
@@ -1545,10 +1507,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
     
     /**
+     * Increment the solution step counter
+     */
+    public void incrementSolutionStep() {
+        currentSolutionStep++;
+    }
+    
+    /**
      * Reset the solution step counter to show hints from the beginning
      */
     public void resetSolutionStep() {
-        Timber.d("GameStateManager: Resetting solution step counter");
         currentSolutionStep = 0;
     }
     
@@ -1678,6 +1646,50 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         Timber.d("[SOLUTION SOLVER][MOVES] Maximum required moves for difficulty %d: %d", difficulty, maxMoves);
         return maxMoves;
+    }
+    
+    /**
+     * Creates a valid game with at least MIN_REQUIRED_MOVES difficulty
+     * @param width Width of the board
+     * @param height Height of the board
+     */
+    private void createValidGame(int width, int height) {
+        Timber.d("GameStateManager: createValidGame() called");
+        
+        // Create a new random game state
+        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
+        Timber.d("GameStateManager: Created new random GameState");
+        
+        // Set the game state
+        currentState.setValue(newState);
+        moveCount.setValue(0);
+        isGameComplete.setValue(false);
+        
+        // Clear the state history
+        stateHistory.clear();
+        squaresMovedHistory.clear();
+        
+        // Initialize the solver with grid elements from the new state
+        ArrayList<GridElement> gridElements = newState.getGridElements();
+        getSolverManager().resetInitialization();
+        getSolverManager().initialize(gridElements);
+        
+        startTime = System.currentTimeMillis();
+        
+        // Start calculating the solution, but use our internal validation callback
+        if (validateDifficulty) {
+            // Temporarily set validateDifficulty to false to prevent infinite recursion
+            // if all generated puzzles are too easy
+            validateDifficulty = false;
+            
+            // Calculate solution with our own callback to validate difficulty
+            Timber.d("GameStateManager: Validating puzzle difficulty...");
+            calculateSolutionAsync(new DifficultyValidationCallback(width, height));
+        } else {
+            // Regular game initialization, don't validate difficulty
+            validateDifficulty = true; // Reset for next time
+            calculateSolutionAsync(null);
+        }
     }
     
     /**

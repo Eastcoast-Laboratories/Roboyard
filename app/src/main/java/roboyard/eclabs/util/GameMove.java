@@ -1,5 +1,8 @@
 package roboyard.eclabs.util;
 
+
+import roboyard.eclabs.Constants;
+
 /**
  * A class representing a single robot move in the game.
  * This provides a standardized format for representing moves
@@ -7,16 +10,16 @@ package roboyard.eclabs.util;
  */
 public class GameMove {
     // Robot identifiers
-    public static final int ROBOT_RED = 0;
-    public static final int ROBOT_GREEN = 1;
-    public static final int ROBOT_BLUE = 2;
-    public static final int ROBOT_YELLOW = 3;
+    public static final int ROBOT_RED = Constants.COLOR_RED;
+    public static final int ROBOT_GREEN = Constants.COLOR_GREEN;
+    public static final int ROBOT_BLUE = Constants.COLOR_BLUE;
+    public static final int ROBOT_YELLOW = Constants.COLOR_YELLOW;
     
     // Move directions
-    public static final int DIRECTION_NORTH = 0;
-    public static final int DIRECTION_EAST = 1;
-    public static final int DIRECTION_SOUTH = 2;
-    public static final int DIRECTION_WEST = 3;
+    public static final int DIRECTION_NORTH = Constants.NORTH;
+    public static final int DIRECTION_EAST = Constants.EAST;
+    public static final int DIRECTION_SOUTH = Constants.SOUTH;
+    public static final int DIRECTION_WEST = Constants.WEST;
     
     private final int robotId;
     private final int direction;

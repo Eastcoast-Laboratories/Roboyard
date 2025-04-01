@@ -58,11 +58,28 @@
 - win stop timer also in random game
 
 - add some pre-hints to the hints:
-- first 2-4 hints are saing "The AI found a solution in less than max+1 to max+3 moves"
-- the next hint;  "The AI found a solution in X moves"
- - when this last pre-hint is shown, also announce this as toast message
-- then the next hints are as now: "1/X move the X Robot X"
-- dont show this pre-hints in the first 10 level games
-
-
-- extract the credits screen content from git id 12d084d4 and add it to the main menu at the very bottom left corner of the screen, but not as button, but as just an underlined text. (clickable) the fragment for the credits screen should contain the text from the old credist screen with clickable buttons
+1. For random games:
+  ◦ Show numPreHints (2-4) hints saying "The AI found a solution in less than [solution+numPreHints] moves" and decreasing
+  ◦ Show a final exact hint "The AI found a solution in X moves" with toast notification
+  ◦ Then show all actual move hints numbered "1/X", "2/X", etc.
+  ◦ In the example: if solution is 7 moves and numPreHints is 4, they should see:
+      ▪ "The AI found a solution in less than 11 moves" (7+4)
+      ▪ "The AI found a solution in less than 10 moves" (7+3)
+      ▪ "The AI found a solution in less than 9 moves" (7+2)
+      ▪ "The AI found a solution in less than 8 moves" (7+1)
+      ▪ "The AI found a solution in 7 moves" (with toast)
+      ▪ Then all 7 move hints
+      ▪ Then "All hints are shown"
+        
+2. For level games 1 - 10:
+  ◦ Always show the first 2 normal hints (no pre-hints)
+  ◦ Then diable the hint button
+    
+3. For level games > 10:
+  ◦ No pre-hints
+  ◦ No normal hints
+  ◦ diable the hint button
+    
+4. After resetting hint count (after seeing all hints):
+  ◦ Only show normal hints, no pre-hints in a random game
+  ◦ in level games nothing more

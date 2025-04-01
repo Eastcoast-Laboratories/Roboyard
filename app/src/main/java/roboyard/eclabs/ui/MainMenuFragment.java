@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -37,6 +38,16 @@ public class MainMenuFragment extends BaseGameFragment {
         settingsButton = view.findViewById(R.id.settings_button);
         helpButton = view.findViewById(R.id.help_button);
         levelEditorButton = view.findViewById(R.id.level_editor_button);
+        
+        // Set up credits link
+        TextView creditsLink = view.findViewById(R.id.credits_link);
+        creditsLink.setPaintFlags(creditsLink.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        creditsLink.setOnClickListener(v -> {
+            Timber.d("MainMenuFragment: Credits link clicked");
+            // Create a new CreditsFragment instance
+            CreditsFragment creditsFragment = new CreditsFragment();
+            navigateToDirect(creditsFragment);
+        });
         
         // Set up button listeners
         setupButtons();
