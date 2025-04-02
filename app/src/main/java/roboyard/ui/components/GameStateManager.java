@@ -48,7 +48,6 @@ import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.SolverManager;
 import roboyard.eclabs.util.BrailleSpinner;
-import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.logic.core.GridElement;
@@ -100,9 +99,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long startTime = 0;
     private Bitmap minimap = null;
     
-    // Difficulty manager
-    private final DifficultyManager difficultyManager;
-    
     // UI mode manager
     private final UIModeManager uiModeManager;
     
@@ -120,9 +116,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // We'll use lazy initialization for solver now - do not create it here
         
         context = application.getApplicationContext();
-        
-        // Initialize difficulty manager
-        difficultyManager = DifficultyManager.getInstance(context);
         
         // Initialize UI mode manager
         uiModeManager = UIModeManager.getInstance(context);
@@ -1098,11 +1091,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
-     * Get the current difficulty level from DifficultyManager
+     * Get the current difficulty level from Preferences
      * @return Current difficulty level
      */
     public int getDifficulty() {
-        return difficultyManager.getDifficulty();
+        return Preferences.difficulty;
     }
     
     /**
@@ -1110,15 +1103,26 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return String representation of the current difficulty level
      */
     public String getDifficultyString() {
-        return difficultyManager.getDifficultyString();
+        switch (getDifficulty()) {
+            case Constants.DIFFICULTY_BEGINNER:
+                return "Beginner";
+            case Constants.DIFFICULTY_INTERMEDIATE:
+                return "Intermediate";
+            case Constants.DIFFICULTY_INSANE:
+                return "Insane";
+            case Constants.DIFFICULTY_IMPOSSIBLE:
+                return "Impossible";
+            default:
+                return "Unknown";
+        }
     }
     
     /**
-     * Set the difficulty level in DifficultyManager
+     * Set the difficulty level in Preferences
      * @param difficulty New difficulty level
      */
     public void setDifficulty(int difficulty) {
-        difficultyManager.setDifficulty(difficulty);
+        Preferences.difficulty = difficulty;
     }
 
     /**
@@ -1596,16 +1600,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return minimum number of moves required for current difficulty
      */
     private int getMinimumRequiredMoves() {
-        int difficulty = difficultyManager.getDifficulty();
+        int difficulty = Preferences.difficulty;
         int minMoves = 0;
         switch (difficulty) {
-            case DifficultyManager.DIFFICULTY_INTERMEDIATE:
+            case Constants.DIFFICULTY_INTERMEDIATE:
                 minMoves = MIN_MOVES_ADVANCED;
                 break;
-            case DifficultyManager.DIFFICULTY_INSANE:
+            case Constants.DIFFICULTY_INSANE:
                 minMoves = MIN_MOVES_INSANE;
                 break;
-            case DifficultyManager.DIFFICULTY_IMPOSSIBLE:
+            case Constants.DIFFICULTY_IMPOSSIBLE:
                 minMoves = MIN_MOVES_IMPOSSIBLE;
                 break;
             default:
@@ -1616,14 +1620,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     private int getMaximumRequiredMoves() {
-        int difficulty = difficultyManager.getDifficulty();
+        int difficulty = Preferences.difficulty;
         int maxMoves = 9999;
         switch (difficulty) {
-            case DifficultyManager.DIFFICULTY_INTERMEDIATE:
+            case Constants.DIFFICULTY_INTERMEDIATE:
                 maxMoves = MAX_MOVES_ADVANCED;
                 break;
-            case DifficultyManager.DIFFICULTY_INSANE:
-            case DifficultyManager.DIFFICULTY_IMPOSSIBLE:
+            case Constants.DIFFICULTY_INSANE:
+            case Constants.DIFFICULTY_IMPOSSIBLE:
                 break;
             default:
                 maxMoves = MAX_MOVES_BEGINNER;
@@ -1643,8 +1647,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Create a new random game state using static Preferences
         GameState newState = GameState.createRandom();
         Timber.d("GameStateManager: Created new random GameState with robotCount=%d, targetColors=%d", 
-                roboyard.logic.core.Preferences.robotCount, 
-                roboyard.logic.core.Preferences.targetColors);
+                Preferences.robotCount, 
+                Preferences.targetColors);
         
         // Set the game state
         currentState.setValue(newState);

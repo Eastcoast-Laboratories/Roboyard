@@ -448,7 +448,6 @@ public class SettingsFragment extends Fragment {
                 // Update static board size variables
                 Context context = requireContext();
                 if (context instanceof MainActivity) {
-                    MainActivity mainActivity = (MainActivity) context;
                     MainActivity.boardSizeX = width;
                     MainActivity.boardSizeY = height;
                     
@@ -494,9 +493,6 @@ public class SettingsFragment extends Fragment {
             
             // Save difficulty setting
             Preferences.setDifficulty(difficultyLevel);
-            
-            // Also update the numeric difficulty value in DifficultyManager
-            roboyard.eclabs.util.DifficultyManager.getInstance(requireActivity()).setDifficulty(difficultyLevel);
         });
         
         // New map radio group
