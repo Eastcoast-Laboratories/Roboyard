@@ -291,7 +291,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 if (saveData != null && !saveData.isEmpty()) {
                     Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
                     if (metadata != null && metadata.containsKey("MAPNAME")) {
-                        name = metadata.get("MAPNAME") + " (Auto-save)";
+                        name = metadata.get("MAPNAME") + "    auto-save";
                         Timber.d("Found map name in autosave slot: %s", name);
                     }
                     
@@ -409,6 +409,21 @@ public class SaveGameFragment extends BaseGameFragment {
      * Helper method to create a minimap bitmap from a map path
      */
     private Bitmap createMinimapFromPath(Context context, String mapPath, int width, int height) {
+        // Try to load the save data from the file
+        String saveData = FileReadWrite.loadAbsoluteData(mapPath);
+        if (saveData != null && !saveData.isEmpty()) {
+            try {
+                // Parse the game state from the save data
+                GameState gameState = GameState.parseFromSaveData(saveData, context);
+                if (gameState != null) {
+                    // Use the MinimapGenerator to create a proper minimap from the game state
+                    return MinimapGenerator.getInstance().generateMinimap(context, gameState, width, height);
+                }
+            } catch (Exception e) {
+                Timber.e(e, "Error creating minimap from save data");
+            }
+        }
+        
         // Create a simple placeholder bitmap for the minimap
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);

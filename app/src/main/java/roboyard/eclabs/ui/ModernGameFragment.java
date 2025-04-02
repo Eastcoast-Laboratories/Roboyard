@@ -113,7 +113,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     // Autosave variables
     private final Handler autosaveHandler = new Handler(Looper.getMainLooper());
     private boolean autosaveRunning = false;
-    private static final int AUTOSAVE_INTERVAL_MS = 2000; // 60 seconds
+    private static final int AUTOSAVE_INTERVAL_MS = 60 * 1000; // 60 seconds
     private final Runnable autosaveRunnable = new Runnable() {
         @Override
         public void run() {

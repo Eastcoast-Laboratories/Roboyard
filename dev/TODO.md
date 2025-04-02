@@ -53,6 +53,9 @@
 - when loading a map, the mapname is not shown
 
 - for debugging: add a skip button to levels, which will just move the robot to its target in one move
-
+- multi-color target is gone
 - Beginner
   - show any puzzles with solutions with at least 4-6 moves (max 6 not always works )
+
+- when saving a game and directly load it again, then save again and the next time it loads, it has no target, 
+- the same: if oyu start the app and directly load the auto save game, it has no target

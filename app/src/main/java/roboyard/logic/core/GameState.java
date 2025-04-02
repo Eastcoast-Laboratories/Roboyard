@@ -716,7 +716,7 @@ public class GameState implements Serializable {
      * @param context The context
      * @return The parsed game state or null if parsing failed
      */
-    private static GameState parseFromSaveData(String saveData, Context context) {
+    public static GameState parseFromSaveData(String saveData, Context context) {
         try {
             String[] lines = saveData.split("\n");
             Timber.d("Parsing save data with %d lines", lines.length);
