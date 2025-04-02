@@ -47,12 +47,12 @@ import roboyard.eclabs.ui.LevelCompletionManager;
 import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.SolverManager;
-import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.DifficultyManager;
 import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.logic.core.GridElement;
+import roboyard.logic.core.Preferences;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import timber.log.Timber;
@@ -100,9 +100,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long startTime = 0;
     private Bitmap minimap = null;
     
-    // Board size manager
-    private final BoardSizeManager boardSizeManager;
-    
     // Difficulty manager
     private final DifficultyManager difficultyManager;
     
@@ -123,9 +120,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // We'll use lazy initialization for solver now - do not create it here
         
         context = application.getApplicationContext();
-        
-        // Initialize board size manager
-        boardSizeManager = BoardSizeManager.getInstance(context);
         
         // Initialize difficulty manager
         difficultyManager = DifficultyManager.getInstance(context);
@@ -176,7 +170,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         regenerationCount = 0;
         
         // Create a new valid game (will regenerate if solution is too simple)
-        createValidGame(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight());
+        createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
         
         // Set UI mode to modern
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
@@ -736,23 +730,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public LiveData<Boolean> isGameComplete() { return isGameComplete; }
     public LiveData<Boolean> getSoundEnabled() { return soundEnabled; }
     public LiveData<Boolean> isSolverRunning() { return isSolverRunning; }
-    
-    /**
-     * Get the board width from BoardSizeManager
-     * @return Current board width
-     */
-    public int getBoardWidth() {
-        Timber.d("[BOARD_SIZE_DEBUG] GameStateManager.getBoardWidth() called, returning: %d", boardSizeManager.getBoardWidth());
-        return boardSizeManager.getBoardWidth();
-    }
-    
-    /**
-     * Get the board height from BoardSizeManager
-     * @return Current board height
-     */
-    public int getBoardHeight() {
-        return boardSizeManager.getBoardHeight();
-    }
 
     /**
      * Setters for game settings
@@ -1434,7 +1411,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 
                 // Create a new game after a short delay to ensure the solver is fully reset
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    createValidGame(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight());
+                    createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
                 }, 100);
                 return;
             } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {

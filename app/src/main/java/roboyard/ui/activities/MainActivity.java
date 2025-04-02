@@ -9,7 +9,6 @@ import roboyard.ui.components.GamePiece;
 import roboyard.ui.components.GameMovementInterface;
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.ui.FragmentHostActivity;
-import roboyard.eclabs.util.BoardSizeManager;
 import android.graphics.Canvas;
 import android.app.Activity;
 import android.content.Context;
@@ -150,10 +149,11 @@ public class MainActivity extends FragmentActivity
      * Initialize game settings from preferences
      */
     private void initGameSettings() {
-        // Load board size from preferences or use default if not set
-        loadBoardSizeFromPreferences(this);
+        // Use board size directly from Preferences class
+        boardSizeX = roboyard.logic.core.Preferences.boardSizeWidth;
+        boardSizeY = roboyard.logic.core.Preferences.boardSizeHeight;
         Timber.d("Initialized with board size: %dx%d", boardSizeX, boardSizeY);
-        
+
         // Load map generation preference
         String newMapSetting = Preferences.getPreferenceValue(this, "newMapEachTime");
         if (newMapSetting == null) {
@@ -546,15 +546,6 @@ public class MainActivity extends FragmentActivity
         Preferences.setPreferences(this, "boardSizeX", String.valueOf(x));
         Preferences.setPreferences(this, "boardSizeY", String.valueOf(y));
         
-        // Also update BoardSizeManager to ensure consistency
-        try {
-            roboyard.eclabs.util.BoardSizeManager boardSizeManager = roboyard.eclabs.util.BoardSizeManager.getInstance(context);
-            boardSizeManager.setBoardSize(x, y);
-            Timber.d("[BOARD_SIZE_DEBUG] Updated BoardSizeManager with size: %dx%d", x, y);
-        } catch (Exception e) {
-            Timber.e(e, "[BOARD_SIZE_DEBUG] Error updating BoardSizeManager");
-        }
-        
         Timber.d("[BOARD_SIZE_DEBUG] Board size saved to preferences: %dx%d", x, y);
     }
 
@@ -572,45 +563,5 @@ public class MainActivity extends FragmentActivity
      */
     public static int getBoardHeight() {
         return boardSizeY;
-    }
-
-    /**
-     * Load board size from preferences or use default if not set
-     */
-    public void loadBoardSizeFromPreferences(Activity activity) {
-        String boardSizeXStr = Preferences.getPreferenceValue(activity, "boardSizeX");
-        String boardSizeYStr = Preferences.getPreferenceValue(activity, "boardSizeY");
-
-        Timber.d("Loading board size from preferences: X=%s, Y=%s", boardSizeXStr, boardSizeYStr);
-
-        if (boardSizeXStr != null && !boardSizeXStr.isEmpty()) {
-            boardSizeX = Integer.parseInt(boardSizeXStr);
-        } else {
-            Timber.d("[BOARD_SIZE_DEBUG] MainActivity.loadBoardSizeFromPreferences - Using default board size: %dx%d", DEFAULT_BOARD_SIZE_X, DEFAULT_BOARD_SIZE_Y);
-            boardSizeX = DEFAULT_BOARD_SIZE_X;
-        }
-
-        if (boardSizeYStr != null && !boardSizeYStr.isEmpty()) {
-            boardSizeY = Integer.parseInt(boardSizeYStr);
-        } else {
-            boardSizeY = DEFAULT_BOARD_SIZE_Y;
-        }
-        
-        // Also sync with BoardSizeManager to ensure consistency
-        try {
-            roboyard.eclabs.util.BoardSizeManager boardSizeManager = roboyard.eclabs.util.BoardSizeManager.getInstance(activity);
-            
-            // Only set if necessary (to avoid circular updates)
-            if (boardSizeManager.getBoardWidth() != boardSizeX || boardSizeManager.getBoardHeight() != boardSizeY) {
-                Timber.d("[BOARD_SIZE_DEBUG] MainActivity.loadBoardSizeFromPreferences - Syncing with BoardSizeManager: %dx%d", boardSizeX, boardSizeY);
-                boardSizeManager.setBoardSize(boardSizeX, boardSizeY);
-            } else {
-                Timber.d("[BOARD_SIZE_DEBUG] MainActivity.loadBoardSizeFromPreferences - BoardSizeManager already in sync: %dx%d", boardSizeX, boardSizeY);
-            }
-        } catch (Exception e) {
-            Timber.e(e, "[BOARD_SIZE_DEBUG] Error syncing with BoardSizeManager");
-        }
-        
-        Timber.d("Board size set to: %dx%d", boardSizeX, boardSizeY);
     }
 }

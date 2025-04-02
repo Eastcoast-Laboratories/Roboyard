@@ -1531,6 +1531,16 @@ public class GameState implements Serializable {
         int boardSizeX = Preferences.boardSizeWidth;
         int boardSizeY = Preferences.boardSizeHeight;
         
+        // Safety check: ensure board dimensions are valid (at least 8x8)
+        if (boardSizeX <= 0 || boardSizeY <= 0) {
+            Timber.tag(TAG).e("[BOARD_SIZE_DEBUG] Invalid board dimensions: %dx%d, using default 16x16", boardSizeX, boardSizeY);
+            boardSizeX = 16;
+            boardSizeY = 16;
+            
+            // Also update the Preferences to fix the issue permanently
+            Preferences.setBoardSize(boardSizeX, boardSizeY);
+        }
+        
         // Set the board size in MainActivity for compatibility with existing code
         MainActivity.boardSizeX = boardSizeX;
         MainActivity.boardSizeY = boardSizeY;

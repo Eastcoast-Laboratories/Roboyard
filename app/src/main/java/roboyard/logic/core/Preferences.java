@@ -2,6 +2,7 @@ package roboyard.logic.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -11,6 +12,7 @@ import timber.log.Timber;
  * This class should be initialized at app start and updated only from the settings screen.
  */
 public class Preferences {
+    // Use a consistent name for SharedPreferences across the entire app
     private static final String PREFS_NAME = "RoboYard";
     private static SharedPreferences prefs;
     
@@ -19,8 +21,9 @@ public class Preferences {
     private static final String KEY_TARGET_COLORS = "target_colors";
     private static final String KEY_SOUND_ENABLED = "sound_enabled";
     private static final String KEY_DIFFICULTY = "difficulty";
-    private static final String KEY_BOARD_SIZE_WIDTH = "board_width";
-    private static final String KEY_BOARD_SIZE_HEIGHT = "board_height";
+    // Use the same keys as BoardSizeManager for compatibility
+    private static final String KEY_BOARD_SIZE_WIDTH = "boardSizeX";
+    private static final String KEY_BOARD_SIZE_HEIGHT = "boardSizeY";
     private static final String KEY_GENERATE_NEW_MAP = "generate_new_map";
     private static final String KEY_ACCESSIBILITY_MODE = "accessibility_mode";
     
@@ -75,11 +78,21 @@ public class Preferences {
             throw new IllegalArgumentException("Context cannot be null");
         }
         
-        prefs = context.getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        // Always use the application context to avoid memory leaks
+        Context appContext = context.getApplicationContext();
+        
+        // Get the shared preferences instance
+        prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        
+        // Load all cached values from SharedPreferences
         loadCachedValues();
         
-        Timber.d("[PREFERENCES] Initialized with robotCount: %d, targetColors: %d, boardSize: %dx%d", 
-                robotCount, targetColors, boardSizeWidth, boardSizeHeight);
+        Timber.d("[PREFERENCES] Initialized with robotCount: %d, targetColors: %d, boardSize: %dx%d, sound: %b, difficulty: %d", 
+                robotCount, targetColors, boardSizeWidth, boardSizeHeight, soundEnabled, difficulty);
+        
+        // Debug: List all preferences in the file
+        Map<String, ?> allPrefs = prefs.getAll();
+        Timber.d("[PREFERENCES] All preferences in %s: %s", PREFS_NAME, allPrefs.toString());
     }
     
     /**
@@ -90,21 +103,109 @@ public class Preferences {
             throw new IllegalStateException("Preferences not initialized. Call initialize() first.");
         }
         
-        robotCount = prefs.getInt(KEY_ROBOT_COUNT, DEFAULT_ROBOT_COUNT);
-        targetColors = prefs.getInt(KEY_TARGET_COLORS, DEFAULT_TARGET_COLORS);
-        soundEnabled = prefs.getBoolean(KEY_SOUND_ENABLED, DEFAULT_SOUND_ENABLED);
-        difficulty = prefs.getInt(KEY_DIFFICULTY, DEFAULT_DIFFICULTY);
-        boardSizeWidth = prefs.getInt(KEY_BOARD_SIZE_WIDTH, DEFAULT_BOARD_SIZE_WIDTH);
-        boardSizeHeight = prefs.getInt(KEY_BOARD_SIZE_HEIGHT, DEFAULT_BOARD_SIZE_HEIGHT);
-        generateNewMap = prefs.getBoolean(KEY_GENERATE_NEW_MAP, DEFAULT_GENERATE_NEW_MAP);
-        accessibilityMode = prefs.getBoolean(KEY_ACCESSIBILITY_MODE, DEFAULT_ACCESSIBILITY_MODE);
-        
-        // For compatibility with existing code
-        boardSizeX = boardSizeWidth;
-        boardSizeY = boardSizeHeight;
+        try {
+            // Load preferences with error handling for each value
+            try {
+                robotCount = prefs.getInt(KEY_ROBOT_COUNT, DEFAULT_ROBOT_COUNT);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading robot count: %s", e.getMessage());
+                // Clear the invalid preference and use default
+                prefs.edit().remove(KEY_ROBOT_COUNT).apply();
+                robotCount = DEFAULT_ROBOT_COUNT;
+            }
+            
+            try {
+                targetColors = prefs.getInt(KEY_TARGET_COLORS, DEFAULT_TARGET_COLORS);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading target colors: %s", e.getMessage());
+                prefs.edit().remove(KEY_TARGET_COLORS).apply();
+                targetColors = DEFAULT_TARGET_COLORS;
+            }
+            
+            try {
+                soundEnabled = prefs.getBoolean(KEY_SOUND_ENABLED, DEFAULT_SOUND_ENABLED);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading sound enabled: %s", e.getMessage());
+                prefs.edit().remove(KEY_SOUND_ENABLED).apply();
+                soundEnabled = DEFAULT_SOUND_ENABLED;
+            }
+            
+            try {
+                difficulty = prefs.getInt(KEY_DIFFICULTY, DEFAULT_DIFFICULTY);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading difficulty: %s", e.getMessage());
+                prefs.edit().remove(KEY_DIFFICULTY).apply();
+                difficulty = DEFAULT_DIFFICULTY;
+            }
+            
+            try {
+                boardSizeWidth = prefs.getInt(KEY_BOARD_SIZE_WIDTH, DEFAULT_BOARD_SIZE_WIDTH);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading board width: %s", e.getMessage());
+                prefs.edit().remove(KEY_BOARD_SIZE_WIDTH).apply();
+                boardSizeWidth = DEFAULT_BOARD_SIZE_WIDTH;
+            }
+            
+            try {
+                boardSizeHeight = prefs.getInt(KEY_BOARD_SIZE_HEIGHT, DEFAULT_BOARD_SIZE_HEIGHT);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading board height: %s", e.getMessage());
+                prefs.edit().remove(KEY_BOARD_SIZE_HEIGHT).apply();
+                boardSizeHeight = DEFAULT_BOARD_SIZE_HEIGHT;
+            }
+            
+            try {
+                generateNewMap = prefs.getBoolean(KEY_GENERATE_NEW_MAP, DEFAULT_GENERATE_NEW_MAP);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading generate new map: %s", e.getMessage());
+                prefs.edit().remove(KEY_GENERATE_NEW_MAP).apply();
+                generateNewMap = DEFAULT_GENERATE_NEW_MAP;
+            }
+            
+            try {
+                accessibilityMode = prefs.getBoolean(KEY_ACCESSIBILITY_MODE, DEFAULT_ACCESSIBILITY_MODE);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading accessibility mode: %s", e.getMessage());
+                prefs.edit().remove(KEY_ACCESSIBILITY_MODE).apply();
+                accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
+            }
+            
+            // For compatibility with existing code
+            boardSizeX = boardSizeWidth;
+            boardSizeY = boardSizeHeight;
+        } catch (Exception e) {
+            // Catch any other unexpected errors
+            Timber.e("[PREFERENCES] Unexpected error loading preferences: %s", e.getMessage());
+            e.printStackTrace();
+            
+            // Reset to defaults
+            resetToDefaults();
+        }
         
         Timber.d("[PREFERENCES] Cached values loaded - robotCount: %d, targetColors: %d, difficulty: %d, boardSize: %dx%d",
                 robotCount, targetColors, difficulty, boardSizeWidth, boardSizeHeight);
+    }
+    
+    /**
+     * Reset all preferences to default values
+     */
+    private static void resetToDefaults() {
+        robotCount = DEFAULT_ROBOT_COUNT;
+        targetColors = DEFAULT_TARGET_COLORS;
+        soundEnabled = DEFAULT_SOUND_ENABLED;
+        difficulty = DEFAULT_DIFFICULTY;
+        boardSizeWidth = DEFAULT_BOARD_SIZE_WIDTH;
+        boardSizeHeight = DEFAULT_BOARD_SIZE_HEIGHT;
+        boardSizeX = boardSizeWidth;
+        boardSizeY = boardSizeHeight;
+        generateNewMap = DEFAULT_GENERATE_NEW_MAP;
+        accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
+        
+        // Clear all preferences
+        if (prefs != null) {
+            prefs.edit().clear().apply();
+            Timber.d("[PREFERENCES] Reset all preferences to defaults");
+        }
     }
     
     /**
@@ -124,22 +225,30 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setRobotCount, attempting to initialize");
-            if (roboyard.ui.activities.MainActivity.getAppContext() != null) {
-                initialize(roboyard.ui.activities.MainActivity.getAppContext());
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
-                robotCount = Math.max(1, count);
+                robotCount = Math.max(1, Math.min(4, count));
                 return;
             }
         }
         
-        // Ensure value is within valid range - allow for future expansion beyond 4 robots
-        int validCount = Math.max(1, count);
-        prefs.edit().putInt(KEY_ROBOT_COUNT, validCount).apply();
+        // Ensure count is between 1 and 4
+        int validCount = Math.max(1, Math.min(4, count));
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_ROBOT_COUNT, validCount);
+        editor.apply();
+        
+        // Update static field
         robotCount = validCount;
+        
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set robot count: %d", validCount);
+        Timber.d("[PREFERENCES] Robot count set to %d", validCount);
     }
     
     /**
@@ -150,8 +259,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setTargetColors, attempting to initialize");
-            if (roboyard.ui.activities.MainActivity.getAppContext() != null) {
-                initialize(roboyard.ui.activities.MainActivity.getAppContext());
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -160,12 +269,20 @@ public class Preferences {
             }
         }
         
-        // Ensure value is within valid range
+        // Ensure count is between 1 and 4
         int validCount = Math.max(1, Math.min(4, count));
-        prefs.edit().putInt(KEY_TARGET_COLORS, validCount).apply();
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_TARGET_COLORS, validCount);
+        editor.apply();
+        
+        // Update static field
         targetColors = validCount;
+        
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set target colors: %d", validCount);
+        Timber.d("[PREFERENCES] Target colors set to %d", validCount);
     }
     
     /**
@@ -176,8 +293,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setSoundEnabled, attempting to initialize");
-            if (roboyard.ui.activities.MainActivity.getAppContext() != null) {
-                initialize(roboyard.ui.activities.MainActivity.getAppContext());
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -186,10 +303,17 @@ public class Preferences {
             }
         }
         
-        prefs.edit().putBoolean(KEY_SOUND_ENABLED, enabled).apply();
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_SOUND_ENABLED, enabled);
+        editor.apply();
+        
+        // Update static field
         soundEnabled = enabled;
+        
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set sound enabled: %s", enabled);
+        Timber.d("[PREFERENCES] Sound enabled set to %s", enabled);
     }
     
     /**
@@ -200,8 +324,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setDifficulty, attempting to initialize");
-            if (roboyard.ui.activities.MainActivity.getAppContext() != null) {
-                initialize(roboyard.ui.activities.MainActivity.getAppContext());
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -210,12 +334,20 @@ public class Preferences {
             }
         }
         
-        // Ensure value is within valid range
+        // Ensure difficulty level is between 1 and 5
         int validDifficulty = Math.max(1, Math.min(5, difficultyLevel));
-        prefs.edit().putInt(KEY_DIFFICULTY, validDifficulty).apply();
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_DIFFICULTY, validDifficulty);
+        editor.apply();
+        
+        // Update static field
         difficulty = validDifficulty;
+        
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set difficulty: %d", validDifficulty);
+        Timber.d("[PREFERENCES] Difficulty set to %d", validDifficulty);
     }
     
     /**
@@ -227,8 +359,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setBoardSize, attempting to initialize");
-            if (roboyard.ui.activities.MainActivity.getAppContext() != null) {
-                initialize(roboyard.ui.activities.MainActivity.getAppContext());
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -240,15 +372,17 @@ public class Preferences {
             }
         }
         
-        // Ensure values are within valid range
+        // Ensure width and height are between 8 and 32
         int validWidth = Math.max(8, Math.min(32, width));
         int validHeight = Math.max(8, Math.min(32, height));
         
+        // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(KEY_BOARD_SIZE_WIDTH, validWidth);
         editor.putInt(KEY_BOARD_SIZE_HEIGHT, validHeight);
         editor.apply();
         
+        // Update static fields
         boardSizeWidth = validWidth;
         boardSizeHeight = validHeight;
         
@@ -256,8 +390,9 @@ public class Preferences {
         boardSizeX = validWidth;
         boardSizeY = validHeight;
         
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set board size: %dx%d", validWidth, validHeight);
+        Timber.d("[PREFERENCES] Board size set to %dx%d", validWidth, validHeight);
     }
     
     /**
@@ -268,8 +403,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setGenerateNewMap, attempting to initialize");
-            if (roboyard.ui.activities.MainActivity.getAppContext() != null) {
-                initialize(roboyard.ui.activities.MainActivity.getAppContext());
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -278,10 +413,17 @@ public class Preferences {
             }
         }
         
-        prefs.edit().putBoolean(KEY_GENERATE_NEW_MAP, generateNewMap).apply();
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_GENERATE_NEW_MAP, generateNewMap);
+        editor.apply();
+        
+        // Update static field
         Preferences.generateNewMap = generateNewMap;
+        
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set generateNewMap: %s", generateNewMap);
+        Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMap);
     }
     
     /**
@@ -289,10 +431,30 @@ public class Preferences {
      * @param enabled True if accessibility mode is enabled, false otherwise
      */
     public static void setAccessibilityMode(boolean enabled) {
-        prefs.edit().putBoolean(KEY_ACCESSIBILITY_MODE, enabled).apply();
+        // Ensure preferences are initialized
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setAccessibilityMode, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                // Set the static field but don't save to preferences
+                accessibilityMode = enabled;
+                return;
+            }
+        }
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_ACCESSIBILITY_MODE, enabled);
+        editor.apply();
+        
+        // Update static field
         accessibilityMode = enabled;
+        
+        // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Set accessibility mode: %s", enabled);
+        Timber.d("[PREFERENCES] Accessibility mode set to %s", enabled);
     }
     
     /**

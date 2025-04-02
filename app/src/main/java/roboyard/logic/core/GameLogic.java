@@ -327,6 +327,14 @@ public class GameLogic {
     public ArrayList<GridElement> generateGameMap(ArrayList<GridElement> existingMap) {
         Timber.d("Using generateNewMapEachTime: %s", generateNewMapEachTime);
         
+        // Safety check: ensure board dimensions are at least 8x8
+        if (boardWidth <= 7 || boardHeight <= 7) {
+            Timber.e("[GAME LOGIC] Invalid board dimensions: %dx%d, using 8x8 instead", boardWidth, boardHeight);
+            // Create a minimal valid board and return it
+            ArrayList<GridElement> safetyData = new ArrayList<>();
+            return safetyData;
+        }
+        
         // For small boards (8x8), use a simplified approach with predefined wall patterns
         if (boardWidth <= 8 && boardHeight <= 8) {
             Timber.d("[GAME LOGIC] Using simplified wall generation for small board (%dx%d)", boardWidth, boardHeight);

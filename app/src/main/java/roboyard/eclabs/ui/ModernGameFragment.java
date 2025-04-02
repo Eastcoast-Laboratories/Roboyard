@@ -24,7 +24,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
-import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.UIModeManager;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
@@ -389,11 +388,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Set up the UI mode manager
         UIModeManager uiModeManager = UIModeManager.getInstance(requireContext());
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
-        
-        // Get board size from BoardSizeManager
-        BoardSizeManager boardSizeManager = BoardSizeManager.getInstance(requireContext());
-        int boardWidth = boardSizeManager.getBoardWidth();
-        int boardHeight = boardSizeManager.getBoardHeight();
         
         // Update difficulty and board size text
         updateDifficulty();
@@ -1403,12 +1397,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
             boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
         } else {
-            // If no game state yet, get from BoardSizeManager
-            BoardSizeManager boardSizeManager = BoardSizeManager.getInstance(requireContext());
-            int boardWidth = boardSizeManager.getBoardWidth();
-            int boardHeight = boardSizeManager.getBoardHeight();
-            Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", boardWidth, boardHeight);
-            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
+            // If no game state yet, get it
+            Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight));
         }
     }
     
