@@ -387,53 +387,42 @@ public class GameState implements Serializable {
      * @return true if all robots are on their correct targets.
      */
     public boolean checkCompletion() {
-        // Timber.d("[GOAL DEBUG] Checking game completion...");
-        
-        // Count how many robots we need to find on targets
-        int robotCount = 0;
-        int matchedRobots = 0;
-        
-        // First find all robots and check if they're on a target of matching color
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                robotCount++;
-                
-                int robotX = element.getX();
-                int robotY = element.getY();
-                int robotColor = element.getColor();
-                
-                // Timber.d("[GOAL DEBUG] Robot %d at (%d, %d)", robotColor, robotX, robotY);
-                
-                // Now check all targets to see if there's a matching target at this position
-                for (GameElement targetElement : gameElements) {
-                    if (targetElement.getType() == GameElement.TYPE_TARGET) {
-                        int targetX = targetElement.getX();
-                        int targetY = targetElement.getY();
-                        int targetColor = targetElement.getColor();
-                        
-                        // Timber.d("[GOAL DEBUG] Target %d at (%d, %d)", targetColor, targetX, targetY);
-                        
-                        // Check if coordinates match and colors match
-                        if (robotX == targetX && robotY == targetY && robotColor == targetColor) {
-                            // Timber.d("[GOAL DEBUG] Robot matched with target at (%d, %d)!", robotX, robotY);
-                            matchedRobots++;
-                            break; // Found a match for this robot, stop checking targets
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Timber.d("[GOAL DEBUG] Found %d/%d robots on matching targets", matchedRobots, robotCount);
-        
-        // Game is complete if all robots are matched with targets
-        if (matchedRobots > 0) {
+        // Use the areAllRobotsAtTargets method to check if all robots are on their targets
+        if (areAllRobotsAtTargets()) {
             // Timber.d("[GOAL DEBUG] Game complete! All robots are on matching targets.");
             completed = true;
             return true;
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Check if all robots are on targets of their matching color
+     * @return True if all robots are on matching targets, false otherwise
+     */
+    public boolean areAllRobotsAtTargets() {
+        // Get all robots in the game
+        List<GameElement> robots = getRobots();
+        int robotsAtTarget = 0;
+        
+        // For each robot, check if it's on a target of its matching color
+        for (GameElement robot : robots) {
+            if (isRobotAtTarget(robot)) {
+                // Count robots that are on their targets
+                robotsAtTarget++;
+                Timber.d("[GOAL DEBUG] Robot %d is at target (%d,%d)", robot.getColor(), robot.getX(), robot.getY());
+            } else {
+                Timber.d("[GOAL DEBUG] Robot %d is NOT at target (%d,%d)", robot.getColor(), robot.getX(), robot.getY());
+            }
+        }
+        
+        // Game is complete when the number of robots at targets matches the target count setting
+        boolean allRobotsAtTargets = (robotsAtTarget >= targetCount);
+        Timber.d("[GOAL DEBUG] %d/%d robots at targets (target count: %d) -> Game complete: %b", 
+                robotsAtTarget, robots.size(), targetCount, allRobotsAtTargets);
+        
+        return allRobotsAtTargets;
     }
     
     /**

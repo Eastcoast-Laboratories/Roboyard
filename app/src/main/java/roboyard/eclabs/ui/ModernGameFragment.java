@@ -44,6 +44,8 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 
+import roboyard.eclabs.AppPreferences;
+
 /**
  * Modern UI implementation of the game screen.
  * all Android-native UI
@@ -1621,56 +1623,48 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Initialize a new game
      */
     private void initializeGame() {
-        Timber.d("[SOLUTION SOLVER] ModernGameFragment: initializeGame() called");
+        Timber.d("ModernGameFragment: initializeGame() called");
         
-        // Check if we have a gameStateManager
-        if (gameStateManager == null) {
-            gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
-        }
-        
-        // Get the game state
-        GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState == null) {
-            Timber.d("[SOLUTION SOLVER] ModernGameFragment: No game state exists, this should not happen!");
-            // crash the app, we should never get here, there should be only one game state, this is a bug. it gets created in MainMenuFragment, when you click on the start button
-            throw new RuntimeException("No game state exists");
-        } else {
-            Timber.d("[SOLUTION SOLVER] ModernGameFragment: Using existing game state with %d robots",
-                      currentState.getRobots().size());
-            
-            // Get target count from preferences
+        // Get target count from AppPreferences or fall back to old Preferences if needed
+        int targetCount = 1; // Default to 1
+        try {
+            targetCount = AppPreferences.getInstance().getTargetCount();
+            Timber.d("[TARGET COUNT] Using target count from AppPreferences: %d", targetCount);
+        } catch (IllegalStateException e) {
+            // Fall back to old Preferences if AppPreferences is not initialized
+            Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
             Preferences preferences = new Preferences();
             String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
-            int targetCount = 1; // Default to 1 if preference doesn't exist
-            
             if (targetCountStr != null && !targetCountStr.isEmpty()) {
                 try {
                     targetCount = Integer.parseInt(targetCountStr);
                     // Ensure value is within valid range
                     targetCount = Math.max(1, Math.min(4, targetCount));
-                    Timber.d("[TARGET COUNT] Using target count from preferences: %d", targetCount);
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "[TARGET COUNT] Error parsing target count preference");
+                } catch (NumberFormatException nfe) {
+                    Timber.e(nfe, "Error parsing target count from preferences");
                 }
-            } else {
-                Timber.d("[TARGET COUNT] No target count preference found, using default: %d", targetCount);
             }
-            
-            // Set target count on current game state
+            Timber.d("[TARGET COUNT] Using target count from old Preferences: %d", targetCount);
+        }
+        
+        // Apply target count to game state
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        if (currentState != null) {
             currentState.setTargetCount(targetCount);
+            Timber.d("[TARGET COUNT] Set target count on GameState: %d", currentState.getTargetCount());
+        }
+        
+        // Check if this is a random game (not a level) and randomize pre-hints
+        if (currentState != null && currentState.getLevelId() <= 0) {
+            // Randomize pre-hints for random games when we initialize
+            int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
+            Timber.d("[HINT] Randomized pre-hints during initializeGame: %d", randomHintCount);
+            numPreHints = randomHintCount;
             
-            // Check if this is a random game (not a level) and randomize pre-hints
-            if (currentState.getLevelId() <= 0) {
-                // Randomize pre-hints for random games when we initialize
-                int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
-                Timber.d("[HINT] Randomizing pre-hints during initializeGame: %d", randomHintCount);
-                numPreHints = randomHintCount;
-                
-                // Auto-calculate solution for random games
-                // This ensures onSolutionCalculationCompleted gets called
-                Timber.d("[HINT] Auto-calculating solution for random game");
-                gameStateManager.calculateSolutionAsync(this);
-            }
+            // Auto-calculate solution for random games
+            // This ensures onSolutionCalculationCompleted gets called
+            Timber.d("[HINT] Auto-calculating solution for random game");
+            gameStateManager.calculateSolutionAsync(this);
         }
         
         // Clear any previous hint or status text
@@ -1833,5 +1827,23 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             optimalMovesButton.setBackground(drawable);
             optimalMovesButton.setTextColor(Color.WHITE); // Reset to white text for most colors
         }
+    }
+    
+    /**
+     * Check if the game is complete (all robots on their target positions).
+     * 
+     * @return true if all robots are on their correct targets.
+     */
+    private boolean checkGameCompletion() {
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        if (currentState == null) {
+            return false;
+        }
+        
+        // Use the new method to check if all robots are at their targets
+        boolean allRobotsAtTargets = currentState.areAllRobotsAtTargets();
+        Timber.d("[GAME COMPLETION] All robots at targets: %s", allRobotsAtTargets);
+        
+        return allRobotsAtTargets;
     }
 }

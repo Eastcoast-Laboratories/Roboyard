@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -23,6 +24,7 @@ import roboyard.logic.core.Constants;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
+import roboyard.eclabs.AppPreferences;
 import timber.log.Timber;
 
 /**
@@ -63,7 +65,7 @@ public class SettingsFragment extends BaseGameFragment {
         // Initialize preferences
         preferences = new Preferences();
         
-        // Set up UI elements
+        // Initialize UI components
         boardSizeSpinner = view.findViewById(R.id.board_size_spinner);
         difficultyRadioGroup = view.findViewById(R.id.difficulty_radio_group);
         difficultyBeginner = view.findViewById(R.id.difficulty_beginner);
@@ -92,6 +94,14 @@ public class SettingsFragment extends BaseGameFragment {
         setupListeners();
         
         return view;
+    }
+    
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        // Set up target count spinner after view is created
+        setupTargetCountSpinner();
     }
     
     /**
@@ -284,7 +294,6 @@ public class SettingsFragment extends BaseGameFragment {
         }
         
         // Load target count setting
-        setupTargetCountSpinner();
         String targetCount = preferences.getPreferenceValue(requireActivity(), "target_count");
         if (targetCount != null) {
             try {
@@ -301,44 +310,76 @@ public class SettingsFragment extends BaseGameFragment {
     }
     
     /**
-     * Set up the target count spinner with values from 1 to 4
+     * Sets up the target count spinner
      */
     private void setupTargetCountSpinner() {
-        // Create list of target count options (1-4)
-        List<String> targetCountOptions = new ArrayList<>();
-        for (int i = 1; i <= 4; i++) {
-            targetCountOptions.add(String.valueOf(i));
+        View view = getView();
+        if (view == null) {
+            Timber.e("setupTargetCountSpinner: View is null");
+            return;
         }
         
-        // Create adapter for the spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                targetCountOptions
-        );
+        // Create spinner for target count selection (1-4)
+        Spinner targetCountSpinner = view.findViewById(R.id.target_count_spinner);
+        if (targetCountSpinner == null) {
+            Timber.e("setupTargetCountSpinner: Target count spinner not found");
+            return;
+        }
+        
+        // Create adapter with values 1-4
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        for (int i = 1; i <= 4; i++) {
+            adapter.add(i);
+        }
         targetCountSpinner.setAdapter(adapter);
         
-        // Default to 1 target if no preference exists
-        String savedTargetCount = preferences.getPreferenceValue(requireActivity(), "target_count");
-        int defaultPosition = 0; // 1 target (index 0)
-        
-        if (savedTargetCount != null && !savedTargetCount.isEmpty()) {
-            try {
-                int count = Integer.parseInt(savedTargetCount);
-                // Adjust for 0-based index
-                defaultPosition = count - 1;
-                // Ensure it's within valid range
-                defaultPosition = Math.max(0, Math.min(defaultPosition, 3));
-            } catch (NumberFormatException e) {
-                Timber.e(e, "Error parsing saved target count");
+        // Set current value from preferences
+        int currentTargetCount = 1; // Default to 1
+        try {
+            currentTargetCount = AppPreferences.getInstance().getTargetCount();
+            Timber.d("[TARGET COUNT] Using target count from AppPreferences: %d", currentTargetCount);
+        } catch (IllegalStateException e) {
+            // Fall back to old Preferences if AppPreferences is not initialized
+            Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
+            Preferences preferences = new Preferences();
+            String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
+            if (targetCountStr != null && !targetCountStr.isEmpty()) {
+                try {
+                    currentTargetCount = Integer.parseInt(targetCountStr);
+                    // Ensure value is within valid range
+                    currentTargetCount = Math.max(1, Math.min(4, currentTargetCount));
+                } catch (NumberFormatException nfe) {
+                    Timber.e(nfe, "Error parsing target count from preferences");
+                }
             }
-        } else {
-            // If no preference exists, save the default
-            preferences.setPreferences(requireActivity(), "target_count", "1");
+            Timber.d("[TARGET COUNT] Using target count from old Preferences: %d", currentTargetCount);
         }
         
-        targetCountSpinner.setSelection(defaultPosition);
+        targetCountSpinner.setSelection(currentTargetCount - 1); // -1 because index is 0-based
+        
+        // Set listener to save changes
+        targetCountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int selectedTargetCount = position + 1; // +1 because index is 0-based
+                try {
+                    AppPreferences.getInstance().setTargetCount(selectedTargetCount);
+                    Timber.d("[TARGET COUNT] Target count set to %d using AppPreferences", selectedTargetCount);
+                } catch (IllegalStateException e) {
+                    // Fall back to old Preferences if AppPreferences is not initialized
+                    Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
+                    Preferences preferences = new Preferences();
+                    preferences.setPreferences(requireActivity(), "target_count", String.valueOf(selectedTargetCount));
+                    Timber.d("[TARGET COUNT] Target count set to %d using old Preferences", selectedTargetCount);
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
     }
     
     /**
@@ -483,7 +524,7 @@ public class SettingsFragment extends BaseGameFragment {
         // Target count spinner
         targetCountSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Add 1 to position because spinner is 0-indexed, but we want to store 1-4
                 int targetCount = position + 1;
                 Timber.d("Target count selected: %d", targetCount);
@@ -491,7 +532,7 @@ public class SettingsFragment extends BaseGameFragment {
             }
 
             @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> parent) {
                 // Do nothing
             }
         });

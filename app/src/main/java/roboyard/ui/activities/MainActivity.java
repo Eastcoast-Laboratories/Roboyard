@@ -17,6 +17,7 @@ import android.content.Context;
 import roboyard.eclabs.R;
 import roboyard.ui.components.GamePiece;
 import roboyard.ui.components.GameMovementInterface;
+import roboyard.eclabs.AppPreferences;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -56,6 +57,19 @@ public class MainActivity extends FragmentActivity
     private GameManager gameManager;
     private final Preferences preferences = new Preferences();
 
+    // Static reference to the application context
+    private static Context appContext;
+    
+    /**
+     * Returns the application context.
+     * This is used for initializing singletons like AppPreferences when needed.
+     * 
+     * @return The application context
+     */
+    public static Context getAppContext() {
+        return appContext;
+    }
+
     // Default board sizes
     public static final int DEFAULT_BOARD_SIZE_X = 12;
     public static final int DEFAULT_BOARD_SIZE_Y = 14;
@@ -76,6 +90,10 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        appContext = getApplicationContext();
+        // Initialize AppPreferences
+        AppPreferences.init(getApplicationContext());
+        
         // Hide the status bar
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
