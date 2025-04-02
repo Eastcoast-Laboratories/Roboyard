@@ -48,6 +48,7 @@ public class GameLogic {
     
     // Configuration for multiple targets
     private int targetCount = 1; // Default to 1 target per color
+    private int targetColors = 4; // Anzahl der verschiedenen Zielfarben (1-4)
     
     // Configuration for the simplified board generation
     private boolean placeWallsInCorners = true;
@@ -205,11 +206,26 @@ public class GameLogic {
         // Store all positions of game elements to avoid overlapping
         ArrayList<GridElement> allElements = new ArrayList<>();
         
-        // Create targets based on targetCount setting
-        // We'll create targets for each color (or multi-color)
-        int targetTypesCount = allowMulticolorTarget ? 5 : 4; // Include or exclude multi-color target
+        // Create targets based on targetCount and targetColors settings
+        // We'll create targets for each color (or multi-color) up to the targetColors limit
+        int maxTargetTypes = allowMulticolorTarget ? 5 : 4;
+        int targetTypesCount = Math.min(targetColors, maxTargetTypes); // Limit to targetColors
         
-        for (int targetType = 0; targetType < targetTypesCount; targetType++) {
+        Timber.d("Creating targets with targetCount=%d and targetColors=%d", targetCount, targetTypesCount);
+        
+        // Create an array of indices to use for target types, and shuffle it to randomize which colors are used
+        int[] targetTypeIndices = new int[maxTargetTypes];
+        for (int i = 0; i < maxTargetTypes; i++) {
+            targetTypeIndices[i] = i;
+        }
+        
+        // Shuffle the array to randomize which colors are used when targetColors < 4
+        shuffleIntArray(targetTypeIndices);
+        
+        // Only use the first targetTypesCount elements from the shuffled array
+        for (int i = 0; i < targetTypesCount; i++) {
+            int targetType = targetTypeIndices[i];
+            
             // For each target type, create targetCount targets
             for (int count = 0; count < targetCount; count++) {
                 int targetX, targetY;
@@ -293,6 +309,18 @@ public class GameLogic {
         
         return data;
     }
+
+    private void shuffleIntArray(int[] array) {
+        // Use Fisher-Yates algorithm to shuffle the array
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = rand.nextInt(i + 1);
+            // Simple swap
+            int temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+    }
+
 
     /**
      * Generate a new map with walls, robots, and targets
@@ -689,40 +717,23 @@ public class GameLogic {
                 int[] pos = wallPositions[i];
                 boolean vertical = isVerticalWall[i];
                 
-                // Determine the actual position to place the wall
-                int x = pos[0];
-                int y = pos[1];
-                
-                // For walls extending from borders, we need to adjust the position
-                // to place them one cell inward from the border
-                if (y == 0 && vertical) { // Top border, vertical wall extending down
-                    y = 1; // Place one cell down from top border
-                } else if (y == boardHeight && vertical) { // Bottom border, vertical wall extending up
-                    y = boardHeight - 1; // Place one cell up from bottom border
-                } else if (x == 0 && !vertical) { // Left border, horizontal wall extending right
-                    x = 1; // Place one cell right from left border
-                } else if (x == boardWidth && !vertical) { // Right border, horizontal wall extending left
-                    x = boardWidth - 1; // Place one cell left from right border
-                }
-                
-                // Check if the position is valid and empty
-                boolean canPlace = false;
-                if (!vertical) { // Horizontal wall
-                    canPlace = (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1 && horizontalWalls[x][y] == 0);
-                } else { // Vertical wall
-                    canPlace = (x >= 0 && x < boardWidth+1 && y >= 0 && y < boardHeight+1 && verticalWalls[x][y] == 0);
-                }
-                
-                if (canPlace) {
-                    if (!vertical) { // Place horizontal wall
-                        horizontalWalls[x][y] = 1;
-                    } else { // Place vertical wall
-                        verticalWalls[x][y] = 1;
+                // Ensure the positions are within bounds
+                if (pos[0] >= 0 && pos[0] < boardWidth+1 && pos[1] >= 0 && pos[1] < boardHeight+1) {
+                    // Only place if position is empty
+                    if ((vertical && verticalWalls[pos[0]][pos[1]] == 0) || 
+                        (!vertical && horizontalWalls[pos[0]][pos[1]] == 0)) {
+                            
+                        if (vertical) {
+                            verticalWalls[pos[0]][pos[1]] = 1;
+                        } else {
+                            horizontalWalls[pos[0]][pos[1]] = 1;
+                        }
+                        
+                        borderPerpendicularWallsPlaced++;
+                        wallsToPlace--;
+                        Timber.d("[GAME LOGIC] Placed %s wall perpendicular to border at (%d,%d)", 
+                                vertical ? "vertical" : "horizontal", pos[0], pos[1]);
                     }
-                    borderPerpendicularWallsPlaced++;
-                    wallsToPlace--; // Decrement the wallsToPlace counter
-                    Timber.d("[GAME LOGIC] Placed %s wall perpendicular to border at (%d,%d)", 
-                            !vertical ? "horizontal" : "vertical", x, y);
                 }
             }
             
@@ -815,8 +826,6 @@ public class GameLogic {
                     }
                 }
             }
-            
-            Timber.d("[GAME LOGIC] Placed %d edge walls", edgeWallsPlaced);
         }
         
         // 3. Finally, place any remaining walls in non-corner, non-edge, non-center positions
@@ -899,8 +908,8 @@ public class GameLogic {
 
         return result;
     }
-    
-        /**
+
+    /**
      * Generate a simplified game map for small boards (8x8) (version 2)
      */
     private ArrayList<GridElement> generateSimpleGameMap2(ArrayList<GridElement> existingMap) {
@@ -1331,5 +1340,23 @@ public class GameLogic {
      */
     public int getTargetCount() {
         return targetCount;
+    }
+
+    /**
+     * Set the number of different target colors to be generated on the map
+     * @param count Number of different target colors (1-4)
+     */
+    public void setTargetColors(int count) {
+        // Ensure count is between 1 and 4
+        this.targetColors = Math.max(1, Math.min(4, count));
+        Timber.d("Target colors set to %d", this.targetColors);
+    }
+
+    /**
+     * Get the current target colors setting
+     * @return Number of different target colors (1-4)
+     */
+    public int getTargetColors() {
+        return targetColors;
     }
 }

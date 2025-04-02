@@ -49,6 +49,7 @@ public class SettingsFragment extends BaseGameFragment {
     private RadioButton accessibilityOn;
     private RadioButton accessibilityOff;
     private Spinner targetCountSpinner;
+    private Spinner targetColorsSpinner;
     private Button backButton;
     
     private Preferences preferences;
@@ -82,6 +83,7 @@ public class SettingsFragment extends BaseGameFragment {
         accessibilityOn = view.findViewById(R.id.accessibility_on);
         accessibilityOff = view.findViewById(R.id.accessibility_off);
         targetCountSpinner = view.findViewById(R.id.target_count_spinner);
+        targetColorsSpinner = view.findViewById(R.id.target_colors_spinner);
         backButton = view.findViewById(R.id.back_button);
         
         // Set up board size options - this must happen first
@@ -102,6 +104,7 @@ public class SettingsFragment extends BaseGameFragment {
         
         // Set up target count spinner after view is created
         setupTargetCountSpinner();
+        setupTargetColorsSpinner();
     }
     
     /**
@@ -372,6 +375,79 @@ public class SettingsFragment extends BaseGameFragment {
                     Preferences preferences = new Preferences();
                     preferences.setPreferences(requireActivity(), "target_count", String.valueOf(selectedTargetCount));
                     Timber.d("[TARGET COUNT] Target count set to %d using old Preferences", selectedTargetCount);
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+    
+    /**
+     * Sets up the target colors spinner
+     */
+    private void setupTargetColorsSpinner() {
+        View view = getView();
+        if (view == null) {
+            Timber.e("setupTargetColorsSpinner: View is null");
+            return;
+        }
+        
+        // Create spinner for target colors selection (1-4)
+        Spinner targetColorsSpinner = view.findViewById(R.id.target_colors_spinner);
+        if (targetColorsSpinner == null) {
+            Timber.e("setupTargetColorsSpinner: Target colors spinner not found");
+            return;
+        }
+        
+        // Create adapter with values 1-4
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        for (int i = 1; i <= 4; i++) {
+            adapter.add(i);
+        }
+        targetColorsSpinner.setAdapter(adapter);
+        
+        // Set current value from preferences
+        int currentTargetColors = 4; // Default to 4
+        try {
+            currentTargetColors = AppPreferences.getInstance().getTargetColors();
+            Timber.d("[TARGET COLORS] Using target colors from AppPreferences: %d", currentTargetColors);
+        } catch (IllegalStateException e) {
+            // Fall back to old Preferences if AppPreferences is not initialized
+            Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
+            Preferences preferences = new Preferences();
+            String targetColorsStr = preferences.getPreferenceValue(requireActivity(), "target_colors");
+            if (targetColorsStr != null && !targetColorsStr.isEmpty()) {
+                try {
+                    currentTargetColors = Integer.parseInt(targetColorsStr);
+                    // Ensure value is within valid range
+                    currentTargetColors = Math.max(1, Math.min(4, currentTargetColors));
+                } catch (NumberFormatException nfe) {
+                    Timber.e(nfe, "Error parsing target colors from preferences");
+                }
+            }
+            Timber.d("[TARGET COLORS] Using target colors from old Preferences: %d", currentTargetColors);
+        }
+        
+        targetColorsSpinner.setSelection(currentTargetColors - 1); // -1 because index is 0-based
+        
+        // Set listener to save changes
+        targetColorsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int selectedTargetColors = position + 1; // +1 because index is 0-based
+                try {
+                    AppPreferences.getInstance().setTargetColors(selectedTargetColors);
+                    Timber.d("[TARGET COLORS] Target colors set to %d using AppPreferences", selectedTargetColors);
+                } catch (IllegalStateException e) {
+                    // Fall back to old Preferences if AppPreferences is not initialized
+                    Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
+                    Preferences preferences = new Preferences();
+                    preferences.setPreferences(requireActivity(), "target_colors", String.valueOf(selectedTargetColors));
+                    Timber.d("[TARGET COLORS] Target colors set to %d using old Preferences", selectedTargetColors);
                 }
             }
             

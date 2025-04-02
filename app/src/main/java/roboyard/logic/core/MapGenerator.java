@@ -33,6 +33,7 @@ public class MapGenerator {
     Boolean allowMulticolorTarget = true;
     public static Boolean generateNewMapEachTime = true; // option in settings
     private int targetCount = 1; // Default to 1 target per color
+    private int targetColors = 4; // Default to 4 different target colors
 
     // Wall configuration
     int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column
@@ -126,6 +127,29 @@ public class MapGenerator {
      */
     public int getTargetCount() {
         return targetCount;
+    }
+
+    /**
+     * Sets the number of different target colors for map generation
+     * @param count Number of different target colors (1-4)
+     */
+    public void setTargetColors(int count) {
+        this.targetColors = Math.max(1, Math.min(4, count));
+        
+        // Pass the target colors to the GameLogic if it exists
+        if (gameLogic != null) {
+            gameLogic.setTargetColors(this.targetColors);
+        }
+        
+        Timber.d("MapGenerator target colors set to %d", this.targetColors);
+    }
+    
+    /**
+     * Gets the current target colors setting
+     * @return Number of different target colors (1-4)
+     */
+    public int getTargetColors() {
+        return targetColors;
     }
 
     /**

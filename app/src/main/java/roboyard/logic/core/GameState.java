@@ -51,6 +51,7 @@ public class GameState implements Serializable {
     private int moveCount;
     private int squaresMoved;
     private int targetCount = 1; // Default to 1 target per color
+    private int targetColorsCount = 4; // Default to 4 different target colors
     private boolean completed = false;
     private int hintCount = 0; // Track the number of hints used in this game
     private String uniqueMapId = ""; // 5-letter unique ID for map identification
@@ -1483,6 +1484,24 @@ public class GameState implements Serializable {
     }
     
     /**
+     * Sets the number of different target colors to use for this game
+     * @param count Number of target colors (1-4)
+     */
+    public void setTargetColors(int count) {
+        // Ensure count is within valid range
+        this.targetColorsCount = Math.max(1, Math.min(4, count));
+        Timber.d("Target colors count set to %d", this.targetColorsCount);
+    }
+    
+    /**
+     * Gets the current target colors count setting
+     * @return Number of target colors (1-4)
+     */
+    public int getTargetColors() {
+        return targetColorsCount;
+    }
+    
+    /**
      * Converts difficulty integer to string for the original GridGameView class
      */
     private static String difficultyIntToString(int difficulty) {
@@ -1535,7 +1554,10 @@ public class GameState implements Serializable {
         
         // Set the target count for map generation
         mapGenerator.setTargetCount(state.targetCount);
-
+        
+        // Set the target colors count for map generation
+        mapGenerator.setTargetColors(state.targetColorsCount);
+        
         // Generate a new game map using the same method as the old canvas-based game
         ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
 

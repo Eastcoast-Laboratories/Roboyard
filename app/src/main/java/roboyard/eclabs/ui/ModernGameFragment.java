@@ -1627,14 +1627,19 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Get target count from AppPreferences or fall back to old Preferences if needed
         int targetCount = 1; // Default to 1
+        int targetColors = 4; // Default to 4
         try {
             targetCount = AppPreferences.getInstance().getTargetCount();
+            targetColors = AppPreferences.getInstance().getTargetColors();
             Timber.d("[TARGET COUNT] Using target count from AppPreferences: %d", targetCount);
+            Timber.d("[TARGET COLORS] Using target colors from AppPreferences: %d", targetColors);
         } catch (IllegalStateException e) {
             // Fall back to old Preferences if AppPreferences is not initialized
             Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
             Preferences preferences = new Preferences();
             String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
+            String targetColorsStr = preferences.getPreferenceValue(requireActivity(), "target_colors");
+            
             if (targetCountStr != null && !targetCountStr.isEmpty()) {
                 try {
                     targetCount = Integer.parseInt(targetCountStr);
@@ -1644,14 +1649,28 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     Timber.e(nfe, "Error parsing target count from preferences");
                 }
             }
+            
+            if (targetColorsStr != null && !targetColorsStr.isEmpty()) {
+                try {
+                    targetColors = Integer.parseInt(targetColorsStr);
+                    // Ensure value is within valid range
+                    targetColors = Math.max(1, Math.min(4, targetColors));
+                } catch (NumberFormatException nfe) {
+                    Timber.e(nfe, "Error parsing target colors from preferences");
+                }
+            }
+            
             Timber.d("[TARGET COUNT] Using target count from old Preferences: %d", targetCount);
+            Timber.d("[TARGET COLORS] Using target colors from old Preferences: %d", targetColors);
         }
         
         // Apply target count to game state
         GameState currentState = gameStateManager.getCurrentState().getValue();
         if (currentState != null) {
             currentState.setTargetCount(targetCount);
+            currentState.setTargetColors(targetColors);
             Timber.d("[TARGET COUNT] Set target count on GameState: %d", currentState.getTargetCount());
+            Timber.d("[TARGET COLORS] Set target colors on GameState: %d", currentState.getTargetColors());
         }
         
         // Check if this is a random game (not a level) and randomize pre-hints

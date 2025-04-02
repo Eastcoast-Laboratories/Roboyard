@@ -15,6 +15,22 @@ public class AppPreferences {
     private static AppPreferences instance;
     private final SharedPreferences prefs;
     
+    // Preference keys
+    private static final String KEY_TARGET_COUNT = "target_count";
+    private static final String KEY_TARGET_COLORS = "target_colors";
+    private static final String KEY_SOUND_ENABLED = "sound_enabled";
+    private static final String KEY_DIFFICULTY = "difficulty";
+    private static final String KEY_BOARD_SIZE_WIDTH = "board_width";
+    private static final String KEY_BOARD_SIZE_HEIGHT = "board_height";
+    
+    // Default values
+    private static final int DEFAULT_TARGET_COUNT = 1;
+    private static final int DEFAULT_TARGET_COLORS = 4;
+    private static final boolean DEFAULT_SOUND_ENABLED = true;
+    private static final int DEFAULT_DIFFICULTY = 3;
+    private static final int DEFAULT_BOARD_SIZE_WIDTH = 16;
+    private static final int DEFAULT_BOARD_SIZE_HEIGHT = 16;
+    
     // Private Konstruktor verhindert direkte Instanziierung
     private AppPreferences(Context context) {
         prefs = context.getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -69,7 +85,7 @@ public class AppPreferences {
      * @return Anzahl der Ziele (1-4)
      */
     public int getTargetCount() {
-        int count = prefs.getInt("target_count", 1); // Default ist 1
+        int count = prefs.getInt(KEY_TARGET_COUNT, DEFAULT_TARGET_COUNT); // Default ist 1
         Timber.d("[TARGET COUNT] AppPreferences.getTargetCount(): %d", count);
         return count;
     }
@@ -82,8 +98,28 @@ public class AppPreferences {
     public void setTargetCount(int count) {
         // Validierung
         int validCount = Math.max(1, Math.min(4, count));
-        prefs.edit().putInt("target_count", validCount).apply();
+        prefs.edit().putInt(KEY_TARGET_COUNT, validCount).apply();
         Timber.d("[TARGET COUNT] AppPreferences.setTargetCount(): %d", validCount);
+    }
+    
+    /**
+     * Gibt die Anzahl der verschiedenen Zielfarben zurück.
+     * 
+     * @return Anzahl der verschiedenen Zielfarben (1-4)
+     */
+    public int getTargetColors() {
+        return prefs.getInt(KEY_TARGET_COLORS, DEFAULT_TARGET_COLORS);
+    }
+    
+    /**
+     * Setzt die Anzahl der verschiedenen Zielfarben.
+     * 
+     * @param count Anzahl der verschiedenen Zielfarben (1-4)
+     */
+    public void setTargetColors(int count) {
+        // Ensure count is within valid range
+        count = Math.max(1, Math.min(4, count));
+        prefs.edit().putInt(KEY_TARGET_COLORS, count).apply();
     }
     
     /**
@@ -92,7 +128,7 @@ public class AppPreferences {
      * @return true wenn Sound aktiviert ist, sonst false
      */
     public boolean isSoundEnabled() {
-        return prefs.getBoolean("sound_enabled", true);
+        return prefs.getBoolean(KEY_SOUND_ENABLED, DEFAULT_SOUND_ENABLED);
     }
     
     /**
@@ -101,7 +137,7 @@ public class AppPreferences {
      * @param enabled true um Sound zu aktivieren, false um ihn zu deaktivieren
      */
     public void setSoundEnabled(boolean enabled) {
-        prefs.edit().putBoolean("sound_enabled", enabled).apply();
+        prefs.edit().putBoolean(KEY_SOUND_ENABLED, enabled).apply();
     }
     
     /**
@@ -110,7 +146,7 @@ public class AppPreferences {
      * @return Schwierigkeitsgrad (1-5)
      */
     public int getDifficulty() {
-        return prefs.getInt("difficulty", 3); // Default ist mittlere Schwierigkeit
+        return prefs.getInt(KEY_DIFFICULTY, DEFAULT_DIFFICULTY); // Default ist mittlere Schwierigkeit
     }
     
     /**
@@ -121,7 +157,7 @@ public class AppPreferences {
     public void setDifficulty(int difficulty) {
         // Validierung
         int validDifficulty = Math.max(1, Math.min(5, difficulty));
-        prefs.edit().putInt("difficulty", validDifficulty).apply();
+        prefs.edit().putInt(KEY_DIFFICULTY, validDifficulty).apply();
     }
     
     /**
@@ -130,8 +166,8 @@ public class AppPreferences {
      * @return Array mit [Breite, Hu00f6he]
      */
     public int[] getBoardSize() {
-        int width = prefs.getInt("board_width", 16);
-        int height = prefs.getInt("board_height", 16);
+        int width = prefs.getInt(KEY_BOARD_SIZE_WIDTH, DEFAULT_BOARD_SIZE_WIDTH);
+        int height = prefs.getInt(KEY_BOARD_SIZE_HEIGHT, DEFAULT_BOARD_SIZE_HEIGHT);
         return new int[]{width, height};
     }
     
@@ -143,8 +179,8 @@ public class AppPreferences {
      */
     public void setBoardSize(int width, int height) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt("board_width", width);
-        editor.putInt("board_height", height);
+        editor.putInt(KEY_BOARD_SIZE_WIDTH, width);
+        editor.putInt(KEY_BOARD_SIZE_HEIGHT, height);
         editor.apply();
         Timber.d("[BOARD_SIZE_DEBUG] AppPreferences.setBoardSize(): %dx%d", width, height);
     }
