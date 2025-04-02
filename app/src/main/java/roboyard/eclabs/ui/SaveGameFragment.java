@@ -274,8 +274,45 @@ public class SaveGameFragment extends BaseGameFragment {
     private void loadSaveSlots() {
         List<SaveSlotInfo> saveSlots = new ArrayList<>();
         
-        // Add auto-save slot
-        saveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null));
+        // Add auto-save slot with proper metadata check
+        try {
+            // Get autosave file path
+            String autosavePath = FileReadWrite.getSaveGamePath(requireActivity(), 0);
+            java.io.File autosaveFile = new java.io.File(autosavePath);
+            
+            if (autosaveFile.exists()) {
+                // Load save data to extract metadata
+                String saveData = FileReadWrite.loadAbsoluteData(autosavePath);
+                String name = "Auto-save";
+                Date date = new Date(autosaveFile.lastModified());
+                Bitmap minimap = null;
+                
+                // Extract metadata if available
+                if (saveData != null && !saveData.isEmpty()) {
+                    Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
+                    if (metadata != null && metadata.containsKey("MAPNAME")) {
+                        name = metadata.get("MAPNAME") + " (Auto-save)";
+                        Timber.d("Found map name in autosave slot: %s", name);
+                    }
+                    
+                    // Create minimap
+                    try {
+                        minimap = createMinimapFromPath(requireContext(), autosavePath, 100, 100);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error creating minimap for autosave slot");
+                    }
+                }
+                
+                // Add autosave slot with metadata
+                saveSlots.add(new SaveSlotInfo(0, name, date, minimap));
+            } else {
+                // Empty autosave slot
+                saveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null));
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error loading autosave slot");
+            saveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null));
+        }
         
         // Add regular save slots (1-34)
         for (int i = 1; i <= 34; i++) {

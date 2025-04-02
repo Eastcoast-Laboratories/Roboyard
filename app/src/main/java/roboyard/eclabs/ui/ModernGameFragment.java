@@ -110,6 +110,29 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     };
     
+    // Autosave variables
+    private final Handler autosaveHandler = new Handler(Looper.getMainLooper());
+    private boolean autosaveRunning = false;
+    private static final int AUTOSAVE_INTERVAL_MS = 2000; // 60 seconds
+    private final Runnable autosaveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Only autosave if game is in progress and not solved
+            if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
+                Timber.d("[AUTOSAVE] Performing autosave to slot 0");
+                boolean saved = gameStateManager.saveGame(0); // Save to slot 0
+                if (saved) {
+                    Timber.d("[AUTOSAVE] Game successfully autosaved to slot 0");
+                } else {
+                    Timber.e("[AUTOSAVE] Failed to autosave game to slot 0");
+                }
+            }
+            
+            // Schedule next autosave
+            autosaveHandler.postDelayed(this, AUTOSAVE_INTERVAL_MS);
+        }
+    };
+    
     // Sound manager for game sound effects
     private SoundManager soundManager;
     
@@ -400,6 +423,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Initialize the game
         initializeGame();
+        
+        // Start autosave
+        startAutosave();
     }
     
     /**
@@ -1349,6 +1375,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (gameStateManager.getCurrentState().getValue() != null && !gameStateManager.isGameComplete().getValue()) {
             startTimer();
         }
+        
+        // Resume autosave when fragment is resumed
+        if (!autosaveRunning) {
+            startAutosave();
+        }
     }
     
     /**
@@ -1445,6 +1476,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         super.onPause();
         // Pause timer when fragment is paused
         stopTimer();
+        
+        // Pause autosave when fragment is paused
+        stopAutosave();
     }
     
     /**
@@ -1808,5 +1842,25 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[GAME COMPLETION] All robots at targets: %s", allRobotsAtTargets);
         
         return allRobotsAtTargets;
+    }
+    
+    /**
+     * Start autosave
+     */
+    private void startAutosave() {
+        if (!autosaveRunning) {
+            autosaveHandler.postDelayed(autosaveRunnable, AUTOSAVE_INTERVAL_MS);
+            autosaveRunning = true;
+        }
+    }
+    
+    /**
+     * Stop autosave
+     */
+    private void stopAutosave() {
+        if (autosaveRunning) {
+            autosaveHandler.removeCallbacks(autosaveRunnable);
+            autosaveRunning = false;
+        }
     }
 }
