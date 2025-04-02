@@ -248,9 +248,6 @@ public class SettingsFragment extends Fragment {
         
         // Difficulty radio buttons
         switch (Preferences.difficulty) {
-            case Constants.DIFFICULTY_BEGINNER:
-                difficultyRadioGroup.check(R.id.difficulty_beginner);
-                break;
             case Constants.DIFFICULTY_INTERMEDIATE:
                 difficultyRadioGroup.check(R.id.difficulty_advanced);
                 break;
@@ -259,6 +256,9 @@ public class SettingsFragment extends Fragment {
                 break;
             case Constants.DIFFICULTY_IMPOSSIBLE:
                 difficultyRadioGroup.check(R.id.difficulty_impossible);
+                break;
+            default:
+                difficultyRadioGroup.check(R.id.difficulty_beginner);
                 break;
         }
         
@@ -308,7 +308,7 @@ public class SettingsFragment extends Fragment {
         // Set current value from static Preferences
         int robotCount = Preferences.robotCount;
         if (robotCount < 1 || robotCount > 4) {
-            robotCount = 1; // Default to 1 if invalid
+            robotCount = Preferences.DEFAULT_ROBOT_COUNT; // Default to 1 if invalid
         }
         robotCountSpinner.setSelection(robotCount - 1); // -1 because index is 0-based
         Timber.d("[PREFERENCES] Using robot count: %d", robotCount);
@@ -365,7 +365,7 @@ public class SettingsFragment extends Fragment {
         // Set current value from static Preferences
         int targetColors = Preferences.targetColors;
         if (targetColors < 1 || targetColors > 4) {
-            targetColors = 4; // Default to 4 if invalid
+            targetColors = Preferences.DEFAULT_TARGET_COLORS; // Default to 4 if invalid
         }
         targetColorsSpinner.setSelection(targetColors - 1); // -1 because index is 0-based
         Timber.d("[PREFERENCES] Using target colors: %d", targetColors);

@@ -13,7 +13,7 @@ import timber.log.Timber;
  */
 public class Preferences {
     // Use a consistent name for SharedPreferences across the entire app
-    private static final String PREFS_NAME = "RoboYard";
+    private static final String PREFS_NAME = Constants.PREFS_NAME;
     private static SharedPreferences prefs;
     
     // Preference keys
@@ -28,14 +28,14 @@ public class Preferences {
     private static final String KEY_ACCESSIBILITY_MODE = "accessibility_mode";
     
     // Default values
-    private static final int DEFAULT_ROBOT_COUNT = 1;
-    private static final int DEFAULT_TARGET_COLORS = 4;
-    private static final boolean DEFAULT_SOUND_ENABLED = true;
-    private static final int DEFAULT_DIFFICULTY = 3;
-    private static final int DEFAULT_BOARD_SIZE_WIDTH = 16;
-    private static final int DEFAULT_BOARD_SIZE_HEIGHT = 16;
-    private static final boolean DEFAULT_GENERATE_NEW_MAP = true;
-    private static final boolean DEFAULT_ACCESSIBILITY_MODE = false;
+    public static final int DEFAULT_ROBOT_COUNT = 1;
+    public static final int DEFAULT_TARGET_COLORS = 1;
+    public static final boolean DEFAULT_SOUND_ENABLED = true;
+    public static final int DEFAULT_DIFFICULTY = Constants.DIFFICULTY_BEGINNER;
+    public static final int DEFAULT_BOARD_SIZE_WIDTH = 12;
+    public static final int DEFAULT_BOARD_SIZE_HEIGHT = 14;
+    public static final boolean DEFAULT_GENERATE_NEW_MAP = true;
+    public static final boolean DEFAULT_ACCESSIBILITY_MODE = false;
     
     // Cached values - accessible as static fields
     public static int robotCount;

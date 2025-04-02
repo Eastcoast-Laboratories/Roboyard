@@ -39,7 +39,7 @@ public class Constants {
     public static final int UI_ELEMENT = 10000;
     
     // Native UI constants
-    public static final String PREFS_NAME = "roboyard_preferences";
+    public static final String PREFS_NAME = "RoboYard";
     public static final String PREF_SOUND_ENABLED = "sound_enabled";
     
     // Game state cell types
