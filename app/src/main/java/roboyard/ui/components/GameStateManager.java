@@ -49,7 +49,6 @@ import roboyard.eclabs.R;
 import roboyard.eclabs.util.SolverManager;
 import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.SolutionAnimator;
-import roboyard.eclabs.util.UIModeManager;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
 import roboyard.pm.ia.GameSolution;
@@ -99,9 +98,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long startTime = 0;
     private Bitmap minimap = null;
     
-    // UI mode manager
-    private final UIModeManager uiModeManager;
-    
     // Solution state
     private GameSolution currentSolution = null;
     private int currentSolutionStep = 0;
@@ -117,8 +113,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         context = application.getApplicationContext();
         
-        // Initialize UI mode manager
-        uiModeManager = UIModeManager.getInstance(context);
     }
     
     /**
@@ -164,9 +158,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Create a new valid game (will regenerate if solution is too simple)
         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-        
-        // Set UI mode to modern
-        uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
         
         // Record start time
         startTime = System.currentTimeMillis();
@@ -223,9 +214,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Start calculating the solution automatically
         calculateSolutionAsync(null);
-        
-        // Set UI mode to modern
-        uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
         
         // Record start time
         startTime = System.currentTimeMillis();

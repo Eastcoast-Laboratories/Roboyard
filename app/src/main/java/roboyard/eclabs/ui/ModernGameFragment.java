@@ -24,7 +24,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
-import roboyard.eclabs.util.UIModeManager;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.IGameMove;
