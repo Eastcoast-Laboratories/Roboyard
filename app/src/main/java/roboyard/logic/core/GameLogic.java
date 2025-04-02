@@ -47,8 +47,8 @@ public class GameLogic {
     private final int currentLevel;
     
     // Configuration for multiple targets
-    private int targetCount = 1; // Default to 1 target per color
-    private int targetColors = 4; // Anzahl der verschiedenen Zielfarben (1-4)
+    private int robotCount = 1; // Default to 1 robot per color
+    private int targetColors = 1; // Anzahl der verschiedenen Zielfarben (1-4) (overridden by Preferences )
     
     // Configuration for the simplified board generation
     private boolean placeWallsInCorners = true;
@@ -211,7 +211,7 @@ public class GameLogic {
         int maxTargetTypes = allowMulticolorTarget ? 5 : 4;
         int targetTypesCount = Math.min(targetColors, maxTargetTypes); // Limit to targetColors
         
-        Timber.d("Creating targets with targetCount=%d and targetColors=%d", targetCount, targetTypesCount);
+        Timber.d("Creating targets with targetCount=%d and targetColors=%d", robotCount, targetTypesCount);
         
         // Create an array of indices to use for target types, and shuffle it to randomize which colors are used
         int[] targetTypeIndices = new int[maxTargetTypes];
@@ -223,11 +223,12 @@ public class GameLogic {
         shuffleIntArray(targetTypeIndices);
         
         // Only use the first targetTypesCount elements from the shuffled array
+        Timber.d("[TARGET] Will use %d different target types out of %d possible types", targetTypesCount, maxTargetTypes);
         for (int i = 0; i < targetTypesCount; i++) {
             int targetType = targetTypeIndices[i];
             
             // For each target type, create targetCount targets
-            for (int count = 0; count < targetCount; count++) {
+            for (int count = 0; count < robotCount; count++) {
                 int targetX, targetY;
                 Boolean tempTargetMustBeInCorner = targetMustBeInCorner;
                 
@@ -1325,21 +1326,21 @@ public class GameLogic {
     }
 
     /**
-     * Set the number of targets per color to be generated on the map
-     * @param count Number of targets (1-4)
+     * Set the number of robots per color to be generated on the map
+     * @param count Number of robots (1-4)
      */
-    public void setTargetCount(int count) {
+    public void setRobotCount(int count) {
         // Ensure count is between 1 and 4
-        this.targetCount = Math.max(1, Math.min(4, count));
-        Timber.d("Target count set to %d", this.targetCount);
+        this.robotCount = Math.max(1, Math.min(4, count));
+        Timber.d("Robot count set to %d", this.robotCount);
     }
 
     /**
-     * Get the current target count setting
-     * @return Number of targets per color (1-4)
+     * Get the current robot count setting
+     * @return Number of robots per color (1-4)
      */
-    public int getTargetCount() {
-        return targetCount;
+    public int getRobotCount() {
+        return robotCount;
     }
 
     /**

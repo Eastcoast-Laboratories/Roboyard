@@ -1625,28 +1625,28 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void initializeGame() {
         Timber.d("ModernGameFragment: initializeGame() called");
         
-        // Get target count from AppPreferences or fall back to old Preferences if needed
-        int targetCount = 1; // Default to 1
+        // Get robot count and target colors from AppPreferences or fall back to old Preferences if needed
+        int robotCount = 1; // Default to 1
         int targetColors = 4; // Default to 4
         try {
-            targetCount = AppPreferences.getInstance().getTargetCount();
+            robotCount = AppPreferences.getInstance().getRobotCount();
             targetColors = AppPreferences.getInstance().getTargetColors();
-            Timber.d("[TARGET COUNT] Using target count from AppPreferences: %d", targetCount);
+            Timber.d("[ROBOT COUNT] Using robot count from AppPreferences: %d", robotCount);
             Timber.d("[TARGET COLORS] Using target colors from AppPreferences: %d", targetColors);
         } catch (IllegalStateException e) {
             // Fall back to old Preferences if AppPreferences is not initialized
             Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
             Preferences preferences = new Preferences();
-            String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
+            String robotCountStr = preferences.getPreferenceValue(requireActivity(), "target_count"); // Still using old key
             String targetColorsStr = preferences.getPreferenceValue(requireActivity(), "target_colors");
             
-            if (targetCountStr != null && !targetCountStr.isEmpty()) {
+            if (robotCountStr != null && !robotCountStr.isEmpty()) {
                 try {
-                    targetCount = Integer.parseInt(targetCountStr);
+                    robotCount = Integer.parseInt(robotCountStr);
                     // Ensure value is within valid range
-                    targetCount = Math.max(1, Math.min(4, targetCount));
+                    robotCount = Math.max(1, Math.min(4, robotCount));
                 } catch (NumberFormatException nfe) {
-                    Timber.e(nfe, "Error parsing target count from preferences");
+                    Timber.e(nfe, "Error parsing robot count from preferences");
                 }
             }
             
@@ -1660,16 +1660,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 }
             }
             
-            Timber.d("[TARGET COUNT] Using target count from old Preferences: %d", targetCount);
+            Timber.d("[ROBOT COUNT] Using robot count from old Preferences: %d", robotCount);
             Timber.d("[TARGET COLORS] Using target colors from old Preferences: %d", targetColors);
         }
         
-        // Apply target count to game state
+        // Apply settings to game state
         GameState currentState = gameStateManager.getCurrentState().getValue();
         if (currentState != null) {
-            currentState.setTargetCount(targetCount);
+            currentState.setRobotCount(robotCount);
             currentState.setTargetColors(targetColors);
-            Timber.d("[TARGET COUNT] Set target count on GameState: %d", currentState.getTargetCount());
+            Timber.d("[ROBOT COUNT] Set robot count on GameState: %d", currentState.getRobotCount());
             Timber.d("[TARGET COLORS] Set target colors on GameState: %d", currentState.getTargetColors());
         }
         

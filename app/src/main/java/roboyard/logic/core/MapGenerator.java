@@ -32,7 +32,7 @@ public class MapGenerator {
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
     public static Boolean generateNewMapEachTime = true; // option in settings
-    private int targetCount = 1; // Default to 1 target per color
+    private int robotCount = 1; // Default to 1 robot per color
     private int targetColors = 4; // Default to 4 different target colors
 
     // Wall configuration
@@ -107,26 +107,26 @@ public class MapGenerator {
     }
     
     /**
-     * Sets the number of targets per color for map generation
-     * @param count Number of targets per color (1-4)
+     * Sets the number of robots per color for map generation
+     * @param count Number of robots per color (1-4)
      */
-    public void setTargetCount(int count) {
-        this.targetCount = Math.max(1, Math.min(4, count));
+    public void setRobotCount(int count) {
+        this.robotCount = Math.max(1, Math.min(4, count));
         
-        // Pass the target count to the GameLogic if it exists
+        // Pass the robot count to the GameLogic if it exists
         if (gameLogic != null) {
-            gameLogic.setTargetCount(this.targetCount);
+            gameLogic.setRobotCount(this.robotCount);
         }
         
-        Timber.d("MapGenerator target count set to %d", this.targetCount);
+        Timber.d("MapGenerator robot count set to %d", this.robotCount);
     }
     
     /**
-     * Gets the current target count setting
-     * @return Number of targets per color (1-4)
+     * Gets the current robot count setting
+     * @return Number of robots per color (1-4)
      */
-    public int getTargetCount() {
-        return targetCount;
+    public int getRobotCount() {
+        return robotCount;
     }
 
     /**
@@ -172,11 +172,6 @@ public class MapGenerator {
     public int getRandom(int min, int max) {
         // Delegate to GameLogic
         return gameLogic.getRandom(min, max);
-    }
-
-    public ArrayList<GridElement> addGameElementsToGameMap(ArrayList<GridElement> data ,int[][] horizontalWalls, int[][]verticalWalls){
-        // Delegate to GameLogic
-        return gameLogic.addGameElementsToGameMap(data, horizontalWalls, verticalWalls);
     }
 
     /**

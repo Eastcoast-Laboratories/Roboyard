@@ -16,7 +16,7 @@ public class AppPreferences {
     private final SharedPreferences prefs;
     
     // Preference keys
-    private static final String KEY_TARGET_COUNT = "target_count";
+    private static final String KEY_ROBOT_COUNT = "robot_count";
     private static final String KEY_TARGET_COLORS = "target_colors";
     private static final String KEY_SOUND_ENABLED = "sound_enabled";
     private static final String KEY_DIFFICULTY = "difficulty";
@@ -84,9 +84,9 @@ public class AppPreferences {
      * 
      * @return Anzahl der Ziele (1-4)
      */
-    public int getTargetCount() {
-        int count = prefs.getInt(KEY_TARGET_COUNT, DEFAULT_TARGET_COUNT); // Default ist 1
-        Timber.d("[TARGET COUNT] AppPreferences.getTargetCount(): %d", count);
+    public int getRobotCount() {
+        int count = prefs.getInt(KEY_ROBOT_COUNT, DEFAULT_TARGET_COUNT); // Default ist 1
+        Timber.d("[TARGET COUNT] AppPreferences.getRobotCount(): %d", count);
         return count;
     }
     
@@ -95,11 +95,11 @@ public class AppPreferences {
      * 
      * @param count Anzahl der Ziele (wird auf 1-4 begrenzt)
      */
-    public void setTargetCount(int count) {
+    public void setRobotCount(int count) {
         // Validierung
         int validCount = Math.max(1, Math.min(4, count));
-        prefs.edit().putInt(KEY_TARGET_COUNT, validCount).apply();
-        Timber.d("[TARGET COUNT] AppPreferences.setTargetCount(): %d", validCount);
+        prefs.edit().putInt(KEY_ROBOT_COUNT, validCount).apply();
+        Timber.d("[TARGET COUNT] AppPreferences.setRobotCount(): %d", validCount);
     }
     
     /**

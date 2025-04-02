@@ -20,7 +20,6 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.logic.core.Constants;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
@@ -82,7 +81,7 @@ public class SettingsFragment extends BaseGameFragment {
         accessibilityRadioGroup = view.findViewById(R.id.accessibility_radio_group);
         accessibilityOn = view.findViewById(R.id.accessibility_on);
         accessibilityOff = view.findViewById(R.id.accessibility_off);
-        targetCountSpinner = view.findViewById(R.id.target_count_spinner);
+        targetCountSpinner = view.findViewById(R.id.robot_count_spinner);
         targetColorsSpinner = view.findViewById(R.id.target_colors_spinner);
         backButton = view.findViewById(R.id.back_button);
         
@@ -103,7 +102,7 @@ public class SettingsFragment extends BaseGameFragment {
         super.onViewCreated(view, savedInstanceState);
         
         // Set up target count spinner after view is created
-        setupTargetCountSpinner();
+        setupRobotCountSpinner();
         setupTargetColorsSpinner();
     }
     
@@ -313,19 +312,19 @@ public class SettingsFragment extends BaseGameFragment {
     }
     
     /**
-     * Sets up the target count spinner
+     * Sets up the robot count spinner
      */
-    private void setupTargetCountSpinner() {
+    private void setupRobotCountSpinner() {
         View view = getView();
         if (view == null) {
-            Timber.e("setupTargetCountSpinner: View is null");
+            Timber.e("setupRobotCountSpinner: View is null");
             return;
         }
         
-        // Create spinner for target count selection (1-4)
-        Spinner targetCountSpinner = view.findViewById(R.id.target_count_spinner);
-        if (targetCountSpinner == null) {
-            Timber.e("setupTargetCountSpinner: Target count spinner not found");
+        // Create spinner for robot count selection (1-4)
+        Spinner robotCountSpinner = view.findViewById(R.id.robot_count_spinner);
+        if (robotCountSpinner == null) {
+            Timber.e("setupRobotCountSpinner: Robot count spinner not found");
             return;
         }
         
@@ -335,13 +334,13 @@ public class SettingsFragment extends BaseGameFragment {
         for (int i = 1; i <= 4; i++) {
             adapter.add(i);
         }
-        targetCountSpinner.setAdapter(adapter);
+        robotCountSpinner.setAdapter(adapter);
         
         // Set current value from preferences
-        int currentTargetCount = 1; // Default to 1
+        int currentRobotCount = 1; // Default to 1
         try {
-            currentTargetCount = AppPreferences.getInstance().getTargetCount();
-            Timber.d("[TARGET COUNT] Using target count from AppPreferences: %d", currentTargetCount);
+            currentRobotCount = AppPreferences.getInstance().getRobotCount();
+            Timber.d("[TARGET COUNT] Using robot count from AppPreferences: %d", currentRobotCount);
         } catch (IllegalStateException e) {
             // Fall back to old Preferences if AppPreferences is not initialized
             Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
@@ -349,32 +348,32 @@ public class SettingsFragment extends BaseGameFragment {
             String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
             if (targetCountStr != null && !targetCountStr.isEmpty()) {
                 try {
-                    currentTargetCount = Integer.parseInt(targetCountStr);
+                    currentRobotCount = Integer.parseInt(targetCountStr);
                     // Ensure value is within valid range
-                    currentTargetCount = Math.max(1, Math.min(4, currentTargetCount));
+                    currentRobotCount = Math.max(1, Math.min(4, currentRobotCount));
                 } catch (NumberFormatException nfe) {
-                    Timber.e(nfe, "Error parsing target count from preferences");
+                    Timber.e(nfe, "Error parsing robot count from preferences");
                 }
             }
-            Timber.d("[TARGET COUNT] Using target count from old Preferences: %d", currentTargetCount);
+            Timber.d("[TARGET COUNT] Using robot count from old Preferences: %d", currentRobotCount);
         }
         
-        targetCountSpinner.setSelection(currentTargetCount - 1); // -1 because index is 0-based
+        robotCountSpinner.setSelection(currentRobotCount - 1); // -1 because index is 0-based
         
         // Set listener to save changes
-        targetCountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        robotCountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 int selectedTargetCount = position + 1; // +1 because index is 0-based
                 try {
-                    AppPreferences.getInstance().setTargetCount(selectedTargetCount);
-                    Timber.d("[TARGET COUNT] Target count set to %d using AppPreferences", selectedTargetCount);
+                    AppPreferences.getInstance().setRobotCount(selectedTargetCount);
+                    Timber.d("[TARGET COUNT] robot count set to %d using AppPreferences", selectedTargetCount);
                 } catch (IllegalStateException e) {
                     // Fall back to old Preferences if AppPreferences is not initialized
                     Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
                     Preferences preferences = new Preferences();
                     preferences.setPreferences(requireActivity(), "target_count", String.valueOf(selectedTargetCount));
-                    Timber.d("[TARGET COUNT] Target count set to %d using old Preferences", selectedTargetCount);
+                    Timber.d("[TARGET COUNT] robot count set to %d using old Preferences", selectedTargetCount);
                 }
             }
             
