@@ -2,7 +2,7 @@
 <resources>
     <!-- Small height screens - make buttons smaller -->
     <dimen name="game_button_height">26dp</dimen>
-    <dimen name="game_button_text_size">12sp</dimen>
+    <dimen name="game_button_text_size">12dp</dimen>
     <dimen name="game_button_margin">4dp</dimen>
     <dimen name="game_button_padding">2dp</dimen>
 </resources>

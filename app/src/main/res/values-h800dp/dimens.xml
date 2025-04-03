@@ -6,7 +6,7 @@
     
     <!-- Tall screens - larger text for buttons -->
     <dimen name="game_button_height">52dp</dimen>
-    <dimen name="game_button_text_size">22sp</dimen>
+    <dimen name="game_button_text_size">22dp</dimen>
     <dimen name="game_button_margin">8dp</dimen>
     <dimen name="game_button_padding">6dp</dimen>
 </resources>

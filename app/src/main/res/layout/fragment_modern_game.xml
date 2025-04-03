@@ -80,6 +80,7 @@
         <TextView
             android:id="@+id/board_size_text"
             android:layout_width="wrap_content"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
             android:text="Board: "
@@ -118,7 +119,8 @@
             android:layout_marginTop="1dp"
             android:text="XXXXX"
             android:textColor="#EEEEEE"
-            android:textSize="36sp"
+            android:layout_marginRight="4dp"
+            android:textSize="36dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -129,7 +131,8 @@
             android:layout_height="wrap_content"
             android:text="00:00"
             android:textColor="#EEEEEE"
-            android:textSize="36sp"
+            android:textSize="36dp"
+            android:layout_marginRight="14dp"
             app:layout_constraintBaseline_toBaselineOf="@id/board_size_text"
             app:layout_constraintEnd_toEndOf="parent" />
 
