@@ -15,14 +15,22 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
 - Überarbeitete Benutzeroberfläche mit klareren Icons und besserer Lesbarkeit
+- Vollständige unterstützung des Accessibility Modus für blinde Spieler mit TalkBack Unterstützung
+- Neuer Spielmodus: bis zu 4 Targets in einem Spiel
 - Neue Tap-to-move-Methode, um Roboter schneller zu bewegen
+- Level Game Auswahl-Screen überarbeitet
+- Neue Boardgrößen: 8x8, 8x12, 10x10, 10x12, 10x14
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
 - Improved user interface with clearer icons and better readability
+- Full support for Accessibility Mode for blind players with TalkBack support
+- New game mode: up to 4 targets in a game
 - New tap-to-move method to move Robots faster
+- Improved Level Game selection screen
+- New board sizes: 8x8, 8x12, 10x10, 10x12, 10x14
 EOF
 )
 

@@ -2,6 +2,15 @@ Changelog Deutsch
 =================
 
 
+## Version 21 (2025-04-03)
+- Überarbeitete Benutzeroberfläche mit klareren Icons und besserer Lesbarkeit
+- Vollständige unterstützung des Accessibility Modus für blinde Spieler mit TalkBack Unterstützung
+- Neuer Spielmodus: bis zu 4 Targets in einem Spiel
+- Neue Tap-to-move-Methode, um Roboter schneller zu bewegen
+- Level Game Auswahl-Screen überarbeitet
+- Neue Boardgrößen: 8x8, 8x12, 10x10, 10x12, 10x14
+
+
 ## Version 20.1 (2025-03-17)
 - Gespeicherte Spiele werden nun sofort im Ladebildschirm als Minimap angezeigt.
 - Performance-Optimierungen: Roboter bewegen sich jetzt schneller.

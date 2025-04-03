@@ -2,6 +2,15 @@
 =========
 
 
+## Version 21 (2025-04-03)
+- Improved user interface with clearer icons and better readability
+- Full support for Accessibility Mode for blind players with TalkBack support
+- New game mode: up to 4 targets in a game
+- New tap-to-move method to move Robots faster
+- Improved Level Game selection screen
+- New board sizes: 8x8, 8x12, 10x10, 10x12, 10x14
+
+
 ## Version 20.1 (2025-03-17)
 - Save games are now immediately displayed in the load screen as a minimap.
 - Performance improvements: Robots now move faster.
