@@ -391,14 +391,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             setupAccessibilityControls();
         }
         
-        // Check for TalkBack OR accessibility preference enabled to show the button
-        boolean accessibilityModeEnabled = false;
-        
-        // Check settings preference
-        // Removed code here
-        
         // Show button if either TalkBack or accessibility mode is enabled
-        if (isTalkBackEnabled() || accessibilityModeEnabled) {
+        if (isTalkBackEnabled() || Preferences.accessibilityMode) {
             btnToggleAccessibilityControls.setVisibility(View.VISIBLE);
             btnToggleAccessibilityControls.setOnClickListener(v -> toggleAccessibilityControls());
         }
