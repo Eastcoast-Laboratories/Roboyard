@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.UnderlineSpan;
 import android.text.style.ClickableSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,9 +39,9 @@ public class CreditsFragment extends BaseGameFragment {
         versionTextView.setText(String.format("Version: %s (Build %d)", versionName, versionCode));
         
         // Set up clickable links
-        setupClickableLink(view, R.id.imprint_link, "https://eclabs.de/ds.html");
+        setupClickableLink(view, R.id.imprint_link, "https://eclabs.de/datenschutz.html");
         setupClickableLink(view, R.id.opensource_link, "https://git.io/fjs5H");
-        setupClickableLink(view, R.id.contact_link, "https://eclabs.de/contact");
+        setupClickableLink(view, R.id.contact_link, "https://eclabs.de/#kontakt");
         
         // Set up back button
         view.findViewById(R.id.back_button).setOnClickListener(v -> {
@@ -61,17 +60,24 @@ public class CreditsFragment extends BaseGameFragment {
      */
     private void setupClickableLink(View view, int textViewId, final String url) {
         TextView textView = view.findViewById(textViewId);
-        SpannableString spannableString = new SpannableString(url);
+        String displayText = textView.getText().toString(); // Get the text from the XML layout
+        SpannableString spannableString = new SpannableString(displayText);
         
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View view) {
                 openLink(url);
             }
+            
+            @Override
+            public void updateDrawState(@NonNull android.text.TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setColor(0xFF0000FF); // Set link color to blue (with full alpha)
+                ds.setUnderlineText(true);
+            }
         };
         
-        spannableString.setSpan(clickableSpan, 0, url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new UnderlineSpan(), 0, url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(clickableSpan, 0, displayText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         
         textView.setText(spannableString);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
