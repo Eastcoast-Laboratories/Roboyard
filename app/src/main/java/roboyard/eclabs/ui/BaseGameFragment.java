@@ -1,5 +1,6 @@
 package roboyard.eclabs.ui;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -11,6 +12,7 @@ import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.util.FontScaleUtil;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -27,6 +29,17 @@ public abstract class BaseGameFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Get the GameStateManager from the activity
         gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
+    }
+    
+    /**
+     * Override onAttach to apply fixed font scaling
+     * This ensures consistent text sizes regardless of system settings
+     */
+    @Override
+    public void onAttach(Context context) {
+        // Apply fixed font scaling to ensure consistent UI
+        Context fixedContext = FontScaleUtil.createFixedFontScaleContext(context);
+        super.onAttach(fixedContext);
     }
     
     /**
