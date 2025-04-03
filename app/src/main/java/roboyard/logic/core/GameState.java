@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import roboyard.logic.core.Constants;
 import roboyard.eclabs.util.MapIdGenerator;
 import roboyard.ui.activities.MainActivity;
 
@@ -1507,7 +1506,7 @@ public class GameState implements Serializable {
     private static String difficultyIntToString(int difficulty) {
         switch (difficulty) {
             case Constants.DIFFICULTY_BEGINNER: return "Beginner";
-            case Constants.DIFFICULTY_INTERMEDIATE: return "Intermediate";
+            case Constants.DIFFICULTY_ADVANCED: return "Intermediate";
             case Constants.DIFFICULTY_INSANE: return "Advanced";
             case Constants.DIFFICULTY_IMPOSSIBLE: return "Expert";
             default: return "Beginner";

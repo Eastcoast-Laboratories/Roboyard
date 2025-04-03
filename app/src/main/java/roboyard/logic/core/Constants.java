@@ -51,7 +51,7 @@ public class Constants {
     
     // Difficulty levels
     public static final int DIFFICULTY_BEGINNER = 0;
-    public static final int DIFFICULTY_INTERMEDIATE = 1;
+    public static final int DIFFICULTY_ADVANCED = 1;
     public static final int DIFFICULTY_INSANE = 2;
     public static final int DIFFICULTY_IMPOSSIBLE = 3;
 
@@ -71,4 +71,6 @@ public class Constants {
     
     // Accessibility constants
     public static final long ACCESSIBILITY_FOCUS_DELAY_MS = 500;
+    public static final int MIN_BOARD_SIZE = 8;
+    public static final int MAX_BOARD_SIZE = 22;
 }

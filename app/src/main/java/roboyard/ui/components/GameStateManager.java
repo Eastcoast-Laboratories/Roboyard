@@ -1094,7 +1094,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         switch (getDifficulty()) {
             case Constants.DIFFICULTY_BEGINNER:
                 return "Beginner";
-            case Constants.DIFFICULTY_INTERMEDIATE:
+            case Constants.DIFFICULTY_ADVANCED:
                 return "Intermediate";
             case Constants.DIFFICULTY_INSANE:
                 return "Insane";
@@ -1591,7 +1591,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int difficulty = Preferences.difficulty;
         int minMoves = 0;
         switch (difficulty) {
-            case Constants.DIFFICULTY_INTERMEDIATE:
+            case Constants.DIFFICULTY_ADVANCED:
                 minMoves = MIN_MOVES_ADVANCED;
                 break;
             case Constants.DIFFICULTY_INSANE:
@@ -1611,7 +1611,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int difficulty = Preferences.difficulty;
         int maxMoves = 9999;
         switch (difficulty) {
-            case Constants.DIFFICULTY_INTERMEDIATE:
+            case Constants.DIFFICULTY_ADVANCED:
                 maxMoves = MAX_MOVES_ADVANCED;
                 break;
             case Constants.DIFFICULTY_INSANE:

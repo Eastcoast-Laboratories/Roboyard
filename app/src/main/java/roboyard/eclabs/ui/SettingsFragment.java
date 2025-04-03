@@ -58,6 +58,9 @@ public class SettingsFragment extends Fragment {
     // Add a flag to track if this is the first selection event
     private boolean isInitialBoardSizeSelection = true;
     
+    // Flag to prevent recursive updates
+    private boolean isUpdatingUI = false;
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
                              @Nullable Bundle savedInstanceState) {
@@ -233,6 +236,12 @@ public class SettingsFragment extends Fragment {
      * Load current settings from preferences
      */
     private void loadSettings() {
+        if (isUpdatingUI) {
+            return;
+        }
+        
+        isUpdatingUI = true;
+        
         // We're now using static Preferences, so we don't need to load most values from disk
         // Just set the UI elements to match the current static Preferences values
         
@@ -248,7 +257,7 @@ public class SettingsFragment extends Fragment {
         
         // Difficulty radio buttons
         switch (Preferences.difficulty) {
-            case Constants.DIFFICULTY_INTERMEDIATE:
+            case Constants.DIFFICULTY_ADVANCED:
                 difficultyRadioGroup.check(R.id.difficulty_advanced);
                 break;
             case Constants.DIFFICULTY_INSANE:
@@ -284,6 +293,8 @@ public class SettingsFragment extends Fragment {
         }
         
         // Note: The robot count and target colors spinners are set up in their respective setup methods
+        
+        isUpdatingUI = false;
     }
     
     /**
@@ -470,14 +481,50 @@ public class SettingsFragment extends Fragment {
         
         // Difficulty radio group
         difficultyRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            String difficulty;
-            int difficultyLevel;
+            // Skip if we're already updating UI from preferences
+            if (isUpdatingUI) {
+                return;
+            }
+            
+            String difficulty = "Beginner"; // default
+            int difficultyLevel = Constants.DIFFICULTY_BEGINNER; // default
+
             if (checkedId == R.id.difficulty_beginner) {
-                difficulty = "Beginner";
-                difficultyLevel = Constants.DIFFICULTY_BEGINNER; 
+                // Only set board size to 12x14 if current size is larger
+                if (Preferences.boardSizeWidth * Preferences.boardSizeHeight > 12 * 14) {
+                    // Find the 12x14 board size in the validBoardSizes list
+                    int position = -1;
+                    for (int i = 0; i < validBoardSizes.size(); i++) {
+                        int[] size = validBoardSizes.get(i);
+                        if (size[0] == 12 && size[1] == 14) {
+                            position = i;
+                            break;
+                        }
+                    }
+                    
+                    // If 12x14 is a valid board size, select it
+                    if (position >= 0) {
+                        isUpdatingUI = true; // Prevent recursive updates
+                        boardSizeSpinner.setSelection(position);
+                        // Update the board size in preferences
+                        Preferences.setBoardSize(12, 14);
+                        isUpdatingUI = false;
+                        Timber.d("Automatically set board size to 12x14 for Beginner difficulty");
+                    }else{
+                        Timber.d("12x14 board size not found for Beginner difficulty");
+                    }
+                }
+                
+                // Set target colors to 1 for Beginner difficulty
+                isUpdatingUI = true; // Prevent recursive updates
+                targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
+                Preferences.setTargetColors(1);
+                isUpdatingUI = false;
+                Timber.d("Automatically set target colors to 1 for Beginner difficulty");
+                
             } else if (checkedId == R.id.difficulty_advanced) {
                 difficulty = "Advanced";
-                difficultyLevel = Constants.DIFFICULTY_INTERMEDIATE; 
+                difficultyLevel = Constants.DIFFICULTY_ADVANCED;
             } else if (checkedId == R.id.difficulty_insane) {
                 difficulty = "Insane";
                 difficultyLevel = Constants.DIFFICULTY_INSANE; 
@@ -486,10 +533,7 @@ public class SettingsFragment extends Fragment {
                 difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE; 
                 // Show warning toast for impossible difficulty
                 showImpossibleDifficultyToast();
-            } else {
-                difficulty = "Beginner";
-                difficultyLevel = Constants.DIFFICULTY_BEGINNER; 
-            }
+            } 
             
             // Save difficulty setting
             Preferences.setDifficulty(difficultyLevel);

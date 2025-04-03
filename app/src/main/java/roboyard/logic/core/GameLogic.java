@@ -19,10 +19,10 @@ public class GameLogic {
     private final Random rand;
 
     // Difficulty level constants
-    public static final int DIFFICULTY_BEGINNER = 0;
-    public static final int DIFFICULTY_ADVANCED = 1;
-    public static final int DIFFICULTY_INSANE = 2;
-    public static final int DIFFICULTY_IMPOSSIBLE = 3;
+    public static final int DIFFICULTY_BEGINNER = Constants.DIFFICULTY_BEGINNER;
+    public static final int DIFFICULTY_ADVANCED = Constants.DIFFICULTY_ADVANCED;
+    public static final int DIFFICULTY_INSANE = Constants.DIFFICULTY_INSANE;
+    public static final int DIFFICULTY_IMPOSSIBLE = Constants.DIFFICULTY_IMPOSSIBLE;
 
     // position of the square in the middle of the game board
     private final int carrePosX; // horizontal position of the top wall of square, starting with 0

@@ -318,7 +318,7 @@ public class Preferences {
     
     /**
      * Set the difficulty level and save to preferences
-     * @param difficultyLevel Difficulty level (1-5)
+     * @param difficultyLevel Difficulty level (0-3)
      */
     public static void setDifficulty(int difficultyLevel) {
         // Ensure preferences are initialized
@@ -329,13 +329,13 @@ public class Preferences {
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
-                difficulty = Math.max(1, Math.min(5, difficultyLevel));
+                difficulty = Math.max(Constants.DIFFICULTY_BEGINNER, Math.min(Constants.DIFFICULTY_IMPOSSIBLE, difficultyLevel));
                 return;
             }
         }
         
-        // Ensure difficulty level is between 1 and 5
-        int validDifficulty = Math.max(1, Math.min(5, difficultyLevel));
+        // Ensure difficulty level is between DIFFICULTY_BEGINNER and DIFFICULTY_IMPOSSIBLE
+        int validDifficulty = Math.max(Constants.DIFFICULTY_BEGINNER, Math.min(Constants.DIFFICULTY_IMPOSSIBLE, difficultyLevel));
         
         // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();
@@ -364,17 +364,17 @@ public class Preferences {
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
-                boardSizeWidth = Math.max(8, Math.min(32, width));
-                boardSizeHeight = Math.max(8, Math.min(32, height));
+                boardSizeWidth = Math.max(Constants.MIN_BOARD_SIZE, Math.min(Constants.MAX_BOARD_SIZE, width));
+                boardSizeHeight = Math.max(Constants.MIN_BOARD_SIZE, Math.min(Constants.MAX_BOARD_SIZE, height));
                 boardSizeX = boardSizeWidth;
                 boardSizeY = boardSizeHeight;
                 return;
             }
         }
         
-        // Ensure width and height are between 8 and 32
-        int validWidth = Math.max(8, Math.min(32, width));
-        int validHeight = Math.max(8, Math.min(32, height));
+        // Ensure width and height are between MIN_BOARD_SIZE and MAX_BOARD_SIZE
+        int validWidth = Math.max(Constants.MIN_BOARD_SIZE, Math.min(Constants.MAX_BOARD_SIZE, width));
+        int validHeight = Math.max(Constants.MIN_BOARD_SIZE, Math.min(Constants.MAX_BOARD_SIZE, height));
         
         // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();

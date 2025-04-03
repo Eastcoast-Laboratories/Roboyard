@@ -499,10 +499,8 @@ public class GameGridView extends View {
         // but BEFORE the walls and other game elements
         if (backgroundLogo != null) {
             // Calculate the center of the board
-            float boardWidth = gridWidth * cellSize;
-            float boardHeight = gridHeight * cellSize;
-            float centerX = boardWidth / 2;
-            float centerY = boardHeight / 2;
+            float centerX = offsetX + (boardWidth / 2);
+            float centerY = offsetY + (boardHeight / 2);
             
             // Make the logo exactly 2x2 squares in size
             float logoSize = cellSize * 2; // Exactly 2 cells wide and high
@@ -523,8 +521,8 @@ public class GameGridView extends View {
         // Draw targets
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET) {
-                float left = element.getX() * cellSize;
-                float top = element.getY() * cellSize;
+                float left = offsetX + (element.getX() * cellSize);
+                float top = offsetY + (element.getY() * cellSize);
                 float right = left + cellSize;
                 float bottom = top + cellSize;
                 
@@ -550,9 +548,9 @@ public class GameGridView extends View {
 
                 // Special handling for border walls to ensure they're visible
                 float offset = cellSize * WALL_OFFSET_FACTOR; 
-                float left = x * cellSize - offset; 
-                float top = y * cellSize; 
-                float right = left + cellSize + 2 * offset;
+                float left = offsetX + (x * cellSize - offset); 
+                float top = offsetY + (y * cellSize); 
+                float right = offsetX + (left + cellSize + 2 * offset);
                 float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
 
                 // Draw horizontal wall - between y and y+1
@@ -560,7 +558,7 @@ public class GameGridView extends View {
                     // Handle the border case for bottom border correctly
                     if (y == state.getHeight()) {
                         // Bottom border wall at edge of board
-                        top = state.getHeight() * cellSize;
+                        top = offsetY + (state.getHeight() * cellSize);
                     }
                     
                     wallHorizontal.setBounds((int)left, (int)(top - wallThickness/2), 
@@ -576,9 +574,9 @@ public class GameGridView extends View {
                 int y = element.getY();
 
                 float offset = cellSize * WALL_OFFSET_FACTOR; 
-                float left = x * cellSize; 
-                float top = y * cellSize - offset;
-                float bottom = top + cellSize + 2 * offset;
+                float left = offsetX + (x * cellSize); 
+                float top = offsetY + (y * cellSize - offset);
+                float bottom = offsetY + (top + cellSize + 2 * offset);
                 float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
                 
                 // Draw vertical wall - between x and x+1
@@ -586,7 +584,7 @@ public class GameGridView extends View {
                     // Handle the border case for right border correctly
                     if (x == state.getWidth()) {
                         // Right border wall at edge of board
-                        left = state.getWidth() * cellSize;
+                        left = offsetX + (state.getWidth() * cellSize);
                     }
                     
                     wallVertical.setBounds((int)(left - wallThickness/2), (int)top,
@@ -604,8 +602,8 @@ public class GameGridView extends View {
             int x = position[0];
             int y = position[1];
             
-            float left = x * cellSize;
-            float top = y * cellSize;
+            float left = offsetX + (x * cellSize);
+            float top = offsetY + (y * cellSize);
             float right = left + cellSize;
             float bottom = top + cellSize;
             
@@ -656,8 +654,11 @@ public class GameGridView extends View {
         int x = robot.getX();
         int y = robot.getY();
         
-        float left = x * cellSize;
-        float top = y * cellSize;
+        float offsetX = (getWidth() - (gridWidth * cellSize)) / 2;
+        float offsetY = (getHeight() - (gridHeight * cellSize)) / 2;
+        
+        float left = offsetX + (x * cellSize);
+        float top = offsetY + (y * cellSize);
         float right = left + cellSize;
         float bottom = top + cellSize;
         
@@ -735,8 +736,8 @@ public class GameGridView extends View {
         float y = event.getY();
         
         // Convert to grid coordinates
-        int gridX = (int) (x / cellSize);
-        int gridY = (int) (y / cellSize);
+        int gridX = (int) ((x - (getWidth() - (gridWidth * cellSize)) / 2) / cellSize);
+        int gridY = (int) ((y - (getHeight() - (gridHeight * cellSize)) / 2) / cellSize);
         
         // Ensure coordinates are within bounds
         if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
@@ -1039,8 +1040,8 @@ public class GameGridView extends View {
             float y = event.getY();
             
             // Convert touch coordinates to grid coordinates
-            int gridX = (int) (x / cellSize);
-            int gridY = (int) (y / cellSize);
+            int gridX = (int) ((x - (getWidth() - (gridWidth * cellSize)) / 2) / cellSize);
+            int gridY = (int) ((y - (getHeight() - (gridHeight * cellSize)) / 2) / cellSize);
             
             // Ensure coordinates are within bounds
             if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
