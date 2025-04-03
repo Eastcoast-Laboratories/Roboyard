@@ -978,7 +978,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Check for vertical wall at the current position
                     for (GameElement element : state.getGameElements()) {
                         if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
-                            element.getX() == i+2 && element.getY() == startY) {
+                            element.getX() == i && element.getY() == startY) {
                             canMove = false;
                             hitWall = true;
                             break;
@@ -1023,7 +1023,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Check for horizontal wall at the current position
                     for (GameElement element : state.getGameElements()) {
                         if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
-                            element.getX() == startX && element.getY() == i+2) {
+                            element.getX() == startX && element.getY() == i) {
                             canMove = false;
                             hitWall = true;
                             break;
