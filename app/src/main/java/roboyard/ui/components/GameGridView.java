@@ -459,11 +459,19 @@ public class GameGridView extends View {
         gridWidth = state.getWidth();
         gridHeight = state.getHeight();
         
+        // Calculate offsets to center the board
+        float boardWidth = gridWidth * cellSize;
+        float boardHeight = gridHeight * cellSize;
+        float canvasWidth = getWidth();
+        float canvasHeight = getHeight();
+        float offsetX = (canvasWidth - boardWidth) / 2;
+        float offsetY = (canvasHeight - boardHeight) / 2;
+        
         // Draw grid cells - board background first
         for (int y = 0; y < gridHeight; y++) {
             for (int x = 0; x < gridWidth; x++) {
-                float left = x * cellSize;
-                float top = y * cellSize;
+                float left = offsetX + (x * cellSize);
+                float top = offsetY + (y * cellSize);
                 float right = left + cellSize;
                 float bottom = top + cellSize;
                 
