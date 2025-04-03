@@ -1,13 +1,12 @@
 package roboyard.ui.components;
-import roboyard.eclabs.Preferences;
+import roboyard.logic.core.Preferences;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.IGameObject;
 import roboyard.eclabs.GameManager;
+import roboyard.eclabs.R;
 import roboyard.logic.core.Constants;
 
 import android.media.MediaPlayer;
-
-import roboyard.eclabs.R;
 
 import android.graphics.Color;
 
@@ -421,9 +420,7 @@ public class GamePiece implements IGameObject {
             MainActivity activity = gameManager.getActivity();
             if (activity != null) {
                 // Check if sound is enabled in preferences
-                Preferences preferences = new Preferences();
-                String soundSetting = preferences.getPreferenceValue(activity, "sound");
-                if (!soundSetting.equals("off")) {
+                if (Preferences.soundEnabled) {
                     // If a sound is already playing, don't play another one
                     if (isSoundPlaying && currentSoundPlayer != null && currentSoundPlayer.isPlaying()) {
                         Timber.d("Not playing sound %s - another sound is already playing", wichSound);

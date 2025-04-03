@@ -2,7 +2,6 @@ package roboyard.ui.activities;
 import roboyard.SoundService;
 import roboyard.logic.core.MapGenerator;
 import roboyard.ui.components.RenderManager;
-import roboyard.eclabs.Preferences;
 import roboyard.eclabs.Move;
 import roboyard.ui.components.InputManager;
 import roboyard.eclabs.IGameObject;
@@ -17,7 +16,7 @@ import android.content.Context;
 import roboyard.eclabs.R;
 import roboyard.ui.components.GamePiece;
 import roboyard.ui.components.GameMovementInterface;
-import roboyard.eclabs.AppPreferences;
+import roboyard.logic.core.Preferences;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -55,7 +54,6 @@ public class MainActivity extends FragmentActivity
     private InputManager inputManager;
     private RenderManager renderManager;
     private GameManager gameManager;
-    private final Preferences preferences = new Preferences();
 
     // Static reference to the application context
     private static Context appContext;
@@ -91,8 +89,9 @@ public class MainActivity extends FragmentActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appContext = getApplicationContext();
-        // Initialize AppPreferences
-        AppPreferences.init(getApplicationContext());
+        
+        // Initialize static Preferences
+        Preferences.initialize(getApplicationContext());
         
         // Hide the status bar
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -156,10 +155,10 @@ public class MainActivity extends FragmentActivity
         Timber.d("Initialized with board size: %dx%d", boardSizeX, boardSizeY);
         
         // Load map generation preference
-        String newMapSetting = preferences.getPreferenceValue(this, "newMapEachTime");
+        String newMapSetting = Preferences.getPreferenceValue(this, "newMapEachTime");
         if (newMapSetting == null) {
             newMapSetting = "true"; // Default value
-            preferences.setPreferences(this, "newMapEachTime", newMapSetting);
+            Preferences.setPreferences(this, "newMapEachTime", newMapSetting);
         }
         MapGenerator.generateNewMapEachTime = newMapSetting.equals("true");
         Timber.d("Initialized generateNewMapEachTime: %s", MapGenerator.generateNewMapEachTime);
@@ -274,7 +273,7 @@ public class MainActivity extends FragmentActivity
     }
 
     public void startSound(){
-        String soundSetting = preferences.getPreferenceValue(this, "sound");
+        String soundSetting = Preferences.getPreferenceValue(this, "sound");
         if(!soundSetting.equals("off")) {
             //start service and play music
             startService(new Intent(MainActivity.this, SoundService.class));
@@ -544,8 +543,8 @@ public class MainActivity extends FragmentActivity
         boardSizeY = y;
         
         // Save board size to preferences using the existing preferences instance
-        preferences.setPreferences(this, "boardSizeX", String.valueOf(x));
-        preferences.setPreferences(this, "boardSizeY", String.valueOf(y));
+        Preferences.setPreferences(this, "boardSizeX", String.valueOf(x));
+        Preferences.setPreferences(this, "boardSizeY", String.valueOf(y));
         
         // Also update BoardSizeManager to ensure consistency
         try {
@@ -579,8 +578,8 @@ public class MainActivity extends FragmentActivity
      * Load board size from preferences or use default if not set
      */
     public void loadBoardSizeFromPreferences(Activity activity) {
-        String boardSizeXStr = preferences.getPreferenceValue(activity, "boardSizeX");
-        String boardSizeYStr = preferences.getPreferenceValue(activity, "boardSizeY");
+        String boardSizeXStr = Preferences.getPreferenceValue(activity, "boardSizeX");
+        String boardSizeYStr = Preferences.getPreferenceValue(activity, "boardSizeY");
 
         Timber.d("Loading board size from preferences: X=%s, Y=%s", boardSizeXStr, boardSizeYStr);
 

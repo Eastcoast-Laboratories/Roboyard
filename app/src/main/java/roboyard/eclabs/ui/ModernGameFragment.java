@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 import roboyard.logic.core.Constants;
-import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.BoardSizeManager;
 import roboyard.eclabs.util.UIModeManager;
@@ -44,7 +43,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 
-import roboyard.eclabs.AppPreferences;
+import roboyard.logic.core.Preferences;
 
 /**
  * Modern UI implementation of the game screen.
@@ -375,11 +374,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         boolean accessibilityModeEnabled = false;
         
         // Check settings preference
-        Preferences preferences = new Preferences();
-        String accessibilityPref = preferences.getPreferenceValue(requireActivity(), "accessibilityMode");
-        if (accessibilityPref != null && accessibilityPref.equals("true")) {
-            accessibilityModeEnabled = true;
-        }
+        // Removed code here
         
         // Show button if either TalkBack or accessibility mode is enabled
         if (isTalkBackEnabled() || accessibilityModeEnabled) {
@@ -1625,52 +1620,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void initializeGame() {
         Timber.d("ModernGameFragment: initializeGame() called");
         
-        // Get robot count and target colors from AppPreferences or fall back to old Preferences if needed
-        int robotCount = 1; // Default to 1
-        int targetColors = 4; // Default to 4
-        try {
-            robotCount = AppPreferences.getInstance().getRobotCount();
-            targetColors = AppPreferences.getInstance().getTargetColors();
-            Timber.d("[ROBOT COUNT] Using robot count from AppPreferences: %d", robotCount);
-            Timber.d("[TARGET COLORS] Using target colors from AppPreferences: %d", targetColors);
-        } catch (IllegalStateException e) {
-            // Fall back to old Preferences if AppPreferences is not initialized
-            Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
-            Preferences preferences = new Preferences();
-            String robotCountStr = preferences.getPreferenceValue(requireActivity(), "target_count"); // Still using old key
-            String targetColorsStr = preferences.getPreferenceValue(requireActivity(), "target_colors");
-            
-            if (robotCountStr != null && !robotCountStr.isEmpty()) {
-                try {
-                    robotCount = Integer.parseInt(robotCountStr);
-                    // Ensure value is within valid range
-                    robotCount = Math.max(1, Math.min(4, robotCount));
-                } catch (NumberFormatException nfe) {
-                    Timber.e(nfe, "Error parsing robot count from preferences");
-                }
-            }
-            
-            if (targetColorsStr != null && !targetColorsStr.isEmpty()) {
-                try {
-                    targetColors = Integer.parseInt(targetColorsStr);
-                    // Ensure value is within valid range
-                    targetColors = Math.max(1, Math.min(4, targetColors));
-                } catch (NumberFormatException nfe) {
-                    Timber.e(nfe, "Error parsing target colors from preferences");
-                }
-            }
-            
-            Timber.d("[ROBOT COUNT] Using robot count from old Preferences: %d", robotCount);
-            Timber.d("[TARGET COLORS] Using target colors from old Preferences: %d", targetColors);
-        }
-        
         // Apply settings to game state
         GameState currentState = gameStateManager.getCurrentState().getValue();
         if (currentState != null) {
-            currentState.setRobotCount(robotCount);
-            currentState.setTargetColors(targetColors);
-            Timber.d("[ROBOT COUNT] Set robot count on GameState: %d", currentState.getRobotCount());
-            Timber.d("[TARGET COLORS] Set target colors on GameState: %d", currentState.getTargetColors());
+            currentState.setRobotCount(roboyard.logic.core.Preferences.robotCount);
+            currentState.setTargetColors(roboyard.logic.core.Preferences.targetColors);
         }
         
         // Check if this is a random game (not a level) and randomize pre-hints

@@ -240,6 +240,13 @@ public class SolverManager implements Runnable {
     public void run() {
         Timber.d("[SOLUTION SOLVER] SolverManager.run() - Starting solver");
         try {
+            if (!isInitialized) {
+                Timber.w("[SOLUTION SOLVER] SolverManager.run() - Solver not initialized, cannot run");
+                if (listener != null) {
+                    listener.onSolverCancelled();
+                }
+                return;
+            }
             startSolverInternal();
         } catch (Exception e) {
             Timber.e(e, "[SOLUTION SOLVER] Error running solver");

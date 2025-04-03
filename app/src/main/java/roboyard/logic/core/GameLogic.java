@@ -211,7 +211,7 @@ public class GameLogic {
         int maxTargetTypes = allowMulticolorTarget ? 5 : 4;
         int targetTypesCount = Math.min(targetColors, maxTargetTypes); // Limit to targetColors
         
-        Timber.d("Creating targets with targetCount=%d and targetColors=%d", robotCount, targetTypesCount);
+        Timber.d("Creating targets with robotCount=%d and targetColors=%d", robotCount, targetTypesCount);
         
         // Create an array of indices to use for target types, and shuffle it to randomize which colors are used
         int[] targetTypeIndices = new int[maxTargetTypes];
@@ -227,51 +227,49 @@ public class GameLogic {
         for (int i = 0; i < targetTypesCount; i++) {
             int targetType = targetTypeIndices[i];
             
-            // For each target type, create targetCount targets
-            for (int count = 0; count < robotCount; count++) {
-                int targetX, targetY;
-                Boolean tempTargetMustBeInCorner = targetMustBeInCorner;
+            // For each target type, create exactly one target
+            int targetX, targetY;
+            Boolean tempTargetMustBeInCorner = targetMustBeInCorner;
+            
+            // 50% probability that the target is in a corner if targetMustBeInCorner is false
+            if (!targetMustBeInCorner && getRandom(0, 1) != 1) {
+                tempTargetMustBeInCorner = true;
+            }
+            
+            do {
+                abandon = false;
+                targetX = getRandom(0, boardWidth - 1);
+                targetY = getRandom(0, boardHeight - 1);
                 
-                // 50% probability that the target is in a corner if targetMustBeInCorner is false
-                if (!targetMustBeInCorner && getRandom(0, 1) != 1) {
-                    tempTargetMustBeInCorner = true;
+                // Check corner walls if required
+                if (tempTargetMustBeInCorner && horizontalWalls[targetX][targetY] == 0 && horizontalWalls[targetX][targetY + 1] == 0)
+                    abandon = true;
+                if (tempTargetMustBeInCorner && verticalWalls[targetX][targetY] == 0 && verticalWalls[targetX + 1][targetY] == 0)
+                    abandon = true;
+                
+                // Check if in the center square
+                if ((targetX == carrePosX && targetY == carrePosY)
+                        || (targetX == carrePosX && targetY == carrePosY + 1)
+                        || (targetX == carrePosX + 1 && targetY == carrePosY)
+                        || (targetX == carrePosX + 1 && targetY == carrePosY + 1))
+                    abandon = true; // target was in square
+                
+                // Check if position is already occupied by another element
+                for (GridElement element : allElements) {
+                    if (element.getX() == targetX && element.getY() == targetY) {
+                        abandon = true;
+                        break;
+                    }
                 }
                 
-                do {
-                    abandon = false;
-                    targetX = getRandom(0, boardWidth - 1);
-                    targetY = getRandom(0, boardHeight - 1);
-                    
-                    // Check corner walls if required
-                    if (tempTargetMustBeInCorner && horizontalWalls[targetX][targetY] == 0 && horizontalWalls[targetX][targetY + 1] == 0)
-                        abandon = true;
-                    if (tempTargetMustBeInCorner && verticalWalls[targetX][targetY] == 0 && verticalWalls[targetX + 1][targetY] == 0)
-                        abandon = true;
-                    
-                    // Check if in the center square
-                    if ((targetX == carrePosX && targetY == carrePosY)
-                            || (targetX == carrePosX && targetY == carrePosY + 1)
-                            || (targetX == carrePosX + 1 && targetY == carrePosY)
-                            || (targetX == carrePosX + 1 && targetY == carrePosY + 1))
-                        abandon = true; // target was in square
-                    
-                    // Check if position is already occupied by another element
-                    for (GridElement element : allElements) {
-                        if (element.getX() == targetX && element.getY() == targetY) {
-                            abandon = true;
-                            break;
-                        }
-                    }
-                    
-                } while (abandon);
-                
-                // Create and add the target
-                GridElement newTarget = new GridElement(targetX, targetY, typesOfTargets[targetType]);
-                data.add(newTarget);
-                allElements.add(newTarget);
-                
-                Timber.d("Added target %s at position %d,%d", typesOfTargets[targetType], targetX, targetY);
-            }
+            } while (abandon);
+            
+            // Create and add the target
+            GridElement newTarget = new GridElement(targetX, targetY, typesOfTargets[targetType]);
+            data.add(newTarget);
+            allElements.add(newTarget);
+            
+            Timber.d("Added target %s at position %d,%d", typesOfTargets[targetType], targetX, targetY);
         }
         
         // Create robots

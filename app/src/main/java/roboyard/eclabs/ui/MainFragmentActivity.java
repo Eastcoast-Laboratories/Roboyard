@@ -8,6 +8,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
+import roboyard.logic.core.Preferences;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -37,6 +38,12 @@ public class MainFragmentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        // Initialize the static Preferences at app startup
+        roboyard.logic.core.Preferences.initialize(getApplicationContext());
+        Timber.d("[PREFERENCES] Initialized with robotCount=%d, targetColors=%d", 
+                roboyard.logic.core.Preferences.robotCount, 
+                roboyard.logic.core.Preferences.targetColors);
         
         // Log the board size at startup
         Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity onCreate - Current board size: %dx%d", 

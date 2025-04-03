@@ -3,11 +3,12 @@ package roboyard.eclabs.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -16,21 +17,22 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.ui.activities.MainActivity;
-import roboyard.eclabs.Preferences;
 import roboyard.eclabs.R;
-import roboyard.eclabs.AppPreferences;
+import roboyard.logic.core.Constants;
+import roboyard.logic.core.Preferences;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 /**
  * Settings screen implemented as a Fragment with native Android UI components.
  * Replaces the canvas-based SettingsScreen, but maintains the same functionality.
  */
-public class SettingsFragment extends BaseGameFragment {
+public class SettingsFragment extends Fragment {
     
     private Spinner boardSizeSpinner;
     private RadioGroup difficultyRadioGroup;
@@ -47,11 +49,10 @@ public class SettingsFragment extends BaseGameFragment {
     private RadioGroup accessibilityRadioGroup;
     private RadioButton accessibilityOn;
     private RadioButton accessibilityOff;
-    private Spinner targetCountSpinner;
     private Spinner targetColorsSpinner;
     private Button backButton;
+    private Spinner robotCountSpinner;
     
-    private Preferences preferences;
     private List<int[]> validBoardSizes;
     
     // Add a flag to track if this is the first selection event
@@ -61,9 +62,6 @@ public class SettingsFragment extends BaseGameFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
-        
-        // Initialize preferences
-        preferences = new Preferences();
         
         // Initialize UI components
         boardSizeSpinner = view.findViewById(R.id.board_size_spinner);
@@ -81,12 +79,18 @@ public class SettingsFragment extends BaseGameFragment {
         accessibilityRadioGroup = view.findViewById(R.id.accessibility_radio_group);
         accessibilityOn = view.findViewById(R.id.accessibility_on);
         accessibilityOff = view.findViewById(R.id.accessibility_off);
-        targetCountSpinner = view.findViewById(R.id.robot_count_spinner);
         targetColorsSpinner = view.findViewById(R.id.target_colors_spinner);
         backButton = view.findViewById(R.id.back_button);
+        robotCountSpinner = view.findViewById(R.id.robot_count_spinner);
         
-        // Set up board size options - this must happen first
+        // Set up board size options
         setupBoardSizeOptions();
+        
+        // Set up robot count spinner
+        setupRobotCountSpinner();
+        
+        // Set up target colors spinner
+        setupTargetColorsSpinner();
         
         // Load current settings
         loadSettings();
@@ -101,9 +105,15 @@ public class SettingsFragment extends BaseGameFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        // Set up target count spinner after view is created
-        setupRobotCountSpinner();
-        setupTargetColorsSpinner();
+        // Register as preference change listener
+        Preferences.setPreferenceChangeListener(new Preferences.PreferenceChangeListener() {
+            @Override
+            public void onPreferencesChanged() {
+                Timber.d("[PREFERENCES] Preferences changed, updating UI");
+                // Update UI if needed
+                loadSettings();
+            }
+        });
     }
     
     /**
@@ -111,11 +121,12 @@ public class SettingsFragment extends BaseGameFragment {
      * This exactly replicates the calculation from the original game
      */
     private void setupBoardSizeOptions() {
-        // Calculate display ratio exactly as in the original game
-        float displayRatio = getResources().getDisplayMetrics().heightPixels / 
-                (float) getResources().getDisplayMetrics().widthPixels;
+        // Calculate device screen ratio
+        float displayRatio = calculateDeviceRatio();
+        float maxBoardRatio = calculateMaxBoardRatio(displayRatio);
         
-        Timber.d("Settings: displayRatio: %f", displayRatio);
+        // Create list of valid board sizes
+        validBoardSizes = new ArrayList<>();
         
         // Define all possible board sizes - exactly as in the original game
         int[][] boardSizes = {
@@ -134,92 +145,59 @@ public class SettingsFragment extends BaseGameFragment {
                 {18, 20}, {18, 22}
         };
         
-        // Calculate max board ratio (same formula as original)
-        float maxBoardRatio = calculateMaxBoardRatio(displayRatio);
-        Timber.d("Settings: Display ratio: %.2f -> Max board ratio: %.2f", displayRatio, maxBoardRatio);
-        
-        // Create list of valid board size options
-        List<String> boardSizeOptions = new ArrayList<>();
-        validBoardSizes = new ArrayList<>();
-        
-        // IMPORTANT FIX: Load board size directly from preferences instead of using MainActivity static variables
-        // This ensures we get the correct values even if MainActivity static variables haven't been initialized yet
-        String boardSizeXStr = preferences.getPreferenceValue(requireActivity(), "boardSizeX");
-        String boardSizeYStr = preferences.getPreferenceValue(requireActivity(), "boardSizeY");
-        
-        // Default to MainActivity's static values if preferences don't exist
-        int currentBoardSizeX = MainActivity.getBoardWidth();
-        int currentBoardSizeY = MainActivity.getBoardHeight();
-        
-        // Override with values from preferences if they exist
-        if (boardSizeXStr != null && !boardSizeXStr.isEmpty()) {
-            try {
-                int prefWidth = Integer.parseInt(boardSizeXStr);
-                currentBoardSizeX = prefWidth;
-                Timber.d("[BOARD_SIZE_DEBUG] Settings: Loaded board width from preferences: %d", currentBoardSizeX);
-            } catch (NumberFormatException e) {
-                Timber.e(e, "[BOARD_SIZE_DEBUG] Settings: Error parsing board width from preferences");
-            }
-        } else {
-            Timber.d("[BOARD_SIZE_DEBUG] Settings: No board width in preferences, using MainActivity value: %d", currentBoardSizeX);
-        }
-        
-        if (boardSizeYStr != null && !boardSizeYStr.isEmpty()) {
-            try {
-                int prefHeight = Integer.parseInt(boardSizeYStr);
-                currentBoardSizeY = prefHeight;
-                Timber.d("[BOARD_SIZE_DEBUG] Settings: Loaded board height from preferences: %d", currentBoardSizeY);
-            } catch (NumberFormatException e) {
-                Timber.e(e, "[BOARD_SIZE_DEBUG] Settings: Error parsing board height from preferences");
-            }
-        } else {
-            Timber.d("[BOARD_SIZE_DEBUG] Settings: No board height in preferences, using MainActivity value: %d", currentBoardSizeY);
-        }
-        
-        Timber.d("[BOARD_SIZE_DEBUG] Settings: Using board size for spinner selection: %dx%d", currentBoardSizeX, currentBoardSizeY);
-        
-        int selectedIndex = -1;
-        int index = 0;
-        
+        // Filter board sizes based on device ratio
         for (int[] size : boardSizes) {
             float boardRatio = (float) size[1] / size[0];
-            Timber.d("Settings: Checking board size %dx%d (ratio: %.2f)", size[0], size[1], boardRatio);
-            
             if (boardRatio <= maxBoardRatio) {
-                String option = size[0] + "x" + size[1];
-                boardSizeOptions.add(option);
                 validBoardSizes.add(size);
-                Timber.d("Settings: Added board size option: %s", option);
-                
-                // Check if this is the current board size
-                if (size[0] == currentBoardSizeX && size[1] == currentBoardSizeY) {
-                    selectedIndex = index;
-                    Timber.d("Settings: Current board size found at index: %d", selectedIndex);
-                }
-                index++;
             }
         }
         
         // Create adapter for spinner
-        if (boardSizeOptions.isEmpty()) {
-            // Fallback if no valid sizes were found
-            boardSizeOptions.add(MainActivity.DEFAULT_BOARD_SIZE_X + "x" + MainActivity.DEFAULT_BOARD_SIZE_Y);
-            int[] defaultSize = {MainActivity.DEFAULT_BOARD_SIZE_X, MainActivity.DEFAULT_BOARD_SIZE_Y};
-            validBoardSizes.add(defaultSize);
-            selectedIndex = 0;
-            Timber.d("Settings: No valid board sizes found, using default: %dx%d", 
-                    MainActivity.DEFAULT_BOARD_SIZE_X, MainActivity.DEFAULT_BOARD_SIZE_Y);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        
+        // Add board size options to adapter
+        for (int[] size : validBoardSizes) {
+            adapter.add(size[0] + "x" + size[1]);
         }
         
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, boardSizeOptions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Set adapter for spinner
         boardSizeSpinner.setAdapter(adapter);
         
-        // Set current selection
-        if (selectedIndex >= 0 && selectedIndex < boardSizeOptions.size()) {
-            boardSizeSpinner.setSelection(selectedIndex);
-            Timber.d("Settings: Selected board size at index: %d", selectedIndex);
+        // Set current board size from preferences
+        // If not found, use default size (16x16)
+        int currentWidth = Preferences.boardSizeWidth;
+        int currentHeight = Preferences.boardSizeHeight;
+        
+        Timber.d("[BOARD_SIZE_DEBUG] Current board size from Preferences: %dx%d", currentWidth, currentHeight);
+        
+        // Find matching board size in validBoardSizes
+        boolean found = false;
+        for (int i = 0; i < validBoardSizes.size(); i++) {
+            int[] size = validBoardSizes.get(i);
+            if (size[0] == currentWidth && size[1] == currentHeight) {
+                boardSizeSpinner.setSelection(i);
+                found = true;
+                break;
+            }
+        }
+        
+        // If no matching size found, default to 16x16 or the first available size
+        if (!found) {
+            for (int i = 0; i < validBoardSizes.size(); i++) {
+                int[] size = validBoardSizes.get(i);
+                if (size[0] == 16 && size[1] == 16) {
+                    boardSizeSpinner.setSelection(i);
+                    found = true;
+                    break;
+                }
+            }
+            
+            // If 16x16 not found, use the first size
+            if (!found && !validBoardSizes.isEmpty()) {
+                boardSizeSpinner.setSelection(0);
+            }
         }
     }
     
@@ -243,88 +221,79 @@ public class SettingsFragment extends BaseGameFragment {
     }
     
     /**
+     * Calculate the device screen ratio
+     * @return The ratio of height to width
+     */
+    private float calculateDeviceRatio() {
+        return getResources().getDisplayMetrics().heightPixels / 
+                (float) getResources().getDisplayMetrics().widthPixels;
+    }
+    
+    /**
      * Load current settings from preferences
      */
     private void loadSettings() {
-        // Load difficulty setting
-        String difficulty = preferences.getPreferenceValue(requireActivity(), "difficulty");
-        if (difficulty != null) {
-            switch (difficulty) {
-                case "Beginner":
-                    difficultyRadioGroup.check(R.id.difficulty_beginner);
-                    break;
-                case "Advanced":
-                    difficultyRadioGroup.check(R.id.difficulty_advanced);
-                    break;
-                case "Insane":
-                    difficultyRadioGroup.check(R.id.difficulty_insane);
-                    break;
-                case "Impossible":
-                    difficultyRadioGroup.check(R.id.difficulty_impossible);
-                    break;
+        // We're now using static Preferences, so we don't need to load most values from disk
+        // Just set the UI elements to match the current static Preferences values
+        
+        // Board size spinner - set based on current board size
+        for (int i = 0; i < validBoardSizes.size(); i++) {
+            int[] size = validBoardSizes.get(i);
+            if (size[0] == Preferences.boardSizeWidth && 
+                size[1] == Preferences.boardSizeHeight) {
+                boardSizeSpinner.setSelection(i);
+                break;
             }
         }
         
-        // Load sound setting
-        String sound = preferences.getPreferenceValue(requireActivity(), "sound");
-        if (sound != null) {
-            if (sound.equalsIgnoreCase("true")) {
-                soundRadioGroup.check(R.id.sound_on);
-            } else {
-                soundRadioGroup.check(R.id.sound_off);
-            }
+        // Difficulty radio buttons
+        switch (Preferences.difficulty) {
+            case Constants.DIFFICULTY_BEGINNER:
+                difficultyRadioGroup.check(R.id.difficulty_beginner);
+                break;
+            case Constants.DIFFICULTY_INTERMEDIATE:
+                difficultyRadioGroup.check(R.id.difficulty_advanced);
+                break;
+            case Constants.DIFFICULTY_INSANE:
+                difficultyRadioGroup.check(R.id.difficulty_insane);
+                break;
+            case Constants.DIFFICULTY_IMPOSSIBLE:
+                difficultyRadioGroup.check(R.id.difficulty_impossible);
+                break;
         }
         
-        // Load accessibility setting
-        String accessibility = preferences.getPreferenceValue(requireActivity(), "accessibility");
-        if (accessibility != null) {
-            if (accessibility.equalsIgnoreCase("true")) {
-                accessibilityRadioGroup.check(R.id.accessibility_on);
-            } else {
-                accessibilityRadioGroup.check(R.id.accessibility_off);
-            }
+        // Sound radio buttons
+        if (Preferences.soundEnabled) {
+            soundRadioGroup.check(R.id.sound_on);
+        } else {
+            soundRadioGroup.check(R.id.sound_off);
         }
         
-        // Load new map setting
-        String newMapSetting = preferences.getPreferenceValue(requireActivity(), "generate_new_map");
-        if (newMapSetting != null) {
-            if (newMapSetting.equalsIgnoreCase("true")) {
-                newMapRadioGroup.check(R.id.new_map_yes);
-            } else {
-                newMapRadioGroup.check(R.id.new_map_no);
-            }
+        // Accessibility radio buttons
+        if (Preferences.accessibilityMode) {
+            accessibilityRadioGroup.check(R.id.accessibility_on);
+        } else {
+            accessibilityRadioGroup.check(R.id.accessibility_off);
         }
         
-        // Load target count setting
-        String targetCount = preferences.getPreferenceValue(requireActivity(), "target_count");
-        if (targetCount != null) {
-            try {
-                int count = Integer.parseInt(targetCount);
-                // Adjust for 0-based index of spinner
-                int spinnerPosition = count - 1;
-                if (spinnerPosition >= 0 && spinnerPosition < targetCountSpinner.getCount()) {
-                    targetCountSpinner.setSelection(spinnerPosition);
-                }
-            } catch (NumberFormatException e) {
-                Timber.e(e, "Error parsing target count from preferences");
-            }
+        // Generate new map radio buttons
+        if (Preferences.generateNewMap) {
+            newMapRadioGroup.check(R.id.new_map_yes);
+        } else {
+            newMapRadioGroup.check(R.id.new_map_no);
         }
+        
+        // Note: The robot count and target colors spinners are set up in their respective setup methods
     }
     
     /**
      * Sets up the robot count spinner
      */
     private void setupRobotCountSpinner() {
-        View view = getView();
-        if (view == null) {
-            Timber.e("setupRobotCountSpinner: View is null");
-            return;
-        }
-        
-        // Create spinner for robot count selection (1-4)
-        Spinner robotCountSpinner = view.findViewById(R.id.robot_count_spinner);
+        // We need to access the spinner directly from the class field, not try to find it again
+        // This is because the view might not be fully initialized when this method is called
         if (robotCountSpinner == null) {
-            Timber.e("setupRobotCountSpinner: Robot count spinner not found");
+            Timber.e("setupRobotCountSpinner: Robot count spinner is null");
             return;
         }
         
@@ -336,45 +305,35 @@ public class SettingsFragment extends BaseGameFragment {
         }
         robotCountSpinner.setAdapter(adapter);
         
-        // Set current value from preferences
-        int currentRobotCount = 1; // Default to 1
-        try {
-            currentRobotCount = AppPreferences.getInstance().getRobotCount();
-            Timber.d("[TARGET COUNT] Using robot count from AppPreferences: %d", currentRobotCount);
-        } catch (IllegalStateException e) {
-            // Fall back to old Preferences if AppPreferences is not initialized
-            Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
-            Preferences preferences = new Preferences();
-            String targetCountStr = preferences.getPreferenceValue(requireActivity(), "target_count");
-            if (targetCountStr != null && !targetCountStr.isEmpty()) {
-                try {
-                    currentRobotCount = Integer.parseInt(targetCountStr);
-                    // Ensure value is within valid range
-                    currentRobotCount = Math.max(1, Math.min(4, currentRobotCount));
-                } catch (NumberFormatException nfe) {
-                    Timber.e(nfe, "Error parsing robot count from preferences");
-                }
-            }
-            Timber.d("[TARGET COUNT] Using robot count from old Preferences: %d", currentRobotCount);
+        // Set current value from static Preferences
+        int robotCount = Preferences.robotCount;
+        if (robotCount < 1 || robotCount > 4) {
+            robotCount = 1; // Default to 1 if invalid
         }
-        
-        robotCountSpinner.setSelection(currentRobotCount - 1); // -1 because index is 0-based
+        robotCountSpinner.setSelection(robotCount - 1); // -1 because index is 0-based
+        Timber.d("[PREFERENCES] Using robot count: %d", robotCount);
         
         // Set listener to save changes
         robotCountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                int selectedTargetCount = position + 1; // +1 because index is 0-based
-                try {
-                    AppPreferences.getInstance().setRobotCount(selectedTargetCount);
-                    Timber.d("[TARGET COUNT] robot count set to %d using AppPreferences", selectedTargetCount);
-                } catch (IllegalStateException e) {
-                    // Fall back to old Preferences if AppPreferences is not initialized
-                    Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
-                    Preferences preferences = new Preferences();
-                    preferences.setPreferences(requireActivity(), "target_count", String.valueOf(selectedTargetCount));
-                    Timber.d("[TARGET COUNT] robot count set to %d using old Preferences", selectedTargetCount);
+                int selectedRobotCount = position + 1; // +1 because index is 0-based
+                
+                // Ensure robot count is never larger than target colors
+                int currentTargetColors = Preferences.targetColors;
+                if (selectedRobotCount > currentTargetColors) {
+                    // Adjust robot count to match target colors
+                    selectedRobotCount = currentTargetColors;
+                    robotCountSpinner.setSelection(selectedRobotCount - 1, false);
+                    
+                    // Show a toast to inform the user
+                    Toast.makeText(requireContext(), 
+                            "Robot count cannot exceed target colors", 
+                            Toast.LENGTH_SHORT).show();
                 }
+                
+                Preferences.setRobotCount(selectedRobotCount);
+                Timber.d("[PREFERENCES] Robot count set to %d", selectedRobotCount);
             }
             
             @Override
@@ -388,16 +347,10 @@ public class SettingsFragment extends BaseGameFragment {
      * Sets up the target colors spinner
      */
     private void setupTargetColorsSpinner() {
-        View view = getView();
-        if (view == null) {
-            Timber.e("setupTargetColorsSpinner: View is null");
-            return;
-        }
-        
-        // Create spinner for target colors selection (1-4)
-        Spinner targetColorsSpinner = view.findViewById(R.id.target_colors_spinner);
+        // We need to access the spinner directly from the class field, not try to find it again
+        // This is because the view might not be fully initialized when this method is called
         if (targetColorsSpinner == null) {
-            Timber.e("setupTargetColorsSpinner: Target colors spinner not found");
+            Timber.e("setupTargetColorsSpinner: Target colors spinner is null");
             return;
         }
         
@@ -409,45 +362,21 @@ public class SettingsFragment extends BaseGameFragment {
         }
         targetColorsSpinner.setAdapter(adapter);
         
-        // Set current value from preferences
-        int currentTargetColors = 4; // Default to 4
-        try {
-            currentTargetColors = AppPreferences.getInstance().getTargetColors();
-            Timber.d("[TARGET COLORS] Using target colors from AppPreferences: %d", currentTargetColors);
-        } catch (IllegalStateException e) {
-            // Fall back to old Preferences if AppPreferences is not initialized
-            Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
-            Preferences preferences = new Preferences();
-            String targetColorsStr = preferences.getPreferenceValue(requireActivity(), "target_colors");
-            if (targetColorsStr != null && !targetColorsStr.isEmpty()) {
-                try {
-                    currentTargetColors = Integer.parseInt(targetColorsStr);
-                    // Ensure value is within valid range
-                    currentTargetColors = Math.max(1, Math.min(4, currentTargetColors));
-                } catch (NumberFormatException nfe) {
-                    Timber.e(nfe, "Error parsing target colors from preferences");
-                }
-            }
-            Timber.d("[TARGET COLORS] Using target colors from old Preferences: %d", currentTargetColors);
+        // Set current value from static Preferences
+        int targetColors = Preferences.targetColors;
+        if (targetColors < 1 || targetColors > 4) {
+            targetColors = 4; // Default to 4 if invalid
         }
-        
-        targetColorsSpinner.setSelection(currentTargetColors - 1); // -1 because index is 0-based
+        targetColorsSpinner.setSelection(targetColors - 1); // -1 because index is 0-based
+        Timber.d("[PREFERENCES] Using target colors: %d", targetColors);
         
         // Set listener to save changes
         targetColorsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 int selectedTargetColors = position + 1; // +1 because index is 0-based
-                try {
-                    AppPreferences.getInstance().setTargetColors(selectedTargetColors);
-                    Timber.d("[TARGET COLORS] Target colors set to %d using AppPreferences", selectedTargetColors);
-                } catch (IllegalStateException e) {
-                    // Fall back to old Preferences if AppPreferences is not initialized
-                    Timber.w(e, "AppPreferences not initialized, falling back to old Preferences");
-                    Preferences preferences = new Preferences();
-                    preferences.setPreferences(requireActivity(), "target_colors", String.valueOf(selectedTargetColors));
-                    Timber.d("[TARGET COLORS] Target colors set to %d using old Preferences", selectedTargetColors);
-                }
+                Preferences.setTargetColors(selectedTargetColors);
+                Timber.d("[PREFERENCES] Target colors set to %d", selectedTargetColors);
             }
             
             @Override
@@ -473,7 +402,7 @@ public class SettingsFragment extends BaseGameFragment {
     private void setGenerateNewMapEachTimeSetting(boolean value) {
         // Since we can't directly access the field, use GridGameView helper method
         // which has package access to MapGenerator
-        preferences.setPreferences(requireActivity(), "newMapEachTime", String.valueOf(value));
+        Preferences.setGenerateNewMap(value);
     }
     
     /**
@@ -481,11 +410,21 @@ public class SettingsFragment extends BaseGameFragment {
      * exactly as in the original game
      */
     private void showImpossibleDifficultyToast() {
-        String message = "Level Impossible will generate a fitting puzzle. This can take a while. In case the solver gets stuck, press >>";
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
-        // Repeat the toast three times like in the original
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+        // Get current board size
+        int[] currentSize = null;
+        int position = boardSizeSpinner.getSelectedItemPosition();
+        if (position >= 0 && position < validBoardSizes.size()) {
+            currentSize = validBoardSizes.get(position);
+        }
+        
+        // Only show toast for small boards (less than 16x16)
+        if (currentSize != null && (currentSize[0] < 16 || currentSize[1] < 16)) {
+            Toast toast = Toast.makeText(requireContext(),
+                    "Impossible on small boards may take several minutes to generate a fitting map",
+                    Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+        }
     }
     
     /**
@@ -493,51 +432,39 @@ public class SettingsFragment extends BaseGameFragment {
      */
     private void setupListeners() {
         // Board size spinner
-        boardSizeSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+        boardSizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || position >= validBoardSizes.size()) {
-                    return;
-                }
-                
-                // Skip the first automatic selection event when the spinner is initialized
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (isInitialBoardSizeSelection) {
-                    Timber.d("[BOARD_SIZE_DEBUG] Settings: Ignoring initial board size selection event");
                     isInitialBoardSizeSelection = false;
                     return;
                 }
                 
-                int[] selectedSize = validBoardSizes.get(position);
-                int width = selectedSize[0];
-                int height = selectedSize[1];
+                // Get selected board size
+                int[] size = validBoardSizes.get(position);
+                int width = size[0];
+                int height = size[1];
                 
-                Timber.d("[BOARD_SIZE_DEBUG] Settings: User selected board size: %dx%d", width, height);
-                
-                // Get the context to pass to setAndSaveBoardSizeToPreferences
+                // Update static board size variables
                 Context context = requireContext();
-                
-                // Get reference to MainActivity or update static values directly
-                if (context instanceof MainActivity mainActivity) {
-                    // For legacy UI, use the MainActivity instance
-                    mainActivity.setAndSaveBoardSizeToPreferences(context, width, height);
-                } else {
-                    // For modern UI, update the static values directly
+                if (context instanceof MainActivity) {
+                    MainActivity mainActivity = (MainActivity) context;
                     MainActivity.boardSizeX = width;
                     MainActivity.boardSizeY = height;
                     
-                    // Save to preferences directly
-                    preferences.setPreferences(requireActivity(), "boardSizeX", String.valueOf(width));
-                    preferences.setPreferences(requireActivity(), "boardSizeY", String.valueOf(height));
+                    // Save to preferences
+                    Preferences.setBoardSize(width, height);
                     
                     Timber.d("[BOARD_SIZE_DEBUG] Settings: Board size updated to %dx%d (direct update)", width, height);
                 }
-
-                preferences.setPreferences(requireActivity(), "boardSizeX", String.valueOf(width));
-                preferences.setPreferences(requireActivity(), "boardSizeY", String.valueOf(height));
+                else {
+                    // Save to preferences
+                    Preferences.setBoardSize(width, height);
+                }
             }
             
             @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            public void onNothingSelected(AdapterView<?> parent) {
                 // Do nothing
             }
         });
@@ -548,38 +475,36 @@ public class SettingsFragment extends BaseGameFragment {
             int difficultyLevel;
             if (checkedId == R.id.difficulty_beginner) {
                 difficulty = "Beginner";
-                difficultyLevel = 0; // DIFFICULTY_BEGINNER
+                difficultyLevel = Constants.DIFFICULTY_BEGINNER; 
             } else if (checkedId == R.id.difficulty_advanced) {
                 difficulty = "Advanced";
-                difficultyLevel = 1; // DIFFICULTY_INTERMEDIATE
+                difficultyLevel = Constants.DIFFICULTY_INTERMEDIATE; 
             } else if (checkedId == R.id.difficulty_insane) {
                 difficulty = "Insane";
-                difficultyLevel = 2; // DIFFICULTY_INSANE
+                difficultyLevel = Constants.DIFFICULTY_INSANE; 
             } else if (checkedId == R.id.difficulty_impossible) {
                 difficulty = "Impossible";
-                difficultyLevel = 3; // DIFFICULTY_IMPOSSIBLE
+                difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE; 
                 // Show warning toast for impossible difficulty
                 showImpossibleDifficultyToast();
             } else {
                 difficulty = "Beginner";
-                difficultyLevel = 0; // DIFFICULTY_BEGINNER
+                difficultyLevel = Constants.DIFFICULTY_BEGINNER; 
             }
             
-            // Save difficulty setting as a string in preferences
-            preferences.setPreferences(requireActivity(), "difficulty", difficulty);
+            // Save difficulty setting
+            Preferences.setDifficulty(difficultyLevel);
             
             // Also update the numeric difficulty value in DifficultyManager
             roboyard.eclabs.util.DifficultyManager.getInstance(requireActivity()).setDifficulty(difficultyLevel);
-            Timber.d("[DIFFICULTY] Set difficulty to: %s (level %d)", difficulty, difficultyLevel);
         });
         
         // New map radio group
         newMapRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             boolean generateNewMap = checkedId == R.id.new_map_yes;
-            String newMapEachTime = generateNewMap ? "true" : "false";
             
             // Save new map setting
-            preferences.setPreferences(requireActivity(), "newMapEachTime", newMapEachTime);
+            Preferences.setGenerateNewMap(generateNewMap);
             
             // Update MapGenerator using our helper method
             setGenerateNewMapEachTimeSetting(generateNewMap);
@@ -588,47 +513,30 @@ public class SettingsFragment extends BaseGameFragment {
         // Sound radio group
         soundRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.sound_on) {
-                preferences.setPreferences(requireActivity(), "sound", "true");
+                Preferences.setSoundEnabled(true);
                 toggleSound(requireActivity(), true);
             } else if (checkedId == R.id.sound_off) {
-                preferences.setPreferences(requireActivity(), "sound", "false");
+                Preferences.setSoundEnabled(false);
                 toggleSound(requireActivity(), false);
             }
         });
         
-        // Target count spinner
-        targetCountSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Add 1 to position because spinner is 0-indexed, but we want to store 1-4
-                int targetCount = position + 1;
-                Timber.d("Target count selected: %d", targetCount);
-                preferences.setPreferences(requireActivity(), "target_count", String.valueOf(targetCount));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
-        
-        // Accessibility mode radio group
+        // Accessibility radio group
         accessibilityRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             boolean accessibilityEnabled = checkedId == R.id.accessibility_on;
-            String accessibilityMode = accessibilityEnabled ? "true" : "false";
             
             // Save accessibility mode setting
-            preferences.setPreferences(requireActivity(), "accessibilityMode", accessibilityMode);
+            Preferences.setAccessibilityMode(accessibilityEnabled);
         });
         
         // Back button
-        backButton.setOnClickListener(v -> {
-            // Simply use the activity's onBackPressed method for safe navigation
-            requireActivity().onBackPressed();
-        });
+        backButton.setOnClickListener(v -> requireActivity().onBackPressed());
     }
     
-    @Override
+    /**
+     * Get the screen title for this fragment
+     * @return The title to display
+     */
     public String getScreenTitle() {
         return "Settings";
     }

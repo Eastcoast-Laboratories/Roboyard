@@ -302,7 +302,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void loadHistoryEntry(int historyId) {
         // TODO: Implement history entry loading
-        GameState newState = GameState.createRandom(boardSizeManager.getBoardWidth(), boardSizeManager.getBoardHeight(), difficultyManager.getDifficulty());
+        GameState newState = GameState.createRandom();
         newState.setLevelId(historyId);
         
         // Set reference to this GameStateManager in the new state
@@ -757,7 +757,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     /**
      * Setters for game settings
      */
-    public void setSoundEnabled(boolean enabled) { this.soundEnabled.setValue(enabled); }
+    public void setSoundEnabled(boolean enabled) { 
+        this.soundEnabled.setValue(enabled); 
+        // Also update the static Preferences value to ensure consistency
+        roboyard.logic.core.Preferences.setSoundEnabled(enabled);
+    }
     
     /**
      * Increment the move count
@@ -1659,9 +1663,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private void createValidGame(int width, int height) {
         Timber.d("GameStateManager: createValidGame() called");
         
-        // Create a new random game state
-        GameState newState = GameState.createRandom(width, height, difficultyManager.getDifficulty());
-        Timber.d("GameStateManager: Created new random GameState");
+        // Create a new random game state using static Preferences
+        GameState newState = GameState.createRandom();
+        Timber.d("GameStateManager: Created new random GameState with robotCount=%d, targetColors=%d", 
+                roboyard.logic.core.Preferences.robotCount, 
+                roboyard.logic.core.Preferences.targetColors);
         
         // Set the game state
         currentState.setValue(newState);

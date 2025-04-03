@@ -1517,46 +1517,47 @@ public class GameState implements Serializable {
     /**
      * Create a random game state
      */
-    public static GameState createRandom(int width, int height, int difficulty) {
+    public static GameState createRandom() {
         // Set the global difficulty level first so difficulty is consistent
-        String difficultyString = difficultyIntToString(difficulty);
+        String difficultyString = difficultyIntToString(Preferences.difficulty);
         
         // Log initial board size and requested size
-        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + width + "x" + height);
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + Preferences.boardSizeX + "x" + Preferences.boardSizeY);
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Current MainActivity.boardSize before setting: " +
                 MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
         // Save current board dimensions and set them for game generation
-        MainActivity.boardSizeX = width;
-        MainActivity.boardSizeY = height;
+        // Ensure board size is never zero to prevent ArrayIndexOutOfBoundsException
+        int boardSizeX = Preferences.boardSizeWidth;
+        int boardSizeY = Preferences.boardSizeHeight;
         
-        // Ensure we're not limiting to a minimum of 14
-        if (width < 14) {
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board width smaller than 14: %s", width);
-        }
-        if (height < 14) {
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Note: Using board height smaller than 14: %s", height);
-        }
+        // Set the board size in MainActivity for compatibility with existing code
+        MainActivity.boardSizeX = boardSizeX;
+        MainActivity.boardSizeY = boardSizeY;
         
         // Log the board size being used for map generation
-        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MainActivity.boardSize after setting: " +
-                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
+        Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Using board size: %dx%d", boardSizeX, boardSizeY);
         
         // Create new game state with specified dimensions
-        GameState state = new GameState(width, height);
+        GameState state = new GameState(boardSizeX, boardSizeY);
 
         // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
-                width + "x" + height);
+                boardSizeX + "x" + boardSizeY);
 
         // Create MapGenerator instance
         MapGenerator mapGenerator = new MapGenerator();
         
-        // Set the robot count for map generation
-        mapGenerator.setRobotCount(state.robotCount);
+        // Set the robot count and target colors from static Preferences
+        state.robotCount = Preferences.robotCount;
+        state.targetColorsCount = Preferences.targetColors;
         
-        // Set the target colors count for map generation
+        // Pass the values to the MapGenerator
+        mapGenerator.setRobotCount(state.robotCount);
         mapGenerator.setTargetColors(state.targetColorsCount);
+        
+        Timber.tag(TAG).d("[PREFERENCES] Using robotCount=%d, targetColors=%d from static Preferences",
+                state.robotCount, state.targetColorsCount);
         
         // Generate a new game map using the same method as the old canvas-based game
         ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
