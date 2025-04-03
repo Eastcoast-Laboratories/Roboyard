@@ -548,61 +548,19 @@ public class GameGridView extends View {
         }
         
         // Draw walls between cells, not on cells
-        for (GameElement element : state.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                // Horizontal walls are drawn between rows (separating cells vertically)
-                int x = element.getX();
-                int y = element.getY(); 
-
-                // Special handling for border walls to ensure they're visible
-                float offset = cellSize * WALL_OFFSET_FACTOR; 
-                float left = offsetX + (x * cellSize - offset); 
-                float top = offsetY + (y * cellSize); 
-                float right = offsetX + (left + cellSize + 2 * offset);
-                float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
-
-                // Draw horizontal wall - between y and y+1
-                if (wallHorizontal != null) {
-                    // Handle the border case for bottom border correctly
-                    if (y == state.getHeight()) {
-                        // Bottom border wall at edge of board
-                        top = offsetY + (state.getHeight() * cellSize);
-                    }
-                    
-                    wallHorizontal.setBounds((int)left, (int)(top - wallThickness/2), 
-                                             (int)right, (int)(top + wallThickness/2));
-                    wallHorizontal.draw(canvas);
-                } else {
-                    Timber.d("Horizontal wall drawable not available");
-                }
-            } 
-            else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                // Vertical walls are drawn between columns (separating cells horizontally)
-                int x = element.getX(); 
-                int y = element.getY();
-
-                float offset = cellSize * WALL_OFFSET_FACTOR; 
-                float left = offsetX + (x * cellSize); 
-                float top = offsetY + (y * cellSize - offset);
-                float bottom = offsetY + (top + cellSize + 2 * offset);
-                float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
-                
-                // Draw vertical wall - between x and x+1
-                if (wallVertical != null) {
-                    // Handle the border case for right border correctly
-                    if (x == state.getWidth()) {
-                        // Right border wall at edge of board
-                        left = offsetX + (state.getWidth() * cellSize);
-                    }
-                    
-                    wallVertical.setBounds((int)(left - wallThickness/2), (int)top,
-                                           (int)(left + wallThickness/2), (int)bottom);
-                    wallVertical.draw(canvas);
-                } else {
-                    Timber.d("Vertical wall drawable not available");
-                }
-            }
-        }
+        // Create wall model from game state
+        roboyard.logic.core.WallModel wallModel = roboyard.logic.core.WallModel.fromGameElements(
+            state.getGameElements(),
+            gridWidth, gridHeight
+        );
+        
+        // Create renderer with current cell size
+        WallRenderer renderer = new WallRenderer(
+            wallModel, cellSize, wallHorizontal, wallVertical
+        );
+        
+        // Draw walls using renderer
+        renderer.drawWalls(canvas, offsetX, offsetY);
         
         // Draw starting positions of robots
         for (int color : robotStartingPositions.keySet()) {

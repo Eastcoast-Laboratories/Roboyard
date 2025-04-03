@@ -1,6 +1,9 @@
 package roboyard.pm.ia.ricochet;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GridElement;
+import roboyard.logic.core.Wall;
+import roboyard.logic.core.WallModel;
+import roboyard.logic.core.WallType;
 import roboyard.ui.activities.MainActivity;
 
 import android.graphics.Color;
@@ -86,7 +89,25 @@ public class RRGetMap {
         int robotCounter = 0;
         boolean targetFound = false;
 
-        // Process each grid element (walls, targets, robots)
+        // Create a wall model from the grid elements
+        WallModel wallModel = WallModel.fromGridElements(gridElements, boardWidth, boardHeight);
+        
+        // Process each wall in the model
+        for (Wall wall : wallModel.getWalls()) {
+            int x = wall.getX();
+            int y = wall.getY();
+            int position = y * board.width + x;
+            
+            if (wall.getType() == WallType.HORIZONTAL) {
+                board.setWall(position, "N", true);
+                Timber.d("[SOLUTION_SOLVER] Setting horizontal wall at position %d (x=%d, y=%d)", position, x, y);
+            } else if (wall.getType() == WallType.VERTICAL) {
+                board.setWall(position, "W", true);
+                Timber.d("[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)", position, x, y);
+            }
+        }
+        
+        // Process each grid element (targets, robots)
         for (Object element : gridElements) {
             GridElement gridElement = (GridElement) element;
             int x = gridElement.getX();
@@ -98,14 +119,11 @@ public class RRGetMap {
 
             String type = gridElement.getType();
             
-            // Handle horizontal walls
-            if (type.equals("mh")) {
-                board.setWall(position, "N", true);
+            // Skip walls as they're already handled by the wall model
+            if (type.equals("mh") || type.equals("mv")) {
+                continue;
             }
-            // Handle vertical walls
-            if (type.equals("mv")) {
-                board.setWall(position, "W", true);
-            }
+            
             // Handle targets (both colored and multi-colored)
             if (type.equals("target_red") || type.equals("target_green") || 
                 type.equals("target_blue") || type.equals("target_yellow") || 
