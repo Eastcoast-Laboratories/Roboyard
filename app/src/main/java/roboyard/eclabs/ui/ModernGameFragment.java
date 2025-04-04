@@ -83,7 +83,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private boolean accessibilityControlsVisible = false;
 
     // Hint managing
-    private int maxPreHints = 3; // Maximum number of pre-hints
+    private static final int NUM_FIXED_PRE_HINTS = 2; // Number of fixed pre-hints that always appear
     private int numPreHints = ThreadLocalRandom.current().nextInt(2, 5); // Randomize between 2-4 by default
     private int totalPossibleHints = 0; // Total possible hints including pre-hints
     private int currentHintStep = 0; // Current hint step (includes pre-hints and regular hints)
@@ -643,7 +643,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // RANDOM GAMES
             // Check if all hints have been shown
-            totalPossibleHints = totalMoves + numPreHints;
+            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
             if (currentHintStep >= totalPossibleHints) {
                 // All hints shown - restart hint system
                 String hintMsg = "All AI hints have been shown (" + totalMoves + ")";
@@ -656,16 +656,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 return;
             }
             
-            // Show pre-hints for random games (if we haven't shown them all yet)
-            if (showingPreHints && currentHintStep < numPreHints) {
+            // Check if we're still showing pre-hints
+            if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
                 showPreHint(solution, totalMoves, currentHintStep);
-                gameStateManager.incrementSolutionStep();
-                return;
+            } else {
+                // We've shown all pre-hints, now show normal hints
+                // Calculate the index for the normal hint (subtract pre-hints)
+                int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                showNormalHint(solution, currentState, totalMoves, normalHintIndex);
             }
-            
-            // Show normal hints
-            int normalHintIndex = showingPreHints ? currentHintStep - numPreHints : currentHintStep;
-            showNormalHint(solution, currentState, totalMoves, normalHintIndex);
             gameStateManager.incrementSolutionStep();
         });
         
@@ -1548,25 +1547,45 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void showPreHint(GameSolution solution, int totalMoves, int currentHintStep) {
         String preHintText;
         
-        // Always show numPreHints pre-hints, decreasing from solution+numPreHints to solution+1
-        // For example, if solution is 7 moves and numPreHints is 4, show:
-        // "less than 11", "less than 10", "less than 9", "less than 8", then "exactly 7"
-        int offset = numPreHints - currentHintStep;
-        if (offset > 0) {
-            // Regular pre-hints show "less than X+offset moves"
-            int hintValue = totalMoves + offset;
-            preHintText = "The AI found a solution in less than " + hintValue + " moves";
-            Timber.d("[HINT] Showing pre-hint %d/%d: less than %d moves", 
-                    currentHintStep + 1, numPreHints, hintValue);
-        } else {
-            // Last pre-hint shows the exact move count with toast notification
+        if (currentHintStep == 0) {
+            // First fixed pre-hint: Show exact solution length
             preHintText = "The AI found a solution in " + totalMoves + " moves";
-            Timber.d("[HINT] Showing final pre-hint: exactly %d moves", totalMoves);
+            Timber.d("[HINT] Showing first fixed pre-hint: solution has %d moves", totalMoves);
+        } 
+        else if (currentHintStep == 1) {
+            // Second fixed pre-hint: Show which robot to move first
+            if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
+                RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
+                String robotColorName = getRobotColorName(firstMove.getColor());
+                preHintText = "Move the " + robotColorName + " robot first";
+                Timber.d("[HINT] Showing second fixed pre-hint: move %s robot first", robotColorName);
+            } else {
+                // Fallback if we can't determine the first robot
+                preHintText = "No solution found";
+                Timber.d("[HINT] Showing fallback second pre-hint (couldn't determine first robot)");
+            }
+        }
+        else {
+            // Regular pre-hints (adjust index to account for fixed pre-hints)
+            int adjustedStep = currentHintStep - NUM_FIXED_PRE_HINTS;
+            int offset = numPreHints - adjustedStep;
             
-            // Show an additional toast message for the last pre-hint
-            Toast.makeText(requireContext(), 
-                "Solution found: " + totalMoves + " moves", 
-                Toast.LENGTH_SHORT).show();
+            if (offset > 0) {
+                // Regular pre-hints show "less than X+offset moves"
+                int hintValue = totalMoves + offset;
+                preHintText = "The AI found a solution in less than " + hintValue + " moves";
+                Timber.d("[HINT] Showing regular pre-hint %d/%d: less than %d moves", 
+                        adjustedStep + 1, numPreHints, hintValue);
+            } else {
+                // Last pre-hint shows the exact move count with toast notification
+                preHintText = "The AI found a solution in exactly " + totalMoves + " moves";
+                Timber.d("[HINT] Showing final regular pre-hint: exactly %d moves", totalMoves);
+                
+                // Show an additional toast message for the last pre-hint
+                Toast.makeText(requireContext(), 
+                    "Solution found: " + totalMoves + " moves", 
+                    Toast.LENGTH_SHORT).show();
+            }
         }
         
         // Display the pre-hint
@@ -1608,12 +1627,48 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.d("[HINT_DEBUG] Robot color: %d, Direction: %d, Solution hash: %d", 
                         rrMove.getColor(), rrMove.getDirection(), System.identityHashCode(solution));
                 
-                // Create the hint message
-                String hintMessage = displayHintNumber + "/" + totalMoves + ": Move the " + 
-                        robotColorName + " robot " + directionName.toLowerCase();
+                // Create the hint message with shortened format
+                StringBuilder hintMessage = new StringBuilder();
+                hintMessage.append(displayHintNumber).append("/").append(totalMoves).append(": ");
+                
+                // For the first hint, just show the robot color and direction
+                if (hintIndex == 0) {
+                    hintMessage.append(robotColorName).append(" ").append(directionName);
+                } else {
+                    // For subsequent hints, first show abbreviated previous moves
+                    // Get previous moves (up to 4)
+                    int startIndex = Math.max(0, hintIndex - 4);
+                    
+                    // Add abbreviated previous moves
+                    for (int i = startIndex; i < hintIndex; i++) {
+                        if (i == startIndex && startIndex > 0) {
+                            // If we're not showing all previous moves, add an ellipsis
+                            hintMessage.append("...,");
+                        }
+                        
+                        IGameMove prevMove = solution.getMoves().get(i);
+                        if (prevMove instanceof RRGameMove prevRRMove) {
+                            // Get abbreviated color and direction
+                            String prevColorName = getRobotColorName(prevRRMove.getColor());
+                            String prevDirectionName = getDirectionName(prevRRMove.getDirection());
+                            
+                            // Add first letter of each
+                            hintMessage.append(prevColorName.charAt(0))
+                                    .append(prevDirectionName.charAt(0));
+                            
+                            // Add comma if not the last previous move
+                            if (i < hintIndex - 1) {
+                                hintMessage.append(",");
+                            }
+                        }
+                    }
+                    
+                    // Add current move
+                    hintMessage.append(", ").append(robotColorName).append(" ").append(directionName);
+                }
                 
                 // Update the status text
-                updateStatusText(hintMessage, true);
+                updateStatusText(hintMessage.toString(), true);
                 Timber.d("[HINT] Displayed hint: %s", hintMessage);
                 
                 // Show the optimal moves button after the first normal hint is shown
