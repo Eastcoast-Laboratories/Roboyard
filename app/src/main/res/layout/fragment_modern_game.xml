@@ -10,7 +10,7 @@
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/status_text_view"
+        app:layout_constraintBottom_toTopOf="@id/hint_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,21 +18,79 @@
         app:layout_constraintVertical_bias="0.0"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <!-- Status text view to display hints -->
-    <TextView
-        android:id="@+id/status_text_view"
+    <!-- Status text view to display hints with navigation buttons -->
+    <LinearLayout
+        android:id="@+id/hint_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/status_text_padding"
-        android:layout_marginTop="6dp"
-        android:textSize="20sp"
-        android:textColor="#333333"
-        android:background="@drawable/status_text_background"
-        android:text="Press Hint to see which robot to move first"
-        android:elevation="10dp"
-        app:layout_constraintTop_toBottomOf="@id/game_grid_view"
-        app:layout_constraintBottom_toTopOf="@id/game_info_container" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:padding="8dp"
+        android:layout_margin="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="#33000000"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/game_info_container">
+        
+        <!-- Previous hint button -->
+        <TextView
+            android:id="@+id/prev_hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="◂"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:contentDescription="Previous hint"
+            android:textColor="#000000"
+            android:background="@drawable/status_text_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:visibility="gone" />
+            
+        <!-- Status text view (clickable for next hint) with right arrow -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            
+            <TextView
+                android:id="@+id/status_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="@dimen/status_text_padding"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:background="@drawable/status_text_background"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:text="Press Hint to see which robot to move first" />
+                
+            <TextView
+                android:id="@+id/next_hint_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="▸"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:contentDescription="Next hint"
+                android:textColor="#000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_gravity="end|center_vertical"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
 
     <!-- Game information above the buttons -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -42,7 +100,7 @@
         android:background="#000000"
         android:padding="2dp"
         app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintTop_toBottomOf="@id/status_text_view"
+        app:layout_constraintTop_toBottomOf="@id/hint_container"
         app:layout_constraintBottom_toTopOf="@id/accessibility_container">
 
         <TextView
@@ -205,17 +263,17 @@
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />
 
-            <Button
+            <ToggleButton
                 android:id="@+id/hint_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/game_button_height"
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_blue_outline"
                 android:padding="@dimen/game_button_padding"
-                android:text="@string/hint_button"
+                android:textOn="@string/cancel_hint_button"
+                android:textOff="@string/hint_button"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
-                android:textStyle="bold" />
+                android:textSize="@dimen/game_button_text_size" />
         </LinearLayout>
 
         <LinearLayout

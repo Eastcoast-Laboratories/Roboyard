@@ -9,8 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -58,7 +60,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private TextView uniqueMapIdTextView; // Added for unique map ID display
     private Button backButton;
     private Button resetRobotsButton;
-    private Button hintButton;
+    private ToggleButton hintButton;
     private Button saveMapButton;
     private Button newMapButton;
     private Button menuButton;
@@ -66,6 +68,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button optimalMovesButton; // Button to display optimal number of moves
     private TextView timerTextView;
     private TextView statusTextView;
+    // Hint navigation components
+    private ViewGroup hintContainer;
+    private TextView prevHintButton;
+    private TextView nextHintButton;
     
     // Class member to track if a robot is currently selected
     private boolean isRobotSelected = false;
@@ -367,6 +373,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         timerTextView = view.findViewById(R.id.game_timer);
         statusTextView = view.findViewById(R.id.status_text_view);
         optimalMovesButton = view.findViewById(R.id.optimal_moves_button);
+        hintContainer = view.findViewById(R.id.hint_container);
+        prevHintButton = view.findViewById(R.id.prev_hint_button);
+        nextHintButton = view.findViewById(R.id.next_hint_button);
         
         // Prevent automatic selection of gameGridView by setting focusable to false
         gameGridView.setFocusable(false);
@@ -420,6 +429,43 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Start autosave
         startAutosave();
+        
+        // Set up status text view to act as a button for showing the next hint
+        statusTextView.setOnClickListener(v -> {
+            Timber.d("[HINT_SYSTEM] Status text view clicked for next hint");
+            GameSolution solution = gameStateManager.getCurrentSolution();
+            if (solution == null || solution.getMoves().isEmpty()) {
+                Timber.d("[HINT_SYSTEM] No solution available for next hint");
+                return;
+            }
+            
+            int totalMoves = solution.getMoves().size();
+            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
+            
+            // Increment hint step if possible
+            if (currentHintStep < totalPossibleHints - 1) {
+                currentHintStep++;
+                Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
+                GameState currentGameState = gameStateManager.getCurrentState().getValue();
+                
+                // Show the appropriate hint
+                if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                    showPreHint(solution, totalMoves, currentHintStep);
+                } else {
+                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                }
+                
+                // Update the game state manager's current solution step
+                gameStateManager.resetSolutionStep();
+                for (int i = 0; i < currentHintStep; i++) {
+                    gameStateManager.incrementSolutionStep();
+                }
+                Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
+            } else {
+                Timber.d("[HINT_SYSTEM] Already at last hint, can't go further");
+            }
+        });
     }
     
     /**
@@ -427,7 +473,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void setupObservers() {
         // Observe current game state
-        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), this::updateGameState);
+        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
+            updateGameState(state);
+            
+            // Check if a hint is being shown and if the move matches the current hint
+            checkIfMoveMatchesHint(state);
+        });
         
         // Observe move count
         gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
@@ -517,15 +568,81 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
-                hintButton.setText(R.string.cancel_hint_button);
+                hintButton.setTextOn("Hide");
+                hintButton.setTextOff("💡Hint");
+                hintButton.setChecked(true);
                 updateStatusText("AI calculating solution...", true);
             } else {
                 // Reset hint button text
-                hintButton.setText(R.string.hint_button);
+                hintButton.setChecked(false);
                 // Don't update the status text here - let callbacks handle it appropriately
                 // This prevents text flashing/flickering between states
             }
         });
+    }
+    
+    /**
+     * Check if a move matches the current hint and advance to the next hint if it does
+     * @param state The current game state
+     */
+    private void checkIfMoveMatchesHint(GameState state) {
+        // Check if a hint is being shown
+        if (hintContainer.getVisibility() == View.VISIBLE) {
+            Timber.d("[HINT_SYSTEM] Checking if move matches hint");
+            // Get the current solution
+            GameSolution solution = gameStateManager.getCurrentSolution();
+            
+            // Check if the solution is valid and has moves
+            if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
+                // Only check normal hints (not pre-hints)
+                if (!showingPreHints || currentHintStep >= (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                    // Calculate the index for the normal hint
+                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                    
+                    // Make sure we're within bounds
+                    if (normalHintIndex >= 0 && normalHintIndex < solution.getMoves().size()) {
+                        // Get the current move count
+                        int currentMoveCount = state.getMoveCount();
+                        Timber.d("[HINT_SYSTEM] Current move count: %d", currentMoveCount);
+                        
+                        // We can't directly check if the move matches, but we can advance the hint
+                        // when a move is made and the hint is being shown
+                        if (currentMoveCount > 0 && hintButton.isChecked()) {
+                            // Advance to the next hint
+                            int totalMoves = solution.getMoves().size();
+                            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
+                            
+                            // Increment hint step if possible
+                            if (currentHintStep < totalPossibleHints - 1) {
+                                currentHintStep++;
+                                Timber.d("[HINT_SYSTEM] Auto-advancing to next hint: step=%d", currentHintStep);
+                                
+                                // Show the appropriate hint after a short delay
+                                new Handler().postDelayed(() -> {
+                                    // Show the appropriate hint
+                                    if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                                        showPreHint(solution, totalMoves, currentHintStep);
+                                    } else {
+                                        int nextNormalHintIndex = showingPreHints ? 
+                                                currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                                        showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
+                                    }
+                                    
+                                    // Update the current solution step
+                                    gameStateManager.resetSolutionStep();
+                                    for (int i = 0; i < currentHintStep; i++) {
+                                        gameStateManager.incrementSolutionStep();
+                                    }
+                                    Timber.d("[HINT_SYSTEM] Updated solution step to %d after auto-advance", currentHintStep);
+                                }, 1000); // 1 second delay
+                            } else {
+                                Timber.d("[HINT_SYSTEM] Already at last hint, can't auto-advance further");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -566,106 +683,120 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // (Button text: "Hint")
         // Hint button - show a hint for the current game
         hintButton = view.findViewById(R.id.hint_button);
-        hintButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Hint button clicked");
-
-            // Check if we have a solution object at all
-            GameSolution solution = gameStateManager.getCurrentSolution();
-            if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
-                Timber.d("[HINT] No solution available, calculating...");
-                updateStatusText("AI calculating solution...", true);
+        Timber.d("[HINT_SYSTEM] Setting up hint toggle button");
+        hintButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Timber.d("[HINT_SYSTEM] Hint button toggled: %s", isChecked ? "ON" : "OFF");
+            
+            if (isChecked) {
+                // Show hint container when button is checked
+                hintContainer.setVisibility(View.VISIBLE);
+                prevHintButton.setVisibility(View.VISIBLE);
+                nextHintButton.setVisibility(View.VISIBLE);
+                Timber.d("[HINT_SYSTEM] Showing hint container and navigation buttons");
                 
-                // Start calculating a solution
-                gameStateManager.calculateSolutionAsync(this);
-                return;
-            }
-            
-            // Debug the current solution
-            Timber.d("[HINT_DEBUG] Current solution hash: %d, move count: %d, level id: %d",
-                    System.identityHashCode(solution), 
-                    solution.getMoves().size(),
-                    currentState != null ? currentState.getLevelId() : -1);
-            
-            // Debug the first few moves in the solution
-            int moveCount = Math.min(solution.getMoves().size(), 3); // Log up to first 3 moves
-            for (int i = 0; i < moveCount; i++) {
-                IGameMove move = solution.getMoves().get(i);
-                if (move instanceof RRGameMove rrMove) {
-                    Timber.d("[HINT_DEBUG] Solution move %d: Color=%d, Direction=%d", 
-                            i, rrMove.getColor(), rrMove.getDirection());
-                }
-            }
-            
-            // Get total moves for the solution
-            int totalMoves = solution.getMoves().size();
-            boolean isFirstTenLevels = isLevelGame && currentState.getLevelId() <= 10;
-            
-            // Check the current hint step - this is a global counter including pre-hints and regular hints
-            currentHintStep = gameStateManager.getCurrentSolutionStep();
-            Timber.d("[HINT] Total solution moves: %d, current hint step: %d, numPreHints: %d", 
-                    totalMoves, currentHintStep, numPreHints);
-            
-            // LEVEL GAMES - First 10 levels: Show up to 2 normal hints then disable
-            if (isLevelGame && isFirstTenLevels) {
-                // For levels 1-10, just show the first two normal hints
-                if (currentHintStep >= 2) {
-                    // All allowed hints shown for level game
-                    updateStatusText("No more hints available for this level", true);
+                // Check if we have a solution object at all
+                GameSolution solution = gameStateManager.getCurrentSolution();
+                if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
+                    Timber.d("[HINT_SYSTEM] No solution available, calculating...");
+                    updateStatusText("AI calculating solution...", true);
                     
-                    // Disable the hint button
-                    hintButton.setEnabled(false);
-                    hintButton.setAlpha(0.5f);
+                    // Start calculating a solution
+                    gameStateManager.calculateSolutionAsync(this);
                     return;
                 }
                 
-                // Show normal hint (no pre-hints)
-                showNormalHint(solution, currentState, totalMoves, currentHintStep);
+                // If we already have a solution, show the current hint
+                GameState currentGameState = gameStateManager.getCurrentState().getValue();
+                int totalMoves = solution.getMoves().size();
+                int currentStep = gameStateManager.getCurrentSolutionStep();
+                Timber.d("[HINT_SYSTEM] Showing current hint: step=%d, totalMoves=%d", currentStep, totalMoves);
                 
-                // Increment hint counter 
-                gameStateManager.incrementSolutionStep();
+                // Check if we're showing pre-hints or normal hints
+                if (showingPreHints && currentStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                    showPreHint(solution, totalMoves, currentStep);
+                } else {
+                    int normalHintIndex = showingPreHints ? currentStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentStep;
+                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                }
+            } else {
+                // Hide hint container when button is unchecked
+                hintContainer.setVisibility(View.GONE);
+                prevHintButton.setVisibility(View.GONE);
+                nextHintButton.setVisibility(View.GONE);
+                Timber.d("[HINT_SYSTEM] Hiding hint container and navigation buttons");
+            }
+        });
+        
+        // Set up previous hint button
+        prevHintButton.setOnClickListener(v -> {
+            Timber.d("[HINT_SYSTEM] Previous hint button clicked");
+            GameSolution solution = gameStateManager.getCurrentSolution();
+            if (solution == null || solution.getMoves().isEmpty()) {
+                Timber.d("[HINT_SYSTEM] No solution available for previous hint");
+                return;
+            }
+            
+            // Decrement hint step if possible
+            if (currentHintStep > 0) {
+                currentHintStep--;
+                Timber.d("[HINT_SYSTEM] Moving to previous hint: step=%d", currentHintStep);
+                GameState currentGameState = gameStateManager.getCurrentState().getValue();
+                int totalMoves = solution.getMoves().size();
                 
-                // Disable hint button after showing 2 hints for level games 1-10
-                if (currentHintStep >= 1) {  // We already incremented, so check for 1
-                    hintButton.setEnabled(false);
-                    hintButton.setAlpha(0.5f);
+                // Show the appropriate hint
+                if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                    showPreHint(solution, totalMoves, currentHintStep);
+                } else {
+                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
                 }
                 
-                return;
-            }
-            
-            // LEVEL GAMES > 10: No hints at all (button should already be disabled)
-            if (isLevelGame && !isFirstTenLevels) {
-                updateStatusText("No hints available for this level", true);
-                hintButton.setEnabled(false); // TODO: this has no effect
-                hintButton.setAlpha(0.5f); // TODO: this has no effect
-                return;
-            }
-            
-            // RANDOM GAMES
-            // Check if all hints have been shown
-            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
-            if (currentHintStep >= totalPossibleHints) {
-                // All hints shown - restart hint system
-                String hintMsg = "All AI hints have been shown (" + totalMoves + ")";
-                updateStatusText(hintMsg, true);
-                Timber.d("[HINT] %s", hintMsg);
-                
-                // Reset hint counter but skip pre-hints on reset
+                // Update the game state manager's current solution step
                 gameStateManager.resetSolutionStep();
-                showingPreHints = true;  // TODO: Skip pre-hints on reset
+                for (int i = 0; i < currentHintStep; i++) {
+                    gameStateManager.incrementSolutionStep();
+                }
+                Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
+            } else {
+                Timber.d("[HINT_SYSTEM] Already at first hint, can't go back further");
+            }
+        });
+        
+        // Set up next hint button
+        nextHintButton.setOnClickListener(v -> {
+            Timber.d("[HINT_SYSTEM] Next hint button clicked");
+            GameSolution solution = gameStateManager.getCurrentSolution();
+            if (solution == null || solution.getMoves().isEmpty()) {
+                Timber.d("[HINT_SYSTEM] No solution available for next hint");
                 return;
             }
             
-            // Check if we're still showing pre-hints
-            if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                showPreHint(solution, totalMoves, currentHintStep);
+            int totalMoves = solution.getMoves().size();
+            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
+            
+            // Increment hint step if possible
+            if (currentHintStep < totalPossibleHints - 1) {
+                currentHintStep++;
+                Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
+                GameState currentGameState = gameStateManager.getCurrentState().getValue();
+                
+                // Show the appropriate hint
+                if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                    showPreHint(solution, totalMoves, currentHintStep);
+                } else {
+                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                }
+                
+                // Update the game state manager's current solution step
+                gameStateManager.resetSolutionStep();
+                for (int i = 0; i < currentHintStep; i++) {
+                    gameStateManager.incrementSolutionStep();
+                }
+                Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
             } else {
-                // We've shown all pre-hints, now show normal hints
-                // Calculate the index for the normal hint (subtract pre-hints)
-                int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                showNormalHint(solution, currentState, totalMoves, normalHintIndex);
+                Timber.d("[HINT_SYSTEM] Already at last hint, can't go further");
             }
-            gameStateManager.incrementSolutionStep();
         });
         
         // (Button text: "Save Map")
@@ -1426,6 +1557,68 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
     
+    private void updateUniqueMapIdText(GameState state) {
+        if (state == null) {
+            return;
+        }
+        
+        // Get the unique map ID
+        String uniqueMapId = state.getUniqueMapId();
+        
+        // Update the unique map ID text view
+        // Check if this is a level game and include level name
+        if (state.getLevelId() > 0) {
+            // For level game - display board size with level name/number
+            String levelText = "Level " + state.getLevelId();
+            uniqueMapIdTextView.setText(levelText);
+        } else if (uniqueMapIdTextView != null) {
+            uniqueMapIdTextView.setText("" + uniqueMapId);
+        }
+    }
+    
+    private void updateOptimalMovesButton(int optimalMoves, boolean showButton) {
+        if (optimalMovesButton != null) {
+            optimalMovesButton.setText(String.valueOf(optimalMoves));
+            optimalMovesButton.setVisibility(showButton ? View.VISIBLE : View.GONE);
+            
+            // Change button background color based on move count (cycle through 5 colors)
+            int colorIndex = optimalMoves % 5;
+            int backgroundColor;
+            
+            switch (colorIndex) {
+                case 0: // Red
+                    backgroundColor = Color.parseColor("#F44336");
+                    break;
+                case 1: // Green
+                    backgroundColor = Color.parseColor("#4CAF50");
+                    break;
+                case 2: // Yellow
+                    backgroundColor = Color.parseColor("#FFEB3B");
+                    optimalMovesButton.setTextColor(Color.BLACK); // Black text on yellow background
+                    return; // Return early to keep black text
+                case 3: // Blue
+                    backgroundColor = Color.parseColor("#2196F3");
+                    break;
+                case 4: // Gray
+                    backgroundColor = Color.parseColor("#9E9E9E");
+                    break;
+                default:
+                    backgroundColor = Color.parseColor("#1976D2"); // Default blue
+                    break;
+            }
+            
+            // Create drawable with the selected color but keep white border
+            GradientDrawable drawable = new GradientDrawable();
+            drawable.setShape(GradientDrawable.RECTANGLE);
+            drawable.setColor(backgroundColor);
+            drawable.setCornerRadius(32 * getResources().getDisplayMetrics().density); // 32dp corner radius
+            drawable.setStroke(4 * (int) getResources().getDisplayMetrics().density, Color.WHITE); // 4dp white border
+            
+            optimalMovesButton.setBackground(drawable);
+            optimalMovesButton.setTextColor(Color.WHITE); // Reset to white text for most colors
+        }
+    }
+    
     /**
      * Get the screen title for accessibility and UI
      * @return The screen title
@@ -1546,51 +1739,54 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void showPreHint(GameSolution solution, int totalMoves, int currentHintStep) {
         String preHintText;
+        Timber.d("[HINT_SYSTEM] Showing pre-hint #%d (total pre-hints: %d + %d fixed)", 
+                currentHintStep + 1, numPreHints, NUM_FIXED_PRE_HINTS);
         
-        if (currentHintStep == 0) {
-            // First fixed pre-hint: Show exact solution length
+        // Calculate total number of pre-hints (regular + fixed)
+        int totalPreHints = numPreHints + NUM_FIXED_PRE_HINTS;
+        
+        // Regular pre-hints come first (decreasing "less than X" hints)
+        if (currentHintStep < numPreHints) {
+            // Calculate offset for "less than X" hints (starting with largest offset)
+            int offset = numPreHints - currentHintStep;
+            int hintValue = totalMoves + offset;
+            
+            preHintText = "The AI found a solution in less than " + hintValue + " moves";
+            Timber.d("[HINT_SYSTEM] Showing regular pre-hint %d/%d: less than %d moves", 
+                    currentHintStep + 1, numPreHints, hintValue);
+        }
+        // Next fixed pre-hint: Show exact solution length
+        else if (currentHintStep == numPreHints) {
             preHintText = "The AI found a solution in " + totalMoves + " moves";
-            Timber.d("[HINT] Showing first fixed pre-hint: solution has %d moves", totalMoves);
-        } 
-        else if (currentHintStep == 1) {
-            // Second fixed pre-hint: Show which robot to move first
+            Timber.d("[HINT_SYSTEM] Showing exact solution length: %d moves", totalMoves);
+            
+            // Show an additional toast message for the exact solution hint
+            Toast.makeText(requireContext(), 
+                "Solution found: " + totalMoves + " moves", 
+                Toast.LENGTH_SHORT).show();
+        }
+        // Last fixed pre-hint: Show which robot to move first
+        else if (currentHintStep == numPreHints + 1) {
             if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
                 RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
                 String robotColorName = getRobotColorName(firstMove.getColor());
                 preHintText = "Move the " + robotColorName + " robot first";
-                Timber.d("[HINT] Showing second fixed pre-hint: move %s robot first", robotColorName);
+                Timber.d("[HINT_SYSTEM] Showing which robot to move first: %s", robotColorName);
             } else {
                 // Fallback if we can't determine the first robot
                 preHintText = "No solution found";
-                Timber.d("[HINT] Showing fallback second pre-hint (couldn't determine first robot)");
+                Timber.d("[HINT_SYSTEM] Showing fallback (couldn't determine first robot)");
             }
         }
+        // Fallback for any other case
         else {
-            // Regular pre-hints (adjust index to account for fixed pre-hints)
-            int adjustedStep = currentHintStep - NUM_FIXED_PRE_HINTS;
-            int offset = numPreHints - adjustedStep;
-            
-            if (offset > 0) {
-                // Regular pre-hints show "less than X+offset moves"
-                int hintValue = totalMoves + offset;
-                preHintText = "The AI found a solution in less than " + hintValue + " moves";
-                Timber.d("[HINT] Showing regular pre-hint %d/%d: less than %d moves", 
-                        adjustedStep + 1, numPreHints, hintValue);
-            } else {
-                // Last pre-hint shows the exact move count with toast notification
-                preHintText = "The AI found a solution in exactly " + totalMoves + " moves";
-                Timber.d("[HINT] Showing final regular pre-hint: exactly %d moves", totalMoves);
-                
-                // Show an additional toast message for the last pre-hint
-                Toast.makeText(requireContext(), 
-                    "Solution found: " + totalMoves + " moves", 
-                    Toast.LENGTH_SHORT).show();
-            }
+            preHintText = "Ready to show step-by-step hints";
+            Timber.d("[HINT_SYSTEM] Showing fallback pre-hint message");
         }
         
         // Display the pre-hint
         updateStatusText(preHintText, true);
-        Timber.d("[HINT] Displayed pre-hint: %s", preHintText);
+        Timber.d("[HINT_SYSTEM] Displayed pre-hint: %s", preHintText);
     }
     
     /**
@@ -1601,9 +1797,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param hintIndex Index of the hint to show (0-based)
      */
     private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
+        Timber.d("[HINT_SYSTEM] showNormalHint called with hintIndex: %d", hintIndex);
         // Validate that the hint index is within bounds
         if (hintIndex < 0 || hintIndex >= totalMoves) {
-            Timber.e("[HINT] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
+            Timber.e("[HINT_SYSTEM] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
             updateStatusText("All hints have been shown", true);
             return;
         }
@@ -1611,7 +1808,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         try {
             // Get the specific move for this hint
             IGameMove hintMove = solution.getMoves().get(hintIndex);
-            Timber.d("[HINT] Showing normal hint #%d: %s", hintIndex + 1, hintMove);
+            Timber.d("[HINT_SYSTEM] Showing normal hint #%d: %s", hintIndex + 1, hintMove);
             
             if (hintMove instanceof RRGameMove rrMove) {
                 // Get the robot's color name - use the color from the move
@@ -1624,7 +1821,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 int displayHintNumber = hintIndex + 1;
                 
                 // Log details to help with debugging
-                Timber.d("[HINT_DEBUG] Robot color: %d, Direction: %d, Solution hash: %d", 
+                Timber.d("[HINT_SYSTEM] Robot color: %d, Direction: %d, Solution hash: %d", 
                         rrMove.getColor(), rrMove.getDirection(), System.identityHashCode(solution));
                 
                 // Create the hint message with shortened format
@@ -1634,6 +1831,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // For the first hint, just show the robot color and direction
                 if (hintIndex == 0) {
                     hintMessage.append(robotColorName).append(" ").append(directionName);
+                    Timber.d("[HINT_SYSTEM] First hint format: %s", hintMessage.toString());
                 } else {
                     // For subsequent hints, first show abbreviated previous moves
                     // Get previous moves (up to 4)
@@ -1665,25 +1863,45 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Add current move
                     hintMessage.append(", ").append(robotColorName).append(" ").append(directionName);
+                    Timber.d("[HINT_SYSTEM] Subsequent hint format: %s", hintMessage.toString());
                 }
                 
                 // Update the status text
                 updateStatusText(hintMessage.toString(), true);
-                Timber.d("[HINT] Displayed hint: %s", hintMessage);
+                Timber.d("[HINT_SYSTEM] Displayed hint: %s", hintMessage);
                 
                 // Show the optimal moves button after the first normal hint is shown
                 if (hintIndex == 0) {
-                    Timber.d("[HINT] First normal hint shown, displaying optimal moves button");
+                    Timber.d("[HINT_SYSTEM] First normal hint shown, displaying optimal moves button");
                     updateOptimalMovesButton(totalMoves, true);
                 }
             } else {
                 // Error in hint system
-                Timber.e("[HINT] Failed to get a valid hint move");
+                Timber.e("[HINT_SYSTEM] Failed to get a valid hint move");
                 updateStatusText("No valid hint available", true);
             }
         } catch (Exception e) {
-            Timber.e(e, "[HINT] Error displaying normal hint #%d", hintIndex + 1);
+            Timber.e(e, "[HINT_SYSTEM] Error displaying normal hint #%d", hintIndex + 1);
             updateStatusText("Error displaying hint", true);
+        }
+    }
+    
+    /**
+     * Helper method to update the status text with a consistent approach
+     * @param message The message to display
+     * @param isVisible Whether to make the status text visible
+     */
+    private void updateStatusText(String message, boolean isVisible) {
+        Timber.d("[STATUS TEXT] Updating status text: '%s', visible: %b", message, isVisible);
+        if (statusTextView != null) {
+            statusTextView.setText(message);
+            statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
+            
+            // Ensure the hint container is visible when showing a hint
+            if (isVisible && hintContainer != null) {
+                Timber.d("[HINT_SYSTEM] Ensuring hint container is visible when showing hint text");
+                hintContainer.setVisibility(View.VISIBLE);
+            }
         }
     }
     
@@ -1728,7 +1946,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("ModernGameFragment: Solution calculation started");
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
-            hintButton.setText(R.string.cancel_hint_button);
+            hintButton.setTextOn("Cancel");
+            hintButton.setTextOff("Hint"); // not shown in the end
+            hintButton.setChecked(true);
             updateStatusText("AI is thinking...", true);
             Timber.d("ModernGameFragment: UI updated to show calculation in progress");
         });
@@ -1781,7 +2001,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 totalPossibleHints, numPreHints, isLevelGame);
         
         // Reset hint button text back to "Hint"
-        hintButton.setText(R.string.hint_button);
+        hintButton.setChecked(false);
         updateStatusText("AI found a solution!", true);
         Timber.d("[HINT] UI updated to show solution found");
         
@@ -1794,85 +2014,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("ModernGameFragment: Solution calculation failed - %s", errorMessage);
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
-            hintButton.setText(R.string.hint_button);
+            hintButton.setChecked(false);
             updateStatusText("Could not find a solution: " + errorMessage, true);
             Timber.d("ModernGameFragment: UI updated to show error");
         });
-    }
-    
-    /**
-     * Helper method to update the status text with a consistent approach
-     * @param message The message to display
-     * @param isVisible Whether to make the status text visible
-     */
-    private void updateStatusText(String message, boolean isVisible) {
-        Timber.d("[STATUS TEXT] Updating status text: '%s', visible: %b", message, isVisible);
-        if (statusTextView != null) {
-            statusTextView.setText(message);
-            statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
-        }
-    }
-    
-    private void updateUniqueMapIdText(GameState state) {
-        if (state == null) {
-            return;
-        }
-        
-        // Get the unique map ID
-        String uniqueMapId = state.getUniqueMapId();
-        
-        // Update the unique map ID text view
-        // Check if this is a level game and include level name
-        if (state.getLevelId() > 0) {
-            // For level game - display board size with level name/number
-            String levelText = "Level " + state.getLevelId();
-            uniqueMapIdTextView.setText(levelText);
-        } else if (uniqueMapIdTextView != null) {
-            uniqueMapIdTextView.setText("" + uniqueMapId);
-        }
-    }
-    
-    private void updateOptimalMovesButton(int optimalMoves, boolean showButton) {
-        if (optimalMovesButton != null) {
-            optimalMovesButton.setText(String.valueOf(optimalMoves));
-            optimalMovesButton.setVisibility(showButton ? View.VISIBLE : View.GONE);
-            
-            // Change button background color based on move count (cycle through 5 colors)
-            int colorIndex = optimalMoves % 5;
-            int backgroundColor;
-            
-            switch (colorIndex) {
-                case 0: // Red
-                    backgroundColor = Color.parseColor("#F44336");
-                    break;
-                case 1: // Green
-                    backgroundColor = Color.parseColor("#4CAF50");
-                    break;
-                case 2: // Yellow
-                    backgroundColor = Color.parseColor("#FFEB3B");
-                    optimalMovesButton.setTextColor(Color.BLACK); // Black text on yellow background
-                    return; // Return early to keep black text
-                case 3: // Blue
-                    backgroundColor = Color.parseColor("#2196F3");
-                    break;
-                case 4: // Gray
-                    backgroundColor = Color.parseColor("#9E9E9E");
-                    break;
-                default:
-                    backgroundColor = Color.parseColor("#1976D2"); // Default blue
-                    break;
-            }
-            
-            // Create drawable with the selected color but keep white border
-            GradientDrawable drawable = new GradientDrawable();
-            drawable.setShape(GradientDrawable.RECTANGLE);
-            drawable.setColor(backgroundColor);
-            drawable.setCornerRadius(32 * getResources().getDisplayMetrics().density); // 32dp corner radius
-            drawable.setStroke(4 * (int) getResources().getDisplayMetrics().density, Color.WHITE); // 4dp white border
-            
-            optimalMovesButton.setBackground(drawable);
-            optimalMovesButton.setTextColor(Color.WHITE); // Reset to white text for most colors
-        }
     }
     
     /**
