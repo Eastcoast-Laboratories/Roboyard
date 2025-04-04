@@ -77,52 +77,21 @@
 - Wenn man hint drückt und bei der optimalen Move-Zahl angekommen ist, steht auch schon gleich der erste Move da, das ist doof. ein Hint dazwischen mit "Optimal solution: X"
 
 
-verküze die Hint-Texte: 
-- einfach nur Farbe Richtung
-- ab dem 2. Hint die vorigen iin kurzform davor
-- bei mehr als 4 vorigen hints, nur die letztzen 5 davor
-Beispiel:
-1. Pink Up, 
-2. PU, Green Left
-3. PU,GL, Green Down
-4. PU,GL,GD, Green Right
-5. PU,GL,GD,GR Yellow Down
-6. GL,GD,GR,YD, Yellow Right
-7. GD,GR,YD,YR, Blue Up
-...
-ausserdem sollen 2 mehr pre-hints angezeigt werden, bevor die normalen hints kommen:
+- Hinttextfeld erstmal unsichtbar starten
 
-1. "AI found a solution with X moves"
-2. "move the Pink Robot first" (e.g. pink)
+- die Roboter Ihren Weg als Linie anzeigen würden
 
-Cool wäre übrigens auch, wenn die Roboter Ihren Weg als Linie anzeigen würden
-1:39
+- Bug: Beim Wischen kein Sound, beim Tappen Sound, obwohl ausgeschaltet
 
-Der hint button still Ein toggle werden für den Hinttextbox. Rechts und links von der Box kleine vor und zurück Buttons, die den nächsten gibt anzeigen
-
-Übrigens: Beim Wischen kein Sound, beim Tappen Sound, obwohl ausgeschaltet
-
-Ah, doch drück mal 10 x reset hintereinander
-
-wenn man den Hint befolgt (z.B. Green Left), dann muss automatisch der nächste Hint angezeigt werden
-1:47
-
-Hint erstmal unsichtbar starten
-
-How to play korrigieren
-
-Das Wort difficulty Weg und kleiner
+- drück mal 10 x reset hintereinander
 
 Stars oben das Wort weg
-2:18
 
-Einen Wirbel Button für die Maps
-2:36
+Einen Würfel Button für die Maps, wenn newmapeachtime no ist
 
 Walls etwas kürzer
 
-Hintergrund tile zufällig drehen
-3:08
+- Hintergrund tile zufällig drehen
 
 when enabling Accessibility mode in settings automatically:
 - mapsize auf 8x8 stellen
