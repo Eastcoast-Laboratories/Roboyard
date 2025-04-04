@@ -72,153 +72,49 @@
 
 - Wenn Map ration sehr gross, dann die Buttons unten alle kleiner und nur mit Icons statt text und alle in eine Reihe anstatt 2
 
-- optimale Zahl  Margin rechts grösser
+- optimale Zahl größer und Margin rechts grösser
 
-## Implemented Features
+- Wenn man hint drückt und bei der optimalen Move-Zahl angekommen ist, steht auch schon gleich der erste Move da, das ist doof. ein Hint dazwischen mit "Optimal solution: X"
 
-### Wall Preservation Across Game Changes
 
-Implemented a feature that preserves wall configurations when starting a new game or resetting robots. This feature works with the existing `generateNewMapEachTime` preference in the settings.
+Hint-Texte: Red Up, Green Left oder noch besser 1. Red Up, 2. RU, Green Left, 3. RU,GL, Green Down 4. RU,GL,GD Green Right, 5. RU,GL,GD,GR Yellow Down usw.
 
-**Implementation Details:**
+Cool wäre übrigens auch, wenn die Roboter Ihren Weg als Linie anzeigen würden
+1:39
 
-1. Created a new `WallStorage` class in the `roboyard.logic.core` package to manage wall configurations:
-   - Provides methods to store, retrieve, and apply wall configurations
-   - Uses a singleton pattern for global access
+Der hint button still Erin toggle werden für den Hinttextbox. Rechts und links von der Box kleine vor und zurück Buttons, die den nächsten gibt anzeigen
 
-2. Modified `GameLogic.generateGameMap()` to check the `generateNewMapEachTime` preference:
-   - If `generateNewMapEachTime` is false and walls are stored, preserves the walls and only regenerates robots and targets
-   - If `generateNewMapEachTime` is true or no walls are stored, generates a completely new map
+Übrigens: Beim Wischen kein Sound, beim Tappen Sound, obwohl ausgeschaltet
 
-3. Updated `MapGenerator.getGeneratedGameMap()` to integrate with the wall storage:
-   - Preserves walls when `generateNewMapEachTime` is false
-   - Stores walls for future use when generating a new map
+Ah, doch drück mal 10 x reset hintereinander
 
-4. Enhanced `GameStateManager` to store walls when resetting robots or creating a new game:
-   - Modified `resetRobots()` to store the current walls before resetting
-   - Modified `createValidGame()` to store walls before creating a new game state
+wenn man den Hint befolgt (z.B. Green Left), dann muss automatisch der nächste Hint angezeigt werden
+1:47
 
-**Testing:**
+Hint erstmal unsichtbar starten
 
-- Verified that walls are preserved when resetting robots with `generateNewMapEachTime` set to false
-- Confirmed that a new map is generated when `generateNewMapEachTime` is set to true
-- Tested that the feature works correctly with different board sizes and difficulty levels
+How to play korrigieren
 
-## Concept: Preserving Walls Across Game Changes
+Das Wort difficulty Weg und kleiner
 
-### Overview
-Implement a feature to preserve the wall configuration when starting a new game or resetting robots, based on a setting in the preferences.
+Stars oben das Wort weg
+2:18
 
-### Implementation Details
+Einen Wirbel Button für die Maps
+2:36
 
-1. **Add a Preference Setting**
-   - Add a new boolean preference in `Preferences.java`: `KEY_PRESERVE_WALLS`
-   - Default value: `false` (for backward compatibility)
-   - Add UI toggle in settings screen
+Walls etwas kürzer
 
-2. **Wall Storage Mechanism**
-   - Create a static `WallStorage` class to store the current wall configuration
-   - Methods:
-     - `storeWalls(GameState state)`: Extract and store only wall elements
-     - `hasStoredWalls()`: Check if walls are stored
-     - `applyWallsToNewState(GameState state)`: Apply stored walls to a new game state
-     - `clearStoredWalls()`: Clear the stored walls
+Hintergrund tile zufällig drehen
+3:08
 
-3. **Modify Game State Creation**
-   - Update `GameStateManager.createValidGame()` to check if walls should be preserved
-   - If `Preferences.preserveWalls` is true and `WallStorage.hasStoredWalls()` is true:
-     - Create a new game state with random robots and targets
-     - Apply the stored walls using `WallStorage.applyWallsToNewState()`
-   - Otherwise, create a completely new random game state
+when enabling Accessibility mode in settings automatically:
+- mapsize auf 8x8 stellen
+- difficulty auf Beginner stellen
+- new map each time auf "no" stellen
+- targetcolor auf "1" stellen
+- show this message below the radio buttons:
+"To enable the accessibility mode, you have to enable TalkBack in your settings"
+- Open automatically the android settings app where you can enablt TalkBack mode
 
-4. **Integration Points**
-   - When `startNewGame()` or `startModernGame()` is called, store walls from current state if available
-   - When `resetRobots()` is called, preserve the wall configuration
-   - Add a button in the UI to manually reset the wall storage
 
-5. **Solver Integration**
-   - Ensure the solver is properly reinitialized with the new game state after applying stored walls
-   - Validate that the new game state with preserved walls is solvable
-
-6. **Edge Cases to Handle**
-   - First game launch (no stored walls)
-   - Changing board size (invalidate stored walls if dimensions change)
-   - Invalid wall configurations (fallback to random generation)
-   - Ensure difficulty validation still works with preserved walls
-
-### Code Changes Required
-
-1. Add new preference in `Preferences.java`
-2. Create new `WallStorage.java` class
-3. Modify `GameStateManager.createValidGame()` method
-4. Update `GameStateManager.resetRobots()` method
-5. Add UI toggle in settings screen
-6. Add wall reset functionality in game UI
-
-### Testing Strategy
-
-1. Verify walls are preserved when starting a new game with the setting enabled
-2. Verify robot positions are reset correctly while walls remain unchanged
-3. Test with different board sizes and difficulty levels
-4. Ensure solver still works correctly with preserved walls
-5. Verify disabling the setting returns to normal random generation
-
-## Improved Play Store Description
-
-### deutsch
-Roboyard - Roboter-Puzzle-Herausforderung
-
-Inspiriert vom klassischen Brettspiel Ricochet Robots, fordert Roboyard dein logisches Denken heraus! Steuere Roboter durch ein Labyrinth voller Hindernisse und finde den optimalen Weg zum Ziel.
-🕹️ SPIELPRINZIP:
-
-🔹 Roboter bewegen sich nur in geraden Linien und stoppen erst an Hindernissen oder anderen Robotern.
-🔹 Plane strategisch und finde den kürzesten Weg zum Ziel!
-🔹 Kannst du jede Herausforderung mit der optimalen Lösung meistern?
-🚀 FEATURES:
-
-✅ Einzigartiger KI-Lösungsalgorithmus – Lass dir Hinweise geben oder sieh die beste Lösung!
-✅ Verschiedene Schwierigkeitsstufen – Von entspannt bis knifflig.
-✅ Spielfelder speichern & teilen – Teile deine eigenen Herausforderungen mit Freunden!
-✅ Trainiere dein logisches Denken & räumliches Vorstellungsvermögen.
-✅ Vollständige Barrierefreiheit – Unterstützt TalkBack und den Android Accessibility Mode für blinde Spieler.
-🎯 PERFEKT FÜR:
-
-✔️ Puzzle-Fans und Logikrätsel-Liebhaber
-✔️ Fans von Ricochet Robots und ähnlichen Denkspielen
-✔️ Alle, die ihr Gehirn herausfordern wollen – egal ob für kurze oder lange Sessions
-
-🔹 Komplett kostenlos, werbefrei & Open Source!
-🔹 Entwickle deine Problemlösungsfähigkeiten und habe Spaß dabei!
-
-🖥️ Quellcode & weitere Infos: https://roboyard.z11.de/
-
-### english
-
-Roboyard – The Ultimate Robot Puzzle Challenge!
-
-Inspired by the classic board game Ricochet Robots, Roboyard challenges your logical thinking! Guide robots through a maze filled with obstacles and find the optimal path to the goal.
-
-🕹️ GAMEPLAY:
-
-🔹 Robots move in straight lines and stop only when hitting a hedge or another robot.
-🔹 Plan ahead and find the shortest path to the target!
-🔹 Can you master each challenge with the perfect solution?
-
-🚀 FEATURES:
-
-✅ Unique AI-powered solution algorithm – Get hints or watch the optimal solution!
-✅ Multiple difficulty levels – From beginner-friendly to mind-bending.
-✅ Save & share custom game boards – Challenge your friends!
-✅ Sharpen your logical thinking & spatial awareness.
-✅ Fully accessible for blind players – Includes TalkBack and Android Accessibility Mode support.
-
-🎯 PERFECT FOR:
-
-✔️ Puzzle enthusiasts and logic lovers
-✔️ Fans of Ricochet Robots and similar brain teasers
-✔️ Anyone looking for a fun mental challenge – whether for quick sessions or deep thinking
-
-🔹 Completely free, ad-free & open source!
-🔹 Train your problem-solving skills while having fun!
-
-🖥️ Source code & more info: https://roboyard.z11.de/

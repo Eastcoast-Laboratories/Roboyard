@@ -1,0 +1,59 @@
+Play Store Description
+
+### deutsch
+Roboyard - Roboter-Puzzle-Herausforderung
+
+Inspiriert vom klassischen Brettspiel Ricochet Robots, fordert Roboyard dein logisches Denken heraus! Steuere Roboter durch ein Labyrinth voller Hindernisse und finde den optimalen Weg zum Ziel.
+🕹️ SPIELPRINZIP:
+
+🔹 Roboter bewegen sich nur in geraden Linien und stoppen erst an Hindernissen oder anderen Robotern.
+🔹 Plane strategisch und finde den kürzesten Weg zum Ziel!
+🔹 Kannst du jede Herausforderung mit der optimalen Lösung meistern?
+🚀 FEATURES:
+
+✅ Einzigartiger KI-Lösungsalgorithmus – Lass dir Hinweise geben oder sieh die beste Lösung!
+✅ Verschiedene Schwierigkeitsstufen – Von entspannt bis knifflig.
+✅ Spielfelder speichern & teilen – Teile deine eigenen Herausforderungen mit Freunden!
+✅ Trainiere dein logisches Denken & räumliches Vorstellungsvermögen.
+✅ Vollständige Barrierefreiheit – Unterstützt TalkBack und den Android Accessibility Mode für blinde Spieler.
+🎯 PERFEKT FÜR:
+
+✔️ Puzzle-Fans und Logikrätsel-Liebhaber
+✔️ Fans von Ricochet Robots und ähnlichen Denkspielen
+✔️ Alle, die ihr Gehirn herausfordern wollen – egal ob für kurze oder lange Sessions
+
+🔹 Komplett kostenlos, werbefrei & Open Source!
+🔹 Entwickle deine Problemlösungsfähigkeiten und habe Spaß dabei!
+
+🖥️ Quellcode & weitere Infos: https://roboyard.z11.de/
+
+### english
+
+Roboyard – The Ultimate Robot Puzzle Challenge!
+
+Inspired by the classic board game Ricochet Robots, Roboyard challenges your logical thinking! Guide robots through a maze filled with obstacles and find the optimal path to the goal.
+
+🕹️ GAMEPLAY:
+
+🔹 Robots move in straight lines and stop only when hitting a hedge or another robot.
+🔹 Plan ahead and find the shortest path to the target!
+🔹 Can you master each challenge with the perfect solution?
+
+🚀 FEATURES:
+
+✅ Unique AI-powered solution algorithm – Get hints or watch the optimal solution!
+✅ Multiple difficulty levels – From beginner-friendly to mind-bending.
+✅ Save & share custom game boards – Challenge your friends!
+✅ Sharpen your logical thinking & spatial awareness.
+✅ Fully accessible for blind players – Includes TalkBack and Android Accessibility Mode support.
+
+🎯 PERFECT FOR:
+
+✔️ Puzzle enthusiasts and logic lovers
+✔️ Fans of Ricochet Robots and similar brain teasers
+✔️ Anyone looking for a fun mental challenge – whether for quick sessions or deep thinking
+
+🔹 Completely free, ad-free & open source!
+🔹 Train your problem-solving skills while having fun!
+
+🖥️ Source code & more info: https://roboyard.z11.de/
