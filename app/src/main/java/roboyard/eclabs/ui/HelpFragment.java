@@ -51,7 +51,6 @@ public class HelpFragment extends BaseGameFragment {
         String helpContent = "How to Play Roboyard\n\n" +
                 "Goal\n" +
                 "Move the colored robots to their matching colored targets. " +
-                "Once a robot reaches a target, it's locked in place. " +
                 "The game is completed when all robots are on their matching targets.\n\n" +
                 "Movement\n" +
                 "- Tap on a robot to select it.\n" +
@@ -60,7 +59,7 @@ public class HelpFragment extends BaseGameFragment {
                 "Controls\n" +
                 "- Hint: Shows a suggested move.\n" +
                 "- Reset: Restarts the current level.\n" +
-                "- Save: Saves your current game progress.\n" +
+                "- Save: Saves your current map.\n" +
                 "- Menu: Returns to the main menu.\n\n" +
                 "Accessibility\n" +
                 "This game is fully compatible with TalkBack screen reader. " +

@@ -77,12 +77,28 @@
 - Wenn man hint drückt und bei der optimalen Move-Zahl angekommen ist, steht auch schon gleich der erste Move da, das ist doof. ein Hint dazwischen mit "Optimal solution: X"
 
 
-Hint-Texte: Red Up, Green Left oder noch besser 1. Red Up, 2. RU, Green Left, 3. RU,GL, Green Down 4. RU,GL,GD Green Right, 5. RU,GL,GD,GR Yellow Down usw.
+verküze die Hint-Texte: 
+- einfach nur Farbe Richtung
+- ab dem 2. Hint die vorigen iin kurzform davor
+- bei mehr als 4 vorigen hints, nur die letztzen 5 davor
+Beispiel:
+1. Pink Up, 
+2. PU, Green Left
+3. PU,GL, Green Down
+4. PU,GL,GD, Green Right
+5. PU,GL,GD,GR Yellow Down
+6. GL,GD,GR,YD, Yellow Right
+7. GD,GR,YD,YR, Blue Up
+...
+ausserdem sollen 2 mehr pre-hints angezeigt werden, bevor die normalen hints kommen:
+
+1. "AI found a solution with X moves"
+2. "move the Pink Robot first" (e.g. pink)
 
 Cool wäre übrigens auch, wenn die Roboter Ihren Weg als Linie anzeigen würden
 1:39
 
-Der hint button still Erin toggle werden für den Hinttextbox. Rechts und links von der Box kleine vor und zurück Buttons, die den nächsten gibt anzeigen
+Der hint button still Ein toggle werden für den Hinttextbox. Rechts und links von der Box kleine vor und zurück Buttons, die den nächsten gibt anzeigen
 
 Übrigens: Beim Wischen kein Sound, beim Tappen Sound, obwohl ausgeschaltet
 
