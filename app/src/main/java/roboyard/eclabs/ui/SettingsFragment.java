@@ -415,16 +415,12 @@ public class SettingsFragment extends Fragment {
         // Since we can't directly access the field, use GridGameView helper method
         // which has package access to MapGenerator
         
-        // Get the previous value to detect changes
-        boolean previousValue = Preferences.generateNewMapEachTime;
-        
         // Update the preference
         Preferences.setGenerateNewMapEachTime(value);
         
-        // If toggling from off to on (false to true), clear the wall storage for current board size
-        if (value && !previousValue) {
-            Timber.d("[WALL STORAGE] Toggling from 'preserve walls' to 'new map each time', clearing wall storage for current board size");
-            // Make sure WallStorage knows the current board size before clearing
+        // If the value is true ("No" for preserving walls), clear the wall storage for current board size
+        if (value) {
+            Timber.d("[WALL STORAGE] Setting 'new map each time' to true, clearing wall storage for current board size: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
             WallStorage wallStorage = WallStorage.getInstance();
             wallStorage.updateCurrentBoardSize();
             wallStorage.clearStoredWalls();
