@@ -1,6 +1,10 @@
 package roboyard.eclabs.ui;
 
 import android.content.Context;
+import android.graphics.Color;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,7 +44,6 @@ import timber.log.Timber;
 // Added imports for accessibility
 import android.view.accessibility.AccessibilityManager;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 
 import roboyard.logic.core.Preferences;
@@ -720,10 +723,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 }
             } else {
                 // Hide hint container when button is unchecked
-                hintContainer.setVisibility(View.GONE);
-                prevHintButton.setVisibility(View.GONE);
-                nextHintButton.setVisibility(View.GONE);
-                Timber.d("[HINT_SYSTEM] Hiding hint container and navigation buttons");
+                hintContainer.setVisibility(View.INVISIBLE);
+                prevHintButton.setVisibility(View.INVISIBLE);
+                nextHintButton.setVisibility(View.INVISIBLE);
+                
+                // Reset hint step to start from the beginning next time
+                currentHintStep = 0;
+                gameStateManager.resetSolutionStep();
+                
+                Timber.d("[HINT_SYSTEM] Hiding hint container and navigation buttons, reset to first hint");
             }
         });
         
@@ -1537,7 +1545,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void updateDifficulty() {
         // Get difficulty string directly from GameStateManager
         String difficultyString = gameStateManager.getDifficultyString();
-        difficultyTextView.setText("Difficulty: " + difficultyString);
+        difficultyTextView.setText(difficultyString);
     }
     
     private void updateBoardSizeText() {
@@ -1898,9 +1906,61 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
             
             // Ensure the hint container is visible when showing a hint
+            int lightgreen = Color.parseColor("#b5f874");
+            int darkgreen = Color.parseColor("#008f00");
             if (isVisible && hintContainer != null) {
                 Timber.d("[HINT_SYSTEM] Ensuring hint container is visible when showing hint text");
                 hintContainer.setVisibility(View.VISIBLE);
+                
+                // Check if the hint message contains a robot color name and change background color accordingly
+                String lowerMessage = message.toLowerCase();
+                GradientDrawable backgroundDrawable = new GradientDrawable();
+                backgroundDrawable.setCornerRadius(8);
+                
+                // Default to using the drawable resource
+                boolean useCustomColors = false;
+                
+                // Change background color based on robot color mentioned in hint
+                if (lowerMessage.contains("red")) {
+                    backgroundDrawable.setColor(Color.parseColor("#f77070"));
+                    backgroundDrawable.setStroke(3, Color.RED);
+                    useCustomColors = true;
+                } else if (lowerMessage.contains("blue")) {
+                    backgroundDrawable.setColor(Color.parseColor("#71a6ff"));
+                    backgroundDrawable.setStroke(3, Color.BLUE);
+                    useCustomColors = true;
+                } else if (lowerMessage.contains("green")) {
+                    backgroundDrawable.setColor(lightgreen);
+                    backgroundDrawable.setStroke(3, darkgreen);
+                    useCustomColors = true;
+                } else if (lowerMessage.contains("yellow")) {
+                    backgroundDrawable.setColor(Color.parseColor("#fffe71"));
+                    backgroundDrawable.setStroke(3, Color.parseColor("#DAA520"));
+                    useCustomColors = true;
+                } else if (lowerMessage.contains("pink") || lowerMessage.contains("purple") || lowerMessage.contains("violet")) {
+                    backgroundDrawable.setColor(Color.parseColor("#eb91ff"));
+                    backgroundDrawable.setStroke(3, Color.parseColor("#800080"));
+                    useCustomColors = true;
+                } else if (lowerMessage.contains("orange")) {
+                    backgroundDrawable.setColor(Color.parseColor("#ffa77f"));
+                    backgroundDrawable.setStroke(3, Color.parseColor("#FFA500"));
+                    useCustomColors = true;
+                }
+                
+                // Apply the background drawable to the status text view
+                if (useCustomColors) {
+                    statusTextView.setBackground(backgroundDrawable);
+                } else {
+                    // Use the default drawable resource
+                    statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
+                }
+                
+                // Add some padding for better text readability
+                statusTextView.setPadding(16, 8, 16, 8);
+            } else {
+                // Reset background to default green with rounded corners when hiding the hint
+                statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
+                statusTextView.setPadding(16, 8, 16, 8);
             }
         }
     }
@@ -1947,7 +2007,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setTextOn("Cancel");
-            hintButton.setTextOff("Hint"); // not shown in the end
+            hintButton.setTextOff("💡Hint");
             hintButton.setChecked(true);
             updateStatusText("AI is thinking...", true);
             Timber.d("ModernGameFragment: UI updated to show calculation in progress");
