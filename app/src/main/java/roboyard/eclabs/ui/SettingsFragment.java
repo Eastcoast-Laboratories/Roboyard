@@ -2,6 +2,7 @@ package roboyard.eclabs.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -450,6 +452,32 @@ public class SettingsFragment extends Fragment {
     }
     
     /**
+     * Shows a message about enabling TalkBack in Android settings
+     * with a button to open the accessibility settings
+     */
+    private void showTalkBackMessage() {
+        // Create an AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Enable TalkBack");
+        builder.setMessage("To enable the accessibility mode, you have to enable TalkBack in your device settings.");
+        
+        // Add a button to open Android accessibility settings
+        builder.setPositiveButton("Open Settings", (dialog, which) -> {
+            // Open Android's accessibility settings
+            Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            startActivity(intent);
+        });
+        
+        // Add a cancel button
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        
+        // Show the dialog
+        builder.create().show();
+    }
+    
+    /**
      * Set up UI event listeners
      */
     private void setupListeners() {
@@ -578,6 +606,34 @@ public class SettingsFragment extends Fragment {
             
             // Save accessibility mode setting
             Preferences.setAccessibilityMode(accessibilityEnabled);
+            
+            // If accessibility mode is enabled, automatically set recommended settings
+            if (accessibilityEnabled) {
+                // Set board size to 8x8
+                Preferences.setBoardSize(8, 8);
+                for (int i = 0; i < validBoardSizes.size(); i++) {
+                    int[] size = validBoardSizes.get(i);
+                    if (size[0] == 8 && size[1] == 8) {
+                        boardSizeSpinner.setSelection(i);
+                        break;
+                    }
+                }
+                
+                // Set difficulty to Beginner
+                Preferences.setDifficulty(Constants.DIFFICULTY_BEGINNER);
+                difficultyRadioGroup.check(R.id.difficulty_beginner);
+                
+                // Set "New Map Each Time" to "No" (preserve walls)
+                Preferences.setGenerateNewMapEachTime(false);
+                newMapRadioGroup.check(R.id.new_map_no);
+                
+                // Set target colors to 1
+                Preferences.setTargetColors(1);
+                targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
+                
+                // Show message about TalkBack
+                showTalkBackMessage();
+            }
         });
         
         // Back button
