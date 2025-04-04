@@ -469,6 +469,29 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.d("[HINT_SYSTEM] Already at last hint, can't go further");
             }
         });
+        
+        // Set up optimal moves button to also act as a next hint button
+        optimalMovesButton.setOnClickListener(v -> {
+            Timber.d("[HINT_SYSTEM] Optimal moves button clicked for next hint");
+            // Only show next hint if the hint container is visible
+            if (hintContainer.getVisibility() == View.VISIBLE && hintButton.isChecked()) {
+                showNextHint();
+            }
+        });
+        
+        // Set up unique map ID text view to also act as a next hint button
+        uniqueMapIdTextView.setOnClickListener(v -> {
+            Timber.d("[HINT_SYSTEM] Unique map ID text view clicked for next hint");
+            // Only show next hint if the hint container is visible
+            if (hintContainer.getVisibility() == View.VISIBLE && hintButton.isChecked()) {
+                showNextHint();
+            }
+        });
+        
+        // Make the unique map ID text view clickable
+        uniqueMapIdTextView.setClickable(true);
+        uniqueMapIdTextView.setFocusable(true);
+        uniqueMapIdTextView.setBackgroundResource(android.R.drawable.list_selector_background);
     }
     
     /**
@@ -1895,6 +1918,45 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
+     * Shows the next hint in the sequence
+     */
+    private void showNextHint() {
+        Timber.d("[HINT_SYSTEM] Showing next hint");
+        GameSolution solution = gameStateManager.getCurrentSolution();
+        if (solution == null || solution.getMoves().isEmpty()) {
+            Timber.d("[HINT_SYSTEM] No solution available for next hint");
+            return;
+        }
+        
+        int totalMoves = solution.getMoves().size();
+        totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
+        
+        // Increment hint step if possible
+        if (currentHintStep < totalPossibleHints - 1) {
+            currentHintStep++;
+            Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
+            GameState currentGameState = gameStateManager.getCurrentState().getValue();
+            
+            // Show the appropriate hint
+            if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                showPreHint(solution, totalMoves, currentHintStep);
+            } else {
+                int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+            }
+            
+            // Update the game state manager's current solution step
+            gameStateManager.resetSolutionStep();
+            for (int i = 0; i < currentHintStep; i++) {
+                gameStateManager.incrementSolutionStep();
+            }
+            Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
+        } else {
+            Timber.d("[HINT_SYSTEM] Already at last hint, can't advance further");
+        }
+    }
+    
+    /**
      * Helper method to update the status text with a consistent approach
      * @param message The message to display
      * @param isVisible Whether to make the status text visible
@@ -2022,9 +2084,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Initialize hints variables
         totalPossibleHints = solution.getMoves().size();
         GameState currentState = gameStateManager.getCurrentState().getValue();
-        boolean isLevelGame = currentState != null && currentState.getLevelId() > 0;
-        boolean isFirstTenLevels = isLevelGame && currentState.getLevelId() <= 10;
-        
+        boolean isLevelGame;
+        if (currentState != null && currentState.getLevelId() > 0) {
+            isLevelGame = true;
+        } else {
+            isLevelGame = false;
+        }
+
         Timber.d("[HINT] Game state analysis: currentState=%s, levelId=%d, isLevelGame=%b", 
                 currentState != null ? "present" : "null",
                 currentState != null ? currentState.getLevelId() : -1,
@@ -2034,7 +2100,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (isLevelGame) {
             Timber.d("[HINT] Level game detected - no pre-hints");
             numPreHints = 0; // No pre-hints for level games
-            if (isFirstTenLevels) {
+            if (currentState != null && currentState.getLevelId() <= 10) {
                 // For levels 1-10, allow two normal hints (handled in hint click)
                 hintButton.setEnabled(true);
             } else {
