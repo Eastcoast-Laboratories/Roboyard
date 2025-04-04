@@ -41,7 +41,6 @@ import java.util.concurrent.Executors;
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.ui.GameElement;
-import roboyard.logic.core.GameState;
 import roboyard.eclabs.ui.LevelCompletionData;
 import roboyard.eclabs.ui.LevelCompletionManager;
 import roboyard.eclabs.MapObjects;
@@ -49,8 +48,10 @@ import roboyard.eclabs.R;
 import roboyard.eclabs.util.SolverManager;
 import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.SolutionAnimator;
+import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
+import roboyard.logic.core.WallStorage;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import timber.log.Timber;
@@ -1216,64 +1217,33 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * This keeps the same map but resets robot positions and move counters
      */
     public void resetRobots() {
-        Timber.d("[ROBOTS] resetRobots: Attempting to reset robots to starting positions");
-        
         GameState currentGameState = currentState.getValue();
         if (currentGameState == null) {
-            Timber.e("[ROBOTS] resetRobots: Current game state is null, cannot reset robots");
+            Timber.e("Cannot reset robots: no current game state");
             return;
         }
         
-        try {
-            // Create a copy of the current state for reset
-            GameState resetState = null;
-            try {
-                // Serialize and deserialize for deep copy
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(bos);
-                oos.writeObject(currentGameState);
-                oos.flush();
-                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                ObjectInputStream ois = new ObjectInputStream(bis);
-                resetState = (GameState) ois.readObject();
-                ois.close();
-                Timber.d("[ROBOTS] resetRobots: Successfully created deep copy of current game state");
-            } catch (Exception e) {
-                Timber.e(e, "[ROBOTS] resetRobots: Error creating a deep copy of GameState for reset");
-                return; // Can't proceed without a valid copy
-            }
-            
-            // Reset robot positions by moving them back to original positions
-            Timber.d("[ROBOTS] resetRobots: Calling resetRobotPositions on the game state");
-            resetState.resetRobotPositions();
-            
-            // Reset counters
-            moveCount.setValue(0);
-            squaresMoved.setValue(0);
-            isGameComplete.setValue(false);
-            Timber.d("[ROBOTS] resetRobots: Reset move count, squares moved, and game complete flag");
-            
-            // Clear history
-            int historySize = stateHistory.size();
-            stateHistory.clear();
-            squaresMovedHistory.clear();
-            Timber.d("[ROBOTS] resetRobots: Cleared state history (previous size: %d)", historySize);
-            
-            // Update state
-            currentState.setValue(resetState);
-            Timber.d("[ROBOTS] resetRobots: Updated current state with reset state");
-            
-            // Show a toast notification
-            if (context instanceof Activity) {
-                ((Activity) context).runOnUiThread(() -> {
-                    Toast.makeText(context, "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
-                });
-            }
-            
-            Timber.d("[ROBOTS] resetRobots: Robots successfully reset to starting positions");
-        } catch (Exception e) {
-            Timber.e(e, "[ROBOTS] resetRobots: Error resetting robots");
-        }
+        // Reset robot positions to their starting positions
+        currentGameState.resetRobotPositions();
+        
+        // Reset game statistics
+        moveCount.setValue(0);
+        squaresMoved.setValue(0);
+        isGameComplete.setValue(false);
+        
+        // Clear the state history
+        int historySize = stateHistory.size();
+        stateHistory.clear();
+        squaresMovedHistory.clear();
+        Timber.d("Cleared state history (previous size: %d)", historySize);
+        
+        // Reset the solution step counter
+        resetSolutionStep();
+        
+        // Notify that the game state has changed
+        currentState.setValue(currentGameState);
+        
+        Timber.d("Robots reset to starting positions");
     }
     
     /**
@@ -1632,6 +1602,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private void createValidGame(int width, int height) {
         Timber.d("GameStateManager: createValidGame() called");
         
+        // Update WallStorage with current board size to ensure we're using the right storage
+        WallStorage wallStorage = WallStorage.getInstance();
+        wallStorage.updateCurrentBoardSize();
+        
         // Create a new random game state using static Preferences
         GameState newState = GameState.createRandom();
         Timber.d("GameStateManager: Created new random GameState with robotCount=%d, targetColors=%d", 
@@ -1642,6 +1616,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
+        
+        // Store walls for future use if we're not generating new maps each time
+        if (!Preferences.generateNewMapEachTime) {
+            wallStorage.storeWalls(newState.getGridElements());
+            Timber.d("[WALL STORAGE] Stored walls for future use after creating new game");
+        }
         
         // Clear the state history
         stateHistory.clear();

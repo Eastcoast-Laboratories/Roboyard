@@ -129,7 +129,7 @@
                 android:text="New Map Each Time:"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#000000"
+                android:textColor="#ffffff"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
@@ -150,9 +150,8 @@
                     android:focusable="true"
                     android:clickable="true"
                     android:contentDescription="Generate new map each time"
-                    
-                    android:textColor="#000000"
-                    android:buttonTint="#000000"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"
                     />
 
                 <RadioButton
@@ -164,9 +163,8 @@
                     android:focusable="true"
                     android:clickable="true"
                     android:contentDescription="Don't generate new map each time"
-                    
-                    android:textColor="#000000"
-                    android:buttonTint="#000000"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"
                     />
             </RadioGroup>
 
@@ -273,7 +271,7 @@
                 android:text="Accessibility Mode:"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#000000"
+                android:textColor="#333333"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
@@ -295,8 +293,8 @@
                     android:layout_marginEnd="32dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:textColor="#000000"
-                    android:buttonTint="#000000"
+                    android:textColor="#333333"
+                    android:buttonTint="#333333"
                     android:contentDescription="Enable accessibility mode" />
 
                 <RadioButton
@@ -307,8 +305,8 @@
                     android:textSize="16sp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:textColor="#000000"
-                    android:buttonTint="#000000"
+                    android:textColor="#333333"
+                    android:buttonTint="#333333"
                     android:contentDescription="Disable accessibility mode" />
             </RadioGroup>
 

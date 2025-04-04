@@ -44,12 +44,16 @@ public class Preferences {
     public static int difficulty;
     public static int boardSizeWidth;
     public static int boardSizeHeight;
-    public static boolean generateNewMap;
+    public static boolean generateNewMapEachTime;
     public static boolean accessibilityMode;
     
     // For compatibility with existing code
     public static int boardSizeX;
     public static int boardSizeY;
+    public static boolean generateNewMap;
+    
+    // Application context for accessing SharedPreferences
+    private static Context applicationContext;
     
     // Listener for preference changes
     private static PreferenceChangeListener preferenceChangeListener;
@@ -70,29 +74,54 @@ public class Preferences {
     }
     
     /**
+     * Set the application context for accessing SharedPreferences
+     * @param context Application context
+     */
+    public static void setContext(Context context) {
+        if (context != null) {
+            applicationContext = context.getApplicationContext();
+            Timber.d("Application context set for Preferences");
+        }
+    }
+    
+    /**
+     * Get the application context
+     * @return Application context or null if not set
+     */
+    public static Context getContext() {
+        return applicationContext;
+    }
+    
+    /**
      * Initialize the Preferences system. Must be called at app start.
      * @param context Application context
      */
     public static void initialize(Context context) {
         if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null");
+            Timber.e("Cannot initialize Preferences with null context");
+            return;
         }
         
-        // Always use the application context to avoid memory leaks
-        Context appContext = context.getApplicationContext();
+        // Store the application context for later use
+        setContext(context);
         
-        // Get the shared preferences instance
-        prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        
-        // Load all cached values from SharedPreferences
-        loadCachedValues();
-        
-        Timber.d("[PREFERENCES] Initialized with robotCount: %d, targetColors: %d, boardSize: %dx%d, sound: %b, difficulty: %d", 
-                robotCount, targetColors, boardSizeWidth, boardSizeHeight, soundEnabled, difficulty);
-        
-        // Debug: List all preferences in the file
-        Map<String, ?> allPrefs = prefs.getAll();
-        Timber.d("[PREFERENCES] All preferences in %s: %s", PREFS_NAME, allPrefs.toString());
+        try {
+            // Get the app's shared preferences
+            prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            
+            // Load all preferences
+            loadCachedValues();
+            
+            // For compatibility with existing code
+            boardSizeX = boardSizeWidth;
+            boardSizeY = boardSizeHeight;
+            
+            Timber.d("Preferences initialized successfully");
+        } catch (Exception e) {
+            Timber.e(e, "Error initializing preferences");
+            // Use defaults if there's an error
+            resetToDefaults();
+        }
     }
     
     /**
@@ -155,11 +184,11 @@ public class Preferences {
             }
             
             try {
-                generateNewMap = prefs.getBoolean(KEY_GENERATE_NEW_MAP, DEFAULT_GENERATE_NEW_MAP);
+                generateNewMapEachTime = prefs.getBoolean(KEY_GENERATE_NEW_MAP, DEFAULT_GENERATE_NEW_MAP);
             } catch (ClassCastException e) {
                 Timber.e("[PREFERENCES] Error loading generate new map: %s", e.getMessage());
                 prefs.edit().remove(KEY_GENERATE_NEW_MAP).apply();
-                generateNewMap = DEFAULT_GENERATE_NEW_MAP;
+                generateNewMapEachTime = DEFAULT_GENERATE_NEW_MAP;
             }
             
             try {
@@ -198,7 +227,7 @@ public class Preferences {
         boardSizeHeight = DEFAULT_BOARD_SIZE_HEIGHT;
         boardSizeX = boardSizeWidth;
         boardSizeY = boardSizeHeight;
-        generateNewMap = DEFAULT_GENERATE_NEW_MAP;
+        generateNewMapEachTime = DEFAULT_GENERATE_NEW_MAP;
         accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
         
         // Clear all preferences
@@ -396,34 +425,58 @@ public class Preferences {
     }
     
     /**
-     * Set whether to generate a new map each time and save to preferences
-     * @param generateNewMap Whether to generate a new map each time
+     * Set whether to generate a new map each time
+     * @param generateNewMapEachTime Whether to generate a new map each time
      */
-    public static void setGenerateNewMap(boolean generateNewMap) {
+    public static void setGenerateNewMapEachTime(boolean generateNewMapEachTime) {
+        if (prefs == null) {
+            Timber.e("[PREFERENCES] Cannot save preference: SharedPreferences not initialized");
+            return;
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_GENERATE_NEW_MAP, generateNewMapEachTime);
+        
+        // Apply changes asynchronously
+        editor.apply();
+        
+        // Update cached value
+        Preferences.generateNewMapEachTime = generateNewMapEachTime;
+        // For compatibility with existing code
+        Preferences.generateNewMap = generateNewMapEachTime;
+        
+        Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime);
+    }
+    
+    /**
+     * Set whether to generate a new map each time and save to preferences
+     * @param generateNewMapEachTime Whether to generate a new map each time
+     */
+    public static void setgenerateNewMapEachTime(boolean generateNewMapEachTime) {
         // Ensure preferences are initialized
         if (prefs == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setGenerateNewMap, attempting to initialize");
+            Timber.w("[PREFERENCES] SharedPreferences is null in setgenerateNewMapEachTime, attempting to initialize");
             if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
                 initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
-                Preferences.generateNewMap = generateNewMap;
+                Preferences.generateNewMapEachTime = generateNewMapEachTime;
                 return;
             }
         }
         
         // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(KEY_GENERATE_NEW_MAP, generateNewMap);
+        editor.putBoolean(KEY_GENERATE_NEW_MAP, generateNewMapEachTime);
         editor.apply();
         
         // Update static field
-        Preferences.generateNewMap = generateNewMap;
+        Preferences.generateNewMapEachTime = generateNewMapEachTime;
         
         // Notify listeners
         notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMap);
+        Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime);
     }
     
     /**
@@ -500,7 +553,7 @@ public class Preferences {
                 return String.valueOf(boardSizeHeight);
             case "newMapEachTime":
                 mappedKey = KEY_GENERATE_NEW_MAP;
-                return generateNewMap ? "true" : "false";
+                return generateNewMapEachTime ? "true" : "false";
             case "accessibilityMode":
                 mappedKey = KEY_ACCESSIBILITY_MODE;
                 return accessibilityMode ? "true" : "false";
@@ -566,7 +619,7 @@ public class Preferences {
                 }
                 return;
             case "newMapEachTime":
-                setGenerateNewMap(value.equals("true"));
+                setgenerateNewMapEachTime(value.equals("true"));
                 return;
             case "accessibilityMode":
                 setAccessibilityMode(value.equals("true"));

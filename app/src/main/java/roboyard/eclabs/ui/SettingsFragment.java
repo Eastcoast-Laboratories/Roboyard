@@ -25,6 +25,7 @@ import java.util.List;
 import roboyard.eclabs.R;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
+import roboyard.logic.core.WallStorage;
 import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
@@ -286,7 +287,7 @@ public class SettingsFragment extends Fragment {
         }
         
         // Generate new map radio buttons
-        if (Preferences.generateNewMap) {
+        if (Preferences.generateNewMapEachTime) {
             newMapRadioGroup.check(R.id.new_map_yes);
         } else {
             newMapRadioGroup.check(R.id.new_map_no);
@@ -413,7 +414,21 @@ public class SettingsFragment extends Fragment {
     private void setGenerateNewMapEachTimeSetting(boolean value) {
         // Since we can't directly access the field, use GridGameView helper method
         // which has package access to MapGenerator
-        Preferences.setGenerateNewMap(value);
+        
+        // Get the previous value to detect changes
+        boolean previousValue = Preferences.generateNewMapEachTime;
+        
+        // Update the preference
+        Preferences.setGenerateNewMapEachTime(value);
+        
+        // If toggling from off to on (false to true), clear the wall storage for current board size
+        if (value && !previousValue) {
+            Timber.d("[WALL STORAGE] Toggling from 'preserve walls' to 'new map each time', clearing wall storage for current board size");
+            // Make sure WallStorage knows the current board size before clearing
+            WallStorage wallStorage = WallStorage.getInstance();
+            wallStorage.updateCurrentBoardSize();
+            wallStorage.clearStoredWalls();
+        }
     }
     
     /**
@@ -541,13 +556,13 @@ public class SettingsFragment extends Fragment {
         
         // New map radio group
         newMapRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            boolean generateNewMap = checkedId == R.id.new_map_yes;
+            boolean generateNewMapEachTime = checkedId == R.id.new_map_yes;
             
             // Save new map setting
-            Preferences.setGenerateNewMap(generateNewMap);
+            Preferences.setGenerateNewMapEachTime(generateNewMapEachTime);
             
             // Update MapGenerator using our helper method
-            setGenerateNewMapEachTimeSetting(generateNewMap);
+            setGenerateNewMapEachTimeSetting(generateNewMapEachTime);
         });
         
         // Sound radio group

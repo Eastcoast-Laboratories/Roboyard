@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import timber.log.Timber;
+import roboyard.logic.core.WallStorage;
 
 /**
  * Created by Alain on 04/02/2015.
@@ -101,7 +102,7 @@ public class MapGenerator {
         gameLogic = new GameLogic(MainActivity.getBoardWidth(), MainActivity.getBoardHeight(), level);
         
         // Synchronize with GameLogic's static setting
-        GameLogic.setGenerateNewMapEachTime(generateNewMapEachTime);
+        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
         
         Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
     }
@@ -155,7 +156,7 @@ public class MapGenerator {
     /**
      * gets the value of generateNewMapEachTime
      */
-    public static boolean getGenerateNewMapEachTime() {
+    public static boolean getgenerateNewMapEachTime() {
         return generateNewMapEachTime;
     }
 
@@ -182,15 +183,47 @@ public class MapGenerator {
     public ArrayList<GridElement> getGeneratedGameMap() {
         // We'll check the latest value of generateNewMapEachTime from our static variable
         // which is already set by SettingsGameScreen when preferences are changed
-        Timber.d("Using generateNewMapEachTime: %s", generateNewMapEachTime);
+        Timber.d("[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s", generateNewMapEachTime);
         
         ArrayList<GridElement> data = GridGameView.getMap();
         
         // Synchronize static settings with GameLogic
-        GameLogic.setGenerateNewMapEachTime(generateNewMapEachTime);
+        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
         
-        // Delegate the map generation to GameLogic
-        data = gameLogic.generateGameMap(data);
+        // Check if we should preserve walls
+        WallStorage wallStorage = WallStorage.getInstance();
+        // Update board size to ensure we're using the right storage
+        wallStorage.updateCurrentBoardSize();
+        
+        boolean preserveWalls = !Preferences.generateNewMapEachTime && wallStorage.hasStoredWalls();
+        Timber.d("[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s, Preserving walls: %s, hasStoredWalls: %s", 
+                Preferences.generateNewMapEachTime, preserveWalls, wallStorage.hasStoredWalls());
+        
+        if (preserveWalls) {
+            Timber.d("Preserving walls from stored configuration");
+            // Remove game elements (robots and targets) but keep walls
+            if (data != null && !data.isEmpty()) {
+                data = removeGameElementsFromMap(data);
+                
+                // Apply stored walls to the map
+                data = wallStorage.applyWallsToElements(data);
+            } else {
+                // If no existing map, use the stored walls
+                data = new ArrayList<>(wallStorage.getStoredWalls());
+            }
+            
+            // Delegate to GameLogic to add robots and targets
+            data = gameLogic.addGameElementsToGameMap(data, null, null);
+        } else {
+            // Generate a completely new map
+            data = gameLogic.generateGameMap(data);
+            
+            // Store the walls for future use if we're not generating new maps each time
+            if (!Preferences.generateNewMapEachTime) {
+                wallStorage.storeWalls(data);
+                Timber.d("Stored walls for future use");
+            }
+        }
         
         // Store the map for future use
         GridGameView.setMap(data);

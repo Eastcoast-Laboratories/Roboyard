@@ -814,7 +814,7 @@ public class GameState implements Serializable {
                         } else if ("V".equals(wallType)) {
                             state.addVerticalWall(x, y);
                             wallsAdded++;
-                            Timber.d("Added vertical wall at (%d,%d) from WALLS section", x, y);
+                            // Timber.d("Added vertical wall at (%d,%d) from WALLS section", x, y);
                         }
                     }
                     continue;
@@ -858,16 +858,16 @@ public class GameState implements Serializable {
                                 }
                             } else {
                                 int cellType = Integer.parseInt(cellData);
-                                Timber.d("Found cell at (%d,%d) with type %d", x, boardLine, cellType);
+                                // Timber.d("Found cell at (%d,%d) with type %d", x, boardLine, cellType);
                                 
                                 if (cellType == Constants.TYPE_HORIZONTAL_WALL) {
                                     state.addHorizontalWall(x, boardLine);
                                     wallsAdded++;
-                                    Timber.d("Added horizontal wall at (%d,%d)", x, boardLine);
+                                    // Timber.d("Added horizontal wall at (%d,%d)", x, boardLine);
                                 } else if (cellType == Constants.TYPE_VERTICAL_WALL) {
                                     state.addVerticalWall(x, boardLine);
                                     wallsAdded++;
-                                    Timber.d("Added vertical wall at (%d,%d)", x, boardLine);
+                                    // Timber.d("Added vertical wall at (%d,%d)", x, boardLine);
                                 } else if (cellType == Constants.TYPE_EMPTY) {
                                     // Empty cell, nothing to do
                                 } else if (cellType != Constants.TYPE_TARGET && cellType != Constants.TYPE_ROBOT) {
@@ -1175,7 +1175,7 @@ public class GameState implements Serializable {
                 }
                 
                 saveData.append(",");
-                Timber.d("Serializing cell at (%d,%d) with type %d", x, y, cellType);
+                // Timber.d("Serializing cell at (%d,%d) with type %d", x, y, cellType);
             }
             saveData.append("\n");
         }
@@ -1187,7 +1187,7 @@ public class GameState implements Serializable {
             for (int x = 0; x < width; x++) {
                 if (hasHorizontalWall(x, y)) {
                     saveData.append("H,").append(x).append(",").append(y).append("\n");
-                    Timber.d("Serializing horizontal wall at (%d,%d)", x, y);
+                    // Timber.d("Serializing horizontal wall at (%d,%d)", x, y);
                 }
             }
         }
@@ -1196,7 +1196,7 @@ public class GameState implements Serializable {
             for (int x = 0; x < width; x++) {
                 if (hasVerticalWall(x, y)) {
                     saveData.append("V,").append(x).append(",").append(y).append("\n");
-                    Timber.d("Serializing vertical wall at (%d,%d)", x, y);
+                    // Timber.d("Serializing vertical wall at (%d,%d)", x, y);
                 }
             }
         }
@@ -1216,8 +1216,7 @@ public class GameState implements Serializable {
             saveData.append(position[0]).append(",")
                    .append(position[1]).append(",")
                    .append(robotColor).append("\n");
-            Timber.d("Serializing initial position for robot color %d at (%d, %d)", 
-                    robotColor, position[0], position[1]);
+            // Timber.d("Serializing initial position for robot color %d at (%d, %d)", robotColor, position[0], position[1]);
         }
         
         // Add current robot positions as INITIAL_POSITIONS section for reference
@@ -1229,8 +1228,7 @@ public class GameState implements Serializable {
             saveData.append(position[0]).append(",")
                    .append(position[1]).append(",")
                    .append(robotColor).append("\n");
-            Timber.d("Serializing initial position for robot color %d at (%d, %d)", 
-                    robotColor, position[0], position[1]);
+            // Timber.d("Serializing initial position for robot color %d at (%d, %d)", robotColor, position[0], position[1]);
         }
         
         return saveData.toString();

@@ -95,10 +95,10 @@ public class WallModel {
         for (GameElement element : elements) {
             if (element.getType() == Constants.TYPE_HORIZONTAL_WALL) {
                 model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL);
-                Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
+                // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
             } else if (element.getType() == Constants.TYPE_VERTICAL_WALL) {
                 model.addWall(element.getX(), element.getY(), WallType.VERTICAL);
-                Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
+                // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
             }
         }
         
@@ -121,10 +121,10 @@ public class WallModel {
             String type = element.getType();
             if ("mh".equals(type)) {
                 model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL);
-                Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
+                // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
             } else if ("mv".equals(type)) {
                 model.addWall(element.getX(), element.getY(), WallType.VERTICAL);
-                Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
+                // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
             }
         }
         
