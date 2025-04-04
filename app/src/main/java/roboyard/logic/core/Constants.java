@@ -56,11 +56,18 @@ public class Constants {
     public static final int DIFFICULTY_IMPOSSIBLE = 3;
 
     // Color constants
-    public static final int COLOR_RED = 0;
+    public static final int COLOR_PINK = 0;
     public static final int COLOR_GREEN = 1;
     public static final int COLOR_BLUE = 2;
     public static final int COLOR_YELLOW = 3;
-    public static final int COLOR_SILVER = 5; // 4 is already taken for the multi target
+    public static final int COLOR_SILVER = 4;
+    public static final int COLOR_RED = 5;
+    public static final int COLOR_BROWN = 6;
+    public static final int COLOR_ORANGE = 7;
+    public static final int COLOR_WHITE = 8;
+    public static final int COLOR_MULTI = 9; // the multi target
+
+    public static final int NUM_ROBOTS = 4; // number of robots
     
     // File and directory paths
     public static final String SAVE_DIRECTORY = "saves";

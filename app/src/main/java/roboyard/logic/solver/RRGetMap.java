@@ -9,11 +9,9 @@ import roboyard.ui.activities.MainActivity;
 import android.graphics.Color;
 
 import driftingdroids.model.Board;
-import roboyard.eclabs.*;
 import timber.log.Timber;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -72,15 +70,16 @@ public class RRGetMap {
         colors2.put("robot_blue", Color.BLUE);
         colors2.put("robot_green", Color.GREEN);
         colors2.put("robot_yellow", Color.YELLOW);
+        colors2.put("robot_silver", Color.GRAY);
 
         // Robot and target indices for game logic
         // Using Constants class values
-        colors.put("robot_red", Constants.COLOR_RED);        // Constants.COLOR_RED
+        colors.put("robot_red", Constants.COLOR_PINK);       // Constants.COLOR_PINK
         colors.put("robot_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
         colors.put("robot_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
         colors.put("robot_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW
 
-        colors.put("target_red", Constants.COLOR_RED);        // Constants.COLOR_RED
+        colors.put("target_red", Constants.COLOR_PINK);       // Constants.COLOR_PINK
         colors.put("target_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
         colors.put("target_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
         colors.put("target_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW

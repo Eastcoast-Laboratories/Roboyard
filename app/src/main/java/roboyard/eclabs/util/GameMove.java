@@ -10,7 +10,7 @@ import roboyard.logic.core.Constants;
  */
 public class GameMove {
     // Robot identifiers
-    public static final int ROBOT_RED = Constants.COLOR_RED;
+    public static final int ROBOT_PINK = Constants.COLOR_PINK;
     public static final int ROBOT_GREEN = Constants.COLOR_GREEN;
     public static final int ROBOT_BLUE = Constants.COLOR_BLUE;
     public static final int ROBOT_YELLOW = Constants.COLOR_YELLOW;
@@ -184,7 +184,7 @@ public class GameMove {
     public String toString() {
         String robotName = "";
         switch (robotId) {
-            case ROBOT_RED:
+            case ROBOT_PINK:
                 robotName = "Red";
                 break;
             case ROBOT_GREEN:

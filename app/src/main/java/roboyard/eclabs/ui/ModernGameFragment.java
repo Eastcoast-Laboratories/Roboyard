@@ -1515,7 +1515,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[HINT_DEBUG] getRobotColorName called with ID: %d", robotId);
         
         switch (robotId) {
-            case Constants.COLOR_RED: return "Red";
+            case Constants.COLOR_PINK: return "Pink";
             case Constants.COLOR_GREEN: return "Green";
             case Constants.COLOR_BLUE: return "Blue";
             case Constants.COLOR_YELLOW: return "Yellow";
