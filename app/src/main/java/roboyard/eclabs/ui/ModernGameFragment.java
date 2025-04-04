@@ -54,7 +54,8 @@ import roboyard.logic.core.Preferences;
  * the layout is defined in the xml file app/src/main/res/layout/fragment_modern_game.xml
  */
 public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
-    
+
+    private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10
     private GameGridView gameGridView;
     private TextView moveCountTextView;
     private TextView squaresMovedTextView;
@@ -447,8 +448,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // For level games 1-10, limit to only 2 hints
             if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
                 // Limit to only the first two hints for levels 1-10
-                if (currentHintStep >= 2) {
-                    Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (2) for status text view");
+                if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
+                    Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for status text view", MAX_HINTS_UP_TO_LEVEL_10);
                     return;
                 }
             }
@@ -502,8 +503,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // For level games 1-10, limit to only 2 hints
                 if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
                     // Limit to only the first two hints for levels 1-10
-                    if (currentHintStep >= 2) {
-                        Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (2) for optimal moves button");
+                    if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
+                        Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for optimal moves button", MAX_HINTS_UP_TO_LEVEL_10);
                         return;
                     }
                 }
