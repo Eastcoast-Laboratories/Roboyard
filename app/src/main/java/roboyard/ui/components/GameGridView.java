@@ -83,6 +83,7 @@ public class GameGridView extends View {
     
     // Grid background
     private Drawable gridTileDrawable; 
+    private int[][] tileRotations; // Store rotation angle for each tile
     private Drawable backgroundLogo; // Background logo
     private Fragment fragment; // Parent fragment
     
@@ -186,6 +187,9 @@ public class GameGridView extends View {
             Timber.e("Failed to load Roboyard logo drawable");
         }
         
+        // Initialize tile rotations with random values (0, 90, 180, 270 degrees)
+        initializeTileRotations();
+        
         // Set up accessibility support
         setFocusable(true);
         setClickable(true);
@@ -206,6 +210,22 @@ public class GameGridView extends View {
                 event.setClassName(GameGridView.class.getName());
             }
         });
+    }
+    
+    /**
+     * Initialize tile rotations with random values
+     */
+    private void initializeTileRotations() {
+        // Only initialize if not already initialized or if dimensions have changed
+        if (tileRotations == null || tileRotations.length != gridWidth || tileRotations[0].length != gridHeight) {
+            tileRotations = new int[gridWidth][gridHeight];
+            for (int i = 0; i < gridWidth; i++) {
+                for (int j = 0; j < gridHeight; j++) {
+                    tileRotations[i][j] = (int) (Math.random() * 4) * 90; // Random rotation (0, 90, 180, 270 degrees)
+                }
+            }
+            Timber.d("Initialized tile rotations for %dx%d grid", gridWidth, gridHeight);
+        }
     }
     
     /**
@@ -462,10 +482,8 @@ public class GameGridView extends View {
         // Calculate offsets to center the board
         float boardWidth = gridWidth * cellSize;
         float boardHeight = gridHeight * cellSize;
-        float canvasWidth = getWidth();
-        float canvasHeight = getHeight();
-        float offsetX = (canvasWidth - boardWidth) / 2;
-        float offsetY = (canvasHeight - boardHeight) / 2;
+        float offsetX = (getWidth() - boardWidth) / 2;
+        float offsetY = (getHeight() - boardHeight) / 2;
         
         // Draw grid cells - board background first
         for (int y = 0; y < gridHeight; y++) {
@@ -477,8 +495,28 @@ public class GameGridView extends View {
                 
                 // Draw grid tile background
                 if (gridTileDrawable != null) {
+                    // Save the canvas state before rotating
+                    canvas.save();
+                    
+                    // Calculate the center point of the tile
+                    float centerX = left + cellSize / 2;
+                    float centerY = top + cellSize / 2;
+                    
+                    // Safely get rotation angle - ensure we don't access out of bounds
+                    int rotationAngle = 0;
+                    if (tileRotations != null && x < tileRotations.length && y < tileRotations[0].length) {
+                        rotationAngle = tileRotations[x][y];
+                    }
+                    
+                    // Rotate the canvas around the center point of the tile
+                    canvas.rotate(rotationAngle, centerX, centerY);
+                    
+                    // Set bounds and draw the rotated tile
                     gridTileDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
                     gridTileDrawable.draw(canvas);
+                    
+                    // Restore the canvas to its original state
+                    canvas.restore();
                 } else {
                     // Fallback to colored background if drawable is not available
                     cellPaint.setColor(Color.rgb(30, 30, 60));
@@ -1188,15 +1226,28 @@ public class GameGridView extends View {
      * @param gridElements List of grid elements to display
      */
     public void setGridElements(ArrayList<GridElement> gridElements) {
-        if (gameStateManager == null || gameStateManager.getCurrentState().getValue() == null) {
+        if (gridElements == null || gridElements.isEmpty()) {
             return;
         }
         
-        GameState state = gameStateManager.getCurrentState().getValue();
+        // Find the maximum x and y values to determine grid dimensions
+        int maxX = 0;
+        int maxY = 0;
+        for (GridElement element : gridElements) {
+            maxX = Math.max(maxX, element.getX());
+            maxY = Math.max(maxY, element.getY());
+        }
         
-        // Update the grid dimensions
-        gridWidth = state.getWidth();
-        gridHeight = state.getHeight();
+        // Update grid dimensions if needed
+        boolean dimensionsChanged = (maxX + 1 != gridWidth) || (maxY + 1 != gridHeight);
+        if (dimensionsChanged) {
+            gridWidth = maxX + 1;
+            gridHeight = maxY + 1;
+            Timber.d("Grid dimensions updated to %dx%d", gridWidth, gridHeight);
+            
+            // Re-initialize tile rotations for the new dimensions
+            initializeTileRotations();
+        }
         
         // Force redraw
         invalidate();
