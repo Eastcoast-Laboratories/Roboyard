@@ -23,6 +23,7 @@ import java.util.HashMap;
 import roboyard.eclabs.R;
 import roboyard.eclabs.ui.GameElement;
 import roboyard.eclabs.ui.ModernGameFragment;
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import timber.log.Timber;
@@ -32,6 +33,11 @@ import timber.log.Timber;
  * Provides proper accessibility support for TalkBack.
  */
 public class GameGridView extends View {
+    // Configuration constants for robot paths
+    private static final int PATH_STROKE_WIDTH = 6; // Width of the robot path lines
+    private static final float BASE_ROBOT_OFFSET_RANGE = 25.0f; // Maximum random offset in pixels (will be -range to +range)
+    private static final float PERPENDICULAR_OFFSET_STEP = 2.0f; // Pixels to offset per repeated traversal
+
     private GameStateManager gameStateManager;
     private Paint cellPaint;
     private Paint robotPaint;
@@ -51,6 +57,8 @@ public class GameGridView extends View {
     
     // Track robot movement paths
     private final HashMap<Integer, ArrayList<int[]>> robotPaths = new HashMap<>(); // Map robot color to list of positions [x,y]
+    private final HashMap<Integer, float[]> robotBaseOffsets = new HashMap<>(); // Base offset for each robot
+    private final HashMap<Integer, HashMap<String, Integer>> segmentCounts = new HashMap<>(); // Track segment traversal count
     
     // Robot drawables for each color
     private Drawable pinkRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight;
@@ -134,7 +142,6 @@ public class GameGridView extends View {
      */
     private void init(Context context) {
         // Initialize paints
-        int strokeWidth = 6;
         cellPaint = new Paint();
         cellPaint.setStyle(Paint.Style.FILL);
         cellPaint.setAntiAlias(true);
@@ -155,32 +162,37 @@ public class GameGridView extends View {
         
         gridPaint = new Paint();
         gridPaint.setStyle(Paint.Style.STROKE);
-        gridPaint.setStrokeWidth(strokeWidth);
+        gridPaint.setStrokeWidth(1);
         
-        pathPaints = new Paint[4];
-        pathPaints[0] = new Paint(); // Pink
-        pathPaints[0].setStyle(Paint.Style.STROKE);
-        pathPaints[0].setStrokeWidth(strokeWidth);
-        pathPaints[0].setColor(Color.argb(128, 255, 0, 0)); // Pink with 50% alpha
-        pathPaints[0].setAntiAlias(true);
+        // Initialize path paints for all robot colors
+        pathPaints = new Paint[10]; // Support up to COLOR_MULTI + 1
         
-        pathPaints[1] = new Paint(); // Green
-        pathPaints[1].setStyle(Paint.Style.STROKE);
-        pathPaints[1].setStrokeWidth(strokeWidth);
-        pathPaints[1].setColor(Color.argb(128, 0, 177, 0)); // Green with 50% alpha
-        pathPaints[1].setAntiAlias(true);
+        // PINK robot
+        pathPaints[Constants.COLOR_PINK] = createPathPaint(Color.rgb(255, 105, 180)); // Pink
         
-        pathPaints[2] = new Paint(); // Blue
-        pathPaints[2].setStyle(Paint.Style.STROKE);
-        pathPaints[2].setStrokeWidth(strokeWidth);
-        pathPaints[2].setColor(Color.argb(128, 0, 0, 255)); // Blue with 50% alpha
-        pathPaints[2].setAntiAlias(true);
+        // GREEN robot
+        pathPaints[Constants.COLOR_GREEN] = createPathPaint(Color.rgb(0, 177, 0)); // Green
         
-        pathPaints[3] = new Paint(); // Yellow
-        pathPaints[3].setStyle(Paint.Style.STROKE);
-        pathPaints[3].setStrokeWidth(strokeWidth);
-        pathPaints[3].setColor(Color.argb(128, 177, 177, 0)); // Yellow with 50% alpha
-        pathPaints[3].setAntiAlias(true);
+        // BLUE robot
+        pathPaints[Constants.COLOR_BLUE] = createPathPaint(Color.rgb(0, 0, 255)); // Blue
+        
+        // YELLOW robot
+        pathPaints[Constants.COLOR_YELLOW] = createPathPaint(Color.rgb(177, 177, 0)); // Yellow
+        
+        // SILVER robot
+        pathPaints[Constants.COLOR_SILVER] = createPathPaint(Color.rgb(192, 192, 192)); // Silver
+        
+        // RED robot
+        pathPaints[Constants.COLOR_RED] = createPathPaint(Color.rgb(177, 0, 0)); // Red
+        
+        // BROWN robot
+        pathPaints[Constants.COLOR_BROWN] = createPathPaint(Color.rgb(165, 42, 42)); // Brown
+        
+        // ORANGE robot
+        pathPaints[Constants.COLOR_ORANGE] = createPathPaint(Color.rgb(177, 165, 0)); // Orange
+        
+        // WHITE robot
+        pathPaints[Constants.COLOR_WHITE] = createPathPaint(Color.rgb(255, 255, 255)); // White
         
         // Load robot drawables
         pinkRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_pink_right);
@@ -240,6 +252,21 @@ public class GameGridView extends View {
                 event.setClassName(GameGridView.class.getName());
             }
         });
+    }
+    
+    /**
+     * Helper method to create path paint with consistent settings
+     * @param color Base color for the path
+     * @return Configured Paint object
+     */
+    private Paint createPathPaint(int color) {
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(PATH_STROKE_WIDTH);
+        paint.setColor(color);
+        paint.setAlpha(128); // 50% transparency
+        paint.setAntiAlias(true);
+        return paint;
     }
     
     /**
@@ -670,21 +697,63 @@ public class GameGridView extends View {
         }
         
         // Draw robot movement paths
-        int offset = 0;
         for (int color : robotPaths.keySet()) {
             ArrayList<int[]> path = robotPaths.get(color);
-            if (path != null && !path.isEmpty()) {
+            HashMap<String, Integer> robotSegments = segmentCounts.get(color);
+            float[] baseOffset = robotBaseOffsets.get(color);
+            
+            if (path != null && !path.isEmpty() && baseOffset != null && color < pathPaints.length && pathPaints[color] != null) {
                 Paint pathPaint = pathPaints[color];
+                
+                // Start from the first point
                 float prevX = offsetX + (path.get(0)[0] * cellSize) + cellSize / 2;
                 float prevY = offsetY + (path.get(0)[1] * cellSize) + cellSize / 2;
                 
                 for (int i = 1; i < path.size(); i++) {
                     int[] pos = path.get(i);
+                    int[] prevPos = path.get(i-1);
+                    
+                    // Calculate center point of the cell
                     float x = offsetX + (pos[0] * cellSize) + cellSize / 2;
                     float y = offsetY + (pos[1] * cellSize) + cellSize / 2;
-
-                    canvas.drawLine(prevX, prevY, x, y, pathPaint);
-                    Timber.d("[ROBOT LINES] Drawing path from (%s, %s) to (%s, %s)", prevX, prevY, x, y);
+                    
+                    // Create segment key to look up traversal count
+                    String segmentKey = prevPos[0] + "," + prevPos[1] + ":" + pos[0] + "," + pos[1];
+                    int count = robotSegments.getOrDefault(segmentKey, 1);
+                    
+                    // Calculate perpendicular direction to the line segment
+                    float dx = x - prevX;
+                    float dy = y - prevY;
+                    float length = (float) Math.sqrt(dx*dx + dy*dy);
+                    
+                    // Avoid division by zero
+                    if (length > 0.001f) {
+                        // Normalize and rotate 90 degrees to get perpendicular direction
+                        float perpX = -dy / length;
+                        float perpY = dx / length;
+                        
+                        // Add perpendicular offset based on traversal count
+                        float perpOffset = (count - 1) * PERPENDICULAR_OFFSET_STEP; // 2 pixels per repeated traversal
+                        
+                        // Apply both base offset and perpendicular offset
+                        canvas.drawLine(
+                            prevX + baseOffset[0] + perpX * perpOffset,
+                            prevY + baseOffset[1] + perpY * perpOffset,
+                            x + baseOffset[0] + perpX * perpOffset,
+                            y + baseOffset[1] + perpY * perpOffset,
+                            pathPaint
+                        );
+                    } else {
+                        // Fallback for zero-length segments
+                        canvas.drawLine(
+                            prevX + baseOffset[0],
+                            prevY + baseOffset[1],
+                            x + baseOffset[0],
+                            y + baseOffset[1],
+                            pathPaint
+                        );
+                    }
+                    
                     prevX = x;
                     prevY = y;
                 }
@@ -1101,12 +1170,30 @@ public class GameGridView extends View {
         
         int color = robot.getColor();
 
-        // Initialize the path list if it doesn't exist
+        // Initialize data structures if they don't exist
         if (!robotPaths.containsKey(color)) {
+            // Generate a consistent base offset for this robot
+            float offsetX = (float) (Math.random() * 2 * BASE_ROBOT_OFFSET_RANGE - BASE_ROBOT_OFFSET_RANGE);
+            float offsetY = (float) (Math.random() * 2 * BASE_ROBOT_OFFSET_RANGE - BASE_ROBOT_OFFSET_RANGE);
+            robotBaseOffsets.put(color, new float[]{offsetX, offsetY});
+            
+            // Initialize path and segment count
             robotPaths.put(color, new ArrayList<>());
+            segmentCounts.put(color, new HashMap<>());
+            
             // Add the starting position
             robotPaths.get(color).add(new int[]{fromX, fromY});
         }
+        
+        // Create a path segment key (direction matters)
+        String segmentKey = fromX + "," + fromY + ":" + toX + "," + toY;
+        
+        // Get the segment count map for this robot
+        HashMap<String, Integer> robotSegments = segmentCounts.get(color);
+        
+        // Update the segment traversal count
+        int count = robotSegments.getOrDefault(segmentKey, 0) + 1;
+        robotSegments.put(segmentKey, count);
         
         // Add the new position to the path
         robotPaths.get(color).add(new int[]{toX, toY});
@@ -1120,6 +1207,8 @@ public class GameGridView extends View {
      */
     public void clearRobotPaths() {
         robotPaths.clear();
+        robotBaseOffsets.clear();
+        segmentCounts.clear();
         invalidate();
     }
     
