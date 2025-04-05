@@ -1495,7 +1495,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (state == null) return;
         
         StringBuilder announcement = new StringBuilder();
-        announcement.append("Game started. ");
         
         // Check if TalkBack is enabled
         if (isTalkBackEnabled()) {
@@ -1558,7 +1557,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         }
         
-        announcement.append("Total robots: ").append(robotCount).append(". ");
+        // announcement.append("Total robots: ").append(robotCount).append(". ");
         
         // Announce targets with concise format
         for (GameElement element : state.getGameElements()) {

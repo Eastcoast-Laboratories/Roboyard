@@ -1714,7 +1714,7 @@ public class GameState implements Serializable {
             if (currentX < nextX) {
                 // Check for vertical walls between current position and target
                 for (int x = currentX; x < nextX; x++) {
-                    if (hasVerticalWall(x, currentY)) {
+                    if (hasVerticalWall(x + 1, currentY)) {
                         return false;
                     }
                 }
@@ -1723,7 +1723,7 @@ public class GameState implements Serializable {
             else if (currentX > nextX) {
                 // Check for vertical walls between current position and target
                 for (int x = nextX; x < currentX; x++) {
-                    if (hasVerticalWall(x, currentY)) {
+                    if (hasVerticalWall(x + 1, currentY)) {
                         return false;
                     }
                 }
@@ -1735,7 +1735,7 @@ public class GameState implements Serializable {
             if (currentY < nextY) {
                 // Check for horizontal walls between current position and target
                 for (int y = currentY; y < nextY; y++) {
-                    if (hasHorizontalWall(currentX, y)) {
+                    if (hasHorizontalWall(currentX, y + 1)) {
                         return false;
                     }
                 }
@@ -1744,7 +1744,7 @@ public class GameState implements Serializable {
             else if (currentY > nextY) {
                 // Check for horizontal walls between current position and target
                 for (int y = nextY; y < currentY; y++) {
-                    if (hasHorizontalWall(currentX, y)) {
+                    if (hasHorizontalWall(currentX, y + 1)) {
                         return false;
                     }
                 }
