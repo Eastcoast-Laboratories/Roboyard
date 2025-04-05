@@ -753,6 +753,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("ModernGameFragment: Reset robots button clicked");
             // Reset the robots
             gameStateManager.resetRobots();
+            
+            // Clear robot movement paths
+            if (gameGridView != null) {
+                gameGridView.clearRobotPaths();
+            }
+            
             Toast.makeText(requireContext(), "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
         });
         

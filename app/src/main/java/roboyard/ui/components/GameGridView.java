@@ -38,6 +38,7 @@ public class GameGridView extends View {
     private Paint targetPaint;
     private Paint textPaint;
     private Paint gridPaint;
+    private Paint[] pathPaints; // Paints for robot movement paths
     private float cellSize;
     
     // Grid dimensions
@@ -48,16 +49,19 @@ public class GameGridView extends View {
     private final int focusedX = -1;
     private final int focusedY = -1;
     
+    // Track robot movement paths
+    private final HashMap<Integer, ArrayList<int[]>> robotPaths = new HashMap<>(); // Map robot color to list of positions [x,y]
+    
     // Robot drawables for each color
-    private Drawable redRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight;
-    private Drawable redRobotLeft, yellowRobotLeft, blueRobotLeft, greenRobotLeft;
+    private Drawable pinkRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight;
+    private Drawable pinkRobotLeft, yellowRobotLeft, blueRobotLeft, greenRobotLeft;
     
     // Wall drawables
     private Drawable wallHorizontal;
     private Drawable wallVertical;
     
     // Target drawables for each color
-    private Drawable targetRedDrawable;     // cr
+    private Drawable targetPinkDrawable;     // cr
     private Drawable targetGreenDrawable;   // cv
     private Drawable targetBlueDrawable;    // cb
     private Drawable targetYellowDrawable;  // cj
@@ -130,6 +134,7 @@ public class GameGridView extends View {
      */
     private void init(Context context) {
         // Initialize paints
+        int strokeWidth = 6;
         cellPaint = new Paint();
         cellPaint.setStyle(Paint.Style.FILL);
         cellPaint.setAntiAlias(true);
@@ -150,15 +155,40 @@ public class GameGridView extends View {
         
         gridPaint = new Paint();
         gridPaint.setStyle(Paint.Style.STROKE);
-        gridPaint.setStrokeWidth(1);
+        gridPaint.setStrokeWidth(strokeWidth);
+        
+        pathPaints = new Paint[4];
+        pathPaints[0] = new Paint(); // Pink
+        pathPaints[0].setStyle(Paint.Style.STROKE);
+        pathPaints[0].setStrokeWidth(strokeWidth);
+        pathPaints[0].setColor(Color.argb(128, 255, 0, 0)); // Pink with 50% alpha
+        pathPaints[0].setAntiAlias(true);
+        
+        pathPaints[1] = new Paint(); // Green
+        pathPaints[1].setStyle(Paint.Style.STROKE);
+        pathPaints[1].setStrokeWidth(strokeWidth);
+        pathPaints[1].setColor(Color.argb(128, 0, 177, 0)); // Green with 50% alpha
+        pathPaints[1].setAntiAlias(true);
+        
+        pathPaints[2] = new Paint(); // Blue
+        pathPaints[2].setStyle(Paint.Style.STROKE);
+        pathPaints[2].setStrokeWidth(strokeWidth);
+        pathPaints[2].setColor(Color.argb(128, 0, 0, 255)); // Blue with 50% alpha
+        pathPaints[2].setAntiAlias(true);
+        
+        pathPaints[3] = new Paint(); // Yellow
+        pathPaints[3].setStyle(Paint.Style.STROKE);
+        pathPaints[3].setStrokeWidth(strokeWidth);
+        pathPaints[3].setColor(Color.argb(128, 177, 177, 0)); // Yellow with 50% alpha
+        pathPaints[3].setAntiAlias(true);
         
         // Load robot drawables
-        redRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_red_right);
+        pinkRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_pink_right);
         yellowRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_yellow_right);
         blueRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_blue_right);
         greenRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_green_right);
         
-        redRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_red_left);
+        pinkRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_pink_left);
         yellowRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_yellow_left);
         blueRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_blue_left);
         greenRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_green_left);
@@ -168,7 +198,7 @@ public class GameGridView extends View {
         wallVertical = ContextCompat.getDrawable(context, R.drawable.mv);
         
         // Load target drawables
-        targetRedDrawable = ContextCompat.getDrawable(context, R.drawable.cr);
+        targetPinkDrawable = ContextCompat.getDrawable(context, R.drawable.cr);
         targetGreenDrawable = ContextCompat.getDrawable(context, R.drawable.cv);
         targetBlueDrawable = ContextCompat.getDrawable(context, R.drawable.cb);
         targetYellowDrawable = ContextCompat.getDrawable(context, R.drawable.cj);
@@ -459,7 +489,7 @@ public class GameGridView extends View {
         }
         
         switch (targetElement.getColor()) {
-            case 0: return targetRedDrawable;
+            case 0: return targetPinkDrawable;
             case 1: return targetGreenDrawable;
             case 2: return targetBlueDrawable;
             case 3: return targetYellowDrawable;
@@ -523,9 +553,9 @@ public class GameGridView extends View {
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
                 
-                // Draw grid lines
-                gridPaint.setColor(Color.rgb(40, 40, 70));
-                canvas.drawRect(left, top, right, bottom, gridPaint);
+                // Draw grid lines (disabled)
+                // gridPaint.setColor(Color.rgb(40, 40, 70));
+                // canvas.drawRect(left, top, right, bottom, gridPaint);
                 
                 // Highlight focused cell for accessibility
                 if (x == focusedX && y == focusedY) {
@@ -615,16 +645,16 @@ public class GameGridView extends View {
             Drawable robotDrawable = null;
             
             switch (color) {
-                case 0: // RED
-                    robotDrawable = redRobotRight;
+                case 0: // Pink
+                    robotDrawable = pinkRobotRight;
                     break;
-                case 1: // GREEN
+                case 1: // Green
                     robotDrawable = greenRobotRight;
                     break;
-                case 2: // BLUE
+                case 2: // Blue
                     robotDrawable = blueRobotRight;
                     break;
-                case 3: // YELLOW
+                case 3: // Yellow
                     robotDrawable = yellowRobotRight;
                     break;
             }
@@ -634,8 +664,30 @@ public class GameGridView extends View {
                 Drawable markerDrawable = robotDrawable.getConstantState().newDrawable().mutate();
                 // Draw robot using drawable
                 markerDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                markerDrawable.setAlpha(76); // Set alpha to 30% for transparency
+                markerDrawable.setAlpha(178); // Set alpha to 70% for transparency
                 markerDrawable.draw(canvas);
+            }
+        }
+        
+        // Draw robot movement paths
+        int offset = 0;
+        for (int color : robotPaths.keySet()) {
+            ArrayList<int[]> path = robotPaths.get(color);
+            if (path != null && !path.isEmpty()) {
+                Paint pathPaint = pathPaints[color];
+                float prevX = offsetX + (path.get(0)[0] * cellSize) + cellSize / 2;
+                float prevY = offsetY + (path.get(0)[1] * cellSize) + cellSize / 2;
+                
+                for (int i = 1; i < path.size(); i++) {
+                    int[] pos = path.get(i);
+                    float x = offsetX + (pos[0] * cellSize) + cellSize / 2;
+                    float y = offsetY + (pos[1] * cellSize) + cellSize / 2;
+
+                    canvas.drawLine(prevX, prevY, x, y, pathPaint);
+                    Timber.d("[ROBOT LINES] Drawing path from (%s, %s) to (%s, %s)", prevX, prevY, x, y);
+                    prevX = x;
+                    prevY = y;
+                }
             }
         }
         
@@ -671,7 +723,7 @@ public class GameGridView extends View {
         
         switch (robot.getColor()) {
             case 0: // RED
-                robotDrawable = redRobotRight;
+                robotDrawable = pinkRobotRight;
                 break;
             case 1: // GREEN
                 robotDrawable = greenRobotRight;
@@ -719,6 +771,7 @@ public class GameGridView extends View {
             
             // Create a copy of the drawable to ensure we don't affect other instances
             Drawable robotDrawableCopy = robotDrawable.getConstantState().newDrawable().mutate();
+            // Draw robot using drawable
             robotDrawableCopy.setBounds(
                 (int) scaledLeft,
                 (int) scaledTop,
@@ -971,6 +1024,9 @@ public class GameGridView extends View {
             animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), DEFAULT_ROBOT_SCALE);
         }
         
+        // Update the robot's path
+        updateRobotPath(selectedRobot, oldX, oldY, selectedRobot.getX(), selectedRobot.getY());
+        
         // Calculate if robot hit a wall or another robot
         boolean hitWall = false;
         boolean hitRobot = false;
@@ -1030,6 +1086,41 @@ public class GameGridView extends View {
             Timber.d("[GOAL DEBUG] Robot moved");
             announceForAccessibility(getRobotDescription(selectedRobot));
         }
+    }
+    
+    /**
+     * Update the robot's movement path
+     * @param robot The robot that moved
+     * @param fromX Starting X position
+     * @param fromY Starting Y position
+     * @param toX Ending X position
+     * @param toY Ending Y position
+     */
+    private void updateRobotPath(GameElement robot, int fromX, int fromY, int toX, int toY) {
+        if (robot == null) return;
+        
+        int color = robot.getColor();
+
+        // Initialize the path list if it doesn't exist
+        if (!robotPaths.containsKey(color)) {
+            robotPaths.put(color, new ArrayList<>());
+            // Add the starting position
+            robotPaths.get(color).add(new int[]{fromX, fromY});
+        }
+        
+        // Add the new position to the path
+        robotPaths.get(color).add(new int[]{toX, toY});
+        
+        // Redraw the view
+        invalidate();
+    }
+    
+    /**
+     * Clear all robot paths
+     */
+    public void clearRobotPaths() {
+        robotPaths.clear();
+        invalidate();
     }
     
     @Override
@@ -1148,10 +1239,15 @@ public class GameGridView extends View {
         if (robot != null) {
             String color = "Unknown";
             switch (robot.getColor()) {
-                case 0: color = "Red"; break;
+                case 0: color = "Pink"; break;
                 case 1: color = "Green"; break;
                 case 2: color = "Blue"; break;
                 case 3: color = "Yellow"; break;
+                case 4: color = "Silver"; break;
+                case 5: color = "Red"; break;
+                case 6: color = "Brown"; break;
+                case 7: color = "Orange"; break;
+                case 8: color = "White"; break;
             }
             description.append(color + " robot. ");
             
@@ -1169,10 +1265,16 @@ public class GameGridView extends View {
             if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
                 String color = "Unknown";
                 switch (element.getColor()) {
-                    case 0: color = "Red"; break;
+                    case 0: color = "Pink"; break;
                     case 1: color = "Green"; break;
                     case 2: color = "Blue"; break;
                     case 3: color = "Yellow"; break;
+                    case 4: color = "Silver"; break;
+                    case 5: color = "Red"; break;
+                    case 6: color = "Brown"; break;
+                    case 7: color = "Orange"; break;
+                    case 8: color = "White"; break;
+                    case 9: color = "Multi-colored"; break;
                     default: color = "Multi-colored";
                 }
                 description.append(color + " goal. ");
