@@ -101,9 +101,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Load available levels
         loadAvailableLevels();
 
-        // Display total stars
+        // Display total stars with format X/420
         if (starsTextView != null) {
-            starsTextView.setText(getString(R.string.stars_count, totalStars));
+            starsTextView.setText(totalStars + "/420");
         }
 
         // Set up adapter
@@ -118,6 +118,14 @@ public class LevelSelectionFragment extends BaseGameFragment {
             Timber.d("Title long pressed, opening Level Design Editor");
             openLevelDesignEditor(0); // Open with new level
             return true;
+        });
+        
+        // Set up back button
+        Button backButton = view.findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> {
+            // Navigate back to the main menu
+            MainMenuFragment menuFragment = new MainMenuFragment();
+            navigateToDirect(menuFragment);
         });
 
         return view;
@@ -164,9 +172,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Update total stars
         totalStars = completionManager.getTotalStars();
 
-        // Update the stars text view
+        // Update the stars text view with format X/420
         if (starsTextView != null) {
-            starsTextView.setText(getString(R.string.stars_count, totalStars));
+            starsTextView.setText(totalStars + "/420");
         }
 
         // Refresh the adapter to update completion stars when returning to this screen
@@ -577,15 +585,15 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 movesText.setText(movesRobots);
                 movesText.setVisibility(View.VISIBLE); // Ensure visibility
 
-                // Format time/fields: "0:12 fields:10"
+                // Format time/squares: "0:12 squares:10"
                 long timeMs = completionData.getTimeNeeded();
                 long seconds = timeMs / 1000;
                 long minutes = seconds / 60;
                 seconds = seconds % 60;
-                String timeFields = String.format("%d:%02d fields:%d", 
+                String timeSquares = String.format("%d:%02d squares:%d", 
                         minutes, seconds, 
                         completionData.getSquaresSurpassed());
-                timeText.setText(timeFields);
+                timeText.setText(timeSquares);
                 timeText.setVisibility(View.VISIBLE); // Ensure visibility
 
                 // Log debug information
