@@ -691,7 +691,7 @@ public class GameGridView extends View {
                 Drawable markerDrawable = robotDrawable.getConstantState().newDrawable().mutate();
                 // Draw robot using drawable
                 markerDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
-                markerDrawable.setAlpha(178); // Set alpha to 70% for transparency
+                markerDrawable.setAlpha(55); // Set alpha to 20% transparency for the semi-transparent robot markers for starting positions
                 markerDrawable.draw(canvas);
             }
         }
