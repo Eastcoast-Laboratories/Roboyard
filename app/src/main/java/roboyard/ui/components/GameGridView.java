@@ -86,10 +86,6 @@ public class GameGridView extends View {
     private final android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
     private final long animationDuration = 300; // Animation duration in milliseconds
     
-    // Wall configuration
-    private static float WALL_THICKNESS_FACTOR = 0.675f; // Default is cellSize / 8 * 3 (3 times thicker)
-    private static float WALL_OFFSET_FACTOR = 0.3f; // walls are a bit longer than the cellsoverlap)
-    
     // Store starting positions of robots
     private final HashMap<Integer, int[]> robotStartingPositions = new HashMap<>(); // Map robot color to starting position [x,y]
     
@@ -162,7 +158,7 @@ public class GameGridView extends View {
         
         gridPaint = new Paint();
         gridPaint.setStyle(Paint.Style.STROKE);
-        gridPaint.setStrokeWidth(1);
+        gridPaint.setStrokeWidth(3);
         
         // Initialize path paints for all robot colors
         pathPaints = new Paint[10]; // Support up to COLOR_MULTI + 1
@@ -581,8 +577,8 @@ public class GameGridView extends View {
                 }
                 
                 // Draw grid lines (disabled)
-                // gridPaint.setColor(Color.rgb(40, 40, 70));
-                // canvas.drawRect(left, top, right, bottom, gridPaint);
+                gridPaint.setColor(Color.parseColor("#4ae600")); // green gridstrokes
+                canvas.drawRect(left, top, right, bottom, gridPaint);
                 
                 // Highlight focused cell for accessibility
                 if (x == focusedX && y == focusedY) {

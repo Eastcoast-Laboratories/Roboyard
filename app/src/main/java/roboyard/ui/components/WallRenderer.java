@@ -20,8 +20,8 @@ public class WallRenderer {
     private final Drawable verticalWallDrawable;
     
     // Factors for wall thickness and offset, moved from GameGridView
-    private static final float WALL_THICKNESS_FACTOR = 0.675f;
-    private static final float WALL_OFFSET_FACTOR = 0.3f;
+    private static final float WALL_THICKNESS_FACTOR = 0.6f;
+    private static final float WALL_OFFSET_FACTOR = 0.24f;
     
     /**
      * Creates a new wall renderer with the specified model and drawables.
