@@ -116,6 +116,43 @@ public class Preferences {
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
             
+            // Check if it's a fresh install (no preferences saved yet)
+            boolean isFreshInstall = !prefs.contains(KEY_ROBOT_COUNT) && 
+                                     !prefs.contains(KEY_BOARD_SIZE_WIDTH) && 
+                                     !prefs.contains(KEY_GENERATE_NEW_MAP);
+            
+            // Check if accessibility is active
+            boolean isAccessibilityActive = roboyard.ui.components.AccessibilityUtil.isScreenReaderActive(context);
+            
+            // For fresh installs with accessibility active, set appropriate defaults
+            if (isFreshInstall && isAccessibilityActive) {
+                SharedPreferences.Editor editor = prefs.edit();
+                
+                // Set board size to 8x8
+                editor.putInt(KEY_BOARD_SIZE_WIDTH, 8);
+                editor.putInt(KEY_BOARD_SIZE_HEIGHT, 8);
+                
+                // Set "Generate new map each time" to false
+                editor.putBoolean(KEY_GENERATE_NEW_MAP, false);
+                
+                // Set accessibility mode to true
+                editor.putBoolean(KEY_ACCESSIBILITY_MODE, true);
+                
+                // Apply all changes
+                editor.apply();
+                
+                // Update cached values
+                boardSizeWidth = 8;
+                boardSizeHeight = 8;
+                boardSizeX = 8;
+                boardSizeY = 8;
+                generateNewMapEachTime = false;
+                generateNewMap = false;
+                accessibilityMode = true;
+                
+                Timber.d("[PREFERENCES] Fresh install with accessibility detected. Setting defaults: board size=8x8, generate new map=false");
+            }
+            
             Timber.d("Preferences initialized successfully");
         } catch (Exception e) {
             Timber.e(e, "Error initializing preferences");
@@ -500,6 +537,27 @@ public class Preferences {
         // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(KEY_ACCESSIBILITY_MODE, enabled);
+        
+        // If accessibility mode is being enabled, also set accessibility-friendly defaults
+        if (enabled) {
+            // For accessibility mode, use a smaller 8x8 board size
+            editor.putInt(KEY_BOARD_SIZE_WIDTH, 8);
+            editor.putInt(KEY_BOARD_SIZE_HEIGHT, 8);
+            
+            // For accessibility mode, disable "Generate new map each time"
+            editor.putBoolean(KEY_GENERATE_NEW_MAP, false);
+            
+            // Update cached values
+            boardSizeWidth = 8;
+            boardSizeHeight = 8;
+            boardSizeX = 8;
+            boardSizeY = 8;
+            generateNewMapEachTime = false;
+            generateNewMap = false;
+            
+            Timber.d("[PREFERENCES] Setting accessibility-friendly defaults: board size=8x8, generate new map=false");
+        }
+        
         editor.apply();
         
         // Update static field
