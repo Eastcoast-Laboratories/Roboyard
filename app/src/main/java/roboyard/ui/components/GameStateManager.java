@@ -514,6 +514,100 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
     
     /**
+     * Move the selected robot in a specific direction until it hits an obstacle
+     * This method can be called by both touch interactions and accessibility controls
+     * 
+     * @param dx Horizontal direction (-1 = left, 0 = no movement, 1 = right)
+     * @param dy Vertical direction (-1 = up, 0 = no movement, 1 = down)
+     * @return True if the robot moved, false otherwise
+     */
+    public boolean moveRobotInDirection(int dx, int dy) {
+        GameState state = getCurrentState().getValue();
+        if (state == null || state.getSelectedRobot() == null) {
+            return false;
+        }
+        
+        GameElement robot = state.getSelectedRobot();
+        int startX = robot.getX();
+        int startY = robot.getY();
+        
+        // Find the farthest position the robot can move in this direction
+        int endX = startX;
+        int endY = startY;
+        boolean hitWall = false;
+        boolean hitRobot = false;
+        
+        // Check for movement in X direction
+        if (dx != 0) {
+            int step = dx > 0 ? 1 : -1;
+            for (int i = startX + step; i >= 0 && i < state.getWidth(); i += step) {
+                if (state.canRobotMoveTo(robot, i, startY)) {
+                    endX = i;
+                } else {
+                    // Found an obstacle
+                    GameElement robotAtPosition = state.getRobotAt(i, startY);
+                    if (robotAtPosition != null) {
+                        hitRobot = true;
+                    } else {
+                        hitWall = true;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Check for movement in Y direction
+        if (dy != 0) {
+            int step = dy > 0 ? 1 : -1;
+            for (int i = startY + step; i >= 0 && i < state.getHeight(); i += step) {
+                if (state.canRobotMoveTo(robot, startX, i)) {
+                    endY = i;
+                } else {
+                    // Found an obstacle
+                    GameElement robotAtPosition = state.getRobotAt(startX, i);
+                    if (robotAtPosition != null) {
+                        hitRobot = true;
+                    } else {
+                        hitWall = true;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Calculate the distance moved
+        int distanceMoved = Math.abs(endX - startX) + Math.abs(endY - startY);
+        
+        // Did the robot move?
+        if (distanceMoved > 0) {
+            // Update the robot's position in the game state
+            int oldX = robot.getX();
+            int oldY = robot.getY();
+            robot.setX(endX);
+            robot.setY(endY);
+            
+            // Update the game state
+            setMoveCount(getMoveCount().getValue() + 1);
+            setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
+            
+            // Notify observers that the state has changed
+            LiveData<GameState> currentStateLiveData = getCurrentState();
+            if (currentStateLiveData instanceof MutableLiveData) {
+                ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
+            }
+            
+            // Check for game completion
+            if (state.isRobotAtTarget(robot)) {
+                setGameComplete(true);
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Handle deep link to a specific level
      * @param levelId Level ID to load
      */

@@ -1162,143 +1162,53 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
         
         GameElement robot = state.getSelectedRobot();
+        // Store original position for sound and announcements
         int startX = robot.getX();
         int startY = robot.getY();
         
-        // Ensure starting position is valid and within bounds
-        if (startX < 0 || startX >= state.getWidth() || startY < 0 || startY >= state.getHeight()) {
-            Timber.e("Robot position outside game boundaries: %d, %d", startX, startY);
-            // Reset robot to a valid position on the board
-            startX = Math.max(0, Math.min(startX, state.getWidth() - 1));
-            startY = Math.max(0, Math.min(startY, state.getHeight() - 1));
-            robot.setX(startX);
-            robot.setY(startY);
-            gameGridView.invalidate();
-            announceAccessibility("Robot repositioned to valid location");
-        }
+        // Use the unified method in GameStateManager
+        boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
         
-        // Find the farthest position the robot can move in this direction
-        int endX = startX;
-        int endY = startY;
-        boolean hitWall = false;
-        boolean hitRobot = false;
-        
-        // Check for movement in X direction
-        if (dx != 0) {
-            int step = dx > 0 ? 1 : -1;
-            // Allow movement to any valid cell including 0 and 1
-            for (int i = startX + step; i >= 0 && i < state.getWidth(); i += step) {
-                boolean canMove = true;
-                
-                // Check if there's a wall between the current position and the next position
-                if (dx > 0) { // Moving right
-                    // Check for vertical wall at the current position
-                    for (GameElement element : state.getGameElements()) {
-                        if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
-                            element.getX() == i && element.getY() == startY) {
-                            canMove = false;
-                            hitWall = true;
-                            break;
-                        }
-                    }
-                } else { // Moving left
-                    // Check for vertical wall at the previous position
-                    for (GameElement element : state.getGameElements()) {
-                        if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
-                            element.getX() == i+1 && element.getY() == startY) {
-                            canMove = false;
-                            hitWall = true;
-                            break;
-                        }
+        if (moved) {
+            // Robot moved - play appropriate sound and make announcements
+            // Calculate the distance from start to end
+            int endX = robot.getX();
+            int endY = robot.getY();
+            int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
+            
+            // Check if the robot hit a wall or another robot
+            boolean hitWall = false;
+            boolean hitRobot = false;
+            
+            // Check for obstacles in the direction of movement
+            if (dx != 0) {
+                // Moving horizontally, check the next position in that direction
+                int nextX = endX + dx;
+                if (nextX >= 0 && nextX < state.getWidth()) {
+                    GameElement robotAtPosition = state.getRobotAt(nextX, endY);
+                    if (robotAtPosition != null) {
+                        hitRobot = true;
+                    } else if (!state.canRobotMoveTo(robot, nextX, endY)) {
+                        hitWall = true;
                     }
                 }
-                
-                // Check for robot at the position
-                GameElement robotAtPosition = state.getRobotAt(i, startY);
-                if (robotAtPosition != null) {
-                    canMove = false;
-                    hitRobot = true;
-                }
-                
-                if (canMove) {
-                    endX = i;
-                } else {
-                    break;
+            } else if (dy != 0) {
+                // Moving vertically, check the next position in that direction
+                int nextY = endY + dy;
+                if (nextY >= 0 && nextY < state.getHeight()) {
+                    GameElement robotAtPosition = state.getRobotAt(endX, nextY);
+                    if (robotAtPosition != null) {
+                        hitRobot = true;
+                    } else if (!state.canRobotMoveTo(robot, endX, nextY)) {
+                        hitWall = true;
+                    }
                 }
             }
-        }
-        
-        // Check for movement in Y direction
-        if (dy != 0) {
-            int step = dy > 0 ? 1 : -1;
-            // Allow movement to any valid cell including 0 and 1
-            for (int i = startY + step; i >= 0 && i < state.getHeight(); i += step) {
-                boolean canMove = true;
-                
-                // Check if there's a wall between the current position and the next position
-                if (dy > 0) { // Moving down
-                    // Check for horizontal wall at the current position
-                    for (GameElement element : state.getGameElements()) {
-                        if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
-                            element.getX() == startX && element.getY() == i) {
-                            canMove = false;
-                            hitWall = true;
-                            break;
-                        }
-                    }
-                } else { // Moving up
-                    // Check for horizontal wall at the previous position
-                    for (GameElement element : state.getGameElements()) {
-                        if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
-                            element.getX() == startX && element.getY() == i+1) {
-                            canMove = false;
-                            hitWall = true;
-                            break;
-                        }
-                    }
-                }
-                
-                // Check for robot at the position
-                GameElement robotAtPosition = state.getRobotAt(startX, i);
-                if (robotAtPosition != null) {
-                    canMove = false;
-                    hitRobot = true;
-                }
-                
-                if (canMove) {
-                    endY = i;
-                } else {
-                    break;
-                }
-            }
-        }
-        
-        // Ensure final position is within bounds
-        if (endX < 0 || endX >= state.getWidth() || endY < 0 || endY >= state.getHeight()) {
-            Timber.e("Calculated end position outside game boundaries: %d, %d", endX, endY);
-            // Restrict to valid bounds
-            endX = Math.max(0, Math.min(endX, state.getWidth() - 1));
-            endY = Math.max(0, Math.min(endY, state.getHeight() - 1));
-        }
-        
-        // Calculate the distance moved
-        int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
-        
-        // Did the robot move?
-        if (dist > 0) {
-            // Update the robot's position in the game state
-            robot.setX(endX);
-            robot.setY(endY);
             
-            // Update the game state
-            gameStateManager.setMoveCount(gameStateManager.getMoveCount().getValue() + 1);
-            gameStateManager.setSquaresMoved(gameStateManager.getSquaresMoved().getValue() + dist);
-            
-            // FIX: Actually update the UI to show the robot movement
+            // Update the game grid view to show the movement
             gameGridView.invalidate();
             
-            // Play the appropriate sound effect
-            Timber.d("[SOUND] Playing sound " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));
+            // Play appropriate sound
             if (hitRobot) {
                 playSound("hit_robot");
             } else if (hitWall) {
@@ -1311,9 +1221,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             announceAccessibility(getRobotColorNameByGridElement(robot) + 
                     " robot moved to " + endX + ", " + endY);
             
-            // Check for goal completion
+            // Check for goal completion - although GameStateManager also does this
             if (state.isRobotAtTarget(robot)) {
-                gameStateManager.setGameComplete(true);
                 announceAccessibility("Goal reached! Game complete in " + 
                         gameStateManager.getMoveCount().getValue() + " moves and " +
                         gameStateManager.getSquaresMoved().getValue() + " squares moved");

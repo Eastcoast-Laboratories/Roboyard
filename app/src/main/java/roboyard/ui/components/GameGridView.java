@@ -1026,35 +1026,55 @@ public class GameGridView extends View {
                                              (absDeltaY <= 2 && absDeltaX >= 3));
                                 
                                 // Determine the primary direction - priority: north, south, east, west
+                                int dx = 0;
+                                int dy = 0;
+                                
                                 if (moveNorth) {
-                                    // North direction
-                                    gridX = robotX;
-                                    // Keep the y-coordinate as it is (it's already north of the robot)
+                                    // North direction (up: dy = -1)
+                                    dx = 0;
+                                    dy = -1;
                                 } else if (moveSouth) {
-                                    // South direction
-                                    gridX = robotX;
-                                    // Keep the y-coordinate as it is (it's already south of the robot)
+                                    // South direction (down: dy = 1)
+                                    dx = 0;
+                                    dy = 1;
                                 } else if (moveEast) {
-                                    // East direction
-                                    gridY = robotY;
-                                    // Keep the x-coordinate as it is (it's already east of the robot)
+                                    // East direction (right: dx = 1)
+                                    dx = 1;
+                                    dy = 0;
                                 } else if (moveWest) {
-                                    // West direction
-                                    gridY = robotY;
-                                    // Keep the x-coordinate as it is (it's already west of the robot)
+                                    // West direction (left: dx = -1)
+                                    dx = -1;
+                                    dy = 0;
                                 }
                                 
-                                Timber.d("Adjusted movement to direction: (%d,%d), deltaX=%d, deltaY=%d", 
-                                        gridX, gridY, deltaX, deltaY);
-                            }
-                            
-                            // Let GameStateManager handle the touch which will update counters properly
-                            gameStateManager.handleGridTouch(gridX, gridY, action);
-                            
-                            // Check if robot moved by comparing old and new positions
-                            Timber.d("[GOAL DEBUG] Selected robot moved from " + oldX + ", " + oldY + " to " + selectedRobot.getX() + ", " + selectedRobot.getY());
-                            if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
-                                handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
+                                // If valid direction detected, use the unified movement method
+                                if (dx != 0 || dy != 0) {
+                                    Timber.d("Using unified moveRobotInDirection with dx=%d, dy=%d", dx, dy);
+                                    boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
+                                    
+                                    // Check if robot moved
+                                    if (moved && (oldX != selectedRobot.getX() || oldY != selectedRobot.getY())) {
+                                        handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
+                                    }
+                                } else {
+                                    // Fall back to original method for edge cases
+                                    Timber.d("Falling back to handleGridTouch at (%d,%d)", gridX, gridY);
+                                    gameStateManager.handleGridTouch(gridX, gridY, action);
+                                    
+                                    // Check if robot moved
+                                    if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
+                                        handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
+                                    }
+                                }
+                            } else {
+                                // Fall back to original method for edge cases
+                                Timber.d("Falling back to handleGridTouch at (%d,%d)", gridX, gridY);
+                                gameStateManager.handleGridTouch(gridX, gridY, action);
+                                
+                                // Check if robot moved
+                                if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
+                                    handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
+                                }
                             }
                         } else {
                             // No robot selected, just handle the touch
