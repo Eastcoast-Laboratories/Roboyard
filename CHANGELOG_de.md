@@ -2,6 +2,14 @@ Changelog Deutsch
 =================
 
 
+## Version 22 (2025-04-05)
+- Behobene TalkBack-Ankündigungen für blinde Spieler mit korrigierten Wandpositionen.
+- Roboter hinterlassen jetzt farbige Spuren.
+- Neue Option, um die gleichen Wände auf einem Spielbrett über Neustarts hinweg zu erhalten.
+- Verbesserte Schriftgrößen.
+- Neuer Hintergrund im Hauptmenu
+
+
 ## Version 21 (2025-04-03)
 - Überarbeitete Benutzeroberfläche mit klareren Icons und besserer Lesbarkeit
 - Vollständige unterstützung des Accessibility Modus für blinde Spieler mit TalkBack Unterstützung

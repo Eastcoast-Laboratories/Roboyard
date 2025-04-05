@@ -1,0 +1,5 @@
+- Behobene TalkBack-Ankündigungen für blinde Spieler mit korrigierten Wandpositionen.
+- Roboter hinterlassen jetzt farbige Spuren.
+- Neue Option, um die gleichen Wände auf einem Spielbrett über Neustarts hinweg zu erhalten.
+- Verbesserte Schriftgrößen.
+- Neuer Hintergrund im Hauptmenu

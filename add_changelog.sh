@@ -14,23 +14,21 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
-- Überarbeitete Benutzeroberfläche mit klareren Icons und besserer Lesbarkeit
-- Vollständige unterstützung des Accessibility Modus für blinde Spieler mit TalkBack Unterstützung
-- Neuer Spielmodus: bis zu 4 Targets in einem Spiel
-- Neue Tap-to-move-Methode, um Roboter schneller zu bewegen
-- Level Game Auswahl-Screen überarbeitet
-- Neue Boardgrößen: 8x8, 8x12, 10x10, 10x12, 10x14
+- Behobene TalkBack-Ankündigungen für blinde Spieler mit korrigierten Wandpositionen.
+- Roboter hinterlassen jetzt farbige Spuren.
+- Neue Option, um die gleichen Wände auf einem Spielbrett über Neustarts hinweg zu erhalten.
+- Verbesserte Schriftgrößen.
+- Neuer Hintergrund im Hauptmenu
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
-- Improved user interface with clearer icons and better readability
-- Full support for Accessibility Mode for blind players with TalkBack support
-- New game mode: up to 4 targets in a game
-- New tap-to-move method to move Robots faster
-- Improved Level Game selection screen
-- New board sizes: 8x8, 8x12, 10x10, 10x12, 10x14
+- Fixed TalkBack announcements for blind players, correcting wall position announcements.
+- Robots now leave colored trails.
+- New option to preserve the same walls on a board across restarts.
+- Improved fontsizes.
+- Added background art to main menu.
 EOF
 )
 

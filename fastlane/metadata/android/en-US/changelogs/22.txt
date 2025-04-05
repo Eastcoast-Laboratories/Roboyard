@@ -1,0 +1,5 @@
+- Fixed TalkBack announcements for blind players, correcting wall position announcements.
+- Robots now leave colored trails.
+- New option to preserve the same walls on a board across restarts.
+- Improved fontsizes.
+- Added background art to main menu.

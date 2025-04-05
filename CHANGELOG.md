@@ -2,6 +2,14 @@
 =========
 
 
+## Version 22 (2025-04-05)
+- Fixed TalkBack announcements for blind players, correcting wall position announcements.
+- Robots now leave colored trails.
+- New option to preserve the same walls on a board across restarts.
+- Improved fontsizes.
+- Added background art to main menu.
+
+
 ## Version 21 (2025-04-03)
 - Improved user interface with clearer icons and better readability
 - Full support for Accessibility Mode for blind players with TalkBack support
