@@ -9,4 +9,14 @@
     <dimen name="game_button_text_size">22dp</dimen>
     <dimen name="game_button_margin">8dp</dimen>
     <dimen name="game_button_padding">6dp</dimen>
+    
+    <!-- Level selection screen dimensions for tall screens -->
+    <dimen name="stars_count_text_size">24dp</dimen>
+    <dimen name="level_item_stats_text_size">14dp</dimen>
+    <dimen name="level_item_name_text_size">16dp</dimen>
+    
+    <!-- Settings screen dimensions for tall screens -->
+    <dimen name="settings_title_text_size">32dp</dimen>
+    <dimen name="settings_label_text_size">24dp</dimen>
+    <dimen name="settings_option_text_size">20dp</dimen>
 </resources>

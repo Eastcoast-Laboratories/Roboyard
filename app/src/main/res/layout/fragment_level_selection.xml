@@ -118,7 +118,7 @@
                 android:layout_width="0dp"
                 android:layout_height="45dp"
                 android:text="@string/stars_count"
-                android:textSize="12dp"
+                android:textSize="@dimen/stars_count_text_size"
                 android:textStyle="bold"
                 android:textAlignment="center"
                 android:gravity="center"

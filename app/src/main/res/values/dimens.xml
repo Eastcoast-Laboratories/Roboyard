@@ -12,4 +12,9 @@
     <dimen name="game_button_text_size">14sp</dimen>
     <dimen name="game_button_margin">8dp</dimen>
     <dimen name="game_button_padding">4dp</dimen>
+    
+    <!-- Level selection screen dimensions -->
+    <dimen name="stars_count_text_size">12dp</dimen>
+    <dimen name="level_item_stats_text_size">12dp</dimen>
+    <dimen name="level_item_name_text_size">14dp</dimen>
 </resources>
