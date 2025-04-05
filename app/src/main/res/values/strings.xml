@@ -19,6 +19,7 @@
     <string name="help_description">View game help</string>
     <string name="exit">Exit</string>
     <string name="exit_description">Exit the game</string>
+    <string name="credits">Credits</string>
     
     <!-- Game Screens -->
     <string name="game_screen_title">Game</string>

@@ -2,8 +2,20 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:layout_height="match_parent">
+
+    <!-- Fullscreen background image -->
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/title_bg_optimized"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Background image" />
 
     <!-- Colorful border using tiled wall graphics -->
     <ImageView
@@ -41,7 +53,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="Right wall" />
-    
+
     <ImageView
         android:id="@+id/bottom_wall"
         android:layout_width="0dp"
@@ -63,12 +75,12 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_wall"
         app:layout_constraintStart_toEndOf="@id/left_wall"
         app:layout_constraintEnd_toStartOf="@id/right_wall">
-        
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
-            
+
             <!-- Title centered but moved higher up -->
             <TextView
                 android:id="@+id/main_menu_title"
@@ -80,30 +92,21 @@
                 android:textAlignment="center"
                 android:gravity="center"
                 android:layout_marginTop="16dp"
-                android:textColor="#212121"
-                android:shadowColor="#80000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
+                android:textColor="#FFFFFF"
+                android:shadowColor="#000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="4"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:background="@drawable/status_text_background"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Blue Robot Image above buttons -->
-            <ImageView
-                android:id="@+id/robot_blue_image"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:src="@drawable/robot_blue_right"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
-                android:contentDescription="Blue robot" />
-                
-            <!-- Button container moved below robot -->
+            <!-- Button container moved higher up and made narrower -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -111,8 +114,8 @@
                 android:layout_marginTop="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/robot_blue_image"
-                app:layout_constraintWidth_max="300dp">
+                app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
+                app:layout_constraintWidth_max="240dp">
 
                 <!-- Modern UI Game button - green with round corners and black outline -->
                 <Button
@@ -121,12 +124,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/new_random_game"
                     android:contentDescription="@string/new_random_game_description"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_green_outline" />
-                    
+
                 <!-- Level Game button - Blue with round corners and black outline -->
                 <Button
                     android:id="@+id/level_game_button"
@@ -134,14 +137,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/level_game"
                     android:contentDescription="@string/level_game_description"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_blue_outline" />
-                    
+
                 <!-- How to Play button - Yellow with round corners and black outline -->
                 <Button
                     android:id="@+id/help_button"
@@ -149,13 +152,13 @@
                     android:layout_height="wrap_content"
                     android:text="@string/help"
                     android:contentDescription="@string/help_description"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#000000"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_yellow_outline" />
-                    
+
                 <!-- Load Game button - red with round corners and black outline -->
                 <Button
                     android:id="@+id/load_game_button"
@@ -163,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/load_game"
                     android:contentDescription="@string/load_game_description"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
@@ -177,7 +180,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings"
                     android:contentDescription="@string/settings_description"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
@@ -208,13 +211,15 @@
         android:id="@+id/credits_link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Credits"
-        android:textSize="14sp"
-        android:textColor="#0000FF"
+        android:text="@string/credits"
+        android:textColor="#000000"
+        android:shadowColor="#FFFFFF"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
         android:padding="8dp"
-        android:textStyle="normal"
-        android:layout_marginStart="4dp"
-        android:layout_marginBottom="4dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
-        app:layout_constraintStart_toEndOf="@id/left_wall" />
+        android:background="@drawable/status_text_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="8dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
