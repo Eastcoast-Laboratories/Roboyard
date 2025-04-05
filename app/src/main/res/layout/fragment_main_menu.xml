@@ -17,95 +17,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="Background image" />
 
-    <!-- Colorful border using tiled wall graphics -->
-    <ImageView
-        android:id="@+id/top_wall"
-        android:layout_width="0dp"
-        android:layout_height="10dp"
-        android:src="@drawable/mh"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="Top wall" />
-    
-    <ImageView
-        android:id="@+id/left_wall"
-        android:layout_width="10dp"
-        android:layout_height="0dp"
-        android:src="@drawable/mv"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="Left wall" />
-    
-    <ImageView
-        android:id="@+id/right_wall"
-        android:layout_width="10dp"
-        android:layout_height="0dp"
-        android:src="@drawable/mv"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="Right wall" />
-
-    <ImageView
-        android:id="@+id/bottom_wall"
-        android:layout_width="0dp"
-        android:layout_height="10dp"
-        android:src="@drawable/mh"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:contentDescription="Bottom wall" />
-
     <!-- Scrollable content area with padding -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/top_wall"
-        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
-        app:layout_constraintStart_toEndOf="@id/left_wall"
-        app:layout_constraintEnd_toStartOf="@id/right_wall">
-
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="110dp">
+        
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
-
-            <!-- Title centered but moved higher up -->
-            <TextView
-                android:id="@+id/main_menu_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/main_menu_title"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:textAlignment="center"
-                android:gravity="center"
-                android:layout_marginTop="16dp"
-                android:textColor="#FFFFFF"
-                android:shadowColor="#000000"
-                android:shadowDx="2"
-                android:shadowDy="2"
-                android:shadowRadius="4"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:background="@drawable/status_text_background"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
+                
             <!-- Button container moved higher up and made narrower -->
             <LinearLayout
                 android:layout_width="0dp"
@@ -114,7 +41,7 @@
                 android:layout_marginTop="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/main_menu_title"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintWidth_max="240dp">
 
                 <!-- Modern UI Game button - green with round corners and black outline -->
@@ -129,7 +56,7 @@
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_green_outline" />
-
+                    
                 <!-- Level Game button - Blue with round corners and black outline -->
                 <Button
                     android:id="@+id/level_game_button"
@@ -144,7 +71,7 @@
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_blue_outline" />
-
+                    
                 <!-- How to Play button - Yellow with round corners and black outline -->
                 <Button
                     android:id="@+id/help_button"
@@ -158,7 +85,7 @@
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_rounded_yellow_outline" />
-
+                    
                 <!-- Load Game button - red with round corners and black outline -->
                 <Button
                     android:id="@+id/load_game_button"
@@ -196,7 +123,7 @@
                     android:layout_height="wrap_content"
                     android:text="Level Design Editor"
                     android:contentDescription="Create or edit game levels"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
@@ -205,6 +132,30 @@
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <!-- Title centered and positioned at the bottom -->
+    <TextView
+        android:id="@+id/main_menu_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_menu_title"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textColor="#000000"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:background="@drawable/title_rounded_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="80dp" 
+        android:layout_marginRight="80dp" 
+        android:layout_marginBottom="60dp" 
+        />
 
     <!-- Credits Link - Positioned at the bottom left corner -->
     <TextView
