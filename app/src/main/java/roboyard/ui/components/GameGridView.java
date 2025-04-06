@@ -775,15 +775,23 @@ public class GameGridView extends View {
         int x = robot.getX();
         int y = robot.getY();
         
+        // Calculate grid offset (space between edge of view and actual grid)
         float offsetX = (getWidth() - (gridWidth * cellSize)) / 2;
         float offsetY = (getHeight() - (gridHeight * cellSize)) / 2;
         
+        // Calculate top-left corner of the cell
         float left = offsetX + (x * cellSize);
         float top = offsetY + (y * cellSize);
-        float right = left + cellSize;
-        float bottom = top + cellSize;
         
-        // Select appropriate robot drawable based on color
+        // Use animation position if available (for smooth movement)
+        if (robot.hasAnimationPosition()) {
+            // Override the position with animation coordinates
+            left = robot.getAnimationX();
+            top = robot.getAnimationY();
+            Timber.d("[ANIM] Using animation position for robot %d: (%.2f,%.2f)", robot.getColor(), left, top);
+        }
+        
+        // Select drawable based on robot color and facing direction
         Drawable robotDrawable = null;
         
         switch (robot.getColor()) {
@@ -1226,6 +1234,14 @@ public class GameGridView extends View {
         robotBaseOffsets.clear();
         segmentCounts.clear();
         invalidate();
+    }
+    
+    /**
+     * Get the current cell size in pixels
+     * @return Cell size in pixels
+     */
+    public float getCellSize() {
+        return cellSize;
     }
     
     @Override

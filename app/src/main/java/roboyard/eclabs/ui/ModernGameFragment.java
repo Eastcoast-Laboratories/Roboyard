@@ -414,6 +414,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameGridView.setFragment(this);
         gameGridView.setGameStateManager(gameStateManager);
         
+        // CRITICAL: Connect the GameGridView to the animation manager
+        gameStateManager.setGameGridView(gameGridView);
+        Timber.d("[ANIM] Connected GameGridView to animation system. Animations enabled: %s", 
+                gameStateManager.areAnimationsEnabled());
+        
         // Set up the UI mode manager
         UIModeManager uiModeManager = UIModeManager.getInstance(requireContext());
         uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
@@ -2048,7 +2053,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setTextOn("Cancel");
-            hintButton.setTextOff("💡Hint");
+            hintButton.setTextOff("Hint");
             hintButton.setChecked(true);
             updateStatusText("AI is thinking...", true);
             Timber.d("ModernGameFragment: UI updated to show calculation in progress");

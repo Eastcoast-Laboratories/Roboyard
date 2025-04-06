@@ -3,6 +3,7 @@ package roboyard.eclabs.ui;
 import java.io.Serializable;
 
 import roboyard.logic.core.Constants;
+import timber.log.Timber;
 
 /**
  * Represents a game element such as a robot or target.
@@ -23,6 +24,12 @@ public class GameElement implements Serializable {
     private int color; // 0=red, 1=green, 2=blue, 3=yellow
     private boolean selected;
     
+    // Transient properties for animation (not serialized)
+    private transient float animationX;
+    private transient float animationY;
+    private transient boolean hasAnimationPosition;
+    private transient boolean animationPositionSet;
+    
     /**
      * Create a new game element
      * @param type Element type
@@ -35,6 +42,8 @@ public class GameElement implements Serializable {
         this.y = y;
         this.color = 0;
         this.selected = false;
+        this.hasAnimationPosition = false;
+        this.animationPositionSet = false;
     }
     
     /**
@@ -112,5 +121,48 @@ public class GameElement implements Serializable {
     public boolean isRobot() {
         return type == TYPE_ROBOT;
     }
-
+    
+    /**
+     * Check if this element has an animation position set
+     * @return true if animation position is set
+     */
+    public boolean hasAnimationPosition() {
+        // Only return true if animationX and animationY are explicitly set
+        return animationPositionSet;
+    }
+    
+    /**
+     * Set the animation position
+     * @param x The x coordinate
+     * @param y The y coordinate
+     */
+    public void setAnimationPosition(float x, float y) {
+        animationX = x;
+        animationY = y;
+        animationPositionSet = true;
+        Timber.d("[ANIM] Set animation position for robot %d: (%.2f,%.2f)", getColor(), x, y);
+    }
+    
+    /**
+     * Clear the animation position
+     */
+    public void clearAnimationPosition() {
+        animationPositionSet = false;
+    }
+    
+    /**
+     * Get the animation X position in pixels
+     * @return Animation X position
+     */
+    public float getAnimationX() {
+        return animationX;
+    }
+    
+    /**
+     * Get the animation Y position in pixels
+     * @return Animation Y position
+     */
+    public float getAnimationY() {
+        return animationY;
+    }
 }

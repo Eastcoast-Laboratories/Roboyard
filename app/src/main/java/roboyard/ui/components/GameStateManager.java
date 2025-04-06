@@ -54,6 +54,7 @@ import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
+import roboyard.ui.animation.RobotAnimationManager;
 import timber.log.Timber;
 
 /**
@@ -108,12 +109,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Track unique robots used for level completion statistics
     private final Set<Integer> robotsUsed = new HashSet<>();
     
+    // Robot animation manager
+    private RobotAnimationManager robotAnimationManager;
+    
+    // Animation settings
+    private boolean animationsEnabled = true;
+    private float accelerationDuration = 150f; // ms
+    private float maxSpeed = 1000f; // pixels per second
+    private float decelerationDuration = 200f; // ms
+    private float overshootPercentage = 0.15f; // 15% overshoot
+    private float springBackDuration = 200f; // ms
+    
+    private boolean isResetting = false;
+    private GameGridView gameGridView;
+    
     public GameStateManager(Application application) {
         super(application);
         // We'll use lazy initialization for solver now - do not create it here
         
         context = application.getApplicationContext();
         
+        // Initialize robotAnimationManager
+        robotAnimationManager = new RobotAnimationManager(this);
     }
     
     /**
@@ -527,6 +544,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             return false;
         }
         
+        // If game is resetting, ignore movement commands
+        if (isResetting) {
+            return false;
+        }
+        
         GameElement robot = state.getSelectedRobot();
         int startX = robot.getX();
         int startY = robot.getY();
@@ -578,27 +600,61 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Calculate the distance moved
         int distanceMoved = Math.abs(endX - startX) + Math.abs(endY - startY);
         
-        // Did the robot move?
         if (distanceMoved > 0) {
-            // Update the robot's position in the game state
-            int oldX = robot.getX();
-            int oldY = robot.getY();
-            robot.setX(endX);
-            robot.setY(endY);
-            
-            // Update the game state
+            // Create a copy of the current position
+            final int originalX = startX;
+            final int originalY = startY;
+            final int targetX = endX;
+            final int targetY = endY;
+
+            // Log the movement initiation
+            Timber.d("[ROBOT] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)", 
+                    robot.getColor(), originalX, originalY, targetX, targetY);
+
+            // Update move count and squares moved
             setMoveCount(getMoveCount().getValue() + 1);
             setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
             
-            // Notify observers that the state has changed
-            LiveData<GameState> currentStateLiveData = getCurrentState();
-            if (currentStateLiveData instanceof MutableLiveData) {
-                ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
-            }
+            // Create completion callback for when animation finishes
+            Runnable completionCallback = () -> {
+                // Update the robot's actual position after animation completes
+                robot.setX(targetX);
+                robot.setY(targetY);
+                
+                // Check for game completion after animation
+                if (state.isRobotAtTarget(robot)) {
+                    setGameComplete(true);
+                }
+                
+                // Notify observers that the state has changed
+                LiveData<GameState> currentStateLiveData = getCurrentState();
+                if (currentStateLiveData instanceof MutableLiveData) {
+                    ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
+                }
+            };
             
-            // Check for game completion
-            if (state.isRobotAtTarget(robot)) {
-                setGameComplete(true);
+            // Queue this movement for animation
+            if (animationsEnabled && robotAnimationManager != null) {
+                Timber.d("[ANIM] Attempting to queue robot animation with manager=%s", robotAnimationManager != null ? "active" : "null");
+                robotAnimationManager.queueRobotMove(
+                    robot, originalX, originalY, targetX, targetY, completionCallback
+                );
+            } else {
+                // Immediate mode - update position without animation
+                Timber.d("[ANIM] Animations disabled or manager null, moving robot immediately");
+                robot.setX(targetX);
+                robot.setY(targetY);
+                
+                // Check for game completion
+                if (state.isRobotAtTarget(robot)) {
+                    setGameComplete(true);
+                }
+                
+                // Notify observers
+                LiveData<GameState> currentStateLiveData = getCurrentState();
+                if (currentStateLiveData instanceof MutableLiveData) {
+                    ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
+                }
             }
             
             return true;
@@ -1821,5 +1877,99 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         new Handler(Looper.getMainLooper()).post(() -> {
             onSolutionCalculationFailed("Solver was cancelled");
         });
+    }
+    
+    /**
+     * Get the robot animation manager
+     * @return The robot animation manager
+     */
+    public RobotAnimationManager getRobotAnimationManager() {
+        return robotAnimationManager;
+    }
+    
+    /**
+     * Update animation settings
+     */
+    public void updateAnimationSettings(boolean enabled, float accelDuration, float maxSpd, 
+                                      float decelDuration, float overshootPct, float springDuration) {
+        this.animationsEnabled = enabled;
+        this.accelerationDuration = accelDuration;
+        this.maxSpeed = maxSpd;
+        this.decelerationDuration = decelDuration;
+        this.overshootPercentage = overshootPct;
+        this.springBackDuration = springDuration;
+        
+        // Update the animation manager with new settings
+        if (robotAnimationManager != null) {
+            robotAnimationManager.updateSettings(
+                accelerationDuration,
+                maxSpeed,
+                decelerationDuration,
+                overshootPercentage,
+                springBackDuration,
+                RobotAnimationManager.AnimationCancellationStrategy.JUMP_TO_END
+            );
+        }
+    }
+    
+    /**
+     * Reset the game to its initial state
+     */
+    public void resetGame() {
+        isResetting = true;
+        
+        // Cancel all animations first
+        if (robotAnimationManager != null) {
+            robotAnimationManager.cancelAllAnimations();
+        }
+        
+        // Get the current game state
+        GameState currentGameState = currentState.getValue();
+        
+        if (currentGameState != null) {
+            // Reset robot positions
+            currentGameState.resetRobotPositions();
+            
+            // Reset move counters
+            setMoveCount(0);
+            setSquaresMoved(0);
+            setGameComplete(false);
+            
+            // Reset robot selection
+            for (GameElement element : currentGameState.getGameElements()) {
+                if (element.isRobot()) {
+                    element.setSelected(false);
+                }
+            }
+            
+            // Reset the robotsUsed tracking for statistics
+            robotsUsed.clear();
+            
+            // Notify observers that the state has changed
+            ((MutableLiveData<GameState>) currentState).setValue(currentGameState);
+        }
+        
+        isResetting = false;
+    }
+    
+    /**
+     * Check if animations are enabled
+     * @return True if animations are enabled
+     */
+    public boolean areAnimationsEnabled() {
+        return animationsEnabled;
+    }
+    
+    /**
+     * Set the GameGridView for rendering
+     * @param gameGridView The game grid view
+     */
+    public void setGameGridView(GameGridView gameGridView) {
+        this.gameGridView = gameGridView;
+        
+        // Connect the grid view to the animation manager
+        if (robotAnimationManager != null) {
+            robotAnimationManager.setGameGridView(gameGridView);
+        }
     }
 }
