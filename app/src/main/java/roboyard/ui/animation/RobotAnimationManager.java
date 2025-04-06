@@ -75,33 +75,56 @@ public class RobotAnimationManager {
      * @param completionCallback Callback to run when animation is complete
      */
     public void queueRobotMove(GameElement robot, int startX, int startY, int endX, int endY, Runnable completionCallback) {
-        Timber.d("[ANIM] Queuing robot move: %d from (%d,%d) to (%d,%d)", robot.getColor(), startX, startY, endX, endY);
+        Timber.d("[ANIM] Queueing robot move: %s (%d,%d) -> (%d,%d)", robot, startX, startY, endX, endY);
         
-        // Reset the robot's animation position to match its logical position initially
-        robot.setAnimationPosition(startX, startY);
+        // Validate the robot first
+        if (robot == null) {
+            Timber.e("[ANIM] Cannot queue move for null robot");
+            if (completionCallback != null) {
+                completionCallback.run();
+            }
+            return;
+        }
+        
+        // Validate coordinates
+        if (startX < 0 || startY < 0 || endX < 0 || endY < 0) {
+            Timber.e("[ANIM] Invalid coordinates: (%d,%d) -> (%d,%d)", startX, startY, endX, endY);
+            if (completionCallback != null) {
+                completionCallback.run();
+            }
+            return;
+        }
+
+        // If the move is to the same position, skip animation
+        if (startX == endX && startY == endY) {
+            Timber.d("[ANIM] Skipping animation for move to same position");
+            if (completionCallback != null) {
+                completionCallback.run();
+            }
+            return;
+        }
+        
+        // Initialize the queue for this robot if it doesn't exist
+        if (!robotMoveQueues.containsKey(robot)) {
+            robotMoveQueues.put(robot, new LinkedList<>());
+            isProcessingRobotAnimations.put(robot, false);
+        }
         
         // Create the move info object
         RobotMoveInfo moveInfo = new RobotMoveInfo(robot, startX, startY, endX, endY, completionCallback);
         
-        // Get the move queue for this robot
-        Queue<RobotMoveInfo> robotQueue = robotMoveQueues.get(robot);
-        if (robotQueue == null) {
-            robotQueue = new LinkedList<>();
-            robotMoveQueues.put(robot, robotQueue);
-        }
-        
         // Add to queue
-        robotQueue.add(moveInfo);
+        robotMoveQueues.get(robot).add(moveInfo);
         
-        // Process the queue if not already processing
+        // Start processing if not already processing
         if (!isProcessingRobotAnimations.getOrDefault(robot, false)) {
-            Timber.d("[ANIM] Starting animation processing for robot %d", robot.getColor());
-            isProcessingRobotAnimations.put(robot, true);
-            
-            // Add a small delay to ensure the initial position is visible
-            gameGridView.postDelayed(() -> processRobotAnimationQueue(robot), 100);
-        } else {
-            Timber.d("[ANIM] Already processing animations for robot %d, queued for later", robot.getColor());
+            // Start processing on the UI thread
+            if (gameGridView != null) {
+                gameGridView.post(() -> processRobotAnimationQueue(robot));
+            } else {
+                // Fallback if no view is set yet
+                new Handler(Looper.getMainLooper()).post(() -> processRobotAnimationQueue(robot));
+            }
         }
     }
 
@@ -110,12 +133,15 @@ public class RobotAnimationManager {
      * @param robot The robot to process animations for
      */
     private void processRobotAnimationQueue(final GameElement robot) {
-        Timber.d("[ANIM] Processing animation queue for robot %d", robot.getColor());
+        Timber.d("[ANIM] Processing animation queue for robot %s", robot);
+        
+        // Set the processing flag immediately to prevent duplicate processing
+        isProcessingRobotAnimations.put(robot, true);
         
         // Get the queue for this robot
         final Queue<RobotMoveInfo> robotQueue = robotMoveQueues.get(robot);
         if (robotQueue == null || robotQueue.isEmpty()) {
-            Timber.d("[ANIM] No queued moves for robot %d, marking as not processing", robot.getColor());
+            Timber.d("[ANIM] No queued moves for robot %s, marking as not processing", robot);
             isProcessingRobotAnimations.put(robot, false);
             return;
         }
@@ -123,17 +149,22 @@ public class RobotAnimationManager {
         // Get the next move
         final RobotMoveInfo moveInfo = robotQueue.poll();
         if (moveInfo == null) {
-            Timber.d("[ANIM] Null move info for robot %d, marking as not processing", robot.getColor());
+            Timber.d("[ANIM] Null move info for robot %s, marking as not processing", robot);
             isProcessingRobotAnimations.put(robot, false);
             return;
+        }
+        
+        // Initialize animation position if not already set
+        if (!robot.hasAnimationPosition()) {
+            robot.setAnimationPosition(moveInfo.startX, moveInfo.startY);
         }
         
         // Calculate animation parameters
         final float distance = calculateDistance(moveInfo.startX, moveInfo.startY, moveInfo.endX, moveInfo.endY);
         final float animationDuration = calculateAnimationDuration(distance);
         
-        Timber.d("[ANIM] Animating robot %d move: (%d,%d) -> (%d,%d), distance=%.2f, duration=%.2f", 
-                robot.getColor(), moveInfo.startX, moveInfo.startY, moveInfo.endX, moveInfo.endY, 
+        Timber.d("[ANIM] Animating robot %s move: (%d,%d) -> (%d,%d), distance=%.2f, duration=%.2f", 
+                robot, moveInfo.startX, moveInfo.startY, moveInfo.endX, moveInfo.endY, 
                 distance, animationDuration);
         
         // Create and start the animation
@@ -143,8 +174,12 @@ public class RobotAnimationManager {
                 moveInfo.completionCallback.run();
             }
             
-            // Process the next animation in queue
-            gameGridView.post(() -> processRobotAnimationQueue(robot));
+            // Process the next animation in queue on the UI thread
+            if (gameGridView != null) {
+                gameGridView.post(() -> processRobotAnimationQueue(robot));
+            } else {
+                new Handler(Looper.getMainLooper()).post(() -> processRobotAnimationQueue(robot));
+            }
         });
     }
 
@@ -173,11 +208,6 @@ public class RobotAnimationManager {
         // Apply custom interpolator for physics feel
         animator.setInterpolator(new DecelerateInterpolator(1.5f));
         
-        // Initialize animation position if not already set
-        if (!robot.hasAnimationPosition()) {
-            robot.setAnimationPosition(moveInfo.startX, moveInfo.startY);
-        }
-        
         // Update the animation position on each frame
         animator.addUpdateListener(animation -> {
             float progress = (float) animation.getAnimatedValue();
@@ -186,8 +216,8 @@ public class RobotAnimationManager {
             float currentX = moveInfo.startX + (moveInfo.endX - moveInfo.startX) * progress;
             float currentY = moveInfo.startY + (moveInfo.endY - moveInfo.startY) * progress;
             
-            Timber.d("[ANIM] Robot %d animation progress: %.2f, position: (%.2f,%.2f)", 
-                    robot.getColor(), progress, currentX, currentY);
+            Timber.d("[ANIM] Robot %s animation progress: %.2f, position: (%.2f,%.2f)", 
+                    robot, progress, currentX, currentY);
             
             // Update the robot's animation position
             robot.setAnimationPosition(currentX, currentY);
@@ -200,7 +230,7 @@ public class RobotAnimationManager {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                Timber.d("[ANIM] Animation complete for robot %d", robot.getColor());
+                Timber.d("[ANIM] Animation complete for robot %s", robot);
                 
                 // Set final position
                 robot.setAnimationPosition(moveInfo.endX, moveInfo.endY);

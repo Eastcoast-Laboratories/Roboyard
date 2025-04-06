@@ -536,10 +536,8 @@ public class GameGridView extends View {
         gridHeight = state.getHeight();
         
         // Calculate offsets to center the board
-        float boardWidth = gridWidth * cellSize;
-        float boardHeight = gridHeight * cellSize;
-        float offsetX = (getWidth() - boardWidth) / 2;
-        float offsetY = (getHeight() - boardHeight) / 2;
+        float offsetX = (getWidth() - (gridWidth * cellSize)) / 2f;
+        float offsetY = (getHeight() - (gridHeight * cellSize)) / 2f;
         
         // Draw grid cells - board background first
         for (int y = 0; y < gridHeight; y++) {
@@ -601,8 +599,8 @@ public class GameGridView extends View {
         // but BEFORE the walls and other game elements
         if (backgroundLogo != null) {
             // Calculate the center of the board
-            float centerX = offsetX + (boardWidth / 2);
-            float centerY = offsetY + (boardHeight / 2);
+            float centerX = offsetX + (gridWidth * cellSize) / 2;
+            float centerY = offsetY + (gridHeight * cellSize) / 2;
             
             // Make the logo exactly 2x2 squares in size
             float logoSize = cellSize * 2; // Exactly 2 cells wide and high
@@ -791,15 +789,18 @@ public class GameGridView extends View {
         }
         
         // Calculate position
-        float left = robot.getX() * cellSize;
-        float top = robot.getY() * cellSize;
+        float offsetX = (getWidth() - (gridWidth * cellSize)) / 2f;
+        float offsetY = (getHeight() - (gridHeight * cellSize)) / 2f;
+        
+        float left = (robot.getX() * cellSize) + offsetX;
+        float top = (robot.getY() * cellSize) + offsetY;
         
         // If robot has animation position, use that instead of logical position
         if (robot.hasAnimationPosition()) {
             Timber.d("[ANIM] Using animation position for robot %d: (%.2f,%.2f)", 
                    robot.getColor(), robot.getAnimationX(), robot.getAnimationY());
-            left = robot.getAnimationX() * cellSize;
-            top = robot.getAnimationY() * cellSize;
+            left = (robot.getAnimationX() * cellSize) + offsetX;
+            top = (robot.getAnimationY() * cellSize) + offsetY;
         }
         
         // Scale for selection
@@ -815,15 +816,15 @@ public class GameGridView extends View {
         
         // Calculate dimensions
         float size = cellSize * scale;
-        float offsetX = (cellSize - size) / 2f;
-        float offsetY = (cellSize - size) / 2f;
+        float offsetX2 = (cellSize - size) / 2f;
+        float offsetY2 = (cellSize - size) / 2f;
         
         // Set the bounds
         robotDrawable.setBounds(
-                (int) (left + offsetX), 
-                (int) (top + offsetY),
-                (int) (left + offsetX + size), 
-                (int) (top + offsetY + size));
+                (int) (left + offsetX2), 
+                (int) (top + offsetY2),
+                (int) (left + offsetX2 + size), 
+                (int) (top + offsetY2 + size));
         
         // Draw the sprite
         robotDrawable.draw(canvas);
@@ -841,21 +842,31 @@ public class GameGridView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         Timber.d("[ANIM] GameGridView.onTouchEvent: %s", event.getAction());
         
-        // First check if an accessibility action is in progress
+        // Skip if a reset or accessibility action is in progress
         if (accessibilityActionInProgress) {
             return true;
         }
         
+        // Convert screen coordinates to grid coordinates
         float x = event.getX();
         float y = event.getY();
         
-        // Convert to grid coordinates
-        int gridX = (int) ((x - (getWidth() - (gridWidth * cellSize)) / 2) / cellSize);
-        int gridY = (int) ((y - (getHeight() - (gridHeight * cellSize)) / 2) / cellSize);
+        // Calculate grid offsets to center the board
+        float offsetX = (getWidth() - (gridWidth * cellSize)) / 2f;
+        float offsetY = (getHeight() - (gridHeight * cellSize)) / 2f;
         
-        // Ensure coordinates are within bounds
-        if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
-            return false;
+        // Adjust for grid offset
+        float adjustedX = x - offsetX;
+        float adjustedY = y - offsetY;
+        
+        // Convert to grid coordinates
+        int gridX = (int) (adjustedX / cellSize);
+        int gridY = (int) (adjustedY / cellSize);
+        
+        // Bounds check
+        if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
+            // Outside grid, ignore
+            return true;
         }
         
         // Capture action for accessibility announcements
@@ -895,33 +906,23 @@ public class GameGridView extends View {
                     // Only process if the distance exceeds the minimum swipe threshold
                     if (distance >= MIN_SWIPE_DISTANCE) {
                         // Determine the dominant direction (horizontal or vertical)
+                        int dx = 0;
+                        int dy = 0;
+                        
                         if (Math.abs(deltaX) > Math.abs(deltaY)) {
                             // Horizontal swipe
-                            gridY = touchedRobot.getY(); // Lock to robot's row
-                            if (deltaX > 0) {
-                                // Swipe right
-                                gridX = gridWidth - 1; // Far right of grid
-                            } else {
-                                // Swipe left
-                                gridX = 0; // Far left of grid
-                            }
+                            dx = deltaX > 0 ? 1 : -1; // Right or left
                         } else {
                             // Vertical swipe
-                            gridX = touchedRobot.getX(); // Lock to robot's column
-                            if (deltaY > 0) {
-                                // Swipe down
-                                gridY = gridHeight - 1; // Bottom of grid
-                            } else {
-                                // Swipe up
-                                gridY = 0; // Top of grid
-                            }
+                            dy = deltaY > 0 ? 1 : -1; // Down or up
                         }
                         
                         // Select the robot
                         state.setSelectedRobot(touchedRobot);
                         
-                        // Trigger the move
-                        gameStateManager.handleGridTouch(gridX, gridY, MotionEvent.ACTION_UP);
+                        // Use the improved moveRobotInDirection method which handles animation
+                        Timber.d("[SWIPE] Moving robot in direction: dx=%d, dy=%d", dx, dy);
+                        gameStateManager.moveRobotInDirection(dx, dy);
                         
                         // Reset tracking variables to prevent further processing in ACTION_UP
                         startTouchX = -1;
@@ -977,100 +978,47 @@ public class GameGridView extends View {
                             return true;
                         }
                         
-                        // Handle regular movement logic for selected robot
+                        // Handle robot movement if a robot is selected
                         if (selectedRobot != null) {
                             int robotX = selectedRobot.getX();
                             int robotY = selectedRobot.getY();
                             
-                            // Store original position for change detection
-                            int oldX = robotX;
-                            int oldY = robotY;
-                            
-                            // If the click is not on the same row AND not on the same column as the robot,
-                            // use a more intuitive direction detection algorithm based on position relative to robot
-                            if (robotX != gridX && robotY != gridY) {
-                                // Calculate relative position from robot
-                                int deltaX = gridX - robotX; // Positive: east, Negative: west
-                                int deltaY = gridY - robotY; // Positive: south, Negative: north
-                                
-                                // Absolute values of the deltas to determine distance
-                                int absDeltaX = Math.abs(deltaX);
-                                int absDeltaY = Math.abs(deltaY);
-                                
-                                boolean moveNorth = (deltaY < 0) && 
-                                             ((absDeltaX == 0) || 
-                                              (absDeltaX <= 2 && absDeltaY >= 2) || 
-                                              (absDeltaX <= 2 && absDeltaY >= 3));
-                                
-                                boolean moveSouth = (deltaY > 0) && 
-                                             ((absDeltaX == 0) || 
-                                              (absDeltaX <= 2 && absDeltaY >= 2) || 
-                                              (absDeltaX <= 2 && absDeltaY >= 3));
-                                
-                                boolean moveEast = (deltaX > 0) && 
-                                            ((absDeltaY == 0) || 
-                                             (absDeltaY <= 2 && absDeltaX >= 2) || 
-                                             (absDeltaY <= 2 && absDeltaX >= 3));
-                                
-                                boolean moveWest = (deltaX < 0) && 
-                                            ((absDeltaY == 0) || 
-                                             (absDeltaY <= 2 && absDeltaX >= 2) || 
-                                             (absDeltaY <= 2 && absDeltaX >= 3));
-                                
-                                // Determine the primary direction - priority: north, south, east, west
+                            // Determine movement direction based on tap location relative to robot
+                            if (robotX == gridX || robotY == gridY) {
+                                // Direct movement along row or column
                                 int dx = 0;
                                 int dy = 0;
                                 
-                                if (moveNorth) {
-                                    // North direction (up: dy = -1)
-                                    dx = 0;
-                                    dy = -1;
-                                } else if (moveSouth) {
-                                    // South direction (down: dy = 1)
-                                    dx = 0;
-                                    dy = 1;
-                                } else if (moveEast) {
-                                    // East direction (right: dx = 1)
-                                    dx = 1;
-                                    dy = 0;
-                                } else if (moveWest) {
-                                    // West direction (left: dx = -1)
-                                    dx = -1;
-                                    dy = 0;
-                                }
-                                
-                                // If valid direction detected, use the unified movement method
-                                if (dx != 0 || dy != 0) {
-                                    Timber.d("Using unified moveRobotInDirection with dx=%d, dy=%d", dx, dy);
-                                    boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
-                                    
-                                    // Check if robot moved
-                                    if (moved && (oldX != selectedRobot.getX() || oldY != selectedRobot.getY())) {
-                                        handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
-                                    }
+                                if (robotX == gridX) {
+                                    // Moving vertically
+                                    dy = gridY > robotY ? 1 : -1;
                                 } else {
-                                    // Fall back to original method for edge cases
-                                    Timber.d("Falling back to handleGridTouch at (%d,%d)", gridX, gridY);
-                                    gameStateManager.handleGridTouch(gridX, gridY, action);
-                                    
-                                    // Check if robot moved
-                                    if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
-                                        handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
-                                    }
+                                    // Moving horizontally
+                                    dx = gridX > robotX ? 1 : -1;
                                 }
-                            } else {
-                                // Fall back to original method for edge cases
-                                Timber.d("Falling back to handleGridTouch at (%d,%d)", gridX, gridY);
-                                gameStateManager.handleGridTouch(gridX, gridY, action);
                                 
-                                // Check if robot moved
-                                if (oldX != selectedRobot.getX() || oldY != selectedRobot.getY()) {
-                                    handleRobotMovementEffects(state, selectedRobot, oldX, oldY);
+                                // Use the GameStateManager to move the robot, which handles animation
+                                Timber.d("[TOUCH] Moving robot in direction: dx=%d, dy=%d", dx, dy);
+                                gameStateManager.moveRobotInDirection(dx, dy);
+                                return true;
+                            } else {
+                                // Diagonal movement - determine which direction to prioritize
+                                int deltaX = gridX - robotX;
+                                int deltaY = gridY - robotY;
+                                
+                                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                                    // Horizontal movement takes priority
+                                    int dx = deltaX > 0 ? 1 : -1;
+                                    Timber.d("[TOUCH] Moving robot horizontally: dx=%d", dx);
+                                    gameStateManager.moveRobotInDirection(dx, 0);
+                                } else {
+                                    // Vertical movement takes priority
+                                    int dy = deltaY > 0 ? 1 : -1;
+                                    Timber.d("[TOUCH] Moving robot vertically: dy=%d", dy);
+                                    gameStateManager.moveRobotInDirection(0, dy);
                                 }
+                                return true;
                             }
-                        } else {
-                            // No robot selected, just handle the touch
-                            gameStateManager.handleGridTouch(gridX, gridY, action);
                         }
                     }
                     return true;

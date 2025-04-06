@@ -460,70 +460,71 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     /**
      * Handle a touch on the game grid
-     *
+     * 
      * @param x      Grid X coordinate
      * @param y      Grid Y coordinate
      * @param action Touch action type
      * @return
      */
     public boolean handleGridTouch(int x, int y, int action) {
-        GameState state = currentState.getValue();
-        if (state != null && action == MotionEvent.ACTION_UP) {
-            // Find if a robot was touched
-            GameElement touchedRobot = state.getRobotAt(x, y);
-            if (touchedRobot != null) {
-                // Robot was touched, update selection
-                state.setSelectedRobot(touchedRobot);
-                currentState.setValue(state);
-            } else if (state.getSelectedRobot() != null) {
-                // Try to move selected robot to this location
-                boolean moved = state.moveRobotTo(state.getSelectedRobot(), x, y);
-                if (moved) {
-                    // Update move count
-                    incrementMoveCount();
+        Timber.d("[TOUCH] Handle grid touch at (%d,%d) with action %d", x, y, action);
+        
+        GameState state = getCurrentState().getValue();
+        if (state != null) {
+            // Get the currently selected robot
+            GameElement selectedRobot = state.getSelectedRobot();
+            
+            if (action == MotionEvent.ACTION_UP) {
+                // Check if the user tapped on a robot - if so, select it
+                GameElement touchedRobot = state.getRobotAt(x, y);
+                
+                if (touchedRobot != null) {
+                    // User tapped on a robot - select it
+                    Timber.d("[TOUCH] Selecting robot at (%d,%d)", x, y);
+                    state.setSelectedRobot(touchedRobot);
                     
-                    // Get how many squares were moved and update counter
-                    int squaresMovedInThisMove = state.getLastSquaresMoved();
-                    addSquaresMoved(squaresMovedInThisMove);
-                    
-                    // Track which robot was used (for level completion statistics)
-                    GameElement robot = state.getSelectedRobot();
-                    if (robot != null && robot.getColor() >= 0) {
-                        robotsUsed.add(robot.getColor());
-                    }
-                    
-                    // Store a copy of the state in history
-                    GameState stateCopy = null;
-                    try {
-                        // Serialize and deserialize for deep copy
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        ObjectOutputStream oos = new ObjectOutputStream(bos);
-                        oos.writeObject(state);
-                        oos.flush();
-                        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                        ObjectInputStream ois = new ObjectInputStream(bis);
-                        stateCopy = (GameState) ois.readObject();
-                        ois.close();
-                    } catch (Exception e) {
-                        Timber.e(e, "Error creating a deep copy of GameState for history");
-                        stateCopy = state; // Fallback to reference copy if deep copy fails
-                    }
-                    
-                    // Add current state to history
-                    stateHistory.add(stateCopy);
-                    squaresMovedHistory.add(squaresMoved.getValue());
-                    
-                    // Check if game is complete
-                    boolean isComplete = state.checkCompletion();
-                    if (isComplete) {
-                        // Set the game as complete - this will trigger the observers
-                        // in ModernGameFragment that show the toast notification
-                        setGameComplete(true);
-                        Timber.d("Game completed! Moves: %d, Squares moved: %d", 
-                            moveCount.getValue(), squaresMoved.getValue());
+                    // Add used robot to the set
+                    if (touchedRobot.getColor() >= 0) {
+                        robotsUsed.add(touchedRobot.getColor());
                     }
                     
                     currentState.setValue(state);
+                } else if (selectedRobot != null) {
+                    // User tapped on an empty space - try to move the selected robot
+                    int robotX = selectedRobot.getX();
+                    int robotY = selectedRobot.getY();
+                    
+                    // Determine movement direction
+                    int dx = 0;
+                    int dy = 0;
+                    
+                    if (robotX == x) {
+                        // Moving vertically
+                        dy = y > robotY ? 1 : -1;
+                    } else if (robotY == y) {
+                        // Moving horizontally
+                        dx = x > robotX ? 1 : -1;
+                    } else {
+                        // Diagonal tap - determine primary direction
+                        int deltaX = x - robotX;
+                        int deltaY = y - robotY;
+                        
+                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                            // Horizontal movement takes priority
+                            dx = deltaX > 0 ? 1 : -1;
+                            dy = 0;
+                        } else {
+                            // Vertical movement takes priority
+                            dx = 0;
+                            dy = deltaY > 0 ? 1 : -1;
+                        }
+                    }
+                    
+                    // Move the robot using the animation system
+                    if (dx != 0 || dy != 0) {
+                        Timber.d("[TOUCH] Moving robot in direction dx=%d, dy=%d", dx, dy);
+                        moveRobotInDirection(dx, dy);
+                    }
                 }
             }
         }
@@ -552,6 +553,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         GameElement robot = state.getSelectedRobot();
         int startX = robot.getX();
         int startY = robot.getY();
+        
+        // Update the robot's direction if moving horizontally
+        if (dx != 0) {
+            robot.setDirectionX(dx); // Set facing direction
+        }
         
         // Find the farthest position the robot can move in this direction
         int endX = startX;
