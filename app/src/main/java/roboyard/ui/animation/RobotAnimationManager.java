@@ -201,6 +201,12 @@ public class RobotAnimationManager {
             return;
         }
         
+        // When starting a move, shrink to DEFAULT_ROBOT_SCALE
+        if (gameGridView instanceof GameGridView) {
+            ((GameGridView) gameGridView).animateRobotScale(robot, 
+                    GameGridView.SELECTED_ROBOT_SCALE, GameGridView.DEFAULT_ROBOT_SCALE);
+        }
+        
         // Create a ValueAnimator to animate from 0 to 1 (progress)
         final ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
         animator.setDuration((long) duration);
@@ -234,6 +240,23 @@ public class RobotAnimationManager {
                 
                 // Set final position
                 robot.setAnimationPosition(moveInfo.endX, moveInfo.endY);
+                
+                // After movement, grow back to SELECTED_ROBOT_SCALE with a slight bounce effect
+                if (gameGridView instanceof GameGridView) {
+                    // First overshoot a bit larger (bounce effect)
+                    ((GameGridView) gameGridView).animateRobotScaleWithCallback(
+                            robot, 
+                            GameGridView.DEFAULT_ROBOT_SCALE, 
+                            GameGridView.SELECTED_ROBOT_SCALE * 1.1f,  // overshoot
+                            150, // shorter duration for bounce
+                            () -> {
+                                // Then bounce back to normal selected scale
+                                ((GameGridView) gameGridView).animateRobotScale(
+                                        robot, 
+                                        GameGridView.SELECTED_ROBOT_SCALE * 1.1f, 
+                                        GameGridView.SELECTED_ROBOT_SCALE);
+                            });
+                }
                 
                 // Redraw one more time
                 gameGridView.invalidate();

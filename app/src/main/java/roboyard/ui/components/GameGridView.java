@@ -76,9 +76,9 @@ public class GameGridView extends View {
     private Drawable targetMultiDrawable;   // cm
     
     // Robot animation configuration
-    private static final float INITIAL_SELECTED_ROBOT_SCALE = 1.5f; // much larger when clicked
-    private static final float SELECTED_ROBOT_SCALE = 1.3f; // 50% larger, when still selected
-    private static final float DEFAULT_ROBOT_SCALE = 1.1f; // a bit larger as a cell by default
+    public static final float INITIAL_SELECTED_ROBOT_SCALE = 1.5f; // much larger when clicked
+    public static final float SELECTED_ROBOT_SCALE = 1.3f; // 50% larger, when still selected
+    public static final float DEFAULT_ROBOT_SCALE = 1.1f; // a bit larger as a cell by default
     private final boolean enableRobotAnimation = true;
     private final HashMap<GameElement, Float> robotScaleMap = new HashMap<>(); // Track current scale for each robot
     private final GameElement focusedRobot = null; // Currently focused (hovered) robot
@@ -439,7 +439,7 @@ public class GameGridView extends View {
      * @param fromScale Starting scale
      * @param toScale Target scale
      */
-    private void animateRobotScale(GameElement robot, float fromScale, float toScale) {
+    public void animateRobotScale(GameElement robot, float fromScale, float toScale) {
         if (robot == null || !enableRobotAnimation) return;
         
         // Initialize scale if not present
@@ -456,6 +456,45 @@ public class GameGridView extends View {
             robotScaleMap.put(robot, scale);
             invalidate(); // Redraw view
         });
+        animator.start();
+    }
+    
+    /**
+     * Animate a robot's scale from one size to another with completion callback
+     * @param robot The robot to animate
+     * @param fromScale Starting scale
+     * @param toScale Target scale
+     * @param duration Custom duration in milliseconds
+     * @param completionCallback Callback to run when animation completes
+     */
+    public void animateRobotScaleWithCallback(GameElement robot, float fromScale, float toScale, long duration, Runnable completionCallback) {
+        if (robot == null || !enableRobotAnimation) return;
+        
+        // Initialize scale if not present
+        if (!robotScaleMap.containsKey(robot)) {
+            robotScaleMap.put(robot, fromScale);
+        }
+        
+        android.animation.ValueAnimator animator = android.animation.ValueAnimator.ofFloat(fromScale, toScale);
+        animator.setDuration(duration);
+        animator.setInterpolator(easeInterpolator);
+        animator.addUpdateListener(animation -> {
+            float scale = (float) animation.getAnimatedValue();
+            robotScaleMap.put(robot, scale);
+            invalidate();
+        });
+        
+        // Add completion callback
+        animator.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                robotScaleMap.put(robot, toScale);
+                if (completionCallback != null) {
+                    completionCallback.run();
+                }
+            }
+        });
+        
         animator.start();
     }
     
@@ -991,10 +1030,10 @@ public class GameGridView extends View {
                                 
                                 if (robotX == gridX) {
                                     // Moving vertically
-                                    dy = gridY > robotY ? 1 : -1;
+                                    dy = gridY > robotY ? 1 : -1; // Down or up
                                 } else {
                                     // Moving horizontally
-                                    dx = gridX > robotX ? 1 : -1;
+                                    dx = gridX > robotX ? 1 : -1; // Right or left
                                 }
                                 
                                 // Use the GameStateManager to move the robot, which handles animation
