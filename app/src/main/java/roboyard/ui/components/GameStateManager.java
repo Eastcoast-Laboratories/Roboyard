@@ -112,13 +112,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Robot animation manager
     private RobotAnimationManager robotAnimationManager;
     
-    // Animation settings
+    // Animation settings - made slower for more visible effect
     private boolean animationsEnabled = true;
-    private float accelerationDuration = 150f; // ms
-    private float maxSpeed = 1000f; // pixels per second
-    private float decelerationDuration = 200f; // ms
-    private float overshootPercentage = 0.15f; // 15% overshoot
-    private float springBackDuration = 200f; // ms
+    private float accelerationDuration = 300f;  // Increased from 150f
+    private float maxSpeed = 300f;             // Reduced from 1000f
+    private float decelerationDuration = 400f;  // Increased from 200f
+    private float overshootPercentage = 0.20f;  // Increased from 0.15f
+    private float springBackDuration = 400f;    // Increased from 200f
     
     private boolean isResetting = false;
     private GameGridView gameGridView;
@@ -636,12 +636,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Queue this movement for animation
             if (animationsEnabled && robotAnimationManager != null) {
                 Timber.d("[ANIM] Attempting to queue robot animation with manager=%s", robotAnimationManager != null ? "active" : "null");
+                
+                // Make absolutely sure the GameGridView is connected
+                if (gameGridView != null && robotAnimationManager.getGameGridView() == null) {
+                    Timber.d("[ANIM] Fixing GameGridView connection to animation manager");
+                    robotAnimationManager.setGameGridView(gameGridView);
+                }
+                
                 robotAnimationManager.queueRobotMove(
                     robot, originalX, originalY, targetX, targetY, completionCallback
                 );
             } else {
                 // Immediate mode - update position without animation
-                Timber.d("[ANIM] Animations disabled or manager null, moving robot immediately");
+                Timber.d("[ANIM] Animations disabled or manager null (enabled=%b, manager=%s), moving robot immediately",
+                        animationsEnabled, robotAnimationManager != null ? "exists" : "null");
                 robot.setX(targetX);
                 robot.setY(targetY);
                 

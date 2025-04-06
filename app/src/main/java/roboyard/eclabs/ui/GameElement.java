@@ -17,12 +17,19 @@ public class GameElement implements Serializable {
     public static final int TYPE_HORIZONTAL_WALL = Constants.TYPE_HORIZONTAL_WALL; // Horizontal wall between rows (mh)
     public static final int TYPE_VERTICAL_WALL = Constants.TYPE_VERTICAL_WALL;   // Vertical wall between columns (mv)
     
+    // Color constants
+    public static final int COLOR_RED = 0;
+    public static final int COLOR_GREEN = 1;
+    public static final int COLOR_BLUE = 2;
+    public static final int COLOR_YELLOW = 3;
+    
     // Element properties
     private final int type;
     private int x;
     private int y;
     private int color; // 0=red, 1=green, 2=blue, 3=yellow
     private boolean selected;
+    private int directionX = 1; // Default direction (1=right, -1=left)
     
     // Transient properties for animation (not serialized)
     private transient float animationX;
@@ -132,15 +139,24 @@ public class GameElement implements Serializable {
     }
     
     /**
-     * Set the animation position
-     * @param x The x coordinate
-     * @param y The y coordinate
+     * Set the animation position for this element
+     * @param x X position in grid coordinates
+     * @param y Y position in grid coordinates
      */
     public void setAnimationPosition(float x, float y) {
-        animationX = x;
-        animationY = y;
-        animationPositionSet = true;
+        // Log the position change for debugging
         Timber.d("[ANIM] Set animation position for robot %d: (%.2f,%.2f)", getColor(), x, y);
+        
+        // Validate inputs to avoid setting invalid positions
+        if (Float.isNaN(x) || Float.isNaN(y) || Float.isInfinite(x) || Float.isInfinite(y)) {
+            Timber.e("[ANIM] Attempted to set invalid animation position: (%.2f,%.2f)", x, y);
+            return;
+        }
+        
+        this.animationX = x;
+        this.animationY = y;
+        this.hasAnimationPosition = true;
+        this.animationPositionSet = true;
     }
     
     /**
@@ -164,5 +180,23 @@ public class GameElement implements Serializable {
      */
     public float getAnimationY() {
         return animationY;
+    }
+    
+    /**
+     * Get the horizontal direction the robot is facing
+     * @return 1 for right, -1 for left
+     */
+    public int getDirectionX() {
+        return directionX;
+    }
+    
+    /**
+     * Set the horizontal direction the robot is facing
+     * @param direction 1 for right, -1 for left
+     */
+    public void setDirectionX(int direction) {
+        if (direction != 0) {
+            this.directionX = direction > 0 ? 1 : -1;
+        }
     }
 }

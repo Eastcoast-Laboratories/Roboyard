@@ -109,6 +109,9 @@ public class GameGridView extends View {
     private GameElement touchedRobot = null;
     private static final float MIN_SWIPE_DISTANCE = 30.0f; // Minimum distance in pixels to consider it a swipe
 
+    // Flag to track if an accessibility action is in progress
+    private boolean accessibilityActionInProgress = false;
+
     /**
      * Constructor for programmatic creation
      */
@@ -772,94 +775,75 @@ public class GameGridView extends View {
      * @param state Current game state
      */
     private void drawRobotWithGraphics(Canvas canvas, GameElement robot, GameState state) {
-        int x = robot.getX();
-        int y = robot.getY();
+        Drawable robotDrawable;
+        int robotColor = robot.getColor();
+        boolean isSelected = robot.isSelected();
         
-        // Calculate grid offset (space between edge of view and actual grid)
-        float offsetX = (getWidth() - (gridWidth * cellSize)) / 2;
-        float offsetY = (getHeight() - (gridHeight * cellSize)) / 2;
+        // Get the correct robot sprite based on color
+        if (robotColor == GameElement.COLOR_BLUE) {
+            robotDrawable = robot.getDirectionX() < 0 ? blueRobotLeft : blueRobotRight;
+        } else if (robotColor == GameElement.COLOR_YELLOW) {
+            robotDrawable = robot.getDirectionX() < 0 ? yellowRobotLeft : yellowRobotRight;
+        } else if (robotColor == GameElement.COLOR_GREEN) {
+            robotDrawable = robot.getDirectionX() < 0 ? greenRobotLeft : greenRobotRight;
+        } else { // Pink (default)
+            robotDrawable = robot.getDirectionX() < 0 ? pinkRobotLeft : pinkRobotRight;
+        }
         
-        // Calculate top-left corner of the cell
-        float left = offsetX + (x * cellSize);
-        float top = offsetY + (y * cellSize);
+        // Calculate position
+        float left = robot.getX() * cellSize;
+        float top = robot.getY() * cellSize;
         
-        // Use animation position if available (for smooth movement)
+        // If robot has animation position, use that instead of logical position
         if (robot.hasAnimationPosition()) {
-            // Override the position with animation coordinates
-            left = robot.getAnimationX();
-            top = robot.getAnimationY();
-            Timber.d("[ANIM] Using animation position for robot %d: (%.2f,%.2f)", robot.getColor(), left, top);
+            Timber.d("[ANIM] Using animation position for robot %d: (%.2f,%.2f)", 
+                   robot.getColor(), robot.getAnimationX(), robot.getAnimationY());
+            left = robot.getAnimationX() * cellSize;
+            top = robot.getAnimationY() * cellSize;
         }
         
-        // Select drawable based on robot color and facing direction
-        Drawable robotDrawable = null;
-        
-        switch (robot.getColor()) {
-            case 0: // RED
-                robotDrawable = pinkRobotRight;
-                break;
-            case 1: // GREEN
-                robotDrawable = greenRobotRight;
-                break;
-            case 2: // BLUE
-                robotDrawable = blueRobotRight;
-                break;
-            case 3: // YELLOW
-                robotDrawable = yellowRobotRight;
-                break;
-        }
-        
-        // Get the current scale from robotScaleMap, or use default scale based on selection
+        // Scale for selection
         float scale = DEFAULT_ROBOT_SCALE;
         if (robotScaleMap.containsKey(robot)) {
-            // Use the animated scale if available
             scale = robotScaleMap.get(robot);
+        } else if (isSelected) {
+            scale = SELECTED_ROBOT_SCALE;
+            robotScaleMap.put(robot, scale);
         } else {
-            // Otherwise use default scale based on selection state
-            boolean isSelected = (state.getSelectedRobot() == robot);
-            if (isSelected) {
-                scale = SELECTED_ROBOT_SCALE;
-                // Initialize the scale in the map for future animations
-                robotScaleMap.put(robot, scale);
-            } else {
-                // Initialize the scale in the map for future animations
-                robotScaleMap.put(robot, DEFAULT_ROBOT_SCALE);
-            }
+            robotScaleMap.put(robot, scale);
         }
         
-        if (robotDrawable != null) {
-            // Calculate center point
-            float centerX = left + cellSize / 2;
-            float centerY = top + cellSize / 2;
-            
-            // Calculate scaled dimensions
-            float scaledWidth = cellSize * scale;
-            float scaledHeight = cellSize * scale;
-            
-            // Calculate new bounds with center preserved
-            float scaledLeft = centerX - scaledWidth / 2;
-            float scaledTop = centerY - scaledHeight / 2;
-            float scaledRight = centerX + scaledWidth / 2;
-            float scaledBottom = centerY + scaledHeight / 2;
-            
-            // Create a copy of the drawable to ensure we don't affect other instances
-            Drawable robotDrawableCopy = robotDrawable.getConstantState().newDrawable().mutate();
-            // Draw robot using drawable
-            robotDrawableCopy.setBounds(
-                (int) scaledLeft,
-                (int) scaledTop,
-                (int) scaledRight,
-                (int) scaledBottom
-            );
-            robotDrawableCopy.setAlpha(255); // Ensure full opacity for the actual robots
-            robotDrawableCopy.draw(canvas);
+        // Calculate dimensions
+        float size = cellSize * scale;
+        float offsetX = (cellSize - size) / 2f;
+        float offsetY = (cellSize - size) / 2f;
+        
+        // Set the bounds
+        robotDrawable.setBounds(
+                (int) (left + offsetX), 
+                (int) (top + offsetY),
+                (int) (left + offsetX + size), 
+                (int) (top + offsetY + size));
+        
+        // Draw the sprite
+        robotDrawable.draw(canvas);
+        
+        // Debug - draw position text
+        if (isSelected) {
+            canvas.drawText("(" + robot.getX() + "," + robot.getY() + ")", 
+                    left + cellSize / 2, 
+                    top + cellSize / 2, 
+                    textPaint);
         }
     }
     
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (gameStateManager == null) {
-            return false;
+        Timber.d("[ANIM] GameGridView.onTouchEvent: %s", event.getAction());
+        
+        // First check if an accessibility action is in progress
+        if (accessibilityActionInProgress) {
+            return true;
         }
         
         float x = event.getX();
@@ -1104,7 +1088,6 @@ public class GameGridView extends View {
         }
         
         // Fall back to original behavior for other actions
-// TODO: not a boolean      return gameStateManager.handleGridTouch(gridX, gridY, action);
         return true;
     }
     
@@ -1112,6 +1095,9 @@ public class GameGridView extends View {
      * Handle effects after a robot has moved (sound, animation, game completion check)
      */
     private void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
+        Timber.d("[ANIM] handleRobotMovementEffects: Robot %d moved from (%d,%d) to (%d,%d)", 
+                selectedRobot.getColor(), oldX, oldY, selectedRobot.getX(), selectedRobot.getY());
+        
         // Shrink the robot back to default size when it starts moving
         if (robotScaleMap.containsKey(selectedRobot) && robotScaleMap.get(selectedRobot) > DEFAULT_ROBOT_SCALE) {
             animateRobotScale(selectedRobot, robotScaleMap.get(selectedRobot), DEFAULT_ROBOT_SCALE);
