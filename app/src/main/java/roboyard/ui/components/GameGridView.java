@@ -878,12 +878,73 @@ public class GameGridView extends View {
     }
     
     @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Get the raw screen coordinates
+        float rawX = event.getRawX();
+        float rawY = event.getRawY();
+        
+        // Check if this might be an edge gesture (like Android back)
+        int[] location = new int[2];
+        getLocationOnScreen(location);
+        boolean isLeftEdgeGesture = rawX - location[0] < 20; // Within 20px of left edge
+        boolean isRightEdgeGesture = (location[0] + getWidth() - rawX) < 20; // Within 20px of right edge
+        
+        // For left/right edge gestures, handle them as robot movements
+        if ((isLeftEdgeGesture || isRightEdgeGesture) && event.getAction() == MotionEvent.ACTION_DOWN) {
+            // Process edge swipes on ACTION_DOWN
+            Timber.d("[BACK] DETECTED edge gesture: %s", isLeftEdgeGesture ? "LEFT" : "RIGHT");
+            
+            GameState state = gameStateManager.getCurrentState().getValue();
+            if (state != null) {
+                GameElement robot = state.getSelectedRobot();
+                if (robot != null) {
+                    // Determine direction based on which edge
+                    int dx = isLeftEdgeGesture ? -1 : 1; // Left edge = move left, Right edge = move right
+                    
+                    Timber.d("[BACK] MOVING Robot %d from (%d,%d) with dx=%d", 
+                            robot.getColor(), robot.getX(), robot.getY(), dx);
+                    
+                    // Move the robot 
+                    boolean moved = gameStateManager.moveRobotInDirection(dx, 0);
+                    Timber.d("[BACK] Movement result: %s", moved ? "SUCCESS" : "FAILED");
+                    
+                    // This is important - return true to consume the event
+                    return true;
+                } else {
+                    Timber.d("[BACK] No robot selected to move");
+                }
+            } else {
+                Timber.d("[BACK] No game state available");
+            }
+        }
+        
+        // Default behavior for normal touches
+        return super.dispatchTouchEvent(event);
+    }
+    
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Timber.d("[ANIM] GameGridView.onTouchEvent: %s", event.getAction());
+        Timber.d("[ANIM] GameGridView.onTouchEvent: action=%d", event.getAction());
         
         // Skip if a reset or accessibility action is in progress
         if (accessibilityActionInProgress) {
             return true;
+        }
+        
+        // Get the raw screen coordinates
+        float rawX = event.getRawX();
+        float rawY = event.getRawY();
+        
+        // Check if this might be an edge gesture (like Android back)
+        int[] location = new int[2];
+        getLocationOnScreen(location);
+        boolean isLeftEdgeGesture = rawX - location[0] < 20; // Within 20px of left edge
+        boolean isRightEdgeGesture = (location[0] + getWidth() - rawX) < 20; // Within 20px of right edge
+        
+        // Log edge gesture detection
+        if (isLeftEdgeGesture || isRightEdgeGesture) {
+            Timber.d("[BACK] DETECTED: Left=%s, Right=%s, Action=%d, RawX=%f, ViewX=%d", 
+                    isLeftEdgeGesture, isRightEdgeGesture, event.getAction(), rawX, location[0]);
         }
         
         // Convert screen coordinates to grid coordinates
@@ -902,7 +963,34 @@ public class GameGridView extends View {
         int gridX = (int) (adjustedX / cellSize);
         int gridY = (int) (adjustedY / cellSize);
         
-        // Bounds check
+        // Handle edge gestures as robot movements
+        if ((isLeftEdgeGesture || isRightEdgeGesture) && event.getAction() == MotionEvent.ACTION_DOWN) {
+            // Process edge swipes on ACTION_DOWN
+            Timber.d("[BACK] Processing edge gesture as robot movement on ACTION_DOWN");
+            GameState state = gameStateManager.getCurrentState().getValue();
+            if (state != null) {
+                GameElement robot = state.getSelectedRobot();
+                if (robot != null) {
+                    // Determine direction based on which edge
+                    int dx = isLeftEdgeGesture ? -1 : 1; // Left edge = move left, Right edge = move right
+                    
+                    Timber.d("[BACK] MOVING: Robot %d with dx=%d", robot.getColor(), dx);
+                    try {
+                        boolean moved = gameStateManager.moveRobotInDirection(dx, 0);
+                        Timber.d("[BACK] Movement result: %s", moved ? "SUCCESS" : "FAILED");
+                    } catch (Exception e) {
+                        Timber.e(e, "[BACK] Error moving robot");
+                    }
+                    return true;
+                } else {
+                    Timber.d("[BACK] No robot selected");
+                }
+            } else {
+                Timber.d("[BACK] No game state available");
+            }
+        }
+        
+        // Bounds check for non-edge gestures
         if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
             // Outside grid, ignore
             return true;
@@ -1036,7 +1124,7 @@ public class GameGridView extends View {
                                     dx = gridX > robotX ? 1 : -1; // Right or left
                                 }
                                 
-                                // Use the GameStateManager to move the robot, which handles animation
+                                // Use the improved moveRobotInDirection method which handles animation
                                 Timber.d("[TOUCH] Moving robot in direction: dx=%d, dy=%d", dx, dy);
                                 gameStateManager.moveRobotInDirection(dx, dy);
                                 return true;

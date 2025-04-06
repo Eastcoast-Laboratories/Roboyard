@@ -316,21 +316,23 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Check if robot is at an edge and move it inward
                     boolean moved = false;
                     if (robotX == 0) { // Left edge
-                        moved = gameState.moveRobotTo(robot, 1, robotY);
-                        Timber.d("Moving robot from left edge inward: %s", moved ? "success" : "failed");
+                        Timber.d("[BACK] Detected robot at left edge, moving inward");
+                        // Use animation system through GameStateManager instead of direct data update
+                        moved = gameStateManager.moveRobotInDirection(1, 0); // Move right
                     } else if (robotX == boardWidth - 1) { // Right edge
-                        moved = gameState.moveRobotTo(robot, boardWidth - 2, robotY);
-                        Timber.d("Moving robot from right edge inward: %s", moved ? "success" : "failed");
+                        Timber.d("[BACK] Detected robot at right edge, moving inward");
+                        moved = gameStateManager.moveRobotInDirection(-1, 0); // Move left
                     } else if (robotY == 0) { // Top edge
-                        moved = gameState.moveRobotTo(robot, robotX, 1);
-                        Timber.d("Moving robot from top edge inward: %s", moved ? "success" : "failed");
+                        Timber.d("[BACK] Detected robot at top edge, moving inward");
+                        moved = gameStateManager.moveRobotInDirection(0, 1); // Move down
                     } else if (robotY == boardHeight - 1) { // Bottom edge
-                        moved = gameState.moveRobotTo(robot, robotX, boardHeight - 2);
-                        Timber.d("Moving robot from bottom edge inward: %s", moved ? "success" : "failed");
+                        Timber.d("[BACK] Detected robot at bottom edge, moving inward");
+                        moved = gameStateManager.moveRobotInDirection(0, -1); // Move up
                     }
                     
                     if (moved) {
                         Toast.makeText(requireContext(), "Robot moved away from edge", Toast.LENGTH_SHORT).show();
+                        Timber.d("[BACK] Robot moved away from edge");
                     } else {
                         // Deselect the robot if it couldn't be moved
                         gameState.setSelectedRobot(null);
