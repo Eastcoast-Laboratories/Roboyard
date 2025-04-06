@@ -1042,7 +1042,7 @@ public class GameGridView extends View {
     /**
      * Handle effects after a robot has moved (sound, animation, game completion check)
      */
-    private void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
+    void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
         Timber.d("[ANIM] handleRobotMovementEffects: Robot %d moved from (%d,%d) to (%d,%d)", 
                 selectedRobot.getColor(), oldX, oldY, selectedRobot.getX(), selectedRobot.getY());
         

@@ -649,9 +649,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     robotAnimationManager.setGameGridView(gameGridView);
                 }
                 
-                robotAnimationManager.queueRobotMove(
-                    robot, originalX, originalY, targetX, targetY, completionCallback
-                );
+                // Capture current position for path tracking
+                final int oldX = robot.getX();
+                final int oldY = robot.getY();
+                
+                // Create enhanced completion callback that tracks paths
+                Runnable enhancedCallback = () -> {
+                    // First run the original completion callback
+                    completionCallback.run();
+                    
+                    // Then update the path tracking in GameGridView
+                    if (gameGridView != null) {
+                        gameGridView.handleRobotMovementEffects(state, robot, oldX, oldY);
+                    }
+                    
+                    // Add this robot to the used set
+                    if (robot.getColor() >= 0) {
+                        robotsUsed.add(robot.getColor());
+                    }
+                };
+                
+                // Queue the animation with the enhanced callback
+                robotAnimationManager.queueRobotMove(robot, originalX, originalY, targetX, targetY, enhancedCallback);
             } else {
                 // Immediate mode - update position without animation
                 Timber.d("[ANIM] Animations disabled or manager null (enabled=%b, manager=%s), moving robot immediately",
