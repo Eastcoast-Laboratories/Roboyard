@@ -747,7 +747,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("ModernGameFragment: Back button clicked");
             // Undo the last move
             if (gameStateManager.undoLastMove()) {
-//                Toast.makeText(requireContext(), "Move undone", Toast.LENGTH_SHORT).show();
+                // Force grid view update after undo
+                if (gameGridView != null) {
+                    // Clear paths if needed
+                    gameGridView.clearRobotPaths();
+                    // Force the grid view to redraw completely
+                    gameGridView.invalidate();
+                    
+                    // Update the game state display to reflect the undone move
+                    if (currentState != null) {
+                        updateGameState(currentState);
+                    }
+                }
             } else {
                 Toast.makeText(requireContext(), "Nothing to undo", Toast.LENGTH_SHORT).show();
             }
@@ -757,16 +768,46 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Reset robots button - reset robots to starting positions without changing the map
         resetRobotsButton = view.findViewById(R.id.reset_robots_button);
         resetRobotsButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Reset robots button clicked");
-            // Reset the robots
+            Timber.d("[ROBOTS] ModernGameFragment: Reset robots button clicked");
+            // Reset the robots - this internally calls currentState.setValue() to notify observers
             gameStateManager.resetRobots();
             
-            // Clear robot movement paths
-            if (gameGridView != null) {
-                gameGridView.clearRobotPaths();
-            }
+            // Get the current state after reset
+            GameState stateAfterReset = gameStateManager.getCurrentState().getValue();
+            Timber.d("[ROBOTS] After reset: currentState is %s", stateAfterReset == null ? "null" : "available");
             
-            Toast.makeText(requireContext(), "Robots reset to starting positions", Toast.LENGTH_SHORT).show();
+            if (stateAfterReset != null) {
+                // Clear animation positions for all robots
+                for (GameElement element : stateAfterReset.getGameElements()) {
+                    if (element.getType() == GameElement.TYPE_ROBOT) {
+                        // Clear any animation positions by explicitly setting them to match logical positions
+                        element.clearAnimationPosition();
+                        Timber.d("[ROBOTS] Cleared animation position for robot color %d at position (%d,%d)", 
+                            element.getColor(), element.getX(), element.getY());
+                    }
+                }
+                
+                // Clear robot movement paths
+                gameGridView.clearRobotPaths();
+                
+                // Force a complete redraw of the game grid
+                gameGridView.invalidate();
+                
+                // Update all UI elements to match the reset state
+                updateGameState(stateAfterReset);
+                
+                // Force an additional invalidation to ensure UI updates
+                requireActivity().runOnUiThread(() -> {
+                    gameGridView.invalidate();
+                    Timber.d("[ROBOTS] Forced additional UI invalidation after reset");
+                });
+                
+                // Play a sound to indicate reset
+                playSound("move");
+                
+                // For accessibility, announce the reset
+                announceAccessibility("Robots reset to starting positions");
+            }
         });
         
         // (Button text: "Hint")
@@ -2055,7 +2096,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setTextOn("Cancel");
-            hintButton.setTextOff("Hint");
+            hintButton.setTextOff("💡Hint");
             hintButton.setChecked(true);
             updateStatusText("AI is thinking...", true);
             Timber.d("ModernGameFragment: UI updated to show calculation in progress");

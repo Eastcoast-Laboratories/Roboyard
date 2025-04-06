@@ -1402,7 +1402,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void resetRobots() {
         GameState currentGameState = currentState.getValue();
         if (currentGameState == null) {
-            Timber.e("Cannot reset robots: no current game state");
+            Timber.e("[ROBOTS] Cannot reset robots: no current game state");
             return;
         }
         
@@ -1418,7 +1418,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int historySize = stateHistory.size();
         stateHistory.clear();
         squaresMovedHistory.clear();
-        Timber.d("Cleared state history (previous size: %d)", historySize);
+        Timber.d("[ROBOTS] Cleared state history (previous size: %d)", historySize);
         
         // Reset the solution step counter
         resetSolutionStep();
@@ -1426,7 +1426,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Notify that the game state has changed
         currentState.setValue(currentGameState);
         
-        Timber.d("Robots reset to starting positions");
+        Timber.d("[ROBOTS] Robots reset to starting positions");
     }
     
     /**

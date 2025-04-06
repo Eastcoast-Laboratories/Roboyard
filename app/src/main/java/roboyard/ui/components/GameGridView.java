@@ -1511,8 +1511,11 @@ public class GameGridView extends View {
      */
     public void setGridElements(ArrayList<GridElement> gridElements) {
         if (gridElements == null || gridElements.isEmpty()) {
+            Timber.e("[ROBOTS] setGridElements: gridElements is null or empty");
             return;
         }
+        
+        Timber.d("[ROBOTS] setGridElements: Setting %d grid elements", gridElements.size());
         
         // Find the maximum x and y values to determine grid dimensions
         int maxX = 0;
@@ -1527,10 +1530,28 @@ public class GameGridView extends View {
         if (dimensionsChanged) {
             gridWidth = maxX + 1;
             gridHeight = maxY + 1;
-            Timber.d("Grid dimensions updated to %dx%d", gridWidth, gridHeight);
+            Timber.d("[ROBOTS] Grid dimensions updated to %dx%d", gridWidth, gridHeight);
             
             // Re-initialize tile rotations for the new dimensions
             initializeTileRotations();
+        }
+        
+        // Log positions of robots for debugging
+        for (GridElement element : gridElements) {
+            if (element.getType() != null && element.getType().startsWith("robot_")) {
+                // Extract robot color from type (robot_red, robot_blue, etc.)
+                String colorStr = element.getType().substring(6); // Remove "robot_" prefix
+                int colorId = -1;
+                switch (colorStr) {
+                    case "red": colorId = 0; break;
+                    case "green": colorId = 1; break;
+                    case "blue": colorId = 2; break;
+                    case "yellow": colorId = 3; break;
+                    case "silver": colorId = 4; break;
+                }
+                Timber.d("[ROBOTS] setGridElements: Robot %s at position (%d,%d)", 
+                        colorStr, element.getX(), element.getY());
+            }
         }
         
         // Force redraw
