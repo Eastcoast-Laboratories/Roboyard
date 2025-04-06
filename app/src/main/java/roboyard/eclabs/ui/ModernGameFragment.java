@@ -331,8 +331,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
                     
                     if (moved) {
-                        Toast.makeText(requireContext(), "Robot moved away from edge", Toast.LENGTH_SHORT).show();
-                        Timber.d("[BACK] Robot moved away from edge");
+                        // Toast.makeText(requireContext(), "Robot moved away from edge", Toast.LENGTH_SHORT).show();
+                        Timber.d("[BACK] Robot moved away from edge, back captured");
                     } else {
                         // Deselect the robot if it couldn't be moved
                         gameState.setSelectedRobot(null);
