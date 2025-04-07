@@ -1807,6 +1807,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Toast.makeText(requireContext(), 
                 "Solution found: " + totalMoves + " moves", 
                 Toast.LENGTH_SHORT).show();
+            
+            // Show the optimal moves button when the optimal moves are available
+            updateOptimalMovesButton(totalMoves, true);
         }
         // Last fixed pre-hint: Show which robot to move first
         else if (currentHintStep == numPreHints + 1) {
@@ -1913,10 +1916,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 updateStatusText(hintMessage.toString(), true);
                 Timber.d("[HINT_SYSTEM] Displayed hint: %s", hintMessage);
                 
-                // Show the optimal moves button after the first normal hint is shown
                 if (hintIndex == 0) {
-                    Timber.d("[HINT_SYSTEM] First normal hint shown, displaying optimal moves button");
-                    updateOptimalMovesButton(totalMoves, true);
+                    Timber.d("[HINT_SYSTEM] First normal hint shown");
                 }
             } else {
                 // Error in hint system
