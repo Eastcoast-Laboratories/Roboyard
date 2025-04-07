@@ -8,6 +8,7 @@ import roboyard.eclabs.GameManager;
 import driftingdroids.model.Board;
 import driftingdroids.model.Solver;
 import driftingdroids.model.Solution;
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.ricochet.ERRGameMove;
@@ -83,6 +84,13 @@ public class SolverDD implements ISolver{
 
         if(solver == null){
             Timber.d("[SOLUTION SOLVER] SolverDD.run(): solver is null, aborting");
+            return;
+        }
+
+        // Check if outer walls are complete before running the solver
+        if (!outerWallsAreComplete()) {
+            Timber.e("[SOLUTION SOLVER] Incomplete outer walls detected! Aborting solver to prevent crash.");
+            solverStatus = SolverStatus.missingData;
             return;
         }
 
@@ -178,5 +186,55 @@ public class SolverDD implements ISolver{
      */
     public boolean isSolution01() {
         return board != null && board.isSolution01();
+    }
+
+    private boolean outerWallsAreComplete() {
+        if (board == null) {
+            Timber.e("[SOLUTION SOLVER][OUTER WALLS] Cannot check outer walls: board is null");
+            return false;
+        }
+        
+        int width = board.width;
+        int height = board.height;
+        
+        Timber.d("[SOLUTION SOLVER][OUTER WALLS] Checking outer walls for board dimensions %d x %d", width, height);
+        // Check top border (horizontal walls)
+        for (int x = 0; x < width; x++) {
+            int position = 0 * width + x; // y=0, first row
+            if (!board.isWall(position, Constants.NORTH)) {
+                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing top wall at x=%d", x);
+                return false;
+            }
+        }
+        
+        // Check bottom border (horizontal walls)
+        for (int x = 0; x < width; x++) {
+            int position = (height-1) * width + x; // y=height-1, last row
+            if (!board.isWall(position, Constants.SOUTH)) {
+                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing bottom wall at x=%d", x);
+                return false;
+            }
+        }
+        
+        // Check left border (vertical walls)
+        for (int y = 0; y < height; y++) {
+            int position = y * width + 0; // x=0, first column
+            if (!board.isWall(position, Constants.WEST)) {
+                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing left wall at y=%d", y);
+                return false;
+            }
+        }
+        
+        // Check right border (vertical walls)
+        for (int y = 0; y < height; y++) {
+            int position = y * width + (width-1); // x=width-1, last column
+            if (!board.isWall(position, Constants.EAST)) {
+                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing right wall at y=%d", y);
+                return false;
+            }
+        }
+        
+        Timber.d("[SOLUTION SOLVER][OUTER WALLS] All outer walls are present");
+        return true;
     }
 }
