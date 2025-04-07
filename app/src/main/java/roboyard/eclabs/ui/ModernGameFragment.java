@@ -2161,7 +2161,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Reset hint button text back to "Hint"
         hintButton.setChecked(false);
-        updateStatusText("AI found a solution!", true);
+        
+        // hide the hint text
+        updateStatusText("AI found a solution!", false);
         Timber.d("[HINT] UI updated to show solution found");
         
         // Initialize the optimal moves button value
