@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -41,6 +42,7 @@ import roboyard.eclabs.GameHistoryEntry;
 import roboyard.eclabs.GameHistoryManager;
 import roboyard.eclabs.R;
 import roboyard.eclabs.FileReadWrite;
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
@@ -475,43 +477,330 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private void shareSaveSlot(int slotId) {
         try {
-            // Get save file path
-            String savePath = FileReadWrite.getSaveGamePath(requireActivity(), slotId);
-            java.io.File saveFile = new java.io.File(savePath);
+            // Use the same path format as in GameState.loadSavedGame
+            File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
+            String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
+            File saveFile = new File(savesDir, filename);
+            String savePath = saveFile.getAbsolutePath();
+            
+            Timber.d("[SHARE] Attempting to load save from: %s (exists: %b)", savePath, saveFile.exists());
             
             if (saveFile.exists()) {
                 // Load save data
                 String saveData = FileReadWrite.loadAbsoluteData(savePath);
                 
                 if (saveData != null && !saveData.isEmpty()) {
-                    // URL encode the save data
-                    String encodedData = URLEncoder.encode(saveData, "UTF-8");
+                    Timber.d("[SHARE] Loaded save data, length: %d characters", saveData.length());
+                    
+                    // Manually extract map name and move count from the save data
+                    String mapName = "Shared Map";
+                    int moveCount = 0;
+                    int width = 16;
+                    int height = 16;
+                    
+                    String[] lines = saveData.split("\n");
+                    Timber.d("[SHARE] Save data has %d lines", lines.length);
+                    
+                    // Parse metadata from the first line if it starts with #
+                    if (lines.length > 0 && lines[0].startsWith("#")) {
+                        String metadataLine = lines[0];
+                        String[] metadata = metadataLine.substring(1).split(";");
+                        
+                        for (String item : metadata) {
+                            if (item.startsWith("MAPNAME:")) {
+                                mapName = item.substring("MAPNAME:".length());
+                                Timber.d("[SHARE] Found map name: %s", mapName);
+                            } else if (item.startsWith("MOVES:")) {
+                                try {
+                                    moveCount = Integer.parseInt(item.substring("MOVES:".length()));
+                                    Timber.d("[SHARE] Found move count: %d", moveCount);
+                                } catch (NumberFormatException e) {
+                                    Timber.e(e, "[SHARE] Error parsing move count");
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Look for board dimensions
+                    for (String line : lines) {
+                        if (line.startsWith("WIDTH:")) {
+                            try {
+                                width = Integer.parseInt(line.substring("WIDTH:".length()).trim().replace(";", ""));
+                                Timber.d("[SHARE] Found width: %d", width);
+                            } catch (NumberFormatException e) {
+                                Timber.e(e, "[SHARE] Error parsing width");
+                            }
+                        } else if (line.startsWith("HEIGHT:")) {
+                            try {
+                                height = Integer.parseInt(line.substring("HEIGHT:".length()).trim().replace(";", ""));
+                                Timber.d("[SHARE] Found height: %d", height);
+                            } catch (NumberFormatException e) {
+                                Timber.e(e, "[SHARE] Error parsing height");
+                            }
+                        }
+                    }
+                    
+                    // Build the data string in the format expected by the share system
+                    StringBuilder formattedData = new StringBuilder();
+                    formattedData.append("name:").append(mapName).append(";");
+                    formattedData.append("num_moves:").append(moveCount).append(";");
+                    formattedData.append("solution:board:").append(width).append(",").append(height).append(";");
+                    
+                    // Parse the board data more comprehensively
+                    boolean inBoardSection = false;
+                    boolean inRobotsSection = false;
+                    boolean inWallsSection = false;
+                    boolean inTargetsSection = false;
+                    
+                    int wallCount = 0;
+                    int targetCount = 0;
+                    int robotCount = 0;
+                    
+                    // For board data, we need to parse walls and other elements
+                    for (int i = 0; i < lines.length; i++) {
+                        String line = lines[i].trim();
+                        
+                        // Skip empty lines
+                        if (line.isEmpty()) {
+                            continue;
+                        }
+                        
+                        // Check for section markers
+                        if (line.equals("BOARD:")) {
+                            inBoardSection = true;
+                            inRobotsSection = false;
+                            inWallsSection = false;
+                            inTargetsSection = false;
+                            Timber.d("[SHARE] Found BOARD section");
+                            continue;
+                        } else if (line.equals("ROBOTS:")) {
+                            inBoardSection = false;
+                            inRobotsSection = true;
+                            inWallsSection = false;
+                            inTargetsSection = false;
+                            Timber.d("[SHARE] Found ROBOTS section");
+                            continue;
+                        } else if (line.equals("WALLS:")) {
+                            inBoardSection = false;
+                            inRobotsSection = false;
+                            inWallsSection = true;
+                            inTargetsSection = false;
+                            Timber.d("[SHARE] Found WALLS section");
+                            continue;
+                        } else if (line.equals("TARGETS:")) {
+                            inBoardSection = false;
+                            inRobotsSection = false;
+                            inWallsSection = false;
+                            inTargetsSection = true;
+                            Timber.d("[SHARE] Found TARGETS section");
+                            continue;
+                        }
+                        
+                        try {
+                            // Parse wall data
+                            if (inWallsSection) {
+                                // Format could be either:
+                                // 1. 'H,y,x' or 'V,y,x' (H=horizontal, V=vertical)
+                                // 2. 'x,y,direction' (direction = 'h' or 'v')
+                                String[] parts = line.split(",");
+                                if (parts.length >= 3) {
+                                    // Check if the first part is a direction letter (H or V)
+                                    if (parts[0].equals("H") || parts[0].equals("V")) {
+                                        // Format is 'H,y,x' or 'V,y,x'
+                                        String direction = parts[0];
+                                        // Validate that parts[1] and parts[2] are numbers
+                                        if (parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                            int y = Integer.parseInt(parts[1]);
+                                            int x = Integer.parseInt(parts[2].replace(";", ""));
+                                            
+                                            if ("H".equals(direction)) {
+                                                formattedData.append("\nmh").append(y).append(",").append(x).append(";");
+                                                wallCount++;
+                                            } else if ("V".equals(direction)) {
+                                                formattedData.append("\nmv").append(y).append(",").append(x).append(";");
+                                                wallCount++;
+                                            }
+                                        } else {
+                                            Timber.e("[SHARE] Invalid wall coordinates: %s", line);
+                                        }
+                                    } else {
+                                        // Try the format 'x,y,direction'
+                                        // Validate that parts[0] and parts[1] are numbers
+                                        if (parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
+                                            int x = Integer.parseInt(parts[0]);
+                                            int y = Integer.parseInt(parts[1]);
+                                            String direction = parts[2].replace(";", "");
+                                            
+                                            if ("h".equals(direction)) {
+                                                formattedData.append("\nmh").append(y).append(",").append(x).append(";");
+                                                wallCount++;
+                                            } else if ("v".equals(direction)) {
+                                                formattedData.append("\nmv").append(y).append(",").append(x).append(";");
+                                                wallCount++;
+                                            }
+                                        } else {
+                                            Timber.e("[SHARE] Invalid wall coordinates: %s", line);
+                                        }
+                                    }
+                                }
+                            }
+                            // Parse target data
+                            else if (inTargetsSection) {
+                                // Format: x,y,color
+                                String[] parts = line.split(",");
+                                if (parts.length >= 3) {
+                                    // Validate that all parts are numbers
+                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                        int x = Integer.parseInt(parts[0]);
+                                        int y = Integer.parseInt(parts[1]);
+                                        int color = Integer.parseInt(parts[2].replace(";", ""));
+                                        
+                                        // Map color code to color name
+                                        String colorName = getRobotColorName(color);
+                                        formattedData.append("\ntarget_").append(colorName).append(x).append(",").append(y).append(";");
+                                        targetCount++;
+                                    } else {
+                                        Timber.e("[SHARE] Invalid target coordinates or color: %s", line);
+                                    }
+                                }
+                            }
+                            // Parse robot data
+                            else if (inRobotsSection) {
+                                // Format: x,y,color
+                                String[] parts = line.split(",");
+                                if (parts.length >= 3) {
+                                    // Validate that all parts are numbers
+                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                        int x = Integer.parseInt(parts[0]);
+                                        int y = Integer.parseInt(parts[1]);
+                                        int color = Integer.parseInt(parts[2].replace(";", ""));
+                                        
+                                        // Map color code to color name
+                                        String colorName = getRobotColorName(color);
+                                        formattedData.append("\nrobot_").append(colorName).append(x).append(",").append(y).append(";");
+                                        robotCount++;
+                                    } else {
+                                        Timber.e("[SHARE] Invalid robot coordinates or color: %s", line);
+                                    }
+                                }
+                            }
+                            
+                            // Fall back to older format if needed
+                            if (line.startsWith("WALL:")) {
+                                // Format: WALL:x,y,direction;
+                                String[] parts = line.substring("WALL:".length()).split(",");
+                                if (parts.length >= 3) {
+                                    // Validate that parts[0] and parts[1] are numbers
+                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
+                                        int x = Integer.parseInt(parts[0]);
+                                        int y = Integer.parseInt(parts[1]);
+                                        String direction = parts[2].replace(";", "");
+                                        
+                                        if ("h".equals(direction)) {
+                                            formattedData.append("\nmh").append(y).append(",").append(x).append(";");
+                                            wallCount++;
+                                        } else if ("v".equals(direction)) {
+                                            formattedData.append("\nmv").append(y).append(",").append(x).append(";");
+                                            wallCount++;
+                                        }
+                                    } else {
+                                        Timber.e("[SHARE] Invalid wall coordinates: %s", line);
+                                    }
+                                }
+                            } else if (line.startsWith("TARGET:")) {
+                                // Format: TARGET:x,y,color;
+                                String[] parts = line.substring("TARGET:".length()).split(",");
+                                if (parts.length >= 3) {
+                                    // Validate that all parts are numbers
+                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                        int x = Integer.parseInt(parts[0]);
+                                        int y = Integer.parseInt(parts[1]);
+                                        int color = Integer.parseInt(parts[2].replace(";", ""));
+                                        String colorName = getRobotColorName(color);
+                                        formattedData.append("\ntarget_").append(colorName).append(x).append(",").append(y).append(";");
+                                        targetCount++;
+                                    } else {
+                                        Timber.e("[SHARE] Invalid target coordinates or color: %s", line);
+                                    }
+                                }
+                            } else if (line.startsWith("ROBOT:")) {
+                                // Format: ROBOT:x,y,color;
+                                String[] parts = line.substring("ROBOT:".length()).split(",");
+                                if (parts.length >= 3) {
+                                    // Validate that all parts are numbers
+                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                        int x = Integer.parseInt(parts[0]);
+                                        int y = Integer.parseInt(parts[1]);
+                                        int color = Integer.parseInt(parts[2].replace(";", ""));
+                                        String colorName = getRobotColorName(color);
+                                        formattedData.append("\nrobot_").append(colorName).append(x).append(",").append(y).append(";");
+                                        robotCount++;
+                                    } else {
+                                        Timber.e("[SHARE] Invalid robot coordinates or color: %s", line);
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "[SHARE] Error parsing line: %s", line);
+                        }
+                    }
+                    
+                    Timber.d("[SHARE] Parsed %d walls, %d targets, %d robots", wallCount, targetCount, robotCount);
+                    
+                    // Check if we have the minimum required data - walls and at least one robot
+                    // Note: Some maps may legitimately have 0 targets, so we don't require targets
+                    if (wallCount == 0 || robotCount == 0) {
+                        Toast.makeText(requireContext(), "Error: Incomplete game data for sharing", Toast.LENGTH_SHORT).show();
+                        Timber.e("[SHARE] Cannot share - missing walls or robots");
+                        return;
+                    }
+                    
+                    // URL encode the formatted data
+                    String encodedData = URLEncoder.encode(formattedData.toString(), "UTF-8");
                     
                     // Create the share URL
                     String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedData;
+                    
+                    // Log the full URL for debugging
+                    Timber.d("[SHARE] Share URL: %s", shareUrl);
                     
                     // Create an intent to open the URL
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
                     startActivity(intent);
                     
                     Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
-                    Timber.d("Sharing save slot %d with URL: %s", slotId, shareUrl);
+                    Timber.d("[SHARE] Sharing save slot %d with URL: %s", slotId, shareUrl);
                 } else {
                     Toast.makeText(requireContext(), "No data to share", Toast.LENGTH_SHORT).show();
+                    Timber.e("[SHARE] Empty save data");
                 }
             } else {
-                Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Save file does not exist", Toast.LENGTH_SHORT).show();
+                Timber.d("[SHARE] Save file does not exist at path: %s", savePath);
             }
-            
-        } catch (UnsupportedEncodingException e) {
-            Timber.e(e, "Error encoding save data");
-            Toast.makeText(requireContext(), "Error creating share URL", Toast.LENGTH_SHORT).show();
-        } catch (ActivityNotFoundException e) {
-            Timber.e(e, "No browser available to open URL");
-            Toast.makeText(requireContext(), "No browser available to open URL", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Timber.e(e, "Error sharing save slot");
-            Toast.makeText(requireContext(), "Error sharing save slot", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Error sharing save: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Timber.e(e, "[SHARE] Error sharing save slot %d", slotId);
+        }
+    }
+    
+    /**
+     * Helper method to get the color name for a robot color
+     */
+    private String getRobotColorName(int color) {
+        switch (color) {
+            case 0:
+                return "pink";  // Constants.COLOR_PINK = 0
+            case 1:
+                return "green"; // Constants.COLOR_GREEN = 1
+            case 2:
+                return "blue";  // Constants.COLOR_BLUE = 2
+            case 3:
+                return "yellow"; // Constants.COLOR_YELLOW = 3
+            case 5:
+                return "red";   // Constants.COLOR_RED = 5
+            default:
+                return "unknown";
         }
     }
     
