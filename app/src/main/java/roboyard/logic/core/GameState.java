@@ -57,7 +57,6 @@ public class GameState implements Serializable {
     
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
-    private transient int lastSquaresMoved; // Number of squares moved in the last successful robot move
     private transient GameStateManager gameStateManager;
     
     // Store initial robot positions for reset functionality
@@ -217,140 +216,7 @@ public class GameState implements Serializable {
         
         selectedRobot = robot;
     }
-    
-    /**
-     * Move a robot to the specified coordinates, following game rules
-     * Returns true if the move was successful
-     */
-    public boolean moveRobotTo(GameElement robot, int targetX, int targetY) {
-        if (robot == null || robot.getType() != GameElement.TYPE_ROBOT) {
-            return false;
-        }
-        
-        int startX = robot.getX();
-        int startY = robot.getY();
-        
-        // Check if the target position is in bounds
-        if (targetX < 0 || targetX >= width || targetY < 0 || targetY >= height) {
-            return false;
-        }
-        
-        // Can only move in straight lines (horizontally or vertically)
-        boolean isHorizontalMove = (startY == targetY);
-        boolean isVerticalMove = (startX == targetX);
-        if (!isHorizontalMove && !isVerticalMove) {
-            return false;
-        }
-        
-        // Calculate move direction
-        int dx = 0;
-        int dy = 0;
-        if (isHorizontalMove) {
-            dx = (targetX > startX) ? 1 : -1; // Moving right or left
-        } else {
-            dy = (targetY > startY) ? 1 : -1; // Moving down or up
-        }
-        
-        // Determine the final position after collision checking
-        int finalX = startX;
-        int finalY = startY;
-        
-        // Move until hitting a wall or another robot
-        int currentX = startX;
-        int currentY = startY;
-        boolean hitObstacle = false;
-        
-        // Track squares moved for this move
-        int squaresMoved = 0;
-        
-        while (!hitObstacle) {
-            // CRITICAL: First check for wall collision at current position before moving
-            // This is needed to properly handle the wall being between cells
-            if (dx > 0) { // Moving right/east - check for vertical wall at current position
-                if (hasVerticalWall(currentX +1, currentY)) {
-                    // Stop at current position, can't go past the wall
-                    hitObstacle = true;
-                    break;
-                }
-            } else if (dx < 0) { // Moving left/west - check for vertical wall at position to the left
-                if (hasVerticalWall(currentX, currentY)) {
-                    // Stop at current position, can't go past the wall
-                    hitObstacle = true;
-                    break;
-                }
-            } else if (dy > 0) { // Moving down/south - check for horizontal wall at current position
-                if (hasHorizontalWall(currentX, currentY + 1)) {
-                    // Stop at current position, can't go past the wall
-                    hitObstacle = true;
-                    break;
-                }
-            } else if (dy < 0) { // Moving up/north - check for horizontal wall at position above
-                if (hasHorizontalWall(currentX, currentY)) {
-                    // Stop at current position, can't go past the wall
-                    hitObstacle = true;
-                    break;
-                }
-            }
-            
-            // Now calculate next position
-            int nextX = currentX + dx;
-            int nextY = currentY + dy;
-            
-            // Check if we'd move out of bounds
-            if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) {
-                hitObstacle = true;
-                break;
-            }
-            
-            // Check for robot collision at next position
-            GameElement obstacleRobot = getRobotAt(nextX, nextY);
-            if (obstacleRobot != null) {
-                hitObstacle = true;
-                break;
-            }
-            
-            // Move to the next cell if no obstacles
-            currentX = nextX;
-            currentY = nextY;
-            squaresMoved++; // Increment squares moved counter
-        }
-        
-        // Update robot position to the final position
-        finalX = currentX;
-        finalY = currentY;
-        
-        // If the robot didn't move, return false
-        if (finalX == startX && finalY == startY) {
-            return false;
-        }
-        
-        // Move the robot to the final position
-        robot.setX(finalX);
-        robot.setY(finalY);
-        
-        // Increment move count
-        moveCount++;
-        
-        // Store the number of squares moved for this move
-        this.lastSquaresMoved = squaresMoved;
-        
-        // Check if the game is completed
-        if (checkCompletion()) {
-            // Game is completed, let the GameStateManager handle the notification
-            // This will be handled in GameStateManager.handleGridTouch method
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Get the number of squares moved in the last successful robot move
-     * @return Number of squares moved
-     */
-    public int getLastSquaresMoved() {
-        return lastSquaresMoved;
-    }
-    
+
     /**
      * Check if there is a vertical wall at the specified position
      * Vertical walls separate columns (they're placed between x and x+1)

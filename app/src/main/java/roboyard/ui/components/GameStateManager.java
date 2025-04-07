@@ -692,12 +692,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             final int targetY = endY;
 
             // Log the movement initiation
-            Timber.d("[ROBOT] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)", 
+            Timber.d("[ROBOT][HINT_SYSTEM] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)", 
                     robot.getColor(), originalX, originalY, targetX, targetY);
-
-            // Update move count and squares moved
-            setMoveCount(getMoveCount().getValue() + 1);
+            
             setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
+
+            // Increment move count
+            // The value in this GameStateManager (UI)
+            setMoveCount(getMoveCount().getValue() + 1);
+
+            // Also update the move count in the GameState object itself (logic)
+            // This ensures state.getMoveCount() returns the correct value
+            state.setMoveCount(getMoveCount().getValue());
+            Timber.d("[HINT_SYSTEM] Updated moveCount in GameState to %d", state.getMoveCount());
             
             // Create completion callback for when animation finishes
             Runnable completionCallback = () -> {
@@ -767,7 +774,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
                 }
             }
-            
             return true;
         }
         
@@ -1025,7 +1031,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Decrement move count
             int moves = moveCount.getValue();
             moveCount.setValue(Math.max(0, moves - 1));
-            Timber.d("[ROBOTS] undoLastMove: Decremented move count to: %d", Math.max(0, moves - 1));
+            Timber.d("[ROBOTS][HINT_SYSTEM] undoLastMove: Decremented move count to: %d", Math.max(0, moves - 1));
             
             // Reset game complete flag if it was set
             if (isGameComplete.getValue()) {

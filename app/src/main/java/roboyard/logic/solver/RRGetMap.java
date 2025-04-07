@@ -126,7 +126,7 @@ public class RRGetMap {
             // Handle targets (both colored and multi-colored)
             if (type.equals("target_red") || type.equals("target_green") || 
                 type.equals("target_blue") || type.equals("target_yellow") || 
-                type.equals("target_multi")) {
+                type.equals("target_silver") || type.equals("target_multi")) {
                 board.addGoal(position, colors.get(type), 1);
                 targetFound = true;
                 
@@ -136,11 +136,12 @@ public class RRGetMap {
             }
             // Handle robots of different colors
             if (type.equals("robot_red") || type.equals("robot_green") || 
-                type.equals("robot_blue") || type.equals("robot_yellow")) {
+                type.equals("robot_blue") || type.equals("robot_yellow") ||
+                type.equals("robot_silver")) {
                 // FIXED: Use the color index (0-3) from colors map instead of the RGB color value from colors2
                 // Old code created piece with actual RGB color instead of index: new RRPiece(x, y, colors2.get(type), robotCounter)
                 int colorIndex = colors.get(type);
-                Timber.d("[HINT] Creating robot piece for %s with colorIndex=%d instead of RGB color %d", 
+                Timber.d("[HINT_SYSTEM] Creating robot piece for %s with colorIndex=%d instead of RGB color %d", 
                         type, colorIndex, colors2.get(type));
                 pieces[colorIndex] = new RRPiece(x, y, colorIndex, robotCounter);
                 

@@ -183,7 +183,7 @@ public class GameElement implements Serializable {
     }
     
     /**
-     * Get the horizontal direction the robot is facing
+     * Get the horizontal direction the robot is facing (for the display of the right robot image)
      * @return 1 for right, -1 for left
      */
     public int getDirectionX() {
