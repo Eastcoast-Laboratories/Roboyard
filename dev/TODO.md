@@ -87,3 +87,5 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
 
 - the level complete message in the hints-textbox should stretch the whole screenwidth if the previous int button is hidden
+
+- settings: when ssetting a higer robotCount than targets, then automatically set the targetCount to the same value

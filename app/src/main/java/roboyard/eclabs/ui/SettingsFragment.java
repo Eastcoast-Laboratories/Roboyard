@@ -179,13 +179,75 @@ public class SettingsFragment extends Fragment {
             
             // Add a message explaining the issue
             TextView errorMessage = new TextView(requireContext());
-            errorMessage.setText("Error loading settings screen. Please try again later.");
+            errorMessage.setText("Error loading settings screen. Please send us a bug report with details below.");
             errorMessage.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
             errorMessage.setGravity(Gravity.CENTER);
             errorMessage.setLayoutParams(new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, 
                     LinearLayout.LayoutParams.WRAP_CONTENT));
             fallbackLayout.addView(errorMessage);
+            
+            // Add error details
+            TextView errorDetails = new TextView(requireContext());
+            StringBuilder detailsBuilder = new StringBuilder()
+                    .append("Error details:\n")
+                    .append("Device: ").append(android.os.Build.MANUFACTURER).append(" ")
+                    .append(android.os.Build.MODEL).append("\n")
+                    .append("Android: ").append(android.os.Build.VERSION.RELEASE)
+                    .append(" (API ").append(android.os.Build.VERSION.SDK_INT).append(")\n")
+                    .append("App version: ").append(getVersionName()).append("\n");
+            
+            if (e != null) {
+                detailsBuilder.append("\nException:\n").append(e.getClass().getName())
+                       .append(": ").append(e.getMessage()).append("\n");
+                
+                if (e.getCause() != null) {
+                    detailsBuilder.append("Caused by: ").append(e.getCause().getClass().getName())
+                            .append(": ").append(e.getCause().getMessage()).append("\n");
+                }
+                
+                StackTraceElement[] stack = e.getStackTrace();
+                if (stack != null && stack.length > 0) {
+                    for (int i = 0; i < Math.min(5, stack.length); i++) {
+                        detailsBuilder.append("at ").append(stack[i].toString()).append("\n");
+                    }
+                }
+            }
+            
+            errorDetails.setText(detailsBuilder.toString());
+            errorDetails.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            errorDetails.setPadding(16, 32, 16, 32);
+            errorDetails.setBackgroundColor(0x22FFFFFF); // Semi-transparent white background
+            LinearLayout.LayoutParams detailsParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            detailsParams.setMargins(8, 16, 8, 16);
+            errorDetails.setLayoutParams(detailsParams);
+            fallbackLayout.addView(errorDetails);
+            
+            // Add email report button
+            Button reportButton = new Button(requireContext());
+            reportButton.setText("Send Bug Report");
+            reportButton.setOnClickListener(v -> {
+                try {
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("message/rfc822");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"roboyard-bugreports@it.z11.de"});
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Roboyard Bug Report - Settings Screen Crash");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, detailsBuilder.toString());
+                    startActivity(Intent.createChooser(emailIntent, "Send Bug Report"));
+                } catch (Exception ex) {
+                    Toast.makeText(requireContext(), "Could not open email app", Toast.LENGTH_SHORT).show();
+                    Timber.e(ex, "Failed to send email report");
+                }
+            });
+            LinearLayout.LayoutParams reportButtonParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            reportButtonParams.gravity = Gravity.CENTER;
+            reportButtonParams.topMargin = 16;
+            reportButton.setLayoutParams(reportButtonParams);
+            fallbackLayout.addView(reportButton);
             
             // Add a back button
             Button backBtn = new Button(requireContext());
@@ -199,7 +261,7 @@ public class SettingsFragment extends Fragment {
                     LinearLayout.LayoutParams.WRAP_CONTENT, 
                     LinearLayout.LayoutParams.WRAP_CONTENT);
             buttonParams.gravity = Gravity.CENTER;
-            buttonParams.topMargin = 32;
+            buttonParams.topMargin = 16;
             backBtn.setLayoutParams(buttonParams);
             fallbackLayout.addView(backBtn);
             
@@ -936,5 +998,22 @@ public class SettingsFragment extends Fragment {
      */
     public String getScreenTitle() {
         return "Settings";
+    }
+    
+    /**
+     * Get the app version name from the package info
+     * @return The version name string or "Unknown" if it couldn't be determined
+     */
+    private String getVersionName() {
+        try {
+            Context context = getContext();
+            if (context != null) {
+                return context.getPackageManager()
+                        .getPackageInfo(context.getPackageName(), 0).versionName;
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error getting app version");
+        }
+        return "Unknown";
     }
 }
