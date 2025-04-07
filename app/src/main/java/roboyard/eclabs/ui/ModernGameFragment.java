@@ -580,6 +580,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Get the current game state
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
+                    // Hide the small New Game button when showing the big completion buttons
+                    newMapButton.setVisibility(View.GONE);
+                    
                     if (state.getLevelId() > 0) {
                         // This is a level game, show the Next Level button
                         nextLevelButton.setVisibility(View.VISIBLE);
@@ -639,6 +642,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
                 }
             } else {
+                // Show the small New Game button again when the game is not complete
+                newMapButton.setVisibility(View.VISIBLE);
+                
                 // Hide the Next Level button when game is not complete
                 nextLevelButton.setVisibility(View.GONE);
                 
