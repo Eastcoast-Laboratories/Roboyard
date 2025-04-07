@@ -85,3 +85,5 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - drück mal 10 x reset hintereinander
 
 - Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
+
+- the level complete message in the hints-textbox should stretch the whole screenwidth if the previous int button is hidden
