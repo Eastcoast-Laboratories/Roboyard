@@ -5,4 +5,18 @@
     <dimen name="game_button_text_size">14sp</dimen>
     <dimen name="game_button_margin">8dp</dimen>
     <dimen name="game_button_padding">4dp</dimen>
+    
+    <!-- Text sizes for medium screens -->
+    <dimen name="status_text_size">20dp</dimen>
+    <dimen name="status_text_padding">6dp</dimen>
+    
+    <!-- Level selection screen dimensions for medium screens -->
+    <dimen name="stars_count_text_size">14dp</dimen>
+    <dimen name="level_item_stats_text_size">12dp</dimen>
+    <dimen name="level_item_name_text_size">14dp</dimen>
+    
+    <!-- Settings screen dimensions for medium screens -->
+    <dimen name="settings_title_text_size">28dp</dimen>
+    <dimen name="settings_label_text_size">20dp</dimen>
+    <dimen name="settings_option_text_size">18dp</dimen>
 </resources>

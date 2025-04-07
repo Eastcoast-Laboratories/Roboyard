@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Game buttons dimensions -->
+    <dimen name="game_button_height">52dp</dimen>
+    <dimen name="game_button_text_size">22dp</dimen>
+    <dimen name="game_button_margin">8dp</dimen>
+    <dimen name="game_button_padding">6dp</dimen>
+    
     <!-- Status text size for tall devices (slightly smaller than default) -->
     <dimen name="status_text_size">16sp</dimen>
+    <dimen name="status_text_padding">5dp</dimen>
+    
+    <!-- Level selection screen dimensions -->
+    <dimen name="stars_count_text_size">24dp</dimen>
+    <dimen name="level_item_stats_text_size">14dp</dimen>
+    <dimen name="level_item_name_text_size">16dp</dimen>
+    
+    <!-- Settings screen dimensions -->
+    <dimen name="settings_title_text_size">32dp</dimen>
+    <dimen name="settings_label_text_size">24dp</dimen>
+    <dimen name="settings_option_text_size">20dp</dimen>
 </resources>
