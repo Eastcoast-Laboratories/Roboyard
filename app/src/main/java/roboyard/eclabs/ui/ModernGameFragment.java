@@ -89,7 +89,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button btnSelectRobot; // New button for TalkBack robot selection
     private TextView txtSelectedRobot;
     private TextView txtRobotGoal;
-    private Button btnToggleAccessibilityControls;
     private boolean accessibilityControlsVisible = false;
 
     // Hint managing
@@ -390,7 +389,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         soundManager = SoundManager.getInstance(requireContext());
         
         // Initialize accessibility controls
-        btnToggleAccessibilityControls = view.findViewById(R.id.btn_toggle_accessibility);
         accessibilityControlsContainer = view.findViewById(R.id.accessibility_container);
         
         if (accessibilityControlsContainer != null) {
@@ -402,14 +400,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             btnMoveWest = accessibilityControlsContainer.findViewById(R.id.btn_move_west);
             btnSelectRobot = accessibilityControlsContainer.findViewById(R.id.btn_select_robot); // New button for TalkBack robot selection
             
-            // Set up directional button click listeners
+            // Set up accessibility controls
             setupAccessibilityControls();
-        }
-        
-        // Show button if either TalkBack or accessibility mode is enabled
-        if (isTalkBackEnabled() || Preferences.accessibilityMode) {
-            btnToggleAccessibilityControls.setVisibility(View.VISIBLE);
-            btnToggleAccessibilityControls.setOnClickListener(v -> toggleAccessibilityControls());
         }
         
         // Set up the game grid view
@@ -1110,6 +1102,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Set up accessibility controls
      */
     private void setupAccessibilityControls() {
+        // Check if TalkBack is enabled or if accessibility mode is enabled in preferences
+        boolean talkBackEnabled = isTalkBackEnabled();
+        boolean shouldShowControls = talkBackEnabled || Preferences.accessibilityMode;
+        
         // Set up directional button click listeners
         btnMoveNorth.setOnClickListener(v -> moveRobotInDirection(0, -1));
         btnMoveSouth.setOnClickListener(v -> moveRobotInDirection(0, 1));
@@ -1125,6 +1121,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Button btnAnnouncePositions = accessibilityControlsContainer.findViewById(R.id.btn_announce_positions);
         if (btnAnnouncePositions != null) {
             btnAnnouncePositions.setOnClickListener(v -> announceGameStart());
+        }
+        
+        // If TalkBack is enabled or accessibility mode is enabled, show the accessibility controls automatically
+        if (shouldShowControls) {
+            accessibilityControlsVisible = true;
+            accessibilityControlsContainer.setVisibility(View.VISIBLE);
+            Timber.d("Accessibility mode active - automatically showing accessibility controls");
+        } else {
+            accessibilityControlsVisible = false;
+            accessibilityControlsContainer.setVisibility(View.GONE);
         }
     }
     
@@ -1179,34 +1185,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Announce the newly selected robot
         String colorName = getRobotColorNameByGridElement(nextRobot);
         announceAccessibility("Selected " + colorName + " robot");
-    }
-    
-    /**
-     * Toggle accessibility controls visibility
-     */
-    private void toggleAccessibilityControls() {
-        accessibilityControlsVisible = !accessibilityControlsVisible;
-        accessibilityControlsContainer.setVisibility(
-                accessibilityControlsVisible ? View.VISIBLE : View.GONE);
-        
-        // Update the text on the toggle button
-        btnToggleAccessibilityControls.setText(
-                accessibilityControlsVisible ? "Hide Controls" : "Accessibility Controls");
-        
-        // Announce to screen reader
-        if (accessibilityControlsVisible) {
-            announceAccessibility("Accessibility controls shown");
-            
-            // Update with current selection info
-            GameState state = gameStateManager.getCurrentState().getValue();
-            if (state != null) {
-                GameElement selectedRobot = state.getSelectedRobot();
-                updateRobotSelectionInfo(selectedRobot);
-                updateDirectionalButtons(selectedRobot);
-            }
-        } else {
-            announceAccessibility("Accessibility controls hidden");
-        }
     }
     
     /**

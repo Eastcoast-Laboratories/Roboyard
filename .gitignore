@@ -17,3 +17,4 @@ zzbak~*
 /.vscode/launch.json
 *.odt\#
 *.~lock.upgrade_path_AI.odt\#
+/.idea/appInsightsSettings.xml
