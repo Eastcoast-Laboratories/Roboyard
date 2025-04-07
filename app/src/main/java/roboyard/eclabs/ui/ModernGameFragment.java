@@ -857,7 +857,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             } else {
                 // Hide hint container when button is unchecked
                 hintContainer.setVisibility(View.INVISIBLE);
-                prevHintButton.setVisibility(View.INVISIBLE);
+                prevHintButton.setVisibility(View.GONE);
                 nextHintButton.setVisibility(View.INVISIBLE);
                 
                 // Reset hint step to start from the beginning next time

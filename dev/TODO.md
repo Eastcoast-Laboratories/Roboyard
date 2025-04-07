@@ -50,7 +50,7 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - add achievement system
 
 # levels 
-- add a "retry" button to the level game screen
+- add a "retry" button to the level game screen when level is complete
 - winning a level: this overwrites the old saved stars and data, so you can "loose" stars this way if you play a level again with less stars
 - for debugging: add a skip button to levels, which will just move the robot to its target in one move
 - In den Leveln, wenn man die schon mal gespielt hat, dann die optimale Zahl gleich anzeigen
@@ -86,6 +86,4 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
 
-- the level complete message in the hints-textbox should stretch the whole screenwidth if the previous int button is hidden
-
-- settings: when ssetting a higer robotCount than targets, then automatically set the targetCount to the same value
+- settings: when setting a higher robotCount than targets, then automatically set the targetCount to the same value
