@@ -1039,6 +1039,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Start the next level
                     gameStateManager.startLevelGame(nextLevelId);
                     
+                    // Clear robot paths
+                    if (gameGridView != null) {
+                        gameGridView.clearRobotPaths();
+                        gameGridView.invalidate();
+                    }
+                    
                     // Reset timer
                     stopTimer();
                     startTimer();
