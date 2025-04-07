@@ -26,7 +26,7 @@ import timber.log.Timber;
 
 public class SolverIDDFS extends Solver {
     
-    private static final int MAX_DEPTH = 126;
+    private static final int MAX_DEPTH = 126; // maximal depth of search tree to prevent OOM
     
     private final int[][] states;
     private final int[][] directions;

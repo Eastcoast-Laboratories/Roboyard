@@ -1072,6 +1072,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Random game - start a new random game
                     gameStateManager.startModernGame();
                     
+                    // Clear robot paths
+                    if (gameGridView != null) {
+                        gameGridView.clearRobotPaths();
+                        gameGridView.invalidate();
+                    }
+                    
                     // Reset timer
                     stopTimer();
                     startTimer();
