@@ -1,0 +1,5 @@
+- Robots now move more fluidly and naturally
+- The paths robots have moved on are now shown
+- Optimal-Move button appears earlier in hints
+- Fixed errors on some devices in Settings screen
+- Share button in Save Screen

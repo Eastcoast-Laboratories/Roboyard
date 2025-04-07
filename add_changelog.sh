@@ -14,21 +14,21 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
-- Behobene TalkBack-Ankündigungen für blinde Spieler mit korrigierten Wandpositionen.
-- Roboter hinterlassen jetzt farbige Spuren.
-- Neue Option, um die gleichen Wände auf einem Spielbrett über Neustarts hinweg zu erhalten.
-- Verbesserte Schriftgrößen.
-- Neuer Hintergrund im Hauptmenu
+- Roboter bewegen sich jetzt flüssiger und natürlicher
+- Die Pfade, die Roboter gelaufen sind, werden jetzt angezeigt
+- Optimal-Move-Button erscheint eher in den Hints
+- Fehler bei einigen Geräten behoben im Einstellungsbildschirm
+- Share Button im Save Screen
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
-- Fixed TalkBack announcements for blind players, correcting wall position announcements.
-- Robots now leave colored trails.
-- New option to preserve the same walls on a board across restarts.
-- Improved fontsizes.
-- Added background art to main menu.
+- Robots now move more fluidly and naturally
+- The paths robots have moved on are now shown
+- Optimal-Move button appears earlier in hints
+- Fixed errors on some devices in Settings screen
+- Share button in Save Screen
 EOF
 )
 

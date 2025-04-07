@@ -2,6 +2,14 @@
 =========
 
 
+## Version 23 (2025-04-07)
+- Robots now move more fluidly and naturally
+- The paths robots have moved on are now shown
+- Optimal-Move button appears earlier in hints
+- Fixed errors on some devices in Settings screen
+- Share button in Save Screen
+
+
 ## Version 22 (2025-04-05)
 - Fixed TalkBack announcements for blind players, correcting wall position announcements.
 - Robots now leave colored trails.

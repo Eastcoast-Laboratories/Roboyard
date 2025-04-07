@@ -2,6 +2,14 @@ Changelog Deutsch
 =================
 
 
+## Version 23 (2025-04-07)
+- Roboter bewegen sich jetzt flüssiger und natürlicher
+- Die Pfade, die Roboter gelaufen sind, werden jetzt angezeigt
+- Optimal-Move-Button erscheint eher in den Hints
+- Fehler bei einigen Geräten behoben im Einstellungsbildschirm
+- Share Button im Save Screen
+
+
 ## Version 22 (2025-04-05)
 - Behobene TalkBack-Ankündigungen für blinde Spieler mit korrigierten Wandpositionen.
 - Roboter hinterlassen jetzt farbige Spuren.

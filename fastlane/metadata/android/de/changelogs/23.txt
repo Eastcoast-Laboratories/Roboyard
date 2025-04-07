@@ -1,0 +1,5 @@
+- Roboter bewegen sich jetzt flüssiger und natürlicher
+- Die Pfade, die Roboter gelaufen sind, werden jetzt angezeigt
+- Optimal-Move-Button erscheint eher in den Hints
+- Fehler bei einigen Geräten behoben im Einstellungsbildschirm
+- Share Button im Save Screen
