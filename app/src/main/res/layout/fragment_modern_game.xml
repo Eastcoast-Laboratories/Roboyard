@@ -222,7 +222,16 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/game_info_container"
-        app:layout_constraintBottom_toTopOf="@id/button_container" />
+        app:layout_constraintBottom_toTopOf="@id/spacer" />
+        
+    <!-- Flexible space to push buttons to bottom -->
+    <Space
+        android:id="@+id/spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/accessibility_container"
+        app:layout_constraintBottom_toTopOf="@id/button_container"
+        app:layout_constraintVertical_weight="1" />
 
     <!-- Buttons fixed at the bottom of the screen -->
     <LinearLayout
