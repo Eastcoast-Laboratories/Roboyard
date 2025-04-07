@@ -93,6 +93,10 @@ public class SoundManager {
                     return;
                 }
                 
+                // Set volume to half (0.5) of the maximum for both left and right channels
+                mp.setVolume(0.5f, 0.5f);
+                Timber.d("[SOUND] Set volume to 50%% for sound: %s", soundType);
+                
                 // Set the global current player
                 currentPlayer = mp;
                 isSoundPlaying = true;
