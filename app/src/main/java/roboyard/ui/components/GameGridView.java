@@ -1135,7 +1135,8 @@ public class GameGridView extends View {
                                 
                                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
                                     // Horizontal movement takes priority
-                                    int dx = deltaX > 0 ? 1 : -1;
+                                    int dx = deltaX > 0 ? 1 : -1; // Left edge = move left, Right edge = move right
+                                    
                                     Timber.d("[TOUCH] Moving robot horizontally: dx=%d", dx);
                                     gameStateManager.moveRobotInDirection(dx, 0);
                                 } else {
@@ -1470,23 +1471,28 @@ public class GameGridView extends View {
         boolean hasEastWall = false;
         boolean hasWestWall = false;
         
-        // Check if there's a horizontal wall above this cell
+        // Check for walls around this cell
         for (GameElement element : state.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
-                element.getX() == x && element.getY() == y) {
-                hasSouthWall = true;
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                // Horizontal wall at the north edge of the cell
+                if (element.getX() == x && element.getY() == y) {
+                    hasNorthWall = true;
+                }
+                // Horizontal wall at the south edge of the cell
+                if (element.getX() == x && element.getY() == y + 1) {
+                    hasSouthWall = true;
+                }
             }
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && 
-                element.getX() == x && element.getY() == y-1) {
-                hasNorthWall = true;
-            }
-            if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
-                element.getX() == x && element.getY() == y) {
-                hasEastWall = true;
-            }
-            if (element.getType() == GameElement.TYPE_VERTICAL_WALL && 
-                element.getX() == x-1 && element.getY() == y) {
-                hasWestWall = true;
+            
+            if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                // Vertical wall at the west edge of the cell
+                if (element.getX() == x && element.getY() == y) {
+                    hasWestWall = true;
+                }
+                // Vertical wall at the east edge of the cell
+                if (element.getX() == x + 1 && element.getY() == y) {
+                    hasEastWall = true;
+                }
             }
         }
         
