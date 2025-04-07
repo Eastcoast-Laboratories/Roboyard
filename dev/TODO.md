@@ -30,8 +30,7 @@
 
 
 # Sonstige Features & Fixes
-- Rückgängig-Funktion ("Back"-Methode) reparieren:  
-  - im Moment Geht nur so viele Schritte zurück, wieviel verschiedene Roboter bereits bewegt wurden, also pro roboter auswahl geht ein back schritt verloren im moment.  
+- Back-Undo Button should also undo the last painted probot path 
 
 # achievements
 - add achievement system
@@ -66,17 +65,11 @@
 
 - Hinttextfeld erstmal unsichtbar starten
 
-- die Roboter Ihren Weg als Linie anzeigen würden
-
 - Bug: Beim Wischen kein Sound, beim Tappen Sound, obwohl ausgeschaltet
 
 - drück mal 10 x reset hintereinander
 
-Stars oben das Wort weg
-
-Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
-
-Walls etwas kürzer
+- Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
 
 Bild 1 (erste Szene mit Hecke, noch ohne spezielle Blumen oder Wurzeln):
 A traditional cel-shaded anime-style painting depicting a lush green hedge maze with a warm, soft lighting atmosphere. The perspective is slightly elevated, showcasing the winding paths and intersections of the maze. The environment feels magical and inviting, with intricate details in the leaves and hedges, giving it a hand-painted Studio Ghibli-inspired look.

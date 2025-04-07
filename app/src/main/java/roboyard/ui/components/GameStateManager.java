@@ -554,16 +554,94 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int startX = robot.getX();
         int startY = robot.getY();
         
+        // Initialize end position to the current position (in case no movement is possible)
+        int endX = startX;
+        int endY = startY;
+        
         // Update the robot's direction if moving horizontally
         if (dx != 0) {
             robot.setDirectionX(dx); // Set facing direction
         }
         
-        // Find the farthest position the robot can move in this direction
-        int endX = startX;
-        int endY = startY;
+        // Flags to determine which sound to play
         boolean hitWall = false;
         boolean hitRobot = false;
+        
+        // Before making a move, push the current state to history for undo functionality
+        // We don't need a deep copy - we'll save the state before making any changes
+        Timber.d("[ROBOTS] Saving current state to history before move. History size before: %d", stateHistory.size());
+        
+        // Create a snapshot of the current state with all elements
+        GameState stateBeforeMove = new GameState(state.getWidth(), state.getHeight());
+        
+        // Copy the board data (walls, targets, etc.)
+        for (int y = 0; y < state.getHeight(); y++) {
+            for (int x = 0; x < state.getWidth(); x++) {
+                int cellType = state.getCellType(x, y);
+                stateBeforeMove.setCellType(x, y, cellType);
+                
+                // Also copy target colors if this is a target
+                if (cellType == Constants.TYPE_TARGET) {
+                    int targetColor = state.getTargetColor(x, y);
+                    stateBeforeMove.setTargetColor(x, y, targetColor);
+                }
+            }
+        }
+        
+        // Copy all game elements including robots, walls, and targets
+        List<GameElement> elements = state.getGameElements();
+        if (elements != null) {
+            for (GameElement element : elements) {
+                // Add the element based on its type
+                if (element.getType() == GameElement.TYPE_ROBOT) {
+                    stateBeforeMove.addRobot(element.getX(), element.getY(), element.getColor());
+                    
+                    // Find the newly added robot and set its direction
+                    for (GameElement newElement : stateBeforeMove.getGameElements()) {
+                        if (newElement.getType() == GameElement.TYPE_ROBOT && 
+                            newElement.getColor() == element.getColor() &&
+                            newElement.getX() == element.getX() && 
+                            newElement.getY() == element.getY()) {
+                            newElement.setDirectionX(element.getDirectionX());
+                            break;
+                        }
+                    }
+                } else if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                    stateBeforeMove.addHorizontalWall(element.getX(), element.getY());
+                } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                    stateBeforeMove.addVerticalWall(element.getX(), element.getY());
+                } else if (element.getType() == GameElement.TYPE_TARGET) {
+                    stateBeforeMove.addTarget(element.getX(), element.getY(), element.getColor());
+                }
+            }
+        }
+        
+        // Copy other game state variables that have setters
+        stateBeforeMove.setLevelId(state.getLevelId());
+        stateBeforeMove.setLevelName(state.getLevelName());
+        stateBeforeMove.setMoveCount(state.getMoveCount());
+        stateBeforeMove.setCompleted(state.isComplete());
+        
+        // Copy the hint count
+        for (int i = 0; i < state.getHintCount(); i++) {
+            stateBeforeMove.incrementHintCount();
+        }
+        
+        stateBeforeMove.setUniqueMapId(state.getUniqueMapId());
+        
+        // Store initial robot positions for robot reset functionality
+        if (state.initialRobotPositions != null) {
+            stateBeforeMove.initialRobotPositions = new HashMap<>();
+            for (Map.Entry<Integer, int[]> entry : state.initialRobotPositions.entrySet()) {
+                int[] positionCopy = new int[]{entry.getValue()[0], entry.getValue()[1]};
+                stateBeforeMove.initialRobotPositions.put(entry.getKey(), positionCopy);
+            }
+        }
+        
+        // Save the complete state for undo
+        stateHistory.add(stateBeforeMove);
+        squaresMovedHistory.add(getSquaresMoved().getValue());
+        Timber.d("[ROBOTS] Saved complete state to history. History size now: %d", stateHistory.size());
         
         // Check for movement in X direction
         if (dx != 0) {
