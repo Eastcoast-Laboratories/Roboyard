@@ -352,7 +352,7 @@ public class GameLogic {
      * Generate a new map with walls, robots, and targets
      */
     public ArrayList<GridElement> generateGameMap(ArrayList<GridElement> existingMap) {
-        Timber.d("Using generateNewMapEachTime: %s", Preferences.generateNewMapEachTime);
+        Timber.d("[WALLS] Using generateNewMapEachTime: %s", Preferences.generateNewMapEachTime);
         
         // Check if we should preserve walls from the existing map
         WallStorage wallStorage = WallStorage.getInstance();
@@ -360,10 +360,10 @@ public class GameLogic {
         Timber.d("[WALL STORAGE] GameLogic: generateNewMapEachTime: %s, Preserving walls: %s, hasStoredWalls: %s", Preferences.generateNewMapEachTime, preserveWalls, wallStorage.hasStoredWalls());
         // If this is the first time generating a map or we're not preserving walls, generate everything new
         if(existingMap == null || existingMap.isEmpty() || Preferences.generateNewMapEachTime){
-            Timber.d("Generating completely new map");
+            Timber.d("[WALLS] Generating completely new map");
             
             // Generate a new map based on board size
-            if (boardWidth <= 8 && boardHeight <= 8) {
+            if (boardWidth <= 8 || boardHeight <= 8) {
                 // For small boards, use the simplified generation algorithm
                 existingMap = generateSimpleGameMap3(null);
             } else {
@@ -374,7 +374,7 @@ public class GameLogic {
             // Store the walls for future use if we're not generating new maps each time
             if (!Preferences.generateNewMapEachTime) {
                 wallStorage.storeWalls(existingMap);
-                Timber.d("Stored walls for future use");
+                Timber.d("[WALLS][WALL STORAGE] Stored walls for future use");
             }
             
             return existingMap;
@@ -383,7 +383,7 @@ public class GameLogic {
             ArrayList<GridElement> data;
             
             if (preserveWalls) {
-                Timber.d("Preserving walls from stored configuration");
+                Timber.d("[WALLS][WALL STORAGE] Preserving walls from stored configuration");
                 // Remove game elements (robots and targets) but keep walls
                 data = removeGameElementsFromMap(existingMap);
                 
@@ -394,7 +394,7 @@ public class GameLogic {
                 data = new ArrayList<>();
                 
                 // Generate a new map based on board size
-                if (boardWidth <= 8 && boardHeight <= 8) {
+                if (boardWidth <= 8 || boardHeight <= 8) {
                     // For small boards, use the simplified generation algorithm
                     data = generateSimpleGameMap3(null);
                 } else {
@@ -405,7 +405,7 @@ public class GameLogic {
                 // Store the walls for future use
                 if (!Preferences.generateNewMapEachTime) {
                     wallStorage.storeWalls(data);
-                    Timber.d("Stored new walls for future use");
+                    Timber.d("[WALLS][WALL STORAGE] Stored new walls for future use");
                 }
             }
             
@@ -670,17 +670,9 @@ public class GameLogic {
             data.addAll(removeGameElementsFromMap(existingMap));
         }
 
-        // Create borders (these are automatically added by the game but we'll define them anyway)
+        // Create borders are automatically added by the game
         // Important: In an 8x8 board, valid indices are 0-7, with the borders at -1, 0, boardWidth, and boardHeight
-        for (int x = 0; x < boardWidth+1; x++) {
-            horizontalWalls[x][0] = 1;
-            horizontalWalls[x][boardHeight] = 1;
-        }
-        for (int y = 0; y < boardHeight+1; y++) {
-            verticalWalls[0][y] = 1;
-            verticalWalls[boardWidth][y] = 1;
-        }
-        
+    
         // Create a center square similar to the original game but simpler
         int centerX = boardWidth / 2 - 1;
         int centerY = boardHeight / 2 - 1;
