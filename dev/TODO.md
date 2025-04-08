@@ -91,3 +91,24 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
 
 - add the hints to accessibility mode
+
+- on a selected robot you ee the coordinates in white, if this is needed for the accessibility mode, the text should be transparent
+
+- der hint "5/8: Br,Bd,Gu, Gr, Green down" kommmt Zu früh schon bei gu zeigt er gr an
+
+- Selected robot Information sagt er nur on selected Robert target Information. Da sollte er bei den Inhalt anzeigen. Und der hind Button ist unter dem Text der muss natürlich viel kleiner. Die Buttons müssen alle für kleiner unten im accessibility Mode
+
+- Jetzt ist bei new Game wieder der path noch drin
+
+- Die Num squares werden nicht gelöscht
+
+- te one solution is not noticed any more
+
+- rename reset in levels to retry when completed
+
+- fdrooid entry enhancements
+
+- find out, which robot can get to its target the fastest
+
+
+
