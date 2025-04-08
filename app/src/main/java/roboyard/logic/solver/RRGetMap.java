@@ -91,19 +91,66 @@ public class RRGetMap {
         // Create a wall model from the grid elements
         WallModel wallModel = WallModel.fromGridElements(gridElements, boardWidth, boardHeight);
         
-        // Process each wall in the model
+        // Process each wall in the model and set it on the board
+        // to understand setWall: driftingdroids solver uses "N" and "W" to represent horizontal and vertical walls
+        // e.g. walls[direction][x + y * this.width] = true;
+        // direction is "N" for horizontal and "W" for vertical
+        // the y position is stored in the same key as multiple of the width of the board
         for (Wall wall : wallModel.getWalls()) {
             int x = wall.getX();
             int y = wall.getY();
             int position = y * board.width + x;
             
             if (wall.getType() == WallType.HORIZONTAL) {
-                board.setWall(position, "N", true);
+                board.setWall(position, "N", true);  // treated as "N" of the current field in driftingdroids solver
+                
                 Timber.d("[SOLUTION_SOLVER] Setting horizontal wall at position %d (x=%d, y=%d)", position, x, y);
             } else if (wall.getType() == WallType.VERTICAL) {
-                board.setWall(position, "W", true);
+                board.setWall(position, "W", true);  // treated as "W" of the current field in driftingdroids solver
+                
                 Timber.d("[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)", position, x, y);
             }
+        }
+        
+        // Force outer walls to be present - essential for the solver
+        int missingWallCountX = 0;
+        int missingWallCountY = 0;
+        
+        for (int x = 0; x < board.width; x++) {
+            // Top border
+            if (!board.isWall(0 + x, Constants.NORTH)){
+                board.setWall(0 + x, "N", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing top border wall at position (%d,0)", x);
+                missingWallCountX++;
+            }
+            // Bottom border
+            int bottomWallY = (board.height-1) * board.width;
+            if (!board.isWall(bottomWallY + x, Constants.SOUTH)){
+                board.setWall(bottomWallY + x, "N", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing bottom border wall at position (%d,%d)", x, board.height-1);
+                missingWallCountX++;
+            }
+        }
+        
+        for (int y = 0; y < board.height; y++) {
+            // Left border
+            int verticalWallY = y * board.width;
+            if (!board.isWall(0 + verticalWallY, Constants.WEST)){
+                board.setWall(0 + verticalWallY, "W", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing left border wall at position (0,%d)", y);
+                missingWallCountY++;
+            }
+            // Right border
+            int rightWallX = board.width - 1;
+            if (!board.isWall(rightWallX + verticalWallY, Constants.EAST)){
+                board.setWall(rightWallX + verticalWallY, "W", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing right border wall at position (%d,%d)", board.width-1, y);
+                missingWallCountY++;
+            }
+        }
+        
+        if (missingWallCountX > 0 || missingWallCountY > 0) {
+            Timber.w("[SOLUTION_SOLVER][WALLS] Added %d missing outer walls to ensure solver stability, X:%d, Y:%d", missingWallCountX + missingWallCountY, missingWallCountX, missingWallCountY);
         }
         
         // Process each grid element (targets, robots)
@@ -174,7 +221,7 @@ public class RRGetMap {
         // For each grid cell (x,y), we'll use:
         // - asciiMap[x*2][y] for vertical walls
         // - asciiMap[x*2+1][y] for robots and targets
-        String[][] asciiMap = new String[44][22]; // Double width to handle separate positions
+        String[][] asciiMap = new String[2*Constants.MAX_BOARD_SIZE+1][Constants.MAX_BOARD_SIZE]; // Double width to handle separate positions
         
         // Track cells that have both a robot and a horizontal wall
         Map<String, String> cellContents = new HashMap<>();
@@ -215,22 +262,30 @@ public class RRGetMap {
                     asciiMap[x*2+1][y] = "y̅"; // y with overline
                 } else if (contents.contains("robot_red")) {
                     asciiMap[x*2+1][y] = "r̅"; // r with overline
+                } else if (contents.contains("robot_pink")) {
+                    asciiMap[x*2+1][y] = "p̅"; // p with overline
                 } else if (contents.contains("robot_blue")) {
                     asciiMap[x*2+1][y] = "b̅"; // b with overline
                 } else if (contents.contains("robot_green")) {
                     asciiMap[x*2+1][y] = "g̅"; // g with overline
+                } else if (contents.contains("robot_silver")) {
+                    asciiMap[x*2+1][y] = "s̅"; // s with overline
                 } else if (contents.contains("target_")) {
                     // Target with horizontal wall
                     if (contents.contains("target_yellow")) {
                         asciiMap[x*2+1][y] = "Y̅"; // Y with overline
                     } else if (contents.contains("target_red")) {
                         asciiMap[x*2+1][y] = "R̅"; // R with overline
+                    } else if (contents.contains("target_pink")) {
+                        asciiMap[x*2+1][y] = "P̅"; // P with overline
                     } else if (contents.contains("target_blue")) {
                         asciiMap[x*2+1][y] = "B̅"; // B with overline
                     } else if (contents.contains("target_green")) {
                         asciiMap[x*2+1][y] = "G̅"; // G with overline
                     } else if (contents.contains("target_multi")) {
                         asciiMap[x*2+1][y] = "M̅"; // M with overline
+                    } else if (contents.contains("target_silver")) {
+                        asciiMap[x*2+1][y] = "S̅"; // S with overline
                     }
                 } else {
                     // Just a horizontal wall an overline
@@ -242,6 +297,8 @@ public class RRGetMap {
                     asciiMap[x*2+1][y] = "y";
                 } else if (contents.contains("robot_red")) {
                     asciiMap[x*2+1][y] = "r";
+                } else if (contents.contains("robot_pink")) {
+                    asciiMap[x*2+1][y] = "p";
                 } else if (contents.contains("robot_blue")) {
                     asciiMap[x*2+1][y] = "b";
                 } else if (contents.contains("robot_green")) {
@@ -254,6 +311,8 @@ public class RRGetMap {
                     asciiMap[x*2+1][y] = "B";
                 } else if (contents.contains("target_green")) {
                     asciiMap[x*2+1][y] = "G";
+                } else if (contents.contains("target_silver")) {
+                    asciiMap[x*2+1][y] = "S";
                 } else if (contents.contains("target_multi")) {
                     asciiMap[x*2+1][y] = "M";
                 }
