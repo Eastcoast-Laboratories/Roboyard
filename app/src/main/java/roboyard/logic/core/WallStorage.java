@@ -109,21 +109,67 @@ public class WallStorage {
         SharedPreferences.Editor editor = prefs.edit();
         
         // Convert walls to a string representation
-        StringBuilder sb = new StringBuilder();
-        for (GridElement wall : storedWalls) {
-            sb.append(wall.getType())
-              .append(",")
-              .append(wall.getX())
-              .append(",")
-              .append(wall.getY())
-              .append(";");
-        }
+        String wallsData = gridElementsToString(storedWalls);
         
-        editor.putString(key, sb.toString());
+        editor.putString(key, wallsData);
         editor.apply();
         
         Timber.tag(TAG).d("[WALL STORAGE] Saved %d walls to disk for board size %dx%d: String: %s", 
-            storedWalls.size(), currentBoardWidth, currentBoardHeight, sb.toString());
+            storedWalls.size(), currentBoardWidth, currentBoardHeight, wallsData);
+    }
+    
+    /**
+     * Convert GridElements to a string for storage
+     */
+    private String gridElementsToString(ArrayList<GridElement> elements) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        
+        // Count walls by type and position for debugging
+        int topWalls = 0;
+        int bottomWalls = 0;
+        int leftWalls = 0;
+        int rightWalls = 0;
+        int otherWalls = 0;
+        int horizontalWalls = 0;
+        int verticalWalls = 0;
+        
+        for (GridElement element : elements) {
+            // Only store walls (mh, mv)
+            if (element.getType().equals("mh") || element.getType().equals("mv")) {
+                if (count > 0) {
+                    sb.append(";");
+                }
+                sb.append(element.getType()).append(",").append(element.getX()).append(",").append(element.getY());
+                count++;
+                
+                // Count wall types for debugging
+                if (element.getType().equals("mh")) {
+                    horizontalWalls++;
+                    if (element.getY() == 0) {
+                        topWalls++;
+                    } else if (element.getY() == currentBoardHeight) {
+                        bottomWalls++;
+                    } else {
+                        otherWalls++;
+                    }
+                } else if (element.getType().equals("mv")) {
+                    verticalWalls++;
+                    if (element.getX() == 0) {
+                        leftWalls++;
+                    } else if (element.getX() == currentBoardWidth) {
+                        rightWalls++;
+                    } else {
+                        otherWalls++;
+                    }
+                }
+            }
+        }
+        
+        Timber.d("[WALL STORAGE] Wall count by position: top=%d, bottom=%d, left=%d, right=%d, other=%d, horizontal=%d, vertical=%d", 
+                topWalls, bottomWalls, leftWalls, rightWalls, otherWalls, horizontalWalls, verticalWalls);
+        
+        return sb.toString();
     }
     
     /**

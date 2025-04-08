@@ -200,7 +200,7 @@ public class MapGenerator {
                 Preferences.generateNewMapEachTime, preserveWalls, wallStorage.hasStoredWalls());
         
         if (preserveWalls) {
-            Timber.d("Preserving walls from stored configuration");
+            Timber.d("[WALL STORAGE] Preserving walls from stored configuration");
             // Remove game elements (robots and targets) but keep walls
             if (data != null && !data.isEmpty()) {
                 data = removeGameElementsFromMap(data);
@@ -212,16 +212,25 @@ public class MapGenerator {
                 data = new ArrayList<>(wallStorage.getStoredWalls());
             }
             
+            // IMPORTANT: Ensure all outer walls exist before adding game elements
+            // This ensures consistent wall behavior even with preserved walls
+            data = gameLogic.ensureOuterWalls(data);
+            Timber.d("[WALL STORAGE] MapGenerator - Verified outer walls in preserved walls: %d elements", data.size());
+            
             // Delegate to GameLogic to add robots and targets
             data = gameLogic.addGameElementsToGameMap(data, null, null);
         } else {
             // Generate a completely new map
             data = gameLogic.generateGameMap(data);
             
+            // IMPORTANT: Explicitly ensure all outer walls exist before storing
+            data = gameLogic.ensureOuterWalls(data);
+            Timber.d("[WALL STORAGE] MapGenerator - Verified outer walls in new map: %d elements", data.size());
+            
             // Store the walls for future use if we're not generating new maps each time
             if (!Preferences.generateNewMapEachTime) {
                 wallStorage.storeWalls(data);
-                Timber.d("Stored walls for future use");
+                Timber.d("[WALL STORAGE] Stored walls for future use");
             }
         }
         

@@ -184,19 +184,104 @@ public class GameLogic {
     public ArrayList<GridElement> translateArraysToMap(int[][] horizontalWalls, int[][] verticalWalls) {
         ArrayList<GridElement> data = new ArrayList<>();
 
-        for(int x=0; x<=boardWidth; x++)
+        for(int x=0; x<=boardWidth; x++){
             for(int y=0; y <= boardHeight; y++)
             {
                 if(horizontalWalls[x][y]== 1) {
-                    // add all horizontal walls
                     data.add(new GridElement(x,y,"mh"));
                 }
                 if(verticalWalls[x][y]== 1) {
-                    // add all vertical walls
                     data.add(new GridElement(x,y,"mv"));
                 }
             }
+        }
+
+        // Ensure all outer walls exist in the grid data
+        data = ensureOuterWalls(data);
+        Timber.d("[WALL STORAGE] translateArraysToMap - %d GridElements after ensuring outer walls", data.size());
+
         return data;
+    }
+
+    /**
+     * Ensure all outer walls exist in the map data
+     * This is critical for consistent wall behavior when walls are preserved
+     */
+    public ArrayList<GridElement> ensureOuterWalls(ArrayList<GridElement> data) {
+        Timber.d("[WALL STORAGE] ensureOuterWalls called for board %dx%d", boardWidth, boardHeight);
+        ArrayList<GridElement> newData = new ArrayList<>(data);
+        // Check each outer wall position and add if missing
+        boolean[] horizontalTopExists = new boolean[boardWidth];
+        boolean[] horizontalBottomExists = new boolean[boardWidth];
+        boolean[] verticalLeftExists = new boolean[boardHeight];
+        boolean[] verticalRightExists = new boolean[boardHeight];
+
+        // First pass: check which outer walls already exist
+        for (GridElement element : data) {
+            if (element.getType().equals("mh")) {
+                // Horizontal walls
+                if (element.getY() == 0) {
+                    horizontalTopExists[element.getX()] = true;
+                    Timber.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.getX());
+                } else if (element.getY() == boardHeight) {
+                    horizontalBottomExists[element.getX()] = true;
+                    Timber.d("[WALL STORAGE] Horizontal bottom wall found at (%d,%d)", element.getX(), boardHeight);
+                }
+            } else if (element.getType().equals("mv")) {
+                // Vertical walls
+                if (element.getX() == 0) {
+                    verticalLeftExists[element.getY()] = true;
+                    Timber.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.getY());
+                } else if (element.getX() == boardWidth) {
+                    verticalRightExists[element.getY()] = true;
+                    Timber.d("[WALL STORAGE] Vertical right wall found at (%d,%d)", boardWidth, element.getY());
+                }
+            }
+        }
+
+        int missingWalls = 0;
+
+        // Add missing top walls
+        for (int x = 0; x < boardWidth; x++) {
+            if (!horizontalTopExists[x]) {
+                newData.add(new GridElement(x, 0, "mh"));
+                Timber.d("[WALL STORAGE] missing top wall at (%d,0)", x);
+                missingWalls++;
+            }
+        }
+
+        // Add missing bottom walls
+        for (int x = 0; x < boardWidth; x++) {
+            if (!horizontalBottomExists[x]) {
+                newData.add(new GridElement(x, boardHeight, "mh"));
+                Timber.d("[WALL STORAGE] missing bottom wall at (%d,%d)", x, boardHeight);
+                missingWalls++;
+            }
+        }
+
+        // Add missing left walls
+        for (int y = 0; y < boardHeight; y++) {
+            if (!verticalLeftExists[y]) {
+                newData.add(new GridElement(0, y, "mv"));
+                Timber.d("[WALL STORAGE] missing left wall at (0,%d)", y);
+                missingWalls++;
+            }
+        }
+
+        // Add missing right walls
+        for (int y = 0; y < boardHeight; y++) {
+            if (!verticalRightExists[y]) {
+                newData.add(new GridElement(boardWidth, y, "mv"));
+                Timber.d("[WALL STORAGE] missing right wall at (%d,%d)", boardWidth, y);
+                missingWalls++;
+            }
+        }
+
+        Timber.d("[WALL STORAGE] %d missing outer walls", missingWalls);
+        
+        return newData;
+        // return data; // send back the original data
+        // return newData; this would send back the new data with the missing walls, but i'd rather just show the error messages and find out, why they are missing
     }
 
     /**
@@ -688,8 +773,19 @@ public class GameLogic {
         int randomBonus = getRandom(0, 3); // Add 0-3 random walls regardless of difficulty
         
         int additionalWalls = baseWallCount + difficultyBonus + randomBonus;
-        int wallsToPlace = Math.min(additionalWalls, maxTotalWalls - 8);
-        wallsToPlace = Math.max(wallsToPlace, minTotalWalls - 8); // Ensure minimum walls
+        int minWalls = 10; // Minimum total walls
+        int maxWalls = 20; // Maximum total walls
+        
+        // Ensure we have at least minAdditionalWalls beyond the center square
+        additionalWalls = Math.max(2, additionalWalls);
+        
+        // Ensure we meet the minimum total wall count
+        if (8 + additionalWalls < minWalls) {
+            additionalWalls = minWalls - 8;
+        }
+        
+        // Cap at maximum total walls
+        int wallsToPlace = Math.min(additionalWalls, maxWalls - 8);
         
         Timber.d("[GAME LOGIC] Adding %d additional walls (total: %d) for difficulty level %d", 
                 wallsToPlace, wallsToPlace + 8, currentLevel);
@@ -775,7 +871,8 @@ public class GameLogic {
                         
                         edgeWallsPlaced++;
                         wallsToPlace--;
-                        Timber.d("[GAME LOGIC] Placed %s edge wall at (%d,%d)", vertical ? "vertical" : "horizontal", pos[0], pos[1]);
+                        Timber.d("[GAME LOGIC] Placed %s edge wall at (%d,%d)", 
+                                vertical ? "vertical" : "horizontal", pos[0], pos[1]);
                     }
                 }
             }
@@ -876,17 +973,9 @@ public class GameLogic {
             data.addAll(removeGameElementsFromMap(existingMap));
         }
 
-        // Create borders (these are automatically added by the game but we'll define them anyway)
+        // Create borders are automatically added by the game
         // Important: In an 8x8 board, valid indices are 0-7, with the borders at -1, 0, boardWidth, and boardHeight
-        for (int x = 0; x < boardWidth; x++) {
-            horizontalWalls[x][0] = 1;
-            horizontalWalls[x][boardHeight] = 1;
-        }
-        for (int y = 0; y < boardHeight; y++) {
-            verticalWalls[0][y] = 1;
-            verticalWalls[boardWidth][y] = 1;
-        }
-        
+    
         // Create a center square similar to the original game but simpler
         int centerX = boardWidth / 2 - 1;
         int centerY = boardHeight / 2 - 1;
@@ -1004,15 +1093,22 @@ public class GameLogic {
             data.addAll(removeGameElementsFromMap(existingMap));
         }
 
-        // Create borders (these are automatically added by the game but we'll define them anyway)
-        // Important: In an 8x8 board, valid indices are 0-7, with the borders at -1, 0, boardWidth, and boardHeight
+        // IMPORTANT: Always explicitly set border walls - don't rely on automatic addition
+        // This ensures consistent behavior especially with saved walls
+        Timber.d("[WALL STORAGE] Explicitly setting ALL outer border walls for board %dx%d", boardWidth, boardHeight);
+        
+        // Set horizontal border walls (top and bottom)
         for (int x = 0; x < boardWidth; x++) {
-            horizontalWalls[x][0] = 1;
-            horizontalWalls[x][boardHeight] = 1;
+            horizontalWalls[x][0] = 1; // Top border
+            horizontalWalls[x][boardHeight] = 1; // Bottom border
+            Timber.d("[WALL STORAGE] Setting horizontal border walls at (%d,0) and (%d,%d)", x, x, boardHeight);
         }
+        
+        // Set vertical border walls (left and right)
         for (int y = 0; y < boardHeight; y++) {
-            verticalWalls[0][y] = 1;
-            verticalWalls[boardWidth][y] = 1;
+            verticalWalls[0][y] = 1; // Left border
+            verticalWalls[boardWidth][y] = 1; // Right border
+            Timber.d("[WALL STORAGE] Setting vertical border walls at (0,%d) and (%d,%d)", y, boardWidth, y);
         }
 
         // Create a center square similar to the original game but simpler
