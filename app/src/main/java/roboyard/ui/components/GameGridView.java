@@ -209,11 +209,11 @@ public class GameGridView extends View {
         wallVertical = ContextCompat.getDrawable(context, R.drawable.mv);
         
         // Load target drawables
-        targetPinkDrawable = ContextCompat.getDrawable(context, R.drawable.cr);
-        targetGreenDrawable = ContextCompat.getDrawable(context, R.drawable.cv);
-        targetBlueDrawable = ContextCompat.getDrawable(context, R.drawable.cb);
-        targetYellowDrawable = ContextCompat.getDrawable(context, R.drawable.cj);
-        targetMultiDrawable = ContextCompat.getDrawable(context, R.drawable.cm);
+        targetPinkDrawable = ContextCompat.getDrawable(context, R.drawable.target_pink);
+        targetGreenDrawable = ContextCompat.getDrawable(context, R.drawable.target_green);
+        targetBlueDrawable = ContextCompat.getDrawable(context, R.drawable.target_blue);
+        targetYellowDrawable = ContextCompat.getDrawable(context, R.drawable.target_yellow);
+        targetMultiDrawable = ContextCompat.getDrawable(context, R.drawable.target_multi);
         
         // Load grid tile background
         gridTileDrawable = ContextCompat.getDrawable(context, R.drawable.grid_tiles);
