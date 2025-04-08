@@ -40,11 +40,11 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 # Accessibility
 - TalkBack-Unterstützung sprache einstellbar machen (Englisch ermöglichen).  
-1. Add a preference setting to customize the order of information in TalkBack announcements
-2. Create custom button sounds to provide audio feedback for different actions
-3. Add a high-contrast mode for better visibility
-4. get rid of the accessibility texts of the walls and the logo in the menu
-
+- Add a preference setting to customize the order of information in TalkBack announcements
+- Create custom button sounds to provide audio feedback for different actions
+- Add a high-contrast mode for better visibility
+- get rid of the accessibility texts of the images in the menu
+- make all accessibility coordinate announcements one more, so on a 8x8 board they go from 1,1 to 8,8 instead of 0,0 to 7,7
 
 # achievements
 - add achievement system
@@ -87,3 +87,7 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
 
 - settings: when setting a higher robotCount than targets, then automatically set the targetCount to the same value
+
+- walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
+
+- add the hints to accessibility mode

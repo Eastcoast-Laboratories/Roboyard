@@ -1229,12 +1229,12 @@ public class GameGridView extends View {
         }
         
         if (state.checkCompletion()) {
-            Timber.d("[GOAL DEBUG] Goal reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
+            Timber.d("[GOAL DEBUG] Target reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
             
             // Critical fix: Tell the GameStateManager the game is complete
             gameStateManager.setGameComplete(true);
             
-            announceForAccessibility("Goal reached! Game complete in " + 
+            announceForAccessibility("Target reached! Game complete in " + 
                 gameStateManager.getMoveCount().getValue() + " moves and " +
                 gameStateManager.getSquaresMoved().getValue() + " squares moved");
         } else {

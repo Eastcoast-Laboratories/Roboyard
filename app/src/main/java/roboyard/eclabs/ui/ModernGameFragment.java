@@ -260,12 +260,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Update goal text
                     if (txtRobotGoal != null) {
-                        txtRobotGoal.setText("Goal: (" + goalX + ", " + goalY + ")");
+                        txtRobotGoal.setText(colorName + " target: (" + goalX + ", " + goalY + ")");
                     }
                     
                     // Announce selection and goal via TalkBack
                     String message = "Selected " + colorName + " robot at (" + x + ", " + y + "). ";
-                    message += "Its goal is at (" + goalX + ", " + goalY + ")";
+                    message += colorName + " target is at (" + goalX + ", " + goalY + ")";
                     announceAccessibility(message);
                     
                     // Announce possible moves
@@ -276,9 +276,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // No goal found for this robot
             if (txtRobotGoal != null) {
-                txtRobotGoal.setText("No goal for this robot");
+                txtRobotGoal.setText("No target for this robot");
             }
-            announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + "). No goal found.");
+            announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + "). No target found.");
             
             // Announce possible moves even if there's no goal
             announcePossibleMoves(robot);
@@ -1267,7 +1267,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // Check for goal completion - although GameStateManager also does this
             if (state.isRobotAtTarget(robot)) {
-                announceAccessibility("Goal reached! Game complete in " + 
+                announceAccessibility("Target reached! Game complete in " + 
                         gameStateManager.getMoveCount().getValue() + " moves and " +
                         gameStateManager.getSquaresMoved().getValue() + " squares moved");
                 
@@ -1334,7 +1334,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Found an obstacle
                 GameElement robotAtPosition = state.getRobotAt(i, y);
                 if (robotAtPosition != null) {
-                    eastObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
+                    eastObstacle = getRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1362,7 +1362,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Found an obstacle
                 GameElement robotAtPosition = state.getRobotAt(i, y);
                 if (robotAtPosition != null) {
-                    westObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
+                    westObstacle = getRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1390,7 +1390,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
-                    northObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
+                    northObstacle = getRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1418,7 +1418,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
-                    southObstacle = getRobotColorNameByGridElement(robotAtPosition) + " robot";
+                    southObstacle = getRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1456,73 +1456,124 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             announcement.append("Then use directional buttons to move the selected robot. ");
         }
         
-        // Announce robots with concise format
-        int robotCount = 0;
+        // Auto-select a robot matching the target color
+        selectRobotWithTargetColor();
+        
+        // Get the currently selected robot
+        GameElement selectedRobot = state.getSelectedRobot();
+        
+        // Announce only the target at game start
+        GameElement targetElement = null;
         for (GameElement element : state.getGameElements()) {
-            if (element.isRobot()) {
-                robotCount++;
-                String color = getRobotColorNameByGridElement(element);
-                int x = element.getX();
-                int y = element.getY();
-                
-                // Find walls - check each direction
-                List<String> walls = new ArrayList<>();
-                
-                // Check east wall
-                if (!state.canRobotMoveTo(element, x + 1, y) && x + 1 < state.getWidth() && 
-                    state.getRobotAt(x + 1, y) == null) {
-                    walls.add("east");
-                }
-                
-                // Check west wall
-                if (!state.canRobotMoveTo(element, x - 1, y) && x - 1 >= 0 && 
-                    state.getRobotAt(x - 1, y) == null) {
-                    walls.add("west");
-                }
-                
-                // Check north wall
-                if (!state.canRobotMoveTo(element, x, y - 1) && y - 1 >= 0 && 
-                    state.getRobotAt(x, y - 1) == null) {
-                    walls.add("north");
-                }
-                
-                // Check south wall
-                if (!state.canRobotMoveTo(element, x, y + 1) && y + 1 < state.getHeight() && 
-                    state.getRobotAt(x, y + 1) == null) {
-                    walls.add("south");
-                }
-                
-                // Build the concise description "[Robot color], [coordinates], [walls directions]"
-                announcement.append(color).append(" robot, ")
-                          .append(x).append("-").append(y);
-                
-                // Add walls if present
-                if (!walls.isEmpty()) {
-                    announcement.append(", walls ");
-                    for (int i = 0; i < walls.size(); i++) {
-                        announcement.append(walls.get(i));
-                        if (i < walls.size() - 1) {
-                            announcement.append(", ");
-                        }
-                    }
-                }
-                announcement.append(". ");
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                String targetColor = getRobotColorName(element.getColor());
+                announcement.append(targetColor).append(" target, ")
+                          .append(element.getX()).append("-").append(element.getY()).append(". ");
+                targetElement = element;
+                break; // Only announce one target
             }
         }
         
-        // announcement.append("Total robots: ").append(robotCount).append(". ");
-        
-        // Announce targets with concise format
-        for (GameElement element : state.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                String color = getRobotColorName(element.getColor());
-                announcement.append(color).append(" target, ")
-                          .append(element.getX()).append("-").append(element.getY()).append(". ");
+        // If a robot is selected, announce it as well
+        if (selectedRobot != null) {
+            String robotColor = getRobotColorNameByGridElement(selectedRobot);
+            int x = selectedRobot.getX();
+            int y = selectedRobot.getY();
+            
+            // Find walls - check each direction
+            List<String> walls = new ArrayList<>();
+            
+            // Check east wall
+            if (!state.canRobotMoveTo(selectedRobot, x + 1, y) && x + 1 < state.getWidth() && 
+                state.getRobotAt(x + 1, y) == null) {
+                walls.add("east");
             }
+            
+            // Check west wall
+            if (!state.canRobotMoveTo(selectedRobot, x - 1, y) && x - 1 >= 0 && 
+                state.getRobotAt(x - 1, y) == null) {
+                walls.add("west");
+            }
+            
+            // Check north wall
+            if (!state.canRobotMoveTo(selectedRobot, x, y - 1) && y - 1 >= 0 && 
+                state.getRobotAt(x, y - 1) == null) {
+                walls.add("north");
+            }
+            
+            // Check south wall
+            if (!state.canRobotMoveTo(selectedRobot, x, y + 1) && y + 1 < state.getHeight() && 
+                state.getRobotAt(x, y + 1) == null) {
+                walls.add("south");
+            }
+            
+            // Build the concise description
+            announcement.append("Selected ").append(robotColor).append(" robot, ")
+                      .append(x).append("-").append(y);
+            
+            // Add walls if present
+            if (!walls.isEmpty()) {
+                announcement.append(", walls ");
+                for (int i = 0; i < walls.size(); i++) {
+                    announcement.append(walls.get(i));
+                    if (i < walls.size() - 1) {
+                        announcement.append(", ");
+                    }
+                }
+            }
+            announcement.append(". ");
         }
         
         // Make the announcement
         announceAccessibility(announcement.toString());
+    }
+    
+    /**
+     * Find and select a robot that matches the color of a target
+     * @return true if a matching robot was found and selected, false otherwise
+     */
+    private boolean selectRobotWithTargetColor() {
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) return false;
+        
+        // First, identify the target
+        GameElement targetElement = null;
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                targetElement = element;
+                break; // Only consider one target for simplicity
+            }
+        }
+        
+        // If no target found, cannot proceed
+        if (targetElement == null) return false;
+        
+        // Now find a robot matching the target's color
+        for (GameElement element : state.getGameElements()) {
+            if (element.isRobot() && element.getColor() == targetElement.getColor()) {
+                // Found a matching robot, select it
+                state.setSelectedRobot(element);
+                isRobotSelected = true;
+                
+                // Update UI elements for the selected robot
+                updateRobotSelectionInfo(element);
+                updateDirectionalButtons(element);
+                
+                // Force the game grid view to redraw to show the selection
+                if (gameGridView != null) {
+                    gameGridView.invalidate();
+                }
+                
+                // Announce the selection of this robot
+                announcePossibleMoves(element);
+                
+                Timber.d("[ACCESSIBILITY] Auto-selected %s robot matching target color", 
+                        getRobotColorNameByGridElement(element));
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     @Override
@@ -1762,10 +1813,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         int c = robot.getColor();
         switch (c) {
-            case 0: return "Red";
+            case 0: return "Pink";
             case 1: return "Green";
             case 2: return "Blue";
             case 3: return "Yellow";
+            case 4: return "Silver";
             default: return "Unknown: " + c;
         }
     }
@@ -2079,12 +2131,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Clear any previous hint or status text
         updateStatusText("", false);
+
+        // Reset and start the timer
+        resetAndStartTimer();
         
-        // Start the timer
-        startTimer();
-        
-        // Announce game start
-        announceGameStart();
+        // Auto-select robot that matches the target color
+        selectRobotWithTargetColor();
     }
 
     @Override
