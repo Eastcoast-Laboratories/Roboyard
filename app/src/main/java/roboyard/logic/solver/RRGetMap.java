@@ -113,44 +113,45 @@ public class RRGetMap {
         }
         
         // Force outer walls to be present - essential for the solver
-        int missingWallCountX = 0;
-        int missingWallCountY = 0;
+        int missingWallCountHorizontal = 0;
+        int missingWallCountVertical = 0;
         
         for (int x = 0; x < board.width; x++) {
             // Top border
             if (!board.isWall(0 + x, Constants.NORTH)){
                 board.setWall(0 + x, "N", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing top border wall at position (%d,0)", x);
-                missingWallCountX++;
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing top horizontal border wall at position (%d,0)", x);
+                missingWallCountHorizontal++;
             }
             // Bottom border
             int bottomWallY = (board.height-1) * board.width;
             if (!board.isWall(bottomWallY + x, Constants.SOUTH)){
                 board.setWall(bottomWallY + x, "N", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing bottom border wall at position (%d,%d)", x, board.height-1);
-                missingWallCountX++;
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing bottom horizontal border wall at position (%d,%d)", x, board.height-1);
+                missingWallCountHorizontal++;
             }
         }
         
         for (int y = 0; y < board.height; y++) {
-            // Left border
+            // Left vertical border
             int verticalWallY = y * board.width;
+            // board.setWall(0, y, Constants.WEST, false); // debug, delete a left vertical walls
             if (!board.isWall(0 + verticalWallY, Constants.WEST)){
                 board.setWall(0 + verticalWallY, "W", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing left border wall at position (0,%d)", y);
-                missingWallCountY++;
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing left vertical border wall at position (0,%d)", y);
+                missingWallCountVertical++;
             }
             // Right border
             int rightWallX = board.width - 1;
             if (!board.isWall(rightWallX + verticalWallY, Constants.EAST)){
                 board.setWall(rightWallX + verticalWallY, "W", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing right border wall at position (%d,%d)", board.width-1, y);
-                missingWallCountY++;
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing right vertical border wall at position (%d,%d)", board.width-1, y);
+                missingWallCountVertical++;
             }
         }
         
-        if (missingWallCountX > 0 || missingWallCountY > 0) {
-            Timber.w("[SOLUTION_SOLVER][WALLS] Added %d missing outer walls to ensure solver stability, X:%d, Y:%d", missingWallCountX + missingWallCountY, missingWallCountX, missingWallCountY);
+        if (missingWallCountHorizontal > 0 || missingWallCountVertical > 0) {
+            Timber.w("[SOLUTION_SOLVER][WALLS] Added %d missing outer walls to ensure solver stability, horizontal:%d, vertical:%d", missingWallCountHorizontal + missingWallCountVertical, missingWallCountHorizontal, missingWallCountVertical);
         }
         
         // Process each grid element (targets, robots)
