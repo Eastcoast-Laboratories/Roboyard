@@ -183,7 +183,7 @@ public class MapGenerator {
     public ArrayList<GridElement> getGeneratedGameMap() {
         // We'll check the latest value of generateNewMapEachTime from our static variable
         // which is already set by SettingsGameScreen when preferences are changed
-        Timber.d("[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s", generateNewMapEachTime);
+        Timber.d("[WALL STORAGE] class default value for generateNewMapEachTime: %s", generateNewMapEachTime);
         
         ArrayList<GridElement> data = GridGameView.getMap();
         

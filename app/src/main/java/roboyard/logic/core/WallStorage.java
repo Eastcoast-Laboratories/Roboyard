@@ -67,7 +67,7 @@ public class WallStorage {
         // Update current board size
         updateCurrentBoardSize();
         
-        Timber.tag(TAG).d("Stored %d wall elements for board size %dx%d", 
+        Timber.tag(TAG).d("[WALL STORAGE] Stored %d wall elements for board size %dx%d", 
             storedWalls.size(), currentBoardWidth, currentBoardHeight);
         
         // Save to persistent storage
@@ -122,8 +122,8 @@ public class WallStorage {
         editor.putString(key, sb.toString());
         editor.apply();
         
-        Timber.tag(TAG).d("Saved %d walls to disk for board size %dx%d", 
-            storedWalls.size(), currentBoardWidth, currentBoardHeight);
+        Timber.tag(TAG).d("[WALL STORAGE] Saved %d walls to disk for board size %dx%d: String: %s", 
+            storedWalls.size(), currentBoardWidth, currentBoardHeight, sb.toString());
     }
     
     /**
