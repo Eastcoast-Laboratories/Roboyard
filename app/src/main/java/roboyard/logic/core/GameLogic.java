@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import android.graphics.Color;
 import driftingdroids.model.Solution;
 import roboyard.pm.ia.GameSolution;
 import timber.log.Timber;
@@ -289,22 +290,44 @@ public class GameLogic {
      */
     public ArrayList<GridElement> addGameElementsToGameMap(ArrayList<GridElement> data, int[][] horizontalWalls, int[][] verticalWalls) {
         boolean abandon;
-        String[] typesOfTargets = {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
-        String[] typesOfRobots = {"robot_red", "robot_blue", "robot_yellow", "robot_green"};
+        
+        // Use our color management methods to generate target and robot type strings
+        String[] typesOfTargets = new String[Constants.NUM_ROBOTS + 1]; // 4 standard targets + multi-colored target
+        for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
+            typesOfTargets[i] = getObjectType(i, false); // false = target
+        }
+        typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Only add multi target at position 4
+        
+        String[] typesOfRobots = new String[Constants.NUM_ROBOTS + 5]; 
+        for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
+            typesOfRobots[i] = getObjectType(i, true); // true = robot
+        }
+        // Add extra robot colors (silver, red, brown, orange, white)
+        typesOfRobots[Constants.NUM_ROBOTS] = "robot_silver";
+        typesOfRobots[Constants.NUM_ROBOTS + 1] = "robot_red";
+        typesOfRobots[Constants.NUM_ROBOTS + 2] = "robot_brown";
+        typesOfRobots[Constants.NUM_ROBOTS + 3] = "robot_orange";
+        typesOfRobots[Constants.NUM_ROBOTS + 4] = "robot_white";
+
+        // workaround for backward compatibility:
+		typesOfTargets = new String[] {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
+		typesOfRobots = new String[] {"robot_red", "robot_blue", "robot_yellow", "robot_green"};
 
         // Store all positions of game elements to avoid overlapping
         ArrayList<GridElement> allElements = new ArrayList<>();
         
         // Create targets based on targetCount and targetColors settings
         // We'll create targets for each color (or multi-color) up to the targetColors limit
-        int maxTargetTypes = allowMulticolorTarget ? 5 : 4;
+        int maxTargetTypes = allowMulticolorTarget ? Constants.NUM_ROBOTS + 1 : Constants.NUM_ROBOTS;
         int targetTypesCount = Math.min(targetColors, maxTargetTypes); // Limit to targetColors
+        targetTypesCount = Math.max(1, targetTypesCount); // Ensure at least one target is always created
         
-        Timber.d("Creating targets with robotCount=%d and targetColors=%d", robotCount, targetTypesCount);
+        Timber.d("[TARGET GENERATION] targetColors=%d, maxTargetTypes=%d, targetTypesCount=%d", 
+                targetColors, maxTargetTypes, targetTypesCount);
         
         // Create an array of indices to use for target types, and shuffle it to randomize which colors are used
-        int[] targetTypeIndices = new int[maxTargetTypes];
-        for (int i = 0; i < maxTargetTypes; i++) {
+        int[] targetTypeIndices = new int[typesOfTargets.length];
+        for (int i = 0; i < typesOfTargets.length; i++) {
             targetTypeIndices[i] = i;
         }
         
@@ -313,7 +336,7 @@ public class GameLogic {
         
         // Only use the first targetTypesCount elements from the shuffled array
         Timber.d("[TARGET] Will use %d different target types out of %d possible types", targetTypesCount, maxTargetTypes);
-
+        
         // If horizontalWalls and verticalWalls are null, create empty arrays
         if (horizontalWalls == null || verticalWalls == null) {
             Timber.d("[WALL STORAGE] Creating empty wall arrays for target placement");
@@ -1407,5 +1430,158 @@ public class GameLogic {
      */
     public int getTargetColors() {
         return targetColors;
+    }
+
+    /**
+     * Convert a color ID to its corresponding name
+     * @param colorId The color ID from Constants
+     * @param capitalize Whether to capitalize the first letter of the color name
+     * @return The color name as a string
+     */
+    public static String getColorName(int colorId, boolean capitalize) {
+        String name;
+        switch (colorId) {
+            case Constants.COLOR_PINK: name = "pink"; break;
+            case Constants.COLOR_GREEN: name = "green"; break;
+            case Constants.COLOR_BLUE: name = "blue"; break;
+            case Constants.COLOR_YELLOW: name = "yellow"; break;
+            case Constants.COLOR_SILVER: name = "silver"; break;
+            case Constants.COLOR_RED: name = "red"; break;
+            case Constants.COLOR_BROWN: name = "brown"; break;
+            case Constants.COLOR_ORANGE: name = "orange"; break;
+            case Constants.COLOR_WHITE: name = "white"; break;
+            case Constants.COLOR_MULTI: name = "multi"; break;
+            default: 
+                Timber.w("[COLOR] Unknown color ID: %d", colorId);
+                throw new IllegalArgumentException("Unknown color ID: " + colorId);
+        }
+        
+        return capitalize ? capitalizeFirstLetter(name) : name;
+    }
+    
+    /**
+     * Helper method to capitalize the first letter of a string
+     */
+    private static String capitalizeFirstLetter(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
+    
+    /**
+     * Converts a color name to its corresponding ID
+     * @param colorName The color name (case insensitive)
+     * @return The color ID from Constants
+     */
+    public static int getColorId(String colorName) {
+        if (colorName == null) {
+            throw new IllegalArgumentException("Color name cannot be null");
+        }
+        
+        switch (colorName.toLowerCase()) {
+            case "pink": return Constants.COLOR_PINK;
+            case "green": return Constants.COLOR_GREEN;
+            case "blue": return Constants.COLOR_BLUE;
+            case "yellow": return Constants.COLOR_YELLOW;
+            case "silver": return Constants.COLOR_SILVER;
+            case "red": return Constants.COLOR_RED;
+            case "brown": return Constants.COLOR_BROWN;
+            case "orange": return Constants.COLOR_ORANGE;
+            case "white": return Constants.COLOR_WHITE;
+            case "multi": return Constants.COLOR_MULTI;
+            default:
+                Timber.w("[COLOR] Unknown color name: %s", colorName);
+                throw new IllegalArgumentException("Unknown color name: " + colorName);
+        }
+    }
+    
+    /**
+     * Get the object type string ("robot_X" or "target_X") from color ID
+     * @param colorId The color ID from Constants
+     * @param isRobot Whether this is a robot (true) or target (false)
+     * @return The object type string
+     */
+    public static String getObjectType(int colorId, boolean isRobot) {
+        String prefix = isRobot ? "robot_" : "target_";
+        return prefix + getColorName(colorId, false);
+    }
+    
+    /**
+     * Extract the color ID from an object type string (e.g., "robot_blue" or "target_pink")
+     * @param objectType The object type string
+     * @return The color ID from Constants
+     */
+    public static int getColorIdFromObjectType(String objectType) {
+        if (objectType == null || objectType.isEmpty() ||
+            (!objectType.startsWith("robot_") && !objectType.startsWith("target_"))) {
+            throw new IllegalArgumentException("Invalid object type: " + objectType);
+        }
+        
+        String colorName = objectType.substring(objectType.indexOf("_") + 1);
+        return getColorId(colorName);
+    }
+
+    /**
+     * Extract the color ID from an object type string (also known as color index)
+     * @param objectType The object type string like "robot_blue" or "target_pink"
+     * @return The color ID (index) from Constants
+     */
+    public static int getColorIndex(String objectType) {
+        return getColorIdFromObjectType(objectType);
+    }
+    
+    /**
+     * Get the RGB color value for an object type
+     * @param objectType The object type string like "robot_blue" or "target_pink"
+     * @return The RGB color value from Constants.colors_rgb
+     */
+    public static int getColor(String objectType) {
+        int colorId = getColorIdFromObjectType(objectType);
+        // Special case for multi-colored targets
+        if (colorId == Constants.COLOR_MULTI) {
+            return Color.WHITE; // Default color for multi-target
+        }
+        if (colorId >= 0 && colorId < Constants.colors_rgb.length) {
+            return Constants.colors_rgb[colorId];
+        }
+        Timber.w("[COLOR] Invalid color ID: %d from objectType: %s", colorId, objectType);
+        throw new IllegalArgumentException("getColor: Invalid color ID: " + colorId + " from objectType: " + objectType);
+    }
+
+    /**
+     * Check if any targets exist in the gridElements list
+     * @param gridElements The list of grid elements to check
+     * @return true if at least one target is found, false otherwise
+     */
+    public static boolean hasTargets(ArrayList<GridElement> gridElements) {
+        if (gridElements == null) {
+            Timber.e("[TARGET CHECK] gridElements is null!");
+            return false;
+        }
+        
+        Timber.d("[TARGET CHECK] Checking %d grid elements for targets", gridElements.size());
+        int targetCount = 0;
+        for (GridElement element : gridElements) {
+            String type = element.getType();
+            if (type != null && type.startsWith("target_")) {
+                targetCount++;
+                Timber.d("[TARGET CHECK] Found target of type %s at position (%d,%d)", 
+                         type, element.getX(), element.getY());
+            }
+        }
+        
+        Timber.d("[TARGET CHECK] Found %d targets", targetCount);
+        return targetCount > 0;
+    }
+
+    /**
+     * Check if debug logging is enabled
+     * @return true if debug logging is enabled
+     */
+    public static boolean hasDebugLogging() {
+        // For now, always return false to minimize log output
+        // Can be changed to a configurable setting later
+        return false;
     }
 }

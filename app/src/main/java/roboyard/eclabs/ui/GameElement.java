@@ -3,6 +3,7 @@ package roboyard.eclabs.ui;
 import java.io.Serializable;
 
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.GameLogic;
 import timber.log.Timber;
 
 /**
@@ -145,7 +146,10 @@ public class GameElement implements Serializable {
      */
     public void setAnimationPosition(float x, float y) {
         // Log the position change for debugging
-        Timber.d("[ANIM] Set animation position for robot %d: (%.2f,%.2f)", getColor(), x, y);
+        if (GameLogic.hasDebugLogging()) {
+            Timber.d("[ANIM] Set animation position for %s robot: (%.2f,%.2f)", 
+                   GameLogic.getColorName(getColor(), true), x, y);
+        }
         
         // Validate inputs to avoid setting invalid positions
         if (Float.isNaN(x) || Float.isNaN(y) || Float.isInfinite(x) || Float.isInfinite(y)) {

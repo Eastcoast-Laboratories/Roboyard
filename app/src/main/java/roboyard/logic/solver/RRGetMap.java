@@ -1,5 +1,6 @@
 package roboyard.pm.ia.ricochet;
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.GameLogic;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Wall;
 import roboyard.logic.core.WallModel;
@@ -54,23 +55,15 @@ public class RRGetMap {
         // Log the actual board dimensions we're using
         Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (MainActivity dimensions: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY + ")");
 
-        // Generate and log the ASCII map for debugging
-        generateAsciiMap(gridElements);
-        
+        // Generate the ASCII map for debugging
+        String asciiMap = generateAsciiMap(gridElements);
+        Timber.d(asciiMap);
         // Create the board with the current dimensions
         Board board = Board.createBoardFreestyle(null, MainActivity.boardSizeX, MainActivity.boardSizeY, MainActivity.numRobots);
         board.removeGoals();
 
         // Color mappings for robots and targets
         Map<String, Integer> colors = new HashMap<>();
-        Map<String, Integer> colors2 = new HashMap<>();
-
-        // Robot colors for visual representation
-        colors2.put("robot_red", Color.RED);
-        colors2.put("robot_blue", Color.BLUE);
-        colors2.put("robot_green", Color.GREEN);
-        colors2.put("robot_yellow", Color.YELLOW);
-        colors2.put("robot_silver", Color.GRAY);
 
         // Robot and target indices for game logic
         // Using Constants class values
@@ -78,6 +71,7 @@ public class RRGetMap {
         colors.put("robot_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
         colors.put("robot_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
         colors.put("robot_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW
+        colors.put("robot_silver", Constants.COLOR_SILVER); 
 
         colors.put("target_red", Constants.COLOR_PINK);       // Constants.COLOR_PINK
         colors.put("target_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
@@ -186,21 +180,46 @@ public class RRGetMap {
             if (type.equals("robot_red") || type.equals("robot_green") || 
                 type.equals("robot_blue") || type.equals("robot_yellow") ||
                 type.equals("robot_silver")) {
-                // FIXED: Use the color index (0-3) from colors map instead of the RGB color value from colors2
-                // Old code created piece with actual RGB color instead of index: new RRPiece(x, y, colors2.get(type), robotCounter)
+                // Get the color index from the GameLogic
                 int colorIndex = colors.get(type);
-                Timber.d("[HINT_SYSTEM] Creating robot piece for %s with colorIndex=%d instead of RGB color %d", 
-                        type, colorIndex, colors2.get(type));
-                pieces[colorIndex] = new RRPiece(x, y, colorIndex, robotCounter);
                 
+                // Map color indices to valid piece array indices (0-3)
+                // This is needed because the solver only supports 4 robots max
+                int mappedIndex;
+                if (colorIndex >= 0 && colorIndex < Constants.NUM_ROBOTS) {
+                    // Standard robots (0-3) use their own indices
+                    mappedIndex = colorIndex;
+                } else {
+                    // For extra robots (indices >= 4), map them to one of the standard robots
+                    // This is a temporary solution - we log a warning to highlight the issue
+                    // PINK = 0, GREEN = 1, BLUE = 2, YELLOW = 3
+                    mappedIndex = robotCounter % Constants.NUM_ROBOTS;
+                    Timber.w("[COLOR_MAPPING] Mapped non-standard robot color %d (%s) to standard color index %d", 
+                             colorIndex, GameLogic.getColorName(colorIndex, true), mappedIndex);
+                }
+                
+                Timber.d("[HINT_SYSTEM] Creating robot piece for %s with colorIndex=%d (mapped to %d) with RGB color %d", 
+                        type, colorIndex, mappedIndex, GameLogic.getColor(type));
+                
+                pieces[mappedIndex] = new RRPiece(x, y, colorIndex, robotCounter);
                 robotCounter++;
             }
         }
 
         // Set robot positions on the board
         // Must be exactly 4 robots as the solver expects this
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < Constants.NUM_ROBOTS; i++) {
+            // Check if the piece exists at this position
+            if (pieces[i] == null) {
+                Timber.e("[ROBOT_MAPPING] Missing robot at position %d. Creating a dummy robot at (0,0)", i);
+                // Create a dummy piece at position (0,0) as a fallback
+                // This ensures the solver can proceed but may not produce correct solutions
+                pieces[i] = new RRPiece(0, 0, i, i);
+            }
+            
             int position = pieces[i].getY() * board.width + pieces[i].getX();
+            Timber.d("[ROBOT_MAPPING] Setting robot %d at board position %d (x=%d, y=%d)", 
+                    i, position, pieces[i].getX(), pieces[i].getY());
             board.setRobot(i, position, false);
         }
         
@@ -214,10 +233,15 @@ public class RRGetMap {
     }
     
     /**
-     * Generates an ASCII representation of the game board for debugging purposes
-     * @param gridElements The grid elements to display in ASCII format
+     * Generate an ASCII representation of the game board from the provided grid elements
+     * @param gridElements List of grid elements to represent
+     * @return ASCII string representation of the board
      */
-    private static void generateAsciiMap(ArrayList<GridElement> gridElements) {
+    public static String generateAsciiMap(ArrayList<GridElement> gridElements) {
+        if (gridElements == null || gridElements.isEmpty()) {
+            return "[ASCII_MAP] Empty or null grid elements provided.";
+        }
+        
         // Create a double-width ASCII map to separate walls from robots/targets
         // For each grid cell (x,y), we'll use:
         // - asciiMap[x*2][y] for vertical walls
@@ -320,35 +344,42 @@ public class RRGetMap {
             }
         }
 
-        // Second pass: render the map row by row
-        for (int y = 0; y < 22; y++) {
-            StringBuilder sb = new StringBuilder();
-            boolean hasContent = false;
-            
-            for (int x = 0; x < 22; x++) {
-                // Add vertical wall position
-                if (asciiMap[x*2][y] == null) {
-                    sb.append(" ");
-                } else {
-                    sb.append(asciiMap[x*2][y]);
-                    hasContent = true;
-                }
-                
-                // Add robot/target or horizontal wall position
-                if (asciiMap[x*2+1][y] == null) {
-                    sb.append(" ");
-                } else {
-                    sb.append(asciiMap[x*2+1][y]);
-                    hasContent = true;
-                }
-            }
-            
-            // Skip empty rows
-            if (!hasContent) {
-                break;
-            }
-            
-            Timber.d("[SOLUTION_SOLVER] [Ascii map] " + (y<10?"0"+y:y) + ": " + sb);
+        // Build the ASCII map as a string
+        StringBuilder result = new StringBuilder("[ASCII_MAP] Board state:\n");
+        
+        // Find the actual dimensions of the board from the grid elements
+        int maxX = 0;
+        int maxY = 0;
+        for (GridElement element : gridElements) {
+            maxX = Math.max(maxX, element.getX());
+            maxY = Math.max(maxY, element.getY());
         }
+        
+        // Add column headers (X coordinates)
+        result.append("   "); // Space for row labels
+        for (int x = 0; x <= maxX; x++) {
+            result.append(String.format("%2d", x));
+        }
+        result.append("\n");
+        
+        // Add each row with row header (Y coordinate)
+        for (int y = 0; y <= maxY; y++) {
+            result.append(String.format("%2d ", y));
+            
+            for (int x = 0; x <= maxX; x++) {
+                // Add vertical wall or space
+                String vWall = (asciiMap[x*2][y] != null) ? asciiMap[x*2][y] : " ";
+                result.append(vWall);
+                
+                // Add cell content or space
+                String cell = (asciiMap[x*2+1][y] != null) ? asciiMap[x*2+1][y] : ".";
+                result.append(cell);
+            }
+            result.append("\n");
+        }
+        
+        return result.toString();
     }
+    
+
 }
