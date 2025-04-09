@@ -2,28 +2,21 @@ package roboyard.ui.activities;
 import roboyard.SoundService;
 import roboyard.logic.core.MapGenerator;
 import roboyard.ui.components.RenderManager;
-import roboyard.eclabs.Move;
 import roboyard.ui.components.InputManager;
 import roboyard.eclabs.IGameObject;
 import roboyard.ui.components.GamePiece;
 import roboyard.ui.components.GameMovementInterface;
 import roboyard.eclabs.GameManager;
-import roboyard.eclabs.ui.FragmentHostActivity;
+
 import android.graphics.Canvas;
-import android.app.Activity;
 import android.content.Context;
 import roboyard.eclabs.R;
-import roboyard.ui.components.GamePiece;
-import roboyard.ui.components.GameMovementInterface;
 import roboyard.logic.core.Preferences;
 
-import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -39,9 +32,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import roboyard.SoundService;
-import roboyard.eclabs.ui.FragmentHostActivity;
-import roboyard.ui.components.InputManager;
 import timber.log.Timber;
 
 public class MainActivity extends FragmentActivity
@@ -337,126 +327,6 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // Ignored
-    }
-
-    /**
-     * Opens the modern UI settings screen
-     * This provides a bridge between the old game logic and the new UI
-     */
-    public void openSettingsScreen() {
-        Intent intent = new Intent(this, FragmentHostActivity.class);
-        intent.putExtra("screen", "settings");
-        startActivity(intent);
-    }
-    
-    /**
-     * Opens the modern UI save game screen
-     * This provides a bridge between the old game logic and the new UI
-     */
-    public void openSaveScreen() {
-        Timber.d("[Save button] MainActivity.openSaveScreen called, launching intent");
-        
-        // Temporarily pause the rendering thread while switching activities
-        // Without this, the game canvas might stay in the foreground
-        boolean wasRendering = false;
-        if (mThread != null) {
-            Timber.d("[Save button] Pausing rendering thread");
-            wasRendering = true;
-            mThread.stopRendering(); // This calls interrupt() and sets mRunning to false
-        }
-        
-        Intent intent = new Intent(this, FragmentHostActivity.class);
-        intent.putExtra("screen", "save");
-        intent.putExtra("saveMode", true);
-        
-        // Add flags to bring this activity to front and clear it from stack
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        
-        try {
-            Timber.d("[Save button] Starting FragmentHostActivity with flags");
-            startActivity(intent);
-            
-            // Use overridePendingTransition to control the animation
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            
-            // Move MainActivity to the background to ensure FragmentHostActivity comes to front
-            // This is an important step that ensures the rendering canvas doesn't stay on top
-            moveTaskToBack(true);
-            
-            Timber.d("[Save button] MainActivity moved to background");
-        } catch (Exception e) {
-            Timber.e("[Save button] Error starting FragmentHostActivity: %s", e.getMessage());
-            e.printStackTrace();
-            
-            // Restart the rendering thread if we failed to launch the activity
-            if (wasRendering && mTextureView != null && mTextureView.isAvailable()) {
-                Timber.d("[Save button] Restarting rendering thread after error");
-                mThread = new RenderingThread(mTextureView);
-                mThread.start();
-            }
-        }
-    }
-    
-    /**
-     * Opens the modern UI load game screen
-     * This provides a bridge between the old game logic and the new UI
-     */
-    public void openLoadScreen() {
-        Timber.d("[Load button] MainActivity.openLoadScreen called, launching intent");
-        
-        // Temporarily pause the rendering thread while switching activities
-        // Without this, the game canvas might stay in the foreground
-        boolean wasRendering = false;
-        if (mThread != null) {
-            Timber.d("[Load button] Pausing rendering thread");
-            wasRendering = true;
-            mThread.stopRendering(); // This calls interrupt() and sets mRunning to false
-        }
-        
-        Intent intent = new Intent(this, FragmentHostActivity.class);
-        intent.putExtra("screen", "save");
-        intent.putExtra("saveMode", false);
-        
-        // Add flags to bring this activity to front and clear it from stack
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        
-        try {
-            Timber.d("[Load button] Starting FragmentHostActivity with flags");
-            startActivity(intent);
-            
-            // Use overridePendingTransition to control the animation
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            
-            // Move MainActivity to the background to ensure FragmentHostActivity comes to front
-            // This is an important step that ensures the rendering canvas doesn't stay on top
-            moveTaskToBack(true);
-            
-            Timber.d("[Load button] MainActivity moved to background");
-        } catch (Exception e) {
-            Timber.e("[Load button] Error starting FragmentHostActivity: %s", e.getMessage());
-            e.printStackTrace();
-            
-            // Restart the rendering thread if we failed to launch the activity
-            if (wasRendering && mTextureView != null && mTextureView.isAvailable()) {
-                Timber.d("[Load button] Restarting rendering thread after error");
-                mThread = new RenderingThread(mTextureView);
-                mThread.start();
-            }
-        }
-    }
-    
-    /**
-     * Opens the modern UI help/credits screen
-     * This provides a bridge between the old game logic and the new UI
-     */
-    public void openHelpScreen() {
-        Intent intent = new Intent(this, FragmentHostActivity.class);
-        intent.putExtra("screen", "help");
-        startActivity(intent);
     }
 
     private boolean needsHighFramerate() {
