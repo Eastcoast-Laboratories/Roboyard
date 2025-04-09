@@ -999,6 +999,8 @@ public class GameState implements Serializable {
         // If no target was found, throw an exception
         // This prevents the NullPointerException in the solver
         if (!hasTarget && !state.getGameElements().isEmpty()) {
+//            Timber.d("[LEVEL LOADING] Generated ASCII map:\n%s", roboyard.pm.ia.ricochet.RRGetMap.generateAsciiMap(state.getGameElements()));
+
             Timber.e("[LEVEL LOADING] No target found in level");
             throw new IllegalStateException("Level has no target, cannot create a valid game state");
         }
@@ -1452,24 +1454,36 @@ public class GameState implements Serializable {
                 state.addVerticalWall(x, y);
             } else if (type.equals("target_red")) {
                 // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
-                state.addTarget(x, y, 0);
+                state.addTarget(x, y, Constants.COLOR_PINK);
+                Timber.d("[COLOR_MAPPING] Added %s target at (%d,%d) with color ID %d (%s)",
+                         type, x, y, Constants.COLOR_PINK, GameLogic.getColorName(Constants.COLOR_PINK, true));
             } else if (type.equals("target_green")) {
-                state.addTarget(x, y, 1);
+                state.addTarget(x, y, Constants.COLOR_GREEN);
+                Timber.d("[COLOR_MAPPING] Added green target at (%d,%d) with color ID %d", x, y, Constants.COLOR_GREEN);
             } else if (type.equals("target_blue")) {
-                state.addTarget(x, y, 2);
+                state.addTarget(x, y, Constants.COLOR_BLUE);
+                Timber.d("[COLOR_MAPPING] Added blue target at (%d,%d) with color ID %d", x, y, Constants.COLOR_BLUE);
             } else if (type.equals("target_yellow")) {
-                state.addTarget(x, y, 3);
+                state.addTarget(x, y, Constants.COLOR_YELLOW);
+                Timber.d("[COLOR_MAPPING] Added yellow target at (%d,%d) with color ID %d", x, y, Constants.COLOR_YELLOW);
             } else if (type.equals("target_multi")) {
-                // Multi-color target - we'll use red as default
-                state.addTarget(x, y, 0);
+                // Multi-color target - we'll use pink as default
+                state.addTarget(x, y, Constants.COLOR_PINK);
+                Timber.d("[COLOR_MAPPING] Added multi-color target at (%d,%d) with color ID %d", x, y, Constants.COLOR_PINK);
             } else if (type.equals("robot_red")) {
-                state.addRobot(x, y, 0);
+                // Both pink and red map to COLOR_PINK (index 0) - pink is the actual game color, red is used in solver
+                state.addRobot(x, y, Constants.COLOR_PINK);
+                Timber.d("[COLOR_MAPPING] Added %s robot at (%d,%d) with color ID %d (%s)",
+                         type, x, y, Constants.COLOR_PINK, GameLogic.getColorName(Constants.COLOR_PINK, true));
             } else if (type.equals("robot_green")) {
-                state.addRobot(x, y, 1);
+                state.addRobot(x, y, Constants.COLOR_GREEN);
+                Timber.d("[COLOR_MAPPING] Added green robot at (%d,%d) with color ID %d", x, y, Constants.COLOR_GREEN);
             } else if (type.equals("robot_blue")) {
-                state.addRobot(x, y, 2);
+                state.addRobot(x, y, Constants.COLOR_BLUE);
+                Timber.d("[COLOR_MAPPING] Added blue robot at (%d,%d) with color ID %d", x, y, Constants.COLOR_BLUE);
             } else if (type.equals("robot_yellow")) {
-                state.addRobot(x, y, 3);
+                state.addRobot(x, y, Constants.COLOR_YELLOW);
+                Timber.d("[COLOR_MAPPING] Added yellow robot at (%d,%d) with color ID %d", x, y, Constants.COLOR_YELLOW);
             }
         }
 
