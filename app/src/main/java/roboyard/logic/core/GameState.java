@@ -55,6 +55,10 @@ public class GameState implements Serializable {
     private int hintCount = 0; // Track the number of hints used in this game
     private String uniqueMapId = ""; // 5-letter unique ID for map identification
     
+    // Tracking the last move for hint verification
+    private GameElement lastMovedRobot = null;
+    private Integer lastMoveDirection = null;
+    
     // Transient properties (not serialized)
     private transient GameElement selectedRobot;
     private transient GameStateManager gameStateManager;
@@ -1328,6 +1332,40 @@ public class GameState implements Serializable {
             }
         }
         return null;
+    }
+    
+    /**
+     * Get the last moved robot
+     * @return The robot that was last moved, or null if no robot has been moved
+     */
+    public GameElement getLastMovedRobot() {
+        return lastMovedRobot;
+    }
+    
+    /**
+     * Set the last moved robot
+     * @param robot The robot that was just moved
+     */
+    public void setLastMovedRobot(GameElement robot) {
+        this.lastMovedRobot = robot;
+        Timber.d("[MOVE_TRACKING] Last moved robot set to color: %d", robot != null ? robot.getColor() : -1);
+    }
+    
+    /**
+     * Get the direction of the last move
+     * @return The direction constant from ERRGameMove, or null if no move has been made
+     */
+    public Integer getLastMoveDirection() {
+        return lastMoveDirection;
+    }
+    
+    /**
+     * Set the direction of the last move
+     * @param direction The direction constant from ERRGameMove
+     */
+    public void setLastMoveDirection(Integer direction) {
+        this.lastMoveDirection = direction;
+        Timber.d("[MOVE_TRACKING] Last move direction set to: %d", direction != null ? direction : -1);
     }
     
     /**

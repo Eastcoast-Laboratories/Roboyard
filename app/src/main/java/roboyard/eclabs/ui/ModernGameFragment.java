@@ -699,39 +699,66 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         int currentMoveCount = state.getMoveCount();
                         Timber.d("[HINT_SYSTEM] Current move count: %d", currentMoveCount);
                         
-                        // We can't directly check if the move matches, but we can advance the hint
-                        // when a move is made and the hint is being shown
-                        if (currentMoveCount > 0 && hintButton.isChecked()) {
-                            // Advance to the next hint
-                            int totalMoves = solution.getMoves().size();
-                            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
+                        // Get the hint move
+                        IGameMove hintMove = solution.getMoves().get(normalHintIndex);
+                        
+                        // Get the last moved robot from the state
+                        GameElement lastMovedRobot = state.getLastMovedRobot();
+                        Integer lastMoveDirection = state.getLastMoveDirection();
+                        
+                        // If we have both the hint and the actual move information, compare them
+                        if (hintMove != null && lastMovedRobot != null && lastMoveDirection != null) {
+                            // Get the hint move details
+                            int hintRobotColor = ((roboyard.pm.ia.ricochet.RRGameMove)hintMove).getColor();
+                            int hintDirection = ((roboyard.pm.ia.ricochet.RRGameMove)hintMove).getDirection();
                             
-                            // Increment hint step if possible
-                            if (currentHintStep < totalPossibleHints - 1) {
-                                currentHintStep++;
-                                Timber.d("[HINT_SYSTEM] Auto-advancing to next hint: step=%d", currentHintStep);
+                            // Log the hint and actual move details for debugging
+                            Timber.d("[HINT_SYSTEM] Move verification - Hint robot: %d, Moved robot: %d, Hint direction: %d, Move direction: %d", 
+                                hintRobotColor, lastMovedRobot.getColor(), hintDirection, lastMoveDirection);
+                            
+                            // Check if the robot color and direction match the hint
+                            boolean robotMatches = (hintRobotColor == lastMovedRobot.getColor());
+                            boolean directionMatches = (hintDirection == lastMoveDirection);
+                            
+                            // Only advance to the next hint if both robot and direction match
+                            if (robotMatches && directionMatches) {
+                                Timber.d("[HINT_SYSTEM] Move matches hint! Advancing to next hint");
+                                // Advance to the next hint
+                                int totalMoves = solution.getMoves().size();
+                                totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
                                 
-                                // Show the appropriate hint after a short delay
-                                new Handler().postDelayed(() -> {
-                                    // Show the appropriate hint
-                                    if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                                        showPreHint(solution, totalMoves, currentHintStep);
-                                    } else {
-                                        int nextNormalHintIndex = showingPreHints ? 
-                                                currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                                        showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
-                                    }
+                                // Increment hint step if possible
+                                if (currentHintStep < totalPossibleHints - 1) {
+                                    currentHintStep++;
+                                    Timber.d("[HINT_SYSTEM] Auto-advancing to next hint: step=%d", currentHintStep);
                                     
-                                    // Update the current solution step
-                                    gameStateManager.resetSolutionStep();
-                                    for (int i = 0; i < currentHintStep; i++) {
-                                        gameStateManager.incrementSolutionStep();
-                                    }
-                                    Timber.d("[HINT_SYSTEM] Updated solution step to %d after auto-advance", currentHintStep);
-                                }, 1000); // 1 second delay
+                                    // Show the appropriate hint after a short delay
+                                    new Handler().postDelayed(() -> {
+                                        // Show the appropriate hint
+                                        if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                                            showPreHint(solution, totalMoves, currentHintStep);
+                                        } else {
+                                            int nextNormalHintIndex = showingPreHints ? 
+                                                    currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                                            showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
+                                        }
+                                        
+                                        // Update the current solution step
+                                        gameStateManager.resetSolutionStep();
+                                        for (int i = 0; i < currentHintStep; i++) {
+                                            gameStateManager.incrementSolutionStep();
+                                        }
+                                        Timber.d("[HINT_SYSTEM] Updated solution step to %d after auto-advance", currentHintStep);
+                                    }, 1000); // 1 second delay
+                                } else {
+                                    Timber.d("[HINT_SYSTEM] Already at last hint, can't auto-advance further");
+                                }
                             } else {
-                                Timber.d("[HINT_SYSTEM] Already at last hint, can't auto-advance further");
+                                Timber.d("[HINT_SYSTEM] Move doesn't match hint - robot match: %b, direction match: %b", 
+                                    robotMatches, directionMatches);
                             }
+                        } else {
+                            Timber.d("[HINT_SYSTEM] Missing information to verify hint match");
                         }
                     }
                 }

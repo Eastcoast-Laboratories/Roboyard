@@ -704,6 +704,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Also update the move count in the GameState object itself (logic)
             // This ensures state.getMoveCount() returns the correct value
             state.setMoveCount(getMoveCount().getValue());
+            
+            // Track the robot and direction for hint verification
+            int directionConstant = 0;
+            if (dx > 0) directionConstant = 2; // RIGHT
+            else if (dx < 0) directionConstant = 8; // LEFT 
+            else if (dy < 0) directionConstant = 1; // UP
+            else if (dy > 0) directionConstant = 4; // DOWN
+            
+            // Store the last moved robot and direction in the GameState
+            state.setLastMovedRobot(robot);
+            state.setLastMoveDirection(directionConstant);
+            
+            Timber.d("[HINT_SYSTEM] Robot moved: color=%d, direction=%d", robot.getColor(), directionConstant);
             Timber.d("[HINT_SYSTEM] Updated moveCount in GameState to %d", state.getMoveCount());
             
             // Create completion callback for when animation finishes
