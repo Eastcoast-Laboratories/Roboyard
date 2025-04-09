@@ -32,7 +32,6 @@ public class GamePiece implements IGameObject {
     private float deltaX              = 0;
     private float deltaY              = 0;
     private int curMoveSquares      = 0;
-    // private int numSquaresMoved     = 0;
     private final int initialSpeed        = 22;
     private final int minSpeed            = 2;
     private final int extraSizeForRobotsAndTargets = 33; // robots and targets are some percent larger than the grid and may overlap 4 px

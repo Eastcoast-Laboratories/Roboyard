@@ -219,7 +219,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Reset move counts and history
         setMoveCount(0);
-        setSquaresMoved(0);
+        setSquaresMoved(0); // reset squares moved count
         setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
@@ -2088,5 +2088,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         if (robotAnimationManager != null) {
             robotAnimationManager.setGameGridView(gameGridView);
         }
+    }
+    
+    /**
+     * Reset all move counts and game history
+     * This resets the move counter, squares moved counter, game completion status,
+     * and clears both state history and squares moved history.
+     */
+    public void resetMoveCountsAndHistory() {
+        Timber.d("[RESET_GAME] Resetting all move counts and game history");
+        // Reset move counts and history
+        setMoveCount(0);
+        setSquaresMoved(0); // reset squares moved count
+        setGameComplete(false);
+        stateHistory.clear();
+        squaresMovedHistory.clear();
     }
 }

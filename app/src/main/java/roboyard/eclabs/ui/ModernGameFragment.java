@@ -986,7 +986,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             newMapButton.setVisibility(View.VISIBLE);
             saveMapButton.setVisibility(View.VISIBLE);
         }
-        
+
+        // "New Game" Button
         newMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
             // Clear robot paths BEFORE starting a new game
@@ -995,6 +996,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.d("[ROBOTS] Cleared robot paths before starting new game");
             }
             
+			// Reset move counts and history explicitly to ensure all counters are zeroed
+	        gameStateManager.resetMoveCountsAndHistory();
+	        Timber.d("[NEW_GAME] Reset move counts and game history");
+
             // Start a new game
             gameStateManager.startModernGame();
             // Reset timer
@@ -1042,7 +1047,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             navigateToDirect(menuFragment);
         });
         
-        // Next Level button - go to the next level when a level is completed
+        // "Next Level" button - go to the next level when a level is completed
+        // big "new Game" button - in random game mode
         nextLevelButton = view.findViewById(R.id.next_level_button);
         nextLevelButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Next Level button clicked");
@@ -1121,6 +1127,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Show restart button for random games
                     newMapButton.setVisibility(View.VISIBLE);
                 }
+
+                // Reset move counts and history explicitly to ensure all counters are zeroed
+                gameStateManager.resetMoveCountsAndHistory();
+                Timber.d("[NEW_GAME] Reset move counts and game history");
             }
         });
     }
@@ -2265,6 +2275,17 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Reset and start the timer
         resetAndStartTimer();
         
+        // Clear robot paths
+        if (gameGridView != null) {
+            gameGridView.clearRobotPaths();
+            gameGridView.invalidate();
+            Timber.d("[ROBOT_PATHS] Cleared robot paths during game initialization");
+        }
+
+        // Reset move counts and history explicitly to ensure all counters are zeroed
+        gameStateManager.resetMoveCountsAndHistory();
+        Timber.d("[GAME_INIT] Reset move counts and game history");
+
         // Auto-select robot that matches the target color
         selectRobotWithTargetColor();
     }
