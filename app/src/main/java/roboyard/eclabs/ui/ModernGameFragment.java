@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -232,9 +233,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (robot == null) {
             if (txtSelectedRobot != null) {
                 txtSelectedRobot.setText("No robot selected");
+                txtSelectedRobot.setContentDescription("No robot selected");
             }
             if (txtRobotGoal != null) {
                 txtRobotGoal.setText("");
+                txtRobotGoal.setContentDescription("");
             }
             announceAccessibility("No robot selected");
             return;
@@ -245,9 +248,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         int x = robot.getX();
         int y = robot.getY();
         
+        // Create content for the selected robot info
+        String robotInfo = "Selected: " + colorName + " robot at (" + x + ", " + y + ")";
+        
         // Update selected robot text
         if (txtSelectedRobot != null) {
-            txtSelectedRobot.setText("Selected: " + colorName + " robot at (" + x + ", " + y + ")");
+            txtSelectedRobot.setText(robotInfo);
+            txtSelectedRobot.setContentDescription(robotInfo);
         }
         
         // Find the robot's goal
@@ -258,9 +265,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     int goalX = element.getX();
                     int goalY = element.getY();
                     
+                    // Create content for the goal info
+                    String goalInfo = colorName + " target: (" + goalX + ", " + goalY + ")";
+                    
                     // Update goal text
                     if (txtRobotGoal != null) {
-                        txtRobotGoal.setText(colorName + " target: (" + goalX + ", " + goalY + ")");
+                        txtRobotGoal.setText(goalInfo);
+                        txtRobotGoal.setContentDescription(goalInfo);
                     }
                     
                     // Announce selection and goal via TalkBack
@@ -275,8 +286,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             
             // No goal found for this robot
+            String noGoalInfo = "No target for this robot";
             if (txtRobotGoal != null) {
-                txtRobotGoal.setText("No target for this robot");
+                txtRobotGoal.setText(noGoalInfo);
+                txtRobotGoal.setContentDescription(noGoalInfo);
             }
             announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + "). No target found.");
             
@@ -976,6 +989,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         newMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
+            // Clear robot paths BEFORE starting a new game
+            if (gameGridView != null) {
+                gameGridView.clearRobotPaths();
+                Timber.d("[ROBOTS] Cleared robot paths before starting new game");
+            }
+            
             // Start a new game
             gameStateManager.startModernGame();
             // Reset timer
@@ -1000,6 +1019,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // Clear any hint text from the status display
             updateStatusText("", false);
+            
+            // Force another path clearing to ensure all paths are removed
+            if (gameGridView != null) {
+                gameGridView.clearRobotPaths();
+                gameGridView.invalidate();
+                Timber.d("[ROBOT_PATHS] Forced additional path clearing after new game start");
+            }
+            
             // Announce the robots and their positions
             announceGameStart();
         });
@@ -1131,12 +1158,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         } else {
             accessibilityControlsVisible = false;
             accessibilityControlsContainer.setVisibility(View.GONE);
+            Timber.d("[ACCESSIBILITY_MODE] Accessibility mode inactive - hiding controls");
         }
     }
     
     /**
-     * Cycle through available robots for TalkBack accessibility
-     * This allows users to quickly switch between robots using a dedicated button
+     * Cycle through available robots for accessibility mode
+     * This method is called when the "Select Robot" button is pressed
      */
     private void cycleThroughRobots() {
         GameState state = gameStateManager.getCurrentState().getValue();
@@ -1160,10 +1188,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Find current robot index
         int currentIndex = -1;
-        GameElement selectedRobot = state.getSelectedRobot();
-        if (selectedRobot != null) {
+        GameElement currentRobot = state.getSelectedRobot();
+        if (currentRobot != null) {
             for (int i = 0; i < robots.size(); i++) {
-                if (robots.get(i).getColor() == selectedRobot.getColor()) {
+                if (robots.get(i).getColor() == currentRobot.getColor()) {
                     currentIndex = i;
                     break;
                 }
@@ -1182,9 +1210,95 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Play a sound to indicate selection changed
         playSound("move");
         
-        // Announce the newly selected robot
-        String colorName = getRobotColorNameByGridElement(nextRobot);
-        announceAccessibility("Selected " + colorName + " robot");
+        Timber.d("[ACCESSIBILITY_ROBOT] Cycled to robot: %s", getRobotColorNameByGridElement(nextRobot));
+        
+        // Announce the newly selected robot with more detailed information
+        if (isTalkBackEnabled() || Preferences.accessibilityMode) {
+            String robotColor = getRobotColorNameByGridElement(nextRobot);
+            String announcementMessage = robotColor + " robot selected";
+            
+            // Check for goal robot by examining goal elements in the game state
+            boolean hasGoal = false;
+            for (GameElement element : state.getGameElements()) {
+                // Check if element is a goal post and matches the robot color
+                if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == nextRobot.getColor()) {
+                    hasGoal = true;
+                    break;
+                }
+            }
+            
+            if (hasGoal) {
+                // announcementMessage += ". This robot has a goal to reach.";
+            } else {
+                // announcementMessage += ". This robot does not have a goal.";
+            }
+            
+            // Try to get the robot position from the game grid
+            int[] coords = findRobotPosition(nextRobot);
+            if (coords != null) {
+                int x = coords[0];
+                int y = coords[1];
+                announcementMessage += String.format(" at position %d, %d.", x + 1, y + 1);
+            }
+            
+            announceAccessibility(announcementMessage);
+            Timber.d("[ACCESSIBILITY_ROBOT] Robot cycling announcement: %s", announcementMessage);
+            
+            // Try to provide haptic feedback when cycling robots if available
+            try {
+                if (getActivity() != null) {
+                    Object vibratorService = getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                    if (vibratorService != null) {
+                        // Use reflection to avoid direct import of Vibrator class which might not be available
+                        Method vibrateMethod = vibratorService.getClass().getMethod("vibrate", long.class);
+                        vibrateMethod.invoke(vibratorService, 50L);
+                        Timber.d("[ACCESSIBILITY_ROBOT] Provided haptic feedback for robot selection");
+                    }
+                }
+            } catch (Exception e) {
+                // Silently ignore vibration errors - it's not critical functionality
+                Timber.d("[ACCESSIBILITY_ROBOT] Could not provide haptic feedback: %s", e.getMessage());
+            }
+            
+            // Instead of directly highlighting through gameGridView, we'll use the fact that
+            // we've updated the selected robot in the game state, which should handle highlighting
+            Timber.d("[ACCESSIBILITY_ROBOT] Updated robot selection in game state");
+        }
+    }
+    
+    /**
+     * Helper method to find a robot's position on the game grid
+     * @param robot The robot element to locate
+     * @return array of [x, y] coordinates or null if unavailable
+     */
+    private int[] findRobotPosition(GameElement robot) {
+        if (robot == null) {
+            return null;
+        }
+        
+        try {
+            GameState state = gameStateManager.getCurrentState().getValue();
+            if (state != null) {
+                // Try to find the robot by examining the game state
+                List<GameElement> elements = state.getGameElements();
+                for (GameElement element : elements) {
+                    if (element.isRobot() && element.getColor() == robot.getColor()) {
+
+                        try {
+                            Timber.d("[ACCESSIBILITY_ROBOT] Using gameGridView to show robot position");
+                            return new int[]{element.getX(), element.getY()};
+                        } catch (Exception e) {
+                            Timber.e("[ACCESSIBILITY_ROBOT] Error finding robot position: %s", e.getMessage());
+                            return null;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Timber.e("[ACCESSIBILITY_ERROR] Error finding robot position: %s", e.getMessage());
+        }
+        
+        return null;
     }
     
     /**
@@ -1829,58 +1943,105 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param currentHintStep Current hint step (0-based index)
      */
     private void showPreHint(GameSolution solution, int totalMoves, int currentHintStep) {
-        String preHintText;
-        Timber.d("[HINT_SYSTEM] Showing pre-hint #%d (total pre-hints: %d + %d fixed)", 
-                currentHintStep + 1, numPreHints, NUM_FIXED_PRE_HINTS);
+        StringBuilder message = new StringBuilder();
         
-        // Calculate total number of pre-hints (regular + fixed)
-        int totalPreHints = numPreHints + NUM_FIXED_PRE_HINTS;
-        
-        // Regular pre-hints come first (decreasing "less than X" hints)
-        if (currentHintStep < numPreHints) {
-            // Calculate offset for "less than X" hints (starting with largest offset)
-            int offset = numPreHints - currentHintStep;
-            int hintValue = totalMoves + offset;
+        if (currentHintStep == 0) {
+            message.append("Hint 1/").append(totalPossibleHints).append(": ");
+            message.append("This level can be solved in ").append(totalMoves).append(" moves.");
             
-            preHintText = "The AI found a solution in less than " + hintValue + " moves";
-            Timber.d("[HINT_SYSTEM] Showing regular pre-hint %d/%d: less than %d moves", 
-                    currentHintStep + 1, numPreHints, hintValue);
-        }
-        // Next fixed pre-hint: Show exact solution length
-        else if (currentHintStep == numPreHints) {
-            preHintText = "The AI found a solution in " + totalMoves + " moves";
-            Timber.d("[HINT_SYSTEM] Showing exact solution length: %d moves", totalMoves);
+            // Display the hint in the status text view
+            updateStatusText(message.toString(), true);
             
-            // Show an additional toast message for the exact solution hint
-            Toast.makeText(requireContext(), 
-                "Solution found: " + totalMoves + " moves", 
-                Toast.LENGTH_SHORT).show();
+            // Make status text accessible
+            statusTextView.setContentDescription(message.toString());
             
-            // Show the optimal moves button when the optimal moves are available
-            updateOptimalMovesButton(totalMoves, true);
-        }
-        // Last fixed pre-hint: Show which robot to move first
-        else if (currentHintStep == numPreHints + 1) {
-            if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
-                RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
-                String robotColorName = getRobotColorName(firstMove.getColor());
-                preHintText = "Move the " + robotColorName + " robot first";
-                Timber.d("[HINT_SYSTEM] Showing which robot to move first: %s", robotColorName);
+            // Announce hint
+            announceAccessibility(message.toString());
+        } else if (currentHintStep == 1) {
+            // Second pre-hint - show the involved robot colors
+            message.append("Hint 2/").append(totalPossibleHints).append(": ");
+            message.append("The solution involves moving: ");
+            
+            // Look at first 5 moves (or all if fewer) to see which robots are involved
+            ArrayList<String> robotsInvolved = new ArrayList<>();
+            List<IGameMove> moves = solution.getMoves().subList(0, Math.min(5, solution.getMoves().size()));
+            for (IGameMove move : moves) {
+                if (move instanceof RRGameMove) {
+                    RRGameMove rrMove = (RRGameMove) move;
+                    String robotColor = getRobotColorName(rrMove.getColor());
+                    // Only add if not already in the list
+                    if (!robotsInvolved.contains(robotColor)) {
+                        robotsInvolved.add(robotColor);
+                    }
+                }
+            }
+            
+            // Format the list of robots with commas and "and" for the last item
+            for (int i = 0; i < robotsInvolved.size(); i++) {
+                if (i == robotsInvolved.size() - 1 && robotsInvolved.size() > 1) {
+                    message.append("and ").append(robotsInvolved.get(i)).append(" robots");
+                } else if (i == robotsInvolved.size() - 1) {
+                    message.append(robotsInvolved.get(i)).append(" robot");
+                } else {
+                    message.append(robotsInvolved.get(i)).append(", ");
+                }
+            }
+            
+            // Display the hint in the status text view
+            updateStatusText(message.toString(), true);
+            
+            // Make status text accessible
+            statusTextView.setContentDescription(message.toString());
+            
+            // Announce hint
+            announceAccessibility(message.toString());
+        } else {
+            // Additional pre-hints based on index between 2 and numPreHints+1
+            // These are the "peek ahead" hints
+            int peekAheadIndex = currentHintStep - 2; // 0-based index within peek ahead hints
+            if (peekAheadIndex < numPreHints) {
+                int peekMoveCount = Math.min(2 + peekAheadIndex, 5); // Show 2-5 moves ahead based on hint step
+                message.append("Hint ").append(currentHintStep + 1).append("/").append(totalPossibleHints).append(": ");
+                message.append("First ").append(peekMoveCount).append(" moves: ");
+                
+                // Look at the specified number of moves
+                for (int i = 0; i < Math.min(peekMoveCount, solution.getMoves().size()); i++) {
+                    IGameMove move = solution.getMoves().get(i);
+                    if (move instanceof RRGameMove) {
+                        RRGameMove rrMove = (RRGameMove) move;
+                        String robotColor = getRobotColorName(rrMove.getColor());
+                        String direction = getDirectionName(rrMove.getDirection());
+                        
+                        // Add comma if not the first move
+                        if (i > 0) {
+                            message.append(", ");
+                        }
+                        
+                        // Add abbreviated form (e.g., "Gr" for Green)
+                        message.append(robotColor.substring(0, Math.min(2, robotColor.length())));
+                        message.append(direction.charAt(0)); // First letter of direction
+                    }
+                }
+                
+                // Display the hint in the status text view
+                updateStatusText(message.toString(), true);
+                
+                // Make status text accessible
+                statusTextView.setContentDescription(message.toString());
+                
+                // Announce hint
+                announceAccessibility(message.toString());
+                
+                // Add additional logging to help diagnose hint timing issues
+                Timber.d("[HINT_SYSTEM] Pre-hint %d displayed at %d ms", currentHintStep + 1, System.currentTimeMillis());
             } else {
-                // Fallback if we can't determine the first robot
-                preHintText = "No solution found";
-                Timber.d("[HINT_SYSTEM] Showing fallback (couldn't determine first robot)");
+                // No more pre-hints available
+                Timber.d("[HINT_SYSTEM] No more pre-hints available, currentHintStep=%d is beyond pre-hint range", currentHintStep);
+                int normalHintIndex = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS);
+                GameState currentState = gameStateManager.getCurrentState().getValue();
+                showNormalHint(solution, currentState, totalMoves, normalHintIndex);
             }
         }
-        // Fallback for any other case
-        else {
-            preHintText = "Ready to show step-by-step hints";
-            Timber.d("[HINT_SYSTEM] Showing fallback pre-hint message");
-        }
-        
-        // Display the pre-hint
-        updateStatusText(preHintText, true);
-        Timber.d("[HINT_SYSTEM] Displayed pre-hint: %s", preHintText);
     }
     
     /**
@@ -1891,91 +2052,53 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param hintIndex Index of the hint to show (0-based)
      */
     private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
-        Timber.d("[HINT_SYSTEM] showNormalHint called with hintIndex: %d", hintIndex);
-        // Validate that the hint index is within bounds
-        if (hintIndex < 0 || hintIndex >= totalMoves) {
-            Timber.e("[HINT_SYSTEM] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
-            updateStatusText("All hints have been shown", true);
-            return;
+        // Calculate actual hint step (accounting for pre-hints)
+        int actualHintStep = showingPreHints ? hintIndex + (numPreHints + NUM_FIXED_PRE_HINTS) : hintIndex;
+        
+        StringBuilder message = new StringBuilder();
+        String moveHint = "";
+        
+        // Check if the hint index is within range
+        if (hintIndex < solution.getMoves().size()) {
+            message.append("Hint ").append(actualHintStep + 1).append("/").append(totalPossibleHints).append(": ");
+            
+            // Get the move
+            IGameMove move = solution.getMoves().get(hintIndex);
+            if (move instanceof RRGameMove) {
+                RRGameMove rrMove = (RRGameMove) move;
+                String robotColor = getRobotColorName(rrMove.getColor());
+                String direction = getDirectionName(rrMove.getDirection());
+                
+                // Format the hint message
+                moveHint = "Move " + robotColor + " robot " + direction;
+                message.append(moveHint);
+                
+                // Highlight the move hint
+                Timber.d("[HINT_SYSTEM] Showing hint: %s", message.toString());
+                
+                // Increment the hint count in the game state
+                if (currentState != null) {
+                    currentState.incrementHintCount();
+                    Timber.d("[HINT_SYSTEM] Incrementing hint count to %d", currentState.getHintCount());
+                }
+            }
+        } else {
+            message.append("Hint ").append(actualHintStep + 1).append("/").append(totalPossibleHints).append(": ");
+            message.append("No more moves available in solution");
+            Timber.d("[HINT_SYSTEM] No more moves available for hint at index %d", hintIndex);
         }
         
-        try {
-            // Get the specific move for this hint
-            IGameMove hintMove = solution.getMoves().get(hintIndex);
-            Timber.d("[HINT_SYSTEM] Showing normal hint #%d: %s", hintIndex + 1, hintMove);
-            
-            if (hintMove instanceof RRGameMove rrMove) {
-                // Get the robot's color name - use the color from the move
-                String robotColorName = getRobotColorName(rrMove.getColor());
-                
-                // Get the direction name
-                String directionName = getDirectionName(rrMove.getDirection());
-                
-                // Calculate the hint number to display (1-based)
-                int displayHintNumber = hintIndex + 1;
-                
-                // Log details to help with debugging
-                Timber.d("[HINT_SYSTEM] Robot color: %d, Direction: %d, Solution hash: %d", 
-                        rrMove.getColor(), rrMove.getDirection(), System.identityHashCode(solution));
-                
-                // Create the hint message with shortened format
-                StringBuilder hintMessage = new StringBuilder();
-                hintMessage.append(displayHintNumber).append("/").append(totalMoves).append(": ");
-                
-                // For the first hint, just show the robot color and direction
-                if (hintIndex == 0) {
-                    hintMessage.append(robotColorName).append(" ").append(directionName);
-                    Timber.d("[HINT_SYSTEM] First hint format: %s", hintMessage.toString());
-                } else {
-                    // For subsequent hints, first show abbreviated previous moves
-                    // Get previous moves (up to 4)
-                    int startIndex = Math.max(0, hintIndex - 4);
-                    
-                    // Add abbreviated previous moves
-                    for (int i = startIndex; i < hintIndex; i++) {
-                        if (i == startIndex && startIndex > 0) {
-                            // If we're not showing all previous moves, add an ellipsis
-                            hintMessage.append("...,");
-                        }
-                        
-                        IGameMove prevMove = solution.getMoves().get(i);
-                        if (prevMove instanceof RRGameMove prevRRMove) {
-                            // Get abbreviated color and direction
-                            String prevColorName = getRobotColorName(prevRRMove.getColor());
-                            String prevDirectionName = getDirectionName(prevRRMove.getDirection());
-                            
-                            // Add first letter of each
-                            hintMessage.append(prevColorName.charAt(0))
-                                    .append(prevDirectionName.charAt(0));
-                            
-                            // Add comma if not the last previous move
-                            if (i < hintIndex - 1) {
-                                hintMessage.append(",");
-                            }
-                        }
-                    }
-                    
-                    // Add current move
-                    hintMessage.append(", ").append(robotColorName).append(" ").append(directionName);
-                    Timber.d("[HINT_SYSTEM] Subsequent hint format: %s", hintMessage.toString());
-                }
-                
-                // Update the status text
-                updateStatusText(hintMessage.toString(), true);
-                Timber.d("[HINT_SYSTEM] Displayed hint: %s", hintMessage);
-                
-                if (hintIndex == 0) {
-                    Timber.d("[HINT_SYSTEM] First normal hint shown");
-                }
-            } else {
-                // Error in hint system
-                Timber.e("[HINT_SYSTEM] Failed to get a valid hint move");
-                updateStatusText("No valid hint available", true);
-            }
-        } catch (Exception e) {
-            Timber.e(e, "[HINT_SYSTEM] Error displaying normal hint #%d", hintIndex + 1);
-            updateStatusText("Error displaying hint", true);
-        }
+        // Display the hint in the status text view
+        updateStatusText(message.toString(), true);
+        
+        // Make status text accessible
+        statusTextView.setContentDescription(message.toString());
+        
+        // Announce hint
+        announceAccessibility(message.toString());
+        
+        // For log purposes only
+        showingPreHints = false;
     }
     
     /**
@@ -2038,7 +2161,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param isVisible Whether to make the status text visible
      */
     private void updateStatusText(String message, boolean isVisible) {
-        Timber.d("[STATUS TEXT] Updating status text: '%s', visible: %b", message, isVisible);
+        Timber.d("[STATUS_TEXT] Updating status text: '%s', visible: %b", message, isVisible);
         if (statusTextView != null) {
             statusTextView.setText(message);
             statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
@@ -2095,6 +2218,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 
                 // Add some padding for better text readability
                 statusTextView.setPadding(16, 8, 16, 8);
+
+                // Set content description for accessibility
+                statusTextView.setContentDescription(message);
+                if (isTalkBackEnabled() || Preferences.accessibilityMode) {
+                    announceAccessibility(message);
+                    Timber.d("[ACCESSIBILITY_MODE] Announced hint text in accessibility mode: %s", message);
+                }
             } else {
                 // Reset background to default green with rounded corners when hiding the hint
                 statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
