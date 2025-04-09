@@ -106,6 +106,6 @@ accesssibility mode:
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
  - suggestion: create a temporary map for the solver, where you delete all other targets and let the solver run with only one target at the time. store the solutions and take only the shortest solution
 
-
+- Second pre-hint - show the involved robot colors
 
 
