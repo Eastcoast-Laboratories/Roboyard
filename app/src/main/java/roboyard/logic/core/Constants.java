@@ -1,5 +1,7 @@
 package roboyard.logic.core;
 
+import android.graphics.Color;
+
 public class Constants {
     // Screen indices (preserved for compatibility with existing code)
     public static final int SCREEN_START = 0;
@@ -65,10 +67,23 @@ public class Constants {
     public static final int COLOR_BROWN = 6;
     public static final int COLOR_ORANGE = 7;
     public static final int COLOR_WHITE = 8;
-    public static final int COLOR_MULTI = 9; // the multi target
+    public static final int COLOR_MULTI = -1; // the multi target
 
     public static final int NUM_ROBOTS = 4; // number of robots
     
+    // RGB color values for robots (used in solver)
+    public static final int[] colors_rgb = {
+        Color.MAGENTA,  // Pink (COLOR_PINK)
+        Color.GREEN,    // Green (COLOR_GREEN)
+        Color.BLUE,     // Blue (COLOR_BLUE)
+        Color.YELLOW,   // Yellow (COLOR_YELLOW)
+        Color.GRAY,     // Silver (COLOR_SILVER)
+        Color.RED,      // Red (COLOR_RED)
+        0xFFA52A2A,     // Brown (COLOR_BROWN)
+        0xFFFFA500,     // Orange (COLOR_ORANGE)
+        Color.WHITE     // White (COLOR_WHITE)
+    };
+
     // File and directory paths
     public static final String SAVE_DIRECTORY = "saves";
     public static final String AUTO_SAVE_FILENAME = "autosave.dat";
