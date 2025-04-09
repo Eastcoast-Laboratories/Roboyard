@@ -25,6 +25,7 @@ import roboyard.eclabs.ui.GameElement;
 import roboyard.eclabs.ui.ModernGameFragment;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
+import roboyard.logic.core.GameLogic;
 import roboyard.logic.core.GridElement;
 import timber.log.Timber;
 
@@ -553,12 +554,17 @@ public class GameGridView extends View {
             return targetMultiDrawable; // Default to multi-colored target
         }
         
-        switch (targetElement.getColor()) {
-            case 0: return targetPinkDrawable;
-            case 1: return targetGreenDrawable;
-            case 2: return targetBlueDrawable;
-            case 3: return targetYellowDrawable;
-            default: return targetMultiDrawable;
+        int colorId = targetElement.getColor();
+        // Use the GameLogic color methods for more maintainable code
+        switch (colorId) {
+            case Constants.COLOR_PINK: return targetPinkDrawable;
+            case Constants.COLOR_GREEN: return targetGreenDrawable;
+            case Constants.COLOR_BLUE: return targetBlueDrawable;
+            case Constants.COLOR_YELLOW: return targetYellowDrawable;
+            case Constants.COLOR_MULTI: // intentional fallthrough
+            default: 
+                Timber.d("[RENDER] Using multi-colored target for color ID: %d", colorId);
+                return targetMultiDrawable;
         }
     }
     
@@ -1383,13 +1389,7 @@ public class GameGridView extends View {
             return "Unknown robot";
         }
         
-        String color = "Unknown";
-        switch (robot.getColor()) {
-            case 0: color = "Red"; break;
-            case 1: color = "Green"; break;
-            case 2: color = "Blue"; break;
-            case 3: color = "Yellow"; break;
-        }
+        String color = GameLogic.getColorName(robot.getColor(), true);
         
         // Find the robot's goal if available
         GameState state = gameStateManager.getCurrentState().getValue();
@@ -1420,18 +1420,7 @@ public class GameGridView extends View {
         // Check for robot
         GameElement robot = state.getRobotAt(x, y);
         if (robot != null) {
-            String color = "Unknown";
-            switch (robot.getColor()) {
-                case 0: color = "Pink"; break;
-                case 1: color = "Green"; break;
-                case 2: color = "Blue"; break;
-                case 3: color = "Yellow"; break;
-                case 4: color = "Silver"; break;
-                case 5: color = "Red"; break;
-                case 6: color = "Brown"; break;
-                case 7: color = "Orange"; break;
-                case 8: color = "White"; break;
-            }
+            String color = GameLogic.getColorName(robot.getColor(), true);
             description.append(color + " robot. ");
             
             // Find the robot's goal
@@ -1446,19 +1435,9 @@ public class GameGridView extends View {
         // Check for target
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
-                String color = "Unknown";
-                switch (element.getColor()) {
-                    case 0: color = "Pink"; break;
-                    case 1: color = "Green"; break;
-                    case 2: color = "Blue"; break;
-                    case 3: color = "Yellow"; break;
-                    case 4: color = "Silver"; break;
-                    case 5: color = "Red"; break;
-                    case 6: color = "Brown"; break;
-                    case 7: color = "Orange"; break;
-                    case 8: color = "White"; break;
-                    case 9: color = "Multi-colored"; break;
-                    default: color = "Multi-colored";
+                String color = GameLogic.getColorName(element.getColor(), true);
+                if (element.getColor() == Constants.COLOR_MULTI) {
+                    color = "Multi-colored";
                 }
                 description.append(color + " goal. ");
                 break;
