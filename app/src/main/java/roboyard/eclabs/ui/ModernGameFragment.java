@@ -1121,6 +1121,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Hide the Next Level button
                     nextLevelButton.setVisibility(View.GONE);
                     
+                    // Hide the optimal moves button when advancing to next level
+                    if (optimalMovesButton != null) {
+                        optimalMovesButton.setVisibility(View.GONE);
+                    }
+                    
                     // Clear any hint text from the status display
                     updateStatusText("", false);
                     
@@ -1163,6 +1168,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Show restart button for random games
                     newMapButton.setVisibility(View.VISIBLE);
+                    
+                    // Hide the optimal moves button when starting a new random game
+                    if (optimalMovesButton != null) {
+                        optimalMovesButton.setVisibility(View.GONE);
+                    }
                 }
 
                 // Reset move counts and history explicitly to ensure all counters are zeroed
