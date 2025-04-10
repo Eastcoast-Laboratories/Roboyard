@@ -1973,6 +1973,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int requiredMoves = getMinimumRequiredMoves();
             int maxMoves = getMaximumRequiredMoves();
             
+            // if only one move is needed, then the puzzle is too easy
+            if (getSolverManager().isSolution01()) {
+                Timber.d("[DifficultyValidationCallback]: Puzzle too easy (1 move), generating new one");
+                createValidGame(width, height);
+                return;
+            }
+            
             Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
                     moveCount, requiredMoves, maxMoves);
             
