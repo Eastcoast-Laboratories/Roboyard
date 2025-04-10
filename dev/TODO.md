@@ -97,8 +97,6 @@ accesssibility mode:
 - der hint "5/8: Br,Bd,Gu, Gr, Green down" kommmt Zu früh schon bei gu zeigt er gr an
 
 
-- the one solution is not noticed any more
-
 - fdroid entry enhancements
 
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
