@@ -110,11 +110,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     // Animation settings - made slower for more visible effect
     private boolean animationsEnabled = true;
-    private float accelerationDuration = 300f;  // Increased from 150f
-    private float maxSpeed = 300f;             // Reduced from 1000f
-    private float decelerationDuration = 400f;  // Increased from 200f
-    private float overshootPercentage = 0.20f;  // Increased from 0.15f
-    private float springBackDuration = 400f;    // Increased from 200f
+    private float accelerationDuration = 100f;  // Reduced from 300f for faster animations
+    private float maxSpeed = 700f;             // Higher speed but not extreme
+    private float decelerationDuration = 100f;  // Reduced from 400f for faster animations
+    private float overshootPercentage = 0.20f;  // Keep original value, extreme values cause memory issues
+    private float springBackDuration = 100f;    // Reduced from 400f for faster animations
+    private long animationFrameDelay = 25;     // Animation frame delay in ms (default Android is ~16ms = 60fps)
     
     private boolean isResetting = false;
     private GameGridView gameGridView;
@@ -2059,13 +2060,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Update animation settings
      */
     public void updateAnimationSettings(boolean enabled, float accelDuration, float maxSpd, 
-                                      float decelDuration, float overshootPct, float springDuration) {
+                                      float decelDuration, float overshootPct, float springDuration, long animationFrameDelay) {
         this.animationsEnabled = enabled;
         this.accelerationDuration = accelDuration;
         this.maxSpeed = maxSpd;
         this.decelerationDuration = decelDuration;
         this.overshootPercentage = overshootPct;
         this.springBackDuration = springDuration;
+        this.animationFrameDelay = animationFrameDelay;
         
         // Update the animation manager with new settings
         if (robotAnimationManager != null) {
@@ -2075,9 +2077,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 decelerationDuration,
                 overshootPercentage,
                 springBackDuration,
-                RobotAnimationManager.AnimationCancellationStrategy.JUMP_TO_END
+                RobotAnimationManager.AnimationCancellationStrategy.JUMP_TO_END,
+                animationFrameDelay
             );
         }
+    }
+    
+    /**
+     * Get the current animation frame delay in milliseconds
+     * @return Current animation frame delay
+     */
+    public long getAnimationFrameDelay() {
+        return animationFrameDelay;
     }
     
     /**
