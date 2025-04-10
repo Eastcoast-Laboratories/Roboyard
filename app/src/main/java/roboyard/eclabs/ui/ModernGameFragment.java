@@ -857,7 +857,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
-        // (Button text: "Hint")
+        // (Button text: "Hint") - this is an onCheckedChanged listener instead of onClick
+        // so each time hintButton.setChecked() is called, the listener is triggered
         // Hint button - show a hint for the current game
         hintButton = view.findViewById(R.id.hint_button);
         Timber.d("[HINT_SYSTEM] Setting up hint toggle button");
@@ -1988,19 +1989,25 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Shows a message that the AI is calculating a solution with restart counter and last solution info
      */
     private void showSolverCalculatingMessage() {
-        int restartCount = gameStateManager.getSolverRestartCount();
+        int solverRestartCount = gameStateManager.getSolverRestartCount();
         int lastMoves = gameStateManager.getLastSolutionMinMoves();
+        
+        Timber.d("[SOLVER_STATUS][DIAG] Building status message: restartCount=%d, lastMoves=%d", 
+                solverRestartCount, lastMoves);
         
         String messageBase = "AI calculating solution...";
         String counterInfo = "";
         
         // Add restart counter and last solution info if applicable
-        if (restartCount > 3) { // Only show counter after some restarts
-            counterInfo = String.format(Locale.getDefault(), " (%d", restartCount);
+        if (solverRestartCount > 3) { // Only show counter after some restarts
+            counterInfo = String.format(Locale.getDefault(), " (%d", solverRestartCount);
             
             // Add last minimum moves if we have any
             if (lastMoves > 0) {
                 counterInfo += String.format(Locale.getDefault(), "/%d", lastMoves);
+                Timber.d("[SOLVER_STATUS][DIAG] Adding last minimum moves: %d", lastMoves);
+            } else {
+                Timber.d("[SOLVER_STATUS][DIAG] No last minimum moves available (lastMoves=%d)", lastMoves);
             }
             
             counterInfo += ")";
@@ -2300,6 +2307,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
                 statusTextView.setPadding(16, 8, 16, 8);
             }
+        }
+    }
+    
+    /**
+     * Hides the hint container and its navigation buttons directly
+     * This can be called explicitly when we need to hide the hint UI regardless of button state
+     */
+    private void hideHintContainer() {
+        if (hintContainer != null) {
+            hintContainer.setVisibility(View.INVISIBLE);
+            prevHintButton.setVisibility(View.GONE);
+            nextHintButton.setVisibility(View.INVISIBLE);
+            Timber.d("[HINT_CONTAINER] Explicitly hiding hint container and navigation buttons");
+        } else {
+            Timber.w("[HINT_CONTAINER] Cannot hide hint container - it is null");
         }
     }
     

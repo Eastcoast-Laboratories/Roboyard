@@ -134,15 +134,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
     
     /**
-     * Get the solver manager instance using the singleton pattern
+     * Get the solver manager instance, initializing it if necessary
+     * @return The solver manager instance
      */
     private SolverManager getSolverManager() {
-        Timber.d("[SOLUTION SOLVER] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
+        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
         SolverManager solverManager = SolverManager.getInstance();
         
         // Set solver listener if not already set
         if (solverManager.getListener() == null) {
             solverManager.setListener(this);
+            Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager registered itself as the SolverListener");
         }
         return solverManager;
     }
@@ -1497,6 +1499,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     /**
      * Reset robots to their starting positions without changing the map
      * This keeps the same map but resets robot positions and move counters
+     * - Preserves the current board/map layout
+     * - Resets robot positions to their starting positions
+     * - Clears move counters and selection states
+     * - Keeps the same target and wall configurations
+     * - Perfect for when a player wants to try the same puzzle again
      */
     public void resetRobots() {
         GameState currentGameState = currentState.getValue();
@@ -1985,6 +1992,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 currentSolution = solution;
                 currentSolutionStep = 0;
                 isSolverRunning.setValue(false);
+                // Signal to UI that solution was accepted and hint container should be hidden
+                Timber.d("[SOLUTION][ACCEPTED] Solution accepted, notifying UI to hide hint container");
             }
         }
         
@@ -1999,12 +2008,30 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     @Override
     public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
-        // Process on main thread
+        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager.onSolverFinished called: success=%b, moves=%d, solutions=%d", 
+                success, solutionMoves, numSolutions);
+        
+        // Process on main thread to ensure thread safety with UI updates
         new Handler(Looper.getMainLooper()).post(() -> {
-            if (success) {
-                GameSolution solution = getSolverManager().getCurrentSolution();
-                onSolutionCalculationCompleted(solution);
+            if (success && numSolutions > 0) {
+                // Get the solution from the solver manager
+                try {
+                    GameSolution solution = getSolverManager().getCurrentSolution();
+                    if (solution != null) {
+                        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves", 
+                                solution.getMoves() != null ? solution.getMoves().size() : 0);
+                        // Forward to the regular solution handling
+                        onSolutionCalculationCompleted(solution);
+                    } else {
+                        Timber.e("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager received null solution despite success=true");
+                        onSolutionCalculationFailed("No valid solution found");
+                    }
+                } catch (Exception e) {
+                    Timber.e(e, "[SOLUTION SOLVER][DIAGNOSTIC] Error getting solution from solver: %s", e.getMessage());
+                    onSolutionCalculationFailed("Error: " + e.getMessage());
+                }
             } else {
+                Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager - No solution found");
                 onSolutionCalculationFailed("No solution found");
             }
         });
@@ -2012,7 +2039,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     @Override
     public void onSolverCancelled() {
-        // Process on main thread
+        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager.onSolverCancelled called");
+        
+        // Process on main thread to ensure thread safety with UI updates
         new Handler(Looper.getMainLooper()).post(() -> {
             onSolutionCalculationFailed("Solver was cancelled");
         });
