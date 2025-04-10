@@ -283,21 +283,26 @@ public class RRGetMap {
             
             // Handle special cases for robot + horizontal wall combinations
             if (hasHorizontalWall) {
-                if (contents.contains("robot_yellow")) {
-                    // Yellow robot with horizontal wall - use combining overline
-                    asciiMap[x*2+1][y] = "y̅"; // y with overline
-                } else if (contents.contains("robot_red")) {
-                    asciiMap[x*2+1][y] = "r̅"; // r with overline
-                } else if (contents.contains("robot_pink")) {
-                    asciiMap[x*2+1][y] = "p̅"; // p with overline
-                } else if (contents.contains("robot_blue")) {
-                    asciiMap[x*2+1][y] = "b̅"; // b with overline
-                } else if (contents.contains("robot_green")) {
-                    asciiMap[x*2+1][y] = "g̅"; // g with overline
-                } else if (contents.contains("robot_silver")) {
-                    asciiMap[x*2+1][y] = "s̅"; // s with overline
+                if (contents.contains("robot_")) {
+                    // robots with horizontal wall - use combining overline
+                    if (contents.contains("robot_yellow")) {
+                        asciiMap[x*2+1][y] = "y̅"; // y with overline
+                    } else if (contents.contains("robot_red")) {
+                        asciiMap[x*2+1][y] = "r̅"; // r with overline
+                    } else if (contents.contains("robot_pink")) {
+                        asciiMap[x*2+1][y] = "p̅"; // p with overline
+                    } else if (contents.contains("robot_blue")) {
+                        asciiMap[x*2+1][y] = "b̅"; // b with overline
+                    } else if (contents.contains("robot_green")) {
+                        asciiMap[x*2+1][y] = "g̅"; // g with overline
+                    } else if (contents.contains("robot_silver")) {
+                        asciiMap[x*2+1][y] = "s̅"; // s with overline
+                    } else {
+                        // Unknown robot
+                        asciiMap[x*2+1][y] = "u̅"; // u with overline
+                    }
                 } else if (contents.contains("target_")) {
-                    // Target with horizontal wall
+                    // targets with horizontal wall
                     if (contents.contains("target_yellow")) {
                         asciiMap[x*2+1][y] = "Y̅"; // Y with overline
                     } else if (contents.contains("target_red")) {
@@ -312,6 +317,9 @@ public class RRGetMap {
                         asciiMap[x*2+1][y] = "M̅"; // M with overline
                     } else if (contents.contains("target_silver")) {
                         asciiMap[x*2+1][y] = "S̅"; // S with overline
+                    } else {
+                        // Unknown target
+                        asciiMap[x*2+1][y] = "U̅"; // U with overline
                     }
                 } else {
                     // Just a horizontal wall an overline
@@ -319,28 +327,40 @@ public class RRGetMap {
                 }
             } else {
                 // No horizontal wall, just set the character based on element type
-                if (contents.contains("robot_yellow")) {
-                    asciiMap[x*2+1][y] = "y";
-                } else if (contents.contains("robot_red")) {
-                    asciiMap[x*2+1][y] = "r";
-                } else if (contents.contains("robot_pink")) {
-                    asciiMap[x*2+1][y] = "p";
-                } else if (contents.contains("robot_blue")) {
-                    asciiMap[x*2+1][y] = "b";
-                } else if (contents.contains("robot_green")) {
-                    asciiMap[x*2+1][y] = "g";
-                } else if (contents.contains("target_yellow")) {
-                    asciiMap[x*2+1][y] = "Y";
-                } else if (contents.contains("target_red")) {
-                    asciiMap[x*2+1][y] = "R";
-                } else if (contents.contains("target_blue")) {
-                    asciiMap[x*2+1][y] = "B";
-                } else if (contents.contains("target_green")) {
-                    asciiMap[x*2+1][y] = "G";
-                } else if (contents.contains("target_silver")) {
-                    asciiMap[x*2+1][y] = "S";
-                } else if (contents.contains("target_multi")) {
-                    asciiMap[x*2+1][y] = "M";
+                if (contents.contains("robot_")) {
+                    if (contents.contains("robot_yellow")) {
+                        asciiMap[x*2+1][y] = "y";
+                    } else if (contents.contains("robot_red")) {
+                        asciiMap[x*2+1][y] = "r";
+                    } else if (contents.contains("robot_pink")) {
+                        asciiMap[x*2+1][y] = "p";
+                    } else if (contents.contains("robot_blue")) {
+                        asciiMap[x*2+1][y] = "b";
+                    } else if (contents.contains("robot_green")) {
+                        asciiMap[x*2+1][y] = "g";
+                    } else if (contents.contains("robot_silver")) {
+                        asciiMap[x*2+1][y] = "s";
+                    } else {
+                        // Unknown robot
+                        asciiMap[x*2+1][y] = "u";
+                    }   
+                } else if (contents.contains("target_")) {
+                    if (contents.contains("target_yellow")) {
+                        asciiMap[x*2+1][y] = "Y";
+                    } else if (contents.contains("target_red")) {
+                        asciiMap[x*2+1][y] = "R";
+                    } else if (contents.contains("target_blue")) {
+                        asciiMap[x*2+1][y] = "B";
+                    } else if (contents.contains("target_green")) {
+                        asciiMap[x*2+1][y] = "G";
+                    } else if (contents.contains("target_silver")) {
+                        asciiMap[x*2+1][y] = "S";
+                    } else if (contents.contains("target_multi")) {
+                        asciiMap[x*2+1][y] = "M";
+                    } else {
+                        // Unknown target
+                        asciiMap[x*2+1][y] = "U";
+                    }
                 }
             }
         }

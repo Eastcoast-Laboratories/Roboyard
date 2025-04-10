@@ -18,14 +18,10 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,6 +119,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private boolean isResetting = false;
     private GameGridView gameGridView;
     
+    // Track solver restart count and last solution minimums for UI display
+    private int solverRestartCount = 0;
+    private int lastSolutionMinMoves = 0;
+
     public GameStateManager(Application application) {
         super(application);
         // We'll use lazy initialization for solver now - do not create it here
@@ -170,7 +170,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
-        
+        resetSolverRestartCount();
+        resetLastSolutionMinMoves();
+
         // Reset regeneration counter
         regenerationCount = 0;
         
@@ -219,7 +221,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Reset move counts and history
         setMoveCount(0);
-        setSquaresMoved(0); // reset squares moved count
+        resetSquaresMoved(); // reset squares moved count
         setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
@@ -1538,8 +1540,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Solver already running, ignoring duplicate request");
             return;
         }
+
+        // Increment solver restart count
+        solverRestartCount++;
+        Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Solver restart count: %d", solverRestartCount);
         
-        // Store the callback
         this.solutionCallback = callback;
         Timber.d("[SOLUTION SOLVER] calculateSolutionAsync: Stored callback: %s", callback);
         
@@ -1679,6 +1684,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         } else {
             Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: No callback provided");
         }
+        
+        // Store the minimum moves from this solution for display
+        lastSolutionMinMoves = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
+        Timber.d("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves after %d regeneration(s)", lastSolutionMinMoves, regenerationCount);
     }
     
     /**
@@ -2112,9 +2121,39 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[RESET_GAME] Resetting all move counts and game history");
         // Reset move counts and history
         setMoveCount(0);
-        setSquaresMoved(0); // reset squares moved count
+        resetSquaresMoved(); // reset squares moved count
         setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
+    }
+    
+    /**
+     * Gets the current solver restart count
+     * @return The number of times the solver has been restarted
+     */
+    public int getSolverRestartCount() {
+        return solverRestartCount;
+    }
+
+    /**
+     * reset the solver restart count
+     */
+    public void resetSolverRestartCount() {
+        solverRestartCount = 0;
+    }
+
+    /**
+     * reset last solution min moves
+     */
+    public void resetLastSolutionMinMoves() {
+        lastSolutionMinMoves = 0;
+    }
+
+    /**
+     * Gets the minimum moves from the last found solution
+     * @return The minimum moves from the last solution, or 0 if no solution found yet
+     */
+    public int getLastSolutionMinMoves() {
+        return lastSolutionMinMoves;
     }
 }

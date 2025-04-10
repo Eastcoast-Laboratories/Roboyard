@@ -665,7 +665,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 hintButton.setTextOn("Hide");
                 hintButton.setTextOff("💡Hint");
                 hintButton.setChecked(true);
-                updateStatusText("AI calculating solution...", true);
+                showSolverCalculatingMessage();
             } else {
                 // Reset hint button text
                 hintButton.setChecked(false);
@@ -866,7 +866,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 GameSolution solution = gameStateManager.getCurrentSolution();
                 if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
                     Timber.d("[HINT_SYSTEM] No solution available, calculating...");
-                    updateStatusText("AI calculating solution...", true);
+                    showSolverCalculatingMessage();
                     
                     // Start calculating a solution
                     gameStateManager.calculateSolutionAsync(this);
@@ -1969,8 +1969,36 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             case 2: return "Blue";
             case 3: return "Yellow";
             case 4: return "Silver";
-            default: return "Unknown: " + c;
+            default:
+                Timber.e("Unknown robot color: '%d'", c);
+                return "Unknown: " + c;
         }
+    }
+    
+    /**
+     * Shows a message that the AI is calculating a solution with restart counter and last solution info
+     */
+    private void showSolverCalculatingMessage() {
+        int restartCount = gameStateManager.getSolverRestartCount();
+        int lastMoves = gameStateManager.getLastSolutionMinMoves();
+        
+        String messageBase = "AI calculating solution...";
+        String counterInfo = "";
+        
+        // Add restart counter and last solution info if applicable
+        if (restartCount > 3) { // Only show counter after some restarts
+            counterInfo = String.format(Locale.getDefault(), " (%d", restartCount);
+            
+            // Add last minimum moves if we have any
+            if (lastMoves > 0) {
+                counterInfo += String.format(Locale.getDefault(), "/%d", lastMoves);
+            }
+            
+            counterInfo += ")";
+        }
+        
+        updateStatusText(messageBase + counterInfo, true);
+        Timber.d("[SOLVER_STATUS] %s", messageBase + counterInfo);
     }
     
     /**
@@ -2321,8 +2349,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             hintButton.setTextOn("Cancel");
             hintButton.setTextOff("💡Hint");
             hintButton.setChecked(true);
-            updateStatusText("AI is thinking...", true);
-            Timber.d("ModernGameFragment: UI updated to show calculation in progress");
+            showSolverCalculatingMessage();
         });
     }
 
