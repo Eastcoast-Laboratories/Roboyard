@@ -23,6 +23,7 @@ DE_CHANGES=$(cat << EOF
 - Roboterpfade werden beim Start eines neuen Spiels zurückgesetzt
 - Squares Moved wird bei neuem Spiel zurückgesetzt
 - Roboteranimationen sind jetzt schneller
+- Den nächsten Hint nur anzeigen, wenn der Roboter den passenden Zug gemacht hat
 EOF
 )
 
@@ -37,6 +38,7 @@ EN_CHANGES=$(cat << EOF
 - Robot paths are now cleared when starting a new game
 - Squares Moved is reset when starting a new game
 - Faster robot animations
+- only advance hint if the suggested move is made
 EOF
 )
 

@@ -2,6 +2,19 @@ Changelog Deutsch
 =================
 
 
+## Version 24 (2025-04-10)
+- Automatische Auswahl des Roboters in der Zielfarbe beim Spielstart
+- Verbesserte Barrierefreiheit:
+  - Steuerungselemente im Accessibility-Modus bleiben jetzt immer sichtbar
+  - Fehler bei der Erkennung von Wandpositionen in der Sprachausgabe behoben
+  - mehr Sprachausgaben
+- Fehlende Außenwände im Süden und Osten wurden behoben
+- Roboterpfade werden beim Start eines neuen Spiels zurückgesetzt
+- Squares Moved wird bei neuem Spiel zurückgesetzt
+- Roboteranimationen sind jetzt schneller
+- Den nächsten Hint nur anzeigen, wenn der Roboter den passenden Zug gemacht hat
+
+
 ## Version 23 (2025-04-07)
 - Roboter bewegen sich jetzt flüssiger und natürlicher
 - Die Pfade, die Roboter gelaufen sind, werden jetzt angezeigt

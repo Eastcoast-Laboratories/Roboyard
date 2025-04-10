@@ -2,6 +2,19 @@
 =========
 
 
+## Version 24 (2025-04-10)
+- Automatically select the robot that matches the target color at game start
+- Improved accessibility:
+  - Controls remain visible in accessibility mode
+  - Fixed incorrect wall position detection in screen reader announcements
+  - Added more announcements
+- Fixed missing outer walls (south and east)
+- Robot paths are now cleared when starting a new game
+- Squares Moved is reset when starting a new game
+- Faster robot animations
+- only advance hint if the suggested move is made
+
+
 ## Version 23 (2025-04-07)
 - Robots now move more fluidly and naturally
 - The paths robots have moved on are now shown
