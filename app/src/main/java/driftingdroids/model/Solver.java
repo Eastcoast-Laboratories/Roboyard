@@ -20,8 +20,6 @@ package driftingdroids.model;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
-// L10n dummy class:
-import driftingdroids.model.L10N;
 
 
 
@@ -31,7 +29,7 @@ public abstract class Solver {
         MINIMUM("minimum", "solver.Minimum.text"), MAXIMUM("maximum", "solver.Maximum.text");
         private final String name, l10nKey;
         private SOLUTION_MODE(String name, String l10nKey) { this.name = name;  this.l10nKey = l10nKey; }
-        @Override public String toString() { return L10N.getString(this.l10nKey); }
+        @Override public String toString() { return Board.L10N.getString(this.l10nKey); }
         public String getName() { return this.name; }
     }
 

@@ -17,10 +17,8 @@
 
 package driftingdroids.model;
 
-import android.util.Log;
 import java.util.Arrays;
 
-import timber.log.Timber;
 
 
 /**
