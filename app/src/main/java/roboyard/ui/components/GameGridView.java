@@ -842,8 +842,9 @@ public class GameGridView extends View {
         
         // If robot has animation position, use that instead of logical position
         if (robot.hasAnimationPosition()) {
-            Timber.d("[ANIM] Using animation position for robot %d: (%.2f,%.2f)", 
-                   robot.getColor(), robot.getAnimationX(), robot.getAnimationY());
+            if (GameLogic.hasDebugLogging()) {
+                Timber.d("[ANIM] Using animation position for robot %d: (%.2f,%.2f)", robot.getColor(), robot.getAnimationX(), robot.getAnimationY());
+            }
             left = (robot.getAnimationX() * cellSize) + offsetX;
             top = (robot.getAnimationY() * cellSize) + offsetY;
         }

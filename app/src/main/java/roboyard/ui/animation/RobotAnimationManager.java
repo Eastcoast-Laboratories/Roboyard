@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import roboyard.eclabs.ui.GameElement;
+import roboyard.logic.core.GameLogic;
 import roboyard.ui.components.GameGridView;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
@@ -222,8 +223,9 @@ public class RobotAnimationManager {
             float currentX = moveInfo.startX + (moveInfo.endX - moveInfo.startX) * progress;
             float currentY = moveInfo.startY + (moveInfo.endY - moveInfo.startY) * progress;
             
-            Timber.d("[ANIM] Robot %s animation progress: %.2f, position: (%.2f,%.2f)", 
-                    robot, progress, currentX, currentY);
+            if (GameLogic.hasDebugLogging()) {
+                Timber.d("[ANIM] Robot %s animation progress: %.2f, position: (%.2f,%.2f)", robot, progress, currentX, currentY);
+            }
             
             // Update the robot's animation position
             robot.setAnimationPosition(currentX, currentY);
