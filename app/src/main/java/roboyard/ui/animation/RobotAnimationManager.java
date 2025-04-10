@@ -309,8 +309,48 @@ public class RobotAnimationManager {
      * @return Animation duration in milliseconds
      */
     private float calculateAnimationDuration(float distance) {
-        // For now, just use a fixed duration
-        return 500f;
+        if (gameStateManager == null) {
+            // Default duration if no gameStateManager is available
+            Timber.d("[ANIM_SPEED] Using default animation duration (500ms) - no GameStateManager");
+            return 500f;
+        }
+        
+        // Calculate travel time based on physics parameters
+        float accelTime = gameStateManager.getAccelerationDuration();
+        float maxSpeed = gameStateManager.getMaxSpeed();
+        float decelTime = gameStateManager.getDecelerationDuration();
+        
+        // Safeguard against division by zero
+        if (maxSpeed <= 0) maxSpeed = 1f;
+        
+        // PERFORMANCE: Cap maximum speed to avoid ANR issues
+        // With very high speeds, the animations can cause the UI to become unresponsive
+        float cappedMaxSpeed = Math.min(maxSpeed, 2000f);
+        if (maxSpeed != cappedMaxSpeed) {
+            Timber.d("[ANIM_SPEED] Capping max speed from %.2f to %.2f to prevent ANR", maxSpeed, cappedMaxSpeed);
+            maxSpeed = cappedMaxSpeed;
+        }
+        
+        // PERFORMANCE: Ensure minimum duration to avoid UI thread overload
+        // Too short durations can cause excessive frame calculations
+        float minDuration = 100f;
+        
+        // Basic physics: time = distance/speed (adjusted by acceleration/deceleration phases)
+        float duration = distance / maxSpeed * 1000f; // Convert to milliseconds
+        
+        // Add time for acceleration and deceleration phases
+        duration += accelTime + decelTime;
+        
+        // Apply minimum duration safeguard
+        if (duration < minDuration) {
+            Timber.d("[ANIM_SPEED] Enforcing minimum animation duration: %.2fms (was %.2fms)", minDuration, duration);
+            duration = minDuration;
+        }
+        
+        Timber.d("[ANIM_SPEED] Calculated animation duration: %.2fms for distance: %.2f (accel: %.2f, maxSpeed: %.2f, decel: %.2f)", 
+                duration, distance, accelTime, maxSpeed, decelTime);
+        
+        return duration;
     }
     
     /**

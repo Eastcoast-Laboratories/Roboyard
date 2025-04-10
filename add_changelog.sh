@@ -14,21 +14,29 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
-- Roboter bewegen sich jetzt flüssiger und natürlicher
-- Die Pfade, die Roboter gelaufen sind, werden jetzt angezeigt
-- Optimal-Move-Button erscheint eher in den Hints
-- Fehler bei einigen Geräten behoben im Einstellungsbildschirm
-- Share Button im Save Screen
+- Automatische Auswahl des Roboters in der Zielfarbe beim Spielstart
+- Verbesserte Barrierefreiheit:
+  - Steuerungselemente im Accessibility-Modus bleiben jetzt immer sichtbar
+  - Fehler bei der Erkennung von Wandpositionen in der Sprachausgabe behoben
+  - mehr Sprachausgaben
+- Fehlende Außenwände im Süden und Osten wurden behoben
+- Roboterpfade werden beim Start eines neuen Spiels zurückgesetzt
+- Squares Moved wird bei neuem Spiel zurückgesetzt
+- Roboteranimationen sind jetzt schneller
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
-- Robots now move more fluidly and naturally
-- The paths robots have moved on are now shown
-- Optimal-Move button appears earlier in hints
-- Fixed errors on some devices in Settings screen
-- Share button in Save Screen
+- Automatically select the robot that matches the target color at game start
+- Improved accessibility:
+  - Controls remain visible in accessibility mode
+  - Fixed incorrect wall position detection in screen reader announcements
+  - Added more announcements
+- Fixed missing outer walls (south and east)
+- Robot paths are now cleared when starting a new game
+- Squares Moved is reset when starting a new game
+- Faster robot animations
 EOF
 )
 

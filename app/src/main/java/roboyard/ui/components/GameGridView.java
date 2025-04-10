@@ -1558,10 +1558,7 @@ public class GameGridView extends View {
         boolean talkbackActive = accessibilityManager != null && accessibilityManager.isTouchExplorationEnabled();
         
         boolean isActive = talkbackActive || Preferences.accessibilityMode;
-        Timber.d("[ACCESSIBILITY] Coordinate display: %s (TalkBack: %s, App setting: %s)", 
-                isActive ? "showing" : "hidden",
-                talkbackActive ? "enabled" : "disabled",
-                Preferences.accessibilityMode ? "enabled" : "disabled");
+        // Timber.d("[ACCESSIBILITY] Coordinate display: %s (TalkBack: %s, App setting: %s)", isActive ? "showing" : "hidden", talkbackActive ? "enabled" : "disabled", Preferences.accessibilityMode ? "enabled" : "disabled");
         
         return isActive;
     }

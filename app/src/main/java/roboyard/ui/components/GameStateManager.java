@@ -108,13 +108,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Robot animation manager
     private RobotAnimationManager robotAnimationManager;
     
-    // Animation settings - made slower for more visible effect
+    // Animation settings - made slower for more visible effect (minDuration = 100f,) 
     private boolean animationsEnabled = true;
-    private float accelerationDuration = 100f;  // Reduced from 300f for faster animations
-    private float maxSpeed = 700f;             // Higher speed but not extreme
-    private float decelerationDuration = 100f;  // Reduced from 400f for faster animations
+    private float accelerationDuration = 300f;  // Reduced from 300f for faster animations
+    private float maxSpeed = 1500f;             // Higher speed but not extreme
+    private float decelerationDuration = 50f;  // Reduced from 400f for faster animations
     private float overshootPercentage = 0.20f;  // Keep original value, extreme values cause memory issues
-    private float springBackDuration = 100f;    // Reduced from 400f for faster animations
+    private float springBackDuration = 220f;    // Reduced from 400f for faster animations
     private long animationFrameDelay = 25;     // Animation frame delay in ms (default Android is ~16ms = 60fps)
     
     private boolean isResetting = false;
@@ -2089,6 +2089,46 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public long getAnimationFrameDelay() {
         return animationFrameDelay;
+    }
+    
+    /**
+     * Get acceleration duration for animations
+     * @return Acceleration duration in milliseconds
+     */
+    public float getAccelerationDuration() {
+        return accelerationDuration;
+    }
+    
+    /**
+     * Get maximum animation speed
+     * @return Maximum speed for animations
+     */
+    public float getMaxSpeed() {
+        return maxSpeed;
+    }
+    
+    /**
+     * Get deceleration duration for animations
+     * @return Deceleration duration in milliseconds
+     */
+    public float getDecelerationDuration() {
+        return decelerationDuration;
+    }
+    
+    /**
+     * Get overshoot percentage for animations
+     * @return Overshoot percentage (0.0-1.0)
+     */
+    public float getOvershootPercentage() {
+        return overshootPercentage;
+    }
+    
+    /**
+     * Get spring back duration for animations
+     * @return Spring back duration in milliseconds
+     */
+    public float getSpringBackDuration() {
+        return springBackDuration;
     }
     
     /**
