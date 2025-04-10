@@ -13,7 +13,7 @@
 
         <!-- Modern UI Activity hosting fragments is now the main entry point -->
         <activity 
-            android:name="roboyard.eclabs.ui.FragmentHostActivity"
+            android:name="roboyard.eclabs.ui.MainFragmentActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
