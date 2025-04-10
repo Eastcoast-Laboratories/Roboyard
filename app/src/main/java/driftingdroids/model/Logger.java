@@ -17,10 +17,34 @@
 
 package driftingdroids.model;
 
+import android.util.Log;
+
 /** a very simple logger class */
 public class Logger {
 
     public static void println(String msg) {
         System.out.println(msg);
+    }
+    
+    /**
+     * Log a formatted message with variable arguments
+     * @param level Log level (from android.util.Log)
+     * @param tag Log tag
+     * @param format Format string (like in String.format)
+     * @param args Variable arguments to insert into the format string
+     */
+    public static void println(int level, String tag, String format, Object... args) {
+        String message;
+        try {
+            message = String.format(format, args);
+        } catch (Exception e) {
+            message = format + " [Error formatting log message: " + e.getMessage() + "]";
+        }
+        
+        // First log to Android system log
+        Log.println(level, tag, message);
+        
+        // Also output to standard output for debugging purposes
+        System.out.println(tag + ": " + message);
     }
 }
