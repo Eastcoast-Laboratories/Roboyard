@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.lang.reflect.Method;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -617,7 +618,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         
                         String starsMessage = getString(R.string.level_stars_description, stars);
                         Toast.makeText(requireContext(), starsMessage, Toast.LENGTH_LONG).show();
-                        
+
                         // Announce level completion for accessibility
                         String completionMessage = getString(R.string.level_complete) + 
                                 " Level " + state.getLevelId() + " completed in " + 
@@ -645,6 +646,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         announceAccessibility(completionMessage);
                         Toast.makeText(requireContext(), completionMessage, Toast.LENGTH_LONG).show();
                     }
+
+                    // change the "Reset" Button to "Retry"
+                    resetRobotsButton.setText("Retry");
+                    Timber.d("[UI] Changed reset button text to 'Retry'");
                 }
             } else {
                 // Show the small New Game button again when the game is not complete
@@ -807,9 +812,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         resetRobotsButton = view.findViewById(R.id.reset_robots_button);
         resetRobotsButton.setOnClickListener(v -> {
             Timber.d("[ROBOTS] ModernGameFragment: Reset robots button clicked");
-            // Reset the robots - this internally calls currentState.setValue() to notify observers
-            gameStateManager.resetRobots();
+            // Use resetGame() which provides a more complete soft reset
+            gameStateManager.resetGame();
             
+            // change the "Reset" Button back to "Reset"
+            resetRobotsButton.setText("Reset");
+            Timber.d("[UI] Changed reset button text back to 'Reset'");
+
             // Get the current state after reset
             GameState stateAfterReset = gameStateManager.getCurrentState().getValue();
             Timber.d("[ROBOTS] After reset: currentState is %s", stateAfterReset == null ? "null" : "available");

@@ -2052,7 +2052,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
     
     /**
-     * Reset the game to its initial state
+     * Reset the game to its initial state (Soft Reset)
+     * - Preserves the current board/map layout
+     * - Resets robot positions to their starting positions
+     * - Clears move counters and selection states
+     * - Keeps the same target and wall configurations
+     * - Perfect for when a player wants to try the same puzzle again
      */
     public void resetGame() {
         isResetting = true;
@@ -2080,6 +2085,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     element.setSelected(false);
                 }
             }
+
+            resetRobots();
             
             // Reset the robotsUsed tracking for statistics
             robotsUsed.clear();
