@@ -23,15 +23,34 @@ import java.util.List;
 
 import timber.log.Timber;
 
-
+/**
+ * Solver using Iterative Deepening Depth-First Search (IDDFS).
+ * 
+ * @author Michael Henke
+ * @version 1.0
+ */
 public class SolverIDDFS extends Solver {
     
-    private static final int MAX_DEPTH = 126; // maximal depth of search tree to prevent OOM
+    // Lower MAX_DEPTH for 5+ robots to prevent OOM errors
+    // The search space grows exponentially with more robots
+    private static int getMaxDepthForRobots(int numRobots) {
+        // Scale down max depth based on number of robots to prevent OOM
+        if (numRobots >= 5) {
+            // Much lower depth for 5+ robots since search space is exponentially larger
+            return 24;
+        } else if (numRobots >= 4) {
+            return 64;
+        } else {
+            return 126; // Original MAX_DEPTH for 1-3 robots
+        }
+    }
+    
+    private final int MAX_DEPTH; // maximal depth of search tree to prevent OOM
     
     private final int[][] states;
     private final int[][] directions;
     private static final int DIRECTION_NOT_MOVED_YET = 7;
-    private final int[][] obstacles = new int[MAX_DEPTH][];
+    private final int[][] obstacles; // initialice in the SolverIDDFS constructor
     private static final int OBSTACLE_ROBOT = (1 << 4);
     private KnownStates knownStates;
     private final int goalPosition;
@@ -46,7 +65,9 @@ public class SolverIDDFS extends Solver {
 
     protected SolverIDDFS(final Board board) {
         super(board);
-        this.initObstacles();
+        this.MAX_DEPTH = getMaxDepthForRobots(board.getNumRobots());
+        this.obstacles = new int[MAX_DEPTH][]; // Initialize here
+        this.initObstacles(); // Call after MAX_DEPTH and obstacles are initialized
         this.states = new int[MAX_DEPTH][this.board.getRobotPositions().length];
         this.directions = new int[MAX_DEPTH][this.board.getRobotPositions().length];
         this.goalPosition = (null == this.board.getGoal() ? 0 : this.board.getGoal().position);
@@ -62,14 +83,14 @@ public class SolverIDDFS extends Solver {
     
     private void initObstacles() {
         this.obstacles[0] = new int[board.size];
-        for (int pos = 0;  pos < this.obstacles[0].length;  ++pos) {
+        for (int pos = 0; pos < this.obstacles[0].length; ++pos) {
             int obstacle = 0;
-            for (int dir = 0;  dir < 4;  ++dir) {
+            for (int dir = 0; dir < 4; ++dir) {
                 if (true == this.boardWalls[dir][pos]) { obstacle |= (1 << dir); }
             }
             this.obstacles[0][pos] = obstacle;
         }
-        for (int depth = 1;  depth < this.obstacles.length;  ++depth) {
+        for (int depth = 1; depth < this.obstacles.length; ++depth) {
             this.obstacles[depth] = this.obstacles[0].clone();
         }
     }
@@ -81,11 +102,15 @@ public class SolverIDDFS extends Solver {
         final long startExecute = System.nanoTime();
         this.lastResultSolutions = new ArrayList<Solution>();
         
-        Timber.d("***** " + this.getClass().getSimpleName() + " *****");
-        Timber.d("options: " + this.getOptionsAsString());
+        Timber.d("[SOLVER_MEMORY] ***** " + this.getClass().getSimpleName() + " *****");
+        Timber.d("[SOLVER_MEMORY] Options: " + this.getOptionsAsString());
+        Timber.d("[SOLVER_MEMORY] Number of robots: %d, Using MAX_DEPTH: %d", board.getNumRobots(), this.MAX_DEPTH);
+        Timber.d("[SOLVER_MEMORY] Available memory: %d MB, Max memory: %d MB", 
+                Runtime.getRuntime().freeMemory() / (1024 * 1024),
+                Runtime.getRuntime().maxMemory() / (1024 * 1024));
         
         if (null == this.board.getGoal()) {
-            Timber.d("no goal is set - nothing to solve!");
+            Timber.d("[SOLVER_ERROR] No goal is set - nothing to solve!");
         } else {
             this.states[0] = this.board.getRobotPositions().clone();
             swapGoalLast(this.states[0]);   //goal robot is always the last one.
