@@ -99,13 +99,46 @@ accesssibility mode:
 
 - the one solution is not noticed any more
 
-- rename reset in levels to retry when completed
-
 - fdroid entry enhancements
 
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
  - suggestion: create a temporary map for the solver, where you delete all other targets and let the solver run with only one target at the time. store the solutions and take only the shortest solution
 
-- Second pre-hint - show the involved robot colors
+-  if i click on the back button, it should also go back in the hints one step
+
+
+- Second pre-hint - show the involved robot colors:
+
+            // pre-hint - show the involved robot colors
+            message.append("Hint 2/").append(totalPossibleHints).append(": ");
+            message.append("The solution involves moving: ");
+            
+            // Look at first 5 moves (or all if fewer) to see which robots are involved
+            ArrayList<String> robotsInvolved = new ArrayList<>();
+            List<IGameMove> moves = solution.getMoves().subList(0, Math.min(5, solution.getMoves().size()));
+            for (IGameMove move : moves) {
+                if (move instanceof RRGameMove) {
+                    RRGameMove rrMove = (RRGameMove) move;
+                    String robotColor = getRobotColorName(rrMove.getColor());
+                    // Only add if not already in the list
+                    if (!robotsInvolved.contains(robotColor)) {
+                        robotsInvolved.add(robotColor);
+                    }
+                }
+            }
+            
+            // Format the list of robots with commas and "and" for the last item
+            for (int i = 0; i < robotsInvolved.size(); i++) {
+                if (i == robotsInvolved.size() - 1 && robotsInvolved.size() > 1) {
+                    message.append("and ").append(robotsInvolved.get(i)).append(" robots");
+                } else if (i == robotsInvolved.size() - 1) {
+                    message.append(robotsInvolved.get(i)).append(" robot");
+                } else {
+                    message.append(robotsInvolved.get(i)).append(", ");
+                }
+            }
+            
+            // Display the hint in the status text view
+            updateStatusText(message.toString(), true);
 
 

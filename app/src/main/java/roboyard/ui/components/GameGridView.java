@@ -1,9 +1,13 @@
 package roboyard.ui.components;
 
+import android.view.accessibility.AccessibilityManager;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -27,6 +31,8 @@ import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameLogic;
 import roboyard.logic.core.GridElement;
+import roboyard.logic.core.Preferences;
+import roboyard.logic.core.WallModel;
 import timber.log.Timber;
 
 /**
@@ -155,10 +161,11 @@ public class GameGridView extends View {
         targetPaint.setAntiAlias(true);
         
         textPaint = new Paint();
-        textPaint.setTextSize(40);
-        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(60);  // Increased from 40 for better visibility
+        textPaint.setColor(Color.BLACK);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setAntiAlias(true);
+        textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         
         gridPaint = new Paint();
         gridPaint.setStyle(Paint.Style.STROKE);
@@ -686,7 +693,7 @@ public class GameGridView extends View {
         
         // Draw walls between cells, not on cells
         // Create wall model from game state
-        roboyard.logic.core.WallModel wallModel = roboyard.logic.core.WallModel.fromGameElements(
+        WallModel wallModel = WallModel.fromGameElements(
             state.getGameElements(),
             gridWidth, gridHeight
         );
@@ -875,8 +882,8 @@ public class GameGridView extends View {
         // Draw the sprite
         robotDrawable.draw(canvas);
         
-        // Debug - draw position text
-        if (isSelected) {
+        // Draw position text when accessibility features are enabled
+        if (isSelected && isAccessibilityActive()) {
             canvas.drawText("(" + robot.getX() + "," + robot.getY() + ")", 
                     left + cellSize / 2, 
                     top + cellSize / 2, 
@@ -1542,5 +1549,20 @@ public class GameGridView extends View {
         
         // Force redraw
         invalidate();
+    }
+
+    private boolean isAccessibilityActive() {
+        // Check system TalkBack status
+        AccessibilityManager accessibilityManager = (AccessibilityManager) getContext()
+                .getSystemService(Context.ACCESSIBILITY_SERVICE);
+        boolean talkbackActive = accessibilityManager != null && accessibilityManager.isTouchExplorationEnabled();
+        
+        boolean isActive = talkbackActive || Preferences.accessibilityMode;
+        Timber.d("[ACCESSIBILITY] Coordinate display: %s (TalkBack: %s, App setting: %s)", 
+                isActive ? "showing" : "hidden",
+                talkbackActive ? "enabled" : "disabled",
+                Preferences.accessibilityMode ? "enabled" : "disabled");
+        
+        return isActive;
     }
 }
