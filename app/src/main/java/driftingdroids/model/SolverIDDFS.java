@@ -17,19 +17,12 @@
 
 package driftingdroids.model;
 
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import timber.log.Timber;
 
-/**
- * Solver using Iterative Deepening Depth-First Search (IDDFS).
- * 
- * @author Michael Henke
- * @version 1.0
- */
+
 public class SolverIDDFS extends Solver {
     
     // Lower MAX_DEPTH for 5+ robots to prevent OOM errors
@@ -84,14 +77,14 @@ public class SolverIDDFS extends Solver {
     
     private void initObstacles() {
         this.obstacles[0] = new int[board.size];
-        for (int pos = 0; pos < this.obstacles[0].length; ++pos) {
+        for (int pos = 0;  pos < this.obstacles[0].length;  ++pos) {
             int obstacle = 0;
-            for (int dir = 0; dir < 4; ++dir) {
+            for (int dir = 0;  dir < 4;  ++dir) {
                 if (true == this.boardWalls[dir][pos]) { obstacle |= (1 << dir); }
             }
             this.obstacles[0][pos] = obstacle;
         }
-        for (int depth = 1; depth < this.obstacles.length; ++depth) {
+        for (int depth = 1;  depth < this.obstacles.length;  ++depth) {
             this.obstacles[depth] = this.obstacles[0].clone();
         }
     }
@@ -103,15 +96,15 @@ public class SolverIDDFS extends Solver {
         final long startExecute = System.nanoTime();
         this.lastResultSolutions = new ArrayList<Solution>();
         
-        Logger.println("[SOLVER_MEMORY] ***** " + this.getClass().getSimpleName() + " *****");
-        Logger.println("[SOLVER_MEMORY] Options: " + this.getOptionsAsString());
+        Logger.println("***** " + this.getClass().getSimpleName() + " *****");
+        Logger.println("Options: " + this.getOptionsAsString());
         Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Number of robots: %d, Using MAX_DEPTH: %d", board.getNumRobots(), this.MAX_DEPTH);
         Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Available memory: %d MB, Max memory: %d MB", 
                 Runtime.getRuntime().freeMemory() / (1024 * 1024),
                 Runtime.getRuntime().maxMemory() / (1024 * 1024));
         
         if (null == this.board.getGoal()) {
-            Logger.println(android.util.Log.ERROR, "DriftingDroid", "[SOLVER_ERROR] No goal is set - nothing to solve!");
+            Logger.println("no goal is set - nothing to solve!");
         } else {
             this.states[0] = this.board.getRobotPositions().clone();
             swapGoalLast(this.states[0]);   //goal robot is always the last one.
