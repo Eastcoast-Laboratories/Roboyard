@@ -1,5 +1,6 @@
 package roboyard.ui.activities;
 import roboyard.SoundService;
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.MapGenerator;
 import roboyard.ui.components.RenderManager;
 import roboyard.ui.components.InputManager;
@@ -68,7 +69,7 @@ public class MainActivity extends FragmentActivity
     // Current board size - can be changed at runtime
     public static int boardSizeX = DEFAULT_BOARD_SIZE_X;
     public static int boardSizeY = DEFAULT_BOARD_SIZE_Y;
-    public static int numRobots = 4;
+    public static int numRobots = Constants.NUM_ROBOTS;
 
     private static final int HIGH_FPS_SLEEP = 15;  // ~15 FPS
     private static final int LOW_FPS_SLEEP = 45;  // ~5 FPS / value 100 tested, but thats far too slow reaction on gmi touch

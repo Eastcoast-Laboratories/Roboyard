@@ -77,6 +77,7 @@ public class RRGetMap {
         colors.put("target_green", Constants.COLOR_GREEN);    // Constants.COLOR_GREEN
         colors.put("target_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
         colors.put("target_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW
+        colors.put("target_silver", Constants.COLOR_SILVER);  // Constants.COLOR_SILVER
         colors.put("target_multi", -1);
 
         int robotCounter = 0;

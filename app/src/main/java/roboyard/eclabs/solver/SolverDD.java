@@ -39,7 +39,7 @@ public class SolverDD implements ISolver{
         solver = null;
         solverStatus = SolverStatus.idle;
         solutions = null;
-        pieces = new RRPiece[4];
+        pieces = new RRPiece[Constants.NUM_ROBOTS];
         board = null;
     }
 
