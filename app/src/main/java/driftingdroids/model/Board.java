@@ -1,5 +1,5 @@
 /*  DriftingDroids - yet another Ricochet Robots solver program.
-    Copyright (C) 2011-2014 Michael Henke
+    Copyright (C) 2011-2025 Michael Henke
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package driftingdroids.model;
 
+import android.util.Log;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -373,7 +374,7 @@ public class Board {
      */
     public static Board createBoardFreestyle(final Board oldBoard, final int width, final int height, final int numRobots) {
         if ((width < WIDTH_MIN) || (height < HEIGHT_MIN) || (width*height > SIZE_MAX)) {
-            Timber.d("error in createBoardFreestyle(): invalid parameter: width=" + width + " height=" + height + " size=" + width*height);
+            Logger.println("error in createBoardFreestyle(): invalid parameter: width=" + width + " height=" + height + " size=" + width*height);
             return oldBoard;
         }
         final Board newBoard = new Board(width, height, numRobots);
@@ -518,7 +519,7 @@ public class Board {
                 throw new IllegalArgumentException("robots or goal position are not valid");
             }
         } catch (Exception e) {
-            Timber.d("error while parsing fingerprint(" + idStr +") :  " + e.toString());
+            Logger.println("error while parsing fingerprint(" + idStr +") :  " + e.toString());
             result = null;
         }
         return result;
@@ -751,7 +752,7 @@ public class Board {
                 throw new IllegalArgumentException("uncompressed data length mismatch");
             }
         } catch(Exception e) {
-            Timber.d("error in unb64unzip: " + e.toString());
+            Logger.println("error in unb64unzip: " + e.toString());
             result = null;
         }
         return result;

@@ -1,5 +1,5 @@
 /*  DriftingDroids - yet another Ricochet Robots solver program.
-    Copyright (C) 2011-2014 Michael Henke
+    Copyright (C) 2011-2025 Michael Henke
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -392,8 +392,8 @@ public final class KeyDepthMapTrieGeneric implements KeyDepthMap {
         for (int i = 0;  i < this.numLeafArrays;  ++i) {
             result += this.leafArrays[i].length;
         }
-//        Timber.d("getBytesAllocated TrieMapByte  nodes = " + nodeResult);
-//        Timber.d("getBytesAllocated TrieMapByte leaves = " + (result - nodeResult));
+//        Logger.println("getBytesAllocated TrieMapByte  nodes = " + nodeResult);
+//        Logger.println("getBytesAllocated TrieMapByte leaves = " + (result - nodeResult));
         return result;
     }
 

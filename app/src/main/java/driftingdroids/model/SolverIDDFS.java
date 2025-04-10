@@ -1,5 +1,5 @@
 /*  DriftingDroids - yet another Ricochet Robots solver program.
-    Copyright (C) 2011-2014 Michael Henke
+    Copyright (C) 2011-2025 Michael Henke
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package driftingdroids.model;
 
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -102,15 +103,15 @@ public class SolverIDDFS extends Solver {
         final long startExecute = System.nanoTime();
         this.lastResultSolutions = new ArrayList<Solution>();
         
-        Timber.d("[SOLVER_MEMORY] ***** " + this.getClass().getSimpleName() + " *****");
-        Timber.d("[SOLVER_MEMORY] Options: " + this.getOptionsAsString());
-        Timber.d("[SOLVER_MEMORY] Number of robots: %d, Using MAX_DEPTH: %d", board.getNumRobots(), this.MAX_DEPTH);
-        Timber.d("[SOLVER_MEMORY] Available memory: %d MB, Max memory: %d MB", 
+        Logger.println("[SOLVER_MEMORY] ***** " + this.getClass().getSimpleName() + " *****");
+        Logger.println("[SOLVER_MEMORY] Options: " + this.getOptionsAsString());
+        Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Number of robots: %d, Using MAX_DEPTH: %d", board.getNumRobots(), this.MAX_DEPTH);
+        Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Available memory: %d MB, Max memory: %d MB", 
                 Runtime.getRuntime().freeMemory() / (1024 * 1024),
                 Runtime.getRuntime().maxMemory() / (1024 * 1024));
         
         if (null == this.board.getGoal()) {
-            Timber.d("[SOLVER_ERROR] No goal is set - nothing to solve!");
+            Logger.println(android.util.Log.ERROR, "DriftingDroid", "[SOLVER_ERROR] No goal is set - nothing to solve!");
         } else {
             this.states[0] = this.board.getRobotPositions().clone();
             swapGoalLast(this.states[0]);   //goal robot is always the last one.
@@ -118,10 +119,10 @@ public class SolverIDDFS extends Solver {
             this.precomputeMinimumMovesToGoal();
             this.knownStates = new KnownStates();
             
-            Timber.d("startState=" + this.stateString(this.states[0]));
-            Timber.d("solution01=" + this.isSolution01 + "  isSolution01NoSpeedup=" + this.isSolution01NoSpeedup);
-            Timber.d("goalWildcard=" + this.isBoardGoalWildcard);
-            Timber.d(this.knownStates.getInfo());
+            Logger.println("startState=" + this.stateString(this.states[0]));
+            Logger.println("solution01=" + this.isSolution01 + "  isSolution01NoSpeedup=" + this.isSolution01NoSpeedup);
+            Logger.println("goalWildcard=" + this.isBoardGoalWildcard);
+            Logger.println(this.knownStates.getInfo());
             
             this.iddfs();
             
@@ -171,7 +172,7 @@ public class SolverIDDFS extends Solver {
     private void iddfs() throws InterruptedException {
         final long nanoStart = System.nanoTime();
         final boolean doDfsFast = (false == this.isBoardGoalWildcard) && (false == this.isSolution01) && (true == this.optAllowRebounds);
-        Timber.d("doDfsFast=" + doDfsFast);
+        Logger.println("doDfsFast=" + doDfsFast);
         for (this.depthLimit = 2;  MAX_DEPTH > this.depthLimit;  ++this.depthLimit) {
             final long nanoDfs = System.nanoTime();
             if (doDfsFast) {
@@ -180,7 +181,7 @@ public class SolverIDDFS extends Solver {
                 this.dfsRecursion(1, -1, -1, this.states[0], this.directions[0]);
             }
             final long nanoEnd = System.nanoTime();
-            Timber.d("iddfs:  finished depthLimit=" + this.depthLimit +
+            Logger.println("iddfs:  finished depthLimit=" + this.depthLimit +
                     " megaBytes=" + this.knownStates.getMegaBytesAllocated() +
                     " time=" + (nanoEnd - nanoDfs) / 1000000L + "ms" + 
                     " totalTime=" + (nanoEnd - nanoStart) / 1000000L + "ms");
@@ -426,7 +427,7 @@ public class SolverIDDFS extends Solver {
             state0 = state1;
         }
         newSolution = newSolution.finish();
-        Timber.d(newSolution.toMovelistString() + " " + newSolution.toString() + " finalState=" + this.stateString(states[depth]));
+        Logger.println(newSolution.toMovelistString() + " " + newSolution.toString() + " finalState=" + this.stateString(states[depth]));
         if (false == this.lastResultSolutions.contains(newSolution)) {
             this.lastResultSolutions.add(newSolution);
         }

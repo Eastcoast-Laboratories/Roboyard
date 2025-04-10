@@ -1,5 +1,5 @@
 /*  DriftingDroids - yet another Ricochet Robots solver program.
-    Copyright (C) 2011-2014 Michael Henke
+    Copyright (C) 2011-2025 Michael Henke
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package driftingdroids.model;
 
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -247,7 +248,7 @@ public class Solution implements Comparable<Solution> {
     private void minimizeColorChanges(List<List<Move>> thisSolution) {
         final long startNano = System.nanoTime();
         if (this.numColors == this.numColorChanges) {
-            Timber.d("minimizeColorChanges: no search, already at global minimum " + this.numColorChanges);
+            Logger.println("minimizeColorChanges: no search, already at global minimum " + this.numColorChanges);
             return; // nothing to be minimized here
         }
         final Set<List<List<Move>>> knownSet = new HashSet<List<List<Move>>>();
@@ -267,12 +268,12 @@ try_swap_loop:
                     for (final Move move2 : nextMoves) {
                         if (move1.pathMap.containsKey(Integer.valueOf(move2.newPosition)) ||
                             move2.pathMap.containsKey(Integer.valueOf(move1.oldPosition))) {
-                            Timber.d("minimizeColorChanges: blocked path  " + move1.toString() + "  " + move2.toString());
+                            Logger.println("minimizeColorChanges: blocked path  " + move1.toString() + "  " + move2.toString());
                             continue try_swap_loop; // no swap - blocked path
                         }
                         if ((move1.newPosition == move2.oldPosition - board.directionIncrement[move1.direction]) ||
                             (move2.newPosition == move1.newPosition - board.directionIncrement[move2.direction])) {
-                            Timber.d("minimizeColorChanges: blocker position  " + move1.toString() + "  " + move2.toString());
+                            Logger.println("minimizeColorChanges: blocker position  " + move1.toString() + "  " + move2.toString());
                             continue try_swap_loop; // no swap - blocker position
                         }
                     }
@@ -290,14 +291,14 @@ try_swap_loop:
                         thisMoves.addAll(nextMoves);
                         nextSolution.set(j - 1, thisMoves);
                         nextSolution.remove(j--);
-                        Timber.d("minimizeColorChanges: merged " + Board.ROBOT_COLOR_NAMES_LONG[thisMoves.get(0).robotNumber]);
+                        Logger.println("minimizeColorChanges: merged " + Board.ROBOT_COLOR_NAMES_LONG[thisMoves.get(0).robotNumber]);
                     } else {
                         thisMoves = nextMoves;
                     }
                 }
                 // if this is a new minimum of color changes then update the solution
                 if (this.numColorChanges > nextSolution.size()) {
-                    Timber.d("minimizeColorChanges: reduced from " + this.numColorChanges + " to " + nextSolution.size());
+                    Logger.println("minimizeColorChanges: reduced from " + this.numColorChanges + " to " + nextSolution.size());
                     this.numColorChanges = nextSolution.size();
                     this.movesList.clear();
                     int stepNumber = 0;
@@ -310,7 +311,7 @@ try_swap_loop:
                     knownSet.clear();
                     todoList.clear();
                     if (this.numColors == this.numColorChanges) { // global minimum reached
-                        Timber.d("minimizeColorChanges: global minimum reached " + this.numColorChanges);
+                        Logger.println("minimizeColorChanges: global minimum reached " + this.numColorChanges);
                         break search_loop; // end of search
                     }
                 }
@@ -320,7 +321,7 @@ try_swap_loop:
             }
         }
         final long millis = (System.nanoTime() - startNano) / 1000000L;
-        Timber.d("minimizeColorChanges: finished after " + millis + " ms.");
+        Logger.println("minimizeColorChanges: finished after " + millis + " ms.");
     }
 }
 
