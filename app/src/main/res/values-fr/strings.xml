@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="title_activity_test_gl">TestGL</string>
+    
+    <!-- Main Menu Strings -->
+    <string name="main_menu_title">Roboyard</string>
+    <string name="new_random_game">Nouveau Jeu</string>
+    <string name="new_random_game_description">Commencer une nouvelle partie</string>
+    <string name="level_game">Jeu de Niveaux</string>
+    <string name="level_game_description">Jouer aux niveaux prédéfinis</string>
+    <string name="load_game">Charger</string>
+    <string name="load_game_description">Charger une partie sauvegardée</string>
+    
+    <!-- Add more strings here through Weblate for a complete translation -->
+    
+</resources>
