@@ -36,12 +36,12 @@ public class CreditsFragment extends BaseGameFragment {
         int versionCode = getVersionCode(requireContext());
         
         TextView versionTextView = view.findViewById(R.id.version_text);
-        versionTextView.setText(String.format("Version: %s (Build %d)", versionName, versionCode));
+        versionTextView.setText(getString(R.string.version_format, versionName, versionCode));
         
         // Set up clickable links
-        setupClickableLink(view, R.id.imprint_link, "https://eclabs.de/datenschutz.html");
-        setupClickableLink(view, R.id.opensource_link, "https://git.io/fjs5H");
-        setupClickableLink(view, R.id.contact_link, "https://eclabs.de/#kontakt");
+        setupClickableLink(view, R.id.imprint_link, getString(R.string.url_imprint));
+        setupClickableLink(view, R.id.opensource_link, getString(R.string.url_opensource));
+        setupClickableLink(view, R.id.contact_link, getString(R.string.url_contact));
         
         // Programmatically disable accessibility for wall elements
         disableAccessibilityForDecorations(view);

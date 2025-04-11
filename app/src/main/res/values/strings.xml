@@ -30,8 +30,7 @@
     <string name="save_load_game_screen_title">Save/Load Game</string>
     <string name="settings_screen_title">Settings</string>
     <string name="help_screen_title">Help</string>
-    <string name="level_selection_title">Select Level</string>
-    
+
     <!-- Level Selection Screen -->
     <string name="level_button_description">Level %1$d</string>
 
@@ -83,6 +82,98 @@
     <string name="language_same_as_app">Same as app language</string>
     <string name="language_changed_title">Language Changed</string>
     <string name="language_changed_message">The language setting has been updated. Some changes will apply immediately, while others will apply when you return to the main menu.</string>
+    <string name="ok">OK</string>
+    <!-- Plurals example for robot count message -->
+    <plurals name="robot_count_message">
+        <item quantity="one">%1$d robot</item>
+        <item quantity="other">%1$d robots</item>
+    </plurals>
+    <!-- Non-translatable string example -->
+    <string name="app_version" translatable="false">Version: 1.0.0</string>
+    <!-- Direction strings -->
+    <string name="direction_north">North</string>
+    <string name="direction_south">South</string>
+    <string name="direction_east">East</string>
+    <string name="direction_west">West</string>
+    
+    <!-- Robot movement format strings -->
+    <string name="robot_move_direction">%1$s %2$s</string>
+    
+    <!-- TalkBack language constant - do not translate -->
+    <string name="talkback_language_same_value" translatable="false">same</string>
+    
+    <!-- Help content -->
+    <string name="help_title" translatable="false">Help</string>
+    
+    <!-- Credits screen -->
+    <string name="version_format">Version: %1$s (Build %2$d)</string>
+    <string name="credits_screen_title">Credits</string>
+    <string name="imprint_link_text">Imprint &amp; Privacy Policy</string>
+    <string name="opensource_link_text">Open Source</string>
+    <string name="contact_link_text">Contact</string>
+    <string name="credits_back_button">Back</string>
+    <string name="credits_eclabs_description">Created by ECLabs</string>
+    
+    <!-- Level Selection screen -->
+    <string name="level_selection_title">Level Selection</string>
+    <string name="level_category_beginner">Beginner</string>
+    <string name="level_category_intermediate">Intermediate</string>
+    <string name="level_category_advanced">Advanced</string>
+    <string name="level_category_expert">Expert</string>
+    <string name="level_locked_message">Level locked</string>
+    <string name="level_format">Level %1$d</string>
+    
+    <!-- Save game screen -->
+    <string name="save_game_title">Save Game</string>
+    <string name="save_slot_format">Slot %1$d</string>
+    <string name="save_empty">Empty</string>
+    <string name="save_date_format">Saved: %1$s</string>
+    <string name="save_level_format">Level %1$s - Moves: %2$d</string>
+    <string name="save_failed">Failed to save game.</string>
+    
+    <!-- Game screen -->
+    <string name="game_move_count">Moves: %1$d</string>
+    <string name="game_time_format">%1$02d:%2$02d</string>
+    <string name="game_paused">Game Paused</string>
+    <string name="game_victory">Victory!</string>
+    <string name="game_moves_optimal">Perfect! Optimal solution.</string>
+    <string name="game_moves_good">Good job!</string>
+    <string name="game_moves_hint_used">You used a hint.</string>
+    
+    <!-- Hint messages -->
+    <plurals name="hint_robot_count">
+        <item quantity="one">Hint: Move the %1$s robot</item>
+        <item quantity="other">Hint: Move the %1$s and %2$s robots</item>
+    </plurals>
+    <string name="hint_direction_format">%1$s to the %2$s</string>
+    
+    <!-- Autosave tags - non-translatable -->
+    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
+    
+    <!-- URLs - non-translatable -->
+    <string name="url_imprint" translatable="false">https://eclabs.de/datenschutz.html</string>
+    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
+    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">How to Play Roboyard</string>
+    <string name="help_goal_section_title">Goal</string>
+    <string name="help_goal_description">Move the colored robots to their matching colored targets. The game is completed when all robots are on their matching targets.</string>
+    <string name="help_movement_section_title">Movement</string>
+    <string name="help_movement_point_1">- Tap on a robot to select it.</string>
+    <string name="help_movement_point_2">- Tap on an empty cell to move the selected robot in that direction.</string>
+    <string name="help_movement_point_3">- Robots will move in straight lines until they hit a wall, another robot, or the edge of the board.</string>
+    <string name="help_controls_section_title">Controls</string>
+    <string name="help_controls_point_1">- Hint: Shows a suggested move.</string>
+    <string name="help_controls_point_2">- Reset: Restarts the current level.</string>
+    <string name="help_controls_point_3">- Save: Saves your current map.</string>
+    <string name="help_controls_point_4">- Menu: Returns to the main menu.</string>
+    <string name="help_accessibility_section_title">Accessibility</string>
+    <string name="help_accessibility_description">This game is fully compatible with TalkBack screen reader. Use explore by touch to hear information about the game elements and buttons. Double-tap to activate buttons or select robots.</string>
+    <string name="help_tips_section_title">Tips</string>
+    <string name="help_tips_point_1">- Try to solve puzzles in the minimum number of moves.</string>
+    <string name="help_tips_point_2">- Sometimes you need to move robots to specific positions to clear paths for other robots.</string>
+    <string name="help_tips_point_3">- If you\'re stuck, use the Hint feature to get a suggestion.</string>
     
     <!-- Game Buttons -->
     <string name="hint_button">💡 Hint</string>

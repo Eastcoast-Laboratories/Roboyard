@@ -820,7 +820,7 @@ public class SettingsFragment extends Fragment {
         resources.updateConfiguration(config, resources.getDisplayMetrics());
         
         // If TalkBack language is set to "Same as app", update it as well
-        if (Preferences.talkbackLanguage.equals("same")) {
+        if (Preferences.talkbackLanguage.equals(getString(R.string.language_same_as_app))) {
             applyTalkbackLanguageSetting(languageCode);
         }
         
@@ -839,7 +839,7 @@ public class SettingsFragment extends Fragment {
         Preferences.setTalkbackLanguage(languageCode);
         
         // If set to "same", use app language
-        String actualLanguageCode = languageCode.equals("same") ? Preferences.appLanguage : languageCode;
+        String actualLanguageCode = languageCode.equals(getString(R.string.talkback_language_same_value)) ? Preferences.appLanguage : languageCode;
         
         // Log for diagnostics
         Timber.d("ROBOYARD_ACCESSIBILITY_LANGUAGE: Changed TalkBack language to %s", actualLanguageCode);
