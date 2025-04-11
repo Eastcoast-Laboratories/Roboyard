@@ -3,6 +3,28 @@
 
     <string name="app_name">Roboyard</string>
     
+    <!-- Main Menu Strings -->
+    <string name="action_settings">Einstellungen</string>
+
+    <string name="new_random_game">Neues Spiel</string>
+    <string name="new_random_game_a11y">Starte ein neues Spiel</string>
+    
+    <string name="level_game">Levels</string>
+    <string name="level_game_a11y">Starte einen Level</string>
+    
+    <string name="load_game">Spiel Laden</string>
+    <string name="load_game_a11y">Lade ein Spielstand</string>
+    
+    <string name="settings">Einstellungen</string>
+    <string name="settings_a11y">Einstellungen</string>
+    
+    <string name="help">Wie spielt man?</string>
+    <string name="help_a11y">Erklärung, wie man spielt</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">Credits</string>
+    
     <!-- Add more strings here for a complete translation -->
     
 </resources>

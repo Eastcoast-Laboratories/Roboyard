@@ -26,6 +26,8 @@ public class Preferences {
     private static final String KEY_BOARD_SIZE_HEIGHT = "boardSizeY";
     private static final String KEY_GENERATE_NEW_MAP = "generate_new_map";
     private static final String KEY_ACCESSIBILITY_MODE = "accessibility_mode";
+    private static final String KEY_APP_LANGUAGE = "app_language";
+    private static final String KEY_TALKBACK_LANGUAGE = "talkback_language";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -36,6 +38,8 @@ public class Preferences {
     public static final int DEFAULT_BOARD_SIZE_HEIGHT = 14;
     public static final boolean DEFAULT_GENERATE_NEW_MAP = true;
     public static final boolean DEFAULT_ACCESSIBILITY_MODE = false;
+    public static final String DEFAULT_APP_LANGUAGE = "en";
+    public static final String DEFAULT_TALKBACK_LANGUAGE = "same";
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -46,11 +50,14 @@ public class Preferences {
     public static int boardSizeHeight;
     public static boolean generateNewMapEachTime;
     public static boolean accessibilityMode;
+    public static String appLanguage;
+    public static String talkbackLanguage;
     
     // For compatibility with existing code
     public static int boardSizeX;
     public static int boardSizeY;
     public static boolean generateNewMap;
+    public static boolean accessibility;
     
     // Application context for accessing SharedPreferences
     private static Context applicationContext;
@@ -230,10 +237,28 @@ public class Preferences {
             
             try {
                 accessibilityMode = prefs.getBoolean(KEY_ACCESSIBILITY_MODE, DEFAULT_ACCESSIBILITY_MODE);
+                accessibility = accessibilityMode; // For legacy code compatibility
             } catch (ClassCastException e) {
                 Timber.e("[PREFERENCES] Error loading accessibility mode: %s", e.getMessage());
                 prefs.edit().remove(KEY_ACCESSIBILITY_MODE).apply();
                 accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
+                accessibility = DEFAULT_ACCESSIBILITY_MODE;
+            }
+            
+            try {
+                appLanguage = prefs.getString(KEY_APP_LANGUAGE, DEFAULT_APP_LANGUAGE);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading app language: %s", e.getMessage());
+                prefs.edit().remove(KEY_APP_LANGUAGE).apply();
+                appLanguage = DEFAULT_APP_LANGUAGE;
+            }
+            
+            try {
+                talkbackLanguage = prefs.getString(KEY_TALKBACK_LANGUAGE, DEFAULT_TALKBACK_LANGUAGE);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading talkback language: %s", e.getMessage());
+                prefs.edit().remove(KEY_TALKBACK_LANGUAGE).apply();
+                talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE;
             }
             
             // For compatibility with existing code
@@ -266,6 +291,8 @@ public class Preferences {
         boardSizeY = boardSizeHeight;
         generateNewMapEachTime = DEFAULT_GENERATE_NEW_MAP;
         accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
+        appLanguage = DEFAULT_APP_LANGUAGE;
+        talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE;
         
         // Clear all preferences
         if (prefs != null) {
@@ -569,6 +596,68 @@ public class Preferences {
     }
     
     /**
+     * Set the app language and save to preferences
+     * @param language App language
+     */
+    public static void setAppLanguage(String language) {
+        // Ensure preferences are initialized
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setAppLanguage, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                // Set the static field but don't save to preferences
+                appLanguage = language;
+                return;
+            }
+        }
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_APP_LANGUAGE, language);
+        editor.apply();
+        
+        // Update static field
+        appLanguage = language;
+        
+        // Notify listeners
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] App language set to %s", language);
+    }
+    
+    /**
+     * Set the talkback language and save to preferences
+     * @param language Talkback language
+     */
+    public static void setTalkbackLanguage(String language) {
+        // Ensure preferences are initialized
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setTalkbackLanguage, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                // Set the static field but don't save to preferences
+                talkbackLanguage = language;
+                return;
+            }
+        }
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_TALKBACK_LANGUAGE, language);
+        editor.apply();
+        
+        // Update static field
+        talkbackLanguage = language;
+        
+        // Notify listeners
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Talkback language set to %s", language);
+    }
+    
+    /**
      * Reload all preference values from disk
      * Call this if preferences might have been changed by another component
      */
@@ -615,6 +704,12 @@ public class Preferences {
             case "accessibilityMode":
                 mappedKey = KEY_ACCESSIBILITY_MODE;
                 return accessibilityMode ? "true" : "false";
+            case "appLanguage":
+                mappedKey = KEY_APP_LANGUAGE;
+                return appLanguage;
+            case "talkbackLanguage":
+                mappedKey = KEY_TALKBACK_LANGUAGE;
+                return talkbackLanguage;
         }
         
         // For any other keys, try to get the value directly
@@ -681,6 +776,12 @@ public class Preferences {
                 return;
             case "accessibilityMode":
                 setAccessibilityMode(value.equals("true"));
+                return;
+            case "appLanguage":
+                setAppLanguage(value);
+                return;
+            case "talkbackLanguage":
+                setTalkbackLanguage(value);
                 return;
         }
         

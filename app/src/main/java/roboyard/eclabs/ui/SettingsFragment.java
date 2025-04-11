@@ -23,6 +23,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -35,6 +36,10 @@ import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
 import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
+
+import java.util.Locale;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 
 /**
  * Settings screen implemented as a Fragment with native Android UI components.
@@ -60,6 +65,11 @@ public class SettingsFragment extends Fragment {
     private Spinner targetColorsSpinner;
     private Button backButton;
     private Spinner robotCountSpinner;
+    
+    // Language settings
+    private Spinner languageSpinner;
+    private Spinner talkbackLanguageSpinner;
+    private LinearLayout talkbackLanguageContainer;
     
     private List<int[]> validBoardSizes;
     
@@ -150,6 +160,11 @@ public class SettingsFragment extends Fragment {
             backButton = view.findViewById(R.id.back_button);
             robotCountSpinner = view.findViewById(R.id.robot_count_spinner);
             
+            // Language settings
+            languageSpinner = view.findViewById(R.id.language_spinner);
+            talkbackLanguageSpinner = view.findViewById(R.id.talkback_language_spinner);
+            talkbackLanguageContainer = view.findViewById(R.id.talkback_language_container);
+            
             // Set up board size options
             setupBoardSizeOptions();
             
@@ -158,6 +173,9 @@ public class SettingsFragment extends Fragment {
             
             // Set up target colors spinner
             setupTargetColorsSpinner();
+            
+            // Set up language spinners
+            setupLanguageSpinners();
             
             // Load current settings
             loadSettings();
@@ -528,6 +546,41 @@ public class SettingsFragment extends Fragment {
             }
             
             isUpdatingUI = false;
+            
+            // Load language settings
+            String appLanguage = Preferences.appLanguage;
+            String talkbackLanguage = Preferences.talkbackLanguage;
+            
+            // Set app language spinner selection
+            int appLanguageIndex = 0; // Default to English
+            if ("de".equals(appLanguage)) {
+                appLanguageIndex = 1; // German
+            } else if ("fr".equals(appLanguage)) {
+                appLanguageIndex = 2; // French
+            }
+            languageSpinner.setSelection(appLanguageIndex);
+            
+            // Set TalkBack language spinner selection
+            int talkbackLanguageIndex = 0; // Default to "Same as app"
+            if ("en".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 1; // English
+            } else if ("de".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 2; // German
+            } else if ("fr".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 3; // French
+            }
+            talkbackLanguageSpinner.setSelection(talkbackLanguageIndex);
+            
+            // Load robot count
+            int robotCount = Preferences.robotCount;
+            robotCountSpinner.setSelection(robotCount - 1); // Zero-based index
+            
+            // Load target colors
+            int targetColors = Preferences.targetColors;
+            targetColorsSpinner.setSelection(targetColors - 1); // Zero-based index
+            
+            isUpdatingUI = false;
+            Timber.d("Settings loaded successfully");
         } catch (Exception e) {
             Timber.e(e, "Error loading settings");
             isUpdatingUI = false; // Make sure to reset this flag even if an error occurs
@@ -582,7 +635,7 @@ public class SettingsFragment extends Fragment {
                                     Toast.LENGTH_SHORT).show();
                         }
                         
-                        Preferences.setRobotCount(selectedRobotCount);
+                        Preferences.robotCount = selectedRobotCount;
                         Timber.d("[PREFERENCES] Robot count set to %d", selectedRobotCount);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing robot count selection");
@@ -643,7 +696,7 @@ public class SettingsFragment extends Fragment {
                                     Toast.LENGTH_SHORT).show();
                             
                             // Update the robot count
-                            Preferences.setRobotCount(selectedTargetColors);
+                            Preferences.robotCount = selectedTargetColors;
                             
                             // Update the robot count spinner if available
                             if (robotCountSpinner != null) {
@@ -651,7 +704,7 @@ public class SettingsFragment extends Fragment {
                             }
                         }
                         
-                        Preferences.setTargetColors(selectedTargetColors);
+                        Preferences.targetColors = selectedTargetColors;
                         Timber.d("[PREFERENCES] Target colors set to %d", selectedTargetColors);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing target colors selection");
@@ -665,6 +718,168 @@ public class SettingsFragment extends Fragment {
             });
         } catch (Exception e) {
             Timber.e(e, "Error setting up target colors spinner");
+        }
+    }
+    
+    /**
+     * Set up language spinners with language options
+     */
+    private void setupLanguageSpinners() {
+        Timber.d("Setting up language spinners");
+        
+        // Set up app language spinner
+        List<String> languages = new ArrayList<>();
+        languages.add(getString(R.string.language_english));
+        languages.add(getString(R.string.language_german));
+        languages.add(getString(R.string.language_french));
+        
+        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, languages);
+        languageSpinner.setAdapter(languageAdapter);
+        
+        // Set up TalkBack language spinner (including "Same as app" option)
+        List<String> talkbackLanguages = new ArrayList<>();
+        talkbackLanguages.add(getString(R.string.language_same_as_app));
+        talkbackLanguages.add(getString(R.string.language_english));
+        talkbackLanguages.add(getString(R.string.language_german));
+        talkbackLanguages.add(getString(R.string.language_french));
+        
+        ArrayAdapter<String> talkbackLanguageAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, talkbackLanguages);
+        talkbackLanguageSpinner.setAdapter(talkbackLanguageAdapter);
+        
+        // Show/hide TalkBack language selection based on accessibility setting
+        updateTalkbackLanguageVisibility(Preferences.accessibilityMode);
+        
+        // Set listeners for language changes
+        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    String selectedLanguage = languages.get(position);
+                    String languageCode = getLanguageCode(selectedLanguage);
+                    applyLanguageSetting(languageCode);
+                } catch (Exception e) {
+                    Timber.e(e, "Error processing language selection");
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+        
+        talkbackLanguageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    String selectedLanguage = talkbackLanguages.get(position);
+                    String languageCode = getTalkbackLanguageCode(selectedLanguage);
+                    applyTalkbackLanguageSetting(languageCode);
+                } catch (Exception e) {
+                    Timber.e(e, "Error processing TalkBack language selection");
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+    
+    /**
+     * Show or hide TalkBack language settings based on accessibility setting
+     * @param accessibilityEnabled Whether accessibility is enabled
+     */
+    private void updateTalkbackLanguageVisibility(boolean accessibilityEnabled) {
+        if (talkbackLanguageContainer != null) {
+            talkbackLanguageContainer.setVisibility(accessibilityEnabled ? View.VISIBLE : View.GONE);
+        }
+    }
+    
+    /**
+     * Apply language settings
+     * @param languageCode The language code to apply (en, de, fr)
+     */
+    private void applyLanguageSetting(String languageCode) {
+        Timber.d("Applying language setting: %s", languageCode);
+        
+        // Save language preference using proper setter method that persists to SharedPreferences
+        Preferences.setAppLanguage(languageCode);
+        
+        // Apply language change
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+        
+        Resources resources = requireContext().getResources();
+        Configuration config = new Configuration(resources.getConfiguration());
+        config.setLocale(locale);
+        
+        resources.updateConfiguration(config, resources.getDisplayMetrics());
+        
+        // If TalkBack language is set to "Same as app", update it as well
+        if (Preferences.talkbackLanguage.equals("same")) {
+            applyTalkbackLanguageSetting(languageCode);
+        }
+        
+        // Log for diagnostics
+        Timber.d("ROBOYARD_LANGUAGE: Changed app language to %s", languageCode);
+    }
+    
+    /**
+     * Apply TalkBack language settings
+     * @param languageCode The language code to apply (en, de, fr, or "same" for same as app)
+     */
+    private void applyTalkbackLanguageSetting(String languageCode) {
+        Timber.d("Applying TalkBack language setting: %s", languageCode);
+        
+        // Save TalkBack language preference using proper setter method that persists to SharedPreferences
+        Preferences.setTalkbackLanguage(languageCode);
+        
+        // If set to "same", use app language
+        String actualLanguageCode = languageCode.equals("same") ? Preferences.appLanguage : languageCode;
+        
+        // Log for diagnostics
+        Timber.d("ROBOYARD_ACCESSIBILITY_LANGUAGE: Changed TalkBack language to %s", actualLanguageCode);
+    }
+    
+    /**
+     * Get the language code for the given language string
+     * @param language The language string (e.g. "English", "Deutsch", "Français")
+     * @return The corresponding language code (e.g. "en", "de", "fr")
+     */
+    private String getLanguageCode(String language) {
+        switch (language) {
+            case "English":
+                return "en";
+            case "Deutsch":
+                return "de";
+            case "Français":
+                return "fr";
+            default:
+                return "en"; // Default to English
+        }
+    }
+    
+    /**
+     * Get the TalkBack language code for the given TalkBack language string
+     * @param language The TalkBack language string (e.g. "Same as app", "English", "Deutsch", "Français")
+     * @return The corresponding TalkBack language code (e.g. "same", "en", "de", "fr")
+     */
+    private String getTalkbackLanguageCode(String language) {
+        switch (language) {
+            case "Same as app":
+                return "same";
+            case "English":
+                return "en";
+            case "Deutsch":
+                return "de";
+            case "Français":
+                return "fr";
+            default:
+                return "same"; // Default to "Same as app"
         }
     }
     
@@ -684,7 +899,7 @@ public class SettingsFragment extends Fragment {
     private void setGenerateNewMapEachTimeSetting(boolean value) {
         try {
             // Update the preference
-            Preferences.setGenerateNewMapEachTime(value);
+            Preferences.generateNewMapEachTime = value;
             
             // If the value is true ("No" for preserving walls), clear the wall storage for current board size
             if (value) {
@@ -794,7 +1009,8 @@ public class SettingsFragment extends Fragment {
                                 int height = size[1];
                                 
                                 // Update static board size variables through the Preferences manager
-                                Preferences.setBoardSize(width, height);
+                                Preferences.boardSizeWidth = width;
+                                Preferences.boardSizeHeight = height;
                                 Timber.d("[BOARD_SIZE_DEBUG] Settings: Board size updated to %dx%d", width, height);
                             } else {
                                 Timber.e("Invalid board size position: %d", position);
@@ -843,7 +1059,8 @@ public class SettingsFragment extends Fragment {
                                     isUpdatingUI = true; // Prevent recursive updates
                                     boardSizeSpinner.setSelection(position);
                                     // Update the board size in preferences
-                                    Preferences.setBoardSize(12, 14);
+                                    Preferences.boardSizeWidth = 12;
+                                    Preferences.boardSizeHeight = 14;
                                     isUpdatingUI = false;
                                     Timber.d("Automatically set board size to 12x14 for Beginner difficulty");
                                 } else {
@@ -855,7 +1072,7 @@ public class SettingsFragment extends Fragment {
                             if (targetColorsSpinner != null) {
                                 isUpdatingUI = true; // Prevent recursive updates
                                 targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
-                                Preferences.setTargetColors(1);
+                                Preferences.targetColors = 1;
                                 isUpdatingUI = false;
                                 Timber.d("Automatically set target colors to 1 for Beginner difficulty");
                             }
@@ -874,7 +1091,7 @@ public class SettingsFragment extends Fragment {
                         }
                         
                         // Save difficulty setting
-                        Preferences.setDifficulty(difficultyLevel);
+                        Preferences.difficulty = difficultyLevel;
                     } catch (Exception e) {
                         Timber.e(e, "Error processing difficulty selection");
                     }
@@ -890,7 +1107,7 @@ public class SettingsFragment extends Fragment {
                         boolean generateNewMapEachTime = checkedId == R.id.new_map_yes;
                         
                         // Save new map setting
-                        Preferences.setGenerateNewMapEachTime(generateNewMapEachTime);
+                        Preferences.generateNewMapEachTime = generateNewMapEachTime;
                         
                         // Update MapGenerator using our helper method
                         setGenerateNewMapEachTimeSetting(generateNewMapEachTime);
@@ -907,10 +1124,10 @@ public class SettingsFragment extends Fragment {
                 soundRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
                         if (checkedId == R.id.sound_on) {
-                            Preferences.setSoundEnabled(true);
+                            Preferences.soundEnabled = true;
                             toggleSound(requireActivity(), true);
                         } else if (checkedId == R.id.sound_off) {
-                            Preferences.setSoundEnabled(false);
+                            Preferences.soundEnabled = false;
                             toggleSound(requireActivity(), false);
                         }
                     } catch (Exception e) {
@@ -928,12 +1145,13 @@ public class SettingsFragment extends Fragment {
                         boolean accessibilityEnabled = checkedId == R.id.accessibility_on;
                         
                         // Save accessibility mode setting
-                        Preferences.setAccessibilityMode(accessibilityEnabled);
+                        Preferences.accessibilityMode = accessibilityEnabled;
                         
                         // If accessibility mode is enabled, automatically set recommended settings
                         if (accessibilityEnabled) {
                             // Set board size to 8x8
-                            Preferences.setBoardSize(8, 8);
+                            Preferences.boardSizeWidth = 8;
+                            Preferences.boardSizeHeight = 8;
                             for (int i = 0; i < validBoardSizes.size(); i++) {
                                 int[] size = validBoardSizes.get(i);
                                 if (size[0] == 8 && size[1] == 8) {
@@ -943,15 +1161,15 @@ public class SettingsFragment extends Fragment {
                             }
                             
                             // Set difficulty to Beginner
-                            Preferences.setDifficulty(Constants.DIFFICULTY_BEGINNER);
+                            Preferences.difficulty = Constants.DIFFICULTY_BEGINNER;
                             difficultyRadioGroup.check(R.id.difficulty_beginner);
                             
                             // Set "New Map Each Time" to "No" (preserve walls)
-                            Preferences.setGenerateNewMapEachTime(false);
+                            Preferences.generateNewMapEachTime = false;
                             newMapRadioGroup.check(R.id.new_map_no);
                             
                             // Set target colors to 1
-                            Preferences.setTargetColors(1);
+                            Preferences.targetColors = 1;
                             targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
                             
                             // Show message about TalkBack

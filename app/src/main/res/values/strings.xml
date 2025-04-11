@@ -2,10 +2,9 @@
 <resources>
 
     <string name="app_name">Roboyard</string>
-    <string name="action_settings">Settings</string>
     
     <!-- Main Menu Strings -->
-    <string name="main_menu_title" translatable="false">Roboyard</string>
+    <string name="action_settings">Settings</string>
 
     <string name="new_random_game">New Game</string>
     <string name="new_random_game_a11y">Start a new game</string>
@@ -22,6 +21,8 @@
     <string name="help">How to Play</string>
     <string name="help_a11y">How to Play</string>
     
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
     <string name="credits">Credits</string>
     
     <!-- Game Screens -->
@@ -70,6 +71,18 @@
     <string name="load_confirm_title">Load Game</string>
     <string name="save_success">Game saved successfully</string>
     <string name="load_success">Game loaded successfully</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">App Language:</string>
+    <string name="language_settings_a11y">Select app display language</string>
+    <string name="accessibility_language_label">TalkBack Language:</string>
+    <string name="accessibility_language_a11y">Select TalkBack announcement language</string>
+    <string name="language_english">English</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_french">Français</string>
+    <string name="language_same_as_app">Same as app language</string>
+    <string name="language_changed_title">Language Changed</string>
+    <string name="language_changed_message">The language setting has been updated. Some changes will apply immediately, while others will apply when you return to the main menu.</string>
     
     <!-- Game Buttons -->
     <string name="hint_button">💡 Hint</string>
