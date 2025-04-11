@@ -154,7 +154,6 @@ public class Preferences {
                 boardSizeX = 8;
                 boardSizeY = 8;
                 generateNewMapEachTime = false;
-                generateNewMap = false;
                 accessibilityMode = true;
                 
                 Timber.d("[PREFERENCES] Fresh install with accessibility detected. Setting defaults: board size=8x8, generate new map=false");
@@ -237,12 +236,10 @@ public class Preferences {
             
             try {
                 accessibilityMode = prefs.getBoolean(KEY_ACCESSIBILITY_MODE, DEFAULT_ACCESSIBILITY_MODE);
-                accessibility = accessibilityMode; // For legacy code compatibility
             } catch (ClassCastException e) {
                 Timber.e("[PREFERENCES] Error loading accessibility mode: %s", e.getMessage());
                 prefs.edit().remove(KEY_ACCESSIBILITY_MODE).apply();
                 accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
-                accessibility = DEFAULT_ACCESSIBILITY_MODE;
             }
             
             try {
@@ -506,8 +503,6 @@ public class Preferences {
         
         // Update cached value
         Preferences.generateNewMapEachTime = generateNewMapEachTime;
-        // For compatibility with existing code
-        Preferences.generateNewMap = generateNewMapEachTime;
         
         Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime);
     }
@@ -580,7 +575,6 @@ public class Preferences {
             boardSizeX = 8;
             boardSizeY = 8;
             generateNewMapEachTime = false;
-            generateNewMap = false;
             
             Timber.d("[PREFERENCES] Setting accessibility-friendly defaults: board size=8x8, generate new map=false");
         }
