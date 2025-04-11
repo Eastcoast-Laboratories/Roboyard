@@ -1,6 +1,8 @@
 package roboyard.eclabs.ui;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 
 import androidx.core.content.ContextCompat;
@@ -372,6 +374,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
                              @Nullable Bundle savedInstanceState) {
+        // Apply language settings before inflating the view
+        applyLanguageSettings();
+        
+        // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_modern_game, container, false);
         return view;
     }
@@ -1788,11 +1794,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     private void updateMoveCount(int moveCount) {
-        moveCountTextView.setText("Moves: " + moveCount);
+        moveCountTextView.setText(getString(R.string.moves_count, moveCount));
     }
     
     private void updateSquaresMoved(int squaresMoved) {
-        squaresMovedTextView.setText("Squares moved: " + squaresMoved);
+        squaresMovedTextView.setText(getString(R.string.squares_moved, squaresMoved));
     }
     
     private void updateDifficulty() {
@@ -1810,11 +1816,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int boardWidth = currentState.getWidth();
             int boardHeight = currentState.getHeight();
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
-            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", boardWidth, boardHeight));
+            boardSizeTextView.setText(getString(R.string.board_size, boardWidth, boardHeight));
         } else {
             // If no game state yet, get it
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-            boardSizeTextView.setText(String.format(Locale.getDefault(), "Board: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight));
+            boardSizeTextView.setText(getString(R.string.board_size, Preferences.boardSizeWidth, Preferences.boardSizeHeight));
         }
     }
     
@@ -2466,10 +2472,17 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     @Override
     public void onSolutionCalculationFailed(String errorMessage) {
         Timber.d("ModernGameFragment: Solution calculation failed - %s", errorMessage);
+        
+        // Check if the fragment is still attached to an activity before proceeding
+        if (!isAdded()) {
+            Timber.w("ModernGameFragment: Fragment not attached to activity, skipping UI update");
+            return;
+        }
+        
         requireActivity().runOnUiThread(() -> {
             // Reset hint button text back to "Hint"
             hintButton.setChecked(false);
-            updateStatusText("Could not find a solution: " + errorMessage, true);
+            updateStatusText(getString(R.string.solution_error, errorMessage), true);
             Timber.d("ModernGameFragment: UI updated to show error");
         });
     }
@@ -2509,6 +2522,26 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (autosaveRunning) {
             autosaveHandler.removeCallbacks(autosaveRunnable);
             autosaveRunning = false;
+        }
+    }
+    
+    private void applyLanguageSettings() {
+        try {
+            // Get saved language setting
+            String languageCode = roboyard.logic.core.Preferences.appLanguage;
+            Timber.d("ROBOYARD_LANGUAGE: Loading saved language in game screen: %s", languageCode);
+            
+            // Apply language change
+            Locale locale = new Locale(languageCode);
+            Locale.setDefault(locale);
+            
+            Resources resources = requireContext().getResources();
+            Configuration config = new Configuration(resources.getConfiguration());
+            config.setLocale(locale);
+            
+            resources.updateConfiguration(config, resources.getDisplayMetrics());
+        } catch (Exception e) {
+            Timber.e(e, "ROBOYARD_LANGUAGE: Error loading language settings in game screen");
         }
     }
 }

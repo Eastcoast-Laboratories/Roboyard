@@ -1,6 +1,8 @@
 package roboyard.eclabs.ui;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -11,8 +13,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import java.util.Locale;
+
 import roboyard.eclabs.R;
 import roboyard.eclabs.util.FontScaleUtil;
+import roboyard.logic.core.Preferences;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -26,6 +31,9 @@ public abstract class BaseGameFragment extends Fragment {
     
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        // Apply language settings before creating the fragment
+        applyLanguageSettings();
+        
         super.onCreate(savedInstanceState);
         // Get the GameStateManager from the activity
         gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
@@ -112,4 +120,30 @@ public abstract class BaseGameFragment extends Fragment {
      * @return The screen title
      */
     public abstract String getScreenTitle();
+    
+    /**
+     * Applies the language settings to the application context
+     */
+    private void applyLanguageSettings() {
+        try {
+            // Get saved language setting
+            String languageCode = Preferences.appLanguage;
+            Timber.d("ROBOYARD_LANGUAGE: Loading saved language in fragment: %s", languageCode);
+            
+            if (languageCode != null && !languageCode.isEmpty()) {
+                // Apply language change
+                Locale locale = new Locale(languageCode);
+                Locale.setDefault(locale);
+                
+                Resources resources = requireContext().getResources();
+                Configuration config = new Configuration(resources.getConfiguration());
+                config.setLocale(locale);
+                
+                resources.updateConfiguration(config, resources.getDisplayMetrics());
+                Timber.d("ROBOYARD_LANGUAGE: Successfully applied language %s in fragment", languageCode);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "ROBOYARD_LANGUAGE: Error loading language settings in fragment");
+        }
+    }
 }
