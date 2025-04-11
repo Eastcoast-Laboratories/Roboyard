@@ -635,7 +635,7 @@ public class SettingsFragment extends Fragment {
                                     Toast.LENGTH_SHORT).show();
                         }
                         
-                        Preferences.robotCount = selectedRobotCount;
+                        Preferences.setRobotCount(selectedRobotCount);
                         Timber.d("[PREFERENCES] Robot count set to %d", selectedRobotCount);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing robot count selection");
@@ -696,7 +696,7 @@ public class SettingsFragment extends Fragment {
                                     Toast.LENGTH_SHORT).show();
                             
                             // Update the robot count
-                            Preferences.robotCount = selectedTargetColors;
+                            Preferences.setRobotCount(selectedTargetColors);
                             
                             // Update the robot count spinner if available
                             if (robotCountSpinner != null) {
@@ -704,7 +704,7 @@ public class SettingsFragment extends Fragment {
                             }
                         }
                         
-                        Preferences.targetColors = selectedTargetColors;
+                        Preferences.setTargetColors(selectedTargetColors);
                         Timber.d("[PREFERENCES] Target colors set to %d", selectedTargetColors);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing target colors selection");
@@ -899,7 +899,7 @@ public class SettingsFragment extends Fragment {
     private void setGenerateNewMapEachTimeSetting(boolean value) {
         try {
             // Update the preference
-            Preferences.generateNewMapEachTime = value;
+            Preferences.setGenerateNewMapEachTime(value);
             
             // If the value is true ("No" for preserving walls), clear the wall storage for current board size
             if (value) {
@@ -1009,8 +1009,7 @@ public class SettingsFragment extends Fragment {
                                 int height = size[1];
                                 
                                 // Update static board size variables through the Preferences manager
-                                Preferences.boardSizeWidth = width;
-                                Preferences.boardSizeHeight = height;
+                                Preferences.setBoardSize(width, height);
                                 Timber.d("[BOARD_SIZE_DEBUG] Settings: Board size updated to %dx%d", width, height);
                             } else {
                                 Timber.e("Invalid board size position: %d", position);
@@ -1059,8 +1058,7 @@ public class SettingsFragment extends Fragment {
                                     isUpdatingUI = true; // Prevent recursive updates
                                     boardSizeSpinner.setSelection(position);
                                     // Update the board size in preferences
-                                    Preferences.boardSizeWidth = 12;
-                                    Preferences.boardSizeHeight = 14;
+                                    Preferences.setBoardSize(12, 14);
                                     isUpdatingUI = false;
                                     Timber.d("Automatically set board size to 12x14 for Beginner difficulty");
                                 } else {
@@ -1072,7 +1070,7 @@ public class SettingsFragment extends Fragment {
                             if (targetColorsSpinner != null) {
                                 isUpdatingUI = true; // Prevent recursive updates
                                 targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
-                                Preferences.targetColors = 1;
+                                Preferences.setTargetColors(1);
                                 isUpdatingUI = false;
                                 Timber.d("Automatically set target colors to 1 for Beginner difficulty");
                             }
@@ -1091,7 +1089,7 @@ public class SettingsFragment extends Fragment {
                         }
                         
                         // Save difficulty setting
-                        Preferences.difficulty = difficultyLevel;
+                        Preferences.setDifficulty(difficultyLevel);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing difficulty selection");
                     }
@@ -1107,7 +1105,7 @@ public class SettingsFragment extends Fragment {
                         boolean generateNewMapEachTime = checkedId == R.id.new_map_yes;
                         
                         // Save new map setting
-                        Preferences.generateNewMapEachTime = generateNewMapEachTime;
+                        Preferences.setGenerateNewMapEachTime(generateNewMapEachTime);
                         
                         // Update MapGenerator using our helper method
                         setGenerateNewMapEachTimeSetting(generateNewMapEachTime);
@@ -1124,10 +1122,10 @@ public class SettingsFragment extends Fragment {
                 soundRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
                         if (checkedId == R.id.sound_on) {
-                            Preferences.soundEnabled = true;
+                            Preferences.setSoundEnabled(true);
                             toggleSound(requireActivity(), true);
                         } else if (checkedId == R.id.sound_off) {
-                            Preferences.soundEnabled = false;
+                            Preferences.setSoundEnabled(false);
                             toggleSound(requireActivity(), false);
                         }
                     } catch (Exception e) {
@@ -1145,13 +1143,12 @@ public class SettingsFragment extends Fragment {
                         boolean accessibilityEnabled = checkedId == R.id.accessibility_on;
                         
                         // Save accessibility mode setting
-                        Preferences.accessibilityMode = accessibilityEnabled;
+                        Preferences.setAccessibilityMode(accessibilityEnabled);
                         
                         // If accessibility mode is enabled, automatically set recommended settings
                         if (accessibilityEnabled) {
                             // Set board size to 8x8
-                            Preferences.boardSizeWidth = 8;
-                            Preferences.boardSizeHeight = 8;
+                            Preferences.setBoardSize(8, 8);
                             for (int i = 0; i < validBoardSizes.size(); i++) {
                                 int[] size = validBoardSizes.get(i);
                                 if (size[0] == 8 && size[1] == 8) {
@@ -1161,15 +1158,15 @@ public class SettingsFragment extends Fragment {
                             }
                             
                             // Set difficulty to Beginner
-                            Preferences.difficulty = Constants.DIFFICULTY_BEGINNER;
+                            Preferences.setDifficulty(Constants.DIFFICULTY_BEGINNER);
                             difficultyRadioGroup.check(R.id.difficulty_beginner);
                             
                             // Set "New Map Each Time" to "No" (preserve walls)
-                            Preferences.generateNewMapEachTime = false;
+                            Preferences.setGenerateNewMapEachTime(false);
                             newMapRadioGroup.check(R.id.new_map_no);
                             
                             // Set target colors to 1
-                            Preferences.targetColors = 1;
+                            Preferences.setTargetColors(1);
                             targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
                             
                             // Show message about TalkBack
