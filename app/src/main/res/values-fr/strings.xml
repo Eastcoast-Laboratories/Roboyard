@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Game UI text for ModernGameFragment -->
+    <string name="no_robot_selected">Aucun robot su00e9lectionnu00e9</string>
+    <string name="robot_selected_info">Su00e9lectionnu00e9: robot %1$s u00e0 la position (%2$d, %3$d)</string>
+    <string name="robot_target_info">Cible %1$s: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">Pas de cible pour ce robot</string>
+    <string name="move_count_text">Coups: %1$d</string>
+    <string name="squares_moved_text">Cases: %1$d</string>
+    <string name="board_size_text">Taille: %1$dx%2$d</string>
+    <string name="moves_label">Mouvements</string>
+    <string name="squares_label">Cases</string>
+    
+    <!-- Button labels -->
+    <string name="hint_button">💡Indice</string>
+    <string name="hint_button_a11y">Indice</string>
+    <string name="cancel_hint_button">✖️ Indice</string>
+    <string name="reset_button">Reset</string>
+    <string name="retry_button">Recommencer</string>
+    <string name="menu_button">Menu</string>
+    <string name="back_button">Retour</string>
+    <string name="save_map_button">Sauvegarder</string>
+    <string name="ai_calculating">IA calcule une solution...</string>
+    
+    <!-- Color names -->
+    <string name="color_red">Rouge</string>
+    <string name="color_blue">Bleu</string>
+    <string name="color_green">Vert</string>
+    <string name="color_yellow">Jaune</string>
+    <string name="color_purple">Violet</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_white">Blanc</string>
+    <string name="color_black">Noir</string>
+    <string name="color_teal">Turquoise</string>
+    <string name="color_gray">Gris</string>
+    
+    <!-- Color names for accessibility -->
+    <string name="color_red_a11y">Rouge</string>
+    <string name="color_blue_a11y">Bleu</string>
+    <string name="color_green_a11y">Vert</string>
+    <string name="color_yellow_a11y">Jaune</string>
+    <string name="color_purple_a11y">Violet</string>
+    <string name="color_orange_a11y">Orange</string>
+    <string name="color_white_a11y">Blanc</string>
+    <string name="color_black_a11y">Noir</string>
+    <string name="color_teal_a11y">Turquoise</string>
+    <string name="color_gray_a11y">Gris</string>
+    
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner">Du00e9butant</string>
+    <string name="difficulty_intermediate">Intermu00e9diaire</string>
+    <string name="difficulty_insane">Difficile</string>
+    <string name="difficulty_impossible">Impossible</string>
+    <string name="difficulty_unknown">Inconnu</string>
+    
+    <!-- Game UI Messages -->
+    <string name="unique_map_id">%1$s</string>
+    <string name="empty_text"></string>
+    <string name="level_id_text">Niveau %1$d</string>
+    <string name="level_completed">Niveau %1$d complu00e9tu00e9 en %2$d coups</string>
+    <string name="solution_found">IA a trouvu00e9 une solution!</string>
+    <string name="solution_error">Impossible de trouver une solution: %1$s</string>
+</resources>
