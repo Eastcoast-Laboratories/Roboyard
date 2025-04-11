@@ -294,7 +294,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + ").");
             
-            // Announce possible moves even if there's no goal
+            // Announce possible moves
             announcePossibleMoves(robot);
         }
     }
@@ -1441,12 +1441,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Play win sound
                 playSound("win");
             } else {
-                // Only announce the final position when movement is complete
-                announceAccessibility(getRobotColorNameByGridElement(robot) + 
-                        " robot moved to " + endX + ", " + endY);
+                // // announce initiating move, starting at
+                // announceAccessibility(getRobotColorNameByGridElement(robot) + " initiating move, starting at " + endX + ", " + endY);
                 
-                // After the move, announce possible moves in the new position
-                announcePossibleMoves(robot);
+                // // Log the announcement for diagnostics
+                // Timber.d("[MOVE_ANNOUNCE] Announced initiating move, starting at %d, %d", endX, endY);
             }
         } else {
             // Did not move, play wall hit sound
@@ -1996,7 +1995,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Shows a message that the AI is calculating a solution with restart counter and last solution info
+     * Shows a message that the A.I. is calculating a solution with restart counter and last solution info
      */
     private void showSolverCalculatingMessage() {
         int solverRestartCount = gameStateManager.getSolverRestartCount();
@@ -2005,7 +2004,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[SOLVER_STATUS][DIAG] Building status message: restartCount=%d, lastMoves=%d", 
                 solverRestartCount, lastMoves);
         
-        String messageBase = "AI calculating solution...";
+        String messageBase = "A.I. calculating solution...";
         String counterInfo = "";
         
         // Add restart counter and last solution info if applicable
@@ -2047,13 +2046,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int offset = numPreHints - currentHintStep;
             int hintValue = totalMoves + offset;
             
-            preHintText = "The AI found a solution in less than " + hintValue + " moves";
+            preHintText = "The A.I. found a solution in less than " + hintValue + " moves";
             Timber.d("[HINT_SYSTEM] Showing regular pre-hint %d/%d: less than %d moves", 
                     currentHintStep + 1, numPreHints, hintValue);
         }
         // Next fixed pre-hint: Show exact solution length
         else if (currentHintStep == numPreHints) {
-            preHintText = "The AI found a solution in " + totalMoves + " moves";
+            preHintText = "The A.I. found a solution in " + totalMoves + " moves";
             Timber.d("[HINT_SYSTEM] Showing exact solution length: %d moves", totalMoves);
             
             // Show an additional toast message for the exact solution hint
@@ -2454,7 +2453,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintButton.setChecked(false);
         
         // hide the hint text
-        updateStatusText("AI found a solution!", false);
+        updateStatusText("A.I. found a solution!", false);
         Timber.d("[HINT] UI updated to show solution found");
         
         // Initialize the optimal moves button value
