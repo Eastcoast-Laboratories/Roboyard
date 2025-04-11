@@ -292,7 +292,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 txtRobotGoal.setText(noGoalInfo);
                 txtRobotGoal.setContentDescription(noGoalInfo);
             }
-            announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + "). No target found.");
+            announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + ").");
             
             // Announce possible moves even if there's no goal
             announcePossibleMoves(robot);
