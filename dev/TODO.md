@@ -45,6 +45,11 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - Add a high-contrast mode for better visibility
 - get rid of the accessibility texts of the images in the menu
 - make all accessibility coordinate announcements one more, so on a 8x8 board they go from 1,1 to 8,8 instead of 0,0 to 7,7
+- Skip repeating current position before final move announcement.
+- Replace " no Target found" → "No goal found".
+- Remove "AI target calculating" on game start.
+- Suppress "Gameboard grid" when selecting a board.
+- Replace "new game help" with "how to play"
 
 # achievements
 - add achievement system
