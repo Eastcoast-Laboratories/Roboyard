@@ -1432,10 +1432,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 playSound("move");
             }
             
-            // Announce the move
-            announceAccessibility(getRobotColorNameByGridElement(robot) + 
-                    " robot moved to " + endX + ", " + endY);
-            
             // Check for goal completion - although GameStateManager also does this
             if (state.isRobotAtTarget(robot)) {
                 announceAccessibility("Target reached! Game complete in " + 
@@ -1445,6 +1441,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Play win sound
                 playSound("win");
             } else {
+                // Only announce the final position when movement is complete
+                announceAccessibility(getRobotColorNameByGridElement(robot) + 
+                        " robot moved to " + endX + ", " + endY);
+                
                 // After the move, announce possible moves in the new position
                 announcePossibleMoves(robot);
             }
