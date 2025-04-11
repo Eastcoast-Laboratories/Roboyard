@@ -145,3 +145,4 @@ accesssibility mode:
 - Include context comments with `translatable="false"` for non-translatable strings
 - Move all text to the default strings.xml
 - Handle plurals with `plurals.xml` for each language
+- I removed the lightbulb. add a lightbulb as graphic in the background of the hint button

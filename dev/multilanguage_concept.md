@@ -13,7 +13,7 @@ Implementing multilanguage support in Roboyard while connecting to Weblate would
 
 ### Resource Structure
 
-Create language-specific resource folders following Android's standard structure:
+There are already language-specific resource folders following Android's standard structure:
 
 ```
 app/src/main/res/
@@ -22,8 +22,6 @@ app/src/main/res/
 ├── values-de/         # German
 │   └── strings.xml
 ├── values-fr/         # French
-│   └── strings.xml
-├── values-es/         # Spanish
 │   └── strings.xml
 └── ...
 ```
@@ -39,23 +37,6 @@ app/src/main/res/
    - Create separate resources for RTL languages (Arabic, Hebrew)
    - Handle plurals with `plurals.xml` for each language
 
-## 2. Weblate Integration
-
-### Setup
-
-1. **Create Weblate project**:
-   - Set up a Weblate instance in a docker image
-   - Configure the project with supported languages
-   - Set up component for the Android strings.xml files
-
-2. **Version Control Integration**:
-   - Connect Weblate to your Git repository
-   - Configure automatic PR/MR creation for new translations
-   - Set up webhooks for synchronization
-
-3. **CI/CD Pipeline**:
-   - Add a translation check step in your CI pipeline
-   - Configure automatic imports from Weblate
 
 ## 3. Translation Workflow
 
@@ -65,26 +46,76 @@ app/src/main/res/
    - Run automated checks before committing string changes
 
 2. **Translation workflow**:
-   - New strings are automatically detected by Weblate
-   - Translators work in Weblate interface
-   - Translations are automatically committed back to repository
+   - Translators work on github repo adding new translations as pulll requests
 
 3. **Quality controls**:
-   - Set up Weblate quality checks
    - Implement manual review process for critical text
-   - Use screenshots in Weblate for context
 
-## 4. Implementation Example
+## 4. Implementation Example for Translation and Accessibility
 
-Here's how we would modify the string resources for Weblate compatibility:
+Here's how we would modify the string resources for translators and accessibility:
 
 ```xml
-<!-- Original -->
+<!-- Original basic string -->
 <string name="back">Back</string>
 
-<!-- Improved for translators -->
+<!-- Improved for translators with comments -->
 <string name="back" comment="Navigation button to go back to previous screen">Back</string>
+
+<!-- For complex UI elements that need more context -->
+<string name="robot_position_template">Robot %1$s at position row %2$d, column %3$d</string>
+
+<!-- For non-translatable technical terms -->
+<string name="api_endpoint" translatable="false">https://api.example.com/v1</string>
+
+<!-- For plurals (translation only) -->
+<plurals name="moves_count">
+    <item quantity="one">%d move made</item>
+    <item quantity="other">%d moves made</item>
+</plurals>
+
+<!-- Action hint as separate string -->
+<string name="undo_move_hint">Tap to undo last move</string>
+
+
 ```
+
+### Accessibility Best Practices
+
+1. **Content Descriptions**: Use dedicated strings for content descriptions
+   ```xml
+   <!-- In layout file -->
+   <ImageButton
+       android:id="@+id/backButton"
+       android:contentDescription="@string/back_button_content_description" />
+   ```
+
+2. **Live Announcements**: For dynamic content changes
+   ```java
+   // In code
+   String announcement = getString(R.string.robot_moved_announcement, robotColor, newRow, newCol);
+   accessibilityManager.announceForAccessibility(announcement);
+   // Log for diagnostics
+   Log.d("ROBOYARD_ACCESSIBILITY", "Announced: " + announcement);
+   ```
+
+3. **Focus Order**: Ensure logical focus navigation for screen readers
+   ```xml
+   <Button
+       android:id="@+id/nextButton"
+       android:nextFocusDown="@id/cancelButton" />
+   ```
+
+4. **State Descriptions**: For elements with changing states
+   ```java
+   // Set state description dynamically
+   robotView.setStateDescription(getString(R.string.robot_active_state));
+   ```
+
+5. **Hints**: Provide usage hints for complex interactions
+   ```xml
+   <string name="board_interaction_hint">Double tap to select a robot, then swipe in direction to move</string>
+   ```
 
 ## 5. Implementation Steps
 
@@ -92,13 +123,9 @@ Here's how we would modify the string resources for Weblate compatibility:
    - Migrate all hardcoded strings to default strings.xml
    - Add context comments with `translatable="false"` for non-translatable strings
    - Handle plurals with `plurals.xml` for each language
-   - Set up Weblate instance/project
-   - Create language resource folders structure
 
 2. **Integration**:
    - Perform initial translations of core languages
-   - Connect Weblate to repository
-   - Configure CI/CD pipeline
    - Create documentation for translators
 
 3. **Testing and Refinement**:
@@ -109,7 +136,6 @@ Here's how we would modify the string resources for Weblate compatibility:
 ## 6. Maintenance Considerations
 
 - **String Change Policy**: Establish a protocol for modifying existing strings
-- **Translation Memory**: Leverage Weblate's translation memory for consistency
 - **Glossary**: Maintain a glossary of game-specific terms for translators
 - **Monitoring**: Set up notifications for untranslated strings in new releases
 
