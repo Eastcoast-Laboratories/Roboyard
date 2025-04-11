@@ -1377,17 +1377,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return String representation of the current difficulty level
      */
     public String getDifficultyString() {
+        Context appContext = getApplication().getApplicationContext();
         switch (getDifficulty()) {
             case Constants.DIFFICULTY_BEGINNER:
-                return "Beginner";
+                return appContext.getString(R.string.difficulty_beginner);
             case Constants.DIFFICULTY_ADVANCED:
-                return "Intermediate";
+                return appContext.getString(R.string.difficulty_intermediate);
             case Constants.DIFFICULTY_INSANE:
-                return "Insane";
+                return appContext.getString(R.string.difficulty_insane);
             case Constants.DIFFICULTY_IMPOSSIBLE:
-                return "Impossible";
+                return appContext.getString(R.string.difficulty_impossible);
             default:
-                return "Unknown";
+                return appContext.getString(R.string.difficulty_unknown);
         }
     }
     

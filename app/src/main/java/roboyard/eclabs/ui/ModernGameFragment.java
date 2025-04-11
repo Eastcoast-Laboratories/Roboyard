@@ -180,7 +180,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         int backgroundColor = getColorForRobot(selectedRobot);
         ColorStateList colorStateList = ColorStateList.valueOf(backgroundColor);
         
-        String robotColorName = getRobotColorNameByGridElement(selectedRobot);
+        String robotColorName = getLocalizedRobotColorNameByGridElement(selectedRobot);
         
         btnMoveNorth.setText(getString(R.string.robot_move_direction, robotColorName, getString(R.string.direction_north)));
         btnMoveSouth.setText(getString(R.string.robot_move_direction, robotColorName, getString(R.string.direction_south)));
@@ -247,7 +247,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
         
         // Get robot color and position
-        String colorName = getRobotColorNameByGridElement(robot);
+        String colorName = getLocalizedRobotColorNameByGridElement(robot);
         int x = robot.getX();
         int y = robot.getY();
         
@@ -655,7 +655,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
 
                     // change the "Reset" Button to "Retry"
-                    resetRobotsButton.setText("Retry");
+                    resetRobotsButton.setText(R.string.retry_button);
                     Timber.d("[UI] Changed reset button text to 'Retry'");
                 }
             } else {
@@ -674,8 +674,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
-                hintButton.setTextOn("Hide");
-                hintButton.setTextOff("💡Hint");
+                hintButton.setTextOn(getString(R.string.cancel_button));
+                hintButton.setTextOff(getString(R.string.hint_button));
                 hintButton.setChecked(true);
                 showSolverCalculatingMessage();
             } else {
@@ -810,7 +810,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
                 }
             } else {
-                Toast.makeText(requireContext(), "Nothing to undo", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
             }
         });
         
@@ -823,7 +823,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             gameStateManager.resetGame();
             
             // change the "Reset" Button back to "Reset"
-            resetRobotsButton.setText("Reset");
+            resetRobotsButton.setText(R.string.reset_button);
             Timber.d("[UI] Changed reset button text back to 'Reset'");
 
             // Get the current state after reset
@@ -860,7 +860,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 playSound("move");
                 
                 // For accessibility, announce the reset
-                announceAccessibility("Robots reset to starting positions");
+                announceAccessibility(getString(R.string.robots_reset));
             }
         });
         
@@ -1233,7 +1233,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void cycleThroughRobots() {
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null) {
-            announceAccessibility("No game in progress");
+            announceAccessibility(getString(R.string.no_game_in_progress));
             return;
         }
         
@@ -1246,7 +1246,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
         
         if (robots.isEmpty()) {
-            announceAccessibility("No robots available");
+            announceAccessibility(getString(R.string.no_robots_available));
             return;
         }
         
@@ -1274,11 +1274,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Play a sound to indicate selection changed
         playSound("move");
         
-        Timber.d("[ACCESSIBILITY_ROBOT] Cycled to robot: %s", getRobotColorNameByGridElement(nextRobot));
+        Timber.d("[ACCESSIBILITY_ROBOT] Cycled to robot: %s", getLocalizedRobotColorNameByGridElement(nextRobot));
         
         // Announce the newly selected robot with more detailed information
         if (isTalkBackEnabled() || Preferences.accessibilityMode) {
-            String robotColor = getRobotColorNameByGridElement(nextRobot);
+            String robotColor = getLocalizedRobotColorNameByGridElement(nextRobot);
             String announcementMessage = robotColor + " robot selected";
             
             // Check for goal robot by examining goal elements in the game state
@@ -1379,7 +1379,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("Moving robot in direction: dx=%d, dy=%d", dx, dy);
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null || state.getSelectedRobot() == null) {
-            announceAccessibility("No robot selected");
+            announceAccessibility(getString(R.string.no_robot_selected));
             return;
         }
         
@@ -1449,7 +1449,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 playSound("win");
             } else {
                 // // announce initiating move, starting at
-                // announceAccessibility(getRobotColorNameByGridElement(robot) + " initiating move, starting at " + endX + ", " + endY);
+                // announceAccessibility(getLocalizedRobotColorNameByGridElement(robot) + " initiating move, starting at " + endX + ", " + endY);
                 
                 // // Log the announcement for diagnostics
                 // Timber.d("[MOVE_ANNOUNCE] Announced initiating move, starting at %d, %d", endX, endY);
@@ -1457,7 +1457,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         } else {
             // Did not move, play wall hit sound
             playSound("hit_wall");
-            announceAccessibility("Cannot move in this direction");
+            announceAccessibility(getString(R.string.cannot_move_in_this_direction));
         }
     }
     
@@ -1485,7 +1485,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             return;
         }
         
-        Timber.d("Announcing possible moves for %s robot", getRobotColorNameByGridElement(robot));
+        Timber.d("Announcing possible moves for %s robot", getLocalizedRobotColorNameByGridElement(robot));
         
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null) {
@@ -1511,7 +1511,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Found an obstacle
                 GameElement robotAtPosition = state.getRobotAt(i, y);
                 if (robotAtPosition != null) {
-                    eastObstacle = getRobotColorNameByGridElement(robotAtPosition);
+                    eastObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1539,7 +1539,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Found an obstacle
                 GameElement robotAtPosition = state.getRobotAt(i, y);
                 if (robotAtPosition != null) {
-                    westObstacle = getRobotColorNameByGridElement(robotAtPosition);
+                    westObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1567,7 +1567,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
-                    northObstacle = getRobotColorNameByGridElement(robotAtPosition);
+                    northObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1595,7 +1595,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if we hit a robot or a wall
                 GameElement robotAtPosition = state.getRobotAt(x, i);
                 if (robotAtPosition != null) {
-                    southObstacle = getRobotColorNameByGridElement(robotAtPosition);
+                    southObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
@@ -1643,7 +1643,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         GameElement targetElement = null;
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET) {
-                String targetColor = getRobotColorName(element.getColor());
+                String targetColor = getLocalizedRobotColorName(element.getColor());
                 announcement.append(targetColor).append(" target, ")
                           .append(element.getX()).append("-").append(element.getY()).append(". ");
                 targetElement = element;
@@ -1653,7 +1653,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // If a robot is selected, announce it as well
         if (selectedRobot != null) {
-            String robotColor = getRobotColorNameByGridElement(selectedRobot);
+            String robotColor = getLocalizedRobotColorNameByGridElement(selectedRobot);
             int x = selectedRobot.getX();
             int y = selectedRobot.getY();
             
@@ -1745,7 +1745,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 announcePossibleMoves(element);
                 
                 Timber.d("[ACCESSIBILITY] Auto-selected %s robot matching target color", 
-                        getRobotColorNameByGridElement(element));
+                        getLocalizedRobotColorNameByGridElement(element));
                 return true;
             }
         }
@@ -1836,10 +1836,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Check if this is a level game and include level name
         if (state.getLevelId() > 0) {
             // For level game - display board size with level name/number
-            String levelText = "Level " + state.getLevelId();
+            String levelText = getString(R.string.level_id_text, state.getLevelId());
             uniqueMapIdTextView.setText(levelText);
         } else if (uniqueMapIdTextView != null) {
-            uniqueMapIdTextView.setText("" + uniqueMapId);
+            uniqueMapIdTextView.setText(getString(R.string.unique_map_id, uniqueMapId));
         }
     }
     
@@ -1968,7 +1968,43 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Get color name for a robot ID
+     * Get localized (translated) color name for a robot ID
+     */
+    private String getLocalizedRobotColorName(int robotId) {
+        Timber.d("[HINT_DEBUG] getLocalizedRobotColorName called with ID: %d", robotId);
+        
+        switch (robotId) {
+            case Constants.COLOR_PINK: return getString(R.string.color_red);
+            case Constants.COLOR_GREEN: return getString(R.string.color_green);
+            case Constants.COLOR_BLUE: return getString(R.string.color_blue);
+            case Constants.COLOR_YELLOW: return getString(R.string.color_yellow);
+            default: 
+                return getString(R.string.unknown_color, robotId);
+        }
+    }
+    
+    /**
+     * Get localized (translated) color name for a robot
+     */
+    private String getLocalizedRobotColorNameByGridElement(GameElement robot) {
+        if (robot == null) return "";
+        
+        int c = robot.getColor();
+        switch (c) {
+            case 0: return getString(R.string.color_red);
+            case 1: return getString(R.string.color_green);
+            case 2: return getString(R.string.color_blue);
+            case 3: return getString(R.string.color_yellow);
+            case 4: return getString(R.string.color_gray);
+            default:
+                Timber.e("Unknown robot color: '%d'", c);
+                return getString(R.string.unknown_color, c);
+        }
+    }
+    
+    /**
+     * Get color name for a robot ID (internal usage only)
+     * Returns fixed English names regardless of locale for internal identification.
      */
     private String getRobotColorName(int robotId) {
         Timber.d("[HINT_DEBUG] getRobotColorName called with ID: %d", robotId);
@@ -1983,7 +2019,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Get color name for a robot
+     * Get color name for a robot (internal usage only)
+     * Returns fixed English names regardless of locale for internal identification.
      */
     private String getRobotColorNameByGridElement(GameElement robot) {
         if (robot == null) return "";
@@ -2000,7 +2037,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 return "Unknown: " + c;
         }
     }
-    
     /**
      * Shows a message that the A.I. is calculating a solution with restart counter and last solution info
      */
@@ -2011,7 +2047,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[SOLVER_STATUS][DIAG] Building status message: restartCount=%d, lastMoves=%d", 
                 solverRestartCount, lastMoves);
         
-        String messageBase = "A.I. calculating solution...";
+        String messageBase = getString(R.string.ai_calculating);
         String counterInfo = "";
         
         // Add restart counter and last solution info if applicable
@@ -2053,18 +2089,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int offset = numPreHints - currentHintStep;
             int hintValue = totalMoves + offset;
             
-            preHintText = "The A.I. found a solution in less than " + hintValue + " moves";
+            preHintText = getString(R.string.pre_hint_less_than_x, hintValue);
             Timber.d("[HINT_SYSTEM] Showing regular pre-hint %d/%d: less than %d moves", 
                     currentHintStep + 1, numPreHints, hintValue);
         }
         // Next fixed pre-hint: Show exact solution length
         else if (currentHintStep == numPreHints) {
-            preHintText = "The A.I. found a solution in " + totalMoves + " moves";
+            preHintText = getString(R.string.pre_hint_exact_solution, totalMoves);
             Timber.d("[HINT_SYSTEM] Showing exact solution length: %d moves", totalMoves);
             
             // Show an additional toast message for the exact solution hint
             Toast.makeText(requireContext(), 
-                "Solution found: " + totalMoves + " moves", 
+                getString(R.string.solution_found, totalMoves), 
                 Toast.LENGTH_SHORT).show();
             
             // Show the optimal moves button when the optimal moves are available
@@ -2074,18 +2110,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         else if (currentHintStep == numPreHints + 1) {
             if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
                 RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
-                String robotColorName = getRobotColorName(firstMove.getColor());
-                preHintText = "Move the " + robotColorName + " robot first";
+                String robotColorName = getLocalizedRobotColorName(firstMove.getColor());
+                preHintText = getString(R.string.pre_hint_first_move, robotColorName);
                 Timber.d("[HINT_SYSTEM] Showing which robot to move first: %s", robotColorName);
             } else {
                 // Fallback if we can't determine the first robot
-                preHintText = "No solution found";
+                preHintText = getString(R.string.no_solution_found);
                 Timber.d("[HINT_SYSTEM] Showing fallback (couldn't determine first robot)");
             }
         }
         // Fallback for any other case
         else {
-            preHintText = "Ready to show step-by-step hints";
+            preHintText = getString(R.string.pre_hint_ready);
             Timber.d("[HINT_SYSTEM] Showing fallback pre-hint message");
         }
         
@@ -2108,7 +2144,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Validate that the hint index is within bounds
         if (hintIndex < 0 || hintIndex >= totalMoves) {
             Timber.e("[HINT_SYSTEM] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
-            updateStatusText("All hints have been shown", true);
+            updateStatusText(getString(R.string.all_hints_shown), true);
             return;
         }
         
@@ -2119,7 +2155,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             if (hintMove instanceof RRGameMove rrMove) {
                 // Get the robot's color name - use the color from the move
-                String robotColorName = getRobotColorName(rrMove.getColor());
+                String robotColorName = getLocalizedRobotColorName(rrMove.getColor());
                 
                 // Get the direction name
                 String directionName = getDirectionName(rrMove.getDirection());
@@ -2154,7 +2190,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         IGameMove prevMove = solution.getMoves().get(i);
                         if (prevMove instanceof RRGameMove prevRRMove) {
                             // Get abbreviated color and direction
-                            String prevColorName = getRobotColorName(prevRRMove.getColor());
+                            String prevColorName = getLocalizedRobotColorName(prevRRMove.getColor());
                             String prevDirectionName = getDirectionName(prevRRMove.getDirection());
                             
                             // Add first letter of each
@@ -2186,11 +2222,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             } else {
                 // Error in hint system
                 Timber.e("[HINT_SYSTEM] Failed to get a valid hint move");
-                updateStatusText("No valid hint available", true);
+                updateStatusText(getString(R.string.no_valid_hint), true);
             }
         } catch (Exception e) {
             Timber.e(e, "[HINT_SYSTEM] Error displaying normal hint #%d", hintIndex + 1);
-            updateStatusText("Error displaying hint", true);
+            updateStatusText(getString(R.string.error_displaying_hint), true);
         }
     }
     
@@ -2395,8 +2431,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("ModernGameFragment: Solution calculation started");
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
-            hintButton.setTextOn("Cancel");
-            hintButton.setTextOff("💡Hint");
+            hintButton.setTextOn(getString(R.string.cancel_button));
+            hintButton.setTextOff(getString(R.string.hint_button));
             hintButton.setChecked(true);
             showSolverCalculatingMessage();
         });
@@ -2462,7 +2498,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintButton.setChecked(false);
         
         // hide the hint text
-        updateStatusText("A.I. found a solution!", false);
+        updateStatusText(getString(R.string.solution_found), false);
         Timber.d("[HINT] UI updated to show solution found");
         
         // Initialize the optimal moves button value

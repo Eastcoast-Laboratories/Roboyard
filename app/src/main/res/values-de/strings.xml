@@ -196,7 +196,7 @@
     <string name="help_tips_point_3">- Wenn du feststeckst, nutze die Hinweis-Funktion, um einen Vorschlag zu erhalten.</string>
     
     <!-- Game Buttons -->
-    <string name="hint_button">💡 Hinweis</string>
+    <string name="hint_button">💡Hinweis</string>
     <string name="hint_button_a11y">Hinweis</string>
     <string name="cancel_hint_button">🔍 Ausblenden</string>
     
@@ -213,10 +213,11 @@
     <!-- Game control buttons -->
     <string name="back_button">Zurück</string>
     <string name="menu_button">Menü</string>
-    <string name="retry_button">Wiederholen</string>
-    <string name="restart_button">Neustart</string>
-    <string name="save_map_button">Karte speichern</string>
-    
+    <string name="retry_button">Neustart</string>
+    <string name="restart_button">Nochmal</string>
+    <string name="save_map_button">Speichern</string>
+    <string name="ai_calculating">KI berechnet Lösung...</string>
+
     <!-- AI and game direction strings -->
     <string name="ai_solution_format">Die KI hat eine Lösung in %1$d Zügen gefunden</string>
     <string name="direction_less_than">weniger als</string>
@@ -244,7 +245,7 @@
     <string name="color_teal">Türkis</string>
     <string name="color_gray">Grau</string>
     
-    <!-- Accessibility versions -->
+    <!-- Color names for accessibility -->
     <string name="color_red_a11y">Rot</string>
     <string name="color_blue_a11y">Blau</string>
     <string name="color_green_a11y">Grün</string>
@@ -254,12 +255,65 @@
     <string name="color_white_a11y">Weiß</string>
     <string name="color_black_a11y">Schwarz</string>
     <string name="color_teal_a11y">Türkis</string>
-    <string name="color_gray_a11y">Grau</string>
+    <string name="color_gray_a11y">Grau</string>    
     
-    <!-- Game UI text for ModernGameFragment -->
+    <!-- Game UI text -->
     <string name="no_robot_selected">Kein Roboter ausgewählt</string>
+    <string name="robot_selected">Ausgewählt: %1$s Roboter bei (%2$d, %3$d)</string>
     <string name="robot_selected_info">Ausgewählt: %1$s Roboter auf Position (%2$d, %3$d)</string>
     <string name="robot_target_info">%1$s Ziel: (%2$d, %3$d)</string>
     <string name="no_target_for_robot">Kein Ziel für diesen Roboter</string>
     <string name="move_count_text">Züge: %1$d</string>
+    <string name="moves_count">Züge: %1$d</string>
+    <string name="squares_moved">Felder bewegt: %1$d</string>
+    <string name="board_size">Spielfeld: %1$dx%2$d</string>
+    <string name="solution_error">Keine Lösung gefunden: %1$s</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="reset_button">Reset</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="empty_text"></string>
+    <string name="level_id_text">Level %1$d</string>
+    <string name="level_completed">Level %1$d abgeschlossen mit %2$d Zügen</string>
+    <string name="stars_earned">Du hast %1$d Sterne verdient</string>
+    <string name="completed_in_moves">Abgeschlossen mit %1$d Zügen</string>
+    <string name="save_screen_error">Kann nicht zum Speicherbildschirm navigieren: %1$s</string>
+    <string name="starting_level">Starte Level %1$d</string>
+    <string name="target_reached">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="robot_move_initiated">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
+    <string name="unknown_robot">Unbekannt: %1$d</string>
+    <string name="unknown_color">Unbekannt: %1$s</string>
+    <string name="ai_solution_less_moves">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="ai_solution_exact_moves">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
+    <string name="solution_found_moves">Lösung gefunden: %1$d Züge</string>
+    <string name="move_robot_first">Bewege zuerst den %1$s Roboter</string>
+
+    <!-- Accessibility versions -->
+    <string name="target_reached_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="robot_move_initiated_a11y">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
+    <string name="starting_level_a11y">Starte Level %1$d</string>
+
+    <!-- Additional Game UI Messages -->
+    <string name="cancel_button">✖️ Hinweis</string>
+    <string name="nothing_to_undo">Nichts zum Rückgängig machen</string>
+    <string name="robots_reset">Roboter auf Startpositionen zurückgesetzt</string>
+    <string name="no_game_in_progress">Kein Spiel läuft</string>
+    <string name="no_robots_available">Keine Roboter verfügbar</string>
+    <string name="cannot_move_in_this_direction">Kann in diese Richtung nicht bewegen</string>
+    <string name="pre_hint_less_than_x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="pre_hint_exact_solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
+    <string name="solution_found">KI hat eine Lösung gefunden!</string>
+    <string name="pre_hint_first_move">Bewege zuerst den %1$s Roboter</string>
+    <string name="no_solution_found">Keine Lösung gefunden</string>
+    <string name="pre_hint_ready">Bereit für schrittweise Hinweise</string>
+    <string name="all_hints_shown">Alle Hinweise wurden angezeigt</string>
+    <string name="no_valid_hint">Kein gültiger Hinweis verfügbar</string>
+    <string name="error_displaying_hint">Fehler beim Anzeigen des Hinweises</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner">Anfänger</string>
+    <string name="difficulty_intermediate">Fortgeschritten</string>
+    <string name="difficulty_insane">Extrem</string>
+    <string name="difficulty_impossible">Unmöglich</string>
+    <string name="difficulty_unknown">Unbekannt</string>
 </resources>

@@ -209,6 +209,7 @@
     <string name="history_screen_title">Game History</string>
     <string name="save_slot_empty">Empty</string>
     <string name="save_slot_autosave">Autosave</string>
+    <string name="ai_calculating">A.I. calculating solution...</string>
 
     <!-- Game control buttons -->
     <string name="back_button">Back</string>
@@ -262,4 +263,58 @@
     <string name="robot_target_info">%1$s target: (%2$d, %3$d)</string>
     <string name="no_target_for_robot">No target for this robot</string>
     <string name="move_count_text">Moves: %1$d</string>
+
+    <!-- Game UI Strings -->    
+    <string name="moves_count">Moves: %1$d</string>
+    <string name="squares_moved">Squares moved: %1$d</string>
+    <string name="board_size">Board: %1$dx%2$d</string>
+    <string name="solution_error">Could not find a solution: %1$s</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="reset_button">Reset</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="empty_text"></string>
+    <string name="level_id_text">Level %1$d</string>
+    <string name="level_completed">Level %1$d completed in %2$d moves</string>
+    <string name="stars_earned">You earned %1$d stars</string>
+    <string name="completed_in_moves">Completed in %1$d moves</string>
+    <string name="save_screen_error">Cannot navigate to save screen: %1$s</string>
+    <string name="starting_level">Starting level %1$d</string>
+    <string name="target_reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="robot_move_initiated">%1$s initiating move, starting at %2$d, %3$d</string>
+    <string name="unknown_robot">Unknown: %1$d</string>
+    <string name="unknown_color">Unknown: %1$s</string>
+    <string name="ai_solution_less_moves">The A.I. found a solution in less than %1$d moves</string>
+    <string name="ai_solution_exact_moves">The A.I. found a solution in %1$d moves</string>
+    <string name="solution_found_moves">Solution found: %1$d moves</string>
+    <string name="move_robot_first">Move the %1$s robot first</string>
+
+    <!-- Accessibility versions -->
+    <string name="target_reached_a11y">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="robot_move_initiated_a11y">%1$s initiating move, starting at %2$d, %3$d</string>
+    <string name="starting_level_a11y">Starting level %1$d</string>
+
+    <!-- Additional Game UI Messages -->
+    <string name="cancel_button">Cancel</string>
+    <string name="nothing_to_undo">Nothing to undo</string>
+    <string name="robots_reset">Robots reset to starting positions</string>
+    <string name="no_game_in_progress">No game in progress</string>
+    <string name="no_robots_available">No robots available</string>
+    <string name="cannot_move_in_this_direction">Cannot move in this direction</string>
+    <string name="pre_hint_less_than_x">The A.I. found a solution in less than %1$d moves</string>
+    <string name="pre_hint_exact_solution">The A.I. found a solution in %1$d moves</string>
+    <string name="solution_found">A.I. found a solution!</string>
+    <string name="pre_hint_first_move">Move the %1$s robot first</string>
+    <string name="no_solution_found">No solution found</string>
+    <string name="pre_hint_ready">Ready to show step-by-step hints</string>
+    <string name="all_hints_shown">All hints have been shown</string>
+    <string name="no_valid_hint">No valid hint available</string>
+    <string name="error_displaying_hint">Error displaying hint</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner">Beginner</string>
+    <string name="difficulty_intermediate">Intermediate</string>
+    <string name="difficulty_insane">Insane</string>
+    <string name="difficulty_impossible">Impossible</string>
+    <string name="difficulty_unknown">Unknown</string>
 </resources>
