@@ -197,6 +197,7 @@
     
     <!-- Game Buttons -->
     <string name="hint_button">💡 Hint</string>
+    <string name="hint_button_a11y">Hint</string>
     <string name="cancel_hint_button">🔍 Hide</string>
     
     <!-- Game screen -->

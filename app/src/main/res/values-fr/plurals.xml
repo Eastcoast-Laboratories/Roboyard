@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Plurals for robot movements -->
+    <plurals name="robot_moved_squares">
+        <item quantity="one">Le robot %1$s s'est déplacé de %2$d case</item>
+        <item quantity="other">Le robot %1$s s'est déplacé de %2$d cases</item>
+    </plurals>
+    
+    <!-- Plurals for hints -->
+    <plurals name="hint_move_count">
+        <item quantity="one">Indice %1$d sur %2$d coup</item>
+        <item quantity="other">Indice %1$d sur %2$d coups</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility hint announcements -->
+    <plurals name="hint_move_count_a11y">
+        <item quantity="one">Indice %1$d sur %2$d coup</item>
+        <item quantity="other">Indice %1$d sur %2$d coups</item>
+    </plurals>
+    
+    <!-- Plurals for game completion -->
+    <plurals name="moves_to_complete">
+        <item quantity="one">Terminé en %1$d coup</item>
+        <item quantity="other">Terminé en %1$d coups</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility game completion announcements -->
+    <plurals name="moves_to_complete_a11y">
+        <item quantity="one">Niveau terminé en %1$d coup</item>
+        <item quantity="other">Niveau terminé en %1$d coups</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility robot movement announcements -->
+    <plurals name="robot_moved_squares_a11y">
+        <item quantity="one">Le robot %1$s s'est déplacé de %2$d case vers le %3$s</item>
+        <item quantity="other">Le robot %1$s s'est déplacé de %2$d cases vers le %3$s</item>
+    </plurals>
+    
+    <!-- Plurals for hint robot count -->
+    <plurals name="hint_robot_count">
+        <item quantity="one">Indice: Déplacez le robot %1$s</item>
+        <item quantity="other">Indice: Déplacez les robots %1$s et %2$s</item>
+    </plurals>
+</resources>
