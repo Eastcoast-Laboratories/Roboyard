@@ -209,4 +209,57 @@
     <string name="history_screen_title">Spielverlauf</string>
     <string name="save_slot_empty">Leer</string>
     <string name="save_slot_autosave">Automatisch gespeichert</string>
+    
+    <!-- Game control buttons -->
+    <string name="back_button">Zurück</string>
+    <string name="menu_button">Menü</string>
+    <string name="retry_button">Wiederholen</string>
+    <string name="restart_button">Neustart</string>
+    <string name="save_map_button">Karte speichern</string>
+    
+    <!-- AI and game direction strings -->
+    <string name="ai_solution_format">Die KI hat eine Lösung in %1$d Zügen gefunden</string>
+    <string name="direction_less_than">weniger als</string>
+    <string name="robot_move_first">Bewege zuerst den %1$s</string>
+    <string name="robot_color_down">%1$s nach unten</string>
+    
+    <!-- Accessibility versions -->
+    <string name="back_button_a11y">Zurück gehen</string>
+    <string name="menu_button_a11y">Zurück zum Hauptmenü</string>
+    <string name="retry_button_a11y">Dieses Level wiederholen</string>
+    <string name="restart_button_a11y">Dieses Level neu starten</string>
+    <string name="save_map_button_a11y">Aktuelle Karte speichern</string>
+    <string name="robot_move_first_a11y">Bewege zuerst den %1$s Roboter</string>
+    <string name="robot_color_down_a11y">Bewege %1$s Roboter nach unten</string>
+
+    <!-- Color names for robots and game elements -->
+    <string name="color_red">Rot</string>
+    <string name="color_blue">Blau</string>
+    <string name="color_green">Grün</string>
+    <string name="color_yellow">Gelb</string>
+    <string name="color_purple">Lila</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_white">Weiß</string>
+    <string name="color_black">Schwarz</string>
+    <string name="color_teal">Türkis</string>
+    <string name="color_gray">Grau</string>
+    
+    <!-- Accessibility versions -->
+    <string name="color_red_a11y">Rot</string>
+    <string name="color_blue_a11y">Blau</string>
+    <string name="color_green_a11y">Grün</string>
+    <string name="color_yellow_a11y">Gelb</string>
+    <string name="color_purple_a11y">Lila</string>
+    <string name="color_orange_a11y">Orange</string>
+    <string name="color_white_a11y">Weiß</string>
+    <string name="color_black_a11y">Schwarz</string>
+    <string name="color_teal_a11y">Türkis</string>
+    <string name="color_gray_a11y">Grau</string>
+    
+    <!-- Game UI text for ModernGameFragment -->
+    <string name="no_robot_selected">Kein Roboter ausgewählt</string>
+    <string name="robot_selected_info">Ausgewählt: %1$s Roboter auf Position (%2$d, %3$d)</string>
+    <string name="robot_target_info">%1$s Ziel: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">Kein Ziel für diesen Roboter</string>
+    <string name="move_count_text">Züge: %1$d</string>
 </resources>

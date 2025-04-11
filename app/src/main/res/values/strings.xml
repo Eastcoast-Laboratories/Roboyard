@@ -210,4 +210,56 @@
     <string name="save_slot_empty">Empty</string>
     <string name="save_slot_autosave">Autosave</string>
 
+    <!-- Game control buttons -->
+    <string name="back_button">Back</string>
+    <string name="menu_button">Menu</string>
+    <string name="retry_button">Retry</string>
+    <string name="restart_button">Restart</string>
+    <string name="save_map_button">Save Map</string>
+    
+    <!-- AI and game direction strings -->
+    <string name="ai_solution_format">The A.I. found a solution in %1$d moves</string>
+    <string name="direction_less_than">less than</string>
+    <string name="robot_move_first">Move the %1$s first</string>
+    <string name="robot_color_down">%1$s down</string>
+    
+    <!-- Accessibility versions -->
+    <string name="back_button_a11y">Go back</string>
+    <string name="menu_button_a11y">Return to main menu</string>
+    <string name="retry_button_a11y">Retry this level</string>
+    <string name="restart_button_a11y">Restart this level</string>
+    <string name="save_map_button_a11y">Save current map</string>
+    <string name="robot_move_first_a11y">Move the %1$s robot first</string>
+    <string name="robot_color_down_a11y">Move %1$s robot down</string>
+
+    <!-- Color names for robots and game elements -->
+    <string name="color_red">Red</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_green">Green</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_white">White</string>
+    <string name="color_black">Black</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_gray">Gray</string>
+    
+    <!-- Accessibility versions -->
+    <string name="color_red_a11y">Red</string>
+    <string name="color_blue_a11y">Blue</string>
+    <string name="color_green_a11y">Green</string>
+    <string name="color_yellow_a11y">Yellow</string>
+    <string name="color_purple_a11y">Purple</string>
+    <string name="color_orange_a11y">Orange</string>
+    <string name="color_white_a11y">White</string>
+    <string name="color_black_a11y">Black</string>
+    <string name="color_teal_a11y">Teal</string>
+    <string name="color_gray_a11y">Gray</string>
+
+    <!-- Game UI text for ModernGameFragment -->
+    <string name="no_robot_selected">No robot selected</string>
+    <string name="robot_selected_info">Selected: %1$s robot at (%2$d, %3$d)</string>
+    <string name="robot_target_info">%1$s target: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">No target for this robot</string>
+    <string name="move_count_text">Moves: %1$d</string>
 </resources>

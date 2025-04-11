@@ -233,14 +233,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void updateRobotSelectionInfo(GameElement robot) {
         if (robot == null) {
             if (txtSelectedRobot != null) {
-                txtSelectedRobot.setText("No robot selected");
-                txtSelectedRobot.setContentDescription("No robot selected");
+                txtSelectedRobot.setText(getString(R.string.no_robot_selected));
+                txtSelectedRobot.setContentDescription(getString(R.string.no_robot_selected));
             }
             if (txtRobotGoal != null) {
                 txtRobotGoal.setText("");
                 txtRobotGoal.setContentDescription("");
             }
-            announceAccessibility("No robot selected");
+            announceAccessibility(getString(R.string.no_robot_selected));
             return;
         }
         
@@ -250,7 +250,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         int y = robot.getY();
         
         // Create content for the selected robot info
-        String robotInfo = "Selected: " + colorName + " robot at (" + x + ", " + y + ")";
+        String robotInfo = getString(R.string.robot_selected_info, colorName, x, y);
         
         // Update selected robot text
         if (txtSelectedRobot != null) {
@@ -267,7 +267,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     int goalY = element.getY();
                     
                     // Create content for the goal info
-                    String goalInfo = colorName + " target: (" + goalX + ", " + goalY + ")";
+                    String goalInfo = getString(R.string.robot_target_info, colorName, goalX, goalY);
                     
                     // Update goal text
                     if (txtRobotGoal != null) {
@@ -276,8 +276,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
                     
                     // Announce selection and goal via TalkBack
-                    String message = "Selected " + colorName + " robot at (" + x + ", " + y + "). ";
-                    message += colorName + " target is at (" + goalX + ", " + goalY + ")";
+                    String message = getString(R.string.robot_selected_a11y, colorName) + ". ";
+                    message += getString(R.string.target_a11y, goalX, goalY);
                     announceAccessibility(message);
                     
                     // Announce possible moves
@@ -287,12 +287,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             
             // No goal found for this robot
-            String noGoalInfo = "No target for this robot";
+            String noGoalInfo = getString(R.string.no_target_for_robot);
             if (txtRobotGoal != null) {
                 txtRobotGoal.setText(noGoalInfo);
                 txtRobotGoal.setContentDescription(noGoalInfo);
             }
-            announceAccessibility("Selected " + colorName + " robot at (" + x + ", " + y + ").");
+            announceAccessibility(getString(R.string.robot_selected_a11y, colorName));
             
             // Announce possible moves
             announcePossibleMoves(robot);
