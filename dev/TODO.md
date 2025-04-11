@@ -48,7 +48,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - Skip repeating current position before final move announcement.
 - Replace " no Target found" → "No goal found".
 - Remove "AI target calculating" on game start.
-- Suppress "Gameboard grid" when selecting a board.
 - Replace "new game help" with "how to play"
 
 # achievements
