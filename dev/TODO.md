@@ -140,3 +140,8 @@ accesssibility mode:
             updateStatusText(message.toString(), true);
 
 
+# thanstation:
+- Add new strings to default strings.xml only
+- Include context comments with `translatable="false"` for non-translatable strings
+- Move all text to the default strings.xml
+- Handle plurals with `plurals.xml` for each language
