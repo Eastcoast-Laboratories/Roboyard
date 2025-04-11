@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Plurals for robot movements -->
+    <plurals name="robot_moved_squares">
+        <item quantity="one">%1$s robot moved %2$d square</item>
+        <item quantity="other">%1$s robot moved %2$d squares</item>
+    </plurals>
+    
+    <!-- Plurals for hints -->
+    <plurals name="hint_move_count">
+        <item quantity="one">Hint %1$d of %2$d move</item>
+        <item quantity="other">Hint %1$d of %2$d moves</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility hint announcements -->
+    <plurals name="hint_move_count_a11y">
+        <item quantity="one">Hint %1$d of %2$d move</item>
+        <item quantity="other">Hint %1$d of %2$d moves</item>
+    </plurals>
+    
+    <!-- Plurals for game completion -->
+    <plurals name="moves_to_complete">
+        <item quantity="one">Completed in %1$d move</item>
+        <item quantity="other">Completed in %1$d moves</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility game completion announcements -->
+    <plurals name="moves_to_complete_a11y">
+        <item quantity="one">Level completed in %1$d move</item>
+        <item quantity="other">Level completed in %1$d moves</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility robot movement announcements -->
+    <plurals name="robot_moved_squares_a11y">
+        <item quantity="one">%1$s robot moved %2$d square %3$s</item>
+        <item quantity="other">%1$s robot moved %2$d squares %3$s</item>
+    </plurals>
+</resources>

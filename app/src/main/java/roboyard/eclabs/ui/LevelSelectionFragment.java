@@ -74,6 +74,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         starsTextView = view.findViewById(R.id.stars_count_text);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
 
+        // Set title
+        titleTextView.setText(getString(R.string.level_selection_title));
+
         // Set up RecyclerView with grid layout (3 columns)
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
         levelRecyclerView.setLayoutManager(layoutManager);
@@ -103,7 +106,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Display total stars with format X/420
         if (starsTextView != null) {
-            starsTextView.setText(totalStars + "/420");
+            starsTextView.setText(String.format("%d/%d", totalStars, 420));
         }
 
         // Set up adapter
@@ -174,7 +177,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Update the stars text view with format X/420
         if (starsTextView != null) {
-            starsTextView.setText(totalStars + "/420");
+            starsTextView.setText(String.format("%d/%d", totalStars, 420));
         }
 
         // Refresh the adapter to update completion stars when returning to this screen

@@ -44,6 +44,7 @@
     <string name="your_moves">Your moves: %1$d</string>
     <string name="level_complete">Level Complete!</string>
     <string name="level_stars_description">You earned %1$d stars</string>
+    <string name="level_stars_a11y">You earned %1$d stars</string>
     <string name="stars_count">%1$d Stars</string>
     <string name="level_locked">You need %1$d more stars to unlock this level</string>
     <string name="random_game_complete">Level Complete!</string>
@@ -53,8 +54,11 @@
     <string name="level_squares_format">Squares: %1$d</string>
     <string name="level_robots_format">Robots: %1$d</string>
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>
+    <string name="robot_a11y">Robot %1$s at position %2$d, %3$d</string>
     <string name="target_description">Target at position %1$d, %2$d</string>
+    <string name="target_a11y">Target at position %1$d, %2$d</string>
     <string name="minimap_description">Minimap showing overall board layout</string>
+    <string name="minimap_a11y">Minimap showing overall board layout</string>
     
     <!-- Exit Dialog -->
     <string name="exit_confirm_title">Exit Game</string>
@@ -95,9 +99,20 @@
     <string name="direction_south">South</string>
     <string name="direction_east">East</string>
     <string name="direction_west">West</string>
-    
-    <!-- Robot movement format strings -->
     <string name="robot_move_direction">%1$s %2$s</string>
+    
+    <!-- Accessibility strings -->
+    <string name="direction_north_a11y">North</string>
+    <string name="direction_south_a11y">South</string>
+    <string name="direction_east_a11y">East</string>
+    <string name="direction_west_a11y">West</string>
+    <string name="robot_move_direction_a11y">Move the %1$s robot %2$s</string>
+    <string name="robot_selected_a11y">%1$s robot selected</string>
+    <string name="robot_deselected_a11y">Robot deselected</string>
+    <string name="target_found_a11y">%1$s robot reached its target</string>
+    <string name="game_complete_a11y">Level complete! You solved the puzzle in %1$d moves</string>
+    <string name="wall_hit_a11y">%1$s robot hit a wall</string>
+    <string name="robot_hit_a11y">%1$s robot hit the %2$s robot</string>
     
     <!-- TalkBack language constant - do not translate -->
     <string name="talkback_language_same_value" translatable="false">same</string>
@@ -122,7 +137,12 @@
     <string name="level_category_expert">Expert</string>
     <string name="level_locked_message">Level locked</string>
     <string name="level_format">Level %1$d</string>
-    
+    <string name="level_filter_all">All</string>
+    <string name="level_filter_played">Played</string>
+    <string name="level_filter_unsolved">Unsolved</string>
+    <string name="level_difficulty_format">Difficulty: %1$s</string>
+    <string name="level_size_format">Size: %1$s</string>
+
     <!-- Save game screen -->
     <string name="save_game_title">Save Game</string>
     <string name="save_slot_format">Slot %1$d</string>
@@ -178,5 +198,15 @@
     <!-- Game Buttons -->
     <string name="hint_button">💡 Hint</string>
     <string name="cancel_hint_button">🔍 Hide</string>
+    
+    <!-- Game screen -->
+    <string name="save_tab_title">Save</string>
+    <string name="load_tab_title">Load</string>
+    <string name="history_tab_title">History</string>
+    <string name="save_screen_title">Save Game</string>
+    <string name="load_screen_title">Load Game</string>
+    <string name="history_screen_title">Game History</string>
+    <string name="save_slot_empty">Empty</string>
+    <string name="save_slot_autosave">Autosave</string>
 
 </resources>

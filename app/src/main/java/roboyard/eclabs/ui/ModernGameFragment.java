@@ -161,10 +161,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void updateDirectionalButtons(GameElement selectedRobot) {
         if (selectedRobot == null) {
-            btnMoveNorth.setText("North");
-            btnMoveSouth.setText("South");
-            btnMoveEast.setText("East");
-            btnMoveWest.setText("West");
+            btnMoveNorth.setText(getString(R.string.direction_north));
+            btnMoveSouth.setText(getString(R.string.direction_south));
+            btnMoveEast.setText(getString(R.string.direction_east));
+            btnMoveWest.setText(getString(R.string.direction_west));
             
             // Reset colors
             btnMoveNorth.setBackgroundResource(R.drawable.button_rounded_blue_outline);
@@ -180,10 +180,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         String robotColorName = getRobotColorNameByGridElement(selectedRobot);
         
-        btnMoveNorth.setText(robotColorName + " North");
-        btnMoveSouth.setText(robotColorName + " South");
-        btnMoveEast.setText(robotColorName + " East");
-        btnMoveWest.setText(robotColorName + " West");
+        btnMoveNorth.setText(getString(R.string.robot_move_direction, robotColorName, getString(R.string.direction_north)));
+        btnMoveSouth.setText(getString(R.string.robot_move_direction, robotColorName, getString(R.string.direction_south)));
+        btnMoveEast.setText(getString(R.string.robot_move_direction, robotColorName, getString(R.string.direction_east)));
+        btnMoveWest.setText(getString(R.string.robot_move_direction, robotColorName, getString(R.string.direction_west)));
         
         // Set button backgrounds to match robot color
         btnMoveNorth.setBackgroundTintList(colorStateList);
@@ -344,6 +344,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
                     
                     if (moved) {
+                        // Robot moved - play sound and make announcements
                         // Toast.makeText(requireContext(), "Robot moved away from edge", Toast.LENGTH_SHORT).show();
                         Timber.d("[BACK] Robot moved away from edge, back captured");
                     } else {
@@ -2262,6 +2263,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Check if the hint message contains a robot color name and change background color accordingly
                 String lowerMessage = message.toLowerCase();
                 GradientDrawable backgroundDrawable = new GradientDrawable();
+                backgroundDrawable.setShape(GradientDrawable.RECTANGLE);
+                backgroundDrawable.setColor(Color.parseColor("#1976D2")); // Default blue
                 backgroundDrawable.setCornerRadius(8);
                 
                 // Default to using the drawable resource
