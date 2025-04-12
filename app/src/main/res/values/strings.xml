@@ -2,44 +2,89 @@
 <resources>
 
     <string name="app_name">Roboyard</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_test_gl">TestGL</string>
     
     <!-- Main Menu Strings -->
-    <string name="main_menu_title">Roboyard</string>
+    <string name="action_settings">Settings</string>
+
     <string name="new_random_game">New Game</string>
-    <string name="new_random_game_description">Start a new game</string>
+    <string name="new_random_game_a11y">Start a new game</string>
+    
     <string name="level_game">Level Game</string>
-    <string name="level_game_description">Play predefined game levels</string>
+    <string name="level_game_a11y">Play predefined game levels</string>
+    
     <string name="load_game">Load Game</string>
-    <string name="load_game_description">Load a saved game</string>
+    <string name="load_game_a11y">Load game</string>
+    
     <string name="settings">Settings</string>
-    <string name="settings_description">Game settings</string>
+    <string name="settings_a11y">Game settings</string>
+    
     <string name="help">How to Play</string>
-    <string name="help_description">View game help</string>
-    <string name="exit">Exit</string>
-    <string name="exit_description">Exit the game</string>
+    <string name="help_a11y">How to Play</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
     <string name="credits">Credits</string>
     
+    <!-- Button texts for various screens -->
+    <string name="button_ok" comment="Standard OK button text">OK</string>
+    <string name="button_cancel" comment="Standard cancel button text">Cancel</string>
+    <string name="button_save" comment="Standard save button text">Save</string>
+    <string name="button_restart" comment="Button to restart the current level">Restart</string>
+    <string name="button_pause" comment="Button to pause the game">Pause</string>
+    <string name="button_resume" comment="Button to resume a paused game">Resume</string>
+    <string name="button_quit" comment="Button to quit/exit the current screen">Quit</string>
+    <string name="button_back" comment="Navigation button to go back">Back</string>
+    <string name="button_next" comment="Navigation button to proceed to next page/level">Next</string>
+    <string name="button_prev" comment="Navigation button to go to previous page/level">Previous</string>
+    <string name="button_retry" comment="Button to retry the current level">Retry</string>
+    <string name="button_hint" comment="Button to get a game hint">Hint</string>
+    <string name="button_skip" comment="Button to skip a level or tutorial">Skip</string>
+
+    <!-- Main menu buttons -->
+    <string name="main_menu_play" comment="Button on main menu to start playing the game">Play</string>
+    <string name="main_menu_settings" comment="Button on main menu to open settings">Settings</string>
+    <string name="main_menu_about" comment="Button on main menu to see game information">About</string>
+    <string name="main_menu_help" comment="Button on main menu to open help/tutorial">Help</string>
+    <string name="main_menu_level_designer" comment="Button on main menu to open level designer">Level Designer</string>
+    <string name="main_menu_quit" comment="Button on main menu to exit the game">Quit</string>
+    <string name="main_menu_share" comment="Button to share the game with others">Share</string>
+    <string name="main_menu_rate" comment="Button to rate the game">Rate</string>
+
+    <!-- Modal dialog buttons -->
+    <string name="dialog_button_yes" comment="Positive response to a dialog prompt">Yes</string>
+    <string name="dialog_button_no" comment="Negative response to a dialog prompt">No</string>
+    <string name="dialog_button_cancel" comment="Cancel/dismiss button for dialogs">Cancel</string>
+    <string name="dialog_button_continue" comment="Button to continue after a dialog">Continue</string>
+    <string name="dialog_button_exit" comment="Button to exit after a dialog">Exit</string>
+
     <!-- Game Screens -->
-    <string name="game_screen_title">Game</string>
-    <string name="save_load_game_screen_title">Save/Load Game</string>
-    <string name="settings_screen_title">Settings</string>
-    <string name="help_screen_title">Help</string>
-    <string name="level_selection_title">Select Level</string>
-    
+    <string name="game_screen_title" comment="Title shown on game screen">Game</string>
+    <string name="save_load_game_screen_title" comment="Title shown on save/load screen">Save/Load Game</string>
+    <string name="settings_screen_title" comment="Title shown on settings screen">Settings</string>
+    <string name="about_screen_title" comment="Title shown on about screen">About</string>
+    <string name="level_select_screen_title" comment="Title shown on level selection screen">Level Select</string>
+    <string name="level_designer_screen_title" comment="Title shown on level designer screen">Level Designer</string>
+    <string name="tutorial_screen_title" comment="Title shown on tutorial screen">Tutorial</string>
+
     <!-- Level Selection Screen -->
-    <string name="level_button_description">Level %1$d</string>
+    <string name="level_button_description" comment="Description for level selection buttons">Level %1$d</string>
+    <string name="level_score" comment="Text showing the score achieved on a level"></string>
+    <string name="level_best_score" comment="Text showing the best score achieved on a level"></string>
+    <string name="level_stars" comment="Text showing stars earned on a level">You earned %1$d stars</string>
+    <string name="level_locked" comment="Text shown for locked/unavailable levels [LevelSelectionFragment]">You need %1$d more stars to unlock this level</string>
+
     <string name="back">Back</string>
     <string name="back_description">Return to previous screen</string>
+
     <string name="next_level">Next Level</string>
     <string name="next_level_description">Go to the next level</string>
+    
     <string name="optimal_moves">Optimal: %1$d moves</string>
     <string name="your_moves">Your moves: %1$d</string>
     <string name="level_complete">Level Complete!</string>
     <string name="level_stars_description">You earned %1$d stars</string>
+    <string name="level_stars_a11y">You earned %1$d stars</string>
     <string name="stars_count">%1$d Stars</string>
-    <string name="level_locked">You need %1$d more stars to unlock this level</string>
     <string name="random_game_complete">Level Complete!</string>
     <string name="new_random_game_button">New Game</string>
     <string name="level_moves_format">Moves: %1$d/%2$d</string>
@@ -47,28 +92,324 @@
     <string name="level_squares_format">Squares: %1$d</string>
     <string name="level_robots_format">Robots: %1$d</string>
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>
+    <string name="robot_a11y">Robot %1$s at position %2$d, %3$d</string>
     <string name="target_description">Target at position %1$d, %2$d</string>
-    <string name="grid_description">Game grid</string>
+    <string name="target_a11y">Target at position %1$d, %2$d</string>
     <string name="minimap_description">Minimap showing overall board layout</string>
+    <string name="minimap_a11y">Minimap showing overall board layout</string>
     
     <!-- Exit Dialog -->
     <string name="exit_confirm_title">Exit Game</string>
     <string name="exit_confirm_message">Are you sure you want to exit the game?</string>
     
     <!-- Save Game Screen -->
-    <string name="save_game_screen_title">Save Game</string>
+    <string name="save_game_screen_title" comment="Title for the save game screen">Save Game</string>
     <string name="save_slots_tab">Save Slots</string>
     <string name="history_tab">History</string>
-    <string name="empty_slot">Empty Slot</string>
     <string name="save_confirm_title">Save Game</string>
     <string name="save_confirm_message">Save current game to this slot?</string>
     <string name="load_confirm_title">Load Game</string>
-    <string name="load_confirm_message">Load this saved game?</string>
     <string name="save_success">Game saved successfully</string>
     <string name="load_success">Game loaded successfully</string>
     
+    <!-- Language Settings -->
+    <string name="language_settings_label">App Language:</string>
+    <string name="language_settings_a11y">Select app display language</string>
+    <string name="accessibility_language_label">TalkBack Language:</string>
+    <string name="accessibility_language_a11y">Select TalkBack announcement language</string>
+    <string name="settings_english">English</string>
+    <string name="settings_german">Deutsch</string>
+    <string name="settings_french">Français</string>
+    <string name="settings_spanish">Español</string>
+    <string name="settings_chinese">中文</string>
+    <string name="settings_korean">한국어</string>
+    <string name="language_same_as_app">Same as app language</string>
+    <string name="language_changed_title">Language Changed</string>
+    <string name="language_changed_message">The language setting has been updated. Some changes will apply immediately, while others will apply when you return to the main menu.</string>
+    <string name="ok">OK</string>
+    <!-- Plurals example for robot count message -->
+    <plurals name="robot_count_message">
+        <item quantity="one">%1$d robot</item>
+        <item quantity="other">%1$d robots</item>
+    </plurals>
+    <!-- Non-translatable string example -->
+    <string name="app_version" translatable="false">Version: 1.0.0</string>
+    <!-- Direction strings -->
+    <string name="direction_north">North</string>
+    <string name="direction_south">South</string>
+    <string name="direction_east">East</string>
+    <string name="direction_west">West</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    
+    <!-- Accessibility strings -->
+    <string name="direction_north_a11y">North</string>
+    <string name="direction_south_a11y">South</string>
+    <string name="direction_east_a11y">East</string>
+    <string name="direction_west_a11y">West</string>
+    <string name="robot_move_direction_a11y">Move the %1$s robot %2$s</string>
+    <string name="robot_selected_a11y">%1$s robot selected</string>
+    <string name="robot_deselected_a11y">Robot deselected</string>
+    <string name="target_found_a11y">%1$s robot reached its target</string>
+    <string name="game_complete_a11y">Level complete! You solved the puzzle in %1$d moves</string>
+    <string name="wall_hit_a11y">%1$s robot hit a wall</string>
+    <string name="robot_hit_a11y">%1$s robot hit the %2$s robot</string>
+    
+    <!-- TalkBack language constant - do not translate -->
+    <string name="talkback_language_same_value" translatable="false">same</string>
+    
+    <!-- Help content -->
+    <string name="help_title" translatable="false">Help</string>
+    
+    <!-- Credits screen -->
+    <string name="version_format">Version: %1$s (Build %2$d)</string>
+    <string name="credits_screen_title">Credits</string>
+    <string name="imprint_link_text">Imprint &amp; Privacy Policy</string>
+    <string name="opensource_link_text">Open Source</string>
+    <string name="contact_link_text">Contact</string>
+    <string name="credits_back_button">Back</string>
+    <string name="credits_eclabs_description">Created by ECLabs</string>
+    
+    <!-- Level Selection screen -->
+    <string name="level_selection_title">Level Selection</string>
+    <string name="level_category_beginner">Beginner</string>
+    <string name="level_category_intermediate">Intermediate</string>
+    <string name="level_category_advanced">Advanced</string>
+    <string name="level_category_expert">Expert</string>
+
+    <!-- Save game screen -->
+    <string name="save_game_title">Save Game</string>
+    
+    <!-- Game screen -->
+    <string name="game_move_count" comment="used in the game info box">Moves: %1$d</string>
+    <string name="game_time_format" comment="TODO: used in the game timer">%1$02d:%2$02d</string>
+    
+    <!-- Hint messages -->
+    <plurals name="hint_robot_count">
+        <item quantity="one">Hint: Move the %1$s robot</item>
+        <item quantity="other">Hint: Move the %1$s and %2$s robots</item>
+    </plurals>
+    
+    <!-- Autosave tags - non-translatable -->
+    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
+    
+    <!-- URLs - non-translatable -->
+    <string name="url_imprint" translatable="false">https://eclabs.de/datenschutz.html</string>
+    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
+    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">How to Play Roboyard</string>
+    <string name="help_goal_section_title">Goal</string>
+    <string name="help_goal_description">Move the colored robots to their matching colored targets. The game is completed when all robots are on their matching targets.</string>
+    <string name="help_movement_section_title">Movement</string>
+    <string name="help_movement_point_1">- Tap on a robot to select it.</string>
+    <string name="help_movement_point_2">- Tap on an empty cell to move the selected robot in that direction.</string>
+    <string name="help_movement_point_3">- Robots will move in straight lines until they hit a wall, another robot, or the edge of the board.</string>
+    <string name="help_controls_section_title">Controls</string>
+    <string name="help_controls_point_1">- Hint: Shows a suggested move.</string>
+    <string name="help_controls_point_2">- Reset: Restarts the current level.</string>
+    <string name="help_controls_point_3">- Save: Saves your current map.</string>
+    <string name="help_controls_point_4">- Menu: Returns to the main menu.</string>
+    <string name="help_accessibility_section_title">Accessibility</string>
+    <string name="help_accessibility_description">This game is fully compatible with TalkBack screen reader. Use explore by touch to hear information about the game elements and buttons. Double-tap to activate buttons or select robots.</string>
+    <string name="help_tips_section_title">Tips</string>
+    <string name="help_tips_point_1">- Try to solve puzzles in the minimum number of moves.</string>
+    <string name="help_tips_point_2">- Sometimes you need to move robots to specific positions to clear paths for other robots.</string>
+    <string name="help_tips_point_3">- If you\'re stuck, use the Hint feature to get a suggestion.</string>
+    
     <!-- Game Buttons -->
-    <string name="hint_button">💡 Hint</string>
-    <string name="cancel_hint_button">🔍 Hide</string>
+    <string name="hint_button">Hint</string>
+    <string name="hint_button_a11y">Hint</string>
+    <string name="cancel_hint_button">Hide</string>
+    <string name="button_back_game">Back</string>
+    <string name="button_reset">Reset</string>
+    <string name="button_save_map">Save Map</string>
+    <string name="button_new_game">New Game</string>
+    <string name="button_menu">Menu</string>
+    
+    <!-- Game screen -->
+    <string name="save_tab_title">Save</string>
+    <string name="load_tab_title">Load</string>
+    <string name="history_tab_title">History</string>
+    <string name="save_screen_title">Save Game</string>
+    <string name="load_screen_title">Load Game</string>
+    <string name="history_screen_title">Game History</string>
+    <string name="save_slot_empty">Empty</string>
+    <string name="save_slot_autosave">Autosave</string>
+    <string name="ai_calculating" comment="Message shown when AI is calculating a solution [ModernGameFragment]">A.I. calculating solution...</string>
+
+    <!-- Game control buttons -->
+    <string name="back_button">Back</string>
+    <string name="menu_button">Menu</string>
+    <string name="retry_button">Retry</string>
+    <string name="restart_button">Restart</string>
+    <string name="save_map_button">Save Map</string>
+    
+    <!-- AI and game direction strings -->
+    <string name="ai_solution_format">The A.I. found a solution in %1$d moves</string>
+    <string name="direction_less_than">less than</string>
+    <string name="robot_color_down" comment="Instruction for robot movement downward">%1$s down</string>
+    
+    <!-- Accessibility versions -->
+    <string name="back_button_a11y">Go back</string>
+    <string name="menu_button_a11y">Return to main menu</string>
+    <string name="retry_button_a11y">Retry this level</string>
+    <string name="restart_button_a11y">Restart this level</string>
+    <string name="save_map_button_a11y">Save current map</string>
+    <string name="robot_color_down_a11y">Move %1$s robot down</string>
+
+    <!-- Color names for robots and game elements -->
+    <string name="color_red">Red</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_green">Green</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_white">White</string>
+    <string name="color_black">Black</string>
+    <string name="color_silver">Silver</string>
+    
+    <!-- Accessibility versions -->
+    <string name="color_red_a11y">Red</string>
+    <string name="color_blue_a11y">Blue</string>
+    <string name="color_green_a11y">Green</string>
+    <string name="color_yellow_a11y">Yellow</string>
+    <string name="color_pink_a11y">Pink</string>
+    <string name="color_orange_a11y">Orange</string>
+    <string name="color_white_a11y">White</string>
+    <string name="color_black_a11y">Black</string>
+    <string name="color_silver_a11y">Silver</string>
+
+    <!-- Dative forms (English doesn't change, but needed for resource references) -->
+    <string name="color_red_dative">Red</string>
+    <string name="color_blue_dative">Blue</string>
+    <string name="color_green_dative">Green</string>
+    <string name="color_yellow_dative">Yellow</string>
+    <string name="color_pink_dative">Pink</string>
+    <string name="color_orange_dative">Orange</string>
+    <string name="color_white_dative">White</string>
+    <string name="color_black_dative">Black</string>
+    <string name="color_silver_dative">Silver</string>
+
+    <!-- Game UI text for ModernGameFragment -->
+    <string name="no_robot_selected" comment="Status message when no robot is currently selected [ModernGameFragment]">No robot selected</string>
+    <string name="robot_selected" comment="Status message showing which robot is selected">Selected: %1$s robot at (%2$d, %3$d)</string>
+    <string name="robot_selected_info" comment="More detailed information about selected robot [ModernGameFragment]">Selected: %1$s robot at position (%2$d, %3$d)</string>
+    <string name="robot_target_info" comment="Information about a target on the board [ModernGameFragment]">%1$s target: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot" comment="Message when a robot has no matching target [ModernGameFragment]">No target for this robot</string>
+    <string name="move_count_text" comment="Text showing number of moves made">Moves: %1$d</string>
+    <string name="moves_count" comment="Alternative text for move counter [ModernGameFragment]">Moves: %1$d</string>
+    <string name="squares_moved" comment="Text showing number of squares robots have moved [ModernGameFragment]">Squares moved: %1$d</string>
+    <string name="board_size" comment="Text showing board dimensions [ModernGameFragment]">Board: %1$dx%2$d</string>
+    <string name="solution_error" comment="Error message when no solution can be found [ModernGameFragment]">Could not find a solution: %1$s</string>
+    <string name="direction_up" comment="Direction name for movement hints [ModernGameFragment]">up</string>
+    <string name="direction_down" comment="Direction name for movement hints [ModernGameFragment]">down</string>
+    <string name="direction_right" comment="Direction name for movement hints [ModernGameFragment]">right</string>
+    <string name="direction_left" comment="Direction name for movement hints [ModernGameFragment]">left</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="cancel_button" comment="Generic cancel button text [ModernGameFragment]">Cancel</string>
+    <string name="hint_cancel_button" comment="Generic cancel button text [ModernGameFragment]">✖️ Hint</string>
+    <string name="reset_button" comment="Button to reset the current game/level [ModernGameFragment]">Reset</string>
+    <string name="unique_map_id" comment="Unique identifier for a game map [ModernGameFragment]">%1$s</string>
+    <string name="empty_text" comment="Empty placeholder text"></string>
+    <string name="level_id_text" comment="Text showing the current level number [ModernGameFragment]">Level %1$d</string>
+    <string name="stars_earned" comment="Message showing stars earned for level completion">You earned %1$d stars</string>
+    <string name="completed_in_moves" comment="Short text showing moves used to complete level">Completed in %1$d moves</string>
+    <string name="starting_level" comment="Message shown when starting a level">Starting level %1$d</string>
+    <string name="target_reached" comment="Message shown when a robot reaches its target">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="robot_move_initiated" comment="Message when robot starts moving">%1$s initiating move, starting at %2$d, %3$d</string>
+    <string name="unknown_robot">Unknown: %1$d</string>
+    <string name="unknown_color">Unknown: %1$s</string>
+    <string name="ai_solution_less_moves">The A.I. found a solution in less than %1$d moves</string>
+    <string name="ai_solution_exact_moves">The A.I. found a solution in %1$d moves</string>
+    <string name="solution_found_moves">Solution found: %1$d moves</string>
+
+    <!-- Accessibility versions -->
+    <string name="target_reached_a11y" comment="Accessibility announcement when target is reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="robot_move_initiated_a11y" comment="Accessibility announcement when robot moves">%1$s robot move initiated, starting at %2$d, %3$d</string>
+    <string name="starting_level_a11y" comment="Accessibility announcement when level starts">Starting level %1$d</string>
+
+    <!-- Additional Game UI Messages -->
+    <string name="nothing_to_undo">Nothing to undo</string>
+    <string name="robots_reset">Robots reset to starting positions</string>
+    <string name="no_game_in_progress">No game in progress</string>
+    <string name="no_robots_available">No robots available</string>
+    <string name="cannot_move_in_this_direction">Cannot move in this direction</string>
+    <string name="pre_hint_less_than_x">The A.I. found a solution in less than %1$d moves</string>
+    <string name="pre_hint_exact_solution">The A.I. found a solution in %1$d moves</string>
+    <string name="solution_found">A.I. found a solution!</string>
+    <string name="pre_hint_first_move">Move the %1$s robot first</string>
+    <string name="no_solution_found">No solution found</string>
+    <string name="pre_hint_ready">Ready to show step-by-step hints</string>
+    <string name="all_hints_shown">All hints have been shown</string>
+    <string name="no_valid_hint">No valid hint available</string>
+    <string name="error_displaying_hint">Error displaying hint</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner" comment="Name of easiest difficulty level [GameStateManager][SettingsFragment]">Beginner</string>
+    <string name="difficulty_advanced" comment="Name of medium difficulty level [GameStateManager][SettingsFragment]">Advanced</string>
+    <string name="difficulty_insane" comment="Name of hard difficulty level [GameStateManager][SettingsFragment]">Insane</string>
+    <string name="difficulty_impossible" comment="Name of hardest difficulty level [GameStateManager][SettingsFragment]">Impossible</string>
+    <string name="difficulty_unknown" comment="Used when difficulty cannot be determined [GameStateManager]">Unknown</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of" comment="Connecting word for phrases like '3 of 4 colors' [SettingsFragment]">of</string>
+    <string name="impossible_small_board_warning" comment="Warning shown when playing on small board with impossible difficulty [SettingsFragment]">Impossible on small boards may take several minutes to generate a fitting map</string>
+    
+    <!-- Toast messages -->
+    <string name="error_email_app" comment="Error message when email app cannot be opened [SettingsFragment]">Could not open email app</string>
+    <string name="robot_movement_canceled" comment="Message when robot movement is canceled [ModernGameFragment]">Robot movement canceled</string>
+    <string name="no_game_to_save" comment="Message when there is no game available to save">No game available to save</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_board_size">Board Size:</string>
+    <string name="settings_difficulty">Difficulty:</string>
+    <string name="settings_new_map_each_time">New Map Each Time:</string>
+    <string name="settings_robots_reach_targets">Robots that must reach targets:</string>
+    <string name="settings_targets">targets</string>
+    <string name="settings_out_of">out of</string>
+    <string name="settings_sound">Sound:</string>
+    <string name="settings_yes">Yes</string>
+    <string name="settings_no">No</string>
+    <string name="settings_beginner">Beginner</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="settings_insane">Insane</string>
+    <string name="settings_impossible">Impossible</string>
+
+    <!-- Level Selection Item Strings -->
+    <string name="level_robots_label">robots:</string>
+    <string name="level_squares_label">squares:</string>
+    
+    <!-- Hint Direction Symbols -->
+    <string name="hint_direction_left">◀</string>
+    <string name="hint_direction_right">▶</string>
+    <string name="hint_direction_up">▲</string>
+    <string name="hint_direction_down">▼</string>
+    
+    <!-- Additional hint strings -->
+    <string name="hint_solution_found">Found a solution in %1$d moves</string>
+    <string name="hint_move_robot_first">Move the %1$s robot first</string>
+
+    <!-- Game text -->
+    <string name="possible_moves">Possible moves</string>
+    <string name="squares_north">squares north</string>
+    <string name="squares_south">squares south</string>
+    <string name="squares_east">squares east</string>
+    <string name="squares_west">squares west</string>
+    <string name="until">until</string>
+    <string name="edge">edge</string>
+    <string name="no_movement_north">no movement north</string>
+    <string name="no_movement_south">no movement south</string>
+    <string name="no_movement_east">no movement east</string>
+    <string name="no_movement_west">no movement west</string>
+    <string name="use_next_robot_button">Use the next robot button to cycle through robots</string>
+    
+    <!-- Accessibility controls -->
+    <string name="announce">Announce</string>
+    <string name="next_robot">Next Robot</string>
+    <string name="announce_a11y">Announce game situation</string>
+    <string name="next_robot_a11y">Select next robot</string>
 
 </resources>

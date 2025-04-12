@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+    <string name="action_settings">Einstellungen</string>
+
+    <string name="new_random_game">Neues Spiel</string>
+    <string name="new_random_game_a11y">Starte ein neues Spiel</string>
+    
+    <string name="level_game">Levels</string>
+    <string name="level_game_a11y">Starte einen Level</string>
+    
+    <string name="load_game">Spiel Laden</string>
+    <string name="load_game_a11y">Lade ein Spielstand</string>
+    
+    <string name="settings">Einstellungen</string>
+    <string name="settings_a11y">Einstellungen</string>
+    
+    <string name="help">Wie spielt man?</string>
+    <string name="help_a11y">Erklärung, wie man spielt</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">Credits</string>
+    
+    <!-- Game Screens -->
+    <string name="game_screen_title">Spiel</string>
+    <string name="save_load_game_screen_title">Spiel speichern/laden</string>
+    <string name="settings_screen_title">Einstellungen</string>
+    <string name="help_screen_title">Hilfe</string>
+
+    <!-- Level Selection Screen -->
+    <string name="level_button_description">Level %1$d</string>
+
+    <string name="next_level">Nächstes Level</string>
+    <string name="next_level_description">Zum nächsten Level</string>
+    
+    <string name="optimal_moves">Optimal: %1$d Züge</string>
+    <string name="your_moves">Deine Züge: %1$d</string>
+    <string name="level_complete">Level geschafft!</string>
+    <string name="level_stars_description">Du hast %1$d Sterne verdient</string>
+    <string name="level_stars_a11y">Du hast %1$d Sterne verdient</string>
+    <string name="stars_count">%1$d Sterne</string>
+    <string name="level_locked">Du brauchst %1$d weitere Sterne, um dieses Level freizuschalten</string>
+    <string name="random_game_complete">Level geschafft!</string>
+    <string name="new_random_game_button">Neues Spiel</string>
+    <string name="level_moves_format">Züge: %1$d/%2$d</string>
+    <string name="level_time_format">Zeit: %1$d:%2$02d</string>
+    <string name="level_squares_format">Felder: %1$d</string>
+    <string name="level_robots_format">Roboter: %1$d</string>
+    <string name="robot_description">Roboter %1$s auf Position %2$d, %3$d</string>
+    <string name="robot_a11y">Roboter %1$s auf Position %2$d, %3$d</string>
+    <string name="target_description">Ziel auf Position %1$d, %2$d</string>
+    <string name="target_a11y">Ziel auf Position %1$d, %2$d</string>
+    <string name="minimap_description">Übersichtskarte zeigt das gesamte Spielfeld</string>
+    <string name="minimap_a11y">Übersichtskarte zeigt das gesamte Spielfeld</string>
+    
+    <!-- Exit Dialog -->
+    <string name="exit_confirm_title">Spiel beenden</string>
+    <string name="exit_confirm_message">Bist du sicher, dass du das Spiel beenden möchtest?</string>
+    
+    <!-- Save Game Screen -->
+    <string name="save_game_screen_title">Spiel speichern</string>
+    <string name="save_slots_tab">Speicherplätze</string>
+    <string name="history_tab">Verlauf</string>
+    <string name="empty_slot">Leerer Slot</string>
+    <string name="save_confirm_title">Spiel speichern</string>
+    <string name="save_confirm_message">Aktuelles Spiel in diesem Slot speichern?</string>
+    <string name="load_confirm_title">Spiel laden</string>
+    <string name="save_success">Spiel erfolgreich gespeichert</string>
+    <string name="load_success">Spiel erfolgreich geladen</string>
+    
+    <!-- Settings Screen -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_board_size">Spielfeldgröße:</string>
+    <string name="settings_difficulty">Schwierigkeit:</string>
+    <string name="settings_new_map_each_time">Jedes Mal neue Karte:</string>
+    <string name="settings_robots_reach_targets">Roboter, die Ziele erreichen müssen:</string>
+    <string name="settings_targets">Zielen</string>
+    <string name="settings_out_of">von</string>
+    <string name="settings_sound">Ton:</string>
+    <string name="settings_yes">Ja</string>
+    <string name="settings_no">Nein</string>
+    <string name="settings_beginner">Anfänger</string>
+    <string name="settings_advanced">Fortgeschritten</string>
+    <string name="settings_insane">Verrückt</string>
+    <string name="settings_impossible">Unmöglich</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">App-Sprache:</string>
+    <string name="language_settings_a11y">App-Anzeigesprache auswählen</string>
+    <string name="accessibility_language_label">TalkBack-Sprache:</string>
+    <string name="accessibility_language_a11y">TalkBack-Ansagesprache auswählen</string>
+    <string name="language_english">Englisch</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_french">Französisch</string>
+    <string name="language_same_as_app">Gleich wie App-Sprache</string>
+    <string name="language_changed_title">Sprache geändert</string>
+    <string name="language_changed_message">Die Spracheinstellung wurde aktualisiert. Einige Änderungen werden sofort wirksam, andere erst, wenn du zum Hauptmenü zurückkehrst.</string>
+    <string name="ok">OK</string>
+    <!-- Plurals example for robot count message -->
+    <plurals name="robot_count_message">
+        <item quantity="one">%1$d Roboter</item>
+        <item quantity="other">%1$d Roboter</item>
+    </plurals>
+    <!-- Non-translatable string example -->
+    <string name="app_version" translatable="false">Version: 1.0.0</string>
+    <!-- Direction strings -->
+    <string name="direction_north">Norden</string>
+    <string name="direction_south">Süden</string>
+    <string name="direction_east">Osten</string>
+    <string name="direction_west">Westen</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    
+    <!-- Accessibility strings -->
+    <string name="direction_north_a11y">Norden</string>
+    <string name="direction_south_a11y">Süden</string>
+    <string name="direction_east_a11y">Osten</string>
+    <string name="direction_west_a11y">Westen</string>
+    <string name="robot_move_direction_a11y">Bewege den %1$s Roboter nach %2$s</string>
+    <string name="robot_selected_a11y">%1$ser Roboter ausgewählt</string>
+    <string name="robot_deselected_a11y">Roboter abgewählt</string>
+    <string name="target_found_a11y">%1$ser Roboter hat sein Ziel erreicht</string>
+    <string name="game_complete_a11y">Level abgeschlossen! Du hast das Rätsel in %1$d Zügen gelöst</string>
+    <string name="wall_hit_a11y">%1$s Roboter ist gegen eine Wand gestoßen</string>
+    <string name="robot_hit_a11y">%1$s Roboter ist gegen den %2$s Roboter gestoßen</string>
+    
+    <!-- TalkBack language constant - do not translate -->
+    <string name="talkback_language_same_value" translatable="false">same</string>
+    
+    <!-- Help content -->
+    <string name="help_title" translatable="false">Hilfe</string>
+    
+    <!-- Credits screen -->
+    <string name="version_format">Version: %1$s (Build %2$d)</string>
+    <string name="credits_screen_title">Credits</string>
+    <string name="imprint_link_text">Impressum &amp; Datenschutz</string>
+    <string name="opensource_link_text">Open Source</string>
+    <string name="contact_link_text">Kontakt</string>
+    <string name="credits_back_button">Zurück</string>
+    <string name="credits_eclabs_description">Erstellt von ECLabs</string>
+    
+    <!-- Level Selection screen -->
+    <string name="level_selection_title">Level-Auswahl</string>
+    <string name="level_category_beginner">Anfänger</string>
+    <string name="level_category_intermediate">Fortgeschritten</string>
+    <string name="level_category_advanced">Experte</string>
+    <string name="level_category_expert">Meister</string>
+    <string name="level_format">Level %1$d</string>
+    <string name="level_filter_all">Alle</string>
+    <string name="level_filter_played">Gespielt</string>
+    <string name="level_filter_unsolved">Ungelöst</string>
+    <string name="level_difficulty_format">Schwierigkeit: %1$s</string>
+    <string name="level_size_format">Größe: %1$s</string>
+
+    <!-- Save game screen -->
+    <string name="save_game_title">Spiel speichern</string>
+    <string name="save_slot_format">Slot %1$d</string>
+    <string name="save_empty">Leer</string>
+    <string name="save_date_format">Gespeichert: %1$s</string>
+    <string name="save_level_format">Level %1$s - Züge: %2$d</string>
+    <string name="save_failed">Speichern fehlgeschlagen.</string>
+    
+    <!-- Game screen -->
+    <string name="game_move_count">Züge: %1$d</string>
+    <string name="game_time_format">%1$02d:%2$02d</string>
+    
+    <!-- Hint messages -->
+    <plurals name="hint_robot_count">
+        <item quantity="one">Hinweis: Bewege den %1$s Roboter</item>
+        <item quantity="other">Hinweis: Bewege den %1$s und %2$s Roboter</item>
+    </plurals>
+    
+    <!-- Autosave tags - non-translatable -->
+    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
+    
+    <!-- URLs - non-translatable -->
+    <string name="url_imprint" translatable="false">https://eclabs.de/datenschutz.html</string>
+    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
+    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">Wie man Roboyard spielt</string>
+    <string name="help_goal_section_title">Ziel</string>
+    <string name="help_goal_description">Bewege die farbigen Roboter zu ihren passenden farbigen Zielen. Das Spiel ist abgeschlossen, wenn alle Roboter auf ihren passenden Zielen stehen.</string>
+    <string name="help_movement_section_title">Bewegung</string>
+    <string name="help_movement_point_1">- Tippe auf einen Roboter, um ihn auszuwählen.</string>
+    <string name="help_movement_point_2">- Tippe auf ein leeres Feld, um den ausgewählten Roboter in diese Richtung zu bewegen.</string>
+    <string name="help_movement_point_3">- Roboter bewegen sich in geraden Linien, bis sie auf eine Wand, einen anderen Roboter oder den Spielfeldrand treffen.</string>
+    <string name="help_controls_section_title">Steuerung</string>
+    <string name="help_controls_point_1">- Hinweis: Zeigt einen vorgeschlagenen Zug.</string>
+    <string name="help_controls_point_2">- Zurücksetzen: Startet das aktuelle Level neu.</string>
+    <string name="help_controls_point_3">- Speichern: Speichert deine aktuelle Karte.</string>
+    <string name="help_controls_point_4">- Menü: Kehrt zum Hauptmenü zurück.</string>
+    <string name="help_accessibility_section_title">Barrierefreiheit</string>
+    <string name="help_accessibility_description">Dieses Spiel ist vollständig mit dem TalkBack-Screenreader kompatibel. Nutze Erkunden durch Berühren, um Informationen über Spielelemente und Schaltflächen zu hören. Doppeltippe, um Schaltflächen zu aktivieren oder Roboter auszuwählen.</string>
+    <string name="help_tips_section_title">Tipps</string>
+    <string name="help_tips_point_1">- Versuche, Rätsel mit der minimalen Anzahl von Zügen zu lösen.</string>
+    <string name="help_tips_point_2">- Manchmal musst du Roboter an bestimmte Positionen bewegen, um Wege für andere Roboter freizumachen.</string>
+    <string name="help_tips_point_3">- Wenn du feststeckst, nutze die Hinweis-Funktion, um einen Vorschlag zu erhalten.</string>
+    
+    <!-- Game Buttons -->
+    <string name="button_reset">Reset</string>
+    <string name="hint_button_a11y">Hinweis</string>
+    <string name="button_new_game">Neues Spiel</string>
+    <string name="new_game">Neues Spiel</string>
+    <string name="button_menu">Menü</string>
+    <string name="menu">Menü</string>
+    <string name="button_back_game">Zurück</string>
+    <string name="button_back">Zurück</string>
+    <string name="back">Zurück</string>
+    <string name="back_description">Zurück zum vorherigen Bildschirm</string>
+    <string name="reset">Zurücksetzen</string>
+    <string name="save_map">Speichern</string>
+    <string name="button_save_map">Speichern</string>
+
+    <!-- Game screen -->
+    <string name="save_tab_title">Speichern</string>
+    <string name="load_tab_title">Laden</string>
+    <string name="history_tab_title">Verlauf</string>
+    <string name="save_screen_title">Spiel speichern</string>
+    <string name="load_screen_title">Spiel laden</string>
+    <string name="history_screen_title">Spielverlauf</string>
+    <string name="save_slot_empty">Leer</string>
+    <string name="save_slot_autosave">Automatisch gespeichert</string>
+    
+    <!-- Game control buttons -->
+    <string name="back_button">Zurück</string>
+    <string name="menu_button">Menü</string>
+    <string name="retry_button">Neustart</string>
+    <string name="restart_button">Nochmal</string>
+    <string name="save_map_button">Speichern</string>
+    <string name="ai_calculating">KI berechnet Lösung...</string>
+
+    <!-- AI and game direction strings -->
+    <string name="ai_solution_format">Die KI hat eine Lösung in %1$d Zügen gefunden</string>
+    <string name="direction_less_than">weniger als</string>
+    <string name="robot_color_down">%1$s nach unten</string>
+    
+    <!-- Accessibility versions -->
+    <string name="back_button_a11y">Zurück gehen</string>
+    <string name="menu_button_a11y">Zurück zum Hauptmenü</string>
+    <string name="retry_button_a11y">Dieses Level wiederholen</string>
+    <string name="restart_button_a11y">Dieses Level neu starten</string>
+    <string name="save_map_button_a11y">Aktuelle Karte speichern</string>
+    <string name="robot_color_down_a11y">Bewege %1$s Roboter nach unten</string>
+
+    <!-- Color names for robots and game elements -->
+    <string name="color_red">Rot</string>
+    <string name="color_blue">Blau</string>
+    <string name="color_green">Grün</string>
+    <string name="color_yellow">Gelb</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_white">Weiß</string>
+    <string name="color_black">Schwarz</string>
+    <string name="color_teal">Türkis</string>
+    <string name="color_silver">Silber</string>
+    
+    <!-- Color names for accessibility -->
+    <string name="color_red_a11y">Rot</string>
+    <string name="color_blue_a11y">Blau</string>
+    <string name="color_green_a11y">Grün</string>
+    <string name="color_yellow_a11y">Gelb</string>
+    <string name="color_pink_a11y">Pink</string>
+    <string name="color_orange_a11y">Orange</string>
+    <string name="color_white_a11y">Weiß</string>
+    <string name="color_black_a11y">Schwarz</string>
+    <string name="color_teal_a11y">Türkis</string>
+    <string name="color_silver_a11y">Silber</string>    
+    
+    <!-- Deklinierte Farbformen für deutsche Grammatik -->
+    <string name="color_red_dative">roten</string>
+    <string name="color_blue_dative">blauen</string>
+    <string name="color_green_dative">grünen</string>
+    <string name="color_yellow_dative">gelben</string>
+    <string name="color_pink_dative">pinken</string>
+    <string name="color_orange_dative">orangen</string>
+    <string name="color_white_dative">weißen</string>
+    <string name="color_black_dative">schwarzen</string>
+    <string name="color_teal_dative">türkisen</string>
+    <string name="color_silver_dative">silbernen</string>
+    
+    <!-- Game UI text -->
+    <string name="no_robot_selected">Kein Roboter ausgewählt</string>
+    <string name="robot_selected">Ausgewählt: %1$ser Roboter bei (%2$d, %3$d)</string>
+    <string name="robot_selected_info">Ausgewählt: %1$ser Roboter auf Position (%2$d, %3$d)</string>
+    <string name="robot_target_info">%1$ses Ziel: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">Kein Ziel für diesen Roboter</string>
+    <string name="move_count_text">Züge: %1$d</string>
+    <string name="moves_count">Züge: %1$d</string>
+    <string name="squares_moved">Felder bewegt: %1$d</string>
+    <string name="board_size">Spielfeld: %1$dx%2$d</string>
+    <string name="solution_error">Keine Lösung gefunden: %1$s</string>
+    <string name="direction_up">nach oben</string>
+    <string name="direction_down">nach unten</string>
+    <string name="direction_right">nach rechts</string>
+    <string name="direction_left">nach links</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="reset_button">Zurücksetzen</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="empty_text"></string>
+    <string name="level_id_text">Level %1$d</string>
+    <string name="level_completed">Level %1$d abgeschlossen mit %2$d Zügen</string>
+    <string name="stars_earned">Du hast %1$d Sterne verdient</string>
+    <string name="completed_in_moves">Abgeschlossen mit %1$d Zügen</string>
+    <string name="starting_level">Starte Level %1$d</string>
+    <string name="target_reached">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="robot_move_initiated">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
+    <string name="unknown_robot">Unbekannt: %1$d</string>
+    <string name="unknown_color">Unbekannt: %1$s</string>
+    <string name="ai_solution_less_moves">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="ai_solution_exact_moves">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
+    <string name="solution_found_moves">Lösung gefunden: %1$d Züge</string>
+    <string name="move_robot_first">Bewege zuerst den %1$s Roboter</string>
+
+    <!-- Accessibility versions -->
+    <string name="target_reached_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="robot_move_initiated_a11y">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
+    <string name="starting_level_a11y">Starte Level %1$d</string>
+
+    <!-- Additional Game UI Messages -->
+    <string name="nothing_to_undo">Nichts zum Rückgängig machen</string>
+    <string name="robots_reset">Roboter auf Startpositionen zurückgesetzt</string>
+    <string name="no_game_in_progress">Kein Spiel läuft</string>
+    <string name="no_robots_available">Keine Roboter verfügbar</string>
+    <string name="cannot_move_in_this_direction">Kann in diese Richtung nicht bewegen</string>
+    <string name="pre_hint_less_than_x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="pre_hint_exact_solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
+    <string name="solution_found">KI hat eine Lösung gefunden!</string>
+    <string name="pre_hint_first_move">Bewege zuerst den %1$s Roboter</string>
+    <string name="no_solution_found">Keine Lösung gefunden</string>
+    <string name="pre_hint_ready">Bereit für schrittweise Hinweise</string>
+    <string name="all_hints_shown">Alle Hinweise wurden angezeigt</string>
+    <string name="no_valid_hint">Kein gültiger Hinweis verfügbar</string>
+    <string name="error_displaying_hint">Fehler beim Anzeigen des Hinweises</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner">Anfänger</string>
+    <string name="difficulty_advanced">Fortgeschritten</string>
+    <string name="difficulty_insane">Extrem</string>
+    <string name="difficulty_impossible">Unmöglich</string>
+    <string name="difficulty_unknown">Unbekannt</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">von</string>
+    <string name="impossible_small_board_warning">Unmöglich auf kleinen Spielfeldern kann mehrere Minuten dauern, um eine passende Karte zu generieren</string>
+
+    <!-- Toast messages -->
+    <string name="error_email_app">E-Mail-App konnte nicht geöffnet werden</string>
+    <string name="robot_movement_canceled">Roboterbewegung abgebrochen</string>
+    <string name="no_game_to_save">Kein Spiel zum Speichern verfügbar</string>
+    <string name="hint_cancel_button">✖️ Hinweis</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="hint_button">💡Hinweis</string>
+    <string name="cancel_hint_button">🔍 Ausblenden</string>
+
+    <!-- Level Selection Item Strings -->
+    <string name="level_robots_label">Roboter:</string>
+    <string name="level_squares_label">Felder:</string>
+    
+    <!-- Hint Direction Symbols -->
+    <string name="hint_direction_left">◀</string>
+    <string name="hint_direction_right">▶</string>
+    <string name="hint_direction_up">▲</string>
+    <string name="hint_direction_down">▼</string>
+    
+    <!-- Additional hint strings -->
+    <string name="hint_solution_found">Lösung gefunden in %1$d Zügen</string>
+    <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
+
+    <!-- Additional game text -->
+    <string name="possible_moves">Mögliche Züge</string>
+    <string name="squares_north">Felder nach Norden</string>
+    <string name="squares_south">Felder nach Süden</string>
+    <string name="squares_east">Felder nach Osten</string>
+    <string name="squares_west">Felder nach Westen</string>
+    <string name="until">bis zum</string>
+    <string name="edge">Rand</string>
+    <string name="use_next_robot_button">Benutze den Nächster Roboter-Knopf, um zwischen Robotern zu wechseln</string>
+    <string name="no_movement_north">keine Bewegung nach Norden</string>
+    <string name="no_movement_south">keine Bewegung nach Süden</string>
+    <string name="no_movement_east">keine Bewegung nach Osten</string>
+    <string name="no_movement_west">keine Bewegung nach Westen</string>
+    
+    <!-- Accessibility controls -->
+    <string name="announce">Ansagen</string>
+    <string name="next_robot">Nächster Roboter</string>
+    <string name="announce_a11y">Spielsituation ansagen</string>
+    <string name="next_robot_a11y">Nächsten Roboter auswählen</string>
+</resources>

@@ -74,6 +74,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         starsTextView = view.findViewById(R.id.stars_count_text);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
 
+        // Set title
+        titleTextView.setText(getString(R.string.level_selection_title));
+
         // Set up RecyclerView with grid layout (3 columns)
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
         levelRecyclerView.setLayoutManager(layoutManager);
@@ -103,7 +106,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Display total stars with format X/420
         if (starsTextView != null) {
-            starsTextView.setText(totalStars + "/420");
+            starsTextView.setText(String.format("%d/%d", totalStars, 420));
         }
 
         // Set up adapter
@@ -174,7 +177,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Update the stars text view with format X/420
         if (starsTextView != null) {
-            starsTextView.setText(totalStars + "/420");
+            starsTextView.setText(String.format("%d/%d", totalStars, 420));
         }
 
         // Refresh the adapter to update completion stars when returning to this screen
@@ -275,6 +278,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         if (!isUnlocked) {
             int starsNeeded = (levelId - 1) * STARS_PER_LEVEL - totalStars;
+            // TODO: this toast is never shown
             Toast.makeText(requireContext(), 
                     getString(R.string.level_locked, starsNeeded),
                     Toast.LENGTH_SHORT).show();
@@ -578,9 +582,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 levelNameText.setVisibility(View.VISIBLE); // Ensure visibility
 
                 // Format moves/robots: "optimal/moves robots:count" (swapped from moves/optimal to optimal/moves)
-                String movesRobots = String.format("%d/%d robots:%d", 
+                String movesRobots = String.format("%d/%d %s%d", 
                         completionData.getOptimalMoves(),
                         completionData.getMovesNeeded(),
+                        fragment.getString(R.string.level_robots_label),
                         completionData.getRobotsUsed());
                 movesText.setText(movesRobots);
                 movesText.setVisibility(View.VISIBLE); // Ensure visibility
@@ -590,8 +595,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 long seconds = timeMs / 1000;
                 long minutes = seconds / 60;
                 seconds = seconds % 60;
-                String timeSquares = String.format("%d:%02d squares:%d", 
+                String timeSquares = String.format("%d:%02d %s%d", 
                         minutes, seconds, 
+                        fragment.getString(R.string.level_squares_label),
                         completionData.getSquaresSurpassed());
                 timeText.setText(timeSquares);
                 timeText.setVisibility(View.VISIBLE); // Ensure visibility

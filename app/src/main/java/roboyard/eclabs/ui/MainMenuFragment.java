@@ -11,6 +11,9 @@ import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
 import timber.log.Timber;
+import java.util.Locale;
+import android.content.res.Resources;
+import android.content.res.Configuration;
 
 /**
  * Main menu screen implemented as a Fragment with modern Android UI components.
@@ -29,9 +32,11 @@ public class MainMenuFragment extends BaseGameFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_menu, container, false);
         
+        // Apply saved language settings
+        applyLanguageSettings();
+        
         // Set up UI elements - only use buttons
         newGameButton = view.findViewById(R.id.modern_ui_button);
-        newGameButton.setText("New Game");
         
         levelGameButton = view.findViewById(R.id.level_game_button);
         loadGameButton = view.findViewById(R.id.load_game_button);
@@ -53,6 +58,29 @@ public class MainMenuFragment extends BaseGameFragment {
         setupButtons();
         
         return view;
+    }
+    
+    /**
+     * Apply saved language settings from preferences
+     */
+    private void applyLanguageSettings() {
+        try {
+            // Get saved language setting
+            String languageCode = roboyard.logic.core.Preferences.appLanguage;
+            Timber.d("ROBOYARD_LANGUAGE: Loading saved language: %s", languageCode);
+            
+            // Apply language change
+            Locale locale = new Locale(languageCode);
+            Locale.setDefault(locale);
+            
+            Resources resources = requireContext().getResources();
+            Configuration config = new Configuration(resources.getConfiguration());
+            config.setLocale(locale);
+            
+            resources.updateConfiguration(config, resources.getDisplayMetrics());
+        } catch (Exception e) {
+            Timber.e(e, "ROBOYARD_LANGUAGE: Error loading language settings");
+        }
     }
     
     /**

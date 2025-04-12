@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            tools:text="Moves: 0" />
+            tools:text="@string/move_count_text" />
     </LinearLayout>
 
     <!-- Controls (buttons) -->
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/hint_button"
-            android:contentDescription="Get a hint for your next move"
+            android:contentDescription="@string/hint_button_a11y"
             android:layout_marginEnd="4dp" />
 
         <Button
@@ -67,8 +67,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Reset"
-            android:contentDescription="Reset the current level"
+            android:text="@string/restart_button"
+            android:contentDescription="@string/restart_button_a11y"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
@@ -77,8 +77,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Save"
-            android:contentDescription="Save the current game"
+            android:text="@string/save_map_button"
+            android:contentDescription="@string/save_map_button_a11y"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
@@ -87,8 +87,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Menu"
-            android:contentDescription="Return to the main menu"
+            android:text="@string/menu_button"
+            android:contentDescription="@string/menu_button_a11y"
             android:layout_marginStart="4dp" />
     </LinearLayout>
 

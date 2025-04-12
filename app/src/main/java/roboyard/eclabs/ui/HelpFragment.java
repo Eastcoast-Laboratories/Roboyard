@@ -47,35 +47,44 @@ public class HelpFragment extends BaseGameFragment {
      */
     private void loadHelpContent() {
         // Set help text with formatting
-
-        String helpContent = "How to Play Roboyard\n\n" +
-                "Goal\n" +
-                "Move the colored robots to their matching colored targets. " +
-                "The game is completed when all robots are on their matching targets.\n\n" +
-                "Movement\n" +
-                "- Tap on a robot to select it.\n" +
-                "- Tap on an empty cell to move the selected robot in that direction.\n" +
-                "- Robots will move in straight lines until they hit a wall, another robot, or the edge of the board.\n\n" +
-                "Controls\n" +
-                "- Hint: Shows a suggested move.\n" +
-                "- Reset: Restarts the current level.\n" +
-                "- Save: Saves your current map.\n" +
-                "- Menu: Returns to the main menu.\n\n" +
-                "Accessibility\n" +
-                "This game is fully compatible with TalkBack screen reader. " +
-                "Use explore by touch to hear information about the game elements and buttons. " +
-                "Double-tap to activate buttons or select robots.\n\n" +
-                "Tips\n" +
-                "- Try to solve puzzles in the minimum number of moves.\n" +
-                "- Sometimes you need to move robots to specific positions to clear paths for other robots.\n" +
-                "- If you're stuck, use the Hint feature to get a suggestion.\n";
+        StringBuilder helpContent = new StringBuilder();
         
-        // Set the text
-        helpText.setText(helpContent);
+        // Title
+        helpContent.append(getString(R.string.help_screen_content_title)).append("\n\n");
+        
+        // Goal section
+        helpContent.append(getString(R.string.help_goal_section_title)).append("\n");
+        helpContent.append(getString(R.string.help_goal_description)).append("\n\n");
+        
+        // Movement section
+        helpContent.append(getString(R.string.help_movement_section_title)).append("\n");
+        helpContent.append(getString(R.string.help_movement_point_1)).append("\n");
+        helpContent.append(getString(R.string.help_movement_point_2)).append("\n");
+        helpContent.append(getString(R.string.help_movement_point_3)).append("\n\n");
+        
+        // Controls section
+        helpContent.append(getString(R.string.help_controls_section_title)).append("\n");
+        helpContent.append(getString(R.string.help_controls_point_1)).append("\n");
+        helpContent.append(getString(R.string.help_controls_point_2)).append("\n");
+        helpContent.append(getString(R.string.help_controls_point_3)).append("\n");
+        helpContent.append(getString(R.string.help_controls_point_4)).append("\n\n");
+        
+        // Accessibility section
+        helpContent.append(getString(R.string.help_accessibility_section_title)).append("\n");
+        helpContent.append(getString(R.string.help_accessibility_description)).append("\n\n");
+        
+        // Tips section
+        helpContent.append(getString(R.string.help_tips_section_title)).append("\n");
+        helpContent.append(getString(R.string.help_tips_point_1)).append("\n");
+        helpContent.append(getString(R.string.help_tips_point_2)).append("\n");
+        helpContent.append(getString(R.string.help_tips_point_3));
+        
+        // Set the help text
+        helpText.setText(helpContent.toString());
     }
     
     @Override
     public String getScreenTitle() {
-        return "Help";
+        return getString(R.string.help_title);
     }
 }

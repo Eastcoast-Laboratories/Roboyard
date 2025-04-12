@@ -23,6 +23,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -35,6 +36,10 @@ import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
 import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
+
+import java.util.Locale;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 
 /**
  * Settings screen implemented as a Fragment with native Android UI components.
@@ -60,6 +65,11 @@ public class SettingsFragment extends Fragment {
     private Spinner targetColorsSpinner;
     private Button backButton;
     private Spinner robotCountSpinner;
+    
+    // Language settings
+    private Spinner languageSpinner;
+    private Spinner talkbackLanguageSpinner;
+    private LinearLayout talkbackLanguageContainer;
     
     private List<int[]> validBoardSizes;
     
@@ -150,6 +160,11 @@ public class SettingsFragment extends Fragment {
             backButton = view.findViewById(R.id.back_button);
             robotCountSpinner = view.findViewById(R.id.robot_count_spinner);
             
+            // Language settings
+            languageSpinner = view.findViewById(R.id.language_spinner);
+            talkbackLanguageSpinner = view.findViewById(R.id.talkback_language_spinner);
+            talkbackLanguageContainer = view.findViewById(R.id.talkback_language_container);
+            
             // Set up board size options
             setupBoardSizeOptions();
             
@@ -158,6 +173,9 @@ public class SettingsFragment extends Fragment {
             
             // Set up target colors spinner
             setupTargetColorsSpinner();
+            
+            // Set up language spinners
+            setupLanguageSpinners();
             
             // Load current settings
             loadSettings();
@@ -237,7 +255,9 @@ public class SettingsFragment extends Fragment {
                     emailIntent.putExtra(Intent.EXTRA_TEXT, detailsBuilder.toString());
                     startActivity(Intent.createChooser(emailIntent, "Send Bug Report"));
                 } catch (Exception ex) {
-                    Toast.makeText(requireContext(), "Could not open email app", Toast.LENGTH_SHORT).show();
+                    // Get localized context
+                    Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+                    Toast.makeText(requireContext(), localizedContext.getString(R.string.error_email_app), Toast.LENGTH_SHORT).show();
                     Timber.e(ex, "Failed to send email report");
                 }
             });
@@ -488,8 +508,8 @@ public class SettingsFragment extends Fragment {
                         break;
                     case Constants.DIFFICULTY_IMPOSSIBLE:
                         if (difficultyImpossible != null) difficultyImpossible.setChecked(true);
-                        break;
-                }
+                                break;
+                            }
             } else {
                 Timber.e("difficultyRadioGroup is null");
             }
@@ -528,6 +548,53 @@ public class SettingsFragment extends Fragment {
             }
             
             isUpdatingUI = false;
+            
+            // Load language settings
+            String appLanguage = Preferences.appLanguage;
+            String talkbackLanguage = Preferences.talkbackLanguage;
+            
+            // Set app language spinner selection
+            int appLanguageIndex = 0; // Default to English
+            if ("de".equals(appLanguage)) {
+                appLanguageIndex = 1; // German
+            } else if ("fr".equals(appLanguage)) {
+                appLanguageIndex = 2; // French
+            } else if ("es".equals(appLanguage)) {
+                appLanguageIndex = 3; // Spanish
+            } else if ("zh".equals(appLanguage)) {
+                appLanguageIndex = 4; // Chinese
+            } else if ("ko".equals(appLanguage)) {
+                appLanguageIndex = 5; // Korean
+            }
+            languageSpinner.setSelection(appLanguageIndex);
+            
+            // Set TalkBack language spinner selection
+            int talkbackLanguageIndex = 0; // Default to "Same as app"
+            if ("en".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 1; // English
+            } else if ("de".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 2; // German
+            } else if ("fr".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 3; // French
+            } else if ("es".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 4; // Spanish
+            } else if ("zh".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 5; // Chinese
+            } else if ("ko".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 6; // Korean
+            }
+            talkbackLanguageSpinner.setSelection(talkbackLanguageIndex);
+            
+            // Load robot count
+            int robotCount = Preferences.robotCount;
+            robotCountSpinner.setSelection(robotCount - 1); // Zero-based index
+            
+            // Load target colors
+            int targetColors = Preferences.targetColors;
+            targetColorsSpinner.setSelection(targetColors - 1); // Zero-based index
+            
+            isUpdatingUI = false;
+            Timber.d("Settings loaded successfully");
         } catch (Exception e) {
             Timber.e(e, "Error loading settings");
             isUpdatingUI = false; // Make sure to reset this flag even if an error occurs
@@ -574,7 +641,7 @@ public class SettingsFragment extends Fragment {
                         if (selectedRobotCount > currentTargetColors) {
                             // Adjust robot count to match target colors
                             selectedRobotCount = currentTargetColors;
-                            robotCountSpinner.setSelection(selectedRobotCount - 1, false);
+                            robotCountSpinner.setSelection(selectedRobotCount - 1);
                             
                             // Show a toast to inform the user
                             Toast.makeText(requireContext(), 
@@ -611,11 +678,12 @@ public class SettingsFragment extends Fragment {
                 return;
             }
             
-            // Create adapter with values 1-4
-            ArrayAdapter<Integer> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
+            // Create adapter with localized text values
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             for (int i = 1; i <= 4; i++) {
-                adapter.add(i);
+                // Format as "1 of 4 targets" with localization
+                adapter.add(String.valueOf(i));
             }
             targetColorsSpinner.setAdapter(adapter);
             
@@ -669,6 +737,186 @@ public class SettingsFragment extends Fragment {
     }
     
     /**
+     * Set up language spinners with language options
+     */
+    private void setupLanguageSpinners() {
+        Timber.d("Setting up language spinners");
+        
+        // Set up app language spinner
+        List<String> languages = new ArrayList<>();
+        languages.add(getString(R.string.settings_english));
+        languages.add(getString(R.string.settings_german));
+        languages.add(getString(R.string.settings_french));
+        languages.add(getString(R.string.settings_spanish));
+        languages.add(getString(R.string.settings_chinese));
+        languages.add(getString(R.string.settings_korean));
+        
+        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, languages);
+        languageSpinner.setAdapter(languageAdapter);
+        
+        // Set up TalkBack language spinner (including "Same as app" option)
+        List<String> talkbackLanguages = new ArrayList<>();
+        talkbackLanguages.add(getString(R.string.language_same_as_app));
+        talkbackLanguages.add(getString(R.string.settings_english));
+        talkbackLanguages.add(getString(R.string.settings_german));
+        talkbackLanguages.add(getString(R.string.settings_french));
+        talkbackLanguages.add(getString(R.string.settings_spanish));
+        talkbackLanguages.add(getString(R.string.settings_chinese));
+        talkbackLanguages.add(getString(R.string.settings_korean));
+        
+        ArrayAdapter<String> talkbackLanguageAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, talkbackLanguages);
+        talkbackLanguageSpinner.setAdapter(talkbackLanguageAdapter);
+        
+        // Show/hide TalkBack language selection based on accessibility setting
+        updateTalkbackLanguageVisibility(Preferences.accessibilityMode);
+        
+        // Set listeners for language changes
+        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    String selectedLanguage = languages.get(position);
+                    String languageCode = getLanguageCode(selectedLanguage);
+                    applyLanguageSetting(languageCode);
+                } catch (Exception e) {
+                    Timber.e(e, "Error processing language selection");
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+        
+        talkbackLanguageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    String selectedLanguage = talkbackLanguages.get(position);
+                    String languageCode = getTalkbackLanguageCode(selectedLanguage);
+                    applyTalkbackLanguageSetting(languageCode);
+                } catch (Exception e) {
+                    Timber.e(e, "Error processing TalkBack language selection");
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+    
+    /**
+     * Show or hide TalkBack language settings based on accessibility setting
+     * @param accessibilityEnabled Whether accessibility is enabled
+     */
+    private void updateTalkbackLanguageVisibility(boolean accessibilityEnabled) {
+        if (talkbackLanguageContainer != null) {
+            talkbackLanguageContainer.setVisibility(accessibilityEnabled ? View.VISIBLE : View.GONE);
+        }
+    }
+    
+    /**
+     * Apply language settings
+     * @param languageCode The language code to apply (en, de, fr)
+     */
+    private void applyLanguageSetting(String languageCode) {
+        Timber.d("Applying language setting: %s", languageCode);
+        
+        // Save language preference using proper setter method that persists to SharedPreferences
+        Preferences.setAppLanguage(languageCode);
+        
+        // Apply language change
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+        
+        Resources resources = requireContext().getResources();
+        Configuration config = new Configuration(resources.getConfiguration());
+        config.setLocale(locale);
+        
+        resources.updateConfiguration(config, resources.getDisplayMetrics());
+        
+        // If TalkBack language is set to "Same as app", update it as well
+        if (Preferences.talkbackLanguage.equals(getString(R.string.language_same_as_app))) {
+            applyTalkbackLanguageSetting(languageCode);
+        }
+        
+        // Log for diagnostics
+        Timber.d("ROBOYARD_LANGUAGE: Changed app language to %s", languageCode);
+    }
+    
+    /**
+     * Apply TalkBack language settings
+     * @param languageCode The language code to apply (en, de, fr, or "same" for same as app)
+     */
+    private void applyTalkbackLanguageSetting(String languageCode) {
+        Timber.d("Applying TalkBack language setting: %s", languageCode);
+        
+        // Save TalkBack language preference using proper setter method that persists to SharedPreferences
+        Preferences.setTalkbackLanguage(languageCode);
+        
+        // If set to "same", use app language
+        String actualLanguageCode = languageCode.equals(getString(R.string.talkback_language_same_value)) ? Preferences.appLanguage : languageCode;
+        
+        // Log for diagnostics
+        Timber.d("ROBOYARD_ACCESSIBILITY_LANGUAGE: Changed TalkBack language to %s", actualLanguageCode);
+    }
+    
+    /**
+     * Get the language code for the given language string
+     * @param language The language string (e.g. "English", "Deutsch", "Français")
+     * @return The corresponding language code (e.g. "en", "de", "fr")
+     */
+    private String getLanguageCode(String language) {
+        switch (language) {
+            case "English":
+                return "en";
+            case "Deutsch":
+                return "de";
+            case "Français":
+                return "fr";
+            case "Español":
+                return "es";
+            case "中文":
+                return "zh";
+            case "한국어":
+                return "ko";
+            default:
+                return "en"; // Default to English
+        }
+    }
+    
+    /**
+     * Get the TalkBack language code for the given TalkBack language string
+     * @param language The TalkBack language string (e.g. "Same as app", "English", "Deutsch", "Français")
+     * @return The corresponding TalkBack language code (e.g. "same", "en", "de", "fr")
+     */
+    private String getTalkbackLanguageCode(String language) {
+        switch (language) {
+            case "Same as app":
+                return "same";
+            case "English":
+                return "en";
+            case "Deutsch":
+                return "de";
+            case "Français":
+                return "fr";
+            case "Español":
+                return "es";
+            case "中文":
+                return "zh";
+            case "한국어":
+                return "ko";
+            default:
+                return "same"; // Default to "Same as app"
+        }
+    }
+    
+    /**
      * Helper method to toggle sound safely from any Activity
      */
     private void toggleSound(Activity activity, boolean enabled) {
@@ -705,7 +953,6 @@ public class SettingsFragment extends Fragment {
             }
         } catch (Exception e) {
             Timber.e(e, "Error setting generateNewMapEachTime setting");
-            Toast.makeText(requireContext(), "Failed to update map generation setting", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -723,8 +970,12 @@ public class SettingsFragment extends Fragment {
         
         // Only show toast for small boards (less than 16x16)
         if (currentSize != null && (currentSize[0] < 16 || currentSize[1] < 16)) {
+            // Get localized context
+            Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+            
+            // Use localized warning message
             Toast toast = Toast.makeText(requireContext(),
-                    "Impossible on small boards may take several minutes to generate a fitting map",
+                    localizedContext.getString(R.string.impossible_small_board_warning),
                     Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
@@ -746,7 +997,6 @@ public class SettingsFragment extends Fragment {
             try {
                 // Open Android's accessibility settings
                 Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } catch (Exception e) {
                 // Handle any exceptions that might occur on newer Android versions
@@ -758,7 +1008,7 @@ public class SettingsFragment extends Fragment {
         });
         
         // Add a cancel button
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
+        builder.setNegativeButton("Other screen reader", (dialog, which) -> {
             dialog.dismiss();
         });
         
@@ -822,10 +1072,14 @@ public class SettingsFragment extends Fragment {
                             return;
                         }
                         
-                        String difficulty = "Beginner"; // default
+                        Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+                        String difficulty = localizedContext.getString(R.string.difficulty_beginner); // default
                         int difficultyLevel = Constants.DIFFICULTY_BEGINNER; // default
 
                         if (checkedId == R.id.difficulty_beginner) {
+                            difficulty = localizedContext.getString(R.string.difficulty_beginner);
+                            difficultyLevel = Constants.DIFFICULTY_BEGINNER;
+                            
                             // Only set board size to 12x14 if current size is larger
                             if (Preferences.boardSizeWidth * Preferences.boardSizeHeight > 12 * 14) {
                                 // Find the 12x14 board size in the validBoardSizes list
@@ -845,9 +1099,9 @@ public class SettingsFragment extends Fragment {
                                     // Update the board size in preferences
                                     Preferences.setBoardSize(12, 14);
                                     isUpdatingUI = false;
-                                    Timber.d("Automatically set board size to 12x14 for Beginner difficulty");
+                                    Timber.d("[DIFFICULTY] Automatically set board size to 12x14 for Beginner difficulty");
                                 } else {
-                                    Timber.d("12x14 board size not found for Beginner difficulty");
+                                    Timber.d("[DIFFICULTY] 12x14 board size not found for Beginner difficulty");
                                 }
                             }
                             
@@ -857,17 +1111,17 @@ public class SettingsFragment extends Fragment {
                                 targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
                                 Preferences.setTargetColors(1);
                                 isUpdatingUI = false;
-                                Timber.d("Automatically set target colors to 1 for Beginner difficulty");
+                                Timber.d("[DIFFICULTY] Automatically set target colors to 1 for Beginner difficulty");
                             }
                             
                         } else if (checkedId == R.id.difficulty_advanced) {
-                            difficulty = "Advanced";
+                            difficulty = localizedContext.getString(R.string.difficulty_advanced);
                             difficultyLevel = Constants.DIFFICULTY_ADVANCED;
                         } else if (checkedId == R.id.difficulty_insane) {
-                            difficulty = "Insane";
+                            difficulty = localizedContext.getString(R.string.difficulty_insane);
                             difficultyLevel = Constants.DIFFICULTY_INSANE; 
                         } else if (checkedId == R.id.difficulty_impossible) {
-                            difficulty = "Impossible";
+                            difficulty = localizedContext.getString(R.string.difficulty_impossible);
                             difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE; 
                             // Show warning toast for impossible difficulty
                             showImpossibleDifficultyToast();

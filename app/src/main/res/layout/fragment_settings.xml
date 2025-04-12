@@ -12,7 +12,7 @@
         android:id="@+id/title_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Settings"
+        android:text="@string/settings_title"
         android:textSize="@dimen/settings_title_text_size"
         android:textStyle="bold"
         android:textAlignment="center"
@@ -44,7 +44,7 @@
                 android:id="@+id/board_size_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Board Size:"
+                android:text="@string/settings_board_size"
                 android:textSize="@dimen/settings_label_text_size"
                 android:textStyle="bold"
                 android:textColor="#ffffff"
@@ -61,12 +61,62 @@
                 android:focusable="true"
                 android:clickable="true" />
 
+            <!-- Language Section -->
+            <TextView
+                android:id="@+id/language_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/language_settings_label"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/language_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/language_settings_a11y"
+                android:minHeight="48dp"
+                android:layout_marginBottom="16dp"
+                android:focusable="true"
+                android:clickable="true" />
+
+            <!-- TalkBack Language Section (only shown when accessibility is enabled) -->
+            <LinearLayout
+                android:id="@+id/talkback_language_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:id="@+id/talkback_language_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accessibility_language_label"
+                    android:textSize="@dimen/settings_label_text_size"
+                    android:textStyle="bold"
+                    android:textColor="#ffffff"
+                    android:layout_marginBottom="8dp" />
+
+                <Spinner
+                    android:id="@+id/talkback_language_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/accessibility_language_a11y"
+                    android:minHeight="48dp"
+                    android:focusable="true"
+                    android:clickable="true" />
+            </LinearLayout>
+
             <!-- Difficulty Section -->
             <TextView
                 android:id="@+id/difficulty_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Difficulty:"
+                android:text="@string/settings_difficulty"
                 android:textSize="@dimen/settings_label_text_size"
                 android:textStyle="bold"
                 android:textColor="#ffffff"
@@ -84,7 +134,7 @@
                     android:id="@+id/difficulty_beginner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Beginner"
+                    android:text="@string/settings_beginner"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -94,7 +144,7 @@
                     android:id="@+id/difficulty_advanced"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Advanced"
+                    android:text="@string/settings_advanced"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -104,7 +154,7 @@
                     android:id="@+id/difficulty_insane"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Insane"
+                    android:text="@string/settings_insane"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -114,7 +164,7 @@
                     android:id="@+id/difficulty_impossible"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Impossible"
+                    android:text="@string/settings_impossible"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -126,7 +176,7 @@
                 android:id="@+id/new_map_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New Map Each Time:"
+                android:text="@string/settings_new_map_each_time"
                 android:textSize="@dimen/settings_label_text_size"
                 android:textStyle="bold"
                 android:textColor="#ffffff"
@@ -144,7 +194,7 @@
                     android:id="@+id/new_map_yes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Yes"
+                    android:text="@string/settings_yes"
                     android:textSize="@dimen/settings_option_text_size"
                     android:layout_marginEnd="32dp"
                     android:focusable="true"
@@ -158,7 +208,7 @@
                     android:id="@+id/new_map_no"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No"
+                    android:text="@string/settings_no"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -173,7 +223,7 @@
                 android:id="@+id/target_count_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Robots that must reach targets:"
+                android:text="@string/settings_robots_reach_targets"
                 android:textSize="@dimen/settings_label_text_size"
                 android:textStyle="bold"
                 android:textColor="#ffffff"
@@ -197,7 +247,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="out of"
+                    android:text="@string/settings_out_of"
                     android:textSize="@dimen/settings_option_text_size"
                     android:textColor="#ffffff"
                     android:layout_marginStart="8dp"
@@ -215,7 +265,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="targets"
+                    android:text="@string/settings_targets"
                     android:textSize="@dimen/settings_option_text_size"
                     android:textColor="#ffffff"
                     android:layout_marginStart="8dp"
@@ -227,7 +277,7 @@
                 android:id="@+id/sound_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Sound:"
+                android:text="@string/settings_sound"
                 android:textSize="@dimen/settings_label_text_size"
                 android:textStyle="bold"
                 android:textColor="#ffffff"
@@ -245,22 +295,26 @@
                     android:id="@+id/sound_on"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="On"
+                    android:text="@string/settings_yes"
                     android:textSize="@dimen/settings_option_text_size"
                     android:layout_marginEnd="32dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:contentDescription="Turn sound on" />
+                    android:contentDescription="Enable sound"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"/>
 
                 <RadioButton
                     android:id="@+id/sound_off"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Off"
+                    android:text="@string/settings_no"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
-                    android:contentDescription="Turn sound off" />
+                    android:contentDescription="Disable sound"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"/>
             </RadioGroup>
 
             <!-- Accessibility Mode Section (secret: black on black) -->
