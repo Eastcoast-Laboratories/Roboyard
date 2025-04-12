@@ -62,6 +62,7 @@
     <!-- Additional localization strings -->
     <string name="of">de</string>
     <string name="colors">couleurs</string>
+    <string name="color_count_format">%1$d sur %2$d couleurs</string>
     <string name="impossible_small_board_warning">Le niveau Impossible sur les petits plateaux peut prendre plusieurs minutes pour générer une carte adaptée</string>
     
     <!-- Toast messages -->

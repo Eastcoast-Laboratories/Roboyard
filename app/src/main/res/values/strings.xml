@@ -352,7 +352,6 @@
     
     <!-- Additional localization strings -->
     <string name="of" comment="Connecting word for phrases like '3 of 4 colors' [SettingsFragment]">of</string>
-    <string name="colors" comment="Plural form of 'color' [SettingsFragment]">colors</string>
     <string name="impossible_small_board_warning" comment="Warning shown when playing on small board with impossible difficulty [SettingsFragment]">Impossible on small boards may take several minutes to generate a fitting map</string>
     
     <!-- Toast messages -->

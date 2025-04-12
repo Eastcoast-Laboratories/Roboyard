@@ -670,10 +670,8 @@ public class SettingsFragment extends Fragment {
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             for (int i = 1; i <= 4; i++) {
-                // Format as "1 of 4 colors" with localization
-                String text = i + " " + getString(R.string.of) + " " + 
-                             getString(R.string.colors);
-                adapter.add(text);
+                // Format as "1 of 4 targets" with localization
+                adapter.add(String.valueOf(i));
             }
             targetColorsSpinner.setAdapter(adapter);
             
