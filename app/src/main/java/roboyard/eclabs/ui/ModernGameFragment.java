@@ -1278,7 +1278,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Announce the newly selected robot with more detailed information
         if (isTalkBackEnabled() || Preferences.accessibilityMode) {
             String robotColor = getLocalizedRobotColorNameByGridElement(nextRobot);
-            String announcementMessage = robotColor + " robot selected";
+            String announcementMessage = getString(R.string.robot_selected_a11y, robotColor);
             
             // Check for goal robot by examining goal elements in the game state
             boolean hasGoal = false;
@@ -1525,7 +1525,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (eastDistance > 0) {
             announcement.append(eastDistance).append(" ").append(getString(R.string.squares_east)).append(" ").append(getString(R.string.until)).append(" ").append(eastObstacle).append(", ");
         } else {
-            announcement.append("no movement east, ");
+            announcement.append(getString(R.string.no_movement_east)).append(", ");
         }
         
         // Check west movement (left)
@@ -1553,7 +1553,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (westDistance > 0) {
             announcement.append(westDistance).append(" ").append(getString(R.string.squares_west)).append(" ").append(getString(R.string.until)).append(" ").append(westObstacle).append(", ");
         } else {
-            announcement.append("no movement west, ");
+            announcement.append(getString(R.string.no_movement_west)).append(", ");
         }
         
         // Check north movement (up)
@@ -1581,7 +1581,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (northDistance > 0) {
             announcement.append(northDistance).append(" ").append(getString(R.string.squares_north)).append(" ").append(getString(R.string.until)).append(" ").append(northObstacle).append(", ");
         } else {
-            announcement.append("no movement north, ");
+            announcement.append(getString(R.string.no_movement_north)).append(", ");
         }
         
         // Check south movement (down)
@@ -1609,7 +1609,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (southDistance > 0) {
             announcement.append(southDistance).append(" ").append(getString(R.string.squares_south)).append(" ").append(getString(R.string.until)).append(" ").append(southObstacle);
         } else {
-            announcement.append("no movement south");
+            announcement.append(getString(R.string.no_movement_south));
         }
         
         // Announce the message
