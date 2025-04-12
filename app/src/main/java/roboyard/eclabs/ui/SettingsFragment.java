@@ -967,7 +967,6 @@ public class SettingsFragment extends Fragment {
             try {
                 // Open Android's accessibility settings
                 Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } catch (Exception e) {
                 // Handle any exceptions that might occur on newer Android versions
@@ -979,7 +978,7 @@ public class SettingsFragment extends Fragment {
         });
         
         // Add a cancel button
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
+        builder.setNegativeButton("Other screen reader", (dialog, which) -> {
             dialog.dismiss();
         });
         

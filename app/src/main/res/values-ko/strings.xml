@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+    <string name="action_settings">uc124uc815</string>
+
+    <string name="new_random_game">uc0c8 uac8cuc784</string>
+    <string name="new_random_game_a11y">uc0c8 uac8cuc784 uc2dcuc791</string>
+    
+    <string name="level_game">ub808ubca8 uac8cuc784</string>
+    <string name="level_game_a11y">ubbf8ub9ac uc815ud574uc9c4 uac8cuc784 ub808ubca8 ud50cub808uc774</string>
+    
+    <string name="load_game">uac8cuc784 ubd88ub7ecuc624uae30</string>
+    <string name="load_game_a11y">uac8cuc784 ubd88ub7ecuc624uae30</string>
+    
+    <string name="settings">uc124uc815</string>
+    <string name="settings_a11y">uac8cuc784 uc124uc815</string>
+    
+    <string name="help">ud50cub808uc774 ubc29ubc95</string>
+    <string name="help_a11y">uac8cuc784 uc124uba85</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">ud06cub808ub527</string>
+</resources>
