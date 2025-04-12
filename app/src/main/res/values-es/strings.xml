@@ -154,7 +154,10 @@
     <string name="restart_button">Reiniciar</string>
     <string name="save_map_button">Guardar Mapa</string>
     <string name="new_game_button">Nuevo Juego</string>
-    <string name="reset_button">Reiniciar</string>
+    <string name="reset_button">Restablecer</string>
+    <string name="next_robot_button">Siguiente Robot</string>
+    <string name="announce_hint">Anunciar Pista</string>
+    <string name="hint_cancel_button">✖️ Pista</string>
     
     <!-- Accessibility Descriptions -->
     <string name="back_button_a11y">Volver</string>
@@ -201,6 +204,11 @@
     <string name="no_valid_hint">No hay pista válida disponible</string>
     <string name="error_displaying_hint">Error al mostrar la pista</string>
 
+    <!-- AI messages -->
+    <string name="ai_solution_format">La IA ha encontrado una solución en %1$d movimientos</string>
+    <string name="ai_solution_less_moves">La IA ha encontrado una solución en menos de %1$d movimientos</string>
+    <string name="completed_in_moves">Completado en %1$d movimientos</string>
+    
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Principiante</string>
     <string name="difficulty_advanced">Avanzado</string>
