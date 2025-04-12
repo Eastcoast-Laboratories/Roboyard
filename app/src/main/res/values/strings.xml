@@ -375,4 +375,19 @@
     <string name="settings_advanced">Advanced</string>
     <string name="settings_insane">Insane</string>
     <string name="settings_impossible">Impossible</string>
+
+    <!-- Level Selection Item Strings -->
+    <string name="level_robots_label">robots:</string>
+    <string name="level_squares_label">squares:</string>
+    
+    <!-- Hint Direction Symbols -->
+    <string name="hint_direction_left">◀</string>
+    <string name="hint_direction_right">▶</string>
+    <string name="hint_direction_up">▲</string>
+    <string name="hint_direction_down">▼</string>
+    
+    <!-- Additional hint strings -->
+    <string name="hint_solution_found">Found a solution in %1$d moves</string>
+    <string name="hint_move_robot_first">Move the %1$s robot first</string>
+
 </resources>

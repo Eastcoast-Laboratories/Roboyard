@@ -354,4 +354,18 @@
     <string name="cancel_button">Cancel</string>
     <string name="hint_button">💡Hinweis</string>
     <string name="cancel_hint_button">🔍 Ausblenden</string>
+
+    <!-- Level Selection Item Strings -->
+    <string name="level_robots_label">Roboter:</string>
+    <string name="level_squares_label">Felder:</string>
+    
+    <!-- Hint Direction Symbols -->
+    <string name="hint_direction_left">◀</string>
+    <string name="hint_direction_right">▶</string>
+    <string name="hint_direction_up">▲</string>
+    <string name="hint_direction_down">▼</string>
+    
+    <!-- Additional hint strings -->
+    <string name="hint_solution_found">Lösung gefunden in %1$d Zügen</string>
+    <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
 </resources>
