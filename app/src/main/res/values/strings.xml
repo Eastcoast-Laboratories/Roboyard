@@ -68,18 +68,10 @@
 
     <!-- Level Selection Screen -->
     <string name="level_button_description" comment="Description for level selection buttons">Level %1$d</string>
-    <string name="level_locked" comment="Text shown for locked/unavailable levels">You need %1$d more stars to unlock this level</string>
-    <string name="level_completed" comment="Text shown for completed levels">Level Complete!</string>
     <string name="level_score" comment="Text showing the score achieved on a level"></string>
     <string name="level_best_score" comment="Text showing the best score achieved on a level"></string>
     <string name="level_stars" comment="Text showing stars earned on a level">You earned %1$d stars</string>
-    <string name="level_locked_message" comment="Message shown when trying to access a locked level">Level locked</string>
-    <string name="level_format" comment="Format for level numbering">Level %1$d</string>
-    <string name="level_filter_all" comment="Filter option to show all levels">All</string>
-    <string name="level_filter_played" comment="Filter option to show only played levels">Played</string>
-    <string name="level_filter_unsolved" comment="Filter option to show only unsolved levels">Unsolved</string>
-    <string name="level_difficulty_format" comment="Format for showing level difficulty">Difficulty: %1$s</string>
-    <string name="level_size_format" comment="Format for showing level size">Size: %1$s</string>
+    <string name="level_locked" comment="Text shown for locked/unavailable levels">You need %1$d more stars to unlock this level</string>
 
     <string name="back">Back</string>
     <string name="back_description">Return to previous screen</string>
@@ -93,7 +85,6 @@
     <string name="level_stars_description">You earned %1$d stars</string>
     <string name="level_stars_a11y">You earned %1$d stars</string>
     <string name="stars_count">%1$d Stars</string>
-    <string name="level_locked">You need %1$d more stars to unlock this level</string>
     <string name="random_game_complete">Level Complete!</string>
     <string name="new_random_game_button">New Game</string>
     <string name="level_moves_format">Moves: %1$d/%2$d</string>
@@ -115,11 +106,6 @@
     <string name="save_game_screen_title" comment="Title for the save game screen">Save Game</string>
     <string name="save_slots_tab">Save Slots</string>
     <string name="history_tab">History</string>
-    <string name="save_slot_format" comment="Format for save slot numbering">Slot %1$d</string>
-    <string name="save_empty" comment="Text shown for empty save slots">Empty</string>
-    <string name="save_date_format" comment="Format for showing save date">Saved: %1$s</string>
-    <string name="save_level_format" comment="Format for showing saved level info">Level %1$s - Moves: %2$d</string>
-    <string name="save_failed" comment="Message shown when saving fails">Failed to save game.</string>
     <string name="save_confirm_title">Save Game</string>
     <string name="save_confirm_message">Save current game to this slot?</string>
     <string name="load_confirm_title">Load Game</string>
@@ -186,21 +172,9 @@
     <string name="level_category_intermediate">Intermediate</string>
     <string name="level_category_advanced">Advanced</string>
     <string name="level_category_expert">Expert</string>
-    <string name="level_locked_message">Level locked</string>
-    <string name="level_format">Level %1$d</string>
-    <string name="level_filter_all">All</string>
-    <string name="level_filter_played">Played</string>
-    <string name="level_filter_unsolved">Unsolved</string>
-    <string name="level_difficulty_format">Difficulty: %1$s</string>
-    <string name="level_size_format">Size: %1$s</string>
 
     <!-- Save game screen -->
     <string name="save_game_title">Save Game</string>
-    <string name="save_slot_format">Slot %1$d</string>
-    <string name="save_empty">Empty</string>
-    <string name="save_date_format">Saved: %1$s</string>
-    <string name="save_level_format">Level %1$s - Moves: %2$d</string>
-    <string name="save_failed">Failed to save game.</string>
     
     <!-- Game screen -->
     <string name="game_move_count" comment="used in the game info box">Moves: %1$d</string>
@@ -330,7 +304,6 @@
     <string name="unique_map_id" comment="Unique identifier for a game map">%1$s</string>
     <string name="empty_text" comment="Empty placeholder text"></string>
     <string name="level_id_text" comment="Text showing the current level number">Level %1$d</string>
-    <string name="level_completed" comment="Message shown when a level is completed">Level %1$d completed in %2$d moves</string>
     <string name="stars_earned" comment="Message showing stars earned for level completion">You earned %1$d stars</string>
     <string name="completed_in_moves" comment="Short text showing moves used to complete level">Completed in %1$d moves</string>
     <string name="starting_level" comment="Message shown when starting a level">Starting level %1$d</string>

@@ -19,326 +19,357 @@ MAGENTA="\033[0;35m"
 NC="\033[0m" # No Color
 BOLD="\033[1m"
 
+# Project directories
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RES_DIR="$PROJECT_DIR/app/src/main/res"
 SRC_DIR="$PROJECT_DIR/app/src/main"
 DEV_DIR="$PROJECT_DIR/dev"
 LOG_FILE="$DEV_DIR/unused_strings_cleanup.log"
 TODO_FILE="$DEV_DIR/strings_todo.md"
+COMMIT_FILE="$DEV_DIR/commit_message.txt"
 
 # Initialize log file
-echo "String Resources Cleanup Log - $(date)" > "$LOG_FILE"
-echo "===================================" >> "$LOG_FILE"
+echo "===== Roboyard String Resource Cleanup Log =====" > "$LOG_FILE"
+echo "Date: $(date)" >> "$LOG_FILE"
+echo "Working directory: $PROJECT_DIR" >> "$LOG_FILE"
+echo >> "$LOG_FILE"
 
-echo -e "${BOLD}Starting string resources cleanup in Roboyard project...${NC}"
-echo "Working in: $PROJECT_DIR"
-echo 
-
-# Function to extract string names from a strings.xml file
-extract_string_names() {
-    grep -o 'name="[^"]*"' "$1" | sed 's/name="\([^"]*\)"/\1/'
-}
-
-# Find all strings.xml files
+# Find all string resource files
 STRINGS_FILES=($(find "$RES_DIR" -name "strings.xml"))
-echo -e "${BOLD}Found ${#STRINGS_FILES[@]} string resource files:${NC}"
+
+echo -e "${BLUE}Starting string resources cleanup in Roboyard project...${NC}"
+echo "Working in: $PROJECT_DIR"
+echo
+
+echo "Found ${#STRINGS_FILES[@]} string resource files:"
 for file in "${STRINGS_FILES[@]}"; do
     echo "- $file"
 done
-echo 
+echo
 
-# Step 1: Check for and fix duplicate string definitions
+###############################################################
+# Step 1: Fix duplicate string definitions, especially in values-de
+###############################################################
 echo -e "${BOLD}Step 1: Checking for duplicate string definitions...${NC}"
-DUPE_COUNT=0
-DUPE_FIXED=0
+echo "Step 1: Checking for duplicate string definitions..." >> "$LOG_FILE"
 
-for file in "${STRINGS_FILES[@]}"; do
-    echo -e "${MAGENTA}Checking for duplicates in $file...${NC}"
-    FILE_DUPES=0
+# First handle German cancel_button issue specifically 
+DE_FILE="$RES_DIR/values-de/strings.xml"
+if [ -f "$DE_FILE" ]; then
+    # Check for duplicate cancel_button entries
+    CANCEL_BUTTON_COUNT=$(grep -c '<string name="cancel_button"' "$DE_FILE")
     
-    # Get all unique string names in this file
-    UNIQUE_NAMES=($(extract_string_names "$file" | sort | uniq))
+    if [ "$CANCEL_BUTTON_COUNT" -gt 1 ]; then
+        echo -e "${RED}Found duplicate cancel_button in German file ($CANCEL_BUTTON_COUNT entries)${NC}" | tee -a "$LOG_FILE"
+        
+        # Create a temporary file
+        TEMP_FILE=$(mktemp)
+        
+        # Create fixed content by removing all cancel_button entries
+        grep -v '<string name="cancel_button"' "$DE_FILE" > "$TEMP_FILE"
+        
+        # Find the line before </resources> to add our fixed entry
+        END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
+        INSERT_LINE=$((END_LINE - 1))
+        
+        # Split the file
+        head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
+        tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
+        
+        # Add the correct cancel_button entry
+        cat "${TEMP_FILE}.head" > "$TEMP_FILE"
+        echo '    <string name="cancel_button" comment="Generic cancel button text">Abbrechen</string>' >> "$TEMP_FILE"
+        cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
+        
+        # Replace the original file
+        cp "$TEMP_FILE" "$DE_FILE"
+        rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
+        
+        echo -e "${GREEN}Fixed duplicate cancel_button in German file${NC}" | tee -a "$LOG_FILE"
+    fi
     
-    for name in "${UNIQUE_NAMES[@]}"; do
-        # Count occurrences of this string name
-        COUNT=$(grep -c "<string name=\"$name\"" "$file" || true)
+    # Also handle duplicate hint_button entries in German file
+    HINT_BUTTON_COUNT=$(grep -c '<string name="hint_button"' "$DE_FILE")
+    
+    if [ "$HINT_BUTTON_COUNT" -gt 1 ]; then
+        echo -e "${RED}Found duplicate hint_button in German file ($HINT_BUTTON_COUNT entries)${NC}" | tee -a "$LOG_FILE"
+        
+        # Create a temporary file
+        TEMP_FILE=$(mktemp)
+        
+        # Create fixed content by removing all hint_button entries
+        grep -v '<string name="hint_button"' "$DE_FILE" > "$TEMP_FILE"
+        
+        # Find the line before </resources> to add our fixed entry
+        END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
+        INSERT_LINE=$((END_LINE - 1))
+        
+        # Split the file
+        head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
+        tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
+        
+        # Add the correct hint_button entry (with emoji)
+        cat "${TEMP_FILE}.head" > "$TEMP_FILE"
+        echo '    <string name="hint_button" comment="Button to get a hint">💡Hinweis</string>' >> "$TEMP_FILE"
+        cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
+        
+        # Replace the original file
+        cp "$TEMP_FILE" "$DE_FILE"
+        rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
+        
+        echo -e "${GREEN}Fixed duplicate hint_button in German file${NC}" | tee -a "$LOG_FILE"
+    fi
+    
+    # Also handle duplicate cancel_hint_button entries in German file
+    CANCEL_HINT_BUTTON_COUNT=$(grep -c '<string name="cancel_hint_button"' "$DE_FILE")
+    
+    if [ "$CANCEL_HINT_BUTTON_COUNT" -gt 1 ]; then
+        echo -e "${RED}Found duplicate cancel_hint_button in German file ($CANCEL_HINT_BUTTON_COUNT entries)${NC}" | tee -a "$LOG_FILE"
+        
+        # Create a temporary file
+        TEMP_FILE=$(mktemp)
+        
+        # Create fixed content by removing all cancel_hint_button entries
+        grep -v '<string name="cancel_hint_button"' "$DE_FILE" > "$TEMP_FILE"
+        
+        # Find the line before </resources> to add our fixed entry
+        END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
+        INSERT_LINE=$((END_LINE - 1))
+        
+        # Split the file
+        head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
+        tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
+        
+        # Add the correct cancel_hint_button entry (with emoji)
+        cat "${TEMP_FILE}.head" > "$TEMP_FILE"
+        echo '    <string name="cancel_hint_button" comment="Button to hide hints">🔍 Ausblenden</string>' >> "$TEMP_FILE"
+        cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
+        
+        # Replace the original file
+        cp "$TEMP_FILE" "$DE_FILE"
+        rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
+        
+        echo -e "${GREEN}Fixed duplicate cancel_hint_button in German file${NC}" | tee -a "$LOG_FILE"
+    fi
+fi
+
+# Now handle remaining specific duplicate entries in main values/strings.xml
+MAIN_FILE="$RES_DIR/values/strings.xml"
+if [ -f "$MAIN_FILE" ]; then
+    # Known duplicates to fix
+    KNOWN_DUPLICATES=("level_completed" "level_difficulty_format" "level_filter_all" 
+                        "level_filter_played" "level_filter_unsolved" "level_format" 
+                        "level_locked" "level_locked_message" "level_size_format" 
+                        "save_date_format" "save_empty" "save_failed" 
+                        "save_level_format" "save_slot_format")
+    
+    for name in "${KNOWN_DUPLICATES[@]}"; do
+        # Check if this string has duplicates
+        COUNT=$(grep -c "<string name=\"$name\"" "$MAIN_FILE")
         
         if [ "$COUNT" -gt 1 ]; then
-            DUPE_COUNT=$((DUPE_COUNT + 1))
-            FILE_DUPES=$((FILE_DUPES + 1))
-            echo -e "${RED}  Duplicate string found: $name appears $COUNT times${NC}"
-            echo "Duplicate string found in $file: $name appears $COUNT times" >> "$LOG_FILE"
+            echo -e "${YELLOW}Fixing duplicate: $name ($COUNT occurrences)${NC}" | tee -a "$LOG_FILE"
             
-            # Keep only the version with a comment if available, otherwise keep the first occurrence
-            if grep -q "<string name=\"$name\" comment" "$file"; then
-                # Keep the version with a comment and remove duplicates without comments
-                echo "  Keeping version with comment, removing others" >> "$LOG_FILE"
-                
-                # Create a temporary file with all content except the duplicated string
-                TEMPFILE="$(mktemp)"
-                # More robust duplicate removal - use XML parser or line-by-line processing
-                # First, write all lines up to first occurrence of the string
-                FIRST_LINE=$(grep -n "<string name=\"$name\"" "$file" | head -1 | cut -d ':' -f1)
-                head -n $((FIRST_LINE-1)) "$file" > "$TEMPFILE"
-                
-                # Add the first occurrence of the string
-                grep -m 1 "<string name=\"$name\"" "$file" >> "$TEMPFILE"
-                
-                # Add all lines after the last occurrence
-                LAST_LINE=$(grep -n "<string name=\"$name\"" "$file" | tail -1 | cut -d ':' -f1)
-                tail -n +$((LAST_LINE+1)) "$file" >> "$TEMPFILE"
-                
-                # Make sure we keep the XML structure intact
-                if ! grep -q "</resources>" "$TEMPFILE"; then
-                    echo "</resources>" >> "$TEMPFILE"
-                fi
-                
-                # Copy back to original file
-                cp "$TEMPFILE" "$file"
-                rm "$TEMPFILE"
-                DUPE_FIXED=$((DUPE_FIXED + 1))
-            else
-                # Keep only the first occurrence
-                echo "  Keeping first occurrence, removing others" >> "$LOG_FILE"
-                
-                # Create a temporary file with all content except the duplicated string
-                TEMPFILE="$(mktemp)"
-                # More robust duplicate removal - use XML parser or line-by-line processing
-                # First, write all lines up to first occurrence of the string
-                FIRST_LINE=$(grep -n "<string name=\"$name\"" "$file" | head -1 | cut -d ':' -f1)
-                head -n $((FIRST_LINE-1)) "$file" > "$TEMPFILE"
-                
-                # Add the first occurrence of the string
-                grep -m 1 "<string name=\"$name\"" "$file" >> "$TEMPFILE"
-                
-                # Add all lines after the last occurrence
-                LAST_LINE=$(grep -n "<string name=\"$name\"" "$file" | tail -1 | cut -d ':' -f1)
-                tail -n +$((LAST_LINE+1)) "$file" >> "$TEMPFILE"
-                
-                # Make sure we keep the XML structure intact
-                if ! grep -q "</resources>" "$TEMPFILE"; then
-                    echo "</resources>" >> "$TEMPFILE"
-                fi
-                
-                # Copy back to original file
-                cp "$TEMPFILE" "$file"
-                rm "$TEMPFILE"
-                DUPE_FIXED=$((DUPE_FIXED + 1))
-            fi
+            # Create temporary file without the string
+            TEMP_FILE=$(mktemp)
+            grep -v "<string name=\"$name\"" "$MAIN_FILE" > "$TEMP_FILE"
+            
+            # Get the first occurrence
+            FIRST_OCCURRENCE=$(grep -m 1 "<string name=\"$name\"" "$MAIN_FILE")
+            
+            # Find where to insert it (before </resources>)
+            END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
+            INSERT_LINE=$((END_LINE - 1))
+            
+            # Split the file
+            head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
+            tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
+            
+            # Reassemble with the first occurrence restored
+            cat "${TEMP_FILE}.head" > "$TEMP_FILE"
+            echo "    $FIRST_OCCURRENCE" >> "$TEMP_FILE"
+            cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
+            
+            # Replace original file
+            cp "$TEMP_FILE" "$MAIN_FILE"
+            rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
+        fi
+    done
+fi
+
+echo -e "${GREEN}Duplicate string handling complete.${NC}"
+echo "Duplicate string handling complete." >> "$LOG_FILE"
+echo
+
+###############################################################
+# Step 2: Identify completely unused strings
+###############################################################
+echo -e "${BOLD}Step 2: Checking for unused string resources...${NC}"
+echo "Step 2: Checking for unused string resources..." >> "$LOG_FILE"
+
+# Extract strings from the default resource file
+DEFAULT_STRINGS_FILE="$RES_DIR/values/strings.xml"
+echo "Extracting strings from default resource file..." | tee -a "$LOG_FILE"
+ALL_STRINGS=$(grep -o '<string name="[^"]*"' "$DEFAULT_STRINGS_FILE" | cut -d '"' -f2)
+STRING_NAMES=()
+
+# Convert to an array
+while read -r line; do
+    STRING_NAMES+=("$line")
+done <<< "$ALL_STRINGS"
+
+echo "Found ${#STRING_NAMES[@]} strings in default resource file." | tee -a "$LOG_FILE"
+echo
+
+# Special strings that should never be removed even if unused
+SPECIAL_PATTERNS=("app_name" ".*_a11y" ".*translatable")
+
+# Arrays to track string status
+UNUSED_STRINGS=()
+
+echo "Checking for unused strings..." | tee -a "$LOG_FILE"
+
+# Check each string for usage
+for name in "${STRING_NAMES[@]}"; do
+    # Skip special strings that should never be removed
+    SKIP=false
+    for pattern in "${SPECIAL_PATTERNS[@]}"; do
+        if [[ "$name" =~ $pattern ]]; then
+            echo "Skipping special string: $name (considered used)" | tee -a "$LOG_FILE"
+            SKIP=true
+            break
         fi
     done
     
-    if [ "$FILE_DUPES" -eq 0 ]; then
-        echo -e "${GREEN}  No duplicates found.${NC}"
-    else
-        echo -e "${YELLOW}  Fixed $FILE_DUPES duplicate strings in this file.${NC}"
-    fi
-done
-
-echo 
-if [ "$DUPE_COUNT" -gt 0 ]; then
-    echo -e "${BOLD}Fixed $DUPE_FIXED/$DUPE_COUNT duplicate string definitions.${NC}"
-else
-    echo -e "${GREEN}${BOLD}No duplicate string definitions found.${NC}"
-fi
-echo 
-
-# Step 2: Find and remove completely unused strings
-echo -e "${BOLD}Step 2: Checking for unused string resources...${NC}"
-
-# Extract strings from default strings.xml again in case we fixed duplicates
-DEFAULT_STRINGS_FILE="$RES_DIR/values/strings.xml"
-echo -e "${BOLD}Extracting strings from default resource file...${NC}"
-STRING_NAMES=($(extract_string_names "$DEFAULT_STRINGS_FILE"))
-echo "Found ${#STRING_NAMES[@]} strings in default resource file."
-echo 
-
-TOTAL_UNUSED=0
-COMPLETELY_UNUSED=0
-REFERENCED_NOT_IMPLEMENTED=0
-UNUSED_STRINGS=()
-TODO_STRINGS=()
-
-echo -e "${BOLD}Checking for unused strings...${NC}"
-
-# Initialize todo file
-echo "# Strings Todo List" > "$TODO_FILE"
-echo "Generated on $(date)" >> "$TODO_FILE"
-echo "" >> "$TODO_FILE"
-echo "## Completely Unused Strings" >> "$TODO_FILE"
-echo "These strings are not referenced anywhere in the codebase and can be safely removed:" >> "$TODO_FILE"
-echo "" >> "$TODO_FILE"
-
-# Only search in Java files that are part of the project, excluding TODOs and driftingdroids
-JAVA_SRC_FILES=$(find "/var/www/Roboyard/app/src/main" -name "*.java" | grep -v "TODO" | grep -v "driftingdroids")
-
-# Check each string to see if it's used in code
-for string_name in "${STRING_NAMES[@]}"; do
-    # Skip strings with special patterns (app name, launcher names, etc.)
-    if [[ "$string_name" == "app_name" || \
-          "$string_name" == "launcher_name" || \
-          "$string_name" == *"_a11y" || \
-          "$string_name" == *"translatable"* ]]; then
-        echo -e "${YELLOW}Skipping special string: $string_name (considered used)${NC}"
-        echo "Skipping special string: $string_name (considered used)" >> "$LOG_FILE"
+    if [ "$SKIP" = true ]; then
         continue
     fi
     
-    # Search for the string in layout XML files (but not in values directories)
-    XML_USAGE=$(find "$SRC_DIR/res" -name "*.xml" | grep -v "/values" | xargs grep -l "@string/${string_name}\b" 2>/dev/null || true)
+    # Check in Java/Kotlin code and XML layouts
+    JAVA_USAGE=$(find "$SRC_DIR" -name "*.java" -o -name "*.kt" | grep -v "TODO" | grep -v "driftingdroids" | xargs grep -l "R\.string\.${name}\b\|getString(R\.string\.${name})" 2>/dev/null || true)
+    XML_USAGE=$(find "$RES_DIR" -name "*.xml" | grep -v "/values" | xargs grep -l "@string/${name}\b" 2>/dev/null || true)
     
-    # Search for the string in Java files
-    JAVA_USAGE=$(echo "$JAVA_SRC_FILES" | xargs grep -l "R\.string\.${string_name}\b\|getString(R\.string\.${string_name})\|getString(R\.string\.${string_name}," 2>/dev/null || true)
-    
-    if [ -n "$XML_USAGE" ] || [ -n "$JAVA_USAGE" ]; then
-        # String is referenced somewhere in the code
-        IMPLEMENTED_USAGE=$(grep -q -r "<string name=\"${string_name}\"" "$RES_DIR" && echo "1" || echo "0")
-        
-        if [ "$IMPLEMENTED_USAGE" == "1" ]; then
-            echo -e "${GREEN}String '$string_name' is used and implemented${NC}"
-        else
-            echo -e "${BLUE}String '$string_name' is referenced in code but not implemented yet${NC}"
-            echo "String '$string_name' is referenced in code but not implemented yet" >> "$LOG_FILE"
-            TODO_STRINGS+=("$string_name")
-            REFERENCED_NOT_IMPLEMENTED=$((REFERENCED_NOT_IMPLEMENTED + 1))
-            TOTAL_UNUSED=$((TOTAL_UNUSED + 1))
-        fi
+    # If not found anywhere, mark as unused
+    if [ -z "$JAVA_USAGE" ] && [ -z "$XML_USAGE" ]; then
+        echo -e "${RED}Completely unused string found: $name${NC}" | tee -a "$LOG_FILE"
+        UNUSED_STRINGS+=("$name")
     else
-        # String is not referenced anywhere
-        echo -e "${RED}Completely unused string found: $string_name${NC}"
-        echo "Completely unused string found: $string_name" >> "$LOG_FILE"
-        UNUSED_STRINGS+=("$string_name")
-        COMPLETELY_UNUSED=$((COMPLETELY_UNUSED + 1))
-        TOTAL_UNUSED=$((TOTAL_UNUSED + 1))
+        echo "String '$name' is used and implemented" >> "$LOG_FILE"
     fi
 done
 
-# Add completely unused strings to the todo file
-for unused_string in "${UNUSED_STRINGS[@]}"; do
-    # Get the string value from the default strings.xml file
-    STRING_VALUE=$(grep -A1 "<string name=\"$unused_string\"" "$DEFAULT_STRINGS_FILE" | tail -n1 | sed 's/^[ \t]*//;s/[ \t]*$//' | sed 's/<\/string>//')
-    echo "- \`$unused_string\`: $STRING_VALUE" >> "$TODO_FILE"
-done
+echo
+echo "Analysis complete. Found:" | tee -a "$LOG_FILE"
+echo "- ${#UNUSED_STRINGS[@]} completely unused strings" | tee -a "$LOG_FILE"
+echo
 
-# Add section for strings referenced but not implemented
-echo "" >> "$TODO_FILE"
-echo "## Strings Referenced But Not Implemented" >> "$TODO_FILE"
-echo "These strings are referenced in the code but are not yet implemented in all locale files:" >> "$TODO_FILE"
-echo "" >> "$TODO_FILE"
+###############################################################
+# Step 3: Remove only the specific safe-to-remove strings
+###############################################################
 
-for todo_string in "${TODO_STRINGS[@]}"; do
-    # Find where this string is referenced (only in project Java files, excluding TODOs and driftingdroids)
-    REFERENCES=$(echo "$JAVA_SRC_FILES" | xargs grep -l "R\.string\.${todo_string}\b\|getString(R\.string\.${todo_string})\|getString(R\.string\.${todo_string}," 2>/dev/null || true)
-    XML_REFS=$(find "$SRC_DIR/res" -name "*.xml" | grep -v "/values" | xargs grep -l "@string/${todo_string}\b" 2>/dev/null || true)
+# Only remove these specific strings which are safe to remove
+SAFE_TO_REMOVE=("robot_count_message" "hint_robot_count")
+REMOVED_COUNT=0
+
+echo -e "${BOLD}Step 3: Removing specific unused strings...${NC}"
+echo "Step 3: Removing specific unused strings..." >> "$LOG_FILE"
+
+for file in "${STRINGS_FILES[@]}"; do
+    FILE_REMOVED=0
     
-    # Format the references to be more readable (just file paths)
-    if [ -n "$REFERENCES" ]; then
-        FORMATTED_REFS=$(echo "$REFERENCES" | sed 's/.*\///' | sort | uniq | sed 's/^/  - /')
-        echo "- \`$todo_string\` is referenced in:" >> "$TODO_FILE"
-        echo "$FORMATTED_REFS" >> "$TODO_FILE"
-    fi
-    
-    if [ -n "$XML_REFS" ]; then
-        XML_FORMATTED=$(echo "$XML_REFS" | sed 's/.*\///' | sort | uniq | sed 's/^/  - /')
-        if [ -z "$REFERENCES" ]; then
-            echo "- \`$todo_string\` is referenced in:" >> "$TODO_FILE"
-        fi
-        echo "$XML_FORMATTED" >> "$TODO_FILE"
-    fi
-done
-
-echo 
-echo -e "${BOLD}Analysis complete. Found:${NC}"
-echo -e "- ${RED}$COMPLETELY_UNUSED completely unused strings${NC}"
-echo -e "- ${BLUE}$REFERENCED_NOT_IMPLEMENTED strings referenced but not implemented${NC}"
-echo -e "${BOLD}Total: $TOTAL_UNUSED strings to review${NC}"
-
-# If there are completely unused strings, remove them from all strings.xml files
-if [ $COMPLETELY_UNUSED -gt 0 ]; then
-    echo -e "\n${BOLD}Step 3: Removing completely unused strings from resource files...${NC}"
-    REMOVED_COUNT=0
-    
-    for file in "${STRINGS_FILES[@]}"; do
-        MODIFIED=false
-        FILE_REMOVED=0
+    for name in "${SAFE_TO_REMOVE[@]}"; do
+        # Use grep to find the line numbers of entries
+        LINE_NUMBERS=$(grep -n "<string name=\"$name\"" "$file" | cut -d':' -f1)
         
-        for unused_string in "${UNUSED_STRINGS[@]}"; do
-            # Check if this string exists in this file
-            if grep -q "<string name=\"$unused_string\"" "$file"; then
-                # If found, remove the string element
-                echo "Removing string '$unused_string' from $file" >> "$LOG_FILE"
-                
-                # Create a temporary file without the unused string
-                TEMPFILE="$(mktemp)"
-                grep -v "<string name=\"$unused_string\"" "$file" > "$TEMPFILE"
-                
-                # Make sure we keep the XML structure intact
-                if ! grep -q "</resources>" "$TEMPFILE"; then
-                    echo "</resources>" >> "$TEMPFILE"
+        if [ -n "$LINE_NUMBERS" ]; then
+            # Create a temporary file
+            TEMP_FILE=$(mktemp)
+            
+            # Initialize line counter
+            LINE_COUNT=1
+            DELETED=false
+            
+            # Process each line
+            while IFS= read -r line; do
+                # Check if this line contains the string to remove
+                if echo "$LINE_NUMBERS" | grep -q "$LINE_COUNT"; then
+                    # Skip this line and the closing tag if needed
+                    if echo "$line" | grep -q "/>"; then
+                        # Self-closing tag, just skip this line
+                        DELETED=true
+                    else
+                        # Multi-line tag, need to skip until </string>
+                        DELETED=true
+                        continue
+                    fi
+                elif [ "$DELETED" = true ] && echo "$line" | grep -q "</string>"; then
+                    # We found the closing tag, reset flag
+                    DELETED=false
+                    continue
+                elif [ "$DELETED" = true ]; then
+                    # Still in a deleted section
+                    continue
+                else
+                    # Regular line to keep
+                    echo "$line" >> "$TEMP_FILE"
                 fi
                 
-                # Copy back to original file
-                cp "$TEMPFILE" "$file"
-                rm "$TEMPFILE"
-                
-                MODIFIED=true
-                REMOVED_COUNT=$((REMOVED_COUNT + 1))
+                LINE_COUNT=$((LINE_COUNT + 1))
+            done < "$file"
+            
+            # Replace original file with the modified one
+            cp "$TEMP_FILE" "$file"
+            rm "$TEMP_FILE"
+            
+            # Verify the string was actually removed
+            if ! grep -q "<string name=\"$name\"" "$file"; then
                 FILE_REMOVED=$((FILE_REMOVED + 1))
+                REMOVED_COUNT=$((REMOVED_COUNT + 1))
+                echo "  Removed string: $name from $file" | tee -a "$LOG_FILE"
             fi
-        done
-        
-        if [ "$MODIFIED" = true ]; then
-            echo -e "${MAGENTA}Modified $file: removed $FILE_REMOVED strings${NC}"
-        else
-            echo -e "${GREEN}No changes needed in: $file${NC}"
         fi
     done
     
-    echo -e "${GREEN}Successfully removed $REMOVED_COUNT unused string references across all files.${NC}"
+    echo "Modified $file: removed $FILE_REMOVED strings" | tee -a "$LOG_FILE"
+done
+
+echo -e "${GREEN}Removed $REMOVED_COUNT unused string references across all files.${NC}" | tee -a "$LOG_FILE"
+echo
+
+###############################################################
+# Step 4: Verify the build still works
+###############################################################
+echo -e "${BOLD}Step 4: Running Gradle build to verify changes...${NC}"
+echo "Step 4: Running Gradle build to verify changes..." >> "$LOG_FILE"
+
+# Generate list of strings we removed
+REMOVED_LIST=""
+for name in "${SAFE_TO_REMOVE[@]}"; do
+    REMOVED_LIST+="- $name\n"
+done
+
+# Run build to verify changes
+if ./gradlew build; then
+    echo -e "\n${GREEN}Build successful! ${NC}" | tee -a "$LOG_FILE"
+    
+    # Create commit message
+    echo -e "${BOLD}Suggested Git commit message:${NC}"
+    echo "Localization: Cleaned up string resources" > "$COMMIT_FILE"
+    echo "" >> "$COMMIT_FILE"
+    echo "Removed $REMOVED_COUNT completely unused string resources from all localization files." >> "$COMMIT_FILE"
+    echo "The removed strings were:" >> "$COMMIT_FILE"
+    echo -e "$REMOVED_LIST" >> "$COMMIT_FILE"
+    
+    echo -e "\nCommit message saved to: $COMMIT_FILE"
+    echo "You can use it with: git commit -F $COMMIT_FILE"
 else
-    echo -e "${GREEN}No completely unused strings to remove.${NC}"
+    echo -e "\n${RED}Build failed after string modifications.${NC}" | tee -a "$LOG_FILE"
+    echo "You may need to manually fix the errors or revert changes to continue."
+    exit 1
 fi
 
-# Running Gradle build to ensure everything still compiles
-echo -e "\n${BOLD}Step 4: Running Gradle build to verify changes...${NC}"
-cd "$PROJECT_DIR"
-./gradlew build
-
-BUILD_RESULT=$?
-if [ $BUILD_RESULT -eq 0 ]; then
-    echo -e "\n${GREEN}Build successful!${NC}"
-    
-    # Generate a git commit message suggestion
-    COMMIT_MSG="Localization: Cleaned up string resources\n\n"
-    if [ $DUPE_COUNT -gt 0 ]; then
-        COMMIT_MSG+="Fixed $DUPE_FIXED duplicate string definitions.\n\n"
-    fi
-    
-    if [ $COMPLETELY_UNUSED -gt 0 ]; then
-        COMMIT_MSG+="Removed $COMPLETELY_UNUSED completely unused string resources from all localization files.\n"
-        COMMIT_MSG+="The removed strings were:\n"
-        
-        for unused_string in "${UNUSED_STRINGS[@]}"; do
-            COMMIT_MSG+="- $unused_string\n"
-        done
-    fi
-    
-    if [ $REFERENCED_NOT_IMPLEMENTED -gt 0 ]; then
-        COMMIT_MSG+="\nAlso identified $REFERENCED_NOT_IMPLEMENTED strings that are referenced in code but not implemented.\n"
-        COMMIT_MSG+="See $TODO_FILE for details."
-    fi
-    
-    echo -e "\n${BOLD}Suggested Git commit message:${NC}"
-    echo -e "${YELLOW}$COMMIT_MSG${NC}"
-    
-    # Write the commit message to a file for easy use
-    echo -e "$COMMIT_MSG" > "$DEV_DIR/commit_message.txt"
-    echo "Commit message suggestion saved to: $DEV_DIR/commit_message.txt"
-    echo "You can use it with: git commit -F $DEV_DIR/commit_message.txt"
-    
-    echo -e "\n${BOLD}Clean-up complete. See $LOG_FILE for details and $TODO_FILE for the todo list.${NC}"
-else
-    echo -e "\n${RED}Build failed! You may need to review your changes.${NC}"
-    echo "Error details can be found in the Gradle output above."
-    echo "Clean-up completed but build failed. Check the build output for errors." >> "$LOG_FILE"
-fi
+echo
+echo -e "${GREEN}Clean-up complete. See $LOG_FILE for details.${NC}"
+echo -e "${YELLOW}Note: Only removed a small set of confirmed unused strings to maintain XML stability.${NC}"
+echo -e "${YELLOW}The analysis found ${#UNUSED_STRINGS[@]} potentially unused strings in total.${NC}"
+echo -e "${YELLOW}For a complete cleanup, consider manually removing the remaining unused strings.${NC}"

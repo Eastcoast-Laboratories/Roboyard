@@ -278,6 +278,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         if (!isUnlocked) {
             int starsNeeded = (levelId - 1) * STARS_PER_LEVEL - totalStars;
+            // TODO: this toast is never shown
             Toast.makeText(requireContext(), 
                     getString(R.string.level_locked, starsNeeded),
                     Toast.LENGTH_SHORT).show();
