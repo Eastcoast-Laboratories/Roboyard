@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # cleanup_unused_strings.sh
-# This script performs two main functions:
+# This script performs these main functions:
 # 1. First it identifies and fixes duplicate string definitions in all string resource files
 # 2. Then it identifies and removes completely unused strings
 # 3. Also checks for strings in localization files that don't exist in the default resources
-# 4. Finally it creates a todo file for strings that are referenced but not implemented
+# 4. Enhances string comments with usage information in Java files
+# 5. Finally it creates a todo file for strings that are referenced but not implemented
 #
 # Usage: cp /var/www/Roboyard/dev/scripts/cleanup_unused_strings.sh /var/tmp/; git reset --hard; cp /var/tmp/cleanup_unused_strings.sh /var/www/Roboyard/dev/scripts/
 
@@ -244,15 +245,97 @@ echo "- ${#UNUSED_STRINGS[@]} completely unused strings" | tee -a "$LOG_FILE"
 echo
 
 ###############################################################
-# Step 4: Remove only the specific safe-to-remove strings
+# Step 4: Enhance comments with file usage information (English only)
+###############################################################
+echo -e "${BOLD}Step 4: Enhancing string comments with usage information...${NC}"
+echo "Step 4: Enhancing string comments with usage information..." >> "$LOG_FILE"
+
+# Function to get class names from file paths
+get_class_name() {
+    local file=$1
+    local base_name=$(basename "$file" .java)
+    echo "$base_name"
+}
+
+# Only update comments in the default resource file
+echo -e "${MAGENTA}Enhancing comments in $DEFAULT_STRINGS_FILE...${NC}" | tee -a "$LOG_FILE"
+
+# Create a temporary file for the updated content
+TEMP_DEFAULT_FILE=$(mktemp)
+
+# Process each line in the default strings file
+LINE_COUNT=0
+MODIFIED_COUNT=0
+
+# Copy the file first
+cp "$DEFAULT_STRINGS_FILE" "$TEMP_DEFAULT_FILE.original"
+
+# Process the strings file line by line
+while IFS= read -r line; do
+    LINE_COUNT=$((LINE_COUNT + 1))
+    
+    # Only process string lines with comments
+    if echo "$line" | grep -q '<string name=\".*\".*comment=\"'; then
+        # Extract the string name
+        STRING_NAME=$(echo "$line" | grep -o 'name="[^"]*"' | cut -d '"' -f2)
+        
+        # Find Java files that use this string
+        JAVA_FILES=$(find "$SRC_DIR" -name "*.java" | grep -v "TODO" | grep -v "driftingdroids" | xargs grep -l "R\.string\.${STRING_NAME}\b\|getString(R\.string\.${STRING_NAME})" 2>/dev/null || true)
+        
+        # If Java usage found, enhance the comment
+        if [ -n "$JAVA_FILES" ]; then
+            # Get class names from file paths
+            FILE_CLASSES=""
+            for java_file in $JAVA_FILES; do
+                class_name=$(get_class_name "$java_file")
+                FILE_CLASSES+="[$class_name]"
+            done
+            
+            # Get the original comment
+            ORIG_COMMENT=$(echo "$line" | grep -o 'comment="[^"]*"' | cut -d '"' -f2)
+            
+            # Check if the comment already has file info (to avoid duplication)
+            if ! echo "$ORIG_COMMENT" | grep -q '\[.*\]'; then
+                # Replace the comment with enhanced version
+                NEW_LINE=$(echo "$line" | sed "s|comment=\"$ORIG_COMMENT\"|comment=\"$ORIG_COMMENT $FILE_CLASSES\"|")
+                echo "$NEW_LINE" >> "$TEMP_DEFAULT_FILE"
+                
+                echo "  Enhanced comment for $STRING_NAME with file usage: $FILE_CLASSES" | tee -a "$LOG_FILE"
+                MODIFIED_COUNT=$((MODIFIED_COUNT + 1))
+                continue
+            fi
+        fi
+    fi
+    
+    # Write unchanged line
+    echo "$line" >> "$TEMP_DEFAULT_FILE"
+done < "$DEFAULT_STRINGS_FILE"
+
+# Replace the original file if we made changes
+if [ $MODIFIED_COUNT -gt 0 ]; then
+    cp "$TEMP_DEFAULT_FILE" "$DEFAULT_STRINGS_FILE"
+    echo -e "${GREEN}Enhanced $MODIFIED_COUNT string comments with file usage information.${NC}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}No string comments were enhanced. All strings already have complete information.${NC}" | tee -a "$LOG_FILE"
+fi
+
+# Clean up
+rm "$TEMP_DEFAULT_FILE" "$TEMP_DEFAULT_FILE.original"
+
+echo -e "${GREEN}Comment enhancement complete.${NC}"
+echo "Comment enhancement complete." >> "$LOG_FILE"
+echo
+
+###############################################################
+# Step 5: Remove only the specific safe-to-remove strings
 ###############################################################
 
 # Only remove these specific strings which are confirmed safe to remove
 SAFE_TO_REMOVE=("robot_count_message" "hint_robot_count")
 REMOVED_COUNT=0
 
-echo -e "${BOLD}Step 4: Removing specific unused strings...${NC}"
-echo "Step 4: Removing specific unused strings..." >> "$LOG_FILE"
+echo -e "${BOLD}Step 5: Removing specific unused strings...${NC}"
+echo "Step 5: Removing specific unused strings..." >> "$LOG_FILE"
 
 for file in "${STRINGS_FILES[@]}"; do
     FILE_REMOVED=0
@@ -317,10 +400,10 @@ echo -e "${GREEN}Removed $REMOVED_COUNT unused string references across all file
 echo
 
 ###############################################################
-# Step 5: Verify the build still works
+# Step 6: Verify the build still works
 ###############################################################
-echo -e "${BOLD}Step 5: Running Gradle build to verify changes...${NC}"
-echo "Step 5: Running Gradle build to verify changes..." >> "$LOG_FILE"
+echo -e "${BOLD}Step 6: Running Gradle build to verify changes...${NC}"
+echo "Step 6: Running Gradle build to verify changes..." >> "$LOG_FILE"
 
 # Generate list of strings we removed
 REMOVED_LIST=""
@@ -337,6 +420,7 @@ if ./gradlew build; then
     echo "Localization: Cleaned up string resources" > "$COMMIT_FILE"
     echo "" >> "$COMMIT_FILE"
     echo "Removed $REMOVED_COUNT completely unused string resources from all localization files." >> "$COMMIT_FILE"
+    echo "Enhanced string comments with source file usage information." >> "$COMMIT_FILE"
     echo "The removed strings were:" >> "$COMMIT_FILE"
     echo -e "$REMOVED_LIST" >> "$COMMIT_FILE"
     

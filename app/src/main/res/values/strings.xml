@@ -71,7 +71,7 @@
     <string name="level_score" comment="Text showing the score achieved on a level"></string>
     <string name="level_best_score" comment="Text showing the best score achieved on a level"></string>
     <string name="level_stars" comment="Text showing stars earned on a level">You earned %1$d stars</string>
-    <string name="level_locked" comment="Text shown for locked/unavailable levels">You need %1$d more stars to unlock this level</string>
+    <string name="level_locked" comment="Text shown for locked/unavailable levels [LevelSelectionFragment]">You need %1$d more stars to unlock this level</string>
 
     <string name="back">Back</string>
     <string name="back_description">Return to previous screen</string>
@@ -228,7 +228,7 @@
     <string name="history_screen_title">Game History</string>
     <string name="save_slot_empty">Empty</string>
     <string name="save_slot_autosave">Autosave</string>
-    <string name="ai_calculating" comment="Message shown when AI is calculating a solution">A.I. calculating solution...</string>
+    <string name="ai_calculating" comment="Message shown when AI is calculating a solution [ModernGameFragment]">A.I. calculating solution...</string>
 
     <!-- Game control buttons -->
     <string name="back_button">Back</string>
@@ -284,28 +284,28 @@
     <string name="color_silver_dative">Silver</string>
 
     <!-- Game UI text for ModernGameFragment -->
-    <string name="no_robot_selected" comment="Status message when no robot is currently selected">No robot selected</string>
+    <string name="no_robot_selected" comment="Status message when no robot is currently selected [ModernGameFragment]">No robot selected</string>
     <string name="robot_selected" comment="Status message showing which robot is selected">Selected: %1$s robot at (%2$d, %3$d)</string>
-    <string name="robot_selected_info" comment="More detailed information about selected robot">Selected: %1$s robot at position (%2$d, %3$d)</string>
-    <string name="robot_target_info" comment="Information about a target on the board">%1$s target: (%2$d, %3$d)</string>
-    <string name="no_target_for_robot" comment="Message when a robot has no matching target">No target for this robot</string>
+    <string name="robot_selected_info" comment="More detailed information about selected robot [ModernGameFragment]">Selected: %1$s robot at position (%2$d, %3$d)</string>
+    <string name="robot_target_info" comment="Information about a target on the board [ModernGameFragment]">%1$s target: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot" comment="Message when a robot has no matching target [ModernGameFragment]">No target for this robot</string>
     <string name="move_count_text" comment="Text showing number of moves made">Moves: %1$d</string>
-    <string name="moves_count" comment="Alternative text for move counter">Moves: %1$d</string>
-    <string name="squares_moved" comment="Text showing number of squares robots have moved">Squares moved: %1$d</string>
-    <string name="board_size" comment="Text showing board dimensions">Board: %1$dx%2$d</string>
-    <string name="solution_error" comment="Error message when no solution can be found">Could not find a solution: %1$s</string>
-    <string name="direction_up" comment="Direction name for movement hints">up</string>
-    <string name="direction_down" comment="Direction name for movement hints">down</string>
-    <string name="direction_right" comment="Direction name for movement hints">right</string>
-    <string name="direction_left" comment="Direction name for movement hints">left</string>
+    <string name="moves_count" comment="Alternative text for move counter [ModernGameFragment]">Moves: %1$d</string>
+    <string name="squares_moved" comment="Text showing number of squares robots have moved [ModernGameFragment]">Squares moved: %1$d</string>
+    <string name="board_size" comment="Text showing board dimensions [ModernGameFragment]">Board: %1$dx%2$d</string>
+    <string name="solution_error" comment="Error message when no solution can be found [ModernGameFragment]">Could not find a solution: %1$s</string>
+    <string name="direction_up" comment="Direction name for movement hints [ModernGameFragment]">up</string>
+    <string name="direction_down" comment="Direction name for movement hints [ModernGameFragment]">down</string>
+    <string name="direction_right" comment="Direction name for movement hints [ModernGameFragment]">right</string>
+    <string name="direction_left" comment="Direction name for movement hints [ModernGameFragment]">left</string>
 
     <!-- Game UI Buttons and Messages -->
-    <string name="cancel_button" comment="Generic cancel button text">Cancel</string>
-    <string name="hint_cancel_button" comment="Generic cancel button text">✖️ Hint</string>
-    <string name="reset_button" comment="Button to reset the current game/level">Reset</string>
-    <string name="unique_map_id" comment="Unique identifier for a game map">%1$s</string>
+    <string name="cancel_button" comment="Generic cancel button text [ModernGameFragment]">Cancel</string>
+    <string name="hint_cancel_button" comment="Generic cancel button text [ModernGameFragment]">✖️ Hint</string>
+    <string name="reset_button" comment="Button to reset the current game/level [ModernGameFragment]">Reset</string>
+    <string name="unique_map_id" comment="Unique identifier for a game map [ModernGameFragment]">%1$s</string>
     <string name="empty_text" comment="Empty placeholder text"></string>
-    <string name="level_id_text" comment="Text showing the current level number">Level %1$d</string>
+    <string name="level_id_text" comment="Text showing the current level number [ModernGameFragment]">Level %1$d</string>
     <string name="stars_earned" comment="Message showing stars earned for level completion">You earned %1$d stars</string>
     <string name="completed_in_moves" comment="Short text showing moves used to complete level">Completed in %1$d moves</string>
     <string name="starting_level" comment="Message shown when starting a level">Starting level %1$d</string>
@@ -339,19 +339,19 @@
     <string name="error_displaying_hint">Error displaying hint</string>
 
     <!-- Difficulty Levels -->
-    <string name="difficulty_beginner" comment="Name of easiest difficulty level">Beginner</string>
-    <string name="difficulty_advanced" comment="Name of medium difficulty level">Advanced</string>
-    <string name="difficulty_insane" comment="Name of hard difficulty level">Insane</string>
-    <string name="difficulty_impossible" comment="Name of hardest difficulty level">Impossible</string>
-    <string name="difficulty_unknown" comment="Used when difficulty cannot be determined">Unknown</string>
+    <string name="difficulty_beginner" comment="Name of easiest difficulty level [GameStateManager][SettingsFragment]">Beginner</string>
+    <string name="difficulty_advanced" comment="Name of medium difficulty level [GameStateManager][SettingsFragment]">Advanced</string>
+    <string name="difficulty_insane" comment="Name of hard difficulty level [GameStateManager][SettingsFragment]">Insane</string>
+    <string name="difficulty_impossible" comment="Name of hardest difficulty level [GameStateManager][SettingsFragment]">Impossible</string>
+    <string name="difficulty_unknown" comment="Used when difficulty cannot be determined [GameStateManager]">Unknown</string>
     
     <!-- Additional localization strings -->
-    <string name="of" comment="Connecting word for phrases like '3 of 4 colors'">of</string>
-    <string name="colors" comment="Plural form of 'color'">colors</string>
-    <string name="impossible_small_board_warning" comment="Warning shown when playing on small board with impossible difficulty">Impossible on small boards may take several minutes to generate a fitting map</string>
+    <string name="of" comment="Connecting word for phrases like '3 of 4 colors' [SettingsFragment]">of</string>
+    <string name="colors" comment="Plural form of 'color' [SettingsFragment]">colors</string>
+    <string name="impossible_small_board_warning" comment="Warning shown when playing on small board with impossible difficulty [SettingsFragment]">Impossible on small boards may take several minutes to generate a fitting map</string>
     
     <!-- Toast messages -->
-    <string name="error_email_app" comment="Error message when email app cannot be opened">Could not open email app</string>
-    <string name="robot_movement_canceled" comment="Message when robot movement is canceled">Robot movement canceled</string>
+    <string name="error_email_app" comment="Error message when email app cannot be opened [SettingsFragment]">Could not open email app</string>
+    <string name="robot_movement_canceled" comment="Message when robot movement is canceled [ModernGameFragment]">Robot movement canceled</string>
     <string name="no_game_to_save" comment="Message when there is no game available to save">No game available to save</string>
 </resources>
