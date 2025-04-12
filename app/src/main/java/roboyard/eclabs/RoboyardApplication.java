@@ -2,6 +2,10 @@ package roboyard.eclabs;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+
+import java.util.Locale;
 
 import roboyard.logic.core.Preferences;
 import timber.log.Timber;
@@ -22,6 +26,30 @@ public class RoboyardApplication extends Application {
         return appContext;
     }
     
+    /**
+     * Updates the app context with the current locale from preferences
+     * This should be called whenever the locale changes
+     */
+    public static void updateAppContextLocale() {
+        // Wenn der appContext noch nicht existiert, abbrechen
+        if (appContext == null) return;
+        
+        // Sprache aus den Pru00e4ferenzen laden
+        String language = Preferences.appLanguage;
+        Locale locale = new Locale(language);
+        Locale.setDefault(locale);
+        
+        // Konfiguration aktualisieren
+        Resources resources = appContext.getResources();
+        Configuration config = new Configuration(resources.getConfiguration());
+        config.setLocale(locale);
+        
+        // Neuen Context erstellen
+        appContext = appContext.createConfigurationContext(config);
+        
+        Timber.d("[LOCALE] Application context locale updated to %s", locale.getLanguage());
+    }
+    
     @Override
     public void onCreate() {
         super.onCreate();
@@ -37,5 +65,8 @@ public class RoboyardApplication extends Application {
         // Initialize the Preferences system at app startup
         Preferences.initialize(appContext);
         Timber.d("[PREFERENCES] Initialized at application startup");
+        
+        // Lokalisierung initialisieren
+        updateAppContextLocale();
     }
 }

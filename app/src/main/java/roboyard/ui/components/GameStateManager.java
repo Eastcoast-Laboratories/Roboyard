@@ -3,6 +3,8 @@ package roboyard.ui.components;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -34,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import roboyard.eclabs.RoboyardApplication;
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.ui.GameElement;
@@ -1377,19 +1380,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return String representation of the current difficulty level
      */
     public String getLocalizedDifficultyString() {
-        Context appContext = getApplication().getApplicationContext();
-        Timber.d("[DIFFICULTY] getDifficultyString() called, using difficulty level %d, possible returns: %s, %s, %s, %s", getDifficulty(), appContext.getString(R.string.difficulty_beginner), appContext.getString(R.string.difficulty_advanced), appContext.getString(R.string.difficulty_insane), appContext.getString(R.string.difficulty_impossible));
+        // Verwende den bereits lokalisierten Anwendungskontext
+        Context localizedContext = RoboyardApplication.getAppContext();
+        
+        Timber.d("[DIFFICULTY] getLocalizedDifficultyString() called, using difficulty level %d", getDifficulty());
+        
         switch (getDifficulty()) {
             case Constants.DIFFICULTY_BEGINNER:
-                return appContext.getString(R.string.difficulty_beginner);
+                return localizedContext.getString(R.string.difficulty_beginner);
             case Constants.DIFFICULTY_ADVANCED:
-                return appContext.getString(R.string.difficulty_advanced);
+                return localizedContext.getString(R.string.difficulty_advanced);
             case Constants.DIFFICULTY_INSANE:
-                return appContext.getString(R.string.difficulty_insane);
+                return localizedContext.getString(R.string.difficulty_insane);
             case Constants.DIFFICULTY_IMPOSSIBLE:
-                return appContext.getString(R.string.difficulty_impossible);
+                return localizedContext.getString(R.string.difficulty_impossible);
             default:
-                return appContext.getString(R.string.difficulty_unknown);
+                return localizedContext.getString(R.string.difficulty_unknown);
         }
     }
     
