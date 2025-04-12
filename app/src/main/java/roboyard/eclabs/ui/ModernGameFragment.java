@@ -1943,7 +1943,28 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.e("ModernGameFragment: SoundManager is null, cannot play sound %s", soundType);
         }
     }
-    
+
+    /**
+     * Get the direction name from a move direction
+     * @param direction Direction constant from ERRGameMove
+     * @return Human-readable direction name
+     */
+    private String getLocalizedDirectionName(int direction) {
+        
+        switch (direction) {
+            case 1: // ERRGameMove.UP.getDirection()
+                return getString(R.string.direction_up);   // "up";
+            case 4: // ERRGameMove.DOWN.getDirection()
+                return getString(R.string.direction_down);   // "down";
+            case 2: // ERRGameMove.RIGHT.getDirection()
+                return getString(R.string.direction_right);   // "right";
+            case 8: // ERRGameMove.LEFT.getDirection()
+                return getString(R.string.direction_left);   // "left";
+            default:
+                return "unknown direction";
+        }
+    }
+
     /**
      * Get the direction name from a move direction
      * @param direction Direction constant from ERRGameMove
@@ -1952,13 +1973,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private String getDirectionArrow(int direction) {
         switch (direction) {
             case 1: // ERRGameMove.UP.getDirection()
-                return "up";
-            case 4: // ERRGameMove.DOWN.getDirection()
-                return "down";
-            case 2: // ERRGameMove.RIGHT.getDirection()
-                return "right";
+                return "^"; 
+            case 2: // ERRGameMove.DOWN.getDirection()
+                return "v"; 
+            case 4: // ERRGameMove.RIGHT.getDirection()
+                return ">"; 
             case 8: // ERRGameMove.LEFT.getDirection()
-                return "left";
+                return "<";
             default: 
                 return "unknown direction";
         }
@@ -2172,7 +2193,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 String robotColorName = getLocalizedRobotColorName(rrMove.getColor());
                 
                 // Get the direction name
-                String directionName = getDirectionArrow(rrMove.getDirection());
+                String directionName = getLocalizedDirectionName(rrMove.getDirection());
                 
                 // Calculate the hint number to display (1-based)
                 int displayHintNumber = hintIndex + 1;
@@ -2185,7 +2206,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 StringBuilder hintMessage = new StringBuilder();
                 hintMessage.append(displayHintNumber).append("/").append(totalMoves).append(": ");
                 
-                // For the first hint, just show the robot color and direction
+                // For the first hint, just show which robot to move
                 if (hintIndex == 0) {
                     hintMessage.append(robotColorName).append(" ").append(directionName);
                     Timber.d("[HINT_SYSTEM] First hint format: %s", hintMessage.toString());
@@ -2204,12 +2225,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         IGameMove prevMove = solution.getMoves().get(i);
                         if (prevMove instanceof RRGameMove prevRRMove) {
                             // Get abbreviated color and direction
-                            String prevColorName = getRobotColorName(prevRRMove.getColor());
-                            String prevDirectionName = getDirectionArrow(prevRRMove.getDirection());
+                            String prevColorName = getColorAbbreviation(getLocalizedRobotColorName(prevRRMove.getColor()));
+                            String prevDirectionName = getDirectionSymbol(getDirectionArrow(prevRRMove.getDirection()));
                             
                             // Add first letter of each
-                            hintMessage.append(LocalizedFirstCharName(prevColorName))
-                                    .append(LocalizedFirstCharDirection(prevDirectionName));
+                            hintMessage.append(prevColorName)
+                                    .append(prevDirectionName);
                             
                             // Add comma if not the last previous move
                             if (i < hintIndex - 1) {
@@ -2219,7 +2240,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     }
                     
                     // Add current move
-                    hintMessage.append(", ").append(robotColorName).append(" ").append(directionName);
+                    // String colorAbbreviation = getColorAbbreviation(robotColorName);
+                    hintMessage.append(", ").append(robotColorName + " ").append(directionName);
                     Timber.d("[HINT_SYSTEM] Subsequent hint format: %s", hintMessage.toString());
                 }
                 
@@ -2244,15 +2266,31 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
 
-    private String LocalizedFirstCharDirection(String prevDirectionName) {
-        String firstChar = String.valueOf(prevDirectionName.charAt(0));
-        return firstChar;
+    private String getColorAbbreviation(String colorName) {
+        Locale currentLocale = getResources().getConfiguration().getLocales().get(0);
+        String languageCode = currentLocale.getLanguage();
+        
+        // Spezielle Behandlung für Deutsch
+        if (languageCode.equals("de")) {
+            // Prüfen auf deutsche Farbduplikate (Grün/Gelb)
+            if (colorName.equalsIgnoreCase("Grün") || colorName.startsWith("Gr")) {
+                return "Gr";
+            } else if (colorName.equalsIgnoreCase("Gelb") || colorName.startsWith("Ge")) {
+                return "Ge";
+            }
+        }
+        
+        // Bei allen anderen Sprachen oder Farben den ersten Buchstaben verwenden
+        if (colorName != null && !colorName.isEmpty()) {
+            return String.valueOf(colorName.charAt(0)).toUpperCase();
+        } else {
+            return "?";
+        }
     }
-
-    private String LocalizedFirstCharName(String prevColorName) {
-        String firstChar = String.valueOf(prevColorName.charAt(0));
-        getString(R.string.color_pink);
-        return firstChar;
+    
+    private String getDirectionSymbol(String directionName) {
+        // Die Pfeile werden bereits von getDirectionArrow() zurückgegeben
+        return directionName;
     }
 
     /**

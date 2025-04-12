@@ -278,6 +278,10 @@
     <string name="squares_moved">Felder bewegt: %1$d</string>
     <string name="board_size">Spielfeld: %1$dx%2$d</string>
     <string name="solution_error">Keine Lösung gefunden: %1$s</string>
+    <string name="direction_up">nach oben</string>
+    <string name="direction_down">nach unten</string>
+    <string name="direction_right">nach rechts</string>
+    <string name="direction_left">nach links</string>
 
     <!-- Game UI Buttons and Messages -->
     <string name="reset_button">Reset</string>

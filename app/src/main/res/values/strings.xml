@@ -276,6 +276,10 @@
     <string name="squares_moved">Squares moved: %1$d</string>
     <string name="board_size">Board: %1$dx%2$d</string>
     <string name="solution_error">Could not find a solution: %1$s</string>
+    <string name="direction_up">up</string>
+    <string name="direction_down">down</string>
+    <string name="direction_right">right</string>
+    <string name="direction_left">left</string>
 
     <!-- Game UI Buttons and Messages -->
     <string name="reset_button">Reset</string>
