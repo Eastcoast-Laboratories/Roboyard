@@ -75,6 +75,22 @@
     <string name="save_success">Spiel erfolgreich gespeichert</string>
     <string name="load_success">Spiel erfolgreich geladen</string>
     
+    <!-- Settings Screen -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_board_size">Spielfeldgröße:</string>
+    <string name="settings_difficulty">Schwierigkeit:</string>
+    <string name="settings_new_map_each_time">Jedes Mal neue Karte:</string>
+    <string name="settings_robots_reach_targets">Roboter, die Ziele erreichen müssen:</string>
+    <string name="settings_targets">Ziele</string>
+    <string name="settings_out_of">von</string>
+    <string name="settings_sound">Ton:</string>
+    <string name="settings_yes">Ja</string>
+    <string name="settings_no">Nein</string>
+    <string name="settings_beginner">Anfänger</string>
+    <string name="settings_advanced">Fortgeschritten</string>
+    <string name="settings_insane">Verrückt</string>
+    <string name="settings_impossible">Unmöglich</string>
+    
     <!-- Language Settings -->
     <string name="language_settings_label">App-Sprache:</string>
     <string name="language_settings_a11y">App-Anzeigesprache auswählen</string>
@@ -189,6 +205,11 @@
     <string name="help_tips_point_3">- Wenn du feststeckst, nutze die Hinweis-Funktion, um einen Vorschlag zu erhalten.</string>
     
     <!-- Game Buttons -->
+    <string name="button_back_game">Zurück</string>
+    <string name="button_reset">Zurücksetzen</string>
+    <string name="button_save_map">Karte speichern</string>
+    <string name="button_new_game">Neues Spiel</string>
+    <string name="button_menu">Menü</string>
     <string name="hint_button_a11y">Hinweis</string>
     
     <!-- Game screen -->

@@ -256,7 +256,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_blue_outline"
                 android:padding="@dimen/game_button_padding"
-                android:text="Back"
+                android:text="@string/button_back_game"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />
@@ -269,7 +269,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_blue_outline"
                 android:padding="@dimen/game_button_padding"
-                android:text="Reset"
+                android:text="@string/button_reset"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />
@@ -301,7 +301,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_red_outline"
                 android:padding="@dimen/game_button_padding"
-                android:text="Save Map"
+                android:text="@string/button_save_map"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />
@@ -314,7 +314,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_green_outline"
                 android:padding="@dimen/game_button_padding"
-                android:text="New Game"
+                android:text="@string/button_new_game"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />
@@ -326,7 +326,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_gray_outline"
                 android:padding="@dimen/game_button_padding"
-                android:text="Menu"
+                android:text="@string/button_menu"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />

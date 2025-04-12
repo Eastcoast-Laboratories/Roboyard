@@ -103,10 +103,31 @@
     <string name="retry_button">Recommencer</string>
     <string name="restart_button">Rejouer</string>
     <string name="save_map_button">Sauvegarder</string>
+    <string name="button_back_game">Retour</string>
+    <string name="button_reset">Réinitialiser</string>
+    <string name="button_save_map">Sauvegarder Carte</string>
+    <string name="button_new_game">Nouveau Jeu</string>
+    <string name="button_menu">Menu</string>
         
     <!-- Game UI Messages -->
     <string name="ai_calculating">IA calcule une solution...</string>
     <string name="nothing_to_undo">Rien à annuler</string>
     <string name="solution_found">IA a trouvé une solution!</string>
     <string name="robot_color_down">%1$s vers le bas</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_board_size">Taille du plateau:</string>
+    <string name="settings_difficulty">Difficulté:</string>
+    <string name="settings_new_map_each_time">Nouvelle carte à chaque fois:</string>
+    <string name="settings_robots_reach_targets">Robots qui doivent atteindre les cibles:</string>
+    <string name="settings_targets">cibles</string>
+    <string name="settings_out_of">sur</string>
+    <string name="settings_sound">Son:</string>
+    <string name="settings_yes">Oui</string>
+    <string name="settings_no">Non</string>
+    <string name="settings_beginner">Débutant</string>
+    <string name="settings_advanced">Avancé</string>
+    <string name="settings_insane">Fou</string>
+    <string name="settings_impossible">Impossible</string>
 </resources>

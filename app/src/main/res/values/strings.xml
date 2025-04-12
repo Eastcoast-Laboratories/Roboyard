@@ -218,6 +218,11 @@
     <string name="hint_button">Hint</string>
     <string name="hint_button_a11y">Hint</string>
     <string name="cancel_hint_button">Hide</string>
+    <string name="button_back_game">Back</string>
+    <string name="button_reset">Reset</string>
+    <string name="button_save_map">Save Map</string>
+    <string name="button_new_game">New Game</string>
+    <string name="button_menu">Menu</string>
     
     <!-- Game screen -->
     <string name="save_tab_title">Save</string>
@@ -354,4 +359,20 @@
     <string name="error_email_app" comment="Error message when email app cannot be opened [SettingsFragment]">Could not open email app</string>
     <string name="robot_movement_canceled" comment="Message when robot movement is canceled [ModernGameFragment]">Robot movement canceled</string>
     <string name="no_game_to_save" comment="Message when there is no game available to save">No game available to save</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_board_size">Board Size:</string>
+    <string name="settings_difficulty">Difficulty:</string>
+    <string name="settings_new_map_each_time">New Map Each Time:</string>
+    <string name="settings_robots_reach_targets">Robots that must reach targets:</string>
+    <string name="settings_targets">targets</string>
+    <string name="settings_out_of">out of</string>
+    <string name="settings_sound">Sound:</string>
+    <string name="settings_yes">Yes</string>
+    <string name="settings_no">No</string>
+    <string name="settings_beginner">Beginner</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="settings_insane">Insane</string>
+    <string name="settings_impossible">Impossible</string>
 </resources>
