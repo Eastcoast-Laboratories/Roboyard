@@ -673,7 +673,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
-                hintButton.setTextOn(getString(R.string.cancel_button));
+                hintButton.setTextOn(getString(R.string.hint_cancel_button));
                 hintButton.setTextOff(getString(R.string.hint_button));
                 hintButton.setChecked(true);
                 showSolverCalculatingMessage();

@@ -300,6 +300,8 @@
     <string name="direction_left" comment="Direction name for movement hints">left</string>
 
     <!-- Game UI Buttons and Messages -->
+    <string name="cancel_button" comment="Generic cancel button text">Cancel</string>
+    <string name="hint_cancel_button" comment="Generic cancel button text">✖️ Hint</string>
     <string name="reset_button" comment="Button to reset the current game/level">Reset</string>
     <string name="unique_map_id" comment="Unique identifier for a game map">%1$s</string>
     <string name="empty_text" comment="Empty placeholder text"></string>
@@ -321,7 +323,6 @@
     <string name="starting_level_a11y" comment="Accessibility announcement when level starts">Starting level %1$d</string>
 
     <!-- Additional Game UI Messages -->
-    <string name="cancel_button" comment="Generic cancel button text">Cancel</string>
     <string name="nothing_to_undo">Nothing to undo</string>
     <string name="robots_reset">Robots reset to starting positions</string>
     <string name="no_game_in_progress">No game in progress</string>

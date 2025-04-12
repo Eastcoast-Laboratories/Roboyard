@@ -4,7 +4,8 @@
 # This script performs two main functions:
 # 1. First it identifies and fixes duplicate string definitions in all string resource files
 # 2. Then it identifies and removes completely unused strings
-# 3. Finally it creates a todo file for strings that are referenced but not implemented
+# 3. Also checks for strings in localization files that don't exist in the default resources
+# 4. Finally it creates a todo file for strings that are referenced but not implemented
 #
 # Usage: cp /var/www/Roboyard/dev/scripts/cleanup_unused_strings.sh /var/tmp/; git reset --hard; cp /var/tmp/cleanup_unused_strings.sh /var/www/Roboyard/dev/scripts/
 
@@ -36,6 +37,7 @@ echo >> "$LOG_FILE"
 
 # Find all string resource files
 STRINGS_FILES=($(find "$RES_DIR" -name "strings.xml"))
+DEFAULT_STRINGS_FILE="$RES_DIR/values/strings.xml"
 
 echo -e "${BLUE}Starting string resources cleanup in Roboyard project...${NC}"
 echo "Working in: $PROJECT_DIR"
@@ -48,167 +50,145 @@ done
 echo
 
 ###############################################################
-# Step 1: Fix duplicate string definitions, especially in values-de
+# Step 1: Fix duplicate string definitions
 ###############################################################
 echo -e "${BOLD}Step 1: Checking for duplicate string definitions...${NC}"
 echo "Step 1: Checking for duplicate string definitions..." >> "$LOG_FILE"
 
-# First handle German cancel_button issue specifically 
-DE_FILE="$RES_DIR/values-de/strings.xml"
-if [ -f "$DE_FILE" ]; then
-    # Check for duplicate cancel_button entries
-    CANCEL_BUTTON_COUNT=$(grep -c '<string name="cancel_button"' "$DE_FILE")
+# Function to handle duplicate strings in a file
+fix_duplicates() {
+    local file=$1
+    local name=$2
+    local count=$3
     
-    if [ "$CANCEL_BUTTON_COUNT" -gt 1 ]; then
-        echo -e "${RED}Found duplicate cancel_button in German file ($CANCEL_BUTTON_COUNT entries)${NC}" | tee -a "$LOG_FILE"
-        
-        # Create a temporary file
-        TEMP_FILE=$(mktemp)
-        
-        # Create fixed content by removing all cancel_button entries
-        grep -v '<string name="cancel_button"' "$DE_FILE" > "$TEMP_FILE"
-        
-        # Find the line before </resources> to add our fixed entry
-        END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
-        INSERT_LINE=$((END_LINE - 1))
-        
-        # Split the file
-        head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
-        tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
-        
-        # Add the correct cancel_button entry
-        cat "${TEMP_FILE}.head" > "$TEMP_FILE"
-        echo '    <string name="cancel_button" comment="Generic cancel button text">Abbrechen</string>' >> "$TEMP_FILE"
-        cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
-        
-        # Replace the original file
-        cp "$TEMP_FILE" "$DE_FILE"
-        rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
-        
-        echo -e "${GREEN}Fixed duplicate cancel_button in German file${NC}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}  Found duplicate: $name ($count occurrences)${NC}" | tee -a "$LOG_FILE"
+    
+    # Create a temporary file without the duplicate string
+    TEMP_FILE=$(mktemp)
+    
+    # Extract all strings except the duplicate
+    grep -v "<string name=\"$name\"" "$file" > "$TEMP_FILE"
+    
+    # Get the first occurrence with comment (preferred) or just first occurrence
+    local entry_with_comment=$(grep -m1 "<string name=\"$name\".*comment=" "$file")
+    
+    # If no entry with comment found, get the first occurrence
+    if [ -z "$entry_with_comment" ]; then
+        entry_with_comment=$(grep -m1 "<string name=\"$name\"" "$file")
     fi
     
-    # Also handle duplicate hint_button entries in German file
-    HINT_BUTTON_COUNT=$(grep -c '<string name="hint_button"' "$DE_FILE")
+    # Find position to insert (before closing </resources>)
+    local end_line=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
+    local insert_line=$((end_line - 1))
     
-    if [ "$HINT_BUTTON_COUNT" -gt 1 ]; then
-        echo -e "${RED}Found duplicate hint_button in German file ($HINT_BUTTON_COUNT entries)${NC}" | tee -a "$LOG_FILE"
-        
-        # Create a temporary file
-        TEMP_FILE=$(mktemp)
-        
-        # Create fixed content by removing all hint_button entries
-        grep -v '<string name="hint_button"' "$DE_FILE" > "$TEMP_FILE"
-        
-        # Find the line before </resources> to add our fixed entry
-        END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
-        INSERT_LINE=$((END_LINE - 1))
-        
-        # Split the file
-        head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
-        tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
-        
-        # Add the correct hint_button entry (with emoji)
-        cat "${TEMP_FILE}.head" > "$TEMP_FILE"
-        echo '    <string name="hint_button" comment="Button to get a hint">💡Hinweis</string>' >> "$TEMP_FILE"
-        cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
-        
-        # Replace the original file
-        cp "$TEMP_FILE" "$DE_FILE"
-        rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
-        
-        echo -e "${GREEN}Fixed duplicate hint_button in German file${NC}" | tee -a "$LOG_FILE"
-    fi
+    # Split and reassemble the file with single entry
+    local head_file=$(mktemp)
+    local tail_file=$(mktemp)
     
-    # Also handle duplicate cancel_hint_button entries in German file
-    CANCEL_HINT_BUTTON_COUNT=$(grep -c '<string name="cancel_hint_button"' "$DE_FILE")
+    head -n "$insert_line" "$TEMP_FILE" > "$head_file"
+    tail -n $((end_line - insert_line)) "$TEMP_FILE" > "$tail_file"
     
-    if [ "$CANCEL_HINT_BUTTON_COUNT" -gt 1 ]; then
-        echo -e "${RED}Found duplicate cancel_hint_button in German file ($CANCEL_HINT_BUTTON_COUNT entries)${NC}" | tee -a "$LOG_FILE"
-        
-        # Create a temporary file
-        TEMP_FILE=$(mktemp)
-        
-        # Create fixed content by removing all cancel_hint_button entries
-        grep -v '<string name="cancel_hint_button"' "$DE_FILE" > "$TEMP_FILE"
-        
-        # Find the line before </resources> to add our fixed entry
-        END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
-        INSERT_LINE=$((END_LINE - 1))
-        
-        # Split the file
-        head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
-        tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
-        
-        # Add the correct cancel_hint_button entry (with emoji)
-        cat "${TEMP_FILE}.head" > "$TEMP_FILE"
-        echo '    <string name="cancel_hint_button" comment="Button to hide hints">🔍 Ausblenden</string>' >> "$TEMP_FILE"
-        cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
-        
-        # Replace the original file
-        cp "$TEMP_FILE" "$DE_FILE"
-        rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
-        
-        echo -e "${GREEN}Fixed duplicate cancel_hint_button in German file${NC}" | tee -a "$LOG_FILE"
-    fi
-fi
+    cat "$head_file" > "$TEMP_FILE"
+    echo "    $entry_with_comment" >> "$TEMP_FILE" 
+    cat "$tail_file" >> "$TEMP_FILE"
+    
+    # Copy back and clean up
+    cp "$TEMP_FILE" "$file"
+    rm "$TEMP_FILE" "$head_file" "$tail_file"
+    
+    echo -e "${GREEN}  Fixed duplicate: $name${NC}" | tee -a "$LOG_FILE"
+}
 
-# Now handle remaining specific duplicate entries in main values/strings.xml
-MAIN_FILE="$RES_DIR/values/strings.xml"
-if [ -f "$MAIN_FILE" ]; then
-    # Known duplicates to fix
-    KNOWN_DUPLICATES=("level_completed" "level_difficulty_format" "level_filter_all" 
-                        "level_filter_played" "level_filter_unsolved" "level_format" 
-                        "level_locked" "level_locked_message" "level_size_format" 
-                        "save_date_format" "save_empty" "save_failed" 
-                        "save_level_format" "save_slot_format")
+# Process each file for duplicates
+for file in "${STRINGS_FILES[@]}"; do
+    echo -e "${MAGENTA}Checking for duplicates in $file...${NC}" | tee -a "$LOG_FILE"
     
-    for name in "${KNOWN_DUPLICATES[@]}"; do
-        # Check if this string has duplicates
-        COUNT=$(grep -c "<string name=\"$name\"" "$MAIN_FILE")
-        
-        if [ "$COUNT" -gt 1 ]; then
-            echo -e "${YELLOW}Fixing duplicate: $name ($COUNT occurrences)${NC}" | tee -a "$LOG_FILE"
-            
-            # Create temporary file without the string
-            TEMP_FILE=$(mktemp)
-            grep -v "<string name=\"$name\"" "$MAIN_FILE" > "$TEMP_FILE"
-            
-            # Get the first occurrence
-            FIRST_OCCURRENCE=$(grep -m 1 "<string name=\"$name\"" "$MAIN_FILE")
-            
-            # Find where to insert it (before </resources>)
-            END_LINE=$(grep -n '</resources>' "$TEMP_FILE" | cut -d':' -f1)
-            INSERT_LINE=$((END_LINE - 1))
-            
-            # Split the file
-            head -n $INSERT_LINE "$TEMP_FILE" > "${TEMP_FILE}.head"
-            tail -n $((END_LINE - INSERT_LINE)) "$TEMP_FILE" > "${TEMP_FILE}.tail"
-            
-            # Reassemble with the first occurrence restored
-            cat "${TEMP_FILE}.head" > "$TEMP_FILE"
-            echo "    $FIRST_OCCURRENCE" >> "$TEMP_FILE"
-            cat "${TEMP_FILE}.tail" >> "$TEMP_FILE"
-            
-            # Replace original file
-            cp "$TEMP_FILE" "$MAIN_FILE"
-            rm "$TEMP_FILE" "${TEMP_FILE}.head" "${TEMP_FILE}.tail"
+    # Extract all string names and find duplicates
+    ALL_NAMES=$(grep -o '<string name="[^"]*"' "$file" | cut -d '"' -f2 | sort)
+    DUPLICATES=$(echo "$ALL_NAMES" | uniq -d)
+    
+    if [ -z "$DUPLICATES" ]; then
+        echo -e "${GREEN}  No duplicates found.${NC}" | tee -a "$LOG_FILE"
+        continue
+    fi
+    
+    # Process each duplicate
+    while read -r name; do
+        if [ -n "$name" ]; then
+            COUNT=$(grep -c "<string name=\"$name\"" "$file")
+            fix_duplicates "$file" "$name" "$COUNT"
         fi
-    done
-fi
+    done <<< "$DUPLICATES"
+done
 
 echo -e "${GREEN}Duplicate string handling complete.${NC}"
 echo "Duplicate string handling complete." >> "$LOG_FILE"
 echo
 
 ###############################################################
-# Step 2: Identify completely unused strings
+# Step 2: Check for localized strings that don't exist in default resources
 ###############################################################
-echo -e "${BOLD}Step 2: Checking for unused string resources...${NC}"
-echo "Step 2: Checking for unused string resources..." >> "$LOG_FILE"
+echo -e "${BOLD}Step 2: Checking for missing default strings...${NC}"
+echo "Step 2: Checking for missing default strings..." >> "$LOG_FILE"
+
+# Get strings from default file
+DEFAULT_STRINGS=$(grep -o '<string name="[^"]*"' "$DEFAULT_STRINGS_FILE" | cut -d '"' -f2 | sort)
+
+# Check each non-default file
+for file in "${STRINGS_FILES[@]}"; do
+    # Skip default file
+    if [ "$file" = "$DEFAULT_STRINGS_FILE" ]; then
+        continue
+    fi
+    
+    echo -e "${MAGENTA}Checking for missing defaults in $file...${NC}" | tee -a "$LOG_FILE"
+    
+    # Get strings from this language file
+    LANG_STRINGS=$(grep -o '<string name="[^"]*"' "$file" | cut -d '"' -f2 | sort)
+    
+    # Extract missing default definitions
+    MISSING_DEFAULTS=$(comm -23 <(echo "$LANG_STRINGS") <(echo "$DEFAULT_STRINGS"))
+    
+    if [ -z "$MISSING_DEFAULTS" ]; then
+        echo -e "${GREEN}  All localized strings have default definitions.${NC}" | tee -a "$LOG_FILE"
+        continue
+    fi
+    
+    # Report missing defaults
+    MISSING_COUNT=0
+    TEMP_FIXED_FILE=$(mktemp)
+    LANG=$(basename $(dirname "$file") | sed 's/values-//')
+    
+    echo -e "${YELLOW}  Found strings in $LANG localization without default definition:${NC}" | tee -a "$LOG_FILE"
+    
+    while read -r name; do
+        if [ -n "$name" ]; then
+            MISSING_COUNT=$((MISSING_COUNT + 1))
+            
+            # Get the localized string to copy to default
+            LOCALIZED_STRING=$(grep -m1 "<string name=\"$name\"" "$file")
+            
+            echo -e "  - $name: ${YELLOW}This string exists in $LANG but not in default resources${NC}" | tee -a "$LOG_FILE"
+            echo "    Original: $LOCALIZED_STRING" | tee -a "$LOG_FILE"
+        fi
+    done <<< "$MISSING_DEFAULTS"
+    
+    echo -e "${YELLOW}  Found $MISSING_COUNT strings in $LANG without default definition.${NC}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}  These strings will likely be removed by the Android build system.${NC}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}  Consider adding them to the default (values/strings.xml) file.${NC}" | tee -a "$LOG_FILE"
+done
+
+echo -e "${GREEN}Missing default string check complete.${NC}"
+echo "Missing default string check complete." >> "$LOG_FILE"
+echo
+
+###############################################################
+# Step 3: Identify completely unused strings
+###############################################################
+echo -e "${BOLD}Step 3: Checking for unused string resources...${NC}"
+echo "Step 3: Checking for unused string resources..." >> "$LOG_FILE"
 
 # Extract strings from the default resource file
-DEFAULT_STRINGS_FILE="$RES_DIR/values/strings.xml"
 echo "Extracting strings from default resource file..." | tee -a "$LOG_FILE"
 ALL_STRINGS=$(grep -o '<string name="[^"]*"' "$DEFAULT_STRINGS_FILE" | cut -d '"' -f2)
 STRING_NAMES=()
@@ -264,15 +244,15 @@ echo "- ${#UNUSED_STRINGS[@]} completely unused strings" | tee -a "$LOG_FILE"
 echo
 
 ###############################################################
-# Step 3: Remove only the specific safe-to-remove strings
+# Step 4: Remove only the specific safe-to-remove strings
 ###############################################################
 
-# Only remove these specific strings which are safe to remove
+# Only remove these specific strings which are confirmed safe to remove
 SAFE_TO_REMOVE=("robot_count_message" "hint_robot_count")
 REMOVED_COUNT=0
 
-echo -e "${BOLD}Step 3: Removing specific unused strings...${NC}"
-echo "Step 3: Removing specific unused strings..." >> "$LOG_FILE"
+echo -e "${BOLD}Step 4: Removing specific unused strings...${NC}"
+echo "Step 4: Removing specific unused strings..." >> "$LOG_FILE"
 
 for file in "${STRINGS_FILES[@]}"; do
     FILE_REMOVED=0
@@ -337,10 +317,10 @@ echo -e "${GREEN}Removed $REMOVED_COUNT unused string references across all file
 echo
 
 ###############################################################
-# Step 4: Verify the build still works
+# Step 5: Verify the build still works
 ###############################################################
-echo -e "${BOLD}Step 4: Running Gradle build to verify changes...${NC}"
-echo "Step 4: Running Gradle build to verify changes..." >> "$LOG_FILE"
+echo -e "${BOLD}Step 5: Running Gradle build to verify changes...${NC}"
+echo "Step 5: Running Gradle build to verify changes..." >> "$LOG_FILE"
 
 # Generate list of strings we removed
 REMOVED_LIST=""
