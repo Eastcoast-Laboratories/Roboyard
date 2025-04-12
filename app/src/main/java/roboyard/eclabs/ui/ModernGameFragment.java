@@ -359,7 +359,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                             gameGridView.invalidate();
                         }
                         
-                        Toast.makeText(requireContext(), "Robot movement canceled", Toast.LENGTH_SHORT).show();
+                        Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+                        Toast.makeText(requireContext(), localizedContext.getString(R.string.robot_movement_canceled), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     // No robot is active, allow normal back navigation
@@ -1974,10 +1975,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[HINT_DEBUG] getLocalizedRobotColorName called with ID: %d", robotId);
         
         switch (robotId) {
-            case Constants.COLOR_PINK: return getString(R.string.color_red);
-            case Constants.COLOR_GREEN: return getString(R.string.color_green);
-            case Constants.COLOR_BLUE: return getString(R.string.color_blue);
-            case Constants.COLOR_YELLOW: return getString(R.string.color_yellow);
+            case Constants.COLOR_PINK: return getString(R.string.color_pink_dative);
+            case Constants.COLOR_GREEN: return getString(R.string.color_green_dative);
+            case Constants.COLOR_BLUE: return getString(R.string.color_blue_dative);
+            case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_dative);
             default: 
                 return getString(R.string.unknown_color, robotId);
         }
@@ -1991,11 +1992,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         int c = robot.getColor();
         switch (c) {
-            case 0: return getString(R.string.color_red);
+            case 0: return getString(R.string.color_pink);
             case 1: return getString(R.string.color_green);
             case 2: return getString(R.string.color_blue);
             case 3: return getString(R.string.color_yellow);
-            case 4: return getString(R.string.color_gray);
+            case 4: return getString(R.string.color_silver);
             default:
                 Timber.e("Unknown robot color: '%d'", c);
                 return getString(R.string.unknown_color, c);
@@ -2111,7 +2112,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
                 RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
                 String robotColorName = getLocalizedRobotColorName(firstMove.getColor());
-                preHintText = getString(R.string.pre_hint_first_move, robotColorName);
+                
+                preHintText = getString(R.string.pre_hint_first_move, robotColorName); // "Move the X robot first"
                 Timber.d("[HINT_SYSTEM] Showing which robot to move first: %s", robotColorName);
             } else {
                 // Fallback if we can't determine the first robot
@@ -2313,27 +2315,28 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 boolean useCustomColors = false;
                 
                 // Change background color based on robot color mentioned in hint
-                if (lowerMessage.contains("red")) {
+                // TODO: localization strings instead of all extra
+                if (lowerMessage.contains("red") || lowerMessage.contains("rot")) {
                     backgroundDrawable.setColor(Color.parseColor("#f77070"));
                     backgroundDrawable.setStroke(3, Color.RED);
                     useCustomColors = true;
-                } else if (lowerMessage.contains("blue")) {
+                } else if (lowerMessage.contains("blue") || lowerMessage.contains("blau")) {
                     backgroundDrawable.setColor(Color.parseColor("#71a6ff"));
                     backgroundDrawable.setStroke(3, Color.BLUE);
                     useCustomColors = true;
-                } else if (lowerMessage.contains("green")) {
+                } else if (lowerMessage.contains("green") || lowerMessage.contains("grun")) {
                     backgroundDrawable.setColor(lightgreen);
                     backgroundDrawable.setStroke(3, darkgreen);
                     useCustomColors = true;
-                } else if (lowerMessage.contains("yellow")) {
+                } else if (lowerMessage.contains("yellow") || lowerMessage.contains("gelb")) {
                     backgroundDrawable.setColor(Color.parseColor("#fffe71"));
                     backgroundDrawable.setStroke(3, Color.parseColor("#DAA520"));
                     useCustomColors = true;
-                } else if (lowerMessage.contains("pink") || lowerMessage.contains("purple") || lowerMessage.contains("violet")) {
+                } else if (lowerMessage.contains("pink") || lowerMessage.contains("rosa") || lowerMessage.contains("purple") || lowerMessage.contains("violet")) {
                     backgroundDrawable.setColor(Color.parseColor("#eb91ff"));
                     backgroundDrawable.setStroke(3, Color.parseColor("#800080"));
                     useCustomColors = true;
-                } else if (lowerMessage.contains("orange")) {
+                } else if (lowerMessage.contains("orange") || lowerMessage.contains("orange")) {
                     backgroundDrawable.setColor(Color.parseColor("#ffa77f"));
                     backgroundDrawable.setStroke(3, Color.parseColor("#FFA500"));
                     useCustomColors = true;

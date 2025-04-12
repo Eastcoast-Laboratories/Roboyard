@@ -221,7 +221,6 @@
     <!-- AI and game direction strings -->
     <string name="ai_solution_format">Die KI hat eine Lösung in %1$d Zügen gefunden</string>
     <string name="direction_less_than">weniger als</string>
-    <string name="robot_move_first">Bewege zuerst den %1$s</string>
     <string name="robot_color_down">%1$s nach unten</string>
     
     <!-- Accessibility versions -->
@@ -230,7 +229,6 @@
     <string name="retry_button_a11y">Dieses Level wiederholen</string>
     <string name="restart_button_a11y">Dieses Level neu starten</string>
     <string name="save_map_button_a11y">Aktuelle Karte speichern</string>
-    <string name="robot_move_first_a11y">Bewege zuerst den %1$s Roboter</string>
     <string name="robot_color_down_a11y">Bewege %1$s Roboter nach unten</string>
 
     <!-- Color names for robots and game elements -->
@@ -238,36 +236,36 @@
     <string name="color_blue">Blau</string>
     <string name="color_green">Grün</string>
     <string name="color_yellow">Gelb</string>
-    <string name="color_purple">Lila</string>
+    <string name="color_pink">Pink</string>
     <string name="color_orange">Orange</string>
     <string name="color_white">Weiß</string>
     <string name="color_black">Schwarz</string>
     <string name="color_teal">Türkis</string>
-    <string name="color_gray">Grau</string>
+    <string name="color_silver">Silber</string>
     
     <!-- Color names for accessibility -->
     <string name="color_red_a11y">Rot</string>
     <string name="color_blue_a11y">Blau</string>
     <string name="color_green_a11y">Grün</string>
     <string name="color_yellow_a11y">Gelb</string>
-    <string name="color_purple_a11y">Lila</string>
+    <string name="color_pink_a11y">Pink</string>
     <string name="color_orange_a11y">Orange</string>
     <string name="color_white_a11y">Weiß</string>
     <string name="color_black_a11y">Schwarz</string>
     <string name="color_teal_a11y">Türkis</string>
-    <string name="color_gray_a11y">Grau</string>    
+    <string name="color_silver_a11y">Silber</string>    
     
     <!-- Deklinierte Farbformen für deutsche Grammatik -->
     <string name="color_red_dative">roten</string>
     <string name="color_blue_dative">blauen</string>
     <string name="color_green_dative">grünen</string>
     <string name="color_yellow_dative">gelben</string>
-    <string name="color_purple_dative">lila</string>
+    <string name="color_pink_dative">pinken</string>
     <string name="color_orange_dative">orangen</string>
     <string name="color_white_dative">weißen</string>
     <string name="color_black_dative">schwarzen</string>
     <string name="color_teal_dative">türkisen</string>
-    <string name="color_gray_dative">grauen</string>
+    <string name="color_silver_dative">silbernen</string>
     
     <!-- Game UI text -->
     <string name="no_robot_selected">Kein Roboter ausgewählt</string>
@@ -289,7 +287,6 @@
     <string name="level_completed">Level %1$d abgeschlossen mit %2$d Zügen</string>
     <string name="stars_earned">Du hast %1$d Sterne verdient</string>
     <string name="completed_in_moves">Abgeschlossen mit %1$d Zügen</string>
-    <string name="save_screen_error">Kann nicht zum Speicherbildschirm navigieren: %1$s</string>
     <string name="starting_level">Starte Level %1$d</string>
     <string name="target_reached">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
     <string name="robot_move_initiated">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
@@ -328,4 +325,14 @@
     <string name="difficulty_insane">Extrem</string>
     <string name="difficulty_impossible">Unmöglich</string>
     <string name="difficulty_unknown">Unbekannt</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">von</string>
+    <string name="colors">Farben</string>
+    <string name="impossible_small_board_warning">Unmöglich auf kleinen Spielfeldern kann mehrere Minuten dauern, um eine passende Karte zu generieren</string>
+
+    <!-- Toast messages -->
+    <string name="error_email_app">E-Mail-App konnte nicht geöffnet werden</string>
+    <string name="robot_movement_canceled">Roboterbewegung abgebrochen</string>
+    <string name="no_game_to_save">Kein Spiel zum Speichern verfügbar</string>
 </resources>

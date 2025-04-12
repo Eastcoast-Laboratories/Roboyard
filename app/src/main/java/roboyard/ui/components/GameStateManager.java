@@ -904,20 +904,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         if (currentGameState == null) {
             Timber.e("Cannot navigate to save screen: No valid GameState available");
-            // Show a toast notification
-            Toast.makeText(context, "No game available to save", Toast.LENGTH_SHORT).show();
             return;
         }
 
         // We should only proceed if the context is a FragmentActivity
         if (!(context instanceof androidx.fragment.app.FragmentActivity activity)) {
             Timber.e("Cannot navigate to save screen: context is not a FragmentActivity");
-            // Toast to inform the user
-            if (context != null) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(context, "Cannot navigate to save screen", Toast.LENGTH_SHORT).show();
-                });
-            }
             return;
         }
         

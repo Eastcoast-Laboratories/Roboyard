@@ -255,7 +255,9 @@ public class SettingsFragment extends Fragment {
                     emailIntent.putExtra(Intent.EXTRA_TEXT, detailsBuilder.toString());
                     startActivity(Intent.createChooser(emailIntent, "Send Bug Report"));
                 } catch (Exception ex) {
-                    Toast.makeText(requireContext(), "Could not open email app", Toast.LENGTH_SHORT).show();
+                    // Get localized context
+                    Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+                    Toast.makeText(requireContext(), localizedContext.getString(R.string.error_email_app), Toast.LENGTH_SHORT).show();
                     Timber.e(ex, "Failed to send email report");
                 }
             });
@@ -506,8 +508,8 @@ public class SettingsFragment extends Fragment {
                         break;
                     case Constants.DIFFICULTY_IMPOSSIBLE:
                         if (difficultyImpossible != null) difficultyImpossible.setChecked(true);
-                        break;
-                }
+                                break;
+                            }
             } else {
                 Timber.e("difficultyRadioGroup is null");
             }
@@ -627,7 +629,7 @@ public class SettingsFragment extends Fragment {
                         if (selectedRobotCount > currentTargetColors) {
                             // Adjust robot count to match target colors
                             selectedRobotCount = currentTargetColors;
-                            robotCountSpinner.setSelection(selectedRobotCount - 1, false);
+                            robotCountSpinner.setSelection(selectedRobotCount - 1);
                             
                             // Show a toast to inform the user
                             Toast.makeText(requireContext(), 
@@ -664,11 +666,17 @@ public class SettingsFragment extends Fragment {
                 return;
             }
             
-            // Create adapter with values 1-4
-            ArrayAdapter<Integer> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
+            // Get localized context from RoboyardApplication
+            Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+            
+            // Create adapter with localized text values
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             for (int i = 1; i <= 4; i++) {
-                adapter.add(i);
+                // Format as "1 of 4 colors" with localization
+                String text = i + " " + localizedContext.getString(R.string.of) + " " + 
+                             localizedContext.getString(R.string.colors);
+                adapter.add(text);
             }
             targetColorsSpinner.setAdapter(adapter);
             
@@ -920,7 +928,6 @@ public class SettingsFragment extends Fragment {
             }
         } catch (Exception e) {
             Timber.e(e, "Error setting generateNewMapEachTime setting");
-            Toast.makeText(requireContext(), "Failed to update map generation setting", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -938,8 +945,12 @@ public class SettingsFragment extends Fragment {
         
         // Only show toast for small boards (less than 16x16)
         if (currentSize != null && (currentSize[0] < 16 || currentSize[1] < 16)) {
+            // Get localized context
+            Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+            
+            // Use localized warning message
             Toast toast = Toast.makeText(requireContext(),
-                    "Impossible on small boards may take several minutes to generate a fitting map",
+                    localizedContext.getString(R.string.impossible_small_board_warning),
                     Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
@@ -1037,10 +1048,14 @@ public class SettingsFragment extends Fragment {
                             return;
                         }
                         
-                        String difficulty = "Beginner"; // default
+                        Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
+                        String difficulty = localizedContext.getString(R.string.difficulty_beginner); // default
                         int difficultyLevel = Constants.DIFFICULTY_BEGINNER; // default
 
                         if (checkedId == R.id.difficulty_beginner) {
+                            difficulty = localizedContext.getString(R.string.difficulty_beginner);
+                            difficultyLevel = Constants.DIFFICULTY_BEGINNER;
+                            
                             // Only set board size to 12x14 if current size is larger
                             if (Preferences.boardSizeWidth * Preferences.boardSizeHeight > 12 * 14) {
                                 // Find the 12x14 board size in the validBoardSizes list
@@ -1060,9 +1075,9 @@ public class SettingsFragment extends Fragment {
                                     // Update the board size in preferences
                                     Preferences.setBoardSize(12, 14);
                                     isUpdatingUI = false;
-                                    Timber.d("Automatically set board size to 12x14 for Beginner difficulty");
+                                    Timber.d("[DIFFICULTY] Automatically set board size to 12x14 for Beginner difficulty");
                                 } else {
-                                    Timber.d("12x14 board size not found for Beginner difficulty");
+                                    Timber.d("[DIFFICULTY] 12x14 board size not found for Beginner difficulty");
                                 }
                             }
                             
@@ -1072,17 +1087,17 @@ public class SettingsFragment extends Fragment {
                                 targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
                                 Preferences.setTargetColors(1);
                                 isUpdatingUI = false;
-                                Timber.d("Automatically set target colors to 1 for Beginner difficulty");
+                                Timber.d("[DIFFICULTY] Automatically set target colors to 1 for Beginner difficulty");
                             }
                             
                         } else if (checkedId == R.id.difficulty_advanced) {
-                            difficulty = "Advanced";
+                            difficulty = localizedContext.getString(R.string.difficulty_advanced);
                             difficultyLevel = Constants.DIFFICULTY_ADVANCED;
                         } else if (checkedId == R.id.difficulty_insane) {
-                            difficulty = "Insane";
+                            difficulty = localizedContext.getString(R.string.difficulty_insane);
                             difficultyLevel = Constants.DIFFICULTY_INSANE; 
                         } else if (checkedId == R.id.difficulty_impossible) {
-                            difficulty = "Impossible";
+                            difficulty = localizedContext.getString(R.string.difficulty_impossible);
                             difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE; 
                             // Show warning toast for impossible difficulty
                             showImpossibleDifficultyToast();

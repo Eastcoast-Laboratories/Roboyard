@@ -221,7 +221,6 @@
     <!-- AI and game direction strings -->
     <string name="ai_solution_format">The A.I. found a solution in %1$d moves</string>
     <string name="direction_less_than">less than</string>
-    <string name="robot_move_first">Move the %1$s first</string>
     <string name="robot_color_down">%1$s down</string>
     
     <!-- Accessibility versions -->
@@ -230,7 +229,6 @@
     <string name="retry_button_a11y">Retry this level</string>
     <string name="restart_button_a11y">Restart this level</string>
     <string name="save_map_button_a11y">Save current map</string>
-    <string name="robot_move_first_a11y">Move the %1$s robot first</string>
     <string name="robot_color_down_a11y">Move %1$s robot down</string>
 
     <!-- Color names for robots and game elements -->
@@ -238,24 +236,33 @@
     <string name="color_blue">Blue</string>
     <string name="color_green">Green</string>
     <string name="color_yellow">Yellow</string>
-    <string name="color_purple">Purple</string>
+    <string name="color_pink">Pink</string>
     <string name="color_orange">Orange</string>
     <string name="color_white">White</string>
     <string name="color_black">Black</string>
-    <string name="color_teal">Teal</string>
-    <string name="color_gray">Gray</string>
+    <string name="color_silver">Silver</string>
     
     <!-- Accessibility versions -->
     <string name="color_red_a11y">Red</string>
     <string name="color_blue_a11y">Blue</string>
     <string name="color_green_a11y">Green</string>
     <string name="color_yellow_a11y">Yellow</string>
-    <string name="color_purple_a11y">Purple</string>
+    <string name="color_pink_a11y">Pink</string>
     <string name="color_orange_a11y">Orange</string>
     <string name="color_white_a11y">White</string>
     <string name="color_black_a11y">Black</string>
-    <string name="color_teal_a11y">Teal</string>
-    <string name="color_gray_a11y">Gray</string>
+    <string name="color_silver_a11y">Silver</string>
+
+    <!-- Dative forms (English doesn't change, but needed for resource references) -->
+    <string name="color_red_dative">Red</string>
+    <string name="color_blue_dative">Blue</string>
+    <string name="color_green_dative">Green</string>
+    <string name="color_yellow_dative">Yellow</string>
+    <string name="color_pink_dative">Pink</string>
+    <string name="color_orange_dative">Orange</string>
+    <string name="color_white_dative">White</string>
+    <string name="color_black_dative">Black</string>
+    <string name="color_silver_dative">Silver</string>
 
     <!-- Game UI text for ModernGameFragment -->
     <string name="no_robot_selected">No robot selected</string>
@@ -278,7 +285,6 @@
     <string name="level_completed">Level %1$d completed in %2$d moves</string>
     <string name="stars_earned">You earned %1$d stars</string>
     <string name="completed_in_moves">Completed in %1$d moves</string>
-    <string name="save_screen_error">Cannot navigate to save screen: %1$s</string>
     <string name="starting_level">Starting level %1$d</string>
     <string name="target_reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
     <string name="robot_move_initiated">%1$s initiating move, starting at %2$d, %3$d</string>
@@ -287,7 +293,6 @@
     <string name="ai_solution_less_moves">The A.I. found a solution in less than %1$d moves</string>
     <string name="ai_solution_exact_moves">The A.I. found a solution in %1$d moves</string>
     <string name="solution_found_moves">Solution found: %1$d moves</string>
-    <string name="move_robot_first">Move the %1$s robot first</string>
 
     <!-- Accessibility versions -->
     <string name="target_reached_a11y">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
@@ -317,4 +322,14 @@
     <string name="difficulty_insane">Insane</string>
     <string name="difficulty_impossible">Impossible</string>
     <string name="difficulty_unknown">Unknown</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">of</string>
+    <string name="colors">colors</string>
+    <string name="impossible_small_board_warning">Impossible on small boards may take several minutes to generate a fitting map</string>
+    
+    <!-- Toast messages -->
+    <string name="error_email_app">Could not open email app</string>
+    <string name="robot_movement_canceled">Robot movement canceled</string>
+    <string name="no_game_to_save">No game available to save</string>
 </resources>
