@@ -262,60 +262,63 @@
     <string name="color_silver_dative">silbernen</string>
     
     <!-- Game UI text -->
-    <string name="no_robot_selected">Kein Roboter ausgewählt</string>
-    <string name="robot_selected">Ausgewählt: %1$s Roboter bei (%2$d, %3$d)</string>
-    <string name="robot_selected_info">Ausgewählt: %1$s Roboter auf Position (%2$d, %3$d)</string>
-    <string name="robot_target_info">%1$s Ziel: (%2$d, %3$d)</string>
-    <string name="no_target_for_robot">Kein Ziel für diesen Roboter</string>
-    <string name="move_count_text">Züge: %1$d</string>
-    <string name="moves_count">Züge: %1$d</string>
-    <string name="squares_moved">Felder bewegt: %1$d</string>
-    <string name="board_size">Spielfeld: %1$dx%2$d</string>
-    <string name="solution_error">Keine Lösung gefunden: %1$s</string>
-    <string name="direction_up">nach oben</string>
-    <string name="direction_down">nach unten</string>
-    <string name="direction_right">nach rechts</string>
-    <string name="direction_left">nach links</string>
+    <string name="no_robot_selected" comment="Status message when no robot is currently selected">Kein Roboter ausgewählt</string>
+    <string name="robot_selected" comment="Status message showing which robot is selected">Ausgewählt: %1$s Roboter bei (%2$d, %3$d)</string>
+    <string name="robot_selected_info" comment="More detailed information about selected robot">Ausgewählt: %1$s Roboter auf Position (%2$d, %3$d)</string>
+    <string name="robot_target_info" comment="Information about a target on the board">%1$s Ziel: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot" comment="Message when a robot has no matching target">Kein Ziel für diesen Roboter</string>
+    <string name="move_count_text" comment="Text showing number of moves made">Züge: %1$d</string>
+    <string name="moves_count" comment="Text showing number of moves made">Züge: %1$d</string>
+    <string name="squares_moved" comment="Text showing number of squares moved">Felder bewegt: %1$d</string>
+    <string name="board_size" comment="Text showing size of the board">Spielfeld: %1$dx%2$d</string>
+    <string name="solution_error" comment="Error message when no solution is found">Keine Lösung gefunden: %1$s</string>
+    <string name="direction_up" comment="Direction name for movement hints">nach oben</string>
+    <string name="direction_down" comment="Direction name for movement hints">nach unten</string>
+    <string name="direction_right" comment="Direction name for movement hints">nach rechts</string>
+    <string name="direction_left" comment="Direction name for movement hints">nach links</string>
 
     <!-- Game UI Buttons and Messages -->
-    <string name="reset_button">Reset</string>
-    <string name="unique_map_id">%1$s</string>
-    <string name="empty_text"></string>
-    <string name="level_id_text">Level %1$d</string>
-    <string name="level_completed">Level %1$d abgeschlossen mit %2$d Zügen</string>
-    <string name="stars_earned">Du hast %1$d Sterne verdient</string>
-    <string name="completed_in_moves">Abgeschlossen mit %1$d Zügen</string>
-    <string name="starting_level">Starte Level %1$d</string>
-    <string name="target_reached">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
-    <string name="robot_move_initiated">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
-    <string name="unknown_robot">Unbekannt: %1$d</string>
-    <string name="unknown_color">Unbekannt: %1$s</string>
-    <string name="ai_solution_less_moves">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
-    <string name="ai_solution_exact_moves">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
-    <string name="solution_found_moves">Lösung gefunden: %1$d Züge</string>
-    <string name="move_robot_first">Bewege zuerst den %1$s Roboter</string>
+    <string name="reset_button" comment="Button to reset the current game/level">Zurücksetzen</string>
+    <string name="hint_button" comment="Button to get a hint">Hinweis</string>
+    <string name="cancel_hint_button" comment="Button to hide hints">Ausblenden</string>
+    <string name="cancel_button" comment="Generic cancel button text">Abbrechen</string>
+    <string name="unique_map_id" comment="Unique identifier for a map">%1$s</string>
+    <string name="empty_text" comment="Empty text for various UI elements"></string>
+    <string name="level_id_text" comment="Text showing the current level ID">Level %1$d</string>
+    <string name="level_completed" comment="Text showing the level completion status">Level %1$d abgeschlossen mit %2$d Zügen</string>
+    <string name="stars_earned" comment="Text showing the number of stars earned">Du hast %1$d Sterne verdient</string>
+    <string name="completed_in_moves" comment="Text showing the number of moves to complete a level">Abgeschlossen mit %1$d Zügen</string>
+    <string name="starting_level" comment="Text showing the starting level">Starte Level %1$d</string>
+    <string name="target_reached" comment="Text showing the target reached status">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="robot_move_initiated" comment="Text showing the robot move initiation">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
+    <string name="unknown_robot" comment="Text showing an unknown robot">Unbekannt: %1$d</string>
+    <string name="unknown_color" comment="Text showing an unknown color">Unbekannt: %1$s</string>
+    <string name="ai_solution_less_moves" comment="Text showing the AI solution with less moves">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="ai_solution_exact_moves" comment="Text showing the AI solution with exact moves">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
+    <string name="solution_found_moves" comment="Text showing the solution found with moves">Lösung gefunden: %1$d Züge</string>
+    <string name="move_robot_first" comment="Text showing the move robot first message">Bewege zuerst den %1$s Roboter</string>
 
     <!-- Accessibility versions -->
-    <string name="target_reached_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
-    <string name="robot_move_initiated_a11y">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
-    <string name="starting_level_a11y">Starte Level %1$d</string>
+    <string name="target_reached_a11y" comment="Accessibility text for target reached">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="robot_move_initiated_a11y" comment="Accessibility text for robot move initiation">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
+    <string name="starting_level_a11y" comment="Accessibility text for starting level">Starte Level %1$d</string>
 
     <!-- Additional Game UI Messages -->
-    <string name="cancel_button">✖️ Hinweis</string>
-    <string name="nothing_to_undo">Nichts zum Rückgängig machen</string>
-    <string name="robots_reset">Roboter auf Startpositionen zurückgesetzt</string>
-    <string name="no_game_in_progress">Kein Spiel läuft</string>
-    <string name="no_robots_available">Keine Roboter verfügbar</string>
-    <string name="cannot_move_in_this_direction">Kann in diese Richtung nicht bewegen</string>
-    <string name="pre_hint_less_than_x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
-    <string name="pre_hint_exact_solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
-    <string name="solution_found">KI hat eine Lösung gefunden!</string>
-    <string name="pre_hint_first_move">Bewege zuerst den %1$s Roboter</string>
-    <string name="no_solution_found">Keine Lösung gefunden</string>
-    <string name="pre_hint_ready">Bereit für schrittweise Hinweise</string>
-    <string name="all_hints_shown">Alle Hinweise wurden angezeigt</string>
-    <string name="no_valid_hint">Kein gültiger Hinweis verfügbar</string>
-    <string name="error_displaying_hint">Fehler beim Anzeigen des Hinweises</string>
+    <string name="cancel_button" comment="Generic cancel button text">✖️ Hinweis</string>
+    <string name="nothing_to_undo" comment="Text showing nothing to undo">Nichts zum Rückgängig machen</string>
+    <string name="robots_reset" comment="Text showing robots reset">Roboter auf Startpositionen zurückgesetzt</string>
+    <string name="no_game_in_progress" comment="Text showing no game in progress">Kein Spiel läuft</string>
+    <string name="no_robots_available" comment="Text showing no robots available">Keine Roboter verfügbar</string>
+    <string name="cannot_move_in_this_direction" comment="Text showing cannot move in this direction">Kann in diese Richtung nicht bewegen</string>
+    <string name="pre_hint_less_than_x" comment="Text showing pre-hint less than x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="pre_hint_exact_solution" comment="Text showing pre-hint exact solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
+    <string name="solution_found" comment="Text showing solution found">KI hat eine Lösung gefunden!</string>
+    <string name="pre_hint_first_move" comment="Text showing pre-hint first move">Bewege zuerst den %1$s Roboter</string>
+    <string name="no_solution_found" comment="Text showing no solution found">Keine Lösung gefunden</string>
+    <string name="pre_hint_ready" comment="Text showing pre-hint ready">Bereit für schrittweise Hinweise</string>
+    <string name="all_hints_shown" comment="Text showing all hints shown">Alle Hinweise wurden angezeigt</string>
+    <string name="no_valid_hint" comment="Text showing no valid hint">Kein gültiger Hinweis verfügbar</string>
+    <string name="error_displaying_hint" comment="Text showing error displaying hint">Fehler beim Anzeigen des Hinweises</string>
 
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Anfänger</string>
