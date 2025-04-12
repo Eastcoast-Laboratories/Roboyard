@@ -49,6 +49,7 @@
     
     <!-- Navigation buttons -->
     <string name="button_back">뒤로</string>
+    <string name="button_back_game">뒤로</string>
     <string name="button_reset">초기화</string>
     <string name="button_save_map">맵 저장</string>
     <string name="button_new_game">새 게임</string>
@@ -58,4 +59,40 @@
     <string name="save_map">맵 저장</string>
     <string name="new_game">새 게임</string>
     <string name="menu">메뉴</string>
+    
+    <!-- Hint related strings -->
+    <string name="hint_button">힌트</string>
+    <string name="hint_button_a11y">힌트 보기</string>
+    <string name="cancel_hint_button">숨기기</string>
+    <string name="cancel_hint_button_a11y">힌트 숨기기</string>
+    <string name="hint_cancel_button">✖️ 힌트</string>
+    <string name="pre_hint_less_than_x">AI가 %1$d번 이하의 이동으로 해결책을 찾았습니다</string>
+    <string name="pre_hint_exact_solution">AI가 %1$d번의 이동으로 해결책을 찾았습니다</string>
+    <string name="pre_hint_first_move">%1$s 로봇을 먼저 이동하세요</string>
+    <string name="pre_hint_ready">단계별 힌트를 보여줄 준비가 되었습니다</string>
+    <string name="hint_solution_found">%1$d번의 이동으로 해결책을 찾았습니다</string>
+    <string name="hint_move_robot_first">%1$s 로봇을 먼저 이동하세요</string>
+    <string name="all_hints_shown">모든 힌트가 표시되었습니다</string>
+    <string name="no_valid_hint">유효한 힌트가 없습니다</string>
+    <string name="error_displaying_hint">힌트 표시 오류</string>
+    
+    <!-- Direction names -->
+    <string name="direction_north">북쪽</string>
+    <string name="direction_south">남쪽</string>
+    <string name="direction_east">동쪽</string>
+    <string name="direction_west">서쪽</string>
+    <string name="direction_north_a11y">북쪽</string>
+    <string name="direction_south_a11y">남쪽</string>
+    <string name="direction_east_a11y">동쪽</string>
+    <string name="direction_west_a11y">서쪽</string>
+    <string name="direction_up">위쪽</string>
+    <string name="direction_down">아래쪽</string>
+    <string name="direction_right">오른쪽</string>
+    <string name="direction_left">왼쪽</string>
+    
+    <!-- Hint Direction Symbols -->
+    <string name="hint_direction_left">◀</string>
+    <string name="hint_direction_right">▶</string>
+    <string name="hint_direction_up">▲</string>
+    <string name="hint_direction_down">▼</string>
 </resources>
