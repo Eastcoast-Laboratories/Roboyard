@@ -6,7 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.ColorUtils;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -26,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.lang.reflect.Method;
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -1641,13 +1639,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         GameElement selectedRobot = state.getSelectedRobot();
         
         // Announce only the target at game start
-        GameElement targetElement = null;
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET) {
-                String targetColor = getLocalizedRobotColorName(element.getColor());
+                String targetColor = getLocalizedRobotColorNameDative(element.getColor());
                 announcement.append(targetColor).append(" target, ")
                           .append(element.getX()).append("-").append(element.getY()).append(". ");
-                targetElement = element;
                 break; // Only announce one target
             }
         }
@@ -1953,7 +1949,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param direction Direction constant from ERRGameMove
      * @return Human-readable direction name
      */
-    private String getDirectionName(int direction) {
+    private String getDirectionArrow(int direction) {
         switch (direction) {
             case 1: // ERRGameMove.UP.getDirection()
                 return "up";
@@ -1967,19 +1963,35 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 return "unknown direction";
         }
     }
-    
+
     /**
      * Get localized (translated) color name for a robot ID
      */
     private String getLocalizedRobotColorName(int robotId) {
         Timber.d("[HINT_DEBUG] getLocalizedRobotColorName called with ID: %d", robotId);
-        
+
+        switch (robotId) {
+            case Constants.COLOR_PINK: return getString(R.string.color_pink);
+            case Constants.COLOR_GREEN: return getString(R.string.color_green);
+            case Constants.COLOR_BLUE: return getString(R.string.color_blue);
+            case Constants.COLOR_YELLOW: return getString(R.string.color_yellow);
+            default:
+                return getString(R.string.unknown_color, robotId);
+        }
+    }
+
+    /**
+     * Get localized (translated) color name for a robot ID in dative
+     */
+    private String getLocalizedRobotColorNameDative(int robotId) {
+        Timber.d("[HINT_DEBUG] getLocalizedRobotColorNameDative called with ID: %d", robotId);
+
         switch (robotId) {
             case Constants.COLOR_PINK: return getString(R.string.color_pink_dative);
             case Constants.COLOR_GREEN: return getString(R.string.color_green_dative);
             case Constants.COLOR_BLUE: return getString(R.string.color_blue_dative);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_dative);
-            default: 
+            default:
                 return getString(R.string.unknown_color, robotId);
         }
     }
@@ -2111,7 +2123,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         else if (currentHintStep == numPreHints + 1) {
             if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
                 RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
-                String robotColorName = getLocalizedRobotColorName(firstMove.getColor());
+                String robotColorName = getLocalizedRobotColorNameDative(firstMove.getColor());
                 
                 preHintText = getString(R.string.pre_hint_first_move, robotColorName); // "Move the X robot first"
                 Timber.d("[HINT_SYSTEM] Showing which robot to move first: %s", robotColorName);
@@ -2160,7 +2172,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 String robotColorName = getLocalizedRobotColorName(rrMove.getColor());
                 
                 // Get the direction name
-                String directionName = getDirectionName(rrMove.getDirection());
+                String directionName = getDirectionArrow(rrMove.getDirection());
                 
                 // Calculate the hint number to display (1-based)
                 int displayHintNumber = hintIndex + 1;
@@ -2192,12 +2204,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         IGameMove prevMove = solution.getMoves().get(i);
                         if (prevMove instanceof RRGameMove prevRRMove) {
                             // Get abbreviated color and direction
-                            String prevColorName = getLocalizedRobotColorName(prevRRMove.getColor());
-                            String prevDirectionName = getDirectionName(prevRRMove.getDirection());
+                            String prevColorName = getRobotColorName(prevRRMove.getColor());
+                            String prevDirectionName = getDirectionArrow(prevRRMove.getDirection());
                             
                             // Add first letter of each
-                            hintMessage.append(prevColorName.charAt(0))
-                                    .append(prevDirectionName.charAt(0));
+                            hintMessage.append(LocalizedFirstCharName(prevColorName))
+                                    .append(LocalizedFirstCharDirection(prevDirectionName));
                             
                             // Add comma if not the last previous move
                             if (i < hintIndex - 1) {
@@ -2231,7 +2243,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             updateStatusText(getString(R.string.error_displaying_hint), true);
         }
     }
-    
+
+    private String LocalizedFirstCharDirection(String prevDirectionName) {
+        String firstChar = String.valueOf(prevDirectionName.charAt(0));
+        return firstChar;
+    }
+
+    private String LocalizedFirstCharName(String prevColorName) {
+        String firstChar = String.valueOf(prevColorName.charAt(0));
+        getString(R.string.color_pink);
+        return firstChar;
+    }
+
     /**
      * Shows the next hint in the sequence
      */
