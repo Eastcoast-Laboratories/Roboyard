@@ -154,18 +154,12 @@
     <!-- Game screen -->
     <string name="game_move_count">Züge: %1$d</string>
     <string name="game_time_format">%1$02d:%2$02d</string>
-    <string name="game_paused">Spiel pausiert</string>
-    <string name="game_victory">Sieg!</string>
-    <string name="game_moves_optimal">Perfekt! Optimale Lösung.</string>
-    <string name="game_moves_good">Gut gemacht!</string>
-    <string name="game_moves_hint_used">Du hast einen Hinweis benutzt.</string>
     
     <!-- Hint messages -->
     <plurals name="hint_robot_count">
         <item quantity="one">Hinweis: Bewege den %1$s Roboter</item>
         <item quantity="other">Hinweis: Bewege den %1$s und %2$s Roboter</item>
     </plurals>
-    <string name="hint_direction_format">%1$s nach %2$s</string>
     
     <!-- Autosave tags - non-translatable -->
     <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>

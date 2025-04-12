@@ -152,20 +152,14 @@
     <string name="save_failed">Failed to save game.</string>
     
     <!-- Game screen -->
-    <string name="game_move_count">Moves: %1$d</string>
-    <string name="game_time_format">%1$02d:%2$02d</string>
-    <string name="game_paused">Game Paused</string>
-    <string name="game_victory">Victory!</string>
-    <string name="game_moves_optimal">Perfect! Optimal solution.</string>
-    <string name="game_moves_good">Good job!</string>
-    <string name="game_moves_hint_used">You used a hint.</string>
+    <string name="game_move_count" comment="used in the game info box">Moves: %1$d</string>
+    <string name="game_time_format" comment="TODO: used in the game timer">%1$02d:%2$02d</string>
     
     <!-- Hint messages -->
     <plurals name="hint_robot_count">
         <item quantity="one">Hint: Move the %1$s robot</item>
         <item quantity="other">Hint: Move the %1$s and %2$s robots</item>
     </plurals>
-    <string name="hint_direction_format">%1$s to the %2$s</string>
     
     <!-- Autosave tags - non-translatable -->
     <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
@@ -275,11 +269,11 @@
     <string name="moves_count">Moves: %1$d</string>
     <string name="squares_moved">Squares moved: %1$d</string>
     <string name="board_size">Board: %1$dx%2$d</string>
-    <string name="solution_error">Could not find a solution: %1$s</string>
-    <string name="direction_up">up</string>
-    <string name="direction_down">down</string>
-    <string name="direction_right">right</string>
-    <string name="direction_left">left</string>
+    <string name="solution_error" comment="not important, should never occur">Could not find a solution: %1$s</string>
+    <string name="direction_up" comment="used in hint messages">up</string>
+    <string name="direction_down" comment="used in hint messages">down</string>
+    <string name="direction_right" comment="used in hint messages">right</string>
+    <string name="direction_left" comment="used in hint messages">left</string>
 
     <!-- Game UI Buttons and Messages -->
     <string name="reset_button">Reset</string>
