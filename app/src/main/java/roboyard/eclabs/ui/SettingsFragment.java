@@ -559,6 +559,12 @@ public class SettingsFragment extends Fragment {
                 appLanguageIndex = 1; // German
             } else if ("fr".equals(appLanguage)) {
                 appLanguageIndex = 2; // French
+            } else if ("es".equals(appLanguage)) {
+                appLanguageIndex = 3; // Spanish
+            } else if ("zh".equals(appLanguage)) {
+                appLanguageIndex = 4; // Chinese
+            } else if ("ko".equals(appLanguage)) {
+                appLanguageIndex = 5; // Korean
             }
             languageSpinner.setSelection(appLanguageIndex);
             
@@ -570,6 +576,12 @@ public class SettingsFragment extends Fragment {
                 talkbackLanguageIndex = 2; // German
             } else if ("fr".equals(talkbackLanguage)) {
                 talkbackLanguageIndex = 3; // French
+            } else if ("es".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 4; // Spanish
+            } else if ("zh".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 5; // Chinese
+            } else if ("ko".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 6; // Korean
             }
             talkbackLanguageSpinner.setSelection(talkbackLanguageIndex);
             
@@ -732,9 +744,12 @@ public class SettingsFragment extends Fragment {
         
         // Set up app language spinner
         List<String> languages = new ArrayList<>();
-        languages.add(getString(R.string.language_english));
-        languages.add(getString(R.string.language_german));
-        languages.add(getString(R.string.language_french));
+        languages.add(getString(R.string.settings_english));
+        languages.add(getString(R.string.settings_german));
+        languages.add(getString(R.string.settings_french));
+        languages.add(getString(R.string.settings_spanish));
+        languages.add(getString(R.string.settings_chinese));
+        languages.add(getString(R.string.settings_korean));
         
         ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, languages);
@@ -743,9 +758,12 @@ public class SettingsFragment extends Fragment {
         // Set up TalkBack language spinner (including "Same as app" option)
         List<String> talkbackLanguages = new ArrayList<>();
         talkbackLanguages.add(getString(R.string.language_same_as_app));
-        talkbackLanguages.add(getString(R.string.language_english));
-        talkbackLanguages.add(getString(R.string.language_german));
-        talkbackLanguages.add(getString(R.string.language_french));
+        talkbackLanguages.add(getString(R.string.settings_english));
+        talkbackLanguages.add(getString(R.string.settings_german));
+        talkbackLanguages.add(getString(R.string.settings_french));
+        talkbackLanguages.add(getString(R.string.settings_spanish));
+        talkbackLanguages.add(getString(R.string.settings_chinese));
+        talkbackLanguages.add(getString(R.string.settings_korean));
         
         ArrayAdapter<String> talkbackLanguageAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, talkbackLanguages);
@@ -861,6 +879,12 @@ public class SettingsFragment extends Fragment {
                 return "de";
             case "Français":
                 return "fr";
+            case "Español":
+                return "es";
+            case "中文":
+                return "zh";
+            case "한국어":
+                return "ko";
             default:
                 return "en"; // Default to English
         }
@@ -881,6 +905,12 @@ public class SettingsFragment extends Fragment {
                 return "de";
             case "Français":
                 return "fr";
+            case "Español":
+                return "es";
+            case "中文":
+                return "zh";
+            case "한국어":
+                return "ko";
             default:
                 return "same"; // Default to "Same as app"
         }

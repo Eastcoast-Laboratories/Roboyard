@@ -117,9 +117,12 @@
     <string name="language_settings_a11y">Select app display language</string>
     <string name="accessibility_language_label">TalkBack Language:</string>
     <string name="accessibility_language_a11y">Select TalkBack announcement language</string>
-    <string name="language_english">English</string>
-    <string name="language_german">Deutsch</string>
-    <string name="language_french">Français</string>
+    <string name="settings_english">English</string>
+    <string name="settings_german">Deutsch</string>
+    <string name="settings_french">Français</string>
+    <string name="settings_spanish">Español</string>
+    <string name="settings_chinese">中文</string>
+    <string name="settings_korean">한국어</string>
     <string name="language_same_as_app">Same as app language</string>
     <string name="language_changed_title">Language Changed</string>
     <string name="language_changed_message">The language setting has been updated. Some changes will apply immediately, while others will apply when you return to the main menu.</string>

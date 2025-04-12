@@ -60,11 +60,11 @@ public class RoboyardApplication extends Application {
         appContext = getApplicationContext();
         
         // Initialize Timber for logging - always enable it for debugging
-        Timber.plant(new Timber.DebugTree());
+            Timber.plant(new Timber.DebugTree());
 
         // Initialize the Preferences system at app startup
         Preferences.initialize(appContext);
-        Timber.d("[PREFERENCES] Initialized at application startup");
+        Timber.d("Preferences initialized");
         
         // Set app language to match device locale on first launch
         if (isFirstLaunch()) {
