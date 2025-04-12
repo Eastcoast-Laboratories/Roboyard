@@ -2,28 +2,20 @@
 <resources>
     <string name="app_name">Roboyard</string>
     
-    <!-- Game UI text for ModernGameFragment -->
-    <string name="no_robot_selected">Aucun robot su00e9lectionnu00e9</string>
-    <string name="robot_selected_info">Su00e9lectionnu00e9: robot %1$s u00e0 la position (%2$d, %3$d)</string>
-    <string name="robot_target_info">Cible %1$s: (%2$d, %3$d)</string>
-    <string name="no_target_for_robot">Pas de cible pour ce robot</string>
-    <string name="move_count_text">Coups: %1$d</string>
-    <string name="squares_moved_text">Cases: %1$d</string>
-    <string name="board_size_text">Taille: %1$dx%2$d</string>
-    <string name="moves_label">Mouvements</string>
-    <string name="squares_label">Cases</string>
-    
-    <!-- Button labels -->
-    <string name="hint_button">💡Indice</string>
-    <string name="hint_button_a11y">Indice</string>
-    <string name="cancel_hint_button">✖️ Indice</string>
-    <string name="reset_button">Reset</string>
-    <string name="retry_button">Recommencer</string>
-    <string name="menu_button">Menu</string>
-    <string name="back_button">Retour</string>
-    <string name="save_map_button">Sauvegarder</string>
-    <string name="ai_calculating">IA calcule une solution...</string>
-    
+    <!-- Main Menu Strings -->
+    <string name="action_settings">Parametres</string>
+    <string name="new_random_game">Nouvelle partie</string>
+    <string name="new_random_game_a11y">Commencer une nouvelle partie</string>
+    <string name="level_game">Niveaux</string>
+    <string name="level_game_a11y">Commencer un niveau</string>
+    <string name="load_game">Charger</string>
+    <string name="load_game_a11y">Charger une partie sauvegardee</string>
+    <string name="settings">Parametres</string>
+    <string name="settings_a11y">Parametres</string>
+    <string name="help">Comment jouer?</string>
+    <string name="help_a11y">Instructions pour jouer</string>
+    <string name="credits">Credits</string>
+
     <!-- Color names -->
     <string name="color_red">Rouge</string>
     <string name="color_blue">Bleu</string>
@@ -48,18 +40,49 @@
     <string name="color_teal_a11y">Turquoise</string>
     <string name="color_gray_a11y">Gris</string>
     
+    <!-- Deklinierte Farbformen -->
+    <string name="color_red_dative">rouge</string>
+    <string name="color_blue_dative">bleu</string>
+    <string name="color_green_dative">vert</string>
+    <string name="color_yellow_dative">jaune</string>
+    <string name="color_purple_dative">violet</string>
+    <string name="color_orange_dative">orange</string>
+    <string name="color_white_dative">blanc</string>
+    <string name="color_black_dative">noir</string>
+    <string name="color_teal_dative">turquoise</string>
+    <string name="color_gray_dative">gris</string>
+    
     <!-- Difficulty Levels -->
-    <string name="difficulty_beginner">Du00e9butant</string>
-    <string name="difficulty_intermediate">Intermu00e9diaire</string>
+    <string name="difficulty_beginner">Debutant</string>
+    <string name="difficulty_intermediate">Intermediaire</string>
     <string name="difficulty_insane">Difficile</string>
     <string name="difficulty_impossible">Impossible</string>
     <string name="difficulty_unknown">Inconnu</string>
     
+    <!-- Game buttons -->
+    <string name="hint_button">Indice</string>
+    <string name="hint_button_a11y">Indice</string>
+    <string name="cancel_hint_button">Annuler indice</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="reset_button">Reset</string>
+    <string name="back_button">Retour</string>
+    <string name="menu_button">Menu</string>
+    <string name="retry_button">Recommencer</string>
+    <string name="restart_button">Rejouer</string>
+    <string name="save_map_button">Sauvegarder</string>
+        
     <!-- Game UI Messages -->
-    <string name="unique_map_id">%1$s</string>
-    <string name="empty_text"></string>
-    <string name="level_id_text">Niveau %1$d</string>
-    <string name="level_completed">Niveau %1$d complu00e9tu00e9 en %2$d coups</string>
-    <string name="solution_found">IA a trouvu00e9 une solution!</string>
-    <string name="solution_error">Impossible de trouver une solution: %1$s</string>
+    <string name="no_robot_selected">Aucun robot selectionne</string>
+    <string name="robot_selected">Selectionne: robot %1$s a (%2$d, %3$d)</string>
+    <string name="robot_selected_info">Selectionne: robot %1$s a la position (%2$d, %3$d)</string>
+    <string name="robot_target_info">Cible %1$s: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">Pas de cible pour ce robot</string>
+    <string name="move_count_text">Coups: %1$d</string>
+    <string name="moves_count">Coups: %1$d</string>
+    <string name="starting_level">Demarrage du niveau %1$d</string>
+    <string name="ai_calculating">IA calcule une solution...</string>
+    <string name="nothing_to_undo">Rien a annuler</string>
+    <string name="robot_move_first">Deplacez abord le robot %1$s</string>
+    <string name="solution_found">IA a trouve une solution!</string>
+    <string name="robot_color_down">%1$s vers le bas</string>
 </resources>

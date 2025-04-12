@@ -257,6 +257,18 @@
     <string name="color_teal_a11y">Türkis</string>
     <string name="color_gray_a11y">Grau</string>    
     
+    <!-- Deklinierte Farbformen für deutsche Grammatik -->
+    <string name="color_red_dative">roten</string>
+    <string name="color_blue_dative">blauen</string>
+    <string name="color_green_dative">grünen</string>
+    <string name="color_yellow_dative">gelben</string>
+    <string name="color_purple_dative">lila</string>
+    <string name="color_orange_dative">orangen</string>
+    <string name="color_white_dative">weißen</string>
+    <string name="color_black_dative">schwarzen</string>
+    <string name="color_teal_dative">türkisen</string>
+    <string name="color_gray_dative">grauen</string>
+    
     <!-- Game UI text -->
     <string name="no_robot_selected">Kein Roboter ausgewählt</string>
     <string name="robot_selected">Ausgewählt: %1$s Roboter bei (%2$d, %3$d)</string>
