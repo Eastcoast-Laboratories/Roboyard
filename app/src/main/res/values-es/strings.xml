@@ -34,7 +34,6 @@
     <!-- Level Selection Screen -->
     <string name="level_button_description">Nivel %1$d</string>
 
-    <string name="back">Atrás</string>
     <string name="back_description">Volver a la pantalla anterior</string>
 
     <string name="next_level">Siguiente Nivel</string>
@@ -298,5 +297,22 @@
     <!-- Additional hint strings -->
     <string name="hint_solution_found">Encontrada solución en %1$d movimientos</string>
     <string name="hint_move_number">Movimiento %1$d de %2$d</string>
+
+    <string name="button_back">Atrás</string>
+    <string name="button_reset">Restablecer</string>
+    <string name="button_save_map">Guardar mapa</string>
+    <string name="button_new_game">Nuevo juego</string>
+    <string name="button_menu">Menú</string>
+    <string name="back">Atrás</string>
+    <string name="reset">Restablecer</string>
+    <string name="save_map">Guardar mapa</string>
+    <string name="new_game">Nuevo juego</string>
+    <string name="menu">Menú</string>
+    
+    <!-- Accessibility controls -->
+    <string name="announce">Anunciar</string>
+    <string name="next_robot">Siguiente robot</string>
+    <string name="announce_a11y">Anunciar la situación del juego</string>
+    <string name="next_robot_a11y">Seleccionar el siguiente robot</string>
 
 </resources>

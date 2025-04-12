@@ -106,10 +106,7 @@
     <string name="save_map_button">Sauvegarder</string>
     <string name="button_back_game">Retour</string>
     <string name="button_reset">Réinitialiser</string>
-    <string name="button_save_map">Sauvegarder Carte</string>
-    <string name="button_new_game">Nouveau Jeu</string>
-    <string name="button_menu">Menu</string>
-        
+
     <!-- Game UI Messages -->
     <string name="ai_calculating">IA calcule une solution...</string>
     <string name="nothing_to_undo">Rien à annuler</string>
@@ -135,6 +132,10 @@
     <!-- Accessibility Controls -->
     <string name="next_robot_button">Robot Suivant</string>
     <string name="announce_hint">Annoncer Indice</string>
+    <string name="announce">Annoncer</string>
+    <string name="next_robot">Robot suivant</string>
+    <string name="announce_a11y">Annoncer la situation du jeu</string>
+    <string name="next_robot_a11y">Sélectionner le robot suivant</string>
 
     <!-- Game text -->
     <string name="possible_moves">Déplacements possibles</string>
@@ -144,13 +145,24 @@
     <string name="squares_west">cases vers l`ouest</string>
     <string name="until">jusqu`au</string>
     <string name="edge">bord</string>
-    <string name="no_movement_north">pas de mouvement vers le nord</string>
-    <string name="no_movement_south">pas de mouvement vers le sud</string>
-    <string name="no_movement_east">pas de mouvement vers l`est</string>
-    <string name="no_movement_west">pas de mouvement vers l`ouest</string>
+    <string name="no_movement_north">aucun mouvement vers le nord</string>
+    <string name="no_movement_south">aucun mouvement vers le sud</string>
+    <string name="no_movement_east">aucun mouvement vers l`est</string>
+    <string name="no_movement_west">aucun mouvement vers l`ouest</string>
     <string name="use_next_robot_button">Utilisez le bouton Robot Suivant pour parcourir les robots</string>
     <string name="direction_north">vers le nord</string>
     <string name="direction_south">vers le sud</string>
     <string name="direction_east">vers l`est</string>
     <string name="direction_west">vers l`ouest</string>
+
+    <!-- Navigation buttons -->
+    <string name="button_back">Retour</string>
+    <string name="button_save_map">Enregistrer</string>
+    <string name="button_new_game">Nouvelle partie</string>
+    <string name="button_menu">Menu</string>
+    <string name="back">Retour</string>
+    <string name="reset">Réinitialiser</string>
+    <string name="save_map">Enregistrer la carte</string>
+    <string name="new_game">Nouvelle partie</string>
+    <string name="menu">Menu</string>
 </resources>

@@ -281,6 +281,10 @@
     <!-- Accessibility Controls -->
     <string name="next_robot_button">下一个机器人</string>
     <string name="announce_hint">提示</string>
+    <string name="announce">播报</string>
+    <string name="next_robot">下一个机器人</string>
+    <string name="announce_a11y">播报游戏状态</string>
+    <string name="next_robot_a11y">选择下一个机器人</string>
     
     <!-- Game text -->
     <string name="possible_moves">可能的移动</string>
@@ -295,4 +299,15 @@
     <string name="no_movement_east">无法向东移动</string>
     <string name="no_movement_west">无法向西移动</string>
     <string name="use_next_robot_button">使用下一个机器人按钮循环选择机器人</string>
+    
+    <!-- Navigation buttons -->
+    <string name="button_back">返回</string>
+    <string name="button_reset">重置</string>
+    <string name="button_save_map">保存地图</string>
+    <string name="button_new_game">新游戏</string>
+    <string name="button_menu">菜单</string>
+    <string name="reset">重置</string>
+    <string name="save_map">保存地图</string>
+    <string name="new_game">新游戏</string>
+    <string name="menu">菜单</string>
 </resources>

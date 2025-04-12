@@ -34,9 +34,6 @@
     <!-- Level Selection Screen -->
     <string name="level_button_description">Level %1$d</string>
 
-    <string name="back">Zurück</string>
-    <string name="back_description">Zurück zum vorherigen Bildschirm</string>
-
     <string name="next_level">Nächstes Level</string>
     <string name="next_level_description">Zum nächsten Level</string>
     
@@ -205,13 +202,20 @@
     <string name="help_tips_point_3">- Wenn du feststeckst, nutze die Hinweis-Funktion, um einen Vorschlag zu erhalten.</string>
     
     <!-- Game Buttons -->
-    <string name="button_back_game">Zurück</string>
-    <string name="button_reset">Zurücksetzen</string>
-    <string name="button_save_map">Karte speichern</string>
-    <string name="button_new_game">Neues Spiel</string>
-    <string name="button_menu">Menü</string>
+    <string name="button_reset">Reset</string>
     <string name="hint_button_a11y">Hinweis</string>
-    
+    <string name="button_new_game">Neues Spiel</string>
+    <string name="new_game">Neues Spiel</string>
+    <string name="button_menu">Menü</string>
+    <string name="menu">Menü</string>
+    <string name="button_back_game">Zurück</string>
+    <string name="button_back">Zurück</string>
+    <string name="back">Zurück</string>
+    <string name="back_description">Zurück zum vorherigen Bildschirm</string>
+    <string name="reset">Zurücksetzen</string>
+    <string name="save_map">Speichern</string>
+    <string name="button_save_map">Speichern</string>
+
     <!-- Game screen -->
     <string name="save_tab_title">Speichern</string>
     <string name="load_tab_title">Laden</string>
@@ -381,4 +385,10 @@
     <string name="no_movement_south">keine Bewegung nach Süden</string>
     <string name="no_movement_east">keine Bewegung nach Osten</string>
     <string name="no_movement_west">keine Bewegung nach Westen</string>
+    
+    <!-- Accessibility controls -->
+    <string name="announce">Ansagen</string>
+    <string name="next_robot">Nächster Roboter</string>
+    <string name="announce_a11y">Spielsituation ansagen</string>
+    <string name="next_robot_a11y">Nächsten Roboter auswählen</string>
 </resources>
