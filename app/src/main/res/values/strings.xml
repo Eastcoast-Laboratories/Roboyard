@@ -405,5 +405,11 @@
     <string name="no_movement_east">no movement east</string>
     <string name="no_movement_west">no movement west</string>
     <string name="use_next_robot_button">Use the next robot button to cycle through robots</string>
+    
+    <!-- Accessibility controls -->
+    <string name="announce">Announce</string>
+    <string name="next_robot">Next Robot</string>
+    <string name="announce_a11y">Announce game situation</string>
+    <string name="next_robot_a11y">Select next robot</string>
 
 </resources>
