@@ -123,9 +123,9 @@
     <string name="direction_east_a11y">Osten</string>
     <string name="direction_west_a11y">Westen</string>
     <string name="robot_move_direction_a11y">Bewege den %1$s Roboter nach %2$s</string>
-    <string name="robot_selected_a11y">%1$s Roboter ausgewählt</string>
+    <string name="robot_selected_a11y">%1$ser Roboter ausgewählt</string>
     <string name="robot_deselected_a11y">Roboter abgewählt</string>
-    <string name="target_found_a11y">%1$s Roboter hat sein Ziel erreicht</string>
+    <string name="target_found_a11y">%1$ser Roboter hat sein Ziel erreicht</string>
     <string name="game_complete_a11y">Level abgeschlossen! Du hast das Rätsel in %1$d Zügen gelöst</string>
     <string name="wall_hit_a11y">%1$s Roboter ist gegen eine Wand gestoßen</string>
     <string name="robot_hit_a11y">%1$s Roboter ist gegen den %2$s Roboter gestoßen</string>
@@ -281,9 +281,9 @@
     
     <!-- Game UI text -->
     <string name="no_robot_selected">Kein Roboter ausgewählt</string>
-    <string name="robot_selected">Ausgewählt: %1$s Roboter bei (%2$d, %3$d)</string>
-    <string name="robot_selected_info">Ausgewählt: %1$s Roboter auf Position (%2$d, %3$d)</string>
-    <string name="robot_target_info">%1$s Ziel: (%2$d, %3$d)</string>
+    <string name="robot_selected">Ausgewählt: %1$ser Roboter bei (%2$d, %3$d)</string>
+    <string name="robot_selected_info">Ausgewählt: %1$ser Roboter auf Position (%2$d, %3$d)</string>
+    <string name="robot_target_info">%1$ses Ziel: (%2$d, %3$d)</string>
     <string name="no_target_for_robot">Kein Ziel für diesen Roboter</string>
     <string name="move_count_text">Züge: %1$d</string>
     <string name="moves_count">Züge: %1$d</string>
@@ -367,4 +367,18 @@
     <!-- Additional hint strings -->
     <string name="hint_solution_found">Lösung gefunden in %1$d Zügen</string>
     <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
+
+    <!-- Additional game text -->
+    <string name="possible_moves">Mögliche Züge</string>
+    <string name="squares_north">Felder nach Norden</string>
+    <string name="squares_south">Felder nach Süden</string>
+    <string name="squares_east">Felder nach Osten</string>
+    <string name="squares_west">Felder nach Westen</string>
+    <string name="until">bis zum</string>
+    <string name="edge">Rand</string>
+    <string name="use_next_robot_button">Benutze den Nächster Roboter-Knopf, um zwischen Robotern zu wechseln</string>
+    <string name="no_movement_north">keine Bewegung nach Norden</string>
+    <string name="no_movement_south">keine Bewegung nach Süden</string>
+    <string name="no_movement_east">keine Bewegung nach Osten</string>
+    <string name="no_movement_west">keine Bewegung nach Westen</string>
 </resources>

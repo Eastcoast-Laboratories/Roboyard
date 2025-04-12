@@ -392,4 +392,18 @@
     <string name="hint_solution_found">Found a solution in %1$d moves</string>
     <string name="hint_move_robot_first">Move the %1$s robot first</string>
 
+    <!-- Game text -->
+    <string name="possible_moves">Possible moves</string>
+    <string name="squares_north">squares north</string>
+    <string name="squares_south">squares south</string>
+    <string name="squares_east">squares east</string>
+    <string name="squares_west">squares west</string>
+    <string name="until">until</string>
+    <string name="edge">edge</string>
+    <string name="no_movement_north">no movement north</string>
+    <string name="no_movement_south">no movement south</string>
+    <string name="no_movement_east">no movement east</string>
+    <string name="no_movement_west">no movement west</string>
+    <string name="use_next_robot_button">Use the next robot button to cycle through robots</string>
+
 </resources>

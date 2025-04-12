@@ -278,4 +278,21 @@
     <string name="hint_solution_found">已找到 %1$d 步的解决方案</string>
     <string name="hint_move_number">移动 %1$d / %2$d</string>
 
+    <!-- Accessibility Controls -->
+    <string name="next_robot_button">下一个机器人</string>
+    <string name="announce_hint">提示</string>
+    
+    <!-- Game text -->
+    <string name="possible_moves">可能的移动</string>
+    <string name="squares_north">向北格子</string>
+    <string name="squares_south">向南格子</string>
+    <string name="squares_east">向东格子</string>
+    <string name="squares_west">向西格子</string>
+    <string name="until">直到</string>
+    <string name="edge">边缘</string>
+    <string name="no_movement_north">无法向北移动</string>
+    <string name="no_movement_south">无法向南移动</string>
+    <string name="no_movement_east">无法向东移动</string>
+    <string name="no_movement_west">无法向西移动</string>
+    <string name="use_next_robot_button">使用下一个机器人按钮循环选择机器人</string>
 </resources>

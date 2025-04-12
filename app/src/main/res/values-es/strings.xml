@@ -206,7 +206,6 @@
 
     <!-- AI messages -->
     <string name="ai_solution_format">La IA ha encontrado una solución en %1$d movimientos</string>
-    <string name="ai_solution_less_moves">La IA ha encontrado una solución en menos de %1$d movimientos</string>
     <string name="completed_in_moves">Completado en %1$d movimientos</string>
     
     <!-- Difficulty Levels -->
@@ -219,6 +218,18 @@
     <!-- Additional localization strings -->
     <string name="of">de</string>
     <string name="impossible_small_board_warning">El nivel Imposible en tableros pequeños puede tardar varios minutos en generar un mapa adecuado</string>
+    <string name="possible_moves">Movimientos posibles</string>
+    <string name="squares_north">casillas hacia el norte</string>
+    <string name="squares_south">casillas hacia el sur</string>
+    <string name="squares_east">casillas hacia el este</string>
+    <string name="squares_west">casillas hacia el oeste</string>
+    <string name="until">hasta</string>
+    <string name="edge">el borde</string>
+    <string name="no_movement_north">sin movimiento hacia el norte</string>
+    <string name="no_movement_south">sin movimiento hacia el sur</string>
+    <string name="no_movement_east">sin movimiento hacia el este</string>
+    <string name="no_movement_west">sin movimiento hacia el oeste</string>
+    <string name="use_next_robot_button">Use el botón Siguiente Robot para cambiar entre robots</string>
     
     <!-- Toast messages -->
     <string name="error_email_app">No se pudo abrir la aplicación de correo electrónico</string>

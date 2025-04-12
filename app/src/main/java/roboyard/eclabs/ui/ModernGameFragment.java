@@ -1523,7 +1523,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         }
         if (eastDistance > 0) {
-            announcement.append(eastDistance).append(" squares east until ").append(eastObstacle).append(", ");
+            announcement.append(eastDistance).append(" ").append(getString(R.string.squares_east)).append(" ").append(getString(R.string.until)).append(" ").append(eastObstacle).append(", ");
         } else {
             announcement.append("no movement east, ");
         }
@@ -1551,7 +1551,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         }
         if (westDistance > 0) {
-            announcement.append(westDistance).append(" squares west until ").append(westObstacle).append(", ");
+            announcement.append(westDistance).append(" ").append(getString(R.string.squares_west)).append(" ").append(getString(R.string.until)).append(" ").append(westObstacle).append(", ");
         } else {
             announcement.append("no movement west, ");
         }
@@ -1579,7 +1579,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         }
         if (northDistance > 0) {
-            announcement.append(northDistance).append(" squares north until ").append(northObstacle).append(", ");
+            announcement.append(northDistance).append(" ").append(getString(R.string.squares_north)).append(" ").append(getString(R.string.until)).append(" ").append(northObstacle).append(", ");
         } else {
             announcement.append("no movement north, ");
         }
@@ -1607,7 +1607,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         }
         if (southDistance > 0) {
-            announcement.append(southDistance).append(" squares south until ").append(southObstacle);
+            announcement.append(southDistance).append(" ").append(getString(R.string.squares_south)).append(" ").append(getString(R.string.until)).append(" ").append(southObstacle);
         } else {
             announcement.append("no movement south");
         }
@@ -1625,12 +1625,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         StringBuilder announcement = new StringBuilder();
         
-        // Check if TalkBack is enabled
-        if (isTalkBackEnabled()) {
-            announcement.append("Accessibility mode is active. ");
-            announcement.append("Use the Select Next Robot button to cycle through robots. ");
-            announcement.append("Then use directional buttons to move the selected robot. ");
-        }
+        // Do not announce that accessibility mode is active as it adds unnecessary verbosity
+        announcement.append(getString(R.string.use_next_robot_button));
         
         // Auto-select a robot matching the target color
         selectRobotWithTargetColor();
@@ -2186,7 +2182,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         try {
             // Get the specific move for this hint
             IGameMove hintMove = solution.getMoves().get(hintIndex);
-            Timber.d("[HINT_SYSTEM] Showing normal hint #%d: %s", hintIndex + 1, hintMove);
             
             if (hintMove instanceof RRGameMove rrMove) {
                 // Get the robot's color name - use the color from the move

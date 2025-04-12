@@ -3,25 +3,25 @@
     <string name="app_name">Roboyard</string>
     
     <!-- Main Menu Strings -->
-    <string name="action_settings">Parametres</string>
+    <string name="action_settings">Paramètres</string>
     <string name="new_random_game">Nouvelle partie</string>
     <string name="new_random_game_a11y">Commencer une nouvelle partie</string>
     <string name="level_game">Niveaux</string>
     <string name="level_game_a11y">Commencer un niveau</string>
     <string name="load_game">Charger</string>
-    <string name="load_game_a11y">Charger une partie sauvegardee</string>
-    <string name="settings">Parametres</string>
-    <string name="settings_a11y">Parametres</string>
+    <string name="load_game_a11y">Charger une partie sauvegardée</string>
+    <string name="settings">Paramètres</string>
+    <string name="settings_a11y">Paramètres</string>
     <string name="help">Comment jouer?</string>
     <string name="help_a11y">Instructions pour jouer</string>
-    <string name="credits">Credits</string>
+    <string name="credits">Crédits</string>
 
     <!-- Color names -->
     <string name="color_red">Rouge</string>
     <string name="color_blue">Bleu</string>
     <string name="color_green">Vert</string>
     <string name="color_yellow">Jaune</string>
-    <string name="color_pink">Pink</string>
+    <string name="color_pink">Rose</string>
     <string name="color_orange">Orange</string>
     <string name="color_white">Blanc</string>
     <string name="color_black">Noir</string>
@@ -33,7 +33,7 @@
     <string name="color_blue_a11y">Bleu</string>
     <string name="color_green_a11y">Vert</string>
     <string name="color_yellow_a11y">Jaune</string>
-    <string name="color_pink_a11y">Pink</string>
+    <string name="color_pink_a11y">Rose</string>
     <string name="color_orange_a11y">Orange</string>
     <string name="color_white_a11y">Blanc</string>
     <string name="color_black_a11y">Noir</string>
@@ -45,7 +45,7 @@
     <string name="color_blue_dative">bleu</string>
     <string name="color_green_dative">vert</string>
     <string name="color_yellow_dative">jaune</string>
-    <string name="color_pink_dative">pink</string>
+    <string name="color_pink_dative">rose</string>
     <string name="color_orange_dative">orange</string>
     <string name="color_white_dative">blanc</string>
     <string name="color_black_dative">noir</string>
@@ -53,9 +53,9 @@
     <string name="color_silver_dative">argent</string>
     
     <!-- Difficulty Levels -->
-    <string name="difficulty_beginner">Debutant</string>
-    <string name="difficulty_advanced">Intermediaire</string>
-    <string name="difficulty_insane">Difficile</string>
+    <string name="difficulty_beginner">Débutant</string>
+    <string name="difficulty_advanced">Avancé</string>
+    <string name="difficulty_insane">Fou</string>
     <string name="difficulty_impossible">Impossible</string>
     <string name="difficulty_unknown">Inconnu</string>
     
@@ -129,6 +129,28 @@
     <string name="settings_no">Non</string>
     <string name="settings_beginner">Débutant</string>
     <string name="settings_advanced">Avancé</string>
-    <string name="settings_insane">Fou</string>
+    <string name="settings_insane">Extrême</string>
     <string name="settings_impossible">Impossible</string>
+
+    <!-- Accessibility Controls -->
+    <string name="next_robot_button">Robot Suivant</string>
+    <string name="announce_hint">Annoncer Indice</string>
+
+    <!-- Game text -->
+    <string name="possible_moves">Déplacements possibles</string>
+    <string name="squares_north">cases vers le nord</string>
+    <string name="squares_south">cases vers le sud</string>
+    <string name="squares_east">cases vers l`est</string>
+    <string name="squares_west">cases vers l`ouest</string>
+    <string name="until">jusqu`au</string>
+    <string name="edge">bord</string>
+    <string name="no_movement_north">pas de mouvement vers le nord</string>
+    <string name="no_movement_south">pas de mouvement vers le sud</string>
+    <string name="no_movement_east">pas de mouvement vers l`est</string>
+    <string name="no_movement_west">pas de mouvement vers l`ouest</string>
+    <string name="use_next_robot_button">Utilisez le bouton Robot Suivant pour parcourir les robots</string>
+    <string name="direction_north">vers le nord</string>
+    <string name="direction_south">vers le sud</string>
+    <string name="direction_east">vers l`est</string>
+    <string name="direction_west">vers l`ouest</string>
 </resources>
