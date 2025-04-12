@@ -139,13 +139,32 @@
     
     <!-- Hint System -->
     <string name="hint_button">提示</string>
+    <string name="hint_button_a11y">提示</string>
     <string name="hint_next_button">下一提示</string>
     <string name="hint_previous_button">上一提示</string>
     <string name="cancel_hint_button">隐藏</string>
+    <string name="hint_cancel_button">✖️ 提示</string>
     <string name="hint_loading">计算解决方案...</string>
     <string name="hint_move_robot">移动 %1$s 机器人</string>
     <string name="hint_move_robot_direction">将 %1$s 机器人向 %2$s 移动</string>
     <string name="hint_move_robot_first">先移动 %1$s 机器人</string>
+    <string name="hint_move_number">移动 %1$d / %2$d</string>
+    <string name="pre_hint_less_than_x">AI找到了少于 %1$d 步的解决方案</string>
+    <string name="pre_hint_exact_solution">AI找到了 %1$d 步的解决方案</string>
+    <string name="pre_hint_ready">准备好显示分步提示</string>
+    <string name="all_hints_shown">所有提示已显示</string>
+    <string name="no_valid_hint">无有效提示</string>
+    <string name="error_displaying_hint">显示提示时出错</string>
+    
+    <!-- Direction names -->
+    <string name="direction_north">北</string>
+    <string name="direction_south">南</string>
+    <string name="direction_east">东</string>
+    <string name="direction_west">西</string>
+    <string name="direction_north_a11y">北方</string>
+    <string name="direction_south_a11y">南方</string>
+    <string name="direction_east_a11y">东方</string>
+    <string name="direction_west_a11y">西方</string>
     
     <!-- Game Buttons -->
     <string name="back_button">返回</string>
@@ -180,7 +199,6 @@
     <string name="down_direction_a11y">向下移动</string>
     <string name="left_direction_a11y">向左移动</string>
     <string name="right_direction_a11y">向右移动</string>
-    <string name="hint_button_a11y">显示提示</string>
     <string name="hint_next_button_a11y">显示下一提示</string>
     <string name="hint_previous_button_a11y">显示上一提示</string>
     <string name="cancel_hint_button_a11y">隐藏提示</string>
@@ -196,10 +214,6 @@
     <string name="solution_found">AI找到了一个解决方案！</string>
     <string name="pre_hint_first_move">先移动 %1$s 机器人</string>
     <string name="no_solution_found">未找到解决方案</string>
-    <string name="pre_hint_ready">准备显示逐步提示</string>
-    <string name="all_hints_shown">所有提示已显示</string>
-    <string name="no_valid_hint">没有有效的提示</string>
-    <string name="error_displaying_hint">显示提示出错</string>
 
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">初学者</string>
@@ -276,7 +290,6 @@
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">已找到 %1$d 步的解决方案</string>
-    <string name="hint_move_number">移动 %1$d / %2$d</string>
 
     <!-- Accessibility Controls -->
     <string name="next_robot_button">下一个机器人</string>
@@ -285,13 +298,11 @@
     <string name="next_robot">下一个机器人</string>
     <string name="announce_a11y">播报游戏状态</string>
     <string name="next_robot_a11y">选择下一个机器人</string>
-    
-    <!-- Game text -->
     <string name="possible_moves">可能的移动</string>
-    <string name="squares_north">向北格子</string>
-    <string name="squares_south">向南格子</string>
-    <string name="squares_east">向东格子</string>
-    <string name="squares_west">向西格子</string>
+    <string name="squares_north">北边方格</string>
+    <string name="squares_south">南边方格</string>
+    <string name="squares_east">东边方格</string>
+    <string name="squares_west">西边方格</string>
     <string name="until">直到</string>
     <string name="edge">边缘</string>
     <string name="no_movement_north">无法向北移动</string>
@@ -302,6 +313,7 @@
     
     <!-- Navigation buttons -->
     <string name="button_back">返回</string>
+    <string name="button_back_game">返回</string>
     <string name="button_reset">重置</string>
     <string name="button_save_map">保存地图</string>
     <string name="button_new_game">新游戏</string>
