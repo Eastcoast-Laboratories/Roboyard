@@ -324,7 +324,7 @@
 
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Anfänger</string>
-    <string name="difficulty_intermediate">Fortgeschritten</string>
+    <string name="difficulty_advanced">Fortgeschritten</string>
     <string name="difficulty_insane">Extrem</string>
     <string name="difficulty_impossible">Unmöglich</string>
     <string name="difficulty_unknown">Unbekannt</string>

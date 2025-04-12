@@ -1376,13 +1376,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Get a string representation of the current difficulty level
      * @return String representation of the current difficulty level
      */
-    public String getDifficultyString() {
+    public String getLocalizedDifficultyString() {
         Context appContext = getApplication().getApplicationContext();
+        Timber.d("[DIFFICULTY] getDifficultyString() called, using difficulty level %d, possible returns: %s, %s, %s, %s", getDifficulty(), appContext.getString(R.string.difficulty_beginner), appContext.getString(R.string.difficulty_advanced), appContext.getString(R.string.difficulty_insane), appContext.getString(R.string.difficulty_impossible));
         switch (getDifficulty()) {
             case Constants.DIFFICULTY_BEGINNER:
                 return appContext.getString(R.string.difficulty_beginner);
             case Constants.DIFFICULTY_ADVANCED:
-                return appContext.getString(R.string.difficulty_intermediate);
+                return appContext.getString(R.string.difficulty_advanced);
             case Constants.DIFFICULTY_INSANE:
                 return appContext.getString(R.string.difficulty_insane);
             case Constants.DIFFICULTY_IMPOSSIBLE:

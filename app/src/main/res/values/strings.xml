@@ -313,7 +313,7 @@
 
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Beginner</string>
-    <string name="difficulty_intermediate">Intermediate</string>
+    <string name="difficulty_advanced">Advanced</string>
     <string name="difficulty_insane">Insane</string>
     <string name="difficulty_impossible">Impossible</string>
     <string name="difficulty_unknown">Unknown</string>

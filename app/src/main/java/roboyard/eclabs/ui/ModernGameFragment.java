@@ -1803,7 +1803,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     
     private void updateDifficulty() {
         // Get difficulty string directly from GameStateManager
-        String difficultyString = gameStateManager.getDifficultyString();
+        String difficultyString = gameStateManager.getLocalizedDifficultyString();
         difficultyTextView.setText(difficultyString);
     }
     

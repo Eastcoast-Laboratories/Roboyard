@@ -54,7 +54,7 @@
     
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Debutant</string>
-    <string name="difficulty_intermediate">Intermediaire</string>
+    <string name="difficulty_advanced">Intermediaire</string>
     <string name="difficulty_insane">Difficile</string>
     <string name="difficulty_impossible">Impossible</string>
     <string name="difficulty_unknown">Inconnu</string>
