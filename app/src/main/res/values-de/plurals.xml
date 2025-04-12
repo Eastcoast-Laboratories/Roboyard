@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Plurals for robot movements -->
+    <plurals name="robot_moved_squares">
+        <item quantity="one">%1$s Roboter hat sich %2$d Feld bewegt</item>
+        <item quantity="other">%1$s Roboter hat sich %2$d Felder bewegt</item>
+    </plurals>
+    
+    <!-- Plurals for hints -->
+    <plurals name="hint_move_count">
+        <item quantity="one">Hinweis %1$d von %2$d Zug</item>
+        <item quantity="other">Hinweis %1$d von %2$d Zügen</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility hint announcements -->
+    <plurals name="hint_move_count_a11y">
+        <item quantity="one">Hinweis %1$d von %2$d Zug</item>
+        <item quantity="other">Hinweis %1$d von %2$d Zügen</item>
+    </plurals>
+    
+    <!-- Plurals for game completion -->
+    <plurals name="moves_to_complete">
+        <item quantity="one">Geschafft in %1$d Zug</item>
+        <item quantity="other">Geschafft in %1$d Zügen</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility game completion announcements -->
+    <plurals name="moves_to_complete_a11y">
+        <item quantity="one">Level abgeschlossen in %1$d Zug</item>
+        <item quantity="other">Level abgeschlossen in %1$d Zügen</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility robot movement announcements -->
+    <plurals name="robot_moved_squares_a11y">
+        <item quantity="one">%1$s Roboter hat sich %2$d Feld nach %3$s bewegt</item>
+        <item quantity="other">%1$s Roboter hat sich %2$d Felder nach %3$s bewegt</item>
+    </plurals>
+</resources>

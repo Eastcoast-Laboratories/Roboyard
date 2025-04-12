@@ -30,11 +30,12 @@
                 android:id="@+id/btn_announce_positions"
                 android:layout_width="120dp"
                 android:layout_height="48dp"
-                android:text="Announce"
+                android:text="@string/announce"
                 android:textSize="12sp"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_rounded_purple"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/announce_a11y" />
             
             <!-- North button -->
             <Button
@@ -51,11 +52,12 @@
                 android:id="@+id/btn_select_robot"
                 android:layout_width="120dp"
                 android:layout_height="48dp"
-                android:text="Next Robot"
+                android:text="@string/next_robot"
                 android:textSize="12sp"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_rounded_purple"
-                android:layout_marginStart="28dp" />
+                android:layout_marginStart="28dp"
+                android:contentDescription="@string/next_robot_a11y" />
         </LinearLayout>
 
         <!-- West and East buttons in the same row -->

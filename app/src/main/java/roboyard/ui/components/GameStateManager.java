@@ -3,6 +3,8 @@ package roboyard.ui.components;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -34,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import roboyard.eclabs.RoboyardApplication;
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.ui.GameElement;
@@ -901,20 +904,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         if (currentGameState == null) {
             Timber.e("Cannot navigate to save screen: No valid GameState available");
-            // Show a toast notification
-            Toast.makeText(context, "No game available to save", Toast.LENGTH_SHORT).show();
             return;
         }
 
         // We should only proceed if the context is a FragmentActivity
         if (!(context instanceof androidx.fragment.app.FragmentActivity activity)) {
             Timber.e("Cannot navigate to save screen: context is not a FragmentActivity");
-            // Toast to inform the user
-            if (context != null) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(context, "Cannot navigate to save screen", Toast.LENGTH_SHORT).show();
-                });
-            }
             return;
         }
         
@@ -1376,18 +1371,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Get a string representation of the current difficulty level
      * @return String representation of the current difficulty level
      */
-    public String getDifficultyString() {
+    public String getLocalizedDifficultyString() {
+        // Verwende den bereits lokalisierten Anwendungskontext
+        Context localizedContext = RoboyardApplication.getAppContext();
+        
+        Timber.d("[DIFFICULTY] getLocalizedDifficultyString() called, using difficulty level %d", getDifficulty());
+        
         switch (getDifficulty()) {
             case Constants.DIFFICULTY_BEGINNER:
-                return "Beginner";
+                return localizedContext.getString(R.string.difficulty_beginner);
             case Constants.DIFFICULTY_ADVANCED:
-                return "Intermediate";
+                return localizedContext.getString(R.string.difficulty_advanced);
             case Constants.DIFFICULTY_INSANE:
-                return "Insane";
+                return localizedContext.getString(R.string.difficulty_insane);
             case Constants.DIFFICULTY_IMPOSSIBLE:
-                return "Impossible";
+                return localizedContext.getString(R.string.difficulty_impossible);
             default:
-                return "Unknown";
+                return localizedContext.getString(R.string.difficulty_unknown);
         }
     }
     

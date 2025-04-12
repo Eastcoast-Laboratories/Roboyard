@@ -1,0 +1,1 @@
+always use scripts to update the whole project like this: cp /var/www/Roboyard/dev/scripts/cleanup_unused_strings.sh /var/tmp/; git reset --hard; cp /var/tmp/cleanup_unused_strings.sh /var/www/Roboyard/dev/scripts/

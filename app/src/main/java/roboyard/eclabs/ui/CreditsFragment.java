@@ -36,12 +36,15 @@ public class CreditsFragment extends BaseGameFragment {
         int versionCode = getVersionCode(requireContext());
         
         TextView versionTextView = view.findViewById(R.id.version_text);
-        versionTextView.setText(String.format("Version: %s (Build %d)", versionName, versionCode));
+        versionTextView.setText(getString(R.string.version_format, versionName, versionCode));
         
         // Set up clickable links
-        setupClickableLink(view, R.id.imprint_link, "https://eclabs.de/datenschutz.html");
-        setupClickableLink(view, R.id.opensource_link, "https://git.io/fjs5H");
-        setupClickableLink(view, R.id.contact_link, "https://eclabs.de/#kontakt");
+        setupClickableLink(view, R.id.imprint_link, getString(R.string.url_imprint));
+        setupClickableLink(view, R.id.opensource_link, getString(R.string.url_opensource));
+        setupClickableLink(view, R.id.contact_link, getString(R.string.url_contact));
+        
+        // Programmatically disable accessibility for wall elements
+        disableAccessibilityForDecorations(view);
         
         // Set up back button
         view.findViewById(R.id.back_button).setOnClickListener(v -> {
@@ -91,6 +94,29 @@ public class CreditsFragment extends BaseGameFragment {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         startActivity(intent);
+    }
+    
+    /**
+     * Disables accessibility for decorative elements
+     * @param view The parent view
+     */
+    private void disableAccessibilityForDecorations(View view) {
+        // Get references to all wall views
+        int[] wallIds = {R.id.top_wall, R.id.left_wall, R.id.right_wall, R.id.bottom_wall};
+        
+        for (int id : wallIds) {
+            View wallView = view.findViewById(id);
+            if (wallView != null) {
+                // Basic approach using only core Android APIs
+                wallView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                wallView.setClickable(false);
+                wallView.setFocusable(false);
+                wallView.setContentDescription(null);
+                
+                // Log for diagnostics
+                Timber.d("Disabled accessibility for wall element: %s", getResources().getResourceEntryName(id));
+            }
+        }
     }
     
     /**

@@ -15,6 +15,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:importantForAccessibility="no"
         android:contentDescription="Background image" />
 
     <!-- Scrollable content area with padding -->
@@ -50,7 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/new_random_game"
-                    android:contentDescription="@string/new_random_game_description"
+                    android:contentDescription="@string/new_random_game_a11y"
                     android:padding="12dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
@@ -63,7 +64,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/level_game"
-                    android:contentDescription="@string/level_game_description"
+                    android:contentDescription="@string/level_game_a11y"
                     android:padding="12dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
@@ -78,7 +79,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/help"
-                    android:contentDescription="@string/help_description"
+                    android:contentDescription="@string/help_a11y"
                     android:padding="12dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#000000"
@@ -92,7 +93,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/load_game"
-                    android:contentDescription="@string/load_game_description"
+                    android:contentDescription="@string/load_game_a11y"
                     android:padding="12dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#FFFFFF"
@@ -106,7 +107,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/settings"
-                    android:contentDescription="@string/settings_description"
+                    android:contentDescription="@string/settings_a11y"
                     android:padding="12dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
@@ -155,6 +156,7 @@
         android:layout_marginLeft="80dp" 
         android:layout_marginRight="80dp" 
         android:layout_marginBottom="60dp" 
+        android:importantForAccessibility="no"
         />
 
     <!-- Credits Link - Positioned at the bottom left corner -->

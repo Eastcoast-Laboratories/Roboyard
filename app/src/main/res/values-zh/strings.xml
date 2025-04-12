@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+    <string name="action_settings">设置</string>
+
+    <string name="new_random_game">新游戏</string>
+    <string name="new_random_game_a11y">开始新游戏</string>
+    
+    <string name="level_game">关卡模式</string>
+    <string name="level_game_a11y">玩预设游戏关卡</string>
+    
+    <string name="load_game">加载游戏</string>
+    <string name="load_game_a11y">加载游戏</string>
+    
+    <string name="settings">设置</string>
+    <string name="settings_a11y">游戏设置</string>
+    
+    <string name="help">如何玩</string>
+    <string name="help_a11y">游戏说明</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">制作人员</string>
+    
+    <!-- Game Screens -->
+    <string name="game_screen_title">游戏</string>
+    <string name="save_load_game_screen_title">保存/加载游戏</string>
+    <string name="settings_screen_title">设置</string>
+    <string name="help_screen_title">帮助</string>
+
+    <!-- Level Selection Screen -->
+    <string name="level_button_description">关卡 %1$d</string>
+
+    <string name="back">返回</string>
+    <string name="back_description">返回上一屏幕</string>
+
+    <string name="next_level">下一关</string>
+    <string name="next_level_description">前往下一关</string>
+    
+    <string name="optimal_moves">最优: %1$d 步</string>
+    <string name="your_moves">你的步数: %1$d</string>
+    <string name="level_complete">关卡完成！</string>
+    <string name="level_stars_description">你获得了 %1$d 颗星</string>
+    <string name="level_stars_a11y">你获得了 %1$d 颗星</string>
+    <string name="stars_count">%1$d 颗星</string>
+    <string name="level_locked">你需要再获得 %1$d 颗星来解锁此关卡</string>
+    <string name="random_game_complete">游戏完成！</string>
+    <string name="new_random_game_button">新游戏</string>
+    
+    <!-- Robot Colors -->
+    <string name="color_red">红色</string>
+    <string name="color_blue">蓝色</string>
+    <string name="color_green">绿色</string>
+    <string name="color_yellow">黄色</string>
+    <string name="color_silver">银色</string>
+    <string name="color_none">无</string>
+    
+    <!-- Accessibility Color Names -->
+    <string name="color_red_a11y">红色机器人</string>
+    <string name="color_blue_a11y">蓝色机器人</string>
+    <string name="color_green_a11y">绿色机器人</string>
+    <string name="color_yellow_a11y">黄色机器人</string>
+    <string name="color_silver_a11y">银色机器人</string>
+    
+    <!-- Color Names (Dative Case) -->
+    <string name="color_red_dative">红色</string>
+    <string name="color_blue_dative">蓝色</string>
+    <string name="color_green_dative">绿色</string>
+    <string name="color_yellow_dative">黄色</string>
+    <string name="color_silver_dative">银色</string>
+    
+    <!-- Save Game -->
+    <string name="save_slot">位置 %1$d</string>
+    <string name="save_game">保存游戏</string>
+    <string name="save_game_success">游戏保存成功</string>
+    <string name="save_game_failed">保存游戏失败</string>
+    <string name="save_date">保存于: %1$s</string>
+    <string name="confirm_overwrite">确定要覆盖这个存档吗？</string>
+    <string name="delete_save">删除</string>
+    <string name="confirm_delete">确定要删除这个存档吗？</string>
+    <string name="delete_save_success">存档删除成功</string>
+    <string name="delete_save_failed">删除存档失败</string>
+    
+    <!-- Load Game -->
+    <string name="load_game_button">加载游戏</string>
+    <string name="load_game_success">游戏加载成功</string>
+    <string name="load_game_failed">加载游戏失败</string>
+    <string name="no_save_data">没有保存数据</string>
+    <string name="no_saves">没有可用的存档</string>
+    
+    <!-- Credits Screen -->
+    <string name="credits_title">制作人员</string>
+    <string name="credits_developers">开发者</string>
+    <string name="credits_designers">设计师</string>
+    <string name="credits_testers">测试人员</string>
+    <string name="credits_special_thanks">特别鸣谢</string>
+    <string name="credits_version">版本 %1$s</string>
+    <string name="credits_eclabs">ECLabs</string>
+    <string name="credits_eclabs_description">由ECLabs创建</string>
+    
+    <!-- Level Selection screen -->
+    <string name="level_selection_title">关卡选择</string>
+    <string name="level_category_beginner">初学者</string>
+    <string name="level_category_intermediate">中级</string>
+    <string name="level_category_advanced">高级</string>
+    <string name="level_category_expert">专家</string>
+    <string name="level_difficulty">难度: %1$s</string>
+    <string name="level_stars">星星: %1$d/%2$d</string>
+    <string name="level_size">大小: %1$dx%2$d</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_unsolved">未解决</string>
+    <string name="filter_played">已玩</string>
+    <string name="level_filter">筛选: %1$s</string>
+    <string name="robots_label">机器人:</string>
+    <string name="squares_label">方格:</string>
+    
+    <!-- Game UI text -->
+    <string name="move_count">步数: %1$d</string>
+    <string name="robot_count">机器人: %1$d</string>
+    <string name="optimum_moves">最优: %1$d</string>
+    <string name="game_over">游戏结束！</string>
+    <string name="game_completion_message">游戏完成，用了 %1$d 步！</string>
+    <string name="restart_game">重新开始</string>
+    <string name="quit_game">退出</string>
+    <string name="continue_game">继续</string>
+    <string name="robot_selected">已选择 %1$s 机器人</string>
+    <string name="robot_selected_info">已选择: %1$s 机器人在 (%2$d, %3$d)</string>
+    <string name="robot_moved">%1$s 机器人移动到 (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">这个机器人没有目标</string>
+    <string name="move_count_text">步数: %1$d</string>
+    <string name="moves_count">步数: %1$d</string>
+    <string name="distance_moved">距离: %1$d</string>
+    <string name="squares_moved">方格: %1$d</string>
+    <string name="robot_info">%1$s 机器人在 (%2$d, %3$d)</string>
+    <string name="target_info">%1$s 机器人的目标在 (%2$d, %3$d)</string>
+    
+    <!-- Hint System -->
+    <string name="hint_button">提示</string>
+    <string name="hint_next_button">下一提示</string>
+    <string name="hint_previous_button">上一提示</string>
+    <string name="cancel_hint_button">隐藏</string>
+    <string name="hint_loading">计算解决方案...</string>
+    <string name="hint_move_robot">移动 %1$s 机器人</string>
+    <string name="hint_move_robot_direction">将 %1$s 机器人向 %2$s 移动</string>
+    <string name="hint_move_robot_first">先移动 %1$s 机器人</string>
+    
+    <!-- Game Buttons -->
+    <string name="back_button">返回</string>
+    <string name="menu_button">菜单</string>
+    <string name="retry_button">重试</string>
+    <string name="restart_button">重新开始</string>
+    <string name="save_map_button">保存地图</string>
+    <string name="new_game_button">新游戏</string>
+    <string name="reset_button">重置</string>
+    
+    <!-- Accessibility Descriptions -->
+    <string name="back_button_a11y">返回</string>
+    <string name="menu_button_a11y">返回主菜单</string>
+    <string name="retry_button_a11y">重试此关卡</string>
+    <string name="restart_button_a11y">重新开始此关卡</string>
+    <string name="save_map_button_a11y">保存当前地图</string>
+    <string name="new_game_button_a11y">开始新游戏</string>
+    <string name="reset_button_a11y">重置游戏</string>
+    <string name="level_button_a11y">关卡 %1$d，已获得 %2$d 颗星，共 %3$d 颗星</string>
+    <string name="help_button_a11y">显示游戏说明</string>
+    <string name="settings_button_a11y">打开游戏设置</string>
+    <string name="credits_button_a11y">查看制作人员</string>
+    <string name="game_grid_a11y">游戏棋盘</string>
+    <string name="cell_a11y">位置 %1$d, %2$d 的单元格</string>
+    <string name="robot_cell_a11y">%1$s 机器人在位置 %2$d, %3$d</string>
+    <string name="target_cell_a11y">%1$s 机器人的目标在位置 %2$d, %3$d</string>
+    <string name="wall_cell_a11y">墙在位置 %1$d, %2$d</string>
+    <string name="robot_with_target_a11y">%1$s 机器人在其目标位置 %2$d, %3$d</string>
+    <string name="move_in_progress_a11y">正在移动 %1$s 机器人</string>
+    <string name="direction_selector_a11y">%1$s 机器人的方向选择器</string>
+    <string name="up_direction_a11y">向上移动</string>
+    <string name="down_direction_a11y">向下移动</string>
+    <string name="left_direction_a11y">向左移动</string>
+    <string name="right_direction_a11y">向右移动</string>
+    <string name="hint_button_a11y">显示提示</string>
+    <string name="hint_next_button_a11y">显示下一提示</string>
+    <string name="hint_previous_button_a11y">显示上一提示</string>
+    <string name="cancel_hint_button_a11y">隐藏提示</string>
+    <string name="help_accessibility_title">无障碍功能</string>
+    <string name="help_accessibility_description">本游戏完全兼容TalkBack屏幕阅读器。使用触摸探索来听取关于游戏元素和按钮的信息。双击激活按钮或选择机器人。</string>
+    
+    <!-- Game Status Messages -->
+    <string name="target_reached">目标达成！游戏完成，用了 %1$d 步和移动了 %2$d 格</string>
+    <string name="robot_move_initiated">%1$s 开始移动，起始位置 %2$d, %3$d</string>
+    <string name="unknown_robot">未知: %1$d</string>
+    <string name="unknown_color">未知: %1$s</string>
+    <string name="ai_solution_less_moves">AI找到了一个少于 %1$d 步的解决方案</string>
+    <string name="solution_found">AI找到了一个解决方案！</string>
+    <string name="pre_hint_first_move">先移动 %1$s 机器人</string>
+    <string name="no_solution_found">未找到解决方案</string>
+    <string name="pre_hint_ready">准备显示逐步提示</string>
+    <string name="all_hints_shown">所有提示已显示</string>
+    <string name="no_valid_hint">没有有效的提示</string>
+    <string name="error_displaying_hint">显示提示出错</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner">初学者</string>
+    <string name="difficulty_advanced">高级</string>
+    <string name="difficulty_insane">疯狂</string>
+    <string name="difficulty_impossible">不可能</string>
+    <string name="difficulty_unknown">未知</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">的</string>
+    <string name="impossible_small_board_warning">在小棋盘上的“不可能”难度关卡中，机器人可能无法到达目标位置。请尝试更大的棋盘或更低的难度。</string>
+    
+    <!-- Toast messages -->
+    <string name="error_email_app">无法打开电子邮件应用</string>
+    <string name="robot_movement_canceled">机器人移动已取消</string>
+    <string name="no_game_to_save">没有可保存的游戏</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">设置</string>
+    <string name="settings_board_size">棋盘大小：</string>
+    <string name="settings_difficulty">难度：</string>
+    <string name="settings_new_map_each_time">每次新游戏生成新地图：</string>
+    <string name="settings_robots_reach_targets">机器人必须到达目标：</string>
+    <string name="settings_targets">目标</string>
+    <string name="settings_out_of">中的</string>
+    <string name="settings_sound">声音：</string>
+    <string name="settings_yes">是</string>
+    <string name="settings_no">否</string>
+    <string name="settings_vibration">振动：</string>
+    <string name="settings_language">语言：</string>
+    <string name="settings_english">English</string>
+    <string name="settings_german">Deutsch</string>
+    <string name="settings_french">Français</string>
+    <string name="settings_spanish">Español</string>
+    <string name="settings_chinese">中文</string>
+    <string name="settings_korean">한국어</string>
+    <string name="settings_accessibility">无障碍：</string>
+    <string name="settings_enhanced_accessibility">增强无障碍：</string>
+    <string name="settings_reset_tutorial">重置教程：</string>
+    <string name="settings_reset_progress">重置进度：</string>
+    <string name="settings_reset_progress_confirm">您确定要重置所有进度吗？这将删除所有保存的游戏数据和解锁的关卡。</string>
+    <string name="settings_reset_progress_success">进度已重置</string>
+    <string name="settings_reset_tutorial_confirm">您确定要重置教程吗？您将失去所有的游戏进度和解锁的关卡。</string>
+    <string name="settings_reset_tutorial_success">教程已重置</string>
+    <string name="settings_about">关于：</string>
+    <string name="settings_version">版本：</string>
+    <string name="settings_contact">联系我们：</string>
+    <string name="settings_contact_email">support@eclabs.com</string>
+    <string name="settings_contact_us">联系我们</string>
+    <string name="settings_contact_subject">关于 Roboyard 的反馈</string>
+    <string name="settings_contact_body">您好，Roboyard 团队，\n\n</string>
+    <string name="settings_privacy_policy">隐私政策</string>
+    <string name="settings_licenses">开源许可</string>
+    <string name="language_changed_title">语言已更改</string>
+    <string name="language_changed_message">语言设置已更改。更改将在下次启动游戏时生效。请注意，更改语言可能会导致游戏数据丢失。</string>
+    <string name="settings_ok">确定</string>
+    <string name="settings_cancel">取消</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_apply">应用</string>
+    <string name="settings_reset">重置</string>
+    <string name="settings_done">完成</string>
+    
+    <!-- Directions for hints -->
+    <string name="direction_up">向上</string>
+    <string name="direction_down">向下</string>
+    <string name="direction_right">向右</string>
+    <string name="direction_left">向左</string>
+    
+    <!-- Direction symbols -->
+    <string name="hint_direction_up">↑</string>
+    <string name="hint_direction_down">↓</string>
+    <string name="hint_direction_right">→</string>
+    <string name="hint_direction_left">←</string>
+    
+    <!-- Additional hint strings -->
+    <string name="hint_solution_found">已找到 %1$d 步的解决方案</string>
+    <string name="hint_move_number">移动 %1$d / %2$d</string>
+
+    <!-- Accessibility Controls -->
+    <string name="next_robot_button">下一个机器人</string>
+    <string name="announce_hint">提示</string>
+    <string name="announce">播报</string>
+    <string name="next_robot">下一个机器人</string>
+    <string name="announce_a11y">播报游戏状态</string>
+    <string name="next_robot_a11y">选择下一个机器人</string>
+    
+    <!-- Game text -->
+    <string name="possible_moves">可能的移动</string>
+    <string name="squares_north">向北格子</string>
+    <string name="squares_south">向南格子</string>
+    <string name="squares_east">向东格子</string>
+    <string name="squares_west">向西格子</string>
+    <string name="until">直到</string>
+    <string name="edge">边缘</string>
+    <string name="no_movement_north">无法向北移动</string>
+    <string name="no_movement_south">无法向南移动</string>
+    <string name="no_movement_east">无法向东移动</string>
+    <string name="no_movement_west">无法向西移动</string>
+    <string name="use_next_robot_button">使用下一个机器人按钮循环选择机器人</string>
+    
+    <!-- Navigation buttons -->
+    <string name="button_back">返回</string>
+    <string name="button_reset">重置</string>
+    <string name="button_save_map">保存地图</string>
+    <string name="button_new_game">新游戏</string>
+    <string name="button_menu">菜单</string>
+    <string name="reset">重置</string>
+    <string name="save_map">保存地图</string>
+    <string name="new_game">新游戏</string>
+    <string name="menu">菜单</string>
+</resources>

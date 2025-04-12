@@ -243,14 +243,29 @@ public class GameGridView extends View {
         setFocusable(true);
         setClickable(true);
         
+        // Suppress the entire view from accessibility announcements
+        // This prevents "gameboard grid, double-click to activate" announcements
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        
+        Timber.d("ROBOYARD_ACCESSIBILITY", "Set GameGridView accessibility to NO");
+        
         // Configure accessibility delegate for TalkBack support
         ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegateCompat() {
             @Override
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
-                // Provide information about the grid for screen readers
+                // Remove all announcements for this view
                 info.setClassName(GameGridView.class.getName());
-                info.setContentDescription("Game board grid");
+                info.setContentDescription(null);
+                info.setVisibleToUser(false);
+                
+                // Remove actions
+                info.removeAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK);
+                info.removeAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_FOCUS);
+                info.setClickable(false);
+                info.setFocusable(false);
+                
+                Timber.d("ROBOYARD_ACCESSIBILITY", "Initialized accessibility info with suppressions");
             }
             
             @Override

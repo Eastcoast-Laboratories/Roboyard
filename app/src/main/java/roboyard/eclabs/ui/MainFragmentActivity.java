@@ -1,5 +1,7 @@
 package roboyard.eclabs.ui;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -11,6 +13,8 @@ import roboyard.eclabs.R;
 import roboyard.logic.core.Preferences;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
+
+import java.util.Locale;
 
 /**
  * Main activity for the game, hosts the fragment-based UI.
@@ -61,6 +65,8 @@ public class MainFragmentActivity extends AppCompatActivity {
         
         // Set up accessibility services
         setupAccessibility();
+        
+        applyLanguageSettings();
     }
     
     /**
@@ -91,5 +97,29 @@ public class MainFragmentActivity extends AppCompatActivity {
         // Return null as we don't use GameManager anymore
         // Legacy code should be updated to use GameStateManager
         return null;
+    }
+    
+    private void applyLanguageSettings() {
+        try {
+            // Get saved language setting
+            String languageCode = roboyard.logic.core.Preferences.appLanguage;
+            Timber.d("ROBOYARD_LANGUAGE: Setting app language on application level: %s", languageCode);
+            
+            if (languageCode != null && !languageCode.isEmpty()) {
+                // Apply language change
+                Locale locale = new Locale(languageCode);
+                Locale.setDefault(locale);
+                
+                Resources resources = getResources();
+                Configuration config = new Configuration(resources.getConfiguration());
+                config.setLocale(locale); // Verwende die neuere Methode statt config.locale = locale
+                
+                resources.updateConfiguration(config, resources.getDisplayMetrics());
+                
+                Timber.d("ROBOYARD_LANGUAGE: Successfully applied language %s at application level", languageCode);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "ROBOYARD_LANGUAGE: Error applying language settings at application level");
+        }
     }
 }

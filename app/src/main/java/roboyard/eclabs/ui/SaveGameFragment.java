@@ -152,22 +152,25 @@ public class SaveGameFragment extends BaseGameFragment {
      * Update title based on the selected tab
      */
     private void updateTitle() {
-        if (tabLayout != null) {
-            int selectedTab = tabLayout.getSelectedTabPosition();
-            switch (selectedTab) {
-                case TAB_SAVE:
-                    titleText.setText("Select slot to save game");
-                    break;
-                case TAB_LOAD:
-                    titleText.setText("Select game to load");
-                    break;
-                case TAB_HISTORY:
-                    titleText.setText("Game history");
-                    break;
+        int tabPosition = tabLayout.getSelectedTabPosition();
+        if (saveMode) {
+            // Save mode
+            if (tabPosition == 0) {
+                // Save tab
+                titleText.setText(getString(R.string.save_screen_title));
+            } else {
+                // History tab
+                titleText.setText(getString(R.string.history_screen_title));
             }
         } else {
-            // Initial title based on save/load mode
-            titleText.setText(saveMode ? "Select slot to save game" : "Select game to load");
+            // Load mode
+            if (tabPosition == 0) {
+                // Load tab
+                titleText.setText(getString(R.string.load_screen_title));
+            } else {
+                // History tab
+                titleText.setText(getString(R.string.history_screen_title));
+            }
         }
     }
     
@@ -182,13 +185,13 @@ public class SaveGameFragment extends BaseGameFragment {
             // Add tabs based on mode
             if (saveMode) {
                 // Save mode tabs: Save (0) and History (1)
-                tabLayout.addTab(tabLayout.newTab().setText("Save"));
-                tabLayout.addTab(tabLayout.newTab().setText(""));
+                tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.save_tab_title)));
+                tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.history_tab_title)));
                 Timber.d("SaveGameFragment: Setting up tabs for SAVE mode");
             } else {
                 // Load mode tabs: Load (0) and History (1)
-                tabLayout.addTab(tabLayout.newTab().setText("Load"));
-                tabLayout.addTab(tabLayout.newTab().setText(""));
+                tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.load_tab_title)));
+                tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.history_tab_title)));
                 Timber.d("SaveGameFragment: Setting up tabs for LOAD mode");
             }
             

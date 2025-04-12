@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+    <string name="action_settings">설정</string>
+
+    <string name="new_random_game">새 게임</string>
+    <string name="new_random_game_a11y">새 게임 시작</string>
+    
+    <string name="level_game">레벨 게임</string>
+    <string name="level_game_a11y">미리 정해진 게임 레벨 플레이</string>
+    
+    <string name="load_game">게임 불러오기</string>
+    <string name="load_game_a11y">게임 불러오기</string>
+    
+    <string name="settings">설정</string>
+    <string name="settings_a11y">게임 설정</string>
+    
+    <string name="help">플레이 방법</string>
+    <string name="help_a11y">게임 설명</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">크레딧</string>
+    
+    <!-- Accessibility Controls -->
+    <string name="announce">안내</string>
+    <string name="next_robot">다음 로봇</string>
+    <string name="announce_a11y">게임 상황 안내</string>
+    <string name="next_robot_a11y">다음 로봇 선택</string>
+    <string name="next_robot_button">다음 로봇</string>
+    <string name="announce_hint">힌트 알려주기</string>
+    
+    <!-- Game text -->
+    <string name="possible_moves">가능한 이동</string>
+    <string name="squares_north">북쪽 방향</string>
+    <string name="squares_south">남쪽 방향</string>
+    <string name="squares_east">동쪽 방향</string>
+    <string name="squares_west">서쪽 방향</string>
+    <string name="until">까지</string>
+    <string name="edge">경계</string>
+    <string name="no_movement_north">북쪽으로 이동 불가</string>
+    <string name="no_movement_south">남쪽으로 이동 불가</string>
+    <string name="no_movement_east">동쪽으로 이동 불가</string>
+    <string name="no_movement_west">서쪽으로 이동 불가</string>
+    <string name="use_next_robot_button">다음 로봇 버튼을 사용하여 로봇을 순환하세요</string>
+    
+    <!-- Navigation buttons -->
+    <string name="button_back">뒤로</string>
+    <string name="button_reset">초기화</string>
+    <string name="button_save_map">맵 저장</string>
+    <string name="button_new_game">새 게임</string>
+    <string name="button_menu">메뉴</string>
+    <string name="back">뒤로</string>
+    <string name="reset">초기화</string>
+    <string name="save_map">맵 저장</string>
+    <string name="new_game">새 게임</string>
+    <string name="menu">메뉴</string>
+</resources>

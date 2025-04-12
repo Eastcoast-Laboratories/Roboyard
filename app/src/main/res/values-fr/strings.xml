@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+    <string name="action_settings">Paramètres</string>
+    <string name="new_random_game">Nouvelle partie</string>
+    <string name="new_random_game_a11y">Commencer une nouvelle partie</string>
+    <string name="level_game">Niveaux</string>
+    <string name="level_game_a11y">Commencer un niveau</string>
+    <string name="load_game">Charger</string>
+    <string name="load_game_a11y">Charger une partie sauvegardée</string>
+    <string name="settings">Paramètres</string>
+    <string name="settings_a11y">Paramètres</string>
+    <string name="help">Comment jouer?</string>
+    <string name="help_a11y">Instructions pour jouer</string>
+    <string name="credits">Crédits</string>
+
+    <!-- Color names -->
+    <string name="color_red">Rouge</string>
+    <string name="color_blue">Bleu</string>
+    <string name="color_green">Vert</string>
+    <string name="color_yellow">Jaune</string>
+    <string name="color_pink">Rose</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_white">Blanc</string>
+    <string name="color_black">Noir</string>
+    <string name="color_teal">Turquoise</string>
+    <string name="color_silver">Argent</string>
+    
+    <!-- Color names for accessibility -->
+    <string name="color_red_a11y">Rouge</string>
+    <string name="color_blue_a11y">Bleu</string>
+    <string name="color_green_a11y">Vert</string>
+    <string name="color_yellow_a11y">Jaune</string>
+    <string name="color_pink_a11y">Rose</string>
+    <string name="color_orange_a11y">Orange</string>
+    <string name="color_white_a11y">Blanc</string>
+    <string name="color_black_a11y">Noir</string>
+    <string name="color_teal_a11y">Turquoise</string>
+    <string name="color_silver_a11y">Argent</string>
+    
+    <!-- Deklinierte Farbformen -->
+    <string name="color_red_dative">rouge</string>
+    <string name="color_blue_dative">bleu</string>
+    <string name="color_green_dative">vert</string>
+    <string name="color_yellow_dative">jaune</string>
+    <string name="color_pink_dative">rose</string>
+    <string name="color_orange_dative">orange</string>
+    <string name="color_white_dative">blanc</string>
+    <string name="color_black_dative">noir</string>
+    <string name="color_teal_dative">turquoise</string>
+    <string name="color_silver_dative">argent</string>
+    
+    <!-- Difficulty Levels -->
+    <string name="difficulty_beginner">Débutant</string>
+    <string name="difficulty_advanced">Avancé</string>
+    <string name="difficulty_insane">Fou</string>
+    <string name="difficulty_impossible">Impossible</string>
+    <string name="difficulty_unknown">Inconnu</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">de</string>
+    <string name="colors">couleurs</string>
+    <string name="color_count_format">%1$d sur %2$d couleurs</string>
+    <string name="impossible_small_board_warning">Le niveau Impossible sur les petits plateaux peut prendre plusieurs minutes pour générer une carte adaptée</string>
+    
+    <!-- Toast messages -->
+    <string name="error_email_app">Impossible d`ouvrir l`application de messagerie</string>
+    <string name="robot_movement_canceled">Mouvement du robot annulé</string>
+    <string name="no_game_to_save">Aucune partie disponible à sauvegarder</string>
+    
+    <!-- Game UI text for ModernGameFragment -->
+    <string name="no_robot_selected" comment="Status message when no robot is currently selected">Aucun robot sélectionné</string>
+    <string name="robot_selected" comment="Status message showing which robot is selected">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
+    <string name="robot_selected_info" comment="More detailed information about selected robot">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
+    <string name="robot_target_info" comment="Information about a target on the board">Cible %1$s: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot" comment="Message when a robot has no matching target">Pas de cible pour ce robot</string>
+    <string name="move_count_text" comment="Text showing number of moves made">Coups: %1$d</string>
+    <string name="moves_count" comment="Text showing number of moves made">Coups: %1$d</string>
+    <string name="squares_moved" comment="Text showing number of squares moved">Cases déplacées: %1$d</string>
+    <string name="board_size" comment="Text showing the board dimensions">Plateau: %1$dx%2$d</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="reset_button" comment="Button to reset the current game/level">Réinitialiser</string>
+    <string name="hint_button" comment="Button to get a hint">Indice</string>
+    <string name="cancel_hint_button" comment="Button to hide hints">Masquer</string>
+    
+    <!-- Game directions -->
+    <string name="direction_up" comment="Direction name for movement hints">vers le haut</string>
+    <string name="direction_down" comment="Direction name for movement hints">vers le bas</string>
+    <string name="direction_right" comment="Direction name for movement hints">vers la droite</string>
+    <string name="direction_left" comment="Direction name for movement hints">vers la gauche</string>
+
+    <!-- Game status messages -->
+    <string name="target_reached" comment="Message shown when a robot reaches its target">Cible atteinte! Partie terminée en %1$d coups et %2$d cases déplacées</string>
+    <string name="starting_level" comment="Message shown when starting a level">Démarrage du niveau %1$d</string>
+    
+    <!-- Game buttons -->
+    <string name="hint_button_a11y">Indice</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="back_button">Retour</string>
+    <string name="menu_button">Menu</string>
+    <string name="retry_button">Recommencer</string>
+    <string name="restart_button">Rejouer</string>
+    <string name="save_map_button">Sauvegarder</string>
+    <string name="button_back_game">Retour</string>
+    <string name="button_reset">Réinitialiser</string>
+
+    <!-- Game UI Messages -->
+    <string name="ai_calculating">IA calcule une solution...</string>
+    <string name="nothing_to_undo">Rien à annuler</string>
+    <string name="solution_found">IA a trouvé une solution!</string>
+    <string name="robot_color_down">%1$s vers le bas</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_board_size">Taille du plateau:</string>
+    <string name="settings_difficulty">Difficulté:</string>
+    <string name="settings_new_map_each_time">Nouvelle carte à chaque fois:</string>
+    <string name="settings_robots_reach_targets">Robots qui doivent atteindre les cibles:</string>
+    <string name="settings_targets">cibles</string>
+    <string name="settings_out_of">sur</string>
+    <string name="settings_sound">Son:</string>
+    <string name="settings_yes">Oui</string>
+    <string name="settings_no">Non</string>
+    <string name="settings_beginner">Débutant</string>
+    <string name="settings_advanced">Avancé</string>
+    <string name="settings_insane">Extrême</string>
+    <string name="settings_impossible">Impossible</string>
+
+    <!-- Accessibility Controls -->
+    <string name="next_robot_button">Robot Suivant</string>
+    <string name="announce_hint">Annoncer Indice</string>
+    <string name="announce">Annoncer</string>
+    <string name="next_robot">Robot suivant</string>
+    <string name="announce_a11y">Annoncer la situation du jeu</string>
+    <string name="next_robot_a11y">Sélectionner le robot suivant</string>
+
+    <!-- Game text -->
+    <string name="possible_moves">Déplacements possibles</string>
+    <string name="squares_north">cases vers le nord</string>
+    <string name="squares_south">cases vers le sud</string>
+    <string name="squares_east">cases vers l`est</string>
+    <string name="squares_west">cases vers l`ouest</string>
+    <string name="until">jusqu`au</string>
+    <string name="edge">bord</string>
+    <string name="no_movement_north">aucun mouvement vers le nord</string>
+    <string name="no_movement_south">aucun mouvement vers le sud</string>
+    <string name="no_movement_east">aucun mouvement vers l`est</string>
+    <string name="no_movement_west">aucun mouvement vers l`ouest</string>
+    <string name="use_next_robot_button">Utilisez le bouton Robot Suivant pour parcourir les robots</string>
+    <string name="direction_north">vers le nord</string>
+    <string name="direction_south">vers le sud</string>
+    <string name="direction_east">vers l`est</string>
+    <string name="direction_west">vers l`ouest</string>
+
+    <!-- Navigation buttons -->
+    <string name="button_back">Retour</string>
+    <string name="button_save_map">Enregistrer</string>
+    <string name="button_new_game">Nouvelle partie</string>
+    <string name="button_menu">Menu</string>
+    <string name="back">Retour</string>
+    <string name="reset">Réinitialiser</string>
+    <string name="save_map">Enregistrer la carte</string>
+    <string name="new_game">Nouvelle partie</string>
+    <string name="menu">Menu</string>
+</resources>

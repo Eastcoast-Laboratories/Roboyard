@@ -39,12 +39,15 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 
 # Accessibility
-- TalkBack-Unterstützung sprache einstellbar machen (Englisch ermöglichen).  
+- sprache einstellbar machen (englisch deutsch und französisch ermöglichen, default english).  
+- TalkBack-Unterstützungs-Sprache gesondert einstellbar machen (english, deutsch und französisch ermöglichen).  
 - Add a preference setting to customize the order of information in TalkBack announcements
 - Create custom button sounds to provide audio feedback for different actions
 - Add a high-contrast mode for better visibility
-- get rid of the accessibility texts of the images in the menu
 - make all accessibility coordinate announcements one more, so on a 8x8 board they go from 1,1 to 8,8 instead of 0,0 to 7,7
+- Remove "AI calculating solution..." on game start.
+- die ganzen buttons unten sollen, wenn accessibility acitive, viel niedriger, damit sie unter die navigation buttons noch passen
+- der hint "5/8: Br,Bd,Gu, Gr, Green down" kommmt Zu früh schon bei gu zeigt er gr an
 
 # achievements
 - add achievement system
@@ -90,13 +93,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
 
-accesssibility mode:
-- die ganzen buttons unten sollen, wenn accessibility acitive, viel niedriger, damit sie unter die navigation buttons noch passen
-
-
-- der hint "5/8: Br,Bd,Gu, Gr, Green down" kommmt Zu früh schon bei gu zeigt er gr an
-
-
 - fdroid entry enhancements
 
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
@@ -140,3 +136,9 @@ accesssibility mode:
             updateStatusText(message.toString(), true);
 
 
+# thanstation:
+- Add new strings to default strings.xml only
+- Include context comments with `translatable="false"` for non-translatable strings
+- Move all text to the default strings.xml
+- Handle plurals with `plurals.xml` for each language
+- I removed the lightbulb. add a lightbulb as graphic in the background of the hint button
