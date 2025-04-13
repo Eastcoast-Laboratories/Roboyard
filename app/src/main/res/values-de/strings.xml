@@ -86,6 +86,11 @@
     <string name="settings_advanced">Fortgeschritten</string>
     <string name="settings_insane">Verrückt</string>
     <string name="settings_impossible">Unmöglich</string>
+    <string name="settings_game_mode">Spielmodus:</string>
+    <string name="settings_standard_game">Standardspiel</string>
+    <string name="settings_standard_game_a11y">Standardspielmodus</string>
+    <string name="settings_multi_target_mode">Multi-Ziel-Modus (Beta)</string>
+    <string name="settings_multi_target_mode_a11y">Multi-Ziel-Modus Beta</string>
     
     <!-- Language Settings -->
     <string name="language_settings_label">App-Sprache:</string>
@@ -125,6 +130,17 @@
     <string name="game_complete_a11y">Level abgeschlossen! Du hast das Rätsel in %1$d Zügen gelöst</string>
     <string name="wall_hit_a11y">%1$s Roboter ist gegen eine Wand gestoßen</string>
     <string name="robot_hit_a11y">%1$s Roboter ist gegen den %2$s Roboter gestoßen</string>
+    <string name="robot_position_a11y">Roboter auf Position</string>
+    <string name="target_position_a11y">Sein Ziel ist auf Position</string>
+    <string name="position_a11y">Position</string>
+    <string name="at_position_a11y">auf Position</string>
+    <string name="multicolored_a11y">Mehrfarbig</string>
+    <string name="walls_on_a11y">Wände an</string>
+    <string name="north_a11y">Norden</string>
+    <string name="south_a11y">Süden</string>
+    <string name="east_a11y">Osten</string>
+    <string name="west_a11y">Westen</string>
+    <string name="empty_space_a11y">Leerer Bereich</string>
     
     <!-- TalkBack language constant - do not translate -->
     <string name="talkback_language_same_value" translatable="false">same</string>

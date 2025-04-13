@@ -93,7 +93,6 @@
     <string name="level_robots_format">Robots: %1$d</string>
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>
     <string name="robot_a11y">Robot %1$s at position %2$d, %3$d</string>
-    <string name="target_a11y">Target at position %1$d, %2$d</string>
     <string name="minimap_description">Minimap showing overall board layout</string>
     <string name="minimap_a11y">Minimap showing overall board layout</string>
     
@@ -362,20 +361,27 @@
     <string name="no_game_to_save" comment="Message when there is no game available to save">No game available to save</string>
 
     <!-- Settings Screen -->
-    <string name="settings_title">Settings</string>
+    <string name="settings_title">Roboyard Settings</string>
     <string name="settings_board_size">Board Size:</string>
-    <string name="settings_difficulty">Difficulty:</string>
-    <string name="settings_new_map_each_time">New Map Each Time:</string>
-    <string name="settings_robots_reach_targets">Robots that must reach targets:</string>
-    <string name="settings_targets">targets</string>
-    <string name="settings_out_of">out of</string>
-    <string name="settings_sound">Sound:</string>
-    <string name="settings_yes">Yes</string>
-    <string name="settings_no">No</string>
+    <string name="settings_difficulty">Difficulty Level:</string>
     <string name="settings_beginner">Beginner</string>
     <string name="settings_advanced">Advanced</string>
     <string name="settings_insane">Insane</string>
     <string name="settings_impossible">Impossible</string>
+    <string name="settings_new_map_each_time">Generate New Map Each Time:</string>
+    <string name="settings_robots_reach_targets">Target Settings:</string>
+    <string name="settings_out_of">of</string>
+    <string name="settings_targets">Targets</string>
+    <string name="settings_sound">Sound Effects:</string>
+    <string name="settings_vibration">Vibration Effects:</string>
+    <string name="settings_yes">Yes</string>
+    <string name="settings_no">No</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_game_mode">Game Mode:</string>
+    <string name="settings_standard_game">Standard Game</string>
+    <string name="settings_standard_game_a11y">Standard Game Mode</string>
+    <string name="settings_multi_target_mode">Multi-target Mode (beta)</string>
+    <string name="settings_multi_target_mode_a11y">Multi-target Mode beta</string>
 
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>
@@ -409,5 +415,19 @@
     <string name="next_robot">Next Robot</string>
     <string name="announce_a11y">Announce game situation</string>
     <string name="next_robot_a11y">Select next robot</string>
+
+    <!-- Accessibility strings for GameGridView's components -->
+    <string name="robot_position_a11y">robot at position</string>
+    <string name="target_position_a11y">Its target is at position</string>
+    <string name="position_a11y">Position</string>
+    <string name="multicolored_a11y">Multi-colored</string>
+    <string name="target_a11y">Target at position %1$d, %2$d</string>
+    <string name="at_position_a11y">at position</string>
+    <string name="walls_on_a11y">Walls on</string>
+    <string name="north_a11y">North</string>
+    <string name="south_a11y">South</string>
+    <string name="east_a11y">East</string>
+    <string name="west_a11y">West</string>
+    <string name="empty_space_a11y">Empty space</string>
 
 </resources>

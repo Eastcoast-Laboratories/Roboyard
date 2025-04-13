@@ -94,4 +94,25 @@
     <string name="hint_direction_right">▶</string>
     <string name="hint_direction_up">▲</string>
     <string name="hint_direction_down">▼</string>
+    
+    <!-- Settings strings -->
+    <string name="settings_game_mode">게임 모드:</string>
+    <string name="settings_standard_game">표준 게임</string>
+    <string name="settings_standard_game_a11y">표준 게임 모드</string>
+    <string name="settings_multi_target_mode">다중 목표 모드 (베타)</string>
+    <string name="settings_multi_target_mode_a11y">다중 목표 모드 베타</string>
+    
+    <!-- Accessibility strings for GameGridView's components -->
+    <string name="robot_position_a11y">로봇 위치</string>
+    <string name="target_position_a11y">목표 위치</string>
+    <string name="position_a11y">위치</string>
+    <string name="multicolored_a11y">다색</string>
+    <string name="target_a11y">목표 위치 %1$d, %2$d</string>
+    <string name="at_position_a11y">위치에</string>
+    <string name="walls_on_a11y">벽 방향</string>
+    <string name="north_a11y">북쪽</string>
+    <string name="south_a11y">남쪽</string>
+    <string name="east_a11y">동쪽</string>
+    <string name="west_a11y">서쪽</string>
+    <string name="empty_space_a11y">빈 공간</string>
 </resources>

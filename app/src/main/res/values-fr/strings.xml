@@ -129,6 +129,13 @@
     <string name="settings_insane">Extrême</string>
     <string name="settings_impossible">Impossible</string>
 
+    <!-- Settings strings -->
+    <string name="settings_game_mode">Mode de jeu:</string>
+    <string name="settings_standard_game">Jeu standard</string>
+    <string name="settings_standard_game_a11y">Mode de jeu standard</string>
+    <string name="settings_multi_target_mode">Mode multi-cibles (bêta)</string>
+    <string name="settings_multi_target_mode_a11y">Mode multi-cibles bêta</string>
+
     <!-- Accessibility Controls -->
     <string name="next_robot_button">Robot Suivant</string>
     <string name="announce_hint">Annoncer Indice</string>
@@ -136,6 +143,20 @@
     <string name="next_robot">Robot suivant</string>
     <string name="announce_a11y">Annoncer la situation du jeu</string>
     <string name="next_robot_a11y">Sélectionner le robot suivant</string>
+
+    <!-- Accessibility strings for GameGridView's components -->
+    <string name="robot_position_a11y">robot à la position</string>
+    <string name="target_position_a11y">Sa cible est à la position</string>
+    <string name="position_a11y">Position</string>
+    <string name="multicolored_a11y">Multicolore</string>
+    <string name="target_a11y">Cible à la position %1$d, %2$d</string>
+    <string name="at_position_a11y">à la position</string>
+    <string name="walls_on_a11y">Murs au</string>
+    <string name="north_a11y">Nord</string>
+    <string name="south_a11y">Sud</string>
+    <string name="east_a11y">Est</string>
+    <string name="west_a11y">Ouest</string>
+    <string name="empty_space_a11y">Espace vide</string>
 
     <!-- Game text -->
     <string name="possible_moves_a11y">Déplacements possibles</string>

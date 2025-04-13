@@ -294,8 +294,28 @@
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">Encontrada solución en %1$d movimientos</string>
-    <string name="hint_move_number">Movimiento %1$d de %2$d</string>
 
+    <!-- Settings strings -->
+    <string name="settings_game_mode">Modo de juego:</string>
+    <string name="settings_standard_game">Juego estándar</string>
+    <string name="settings_standard_game_a11y">Modo de juego estándar</string>
+    <string name="settings_multi_target_mode">Modo multi-objetivo (beta)</string>
+    <string name="settings_multi_target_mode_a11y">Modo multi-objetivo beta</string>
+    
+    <!-- Accessibility strings for GameGridView's components -->
+    <string name="robot_position_a11y">robot en posición</string>
+    <string name="target_position_a11y">Su objetivo está en posición</string>
+    <string name="position_a11y">Posición</string>
+    <string name="multicolored_a11y">Multicolor</string>
+    <string name="target_a11y">Objetivo en posición %1$d, %2$d</string>
+    <string name="at_position_a11y">en posición</string>
+    <string name="walls_on_a11y">Paredes en</string>
+    <string name="north_a11y">Norte</string>
+    <string name="south_a11y">Sur</string>
+    <string name="east_a11y">Este</string>
+    <string name="west_a11y">Oeste</string>
+    <string name="empty_space_a11y">Espacio vacío</string>
+    
     <string name="button_back">Atrás</string>
     <string name="button_reset">Restablecer</string>
     <string name="button_save_map">Guardar mapa</string>

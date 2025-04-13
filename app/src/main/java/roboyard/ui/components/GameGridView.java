@@ -896,7 +896,7 @@ public class GameGridView extends View {
         
         // Draw position text when accessibility features are enabled
         if (isSelected && isAccessibilityActive()) {
-            canvas.drawText("(" + robot.getX() + "," + robot.getY() + ")", 
+            canvas.drawText(robot.getX() + "," + robot.getY(), 
                     left + cellSize / 2, 
                     top + cellSize / 2, 
                     textPaint);
@@ -1264,7 +1264,7 @@ public class GameGridView extends View {
                 gameStateManager.getMoveCount().getValue() + " moves and " +
                 gameStateManager.getSquaresMoved().getValue() + " squares moved");
         } else {
-            Timber.d("[GOAL DEBUG] Robot moved");
+            Timber.d("[bbb    n          ddf DEBUG] Robot moved");
             announceForAccessibility(getRobotDescription(selectedRobot));
         }
     }
@@ -1394,27 +1394,25 @@ public class GameGridView extends View {
     }
     
     /**
-     * Get a description of a robot for accessibility announcements
+     * Get a description of a robot for accessibility
      */
     private String getRobotDescription(GameElement robot) {
-        if (robot == null) {
-            return "Unknown robot";
-        }
+        if (robot == null) return "";
         
         String color = GameLogic.getColorName(robot.getColor(), true);
         
-        // Find the robot's goal if available
+        // Find the robot's target if available
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state != null) {
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                    return color + " robot at position " + robot.getX() + ", " + robot.getY() + 
-                           ". Its target is at position " + element.getX() + ", " + element.getY();
+                    return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + robot.getX() + ", " + robot.getY() + 
+                           ". " + getContext().getString(R.string.target_position_a11y) + " " + element.getX() + ", " + element.getY();
                 }
             }
         }
         
-        return color + " robot at position " + robot.getX() + ", " + robot.getY();
+        return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + robot.getX() + ", " + robot.getY();
     }
     
     /**
@@ -1422,23 +1420,23 @@ public class GameGridView extends View {
      */
     private String getPositionDescription(int x, int y) {
         if (gameStateManager == null || gameStateManager.getCurrentState().getValue() == null) {
-            return "Position " + x + ", " + y;
+            return getContext().getString(R.string.position_a11y) + " " + x + ", " + y;
         }
         
         GameState state = gameStateManager.getCurrentState().getValue();
         StringBuilder description = new StringBuilder();
-        description.append("Position " + x + ", " + y + ": ");
+        description.append(getContext().getString(R.string.position_a11y) + " " + x + ", " + y + ": ");
         
         // Check for robot
         GameElement robot = state.getRobotAt(x, y);
         if (robot != null) {
             String color = GameLogic.getColorName(robot.getColor(), true);
-            description.append(color + " robot. ");
+            description.append(color + " " + getContext().getString(R.string.robot_a11y) + ". ");
             
             // Find the robot's target
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                    description.append("Its target is at position " + element.getX() + ", " + element.getY() + ". ");
+                    description.append(String.format(getContext().getString(R.string.target_a11y), element.getX(), element.getY()) + ". ");
                     break;
                 }
             }
@@ -1449,9 +1447,9 @@ public class GameGridView extends View {
             if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
                 String color = GameLogic.getColorName(element.getColor(), true);
                 if (element.getColor() == Constants.COLOR_MULTI) {
-                    color = "Multi-colored";
+                    color = getContext().getString(R.string.multicolored_a11y);
                 }
-                description.append(color + " target. ");
+                description.append(color + " " + String.format(getContext().getString(R.string.target_a11y), element.getX(), element.getY()) + ". ");
                 break;
             }
         }
@@ -1489,13 +1487,13 @@ public class GameGridView extends View {
         
         // Add wall description
         if (hasNorthWall || hasSouthWall || hasEastWall || hasWestWall) {
-            description.append("Walls on: ");
-            if (hasNorthWall) description.append("North ");
-            if (hasSouthWall) description.append("South ");
-            if (hasEastWall) description.append("East ");
-            if (hasWestWall) description.append("West ");
+            description.append(getContext().getString(R.string.walls_on_a11y) + ": ");
+            if (hasNorthWall) description.append(getContext().getString(R.string.north_a11y) + " ");
+            if (hasSouthWall) description.append(getContext().getString(R.string.south_a11y) + " ");
+            if (hasEastWall) description.append(getContext().getString(R.string.east_a11y) + " ");
+            if (hasWestWall) description.append(getContext().getString(R.string.west_a11y) + " ");
         } else if (robot == null) {
-            description.append("Empty space");
+            description.append(getContext().getString(R.string.empty_space_a11y));
         }
         
         return description.toString();
@@ -1559,6 +1557,7 @@ public class GameGridView extends View {
         // Check system TalkBack status
         AccessibilityManager accessibilityManager = (AccessibilityManager) getContext()
                 .getSystemService(Context.ACCESSIBILITY_SERVICE);
+        
         boolean talkbackActive = accessibilityManager != null && accessibilityManager.isTouchExplorationEnabled();
         
         boolean isActive = talkbackActive || Preferences.accessibilityMode;
