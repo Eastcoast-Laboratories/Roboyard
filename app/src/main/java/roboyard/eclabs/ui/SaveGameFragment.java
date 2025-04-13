@@ -76,7 +76,7 @@ public class SaveGameFragment extends BaseGameFragment {
     private boolean saveMode;
     
     private GameStateManager gameStateManager;
-    private List<SaveSlotInfo> saveSlots = new ArrayList<>();
+    private final List<SaveSlotInfo> saveSlots = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -293,7 +293,7 @@ public class SaveGameFragment extends BaseGameFragment {
      * Load save slots from storage
      */
     private void loadSaveSlots() {
-        List<SaveSlotInfo> saveSlots = new ArrayList<>();
+        List<SaveSlotInfo> newSaveSlots = new ArrayList<>();
         
         // Add auto-save slot with proper metadata check
         try {
@@ -324,14 +324,14 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Extract board size from #SIZE:width,height or WIDTH/HEIGHT lines
-                    Pattern sizePattern = Pattern.compile("#SIZE:(\\d+),(\\d+)");
+                    Pattern sizePattern = Pattern.compile("(#SIZE:|SIZE:)(\\d+),(\\d+)");
                     Matcher sizeMatcher = sizePattern.matcher(saveData);
                     int width = 0, height = 0;
                     
                     if (sizeMatcher.find()) {
-                        width = Integer.parseInt(sizeMatcher.group(1));
-                        height = Integer.parseInt(sizeMatcher.group(2));
-                        Timber.d("[SAVEDATA] Found size in #SIZE tag: %dx%d", width, height);
+                        width = Integer.parseInt(sizeMatcher.group(2));
+                        height = Integer.parseInt(sizeMatcher.group(3));
+                        Timber.d("[SAVEDATA] Found size in SIZE tag: %dx%d", width, height);
                     } else {
                         // Try WIDTH/HEIGHT format
                         Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
@@ -355,11 +355,10 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Extract difficulty - first try a direct DIFFICULTY tag
-                    Pattern difficultyPattern = Pattern.compile("DIFFICULTY:([^;\\n]+)|#DIFFICULTY:([^;\\n]+)");
+                    Pattern difficultyPattern = Pattern.compile("(DIFFICULTY:|#DIFFICULTY:)([^;\\n]+)");
                     Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
                     if (difficultyMatcher.find()) {
-                        // Group 1 or 2 might be non-null depending on which pattern matched
-                        String diffValue = difficultyMatcher.group(1) != null ? difficultyMatcher.group(1) : difficultyMatcher.group(2);
+                        String diffValue = difficultyMatcher.group(2);
                         try {
                             // Try parsing as integer first
                             int difficultyInt = Integer.parseInt(diffValue.trim());
@@ -375,22 +374,39 @@ public class SaveGameFragment extends BaseGameFragment {
                         Timber.d("[SAVEDATA] No difficulty in save data, using beginner difficulty: %s", difficulty);
                     }
                     
-                    // Extract move count from |MOVES:count
-                    Pattern movesPattern = Pattern.compile("\\|MOVES:(\\d+)");
-                    Matcher movesMatcher = movesPattern.matcher(saveData);
-                    if (movesMatcher.find()) {
-                        int moves = Integer.parseInt(movesMatcher.group(1));
-                        movesCount = "Moves: " + moves;
+                    // Extract move count - try multiple patterns
+                    Pattern movesPattern1 = Pattern.compile("\\|MOVES:(\\d+)");
+                    Pattern movesPattern2 = Pattern.compile("MOVES:(\\d+);");
+                    Pattern movesPattern3 = Pattern.compile("#MOVES:(\\d+)");
+                    
+                    Matcher movesMatcher1 = movesPattern1.matcher(saveData);
+                    Matcher movesMatcher2 = movesPattern2.matcher(saveData);
+                    Matcher movesMatcher3 = movesPattern3.matcher(saveData);
+                    
+                    int moves = 0;
+                    if (movesMatcher1.find()) {
+                        moves = Integer.parseInt(movesMatcher1.group(1));
                         Timber.d("[SAVEDATA] Found moves with pipe pattern: %d", moves);
+                    } else if (movesMatcher2.find()) {
+                        moves = Integer.parseInt(movesMatcher2.group(1));
+                        Timber.d("[SAVEDATA] Found moves with semicolon pattern: %d", moves);
+                    } else if (movesMatcher3.find()) {
+                        moves = Integer.parseInt(movesMatcher3.group(1));
+                        Timber.d("[SAVEDATA] Found moves with hash pattern: %d", moves);
                     }
                     
-                    // Extract completion status from #SOLVED:true
-                    Pattern solvedPattern = Pattern.compile("#SOLVED:(true|false)");
-                    Matcher solvedMatcher = solvedPattern.matcher(saveData);
-                    if (solvedMatcher.find()) {
-                        boolean solved = Boolean.parseBoolean(solvedMatcher.group(1));
-                        completionStatus = solved ? "Completed" : "Incomplete";
-                        Timber.d("[SAVEDATA] Found solved status: %s", completionStatus);
+                    if (moves > 0) {
+                        movesCount = "Moves: " + moves;
+                        
+                        // Only show completion status if game has been started (moves > 0)
+                        // Extract completion status from #SOLVED:true
+                        Pattern solvedPattern = Pattern.compile("(#SOLVED:|SOLVED:)(true|false)");
+                        Matcher solvedMatcher = solvedPattern.matcher(saveData);
+                        if (solvedMatcher.find()) {
+                            boolean solved = Boolean.parseBoolean(solvedMatcher.group(2));
+                            completionStatus = solved ? "Completed" : "Incomplete";
+                            Timber.d("[SAVEDATA] Found solved status: %s", completionStatus);
+                        }
                     }
                     
                     // Create minimap
@@ -402,14 +418,14 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
                 
                 // Add autosave slot with metadata
-                saveSlots.add(new SaveSlotInfo(0, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
+                newSaveSlots.add(new SaveSlotInfo(0, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
             } else {
                 // Empty autosave slot
-                saveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null, null, null, null, null));
+                newSaveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null, null, null, null, null));
             }
         } catch (Exception e) {
             Timber.e(e, "Error loading autosave slot");
-            saveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null, null, null, null, null));
+            newSaveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null, null, null, null, null));
         }
         
         // Add regular save slots (1-34)
@@ -440,20 +456,41 @@ public class SaveGameFragment extends BaseGameFragment {
                         
                         // Extract additional metadata using regex patterns
                         // Extract board size from #SIZE:width,height
-                        Pattern sizePattern = Pattern.compile("#SIZE:(\\d+),(\\d+)");
+                        Pattern sizePattern = Pattern.compile("(#SIZE:|SIZE:)(\\d+),(\\d+)");
                         Matcher sizeMatcher = sizePattern.matcher(saveData);
                         if (sizeMatcher.find()) {
-                            int width = Integer.parseInt(sizeMatcher.group(1));
-                            int height = Integer.parseInt(sizeMatcher.group(2));
+                            int width = Integer.parseInt(sizeMatcher.group(2));
+                            int height = Integer.parseInt(sizeMatcher.group(3));
                             boardSize = "Board: " + width + "\u00D7" + height;
+                            Timber.d("[SAVEDATA] Found board size in slot %d: %s", i, boardSize);
+                        } else {
+                            // Try WIDTH/HEIGHT format
+                            Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
+                            Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
+                            Matcher widthMatcher = widthPattern.matcher(saveData);
+                            Matcher heightMatcher = heightPattern.matcher(saveData);
+                            int width = 0, height = 0;
+                            
+                            if (widthMatcher.find()) {
+                                width = Integer.parseInt(widthMatcher.group(1));
+                                Timber.d("[SAVEDATA] Found width in slot %d: %d", i, width);
+                            }
+                            
+                            if (heightMatcher.find()) {
+                                height = Integer.parseInt(heightMatcher.group(1));
+                                Timber.d("[SAVEDATA] Found height in slot %d: %d", i, height);
+                            }
+                            
+                            if (width > 0 && height > 0) {
+                                boardSize = "Board: " + width + "\u00D7" + height;
+                            }
                         }
                         
                         // Extract difficulty from DIFFICULTY:level
-                        Pattern difficultyPattern = Pattern.compile("DIFFICULTY:([^;\\n]+)|#DIFFICULTY:([^;\\n]+)");
+                        Pattern difficultyPattern = Pattern.compile("(DIFFICULTY:|#DIFFICULTY:)([^;\\n]+)");
                         Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
                         if (difficultyMatcher.find()) {
-                            // Group 1 or 2 might be non-null depending on which pattern matched
-                            String diffValue = difficultyMatcher.group(1) != null ? difficultyMatcher.group(1) : difficultyMatcher.group(2);
+                            String diffValue = difficultyMatcher.group(2);
                             try {
                                 // Try parsing as integer first
                                 int difficultyInt = Integer.parseInt(diffValue.trim());
@@ -462,26 +499,45 @@ public class SaveGameFragment extends BaseGameFragment {
                                 // If it's already a string value, use it directly
                                 difficulty = diffValue.trim();
                             }
-                            Timber.d("[SAVEDATA] Found difficulty in save data: %s", difficulty);
+                            Timber.d("[SAVEDATA] Found difficulty in slot %d: %s", i, difficulty);
                         } else {
                             // If difficulty not found, use beginner difficulty as fallback
                             difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
                         }
                         
-                        // Extract move count from |MOVES:count
-                        Pattern movesPattern = Pattern.compile("\\|MOVES:(\\d+)");
-                        Matcher movesMatcher = movesPattern.matcher(saveData);
-                        if (movesMatcher.find()) {
-                            int moves = Integer.parseInt(movesMatcher.group(1));
-                            movesCount = "Moves: " + moves;
+                        // Extract move count - try multiple patterns
+                        Pattern movesPattern1 = Pattern.compile("\\|MOVES:(\\d+)");
+                        Pattern movesPattern2 = Pattern.compile("MOVES:(\\d+);");
+                        Pattern movesPattern3 = Pattern.compile("#MOVES:(\\d+)");
+                        
+                        Matcher movesMatcher1 = movesPattern1.matcher(saveData);
+                        Matcher movesMatcher2 = movesPattern2.matcher(saveData);
+                        Matcher movesMatcher3 = movesPattern3.matcher(saveData);
+                        
+                        int moves = 0;
+                        if (movesMatcher1.find()) {
+                            moves = Integer.parseInt(movesMatcher1.group(1));
+                            Timber.d("[SAVEDATA] Found moves with pipe pattern in slot %d: %d", i, moves);
+                        } else if (movesMatcher2.find()) {
+                            moves = Integer.parseInt(movesMatcher2.group(1));
+                            Timber.d("[SAVEDATA] Found moves with semicolon pattern in slot %d: %d", i, moves);
+                        } else if (movesMatcher3.find()) {
+                            moves = Integer.parseInt(movesMatcher3.group(1));
+                            Timber.d("[SAVEDATA] Found moves with hash pattern in slot %d: %d", i, moves);
                         }
                         
-                        // Extract completion status from #SOLVED:true
-                        Pattern solvedPattern = Pattern.compile("#SOLVED:(true|false)");
-                        Matcher solvedMatcher = solvedPattern.matcher(saveData);
-                        if (solvedMatcher.find()) {
-                            boolean solved = Boolean.parseBoolean(solvedMatcher.group(1));
-                            completionStatus = solved ? "Completed" : "Incomplete";
+                        if (moves > 0) {
+                            movesCount = "Moves: " + moves;
+                            
+                            // Only show completion status if game has been started (moves > 0)
+                            // Extract completion status from #SOLVED:true
+                            Pattern solvedPattern = Pattern.compile("(#SOLVED:|SOLVED:)(true|false)");
+                            Matcher solvedMatcher = solvedPattern.matcher(saveData);
+                            if (solvedMatcher.find()) {
+                                boolean solved = Boolean.parseBoolean(solvedMatcher.group(2));
+                                completionStatus = solved ? "Completed" : "Incomplete";
+                                Timber.d("[SAVEDATA] Found solved status in slot %d: %s", i, completionStatus);
+                            }
                         }
                         
                         // Create minimap
@@ -493,19 +549,32 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Add save slot with metadata
-                    saveSlots.add(new SaveSlotInfo(i, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
+                    newSaveSlots.add(new SaveSlotInfo(i, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
                 } else {
                     // Empty slot
-                    saveSlots.add(new SaveSlotInfo(i, "Empty Slot " + i, null, null, null, null, null, null));
+                    newSaveSlots.add(new SaveSlotInfo(i, "Slot " + i + " (" + getString(R.string.empty_slot) + ")", null, null, null, null, null, null));
                 }
             } catch (Exception e) {
                 Timber.e(e, "Error loading save slot %d", i);
-                saveSlots.add(new SaveSlotInfo(i, "Error: Slot " + i, null, null, null, null, null, null));
+                newSaveSlots.add(new SaveSlotInfo(i, "Slot " + i + " (Error)", null, null, null, null, null, null));
             }
         }
         
-        // Update the adapter
-        saveSlotAdapter.updateSaveSlots(saveSlots);
+        // Update the list and notify the adapter on the UI thread
+        requireActivity().runOnUiThread(() -> {
+            saveSlots.clear();
+            saveSlots.addAll(newSaveSlots);
+            
+            // Only update if the adapter exists and is attached to the RecyclerView
+            if (saveSlotAdapter != null) {
+                saveSlotAdapter.notifyDataSetChanged();
+                Timber.d("SaveSlotAdapter updated with %d slots", saveSlots.size());
+            } else {
+                Timber.e("SaveSlotAdapter is null, can't update data");
+                saveSlotAdapter = new SaveSlotAdapter(requireContext(), saveSlots);
+                saveSlotRecyclerView.setAdapter(saveSlotAdapter);
+            }
+        });
     }
     
     /**
@@ -1287,7 +1356,7 @@ public class SaveGameFragment extends BaseGameFragment {
             }
             
             // Completion status
-            if (slot.getCompletionStatus() != null && !slot.getCompletionStatus().isEmpty()) {
+            if (slot.getMovesCount() != null && !slot.getMovesCount().isEmpty() && slot.getCompletionStatus() != null && !slot.getCompletionStatus().isEmpty()) {
                 holder.completionStatus.setVisibility(View.VISIBLE);
                 holder.completionStatus.setText(slot.getCompletionStatus());
             } else {
