@@ -62,9 +62,14 @@ public class SettingsFragment extends Fragment {
     private RadioGroup accessibilityRadioGroup;
     private RadioButton accessibilityOn;
     private RadioButton accessibilityOff;
+    // Game mode radio buttons
+    private RadioGroup gameModeRadioGroup;
+    private RadioButton standardGameModeButton;
+    private RadioButton multiTargetGameModeButton;
     private Spinner targetColorsSpinner;
     private Button backButton;
     private Spinner robotCountSpinner;
+    private LinearLayout targetCountContainer; // Container for the target settings
     
     // Language settings
     private Spinner languageSpinner;
@@ -156,7 +161,12 @@ public class SettingsFragment extends Fragment {
             accessibilityRadioGroup = view.findViewById(R.id.accessibility_radio_group);
             accessibilityOn = view.findViewById(R.id.accessibility_on);
             accessibilityOff = view.findViewById(R.id.accessibility_off);
+            // Game mode radio buttons
+            gameModeRadioGroup = view.findViewById(R.id.game_mode_radio_group);
+            standardGameModeButton = view.findViewById(R.id.standard_game_mode);
+            multiTargetGameModeButton = view.findViewById(R.id.multi_target_game_mode);
             targetColorsSpinner = view.findViewById(R.id.target_colors_spinner);
+            targetCountContainer = view.findViewById(R.id.target_count_container);
             backButton = view.findViewById(R.id.back_button);
             robotCountSpinner = view.findViewById(R.id.robot_count_spinner);
             
@@ -593,6 +603,16 @@ public class SettingsFragment extends Fragment {
             int targetColors = Preferences.targetColors;
             targetColorsSpinner.setSelection(targetColors - 1); // Zero-based index
             
+            // Load game mode
+            int gameMode = Preferences.gameMode;
+            if (gameMode == Constants.GAME_MODE_STANDARD) {
+                if (standardGameModeButton != null) standardGameModeButton.setChecked(true);
+                if (targetCountContainer != null) targetCountContainer.setVisibility(View.GONE);
+            } else if (gameMode == Constants.GAME_MODE_MULTI_TARGET) {
+                if (multiTargetGameModeButton != null) multiTargetGameModeButton.setChecked(true);
+                if (targetCountContainer != null) targetCountContainer.setVisibility(View.VISIBLE);
+            }
+            
             isUpdatingUI = false;
             Timber.d("Settings loaded successfully");
         } catch (Exception e) {
@@ -702,6 +722,15 @@ public class SettingsFragment extends Fragment {
                     try {
                         int selectedTargetColors = position + 1; // +1 because index is 0-based
                         int currentRobotCount = Preferences.robotCount;
+                        
+                        // In multi-target mode, enforce minimum of 2 targets
+                        if (Preferences.gameMode == Constants.GAME_MODE_MULTI_TARGET && selectedTargetColors < 2) {
+                            selectedTargetColors = 2;
+                            targetColorsSpinner.setSelection(selectedTargetColors - 1);
+                            Toast.makeText(requireContext(), 
+                                    "Multi-target mode requires at least 2 targets", 
+                                    Toast.LENGTH_SHORT).show();
+                        }
                         
                         // If the selected target colors is less than the current robot count, adjust
                         if (selectedTargetColors < currentRobotCount) {
@@ -1021,114 +1050,28 @@ public class SettingsFragment extends Fragment {
      */
     private void setupListeners() {
         try {
-            // Board size spinner
-            if (boardSizeSpinner != null) {
-                boardSizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        try {
-                            if (isInitialBoardSizeSelection) {
-                                isInitialBoardSizeSelection = false;
-                                return;
-                            }
-                            
-                            // Skip if we're already updating UI from preferences
-                            if (isUpdatingUI) {
-                                return;
-                            }
-                            
-                            // Get selected board size
-                            if (position >= 0 && position < validBoardSizes.size()) {
-                                int[] size = validBoardSizes.get(position);
-                                int width = size[0];
-                                int height = size[1];
-                                
-                                // Update static board size variables through the Preferences manager
-                                Preferences.setBoardSize(width, height);
-                                Timber.d("[BOARD_SIZE_DEBUG] Settings: Board size updated to %dx%d", width, height);
-                            } else {
-                                Timber.e("Invalid board size position: %d", position);
-                            }
-                        } catch (Exception e) {
-                            Timber.e(e, "Error processing board size selection");
-                        }
-                    }
-                    
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        // Do nothing
-                    }
-                });
-            } else {
-                Timber.e("boardSizeSpinner is null");
-            }
+            isUpdatingUI = true;
             
             // Difficulty radio group
             if (difficultyRadioGroup != null) {
                 difficultyRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
-                        // Skip if we're already updating UI from preferences
-                        if (isUpdatingUI) {
-                            return;
-                        }
+                        if (isUpdatingUI) return;
                         
-                        Context localizedContext = roboyard.eclabs.RoboyardApplication.getAppContext();
-                        String difficulty = localizedContext.getString(R.string.difficulty_beginner); // default
-                        int difficultyLevel = Constants.DIFFICULTY_BEGINNER; // default
-
+                        int difficulty = Constants.DIFFICULTY_BEGINNER; // Default
+                        
                         if (checkedId == R.id.difficulty_beginner) {
-                            difficulty = localizedContext.getString(R.string.difficulty_beginner);
-                            difficultyLevel = Constants.DIFFICULTY_BEGINNER;
-                            
-                            // Only set board size to 12x14 if current size is larger
-                            if (Preferences.boardSizeWidth * Preferences.boardSizeHeight > 12 * 14) {
-                                // Find the 12x14 board size in the validBoardSizes list
-                                int position = -1;
-                                for (int i = 0; i < validBoardSizes.size(); i++) {
-                                    int[] size = validBoardSizes.get(i);
-                                    if (size[0] == 12 && size[1] == 14) {
-                                        position = i;
-                                        break;
-                                    }
-                                }
-                                
-                                // If 12x14 is a valid board size, select it
-                                if (position >= 0 && boardSizeSpinner != null) {
-                                    isUpdatingUI = true; // Prevent recursive updates
-                                    boardSizeSpinner.setSelection(position);
-                                    // Update the board size in preferences
-                                    Preferences.setBoardSize(12, 14);
-                                    isUpdatingUI = false;
-                                    Timber.d("[DIFFICULTY] Automatically set board size to 12x14 for Beginner difficulty");
-                                } else {
-                                    Timber.d("[DIFFICULTY] 12x14 board size not found for Beginner difficulty");
-                                }
-                            }
-                            
-                            // Set target colors to 1 for Beginner difficulty
-                            if (targetColorsSpinner != null) {
-                                isUpdatingUI = true; // Prevent recursive updates
-                                targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
-                                Preferences.setTargetColors(1);
-                                isUpdatingUI = false;
-                                Timber.d("[DIFFICULTY] Automatically set target colors to 1 for Beginner difficulty");
-                            }
-                            
+                            difficulty = Constants.DIFFICULTY_BEGINNER;
                         } else if (checkedId == R.id.difficulty_advanced) {
-                            difficulty = localizedContext.getString(R.string.difficulty_advanced);
-                            difficultyLevel = Constants.DIFFICULTY_ADVANCED;
+                            difficulty = Constants.DIFFICULTY_ADVANCED;
                         } else if (checkedId == R.id.difficulty_insane) {
-                            difficulty = localizedContext.getString(R.string.difficulty_insane);
-                            difficultyLevel = Constants.DIFFICULTY_INSANE; 
+                            difficulty = Constants.DIFFICULTY_INSANE;
                         } else if (checkedId == R.id.difficulty_impossible) {
-                            difficulty = localizedContext.getString(R.string.difficulty_impossible);
-                            difficultyLevel = Constants.DIFFICULTY_IMPOSSIBLE; 
-                            // Show warning toast for impossible difficulty
-                            showImpossibleDifficultyToast();
+                            difficulty = Constants.DIFFICULTY_IMPOSSIBLE;
                         }
                         
-                        // Save difficulty setting
-                        Preferences.setDifficulty(difficultyLevel);
+                        Preferences.setDifficulty(difficulty);
+                        Timber.d("[PREFERENCES] Difficulty set to %d", difficulty);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing difficulty selection");
                     }
@@ -1141,13 +1084,12 @@ public class SettingsFragment extends Fragment {
             if (newMapRadioGroup != null) {
                 newMapRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
-                        boolean generateNewMapEachTime = checkedId == R.id.new_map_yes;
+                        if (isUpdatingUI) return;
                         
-                        // Save new map setting
-                        Preferences.setGenerateNewMapEachTime(generateNewMapEachTime);
+                        boolean generateNewMap = checkedId == R.id.new_map_yes; // Default to Yes
                         
-                        // Update MapGenerator using our helper method
-                        setGenerateNewMapEachTimeSetting(generateNewMapEachTime);
+                        Preferences.setGenerateNewMapEachTime(generateNewMap);
+                        Timber.d("[PREFERENCES] Generate new map set to %b", generateNewMap);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing new map selection");
                     }
@@ -1160,13 +1102,12 @@ public class SettingsFragment extends Fragment {
             if (soundRadioGroup != null) {
                 soundRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
-                        if (checkedId == R.id.sound_on) {
-                            Preferences.setSoundEnabled(true);
-                            toggleSound(requireActivity(), true);
-                        } else if (checkedId == R.id.sound_off) {
-                            Preferences.setSoundEnabled(false);
-                            toggleSound(requireActivity(), false);
-                        }
+                        if (isUpdatingUI) return;
+                        
+                        boolean soundEnabled = checkedId == R.id.sound_on; // Default to On
+                        
+                        Preferences.setSoundEnabled(soundEnabled);
+                        Timber.d("[PREFERENCES] Sound enabled set to %b", soundEnabled);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing sound selection");
                     }
@@ -1179,38 +1120,16 @@ public class SettingsFragment extends Fragment {
             if (accessibilityRadioGroup != null) {
                 accessibilityRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
-                        boolean accessibilityEnabled = checkedId == R.id.accessibility_on;
+                        if (isUpdatingUI) return;
                         
-                        // Save accessibility mode setting
-                        Preferences.setAccessibilityMode(accessibilityEnabled);
+                        boolean accessibilityMode = checkedId == R.id.accessibility_on; // Default to Off
                         
-                        // If accessibility mode is enabled, automatically set recommended settings
-                        if (accessibilityEnabled) {
-                            // Set board size to 8x8
-                            Preferences.setBoardSize(8, 8);
-                            for (int i = 0; i < validBoardSizes.size(); i++) {
-                                int[] size = validBoardSizes.get(i);
-                                if (size[0] == 8 && size[1] == 8) {
-                                    boardSizeSpinner.setSelection(i);
-                                    break;
-                                }
-                            }
-                            
-                            // Set difficulty to Beginner
-                            Preferences.setDifficulty(Constants.DIFFICULTY_BEGINNER);
-                            difficultyRadioGroup.check(R.id.difficulty_beginner);
-                            
-                            // Set "New Map Each Time" to "No" (preserve walls)
-                            Preferences.setGenerateNewMapEachTime(false);
-                            newMapRadioGroup.check(R.id.new_map_no);
-                            
-                            // Set target colors to 1
-                            Preferences.setTargetColors(1);
-                            targetColorsSpinner.setSelection(0); // 0 = 1 color (index is 0-based)
-                            
-                            // Show message about TalkBack
-                            showTalkBackMessage();
-                        }
+                        Preferences.setAccessibilityMode(accessibilityMode);
+                        
+                        // Update TalkBack language visibility
+                        updateTalkbackLanguageVisibility(accessibilityMode);
+                        
+                        Timber.d("[PREFERENCES] Accessibility mode set to %b", accessibilityMode);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing accessibility selection");
                     }
@@ -1219,30 +1138,80 @@ public class SettingsFragment extends Fragment {
                 Timber.e("accessibilityRadioGroup is null");
             }
             
+            // Game mode radio group
+            if (gameModeRadioGroup != null) {
+                gameModeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                    try {
+                        if (isUpdatingUI) return;
+                        
+                        if (checkedId == R.id.standard_game_mode) {
+                            // Standard game mode - set robot count and target colors to 1
+                            Preferences.setGameMode(Constants.GAME_MODE_STANDARD);
+                            Preferences.setRobotCount(1);
+                            Preferences.setTargetColors(1);
+                            
+                            // Update UI
+                            if (robotCountSpinner != null) {
+                                robotCountSpinner.setSelection(0); // 1 robot (index 0)
+                            }
+                            if (targetColorsSpinner != null) {
+                                targetColorsSpinner.setSelection(0); // 1 target color (index 0)
+                            }
+                            
+                            // Hide target count container
+                            if (targetCountContainer != null) {
+                                targetCountContainer.setVisibility(View.GONE);
+                            }
+                            
+                            Timber.d("[GAME_MODE] Switched to Standard Game mode");
+                        } else if (checkedId == R.id.multi_target_game_mode) {
+                            // Multi-target mode - enforce minimum of 2 target colors
+                            Preferences.setGameMode(Constants.GAME_MODE_MULTI_TARGET);
+                            
+                            // Ensure at least 2 target colors
+                            int targetColors = Preferences.targetColors;
+                            if (targetColors < 2) {
+                                Preferences.setTargetColors(2);
+                                if (targetColorsSpinner != null) {
+                                    targetColorsSpinner.setSelection(1); // 2 target colors (index 1)
+                                }
+                            }
+                            
+                            // Show target count container
+                            if (targetCountContainer != null) {
+                                targetCountContainer.setVisibility(View.VISIBLE);
+                            }
+                            
+                            Timber.d("[GAME_MODE] Switched to Multi-target mode");
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "[GAME_MODE] Error processing game mode selection: %s", e.getMessage());
+                    }
+                });
+            } else {
+                Timber.e("[GAME_MODE] gameModeRadioGroup is null");
+            }
+            
             // Back button
             if (backButton != null) {
                 backButton.setOnClickListener(v -> {
                     try {
+                        // Go back to previous screen
                         if (getActivity() != null) {
                             getActivity().onBackPressed();
-                        } else {
-                            Timber.e("Activity is null when back button pressed");
                         }
                     } catch (Exception e) {
-                        Timber.e(e, "Error handling back button");
-                        // Try fallback navigation if available
-                        try {
-                            requireActivity().onBackPressed();
-                        } catch (Exception ex) {
-                            Timber.e(ex, "Fallback navigation also failed");
-                        }
+                        Timber.e(e, "Error handling back button click");
                     }
                 });
             } else {
                 Timber.e("backButton is null");
             }
+            
+            isUpdatingUI = false;
         } catch (Exception e) {
             Timber.e(e, "Error setting up listeners");
+            isUpdatingUI = false; // Make sure to reset this flag even if an error occurs
         }
     }
     
