@@ -488,9 +488,55 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Serialize game state to JSON
             String saveData = gameState.serialize();
             
+            // Add additional important metadata if not already present
+            StringBuilder enhancedSaveData = new StringBuilder(saveData);
+            
+            // Check if we need to add a DIFFICULTY tag - find first line end
+            if (!saveData.contains("DIFFICULTY:")) {
+                int difficultyLevel = Preferences.difficulty; // Get current difficulty setting
+                int endOfFirstLine = saveData.indexOf("\n");
+                if (endOfFirstLine > 0) {
+                    String difficultyTag = "DIFFICULTY:" + difficultyLevel + ";";
+                    // Insert right after first semicolon
+                    int insertPos = saveData.indexOf(";", 0) + 1;
+                    enhancedSaveData.insert(insertPos, difficultyTag);
+                    Timber.d("[SAVEDATA] Added difficulty tag: %s", difficultyTag);
+                }
+            }
+            
+            // Add board size if not already present
+            if (!saveData.contains("SIZE:")) {
+                int width = gameState.getWidth();
+                int height = gameState.getHeight();
+                int endOfFirstLine = enhancedSaveData.indexOf("\n");
+                if (endOfFirstLine > 0) {
+                    String sizeTag = "SIZE:" + width + "," + height + ";";
+                    // Insert right after first semicolon and any other tags we've added
+                    int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
+                    enhancedSaveData.insert(insertPos, sizeTag);
+                    Timber.d("[SAVEDATA] Added size tag: %s", sizeTag);
+                }
+            }
+            
+            // Add completion status if not already present
+            if (!saveData.contains("SOLVED:")) {
+                boolean solved = gameState.isComplete();
+                String solvedTag = "SOLVED:" + solved + ";";
+                int endOfFirstLine = enhancedSaveData.indexOf("\n");
+                if (endOfFirstLine > 0) {
+                    // Insert right after first semicolon and any other tags we've added
+                    int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
+                    enhancedSaveData.insert(insertPos, solvedTag);
+                    Timber.d("[SAVEDATA] Added solved tag: %s", solvedTag);
+                }
+            }
+            
+            // Log the enhanced save data for debugging
+            Timber.d("[SAVEDATA] Enhanced save data: %s", enhancedSaveData.toString());
+            
             // Write to file
             try (FileOutputStream fos = new FileOutputStream(saveFile)) {
-                fos.write(saveData.getBytes());
+                fos.write(enhancedSaveData.toString().getBytes());
                 fos.flush();
                 Timber.d("Game saved successfully to slot %d", saveId);
                 return true;

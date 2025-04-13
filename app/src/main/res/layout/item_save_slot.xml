@@ -4,55 +4,100 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
+    android:layout_margin="8dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp"
-    android:focusable="true"
-    android:clickable="true">
+    app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:padding="12dp">
 
-        <!-- Minimap thumbnail -->
+        <!-- Minimap image -->
         <ImageView
             android:id="@+id/minimap_view"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:importantForAccessibility="no"
+            android:contentDescription="Board preview"
             android:scaleType="fitCenter"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@android:drawable/ic_menu_gallery" />
 
-        <!-- Save slot name -->
+        <!-- Save name -->
         <TextView
             android:id="@+id/name_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textSize="16sp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/minimap_view"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Level 1" />
+            tools:text="Level 1: Easy Start" />
 
-        <!-- Save date -->
+        <!-- Date -->
         <TextView
             android:id="@+id/date_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
             android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/minimap_view"
             app:layout_constraintTop_toBottomOf="@+id/name_text"
-            tools:text="2025-03-19 12:45" />
+            tools:text="Apr 13, 08:45" />
+
+        <!-- Board size -->
+        <TextView
+            android:id="@+id/board_size_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintTop_toBottomOf="@+id/date_text"
+            tools:text="Board: 10×10" />
+
+        <!-- Difficulty -->
+        <TextView
+            android:id="@+id/difficulty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@+id/board_size_text"
+            app:layout_constraintTop_toBottomOf="@+id/date_text"
+            tools:text="Expert" />
+
+        <!-- Moves -->
+        <TextView
+            android:id="@+id/moves_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintTop_toBottomOf="@+id/board_size_text"
+            tools:text="Moves: 12" />
+
+        <!-- Game Completion status -->
+        <TextView
+            android:id="@+id/completion_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toEndOf="@+id/moves_text"
+            app:layout_constraintTop_toBottomOf="@+id/board_size_text"
+            tools:text="Incomplete" />
 
         <!-- Share button -->
         <ImageButton
@@ -60,11 +105,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Share this game online"
-            android:padding="8dp"
+            android:contentDescription="@string/share_button_a11y"
             android:src="@android:drawable/ic_menu_share"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

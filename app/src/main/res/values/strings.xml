@@ -109,6 +109,15 @@
     <string name="load_confirm_title">Load Game</string>
     <string name="save_success">Game saved successfully</string>
     <string name="load_success">Game loaded successfully</string>
+    <string name="share_button_a11y">Share this saved game</string>
+    <string name="level_difficulty">Difficulty</string>
+    <string name="saved_on">saved on</string>
+    <string name="share_a11y">Share</string>
+    <string name="empty_slot">empty slot</string>
+    <string name="level_difficulty_beginner">Beginner</string>
+    <string name="level_difficulty_intermediate">Intermediate</string>
+    <string name="level_difficulty_advanced">Advanced</string>
+    <string name="level_difficulty_expert">Expert</string>
     
     <!-- Language Settings -->
     <string name="language_settings_label">App Language:</string>

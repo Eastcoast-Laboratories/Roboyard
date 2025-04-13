@@ -1,15 +1,14 @@
 package roboyard.eclabs.ui;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +23,12 @@ import androidx.annotation.Nullable;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,12 +38,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import roboyard.eclabs.GameHistoryEntry;
 import roboyard.eclabs.GameHistoryManager;
 import roboyard.eclabs.R;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.Preferences;
 import roboyard.logic.core.GameState;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
@@ -74,6 +76,7 @@ public class SaveGameFragment extends BaseGameFragment {
     private boolean saveMode;
     
     private GameStateManager gameStateManager;
+    private List<SaveSlotInfo> saveSlots = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -227,16 +230,15 @@ public class SaveGameFragment extends BaseGameFragment {
      * Set up the RecyclerView for save slots or history entries
      */
     private void setupRecyclerView() {
-        // Set up layout manager
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 1);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         saveSlotRecyclerView.setLayoutManager(layoutManager);
         
         // Create adapters
-        saveSlotAdapter = new SaveSlotAdapter();
+        saveSlotAdapter = new SaveSlotAdapter(requireContext(), saveSlots);
         historyAdapter = new HistoryAdapter();
         
         // Set initial adapter based on mode
-        saveSlotRecyclerView.setAdapter(saveSlotAdapter);
+        saveSlotRecyclerView.setAdapter(saveMode ? saveSlotAdapter : historyAdapter);
         
         // Load data
         loadSaveSlots();
@@ -244,6 +246,18 @@ public class SaveGameFragment extends BaseGameFragment {
         
         // Update title to match initial mode
         updateTitle();
+    }
+
+    /**
+     * Helper method to find position of a slot by its ID
+     */
+    private int position(int slotId) {
+        for (int i = 0; i < saveSlots.size(); i++) {
+            if (saveSlots.get(i).getSlotId() == slotId) {
+                return i;
+            }
+        }
+        return -1;
     }
     
     /**
@@ -293,6 +307,13 @@ public class SaveGameFragment extends BaseGameFragment {
                 String name = "Auto-save";
                 Date date = new Date(autosaveFile.lastModified());
                 Bitmap minimap = null;
+                String boardSize = null;
+                String difficulty = null;
+                String movesCount = null;
+                String completionStatus = null;
+                
+                // Dump the whole save data for debugging
+                Timber.d("[SAVEDATA] Autosave data dump: %s", saveData);
                 
                 // Extract metadata if available
                 if (saveData != null && !saveData.isEmpty()) {
@@ -300,6 +321,76 @@ public class SaveGameFragment extends BaseGameFragment {
                     if (metadata != null && metadata.containsKey("MAPNAME")) {
                         name = metadata.get("MAPNAME") + "    auto-save";
                         Timber.d("Found map name in autosave slot: %s", name);
+                    }
+                    
+                    // Extract board size from #SIZE:width,height or WIDTH/HEIGHT lines
+                    Pattern sizePattern = Pattern.compile("#SIZE:(\\d+),(\\d+)");
+                    Matcher sizeMatcher = sizePattern.matcher(saveData);
+                    int width = 0, height = 0;
+                    
+                    if (sizeMatcher.find()) {
+                        width = Integer.parseInt(sizeMatcher.group(1));
+                        height = Integer.parseInt(sizeMatcher.group(2));
+                        Timber.d("[SAVEDATA] Found size in #SIZE tag: %dx%d", width, height);
+                    } else {
+                        // Try WIDTH/HEIGHT format
+                        Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
+                        Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
+                        Matcher widthMatcher = widthPattern.matcher(saveData);
+                        Matcher heightMatcher = heightPattern.matcher(saveData);
+                        
+                        if (widthMatcher.find()) {
+                            width = Integer.parseInt(widthMatcher.group(1));
+                            Timber.d("[SAVEDATA] Found width: %d", width);
+                        }
+                        
+                        if (heightMatcher.find()) {
+                            height = Integer.parseInt(heightMatcher.group(1));
+                            Timber.d("[SAVEDATA] Found height: %d", height);
+                        }
+                    }
+                    
+                    if (width > 0 && height > 0) {
+                        boardSize = "Board: " + width + "\u00D7" + height;
+                    }
+                    
+                    // Extract difficulty - first try a direct DIFFICULTY tag
+                    Pattern difficultyPattern = Pattern.compile("DIFFICULTY:([^;\\n]+)|#DIFFICULTY:([^;\\n]+)");
+                    Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
+                    if (difficultyMatcher.find()) {
+                        // Group 1 or 2 might be non-null depending on which pattern matched
+                        String diffValue = difficultyMatcher.group(1) != null ? difficultyMatcher.group(1) : difficultyMatcher.group(2);
+                        try {
+                            // Try parsing as integer first
+                            int difficultyInt = Integer.parseInt(diffValue.trim());
+                            difficulty = difficultyIntToString(difficultyInt);
+                        } catch (NumberFormatException e) {
+                            // If it's already a string value, use it directly
+                            difficulty = diffValue.trim();
+                        }
+                        Timber.d("[SAVEDATA] Found difficulty in save data: %s", difficulty);
+                    } else {
+                        // If difficulty not found, use beginner difficulty as fallback
+                        difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
+                        Timber.d("[SAVEDATA] No difficulty in save data, using beginner difficulty: %s", difficulty);
+                    }
+                    
+                    // Extract move count from |MOVES:count
+                    Pattern movesPattern = Pattern.compile("\\|MOVES:(\\d+)");
+                    Matcher movesMatcher = movesPattern.matcher(saveData);
+                    if (movesMatcher.find()) {
+                        int moves = Integer.parseInt(movesMatcher.group(1));
+                        movesCount = "Moves: " + moves;
+                        Timber.d("[SAVEDATA] Found moves with pipe pattern: %d", moves);
+                    }
+                    
+                    // Extract completion status from #SOLVED:true
+                    Pattern solvedPattern = Pattern.compile("#SOLVED:(true|false)");
+                    Matcher solvedMatcher = solvedPattern.matcher(saveData);
+                    if (solvedMatcher.find()) {
+                        boolean solved = Boolean.parseBoolean(solvedMatcher.group(1));
+                        completionStatus = solved ? "Completed" : "Incomplete";
+                        Timber.d("[SAVEDATA] Found solved status: %s", completionStatus);
                     }
                     
                     // Create minimap
@@ -311,14 +402,14 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
                 
                 // Add autosave slot with metadata
-                saveSlots.add(new SaveSlotInfo(0, name, date, minimap));
+                saveSlots.add(new SaveSlotInfo(0, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
             } else {
                 // Empty autosave slot
-                saveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null));
+                saveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null, null, null, null, null));
             }
         } catch (Exception e) {
             Timber.e(e, "Error loading autosave slot");
-            saveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null));
+            saveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null, null, null, null, null));
         }
         
         // Add regular save slots (1-34)
@@ -334,6 +425,10 @@ public class SaveGameFragment extends BaseGameFragment {
                     String name = "Slot " + i;
                     Date date = new Date(saveFile.lastModified());
                     Bitmap minimap = null;
+                    String boardSize = null;
+                    String difficulty = null;
+                    String movesCount = null;
+                    String completionStatus = null;
                     
                     // Extract metadata if available
                     if (saveData != null && !saveData.isEmpty()) {
@@ -341,6 +436,52 @@ public class SaveGameFragment extends BaseGameFragment {
                         if (metadata != null && metadata.containsKey("MAPNAME")) {
                             name = metadata.get("MAPNAME");
                             Timber.d("Found map name in slot %d: %s", i, name);
+                        }
+                        
+                        // Extract additional metadata using regex patterns
+                        // Extract board size from #SIZE:width,height
+                        Pattern sizePattern = Pattern.compile("#SIZE:(\\d+),(\\d+)");
+                        Matcher sizeMatcher = sizePattern.matcher(saveData);
+                        if (sizeMatcher.find()) {
+                            int width = Integer.parseInt(sizeMatcher.group(1));
+                            int height = Integer.parseInt(sizeMatcher.group(2));
+                            boardSize = "Board: " + width + "\u00D7" + height;
+                        }
+                        
+                        // Extract difficulty from DIFFICULTY:level
+                        Pattern difficultyPattern = Pattern.compile("DIFFICULTY:([^;\\n]+)|#DIFFICULTY:([^;\\n]+)");
+                        Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
+                        if (difficultyMatcher.find()) {
+                            // Group 1 or 2 might be non-null depending on which pattern matched
+                            String diffValue = difficultyMatcher.group(1) != null ? difficultyMatcher.group(1) : difficultyMatcher.group(2);
+                            try {
+                                // Try parsing as integer first
+                                int difficultyInt = Integer.parseInt(diffValue.trim());
+                                difficulty = difficultyIntToString(difficultyInt);
+                            } catch (NumberFormatException e) {
+                                // If it's already a string value, use it directly
+                                difficulty = diffValue.trim();
+                            }
+                            Timber.d("[SAVEDATA] Found difficulty in save data: %s", difficulty);
+                        } else {
+                            // If difficulty not found, use beginner difficulty as fallback
+                            difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
+                        }
+                        
+                        // Extract move count from |MOVES:count
+                        Pattern movesPattern = Pattern.compile("\\|MOVES:(\\d+)");
+                        Matcher movesMatcher = movesPattern.matcher(saveData);
+                        if (movesMatcher.find()) {
+                            int moves = Integer.parseInt(movesMatcher.group(1));
+                            movesCount = "Moves: " + moves;
+                        }
+                        
+                        // Extract completion status from #SOLVED:true
+                        Pattern solvedPattern = Pattern.compile("#SOLVED:(true|false)");
+                        Matcher solvedMatcher = solvedPattern.matcher(saveData);
+                        if (solvedMatcher.find()) {
+                            boolean solved = Boolean.parseBoolean(solvedMatcher.group(1));
+                            completionStatus = solved ? "Completed" : "Incomplete";
                         }
                         
                         // Create minimap
@@ -352,14 +493,14 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Add save slot with metadata
-                    saveSlots.add(new SaveSlotInfo(i, name, date, minimap));
+                    saveSlots.add(new SaveSlotInfo(i, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
                 } else {
                     // Empty slot
-                    saveSlots.add(new SaveSlotInfo(i, "Empty Slot " + i, null, null));
+                    saveSlots.add(new SaveSlotInfo(i, "Empty Slot " + i, null, null, null, null, null, null));
                 }
             } catch (Exception e) {
                 Timber.e(e, "Error loading save slot %d", i);
-                saveSlots.add(new SaveSlotInfo(i, "Error: Slot " + i, null, null));
+                saveSlots.add(new SaveSlotInfo(i, "Error: Slot " + i, null, null, null, null, null, null));
             }
         }
         
@@ -465,14 +606,198 @@ public class SaveGameFragment extends BaseGameFragment {
     /**
      * Refresh a specific save slot (called after saving a game)
      * This addresses the issue mentioned in the memory about minimaps not being displayed
+     * @param slotId The save slot ID
      */
-    public void refreshSaveSlot(int slotId) {
-        gameStateManager.loadSavedGame(requireContext(), slotId);
-        if (gameStateManager != null) {
-            String name = gameStateManager.getLevelName();
-            Date date = new Date(gameStateManager.getStartTime());
-            Bitmap minimap = gameStateManager.getMiniMap(requireContext(), 100, 100);
-            saveSlotAdapter.updateSaveSlot(slotId, name, date, minimap);
+    private void refreshSaveSlot(int slotId) {
+        Timber.d("[SAVEDATA] Refreshing save slot %d", slotId);
+        try {
+            // Get the save path for this slot
+            String savePath = FileReadWrite.getSaveGamePath(requireActivity(), slotId);
+            java.io.File saveFile = new java.io.File(savePath);
+            
+            if (saveFile.exists()) {
+                // Get the current game state for metadata
+                GameState currentState = gameStateManager.getCurrentState().getValue();
+                String saveData = FileReadWrite.loadAbsoluteData(savePath);
+                
+                // Create a new SaveSlotInfo with updated information
+                String name = "Save " + slotId;
+                Date date = new Date(saveFile.lastModified());
+                Bitmap minimap = null;
+                String boardSize = null;
+                String difficulty = null;
+                String movesCount = null;
+                String completionStatus = null;
+                
+                // Log save data for debugging
+                Timber.d("[SAVEDATA] Refresh save data dump: %s", saveData);
+                
+                // Extract metadata from GameStateManager if available
+                Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
+                if (metadata != null && metadata.containsKey("MAPNAME")) {
+                    name = metadata.get("MAPNAME");
+                    Timber.d("[SAVEDATA] Found map name: %s", name);
+                }
+                
+                if (currentState != null) {
+                    int width = currentState.getWidth();
+                    int height = currentState.getHeight();
+                    boardSize = "Board: " + width + "×" + height;
+                    Timber.d("[SAVEDATA] Board size: %s", boardSize);
+                    
+                    int moves = currentState.getMoveCount();
+                    movesCount = "Moves: " + moves;
+                    Timber.d("[SAVEDATA] Moves count: %s", movesCount);
+                    
+                    boolean solved = currentState.isComplete();
+                    completionStatus = solved ? "Completed" : "Incomplete";
+                    Timber.d("[SAVEDATA] Completion status: %s", completionStatus);
+                    
+                    // Get difficulty from global preference as fallback
+                    difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
+                    Timber.d("[SAVEDATA] Using beginner difficulty: %s", difficulty);
+                } else {
+                    // Extract from save data using regex as fallback
+                    
+                    // Extract board size from #SIZE:width,height or WIDTH/HEIGHT lines
+                    Pattern sizePattern = Pattern.compile("#SIZE:(\\d+),(\\d+)");
+                    Matcher sizeMatcher = sizePattern.matcher(saveData);
+                    int width = 0, height = 0;
+                    
+                    if (sizeMatcher.find()) {
+                        width = Integer.parseInt(sizeMatcher.group(1));
+                        height = Integer.parseInt(sizeMatcher.group(2));
+                        Timber.d("[SAVEDATA] Found size in #SIZE tag: %dx%d", width, height);
+                    } else {
+                        // Try WIDTH/HEIGHT format
+                        Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
+                        Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
+                        Matcher widthMatcher = widthPattern.matcher(saveData);
+                        Matcher heightMatcher = heightPattern.matcher(saveData);
+                        
+                        if (widthMatcher.find()) {
+                            width = Integer.parseInt(widthMatcher.group(1));
+                            Timber.d("[SAVEDATA] Found width: %d", width);
+                        }
+                        
+                        if (heightMatcher.find()) {
+                            height = Integer.parseInt(heightMatcher.group(1));
+                            Timber.d("[SAVEDATA] Found height: %d", height);
+                        }
+                    }
+                    
+                    if (width > 0 && height > 0) {
+                        boardSize = "Board: " + width + "×" + height;
+                    }
+                    
+                    // Extract difficulty - first try a direct DIFFICULTY tag
+                    Pattern difficultyPattern = Pattern.compile("DIFFICULTY:([^;\\n]+)|#DIFFICULTY:([^;\\n]+)");
+                    Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
+                    if (difficultyMatcher.find()) {
+                        // Group 1 or 2 might be non-null depending on which pattern matched
+                        String diffValue = difficultyMatcher.group(1) != null ? difficultyMatcher.group(1) : difficultyMatcher.group(2);
+                        try {
+                            // Try parsing as integer first
+                            int difficultyInt = Integer.parseInt(diffValue.trim());
+                            difficulty = difficultyIntToString(difficultyInt);
+                        } catch (NumberFormatException e) {
+                            // If it's already a string value, use it directly
+                            difficulty = diffValue.trim();
+                        }
+                        Timber.d("[SAVEDATA] Found difficulty in save data: %s", difficulty);
+                    } else {
+                        // If difficulty not found, use beginner difficulty as fallback
+                        difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
+                        Timber.d("[SAVEDATA] No difficulty tag found, using beginner difficulty: %s", difficulty);
+                    }
+                    
+                    // Extract move count from various patterns
+                    Pattern movesPattern = Pattern.compile("\\|MOVES:(\\d+)");
+                    Matcher movesMatcher = movesPattern.matcher(saveData);
+                    if (movesMatcher.find()) {
+                        int moves = Integer.parseInt(movesMatcher.group(1));
+                        movesCount = "Moves: " + moves;
+                        Timber.d("[SAVEDATA] Found moves with pipe pattern: %d", moves);
+                    } else if (metadata.containsKey("MOVES")) {
+                        // Try metadata version
+                        try {
+                            int moves = Integer.parseInt(metadata.get("MOVES"));
+                            movesCount = "Moves: " + moves;
+                            Timber.d("[SAVEDATA] Found moves in metadata: %d", moves);
+                        } catch (NumberFormatException e) {
+                            Timber.e("Error parsing move count from metadata");
+                        }
+                    }
+                    
+                    // Extract completion status
+                    Pattern solvedPattern = Pattern.compile("#SOLVED:(true|false)");
+                    Matcher solvedMatcher = solvedPattern.matcher(saveData);
+                    if (solvedMatcher.find()) {
+                        boolean solved = Boolean.parseBoolean(solvedMatcher.group(1));
+                        completionStatus = solved ? "Completed" : "Incomplete";
+                        Timber.d("[SAVEDATA] Found solved status: %s", completionStatus);
+                    } else if (metadata.containsKey("SOLVED")) {
+                        boolean solved = Boolean.parseBoolean(metadata.get("SOLVED"));
+                        completionStatus = solved ? "Completed" : "Incomplete";
+                        Timber.d("[SAVEDATA] Found solved in metadata: %s", completionStatus);
+                    } else {
+                        // Default to incomplete
+                        completionStatus = "Incomplete";
+                    }
+                }
+                
+                // Create minimap
+                try {
+                    minimap = createMinimapFromPath(requireContext(), savePath, 100, 100);
+                } catch (Exception e) {
+                    Timber.e(e, "Error creating minimap for slot %d", slotId);
+                }
+                
+                // Create a new SaveSlotInfo
+                SaveSlotInfo updatedSlot = new SaveSlotInfo(slotId, name, date, minimap, boardSize, difficulty, movesCount, completionStatus);
+                
+                // Find and update the slot in the list
+                boolean slotFound = false;
+                for (int i = 0; i < saveSlots.size(); i++) {
+                    if (saveSlots.get(i).getSlotId() == slotId) {
+                        saveSlots.set(i, updatedSlot);
+                        slotFound = true;
+                        break;
+                    }
+                }
+                
+                // If slot wasn't found, add it
+                if (!slotFound) {
+                    saveSlots.add(updatedSlot);
+                }
+                
+                // Update the recycler view
+                saveSlotAdapter.updateSaveSlots(saveSlots);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error refreshing save slot %d", slotId);
+        }
+    }
+    
+    /**
+     * Convert difficulty integer to readable string
+     * @param difficulty difficulty constant
+     * @return readable difficulty string
+     */
+    private String difficultyIntToString(int difficulty) {
+        // Get localized difficulty strings from resources
+        Resources res = requireContext().getResources();
+        switch (difficulty) {
+            case Constants.DIFFICULTY_BEGINNER:
+                return res.getString(R.string.level_difficulty_beginner);
+            case Constants.DIFFICULTY_ADVANCED:
+                return res.getString(R.string.level_difficulty_intermediate);
+            case Constants.DIFFICULTY_INSANE:
+                return res.getString(R.string.level_difficulty_advanced);
+            case Constants.DIFFICULTY_IMPOSSIBLE:
+                return res.getString(R.string.level_difficulty_expert);
+            default:
+                return res.getString(R.string.level_difficulty_beginner);
         }
     }
     
@@ -911,57 +1236,82 @@ public class SaveGameFragment extends BaseGameFragment {
      * SaveSlotAdapter for displaying save game slots
      */
     private class SaveSlotAdapter extends RecyclerView.Adapter<SaveSlotViewHolder> {
-        private List<SaveSlotInfo> saveSlots = new ArrayList<>();
-        
+        private final List<SaveSlotInfo> saveSlots;
+        private final SimpleDateFormat dateFormat;
+
+        public SaveSlotAdapter(Context context, List<SaveSlotInfo> saveSlots) {
+            this.saveSlots = saveSlots;
+            this.dateFormat = new SimpleDateFormat("MM/dd HH:mm", Locale.US); // Changed date format
+        }
+
         @NonNull
         @Override
         public SaveSlotViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_save_slot, parent, false);
+                    .inflate(R.layout.item_save_slot, parent, false);
             return new SaveSlotViewHolder(view);
         }
-        
+
         @Override
         public void onBindViewHolder(@NonNull SaveSlotViewHolder holder, int position) {
-            SaveSlotInfo saveSlot = saveSlots.get(position);
+            SaveSlotInfo slot = saveSlots.get(position);
+            holder.nameText.setText(slot.getName());
             
-            // Set save slot info
-            holder.nameText.setText(saveSlot.getName());
+            // Set date with updated format
+            String dateStr = slot.getDate() != null ? dateFormat.format(slot.getDate()) : "";
+            holder.dateText.setText(dateStr);
             
-            // Set date if available
-            if (saveSlot.getDate() != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-                holder.dateText.setText(sdf.format(saveSlot.getDate()));
-                holder.dateText.setVisibility(View.VISIBLE);
+            // Set metadata fields - each can be null so check first
+            // Board size
+            if (slot.getBoardSize() != null && !slot.getBoardSize().isEmpty()) {
+                holder.boardSizeText.setVisibility(View.VISIBLE);
+                holder.boardSizeText.setText(slot.getBoardSize());
             } else {
-                holder.dateText.setVisibility(View.GONE);
+                holder.boardSizeText.setVisibility(View.GONE);
             }
             
-            // Set minimap if available
-            if (saveSlot.getMinimap() != null) {
-                holder.minimapView.setImageBitmap(saveSlot.getMinimap());
+            // Difficulty
+            if (slot.getDifficulty() != null && !slot.getDifficulty().isEmpty()) {
+                holder.difficultyText.setVisibility(View.VISIBLE);
+                holder.difficultyText.setText(requireContext().getString(R.string.level_difficulty) + ": " + slot.getDifficulty());
+            } else {
+                holder.difficultyText.setVisibility(View.GONE);
+            }
+            
+            // Moves count
+            if (slot.getMovesCount() != null && !slot.getMovesCount().isEmpty()) {
+                holder.movesText.setVisibility(View.VISIBLE);
+                holder.movesText.setText(slot.getMovesCount());
+            } else {
+                holder.movesText.setVisibility(View.GONE);
+            }
+            
+            // Completion status
+            if (slot.getCompletionStatus() != null && !slot.getCompletionStatus().isEmpty()) {
+                holder.completionStatus.setVisibility(View.VISIBLE);
+                holder.completionStatus.setText(slot.getCompletionStatus());
+            } else {
+                holder.completionStatus.setVisibility(View.GONE);
+            }
+            
+            // Set minimap
+            if (slot.getMinimap() != null) {
+                holder.minimapView.setImageBitmap(slot.getMinimap());
                 holder.minimapView.setVisibility(View.VISIBLE);
             } else {
                 holder.minimapView.setVisibility(View.GONE);
             }
             
-            // Content description for accessibility
-            String contentDesc = saveSlot.getName();
-            if (saveSlot.getDate() != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-                contentDesc += ", saved on " + sdf.format(saveSlot.getDate());
-            }
-            holder.itemView.setContentDescription(contentDesc);
-            
-            // Set click listener
+            // Set up click listener
             holder.itemView.setOnClickListener(v -> {
                 if (saveMode) {
                     // Save current game to this slot
-                    Timber.d("Saving game to slot " + saveSlot.getSlotId());
-                    if (gameStateManager.saveGame(saveSlot.getSlotId())) {
-                        Toast.makeText(requireContext(), "Game saved to slot " + saveSlot.getSlotId(), Toast.LENGTH_SHORT).show();
+                    int slotId = slot.getSlotId();
+                    Timber.d("Saving game to slot " + slotId);
+                    if (gameStateManager.saveGame(slotId)) {
+                        Toast.makeText(requireContext(), "Game saved to slot " + slotId, Toast.LENGTH_SHORT).show();
                         // Refresh the slot to update minimap
-                        refreshSaveSlot(saveSlot.getSlotId());
+                        refreshSaveSlot(slotId);
                         
                         // Switch to load mode after successful save
                         saveMode = false;
@@ -981,9 +1331,9 @@ public class SaveGameFragment extends BaseGameFragment {
                         Toast.makeText(requireContext(), "Failed to save game", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    if (saveSlot.getDate() != null) { // Only load if slot has a save
+                    if (slot.getDate() != null) { // Only load if slot has a save
                         // Load the game first
-                        gameStateManager.loadGame(saveSlot.getSlotId());
+                        gameStateManager.loadGame(slot.getSlotId());
                         
                         // Verify that the game state was loaded successfully
                         if (gameStateManager.getCurrentState().getValue() != null) {
@@ -996,7 +1346,7 @@ public class SaveGameFragment extends BaseGameFragment {
                         } else {
                             // Show error if game state couldn't be loaded
                             Toast.makeText(requireContext(), "Error loading saved game", Toast.LENGTH_SHORT).show();
-                            Timber.e("Failed to load game state from slot %d", saveSlot.getSlotId());
+                            Timber.e("Failed to load game state from slot %d", slot.getSlotId());
                         }
                     } else {
                         Toast.makeText(requireContext(), "No saved game in this slot", Toast.LENGTH_SHORT).show();
@@ -1004,46 +1354,38 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
             });
             
-            // Set share button click listener - only enable for slots with data
-            if (saveSlot.getDate() != null) {
-                holder.shareButton.setVisibility(View.VISIBLE);
-                holder.shareButton.setOnClickListener(v -> {
-                    // Share the save slot via URL
-                    shareSaveSlot(saveSlot.getSlotId());
-                });
+            // Set up share button
+            holder.shareButton.setOnClickListener(v -> {
+                // Share the save slot via URL
+                shareSaveSlot(slot.getSlotId());
+            });
+            
+            // Set content description for accessibility
+            if (slot.getDate() != null) {
+                StringBuilder contentDesc = new StringBuilder(slot.getName()).append(", ");
+                if (slot.getBoardSize() != null) contentDesc.append(slot.getBoardSize()).append(", ");
+                if (slot.getDifficulty() != null) contentDesc.append(requireContext().getString(R.string.level_difficulty)).append(": ").append(slot.getDifficulty()).append(", ");
+                if (slot.getMovesCount() != null) contentDesc.append(slot.getMovesCount()).append(", ");
+                if (slot.getCompletionStatus() != null) contentDesc.append(slot.getCompletionStatus()).append(", ");
+                contentDesc.append(requireContext().getString(R.string.saved_on)).append(" ").append(dateFormat.format(slot.getDate()));
+                
+                holder.itemView.setContentDescription(contentDesc.toString());
+                holder.shareButton.setContentDescription(requireContext().getString(R.string.share_a11y) + " " + slot.getName());
             } else {
+                holder.itemView.setContentDescription(slot.getName() + ", " + requireContext().getString(R.string.empty_slot));
                 holder.shareButton.setVisibility(View.GONE);
             }
         }
-        
+
         @Override
         public int getItemCount() {
             return saveSlots.size();
         }
-        
-        /**
-         * Update all save slots
-         */
+
         public void updateSaveSlots(List<SaveSlotInfo> saveSlots) {
-            this.saveSlots = saveSlots;
+            this.saveSlots.clear();
+            this.saveSlots.addAll(saveSlots);
             notifyDataSetChanged();
-        }
-        
-        /**
-         * Update a specific save slot
-         * This addresses the minimap refresh issue mentioned in the memory
-         */
-        public void updateSaveSlot(int slotId, String name, Date date, Bitmap minimap) {
-            for (int i = 0; i < saveSlots.size(); i++) {
-                SaveSlotInfo slot = saveSlots.get(i);
-                if (slot.getSlotId() == slotId) {
-                    // Update slot info
-                    SaveSlotInfo updatedSlot = new SaveSlotInfo(slotId, name, date, minimap);
-                    saveSlots.set(i, updatedSlot);
-                    notifyItemChanged(i);
-                    break;
-                }
-            }
         }
     }
     
@@ -1165,6 +1507,10 @@ public class SaveGameFragment extends BaseGameFragment {
     private static class SaveSlotViewHolder extends RecyclerView.ViewHolder {
         TextView nameText;
         TextView dateText;
+        TextView boardSizeText;
+        TextView difficultyText;
+        TextView movesText;
+        TextView completionStatus;
         ImageView minimapView;
         ImageButton shareButton;
         
@@ -1172,6 +1518,10 @@ public class SaveGameFragment extends BaseGameFragment {
             super(itemView);
             nameText = itemView.findViewById(R.id.name_text);
             dateText = itemView.findViewById(R.id.date_text);
+            boardSizeText = itemView.findViewById(R.id.board_size_text);
+            difficultyText = itemView.findViewById(R.id.difficulty_text);
+            movesText = itemView.findViewById(R.id.moves_text);
+            completionStatus = itemView.findViewById(R.id.completion_status);
             minimapView = itemView.findViewById(R.id.minimap_view);
             shareButton = itemView.findViewById(R.id.share_button);
         }
@@ -1207,18 +1557,30 @@ public class SaveGameFragment extends BaseGameFragment {
         private final String name;
         private final Date date;
         private final Bitmap minimap;
+        private final String boardSize;
+        private final String difficulty;
+        private final String movesCount;
+        private final String completionStatus;
         
-        public SaveSlotInfo(int slotId, String name, Date date, Bitmap minimap) {
+        public SaveSlotInfo(int slotId, String name, Date date, Bitmap minimap, String boardSize, String difficulty, String movesCount, String completionStatus) {
             this.slotId = slotId;
             this.name = name;
             this.date = date;
             this.minimap = minimap;
+            this.boardSize = boardSize;
+            this.difficulty = difficulty;
+            this.movesCount = movesCount;
+            this.completionStatus = completionStatus;
         }
         
         public int getSlotId() { return slotId; }
         public String getName() { return name; }
         public Date getDate() { return date; }
         public Bitmap getMinimap() { return minimap; }
+        public String getBoardSize() { return boardSize; }
+        public String getDifficulty() { return difficulty; }
+        public String getMovesCount() { return movesCount; }
+        public String getCompletionStatus() { return completionStatus; }
     }
     
     /**
