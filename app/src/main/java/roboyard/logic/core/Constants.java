@@ -51,6 +51,10 @@ public class Constants {
     public static final int TYPE_HORIZONTAL_WALL = 3;
     public static final int TYPE_VERTICAL_WALL = 4;
     
+    // Game modes
+    public static final int GAME_MODE_STANDARD = 0;
+    public static final int GAME_MODE_MULTI_TARGET = 1;
+
     // Difficulty levels
     public static final int DIFFICULTY_BEGINNER = 0;
     public static final int DIFFICULTY_ADVANCED = 1;

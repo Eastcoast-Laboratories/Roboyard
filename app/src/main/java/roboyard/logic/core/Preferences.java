@@ -28,6 +28,7 @@ public class Preferences {
     private static final String KEY_ACCESSIBILITY_MODE = "accessibility_mode";
     private static final String KEY_APP_LANGUAGE = "app_language";
     private static final String KEY_TALKBACK_LANGUAGE = "talkback_language";
+    private static final String KEY_GAME_MODE = "game_mode";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -40,6 +41,7 @@ public class Preferences {
     public static final boolean DEFAULT_ACCESSIBILITY_MODE = false;
     public static final String DEFAULT_APP_LANGUAGE = "en";
     public static final String DEFAULT_TALKBACK_LANGUAGE = "same";
+    public static final int DEFAULT_GAME_MODE = Constants.GAME_MODE_STANDARD;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -52,6 +54,7 @@ public class Preferences {
     public static boolean accessibilityMode;
     public static String appLanguage;
     public static String talkbackLanguage;
+    public static int gameMode;
     
     // For compatibility with existing code
     public static int boardSizeX;
@@ -258,6 +261,14 @@ public class Preferences {
                 talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE;
             }
             
+            try {
+                gameMode = prefs.getInt(KEY_GAME_MODE, DEFAULT_GAME_MODE);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading game mode: %s", e.getMessage());
+                prefs.edit().remove(KEY_GAME_MODE).apply();
+                gameMode = DEFAULT_GAME_MODE;
+            }
+            
             // For compatibility with existing code
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
@@ -290,6 +301,7 @@ public class Preferences {
         accessibilityMode = DEFAULT_ACCESSIBILITY_MODE;
         appLanguage = DEFAULT_APP_LANGUAGE;
         talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE;
+        gameMode = DEFAULT_GAME_MODE;
         
         // Clear all preferences
         if (prefs != null) {
@@ -652,6 +664,37 @@ public class Preferences {
     }
     
     /**
+     * Set the game mode and save to preferences
+     * @param gameMode Game mode
+     */
+    public static void setGameMode(int gameMode) {
+        // Ensure preferences are initialized
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setGameMode, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                // Set the static field but don't save to preferences
+                Preferences.gameMode = gameMode;
+                return;
+            }
+        }
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_GAME_MODE, gameMode);
+        editor.apply();
+        
+        // Update static field
+        Preferences.gameMode = gameMode;
+        
+        // Notify listeners
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Game mode set to %d", gameMode);
+    }
+    
+    /**
      * Reload all preference values from disk
      * Call this if preferences might have been changed by another component
      */
@@ -704,6 +747,9 @@ public class Preferences {
             case "talkbackLanguage":
                 mappedKey = KEY_TALKBACK_LANGUAGE;
                 return talkbackLanguage;
+            case "gameMode":
+                mappedKey = KEY_GAME_MODE;
+                return String.valueOf(gameMode);
         }
         
         // For any other keys, try to get the value directly
@@ -776,6 +822,13 @@ public class Preferences {
                 return;
             case "talkbackLanguage":
                 setTalkbackLanguage(value);
+                return;
+            case "gameMode":
+                try {
+                    setGameMode(Integer.parseInt(value));
+                } catch (NumberFormatException e) {
+                    Timber.e(e, "Error parsing game mode: %s", value);
+                }
                 return;
         }
         

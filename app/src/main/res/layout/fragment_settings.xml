@@ -218,58 +218,110 @@
                     />
             </RadioGroup>
 
-            <!-- Target Count Section -->
+            <!-- Game Mode Section -->
             <TextView
-                android:id="@+id/target_count_label"
+                android:id="@+id/game_mode_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_robots_reach_targets"
+                android:text="@string/settings_game_mode"
                 android:textSize="@dimen/settings_label_text_size"
                 android:textStyle="bold"
                 android:textColor="#ffffff"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
-            <LinearLayout
+            <RadioGroup
+                android:id="@+id/game_mode_radio_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
+
+                <RadioButton
+                    android:id="@+id/standard_game_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_standard_game"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="@string/settings_standard_game_a11y"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+
+                <RadioButton
+                    android:id="@+id/multi_target_game_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_multi_target_mode"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="@string/settings_multi_target_mode_a11y"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+            </RadioGroup>
+
+            <!-- Target Count Section -->
+            <LinearLayout
+                android:id="@+id/target_count_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
-                <Spinner
-                    android:id="@+id/robot_count_spinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="Select number of robots that must reach targets"
-                    android:minHeight="48dp" />
-
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/target_count_label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_out_of"
-                    android:textSize="@dimen/settings_option_text_size"
+                    android:text="@string/settings_robots_reach_targets"
+                    android:textSize="@dimen/settings_label_text_size"
+                    android:textStyle="bold"
                     android:textColor="#ffffff"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp" />
 
-                <Spinner
-                    android:id="@+id/target_colors_spinner"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="Select number of different target colors"
-                    android:minHeight="48dp" />
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_targets"
-                    android:textSize="@dimen/settings_option_text_size"
-                    android:textColor="#ffffff"
-                    android:layout_marginStart="8dp"
-                    android:layout_gravity="center_vertical" />
+                    <Spinner
+                        android:id="@+id/robot_count_spinner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:contentDescription="Select number of robots that must reach targets"
+                        android:minHeight="48dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_out_of"
+                        android:textSize="@dimen/settings_option_text_size"
+                        android:textColor="#ffffff"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_gravity="center_vertical" />
+
+                    <Spinner
+                        android:id="@+id/target_colors_spinner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:contentDescription="Select number of different target colors"
+                        android:minHeight="48dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_targets"
+                        android:textSize="@dimen/settings_option_text_size"
+                        android:textColor="#ffffff"
+                        android:layout_marginStart="8dp"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Sound Section -->
