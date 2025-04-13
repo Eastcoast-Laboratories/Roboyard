@@ -31,7 +31,7 @@ public interface ISolver extends Runnable {
     
     /**
      * Check if the solution can be reached in one move
-     * @return true if the goal can be reached in one move
+     * @return true if the target can be reached in one move
      */
     boolean isSolution01();
 }

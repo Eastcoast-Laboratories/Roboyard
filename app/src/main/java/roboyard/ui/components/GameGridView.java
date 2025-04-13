@@ -1,9 +1,7 @@
 package roboyard.ui.components;
 
 import android.view.accessibility.AccessibilityManager;
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,7 +11,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.view.AccessibilityDelegateCompat;
@@ -1326,15 +1323,7 @@ public class GameGridView extends View {
         segmentCounts.clear();
         invalidate();
     }
-    
-    /**
-     * Get the current cell size in pixels
-     * @return Cell size in pixels
-     */
-    public float getCellSize() {
-        return cellSize;
-    }
-    
+
     @Override
     public boolean dispatchHoverEvent(MotionEvent event) {
         // Use the AccessibilityManager to check if TalkBack is enabled
@@ -1420,7 +1409,7 @@ public class GameGridView extends View {
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
                     return color + " robot at position " + robot.getX() + ", " + robot.getY() + 
-                           ". Its goal is at position " + element.getX() + ", " + element.getY();
+                           ". Its target is at position " + element.getX() + ", " + element.getY();
                 }
             }
         }
@@ -1446,10 +1435,10 @@ public class GameGridView extends View {
             String color = GameLogic.getColorName(robot.getColor(), true);
             description.append(color + " robot. ");
             
-            // Find the robot's goal
+            // Find the robot's target
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                    description.append("Its goal is at position " + element.getX() + ", " + element.getY() + ". ");
+                    description.append("Its target is at position " + element.getX() + ", " + element.getY() + ". ");
                     break;
                 }
             }
@@ -1462,7 +1451,7 @@ public class GameGridView extends View {
                 if (element.getColor() == Constants.COLOR_MULTI) {
                     color = "Multi-colored";
                 }
-                description.append(color + " goal. ");
+                description.append(color + " target. ");
                 break;
             }
         }

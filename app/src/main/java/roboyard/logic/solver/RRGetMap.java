@@ -22,7 +22,7 @@ import java.util.HashMap;
  * - Grid cell conversion
  * - Robot piece placement
  * - Wall and obstacle mapping
- * - Goal position translation
+ * - target position translation
  *
  * @see driftingdroids.model.Board
  * @see roboyard.eclabs.GridElement
@@ -173,7 +173,7 @@ public class RRGetMap {
                 board.addGoal(position, colors.get(type), 1);
                 targetFound = true;
                 
-                // Set this as the active goal
+                // Set this as the active target
                 board.setGoal(position);
                 Timber.d("[SOLUTION_SOLVER] Setting goal at position %d for robot color %d", position, colors.get(type));
             }

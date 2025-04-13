@@ -296,7 +296,7 @@ public class GameLogic {
         for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
             typesOfTargets[i] = getObjectType(i, false); // false = target
         }
-        typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Only add multi target at position 4
+        typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Only add multitarget at index 4
         
         String[] typesOfRobots = new String[Constants.NUM_ROBOTS + 5]; 
         for (int i = 0; i < Constants.NUM_ROBOTS; i++) {

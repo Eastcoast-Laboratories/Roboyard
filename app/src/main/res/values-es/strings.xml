@@ -175,7 +175,6 @@
     <string name="robot_cell_a11y">Robot %1$s en posición %2$d, %3$d</string>
     <string name="target_cell_a11y">Objetivo para robot %1$s en posición %2$d, %3$d</string>
     <string name="wall_cell_a11y">Muro en posición %1$d, %2$d</string>
-    <string name="robot_with_target_a11y">Robot %1$s en su objetivo en posición %2$d, %3$d</string>
     <string name="move_in_progress_a11y">Moviendo robot %1$s</string>
     <string name="direction_selector_a11y">Selector de dirección para robot %1$s</string>
     <string name="up_direction_a11y">Mover hacia arriba</string>
@@ -217,7 +216,7 @@
     <!-- Additional localization strings -->
     <string name="of">de</string>
     <string name="impossible_small_board_warning">El nivel Imposible en tableros pequeños puede tardar varios minutos en generar un mapa adecuado</string>
-    <string name="possible_moves">Movimientos posibles</string>
+    <string name="possible_moves_a11y">Movimientos posibles</string>
     <string name="squares_north">casillas hacia el norte</string>
     <string name="squares_south">casillas hacia el sur</string>
     <string name="squares_east">casillas hacia el este</string>
@@ -228,7 +227,6 @@
     <string name="no_movement_south">sin movimiento hacia el sur</string>
     <string name="no_movement_east">sin movimiento hacia el este</string>
     <string name="no_movement_west">sin movimiento hacia el oeste</string>
-    <string name="use_next_robot_button">Use el botón Siguiente Robot para cambiar entre robots</string>
     
     <!-- Toast messages -->
     <string name="error_email_app">No se pudo abrir la aplicación de correo electrónico</string>

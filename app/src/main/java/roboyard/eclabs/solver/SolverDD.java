@@ -182,7 +182,7 @@ public class SolverDD implements ISolver{
 
     /**
      * Check if the solution can be reached in one move
-     * @return true if the goal can be reached in one move
+     * @return true if the target can be reached in one move
      */
     public boolean isSolution01() {
         return board != null && board.isSolution01();

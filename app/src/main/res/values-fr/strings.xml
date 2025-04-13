@@ -138,7 +138,7 @@
     <string name="next_robot_a11y">Sélectionner le robot suivant</string>
 
     <!-- Game text -->
-    <string name="possible_moves">Déplacements possibles</string>
+    <string name="possible_moves_a11y">Déplacements possibles</string>
     <string name="squares_north">cases vers le nord</string>
     <string name="squares_south">cases vers le sud</string>
     <string name="squares_east">cases vers l`est</string>
@@ -149,7 +149,6 @@
     <string name="no_movement_south">aucun mouvement vers le sud</string>
     <string name="no_movement_east">aucun mouvement vers l`est</string>
     <string name="no_movement_west">aucun mouvement vers l`ouest</string>
-    <string name="use_next_robot_button">Utilisez le bouton Robot Suivant pour parcourir les robots</string>
     <string name="direction_north">vers le nord</string>
     <string name="direction_south">vers le sud</string>
     <string name="direction_east">vers l`est</string>

@@ -34,7 +34,7 @@
     <string name="announce_hint">힌트 알려주기</string>
     
     <!-- Game text -->
-    <string name="possible_moves">가능한 이동</string>
+    <string name="possible_moves_a11y">가능한 이동</string>
     <string name="squares_north">북쪽 방향</string>
     <string name="squares_south">남쪽 방향</string>
     <string name="squares_east">동쪽 방향</string>
@@ -45,7 +45,6 @@
     <string name="no_movement_south">남쪽으로 이동 불가</string>
     <string name="no_movement_east">동쪽으로 이동 불가</string>
     <string name="no_movement_west">서쪽으로 이동 불가</string>
-    <string name="use_next_robot_button">다음 로봇 버튼을 사용하여 로봇을 순환하세요</string>
     
     <!-- Navigation buttons -->
     <string name="button_back">뒤로</string>

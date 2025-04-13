@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Represents a solution to a puzzle.
  * A solution consists of a sequence of moves that lead from the initial state
- * to a state where a robot reaches its goal position.
+ * to a state where a robot reaches its target position.
  * 
  * This class is used by both the game logic and the solver components to
  * store and manipulate solution sequences.

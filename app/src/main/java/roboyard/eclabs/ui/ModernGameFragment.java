@@ -277,7 +277,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Announce selection and goal via TalkBack
                     String message = getString(R.string.robot_selected_a11y, colorName) + ". ";
-                    message += getString(R.string.target_a11y, goalX, goalY);
+                    message += getString(R.string.target_a11y, goalX, goalY); // target at position
                     announceAccessibility(message);
                     
                     // Announce possible moves
@@ -1525,7 +1525,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Build the announcement message with detailed information about possible moves
         StringBuilder announcement = new StringBuilder();
-        announcement.append("Possible moves: ");
+        announcement.append("Possible moves: "); // TODO use possible_moves_a11y
         
         // Check east movement (right)
         int eastDistance = 0;
@@ -1653,9 +1653,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (state == null) return;
         
         StringBuilder announcement = new StringBuilder();
-        
-        // Do not announce that accessibility mode is active as it adds unnecessary verbosity
-        announcement.append(getString(R.string.use_next_robot_button));
         
         // Auto-select a robot matching the target color
         selectRobotWithTargetColor();
