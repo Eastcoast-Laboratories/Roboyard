@@ -794,6 +794,35 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         backButton = view.findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Back button clicked");
+            
+            // Check if hint container is visible (hints are being shown)
+            if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE && currentHintStep > 0) {
+                // Go back one step in hints
+                currentHintStep--;
+                // Update the current solution step
+                gameStateManager.resetSolutionStep();
+                for (int i = 0; i < currentHintStep; i++) {
+                    gameStateManager.incrementSolutionStep();
+                }
+                Timber.d("[HINT_SYSTEM] Moving to previous hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
+                
+                // Display the previous hint
+                GameSolution solution = gameStateManager.getCurrentSolution();
+                if (solution != null) {
+                    int totalMoves = solution.getMoves().size();
+                    GameState state = gameStateManager.getCurrentState().getValue();
+                    
+                    // Show the appropriate hint based on the currentHintStep
+                    if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                        showPreHint(solution, totalMoves, currentHintStep);
+                    } else {
+                        int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                        showNormalHint(solution, state, totalMoves, normalHintIndex);
+                    }
+                }
+            }
+            
+            // Standard undo functionality (original code)
             // Undo the last move
             if (gameStateManager.undoLastMove()) {
                 // Force grid view update after undo
