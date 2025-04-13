@@ -228,7 +228,7 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private void setupRecyclerView() {
         // Set up layout manager
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2);
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 1);
         saveSlotRecyclerView.setLayoutManager(layoutManager);
         
         // Create adapters
