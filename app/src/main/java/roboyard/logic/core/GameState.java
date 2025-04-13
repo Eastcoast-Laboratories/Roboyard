@@ -680,7 +680,7 @@ public class GameState implements Serializable {
                         if ("H".equals(wallType)) {
                             state.addHorizontalWall(x, y);
                             wallsAdded++;
-                            Timber.d("Added horizontal wall at (%d,%d) from WALLS section", x, y);
+                            //Timber.d("Added horizontal wall at (%d,%d) from WALLS section", x, y);
                         } else if ("V".equals(wallType)) {
                             state.addVerticalWall(x, y);
                             wallsAdded++;
