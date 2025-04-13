@@ -15,6 +15,8 @@ import timber.log.Timber;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Utility class for converting between Roboyard's game elements and DriftingDroids board format.
@@ -38,14 +40,13 @@ public class RRGetMap {
      * @return
      */
     public static Board createDDWorld(ArrayList<GridElement> gridElements, RRPiece[] pieces) {
-
-        // Calculate actual board dimensions from grid elements
+        // Find the board dimensions from the GridElements
         int maxX = 0;
         int maxY = 0;
-        
-        for (GridElement element : gridElements) {
-            if (element.getX() > maxX) maxX = element.getX();
-            if (element.getY() > maxY) maxY = element.getY();
+        for (Object element : gridElements) {
+            GridElement gridElement = (GridElement) element;
+            maxX = Math.max(maxX, gridElement.getX());
+            maxY = Math.max(maxY, gridElement.getY());
         }
         
         // Add 1 to get width/height from max coordinates
@@ -82,86 +83,20 @@ public class RRGetMap {
 
         int robotCounter = 0;
         boolean targetFound = false;
-
-        // Create a wall model from the grid elements
-        WallModel wallModel = WallModel.fromGridElements(gridElements, boardWidth, boardHeight);
         
-        // Process each wall in the model and set it on the board
-        // to understand setWall: driftingdroids solver uses "N" and "W" to represent horizontal and vertical walls
-        // e.g. walls[direction][x + y * this.width] = true;
-        // direction is "N" for horizontal and "W" for vertical
-        // the y position is stored in the same key as multiple of the width of the board
-        for (Wall wall : wallModel.getWalls()) {
-            int x = wall.getX();
-            int y = wall.getY();
-            int position = y * board.width + x;
-            
-            if (wall.getType() == WallType.HORIZONTAL) {
-                board.setWall(position, "N", true);  // treated as "N" of the current field in driftingdroids solver
-                
-                Timber.d("[SOLUTION_SOLVER] Setting horizontal wall at position %d (x=%d, y=%d)", position, x, y);
-            } else if (wall.getType() == WallType.VERTICAL) {
-                board.setWall(position, "W", true);  // treated as "W" of the current field in driftingdroids solver
-                
-                Timber.d("[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)", position, x, y);
-            }
-        }
+        // Track positions where targets exist to avoid wall/target conflicts
+        Set<Integer> targetPositions = new HashSet<>();
         
-        // Force outer walls to be present - essential for the solver
-        int missingWallCountHorizontal = 0;
-        int missingWallCountVertical = 0;
-        
-        for (int x = 0; x < board.width; x++) {
-            // Top border
-            if (!board.isWall(0 + x, Constants.NORTH)){
-                board.setWall(0 + x, "N", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing top horizontal border wall at position (%d,0)", x);
-                missingWallCountHorizontal++;
-            }
-            // Bottom border
-            int bottomWallY = (board.height-1) * board.width;
-            if (!board.isWall(bottomWallY + x, Constants.SOUTH)){
-                board.setWall(bottomWallY + x, "N", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing bottom horizontal border wall at position (%d,%d)", x, board.height-1);
-                missingWallCountHorizontal++;
-            }
-        }
-        
-        for (int y = 0; y < board.height; y++) {
-            // Left vertical border
-            int verticalWallY = y * board.width;
-            // board.setWall(0, y, Constants.WEST, false); // debug, delete a left vertical walls
-            if (!board.isWall(0 + verticalWallY, Constants.WEST)){
-                board.setWall(0 + verticalWallY, "W", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing left vertical border wall at position (0,%d)", y);
-                missingWallCountVertical++;
-            }
-            // Right border
-            int rightWallX = board.width - 1;
-            if (!board.isWall(rightWallX + verticalWallY, Constants.EAST)){
-                board.setWall(rightWallX + verticalWallY, "W", true);
-                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing right vertical border wall at position (%d,%d)", board.width-1, y);
-                missingWallCountVertical++;
-            }
-        }
-        
-        if (missingWallCountHorizontal > 0 || missingWallCountVertical > 0) {
-            Timber.w("[SOLUTION_SOLVER][WALLS] Added %d missing outer walls to ensure solver stability, horizontal:%d, vertical:%d", missingWallCountHorizontal + missingWallCountVertical, missingWallCountHorizontal, missingWallCountVertical);
-        }
-        
-        // Process each grid element (targets, robots)
+        // CRITICAL CHANGE: First process all non-wall elements (targets, robots) before walls
+        // This ensures targets get priority over walls at the same position
         for (Object element : gridElements) {
             GridElement gridElement = (GridElement) element;
+            String type = gridElement.getType();
             int x = gridElement.getX();
             int y = gridElement.getY();
-            
-            // Calculate linear position (y * width + x)
-            // This maps 2D coordinates to a unique 1D position
             int position = y * board.width + x;
-
-            String type = gridElement.getType();
             
-            // Skip walls as they're already handled by the wall model
+            // Skip walls - we'll handle them separately after targets
             if (type.equals("mh") || type.equals("mv")) {
                 continue;
             }
@@ -169,20 +104,29 @@ public class RRGetMap {
             // Handle targets (both colored and multi-colored)
             if (type.equals("target_red") || type.equals("target_green") || 
                 type.equals("target_blue") || type.equals("target_yellow") || 
-                type.equals("target_silver") || type.equals("target_multi")) {
-                board.addGoal(position, colors.get(type), 1);
+                type.equals("target_silver") || type.equals("target_multi") ||
+                type.equals("target_pink")) { // Added target_pink here
+                
+                int targetColor = colors.getOrDefault(type, Constants.COLOR_PINK);
+                board.addGoal(position, targetColor, 1);
                 targetFound = true;
+                
+                // Add to target positions set to avoid wall conflicts
+                targetPositions.add(position);
                 
                 // Set this as the active target
                 board.setGoal(position);
-                Timber.d("[SOLUTION_SOLVER] Setting goal at position %d for robot color %d", position, colors.get(type));
+                Timber.d("[SOLUTION_SOLVER] Setting goal at position %d (%d,%d) for robot color %d", 
+                        position, x, y, targetColor);
             }
+            
             // Handle robots of different colors
             if (type.equals("robot_red") || type.equals("robot_green") || 
                 type.equals("robot_blue") || type.equals("robot_yellow") ||
-                type.equals("robot_silver")) {
+                type.equals("robot_silver") || type.equals("robot_pink")) { // Added robot_pink
+                
                 // Get the color index from the GameLogic
-                int colorIndex = colors.get(type);
+                int colorIndex = colors.getOrDefault(type, robotCounter % Constants.NUM_ROBOTS);
                 
                 // Map color indices to valid piece array indices (0-3)
                 // This is needed because the solver only supports 4 robots max
@@ -205,6 +149,83 @@ public class RRGetMap {
                 pieces[mappedIndex] = new RRPiece(x, y, colorIndex, robotCounter);
                 robotCounter++;
             }
+        }
+
+        // Now process walls - AFTER we've identified target positions
+        // Create a wall model from the grid elements
+        WallModel wallModel = WallModel.fromGridElements(gridElements, boardWidth, boardHeight);
+        
+        // Process each wall in the model and set it on the board
+        // to understand setWall: driftingdroids solver uses "N" and "W" to represent horizontal and vertical walls
+        // e.g. walls[direction][x + y * this.width] = true;
+        // direction is "N" for horizontal and "W" for vertical
+        // the y position is stored in the same key as multiple of the width of the board
+        for (Wall wall : wallModel.getWalls()) {
+            int x = wall.getX();
+            int y = wall.getY();
+            int position = y * board.width + x;
+            
+            // CRITICAL FIX: Skip adding walls at positions where targets exist
+            if (targetPositions.contains(position)) {
+                Timber.w("[SOLUTION_SOLVER] Skipping wall at position %d (%d,%d) because a target exists there", 
+                        position, x, y);
+                continue;
+            }
+            
+            if (wall.getType() == WallType.HORIZONTAL) {
+                board.setWall(position, "N", true);  // treated as "N" of the current field in driftingdroids solver
+                
+                Timber.d("[SOLUTION_SOLVER] Setting horizontal wall at position %d (x=%d, y=%d)", position, x, y);
+            } else if (wall.getType() == WallType.VERTICAL) {
+                board.setWall(position, "W", true);  // treated as "W" of the current field in driftingdroids solver
+                
+                Timber.d("[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)", position, x, y);
+            }
+        }
+        
+        // Force outer walls to be present - essential for the solver
+        int missingWallCountHorizontal = 0;
+        int missingWallCountVertical = 0;
+        
+        for (int x = 0; x < board.width; x++) {
+            // Top border
+            int topPosition = 0 + x;
+            if (!board.isWall(topPosition, Constants.NORTH) && !targetPositions.contains(topPosition)){
+                board.setWall(topPosition, "N", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing top horizontal border wall at position (%d,0)", x);
+                missingWallCountHorizontal++;
+            }
+            // Bottom border
+            int bottomWallY = (board.height-1) * board.width;
+            int bottomPosition = bottomWallY + x;
+            if (!board.isWall(bottomPosition, Constants.SOUTH) && !targetPositions.contains(bottomPosition)){
+                board.setWall(bottomPosition, "N", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing bottom horizontal border wall at position (%d,%d)", x, board.height-1);
+                missingWallCountHorizontal++;
+            }
+        }
+        
+        for (int y = 0; y < board.height; y++) {
+            // Left vertical border
+            int verticalWallY = y * board.width;
+            int leftPosition = 0 + verticalWallY;
+            if (!board.isWall(leftPosition, Constants.WEST) && !targetPositions.contains(leftPosition)){
+                board.setWall(leftPosition, "W", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing left vertical border wall at position (0,%d)", y);
+                missingWallCountVertical++;
+            }
+            // Right border
+            int rightWallX = board.width - 1;
+            int rightPosition = rightWallX + verticalWallY;
+            if (!board.isWall(rightPosition, Constants.EAST) && !targetPositions.contains(rightPosition)){
+                board.setWall(rightPosition, "W", true);
+                Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing right vertical border wall at position (%d,%d)", board.width-1, y);
+                missingWallCountVertical++;
+            }
+        }
+        
+        if (missingWallCountHorizontal > 0 || missingWallCountVertical > 0) {
+            Timber.w("[SOLUTION_SOLVER][WALLS] Added %d missing outer walls to ensure solver stability, horizontal:%d, vertical:%d", missingWallCountHorizontal + missingWallCountVertical, missingWallCountHorizontal, missingWallCountVertical);
         }
 
         // Set robot positions on the board
