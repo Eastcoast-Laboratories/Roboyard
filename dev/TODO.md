@@ -75,9 +75,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - when loading a map, the mapname is not shown
 - when saving a game and directly load it again, then save again and the next time it loads, it has no target. strangely, the solver still works, as if the target were there where it was before saving.
 
-- the same: if you start the app and directly load the auto save game, it has no target
-
-- Die Maps die verworfen wurden zählen beim generieren, also einen counter bei "AI calculating solution..."
 
 - im start menu schon die Mini-Maps cachen
 

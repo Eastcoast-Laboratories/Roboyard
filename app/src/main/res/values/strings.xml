@@ -185,6 +185,12 @@
 
     <!-- Save game screen -->
     <string name="save_game_title">Save Game</string>
+    <string name="save_slot_format">Slot %1$d</string>
+    <string name="save_empty">Empty</string>
+    <string name="save_date_format">Saved: %1$s</string>
+    <string name="save_level_format">Level: %1$s - Moves: %2$d</string>
+    <string name="save_failed" translatable="false">Failed to save game.</string>
+    <string name="save_no_targets_a11y" translatable="false">Warning: This save has no targets and may cause problems</string>
     
     <!-- Game screen -->
     <string name="game_move_count" comment="used in the game info box">Moves: %1$d</string>

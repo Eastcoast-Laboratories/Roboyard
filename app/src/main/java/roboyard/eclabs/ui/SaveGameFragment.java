@@ -328,6 +328,7 @@ public class SaveGameFragment extends BaseGameFragment {
                         Timber.d("Found map name in autosave slot: %s", name);
                     }
                     
+                    // Extract additional metadata using regex patterns
                     // Extract board size from #SIZE:width,height or WIDTH/HEIGHT lines
                     Pattern sizePattern = Pattern.compile("(#SIZE:|SIZE:)(\\d+),(\\d+)");
                     Matcher sizeMatcher = sizePattern.matcher(saveData);
@@ -353,13 +354,13 @@ public class SaveGameFragment extends BaseGameFragment {
                             height = Integer.parseInt(heightMatcher.group(1));
                             Timber.d("[SAVEDATA] Found height: %d", height);
                         }
+                        
+                        if (width > 0 && height > 0) {
+                            boardSize = "Board: " + width + "\u00D7" + height;
+                        }
                     }
                     
-                    if (width > 0 && height > 0) {
-                        boardSize = "Board: " + width + "\u00D7" + height;
-                    }
-                    
-                    // Extract difficulty - first try a direct DIFFICULTY tag
+                    // Extract difficulty from DIFFICULTY:level
                     Pattern difficultyPattern = Pattern.compile("(DIFFICULTY:|#DIFFICULTY:)([^;\\n]+)");
                     Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
                     if (difficultyMatcher.find()) {
@@ -422,15 +423,15 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                 }
                 
-                // Add autosave slot with metadata
-                newSaveSlots.add(new SaveSlotInfo(0, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
+                // Create the SaveSlotInfo with the save data included
+                newSaveSlots.add(new SaveSlotInfo(0, name, date, minimap, boardSize, difficulty, movesCount, completionStatus, saveData));
             } else {
                 // Empty autosave slot
-                newSaveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null, null, null, null, null));
+                newSaveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null, null, null, null, null, null));
             }
         } catch (Exception e) {
             Timber.e(e, "Error loading autosave slot");
-            newSaveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null, null, null, null, null));
+            newSaveSlots.add(new SaveSlotInfo(0, "Auto-save", null, null, null, null, null, null, null));
         }
         
         // Add regular save slots (1-34)
@@ -554,14 +555,14 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Add save slot with metadata
-                    newSaveSlots.add(new SaveSlotInfo(i, name, date, minimap, boardSize, difficulty, movesCount, completionStatus));
+                    newSaveSlots.add(new SaveSlotInfo(i, name, date, minimap, boardSize, difficulty, movesCount, completionStatus, saveData));
                 } else {
                     // Empty slot
-                    newSaveSlots.add(new SaveSlotInfo(i, "Slot " + i + " (" + getString(R.string.empty_slot) + ")", null, null, null, null, null, null));
+                    newSaveSlots.add(new SaveSlotInfo(i, "Slot " + i + " (" + getString(R.string.empty_slot) + ")", null, null, null, null, null, null, null));
                 }
             } catch (Exception e) {
                 Timber.e(e, "Error loading save slot %d", i);
-                newSaveSlots.add(new SaveSlotInfo(i, "Slot " + i + " (Error)", null, null, null, null, null, null));
+                newSaveSlots.add(new SaveSlotInfo(i, "Slot " + i + " (Error)", null, null, null, null, null, null, null));
             }
         }
         
@@ -828,7 +829,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
                 
                 // Create a new SaveSlotInfo
-                SaveSlotInfo updatedSlot = new SaveSlotInfo(slotId, name, date, minimap, boardSize, difficulty, movesCount, completionStatus);
+                SaveSlotInfo updatedSlot = new SaveSlotInfo(slotId, name, date, minimap, boardSize, difficulty, movesCount, completionStatus, saveData);
                 
                 // Find and update the slot in the list
                 boolean slotFound = false;
@@ -860,18 +861,17 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private String difficultyIntToString(int difficulty) {
         // Get localized difficulty strings from resources
-        Resources res = requireContext().getResources();
         switch (difficulty) {
             case Constants.DIFFICULTY_BEGINNER:
-                return res.getString(R.string.level_difficulty_beginner);
+                return getString(R.string.settings_beginner);
             case Constants.DIFFICULTY_ADVANCED:
-                return res.getString(R.string.level_difficulty_intermediate);
+                return getString(R.string.settings_advanced);
             case Constants.DIFFICULTY_INSANE:
-                return res.getString(R.string.level_difficulty_advanced);
+                return getString(R.string.settings_insane);
             case Constants.DIFFICULTY_IMPOSSIBLE:
-                return res.getString(R.string.level_difficulty_expert);
+                return getString(R.string.settings_impossible);
             default:
-                return res.getString(R.string.level_difficulty_beginner);
+                return getString(R.string.settings_beginner);
         }
     }
     
@@ -1136,82 +1136,6 @@ public class SaveGameFragment extends BaseGameFragment {
                                     }
                                 }
                             }
-                            
-                            // Fall back to older format if needed
-                            if (line.startsWith("WALL:")) {
-                                // Format: WALL:x,y,direction;
-                                String[] parts = line.substring("WALL:".length()).split(",");
-                                if (parts.length >= 3) {
-                                    // Validate that parts[0] and parts[1] are numbers
-                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
-                                        int x = Integer.parseInt(parts[0]);
-                                        int y = Integer.parseInt(parts[1]);
-                                        String direction = parts[2].replace(";", "");
-                                        
-                                        // Skip border walls (x=0, y=0, x=width-1, y=height-1)
-                                        if (isBorderWall(x, y, width, height)) {
-                                            continue;
-                                        }
-                                        
-                                        String wallEntry;
-                                        if ("h".equals(direction)) {
-                                            wallEntry = "\nmh" + y + "," + x + ";";
-                                        } else { // "v".equals(direction)
-                                            wallEntry = "\nmv" + y + "," + x + ";";
-                                        }
-                                        
-                                        // Only add if not already added
-                                        if (wallEntries.add(wallEntry)) {
-                                            formattedData.append(wallEntry);
-                                            wallCount++;
-                                        }
-                                    } else {
-                                        Timber.e("[SHARE] Invalid wall coordinates: %s", line);
-                                    }
-                                }
-                            } else if (line.startsWith("TARGET:")) {
-                                // Format: TARGET:x,y,color;
-                                String[] parts = line.substring("TARGET:".length()).split(",");
-                                if (parts.length >= 3) {
-                                    // Validate that all parts are numbers
-                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                                        int x = Integer.parseInt(parts[0]);
-                                        int y = Integer.parseInt(parts[1]);
-                                        int color = Integer.parseInt(parts[2].replace(";", ""));
-                                        String colorName = getRobotColorName(color);
-                                        String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
-                                        
-                                        // Only add if not already added
-                                        if (targetEntries.add(targetEntry)) {
-                                            formattedData.append(targetEntry);
-                                            targetCount++;
-                                        }
-                                    } else {
-                                        Timber.e("[SHARE] Invalid target coordinates or color: %s", line);
-                                    }
-                                }
-                            } else if (line.startsWith("ROBOT:")) {
-                                // Format: ROBOT:x,y,color;
-                                String[] parts = line.substring("ROBOT:".length()).split(",");
-                                if (parts.length >= 3) {
-                                    // Validate that all parts are numbers
-                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                                        int x = Integer.parseInt(parts[0]);
-                                        int y = Integer.parseInt(parts[1]);
-                                        int color = Integer.parseInt(parts[2].replace(";", ""));
-                                        String colorName = getRobotColorName(color);
-                                        String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
-                                        
-                                        // Only add if not already added
-                                        if (robotEntries.add(robotEntry)) {
-                                            formattedData.append(robotEntry);
-                                            robotCount++;
-                                        }
-                                    } else {
-                                        Timber.e("[SHARE] Invalid robot coordinates or color: %s", line);
-                                    }
-                                }
-                            }
                         } catch (Exception e) {
                             Timber.e(e, "[SHARE] Error parsing line: %s", line);
                         }
@@ -1219,17 +1143,39 @@ public class SaveGameFragment extends BaseGameFragment {
                     
                     Timber.d("[SHARE] Parsed %d walls, %d targets, %d robots", wallCount, targetCount, robotCount);
                     
-                    // Check if we have the minimum required data - walls and at least one robot
-                    // Note: Some maps may legitimately have 0 targets, so we don't require targets
-                    if (wallCount == 0 || robotCount == 0) {
-                        // Add a hardcoded target if none is found
-                        String targetEntry = "\ntarget_green" + width/2 + "," + height/2 + ";";
-                        formattedData.append(targetEntry);
-                        targetCount++;
+                    // Final check for targets
+                    if (targetCount == 0) {
+                        Timber.e("[SHARE] No targets found in save data, cannot share");
+                        // Show a toast message instead of creating a fake target
+                        Toast.makeText(requireContext(), 
+                            "Cannot share - no target data found in save file", 
+                            Toast.LENGTH_LONG).show();
+                        // Add comprehensive logging to help debug the issue
+                        Timber.e("[SHARE_ERROR] Could not share save slot %d - no targets found", slotId);
+                        Timber.e("[SHARE_ERROR] Save data contains %d lines", lines.length);
+                        Timber.e("[SHARE_ERROR] Map name: %s, Width: %d, Height: %d", mapName, width, height);
+                        Timber.e("[SHARE_ERROR] Robot count: %d, Wall count: %d", robotCount, wallCount);
+                        
+                        // Log the first 10 lines of save data to help diagnose issues
+                        int linesToLog = Math.min(lines.length, 10);
+                        for (int i = 0; i < linesToLog; i++) {
+                            Timber.d("[SHARE_ERROR] Line %d: %s", i, lines[i]);
+                        }
+                        
+                        return; // Don't continue with sharing
                     }
                     
                     // URL encode the formatted data
-                    String encodedData = URLEncoder.encode(formattedData.toString(), "UTF-8");
+                    String encodedData;
+                    try {
+                        encodedData = URLEncoder.encode(formattedData.toString(), "UTF-8");
+                        Timber.d("[SHARE] Encoded data length: %d chars", encodedData.length());
+                        // Log the first 100 chars of the encoded data to help diagnose issues
+                        Timber.d("[SHARE] Full encoded data: %s", encodedData);
+                    } catch (Exception e) {
+                        Timber.e(e, "[SHARE] Error encoding data");
+                        return;
+                    }
                     
                     // Create the share URL
                     String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedData;
@@ -1329,7 +1275,25 @@ public class SaveGameFragment extends BaseGameFragment {
         @Override
         public void onBindViewHolder(@NonNull SaveSlotViewHolder holder, int position) {
             SaveSlotInfo slot = saveSlots.get(position);
-            holder.nameText.setText(slot.getName());
+            
+            // Set the name with a red cross indicator if no targets
+            String nameText = slot.getName();
+            String saveData = slot.getSaveData();
+            if (saveData != null && !hasTargets(saveData)) {
+                // Add a red cross indicator for saves without targets
+                nameText += " ❌";
+                // Set text color to red for visual indication
+                holder.nameText.setTextColor(Color.RED);
+                
+                // Add accessibility information
+                String errorDescription = getString(R.string.save_no_targets_a11y);
+                holder.nameText.setContentDescription(nameText + ". " + errorDescription);
+                
+                Timber.d("[TARGET_CHECK] Adding red cross to save slot %d - no targets found", slot.getSlotId());
+            } else {
+                // leave default
+            }
+            holder.nameText.setText(nameText);
             
             // Set date with updated format
             String dateStr = slot.getDate() != null ? dateFormat.format(slot.getDate()) : "";
@@ -1635,8 +1599,9 @@ public class SaveGameFragment extends BaseGameFragment {
         private final String difficulty;
         private final String movesCount;
         private final String completionStatus;
+        private final String saveData;
         
-        public SaveSlotInfo(int slotId, String name, Date date, Bitmap minimap, String boardSize, String difficulty, String movesCount, String completionStatus) {
+        public SaveSlotInfo(int slotId, String name, Date date, Bitmap minimap, String boardSize, String difficulty, String movesCount, String completionStatus, String saveData) {
             this.slotId = slotId;
             this.name = name;
             this.date = date;
@@ -1645,6 +1610,7 @@ public class SaveGameFragment extends BaseGameFragment {
             this.difficulty = difficulty;
             this.movesCount = movesCount;
             this.completionStatus = completionStatus;
+            this.saveData = saveData;
         }
         
         public int getSlotId() { return slotId; }
@@ -1655,6 +1621,7 @@ public class SaveGameFragment extends BaseGameFragment {
         public String getDifficulty() { return difficulty; }
         public String getMovesCount() { return movesCount; }
         public String getCompletionStatus() { return completionStatus; }
+        public String getSaveData() { return saveData; }
     }
     
     /**
@@ -1686,5 +1653,34 @@ public class SaveGameFragment extends BaseGameFragment {
         public String getSize() { return size; }
         public String getMapPath() { return mapPath; }
         public Bitmap getMinimap() { return minimap; }
+    }
+
+    private boolean hasTargets(String saveData) {
+        if (saveData == null || saveData.isEmpty()) {
+            return false;
+        }
+        
+        // Check if the save contains any targets
+        boolean hasTargets = false;
+        
+        // Method 1: Look for TARGET: entries
+        if (saveData.contains("TARGET:") || saveData.contains("target_")) {
+            hasTargets = true;
+        }
+        
+        // Method 2: Count targets in board data if method 1 failed
+        if (!hasTargets) {
+            String[] lines = saveData.split("\n");
+            // Search for type=3 in board data which indicates a target
+            for (String line : lines) {
+                if (line.trim().contains("3,")) {  // Cell type 3 is target
+                    hasTargets = true;
+                    break;
+                }
+            }
+        }
+        
+        Timber.d("[TARGET_CHECK] Save data has targets: %s", hasTargets);
+        return hasTargets;
     }
 }
