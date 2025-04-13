@@ -52,7 +52,6 @@
     <string name="level_robots_format">Roboter: %1$d</string>
     <string name="robot_description">Roboter %1$s auf Position %2$d, %3$d</string>
     <string name="robot_a11y">Roboter %1$s auf Position %2$d, %3$d</string>
-    <string name="target_description">Ziel auf Position %1$d, %2$d</string>
     <string name="target_a11y">Ziel auf Position %1$d, %2$d</string>
     <string name="minimap_description">Übersichtskarte zeigt das gesamte Spielfeld</string>
     <string name="minimap_a11y">Übersichtskarte zeigt das gesamte Spielfeld</string>
@@ -373,14 +372,13 @@
     <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
 
     <!-- Additional game text -->
-    <string name="possible_moves">Mögliche Züge</string>
+    <string name="possible_moves_a11y">Mögliche Züge</string>
     <string name="squares_north">Felder nach Norden</string>
     <string name="squares_south">Felder nach Süden</string>
     <string name="squares_east">Felder nach Osten</string>
     <string name="squares_west">Felder nach Westen</string>
     <string name="until">bis zum</string>
     <string name="edge">Rand</string>
-    <string name="use_next_robot_button">Benutze den Nächster Roboter-Knopf, um zwischen Robotern zu wechseln</string>
     <string name="no_movement_north">keine Bewegung nach Norden</string>
     <string name="no_movement_south">keine Bewegung nach Süden</string>
     <string name="no_movement_east">keine Bewegung nach Osten</string>

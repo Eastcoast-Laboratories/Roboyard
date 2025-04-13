@@ -98,10 +98,7 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
  - suggestion: create a temporary map for the solver, where you delete all other targets and let the solver run with only one target at the time. store the solutions and take only the shortest solution
 
--  if i click on the back button, it should also go back in the hints one step
-
-
-- Second pre-hint - show the involved robot colors:
+- new Second pre-hint - show the involved robot colors:
 
             // pre-hint - show the involved robot colors
             message.append("Hint 2/").append(totalPossibleHints).append(": ");
@@ -137,8 +134,4 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 
 # thanstation:
-- Add new strings to default strings.xml only
 - Include context comments with `translatable="false"` for non-translatable strings
-- Move all text to the default strings.xml
-- Handle plurals with `plurals.xml` for each language
-- I removed the lightbulb. add a lightbulb as graphic in the background of the hint button

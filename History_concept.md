@@ -368,7 +368,7 @@ The implementation will proceed in the following order:
 2. **Time Tracking and Auto-Saving (Phase 2)** (done)
    - time tracking is already implemented into GridGameScreen - use that timer (done)
    - Implement automatic saving after 1 minute of gameplay (done)
-   - add a stop of the timer, when the user reached the goal or pressed the back button or the next button. Then update the history save entry with the new time and moves data. (done)
+   - add a stop of the timer, when the user reached the target or pressed the back button or the next button. Then update the history save entry with the new time and moves data. (done)
    - Create minimap previews for history entries (done)
    - Test saving and loading of history entries (done)
 

@@ -192,7 +192,6 @@
     <string name="robot_cell_a11y">%1$s 机器人在位置 %2$d, %3$d</string>
     <string name="target_cell_a11y">%1$s 机器人的目标在位置 %2$d, %3$d</string>
     <string name="wall_cell_a11y">墙在位置 %1$d, %2$d</string>
-    <string name="robot_with_target_a11y">%1$s 机器人在其目标位置 %2$d, %3$d</string>
     <string name="move_in_progress_a11y">正在移动 %1$s 机器人</string>
     <string name="direction_selector_a11y">%1$s 机器人的方向选择器</string>
     <string name="up_direction_a11y">向上移动</string>
@@ -298,7 +297,7 @@
     <string name="next_robot">下一个机器人</string>
     <string name="announce_a11y">播报游戏状态</string>
     <string name="next_robot_a11y">选择下一个机器人</string>
-    <string name="possible_moves">可能的移动</string>
+    <string name="possible_moves_a11y">可能的移动</string>
     <string name="squares_north">北边方格</string>
     <string name="squares_south">南边方格</string>
     <string name="squares_east">东边方格</string>
@@ -309,7 +308,6 @@
     <string name="no_movement_south">无法向南移动</string>
     <string name="no_movement_east">无法向东移动</string>
     <string name="no_movement_west">无法向西移动</string>
-    <string name="use_next_robot_button">使用下一个机器人按钮循环选择机器人</string>
     
     <!-- Navigation buttons -->
     <string name="button_back">返回</string>

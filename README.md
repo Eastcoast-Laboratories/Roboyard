@@ -36,7 +36,7 @@ Roboyard allows to record up to 35 different maps. So if during your games you e
 # Difficulty
 - Beginner
   - show any puzzles with solutions with at least 4-6 moves
-  - goals are always in corners with two walls
+  - targets are always in corners with two walls
 - Advanced
   - solutions with at least 6-8 moves
   - keep initial playing field when starting the next game
