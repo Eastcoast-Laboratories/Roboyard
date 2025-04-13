@@ -964,11 +964,11 @@ public class LevelDesignEditorFragment extends Fragment {
                     // Wall: wall h/v x y
                     if (parts[0].equals("wall_h")) {
                         state.setCellType(x, y, Constants.TYPE_HORIZONTAL_WALL);
-                        Timber.d("Added horizontal wall at (%d, %d)", x, y);
+                        // Timber.d("Added horizontal wall at (%d, %d)", x, y);
                         elementCount++;
                     } else if (parts[0].equals("wall_v")) {
                         state.setCellType(x, y, Constants.TYPE_VERTICAL_WALL);
-                        Timber.d("Added vertical wall at (%d, %d)", x, y);
+                        // Timber.d("Added vertical wall at (%d, %d)", x, y);
                         elementCount++;
                     }
                 } else if (parts[0].startsWith("robot") && parts.length >= 4) {

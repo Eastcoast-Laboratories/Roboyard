@@ -237,12 +237,12 @@ public class SaveGameFragment extends BaseGameFragment {
         saveSlotAdapter = new SaveSlotAdapter(requireContext(), saveSlots);
         historyAdapter = new HistoryAdapter();
         
-        // Set initial adapter based on mode
-        saveSlotRecyclerView.setAdapter(saveMode ? saveSlotAdapter : historyAdapter);
-        
-        // Load data
+        // Load data first
         loadSaveSlots();
         loadHistoryEntries();
+        
+        // Set initial adapter based on mode and current tab
+        updateTabContent(tabLayout.getSelectedTabPosition());
         
         // Update title to match initial mode
         updateTitle();
@@ -264,16 +264,19 @@ public class SaveGameFragment extends BaseGameFragment {
      * Update content based on selected tab
      */
     private void updateTabContent(int tabPosition) {
+        Timber.d("[SaveGameFragment] Updating tab content for position: %d", tabPosition);
         if (saveMode) {
             // Save mode tabs: Save (0) or History (1)
             if (tabPosition == 0) {
                 // Save tab
                 saveSlotRecyclerView.setAdapter(saveSlotAdapter);
                 loadSaveSlots();
+                Timber.d("[SaveGameFragment] Set adapter to saveSlotAdapter (Save mode)");
             } else {
                 // History tab
                 saveSlotRecyclerView.setAdapter(historyAdapter);
                 loadHistoryEntries();
+                Timber.d("[SaveGameFragment] Set adapter to historyAdapter (Save mode)");
             }
         } else {
             // Load mode tabs: Load (0) or History (1)
@@ -281,10 +284,12 @@ public class SaveGameFragment extends BaseGameFragment {
                 // Load tab
                 saveSlotRecyclerView.setAdapter(saveSlotAdapter);
                 loadSaveSlots();
+                Timber.d("[SaveGameFragment] Set adapter to saveSlotAdapter (Load mode)");
             } else {
                 // History tab
                 saveSlotRecyclerView.setAdapter(historyAdapter);
                 loadHistoryEntries();
+                Timber.d("[SaveGameFragment] Set adapter to historyAdapter (Load mode)");
             }
         }
     }
@@ -313,7 +318,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 String completionStatus = null;
                 
                 // Dump the whole save data for debugging
-                Timber.d("[SAVEDATA] Autosave data dump: %s", saveData);
+                // Timber.d("[SAVEDATA] Autosave data dump: %s", saveData);
                 
                 // Extract metadata if available
                 if (saveData != null && !saveData.isEmpty()) {
