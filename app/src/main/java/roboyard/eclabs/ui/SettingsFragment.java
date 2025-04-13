@@ -1052,6 +1052,49 @@ public class SettingsFragment extends Fragment {
         try {
             isUpdatingUI = true;
             
+            // Board size spinner
+            if (boardSizeSpinner != null) {
+                boardSizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        try {
+                            if (isUpdatingUI) {
+                                // Skip processing during initial UI setup
+                                isUpdatingUI = false;
+                                Timber.d("[BOARD_SIZE] Skipping board size change during UI update");
+                                return;
+                            }
+                            
+                            // Get selected board size
+                            if (position >= 0 && position < validBoardSizes.size()) {
+                                int[] selectedSize = validBoardSizes.get(position);
+                                int width = selectedSize[0];
+                                int height = selectedSize[1];
+                                
+                                Timber.d("[BOARD_SIZE] Selected board size: %dx%d", width, height);
+                                
+                                // Save board size to preferences
+                                Preferences.setBoardSize(width, height);
+                                
+                                // Check if difficult is set to impossible with a small board size
+                                if (difficultyRadioGroup.getCheckedRadioButtonId() == R.id.difficulty_impossible) {
+                                    showImpossibleDifficultyToast();
+                                }
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "[BOARD_SIZE] Error processing board size selection");
+                        }
+                    }
+                    
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // Do nothing
+                    }
+                });
+            } else {
+                Timber.e("boardSizeSpinner is null");
+            }
+            
             // Difficulty radio group
             if (difficultyRadioGroup != null) {
                 difficultyRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
