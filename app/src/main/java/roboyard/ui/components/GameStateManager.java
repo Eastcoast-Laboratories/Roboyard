@@ -51,6 +51,7 @@ import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
+import roboyard.logic.core.GameLogic;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.ui.animation.RobotAnimationManager;
@@ -282,17 +283,128 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Set reference to this GameStateManager in the new state
                 newState.setGameStateManager(this);
                 
+                // Analyze the loaded data and show all elements loaded in the log
+                Timber.d("[GAME_LOAD] Analyzing loaded game data for slot %d", saveId);
+                Timber.d("[GAME_LOAD] Board size: %d x %d", newState.getWidth(), newState.getHeight());
+                Timber.d("[GAME_LOAD] Map name: %s", newState.getLevelName());
+                
+                // Log all game elements
+                int robotCount = 0;
+                int targetCount = 0;
+                int horizontalWallCount = 0;
+                int verticalWallCount = 0;
+                
+                for (GameElement element : newState.getGameElements()) {
+                    switch (element.getType()) {
+                        case GameElement.TYPE_ROBOT:
+                            robotCount++;
+                            Timber.d("[GAME_LOAD] Found robot at (%d,%d) with color %d", 
+                                    element.getX(), element.getY(), element.getColor());
+                            break;
+                        case GameElement.TYPE_TARGET:
+                            targetCount++;
+                            Timber.d("[GAME_LOAD] Found target at (%d,%d) with color %d", 
+                                    element.getX(), element.getY(), element.getColor());
+                            break;
+                        case GameElement.TYPE_HORIZONTAL_WALL:
+                            horizontalWallCount++;
+                            break;
+                        case GameElement.TYPE_VERTICAL_WALL:
+                            verticalWallCount++;
+                            break;
+                    }
+                }
+                
+                // Log summary of elements
+                Timber.d("[GAME_LOAD] Element summary - Robots: %d, Targets: %d, Horizontal walls: %d, Vertical walls: %d", 
+                        robotCount, targetCount, horizontalWallCount, verticalWallCount);
+                
+                // Check for targets in the board data (cellType and targetColors)
+                int boardTargetCount = 0;
+                for (int y = 0; y < newState.getHeight(); y++) {
+                    for (int x = 0; x < newState.getWidth(); x++) {
+                        if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
+                            boardTargetCount++;
+                            int targetColor = newState.getTargetColor(x, y);
+                            Timber.d("[GAME_LOAD] Found board target at (%d,%d) with color %d", x, y, targetColor);
+                        }
+                    }
+                }
+                
+                Timber.d("[GAME_LOAD] Board target count: %d", boardTargetCount);
+                
+                // If there are no targets in gameElements but there are targets in the board data,
+                // we need to recreate the GameElements for the targets
+                if (targetCount == 0 && boardTargetCount > 0) {
+                    Timber.w("[GAME_LOAD] No targets found in gameElements but %d targets found in board data. Recreating targets.", boardTargetCount);
+                    
+                    // Recreate target elements based on board data
+                    for (int y = 0; y < newState.getHeight(); y++) {
+                        for (int x = 0; x < newState.getWidth(); x++) {
+                            if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
+                                int color = newState.getTargetColor(x, y);
+                                GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                                target.setColor(color);
+                                newState.getGameElements().add(target);
+                                Timber.d("[GAME_LOAD] Recreated target element at (%d,%d) with color %d", x, y, color);
+                            }
+                        }
+                    }
+                }
+                
+                // If there are no targets at all, throw an exception
+                if (targetCount == 0 && boardTargetCount == 0) {
+                    String errorMessage = "No targets found in loaded game data";
+                    Timber.e("[GAME_LOAD] %s", errorMessage);
+                    throw new IllegalStateException(errorMessage);
+                }
+                
                 // Ensure robots are reset to their initial positions
                 newState.resetRobotPositions();
-                Timber.d("GameStateManager: Robots reset to initial positions after loading saved game");
+                Timber.d("[GAME_LOAD] Robots reset to initial positions after loading saved game");
                 
                 currentState.setValue(newState);
                 moveCount.setValue(newState.getMoveCount());
                 isGameComplete.setValue(newState.isComplete());
                 
-                // Initialize solver with grid elements
-                ArrayList<GridElement> gridElements = newState.getGridElements();
+                // CRITICAL FIX: We need to ensure the solver receives the correct GridElements for targets
+                // Create a GridElements list that properly includes the targets
+                ArrayList<GridElement> gridElements = new ArrayList<>();
+                
+                // Convert GameElements to GridElements for the solver
+                for (GameElement element : newState.getGameElements()) {
+                    GridElement gridElement = null;
+                    
+                    switch (element.getType()) {
+                        case GameElement.TYPE_ROBOT:
+                            String robotType = "robot_" + GameLogic.getColorName(element.getColor(), false);
+                            gridElement = new GridElement(element.getX(), element.getY(), robotType);
+                            Timber.d("[SOLVER_INIT] Added robot GridElement: %s at (%d,%d)", robotType, element.getX(), element.getY());
+                            break;
+                            
+                        case GameElement.TYPE_TARGET:
+                            String targetType = "target_" + GameLogic.getColorName(element.getColor(), false);
+                            gridElement = new GridElement(element.getX(), element.getY(), targetType);
+                            Timber.d("[SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.getX(), element.getY());
+                            break;
+                            
+                        case GameElement.TYPE_HORIZONTAL_WALL:
+                            gridElement = new GridElement(element.getX(), element.getY(), "mh");
+                            break;
+                            
+                        case GameElement.TYPE_VERTICAL_WALL:
+                            gridElement = new GridElement(element.getX(), element.getY(), "mv");
+                            break;
+                    }
+                    
+                    if (gridElement != null) {
+                        gridElements.add(gridElement);
+                    }
+                }
+                
+                // Initialize solver with our properly constructed grid elements
                 getSolverManager().initialize(gridElements);
+                Timber.d("[SOLVER_INIT] Initialized solver with %d grid elements including robots and targets", gridElements.size());
             }
         }
     }
