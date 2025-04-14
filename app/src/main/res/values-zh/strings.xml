@@ -187,10 +187,6 @@
     <string name="settings_button_a11y">打开游戏设置</string>
     <string name="credits_button_a11y">查看制作人员</string>
     <string name="game_grid_a11y">游戏棋盘</string>
-    <string name="cell_a11y">位置 %1$d, %2$d 的单元格</string>
-    <string name="robot_cell_a11y">%1$s 机器人在位置 %2$d, %3$d</string>
-    <string name="target_cell_a11y">%1$s 机器人的目标在位置 %2$d, %3$d</string>
-    <string name="wall_cell_a11y">墙在位置 %1$d, %2$d</string>
     <string name="move_in_progress_a11y">正在移动 %1$s 机器人</string>
     <string name="direction_selector_a11y">%1$s 机器人的方向选择器</string>
     <string name="up_direction_a11y">向上移动</string>

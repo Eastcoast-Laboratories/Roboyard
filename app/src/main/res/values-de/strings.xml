@@ -29,8 +29,6 @@
     <string name="game_screen_title">Spiel</string>
     <string name="save_load_game_screen_title">Spiel speichern/laden</string>
     <string name="settings_screen_title">Einstellungen</string>
-    <string name="help_screen_title">Hilfe</string>
-
     <!-- Level Selection Screen -->
     <string name="level_button_description">Level %1$d</string>
 
@@ -64,7 +62,6 @@
     <string name="save_game_screen_title">Spiel speichern</string>
     <string name="save_slots_tab">Speicherplätze</string>
     <string name="history_tab">Verlauf</string>
-    <string name="empty_slot">Leerer Slot</string>
     <string name="save_confirm_title">Spiel speichern</string>
     <string name="save_confirm_message">Aktuelles Spiel in diesem Slot speichern?</string>
     <string name="load_confirm_title">Spiel laden</string>
