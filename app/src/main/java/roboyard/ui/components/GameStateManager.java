@@ -320,6 +320,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 Timber.d("[GAME_LOAD] Element summary - Robots: %d, Targets: %d, Horizontal walls: %d, Vertical walls: %d", 
                         robotCount, targetCount, horizontalWallCount, verticalWallCount);
                 
+                // Store the map name from the loaded state
+                this.currentMapName = newState.getLevelName();
+                Timber.d("[MAPNAME] GameStateManager.loadGame - Set currentMapName to: %s", this.currentMapName);
+                
                 // Check for targets in the board data (cellType and targetColors)
                 int boardTargetCount = 0;
                 for (int y = 0; y < newState.getHeight(); y++) {
@@ -1670,7 +1674,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 appDir.mkdirs();
             }
             
-            // Create the map file
+            // Create save file
             File mapFile = new File(appDir, mapName + ".map");
             
             // Write the current state to the map file

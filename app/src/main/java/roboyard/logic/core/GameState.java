@@ -167,6 +167,7 @@ public class GameState implements Serializable {
         gameElements.add(target);
         setCellType(x, y, Constants.TYPE_TARGET);
         setTargetColor(x, y, color);
+        Timber.d("[TARGETS] Added target at (%d,%d) with color %d", x, y, color);
     }
     
     /**
@@ -573,15 +574,30 @@ public class GameState implements Serializable {
             // Debug: verify that targets were properly loaded
             if (state != null) {
                 int targetCount = 0;
-                for (int y = 0; y < state.getHeight(); y++) {
-                    for (int x = 0; x < state.getWidth(); x++) {
-                        if (state.getCellType(x, y) == Constants.TYPE_TARGET) {
-                            targetCount++;
-                            Timber.d("[GAME_LOAD_VERIFY] Found target at (%d,%d) with color %d", 
-                                   x, y, state.getTargetColor(x, y));
+                
+                // First check targets in the gameElements list - this is more reliable
+                // especially for targets at x=0 which may be affected by wall indexing
+                for (GameElement element : state.getGameElements()) {
+                    if (element.getType() == GameElement.TYPE_TARGET) {
+                        targetCount++;
+                        Timber.d("[GAME_LOAD_VERIFY] Found target in gameElements at (%d,%d) with color %d", 
+                               element.getX(), element.getY(), element.getColor());
+                    }
+                }
+                
+                // Also verify targets in the board array as a secondary check
+                if (targetCount == 0) {
+                    for (int y = 0; y < state.getHeight(); y++) {
+                        for (int x = 0; x < state.getWidth(); x++) {
+                            if (state.getCellType(x, y) == Constants.TYPE_TARGET) {
+                                targetCount++;
+                                Timber.d("[GAME_LOAD_VERIFY] Found target in board array at (%d,%d) with color %d", 
+                                       x, y, state.getTargetColor(x, y));
+                            }
                         }
                     }
                 }
+                
                 Timber.d("[GAME_LOAD_VERIFY] Loaded GameState has %d targets", targetCount);
                 
                 if (targetCount == 0) {
@@ -597,6 +613,7 @@ public class GameState implements Serializable {
             }
             
             return state;
+            
         } catch (IOException e) {
             Timber.e(e, "Error loading saved game from slot %d", slotId);
             return null;
@@ -633,6 +650,7 @@ public class GameState implements Serializable {
                 for (String item : metadata) {
                     if (item.startsWith("MAPNAME:")) {
                         mapName = item.substring("MAPNAME:".length());
+                        Timber.d("[MAPNAME] parseFromSaveData - Parsed map name: '%s'", mapName);
                     } else if (item.startsWith("TIME:")) {
                         timePlayed = Long.parseLong(item.substring("TIME:".length()));
                     } else if (item.startsWith("MOVES:")) {
@@ -716,6 +734,15 @@ public class GameState implements Serializable {
                         
                         targetsAdded++;
                         Timber.d("Added target at (%d,%d) with color %d from TARGET_SECTION section", x, y, color);
+                        
+                        // Verify that the target was added correctly by directly querying the data structures
+                        if (y >= 0 && y < state.getHeight() && x >= 0 && x < state.getWidth()) {
+                            Timber.d("[TARGET_VERIFY] Board value at (%d,%d): %d", x, y, state.board[y][x]);
+                            Timber.d("[TARGET_VERIFY] Target color at (%d,%d): %d", x, y, state.targetColors[y][x]);
+                        } else {
+                            Timber.e("[TARGET_ERROR] Target at (%d,%d) is out of bounds (width=%d, height=%d)", 
+                                   x, y, state.getWidth(), state.getHeight());
+                        }
                     }
                     continue;
                 }
@@ -743,7 +770,6 @@ public class GameState implements Serializable {
                     continue;
                 }
                 
-                // If we haven't started parsing board data yet, and this line contains commas, it's board data
                 if (!boardDataStarted && line.contains(",")) {
                     boardDataStarted = true;
                     Timber.d("Started parsing board data at line %d", i);
