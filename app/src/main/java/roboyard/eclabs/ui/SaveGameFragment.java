@@ -1009,12 +1009,12 @@ public class SaveGameFragment extends BaseGameFragment {
                             inTargetsSection = false;
                             Timber.d("[SHARE] Found WALLS section");
                             continue;
-                        } else if (line.equals("TARGETS:")) {
+                        } else if (line.equals("TARGET_SECTION:")) {
                             inBoardSection = false;
                             inRobotsSection = false;
                             inWallsSection = false;
                             inTargetsSection = true;
-                            Timber.d("[SHARE] Found TARGETS section");
+                            Timber.d("[SHARE] Found TARGET_SECTION section");
                             continue;
                         }
                         
@@ -1663,21 +1663,9 @@ public class SaveGameFragment extends BaseGameFragment {
         // Check if the save contains any targets
         boolean hasTargets = false;
         
-        // Method 1: Look for TARGET: entries
-        if (saveData.contains("TARGET:") || saveData.contains("target_")) {
+        // Method 1: Look for TARGET_SECTION: entries
+        if (saveData.contains("TARGET_SECTION:")) {
             hasTargets = true;
-        }
-        
-        // Method 2: Count targets in board data if method 1 failed
-        if (!hasTargets) {
-            String[] lines = saveData.split("\n");
-            // Search for type=3 in board data which indicates a target
-            for (String line : lines) {
-                if (line.trim().contains("3,")) {  // Cell type 3 is target
-                    hasTargets = true;
-                    break;
-                }
-            }
         }
         
         Timber.d("[TARGET_CHECK] Save data has targets: %s", hasTargets);
