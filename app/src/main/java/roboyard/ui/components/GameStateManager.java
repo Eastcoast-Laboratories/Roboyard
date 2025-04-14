@@ -3,15 +3,20 @@ package roboyard.ui.components;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -37,22 +42,23 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import roboyard.eclabs.RoboyardApplication;
-import roboyard.logic.core.Constants;
 import roboyard.eclabs.FileReadWrite;
+import roboyard.eclabs.GameHistoryEntry;
+import roboyard.eclabs.GameHistoryManager;
+import roboyard.eclabs.MapObjects;
+import roboyard.eclabs.R;
+import roboyard.eclabs.RoboyardApplication;
 import roboyard.eclabs.ui.GameElement;
 import roboyard.eclabs.ui.LevelCompletionData;
 import roboyard.eclabs.ui.LevelCompletionManager;
-import roboyard.eclabs.MapObjects;
-import roboyard.eclabs.R;
-import roboyard.eclabs.util.SolverManager;
 import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.SolutionAnimator;
+import roboyard.eclabs.util.SolverManager;
+import roboyard.logic.core.Constants;
+import roboyard.logic.core.GameLogic;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
-import roboyard.logic.core.WallStorage;
-import roboyard.logic.core.GameLogic;
 import roboyard.pm.ia.GameSolution;
 import roboyard.pm.ia.IGameMove;
 import roboyard.ui.animation.RobotAnimationManager;
@@ -128,6 +134,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Track solver restart count and last solution minimums for UI display
     private int solverRestartCount = 0;
     private int lastSolutionMinMoves = 0;
+
+    // Game history tracking variables
+    private long gameStartTime;
+    private int totalPlayTime = 0;
+    private boolean isHistorySaved = false;
+    private static final int HISTORY_SAVE_THRESHOLD = 3; // 3 seconds threshold for saving to history (reduced for testing)
 
     public GameStateManager(Application application) {
         super(application);
@@ -1769,33 +1781,131 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * - Perfect for when a player wants to try the same puzzle again
      */
     public void resetRobots() {
-        GameState currentGameState = currentState.getValue();
-        if (currentGameState == null) {
-            Timber.e("[ROBOTS] Cannot reset robots: no current game state");
-            return;
+        isResetting = true;
+        
+        // Cancel all animations first
+        if (robotAnimationManager != null) {
+            robotAnimationManager.cancelAllAnimations();
         }
         
-        // Reset robot positions to their starting positions
-        currentGameState.resetRobotPositions();
+        // Get the current game state
+        GameState currentGameState = currentState.getValue();
         
-        // Reset game statistics
-        moveCount.setValue(0);
-        squaresMoved.setValue(0);
-        isGameComplete.setValue(false);
+        if (currentGameState != null) {
+            // Reset robot positions
+            currentGameState.resetRobotPositions();
+            
+            // Reset game statistics
+            moveCount.setValue(0);
+            squaresMoved.setValue(0);
+            isGameComplete.setValue(false);
+            
+            // Reset robot selection
+            for (GameElement element : currentGameState.getGameElements()) {
+                if (element.isRobot()) {
+                    element.setSelected(false);
+                }
+            }
+
+            resetRobots();
+            
+            // Reset the robotsUsed tracking for statistics
+            robotsUsed.clear();
+            
+            // Notify that the game state has changed
+            currentState.setValue(currentGameState);
+        }
         
-        // Clear the state history
-        int historySize = stateHistory.size();
-        stateHistory.clear();
-        squaresMovedHistory.clear();
-        Timber.d("[ROBOTS] Cleared state history (previous size: %d)", historySize);
-        
-        // Reset the solution step counter
-        resetSolutionStep();
-        
-        // Notify that the game state has changed
-        currentState.setValue(currentGameState);
-        
-        Timber.d("[ROBOTS] Robots reset to starting positions");
+        isResetting = false;
+        resetGameTimer();
+    }
+    
+    /**
+     * Start the game timer for history tracking
+     */
+    public void startGameTimer() {
+        gameStartTime = System.currentTimeMillis();
+        isHistorySaved = false;
+        Timber.d("[HISTORY] Game timer started");
+    }
+    
+    /**
+     * Update the game timer and check if game should be saved to history
+     */
+    public void updateGameTimer() {
+        if (!isHistorySaved && currentState.getValue() != null) {
+            int elapsedSeconds = (int)((System.currentTimeMillis() - gameStartTime) / 1000);
+            totalPlayTime = elapsedSeconds;
+            
+            // Save to history after threshold time of play
+            if (totalPlayTime >= HISTORY_SAVE_THRESHOLD) {
+                saveToHistory();
+                isHistorySaved = true;
+            }
+        }
+    }
+
+    /**
+     * Save the current game state to history
+     */
+    private void saveToHistory() {
+        try {
+            GameState gameState = currentState.getValue();
+            if (gameState == null) {
+                Timber.e("[HISTORY] Cannot save to history: no current game state");
+                return;
+            }
+
+            Activity activity = getActivity();
+            if (activity == null) {
+                Timber.e("[HISTORY] Cannot save to history: no activity");
+                return;
+            }
+
+            // Initialize GameHistoryManager if needed
+            GameHistoryManager.initialize(activity);
+
+            // Get next available history index
+            int historyIndex = GameHistoryManager.getNextHistoryIndex(activity);
+            String historyFileName = "history_" + historyIndex + ".txt";
+            String historyPath = "history/" + historyFileName;
+
+            // Create minimap preview image
+            String previewImagePath = "history/" + historyFileName + "_preview.png";
+            Bitmap minimap = gameState.createMiniMap();
+            if (minimap != null) {
+                FileReadWrite.writeBitmapToPrivateData(activity, previewImagePath, minimap);
+            }
+
+            // Save the game state
+            String saveData = gameState.createSaveData(false);
+            FileReadWrite.writePrivateData(activity, historyPath, saveData);
+
+            // Get board dimensions
+            int boardWidth = gameState.getBoardWidth();
+            int boardHeight = gameState.getBoardHeight();
+            String boardSize = boardWidth + "x" + boardHeight;
+
+            // Create history entry
+            GameHistoryEntry entry = new GameHistoryEntry(
+                historyPath,
+                gameState.getMapName(),
+                System.currentTimeMillis(),
+                totalPlayTime,
+                moveCount.getValue(),
+                gameState.getSolutionMoveCount(),
+                boardSize,
+                previewImagePath
+            );
+
+            // Add entry to history index
+            GameHistoryManager.addHistoryEntry(activity, entry);
+            
+            Timber.d("[HISTORY] Game saved to history: %s", historyPath);
+        } catch (Exception e) {
+            Throwable t = new Throwable(e);
+            Timber.e(t, "[HISTORY] Error saving game to history: %s", e.getMessage());
+        }
     }
     
     /**
@@ -2484,5 +2594,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public int getLastSolutionMinMoves() {
         return lastSolutionMinMoves;
+    }
+    
+    private void resetGameTimer() {
+        gameStartTime = System.currentTimeMillis();
+        totalPlayTime = 0;
+        isHistorySaved = false;
+    }
+
+    /**
+     * Get the current activity
+     * @return The current activity or null if none is available
+     */
+    private Activity getActivity() {
+        if (context instanceof Activity) {
+            return (Activity) context;
+        }
+        return null;
     }
 }
