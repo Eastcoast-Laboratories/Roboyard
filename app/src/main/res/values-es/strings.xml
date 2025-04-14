@@ -171,10 +171,6 @@
     <string name="settings_button_a11y">Abrir ajustes del juego</string>
     <string name="credits_button_a11y">Ver créditos</string>
     <string name="game_grid_a11y">Tablero de juego</string>
-    <string name="cell_a11y">Celda en posición %1$d, %2$d</string>
-    <string name="robot_cell_a11y">Robot %1$s en posición %2$d, %3$d</string>
-    <string name="target_cell_a11y">Objetivo para robot %1$s en posición %2$d, %3$d</string>
-    <string name="wall_cell_a11y">Muro en posición %1$d, %2$d</string>
     <string name="move_in_progress_a11y">Moviendo robot %1$s</string>
     <string name="direction_selector_a11y">Selector de dirección para robot %1$s</string>
     <string name="up_direction_a11y">Mover hacia arriba</string>
