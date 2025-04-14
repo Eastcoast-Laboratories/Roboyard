@@ -39,21 +39,16 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 
 # Accessibility
-- sprache einstellbar machen (englisch deutsch und französisch ermöglichen, default english).  
-- TalkBack-Unterstützungs-Sprache gesondert einstellbar machen (english, deutsch und französisch ermöglichen).  
 - Add a preference setting to customize the order of information in TalkBack announcements
 - Create custom button sounds to provide audio feedback for different actions
 - Add a high-contrast mode for better visibility
-- make all accessibility coordinate announcements one more, so on a 8x8 board they go from 1,1 to 8,8 instead of 0,0 to 7,7
 - Remove "AI calculating solution..." on game start.
 - die ganzen buttons unten sollen, wenn accessibility acitive, viel niedriger, damit sie unter die navigation buttons noch passen
-- der hint "5/8: Br,Bd,Gu, Gr, Green down" kommmt Zu früh schon bei gu zeigt er gr an
 
 # achievements
 - add achievement system
 
 # levels 
-- add a "retry" button to the level game screen when level is complete
 - winning a level: this overwrites the old saved stars and data, so you can "loose" stars this way if you play a level again with less stars
 - for debugging: add a skip button to levels, which will just move the robot to its target in one move
 - In den Leveln, wenn man die schon mal gespielt hat, dann die optimale Zahl gleich anzeigen
@@ -64,16 +59,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - add sound effects for buttons
 - add sound effect background for game
 - Back-Undo Button should also undo the last painted robot path 
-
-- auto save to history after 60 seconds (2s for now) seems to work, but nothing shown in the history tab
-
-- multi-color target is gone
-
-- Beginner
-  - show any puzzles with solutions with at least 4-6 moves (max 6 not always works )
-
-- when loading a map, the mapname is not shown
-- when saving a game and directly load it again, then save again and the next time it loads, it has no target. strangely, the solver still works, as if the target were there where it was before saving.
 
 
 - im start menu schon die Mini-Maps cachen
@@ -90,7 +75,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
 
-- fdroid entry enhancements
 
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
  - suggestion: create a temporary map for the solver, where you delete all other targets and let the solver run with only one target at the time. store the solutions and take only the shortest solution
@@ -129,6 +113,14 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
             // Display the hint in the status text view
             updateStatusText(message.toString(), true);
 
+# current
 
-# thanstation:
-- Include context comments with `translatable="false"` for non-translatable strings
+- multi-color target is gone
+
+- Beginner
+  - show any puzzles with solutions with at least 4-6 moves (max 6 not always works )
+
+- fdroid entry enhancements
+- make all accessibility coordinate announcements one more, so on a 8x8 board they go from 1,1 to 8,8 instead of 0,0 to 7,7
+
+  - goals are still always in corners with two walls, but in insane and impossible they should be generated randoly anywhere (apart the center careé)

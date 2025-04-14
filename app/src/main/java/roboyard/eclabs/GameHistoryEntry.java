@@ -15,6 +15,7 @@ public class GameHistoryEntry {
     private String mapName;          // Name of the map
     private int optimalMoves;        // Optimal number of moves (if available)
     private int historyIndex;        // Index in the history list
+    private int difficulty;          // Difficulty level (1-30)
     
     // Default constructor needed for JSON deserialization
     public GameHistoryEntry() {
@@ -45,6 +46,23 @@ public class GameHistoryEntry {
         this.playDuration = playDuration;
         this.movesMade = movesMade;
         this.optimalMoves = optimalMoves;
+        this.boardSize = boardSize;
+        this.previewImagePath = previewImagePath;
+        parseHistoryIndexFromPath();
+    }
+    
+    /**
+     * Constructor with difficulty
+     */
+    public GameHistoryEntry(String mapPath, String mapName, long timestamp, int playDuration, 
+                             int movesMade, int optimalMoves, int difficulty, String boardSize, String previewImagePath) {
+        this.mapPath = mapPath;
+        this.mapName = mapName;
+        this.timestamp = timestamp;
+        this.playDuration = playDuration;
+        this.movesMade = movesMade;
+        this.optimalMoves = optimalMoves;
+        this.difficulty = difficulty;
         this.boardSize = boardSize;
         this.previewImagePath = previewImagePath;
         parseHistoryIndexFromPath();
@@ -138,5 +156,13 @@ public class GameHistoryEntry {
     
     public void setHistoryIndex(int historyIndex) {
         this.historyIndex = historyIndex;
+    }
+    
+    public int getDifficulty() {
+        return difficulty;
+    }
+    
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
     }
 }
