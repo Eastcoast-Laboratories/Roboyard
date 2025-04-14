@@ -14,31 +14,21 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
-- Automatische Auswahl des Roboters in der Zielfarbe beim Spielstart
-- Verbesserte Barrierefreiheit:
-  - Steuerungselemente im Accessibility-Modus bleiben jetzt immer sichtbar
-  - Fehler bei der Erkennung von Wandpositionen in der Sprachausgabe behoben
-  - mehr Sprachausgaben
-- Fehlende Außenwände im Süden und Osten wurden behoben
-- Roboterpfade werden beim Start eines neuen Spiels zurückgesetzt
-- Squares Moved wird bei neuem Spiel zurückgesetzt
-- Roboteranimationen sind jetzt schneller
-- Den nächsten Hint nur anzeigen, wenn der Roboter den passenden Zug gemacht hat
+- Mehrsprachigkeit hinzugefügt: Deutsch, Spanisch, Französisch, Chinesisch und Koreanisch
+- Verbesserte Barrierefreiheit
+- Verhindern von Karten mit Lösung in nur einem Zug
+- Neuer Multi-Target Mode (beta) in Settings
+- Im Save Screen wird nun die Kartengröße und der Spielfortschritt gespeichert.
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
-- Automatically select the robot that matches the target color at game start
-- Improved accessibility:
-  - Controls remain visible in accessibility mode
-  - Fixed incorrect wall position detection in screen reader announcements
-  - Added more announcements
-- Fixed missing outer walls (south and east)
-- Robot paths are now cleared when starting a new game
-- Squares Moved is reset when starting a new game
-- Faster robot animations
-- only advance hint if the suggested move is made
+- Added German, Spanish, French, Chinese and Korean translation
+- Improved accessibility messages
+- Prevent maps with solution one move
+- Added Multi-Target Mode (beta) in Settings with radio buttons.
+- Added board size and completion status to save files.
 EOF
 )
 

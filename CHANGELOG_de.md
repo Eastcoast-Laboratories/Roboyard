@@ -2,6 +2,14 @@ Changelog Deutsch
 =================
 
 
+## Version 25 (2025-04-14)
+- Mehrsprachigkeit hinzugefügt: Deutsch, Spanisch, Französisch, Chinesisch und Koreanisch
+- Verbesserte Barrierefreiheit
+- Verhindern von Karten mit Lösung in nur einem Zug
+- Neuer Multi-Target Mode (beta) in Settings
+- Im Save Screen wird nun die Kartengröße und der Spielfortschritt gespeichert.
+
+
 ## Version 24 (2025-04-10)
 - Automatische Auswahl des Roboters in der Zielfarbe beim Spielstart
 - Verbesserte Barrierefreiheit:

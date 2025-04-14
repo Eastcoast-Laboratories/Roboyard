@@ -2,6 +2,14 @@
 =========
 
 
+## Version 25 (2025-04-14)
+- Added German, Spanish, French, Chinese and Korean translation
+- Improved accessibility messages
+- Prevent maps with solution one move
+- Added Multi-Target Mode (beta) in Settings with radio buttons.
+- Added board size and completion status to save files.
+
+
 ## Version 24 (2025-04-10)
 - Automatically select the robot that matches the target color at game start
 - Improved accessibility:
