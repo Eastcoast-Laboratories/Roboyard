@@ -1848,6 +1848,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             return;
         }
         
+        // Get map name from GameStateManager for debugging
+        String gameManagerMapName = gameStateManager.getLevelName();
+        String gameStateMapName = state.getLevelName();
+        Timber.d("[MAPNAME] GameState levelName: '%s', GameStateManager levelName: '%s'", 
+                gameStateMapName, gameManagerMapName);
+        
         // Get the unique map ID
         String uniqueMapId = state.getUniqueMapId();
         
@@ -1857,11 +1863,23 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // For level game - display board size with level name/number
             String levelText = getString(R.string.level_id_text, state.getLevelId());
             uniqueMapIdTextView.setText(levelText);
+            Timber.d("[MAPNAME] Showing level ID text: %s", levelText);
+        } 
+        // Check for valid map name from GameState
+        else if (gameStateMapName != null && !gameStateMapName.isEmpty() ) {
+            uniqueMapIdTextView.setText(gameStateMapName);
+            Timber.d("[MAPNAME] Showing map name from GameState: %s", gameStateMapName);
         } else if (uniqueMapIdTextView != null) {
             uniqueMapIdTextView.setText(getString(R.string.unique_map_id, uniqueMapId));
+            Timber.d("[MAPNAME] Showing unique map ID as fallback: %s", uniqueMapId);
         }
     }
     
+    /**
+     * Update the optimal moves button with the given number of moves
+     * @param optimalMoves Number of optimal moves
+     * @param showButton Whether to show the button
+     */
     private void updateOptimalMovesButton(int optimalMoves, boolean showButton) {
         if (optimalMovesButton != null) {
             optimalMovesButton.setText(String.valueOf(optimalMoves));
