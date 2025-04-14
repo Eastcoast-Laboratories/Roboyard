@@ -881,6 +881,23 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private void shareSaveSlot(int slotId) {
         try {
+            // First try to load the game state and synchronize targets
+            GameState gameState = null;
+            try {
+                gameState = GameState.loadSavedGame(requireContext(), slotId);
+                if (gameState != null) {
+                    // Synchronize targets to ensure board array and gameElements list are in sync
+                    int syncedTargets = gameState.synchronizeTargets();
+                    if (syncedTargets > 0) {
+                        Timber.d("[SHARE] Synchronized %d targets before sharing", syncedTargets);
+                    }
+                }
+            } catch (Exception e) {
+                Throwable t = new Throwable();
+                Timber.e(t, "[SHARE_ERROR] Failed to load game state for synchronization: %s", e.getMessage());
+                // Continue with the sharing process even if synchronization fails
+            }
+            
             // Use the same path format as in GameState.loadSavedGame
             File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
             String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
@@ -1087,29 +1104,38 @@ public class SaveGameFragment extends BaseGameFragment {
                                 }
                             }
                             // Parse target data
-                            else if (inTargetsSection) {
-                                // Format: x,y,color
-                                String[] parts = line.split(",");
-                                if (parts.length >= 3) {
-                                    // Validate that all parts are numbers
-                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                                        int x = Integer.parseInt(parts[0]);
-                                        int y = Integer.parseInt(parts[1]);
-                                        int color = Integer.parseInt(parts[2].replace(";", ""));
-                                        
-                                        // Map color code to color name
-                                        String colorName = getRobotColorName(color);
-                                        String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
-                                        
-                                        // Only add if not already added
-                                        if (targetEntries.add(targetEntry)) {
-                                            formattedData.append(targetEntry);
-                                            targetCount++;
+                            else if (inTargetsSection && line.startsWith("TARGET_SECTION:") && line.length() > 15) {
+                                // Format: TARGET_SECTION:x,y,color
+                                try {
+                                    String targetData = line.substring("TARGET_SECTION:".length());
+                                    String[] parts = targetData.split(",");
+                                    if (parts.length >= 3) {
+                                        // Validate that all parts are numbers
+                                        if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                            int x = Integer.parseInt(parts[0]);
+                                            int y = Integer.parseInt(parts[1]);
+                                            int color = Integer.parseInt(parts[2].replace(";", ""));
+                                            
+                                            // Map color code to color name
+                                            String colorName = getRobotColorName(color);
+                                            String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
+                                            
+                                            // Only add if not already added
+                                            if (targetEntries.add(targetEntry)) {
+                                                formattedData.append(targetEntry);
+                                                targetCount++;
+                                                Timber.d("[SHARE] Added target at (%d,%d) with color %d", x, y, color);
+                                            }
+                                        } else {
+                                            Timber.e("[SHARE] Invalid target data format: %s", targetData);
                                         }
                                     } else {
-                                        Timber.e("[SHARE] Invalid target coordinates or color: %s", line);
+                                        Timber.e("[SHARE] Insufficient target data parts in: %s", targetData);
                                     }
+                                } catch (Exception e) {
+                                    Timber.e(e, "[SHARE] Error parsing target line: %s", line);
                                 }
+                                continue;
                             }
                             // Parse robot data
                             else if (inRobotsSection) {
@@ -1145,7 +1171,8 @@ public class SaveGameFragment extends BaseGameFragment {
                     
                     // Final check for targets
                     if (targetCount == 0) {
-                        Timber.e("[SHARE] No targets found in save data, cannot share");
+                        Throwable t = new Throwable();
+                        Timber.e(t, "[SHARE_ERROR] No targets found in save data, cannot share");
                         // Show a toast message instead of creating a fake target
                         Toast.makeText(requireContext(), 
                             "Cannot share - no target data found in save file", 
