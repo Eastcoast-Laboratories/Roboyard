@@ -360,13 +360,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // If there are no targets at all, throw an exception
                 if (targetCount == 0 && boardTargetCount == 0) {
                     String errorMessage = "No targets found in loaded game data";
-                    Timber.e("[GAME_LOAD] %s", errorMessage);
+                    Throwable t = new Throwable();
+                    Timber.e(t, "[GAME_LOAD] %s", errorMessage);
                     throw new IllegalStateException(errorMessage);
                 }
                 
                 // Ensure robots are reset to their initial positions
                 newState.resetRobotPositions();
                 Timber.d("[GAME_LOAD] Robots reset to initial positions after loading saved game");
+                
+                // Synchronize targets to ensure board array matches gameElements
+                int syncedTargets = newState.synchronizeTargets();
+                if (syncedTargets > 0) {
+                    Timber.d("[GAME_LOAD] Synchronized %d targets after loading saved game", syncedTargets);
+                }
                 
                 currentState.setValue(newState);
                 moveCount.setValue(newState.getMoveCount());
@@ -558,7 +565,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             }
                         }
                     }
-                    Timber.e("[SAVE_VERIFICATION] Total targets in CURRENT game state: %d", targetCount);
+                    Throwable t = new Throwable();
+                    Timber.e(t, "[SAVE_VERIFICATION] Total targets in CURRENT game state: %d", targetCount);
                     Timber.e("[SAVE_VERIFICATION] Save file content before deletion (first 200 chars): %s", 
                              savedContent.length() > 200 ? savedContent.substring(0, 200) + "..." : savedContent);
                     saveFile.delete();

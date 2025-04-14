@@ -610,7 +610,9 @@ public class GameState implements Serializable {
                         Timber.e("[GAME_LOAD_ERROR] Line %d: %s", i, contentLines[i]);
                     }
                     // Don't load games without targets - this is a critical error
-                    throw new IllegalStateException("Cannot load game: no targets found in save file");
+                    Throwable t = new Throwable();
+                    Timber.e(t, "[GAME_LOAD_ERROR] Stack trace for no target found");
+                    throw new IllegalStateException("[GAME_LOAD_ERROR] Cannot load game: no targets found in save file");
                 }
             }
             
@@ -1128,7 +1130,9 @@ public class GameState implements Serializable {
 //            Timber.d("[LEVEL LOADING] Generated ASCII map:\n%s", roboyard.pm.ia.ricochet.RRGetMap.generateAsciiMap(state.getGameElements()));
 
             Timber.e("[LEVEL LOADING] No target found in level");
-            throw new IllegalStateException("Level has no target, cannot create a valid game state");
+            Throwable t = new Throwable();
+            Timber.e(t, "[LEVEL LOADING] Stack trace for no target found");
+            throw new IllegalStateException("[LEVEL LOADING] Level has no target, cannot create a valid game state");
         }
         
         // Store initial robot positions for reset functionality
@@ -1142,45 +1146,56 @@ public class GameState implements Serializable {
      * @return String representation of the game state
      */
     public String serialize() {
-        StringBuilder saveData = new StringBuilder();
+        // Synchronize targets from gameElements to board array
+        int syncedTargets = synchronizeTargets();
+        if (syncedTargets > 0) {
+            Timber.d("[SAVE_DATA] Synchronized %d targets before serialization", syncedTargets);
+        }
         
-        // Add metadata as a comment line
-        // Format: #MAPNAME:name;TIME:seconds;MOVES:count;
-        saveData.append("#MAPNAME:").append(levelName).append(";");
-        saveData.append("TIME:").append(System.currentTimeMillis() - startTime).append(";");
-        saveData.append("MOVES:").append(moveCount).append(";");
-        saveData.append("HINTS:").append(hintCount).append(";\n");
+        StringBuilder sb = new StringBuilder();
+        
+        // Generate the metadata section
+        sb.append("#MAPNAME:").append(levelName)
+          .append(";TIME:").append(System.currentTimeMillis() - startTime)
+          .append(";MOVES:").append(moveCount);
+        
+        if (!uniqueMapId.isEmpty()) {
+            sb.append(";UNIQUE_MAP_ID:").append(uniqueMapId);
+        }
+        
+        sb.append("\n");
         
         // Add board dimensions
-        saveData.append("WIDTH:").append(width).append(";\n");
-        saveData.append("HEIGHT:").append(height).append(";\n");
+        sb.append("WIDTH:").append(width).append(";\n");
+        sb.append("HEIGHT:").append(height).append(";\n");
         
-        // Add board data
+        // Generate the board representation
         for (int y = 0; y < height; y++) {
-            // Serialize the cell contents including walls
             for (int x = 0; x < width; x++) {
+                if (x > 0) {
+                    sb.append(",");
+                }
+                
                 int cellType = board[y][x];
                 
                 if (cellType == Constants.TYPE_TARGET) {
-                    saveData.append(cellType).append(":").append(targetColors[y][x]);
+                    // Targets include their color information
+                    sb.append(cellType).append(":").append(targetColors[y][x]);
                 } else {
-                    saveData.append(cellType);
+                    sb.append(cellType);
                 }
-                
-                saveData.append(",");
-                // Timber.d("Serializing cell at (%d,%d) with type %d", x, y, cellType);
             }
-            saveData.append("\n");
+            sb.append("\n");
         }
         
         // Add dedicated TARGET_SECTION section to make them explicit and easier to detect
-        saveData.append("TARGET_SECTION:\n");
+        sb.append("TARGET_SECTION:\n");
         int targetCount = 0;
         // Save targets (position and color)
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (board[y][x] == Constants.TYPE_TARGET) {
-                    saveData.append("TARGET_SECTION:").append(x).append(",").append(y)
+                    sb.append("TARGET_SECTION:").append(x).append(",").append(y)
                            .append(",").append(targetColors[y][x]).append("\n");
                     targetCount++;
                     Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, targetColors[y][x]);
@@ -1190,17 +1205,18 @@ public class GameState implements Serializable {
         
         if (targetCount == 0) {
             // This is a fatal error - all Roboyard games MUST have targets
-            Timber.e("[SAVE_DATA] FATAL ERROR: No targets found while serializing game state!");
-            throw new IllegalStateException("Cannot save game: no targets found in game state");
+            Throwable t = new Throwable();
+            Timber.e(t, "[SAVE_DATA] FATAL ERROR: No targets found while serializing game state!");
+            throw new IllegalStateException("[SAVE_DATA] Cannot save game: no targets found in game state");
         }
         
         // Add dedicated WALLS section to ensure all walls are properly serialized
-        saveData.append("WALLS:\n");
+        sb.append("WALLS:\n");
         // Save horizontal walls
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (hasHorizontalWall(x, y)) {
-                    saveData.append("H,").append(x).append(",").append(y).append("\n");
+                    sb.append("H,").append(x).append(",").append(y).append("\n");
                     // Timber.d("Serializing horizontal wall at (%d,%d)", x, y);
                 }
             }
@@ -1209,7 +1225,7 @@ public class GameState implements Serializable {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (hasVerticalWall(x, y)) {
-                    saveData.append("V,").append(x).append(",").append(y).append("\n");
+                    sb.append("V,").append(x).append(",").append(y).append("\n");
                     // Timber.d("Serializing vertical wall at (%d,%d)", x, y);
                 }
             }
@@ -1222,11 +1238,11 @@ public class GameState implements Serializable {
         }
         
         // Add dedicated ROBOTS section
-        saveData.append("ROBOTS:\n");
+        sb.append("ROBOTS:\n");
         for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
             int robotColor = entry.getKey();
             int[] position = entry.getValue();
-            saveData.append(position[0]).append(",")
+            sb.append(position[0]).append(",")
                    .append(position[1]).append(",")
                    .append(robotColor).append("\n");
             // Timber.d("Serializing initial position for robot color %d at (%d, %d)", robotColor, position[0], position[1]);
@@ -1234,17 +1250,17 @@ public class GameState implements Serializable {
         
         // Add current robot positions as INITIAL_POSITIONS section for reference
         // This maintains compatibility with the existing code
-        saveData.append("INITIAL_POSITIONS:\n");
+        sb.append("INITIAL_POSITIONS:\n");
         for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
             int robotColor = entry.getKey();
             int[] position = entry.getValue();
-            saveData.append(position[0]).append(",")
+            sb.append(position[0]).append(",")
                    .append(position[1]).append(",")
                    .append(robotColor).append("\n");
             // Timber.d("Serializing initial position for robot color %d at (%d, %d)", robotColor, position[0], position[1]);
         }
         
-        return saveData.toString();
+        return sb.toString();
     }
     
     /**
@@ -1812,5 +1828,67 @@ public class GameState implements Serializable {
         
         // If we've made it this far, the move is valid
         return true;
+    }
+    
+    /**
+     * Ensure all targets in gameElements are properly reflected in the board array
+     * This is crucial to prevent target loss when saving/loading games
+     * @return number of targets synchronized
+     */
+    public int synchronizeTargets() {
+        int syncedTargets = 0;
+        
+        // First log the current state for diagnostic purposes
+        int boardTargets = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (board[y][x] == Constants.TYPE_TARGET) {
+                    boardTargets++;
+                }
+            }
+        }
+        
+        int elementTargets = 0;
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                elementTargets++;
+            }
+        }
+        
+        Timber.d("[TARGET SYNC] Before synchronization: %d targets in board, %d targets in gameElements", 
+                boardTargets, elementTargets);
+        
+        // Now update the board array to match the gameElements list
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                int x = element.getX();
+                int y = element.getY();
+                int color = element.getColor();
+                
+                // Skip invalid coordinates
+                if (x < 0 || y < 0 || x >= width || y >= height) {
+                    Timber.e("[TARGET SYNC] Target at invalid position (%d,%d) with color %d", x, y, color);
+                    continue;
+                }
+                
+                // If this target is not reflected in the board array, update it
+                if (board[y][x] != Constants.TYPE_TARGET) {
+                    Timber.d("[TARGET SYNC] Updating board at (%d,%d) from %d to %s for target with color %d", 
+                            x, y, board[y][x], Constants.TYPE_TARGET, color);
+                    board[y][x] = Constants.TYPE_TARGET;
+                    targetColors[y][x] = color;
+                    syncedTargets++;
+                } else if (targetColors[y][x] != color) {
+                    // The cell is already a target but the color doesn't match
+                    Timber.d("[TARGET SYNC] Updating target color at (%d,%d) from %d to %d", 
+                            x, y, targetColors[y][x], color);
+                    targetColors[y][x] = color;
+                    syncedTargets++;
+                }
+            }
+        }
+        
+        Timber.d("[TARGET SYNC] Synchronized %d targets", syncedTargets);
+        return syncedTargets;
     }
 }
