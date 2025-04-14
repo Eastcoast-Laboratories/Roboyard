@@ -115,3 +115,24 @@ public boolean validate() {
 - Identify exactly where targets are being lost during the loading process
 - Determine if the issue is in serialization, deserialization, or both
 - Develop a targeted fix for the specific component causing the problem
+
+
+after adding more debug, we found the root cause of the issue! The logs reveal exactly what's happening with the target loading and why it's failing on save.
+The problem is a target state synchronization issue:
+    
+1. During loading, targets are properly added to the gameElements list, but they're not being correctly preserved in the board array:
+        ◦ First load shows: targetsAdded=2, targetElementsCount=2, targetsInBoard=1
+        ◦ Second load shows: targetsAdded=2, targetElementsCount=2, targetsInBoard=0
+
+2. When the game tries to save, the serialization process is checking the board array for targets, not the gameElements list, causing the crash:
+        ◦ [SAVE_DATA] FATAL ERROR: No targets found while serializing game state!
+
+
+The direct issue is that target information is being stored in two places that are becoming out of sync:
+    1. The gameElements list (which has the targets)
+    2. The board array (which is losing the targets)
+
+This happens because:
+    • During loading, we add targets twice (once from the board data parsing and once from TARGET_SECTION)
+    • Something after loading is clearing the board array targets, but keeping the gameElements targets
+    • The serialize() method only checks the board array, not the gameElements list
