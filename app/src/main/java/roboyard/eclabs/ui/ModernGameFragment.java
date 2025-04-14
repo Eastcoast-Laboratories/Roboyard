@@ -102,8 +102,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     // Timer variables
     private long startTime = 0L;
+    private long lastHistoryCheckTime = 0;
+    private long lastAutosaveTime = 0;
     private final Handler timerHandler = new Handler(Looper.getMainLooper());
     private boolean timerRunning = false;
+    private boolean autosaveRunning = false;
+    private boolean historySaveRunning = false;
+    private static final int AUTOSAVE_INTERVAL_MS = 60 * 1000; // 60 seconds
+    private static final int HISTORY_CHECK_INTERVAL_MS = 3000; // Check every 3 seconds
     private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -116,31 +122,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             String timeStr = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
             timerTextView.setText(timeStr);
             
-            // Continue updating the timer
-            timerHandler.postDelayed(this, 500); // Update every half-second
-        }
-    };
-    
-    // Autosave variables
-    private final Handler autosaveHandler = new Handler(Looper.getMainLooper());
-    private boolean autosaveRunning = false;
-    private static final int AUTOSAVE_INTERVAL_MS = 60 * 1000; // 60 seconds
-    private final Runnable autosaveRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Only autosave if game is in progress and not solved
-            if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
-                Timber.d("[AUTOSAVE] Performing autosave to slot 0");
-                boolean saved = gameStateManager.saveGame(0); // Save to slot 0
-                if (saved) {
-                    Timber.d("[AUTOSAVE] Game successfully autosaved to slot 0");
-                } else {
-                    Timber.e("[AUTOSAVE] Failed to autosave game to slot 0");
-                }
+            // Check if we should perform autosave
+            long currentTime = SystemClock.elapsedRealtime();
+            if (autosaveRunning && currentTime - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS) {
+                autosave();
+                lastAutosaveTime = currentTime;
             }
             
-            // Schedule next autosave
-            autosaveHandler.postDelayed(this, AUTOSAVE_INTERVAL_MS);
+            // Check if we should update history
+            if (historySaveRunning && currentTime - lastHistoryCheckTime >= HISTORY_CHECK_INTERVAL_MS) {
+                checkHistorySave();
+                lastHistoryCheckTime = currentTime;
+            }
+            
+            // Continue updating the timer
+            timerHandler.postDelayed(this, 500); // Update every half-second
         }
     };
     
@@ -452,6 +448,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Start autosave
         startAutosave();
+        
+        // Start history saving
+        startHistorySave();
         
         // Set up status text view to act as a button for showing the next hint
         statusTextView.setOnClickListener(v -> {
@@ -1790,6 +1789,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (!autosaveRunning) {
             startAutosave();
         }
+        
+        // Resume history saving when fragment is resumed
+        if (!historySaveRunning) {
+            startHistorySave();
+        }
     }
     
     /**
@@ -1937,9 +1941,17 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void startTimer() {
         if (!timerRunning) {
+            // Start the game timer for history tracking
+            if (gameStateManager != null) {
+                gameStateManager.startGameTimer();
+            }
             startTime = SystemClock.elapsedRealtime();
-            timerHandler.postDelayed(timerRunnable, 0);
+            lastHistoryCheckTime = startTime;
+            lastAutosaveTime = startTime;
+            timerHandler.post(timerRunnable);
             timerRunning = true;
+            historySaveRunning = true;
+            autosaveRunning = true;
         }
     }
     
@@ -1950,6 +1962,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (timerRunning) {
             timerHandler.removeCallbacks(timerRunnable);
             timerRunning = false;
+            historySaveRunning = false;
+            autosaveRunning = false;
         }
     }
     
@@ -1958,17 +1972,17 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void resetAndStartTimer() {
         stopTimer();
+        startTime = SystemClock.elapsedRealtime();
+        lastHistoryCheckTime = startTime;
+        lastAutosaveTime = startTime;
+        timerTextView.setText("00:00");
         startTimer();
     }
     
     @Override
     public void onPause() {
         super.onPause();
-        // Pause timer when fragment is paused
         stopTimer();
-        
-        // Pause autosave when fragment is paused
-        stopAutosave();
     }
     
     /**
@@ -2111,6 +2125,39 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 return "Unknown: " + c;
         }
     }
+
+    /**
+     * Apply language settings
+     */
+    private void applyLanguageSettings() {
+        try {
+            // Get saved language setting
+            String languageCode = roboyard.logic.core.Preferences.appLanguage;
+            Timber.d("ROBOYARD_LANGUAGE: Loading saved language in game screen: %s", languageCode);
+            
+            // Apply language change
+            Locale locale = new Locale(languageCode);
+            Locale.setDefault(locale);
+            
+            Resources resources = requireContext().getResources();
+            Configuration config = new Configuration(resources.getConfiguration());
+            config.setLocale(locale);
+            
+            resources.updateConfiguration(config, resources.getDisplayMetrics());
+        } catch (Exception e) {
+            Timber.e(e, "ROBOYARD_LANGUAGE: Error loading language settings in game screen");
+        }
+    }
+    
+    /**
+     * Start history saving
+     */
+    private void startHistorySave() {
+        historySaveRunning = true;
+        lastHistoryCheckTime = SystemClock.elapsedRealtime();
+        Timber.d("[HISTORY] History saving started");
+    }
+    
     /**
      * Shows a message that the A.I. is calculating a solution with restart counter and last solution info
      */
@@ -2649,7 +2696,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void startAutosave() {
         if (!autosaveRunning) {
-            autosaveHandler.postDelayed(autosaveRunnable, AUTOSAVE_INTERVAL_MS);
+            long currentTime = SystemClock.elapsedRealtime();
+            if (currentTime - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS) {
+                autosave();
+                lastAutosaveTime = currentTime;
+            }
             autosaveRunning = true;
         }
     }
@@ -2659,28 +2710,34 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void stopAutosave() {
         if (autosaveRunning) {
-            autosaveHandler.removeCallbacks(autosaveRunnable);
             autosaveRunning = false;
         }
     }
     
-    private void applyLanguageSettings() {
-        try {
-            // Get saved language setting
-            String languageCode = roboyard.logic.core.Preferences.appLanguage;
-            Timber.d("ROBOYARD_LANGUAGE: Loading saved language in game screen: %s", languageCode);
-            
-            // Apply language change
-            Locale locale = new Locale(languageCode);
-            Locale.setDefault(locale);
-            
-            Resources resources = requireContext().getResources();
-            Configuration config = new Configuration(resources.getConfiguration());
-            config.setLocale(locale);
-            
-            resources.updateConfiguration(config, resources.getDisplayMetrics());
-        } catch (Exception e) {
-            Timber.e(e, "ROBOYARD_LANGUAGE: Error loading language settings in game screen");
+    /**
+     * Perform autosave
+     */
+    private void autosave() {
+        // Only autosave if game is in progress and not solved
+        if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
+            Timber.d("[AUTOSAVE] Performing autosave to slot 0");
+            boolean saved = gameStateManager.saveGame(0); // Save to slot 0
+            if (saved) {
+                Timber.d("[AUTOSAVE] Game successfully autosaved to slot 0");
+            } else {
+                Timber.e("[AUTOSAVE] Failed to autosave game to slot 0");
+            }
+        }
+    }
+    
+    /**
+     * Check if the game should be saved to history
+     */
+    private void checkHistorySave() {
+        // Only check for history saving if game is in progress and not already saved
+        if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
+            Timber.d("[HISTORY] Checking if game should be saved to history");
+            gameStateManager.updateGameTimer(); // This handles threshold checking and saving
         }
     }
 }
