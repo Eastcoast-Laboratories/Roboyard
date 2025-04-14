@@ -384,6 +384,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Initialize the game state manager
         gameStateManager = new ViewModelProvider(requireActivity()).get(GameStateManager.class);
         
+        // Set activity reference in GameStateManager to fix history saving
+        gameStateManager.setActivity(requireActivity());
+        Timber.d("[HISTORY] Setting activity reference in GameStateManager during onViewCreated");
+        
         // Initialize UI components
         gameGridView = view.findViewById(R.id.game_grid_view);
         moveCountTextView = view.findViewById(R.id.move_count_text);
@@ -1774,6 +1778,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     @Override
     public void onResume() {
         super.onResume();
+        
+        // Refresh activity reference in GameStateManager during resume
+        if (gameStateManager != null) {
+            gameStateManager.setActivity(requireActivity());
+            Timber.d("[HISTORY] Refreshing activity reference in GameStateManager during onResume");
+        }
         
         // Announce game start on resume
         if (gameStateManager != null && gameStateManager.getCurrentState().getValue() != null) {
