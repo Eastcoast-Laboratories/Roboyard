@@ -689,6 +689,35 @@ public class GameState implements Serializable {
                     boardDataStarted = false; // Exit board data mode
                     Timber.d("Entering WALLS section");
                     continue;
+                } else if (line.equals("TARGET_SECTION:")) {
+                    // Entering targets section, exit other modes
+                    inRobotsSection = false;
+                    inInitialPositionsSection = false;
+                    boardDataStarted = false;
+                    Timber.d("Entering TARGET_SECTION section");
+                    continue;
+                } else if (line.startsWith("TARGET_SECTION:") && line.length() > 15) {
+                    // Format: TARGET_SECTION:x,y,color (each TARGET_SECTION entry is on its own line)
+                    String[] targetData = line.substring("TARGET_SECTION:".length()).split(",");
+                    if (targetData.length >= 3) {
+                        int x = Integer.parseInt(targetData[0]);
+                        int y = Integer.parseInt(targetData[1]);
+                        int color = Integer.parseInt(targetData[2]);
+                        
+                        // We directly set the cell type and color in the board data structures
+                        // to avoid any synchronization issues
+                        state.board[y][x] = Constants.TYPE_TARGET;
+                        state.targetColors[y][x] = color;
+                        
+                        // Also add as a game element for rendering
+                        GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                        target.setColor(color);
+                        state.gameElements.add(target);
+                        
+                        targetsAdded++;
+                        Timber.d("Added target at (%d,%d) with color %d from TARGET_SECTION section", x, y, color);
+                    }
+                    continue;
                 }
                 
                 // Process WALLS section data
@@ -1063,7 +1092,6 @@ public class GameState implements Serializable {
             for (int x = 0; x < width; x++) {
                 int cellType = board[y][x];
                 
-                // If the cell is a target, append the target color
                 if (cellType == Constants.TYPE_TARGET) {
                     saveData.append(cellType).append(":").append(targetColors[y][x]);
                 } else {
@@ -1076,14 +1104,14 @@ public class GameState implements Serializable {
             saveData.append("\n");
         }
         
-        // Add dedicated TARGETS section to make them explicit and easier to detect
-        saveData.append("TARGETS:\n");
+        // Add dedicated TARGET_SECTION section to make them explicit and easier to detect
+        saveData.append("TARGET_SECTION:\n");
         int targetCount = 0;
         // Save targets (position and color)
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (board[y][x] == Constants.TYPE_TARGET) {
-                    saveData.append("TARGET:").append(x).append(",").append(y)
+                    saveData.append("TARGET_SECTION:").append(x).append(",").append(y)
                            .append(",").append(targetColors[y][x]).append("\n");
                     targetCount++;
                     Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, targetColors[y][x]);
@@ -1474,7 +1502,7 @@ public class GameState implements Serializable {
                 MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
         // Save current board dimensions and set them for game generation
-        // Ensure board size is never zero to prevent ArrayIndexOutOfBoundsException
+        // Ensure board dimensions are never zero to prevent ArrayIndexOutOfBoundsException
         int boardSizeX = Preferences.boardSizeWidth;
         int boardSizeY = Preferences.boardSizeHeight;
         

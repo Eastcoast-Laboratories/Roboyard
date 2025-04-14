@@ -588,11 +588,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private boolean validateSaveContainsTargets(String saveData, File saveFile) {
         Timber.d("[SAVE_VERIFICATION] Validating save file: %s", saveFile.getName());
         
-        // Check for dedicated TARGETS section
-        if (saveData.contains("TARGETS:")) {
-            // Look for TARGET: entries which must be present
-            if (saveData.contains("TARGET:")) {
-                Timber.d("[SAVE_VERIFICATION] Save file contains TARGETS section and TARGET: entries");
+        // Check for dedicated TARGET_SECTION section
+        if (saveData.contains("TARGET_SECTION:")) {
+            // Look for TARGET_SECTION: entries which must be present
+            if (saveData.contains("TARGET_SECTION:")) {
+                Timber.d("[SAVE_VERIFICATION] Save file contains TARGET_SECTION section and TARGET_SECTION: entries");
                 return true;
             }
         }
@@ -1742,7 +1742,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("GameStateManager: Map saved as %s", mapName);
             return true;
         } catch (IOException e) {
-            Timber.e(e, "Error saving map");
+            Timber.e("Error saving map");
             return false;
         }
     }
@@ -2384,10 +2384,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Reset robot positions
             currentGameState.resetRobotPositions();
             
-            // Reset move counters
-            setMoveCount(0);
-            setSquaresMoved(0);
-            setGameComplete(false);
+            // Reset game statistics
+            moveCount.setValue(0);
+            squaresMoved.setValue(0);
+            isGameComplete.setValue(false);
             
             // Reset robot selection
             for (GameElement element : currentGameState.getGameElements()) {
@@ -2401,8 +2401,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Reset the robotsUsed tracking for statistics
             robotsUsed.clear();
             
-            // Notify observers that the state has changed
-            ((MutableLiveData<GameState>) currentState).setValue(currentGameState);
+            // Notify that the game state has changed
+            currentState.setValue(currentGameState);
         }
         
         isResetting = false;
