@@ -3,8 +3,6 @@ package roboyard.ui.components;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -20,10 +18,13 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -531,19 +532,110 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
             
-            // Log the enhanced save data for debugging
-            Timber.d("[SAVEDATA] Enhanced save data: %s", enhancedSaveData.toString());
-            
-            // Write to file
+            // Write the save data to the file
             try (FileOutputStream fos = new FileOutputStream(saveFile)) {
                 fos.write(enhancedSaveData.toString().getBytes());
-                fos.flush();
-                Timber.d("Game saved successfully to slot %d", saveId);
+                Timber.d("Game saved to %s", saveFile.getAbsolutePath());
+                
+                // VERIFICATION: Read back the save file and check for targets
+                String savedContent = readSaveFileContent(saveFile);
+                if (savedContent == null || !validateSaveContainsTargets(savedContent, saveFile)) {
+                    // This is a fatal error - delete the corrupt save file
+                    Timber.e("[SAVE_VERIFICATION] FATAL ERROR: Save file validation failed - no targets found");
+                    Timber.e("[SAVE_VERIFICATION] FATAL: Game state information before throw:");
+                    Timber.e("[SAVE_VERIFICATION] Width: %d, Height: %d", gameState.getWidth(), gameState.getHeight());
+                    int targetCount = 0;
+                    for (int y = 0; y < gameState.getHeight(); y++) {
+                        for (int x = 0; x < gameState.getWidth(); x++) {
+                            if (gameState.getCellType(x, y) == Constants.TYPE_TARGET) {
+                                targetCount++;
+                                Timber.e("[SAVE_VERIFICATION] Target found at (%d,%d) with color %d", 
+                                         x, y, gameState.getTargetColor(x, y));
+                            }
+                        }
+                    }
+                    Timber.e("[SAVE_VERIFICATION] Total targets in CURRENT game state: %d", targetCount);
+                    Timber.e("[SAVE_VERIFICATION] Save file content before deletion (first 200 chars): %s", 
+                             savedContent.length() > 200 ? savedContent.substring(0, 200) + "..." : savedContent);
+                    saveFile.delete();
+                    throw new IllegalStateException("Save file validation failed: No targets found in saved game");
+                }
+                
+                return true;
+            } catch (IOException e) {
+                Timber.e("Error saving game: %s", e.getMessage());
+                return false;
+            }
+        } catch (IllegalStateException e) {
+            // Log the detailed error for debugging
+            Timber.e("[SAVE_ERROR] %s", e.getMessage());
+            // Rethrow as this is a fatal error that should never occur
+            throw new RuntimeException("FATAL: " + e.getMessage(), e);
+        } catch (Exception e) {
+            Timber.e("Unexpected error saving game: %s", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Validates that a save file contains at least one target.
+     * In Roboyard, all games MUST have targets - this is a fatal requirement.
+     * 
+     * @param saveData The save data string to validate
+     * @param saveFile The save file reference (for logging)
+     * @return true if the save contains targets, false otherwise
+     */
+    private boolean validateSaveContainsTargets(String saveData, File saveFile) {
+        Timber.d("[SAVE_VERIFICATION] Validating save file: %s", saveFile.getName());
+        
+        // Check for dedicated TARGETS section
+        if (saveData.contains("TARGETS:")) {
+            // Look for TARGET: entries which must be present
+            if (saveData.contains("TARGET:")) {
+                Timber.d("[SAVE_VERIFICATION] Save file contains TARGETS section and TARGET: entries");
                 return true;
             }
+        }
+        
+        // Check for target cell types in board data
+        String[] lines = saveData.split("\n");
+        for (String line : lines) {
+            if (line.contains(Constants.TYPE_TARGET + ":")) {
+                Timber.d("[SAVE_VERIFICATION] Save file contains target cell types in board data");
+                return true;
+            }
+        }
+        
+        // Log the full save data for diagnostics when no targets are found
+        Timber.e("[SAVE_VERIFICATION] NO TARGETS FOUND IN SAVE DATA:");
+        String[] logLines = saveData.split("\n");
+        for (int i = 0; i < Math.min(logLines.length, 50); i++) { // Limit to 50 lines
+            Timber.e("[SAVE_VERIFICATION] Line %d: %s", i, logLines[i]);
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Reads the content of a save file.
+     * 
+     * @param saveFile The save file to read
+     * @return The content of the save file as a string, or null if reading fails
+     */
+    private String readSaveFileContent(File saveFile) {
+        try (FileInputStream fis = new FileInputStream(saveFile);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
+
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+            
+            return content.toString();
         } catch (IOException e) {
-            Timber.e(e, "Error saving game to slot %d", saveId);
-            return false;
+            Timber.e("Error reading save file: %s", e.getMessage());
+            return null;
         }
     }
     
@@ -859,7 +951,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
             // Log the movement initiation
             Timber.d("[ROBOT][HINT_SYSTEM] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)", 
-                    robot.getColor(), originalX, originalY, targetX, targetY);
+                  robot.getColor(), originalX, originalY, targetX, targetY);
             
             setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
 
@@ -2220,34 +2312,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public RobotAnimationManager getRobotAnimationManager() {
         return robotAnimationManager;
     }
-    
-    /**
-     * Update animation settings
-     */
-    public void updateAnimationSettings(boolean enabled, float accelDuration, float maxSpd, 
-                                      float decelDuration, float overshootPct, float springDuration, long animationFrameDelay) {
-        this.animationsEnabled = enabled;
-        this.accelerationDuration = accelDuration;
-        this.maxSpeed = maxSpd;
-        this.decelerationDuration = decelDuration;
-        this.overshootPercentage = overshootPct;
-        this.springBackDuration = springDuration;
-        this.animationFrameDelay = animationFrameDelay;
-        
-        // Update the animation manager with new settings
-        if (robotAnimationManager != null) {
-            robotAnimationManager.updateSettings(
-                accelerationDuration,
-                maxSpeed,
-                decelerationDuration,
-                overshootPercentage,
-                springBackDuration,
-                RobotAnimationManager.AnimationCancellationStrategy.JUMP_TO_END,
-                animationFrameDelay
-            );
-        }
-    }
-    
+
     /**
      * Get the current animation frame delay in milliseconds
      * @return Current animation frame delay

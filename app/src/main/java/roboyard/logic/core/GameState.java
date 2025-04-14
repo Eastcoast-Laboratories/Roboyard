@@ -538,43 +538,67 @@ public class GameState implements Serializable {
      * Load a saved game from a file
      */
     public static GameState loadSavedGame(Context context, int slotId) {
-        Timber.d("Attempting to load game from slot %d with filename: %s", slotId, Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION);
-        
         try {
-            // Get save directory
-            File savesDir = new File(context.getFilesDir(), Constants.SAVE_DIRECTORY);
-            Timber.d("Save directory path: %s, exists: %b", savesDir.getAbsolutePath(), savesDir.exists());
-            
-            // Get save file
-            String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
-            File saveFile = new File(savesDir, filename);
-            Timber.d("Save file path: %s, exists: %b, size: %d bytes", saveFile.getAbsolutePath(), saveFile.exists(), saveFile.length());
-            
-            if (!saveFile.exists()) {
-                Timber.e("Save file does not exist");
+            File saveDir = new File(context.getFilesDir(), Constants.SAVE_DIRECTORY);
+            if (!saveDir.exists()) {
                 return null;
             }
             
-            // Read the file as text
-            StringBuilder content = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(saveFile)))) {
+            String fileName = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
+            File saveFile = new File(saveDir, fileName);
+            
+            Timber.d("Attempting to load game from slot %d with filename: %s", slotId, fileName);
+            Timber.d("Save directory path: %s, exists: %s", saveDir.getAbsolutePath(), saveDir.exists());
+            Timber.d("Save file path: %s, exists: %s, size: %d bytes", 
+                  saveFile.getAbsolutePath(), saveFile.exists(), saveFile.exists() ? saveFile.length() : 0);
+            
+            if (!saveFile.exists()) {
+                return null;
+            }
+            
+            StringBuilder saveData = new StringBuilder();
+            try (FileInputStream fis = new FileInputStream(saveFile);
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
+                
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    content.append(line).append("\n");
+                    saveData.append(line).append("\n");
                 }
             }
             
-            String saveData = content.toString();
             Timber.d("Read %d characters from save file", saveData.length());
             
-            // Parse the save data
-            return parseFromSaveData(saveData, context);
+            GameState state = parseFromSaveData(saveData.toString(), context);
             
+            // Debug: verify that targets were properly loaded
+            if (state != null) {
+                int targetCount = 0;
+                for (int y = 0; y < state.getHeight(); y++) {
+                    for (int x = 0; x < state.getWidth(); x++) {
+                        if (state.getCellType(x, y) == Constants.TYPE_TARGET) {
+                            targetCount++;
+                            Timber.d("[GAME_LOAD_VERIFY] Found target at (%d,%d) with color %d", 
+                                   x, y, state.getTargetColor(x, y));
+                        }
+                    }
+                }
+                Timber.d("[GAME_LOAD_VERIFY] Loaded GameState has %d targets", targetCount);
+                
+                if (targetCount == 0) {
+                    Timber.e("[GAME_LOAD_ERROR] NO TARGETS FOUND after loading save file %s", fileName);
+                    // Try to examine the save file contents to debug this issue
+                    String[] contentLines = saveData.toString().split("\n");
+                    for (int i = 0; i < Math.min(contentLines.length, 20); i++) {
+                        Timber.e("[GAME_LOAD_ERROR] Line %d: %s", i, contentLines[i]);
+                    }
+                    // Don't load games without targets - this is a critical error
+                    throw new IllegalStateException("Cannot load game: no targets found in save file");
+                }
+            }
+            
+            return state;
         } catch (IOException e) {
-            Timber.tag(TAG).e(e, "IOException while loading game from slot %d: %s", slotId, e.getMessage());
-            return null;
-        } catch (Exception e) {
-            Timber.tag(TAG).e(e, "Unexpected error loading game from slot %d: %s", slotId, e.getMessage());
+            Timber.e(e, "Error loading saved game from slot %d", slotId);
             return null;
         }
     }
@@ -1052,6 +1076,27 @@ public class GameState implements Serializable {
             saveData.append("\n");
         }
         
+        // Add dedicated TARGETS section to make them explicit and easier to detect
+        saveData.append("TARGETS:\n");
+        int targetCount = 0;
+        // Save targets (position and color)
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (board[y][x] == Constants.TYPE_TARGET) {
+                    saveData.append("TARGET:").append(x).append(",").append(y)
+                           .append(",").append(targetColors[y][x]).append("\n");
+                    targetCount++;
+                    Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, targetColors[y][x]);
+                }
+            }
+        }
+        
+        if (targetCount == 0) {
+            // This is a fatal error - all Roboyard games MUST have targets
+            Timber.e("[SAVE_DATA] FATAL ERROR: No targets found while serializing game state!");
+            throw new IllegalStateException("Cannot save game: no targets found in game state");
+        }
+        
         // Add dedicated WALLS section to ensure all walls are properly serialized
         saveData.append("WALLS:\n");
         // Save horizontal walls
@@ -1079,8 +1124,7 @@ public class GameState implements Serializable {
             Timber.d("Initial robot positions were not stored, storing them now");
         }
         
-        // Add initial robot positions as the ROBOTS section
-        // This ensures that when a game is loaded, robots are placed at their initial positions
+        // Add dedicated ROBOTS section
         saveData.append("ROBOTS:\n");
         for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
             int robotColor = entry.getKey();
