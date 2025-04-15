@@ -115,14 +115,24 @@ public class GameLogic {
                 level, DIFFICULTY_BEGINNER, DIFFICULTY_ADVANCED, DIFFICULTY_INSANE, DIFFICULTY_IMPOSSIBLE);
         
         if(level == DIFFICULTY_BEGINNER) { 
-            // For beginner level - default settings
+            // For beginner level - targets must be in corners
+            targetMustBeInCorner = true;
             Timber.d("[DIFFICULTY] Using BEGINNER settings (targets in corners only)");
-        } else {
-            if(level == DIFFICULTY_ADVANCED) { 
-                // For Advanced difficulty, allow both corner and non-corner targets (50% probability)
-                targetMustBeInCorner = false; // Set to false but we'll use 50% probability in target placement
-                Timber.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement");
-            }
+        } else if(level == DIFFICULTY_ADVANCED) {
+            // For Advanced difficulty, targets can be in random positions
+            targetMustBeInCorner = false;
+            Timber.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement");
+
+            allowMulticolorTarget = false;
+
+            maxWallsInOneVerticalCol = 3;
+            maxWallsInOneHorizontalRow = 3;
+            wallsPerQuadrant = (int) (boardWidth/3.3);
+
+            loneWallsAllowed = true;
+        } else { // For easier/medium difficulties
+            // Keep targetMustBeInCorner = true
+            Timber.d("[DIFFICULTY] Using MEDIUM settings (targets in corners only)");
             
             allowMulticolorTarget = false;
 
@@ -155,7 +165,7 @@ public class GameLogic {
         Timber.d("[DIFFICULTY] Final settings: targetMustBeInCorner=%b, maxWallsInOneVerticalCol=%d, maxWallsInOneHorizontalRow=%d, wallsPerQuadrant=%d, boardSize=%dx%d", 
                 targetMustBeInCorner, maxWallsInOneVerticalCol, maxWallsInOneHorizontalRow, wallsPerQuadrant, boardWidth, boardHeight);
     }
-
+    
     /**
      * Get a random number between min and max (inclusive)
      * Adds safety checks to ensure min <= max
@@ -1550,5 +1560,12 @@ public class GameLogic {
         // For now, always return false to minimize log output
         // Can be changed to a configurable setting later
         return false;
+    }
+
+    /**
+     * Returns the current difficulty level
+     */
+    public int getDifficultyLevel() {
+        return currentLevel;
     }
 }

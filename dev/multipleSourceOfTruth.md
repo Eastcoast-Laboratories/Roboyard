@@ -1,9 +1,35 @@
-# Wall Manager Concept
+# Concept
 
 ## Problem Description
 
-Currently, wall handling in Roboyard is implemented in multiple places, creating multiple sources of truth:
+Currently, there are two separate data structures for game elements due to their different purposes:
+1. gameElements (List):
+    ◦ A collection of all dynamic objects in the game (robots, targets)
+    ◦ Used primarily for rendering and user interactions
+    ◦ Contains detailed information about each element (position, type, color)
+    ◦ Needed for the UI to draw the game elements on screen
+    ◦ Also used by the game logic to track robots and their movements
+2. board (2D array):
+    ◦ A grid representation of the game board's cell types
+    ◦ Used for fast spatial lookups and collision detection
+    ◦ Stores only the type of cell at each position (empty, wall, target, robot)
+    ◦ Provides a way to quickly check what exists at a specific coordinate
+    ◦ Essential for movement logic to determine valid moves
 
+This dual representation creates a challenge: the game needs to keep both data structures synchronized. When a target is added, it must be added to both:
+    • The gameElements list (for rendering)
+    • The board array (for collision detection)
+
+refactoring of the codebase might introduce performance issues. Here's why:
+1. Different access patterns:
+    ◦ The board array provides O(1) access to determine what's at a specific coordinate
+    ◦ Using gameElements for the same task would require iterating through the list (O(n) operation)
+    ◦ This would severely impact performance for frequent operations like collision detection
+2. Game logic dependencies:
+    ◦ Many critical game functions (movement, collision detection) are optimized for grid-based lookups
+    ◦ They depend on the board array's direct indexing for performance
+    
+# idea:
 1. **GameStateManager**: Handles walls when creating new games via the "New Game" button
 2. **GameLogic**: Handles walls when preserving a game state or resetting robots
 3. **WallStorage**: Stores and retrieves walls, but is used inconsistently

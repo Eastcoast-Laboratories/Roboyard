@@ -1,7 +1,6 @@
 package roboyard.logic.core;
 
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GridGameView;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -53,8 +52,15 @@ public class MapGenerator {
         // Calculate walls per quadrant based on board width
         wallsPerQuadrant = MainActivity.getBoardWidth()/4;  // Default: quarter of board width
 
-        // Check difficulty level
-        int level = GridGameView.getLevel();
+        // Get difficulty directly from Preferences
+        int level = Preferences.difficulty;
+        
+        // Initialize GameLogic with the same configuration
+        gameLogic = new GameLogic(MainActivity.getBoardWidth(), MainActivity.getBoardHeight(), level);
+        
+        // Synchronize with GameLogic's static setting
+        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
+        
         if(level == DIFFICULTY_BEGINNER){ // Difficulty Beginner
             // For beginner level
         } else {
@@ -97,12 +103,6 @@ public class MapGenerator {
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
-        
-        // Initialize GameLogic with the same configuration
-        gameLogic = new GameLogic(MainActivity.getBoardWidth(), MainActivity.getBoardHeight(), level);
-        
-        // Synchronize with GameLogic's static setting
-        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
         
         Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
     }
@@ -185,7 +185,7 @@ public class MapGenerator {
         // which is already set by SettingsGameScreen when preferences are changed
         Timber.d("[WALL STORAGE] class default value for generateNewMapEachTime: %s", generateNewMapEachTime);
         
-        ArrayList<GridElement> data = GridGameView.getMap();
+        ArrayList<GridElement> data = new ArrayList<>();
         
         // Synchronize static settings with GameLogic
         GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
@@ -233,9 +233,6 @@ public class MapGenerator {
                 Timber.d("[WALL STORAGE] Stored walls for future use");
             }
         }
-        
-        // Store the map for future use
-        GridGameView.setMap(data);
         
         return data;
     }
