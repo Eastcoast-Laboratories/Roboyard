@@ -2055,22 +2055,47 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             GameState state = currentState.getValue();
             boolean isLevelMode = (state != null && state.getLevelId() > 0);
             int minRequiredMoves = getMinimumRequiredMoves();
+            int maxRequiredMoves = getMaximumRequiredMoves();
             
-            if (moveCount < minRequiredMoves && !isLevelMode && regenerationCount < MAX_AUTO_REGENERATIONS) {
-                Timber.d("[SOLUTION SOLVER][MOVES] Solution has only %d moves (minimum required: %d), starting new game (regeneration %d/%d)", 
-                        moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
-                regenerationCount++;
+            // BEGINNER MODE: Check if solution is too easy (below minimum) or too hard (above maximum)
+            if (!isLevelMode && regenerationCount < MAX_AUTO_REGENERATIONS) {
+                boolean isTooEasy = moveCount < minRequiredMoves;
+                boolean isTooHard = Preferences.difficulty == Constants.DIFFICULTY_BEGINNER && moveCount > MAX_MOVES_BEGINNER;
                 
-                // Force reset the solver state before starting a new game
-                SolverManager solverManager = getSolverManager();
-                solverManager.resetInitialization();
-                solverManager.cancelSolver(); // Cancel any running solver process
-                
-                // Create a new game after a short delay to ensure the solver is fully reset
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-                }, 100);
-                return;
+                if (isTooEasy) {
+                    // Regenerate if puzzle is too easy
+                    Timber.d("[SOLUTION SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)", 
+                            moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                    regenerationCount++;
+                    
+                    // Force reset the solver state before starting a new game
+                    SolverManager solverManager = getSolverManager();
+                    solverManager.resetInitialization();
+                    solverManager.cancelSolver(); // Cancel any running solver process
+                    
+                    // Create a new game after a short delay to ensure the solver is fully reset
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+                    }, 100);
+                    return;
+                } else if (isTooHard) {
+                    // Regenerate if puzzle is too hard for beginner mode
+                    Timber.w("[DIFFICULTY ENFORCER] BEGINNER mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
+                            moveCount, MAX_MOVES_BEGINNER, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                    regenerationCount++;
+                    
+                    // Force reset the solver state before starting a new game
+                    SolverManager solverManager = getSolverManager();
+                    solverManager.resetInitialization();
+                    solverManager.cancelSolver(); // Cancel any running solver process
+                    
+                    // Create a new game after a short delay to ensure the solver is fully reset
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        validateDifficulty = true; // Make sure difficulty is checked
+                        createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+                    }, 100);
+                    return;
+                }
             } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
                 Timber.d("[SOLUTION SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.", MAX_AUTO_REGENERATIONS);
                 regenerationCount = 0; // Reset for next time
