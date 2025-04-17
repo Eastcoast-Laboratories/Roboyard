@@ -216,7 +216,7 @@
     <!-- Game Buttons -->
     <string name="button_reset">Reset</string>
     <string name="hint_button_a11y">Hinweis</string>
-    <string name="button_new_game">Neues Spiel</string>
+    <string name="button_new_game">Neue Map</string>
     <string name="new_game">Neues Spiel</string>
     <string name="button_menu">Menü</string>
     <string name="menu">Menü</string>

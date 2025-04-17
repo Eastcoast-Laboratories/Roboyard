@@ -8,7 +8,7 @@
     <dimen name="game_button_height">52dp</dimen>
     <dimen name="game_button_text_size">22dp</dimen>
     <dimen name="game_button_margin">8dp</dimen>
-    <dimen name="game_button_padding">6dp</dimen>
+    <dimen name="game_button_padding">1dp</dimen>
     
     <!-- Level selection screen dimensions for tall screens -->
     <dimen name="stars_count_text_size">24dp</dimen>
