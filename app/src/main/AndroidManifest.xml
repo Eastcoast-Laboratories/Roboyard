@@ -20,6 +20,23 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <!-- Deep link for custom URI scheme -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="roboyard" android:host="open" />
+            </intent-filter>
+            
+            <!-- Deep link for http/https intent (Chrome compatibility) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="roboyard.app" android:pathPrefix="/open" />
+                <data android:scheme="https" android:host="roboyard.app" android:pathPrefix="/open" />
+            </intent-filter>
         </activity>
         
         <!-- Legacy activity, no longer the main entry point -->

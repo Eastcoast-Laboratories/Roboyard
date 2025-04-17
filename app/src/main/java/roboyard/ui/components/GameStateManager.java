@@ -146,6 +146,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
     private WeakReference<Activity> activityRef;
     
+    // Store the difficulty level from a deep link
+    private int deepLinkDifficulty = -1;
+    
     public GameStateManager(Application application) {
         super(application);
         // We'll use lazy initialization for solver now - do not create it here
@@ -2677,5 +2680,67 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             this.activityRef = new WeakReference<>(activity);
             Timber.d("[HISTORY] Activity reference updated in GameStateManager");
         }
+    }
+    
+    /**
+     * Set the current game state
+     * Used by deep link functionality to load a state from external data
+     * 
+     * @param state The game state to set
+     */
+    public void setGameState(GameState state) {
+        if (state == null) {
+            Timber.e("[DEEPLINK] Cannot set null game state");
+            return;
+        }
+        
+        Timber.d("[DEEPLINK] Setting game state from deep link");
+        
+        // Clear history and reset counters
+        resetMoveCountsAndHistory();
+        
+        // Set the current map name
+        this.currentMapName = state.getLevelName();
+        Timber.d("[MAPNAME] GameStateManager.setGameState - Set currentMapName to: %s", this.currentMapName);
+        
+        // Set the connection back to this manager
+        state.setGameStateManager(this);
+        
+        // Update the current state
+        currentState.setValue(state);
+        
+        // Update the move count
+        moveCount.setValue(state.getMoveCount());
+        
+        // Reset game timer
+        resetGameTimer();
+        startGameTimer();
+        
+        // Start the solver in the background
+        calculateSolutionAsync(null);
+    }
+    
+    /**
+     * Set the difficulty level from a deep link
+     * @param difficulty The difficulty level to set
+     */
+    public void setDeepLinkDifficulty(int difficulty) {
+        this.deepLinkDifficulty = difficulty;
+        Timber.d("[DEEPLINK] Stored deep link difficulty: %d", difficulty);
+    }
+    
+    /**
+     * Get the difficulty level from a deep link
+     * @return The difficulty level or -1 if not set
+     */
+    public int getDeepLinkDifficulty() {
+        return deepLinkDifficulty;
+    }
+    
+    /**
+     * Clear the deep link difficulty
+     */
+    public void clearDeepLinkDifficulty() {
+        this.deepLinkDifficulty = -1;
     }
 }
