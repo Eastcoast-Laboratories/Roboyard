@@ -84,9 +84,6 @@ public class RRGetMap {
         int robotCounter = 0;
         boolean targetFound = false;
         
-        // Track positions where targets exist to avoid wall/target conflicts
-        Set<Integer> targetPositions = new HashSet<>();
-        
         // CRITICAL CHANGE: First process all non-wall elements (targets, robots) before walls
         // This ensures targets get priority over walls at the same position
         for (Object element : gridElements) {
@@ -110,9 +107,6 @@ public class RRGetMap {
                 int targetColor = colors.getOrDefault(type, Constants.COLOR_PINK);
                 board.addGoal(position, targetColor, 1);
                 targetFound = true;
-                
-                // Add to target positions set to avoid wall conflicts
-                targetPositions.add(position);
                 
                 // Set this as the active target
                 board.setGoal(position);
@@ -165,13 +159,6 @@ public class RRGetMap {
             int y = wall.getY();
             int position = y * board.width + x;
             
-            // CRITICAL FIX: Skip adding walls at positions where targets exist
-            if (targetPositions.contains(position)) {
-                Timber.w("[SOLUTION_SOLVER] Skipping wall at position %d (%d,%d) because a target exists there", 
-                        position, x, y);
-                continue;
-            }
-            
             if (wall.getType() == WallType.HORIZONTAL) {
                 board.setWall(position, "N", true);  // treated as "N" of the current field in driftingdroids solver
                 
@@ -190,7 +177,7 @@ public class RRGetMap {
         for (int x = 0; x < board.width; x++) {
             // Top border
             int topPosition = 0 + x;
-            if (!board.isWall(topPosition, Constants.NORTH) && !targetPositions.contains(topPosition)){
+            if (!board.isWall(topPosition, Constants.NORTH)){
                 board.setWall(topPosition, "N", true);
                 Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing top horizontal border wall at position (%d,0)", x);
                 missingWallCountHorizontal++;
@@ -198,7 +185,7 @@ public class RRGetMap {
             // Bottom border
             int bottomWallY = (board.height-1) * board.width;
             int bottomPosition = bottomWallY + x;
-            if (!board.isWall(bottomPosition, Constants.SOUTH) && !targetPositions.contains(bottomPosition)){
+            if (!board.isWall(bottomPosition, Constants.SOUTH)){
                 board.setWall(bottomPosition, "N", true);
                 Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing bottom horizontal border wall at position (%d,%d)", x, board.height-1);
                 missingWallCountHorizontal++;
@@ -209,7 +196,7 @@ public class RRGetMap {
             // Left vertical border
             int verticalWallY = y * board.width;
             int leftPosition = 0 + verticalWallY;
-            if (!board.isWall(leftPosition, Constants.WEST) && !targetPositions.contains(leftPosition)){
+            if (!board.isWall(leftPosition, Constants.WEST)){
                 board.setWall(leftPosition, "W", true);
                 Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing left vertical border wall at position (0,%d)", y);
                 missingWallCountVertical++;
@@ -217,7 +204,7 @@ public class RRGetMap {
             // Right border
             int rightWallX = board.width - 1;
             int rightPosition = rightWallX + verticalWallY;
-            if (!board.isWall(rightPosition, Constants.EAST) && !targetPositions.contains(rightPosition)){
+            if (!board.isWall(rightPosition, Constants.EAST)){
                 board.setWall(rightPosition, "W", true);
                 Timber.w("[SOLUTION_SOLVER][WALLS] Adding missing right vertical border wall at position (%d,%d)", board.width-1, y);
                 missingWallCountVertical++;
