@@ -164,13 +164,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return The solver manager instance
      */
     private SolverManager getSolverManager() {
-        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
+        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
         SolverManager solverManager = SolverManager.getInstance();
         
         // Set solver listener if not already set
         if (solverManager.getListener() == null) {
             solverManager.setListener(this);
-            Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager registered itself as the SolverListener");
+            Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager registered itself as the SolverListener");
         }
         return solverManager;
     }
@@ -222,7 +222,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // If solver is already running, don't create a new game state to avoid mismatch
         if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
-            Timber.d("[SOLUTION SOLVER] startLevelGame: Solver already running, not creating new game state");
+            Timber.d("[SOLUTION_SOLVER] startLevelGame: Solver already running, not creating new game state");
             return;
         }
         
@@ -256,7 +256,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Initialize the solver with the grid elements from the loaded level
         ArrayList<GridElement> gridElements = state.getGridElements();
-        Timber.d("[SOLUTION SOLVER] Initializing solver with %d grid elements from level %d", 
+        Timber.d("[SOLUTION_SOLVER] Initializing solver with %d grid elements from level %d", 
                 gridElements.size(), levelId);
         getSolverManager().initialize(gridElements);
         
@@ -1950,43 +1950,43 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void calculateSolutionAsync(final SolutionCallback callback) {
         // Don't start a new calculation if one is already running
         if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
-            Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Solver already running, ignoring duplicate request");
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Solver already running, ignoring duplicate request");
             return;
         }
 
         // Increment solver restart count
         solverRestartCount++;
-        Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Solver restart count: %d", solverRestartCount);
+        Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Solver restart count: %d", solverRestartCount);
         
         this.solutionCallback = callback;
-        Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Stored callback: %s", callback);
+        Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Stored callback: %s", callback);
         
         GameState state = currentState.getValue();
         if (state == null) {
-            Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Current state is null");
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Current state is null");
             onSolutionCalculationFailed("No game state available");
             return;
         }
         
         // Log the current game state details
         ArrayList<GridElement> elements = state.getGridElements();
-        Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Current GameState hash: %d", state.hashCode());
-        Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Current map has %d elements", elements.size());
+        Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Current GameState hash: %d", state.hashCode());
+        Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Current map has %d elements", elements.size());
         
         // Log robot positions
         List<GameElement> robots = state.getRobots();
         for (GameElement robot : robots) {
-            Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Robot ID %d (color %d) at position (%d, %d)", 
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Robot ID %d (color %d) at position (%d, %d)", 
                   robot.getColor(), robot.getColor(), robot.getX(), robot.getY());
         }
         
         // Log target position
         GameElement target = state.getTarget();
         if (target != null) {
-            Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Target for robot Color %d (color %d) at position (%d, %d)",
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Target for robot Color %d (color %d) at position (%d, %d)",
                   target.getColor(), target.getColor(), target.getX(), target.getY());
         } else {
-            Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] No target found in current game state");
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] No target found in current game state");
         }
         
         // Set solver running state
@@ -1996,19 +1996,25 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         onSolutionCalculationStarted();
         
         try {
-            Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Initializing solver with current game state");
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Initializing solver with current game state");
             getSolverManager().initialize(elements);
             
             // Run the solver on a background thread
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.execute(() -> {
                 try {
-                    Timber.d("[SOLUTION SOLVER][calculateSolutionAsync] Running solver on background thread");
-                    getSolverManager().run();
+                    Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Running solver on background thread");
+                    // Get the current solver ID for tracing
+                    SolverManager manager = getSolverManager();
+                    // Ensure we're incrementing the counter before running
+                    SolverManager.ensureUniqueInvocationId();
+                    Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Using solver manager with counter: %d", 
+                            SolverManager.getCurrentSolverInvocationId());
+                    manager.run();
                     // Note: The solver will call the listener methods (onSolverFinished)
                     // when it completes, so we don't need to do anything more here
                 } catch (Exception e) {
-                    Timber.e(e, "[SOLUTION SOLVER] Error running solver");
+                    Timber.e(e, "[SOLUTION_SOLVER] Error running solver");
                     // Handle on main thread
                     new Handler(Looper.getMainLooper()).post(() -> {
                         onSolutionCalculationFailed("Error: " + e.getMessage());
@@ -2017,7 +2023,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             });
             executor.shutdown();
         } catch (Exception e) {
-            Timber.e(e, "[SOLUTION SOLVER] Error initializing solver");
+            Timber.e(e, "[SOLUTION_SOLVER] Error initializing solver");
             onSolutionCalculationFailed("Error: " + e.getMessage());
         }
     }
@@ -2026,16 +2032,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Called when the solution calculation starts
      */
     private void onSolutionCalculationStarted() {
-        Timber.d("[SOLUTION SOLVER] onSolutionCalculationStarted");
+        Timber.d("[SOLUTION_SOLVER] onSolutionCalculationStarted");
         currentSolution = null;
         currentSolutionStep = 0;
         
         // Notify callback if provided
         if (solutionCallback != null) {
-            Timber.d("[SOLUTION SOLVER] onSolutionCalculationStarted: Notifying callback: %s", solutionCallback);
+            Timber.d("[SOLUTION_SOLVER] onSolutionCalculationStarted: Notifying callback: %s", solutionCallback);
             solutionCallback.onSolutionCalculationStarted();
         } else {
-            Timber.w("[SOLUTION SOLVER] onSolutionCalculationStarted: No callback to notify");
+            Timber.w("[SOLUTION_SOLVER] onSolutionCalculationStarted: No callback to notify");
         }
     }
 
@@ -2047,12 +2053,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @param solution The calculated solution
      */
     private void onSolutionCalculationCompleted(GameSolution solution) {
-        Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: solution=%s", solution);
+        Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: solution=%s", solution);
         
         // Add more detailed logging about the solution
         int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
         if (moveCount > 0) {
-            Timber.d("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
+            Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
             // If solution requires fewer moves than required minimum and we're not in level mode,
             // automatically start a new game because this one is too easy
             GameState state = currentState.getValue();
@@ -2067,7 +2073,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 
                 if (isTooEasy) {
                     // Regenerate if puzzle is too easy
-                    Timber.d("[SOLUTION SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)", 
+                    Timber.d("[SOLUTION_SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)", 
                             moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
                     regenerationCount++;
                     
@@ -2100,11 +2106,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     return;
                 }
             } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
-                Timber.d("[SOLUTION SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.", MAX_AUTO_REGENERATIONS);
+                Timber.d("[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.", MAX_AUTO_REGENERATIONS);
                 regenerationCount = 0; // Reset for next time
             }
         } else {
-            Timber.w("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
+            Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
         }
         
         // Store the solution for later use with getHint()
@@ -2116,16 +2122,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Notify the callback if provided
         if (solutionCallback != null) {
-            Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: Notifying callback: %s", solutionCallback);
+            Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: Notifying callback: %s", solutionCallback);
             solutionCallback.onSolutionCalculationCompleted(solution);
             solutionCallback = null; // Clear callback after use
         } else {
-            Timber.d("[SOLUTION SOLVER] onSolutionCalculationCompleted: No callback provided");
+            Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: No callback provided");
         }
         
         // Store the minimum moves from this solution for display
         lastSolutionMinMoves = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
-        Timber.d("[SOLUTION SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves after %d regeneration(s)", lastSolutionMinMoves, regenerationCount);
+        Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves after %d regeneration(s)", lastSolutionMinMoves, regenerationCount);
     }
     
     /**
@@ -2133,7 +2139,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @param errorMessage The error message
      */
     private void onSolutionCalculationFailed(String errorMessage) {
-        Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed: %s", errorMessage);
+        Timber.d("[SOLUTION_SOLVER] onSolutionCalculationFailed: %s", errorMessage);
         
         // Clear any partial solution
         currentSolution = null;
@@ -2144,11 +2150,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Notify the callback if provided
         if (solutionCallback != null) {
-            Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed: Notifying callback: %s", solutionCallback);
+            Timber.d("[SOLUTION_SOLVER] onSolutionCalculationFailed: Notifying callback: %s", solutionCallback);
             solutionCallback.onSolutionCalculationFailed(errorMessage);
             solutionCallback = null; // Clear callback after use
         } else {
-            Timber.d("[SOLUTION SOLVER] onSolutionCalculationFailed: No callback provided");
+            Timber.d("[SOLUTION_SOLVER] onSolutionCalculationFailed: No callback provided");
         }
     }
 
@@ -2156,7 +2162,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Cancel any running solver operation
      */
     public void cancelSolver() {
-        Timber.d("[SOLUTION SOLVER] cancelSolver called");
+        Timber.d("[SOLUTION_SOLVER] cancelSolver called");
         if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
             getSolverManager().cancelSolver();
             // The solver will call onSolverCancelled() via the listener
@@ -2300,7 +2306,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             default:
                 minMoves = MIN_MOVES_BEGINNER; // Default to beginner if unknown difficulty
         }
-        Timber.d("[SOLUTION SOLVER][MOVES] Minimum required moves for difficulty %d: %d", difficulty, minMoves);
+        Timber.d("[SOLUTION_SOLVER][MOVES] Minimum required moves for difficulty %d: %d", difficulty, minMoves);
         return minMoves;
     }
 
@@ -2317,7 +2323,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             default:
                 maxMoves = MAX_MOVES_BEGINNER;
         }
-        Timber.d("[SOLUTION SOLVER][MOVES] Maximum required moves for difficulty %d: %d", difficulty, maxMoves);
+        Timber.d("[SOLUTION_SOLVER][MOVES] Maximum required moves for difficulty %d: %d", difficulty, maxMoves);
         return maxMoves;
     }
     
@@ -2449,7 +2455,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     @Override
     public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
-        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager.onSolverFinished called: success=%b, moves=%d, solutions=%d", 
+        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverFinished called: success=%b, moves=%d, solutions=%d", 
                 success, solutionMoves, numSolutions);
         
         // Process on main thread to ensure thread safety with UI updates
@@ -2459,20 +2465,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 try {
                     GameSolution solution = getSolverManager().getCurrentSolution();
                     if (solution != null) {
-                        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves", 
+                        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves", 
                                 solution.getMoves() != null ? solution.getMoves().size() : 0);
                         // Forward to the regular solution handling
                         onSolutionCalculationCompleted(solution);
                     } else {
-                        Timber.e("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager received null solution despite success=true");
+                        Timber.e("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager received null solution despite success=true");
                         onSolutionCalculationFailed("No valid solution found");
                     }
                 } catch (Exception e) {
-                    Timber.e(e, "[SOLUTION SOLVER][DIAGNOSTIC] Error getting solution from solver: %s", e.getMessage());
+                    Timber.e(e, "[SOLUTION_SOLVER][DIAGNOSTIC] Error getting solution from solver: %s", e.getMessage());
                     onSolutionCalculationFailed("Error: " + e.getMessage());
                 }
             } else {
-                Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager - No solution found");
+                Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager - No solution found");
                 onSolutionCalculationFailed("No solution found");
             }
         });
@@ -2480,7 +2486,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     @Override
     public void onSolverCancelled() {
-        Timber.d("[SOLUTION SOLVER][DIAGNOSTIC] GameStateManager.onSolverCancelled called");
+        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverCancelled called");
         
         // Process on main thread to ensure thread safety with UI updates
         new Handler(Looper.getMainLooper()).post(() -> {
@@ -2699,6 +2705,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         Timber.d("[DEEPLINK] Setting game state from deep link");
         
+        // --- VALIDATION LOGGING [RANDOM_STATE_VALIDATION] ---
+        // Check if the state is a random state (i.e., not from a level, save, or deep link)
+        // If so, log a warning. This helps ensure validation is not bypassed.
+        if (state.getLevelId() == -1 && (state.getLevelName() == null || state.getLevelName().equals("XXXXX"))) {
+            Timber.w("[RANDOM_STATE_VALIDATION] setGameState called with a random state! This may bypass difficulty validation. State: levelId=%d, levelName=%s", state.getLevelId(), state.getLevelName());
+        }
+        // --- END VALIDATION LOGGING ---
+
         // Clear history and reset counters
         resetMoveCountsAndHistory();
         

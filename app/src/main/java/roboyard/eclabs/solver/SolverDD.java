@@ -49,71 +49,71 @@ public class SolverDD implements ISolver{
         solutions = null;
         solverStatus = SolverStatus.idle;
         
-        Timber.d("[SOLUTION SOLVER] SolverDD.init(): Initializing solver with %d grid elements", elements.size());
+        Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Initializing solver with %d grid elements", elements.size());
         
         // Log some sample elements to verify data
         if (elements.size() > 0) {
-            Timber.d("[SOLUTION SOLVER] SolverDD.init(): First few elements:");
+            Timber.d("[SOLUTION_SOLVER] SolverDD.init(): First few elements:");
             for (int i = 0; i < Math.min(5, elements.size()); i++) {
                 GridElement element = elements.get(i);
-                Timber.d("[SOLUTION SOLVER] Element %d: type=%s, position=(%d,%d)", i, element.getType(), element.getX(), element.getY());
+                Timber.d("[SOLUTION_SOLVER] Element %d: type=%s, position=(%d,%d)", i, element.getType(), element.getX(), element.getY());
             }
         }
         
         // Initialize new board and solver
-        Timber.d("[SOLUTION SOLVER] SolverDD.init(): Creating DD World from elements");
+        Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Creating DD World from elements");
         board = RRGetMap.createDDWorld(elements, pieces);
         
         // Log robot pieces information
-        Timber.d("[SOLUTION SOLVER] SolverDD.init(): Robot pieces after initialization:");
+        Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Robot pieces after initialization:");
         for (int i = 0; i < pieces.length; i++) {
             if (pieces[i] != null) {
-                Timber.d("[SOLUTION SOLVER] Robot %d: color=%d, position=(%d,%d)", 
+                Timber.d("[SOLUTION_SOLVER] Robot %d: color=%d, position=(%d,%d)", 
                     i, pieces[i].getColor(), pieces[i].getX(), pieces[i].getY());
             } else {
-                Timber.d("[SOLUTION SOLVER] Robot %d: null", i);
+                Timber.d("[SOLUTION_SOLVER] Robot %d: null", i);
             }
         }
         
         solver = Solver.createInstance(board);
-        Timber.d("[SOLUTION SOLVER] SolverDD.init(): Solver created successfully");
+        Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Solver created successfully");
     }
 
     @Override
     public void run() {
 
         if(solver == null){
-            Timber.d("[SOLUTION SOLVER] SolverDD.run(): solver is null, aborting");
+            Timber.d("[SOLUTION_SOLVER] SolverDD.run(): solver is null, aborting");
             return;
         }
 
         // Check if outer walls are complete before running the solver
         if (!outerWallsAreComplete()) {
-            Timber.e("[SOLUTION SOLVER] Incomplete outer walls detected! Aborting solver to prevent crash.");
+            Timber.e("[SOLUTION_SOLVER] Incomplete outer walls detected! Aborting solver to prevent crash.");
             solverStatus = SolverStatus.missingData;
             return;
         }
 
         solverStatus = SolverStatus.solving;
-        Timber.d("[SOLUTION SOLVER] SolverDD.run(): Starting solver with status %s", solverStatus);
+        Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Starting solver with status %s", solverStatus);
 
         try {
-            Timber.d("[SOLUTION SOLVER] SolverDD.run(): Executing solver");
+            Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Executing solver");
             solutions = solver.execute();
-            Timber.d("[SOLUTION SOLVER] SolverDD.run(): Solver execution complete");
+            Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Solver execution complete");
             
             if(solutions.size() != 0){
                 Solution solution = solutions.get(0);
-                Timber.d("[SOLUTION SOLVER] %d solution(s) found; first solution:", solutions.size());
-                Timber.d("[SOLUTION SOLVER] %s", solution.toString());
+                Timber.d("[SOLUTION_SOLVER] %d solution(s) found; first solution:", solutions.size());
+                Timber.d("[SOLUTION_SOLVER] %s", solution.toString());
                 solverStatus = SolverStatus.solved;
-                Timber.d("[SOLUTION SOLVER] SolverDD.run(): Status set to %s", solverStatus);
+                Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Status set to %s", solverStatus);
             }else{
-                Timber.d("[SOLUTION SOLVER] SolverDD.run(): No solutions found");
+                Timber.d("[SOLUTION_SOLVER] SolverDD.run(): No solutions found");
                 solverStatus = SolverStatus.noSolution;
             }
         }catch(InterruptedException e){
-            Timber.e(e, "[SOLUTION SOLVER] SolverDD.run(): Solver interrupted");
+            Timber.e(e, "[SOLUTION_SOLVER] SolverDD.run(): Solver interrupted");
             solverStatus = SolverStatus.noSolution;
         }
     }
@@ -133,11 +133,11 @@ public class SolverDD implements ISolver{
      */
     public GameSolution getSolution(int num){
         if (solutions == null || num >= solutions.size()) {
-            Timber.d("[SOLUTION SOLVER] getSolution(%d): Solutions null or index out of range", num);
+            Timber.d("[SOLUTION_SOLVER] getSolution(%d): Solutions null or index out of range", num);
             return null;
         }
 
-        Timber.d("[SOLUTION SOLVER] getSolution(%d): Creating GameSolution from DriftingDroids solution", num);
+        Timber.d("[SOLUTION_SOLVER] getSolution(%d): Creating GameSolution from DriftingDroids solution", num);
         GameSolution s = new GameSolution();
         Solution solution = solutions.get(num);
         solution.resetMoves();
@@ -169,7 +169,7 @@ public class SolverDD implements ISolver{
             m = solution.getNextMove();
         }
         
-        Timber.d("[SOLUTION SOLVER] getSolution(%d): Created GameSolution with %d moves", num, moveCount);
+        Timber.d("[SOLUTION_SOLVER] getSolution(%d): Created GameSolution with %d moves", num, moveCount);
         return s;
     }
 
@@ -190,19 +190,19 @@ public class SolverDD implements ISolver{
 
     private boolean outerWallsAreComplete() {
         if (board == null) {
-            Timber.e("[SOLUTION SOLVER][OUTER WALLS] Cannot check outer walls: board is null");
+            Timber.e("[SOLUTION_SOLVER][OUTER WALLS] Cannot check outer walls: board is null");
             return false;
         }
         
         int width = board.width;
         int height = board.height;
         
-        Timber.d("[SOLUTION SOLVER][OUTER WALLS] Checking outer walls for board dimensions %d x %d", width, height);
+        Timber.d("[SOLUTION_SOLVER][OUTER WALLS] Checking outer walls for board dimensions %d x %d", width, height);
         // Check top border (horizontal walls)
         for (int x = 0; x < width; x++) {
             int position = 0 * width + x; // y=0, first row
             if (!board.isWall(position, Constants.NORTH)) {
-                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing top wall at x=%d", x);
+                Timber.e("[SOLUTION_SOLVER][OUTER WALLS] Missing top wall at x=%d", x);
                 return false;
             }
         }
@@ -211,7 +211,7 @@ public class SolverDD implements ISolver{
         for (int x = 0; x < width; x++) {
             int position = (height-1) * width + x; // y=height-1, last row
             if (!board.isWall(position, Constants.SOUTH)) {
-                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing bottom wall at x=%d", x);
+                Timber.e("[SOLUTION_SOLVER][OUTER WALLS] Missing bottom wall at x=%d", x);
                 return false;
             }
         }
@@ -220,7 +220,7 @@ public class SolverDD implements ISolver{
         for (int y = 0; y < height; y++) {
             int position = y * width + 0; // x=0, first column
             if (!board.isWall(position, Constants.WEST)) {
-                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing left wall at y=%d", y);
+                Timber.e("[SOLUTION_SOLVER][OUTER WALLS] Missing left wall at y=%d", y);
                 return false;
             }
         }
@@ -229,12 +229,12 @@ public class SolverDD implements ISolver{
         for (int y = 0; y < height; y++) {
             int position = y * width + (width-1); // x=width-1, last column
             if (!board.isWall(position, Constants.EAST)) {
-                Timber.e("[SOLUTION SOLVER][OUTER WALLS] Missing right wall at y=%d", y);
+                Timber.e("[SOLUTION_SOLVER][OUTER WALLS] Missing right wall at y=%d", y);
                 return false;
             }
         }
         
-        Timber.d("[SOLUTION SOLVER][OUTER WALLS] All outer walls are present");
+        Timber.d("[SOLUTION_SOLVER][OUTER WALLS] All outer walls are present");
         return true;
     }
 }
