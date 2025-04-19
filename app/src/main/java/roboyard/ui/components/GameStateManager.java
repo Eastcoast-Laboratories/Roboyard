@@ -1814,8 +1814,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     element.setSelected(false);
                 }
             }
-
-            resetRobots();
             
             // Reset the robotsUsed tracking for statistics
             robotsUsed.clear();
@@ -2585,7 +2583,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
 
-            resetRobots();
+            // REMOVED: resetRobots(); - This was causing infinite recursion
             
             // Reset the robotsUsed tracking for statistics
             robotsUsed.clear();
