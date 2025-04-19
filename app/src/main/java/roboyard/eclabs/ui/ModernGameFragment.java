@@ -915,9 +915,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
                     Timber.d("[HINT_SYSTEM] No solution available, calculating...");
                     showSolverCalculatingMessage();
-                    
-                    // Start calculating a solution
-                    gameStateManager.calculateSolutionAsync(this);
                     return;
                 }
                 
@@ -2558,11 +2555,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
             Timber.d("[HINT] Randomized hint count: %d", randomHintCount);
             numPreHints = randomHintCount;
-            
-            // Auto-calculate solution for random games
-            // This ensures onSolutionCalculationCompleted gets called
-            Timber.d("[HINT] Auto-calculating solution for random game");
-            gameStateManager.calculateSolutionAsync(this);
         }
         
         // Clear any previous hint or status text
