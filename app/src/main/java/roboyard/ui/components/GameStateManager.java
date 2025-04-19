@@ -2069,7 +2069,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // BEGINNER MODE: Check if solution is too easy (below minimum) or too hard (above maximum)
             if (!isLevelMode && regenerationCount < MAX_AUTO_REGENERATIONS) {
                 boolean isTooEasy = moveCount < minRequiredMoves;
-                boolean isTooHard = Preferences.difficulty == Constants.DIFFICULTY_BEGINNER && moveCount > MAX_MOVES_BEGINNER;
+                boolean isTooHard = moveCount > maxRequiredMoves;
                 
                 if (isTooEasy) {
                     // Regenerate if puzzle is too easy
@@ -2088,9 +2088,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     }, 100);
                     return;
                 } else if (isTooHard) {
-                    // Regenerate if puzzle is too hard for beginner mode
-                    Timber.w("[DIFFICULTY ENFORCER] BEGINNER mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
-                            moveCount, MAX_MOVES_BEGINNER, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                    // Regenerate if puzzle is too hard for current difficulty mode
+                    Timber.w("[DIFFICULTY ENFORCER] %s mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
+                            getLocalizedDifficultyString(), moveCount, maxRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
                     regenerationCount++;
                     
                     // Force reset the solver state before starting a new game
