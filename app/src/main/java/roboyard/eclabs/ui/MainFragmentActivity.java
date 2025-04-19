@@ -29,7 +29,6 @@ public class MainFragmentActivity extends AppCompatActivity {
     
     private GameStateManager gameStateManager;
     private NavController navController;
-    private String deepLinkData = null;
 
     // Forward to the regular MainActivity's static methods
     public static int getBoardWidth() {
@@ -125,7 +124,6 @@ public class MainFragmentActivity extends AppCompatActivity {
             
             if (mapData != null && !mapData.isEmpty()) {
                 Timber.d("[DEEPLINK] Extracted map data: %s", mapData.substring(0, Math.min(50, mapData.length())));
-                deepLinkData = mapData;
                 
                 // Check if the data is in web format (starts with "name:" or contains "mh" wall markers)
                 if (mapData.startsWith("name:") || mapData.contains("mh") || mapData.contains("mv")) {
@@ -558,14 +556,6 @@ public class MainFragmentActivity extends AppCompatActivity {
             Timber.e(e, "[DEEPLINK_PROCESS] Error processing map data: %s", e.getMessage());
             e.printStackTrace();
         }
-    }
-    
-    /**
-     * Get the deep link data if available
-     * @return The deep link data or null if none is available
-     */
-    public String getDeepLinkData() {
-        return deepLinkData;
     }
     
     /**
