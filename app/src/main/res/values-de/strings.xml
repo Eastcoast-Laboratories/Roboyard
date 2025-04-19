@@ -224,7 +224,7 @@
     <string name="button_back">Zurück</string>
     <string name="back">Zurück</string>
     <string name="back_description">Zurück zum vorherigen Bildschirm</string>
-    <string name="reset">Zurücksetzen</string>
+    <string name="reset">Reset</string>
     <string name="save_map">Speichern</string>
     <string name="button_save_map">Speichern</string>
 
@@ -312,7 +312,7 @@
     <string name="direction_left">nach links</string>
 
     <!-- Game UI Buttons and Messages -->
-    <string name="reset_button">Zurücksetzen</string>
+    <string name="reset_button">Reset</string>
     <string name="unique_map_id">%1$s</string>
     <string name="empty_text"></string>
     <string name="level_id_text">Level %1$d</string>
@@ -368,7 +368,7 @@
     <string name="hint_cancel_button">✖️ Hinweis</string>
     <string name="cancel_button">Cancel</string>
     <string name="hint_button">💡Hinweis</string>
-    <string name="cancel_hint_button">🔍 Ausblenden</string>
+    <string name="cancel_hint_button">✖️ Hinweis</string>
 
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">Roboter:</string>

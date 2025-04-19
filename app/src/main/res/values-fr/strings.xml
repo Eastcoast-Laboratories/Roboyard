@@ -105,7 +105,7 @@
     <string name="restart_button">Rejouer</string>
     <string name="save_map_button">Sauvegarder</string>
     <string name="button_back_game">Retour</string>
-    <string name="button_reset">Réinitialiser</string>
+    <string name="button_reset">Rétablir</string>
 
     <!-- Game UI Messages -->
     <string name="ai_calculating">IA calcule une solution...</string>
@@ -177,12 +177,12 @@
 
     <!-- Navigation buttons -->
     <string name="button_back">Retour</string>
-    <string name="button_save_map">Enregistrer</string>
-    <string name="button_new_game">Nouvelle partie</string>
+    <string name="button_save_map">Sauver</string>
+    <string name="button_new_game">Recréer</string>
     <string name="button_menu">Menu</string>
     <string name="back">Retour</string>
-    <string name="reset">Réinitialiser</string>
-    <string name="save_map">Enregistrer la carte</string>
-    <string name="new_game">Nouvelle partie</string>
+    <string name="reset">Rétablir</string>
+    <string name="save_map">Sauver</string>
+    <string name="new_game">Recréer</string>
     <string name="menu">Menu</string>
 </resources>
