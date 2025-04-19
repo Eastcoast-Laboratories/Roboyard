@@ -122,23 +122,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - multiple sources of truth concept ausführen
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
 
-# prompt for AI / Developer:
+- deep link support
 
-I need to add deep link support to  so that when a user clicks a link like roboyard://open?data=... (or an intent link in the browser on the cellphone), the app launches and receives the data parameter.
-
-Requirements:
-
-The app should register the roboyard URI scheme and handle links such as roboyard://open?data=....
-When the app is opened via such a link, it should extract the data query parameter and make it available to the app logic and open the data as a new random map.
-The app’s manifest should be configured for both custom scheme and Android intent links (for Chrome compatibility).
-If possible, provide a method for the main Activity to access the data parameter.
-Example link:
-roboyard://open?data=EXAMPLEDATA
-
-Please provide:
-
-The necessary AndroidManifest.xml intent filter(s).
-Example code to extract the data parameter in the main Activity.
-Any additional steps needed for Chrome/intent:// compatibility.
-
-the best would be, if the data is in a format, that is already implemented iin the app, maybe the saveMap format?
+- the green target color on a shared map is yellow
