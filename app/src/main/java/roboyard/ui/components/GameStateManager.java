@@ -77,8 +77,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Minimum required moves for each difficulty level (as per documentation)
     private static final int MIN_MOVES_BEGINNER = 4;      // 4-6 moves
     private static final int MAX_MOVES_BEGINNER = 6;    // 4-6 moves
-    private static final int MIN_MOVES_ADVANCED = 6;    // 6-8 moves
-    private static final int MAX_MOVES_ADVANCED = 8;    // 6-8 moves
+    private static final int MIN_MOVES_ADVANCED = 6;    // 6-10 moves
+    private static final int MAX_MOVES_ADVANCED = 10;    // 6-10 moves
     private static final int MIN_MOVES_INSANE = 10;     // 10+ moves
     private static final int MIN_MOVES_IMPOSSIBLE = 17; // 17+ moves
     

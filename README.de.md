@@ -37,9 +37,7 @@ Roboyard ermöglicht es, bis zu 35 verschiedene Karten zu speichern. Wenn Sie al
   - zeigt Rätsel mit Lösungen von mindestens 4-6 Zügen
   - Ziele befinden sich immer in Ecken mit zwei Wänden
 - Fortgeschritten
-  - Lösungen mit mindestens 6-8 Zügen
-  - Spielfeld beim Start des nächsten Spiels beibehalten
-  - Spielfeld beim Laden eines gespeicherten Spiels beibehalten
+  - Lösungen mit mindestens 6-10 Zügen
   - drei Linien in derselben Reihe/Spalte erlaubt
   - kein mehrfarbiges Ziel
 - Wahnsinnsmodus
