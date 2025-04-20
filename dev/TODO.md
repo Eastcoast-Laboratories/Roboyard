@@ -125,3 +125,10 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - deep link support
 
 - the green target color on a shared map is yellow
+
+- im save slot anzeigen, wieviel die optimal moves sind und wieviel man gebraucht hat, wenn man den level completed hat
+
+- wenn man einen level ohne hints geschafft hat, anzeigen, wieviel die optimal moves wären
+
+- in der history steht immer 16x16 statt der richtigen grösse
+

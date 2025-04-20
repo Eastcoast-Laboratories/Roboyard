@@ -79,10 +79,6 @@
     <string name="settings_sound">Ton:</string>
     <string name="settings_yes">Ja</string>
     <string name="settings_no">Nein</string>
-    <string name="settings_beginner">Anfänger</string>
-    <string name="settings_advanced">Fortgeschritten</string>
-    <string name="settings_insane">Verrückt</string>
-    <string name="settings_impossible">Unmöglich</string>
     <string name="settings_game_mode">Spielmodus:</string>
     <string name="settings_standard_game">Standardspiel</string>
     <string name="settings_standard_game_a11y">Standardspielmodus</string>
@@ -353,7 +349,7 @@
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Anfänger</string>
     <string name="difficulty_advanced">Fortgeschritten</string>
-    <string name="difficulty_insane">Extrem</string>
+    <string name="difficulty_insane">Verrückt</string>
     <string name="difficulty_impossible">Unmöglich</string>
     <string name="difficulty_unknown">Unbekannt</string>
     

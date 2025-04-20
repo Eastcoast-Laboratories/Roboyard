@@ -114,7 +114,7 @@
     <string name="saved_on">saved on</string>
     <string name="share_a11y">Share</string>
     <string name="empty_slot">empty slot</string>
-    <string name="level_difficulty_beginner">Beginner</string>
+    <string name="level_difficulty_beginner">Beginner</string>f
     <string name="level_difficulty_intermediate">Intermediate</string>
     <string name="level_difficulty_advanced">Advanced</string>
     <string name="level_difficulty_expert">Expert</string>
@@ -379,10 +379,6 @@
     <string name="settings_title">Roboyard Settings</string>
     <string name="settings_board_size">Board Size:</string>
     <string name="settings_difficulty">Difficulty Level:</string>
-    <string name="settings_beginner">Beginner</string>
-    <string name="settings_advanced">Advanced</string>
-    <string name="settings_insane">Insane</string>
-    <string name="settings_impossible">Impossible</string>
     <string name="settings_new_map_each_time">Generate New Map Each Time:</string>
     <string name="settings_robots_reach_targets">Target Settings:</string>
     <string name="settings_out_of">of</string>

@@ -124,10 +124,6 @@
     <string name="settings_sound">Son:</string>
     <string name="settings_yes">Oui</string>
     <string name="settings_no">Non</string>
-    <string name="settings_beginner">Débutant</string>
-    <string name="settings_advanced">Avancé</string>
-    <string name="settings_insane">Extrême</string>
-    <string name="settings_impossible">Impossible</string>
 
     <!-- Settings strings -->
     <string name="settings_game_mode">Mode de jeu:</string>

@@ -863,15 +863,15 @@ public class SaveGameFragment extends BaseGameFragment {
         // Get localized difficulty strings from resources
         switch (difficulty) {
             case Constants.DIFFICULTY_BEGINNER:
-                return getString(R.string.settings_beginner);
+                return getString(R.string.difficulty_beginner);
             case Constants.DIFFICULTY_ADVANCED:
-                return getString(R.string.settings_advanced);
+                return getString(R.string.difficulty_advanced);
             case Constants.DIFFICULTY_INSANE:
-                return getString(R.string.settings_insane);
+                return getString(R.string.difficulty_insane);
             case Constants.DIFFICULTY_IMPOSSIBLE:
-                return getString(R.string.settings_impossible);
+                return getString(R.string.difficulty_impossible);
             default:
-                return getString(R.string.settings_beginner);
+                return getString(R.string.difficulty_beginner);
         }
     }
     
@@ -1367,7 +1367,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 holder.minimapView.setVisibility(View.GONE);
             }
             
-            // Set up click listener
+            // Set up click listener to load or save a game on touch
             holder.itemView.setOnClickListener(v -> {
                 if (saveMode) {
                     // Save current game to this slot
