@@ -1239,7 +1239,11 @@ public class SaveGameFragment extends BaseGameFragment {
      * @return true if the wall is a border wall
      */
     private boolean isBorderWall(int x, int y, int width, int height) {
-        return x == 0 || y == 0 || x == width - 1 || y == height - 1;
+        // Note: In Roboyard, walls are indexed starting at -1
+        // Walls at x=0 or y=0 are NOT border walls, they are valid game elements
+        // Only consider walls at the absolute edge (which would be at -1 if walls were indexed properly)
+        // Since we don't have access to -1 coordinates here, we don't filter any walls
+        return false; // Don't filter out any walls - we need them all
     }
     
     /**
