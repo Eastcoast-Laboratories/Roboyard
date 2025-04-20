@@ -526,7 +526,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                 // Override the difficulty if specified in the deep link
                 if (difficulty >= 0) {
                     // Store the difficulty for this map
-                    gameStateManager.setDeepLinkDifficulty(difficulty);
+                    gameStateManager.setDifficulty(difficulty);
                     Timber.d("[DEEPLINK_PROCESS] Set map difficulty: %d", difficulty);
                 }
                 

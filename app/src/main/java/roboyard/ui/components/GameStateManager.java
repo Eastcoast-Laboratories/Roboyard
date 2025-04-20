@@ -72,8 +72,8 @@ import timber.log.Timber;
  * This replaces the previous GameManager with a more Android-native approach.
  */
 public class GameStateManager extends AndroidViewModel implements SolverManager.SolverListener {
-    
-        
+
+
     // Minimum required moves for each difficulty level (as per documentation)
     private static final int MIN_MOVES_BEGINNER = 4;      // 4-6 moves
     private static final int MAX_MOVES_BEGINNER = 6;    // 4-6 moves
@@ -81,46 +81,46 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private static final int MAX_MOVES_ADVANCED = 10;    // 6-10 moves
     private static final int MIN_MOVES_INSANE = 10;     // 10+ moves
     private static final int MIN_MOVES_IMPOSSIBLE = 17; // 17+ moves
-    
+
     private boolean validateDifficulty = true;
     private int regenerationCount = 0;
     private static final int MAX_AUTO_REGENERATIONS = 999;
-    
+
     // Game state
     private final MutableLiveData<GameState> currentState = new MutableLiveData<>();
     private final MutableLiveData<Integer> moveCount = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> squaresMoved = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
-    
+
     // Move history for undo functionality
     private final ArrayList<GameState> stateHistory = new ArrayList<>();
     private final ArrayList<Integer> squaresMovedHistory = new ArrayList<>();
-    
+
     // Game settings
     private final MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
     private final MutableLiveData<Boolean> isSolverRunning = new MutableLiveData<>(false);
-    
+
     // Solver
     private SolverManager solver;
     private Context context;
-    
+
     // Minimap
     private String currentMapName = "";
     private long startTime = 0;
     private Bitmap minimap = null;
-    
+
     // Solution state
     private GameSolution currentSolution = null;
     private int currentSolutionStep = 0;
-    
+
     // Track hint usage for level completion statistics
     private int hintsShown = 0;
     // Track unique robots used for level completion statistics
     private final Set<Integer> robotsUsed = new HashSet<>();
-    
+
     // Robot animation manager
     private RobotAnimationManager robotAnimationManager;
-    
+
     // Animation settings - made slower for more visible effect (minDuration = 100f,) 
     private boolean animationsEnabled = true;
     private float accelerationDuration = 300f;  // Reduced from 300f for faster animations
@@ -129,10 +129,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private float overshootPercentage = 0.20f;  // Keep original value, extreme values cause memory issues
     private float springBackDuration = 220f;    // Reduced from 400f for faster animations
     private long animationFrameDelay = 25;     // Animation frame delay in ms (default Android is ~16ms = 60fps)
-    
+
     private boolean isResetting = false;
     private GameGridView gameGridView;
-    
+
     // Track solver restart count and last solution minimums for UI display
     private int solverRestartCount = 0;
     private int lastSolutionMinMoves = 0;
@@ -145,28 +145,29 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
     private WeakReference<Activity> activityRef;
-    
+
     // Store the difficulty level from a deep link
     private int deepLinkDifficulty = -1;
-    
+
     public GameStateManager(Application application) {
         super(application);
         // We'll use lazy initialization for solver now - do not create it here
-        
+
         context = application.getApplicationContext();
-        
+
         // Initialize robotAnimationManager
         robotAnimationManager = new RobotAnimationManager(this);
     }
-    
+
     /**
      * Get the solver manager instance, initializing it if necessary
+     *
      * @return The solver manager instance
      */
     private SolverManager getSolverManager() {
         Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
         SolverManager solverManager = SolverManager.getInstance();
-        
+
         // Set solver listener if not already set
         if (solverManager.getListener() == null) {
             solverManager.setListener(this);
@@ -174,7 +175,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         return solverManager;
     }
-    
+
     /**
      * Start a new random game
      */
@@ -183,18 +184,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         startModernGame();
     }
-    
+
     /**
      * Start a new modern game
      */
     public void startModernGame() {
         Timber.d("GameStateManager: startModernGame() called");
-        
+
         // Reset any existing solver state to ensure a clean calculation for the new game
         SolverManager solverManager = getSolverManager();
         solverManager.resetInitialization();
         solverManager.cancelSolver(); // Cancel any running solver process
-        
+
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
@@ -203,97 +204,100 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Reset regeneration counter
         regenerationCount = 0;
-        
+
         // Create a new valid game (will regenerate if solution is too simple)
         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-        
+
         // Record start time
         startTime = System.currentTimeMillis();
-        
+
         Timber.d("GameStateManager: startModernGame() complete");
     }
-    
+
     /**
      * Start a level game with the modern UI
+     *
      * @param levelId Level ID to load
      */
     public void startLevelGame(int levelId) {
         Timber.d("GameStateManager: startLevelGame() called with levelId: %d", levelId);
-        
+
         // If solver is already running, don't create a new game state to avoid mismatch
         if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
             Timber.d("[SOLUTION_SOLVER] startLevelGame: Solver already running, not creating new game state");
             return;
         }
-        
+
         // Reset any existing solver state to ensure a clean calculation for the new level
         SolverManager solverManager = getSolverManager();
         solverManager.resetInitialization();
         solverManager.cancelSolver(); // Cancel any running solver process
-        
+
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
-        
+
         // Load level from assets
         GameState state = GameState.loadLevel(getApplication(), levelId);
         state.setLevelId(levelId);
         state.setLevelName("Level " + levelId);
-        
+
         // Set reference to this GameStateManager in the new state
         state.setGameStateManager(this);
-        
+
         // Set the current state
         currentState.setValue(state);
         currentMapName = "Level-" + levelId;
-        
+
         // Reset move counts and history
         setMoveCount(0);
         resetSquaresMoved(); // reset squares moved count
         setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
-        
+
         // Initialize the solver with the grid elements from the loaded level
         ArrayList<GridElement> gridElements = state.getGridElements();
-        Timber.d("[SOLUTION_SOLVER] Initializing solver with %d grid elements from level %d", 
+        Timber.d("[SOLUTION_SOLVER] Initializing solver with %d grid elements from level %d",
                 gridElements.size(), levelId);
         getSolverManager().initialize(gridElements);
-        
+
         // Start calculating the solution automatically
         calculateSolutionAsync(null);
-        
+
         // Record start time
         startTime = System.currentTimeMillis();
-        
+
         Timber.d("GameStateManager: startLevelGame() complete for level %d", levelId);
-        
+
         resetStatistics();
     }
-    
+
     /**
      * Load a specific level
+     *
      * @param levelId Level ID to load
      */
     public void loadLevel(int levelId) {
         // Load level from assets
         GameState newState = GameState.loadLevel(getApplication(), levelId);
         newState.setLevelId(levelId);
-        
+
         // Set reference to this GameStateManager in the new state
         newState.setGameStateManager(this);
-        
+
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
-        
+
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
         getSolverManager().initialize(gridElements);
     }
-    
+
     /**
      * Load a saved game
+     *
      * @param saveId Save slot ID
      */
     public void loadGame(int saveId) {
@@ -301,174 +305,199 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Load saved game using the original method
             GameState newState = GameState.loadSavedGame(getApplication(), saveId);
             if (newState != null) {
-                // Set reference to this GameStateManager in the new state
-                newState.setGameStateManager(this);
-                
-                // Analyze the loaded data and show all elements loaded in the log
-                Timber.d("[GAME_LOAD] Analyzing loaded game data for slot %d", saveId);
-                Timber.d("[GAME_LOAD] Board size: %d x %d", newState.getWidth(), newState.getHeight());
-                Timber.d("[GAME_LOAD] Map name: %s", newState.getLevelName());
-                
-                // Log all game elements
-                int robotCount = 0;
-                int targetCount = 0;
-                int horizontalWallCount = 0;
-                int verticalWallCount = 0;
-                
-                for (GameElement element : newState.getGameElements()) {
-                    switch (element.getType()) {
-                        case GameElement.TYPE_ROBOT:
-                            robotCount++;
-                            Timber.d("[GAME_LOAD] Found robot at (%d,%d) with color %d", 
-                                    element.getX(), element.getY(), element.getColor());
-                            break;
-                        case GameElement.TYPE_TARGET:
-                            targetCount++;
-                            Timber.d("[GAME_LOAD] Found target at (%d,%d) with color %d", 
-                                    element.getX(), element.getY(), element.getColor());
-                            break;
-                        case GameElement.TYPE_HORIZONTAL_WALL:
-                            horizontalWallCount++;
-                            break;
-                        case GameElement.TYPE_VERTICAL_WALL:
-                            verticalWallCount++;
-                            break;
-                    }
-                }
-                
-                // Log summary of elements
-                Timber.d("[GAME_LOAD] Element summary - Robots: %d, Targets: %d, Horizontal walls: %d, Vertical walls: %d", 
-                        robotCount, targetCount, horizontalWallCount, verticalWallCount);
-                
-                // Store the map name from the loaded state
-                this.currentMapName = newState.getLevelName();
-                Timber.d("[MAPNAME] GameStateManager.loadGame - Set currentMapName to: %s", this.currentMapName);
-                
-                // Check for targets in the board data (cellType and targetColors)
-                int boardTargetCount = 0;
-                for (int y = 0; y < newState.getHeight(); y++) {
-                    for (int x = 0; x < newState.getWidth(); x++) {
-                        if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
-                            boardTargetCount++;
-                            int targetColor = newState.getTargetColor(x, y);
-                            Timber.d("[GAME_LOAD] Found board target at (%d,%d) with color %d", x, y, targetColor);
-                        }
-                    }
-                }
-                
-                Timber.d("[GAME_LOAD] Board target count: %d", boardTargetCount);
-                
-                // If there are no targets in gameElements but there are targets in the board data,
-                // we need to recreate the GameElements for the targets
-                if (targetCount == 0 && boardTargetCount > 0) {
-                    Timber.w("[GAME_LOAD] No targets found in gameElements but %d targets found in board data. Recreating targets.", boardTargetCount);
-                    
-                    // Recreate target elements based on board data
-                    for (int y = 0; y < newState.getHeight(); y++) {
-                        for (int x = 0; x < newState.getWidth(); x++) {
-                            if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
-                                int color = newState.getTargetColor(x, y);
-                                GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                                target.setColor(color);
-                                newState.getGameElements().add(target);
-                                Timber.d("[GAME_LOAD] Recreated target element at (%d,%d) with color %d", x, y, color);
-                            }
-                        }
-                    }
-                }
-                
-                // If there are no targets at all, throw an exception
-                if (targetCount == 0 && boardTargetCount == 0) {
-                    String errorMessage = "No targets found in loaded game data";
-                    Throwable t = new Throwable();
-                    Timber.e(t, "[GAME_LOAD] %s", errorMessage);
-                    throw new IllegalStateException(errorMessage);
-                }
-                
-                // Ensure robots are reset to their initial positions
-                newState.resetRobotPositions();
-                Timber.d("[GAME_LOAD] Robots reset to initial positions after loading saved game");
-                
-                // Synchronize targets to ensure board array matches gameElements
-                int syncedTargets = newState.synchronizeTargets();
-                if (syncedTargets > 0) {
-                    Timber.d("[GAME_LOAD] Synchronized %d targets after loading saved game", syncedTargets);
-                }
-                
-                currentState.setValue(newState);
-                moveCount.setValue(newState.getMoveCount());
-                isGameComplete.setValue(newState.isComplete());
-                
-                // CRITICAL FIX: We need to ensure the solver receives the correct GridElements for targets
-                // Create a GridElements list that properly includes the targets
-                ArrayList<GridElement> gridElements = new ArrayList<>();
-                
-                // Convert GameElements to GridElements for the solver
-                for (GameElement element : newState.getGameElements()) {
-                    GridElement gridElement = null;
-                    
-                    switch (element.getType()) {
-                        case GameElement.TYPE_ROBOT:
-                            String robotType = "robot_" + GameLogic.getColorName(element.getColor(), false);
-                            gridElement = new GridElement(element.getX(), element.getY(), robotType);
-                            Timber.d("[SOLVER_INIT] Added robot GridElement: %s at (%d,%d)", robotType, element.getX(), element.getY());
-                            break;
-                            
-                        case GameElement.TYPE_TARGET:
-                            String targetType = "target_" + GameLogic.getColorName(element.getColor(), false);
-                            gridElement = new GridElement(element.getX(), element.getY(), targetType);
-                            Timber.d("[SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.getX(), element.getY());
-                            break;
-                            
-                        case GameElement.TYPE_HORIZONTAL_WALL:
-                            gridElement = new GridElement(element.getX(), element.getY(), "mh");
-                            break;
-                            
-                        case GameElement.TYPE_VERTICAL_WALL:
-                            gridElement = new GridElement(element.getX(), element.getY(), "mv");
-                            break;
-                    }
-                    
-                    if (gridElement != null) {
-                        gridElements.add(gridElement);
-                    }
-                }
-                
-                // Initialize solver with our properly constructed grid elements
-                getSolverManager().initialize(gridElements);
-                Timber.d("[SOLVER_INIT] Initialized solver with %d grid elements including robots and targets", gridElements.size());
+                // Apply the loaded game state using the shared method
+                applyLoadedGameState(newState);
+                Timber.d("Successfully loaded game from slot %d", saveId);
+            } else {
+                Timber.e("Failed to load game state from slot %d", saveId);
             }
         }
     }
-    
+
+    /**
+     * Apply a loaded GameState to the current game
+     * This method contains the common logic used by both saved games and deep links
+     *
+     * @param newState The new GameState to apply
+     * @return true if successful, false otherwise
+     */
+    public boolean applyLoadedGameState(GameState newState) {
+        // Set reference to this GameStateManager in the new state
+        newState.setGameStateManager(this);
+
+        // Analyze the loaded data and show all elements loaded in the log
+        Timber.d("[GAME_LOAD] Analyzing loaded game data");
+        Timber.d("[GAME_LOAD] Board size: %d x %d", newState.getWidth(), newState.getHeight());
+        Timber.d("[GAME_LOAD] Map name: %s", newState.getLevelName());
+
+        // Log all game elements
+        int robotCount = 0;
+        int targetCount = 0;
+        int horizontalWallCount = 0;
+        int verticalWallCount = 0;
+        for (GameElement element : newState.getGameElements()) {
+            switch (element.getType()) {
+                case GameElement.TYPE_ROBOT:
+                    robotCount++;
+                    Timber.d("[GAME_LOAD] Found robot at (%d,%d) with color %d",
+                            element.getX(), element.getY(), element.getColor());
+                    break;
+                case GameElement.TYPE_TARGET:
+                    targetCount++;
+                    Timber.d("[GAME_LOAD] Found target at (%d,%d) with color %d",
+                            element.getX(), element.getY(), element.getColor());
+                    break;
+                case GameElement.TYPE_HORIZONTAL_WALL:
+                    horizontalWallCount++;
+                    break;
+                case GameElement.TYPE_VERTICAL_WALL:
+                    verticalWallCount++;
+                    break;
+            }
+        }
+
+        // Log summary of elements
+        Timber.d("[GAME_LOAD] Element summary - Robots: %d, Targets: %d, Horizontal walls: %d, Vertical walls: %d",
+                robotCount, targetCount, horizontalWallCount, verticalWallCount);
+
+        // Store the map name from the loaded state
+        this.currentMapName = newState.getLevelName();
+        Timber.d("[MAPNAME] GameStateManager - Set currentMapName to: %s", this.currentMapName);
+
+        // Check for targets in the board data (cellType and targetColors)
+        int boardTargetCount = 0;
+        for (int y = 0; y < newState.getHeight(); y++) {
+            for (int x = 0; x < newState.getWidth(); x++) {
+                if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
+                    boardTargetCount++;
+                    int targetColor = newState.getTargetColor(x, y);
+                    Timber.d("[GAME_LOAD] Found board target at (%d,%d) with color %d", x, y, targetColor);
+                }
+            }
+        }
+        Timber.d("[GAME_LOAD] Board target count: %d", boardTargetCount);
+
+        // If there are no targets in gameElements but there are targets in the board data,
+        // we need to recreate the GameElements for the targets
+        if (targetCount == 0 && boardTargetCount > 0) {
+            Timber.w("[GAME_LOAD] No targets found in gameElements but %d targets found in board data. Recreating targets.", boardTargetCount);
+            // Recreate target elements based on board data
+            for (int y = 0; y < newState.getHeight(); y++) {
+                for (int x = 0; x < newState.getWidth(); x++) {
+                    if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
+                        int color = newState.getTargetColor(x, y);
+                        GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
+                        target.setColor(color);
+                        newState.getGameElements().add(target);
+                        Timber.d("[GAME_LOAD] Recreated target element at (%d,%d) with color %d", x, y, color);
+                    }
+                }
+            }
+        }
+
+        // If there are no targets at all, throw an exception
+        if (targetCount == 0 && boardTargetCount == 0) {
+            String errorMessage = "No targets found in loaded game data";
+            Throwable t = new Throwable();
+            Timber.e(t, "[GAME_LOAD] %s", errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
+
+        // Ensure robots are reset to their initial positions
+        newState.resetRobotPositions();
+        Timber.d("[GAME_LOAD] Robots reset to initial positions after loading");
+
+        // Synchronize targets to ensure board array matches gameElements
+        int syncedTargets = newState.synchronizeTargets();
+        if (syncedTargets > 0) {
+            Timber.d("[GAME_LOAD] Synchronized %d targets after loading", syncedTargets);
+        }
+
+        // Update LiveData values
+        currentState.setValue(newState);
+        moveCount.setValue(newState.getMoveCount());
+        isGameComplete.setValue(newState.isComplete());
+
+        // Initialize solver with grid elements
+        initializeSolverForState(newState);
+
+        return true;
+    }
+
+    /**
+     * Initialize the solver with grid elements from a game state
+     *
+     * @param state The game state to initialize the solver with
+     */
+    private void initializeSolverForState(GameState state) {
+        // Create a GridElements list that properly includes the targets
+        ArrayList<GridElement> gridElements = new ArrayList<>();
+
+        // Convert GameElements to GridElements for the solver
+        for (GameElement element : state.getGameElements()) {
+            GridElement gridElement = null;
+            switch (element.getType()) {
+                case GameElement.TYPE_ROBOT:
+                    String robotType = "robot_" + GameLogic.getColorName(element.getColor(), false);
+                    gridElement = new GridElement(element.getX(), element.getY(), robotType);
+                    Timber.d("[SOLVER_INIT] Added robot GridElement: %s at (%d,%d)", robotType, element.getX(), element.getY());
+                    break;
+
+                case GameElement.TYPE_TARGET:
+                    String targetType = "target_" + GameLogic.getColorName(element.getColor(), false);
+                    gridElement = new GridElement(element.getX(), element.getY(), targetType);
+                    Timber.d("[SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.getX(), element.getY());
+                    break;
+
+                case GameElement.TYPE_HORIZONTAL_WALL:
+                    gridElement = new GridElement(element.getX(), element.getY(), "mh");
+                    break;
+
+                case GameElement.TYPE_VERTICAL_WALL:
+                    gridElement = new GridElement(element.getX(), element.getY(), "mv");
+                    break;
+            }
+
+            if (gridElement != null) {
+                gridElements.add(gridElement);
+            }
+        }
+
+        // Initialize solver with our properly constructed grid elements
+        getSolverManager().initialize(gridElements);
+        Timber.d("[SOLVER_INIT] Initialized solver with %d grid elements including robots and targets", gridElements.size());
+    }
+
     /**
      * Load a history entry
+     *
      * @param historyId History entry ID to load
      */
     public void loadHistoryEntry(int historyId) {
         // TODO: Implement history entry loading
         GameState newState = GameState.createRandom();
         newState.setLevelId(historyId);
-        
+
         // Set reference to this GameStateManager in the new state
         newState.setGameStateManager(this);
-        
+
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
-        
+
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
         getSolverManager().initialize(gridElements);
     }
-    
+
     /**
      * Load a game from a history entry
+     *
      * @param mapPath Path to the history entry file
      */
     public void loadHistoryEntry(String mapPath) {
         Timber.d("Loading history entry: %s", mapPath);
-        
+
         try {
             // Load game state from file
             File historyFile = new File(mapPath);
@@ -476,23 +505,24 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 Timber.e("History file does not exist: %s", mapPath);
                 return;
             }
-            
+
             // TODO: Implement proper loading from history file
-            
+
             Timber.d("Loaded history entry");
         } catch (Exception e) {
             Timber.e(e, "Error loading history entry: %s", mapPath);
         }
     }
-    
+
     /**
      * Save the current game to a slot
+     *
      * @param saveId The save slot ID
      * @return true if the game was saved successfully, false otherwise
      */
     public boolean saveGame(int saveId) {
         Timber.d("Saving game to slot %d", saveId);
-        
+
         // Get the current game state
         GameState gameState = currentState.getValue();
         if (gameState == null) {
@@ -502,7 +532,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("Has saved state history: %s", stateHistory.isEmpty() ? "no" : "yes, with " + stateHistory.size() + " entries");
             return false;
         }
-        
+
         try {
             // Create save directory if it doesn't exist
             File saveDir = new File(getContext().getFilesDir(), Constants.SAVE_DIRECTORY);
@@ -512,17 +542,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     return false;
                 }
             }
-            
+
             // Create save file
             String fileName = Constants.SAVE_FILENAME_PREFIX + saveId + Constants.SAVE_FILENAME_EXTENSION;
             File saveFile = new File(saveDir, fileName);
-            
+
             // Serialize game state to JSON
             String saveData = gameState.serialize();
-            
+
             // Add additional important metadata if not already present
             StringBuilder enhancedSaveData = new StringBuilder(saveData);
-            
+
             // Check if we need to add a DIFFICULTY tag - find first line end
             if (!saveData.contains("DIFFICULTY:")) {
                 int difficultyLevel = Preferences.difficulty; // Get current difficulty setting
@@ -535,7 +565,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.d("[SAVEDATA] Added difficulty tag: %s", difficultyTag);
                 }
             }
-            
+
             // Add board size if not already present
             if (!saveData.contains("SIZE:")) {
                 int width = gameState.getWidth();
@@ -549,7 +579,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.d("[SAVEDATA] Added size tag: %s", sizeTag);
                 }
             }
-            
+
             // Add completion status if not already present
             if (!saveData.contains("SOLVED:")) {
                 boolean solved = gameState.isComplete();
@@ -562,12 +592,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.d("[SAVEDATA] Added solved tag: %s", solvedTag);
                 }
             }
-            
+
             // Write the save data to the file
             try (FileOutputStream fos = new FileOutputStream(saveFile)) {
                 fos.write(enhancedSaveData.toString().getBytes());
                 Timber.d("Game saved to %s", saveFile.getAbsolutePath());
-                
+
                 // VERIFICATION: Read back the save file and check for targets
                 String savedContent = readSaveFileContent(saveFile);
                 if (savedContent == null || !validateSaveContainsTargets(savedContent, saveFile)) {
@@ -580,19 +610,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         for (int x = 0; x < gameState.getWidth(); x++) {
                             if (gameState.getCellType(x, y) == Constants.TYPE_TARGET) {
                                 targetCount++;
-                                Timber.e("[SAVE_VERIFICATION] Target found at (%d,%d) with color %d", 
-                                         x, y, gameState.getTargetColor(x, y));
+                                Timber.e("[SAVE_VERIFICATION] Target found at (%d,%d) with color %d",
+                                        x, y, gameState.getTargetColor(x, y));
                             }
                         }
                     }
                     Throwable t = new Throwable();
                     Timber.e(t, "[SAVE_VERIFICATION] Total targets in CURRENT game state: %d", targetCount);
-                    Timber.e("[SAVE_VERIFICATION] Save file content before deletion (first 200 chars): %s", 
-                             savedContent.length() > 200 ? savedContent.substring(0, 200) + "..." : savedContent);
+                    Timber.e("[SAVE_VERIFICATION] Save file content before deletion (first 200 chars): %s",
+                            savedContent.length() > 200 ? savedContent.substring(0, 200) + "..." : savedContent);
                     saveFile.delete();
                     throw new IllegalStateException("Save file validation failed: No targets found in saved game");
                 }
-                
+
                 return true;
             } catch (IOException e) {
                 Timber.e("Error saving game: %s", e.getMessage());
@@ -608,18 +638,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             return false;
         }
     }
-    
+
     /**
      * Validates that a save file contains at least one target.
      * In Roboyard, all games MUST have targets - this is a fatal requirement.
-     * 
+     *
      * @param saveData The save data string to validate
      * @param saveFile The save file reference (for logging)
      * @return true if the save contains targets, false otherwise
      */
     private boolean validateSaveContainsTargets(String saveData, File saveFile) {
         Timber.d("[SAVE_VERIFICATION] Validating save file: %s", saveFile.getName());
-        
+
         // Check for dedicated TARGET_SECTION section
         if (saveData.contains("TARGET_SECTION:")) {
             // Look for TARGET_SECTION: entries which must be present
@@ -628,7 +658,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 return true;
             }
         }
-        
+
         // Check for target cell types in board data
         String[] lines = saveData.split("\n");
         for (String line : lines) {
@@ -637,20 +667,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 return true;
             }
         }
-        
+
         // Log the full save data for diagnostics when no targets are found
         Timber.e("[SAVE_VERIFICATION] NO TARGETS FOUND IN SAVE DATA:");
         String[] logLines = saveData.split("\n");
         for (int i = 0; i < Math.min(logLines.length, 50); i++) { // Limit to 50 lines
             Timber.e("[SAVE_VERIFICATION] Line %d: %s", i, logLines[i]);
         }
-        
+
         return false;
     }
-    
+
     /**
      * Reads the content of a save file.
-     * 
+     *
      * @param saveFile The save file to read
      * @return The content of the save file as a string, or null if reading fails
      */
@@ -663,18 +693,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
             }
-            
+
             return content.toString();
         } catch (IOException e) {
             Timber.e("Error reading save file: %s", e.getMessage());
             return null;
         }
     }
-    
+
     /**
      * Load a saved game from a specific slot
+     *
      * @param context The context
-     * @param slotId The save slot ID
+     * @param slotId  The save slot ID
      * @return True if successful, false otherwise
      */
     public boolean loadSavedGame(Context context, int slotId) {
@@ -682,17 +713,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Get save file path
             String savePath = FileReadWrite.getSaveGamePath((Activity) context, slotId);
             String saveData = FileReadWrite.loadAbsoluteData(savePath);
-            
+
             if (saveData != null && !saveData.isEmpty()) {
                 // Extract metadata
                 Map<String, String> metadata = extractMetadataFromSaveData(saveData);
-                
+
                 // Store metadata for access by other methods
                 if (metadata != null) {
                     if (metadata.containsKey("MAPNAME")) {
                         this.currentMapName = metadata.get("MAPNAME");
                     }
-                    
+
                     if (metadata.containsKey("TIME")) {
                         try {
                             this.startTime = Long.parseLong(metadata.get("TIME"));
@@ -701,39 +732,40 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         }
                     }
                 }
-                
+
                 // Create minimap for this save
                 try {
                     this.minimap = createMinimapFromSaveData(context, saveData);
                 } catch (Exception e) {
                     Timber.e(e, "Error creating minimap for slot %d", slotId);
                 }
-                
+
                 return true;
             }
-            
+
             return false;
         } catch (Exception e) {
             Timber.e(e, "Error loading saved game from slot %d", slotId);
             return false;
         }
     }
-    
+
     /**
      * Extract metadata from save data
+     *
      * @param saveData The save data string
      * @return A map containing the metadata or null if no metadata was found
      */
     public static Map<String, String> extractMetadataFromSaveData(String saveData) {
         Map<String, String> metadata = new HashMap<>();
-        
+
         // Check if the save data has a metadata line
         if (saveData != null && saveData.startsWith("#")) {
             // Extract the first line
             int endOfFirstLine = saveData.indexOf('\n');
             if (endOfFirstLine > 0) {
                 String metadataLine = saveData.substring(1, endOfFirstLine);
-                
+
                 // Parse metadata entries (MAPNAME:name;TIME:seconds;MOVES:count;)
                 String[] entries = metadataLine.split(";");
                 for (String entry : entries) {
@@ -744,13 +776,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
-        
+
         return metadata;
     }
-    
+
     /**
      * Handle a touch on the game grid
-     * 
+     *
      * @param x      Grid X coordinate
      * @param y      Grid Y coordinate
      * @param action Touch action type
@@ -758,36 +790,36 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public boolean handleGridTouch(int x, int y, int action) {
         Timber.d("[TOUCH] Handle grid touch at (%d,%d) with action %d", x, y, action);
-        
+
         GameState state = getCurrentState().getValue();
         if (state != null) {
             // Get the currently selected robot
             GameElement selectedRobot = state.getSelectedRobot();
-            
+
             if (action == MotionEvent.ACTION_UP) {
                 // Check if the user tapped on a robot - if so, select it
                 GameElement touchedRobot = state.getRobotAt(x, y);
-                
+
                 if (touchedRobot != null) {
                     // User tapped on a robot - select it
                     Timber.d("[TOUCH] Selecting robot at (%d,%d)", x, y);
                     state.setSelectedRobot(touchedRobot);
-                    
+
                     // Add used robot to the set
                     if (touchedRobot.getColor() >= 0) {
                         robotsUsed.add(touchedRobot.getColor());
                     }
-                    
+
                     currentState.setValue(state);
                 } else if (selectedRobot != null) {
                     // User tapped on an empty space - try to move the selected robot
                     int robotX = selectedRobot.getX();
                     int robotY = selectedRobot.getY();
-                    
+
                     // Determine movement direction
                     int dx = 0;
                     int dy = 0;
-                    
+
                     if (robotX == x) {
                         // Moving vertically
                         dy = y > robotY ? 1 : -1;
@@ -798,7 +830,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         // Diagonal tap - determine primary direction
                         int deltaX = x - robotX;
                         int deltaY = y - robotY;
-                        
+
                         if (Math.abs(deltaX) > Math.abs(deltaY)) {
                             // Horizontal movement takes priority
                             dx = deltaX > 0 ? 1 : -1;
@@ -809,7 +841,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             dy = deltaY > 0 ? 1 : -1;
                         }
                     }
-                    
+
                     // Move the robot using the animation system
                     if (dx != 0 || dy != 0) {
                         Timber.d("[TOUCH] Moving robot in direction dx=%d, dy=%d", dx, dy);
@@ -820,11 +852,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         return true;
     }
-    
+
     /**
      * Move the selected robot in a specific direction until it hits an obstacle
      * This method can be called by both touch interactions and accessibility controls
-     * 
+     *
      * @param dx Horizontal direction (-1 = left, 0 = no movement, 1 = right)
      * @param dy Vertical direction (-1 = up, 0 = no movement, 1 = down)
      * @return True if the robot moved, false otherwise
@@ -834,42 +866,42 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         if (state == null || state.getSelectedRobot() == null) {
             return false;
         }
-        
+
         // If game is resetting, ignore movement commands
         if (isResetting) {
             return false;
         }
-        
+
         GameElement robot = state.getSelectedRobot();
         int startX = robot.getX();
         int startY = robot.getY();
-        
+
         // Initialize end position to the current position (in case no movement is possible)
         int endX = startX;
         int endY = startY;
-        
+
         // Update the robot's direction if moving horizontally
         if (dx != 0) {
             robot.setDirectionX(dx); // Set facing direction
         }
-        
+
         // Flags to determine which sound to play
         boolean hitWall = false;
         boolean hitRobot = false;
-        
+
         // Before making a move, push the current state to history for undo functionality
         // We don't need a deep copy - we'll save the state before making any changes
         Timber.d("[ROBOTS] Saving current state to history before move. History size before: %d", stateHistory.size());
-        
+
         // Create a snapshot of the current state with all elements
         GameState stateBeforeMove = new GameState(state.getWidth(), state.getHeight());
-        
+
         // Copy the board data (walls, targets, etc.)
         for (int y = 0; y < state.getHeight(); y++) {
             for (int x = 0; x < state.getWidth(); x++) {
                 int cellType = state.getCellType(x, y);
                 stateBeforeMove.setCellType(x, y, cellType);
-                
+
                 // Also copy target colors if this is a target
                 if (cellType == Constants.TYPE_TARGET) {
                     int targetColor = state.getTargetColor(x, y);
@@ -877,7 +909,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
-        
+
         // Copy all game elements including robots, walls, and targets
         List<GameElement> elements = state.getGameElements();
         if (elements != null) {
@@ -885,13 +917,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Add the element based on its type
                 if (element.getType() == GameElement.TYPE_ROBOT) {
                     stateBeforeMove.addRobot(element.getX(), element.getY(), element.getColor());
-                    
+
                     // Find the newly added robot and set its direction
                     for (GameElement newElement : stateBeforeMove.getGameElements()) {
-                        if (newElement.getType() == GameElement.TYPE_ROBOT && 
-                            newElement.getColor() == element.getColor() &&
-                            newElement.getX() == element.getX() && 
-                            newElement.getY() == element.getY()) {
+                        if (newElement.getType() == GameElement.TYPE_ROBOT &&
+                                newElement.getColor() == element.getColor() &&
+                                newElement.getX() == element.getX() &&
+                                newElement.getY() == element.getY()) {
                             newElement.setDirectionX(element.getDirectionX());
                             break;
                         }
@@ -905,20 +937,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
-        
+
         // Copy other game state variables that have setters
         stateBeforeMove.setLevelId(state.getLevelId());
         stateBeforeMove.setLevelName(state.getLevelName());
         stateBeforeMove.setMoveCount(state.getMoveCount());
         stateBeforeMove.setCompleted(state.isComplete());
-        
+
         // Copy the hint count
         for (int i = 0; i < state.getHintCount(); i++) {
             stateBeforeMove.incrementHintCount();
         }
-        
+
         stateBeforeMove.setUniqueMapId(state.getUniqueMapId());
-        
+
         // Store initial robot positions for robot reset functionality
         if (state.initialRobotPositions != null) {
             stateBeforeMove.initialRobotPositions = new HashMap<>();
@@ -927,12 +959,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 stateBeforeMove.initialRobotPositions.put(entry.getKey(), positionCopy);
             }
         }
-        
+
         // Save the complete state for undo
         stateHistory.add(stateBeforeMove);
         squaresMovedHistory.add(getSquaresMoved().getValue());
         Timber.d("[ROBOTS] Saved complete state to history. History size now: %d", stateHistory.size());
-        
+
         // Check for movement in X direction
         if (dx != 0) {
             int step = dx > 0 ? 1 : -1;
@@ -951,7 +983,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
-        
+
         // Check for movement in Y direction
         if (dy != 0) {
             int step = dy > 0 ? 1 : -1;
@@ -970,10 +1002,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
-        
+
         // Calculate the distance moved
         int distanceMoved = Math.abs(endX - startX) + Math.abs(endY - startY);
-        
+
         if (distanceMoved > 0) {
             // Create a copy of the current position
             final int originalX = startX;
@@ -982,9 +1014,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             final int targetY = endY;
 
             // Log the movement initiation
-            Timber.d("[ROBOT][HINT_SYSTEM] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)", 
-                  robot.getColor(), originalX, originalY, targetX, targetY);
-            
+            Timber.d("[ROBOT][HINT_SYSTEM] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)",
+                    robot.getColor(), originalX, originalY, targetX, targetY);
+
             setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
 
             // Increment move count
@@ -994,69 +1026,69 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Also update the move count in the GameState object itself (logic)
             // This ensures state.getMoveCount() returns the correct value
             state.setMoveCount(getMoveCount().getValue());
-            
+
             // Track the robot and direction for hint verification
             int directionConstant = 0;
             if (dx > 0) directionConstant = 2; // RIGHT
             else if (dx < 0) directionConstant = 8; // LEFT 
             else if (dy < 0) directionConstant = 1; // UP
             else if (dy > 0) directionConstant = 4; // DOWN
-            
+
             // Store the last moved robot and direction in the GameState
             state.setLastMovedRobot(robot);
             state.setLastMoveDirection(directionConstant);
-            
+
             Timber.d("[HINT_SYSTEM] Robot moved: color=%d, direction=%d", robot.getColor(), directionConstant);
             Timber.d("[HINT_SYSTEM] Updated moveCount in GameState to %d", state.getMoveCount());
-            
+
             // Create completion callback for when animation finishes
             Runnable completionCallback = () -> {
                 // Update the robot's actual position after animation completes
                 robot.setX(targetX);
                 robot.setY(targetY);
-                
+
                 // Check for game completion after animation
                 if (state.isRobotAtTarget(robot)) {
                     setGameComplete(true);
                 }
-                
+
                 // Notify observers that the state has changed
                 LiveData<GameState> currentStateLiveData = getCurrentState();
                 if (currentStateLiveData instanceof MutableLiveData) {
                     ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
                 }
             };
-            
+
             // Queue this movement for animation
             if (animationsEnabled && robotAnimationManager != null) {
                 Timber.d("[ANIM] Attempting to queue robot animation with manager=%s", robotAnimationManager != null ? "active" : "null");
-                
+
                 // Make absolutely sure the GameGridView is connected
                 if (gameGridView != null && robotAnimationManager.getGameGridView() == null) {
                     Timber.d("[ANIM] Fixing GameGridView connection to animation manager");
                     robotAnimationManager.setGameGridView(gameGridView);
                 }
-                
+
                 // Capture current position for path tracking
                 final int oldX = robot.getX();
                 final int oldY = robot.getY();
-                
+
                 // Create enhanced completion callback that tracks paths
                 Runnable enhancedCallback = () -> {
                     // First run the original completion callback
                     completionCallback.run();
-                    
+
                     // Then update the path tracking in GameGridView
                     if (gameGridView != null) {
                         gameGridView.handleRobotMovementEffects(state, robot, oldX, oldY);
                     }
-                    
+
                     // Add this robot to the used set
                     if (robot.getColor() >= 0) {
                         robotsUsed.add(robot.getColor());
                     }
                 };
-                
+
                 // Queue the animation with the enhanced callback
                 robotAnimationManager.queueRobotMove(robot, originalX, originalY, targetX, targetY, enhancedCallback);
             } else {
@@ -1065,12 +1097,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         animationsEnabled, robotAnimationManager != null ? "exists" : "null");
                 robot.setX(targetX);
                 robot.setY(targetY);
-                
+
                 // Check for game completion
                 if (state.isRobotAtTarget(robot)) {
                     setGameComplete(true);
                 }
-                
+
                 // Notify observers
                 LiveData<GameState> currentStateLiveData = getCurrentState();
                 if (currentStateLiveData instanceof MutableLiveData) {
@@ -1079,53 +1111,57 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * Handle deep link to a specific level
+     *
      * @param levelId Level ID to load
      */
     public void handleDeepLink(int levelId) {
         loadLevel(levelId);
     }
-    
+
     /**
      * Get a hint for the next move
+     *
      * @return The next move according to the solver, or null if no solution exists
      */
     public IGameMove getHint() {
-        if (currentSolution != null && currentSolution.getMoves() != null && 
-            currentSolutionStep < currentSolution.getMoves().size()) {
-            
+        if (currentSolution != null && currentSolution.getMoves() != null &&
+                currentSolutionStep < currentSolution.getMoves().size()) {
+
             // Increment hint counter for level completion statistics
             hintsShown++;
-            
+
             IGameMove move = currentSolution.getMoves().get(currentSolutionStep);
             incrementSolutionStep();
             return move;
         }
         return null;
     }
-    
+
     /**
      * Check if a valid solution is available
+     *
      * @return true if a solution is available, false otherwise
      */
     public boolean hasSolution() {
-        return currentSolution != null && currentSolution.getMoves() != null && 
-               currentSolutionStep < currentSolution.getMoves().size();
+        return currentSolution != null && currentSolution.getMoves() != null &&
+                currentSolutionStep < currentSolution.getMoves().size();
     }
-    
+
     /**
      * Navigate to specific level screen (beginner, intermediate, advanced, expert)
+     *
      * @param screenId Screen ID from Constants (SCREEN_LEVEL_BEGINNER, etc)
      */
     public void navigateToLevelScreen(int screenId) {
         // Store the selected level screen for the GamePlayFragment to use
         MutableLiveData<Integer> levelScreen = new MutableLiveData<>(screenId);
-        
+
         // The GamePlayFragment will check this value and load the appropriate level screen
         // This corresponds to the Constants.SCREEN_LEVEL_BEGINNER etc. values
         switch (screenId) {
@@ -1151,7 +1187,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 break;
         }
     }
-    
+
     /**
      * Navigate to main menu
      */
@@ -1162,7 +1198,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 (androidx.fragment.app.FragmentActivity) context, R.id.nav_host_fragment);
         navController.navigate(R.id.actionGlobalMainMenu);
     }
-    
+
     /**
      * Navigate to settings screen
      */
@@ -1173,9 +1209,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 (androidx.fragment.app.FragmentActivity) context, R.id.nav_host_fragment);
         navController.navigate(R.id.actionGlobalSettings);
     }
-    
+
     /**
      * Navigate to save screen
+     *
      * @param saveMode True for save mode, false for load mode
      */
     public void navigateToSaveScreen(boolean saveMode) {
@@ -1183,7 +1220,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Check if we have a valid state before navigation
         GameState currentGameState = currentState.getValue();
         Timber.d("Current state before navigation: %s", currentGameState != null ? "valid" : "null");
-        
+
         if (currentGameState == null) {
             Timber.e("Cannot navigate to save screen: No valid GameState available");
             return;
@@ -1194,7 +1231,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.e("Cannot navigate to save screen: context is not a FragmentActivity");
             return;
         }
-        
+
         // Get the current activity context
 
         // Check if we're on the main thread
@@ -1210,7 +1247,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             });
         }
     }
-    
+
     /**
      * Perform the actual navigation on the main thread
      */
@@ -1219,15 +1256,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Create a bundle to pass the save mode parameter
             android.os.Bundle args = new android.os.Bundle();
             args.putBoolean("saveMode", saveMode);
-            
+
             // Find the NavController for the current fragment
             androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(
                     activity, R.id.nav_host_fragment);
-            
+
             // Get the current destination ID
             int currentDestId = navController.getCurrentDestination().getId();
             Timber.d("Current destination ID: %d", currentDestId);
-            
+
             // Choose the appropriate action based on the current fragment
             if (currentDestId == R.id.gameCanvasFragment) {
                 Timber.d("Navigating from GameCanvasFragment to SaveGame");
@@ -1245,9 +1282,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.e(e, "Navigation error");
         }
     }
-    
+
     /**
      * Update the context to a valid activity context for fragment navigation
+     *
      * @param activityContext The activity context
      */
     public void updateContext(Context activityContext) {
@@ -1256,34 +1294,52 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             this.context = activityContext;
         }
     }
-    
+
     /**
      * Get the context from application
+     *
      * @return Application context
      */
     private Context getContext() {
         return getApplication().getApplicationContext();
     }
-    
+
     /**
      * Getters for LiveData to observe
      */
-    public LiveData<GameState> getCurrentState() { return currentState; }
-    public LiveData<Integer> getMoveCount() { return moveCount; }
-    public LiveData<Integer> getSquaresMoved() { return squaresMoved; }
-    public LiveData<Boolean> isGameComplete() { return isGameComplete; }
-    public LiveData<Boolean> getSoundEnabled() { return soundEnabled; }
-    public LiveData<Boolean> isSolverRunning() { return isSolverRunning; }
+    public LiveData<GameState> getCurrentState() {
+        return currentState;
+    }
+
+    public LiveData<Integer> getMoveCount() {
+        return moveCount;
+    }
+
+    public LiveData<Integer> getSquaresMoved() {
+        return squaresMoved;
+    }
+
+    public LiveData<Boolean> isGameComplete() {
+        return isGameComplete;
+    }
+
+    public LiveData<Boolean> getSoundEnabled() {
+        return soundEnabled;
+    }
+
+    public LiveData<Boolean> isSolverRunning() {
+        return isSolverRunning;
+    }
 
     /**
      * Setters for game settings
      */
-    public void setSoundEnabled(boolean enabled) { 
-        this.soundEnabled.setValue(enabled); 
+    public void setSoundEnabled(boolean enabled) {
+        this.soundEnabled.setValue(enabled);
         // Also update the static Preferences value to ensure consistency
         roboyard.logic.core.Preferences.setSoundEnabled(enabled);
     }
-    
+
     /**
      * Increment the move count
      */
@@ -1293,9 +1349,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             moveCount.setValue(currentCount + 1);
         }
     }
-    
+
     /**
      * Undo the last move if possible
+     *
      * @return true if a move was undone, false otherwise
      */
     public boolean undoLastMove() {
@@ -1304,11 +1361,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[ROBOTS] undoLastMove: No history to undo, stateHistory is empty");
             return false;
         }
-        
+
         // Get the previous state and restore it
         GameState previousState = stateHistory.remove(stateHistory.size() - 1);
         Timber.d("[ROBOTS] undoLastMove: Removed previous state from history, remaining history size: %d", stateHistory.size());
-        
+
         if (previousState != null) {
             // Also restore the squares moved count
             if (!squaresMovedHistory.isEmpty()) {
@@ -1318,40 +1375,42 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             } else {
                 Timber.d("[ROBOTS] undoLastMove: No squares moved history to restore");
             }
-            
+
             // Restore the state
             currentState.setValue(previousState);
             Timber.d("[ROBOTS] undoLastMove: Restored previous game state");
-            
+
             // Decrement move count
             int moves = moveCount.getValue();
             moveCount.setValue(Math.max(0, moves - 1));
             Timber.d("[ROBOTS][HINT_SYSTEM] undoLastMove: Decremented move count to: %d", Math.max(0, moves - 1));
-            
+
             // Reset game complete flag if it was set
             if (isGameComplete.getValue()) {
                 isGameComplete.setValue(false);
                 Timber.d("[ROBOTS] undoLastMove: Reset game complete flag");
             }
-            
+
             return true;
         } else {
             Timber.e("[ROBOTS] undoLastMove: Previous state was null, this should not happen");
         }
-        
+
         return false;
     }
-    
+
     /**
      * Set the move count
+     *
      * @param count New move count
      */
     public void setMoveCount(int count) {
         moveCount.setValue(count);
     }
-    
+
     /**
      * Add squares moved to the counter
+     *
      * @param squares Number of squares moved
      */
     public void addSquaresMoved(int squares) {
@@ -1360,7 +1419,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             squaresMoved.setValue(current + squares);
         }
     }
-    
+
     /**
      * Reset squares moved counter
      */
@@ -1368,17 +1427,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         squaresMoved.setValue(0);
         squaresMovedHistory.clear();
     }
-    
+
     /**
      * Set the squares moved count
+     *
      * @param squares Number of squares moved
      */
     public void setSquaresMoved(int squares) {
         squaresMoved.setValue(squares);
     }
-    
+
     /**
      * Set whether the game is complete
+     *
      * @param complete Whether the game is complete
      */
     public void setGameComplete(boolean complete) {
@@ -1387,19 +1448,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("Setting game complete: %s for level %d", complete, state.getLevelId());
             state.setCompleted(complete);
             isGameComplete.setValue(complete);
-            
+
             // Save level completion data if this is a level game
             if (complete && state.getLevelId() > 0) {
                 Timber.d("[SAVE] [STARS] Game completed, saving level completion data for level %d", state.getLevelId());
                 LevelCompletionData data = saveLevelCompletionData(state);
-                
+
                 // Now save the prepared data
                 if (data != null) {
                     LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
                     manager.saveLevelCompletionData(data);
                     Timber.d("Saved level completion data: %s", data);
                 }
-                
+
                 // Show a toast to indicate the level was completed
                 new Handler(Looper.getMainLooper()).post(() -> {
                     Toast.makeText(context, "Level " + state.getLevelId() + " completed!", Toast.LENGTH_SHORT).show();
@@ -1407,9 +1468,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
         }
     }
-    
+
     /**
      * Save level completion data when a level is completed
+     *
      * @param state The completed game state
      * @return The prepared LevelCompletionData object (does not save it)
      */
@@ -1419,15 +1481,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("Not saving completion data - not a level game (levelId=%d)", levelId);
             return null; // Not a level game
         }
-        
+
         Timber.d("Preparing completion data for level %d", levelId);
-        
+
         // Get the level completion manager
         LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
-        
+
         // Get or create completion data for this level
         LevelCompletionData data = manager.getLevelCompletionData(levelId);
-        
+
         // Update completion data
         data.setCompleted(true);
         data.setHintsShown(hintsShown);
@@ -1435,48 +1497,48 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         data.setMovesNeeded(moveCount.getValue() != null ? moveCount.getValue() : 0);
         data.setRobotsUsed(robotsUsed.size());
         data.setSquaresSurpassed(squaresMoved.getValue() != null ? squaresMoved.getValue() : 0);
-        
+
         // Set optimal moves if we have a solution
         int optimalMoves = 0;
         if (currentSolution != null && currentSolution.getMoves() != null) {
             optimalMoves = currentSolution.getMoves().size();
             data.setOptimalMoves(optimalMoves);
         }
-        
+
         // Calculate stars based on the criteria
         int playerMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
         int starCount = calculateStars(playerMoves, optimalMoves, hintsShown);
         data.setStars(starCount);
-        
-        Timber.d("[STARS] gameStateManager: Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars", 
+
+        Timber.d("[STARS] gameStateManager: Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars",
                 levelId, playerMoves, optimalMoves, hintsShown, starCount);
-        
+
         // Return the prepared data without saving it
         Timber.d("Prepared level completion data: %s", data);
         return data;
     }
-    
+
     /**
      * Calculate star rating based on player performance
-     * 
+     * <p>
      * Star allocation rules:
      * - 4 stars: Hyper-optimal solution (better than solver's optimal solution)
      * - 3 stars: Optimal solution (same as solver) with no hints
      * - 2 stars: One move more than optimal with no hints, OR optimal with one hint
      * - 1 star: Optimal solution with two hints, OR two moves more than optimal with no hints
      * - 0 stars: All other cases
-     * 
-     * @param playerMoves Number of moves used by player
+     *
+     * @param playerMoves  Number of moves used by player
      * @param optimalMoves Optimal number of moves from solver
-     * @param hintsUsed Number of hints used
+     * @param hintsUsed    Number of hints used
      * @return Number of stars earned (0-4)
      */
     public int calculateStars(int playerMoves, int optimalMoves, int hintsUsed) {
         if (optimalMoves <= 0) {
-        	Timber.d("[stars] No optimal solution available");
+            Timber.d("[stars] No optimal solution available");
             return 0; // No optimal solution available
         }
-        
+
         // Calculate stars based on the rules
         if (playerMoves < optimalMoves) {
             // hyper-Optimal solution (better than solver's solution)
@@ -1485,13 +1547,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         } else if (playerMoves == optimalMoves && hintsUsed == 0) {
             // Optimal solution (or better) and no hints
             Timber.d("[stars] optimal solution! 3 stars");
-			return 3;
-        } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) || 
-                  (playerMoves == optimalMoves && hintsUsed == 1)) {
+            return 3;
+        } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) ||
+                (playerMoves == optimalMoves && hintsUsed == 1)) {
             // One move more than optimal with no hints OR optimal with one hint
             return 2;
-        } else if ((playerMoves == optimalMoves && hintsUsed == 2) || 
-                  (playerMoves == optimalMoves + 2 && hintsUsed == 0)) {
+        } else if ((playerMoves == optimalMoves && hintsUsed == 2) ||
+                (playerMoves == optimalMoves + 2 && hintsUsed == 0)) {
             // Optimal with two hints OR two moves more than optimal with no hints
             return 1;
         } else {
@@ -1499,35 +1561,39 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             return 0;
         }
     }
-    
+
     /**
      * Get the total number of stars earned across all levels
+     *
      * @return Total number of stars
      */
     public int getTotalStars() {
         LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
         return manager.getTotalStars();
     }
-    
+
     /**
      * Get the level name
+     *
      * @return The current level name
      */
     public String getLevelName() {
         return currentMapName;
     }
-    
+
     /**
      * Get the start time
+     *
      * @return The start time as a long value
      */
     public long getStartTime() {
         return startTime;
     }
-    
+
     /**
      * Create a minimap from save data
-     * @param context The context
+     *
+     * @param context  The context
      * @param saveData The save data
      * @return The minimap bitmap
      */
@@ -1539,55 +1605,57 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 saveData = saveData.substring(newlineIndex + 1);
             }
         }
-        
+
         // Extract grid elements
         List<GridElement> elements = MapObjects.extractDataFromString(saveData, true);
-        
+
         // Create a simple minimap
         return createMinimap(context, elements, 100, 100);
     }
-    
+
     /**
      * Get a minimap for the current game state
+     *
      * @param context The context
-     * @param width The minimap width
-     * @param height The minimap height
+     * @param width   The minimap width
+     * @param height  The minimap height
      * @return The minimap bitmap
      */
     public Bitmap getMiniMap(Context context, int width, int height) {
         if (minimap != null) {
             return minimap;
         }
-        
+
         // If no minimap is available, create a placeholder
         Bitmap placeholder = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(placeholder);
         canvas.drawColor(Color.LTGRAY);
         return placeholder;
     }
-    
+
     /**
      * Create a minimap from grid elements
-     * @param context The context
+     *
+     * @param context  The context
      * @param elements The grid elements
-     * @param width The minimap width
-     * @param height The minimap height
+     * @param width    The minimap width
+     * @param height   The minimap height
      * @return The minimap bitmap
      */
     private Bitmap createMinimap(Context context, List<GridElement> elements, int width, int height) {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.WHITE);
-        
+
         // If no elements, return empty bitmap
         if (elements == null || elements.isEmpty()) {
             return bitmap;
         }
-        
+
         // Determine grid bounds
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
         int maxX = 0, maxY = 0;
-        
+
         for (GridElement element : elements) {
             int x = element.getX();
             int y = element.getY();
@@ -1596,18 +1664,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             maxX = Math.max(maxX, x);
             maxY = Math.max(maxY, y);
         }
-        
+
         // Calculate scaling
         float gridWidth = maxX - minX + 2; // Add padding
         float gridHeight = maxY - minY + 2;
         float scaleX = width / gridWidth;
         float scaleY = height / gridHeight;
         float scale = Math.min(scaleX, scaleY);
-        
+
         // Draw elements
         Paint paint = new Paint();
         paint.setAntiAlias(true);
-        
+
         for (GridElement element : elements) {
             int x = element.getX() - minX + 1; // Add padding
             int y = element.getY() - minY + 1;
@@ -1615,7 +1683,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             float top = y * scale;
             float right = (x + 1) * scale;
             float bottom = (y + 1) * scale;
-            
+
             if (element.getType().startsWith("robot_")) {
                 // Draw robots
                 paint.setColor(Color.RED);
@@ -1630,35 +1698,37 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             } else if (element.getType().equals("mv")) {
                 // Draw walls
                 paint.setColor(Color.DKGRAY);
-                canvas.drawRect(left + scale/3, top, right - scale/3, bottom, paint);
+                canvas.drawRect(left + scale / 3, top, right - scale / 3, bottom, paint);
             } else if (element.getType().equals("mh")) {
                 // Draw walls
                 paint.setColor(Color.DKGRAY);
-                canvas.drawRect(left, top + scale/3, right, bottom - scale/3, paint);
+                canvas.drawRect(left, top + scale / 3, right, bottom - scale / 3, paint);
             }
         }
-        
+
         return bitmap;
     }
 
     /**
      * Get the current difficulty level from Preferences
+     *
      * @return Current difficulty level
      */
     public int getDifficulty() {
         return Preferences.difficulty;
     }
-    
+
     /**
      * Get a string representation of the current difficulty level
+     *
      * @return String representation of the current difficulty level
      */
     public String getLocalizedDifficultyString() {
         // Verwende den bereits lokalisierten Anwendungskontext
         Context localizedContext = RoboyardApplication.getAppContext();
-        
+
         Timber.d("[DIFFICULTY] getLocalizedDifficultyString() called, using difficulty level %d", getDifficulty());
-        
+
         switch (getDifficulty()) {
             case Constants.DIFFICULTY_BEGINNER:
                 return localizedContext.getString(R.string.difficulty_beginner);
@@ -1672,9 +1742,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 return localizedContext.getString(R.string.difficulty_unknown);
         }
     }
-    
+
     /**
      * Set the difficulty level in Preferences
+     *
      * @param difficulty New difficulty level
      */
     public void setDifficulty(int difficulty) {
@@ -1683,6 +1754,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Save the current map for later use
+     *
      * @return true if the map was saved successfully, false otherwise
      */
     public boolean saveCurrentMap() {
@@ -1690,36 +1762,36 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         if (state == null) {
             return false;
         }
-        
+
         try {
             // Create a timestamp for the map name
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             String mapName = "custom_map_" + timestamp;
-            
+
             // Get the save directory
             File appDir = new File(context.getFilesDir(), "maps");
             if (!appDir.exists()) {
                 appDir.mkdirs();
             }
-            
+
             // Create save file
             File mapFile = new File(appDir, mapName + ".map");
-            
+
             // Write the current state to the map file
             FileWriter writer = new FileWriter(mapFile);
-            
+
             // Write metadata
             writer.write("#MAPNAME:" + mapName + ";TIME:" + System.currentTimeMillis() + ";\n");
-            
+
             // Write board dimensions
             writer.write(state.getWidth() + " " + state.getHeight() + "\n");
-            
+
             // Write the grid elements (walls, robots, targets)
             ArrayList<GridElement> elements = state.getGridElements();
             for (GridElement element : elements) {
                 // Format: type x y [color]
                 StringBuilder line = new StringBuilder();
-                
+
                 // Add type code based on element type
                 String type = element.getType();
                 if (type.startsWith("robot_")) {
@@ -1733,17 +1805,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 } else {
                     continue; // Skip unknown elements
                 }
-                
+
                 // Add position
                 line.append(" ").append(element.getX())
-                    .append(" ").append(element.getY());
-                
+                        .append(" ").append(element.getY());
+
                 // Add color for robots and targets
                 if (type.startsWith("robot_") || type.startsWith("target_")) {
                     // Extract color from type (e.g., "robot_red" -> "red")
                     String color = type.substring(type.indexOf("_") + 1);
                     int colorCode = 0; // Default to black
-                    
+
                     // Convert color string to code
                     if (color.equals("red")) {
                         colorCode = 1;
@@ -1754,23 +1826,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     } else if (color.equals("yellow")) {
                         colorCode = 4;
                     }
-                    
+
                     line.append(" ").append(colorCode);
                 }
-                
+
                 // Write the line
                 writer.write(line + "\n");
             }
-            
+
             writer.close();
-            
+
             // Show a toast notification
             if (context instanceof Activity) {
                 ((Activity) context).runOnUiThread(() -> {
                     Toast.makeText(context, "Map saved as " + mapName, Toast.LENGTH_SHORT).show();
                 });
             }
-            
+
             Timber.d("GameStateManager: Map saved as %s", mapName);
             return true;
         } catch (IOException e) {
@@ -1790,42 +1862,42 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void resetRobots() {
         isResetting = true;
-        
+
         // Cancel all animations first
         if (robotAnimationManager != null) {
             robotAnimationManager.cancelAllAnimations();
         }
-        
+
         // Get the current game state
         GameState currentGameState = currentState.getValue();
-        
+
         if (currentGameState != null) {
             // Reset robot positions
             currentGameState.resetRobotPositions();
-            
+
             // Reset game statistics
             moveCount.setValue(0);
             squaresMoved.setValue(0);
             isGameComplete.setValue(false);
-            
+
             // Reset robot selection
             for (GameElement element : currentGameState.getGameElements()) {
                 if (element.isRobot()) {
                     element.setSelected(false);
                 }
             }
-            
+
             // Reset the robotsUsed tracking for statistics
             robotsUsed.clear();
-            
+
             // Notify that the game state has changed
             currentState.setValue(currentGameState);
         }
-        
+
         isResetting = false;
         resetGameTimer();
     }
-    
+
     /**
      * Start the game timer for history tracking
      */
@@ -1834,15 +1906,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         isHistorySaved = false;
         Timber.d("[HISTORY] Game timer started");
     }
-    
+
     /**
      * Update the game timer and check if game should be saved to history
      */
     public void updateGameTimer() {
         if (!isHistorySaved && currentState.getValue() != null) {
-            int elapsedSeconds = (int)((System.currentTimeMillis() - gameStartTime) / 1000);
+            int elapsedSeconds = (int) ((System.currentTimeMillis() - gameStartTime) / 1000);
             totalPlayTime = elapsedSeconds;
-            
+
             // Save to history after threshold time of play
             if (totalPlayTime >= HISTORY_SAVE_THRESHOLD) {
                 Timber.d("[HISTORY] Threshold reached (%d seconds), saving game to history", HISTORY_SAVE_THRESHOLD);
@@ -1880,12 +1952,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
             // Get a proper map name directly from the game state
             String mapName = null;
-            
+
             // Get level name from the game state
             if (gameState != null) {
                 mapName = gameState.getLevelName();
                 Timber.d("[HISTORY] Retrieved level name from game state: %s", mapName);
-                
+
                 // If level name is not set properly, use level ID
                 if (mapName == null || mapName.isEmpty() || "XXXXX".equals(mapName)) {
                     int levelId = gameState.getLevelId();
@@ -1908,41 +1980,41 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // This avoids calling the missing methods
             String saveData = gameState.toString();
             FileReadWrite.writePrivateData(activity, historyPath, saveData);
-            
+
             // Use static values for missing board dimensions
             int boardWidth = 16; // Default value
             int boardHeight = 16; // Default value
             String boardSize = boardWidth + "x" + boardHeight;
-            
+
             // Simplified approach for preview image
             String previewImagePath = "history/" + historyFileName + "_preview.txt";
             FileReadWrite.writePrivateData(activity, previewImagePath, "");
 
             // Create history entry with available information
             GameHistoryEntry entry = new GameHistoryEntry(
-                historyPath,
-                mapName,
-                System.currentTimeMillis(),
-                totalPlayTime,
-                moveCount.getValue(),
-                0, // We don't have solution move count
-                boardSize,
-                previewImagePath
+                    historyPath,
+                    mapName,
+                    System.currentTimeMillis(),
+                    totalPlayTime,
+                    moveCount.getValue(),
+                    0, // We don't have solution move count
+                    boardSize,
+                    previewImagePath
             );
 
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(activity, entry);
-            
+
             Timber.d("[HISTORY] Game saved to history: %s (Map name: '%s')", historyPath, mapName);
         } catch (Exception e) {
             Timber.e("[HISTORY] Error saving game to history: %s", e.getMessage());
         }
     }
-    
+
     /**
      * Asynchronously calculates the solution for the current game state
      * and returns the result via callback
-     * 
+     *
      * @param callback The callback to receive the solution when it's ready
      */
     public void calculateSolutionAsync(final SolutionCallback callback) {
@@ -1955,48 +2027,48 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Increment solver restart count
         solverRestartCount++;
         Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Solver restart count: %d", solverRestartCount);
-        
+
         this.solutionCallback = callback;
         Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Stored callback: %s", callback);
-        
+
         GameState state = currentState.getValue();
         if (state == null) {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Current state is null");
             onSolutionCalculationFailed("No game state available");
             return;
         }
-        
+
         // Log the current game state details
         ArrayList<GridElement> elements = state.getGridElements();
         Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Current GameState hash: %d", state.hashCode());
         Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Current map has %d elements", elements.size());
-        
+
         // Log robot positions
         List<GameElement> robots = state.getRobots();
         for (GameElement robot : robots) {
-            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Robot ID %d (color %d) at position (%d, %d)", 
-                  robot.getColor(), robot.getColor(), robot.getX(), robot.getY());
+            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Robot ID %d (color %d) at position (%d, %d)",
+                    robot.getColor(), robot.getColor(), robot.getX(), robot.getY());
         }
-        
+
         // Log target position
         GameElement target = state.getTarget();
         if (target != null) {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Target for robot Color %d (color %d) at position (%d, %d)",
-                  target.getColor(), target.getColor(), target.getX(), target.getY());
+                    target.getColor(), target.getColor(), target.getX(), target.getY());
         } else {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] No target found in current game state");
         }
-        
+
         // Set solver running state
         isSolverRunning.setValue(true);
-        
+
         // Signal that calculation has started
         onSolutionCalculationStarted();
-        
+
         try {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Initializing solver with current game state");
             getSolverManager().initialize(elements);
-            
+
             // Run the solver on a background thread
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.execute(() -> {
@@ -2006,7 +2078,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     SolverManager manager = getSolverManager();
                     // Ensure we're incrementing the counter before running
                     SolverManager.ensureUniqueInvocationId();
-                    Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Using solver manager with counter: %d", 
+                    Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Using solver manager with counter: %d",
                             SolverManager.getCurrentSolverInvocationId());
                     manager.run();
                     // Note: The solver will call the listener methods (onSolverFinished)
@@ -2033,7 +2105,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION_SOLVER] onSolutionCalculationStarted");
         currentSolution = null;
         currentSolutionStep = 0;
-        
+
         // Notify callback if provided
         if (solutionCallback != null) {
             Timber.d("[SOLUTION_SOLVER] onSolutionCalculationStarted: Notifying callback: %s", solutionCallback);
@@ -2047,12 +2119,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Called when the solution calculation completes successfully
      * This is the SolverManager.Listener implementation that's called by SolverManager when the solver finishes.
      * This method stores the solution and notifies any registered callback.
-     * 
+     *
      * @param solution The calculated solution
      */
     private void onSolutionCalculationCompleted(GameSolution solution) {
         Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: solution=%s", solution);
-        
+
         // Add more detailed logging about the solution
         int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
         if (moveCount > 0) {
@@ -2063,23 +2135,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             boolean isLevelMode = (state != null && state.getLevelId() > 0);
             int minRequiredMoves = getMinimumRequiredMoves();
             int maxRequiredMoves = getMaximumRequiredMoves();
-            
+
             // BEGINNER MODE: Check if solution is too easy (below minimum) or too hard (above maximum)
             if (!isLevelMode && regenerationCount < MAX_AUTO_REGENERATIONS) {
                 boolean isTooEasy = moveCount < minRequiredMoves;
                 boolean isTooHard = moveCount > maxRequiredMoves;
-                
+
                 if (isTooEasy) {
                     // Regenerate if puzzle is too easy
-                    Timber.d("[SOLUTION_SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)", 
+                    Timber.d("[SOLUTION_SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)",
                             moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
                     regenerationCount++;
-                    
+
                     // Force reset the solver state before starting a new game
                     SolverManager solverManager = getSolverManager();
                     solverManager.resetInitialization();
                     solverManager.cancelSolver(); // Cancel any running solver process
-                    
+
                     // Create a new game after a short delay to ensure the solver is fully reset
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
@@ -2090,12 +2162,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.w("[DIFFICULTY ENFORCER] %s mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
                             getLocalizedDifficultyString(), moveCount, maxRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
                     regenerationCount++;
-                    
+
                     // Force reset the solver state before starting a new game
                     SolverManager solverManager = getSolverManager();
                     solverManager.resetInitialization();
                     solverManager.cancelSolver(); // Cancel any running solver process
-                    
+
                     // Create a new game after a short delay to ensure the solver is fully reset
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         validateDifficulty = true; // Make sure difficulty is checked
@@ -2110,14 +2182,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         } else {
             Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
         }
-        
+
         // Store the solution for later use with getHint()
         currentSolution = solution;
         currentSolutionStep = 0;
-        
+
         // Update solver status
         isSolverRunning.setValue(false);
-        
+
         // Notify the callback if provided
         if (solutionCallback != null) {
             Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: Notifying callback: %s", solutionCallback);
@@ -2126,26 +2198,27 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         } else {
             Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: No callback provided");
         }
-        
+
         // Store the minimum moves from this solution for display
         lastSolutionMinMoves = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
         Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves after %d regeneration(s)", lastSolutionMinMoves, regenerationCount);
     }
-    
+
     /**
      * Called when the solution calculation fails
+     *
      * @param errorMessage The error message
      */
     private void onSolutionCalculationFailed(String errorMessage) {
         Timber.d("[SOLUTION_SOLVER] onSolutionCalculationFailed: %s", errorMessage);
-        
+
         // Clear any partial solution
         currentSolution = null;
         currentSolutionStep = 0;
-        
+
         // Update solver status
         isSolverRunning.setValue(false);
-        
+
         // Notify the callback if provided
         if (solutionCallback != null) {
             Timber.d("[SOLUTION_SOLVER] onSolutionCalculationFailed: Notifying callback: %s", solutionCallback);
@@ -2166,40 +2239,42 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // The solver will call onSolverCancelled() via the listener
         }
     }
-    
+
     /**
      * Get the current solution
+     *
      * @return The current solution or null if none is available
      */
     public GameSolution getCurrentSolution() {
         return currentSolution;
     }
-    
+
     /**
      * Get the current solution step (hint number)
+     *
      * @return The current solution step (0-indexed)
      */
     public int getCurrentSolutionStep() {
         return currentSolutionStep;
     }
-    
+
     /**
      * Increment the solution step counter
      */
     public void incrementSolutionStep() {
         currentSolutionStep++;
     }
-    
+
     /**
      * Reset the solution step counter to show hints from the beginning
      */
     public void resetSolutionStep() {
         currentSolutionStep = 0;
     }
-    
+
     // Field to store the current solution callback
     private SolutionCallback solutionCallback;
-    
+
     /**
      * Callback interface for solution calculation
      */
@@ -2208,28 +2283,30 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
          * Called when the solution calculation starts
          */
         void onSolutionCalculationStarted();
-        
+
         /**
          * Called when the solution calculation completes successfully
+         *
          * @param solution The calculated solution
          */
         void onSolutionCalculationCompleted(GameSolution solution);
-        
+
         /**
          * Called when the solution calculation fails
+         *
          * @param errorMessage The error message
          */
         void onSolutionCalculationFailed(String errorMessage);
     }
-    
+
     /**
      * Shows a spinner animation while a solution is being calculated.
      * This method can be used by any UI implementation to show a standardized
      * loading indicator during solver processing.
-     * 
+     *
      * @param callback A callback that will receive the Braille spinner character
      *                 updates for display
-     * @param show True to show the spinner, false to hide it
+     * @param show     True to show the spinner, false to hide it
      * @return The BrailleSpinner instance (so the caller can store and stop it later)
      */
     public BrailleSpinner showSpinner(BrailleSpinner.SpinnerListener callback, boolean show) {
@@ -2244,12 +2321,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         return null;
     }
-    
+
     /**
      * Animate a solution by moving robots according to the solution steps.
      * This implementation uses the utility SolutionAnimator and provides
      * a standard way to display solution animations in any UI.
-     * 
+     *
      * @param solution The solution to animate
      * @param listener The listener to receive animation events
      * @return The SolutionAnimator instance (so the caller can store and control it)
@@ -2262,16 +2339,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
             return null;
         }
-        
+
         Timber.d("Animating solution with %d moves", solution.getMoves().size());
-        
+
         // Create and configure animator
         SolutionAnimator animator = new SolutionAnimator();
         animator.setAnimationListener(listener);
         animator.animateSolution(solution);
         return animator;
     }
-    
+
     /**
      * Reset statistics for a new game
      */
@@ -2283,9 +2360,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         squaresMoved.setValue(0);
         isGameComplete.setValue(false);
     }
-    
+
     /**
      * Gets the minimum required moves based on current difficulty setting
+     *
      * @return minimum number of moves required for current difficulty
      */
     private int getMinimumRequiredMoves() {
@@ -2324,51 +2402,52 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION_SOLVER][MOVES] Maximum required moves for difficulty %d: %d", difficulty, maxMoves);
         return maxMoves;
     }
-    
+
     /**
      * Creates a valid game with at least MIN_REQUIRED_MOVES difficulty
-     * @param width Width of the board
+     *
+     * @param width  Width of the board
      * @param height Height of the board
      */
     private void createValidGame(int width, int height) {
         Timber.d("GameStateManager: createValidGame() called");
-        
+
         // Update WallStorage with current board size to ensure we're using the right storage
         WallStorage wallStorage = WallStorage.getInstance();
         wallStorage.updateCurrentBoardSize();
-        
+
         // Create a new random game state using static Preferences
         GameState newState = GameState.createRandom();
-        Timber.d("GameStateManager: Created new random GameState with robotCount=%d, targetColors=%d", 
-                Preferences.robotCount, 
+        Timber.d("GameStateManager: Created new random GameState with robotCount=%d, targetColors=%d",
+                Preferences.robotCount,
                 Preferences.targetColors);
-        
+
         // Set the game state
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
-        
+
         // Store walls for future use if we're not generating new maps each time
         if (!Preferences.generateNewMapEachTime) {
             wallStorage.storeWalls(newState.getGridElements());
             Timber.d("[WALL STORAGE] Stored walls for future use after creating new game");
         }
-        
+
         // Clear the state history
         stateHistory.clear();
         squaresMovedHistory.clear();
-        
+
         // Initialize the solver with grid elements from the new state
         ArrayList<GridElement> gridElements = newState.getGridElements();
         getSolverManager().resetInitialization();
         getSolverManager().initialize(gridElements);
-        
+
         startTime = System.currentTimeMillis();
-        
+
         // Start calculating the solution, but use our internal validation callback
         if (validateDifficulty) {
             // Temporarily set validateDifficulty to false to prevent infinite recursion
-            
+
             // Calculate solution with our own callback to validate difficulty
             Timber.d("[calculateSolutionAsync] GameStateManager: Validating puzzle difficulty...");
             calculateSolutionAsync(new DifficultyValidationCallback(width, height));
@@ -2380,7 +2459,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             calculateSolutionAsync(null);
         }
     }
-    
+
     /**
      * Callback to validate puzzle difficulty and regenerate if needed
      */
@@ -2389,34 +2468,34 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         private final int height;
         private int attemptCount = 0;
         private static final int MAX_ATTEMPTS = 999;
-        
+
         public DifficultyValidationCallback(int width, int height) {
             this.width = width;
             this.height = height;
         }
-        
+
         @Override
         public void onSolutionCalculationStarted() {
             Timber.d("DifficultyValidationCallback: Calculation started, attempt %d", attemptCount + 1);
         }
-        
+
         @Override
         public void onSolutionCalculationCompleted(GameSolution solution) {
             attemptCount++;
             int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
             int requiredMoves = getMinimumRequiredMoves();
             int maxMoves = getMaximumRequiredMoves();
-            
+
             // if only one move is needed, then the puzzle is too easy
             if (getSolverManager().isSolution01()) {
                 Timber.d("[DifficultyValidationCallback]: Puzzle too easy (1 move), generating new one");
                 createValidGame(width, height);
                 return;
             }
-            
+
             Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
                     moveCount, requiredMoves, maxMoves);
-            
+
             if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
                 // Puzzle too easy, generate a new one
                 Timber.d("[DifficultyValidationCallback]: Puzzle too easy (%d moves), generating new one", moveCount);
@@ -2436,12 +2515,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 isSolverRunning.setValue(false);
                 // Signal to UI that solution was accepted and hint container should be hidden
                 Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] Solution accepted, notifying UI to hide hint container");
-                
+
                 // TODO: stop all other solver threads:
-                
+
             }
         }
-        
+
         @Override
         public void onSolutionCalculationFailed(String errorMessage) {
             Timber.w("DifficultyValidationCallback: Solution calculation failed: %s", errorMessage);
@@ -2450,12 +2529,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             isSolverRunning.setValue(false);
         }
     }
-    
+
     @Override
     public void onSolverFinished(boolean success, int solutionMoves, int numSolutions) {
-        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverFinished called: success=%b, moves=%d, solutions=%d", 
+        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverFinished called: success=%b, moves=%d, solutions=%d",
                 success, solutionMoves, numSolutions);
-        
+
         // Process on main thread to ensure thread safety with UI updates
         new Handler(Looper.getMainLooper()).post(() -> {
             if (success && numSolutions > 0) {
@@ -2463,7 +2542,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 try {
                     GameSolution solution = getSolverManager().getCurrentSolution();
                     if (solution != null) {
-                        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves", 
+                        Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves",
                                 solution.getMoves() != null ? solution.getMoves().size() : 0);
                         // Forward to the regular solution handling
                         onSolutionCalculationCompleted(solution);
@@ -2481,19 +2560,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
         });
     }
-    
+
     @Override
     public void onSolverCancelled() {
         Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverCancelled called");
-        
+
         // Process on main thread to ensure thread safety with UI updates
         new Handler(Looper.getMainLooper()).post(() -> {
             onSolutionCalculationFailed("Solver was cancelled");
         });
     }
-    
+
     /**
      * Get the robot animation manager
+     *
      * @return The robot animation manager
      */
     public RobotAnimationManager getRobotAnimationManager() {
@@ -2502,52 +2582,58 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Get the current animation frame delay in milliseconds
+     *
      * @return Current animation frame delay
      */
     public long getAnimationFrameDelay() {
         return animationFrameDelay;
     }
-    
+
     /**
      * Get acceleration duration for animations
+     *
      * @return Acceleration duration in milliseconds
      */
     public float getAccelerationDuration() {
         return accelerationDuration;
     }
-    
+
     /**
      * Get maximum animation speed
+     *
      * @return Maximum speed for animations
      */
     public float getMaxSpeed() {
         return maxSpeed;
     }
-    
+
     /**
      * Get deceleration duration for animations
+     *
      * @return Deceleration duration in milliseconds
      */
     public float getDecelerationDuration() {
         return decelerationDuration;
     }
-    
+
     /**
      * Get overshoot percentage for animations
+     *
      * @return Overshoot percentage (0.0-1.0)
      */
     public float getOvershootPercentage() {
         return overshootPercentage;
     }
-    
+
     /**
      * Get spring back duration for animations
+     *
      * @return Spring back duration in milliseconds
      */
     public float getSpringBackDuration() {
         return springBackDuration;
     }
-    
+
     /**
      * Reset the game to its initial state (Soft Reset)
      * - Preserves the current board/map layout
@@ -2558,24 +2644,24 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void resetGame() {
         isResetting = true;
-        
+
         // Cancel all animations first
         if (robotAnimationManager != null) {
             robotAnimationManager.cancelAllAnimations();
         }
-        
+
         // Get the current game state
         GameState currentGameState = currentState.getValue();
-        
+
         if (currentGameState != null) {
             // Reset robot positions
             currentGameState.resetRobotPositions();
-            
+
             // Reset game statistics
             moveCount.setValue(0);
             squaresMoved.setValue(0);
             isGameComplete.setValue(false);
-            
+
             // Reset robot selection
             for (GameElement element : currentGameState.getGameElements()) {
                 if (element.isRobot()) {
@@ -2584,38 +2670,40 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
 
             // REMOVED: resetRobots(); - This was causing infinite recursion
-            
+
             // Reset the robotsUsed tracking for statistics
             robotsUsed.clear();
-            
+
             // Notify that the game state has changed
             currentState.setValue(currentGameState);
         }
-        
+
         isResetting = false;
     }
-    
+
     /**
      * Check if animations are enabled
+     *
      * @return True if animations are enabled
      */
     public boolean areAnimationsEnabled() {
         return animationsEnabled;
     }
-    
+
     /**
      * Set the GameGridView for rendering
+     *
      * @param gameGridView The game grid view
      */
     public void setGameGridView(GameGridView gameGridView) {
         this.gameGridView = gameGridView;
-        
+
         // Connect the grid view to the animation manager
         if (robotAnimationManager != null) {
             robotAnimationManager.setGameGridView(gameGridView);
         }
     }
-    
+
     /**
      * Reset all move counts and game history
      * This resets the move counter, squares moved counter, game completion status,
@@ -2630,9 +2718,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         stateHistory.clear();
         squaresMovedHistory.clear();
     }
-    
+
     /**
      * Gets the current solver restart count
+     *
      * @return The number of times the solver has been restarted
      */
     public int getSolverRestartCount() {
@@ -2655,12 +2744,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Gets the minimum moves from the last found solution
+     *
      * @return The minimum moves from the last solution, or 0 if no solution found yet
      */
     public int getLastSolutionMinMoves() {
         return lastSolutionMinMoves;
     }
-    
+
     private void resetGameTimer() {
         gameStartTime = System.currentTimeMillis();
         totalPlayTime = 0;
@@ -2669,6 +2759,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Get the current activity
+     *
      * @return The current activity or null if none is available
      */
     private Activity getActivity() {
@@ -2677,9 +2768,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         return null;
     }
-    
+
     /**
      * Set the current activity reference
+     *
      * @param activity Current activity
      */
     public void setActivity(Activity activity) {
@@ -2688,11 +2780,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[HISTORY] Activity reference updated in GameStateManager");
         }
     }
-    
+
     /**
      * Set the current game state
      * Used by deep link functionality to load a state from external data
-     * 
+     *
      * @param state The game state to set
      */
     public void setGameState(GameState state) {
@@ -2700,9 +2792,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.e("[DEEPLINK] Cannot set null game state");
             return;
         }
-        
+
         Timber.d("[DEEPLINK] Setting game state from deep link");
-        
+
         // --- VALIDATION LOGGING [RANDOM_STATE_VALIDATION] ---
         // Check if the state is a random state (i.e., not from a level, save, or deep link)
         // If so, log a warning. This helps ensure validation is not bypassed.
@@ -2713,49 +2805,26 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Clear history and reset counters
         resetMoveCountsAndHistory();
-        
+
         // Set the current map name
         this.currentMapName = state.getLevelName();
         Timber.d("[MAPNAME] GameStateManager.setGameState - Set currentMapName to: %s", this.currentMapName);
-        
+
         // Set the connection back to this manager
         state.setGameStateManager(this);
-        
+
         // Update the current state
         currentState.setValue(state);
-        
+
         // Update the move count
         moveCount.setValue(state.getMoveCount());
-        
+
         // Reset game timer
         resetGameTimer();
         startGameTimer();
-        
+
         // Start the solver in the background
         calculateSolutionAsync(null);
     }
-    
-    /**
-     * Set the difficulty level from a deep link
-     * @param difficulty The difficulty level to set
-     */
-    public void setDeepLinkDifficulty(int difficulty) {
-        this.deepLinkDifficulty = difficulty;
-        Timber.d("[DEEPLINK] Stored deep link difficulty: %d", difficulty);
-    }
-    
-    /**
-     * Get the difficulty level from a deep link
-     * @return The difficulty level or -1 if not set
-     */
-    public int getDeepLinkDifficulty() {
-        return deepLinkDifficulty;
-    }
-    
-    /**
-     * Clear the deep link difficulty
-     */
-    public void clearDeepLinkDifficulty() {
-        this.deepLinkDifficulty = -1;
-    }
 }
+    
