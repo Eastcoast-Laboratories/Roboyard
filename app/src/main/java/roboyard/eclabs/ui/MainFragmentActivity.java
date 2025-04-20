@@ -12,6 +12,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
 import roboyard.ui.components.GameStateManager;
@@ -468,13 +469,13 @@ public class MainFragmentActivity extends AppCompatActivity {
      */
     private int getColorId(String colorName) {
         switch (colorName.toLowerCase()) {
-            case "red": return 0;
-            case "pink": return 0;
-            case "blue": return 1;
-            case "green": return 2;
-            case "yellow": return 3;
-            case "silver": return 4;
-            default: return 0; // Default to red
+            case "red": return Constants.COLOR_RED;
+            case "pink": return Constants.COLOR_RED;
+            case "green": return Constants.COLOR_GREEN;
+            case "blue": return Constants.COLOR_BLUE;
+            case "yellow": return Constants.COLOR_YELLOW;
+            case "silver": return Constants.COLOR_SILVER;
+            default: return Constants.COLOR_RED; // Default to red
         }
     }
     
