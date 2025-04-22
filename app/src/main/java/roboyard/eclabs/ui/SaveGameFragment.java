@@ -1205,7 +1205,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Create the share URL
-                    String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedData;
+                    String shareUrl = "https://roboyard.z11.de/share_map?data=" + formattedData.toString();
                     
                     // Log the full URL for debugging
                     Timber.d("[SHARE] Share URL: %s", shareUrl);

@@ -58,6 +58,7 @@ import roboyard.logic.core.Preferences;
 public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
 
     private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10
+    private static final int MAX_HINT_HISTORY = 6;
     private GameGridView gameGridView;
     private TextView moveCountTextView;
     private TextView squaresMovedTextView;
@@ -2297,7 +2298,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 
                 // Create the hint message with shortened format
                 StringBuilder hintMessage = new StringBuilder();
-                hintMessage.append(displayHintNumber).append("/").append(totalMoves).append(": ");
+                hintMessage.append(displayHintNumber).append(". "); // append(totalMoves).append(": ");
                 
                 // For the first hint, just show which robot to move
                 if (hintIndex == 0) {
@@ -2305,8 +2306,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     Timber.d("[HINT_SYSTEM] First hint format: %s", hintMessage.toString());
                 } else {
                     // For subsequent hints, first show abbreviated previous moves
-                    // Get previous moves (up to 4)
-                    int startIndex = Math.max(0, hintIndex - 4);
+                    // Get previous moves (up to MAX_HINT_HISTORY)
+                    int startIndex = Math.max(0, hintIndex - MAX_HINT_HISTORY);
                     
                     // Add abbreviated previous moves
                     String lastColorName = null;
@@ -2328,7 +2329,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                             }
                             hintMessage.append(prevDirectionArrow);
                             lastColorName = prevColorName;
-                            
+
                             // Add comma if not the last previous move
                             if (i < hintIndex - 1) {
                                 hintMessage.append(",");
