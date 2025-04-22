@@ -2034,14 +2034,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private String getDirectionArrow(int direction) {
         switch (direction) {
             case 1: // ERRGameMove.UP.getDirection()
-                return "^"; 
-            case 2: // ERRGameMove.DOWN.getDirection()
-                return "v"; 
-            case 4: // ERRGameMove.RIGHT.getDirection()
-                return ">"; 
+                return getString(R.string.hint_direction_up); // ▲
+            case 2: // ERRGameMove.RIGHT.getDirection()
+                return getString(R.string.hint_direction_right); // ▶
+            case 4: // ERRGameMove.DOWN.getDirection()
+                return getString(R.string.hint_direction_down); // ▼
             case 8: // ERRGameMove.LEFT.getDirection()
-                return "<";
-            default: 
+                return getString(R.string.hint_direction_left); // ◀
+            default:
                 return "unknown direction";
         }
     }
@@ -2319,11 +2319,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         if (prevMove instanceof RRGameMove prevRRMove) {
                             // Get abbreviated color and direction
                             String prevColorName = getColorAbbreviation(getLocalizedRobotColorName(prevRRMove.getColor()));
-                            String prevDirectionName = getDirectionSymbol(getDirectionArrow(prevRRMove.getDirection()));
+                            String prevDirectionArrow = getDirectionSymbol(getDirectionArrow(prevRRMove.getDirection()));
                             
                             // Add first letter of each
                             hintMessage.append(prevColorName)
-                                    .append(prevDirectionName);
+                                    .append(prevDirectionArrow);
                             
                             // Add comma if not the last previous move
                             if (i < hintIndex - 1) {
