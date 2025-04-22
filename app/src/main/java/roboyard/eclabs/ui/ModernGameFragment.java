@@ -2309,6 +2309,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     int startIndex = Math.max(0, hintIndex - 4);
                     
                     // Add abbreviated previous moves
+                    String lastColorName = null;
                     for (int i = startIndex; i < hintIndex; i++) {
                         if (i == startIndex && startIndex > 0) {
                             // If we're not showing all previous moves, add an ellipsis
@@ -2321,9 +2322,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                             String prevColorName = getColorAbbreviation(getLocalizedRobotColorName(prevRRMove.getColor()));
                             String prevDirectionArrow = getDirectionSymbol(getDirectionArrow(prevRRMove.getDirection()));
                             
-                            // Add first letter of each
-                            hintMessage.append(prevColorName)
-                                    .append(prevDirectionArrow);
+                            // Only add color abbreviation if color changed from previous move
+                            if (lastColorName == null || !prevColorName.equals(lastColorName)) {
+                                hintMessage.append(prevColorName);
+                            }
+                            hintMessage.append(prevDirectionArrow);
+                            lastColorName = prevColorName;
                             
                             // Add comma if not the last previous move
                             if (i < hintIndex - 1) {
