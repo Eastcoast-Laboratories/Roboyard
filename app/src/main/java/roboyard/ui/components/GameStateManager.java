@@ -44,7 +44,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import roboyard.eclabs.FileReadWrite;
-import roboyard.eclabs.GameHistoryEntry;
 import roboyard.eclabs.GameHistoryManager;
 import roboyard.eclabs.MapObjects;
 import roboyard.eclabs.R;
@@ -56,6 +55,7 @@ import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.SolverManager;
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameLogic;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
@@ -2827,4 +2827,3 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         calculateSolutionAsync(null);
     }
 }
-    

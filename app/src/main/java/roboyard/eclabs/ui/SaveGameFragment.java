@@ -41,14 +41,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import roboyard.eclabs.GameHistoryEntry;
-import roboyard.eclabs.GameHistoryManager;
+import roboyard.logic.core.GameState;
 import roboyard.eclabs.R;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
-import roboyard.logic.core.GameState;
+import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.components.GameStateManager;
+import roboyard.eclabs.GameHistoryManager;
 import timber.log.Timber;
 
 /**

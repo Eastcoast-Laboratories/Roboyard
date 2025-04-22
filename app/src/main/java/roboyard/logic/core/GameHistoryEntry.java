@@ -1,4 +1,4 @@
-package roboyard.eclabs;
+package roboyard.logic.core;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
