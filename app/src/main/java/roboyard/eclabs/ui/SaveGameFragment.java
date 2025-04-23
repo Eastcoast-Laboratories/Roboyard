@@ -598,7 +598,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     // Create a history item with data from the entry
                     String name = entry.getMapName();
                     // Format date manually since getFormattedDate() might not exist
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
                     String date = sdf.format(new Date(entry.getTimestamp()));
                     int moves = entry.getMovesMade();
                     String mapPath = entry.getMapPath();
@@ -613,7 +613,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Create a history item and add it to the adapter
-                    HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves, entry.getBoardSize(), mapPath, minimap);
+                    HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves, "16×16", mapPath, minimap);
                     entries.add(historyEntry);
                 }
                 
@@ -1292,7 +1292,7 @@ public class SaveGameFragment extends BaseGameFragment {
 
         public SaveSlotAdapter(Context context, List<SaveSlotInfo> saveSlots) {
             this.saveSlots = saveSlots;
-            this.dateFormat = new SimpleDateFormat("MM/dd HH:mm", Locale.US); // Changed date format
+            this.dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US); // Updated date format
         }
 
         @NonNull
@@ -1342,7 +1342,7 @@ public class SaveGameFragment extends BaseGameFragment {
             // Difficulty
             if (slot.getDifficulty() != null && !slot.getDifficulty().isEmpty()) {
                 holder.difficultyText.setVisibility(View.VISIBLE);
-                holder.difficultyText.setText(requireContext().getString(R.string.level_difficulty) + ": " + slot.getDifficulty());
+                holder.difficultyText.setText(slot.getDifficulty());
             } else {
                 holder.difficultyText.setVisibility(View.GONE);
             }
@@ -1479,15 +1479,12 @@ public class SaveGameFragment extends BaseGameFragment {
             // Set history entry info
             holder.nameText.setText(entry.getName());
             
-            // Set date
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            // Set date with updated format
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             holder.dateText.setText(sdf.format(entry.getDate()));
             
             // Set moves
             holder.movesText.setText(entry.getMoves() + " moves");
-            
-            // Set duration
-            holder.durationText.setText(entry.getSize() + " seconds");
             
             // Set minimap if available
             if (entry.getMinimap() != null) {

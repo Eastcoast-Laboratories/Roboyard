@@ -14,6 +14,7 @@ CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Deutsche Änderungen definieren
 DE_CHANGES=$(cat << EOF
+- Mehrsprachigkeit hinzugefügt: Deutsch, Spanisch, Französisch, Chinesisch und Koreanisch
 - Automatische Auswahl des Roboters in der Zielfarbe beim Spielstart
 - Verbesserte Barrierefreiheit:
   - Steuerungselemente im Accessibility-Modus bleiben jetzt immer sichtbar
@@ -23,11 +24,19 @@ DE_CHANGES=$(cat << EOF
 - Roboterpfade werden beim Start eines neuen Spiels zurückgesetzt
 - Squares Moved wird bei neuem Spiel zurückgesetzt
 - Roboteranimationen sind jetzt schneller
+- Den nächsten Hint nur anzeigen, wenn der Roboter den passenden Zug gemacht hat
+- Verhindern von Karten mit Lösung in nur einem Zug
+- Neuer Multi-Target Mode (beta) in Settings
+- Im Save Screen wird nun die Kartengröße und der Spielfortschritt gespeichert.
+- Im Fortgeschrittenen Modus werden nun Lösungen mit mindestens 6-10 Zügen erwartet
+- Share button: Man kann Karten mit Lösungen teilen
+- Man kann das Spiel von externen Seiten starten mit dem URL Schema 'roboyard://'
 EOF
 )
 
 # Englische Übersetzung
 EN_CHANGES=$(cat << EOF
+- Added German, Spanish, French, Chinese and Korean translation
 - Automatically select the robot that matches the target color at game start
 - Improved accessibility:
   - Controls remain visible in accessibility mode
@@ -37,6 +46,13 @@ EN_CHANGES=$(cat << EOF
 - Robot paths are now cleared when starting a new game
 - Squares Moved is reset when starting a new game
 - Faster robot animations
+- only advance hint if the suggested move is made
+- Prevent maps with solution one move
+- Added Multi-Target Mode (beta) in Settings with radio buttons.
+- Added board size and completion status to save files.
+- advanced mode now requires solutions with at least 6-10 moves
+- Improved Sharing: Added support for sharing maps with solutions
+- Added support for deep links: You can now open games via the URL scheme 'roboyard://'
 EOF
 )
 
