@@ -2,6 +2,7 @@ package roboyard.eclabs.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -173,18 +174,28 @@ public class LevelCompletionManager {
         if (json != null) {
             try {
                 Gson gson = new Gson();
-                Type type = new TypeToken<Map<Integer, LevelCompletionData>>(){}.getType();
-                Map<Integer, LevelCompletionData> loadedData = gson.fromJson(json, type);
+                // Use Runtime Type to avoid ProGuard issues
+                Type mapType = new TypeToken<HashMap<Integer, LevelCompletionData>>() {}.getType();
+                Map<Integer, LevelCompletionData> loadedData = gson.fromJson(json, mapType);
                 
                 if (loadedData != null) {
                     completionDataMap = loadedData;
-                    Timber.d("Loaded completion data for %d levels: %s", 
-                            completionDataMap.size(), completionDataMap.toString());
+                    Timber.d("Loaded completion data for %d levels", completionDataMap.size());
+                    
+                    // Debug output to show what was loaded
+                    for (Map.Entry<Integer, LevelCompletionData> entry : completionDataMap.entrySet()) {
+                        Timber.d("Loaded level %d: completed=%s, stars=%d", 
+                                entry.getKey(), entry.getValue().isCompleted(), entry.getValue().getStars());
+                    }
                 } else {
                     Timber.w("Loaded data was null despite having JSON");
                 }
             } catch (Exception e) {
+                // More detailed error handling with UI feedback
                 Timber.e(e, "Error loading level completion data");
+                Toast.makeText(context, "Error loading level data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                // Create an empty map as fallback
+                completionDataMap = new HashMap<>();
             }
         } else {
             Timber.d("No completion data found in SharedPreferences");
