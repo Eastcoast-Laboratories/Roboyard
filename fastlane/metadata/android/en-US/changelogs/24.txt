@@ -1,0 +1,17 @@
+- Added German, Spanish, French, Chinese and Korean translation
+- Automatically select the robot that matches the target color at game start
+- Improved accessibility:
+  - Controls remain visible in accessibility mode
+  - Fixed incorrect wall position detection in screen reader announcements
+  - Added more announcements
+- Fixed missing outer walls (south and east)
+- Robot paths are now cleared when starting a new game
+- Squares Moved is reset when starting a new game
+- Faster robot animations
+- only advance hint if the suggested move is made
+- Prevent maps with solution one move
+- Added Multi-Target Mode (beta) in Settings with radio buttons.
+- Added board size and completion status to save files.
+- advanced mode now requires solutions with at least 6-10 moves
+- Improved Sharing: Added support for sharing maps with solutions
+- Added support for deep links: You can now open games via the URL scheme 'roboyard://'
