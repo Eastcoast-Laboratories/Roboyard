@@ -112,7 +112,7 @@ public class MapGenerator {
      * @param count Number of robots per color (1-4)
      */
     public void setRobotCount(int count) {
-        this.robotCount = Math.max(1, Math.min(4, count));
+        this.robotCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         
         // Pass the robot count to the GameLogic if it exists
         if (gameLogic != null) {

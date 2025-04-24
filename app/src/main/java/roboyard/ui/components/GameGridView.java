@@ -65,8 +65,8 @@ public class GameGridView extends View {
     private final HashMap<Integer, HashMap<String, Integer>> segmentCounts = new HashMap<>(); // Track segment traversal count
     
     // Robot drawables for each color
-    private Drawable pinkRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight;
-    private Drawable pinkRobotLeft, yellowRobotLeft, blueRobotLeft, greenRobotLeft;
+    private Drawable pinkRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight, silverRobotRight;
+    private Drawable pinkRobotLeft, yellowRobotLeft, blueRobotLeft, greenRobotLeft, silverRobotLeft;
     
     // Wall drawables
     private Drawable wallHorizontal;
@@ -77,6 +77,7 @@ public class GameGridView extends View {
     private Drawable targetGreenDrawable;   // cv
     private Drawable targetBlueDrawable;    // cb
     private Drawable targetYellowDrawable;  // cj
+    private Drawable targetSilverDrawable;  // cs
     private Drawable targetMultiDrawable;   // cm
     
     // Robot animation configuration
@@ -203,11 +204,13 @@ public class GameGridView extends View {
         yellowRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_yellow_right);
         blueRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_blue_right);
         greenRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_green_right);
+        silverRobotRight = ContextCompat.getDrawable(context, R.drawable.robot_silver_right);
         
         pinkRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_pink_left);
         yellowRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_yellow_left);
         blueRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_blue_left);
         greenRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_green_left);
+        silverRobotLeft = ContextCompat.getDrawable(context, R.drawable.robot_silver_left);
         
         // Load wall drawables
         wallHorizontal = ContextCompat.getDrawable(context, R.drawable.mh);
@@ -218,6 +221,7 @@ public class GameGridView extends View {
         targetGreenDrawable = ContextCompat.getDrawable(context, R.drawable.target_green);
         targetBlueDrawable = ContextCompat.getDrawable(context, R.drawable.target_blue);
         targetYellowDrawable = ContextCompat.getDrawable(context, R.drawable.target_yellow);
+        targetSilverDrawable = ContextCompat.getDrawable(context, R.drawable.target_silver);
         targetMultiDrawable = ContextCompat.getDrawable(context, R.drawable.target_multi);
         
         // Load grid tile background
@@ -580,6 +584,7 @@ public class GameGridView extends View {
             case Constants.COLOR_GREEN: return targetGreenDrawable;
             case Constants.COLOR_BLUE: return targetBlueDrawable;
             case Constants.COLOR_YELLOW: return targetYellowDrawable;
+            case Constants.COLOR_SILVER: return targetSilverDrawable;
             case Constants.COLOR_MULTI: // intentional fallthrough
             default: 
                 Timber.d("[RENDER] Using multi-colored target for color ID: %d", colorId);
@@ -598,6 +603,19 @@ public class GameGridView extends View {
         GameState state = gameStateManager.getCurrentState().getValue();
         gridWidth = state.getWidth();
         gridHeight = state.getHeight();
+        
+        // DEBUG: Count robots that will be drawn
+        int robotsDrawn = 0;
+        Timber.d("[DEBUG_ROBOTS] Starting debug of robots drawn in GameGridView.onDraw()");
+        for (GameElement element : state.getGameElements()) {
+            if (element.isRobot()) {
+                robotsDrawn++;
+                Timber.d("[DEBUG_ROBOTS] Will draw robot #%d at (%d,%d) with color %d (colorName: %s)",
+                        robotsDrawn, element.getX(), element.getY(), element.getColor(), 
+                        GameLogic.getColorName(element.getColor(), true));
+            }
+        }
+        Timber.d("[DEBUG_ROBOTS] Total robots to be drawn: %d", robotsDrawn);
         
         // Calculate offsets to center the board
         float offsetX = (getWidth() - (gridWidth * cellSize)) / 2f;
@@ -745,6 +763,9 @@ public class GameGridView extends View {
                 case 3: // Yellow
                     robotDrawable = yellowRobotRight;
                     break;
+                case 4: // Silver
+                    robotDrawable = silverRobotRight;
+                    break;
             }
             
             if (robotDrawable != null) {
@@ -848,6 +869,8 @@ public class GameGridView extends View {
             robotDrawable = robot.getDirectionX() < 0 ? yellowRobotLeft : yellowRobotRight;
         } else if (robotColor == GameElement.COLOR_GREEN) {
             robotDrawable = robot.getDirectionX() < 0 ? greenRobotLeft : greenRobotRight;
+        } else if (robotColor == GameElement.COLOR_SILVER) {
+            robotDrawable = robot.getDirectionX() < 0 ? silverRobotLeft : silverRobotRight;
         } else { // Pink (default)
             robotDrawable = robot.getDirectionX() < 0 ? pinkRobotLeft : pinkRobotRight;
         }

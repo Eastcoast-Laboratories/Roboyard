@@ -338,7 +338,7 @@ public class Preferences {
         }
         
         // Ensure count is between 1 and 4
-        int validCount = Math.max(1, Math.min(4, count));
+        int validCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         
         // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();
@@ -366,13 +366,13 @@ public class Preferences {
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
-                targetColors = Math.max(1, Math.min(4, count));
+                targetColors = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
                 return;
             }
         }
         
         // Ensure count is between 1 and 4
-        int validCount = Math.max(1, Math.min(4, count));
+        int validCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         
         // Save to preferences
         SharedPreferences.Editor editor = prefs.edit();

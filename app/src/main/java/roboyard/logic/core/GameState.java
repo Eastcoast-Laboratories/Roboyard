@@ -413,6 +413,8 @@ public class GameState implements Serializable {
                         gridElementType = "target_blue";
                     } else if (targetColor == 3) {
                         gridElementType = "target_yellow";
+                    } else if (targetColor == 4) {
+                        gridElementType = "target_silver";
                     } else {
                         // Fallback
                         gridElementType = "target_red";
@@ -454,6 +456,8 @@ public class GameState implements Serializable {
                     gridElementType = "robot_blue";
                 } else if (robotColor == 3) {
                     gridElementType = "robot_yellow";
+                } else if (robotColor == 4) {
+                    gridElementType = "robot_silver";
                 } else {
                     // Fallback
                     gridElementType = "robot_red";
@@ -1060,6 +1064,7 @@ public class GameState implements Serializable {
                             else if (color.equals("green")) colorId = 1;
                             else if (color.equals("blue")) colorId = 2;
                             else if (color.equals("yellow")) colorId = 3;
+                            else if (color.equals("silver")) colorId = 4;
                             
                             if (colorId >= 0) {
                                 state.addTarget(x, y, colorId);
@@ -1109,6 +1114,7 @@ public class GameState implements Serializable {
                             else if (color.equals("green")) colorId = 1;
                             else if (color.equals("blue")) colorId = 2;
                             else if (color.equals("yellow")) colorId = 3;
+                            else if (color.equals("silver")) colorId = 4;
                             
                             if (colorId >= 0) {
                                 state.addRobot(x, y, colorId);
@@ -1532,7 +1538,7 @@ public class GameState implements Serializable {
      */
     public void setRobotCount(int count) {
         // Ensure count is within valid range
-        this.robotCount = Math.max(1, Math.min(4, count));
+        this.robotCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         Timber.d("Robot count set to %d", this.robotCount);
     }
     
@@ -1662,6 +1668,9 @@ public class GameState implements Serializable {
             } else if (type.equals("target_yellow")) {
                 state.addTarget(x, y, Constants.COLOR_YELLOW);
                 Timber.d("[COLOR_MAPPING] Added yellow target at (%d,%d) with color ID %d", x, y, Constants.COLOR_YELLOW);
+            } else if (type.equals("target_silver")) {
+                state.addTarget(x, y, Constants.COLOR_SILVER);
+                Timber.d("[COLOR_MAPPING] Added silver target at (%d,%d) with color ID %d", x, y, Constants.COLOR_SILVER);
             } else if (type.equals("target_multi")) {
                 // Multi-color target - we'll use pink as default
                 state.addTarget(x, y, Constants.COLOR_PINK);
@@ -1680,6 +1689,9 @@ public class GameState implements Serializable {
             } else if (type.equals("robot_yellow")) {
                 state.addRobot(x, y, Constants.COLOR_YELLOW);
                 Timber.d("[COLOR_MAPPING] Added yellow robot at (%d,%d) with color ID %d", x, y, Constants.COLOR_YELLOW);
+            } else if (type.equals("robot_silver")) {
+                state.addRobot(x, y, Constants.COLOR_SILVER);
+                Timber.d("[COLOR_MAPPING] Added silver robot at (%d,%d) with color ID %d", x, y, Constants.COLOR_SILVER);
             }
         }
 

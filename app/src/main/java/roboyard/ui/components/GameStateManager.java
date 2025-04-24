@@ -2267,6 +2267,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 Preferences.robotCount,
                 Preferences.targetColors);
 
+        // DEBUG: Analyze all game elements in the newly created state
+        Timber.d("[DEBUG_ROBOTS] Starting debug of newly created GameState (createValidGame)");
+        int robotCount = 0;
+        for (GameElement element : newState.getGameElements()) {
+            if (element.isRobot()) {
+                robotCount++;
+                Timber.d("[DEBUG_ROBOTS] Robot #%d at (%d,%d) with color %d (colorName: %s)",
+                        robotCount, element.getX(), element.getY(), element.getColor(), 
+                        GameLogic.getColorName(element.getColor(), true));
+            }
+        }
+        Timber.d("[DEBUG_ROBOTS] Total robots in new GameState: %d (should be %d)", 
+                robotCount, Constants.NUM_ROBOTS);
+
         // Set the game state
         currentState.setValue(newState);
         moveCount.setValue(0);

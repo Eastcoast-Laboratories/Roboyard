@@ -23,6 +23,7 @@ public class GameElement implements Serializable {
     public static final int COLOR_GREEN = 1;
     public static final int COLOR_BLUE = 2;
     public static final int COLOR_YELLOW = 3;
+    public static final int COLOR_SILVER = 4;
     
     // Element properties
     private final int type;

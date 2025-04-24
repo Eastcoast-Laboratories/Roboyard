@@ -199,10 +199,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (robot == null) return Color.BLUE;
         
         switch (robot.getColor()) {
-            case 0: return Color.RED;
+            case 0: return Color.RED; // (Pink)
             case 1: return Color.GREEN;
             case 2: return Color.BLUE;
             case 3: return Color.YELLOW;
+            case 4: return Color.GRAY; // (Silver)
             default: return Color.DKGRAY;
         }
     }
@@ -1915,7 +1916,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 case 3: // Blue
                     backgroundColor = Color.parseColor("#2196F3");
                     break;
-                case 4: // Gray
+                case 4: // Gray (Silver)
                     backgroundColor = Color.parseColor("#9E9E9E");
                     break;
                 default:
@@ -2058,6 +2059,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             case Constants.COLOR_GREEN: return getString(R.string.color_green);
             case Constants.COLOR_BLUE: return getString(R.string.color_blue);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow);
+            case Constants.COLOR_SILVER: return getString(R.string.color_silver);
             default:
                 return getString(R.string.unknown_color, robotId);
         }
@@ -2074,6 +2076,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             case Constants.COLOR_GREEN: return getString(R.string.color_green_dative);
             case Constants.COLOR_BLUE: return getString(R.string.color_blue_dative);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_dative);
+            case Constants.COLOR_SILVER: return getString(R.string.color_silver_dative);
             default:
                 return getString(R.string.unknown_color, robotId);
         }
@@ -2110,6 +2113,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             case Constants.COLOR_GREEN: return "Green";
             case Constants.COLOR_BLUE: return "Blue";
             case Constants.COLOR_YELLOW: return "Yellow";
+            case Constants.COLOR_SILVER: return "Silver";
             default: return "Unknown: " + robotId;
         }
     }
@@ -2494,6 +2498,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 } else if (lowerMessage.contains("pink") || lowerMessage.contains("rosa") || lowerMessage.contains("purple") || lowerMessage.contains("violet")) {
                     backgroundDrawable.setColor(Color.parseColor("#eb91ff"));
                     backgroundDrawable.setStroke(3, Color.parseColor("#800080"));
+                    useCustomColors = true;
+                } else if (lowerMessage.contains("silver") || lowerMessage.contains("silber")) {
+                    backgroundDrawable.setColor(Color.parseColor("#c0c0c0"));
+                    backgroundDrawable.setStroke(3, Color.GRAY); // (Silver)
                     useCustomColors = true;
                 } else if (lowerMessage.contains("orange") || lowerMessage.contains("orange")) {
                     backgroundDrawable.setColor(Color.parseColor("#ffa77f"));

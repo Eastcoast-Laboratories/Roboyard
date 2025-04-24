@@ -1372,7 +1372,7 @@ public class GameLogic {
      */
     public void setRobotCount(int count) {
         // Ensure count is between 1 and 4
-        this.robotCount = Math.max(1, Math.min(4, count));
+        this.robotCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         Timber.d("Robot count set to %d", this.robotCount);
     }
 
@@ -1390,7 +1390,7 @@ public class GameLogic {
      */
     public void setTargetColors(int count) {
         // Ensure count is between 1 and 4
-        this.targetColors = Math.max(1, Math.min(4, count));
+        this.targetColors = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         Timber.d("Target colors set to %d", this.targetColors);
     }
 
