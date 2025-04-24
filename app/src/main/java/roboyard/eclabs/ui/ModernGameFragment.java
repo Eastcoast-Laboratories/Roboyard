@@ -2016,13 +2016,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         switch (direction) {
             case 1: // ERRGameMove.UP.getDirection()
-                return getString(R.string.direction_up);   // "up";
+                return getString(R.string.hint_direction_up);
             case 4: // ERRGameMove.DOWN.getDirection()
-                return getString(R.string.direction_down);   // "down";
+                return getString(R.string.hint_direction_down);
             case 2: // ERRGameMove.RIGHT.getDirection()
-                return getString(R.string.direction_right);   // "right";
+                return getString(R.string.hint_direction_right);
             case 8: // ERRGameMove.LEFT.getDirection()
-                return getString(R.string.direction_left);   // "left";
+                return getString(R.string.hint_direction_left);
             default:
                 return "unknown direction";
         }

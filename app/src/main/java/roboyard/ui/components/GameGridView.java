@@ -117,8 +117,6 @@ public class GameGridView extends View {
     // Variables to track continuous swiping
     private boolean continuousMoveEnabled = true;  // Flag to enable continuous move mode
     private boolean hasMovedRobotInCurrentGesture = false;
-    private int lastMoveX = -1;
-    private int lastMoveY = -1;
     private int pendingMoveDirectionX = 0;  // Track pending movement direction for ACTION_UP
     private int pendingMoveDirectionY = 0;  // Track pending movement direction for ACTION_UP
     private boolean robotCurrentlyMoving = false;  // Track if a robot is currently in motion
@@ -1066,8 +1064,6 @@ public class GameGridView extends View {
                 if (state != null) {
                     // Reset continuous movement tracking
                     hasMovedRobotInCurrentGesture = false;
-                    lastMoveX = -1;
-                    lastMoveY = -1;
                     pendingMoveDirectionX = 0;
                     pendingMoveDirectionY = 0;
                     robotActivatedBySwipe = false;  // Reset robot activation flag
@@ -1172,13 +1168,17 @@ public class GameGridView extends View {
                                     startTouchX = x;
                                     startTouchY = y;
                                     
-                                    // Store the current grid position to avoid repetitive movements
-                                    lastMoveX = gridX;
-                                    lastMoveY = gridY;
-                                    
-                                    // Also clear the pending move direction since we've already moved
+                                    // After a successful move, reset all swipe and activation state.
+                                    // This ensures that the robot cannot be activated or moved again
+                                    // until the user performs a new ACTION_DOWN on a robot.
+                                    touchedRobot = null;
+                                    startTouchX = -1;
+                                    startTouchY = -1;
+                                    touchStartGridX = -1;
+                                    touchStartGridY = -1;
                                     pendingMoveDirectionX = 0;
                                     pendingMoveDirectionY = 0;
+                                    robotActivatedBySwipe = false;
                                 } else {
                                     // If the move failed, reset the flag
                                     robotCurrentlyMoving = false;
@@ -1199,7 +1199,7 @@ public class GameGridView extends View {
                     }
                     
                     // For continuous mode: check if we're on a new robot
-                    if (continuousMoveEnabled && (gridX != lastMoveX || gridY != lastMoveY) && !robotCurrentlyMoving) {
+                    if (continuousMoveEnabled && !robotCurrentlyMoving) {
                         GameElement newRobot = state.getRobotAt(gridX, gridY);
                         // If we moved onto a different robot, select it for the next movement
                         if (newRobot != null && (touchedRobot == null || newRobot != touchedRobot)) {
@@ -1215,10 +1215,6 @@ public class GameGridView extends View {
                             startTouchY = y;
                             touchStartGridX = gridX;
                             touchStartGridY = gridY;
-                            
-                            // Update last move position
-                            lastMoveX = gridX;
-                            lastMoveY = gridY;
                             
                             // Reset pending move directions
                             pendingMoveDirectionX = 0;
@@ -1273,8 +1269,6 @@ public class GameGridView extends View {
                     touchStartGridY = -1;
                     touchedRobot = null;
                     hasMovedRobotInCurrentGesture = false;
-                    lastMoveX = -1;
-                    lastMoveY = -1;
                     pendingMoveDirectionX = 0;
                     pendingMoveDirectionY = 0;
                     robotActivatedBySwipe = false;  // Reset robot activation state
@@ -1359,8 +1353,6 @@ public class GameGridView extends View {
                 touchStartGridY = -1;
                 touchedRobot = null;
                 hasMovedRobotInCurrentGesture = false;
-                lastMoveX = -1;
-                lastMoveY = -1;
                 pendingMoveDirectionX = 0;
                 pendingMoveDirectionY = 0;
                 robotActivatedBySwipe = false;  // Reset robot activation state

@@ -277,10 +277,10 @@
     <string name="direction_left">向左</string>
     
     <!-- Direction symbols -->
-    <string name="hint_direction_up">↑</string>
-    <string name="hint_direction_down">↓</string>
-    <string name="hint_direction_right">→</string>
-    <string name="hint_direction_left">←</string>
+    <string name="hint_direction_up">▲</string>
+    <string name="hint_direction_down">▼</string>
+    <string name="hint_direction_right">▶</string>
+    <string name="hint_direction_left">◀</string>
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">已找到 %1$d 步的解决方案</string>
