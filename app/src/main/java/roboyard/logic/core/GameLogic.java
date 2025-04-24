@@ -363,7 +363,7 @@ public class GameLogic {
             targetTypeIndices[i] = i;
         }
         
-        // Shuffle the array to randomize which colors are used when targetColors < 4
+        // Shuffle the array to randomize which colors are used when targetColors < NUM_ROBOTS
         shuffleIntArray(targetTypeIndices);
         
         // Only use the first targetTypesCount elements from the shuffled array

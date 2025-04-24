@@ -33,7 +33,7 @@ public class MapGenerator {
     Boolean allowMulticolorTarget = true;
     public static Boolean generateNewMapEachTime = true; // option in settings
     private int robotCount = 1; // Default to 1 robot per color
-    private int targetColors = 4; // Default to 4 different target colors
+    private int targetColors = Constants.NUM_ROBOTS; // Default to 4 different target colors
 
     // Wall configuration
     int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column

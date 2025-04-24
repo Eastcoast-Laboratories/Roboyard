@@ -50,7 +50,7 @@ public class GameState implements Serializable {
     private int moveCount;
     private int squaresMoved;
     private int robotCount = 1; // Default to 1 robot per color
-    private int targetColorsCount = 4; // Default to 4 different target colors
+    private int targetColorsCount = Constants.NUM_ROBOTS; // Default to 4 different target colors
     private boolean completed = false;
     private int hintCount = 0; // Track the number of hints used in this game
     private String uniqueMapId = ""; // 5-letter unique ID for map identification
@@ -471,7 +471,7 @@ public class GameState implements Serializable {
         int[] cornerY = {1, 1, height-2, height-2};
         int cornerIndex = 0;
         
-        for (int color = 0; color < 4; color++) {
+        for (int color = 0; color < Constants.NUM_ROBOTS; color++) {
             if (!robotColorsAdded[color]) {
                 // Add a placeholder robot off-screen (the solver needs exactly 4 robots)
                 String gridElementType;
@@ -480,6 +480,7 @@ public class GameState implements Serializable {
                     case 1: gridElementType = "robot_green"; break;
                     case 2: gridElementType = "robot_blue"; break;
                     case 3: gridElementType = "robot_yellow"; break;
+                    case 4: gridElementType = "robot_silver"; break;
                     default: gridElementType = "robot_red"; break;
                 }
                 

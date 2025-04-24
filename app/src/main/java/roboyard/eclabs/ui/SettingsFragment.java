@@ -636,14 +636,14 @@ public class SettingsFragment extends Fragment {
             // Create adapter with values 1-4
             ArrayAdapter<Integer> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            for (int i = 1; i <= 4; i++) {
+            for (int i = 1; i <= Constants.NUM_ROBOTS; i++) {
                 adapter.add(i);
             }
             robotCountSpinner.setAdapter(adapter);
             
             // Set current value from static Preferences
             int robotCount = Preferences.robotCount;
-            if (robotCount < 1 || robotCount > 4) {
+            if (robotCount < 1 || robotCount > Constants.NUM_ROBOTS) {
                 robotCount = Preferences.DEFAULT_ROBOT_COUNT; // Default to 1 if invalid
             }
             robotCountSpinner.setSelection(robotCount - 1); // -1 because index is 0-based
@@ -701,7 +701,7 @@ public class SettingsFragment extends Fragment {
             // Create adapter with localized text values
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            for (int i = 1; i <= 4; i++) {
+            for (int i = 1; i <= Constants.NUM_ROBOTS; i++) {
                 // Format as "1 of 4 targets" with localization
                 adapter.add(String.valueOf(i));
             }

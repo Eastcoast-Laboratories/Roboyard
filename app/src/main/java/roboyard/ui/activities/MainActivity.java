@@ -6,7 +6,6 @@ import roboyard.ui.components.RenderManager;
 import roboyard.ui.components.InputManager;
 import roboyard.eclabs.IGameObject;
 import roboyard.ui.components.GamePiece;
-import roboyard.ui.components.GameMovementInterface;
 import roboyard.eclabs.GameManager;
 
 import android.graphics.Canvas;
@@ -344,12 +343,6 @@ public class MainActivity extends FragmentActivity
         for (IGameObject obj : gameManager.getCurrentScreen().getGameObjects()) {
             if (obj instanceof GamePiece piece) {
                 if (piece.isInMovement()) {
-                    return true;
-                }
-            }
-            // Check if GMI is active
-            if (obj instanceof GameMovementInterface gmi) {
-                if (gmi.isActive()) {
                     return true;
                 }
             }
