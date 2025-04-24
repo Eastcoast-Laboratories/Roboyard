@@ -324,26 +324,19 @@ public class GameLogic {
                 currentLevel, targetMustBeInCorner);
         
         // Use our color management methods to generate target and robot type strings
-        String[] typesOfTargets = new String[Constants.NUM_ROBOTS + 1]; // 4 standard targets + multi-colored target
+        String[] typesOfTargets = new String[Constants.NUM_ROBOTS + 1]; // standard targets + multi-colored target
         for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
             typesOfTargets[i] = getObjectType(i, false); // false = target
         }
-        typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Only add multitarget at index 4
+        typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Only add multitarget at the last index 
         
-        String[] typesOfRobots = new String[Constants.NUM_ROBOTS + 5]; 
+        String[] typesOfRobots = new String[Constants.NUM_ROBOTS]; 
         for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
             typesOfRobots[i] = getObjectType(i, true); // true = robot
         }
-        // Add extra robot colors (silver, red, brown, orange, white)
-        typesOfRobots[Constants.NUM_ROBOTS] = "robot_silver";
-        typesOfRobots[Constants.NUM_ROBOTS + 1] = "robot_red";
-        typesOfRobots[Constants.NUM_ROBOTS + 2] = "robot_brown";
-        typesOfRobots[Constants.NUM_ROBOTS + 3] = "robot_orange";
-        typesOfRobots[Constants.NUM_ROBOTS + 4] = "robot_white";
-
-        // workaround for backward compatibility:
-		typesOfTargets = new String[] {"target_red", "target_blue", "target_yellow", "target_green", "target_multi"};
-		typesOfRobots = new String[] {"robot_red", "robot_blue", "robot_yellow", "robot_green"};
+        // workaround for backward compatibility
+        typesOfRobots[0] = "robot_red";
+        typesOfTargets[0] = "target_red";
 
         // Store all positions of game elements to avoid overlapping
         ArrayList<GridElement> allElements = new ArrayList<>();

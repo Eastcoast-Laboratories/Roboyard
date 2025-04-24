@@ -438,7 +438,7 @@ public class GameState implements Serializable {
         // TODO: if not already, then add left and top border walls
         
         // Track which robot colors we've already added
-        boolean[] robotColorsAdded = new boolean[4]; // For the 4 standard colors
+        boolean[] robotColorsAdded = new boolean[Constants.NUM_ROBOTS]; // For the 4 standard colors
         
         // Add robots from game elements
         for (GameElement element : gameElements) {
