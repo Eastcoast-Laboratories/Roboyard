@@ -130,5 +130,8 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - wenn man einen level ohne hints geschafft hat, anzeigen, wieviel die optimal moves wären
 
-- in der history steht immer 16x16 statt der richtigen grösse
+- fullscreen button in settings
+- choose num_robots in settings (2-5)
+- in the simplemap generator the right-angled walls are missing
 
+- only add the same color at the end of the hint if it is not the same as the last color
