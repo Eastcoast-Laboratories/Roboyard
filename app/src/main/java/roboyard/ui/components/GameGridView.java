@@ -114,6 +114,17 @@ public class GameGridView extends View {
     private GameElement touchedRobot = null;
     private static final float MIN_SWIPE_DISTANCE = 30.0f; // Minimum distance in pixels to consider it a swipe
 
+    // Variables to track continuous swiping
+    private boolean continuousMoveEnabled = true;  // Flag to enable continuous move mode
+    private boolean hasMovedRobotInCurrentGesture = false;
+    private int lastMoveX = -1;
+    private int lastMoveY = -1;
+    private int pendingMoveDirectionX = 0;  // Track pending movement direction for ACTION_UP
+    private int pendingMoveDirectionY = 0;  // Track pending movement direction for ACTION_UP
+    private boolean robotCurrentlyMoving = false;  // Track if a robot is currently in motion
+    private boolean robotActivatedBySwipe = false;  // Track if a robot was activated by swiping over it
+    private static final float ROBOT_MOVE_THRESHOLD = 60.0f;  // Minimum distance to trigger robot movement after activation
+
     // Flag to track if an accessibility action is in progress
     private boolean accessibilityActionInProgress = false;
 
@@ -1024,12 +1035,12 @@ public class GameGridView extends View {
                     int dx = isLeftEdgeGesture ? -1 : 1; // Left edge = move left, Right edge = move right
                     
                     Timber.d("[BACK] MOVING: Robot %d with dx=%d", robot.getColor(), dx);
-                    try {
-                        boolean moved = gameStateManager.moveRobotInDirection(dx, 0);
-                        Timber.d("[BACK] Movement result: %s", moved ? "SUCCESS" : "FAILED");
-                    } catch (Exception e) {
-                        Timber.e(e, "[BACK] Error moving robot");
-                    }
+                    
+                    // Move the robot 
+                    boolean moved = gameStateManager.moveRobotInDirection(dx, 0);
+                    Timber.d("[BACK] Movement result: %s", moved ? "SUCCESS" : "FAILED");
+                    
+                    // This is important - return true to consume the event
                     return true;
                 } else {
                     Timber.d("[BACK] No robot selected");
@@ -1053,17 +1064,27 @@ public class GameGridView extends View {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (state != null) {
+                    // Reset continuous movement tracking
+                    hasMovedRobotInCurrentGesture = false;
+                    lastMoveX = -1;
+                    lastMoveY = -1;
+                    pendingMoveDirectionX = 0;
+                    pendingMoveDirectionY = 0;
+                    robotActivatedBySwipe = false;  // Reset robot activation flag
+                    
                     // Store initial touch position
                     startTouchX = x;
                     startTouchY = y;
                     touchStartGridX = gridX;
                     touchStartGridY = gridY;
                     
-                    // Check if a robot was touched
+                    // Check if a robot was touched at the start
                     touchedRobot = state.getRobotAt(gridX, gridY);
                     
                     // Announce selection for accessibility
                     if (touchedRobot != null) {
+                        state.setSelectedRobot(touchedRobot);
+                        animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
                         announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
                     } else {
                         announceForAccessibility(getPositionDescription(gridX, gridY));
@@ -1072,40 +1093,143 @@ public class GameGridView extends View {
                 return true;
                 
             case MotionEvent.ACTION_MOVE:
-                // Only process if we have a valid starting point and a touched robot
-                if (startTouchX >= 0 && startTouchY >= 0 && touchedRobot != null && state != null) {
-                    // Calculate the distance moved
-                    float deltaX = x - startTouchX;
-                    float deltaY = y - startTouchY;
-                    float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (state != null) {
+                    // Check if we just moved over a robot and none was selected before
+                    GameElement robotAtCurrentPos = state.getRobotAt(gridX, gridY);
+                    GameElement selectedRobot = state.getSelectedRobot();
                     
-                    // Only process if the distance exceeds the minimum swipe threshold
-                    if (distance >= MIN_SWIPE_DISTANCE) {
-                        // Determine the dominant direction (horizontal or vertical)
-                        int dx = 0;
-                        int dy = 0;
-                        
-                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                            // Horizontal swipe
-                            dx = deltaX > 0 ? 1 : -1; // Right or left
-                        } else {
-                            // Vertical swipe
-                            dy = deltaY > 0 ? 1 : -1; // Down or up
-                        }
-                        
-                        // Select the robot
+                    // Detect a robot if we pass over one and no robot is currently being moved
+                    if (touchedRobot == null && robotAtCurrentPos != null && !hasMovedRobotInCurrentGesture && !robotCurrentlyMoving) {
+                        // We found a robot while swiping
+                        touchedRobot = robotAtCurrentPos;
                         state.setSelectedRobot(touchedRobot);
                         
-                        // Use the improved moveRobotInDirection method which handles animation
-                        Timber.d("[SWIPE] Moving robot in direction: dx=%d, dy=%d", dx, dy);
-                        gameStateManager.moveRobotInDirection(dx, dy);
+                        // Update the start position for calculating movement direction
+                        startTouchX = x;
+                        startTouchY = y;
+                        touchStartGridX = gridX;
+                        touchStartGridY = gridY;
                         
-                        // Reset tracking variables to prevent further processing in ACTION_UP
-                        startTouchX = -1;
-                        startTouchY = -1;
-                        touchedRobot = null;
+                        // Animate the robot growing to show it's activated
+                        animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
+                        robotActivatedBySwipe = true;  // Mark that we activated this robot by swiping
                         
+                        Timber.d("[SWIPE] Found and activated robot %d while swiping at (%d,%d)", 
+                                touchedRobot.getColor(), gridX, gridY);
+                        
+                        // Announce selection for accessibility
+                        announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
+                        
+                        // Return without movement - require additional swiping to move
                         return true;
+                    }
+                    
+                    // If we have a touched/selected robot, calculate the movement direction
+                    if (touchedRobot != null && startTouchX >= 0 && startTouchY >= 0) {
+                        // Calculate the distance moved from the start position
+                        float deltaX = x - startTouchX;
+                        float deltaY = y - startTouchY;
+                        float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                        
+                        // For an activated robot, we need a larger swipe to start moving
+                        float movementThreshold = robotActivatedBySwipe ? ROBOT_MOVE_THRESHOLD : MIN_SWIPE_DISTANCE;
+                        
+                        // Only process if the distance exceeds the threshold
+                        if (distance >= movementThreshold) {
+                            // Determine the dominant direction (horizontal or vertical)
+                            int dx = 0;
+                            int dy = 0;
+                            
+                            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                                // Horizontal swipe
+                                dx = deltaX > 0 ? 1 : -1; // Right or left
+                                dy = 0;
+                            } else {
+                                // Vertical swipe
+                                dx = 0;
+                                dy = deltaY > 0 ? 1 : -1; // Down or up
+                            }
+                            
+                            // Make sure the robot is selected
+                            state.setSelectedRobot(touchedRobot);
+                            
+                            // For swipe gestures, move the robot immediately
+                            // But only if no robot is currently moving
+                            if (!robotCurrentlyMoving) {
+                                Timber.d("[SWIPE] Moving robot immediately: dx=%d, dy=%d, distance=%f", dx, dy, distance);
+                                robotCurrentlyMoving = true;  // Mark as moving before we start
+                                
+                                // Reset the activation flag since we're proceeding with the move
+                                robotActivatedBySwipe = false;
+                                
+                                boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
+                                
+                                if (moved) {
+                                    // Record that we've moved a robot in this gesture
+                                    hasMovedRobotInCurrentGesture = true;
+                                    
+                                    // Reset starting position for next movement
+                                    startTouchX = x;
+                                    startTouchY = y;
+                                    
+                                    // Store the current grid position to avoid repetitive movements
+                                    lastMoveX = gridX;
+                                    lastMoveY = gridY;
+                                    
+                                    // Also clear the pending move direction since we've already moved
+                                    pendingMoveDirectionX = 0;
+                                    pendingMoveDirectionY = 0;
+                                } else {
+                                    // If the move failed, reset the flag
+                                    robotCurrentlyMoving = false;
+                                    
+                                    // Store the direction for retry on ACTION_UP
+                                    pendingMoveDirectionX = dx;
+                                    pendingMoveDirectionY = dy;
+                                }
+                            } else {
+                                // Robot is already moving, don't initiate another move
+                                Timber.d("[SWIPE] Ignoring move request - robot already in motion");
+                            }
+                        } else {
+                            // Not enough distance yet, just log it
+                            Timber.d("[SWIPE] Swipe distance %.2f not enough to trigger movement (need %.2f)", 
+                                    distance, movementThreshold);
+                        }
+                    }
+                    
+                    // For continuous mode: check if we're on a new robot
+                    if (continuousMoveEnabled && (gridX != lastMoveX || gridY != lastMoveY) && !robotCurrentlyMoving) {
+                        GameElement newRobot = state.getRobotAt(gridX, gridY);
+                        // If we moved onto a different robot, select it for the next movement
+                        if (newRobot != null && (touchedRobot == null || newRobot != touchedRobot)) {
+                            touchedRobot = newRobot;
+                            state.setSelectedRobot(touchedRobot);
+                            
+                            // Animate the robot growing to show it's activated
+                            animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
+                            robotActivatedBySwipe = true;  // Mark that we activated this robot by swiping
+                            
+                            // Reset starting position for the new robot
+                            startTouchX = x;
+                            startTouchY = y;
+                            touchStartGridX = gridX;
+                            touchStartGridY = gridY;
+                            
+                            // Update last move position
+                            lastMoveX = gridX;
+                            lastMoveY = gridY;
+                            
+                            // Reset pending move directions
+                            pendingMoveDirectionX = 0;
+                            pendingMoveDirectionY = 0;
+                            
+                            Timber.d("[SWIPE] Continuous mode: switched to robot %d at (%d,%d)", 
+                                   touchedRobot.getColor(), gridX, gridY);
+                            
+                            // Announce selection for accessibility
+                            announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
+                        }
                     }
                 }
                 return true;
@@ -1117,18 +1241,43 @@ public class GameGridView extends View {
                                     Math.abs(x - startTouchX) < MIN_SWIPE_DISTANCE && 
                                     Math.abs(y - startTouchY) < MIN_SWIPE_DISTANCE);
                     
-                    // Reset tracking variables
+                    // If we have a pending move direction (not a tap), execute it now
+                    if (touchedRobot != null && !isTap && (pendingMoveDirectionX != 0 || pendingMoveDirectionY != 0) && !robotCurrentlyMoving) {
+                        // Execute the pending move only if no robot is already moving
+                        Timber.d("[SWIPE] Executing pending move on ACTION_UP: dx=%d, dy=%d", 
+                              pendingMoveDirectionX, pendingMoveDirectionY);
+                              
+                        robotCurrentlyMoving = true;  // Mark as moving before we start
+                        boolean moved = gameStateManager.moveRobotInDirection(
+                              pendingMoveDirectionX, pendingMoveDirectionY);
+                              
+                        if (moved) {
+                            hasMovedRobotInCurrentGesture = true;
+                        } else {
+                            // If the move failed, reset the moving flag
+                            robotCurrentlyMoving = false;
+                        }
+                    }
+                    
+                    // Store references to the old values before resetting
                     float oldStartX = startTouchX;
                     float oldStartY = startTouchY;
                     int oldTouchStartGridX = touchStartGridX;
                     int oldTouchStartGridY = touchStartGridY;
                     GameElement oldTouchedRobot = touchedRobot;
                     
+                    // Reset all tracking variables
                     startTouchX = -1;
                     startTouchY = -1;
                     touchStartGridX = -1;
                     touchStartGridY = -1;
                     touchedRobot = null;
+                    hasMovedRobotInCurrentGesture = false;
+                    lastMoveX = -1;
+                    lastMoveY = -1;
+                    pendingMoveDirectionX = 0;
+                    pendingMoveDirectionY = 0;
+                    robotActivatedBySwipe = false;  // Reset robot activation state
                     
                     // Handle tap behavior
                     if (isTap) {
@@ -1203,12 +1352,18 @@ public class GameGridView extends View {
                 break;
                 
             case MotionEvent.ACTION_CANCEL:
-                // Reset tracking variables
+                // Reset all tracking variables
                 startTouchX = -1;
                 startTouchY = -1;
                 touchStartGridX = -1;
                 touchStartGridY = -1;
                 touchedRobot = null;
+                hasMovedRobotInCurrentGesture = false;
+                lastMoveX = -1;
+                lastMoveY = -1;
+                pendingMoveDirectionX = 0;
+                pendingMoveDirectionY = 0;
+                robotActivatedBySwipe = false;  // Reset robot activation state
                 return true;
         }
         
@@ -1290,6 +1445,10 @@ public class GameGridView extends View {
             Timber.d("[bbb    n          ddf DEBUG] Robot moved");
             announceForAccessibility(getRobotDescription(selectedRobot));
         }
+        
+        // Mark robot as finished moving - now other movements can be triggered
+        robotCurrentlyMoving = false;
+        Timber.d("[ANIM] Robot movement complete, allowing new movements");
     }
     
     /**
