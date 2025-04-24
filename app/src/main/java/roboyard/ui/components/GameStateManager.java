@@ -3,20 +3,15 @@ package roboyard.ui.components;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -27,17 +22,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -1750,152 +1741,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void setDifficulty(int difficulty) {
         Preferences.difficulty = difficulty;
-    }
-
-    /**
-     * Save the current map for later use
-     *
-     * @return true if the map was saved successfully, false otherwise
-     */
-    public boolean saveCurrentMap() {
-        GameState state = currentState.getValue();
-        if (state == null) {
-            return false;
-        }
-
-        try {
-            // Create a timestamp for the map name
-            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-            String mapName = "custom_map_" + timestamp;
-
-            // Get the save directory
-            File appDir = new File(context.getFilesDir(), "maps");
-            if (!appDir.exists()) {
-                appDir.mkdirs();
-            }
-
-            // Create save file
-            File mapFile = new File(appDir, mapName + ".map");
-
-            // Write the current state to the map file
-            FileWriter writer = new FileWriter(mapFile);
-
-            // Write metadata
-            writer.write("#MAPNAME:" + mapName + ";TIME:" + System.currentTimeMillis() + ";\n");
-
-            // Write board dimensions
-            writer.write(state.getWidth() + " " + state.getHeight() + "\n");
-
-            // Write the grid elements (walls, robots, targets)
-            ArrayList<GridElement> elements = state.getGridElements();
-            for (GridElement element : elements) {
-                // Format: type x y [color]
-                StringBuilder line = new StringBuilder();
-
-                // Add type code based on element type
-                String type = element.getType();
-                if (type.startsWith("robot_")) {
-                    line.append("rb");
-                } else if (type.startsWith("target_")) {
-                    line.append("tg");
-                } else if (type.equals("mv")) {
-                    line.append("mv");
-                } else if (type.equals("mh")) {
-                    line.append("mh");
-                } else {
-                    continue; // Skip unknown elements
-                }
-
-                // Add position
-                line.append(" ").append(element.getX())
-                        .append(" ").append(element.getY());
-
-                // Add color for robots and targets
-                if (type.startsWith("robot_") || type.startsWith("target_")) {
-                    // Extract color from type (e.g., "robot_red" -> "red")
-                    String color = type.substring(type.indexOf("_") + 1);
-                    int colorCode = 0; // Default to black
-
-                    // Convert color string to code
-                    if (color.equals("red")) {
-                        colorCode = 1;
-                    } else if (color.equals("green")) {
-                        colorCode = 2;
-                    } else if (color.equals("blue")) {
-                        colorCode = 3;
-                    } else if (color.equals("yellow")) {
-                        colorCode = 4;
-                    }
-
-                    line.append(" ").append(colorCode);
-                }
-
-                // Write the line
-                writer.write(line + "\n");
-            }
-
-            writer.close();
-
-            // Show a toast notification
-            if (context instanceof Activity) {
-                ((Activity) context).runOnUiThread(() -> {
-                    Toast.makeText(context, "Map saved as " + mapName, Toast.LENGTH_SHORT).show();
-                });
-            }
-
-            Timber.d("GameStateManager: Map saved as %s", mapName);
-            return true;
-        } catch (IOException e) {
-            Timber.e("Error saving map");
-            return false;
-        }
-    }
-
-    /**
-     * Reset robots to their starting positions without changing the map
-     * This keeps the same map but resets robot positions and move counters
-     * - Preserves the current board/map layout
-     * - Resets robot positions to their starting positions
-     * - Clears move counters and selection states
-     * - Keeps the same target and wall configurations
-     * - Perfect for when a player wants to try the same puzzle again
-     */
-    public void resetRobots() {
-        isResetting = true;
-
-        // Cancel all animations first
-        if (robotAnimationManager != null) {
-            robotAnimationManager.cancelAllAnimations();
-        }
-
-        // Get the current game state
-        GameState currentGameState = currentState.getValue();
-
-        if (currentGameState != null) {
-            // Reset robot positions
-            currentGameState.resetRobotPositions();
-
-            // Reset game statistics
-            moveCount.setValue(0);
-            squaresMoved.setValue(0);
-            isGameComplete.setValue(false);
-
-            // Reset robot selection
-            for (GameElement element : currentGameState.getGameElements()) {
-                if (element.isRobot()) {
-                    element.setSelected(false);
-                }
-            }
-
-            // Reset the robotsUsed tracking for statistics
-            robotsUsed.clear();
-
-            // Notify that the game state has changed
-            currentState.setValue(currentGameState);
-        }
-
-        isResetting = false;
-        resetGameTimer();
     }
 
     /**

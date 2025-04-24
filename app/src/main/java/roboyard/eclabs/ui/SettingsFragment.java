@@ -1,6 +1,5 @@
 package roboyard.eclabs.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,18 +22,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
-import roboyard.logic.core.WallStorage;
-import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 import java.util.Locale;
@@ -944,47 +939,7 @@ public class SettingsFragment extends Fragment {
                 return "same"; // Default to "Same as app"
         }
     }
-    
-    /**
-     * Helper method to toggle sound safely from any Activity
-     */
-    private void toggleSound(Activity activity, boolean enabled) {
-        if (activity instanceof MainActivity) {
-            ((MainActivity) activity).toggleSound(enabled);
-        }
-    }
-    
-    /**
-     * Helper method to set MapGenerator.generateNewMapEachTime via reflection
-     * This is necessary because the field is package-private
-     */
-    private void setGenerateNewMapEachTimeSetting(boolean value) {
-        try {
-            // Update the preference
-            Preferences.setGenerateNewMapEachTime(value);
-            
-            // If the value is true ("No" for preserving walls), clear the wall storage for current board size
-            if (value) {
-                Timber.d("[WALL STORAGE] Setting 'new map each time' to true, clearing wall storage for current board size: %dx%d", 
-                        Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-                
-                try {
-                    WallStorage wallStorage = WallStorage.getInstance();
-                    if (wallStorage != null) {
-                        wallStorage.updateCurrentBoardSize();
-                        wallStorage.clearStoredWalls();
-                    } else {
-                        Timber.e("WallStorage instance is null");
-                    }
-                } catch (Exception e) {
-                    Timber.e(e, "Error clearing wall storage");
-                }
-            }
-        } catch (Exception e) {
-            Timber.e(e, "Error setting generateNewMapEachTime setting");
-        }
-    }
-    
+
     /**
      * Shows a toast message for small board sizes on Impossible difficulty,
      * exactly as in the original game

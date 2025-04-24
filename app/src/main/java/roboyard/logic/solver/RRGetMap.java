@@ -129,9 +129,9 @@ public class RRGetMap {
                     // Standard robots (0-3) use their own indices
                     mappedIndex = colorIndex;
                 } else {
-                    // For extra robots (indices >= 4), map them to one of the standard robots
+                    // For extra robots (indices >= Constants.NUM_ROBOTS), map them to one of the standard robots
                     // This is a temporary solution - we log a warning to highlight the issue
-                    // PINK = 0, GREEN = 1, BLUE = 2, YELLOW = 3
+                    // PINK = 0, GREEN = 1, BLUE = 2, YELLOW = 3, SILVER = 4
                     mappedIndex = robotCounter % Constants.NUM_ROBOTS;
                     Timber.w("[COLOR_MAPPING] Mapped non-standard robot color %d (%s) to standard color index %d", 
                              colorIndex, GameLogic.getColorName(colorIndex, true), mappedIndex);

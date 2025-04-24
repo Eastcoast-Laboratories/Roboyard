@@ -1,7 +1,6 @@
 package roboyard.eclabs;
 import roboyard.logic.core.Constants;
 import roboyard.ui.components.RenderManager;
-import roboyard.ui.components.ScreenLayout;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameScreen;
 
@@ -57,20 +56,6 @@ public class GameManager {
     }
 
     /**
-     * Requests to end the application.
-     */
-    public void requestEnd() {
-        this.activity.closeApp();
-    }
-
-    /**
-     * Requests to restart the application.
-     */
-    public void requestRestart() {
-        this.activity.restartApp();
-    }
-
-    /**
      * Requests to display a toast message.
      *
      * @param str The message to display.
@@ -87,24 +72,6 @@ public class GameManager {
      */
     public SparseArray<GameScreen> getScreens() {
         return this.screens;
-    }
-
-    /**
-     * Returns the width of the screen.
-     *
-     * @return Width of the screen.
-     */
-    public int getScreenWidth() {
-        return this.sWidth;
-    }
-
-    /**
-     * Returns the height of the screen.
-     *
-     * @return Height of the screen.
-     */
-    public int getScreenHeight() {
-        return this.sHeight;
     }
 
     /**
@@ -148,64 +115,6 @@ public class GameManager {
      */
     public void draw() {
         this.currentScreen.draw(this.renderManager);
-    }
-
-    /**
-     * Destroys all existing game screens and objects.
-     */
-    public void destroy() {
-        for (int i = 0; i < this.screens.size(); i++) {
-            this.screens.get(this.screens.keyAt(i)).destroy();
-        }
-    }
-
-    /**
-     * Sets the current game screen.
-     *
-     * @param nextScreen The screen to set as current screen.
-     */
-    public void setGameScreen(int nextScreen) {
-        GameScreen nextGameScreen = screens.get(nextScreen);
-        if (nextGameScreen == null) {
-            requestToast("Screen not found: " + nextScreen, true);
-            return;
-        }
-        
-        // Only update previous screen if we're not already tracking it
-        if (nextGameScreen != previousScreen && nextGameScreen != currentScreen) {
-            previousScreen = currentScreen;
-        }
-        
-        currentScreen = nextGameScreen;
-    }
-
-    /**
-     * Sets the previous screen directly.
-     *
-     * @param screen The screen to set as previous screen.
-     */
-    public void setPreviousScreen(GameScreen screen) {
-        this.previousScreen = screen;
-    }
-
-    /**
-     * Returns the key of the previous game screen.
-     *
-     * @return Key of the previous game screen.
-     */
-    public int getPreviousScreenKey() {
-        return Constants.SCREEN_START; // Fallback to main menu
-    }
-
-    /**
-     * Toggles sound on or off.
-     *
-     * @param enabled Flag indicating whether sound should be enabled or disabled.
-     */
-    public void toggleSound(boolean enabled) {
-        if (activity instanceof MainActivity) {
-            activity.toggleSound(enabled);
-        }
     }
 
     public void announce(String s) {
