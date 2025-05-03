@@ -833,7 +833,7 @@ public class GameLogic {
         return data;
     }
 
-    /**
+     /**
      * Generate a simplified game map for small boards (8x8)
      */
     private ArrayList<GridElement> generateSimpleGameMap(ArrayList<GridElement> existingMap) {
@@ -1112,6 +1112,19 @@ public class GameLogic {
         verticalWalls[centerX][centerY] = verticalWalls[centerX][centerY + 1] = 1;
         verticalWalls[centerX+2][centerY] = verticalWalls[centerX+2][centerY + 1] = 1;
 
+        // CRITICAL: Add four right-angled walls at the outer borders - one on each side
+        // These form the characteristic right angles with the border walls
+
+        // Calculate random positions at least 2 squares from corners
+        // Top edge (row 0) - vertical wall
+        verticalWalls[getRandom(2, boardWidth-2)][0] = 1;
+        // Right edge (col boardWidth-1) - horizontal wall
+        horizontalWalls[boardWidth-1][getRandom(2, boardHeight-2)] = 1;
+        // Bottom edge (row boardHeight-1) - vertical wall
+        verticalWalls[getRandom(2, boardWidth-2)][boardHeight-1] = 1;
+        // Left edge (col 0) - horizontal wall
+        horizontalWalls[0][getRandom(2, boardHeight-2)] = 1;
+        
         // Determine the number of additional walls based on difficulty (10-20 walls total)
         // We already placed 8 walls for the center square, so add between 2-12 more
         int baseWallCount = 4; // Base number of additional walls
