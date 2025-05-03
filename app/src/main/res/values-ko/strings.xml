@@ -97,11 +97,14 @@
     
     <!-- Settings strings -->
     <string name="settings_game_mode">게임 모드:</string>
-    <string name="settings_standard_game">표준 게임</string>
+    <string name="settings_standard_game">표준 게임 모드</string>
     <string name="settings_standard_game_a11y">표준 게임 모드</string>
-    <string name="settings_multi_target_mode">다중 목표 모드 (베타)</string>
-    <string name="settings_multi_target_mode_a11y">다중 목표 모드 베타</string>
-    
+    <string name="settings_multi_target_mode">다중 대상 모드 (베타)</string>
+    <string name="settings_multi_target_mode_a11y">다중 대상 모드 베타</string>
+    <string name="settings_fullscreen">전체 화면 모드:</string>
+    <string name="settings_fullscreen_a11y">전체 화면 모드 전환</string>
+    <string name="settings_fullscreen_applying">전체 화면 설정 적용 중</string>
+
     <!-- Accessibility strings for GameGridView's components -->
     <string name="robot_position_a11y">로봇 위치</string>
     <string name="target_position_a11y">목표 위치</string>

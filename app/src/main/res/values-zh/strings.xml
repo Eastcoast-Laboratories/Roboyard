@@ -322,7 +322,10 @@
     <string name="settings_standard_game_a11y">标准游戏模式</string>
     <string name="settings_multi_target_mode">多目标模式（实验版）</string>
     <string name="settings_multi_target_mode_a11y">多目标模式实验版</string>
-    
+    <string name="settings_fullscreen">全屏模式：</string>
+    <string name="settings_fullscreen_a11y">切换全屏模式</string>
+    <string name="settings_fullscreen_applying">应用全屏设置</string>
+
     <!-- Accessibility strings for GameGridView's components -->
     <string name="robot_position_a11y">机器人位置</string>
     <string name="target_position_a11y">目标位置</string>

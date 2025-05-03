@@ -393,7 +393,10 @@
     <string name="settings_standard_game_a11y">Standard Game Mode</string>
     <string name="settings_multi_target_mode">Multi-target Mode (beta)</string>
     <string name="settings_multi_target_mode_a11y">Multi-target Mode beta</string>
-
+    <string name="settings_fullscreen">Fullscreen Mode:</string>
+    <string name="settings_fullscreen_a11y">Toggle fullscreen mode</string>
+    <string name="settings_fullscreen_applying">Applying Fullscreen settings</string>
+    
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>
     <string name="level_squares_label">squares:</string>

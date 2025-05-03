@@ -297,6 +297,11 @@
     <string name="settings_standard_game_a11y">Modo de juego estándar</string>
     <string name="settings_multi_target_mode">Modo multi-objetivo (beta)</string>
     <string name="settings_multi_target_mode_a11y">Modo multi-objetivo beta</string>
+    <string name="settings_fullscreen">Modo pantalla completa:</string>
+    <string name="settings_fullscreen_a11y">Cambiar modo pantalla completa</string>
+    <string name="settings_fullscreen_applying">Aplicando configuración de pantalla completa</string>
+
+    <!-- Level Selection Item Strings -->
     
     <!-- Accessibility strings for GameGridView's components -->
     <string name="robot_position_a11y">robot en posición</string>

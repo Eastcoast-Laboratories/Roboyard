@@ -130,7 +130,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - wenn man einen level ohne hints geschafft hat, anzeigen, wieviel die optimal moves wären
 
-- fullscreen button in settings
 - choose num_robots in settings (2-5)
 - in the simplemap generator the right-angled walls are missing
 

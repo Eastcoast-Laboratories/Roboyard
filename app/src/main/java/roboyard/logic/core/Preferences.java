@@ -29,6 +29,7 @@ public class Preferences {
     private static final String KEY_APP_LANGUAGE = "app_language";
     private static final String KEY_TALKBACK_LANGUAGE = "talkback_language";
     private static final String KEY_GAME_MODE = "game_mode";
+    private static final String KEY_FULLSCREEN_ENABLED = "fullscreen_enabled";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -42,6 +43,7 @@ public class Preferences {
     public static final String DEFAULT_APP_LANGUAGE = "en";
     public static final String DEFAULT_TALKBACK_LANGUAGE = "same";
     public static final int DEFAULT_GAME_MODE = Constants.GAME_MODE_STANDARD;
+    public static final boolean DEFAULT_FULLSCREEN_ENABLED = true;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -55,6 +57,7 @@ public class Preferences {
     public static String appLanguage;
     public static String talkbackLanguage;
     public static int gameMode;
+    public static boolean fullscreenEnabled;
     
     // For compatibility with existing code
     public static int boardSizeX;
@@ -269,6 +272,14 @@ public class Preferences {
                 gameMode = DEFAULT_GAME_MODE;
             }
             
+            try {
+                fullscreenEnabled = prefs.getBoolean(KEY_FULLSCREEN_ENABLED, DEFAULT_FULLSCREEN_ENABLED);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading fullscreen enabled: %s", e.getMessage());
+                prefs.edit().remove(KEY_FULLSCREEN_ENABLED).apply();
+                fullscreenEnabled = DEFAULT_FULLSCREEN_ENABLED;
+            }
+            
             // For compatibility with existing code
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
@@ -302,6 +313,7 @@ public class Preferences {
         appLanguage = DEFAULT_APP_LANGUAGE;
         talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE;
         gameMode = DEFAULT_GAME_MODE;
+        fullscreenEnabled = DEFAULT_FULLSCREEN_ENABLED;
         
         // Clear all preferences
         if (prefs != null) {
@@ -695,6 +707,37 @@ public class Preferences {
     }
     
     /**
+     * Set whether fullscreen mode is enabled and save to preferences
+     * @param enabled True if fullscreen mode is enabled, false otherwise
+     */
+    public static void setFullscreenEnabled(boolean enabled) {
+        // Ensure preferences are initialized
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setFullscreenEnabled, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                // Set the static field but don't save to preferences
+                fullscreenEnabled = enabled;
+                return;
+            }
+        }
+        
+        // Save to preferences
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_FULLSCREEN_ENABLED, enabled);
+        editor.apply();
+        
+        // Update static field
+        fullscreenEnabled = enabled;
+        
+        // Notify listeners
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Fullscreen enabled set to %s", enabled);
+    }
+    
+    /**
      * Reload all preference values from disk
      * Call this if preferences might have been changed by another component
      */
@@ -750,6 +793,9 @@ public class Preferences {
             case "gameMode":
                 mappedKey = KEY_GAME_MODE;
                 return String.valueOf(gameMode);
+            case "fullscreenEnabled":
+                mappedKey = KEY_FULLSCREEN_ENABLED;
+                return fullscreenEnabled ? "true" : "false";
         }
         
         // For any other keys, try to get the value directly
@@ -829,6 +875,9 @@ public class Preferences {
                 } catch (NumberFormatException e) {
                     Timber.e(e, "Error parsing game mode: %s", value);
                 }
+                return;
+            case "fullscreenEnabled":
+                setFullscreenEnabled(value.equals("true"));
                 return;
         }
         

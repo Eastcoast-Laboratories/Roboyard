@@ -131,6 +131,9 @@
     <string name="settings_standard_game_a11y">Mode de jeu standard</string>
     <string name="settings_multi_target_mode">Mode multi-cibles (bêta)</string>
     <string name="settings_multi_target_mode_a11y">Mode multi-cibles bêta</string>
+    <string name="settings_fullscreen">Mode plein écran :</string>
+    <string name="settings_fullscreen_a11y">Basculer le mode plein écran</string>
+    <string name="settings_fullscreen_applying">Application des paramètres plein écran</string>
 
     <!-- Accessibility Controls -->
     <string name="next_robot_button">Robot Suivant</string>

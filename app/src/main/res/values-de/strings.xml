@@ -80,10 +80,13 @@
     <string name="settings_yes">Ja</string>
     <string name="settings_no">Nein</string>
     <string name="settings_game_mode">Spielmodus:</string>
-    <string name="settings_standard_game">Standardspiel</string>
-    <string name="settings_standard_game_a11y">Standardspielmodus</string>
-    <string name="settings_multi_target_mode">Multi-Ziel-Modus (Beta)</string>
-    <string name="settings_multi_target_mode_a11y">Multi-Ziel-Modus Beta</string>
+    <string name="settings_standard_game">Standard-Spielmodus</string>
+    <string name="settings_standard_game_a11y">Standard-Spielmodus</string>
+    <string name="settings_multi_target_mode">Multi-Target Modus (Beta)</string>
+    <string name="settings_multi_target_mode_a11y">Multi-Target Modus Beta</string>
+    <string name="settings_fullscreen">Vollbildmodus:</string>
+    <string name="settings_fullscreen_a11y">Vollbildmodus umschalten</string>
+    <string name="settings_fullscreen_applying">Vollbildmodus-Einstellungen werden angewendet</string>
     
     <!-- Language Settings -->
     <string name="language_settings_label">App-Sprache:</string>

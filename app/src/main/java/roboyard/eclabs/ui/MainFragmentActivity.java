@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import android.view.View;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
@@ -47,6 +48,10 @@ public class MainFragmentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Apply fullscreen mode if enabled
+        applyFullscreenMode();
+        
         setContentView(R.layout.activity_main);
         
         // Initialize the static Preferences at app startup
@@ -76,6 +81,23 @@ public class MainFragmentActivity extends AppCompatActivity {
         
         // Handle deep link intent
         handleIntent(getIntent());
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        // Re-apply fullscreen mode when resuming
+        // This is needed in case the user changed the setting in the settings screen
+        applyFullscreenMode();
+    }
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        
+        // Re-apply fullscreen mode on configuration changes (e.g. rotation)
+        applyFullscreenMode();
     }
     
     @Override
@@ -610,6 +632,28 @@ public class MainFragmentActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Timber.e(e, "ROBOYARD_LANGUAGE: Error applying language settings at application level");
+        }
+    }
+    
+    private void applyFullscreenMode() {
+        // Check if fullscreen is enabled in preferences
+        boolean fullscreenEnabled = Preferences.fullscreenEnabled;
+        
+        if (fullscreenEnabled) {
+            // Apply fullscreen mode by hiding the system UI
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            
+            Timber.d("[FULLSCREEN] Fullscreen mode enabled");
+        } else {
+            // Ensure normal mode with system UI visible
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            Timber.d("[FULLSCREEN] Fullscreen mode disabled");
         }
     }
 }

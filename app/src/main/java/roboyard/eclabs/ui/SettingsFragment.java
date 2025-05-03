@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.ui.MainFragmentActivity;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
 import timber.log.Timber;
@@ -57,6 +58,9 @@ public class SettingsFragment extends Fragment {
     private RadioGroup accessibilityRadioGroup;
     private RadioButton accessibilityOn;
     private RadioButton accessibilityOff;
+    private RadioGroup fullscreenRadioGroup;
+    private RadioButton fullscreenOn;
+    private RadioButton fullscreenOff;
     // Game mode radio buttons
     private RadioGroup gameModeRadioGroup;
     private RadioButton standardGameModeButton;
@@ -156,6 +160,9 @@ public class SettingsFragment extends Fragment {
             accessibilityRadioGroup = view.findViewById(R.id.accessibility_radio_group);
             accessibilityOn = view.findViewById(R.id.accessibility_on);
             accessibilityOff = view.findViewById(R.id.accessibility_off);
+            fullscreenRadioGroup = view.findViewById(R.id.fullscreen_radio_group);
+            fullscreenOn = view.findViewById(R.id.fullscreen_on);
+            fullscreenOff = view.findViewById(R.id.fullscreen_off);
             // Game mode radio buttons
             gameModeRadioGroup = view.findViewById(R.id.game_mode_radio_group);
             standardGameModeButton = view.findViewById(R.id.standard_game_mode);
@@ -498,6 +505,7 @@ public class SettingsFragment extends Fragment {
             boolean generateNewMapEachTime = Preferences.generateNewMapEachTime;
             boolean soundEnabled = Preferences.soundEnabled;
             boolean accessibilityMode = Preferences.accessibilityMode;
+            boolean fullscreenEnabled = Preferences.fullscreenEnabled;
             
             // Set difficulty radio buttons
             if (difficultyRadioGroup != null) {
@@ -550,6 +558,17 @@ public class SettingsFragment extends Fragment {
                 }
             } else {
                 Timber.e("accessibilityRadioGroup is null");
+            }
+            
+            // Set fullscreen radio buttons
+            if (fullscreenRadioGroup != null) {
+                if (fullscreenEnabled) {
+                    if (fullscreenOn != null) fullscreenOn.setChecked(true);
+                } else {
+                    if (fullscreenOff != null) fullscreenOff.setChecked(true);
+                }
+            } else {
+                Timber.e("fullscreenRadioGroup is null");
             }
             
             isUpdatingUI = false;
@@ -1134,6 +1153,39 @@ public class SettingsFragment extends Fragment {
                 });
             } else {
                 Timber.e("accessibilityRadioGroup is null");
+            }
+            
+            // Fullscreen radio group
+            if (fullscreenRadioGroup != null) {
+                fullscreenRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                    try {
+                        if (isUpdatingUI) return;
+                        
+                        boolean fullscreenMode = checkedId == R.id.fullscreen_on; // Default to Off
+                        
+                        // Check if the setting has actually changed
+                        if (fullscreenMode != Preferences.fullscreenEnabled) {
+                            // Update the preference
+                            Preferences.setFullscreenEnabled(fullscreenMode);
+                            
+                            Timber.d("[PREFERENCES] Fullscreen mode set to %b", fullscreenMode);
+                            
+                            // Show toast message about applying fullscreen settings
+                            Toast.makeText(requireContext(), 
+                                getString(R.string.settings_fullscreen_applying), 
+                                Toast.LENGTH_SHORT).show();
+                            
+                            // Restart the activity to apply the fullscreen setting
+                            requireActivity().finish();
+                            Intent intent = new Intent(requireActivity(), MainFragmentActivity.class);
+                            startActivity(intent);
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "Error processing fullscreen selection");
+                    }
+                });
+            } else {
+                Timber.e("fullscreenRadioGroup is null");
             }
             
             // Game mode radio group
