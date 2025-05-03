@@ -1,52 +1,54 @@
 #!/bin/bash
 
-# Pfade definieren
+# Paths
 BUILD_GRADLE="app/build.gradle"
 BASE_DIR="fastlane/metadata/android"
 CHANGELOG_MD="CHANGELOG.md"
 CHANGELOG_DE_MD="CHANGELOG_de.md"
 PLAYSTORE_DIR="fastlane/metadata/android/playstore"
 
-# Version aus build.gradle extrahieren
+# Get version from build.gradle
 VERSION_NAME=$(grep versionName $BUILD_GRADLE | awk -F\" '{print $2}')
 
-# Aktuelles Datum
+# Get current date
 CURRENT_DATE=$(date +"%Y-%m-%d")
 
 # Play Store Zeichenlimit für Changelogs (pro Sprache)
 PLAYSTORE_CHAR_LIMIT=500
 
-# Funktion zum Prüfen der Zeichenlänge und Warnen bei Überschreitung
+# Function to check length and warn if exceeded
 check_length() {
   local content="$1"
   local locale="$2"
-  # Zähle nur die tatsächlichen Changelog-Einträge, nicht die XML-Tags
+  # Count only the actual changelog entries, not the XML tags
   local content_without_tags=$(echo "$content" | grep -v "^<.*>$")
   local chars=$(echo "$content_without_tags" | wc -c)
   local limit=$PLAYSTORE_CHAR_LIMIT
   
-  echo "Changelog für $locale: $chars Zeichen"
+  echo "Changelog for $locale: $chars characters"
   
   if [ $chars -gt $limit ]; then
     local over=$((chars - limit))
-    echo "⚠️ WARNUNG: Changelog für $locale ist um $over Zeichen zu lang! (Maximum: $limit)"
+    echo "⚠️ WARNING: Changelog for $locale is $over characters too long! (Maximum: $limit)"
     return 1
   else
     local remaining=$((limit - chars))
-    echo "✔️ OK: Noch $remaining Zeichen verfügbar."
+    echo "✔️ OK: $remaining characters remaining."
     return 0
   fi
 }
 
-# Deutsche Änderungen definieren
+# German Changelog
 DE_CHANGES=$(cat << EOF
 - Fullscreen Option in Settings
 EOF
 )
 
-# Englische Übersetzung
+# English Changelog
 EN_CHANGES=$(cat << EOF
 - Fullscreen toggle option in settings
+- enhance swipe-to-move: continuous swiping
+- allow 5 Robots when opening external Maps
 EOF
 )
 

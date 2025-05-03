@@ -117,10 +117,13 @@ public class GameGridView extends View {
     // Variables to track continuous swiping
     private boolean continuousMoveEnabled = true;  // Flag to enable continuous move mode
     private boolean hasMovedRobotInCurrentGesture = false;
+    private int lastMoveX = -1;
+    private int lastMoveY = -1;
     private int pendingMoveDirectionX = 0;  // Track pending movement direction for ACTION_UP
     private int pendingMoveDirectionY = 0;  // Track pending movement direction for ACTION_UP
     private boolean robotCurrentlyMoving = false;  // Track if a robot is currently in motion
     private boolean robotActivatedBySwipe = false;  // Track if a robot was activated by swiping over it
+    private boolean allowRobotDeselect = false;     // Flag to control robot deselection on tap
     private static final float ROBOT_MOVE_THRESHOLD = 60.0f;  // Minimum distance to trigger robot movement after activation
 
     // Flag to track if an accessibility action is in progress
@@ -1061,9 +1064,12 @@ public class GameGridView extends View {
         // Handle sliding gestures and regular taps
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                Timber.d("[SWIPE][TOUCH] ACTION_DOWN");
                 if (state != null) {
                     // Reset continuous movement tracking
                     hasMovedRobotInCurrentGesture = false;
+                    lastMoveX = -1;
+                    lastMoveY = -1;
                     pendingMoveDirectionX = 0;
                     pendingMoveDirectionY = 0;
                     robotActivatedBySwipe = false;  // Reset robot activation flag
@@ -1077,6 +1083,19 @@ public class GameGridView extends View {
                     // Check if a robot was touched at the start
                     touchedRobot = state.getRobotAt(gridX, gridY);
                     
+                    // Check if this is a second tap on the same robot
+                    GameElement selectedRobot = state.getSelectedRobot();
+                    if (touchedRobot != null && selectedRobot != null && 
+                        touchedRobot.getX() == selectedRobot.getX() && 
+                        touchedRobot.getY() == selectedRobot.getY()) {
+                        // This is a tap on an already selected robot - enable deselect on next ACTION_UP
+                        allowRobotDeselect = true;
+                        Timber.d("[TOUCH] Tapped on already selected robot - will allow deselect");
+                    } else {
+                        // Not tapping on the currently selected robot
+                        allowRobotDeselect = false;
+                    }
+                    
                     // Announce selection for accessibility
                     if (touchedRobot != null) {
                         state.setSelectedRobot(touchedRobot);
@@ -1089,6 +1108,7 @@ public class GameGridView extends View {
                 return true;
                 
             case MotionEvent.ACTION_MOVE:
+                Timber.d("[SWIPE][TOUCH] ACTION_MOVE");
                 if (state != null) {
                     // Check if we just moved over a robot and none was selected before
                     GameElement robotAtCurrentPos = state.getRobotAt(gridX, gridY);
@@ -1110,7 +1130,7 @@ public class GameGridView extends View {
                         animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
                         robotActivatedBySwipe = true;  // Mark that we activated this robot by swiping
                         
-                        Timber.d("[SWIPE] Found and activated robot %d while swiping at (%d,%d)", 
+                        Timber.d("[SWIPE][TOUCH] Found and activated robot %d while swiping at (%d,%d)", 
                                 touchedRobot.getColor(), gridX, gridY);
                         
                         // Announce selection for accessibility
@@ -1152,7 +1172,7 @@ public class GameGridView extends View {
                             // For swipe gestures, move the robot immediately
                             // But only if no robot is currently moving
                             if (!robotCurrentlyMoving) {
-                                Timber.d("[SWIPE] Moving robot immediately: dx=%d, dy=%d, distance=%f", dx, dy, distance);
+                                Timber.d("[SWIPE][TOUCH] Moving robot immediately: dx=%d, dy=%d, distance=%f", dx, dy, distance);
                                 robotCurrentlyMoving = true;  // Mark as moving before we start
                                 
                                 // Reset the activation flag since we're proceeding with the move
@@ -1189,11 +1209,11 @@ public class GameGridView extends View {
                                 }
                             } else {
                                 // Robot is already moving, don't initiate another move
-                                Timber.d("[SWIPE] Ignoring move request - robot already in motion");
+                                Timber.d("[SWIPE][TOUCH] Ignoring move request - robot already in motion");
                             }
                         } else {
                             // Not enough distance yet, just log it
-                            Timber.d("[SWIPE] Swipe distance %.2f not enough to trigger movement (need %.2f)", 
+                            Timber.d("[SWIPE][TOUCH] Swipe distance %.2f not enough to trigger movement (need %.2f)", 
                                     distance, movementThreshold);
                         }
                     }
@@ -1220,7 +1240,7 @@ public class GameGridView extends View {
                             pendingMoveDirectionX = 0;
                             pendingMoveDirectionY = 0;
                             
-                            Timber.d("[SWIPE] Continuous mode: switched to robot %d at (%d,%d)", 
+                            Timber.d("[SWIPE][TOUCH] Continuous mode: switched to robot %d at (%d,%d)", 
                                    touchedRobot.getColor(), gridX, gridY);
                             
                             // Announce selection for accessibility
@@ -1231,16 +1251,17 @@ public class GameGridView extends View {
                 return true;
                 
             case MotionEvent.ACTION_UP:
+                Timber.d("[SWIPE][TOUCH] ACTION_UP - state: %s", state);
                 if (state != null) {
                     // Check if this was a tap (no significant movement)
                     boolean isTap = (startTouchX >= 0 && 
                                     Math.abs(x - startTouchX) < MIN_SWIPE_DISTANCE && 
                                     Math.abs(y - startTouchY) < MIN_SWIPE_DISTANCE);
-                    
+                    Timber.d("[SWIPE][TOUCH] ACTION_UP - isTap: %s", isTap);
                     // If we have a pending move direction (not a tap), execute it now
                     if (touchedRobot != null && !isTap && (pendingMoveDirectionX != 0 || pendingMoveDirectionY != 0) && !robotCurrentlyMoving) {
                         // Execute the pending move only if no robot is already moving
-                        Timber.d("[SWIPE] Executing pending move on ACTION_UP: dx=%d, dy=%d", 
+                        Timber.d("[SWIPE][TOUCH] Executing pending move on ACTION_UP: dx=%d, dy=%d", 
                               pendingMoveDirectionX, pendingMoveDirectionY);
                               
                         robotCurrentlyMoving = true;  // Mark as moving before we start
@@ -1276,15 +1297,17 @@ public class GameGridView extends View {
                     // Handle tap behavior
                     if (isTap) {
                         GameElement selectedRobot = state.getSelectedRobot();
-                        
+                        Timber.d("[TOUCH] ACTION_UP - selectedRobot: %s", getRobotDescription(selectedRobot));
                         // Check if user tapped on the currently selected robot to deselect it
                         if (selectedRobot != null && gridX == selectedRobot.getX() && gridY == selectedRobot.getY()) {
                             // User tapped on the currently selected robot, deselect it
                             Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
-                            state.setSelectedRobot(null);
-                            animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
-                            announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
-                            invalidate();
+                            if (allowRobotDeselect) {
+                                state.setSelectedRobot(null);
+                                animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
+                                announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
+                                invalidate();
+                            }
                             return true;
                         }
                         
@@ -1292,7 +1315,7 @@ public class GameGridView extends View {
                         GameElement clickedRobot = state.getRobotAt(gridX, gridY);
                         if (clickedRobot != null && (selectedRobot == null || clickedRobot != selectedRobot)) {
                             // User clicked on a different robot, select it
-                            Timber.d("Selecting a different robot at (%d,%d)", gridX, gridY);
+                            Timber.d("[TOUCH] Selecting a different robot at (%d,%d)", gridX, gridY);
                             gameStateManager.handleGridTouch(gridX, gridY, action);
                             return true;
                         }
@@ -1347,6 +1370,7 @@ public class GameGridView extends View {
                 
             case MotionEvent.ACTION_CANCEL:
                 // Reset all tracking variables
+                Timber.d("[TOUCH] ACTION_CANCEL");
                 startTouchX = -1;
                 startTouchY = -1;
                 touchStartGridX = -1;
