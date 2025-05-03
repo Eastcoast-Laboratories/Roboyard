@@ -1,0 +1,4 @@
+- Fullscreen toggle option in settings
+- enhance swipe-to-move: continuous swiping
+- allow 5 Robots when opening external Maps
+- fix missing right-angled walls on the edge on 8x8 and 8x12 maps

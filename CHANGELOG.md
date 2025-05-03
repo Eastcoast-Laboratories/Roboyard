@@ -2,6 +2,13 @@
 =========
 
 
+## Version 25 (2025-05-03)
+- Fullscreen toggle option in settings
+- enhance swipe-to-move: continuous swiping
+- allow 5 Robots when opening external Maps
+- fix missing right-angled walls on the edge on 8x8 and 8x12 maps
+
+
 ## Version 24 (2025-04-23)
 - Added German, Spanish, French, Chinese and Korean translation
 - Automatically select the robot that matches the target color at game start

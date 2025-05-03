@@ -1,0 +1,4 @@
+- Fullscreen Option in Settings
+- Verbesserte swipe-to-move Steuerung
+- 5 Roboter aus externen Maps erlaubt
+- Fix: fehlende rechtwinklige Wände an den Rändern auf 8x8 und 8x12 Maps

@@ -2,6 +2,13 @@ Changelog Deutsch
 =================
 
 
+## Version 25 (2025-05-03)
+- Fullscreen Option in Settings
+- Verbesserte swipe-to-move Steuerung
+- 5 Roboter aus externen Maps erlaubt
+- Fix: fehlende rechtwinklige Wände an den Rändern auf 8x8 und 8x12 Maps
+
+
 ## Version 24 (2025-04-23)
 - Mehrsprachigkeit hinzugefügt: Deutsch, Spanisch, Französisch, Chinesisch und Koreanisch
 - Automatische Auswahl des Roboters in der Zielfarbe beim Spielstart
