@@ -655,7 +655,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         String completionMessage = getString(R.string.random_game_complete) +
                                 " Completed in " + gameStateManager.getMoveCount().getValue() + " moves.";
                         announceAccessibility(completionMessage);
-                        Toast.makeText(requireContext(), completionMessage, Toast.LENGTH_LONG).show();
+                        // Toast.makeText(requireContext(), completionMessage, Toast.LENGTH_LONG).show();
                     }
 
                     // change the "Reset" Button to "Retry"
