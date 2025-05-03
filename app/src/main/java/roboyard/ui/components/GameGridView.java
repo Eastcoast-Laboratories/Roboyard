@@ -121,10 +121,11 @@ public class GameGridView extends View {
     private int lastMoveY = -1;
     private int pendingMoveDirectionX = 0;  // Track pending movement direction for ACTION_UP
     private int pendingMoveDirectionY = 0;  // Track pending movement direction for ACTION_UP
-    private boolean robotCurrentlyMoving = false;  // Track if a robot is currently in motion
+    private boolean robotMoveInitiated = false;  // Flag to track if a robot movement has been initiated
     private boolean robotActivatedBySwipe = false;  // Track if a robot was activated by swiping over it
     private boolean allowRobotDeselect = false;     // Flag to control robot deselection on tap
     private static final float ROBOT_MOVE_THRESHOLD = 60.0f;  // Minimum distance to trigger robot movement after activation
+    private boolean robotAnimationInProgress = false;  // Track if a robot animation is in progress
 
     // Flag to track if an accessibility action is in progress
     private boolean accessibilityActionInProgress = false;
@@ -987,6 +988,12 @@ public class GameGridView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         Timber.d("[ANIM] GameGridView.onTouchEvent: action=%d", event.getAction());
         
+        // Block ALL touch events while a robot animation is in progress
+        if (robotAnimationInProgress) {
+            Timber.d("[SWIPE][TOUCH] Blocking touch events while robot animation is in progress");
+            return true;
+        }
+        
         // Skip if a reset or accessibility action is in progress
         if (accessibilityActionInProgress) {
             return true;
@@ -1112,10 +1119,9 @@ public class GameGridView extends View {
                 if (state != null) {
                     // Check if we just moved over a robot and none was selected before
                     GameElement robotAtCurrentPos = state.getRobotAt(gridX, gridY);
-                    GameElement selectedRobot = state.getSelectedRobot();
                     
                     // Detect a robot if we pass over one and no robot is currently being moved
-                    if (touchedRobot == null && robotAtCurrentPos != null && !hasMovedRobotInCurrentGesture && !robotCurrentlyMoving) {
+                    if (touchedRobot == null && robotAtCurrentPos != null && !hasMovedRobotInCurrentGesture && !robotMoveInitiated) {
                         // We found a robot while swiping
                         touchedRobot = robotAtCurrentPos;
                         state.setSelectedRobot(touchedRobot);
@@ -1171,9 +1177,11 @@ public class GameGridView extends View {
                             
                             // For swipe gestures, move the robot immediately
                             // But only if no robot is currently moving
-                            if (!robotCurrentlyMoving) {
+                            if (!robotMoveInitiated) {
                                 Timber.d("[SWIPE][TOUCH] Moving robot immediately: dx=%d, dy=%d, distance=%f", dx, dy, distance);
-                                robotCurrentlyMoving = true;  // Mark as moving before we start
+                                robotMoveInitiated = true;  // Mark as moving before we start
+                                robotAnimationInProgress = true;  // Set animation flag
+                                Timber.d("[ANIM] Setting robotAnimationInProgress=true for swipe movement");
                                 
                                 // Reset the activation flag since we're proceeding with the move
                                 robotActivatedBySwipe = false;
@@ -1201,7 +1209,9 @@ public class GameGridView extends View {
                                     robotActivatedBySwipe = false;
                                 } else {
                                     // If the move failed, reset the flag
-                                    robotCurrentlyMoving = false;
+                                    robotMoveInitiated = false;
+                                    robotAnimationInProgress = false;  // Clear animation flag on failure
+                                    Timber.d("[ANIM] Move failed, clearing animation flag");
                                     
                                     // Store the direction for retry on ACTION_UP
                                     pendingMoveDirectionX = dx;
@@ -1219,7 +1229,7 @@ public class GameGridView extends View {
                     }
                     
                     // For continuous mode: check if we're on a new robot
-                    if (continuousMoveEnabled && !robotCurrentlyMoving) {
+                    if (continuousMoveEnabled && !robotMoveInitiated) {
                         GameElement newRobot = state.getRobotAt(gridX, gridY);
                         // If we moved onto a different robot, select it for the next movement
                         if (newRobot != null && (touchedRobot == null || newRobot != touchedRobot)) {
@@ -1259,12 +1269,12 @@ public class GameGridView extends View {
                                     Math.abs(y - startTouchY) < MIN_SWIPE_DISTANCE);
                     Timber.d("[SWIPE][TOUCH] ACTION_UP - isTap: %s", isTap);
                     // If we have a pending move direction (not a tap), execute it now
-                    if (touchedRobot != null && !isTap && (pendingMoveDirectionX != 0 || pendingMoveDirectionY != 0) && !robotCurrentlyMoving) {
+                    if (touchedRobot != null && !isTap && (pendingMoveDirectionX != 0 || pendingMoveDirectionY != 0) && !robotMoveInitiated) {
                         // Execute the pending move only if no robot is already moving
                         Timber.d("[SWIPE][TOUCH] Executing pending move on ACTION_UP: dx=%d, dy=%d", 
                               pendingMoveDirectionX, pendingMoveDirectionY);
                               
-                        robotCurrentlyMoving = true;  // Mark as moving before we start
+                        robotMoveInitiated = true;  // Mark as moving before we start
                         boolean moved = gameStateManager.moveRobotInDirection(
                               pendingMoveDirectionX, pendingMoveDirectionY);
                               
@@ -1272,7 +1282,9 @@ public class GameGridView extends View {
                             hasMovedRobotInCurrentGesture = true;
                         } else {
                             // If the move failed, reset the moving flag
-                            robotCurrentlyMoving = false;
+                            robotMoveInitiated = false;
+                            robotAnimationInProgress = false;  // Clear animation flag
+                            Timber.d("[ANIM] Move from ACTION_UP failed, clearing animation flag");
                         }
                     }
                     
@@ -1341,7 +1353,10 @@ public class GameGridView extends View {
                                 
                                 // Use the improved moveRobotInDirection method which handles animation
                                 Timber.d("[TOUCH] Moving robot in direction: dx=%d, dy=%d", dx, dy);
-                                gameStateManager.moveRobotInDirection(dx, dy);
+                                robotMoveInitiated = true;  // Mark as moving before we start
+                                robotAnimationInProgress = true;  // Track animation state
+                                Timber.d("[ANIM] Setting robotAnimationInProgress=true for tap movement");
+                                boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
                                 return true;
                             } else {
                                 // Diagonal movement - determine which direction to prioritize
@@ -1463,8 +1478,9 @@ public class GameGridView extends View {
         }
         
         // Mark robot as finished moving - now other movements can be triggered
-        robotCurrentlyMoving = false;
-        Timber.d("[ANIM] Robot movement complete, allowing new movements");
+        robotMoveInitiated = false;
+        robotAnimationInProgress = false;  // Clear animation flag
+        Timber.d("[ANIM] Robot movement complete, animation finished, allowing new movements");
     }
     
     /**
@@ -1762,5 +1778,9 @@ public class GameGridView extends View {
         // Timber.d("[ACCESSIBILITY] Coordinate display: %s (TalkBack: %s, App setting: %s)", isActive ? "showing" : "hidden", talkbackActive ? "enabled" : "disabled", Preferences.accessibilityMode ? "enabled" : "disabled");
         
         return isActive;
+    }
+    
+    public boolean isRobotAnimationInProgress() {
+        return robotAnimationInProgress;
     }
 }
