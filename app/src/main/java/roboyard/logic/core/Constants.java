@@ -73,8 +73,9 @@ public class Constants {
     public static final int COLOR_WHITE = 8;
     public static final int COLOR_MULTI = -1; // the multi target
 
-    public static final int NUM_ROBOTS = 5; // number of robots
-    
+    public static final int NUM_ROBOTS = 4; // number of robots
+    public static final int MAX_NUM_ROBOTS = 5; // maximal allowed num robots
+
     // RGB color values for robots (used in solver)
     public static final int[] colors_rgb = {
         Color.MAGENTA,  // Pink (COLOR_PINK)
