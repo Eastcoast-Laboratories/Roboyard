@@ -41,6 +41,9 @@ check_length() {
 # German Changelog
 DE_CHANGES=$(cat << EOF
 - Fullscreen Option in Settings
+- Verbesserte swipe-to-move Steuerung
+- 5 Roboter aus externen Maps erlaubt
+- Fix: fehlende rechtwinklige Wände an den Rändern auf 8x8 und 8x12 Maps
 EOF
 )
 
@@ -49,6 +52,7 @@ EN_CHANGES=$(cat << EOF
 - Fullscreen toggle option in settings
 - enhance swipe-to-move: continuous swiping
 - allow 5 Robots when opening external Maps
+- fix missing right-angled walls on the edge on 8x8 and 8x12 maps
 EOF
 )
 
@@ -56,6 +60,9 @@ EOF
 PLAYSTORE_DE_DE=$(cat << EOF
 <de-DE>
 - Fullscreen Option in Settings
+- Verbesserte swipe-to-move Steuerung
+- 5 Roboter aus externen Maps erlaubt
+- Fix: fehlende rechtwinklige Wände an den Rändern auf 8x8 und 8x12 Maps
 </de-DE>
 EOF
 )
@@ -63,6 +70,9 @@ EOF
 PLAYSTORE_EN_GB=$(cat << EOF
 <en-GB>
 - Fullscreen toggle option in settings
+- enhance swipe-to-move: continuous swiping
+- allow 5 Robots when opening external Maps
+- fix missing right-angled walls on the edge on 8x8 and 8x12 maps
 </en-GB>
 EOF
 )
