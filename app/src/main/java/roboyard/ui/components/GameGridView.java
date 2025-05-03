@@ -1106,6 +1106,7 @@ public class GameGridView extends View {
                     // Announce selection for accessibility
                     if (touchedRobot != null) {
                         state.setSelectedRobot(touchedRobot);
+                        shrinkNonSelectedRobots(touchedRobot);
                         animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
                         announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
                     } else {
@@ -1125,6 +1126,7 @@ public class GameGridView extends View {
                         // We found a robot while swiping
                         touchedRobot = robotAtCurrentPos;
                         state.setSelectedRobot(touchedRobot);
+                        shrinkNonSelectedRobots(touchedRobot);
                         
                         // Update the start position for calculating movement direction
                         startTouchX = x;
@@ -1174,6 +1176,7 @@ public class GameGridView extends View {
                             
                             // Make sure the robot is selected
                             state.setSelectedRobot(touchedRobot);
+                            shrinkNonSelectedRobots(touchedRobot);
                             
                             // For swipe gestures, move the robot immediately
                             // But only if no robot is currently moving
@@ -1235,6 +1238,7 @@ public class GameGridView extends View {
                         if (newRobot != null && (touchedRobot == null || newRobot != touchedRobot)) {
                             touchedRobot = newRobot;
                             state.setSelectedRobot(touchedRobot);
+                            shrinkNonSelectedRobots(touchedRobot);
                             
                             // Animate the robot growing to show it's activated
                             animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
@@ -1316,6 +1320,7 @@ public class GameGridView extends View {
                             Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
                             if (allowRobotDeselect) {
                                 state.setSelectedRobot(null);
+                                shrinkNonSelectedRobots(null);
                                 animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
                                 announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
                                 invalidate();
@@ -1782,5 +1787,24 @@ public class GameGridView extends View {
     
     public boolean isRobotAnimationInProgress() {
         return robotAnimationInProgress;
+    }
+    
+    /**
+     * Shrink all robots except the currently selected one back to default size
+     * @param selectedRobot The robot to keep at its current scale (can be null to shrink all robots)
+     */
+    private void shrinkNonSelectedRobots(GameElement selectedRobot) {
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) return;
+        
+        for (GameElement robot : state.getRobots()) {
+            // Skip the selected robot
+            if (robot == selectedRobot) continue;
+            
+            // If the robot is currently scaled larger than default, shrink it back
+            if (robotScaleMap.containsKey(robot) && robotScaleMap.get(robot) > DEFAULT_ROBOT_SCALE) {
+                animateRobotScale(robot, robotScaleMap.get(robot), DEFAULT_ROBOT_SCALE);
+            }
+        }
     }
 }
