@@ -2,6 +2,9 @@ Changelog Deutsch
 =================
 
 
+## Version 26 (2025-05-08)
+- Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
+
 ## Version 25 (2025-05-03)
 - Fullscreen Option in Settings
 - Verbesserte swipe-to-move Steuerung

@@ -117,7 +117,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - multi-color target is gone
 
 - fdroid entry enhancements
-- make all accessibility coordinate announcements one more, so on a 8x8 board they go from 1,1 to 8,8 instead of 0,0 to 7,7
 
 - multiple sources of truth concept ausführen
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place

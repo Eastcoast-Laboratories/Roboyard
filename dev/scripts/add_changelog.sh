@@ -40,39 +40,27 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Fullscreen Option in Settings
-- Verbesserte swipe-to-move Steuerung
-- 5 Roboter aus externen Maps erlaubt
-- Fix: fehlende rechtwinklige Wände an den Rändern auf 8x8 und 8x12 Maps
+- Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Fullscreen toggle option in settings
-- enhance swipe-to-move: continuous swiping
-- allow 5 Robots when opening external Maps
-- fix missing right-angled walls on the edge on 8x8 and 8x12 maps
+- make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
 EOF
 )
 
 # Play Store has a limit of 500 characters
 PLAYSTORE_DE_DE=$(cat << EOF
 <de-DE>
-- Fullscreen Option in Settings
-- Verbesserte swipe-to-move Steuerung
-- 5 Roboter aus externen Maps erlaubt
-- Fix: fehlende rechtwinklige Wände an den Rändern auf 8x8 und 8x12 Maps
+- Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
 </de-DE>
 EOF
 )
 
 PLAYSTORE_EN_GB=$(cat << EOF
 <en-GB>
-- Fullscreen toggle option in settings
-- enhance swipe-to-move: continuous swiping
-- allow 5 Robots when opening external Maps
-- fix missing right-angled walls on the edge on 8x8 and 8x12 maps
+- make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
 </en-GB>
 EOF
 )
@@ -98,7 +86,7 @@ echo "$PLAYSTORE_DE_DE" >> "$PLAYSTORE_CHANGELOG_FILE"
 
 # check length of Play Store Changelogs
 echo ""
-echo "Prüfe Zeichenlänge der Play Store Changelogs:"
+echo "check length of Play Store Changelogs:"
 echo "-----------------------------------------------"
 check_length "$PLAYSTORE_EN_GB" "en-GB"
 echo ""
@@ -120,7 +108,7 @@ check_length "$(cat $TEMP_DE)" "Full DE"
 rm "$TEMP_EN" "$TEMP_DE"
 echo "-----------------------------------------------"
 
-# CHANGELOG.md aktualisieren (nur Englisch)
+# CHANGELOG.md update (only English)
 if [ ! -f "$CHANGELOG_MD" ]; then
   echo "# Changelog" > "$CHANGELOG_MD"
   echo "=========" >> "$CHANGELOG_MD"
@@ -129,44 +117,101 @@ else
   # create temporary file
   TEMP_FILE=$(mktemp)
   
-  # Die ersten 3 Zeilen beibehalten (Titel und Trennlinie)
-  head -n 3 "$CHANGELOG_MD" > "$TEMP_FILE"
+  # Check if the current version already exists in the changelog
+  if grep -q "## Version ${VERSION_NAME}" "$CHANGELOG_MD"; then
+    # Version exists, update it instead of adding a new entry
+    echo "Updating existing entry for Version ${VERSION_NAME} in CHANGELOG.md"
+    
+    # Get line number of the version header
+    VERSION_LINE=$(grep -n "## Version ${VERSION_NAME}" "$CHANGELOG_MD" | cut -d ':' -f1)
+    
+    # Copy everything before the version header (excluding the version line itself)
+    head -n $((VERSION_LINE - 1)) "$CHANGELOG_MD" > "$TEMP_FILE"
+    
+    # Update the version header with current date
+    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    
+    # Add the updated changes
+    echo "$EN_CHANGES" >> "$TEMP_FILE"
+    echo "" >> "$TEMP_FILE"
+    
+    # Find the next version header or end of file
+    NEXT_VERSION_LINE=$(tail -n +$((VERSION_LINE + 1)) "$CHANGELOG_MD" | grep -n "^## Version" | head -n 1 | cut -d ':' -f1)
+    
+    if [ -n "$NEXT_VERSION_LINE" ]; then
+      # If there is a next version, add everything from that line onwards
+      NEXT_VERSION_LINE=$((VERSION_LINE + NEXT_VERSION_LINE))
+      tail -n +$NEXT_VERSION_LINE "$CHANGELOG_MD" >> "$TEMP_FILE"
+    fi
+  else
+    # Version doesn't exist, add a new entry
+    # keep first 3 lines (title and separator)
+    head -n 3 "$CHANGELOG_MD" > "$TEMP_FILE"
+    
+    # add new entry after separator
+    echo "" >> "$TEMP_FILE"
+    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    echo "$EN_CHANGES" >> "$TEMP_FILE"
+    echo "" >> "$TEMP_FILE"
+    
+    # append rest of original file, but skip first 3 lines
+    tail -n +4 "$CHANGELOG_MD" >> "$TEMP_FILE"
+  fi
   
-  # Neue Einträge nach der Trennlinie hinzufügen
-  echo "" >> "$TEMP_FILE"
-  echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
-  echo "$EN_CHANGES" >> "$TEMP_FILE"
-  echo "" >> "$TEMP_FILE"
-  
-  # Restlichen Inhalt anhängen, aber die ersten 3 Zeilen überspringen
-  tail -n +4 "$CHANGELOG_MD" >> "$TEMP_FILE"
-  
-  # Temporäre Datei in die Originaldatei verschieben
+  # move temporary file back to original file
   mv "$TEMP_FILE" "$CHANGELOG_MD"
 fi
 
-# CHANGELOG_de.md aktualisieren (nur Deutsch)
+# CHANGELOG_de.md update (only German)
 if [ ! -f "$CHANGELOG_DE_MD" ]; then
   echo "# Changelog" > "$CHANGELOG_DE_MD"
   echo "=========" >> "$CHANGELOG_DE_MD"
-  echo "" >> "$CHANGELOG_DE_MD"
 else
   # create temporary file
   TEMP_FILE=$(mktemp)
   
-  # Die ersten 3 Zeilen beibehalten (Titel und Trennlinie)
-  head -n 3 "$CHANGELOG_DE_MD" > "$TEMP_FILE"
+  # Check if the current version already exists in the changelog
+  if grep -q "## Version ${VERSION_NAME}" "$CHANGELOG_DE_MD"; then
+    # Version exists, update it instead of adding a new entry
+    echo "Updating existing entry for Version ${VERSION_NAME} in CHANGELOG_de.md"
+    
+    # Get line number of the version header
+    VERSION_LINE=$(grep -n "## Version ${VERSION_NAME}" "$CHANGELOG_DE_MD" | cut -d ':' -f1)
+    
+    # Copy everything before the version header (excluding the version line itself)
+    head -n $((VERSION_LINE - 1)) "$CHANGELOG_DE_MD" > "$TEMP_FILE"
+    
+    # Update the version header with current date
+    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    
+    # Add the updated changes
+    echo "$DE_CHANGES" >> "$TEMP_FILE"
+    echo "" >> "$TEMP_FILE"
+    
+    # Find the next version header or end of file
+    NEXT_VERSION_LINE=$(tail -n +$((VERSION_LINE + 1)) "$CHANGELOG_DE_MD" | grep -n "^## Version" | head -n 1 | cut -d ':' -f1)
+    
+    if [ -n "$NEXT_VERSION_LINE" ]; then
+      # If there is a next version, add everything from that line onwards
+      NEXT_VERSION_LINE=$((VERSION_LINE + NEXT_VERSION_LINE))
+      tail -n +$NEXT_VERSION_LINE "$CHANGELOG_DE_MD" >> "$TEMP_FILE"
+    fi
+  else
+    # Version doesn't exist, add a new entry
+    # keep first 3 lines (title and separator)
+    head -n 3 "$CHANGELOG_DE_MD" > "$TEMP_FILE"
+    
+    # add new entry after separator
+    echo "" >> "$TEMP_FILE"
+    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    echo "$DE_CHANGES" >> "$TEMP_FILE"
+    echo "" >> "$TEMP_FILE"
+    
+    # append rest of original file, but skip first 3 lines
+    tail -n +4 "$CHANGELOG_DE_MD" >> "$TEMP_FILE"
+  fi
   
-  # Neue Einträge nach der Trennlinie hinzufügen
-  echo "" >> "$TEMP_FILE"
-  echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
-  echo "$DE_CHANGES" >> "$TEMP_FILE"
-  echo "" >> "$TEMP_FILE"
-  
-  # Restlichen Inhalt anhängen, aber die ersten 3 Zeilen überspringen
-  tail -n +4 "$CHANGELOG_DE_MD" >> "$TEMP_FILE"
-  
-  # Temporäre Datei in die Originaldatei verschieben
+  # move temporary file back to original file
   mv "$TEMP_FILE" "$CHANGELOG_DE_MD"
 fi
 
