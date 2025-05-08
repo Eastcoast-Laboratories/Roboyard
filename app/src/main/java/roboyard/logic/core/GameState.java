@@ -1673,7 +1673,7 @@ public class GameState implements Serializable {
                 Timber.d("[COLOR_MAPPING] Added silver target at (%d,%d) with color ID %d", x, y, Constants.COLOR_SILVER);
             } else if (type.equals("target_multi")) {
                 // Multi-color target - we'll use pink as default
-                state.addTarget(x, y, Constants.COLOR_PINK);
+                state.addTarget(x, y, Constants.COLOR_MULTI);
                 Timber.d("[COLOR_MAPPING] Added multi-color target at (%d,%d) with color ID %d", x, y, Constants.COLOR_PINK);
             } else if (type.equals("robot_red")) {
                 // Both pink and red map to COLOR_PINK (index 0) - pink is the actual game color, red is used in solver
