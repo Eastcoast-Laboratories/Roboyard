@@ -1471,9 +1471,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // Check for goal completion - although GameStateManager also does this
             if (state.isRobotAtTarget(robot)) {
-                announceAccessibility("Target reached! Game complete in " + 
-                        gameStateManager.getMoveCount().getValue() + " moves and " +
-                        gameStateManager.getSquaresMoved().getValue() + " squares moved");
+                announceAccessibility(getString(R.string.game_completed_a11y, 
+                        gameStateManager.getMoveCount().getValue(),
+                        gameStateManager.getSquaresMoved().getValue()));
                 
                 // Play win sound
                 playSound("win");
@@ -1527,11 +1527,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Build the announcement message with detailed information about possible moves
         StringBuilder announcement = new StringBuilder();
-        announcement.append("Possible moves: "); // TODO use possible_moves_a11y
+        announcement.append(getString(R.string.possible_moves_a11y)).append(": ");
         
         // Check east movement (right)
         int eastDistance = 0;
-        String eastObstacle = "edge";
+        String eastObstacle = getString(R.string.edge_a11y);
         int obstacleX = x;
         for (int i = x + 1; i < state.getWidth(); i++) {
             if (state.canRobotMoveTo(robot, i, y)) {
@@ -1545,23 +1545,31 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
-                        eastObstacle += " with target reached";
+                        eastObstacle += " " + getString(R.string.target_reached_a11y);
                     }
                 } else {
-                    eastObstacle = "wall";
+                    eastObstacle = getString(R.string.wall_a11y);
                 }
                 break;
             }
         }
         if (eastDistance > 0) {
-            announcement.append(eastDistance).append(" ").append(getString(R.string.squares_east)).append(" ").append(getString(R.string.until)).append(" ").append(eastObstacle).append(", ");
+            String untilString;
+            if (eastObstacle.equals(getString(R.string.edge_a11y))) {
+                untilString = getString(R.string.until_masculine);
+            } else if (eastObstacle.equals(getString(R.string.wall_a11y))) {
+                untilString = getString(R.string.until_feminine);
+            } else {
+                untilString = getString(R.string.until);
+            }
+            announcement.append(eastDistance).append(" ").append(getString(R.string.squares_east)).append(" ").append(untilString).append(" ").append(eastObstacle).append(", ");
         } else {
             announcement.append(getString(R.string.no_movement_east)).append(", ");
         }
         
         // Check west movement (left)
         int westDistance = 0;
-        String westObstacle = "edge";
+        String westObstacle = getString(R.string.edge_a11y);
         for (int i = x - 1; i >= 0; i--) {
             if (state.canRobotMoveTo(robot, i, y)) {
                 westDistance++;
@@ -1573,23 +1581,31 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
-                        westObstacle += " with target reached";
+                        westObstacle += " " + getString(R.string.target_reached_a11y);
                     }
                 } else {
-                    westObstacle = "wall";
+                    westObstacle = getString(R.string.wall_a11y);
                 }
                 break;
             }
         }
         if (westDistance > 0) {
-            announcement.append(westDistance).append(" ").append(getString(R.string.squares_west)).append(" ").append(getString(R.string.until)).append(" ").append(westObstacle).append(", ");
+            String untilString;
+            if (westObstacle.equals(getString(R.string.edge_a11y))) {
+                untilString = getString(R.string.until_masculine);
+            } else if (westObstacle.equals(getString(R.string.wall_a11y))) {
+                untilString = getString(R.string.until_feminine);
+            } else {
+                untilString = getString(R.string.until);
+            }
+            announcement.append(westDistance).append(" ").append(getString(R.string.squares_west)).append(" ").append(untilString).append(" ").append(westObstacle).append(", ");
         } else {
             announcement.append(getString(R.string.no_movement_west)).append(", ");
         }
         
         // Check north movement (up)
         int northDistance = 0;
-        String northObstacle = "edge";
+        String northObstacle = getString(R.string.edge_a11y);
         for (int i = y - 1; i >= 0; i--) {
             if (state.canRobotMoveTo(robot, x, i)) {
                 northDistance++;
@@ -1601,23 +1617,31 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
-                        northObstacle += " with target reached";
+                        northObstacle += " " + getString(R.string.target_reached_a11y);
                     }
                 } else {
-                    northObstacle = "wall";
+                    northObstacle = getString(R.string.wall_a11y);
                 }
                 break;
             }
         }
         if (northDistance > 0) {
-            announcement.append(northDistance).append(" ").append(getString(R.string.squares_north)).append(" ").append(getString(R.string.until)).append(" ").append(northObstacle).append(", ");
+            String untilString;
+            if (northObstacle.equals(getString(R.string.edge_a11y))) {
+                untilString = getString(R.string.until_masculine);
+            } else if (northObstacle.equals(getString(R.string.wall_a11y))) {
+                untilString = getString(R.string.until_feminine);
+            } else {
+                untilString = getString(R.string.until);
+            }
+            announcement.append(northDistance).append(" ").append(getString(R.string.squares_north)).append(" ").append(untilString).append(" ").append(northObstacle).append(", ");
         } else {
             announcement.append(getString(R.string.no_movement_north)).append(", ");
         }
         
         // Check south movement (down)
         int southDistance = 0;
-        String southObstacle = "edge";
+        String southObstacle = getString(R.string.edge_a11y);
         for (int i = y + 1; i < state.getHeight(); i++) {
             if (state.canRobotMoveTo(robot, x, i)) {
                 southDistance++;
@@ -1629,16 +1653,24 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Check if the robot is at its target
                     if (state.isRobotAtTarget(robotAtPosition)) {
-                        southObstacle += " with target reached";
+                        southObstacle += " " + getString(R.string.target_reached_a11y);
                     }
                 } else {
-                    southObstacle = "wall";
+                    southObstacle = getString(R.string.wall_a11y);
                 }
                 break;
             }
         }
         if (southDistance > 0) {
-            announcement.append(southDistance).append(" ").append(getString(R.string.squares_south)).append(" ").append(getString(R.string.until)).append(" ").append(southObstacle);
+            String untilString;
+            if (southObstacle.equals(getString(R.string.edge_a11y))) {
+                untilString = getString(R.string.until_masculine);
+            } else if (southObstacle.equals(getString(R.string.wall_a11y))) {
+                untilString = getString(R.string.until_feminine);
+            } else {
+                untilString = getString(R.string.until);
+            }
+            announcement.append(southDistance).append(" ").append(getString(R.string.squares_south)).append(" ").append(untilString).append(" ").append(southObstacle).append(".");
         } else {
             announcement.append(getString(R.string.no_movement_south));
         }
@@ -1665,16 +1697,17 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Announce only the target at game start
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET) {
-                String targetColor = getLocalizedRobotColorNameDative(element.getColor());
-                announcement.append(targetColor).append(" target, ")
-                          .append(element.getX()).append("-").append(element.getY()).append(". ");
+                String targetColor = getLocalizedTargetColorName(element.getColor());
+                String targetPosition = String.format("%d,%d", element.getX() + 1, element.getY() + 1);
+                announcement.append(targetColor).append(" ").append(getString(R.string.target_a11y))
+                          .append(" ").append(targetPosition).append(". ");
                 break; // Only announce one target
             }
         }
         
         // If a robot is selected, announce it as well
         if (selectedRobot != null) {
-            String robotColor = getLocalizedRobotColorNameByGridElement(selectedRobot);
+            String robotColor = getLocalizedRobotColorNameAdjByGridElement(selectedRobot);
             int x = selectedRobot.getX();
             int y = selectedRobot.getY();
             
@@ -1706,12 +1739,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             
             // Build the concise description
-            announcement.append("Selected ").append(robotColor).append(" robot, ")
-                      .append(x).append("-").append(y);
+            String robotPosition = String.format("%d,%d", x + 1, y + 1);
+            announcement.append(robotColor).append(" ").append(getString(R.string.robot_a11y).replace("%1$s", "").replace("%2$d", "").replace("%3$d", "").trim())
+                      .append(" ").append(robotPosition);
             
             // Add walls if present
             if (!walls.isEmpty()) {
-                announcement.append(", walls ");
+                announcement.append(", ").append(getString(R.string.walls_a11y)).append(" ");
                 for (int i = 0; i < walls.size(); i++) {
                     announcement.append(walls.get(i));
                     if (i < walls.size() - 1) {
@@ -2083,6 +2117,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
+     * Get localized (translated) color name for a target in proper adjective form (e.g., "Pinkes" for "Pinkes Ziel")
+     */
+    private String getLocalizedTargetColorName(int robotId) {
+        switch (robotId) {
+            case Constants.COLOR_PINK: return getString(R.string.color_pink_target);
+            case Constants.COLOR_GREEN: return getString(R.string.color_green_target);
+            case Constants.COLOR_BLUE: return getString(R.string.color_blue_target);
+            case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_target);
+            case Constants.COLOR_SILVER: return getString(R.string.color_silver_target);
+            default:
+                return getString(R.string.unknown_color, robotId);
+        }
+    }
+    
+    /**
      * Get localized (translated) color name for a robot
      */
     private String getLocalizedRobotColorNameByGridElement(GameElement robot) {
@@ -2099,6 +2148,29 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.e("Unknown robot color: '%d'", c);
                 return getString(R.string.unknown_color, c);
         }
+    }
+    
+    /**
+     * Get localized (translated) color name for a robot in proper adjective form (e.g., "Pinker" for "Pinker Roboter")
+     */
+    private String getLocalizedRobotColorNameAdj(int robotId) {
+        switch (robotId) {
+            case Constants.COLOR_PINK: return getString(R.string.color_pink_adj);
+            case Constants.COLOR_GREEN: return getString(R.string.color_green_adj);
+            case Constants.COLOR_BLUE: return getString(R.string.color_blue_adj);
+            case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_adj);
+            case Constants.COLOR_SILVER: return getString(R.string.color_silver_adj);
+            default:
+                return getString(R.string.unknown_color, robotId);
+        }
+    }
+    
+    /**
+     * Get localized (translated) color name for a robot in proper adjective form
+     */
+    private String getLocalizedRobotColorNameAdjByGridElement(GameElement robot) {
+        if (robot == null) return "";
+        return getLocalizedRobotColorNameAdj(robot.getColor());
     }
     
     /**

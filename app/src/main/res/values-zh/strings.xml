@@ -70,7 +70,33 @@
     <string name="color_blue_dative">蓝色</string>
     <string name="color_green_dative">绿色</string>
     <string name="color_yellow_dative">黄色</string>
+    <string name="color_pink_dative">粉色</string>
     <string name="color_silver_dative">银色</string>
+    
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">红色</string>
+    <string name="color_blue_adj">蓝色</string>
+    <string name="color_green_adj">绿色</string>
+    <string name="color_yellow_adj">黄色</string>
+    <string name="color_pink_adj">粉色</string>
+    <string name="color_silver_adj">银色</string>
+    
+    <!-- Target color forms -->
+    <string name="color_red_target">红色</string>
+    <string name="color_blue_target">蓝色</string>
+    <string name="color_green_target">绿色</string>
+    <string name="color_yellow_target">黄色</string>
+    <string name="color_pink_target">粉色</string>
+    <string name="color_silver_target">银色</string>
+    
+    <!-- Additional accessibility strings -->
+    <string name="possible_moves_a11y">可能的移动</string>
+    <string name="edge_a11y">边缘</string>
+    <string name="wall_a11y">墙</string>
+    <string name="walls_a11y">墙壁</string>
+    <string name="target_reached_a11y">目标已达成</string>
+    <string name="game_completed_a11y">目标已达成！游戏完成，共走了 %1$d 步，移动了 %2$d 格</string>
+    <!-- Removed duplicate color_silver_dative -->
     
     <!-- Save Game -->
     <string name="save_slot">位置 %1$d</string>
@@ -182,7 +208,6 @@
     <string name="save_map_button_a11y">保存当前地图</string>
     <string name="new_game_button_a11y">开始新游戏</string>
     <string name="reset_button_a11y">重置游戏</string>
-    <string name="level_button_a11y">关卡 %1$d，已获得 %2$d 颗星，共 %3$d 颗星</string>
     <string name="help_button_a11y">显示游戏说明</string>
     <string name="settings_button_a11y">打开游戏设置</string>
     <string name="credits_button_a11y">查看制作人员</string>
@@ -292,12 +317,13 @@
     <string name="next_robot">下一个机器人</string>
     <string name="announce_a11y">播报游戏状态</string>
     <string name="next_robot_a11y">选择下一个机器人</string>
-    <string name="possible_moves_a11y">可能的移动</string>
-    <string name="squares_north">北边方格</string>
+    <string name="squares_north">向北格子</string>
     <string name="squares_south">南边方格</string>
     <string name="squares_east">东边方格</string>
     <string name="squares_west">西边方格</string>
     <string name="until">直到</string>
+    <string name="until_masculine">直到</string>
+    <string name="until_feminine">直到</string>
     <string name="edge">边缘</string>
     <string name="no_movement_north">无法向北移动</string>
     <string name="no_movement_south">无法向南移动</string>
@@ -331,7 +357,7 @@
     <string name="target_position_a11y">目标位置</string>
     <string name="position_a11y">位置</string>
     <string name="multicolored_a11y">多色</string>
-    <string name="target_a11y">目标位置 %1$d, %2$d</string>
+    <string name="target_a11y">目标位置</string>
     <string name="at_position_a11y">在位置</string>
     <string name="walls_on_a11y">墙</string>
     <string name="north_a11y">北</string>

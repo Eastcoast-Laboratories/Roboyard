@@ -46,6 +46,30 @@
     <string name="color_green_dative">vert</string>
     <string name="color_yellow_dative">jaune</string>
     <string name="color_pink_dative">rose</string>
+    
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">Rouge</string>
+    <string name="color_blue_adj">Bleu</string>
+    <string name="color_green_adj">Vert</string>
+    <string name="color_yellow_adj">Jaune</string>
+    <string name="color_pink_adj">Rose</string>
+    <string name="color_silver_adj">Argenté</string>
+    
+    <!-- Target color forms -->
+    <string name="color_red_target">Rouge</string>
+    <string name="color_blue_target">Bleu</string>
+    <string name="color_green_target">Vert</string>
+    <string name="color_yellow_target">Jaune</string>
+    <string name="color_pink_target">Rose</string>
+    <string name="color_silver_target">Argenté</string>
+    
+    <!-- Additional accessibility strings -->
+    <!-- Removed duplicate possible_moves_a11y -->
+    <string name="edge_a11y">bord</string>
+    <string name="wall_a11y">mur</string>
+    <string name="walls_a11y">murs</string>
+    <string name="target_reached_a11y">avec cible atteinte</string>
+    <string name="game_completed_a11y">Cible atteinte ! Partie terminée en %1$d coups et %2$d cases déplacées</string>
     <string name="color_orange_dative">orange</string>
     <string name="color_white_dative">blanc</string>
     <string name="color_black_dative">noir</string>
@@ -66,7 +90,7 @@
     <string name="impossible_small_board_warning">Le niveau Impossible sur les petits plateaux peut prendre plusieurs minutes pour générer une carte adaptée</string>
     
     <!-- Toast messages -->
-    <string name="error_email_app">Impossible d`ouvrir l`application de messagerie</string>
+    <string name="error_email_app">Impossible d\'ouvrir l\'application de messagerie</string>
     <string name="robot_movement_canceled">Mouvement du robot annulé</string>
     <string name="no_game_to_save">Aucune partie disponible à sauvegarder</string>
     
@@ -148,7 +172,7 @@
     <string name="target_position_a11y">Sa cible est à la position</string>
     <string name="position_a11y">Position</string>
     <string name="multicolored_a11y">Multicolore</string>
-    <string name="target_a11y">Cible à la position %1$d, %2$d</string>
+    <string name="target_a11y">Cible à la position</string>
     <string name="at_position_a11y">à la position</string>
     <string name="walls_on_a11y">Murs au</string>
     <string name="north_a11y">Nord</string>
@@ -161,18 +185,18 @@
     <string name="possible_moves_a11y">Déplacements possibles</string>
     <string name="squares_north">cases vers le nord</string>
     <string name="squares_south">cases vers le sud</string>
-    <string name="squares_east">cases vers l`est</string>
-    <string name="squares_west">cases vers l`ouest</string>
-    <string name="until">jusqu`au</string>
+    <string name="squares_east">cases vers l\'est</string>
+    <string name="squares_west">cases vers l\'ouest</string>
+    <string name="until">jusqu\'au</string>
     <string name="edge">bord</string>
     <string name="no_movement_north">aucun mouvement vers le nord</string>
     <string name="no_movement_south">aucun mouvement vers le sud</string>
-    <string name="no_movement_east">aucun mouvement vers l`est</string>
-    <string name="no_movement_west">aucun mouvement vers l`ouest</string>
+    <string name="no_movement_east">aucun mouvement vers l\'est</string>
+    <string name="no_movement_west">aucun mouvement vers l\'ouest</string>
     <string name="direction_north">vers le nord</string>
     <string name="direction_south">vers le sud</string>
-    <string name="direction_east">vers l`est</string>
-    <string name="direction_west">vers l`ouest</string>
+    <string name="direction_east">vers l\'est</string>
+    <string name="direction_west">vers l\'ouest</string>
 
     <!-- Navigation buttons -->
     <string name="button_back">Retour</string>

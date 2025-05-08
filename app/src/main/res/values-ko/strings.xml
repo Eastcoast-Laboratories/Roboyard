@@ -40,6 +40,8 @@
     <string name="squares_east">동쪽 방향</string>
     <string name="squares_west">서쪽 방향</string>
     <string name="until">까지</string>
+    <string name="until_masculine">까지</string>
+    <string name="until_feminine">까지</string>
     <string name="edge">경계</string>
     <string name="no_movement_north">북쪽으로 이동 불가</string>
     <string name="no_movement_south">남쪽으로 이동 불가</string>
@@ -110,7 +112,7 @@
     <string name="target_position_a11y">목표 위치</string>
     <string name="position_a11y">위치</string>
     <string name="multicolored_a11y">다색</string>
-    <string name="target_a11y">목표 위치 %1$d, %2$d</string>
+    <string name="target_a11y">목표 위치</string>
     <string name="at_position_a11y">위치에</string>
     <string name="walls_on_a11y">벽 방향</string>
     <string name="north_a11y">북쪽</string>
@@ -118,4 +120,49 @@
     <string name="east_a11y">동쪽</string>
     <string name="west_a11y">서쪽</string>
     <string name="empty_space_a11y">빈 공간</string>
+    <string name="color_blue">파랑</string>
+    <string name="color_green">초록</string>
+    <string name="color_yellow">노랑</string>
+    <string name="color_pink">핑크</string>
+    <string name="color_silver">은색</string>
+    
+    <!-- Color names for accessibility -->
+    <string name="color_red_a11y">빨강</string>
+    <string name="color_blue_a11y">파랑</string>
+    <string name="color_green_a11y">초록</string>
+    <string name="color_yellow_a11y">노랑</string>
+    <string name="color_pink_a11y">핑크</string>
+    <string name="color_silver_a11y">은색</string>
+    
+    <!-- Dative forms for Korean grammar -->
+    <string name="color_red_dative">빨간</string>
+    <string name="color_blue_dative">파란</string>
+    <string name="color_green_dative">초록</string>
+    <string name="color_yellow_dative">노란</string>
+    <string name="color_pink_dative">핑크</string>
+    <string name="color_silver_dative">은색</string>
+    
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">빨간</string>
+    <string name="color_blue_adj">파란</string>
+    <string name="color_green_adj">초록</string>
+    <string name="color_yellow_adj">노란</string>
+    <string name="color_pink_adj">핑크</string>
+    <string name="color_silver_adj">은색</string>
+    
+    <!-- Target color forms -->
+    <string name="color_red_target">빨간</string>
+    <string name="color_blue_target">파란</string>
+    <string name="color_green_target">초록</string>
+    <string name="color_yellow_target">노란</string>
+    <string name="color_pink_target">핑크</string>
+    <string name="color_silver_target">은색</string>
+    
+    <!-- Additional accessibility strings -->
+    <!-- Removed duplicate possible_moves_a11y -->
+    <string name="edge_a11y">가장자리</string>
+    <string name="wall_a11y">벽</string>
+    <string name="walls_a11y">벽들</string>
+    <string name="target_reached_a11y">목표에 도달함</string>
+    <string name="game_completed_a11y">목표 도달! 게임 완료, %1$d번 이동하고 %2$d칸 지남</string>
 </resources>

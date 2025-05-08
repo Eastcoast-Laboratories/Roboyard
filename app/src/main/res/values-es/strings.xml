@@ -69,7 +69,33 @@
     <string name="color_blue_dative">azul</string>
     <string name="color_green_dative">verde</string>
     <string name="color_yellow_dative">amarillo</string>
+    <string name="color_pink_dative">rosa</string>
     <string name="color_silver_dative">plateado</string>
+    
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">Rojo</string>
+    <string name="color_blue_adj">Azul</string>
+    <string name="color_green_adj">Verde</string>
+    <string name="color_yellow_adj">Amarillo</string>
+    <string name="color_pink_adj">Rosa</string>
+    <string name="color_silver_adj">Plateado</string>
+    
+    <!-- Target color forms -->
+    <string name="color_red_target">Rojo</string>
+    <string name="color_blue_target">Azul</string>
+    <string name="color_green_target">Verde</string>
+    <string name="color_yellow_target">Amarillo</string>
+    <string name="color_pink_target">Rosa</string>
+    <string name="color_silver_target">Plateado</string>
+    
+    <!-- Additional accessibility strings -->
+    <string name="possible_moves_a11y">Movimientos posibles</string>
+    <string name="edge_a11y">borde</string>
+    <string name="wall_a11y">pared</string>
+    <string name="walls_a11y">paredes</string>
+    <string name="target_reached_a11y">con objetivo alcanzado</string>
+    <string name="game_completed_a11y">¡Objetivo alcanzado! Juego completado en %1$d movimientos y %2$d casillas recorridas</string>
+    <!-- Removed duplicate color_silver_dative -->
     
     <!-- Save Game -->
     <string name="save_slot">Espacio %1$d</string>
@@ -166,7 +192,6 @@
     <string name="save_map_button_a11y">Guardar el mapa actual</string>
     <string name="new_game_button_a11y">Comenzar un nuevo juego</string>
     <string name="reset_button_a11y">Reiniciar el juego</string>
-    <string name="level_button_a11y">Nivel %1$d, %2$d de %3$d estrellas conseguidas</string>
     <string name="help_button_a11y">Mostrar instrucciones de juego</string>
     <string name="settings_button_a11y">Abrir ajustes del juego</string>
     <string name="credits_button_a11y">Ver créditos</string>
@@ -212,12 +237,14 @@
     <!-- Additional localization strings -->
     <string name="of">de</string>
     <string name="impossible_small_board_warning">El nivel Imposible en tableros pequeños puede tardar varios minutos en generar un mapa adecuado</string>
-    <string name="possible_moves_a11y">Movimientos posibles</string>
-    <string name="squares_north">casillas hacia el norte</string>
+    <!-- Removed duplicate possible_moves_a11y -->
+    <string name="squares_north">Casillas al norte</string>
     <string name="squares_south">casillas hacia el sur</string>
     <string name="squares_east">casillas hacia el este</string>
     <string name="squares_west">casillas hacia el oeste</string>
     <string name="until">hasta</string>
+    <string name="until_masculine">hasta el</string>
+    <string name="until_feminine">hasta la</string>
     <string name="edge">el borde</string>
     <string name="no_movement_north">sin movimiento hacia el norte</string>
     <string name="no_movement_south">sin movimiento hacia el sur</string>
@@ -308,7 +335,7 @@
     <string name="target_position_a11y">Su objetivo está en posición</string>
     <string name="position_a11y">Posición</string>
     <string name="multicolored_a11y">Multicolor</string>
-    <string name="target_a11y">Objetivo en posición %1$d, %2$d</string>
+    <string name="target_a11y">Objetivo en posición</string>
     <string name="at_position_a11y">en posición</string>
     <string name="walls_on_a11y">Paredes en</string>
     <string name="north_a11y">Norte</string>

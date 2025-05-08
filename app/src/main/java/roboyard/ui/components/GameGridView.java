@@ -932,10 +932,7 @@ public class GameGridView extends View {
         
         // Draw position text when accessibility features are enabled
         if (isSelected && isAccessibilityActive()) {
-            canvas.drawText(robot.getX() + "," + robot.getY(), 
-                    left + cellSize / 2, 
-                    top + cellSize / 2, 
-                    textPaint);
+            canvas.drawText((robot.getX() + 1) + "," + (robot.getY() + 1), left + cellSize / 2, top + cellSize / 2, textPaint);
         }
     }
     
@@ -1108,7 +1105,7 @@ public class GameGridView extends View {
                         state.setSelectedRobot(touchedRobot);
                         shrinkNonSelectedRobots(touchedRobot);
                         animateRobotScale(touchedRobot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
-                        announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
+                        announceForAccessibility(getRobotDescription(touchedRobot));
                     } else {
                         announceForAccessibility(getPositionDescription(gridX, gridY));
                     }
@@ -1142,7 +1139,7 @@ public class GameGridView extends View {
                                 touchedRobot.getColor(), gridX, gridY);
                         
                         // Announce selection for accessibility
-                        announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
+                        announceForAccessibility(getRobotDescription(touchedRobot));
                         
                         // Return without movement - require additional swiping to move
                         return true;
@@ -1258,7 +1255,7 @@ public class GameGridView extends View {
                                    touchedRobot.getColor(), gridX, gridY);
                             
                             // Announce selection for accessibility
-                            announceForAccessibility("Selected " + getRobotDescription(touchedRobot));
+                            announceForAccessibility(getRobotDescription(touchedRobot));
                         }
                     }
                 }
@@ -1317,12 +1314,13 @@ public class GameGridView extends View {
                         // Check if user tapped on the currently selected robot to deselect it
                         if (selectedRobot != null && gridX == selectedRobot.getX() && gridY == selectedRobot.getY()) {
                             // User tapped on the currently selected robot, deselect it
-                            Timber.d("Deselecting robot at (%d,%d)", gridX, gridY);
+                            Timber.d("[TOUCH] Try Deselecting robot at (%d,%d)", gridX, gridY);
                             if (allowRobotDeselect) {
                                 state.setSelectedRobot(null);
                                 shrinkNonSelectedRobots(null);
                                 animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
-                                announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
+                                // announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
+                                Timber.d("[TOUCH] Deselecting robot at (%d,%d)", gridX, gridY);
                                 invalidate();
                             }
                             return true;
@@ -1620,18 +1618,40 @@ public class GameGridView extends View {
         
         String color = GameLogic.getColorName(robot.getColor(), true);
         
+        // For German, use the adjective form (e.g., "Pinker")
+        Context context = getContext();
+        if (context.getResources().getConfiguration().locale.getLanguage().equals("de")) {
+            switch (robot.getColor()) {
+                case Constants.COLOR_PINK:
+                    color = context.getString(R.string.color_pink_adj);
+                    break;
+                case Constants.COLOR_GREEN:
+                    color = context.getString(R.string.color_green_adj);
+                    break;
+                case Constants.COLOR_BLUE:
+                    color = context.getString(R.string.color_blue_adj);
+                    break;
+                case Constants.COLOR_YELLOW:
+                    color = context.getString(R.string.color_yellow_adj);
+                    break;
+                case Constants.COLOR_SILVER:
+                    color = context.getString(R.string.color_silver_adj);
+                    break;
+            }
+        }
+        
         // Find the robot's target if available
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state != null) {
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                    return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + robot.getX() + ", " + robot.getY() + 
-                           ". " + getContext().getString(R.string.target_position_a11y) + " " + element.getX() + ", " + element.getY();
+                    return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + (robot.getX() + 1) + "," + (robot.getY() + 1) + 
+                           ". " + getContext().getString(R.string.target_position_a11y) + " " + (element.getX() + 1) + "," + (element.getY() + 1);
                 }
             }
         }
         
-        return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + robot.getX() + ", " + robot.getY();
+        return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + (robot.getX() + 1) + "," + (robot.getY() + 1);
     }
     
     /**
@@ -1639,12 +1659,12 @@ public class GameGridView extends View {
      */
     private String getPositionDescription(int x, int y) {
         if (gameStateManager == null || gameStateManager.getCurrentState().getValue() == null) {
-            return getContext().getString(R.string.position_a11y) + " " + x + ", " + y;
+            return getContext().getString(R.string.position_a11y) + " " + (x + 1) + ", " + (y + 1);
         }
         
         GameState state = gameStateManager.getCurrentState().getValue();
         StringBuilder description = new StringBuilder();
-        description.append(getContext().getString(R.string.position_a11y) + " " + x + ", " + y + ": ");
+        description.append(getContext().getString(R.string.position_a11y) + " " + (x + 1) + ", " + (y + 1) + ": ");
         
         // Check for robot
         GameElement robot = state.getRobotAt(x, y);
@@ -1655,7 +1675,7 @@ public class GameGridView extends View {
             // Find the robot's target
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                    description.append(String.format(getContext().getString(R.string.target_a11y), element.getX(), element.getY()) + ". ");
+                    description.append(String.format(getContext().getString(R.string.target_a11y), element.getX() + 1, element.getY() + 1) + ". ");
                     break;
                 }
             }
@@ -1668,7 +1688,7 @@ public class GameGridView extends View {
                 if (element.getColor() == Constants.COLOR_MULTI) {
                     color = getContext().getString(R.string.multicolored_a11y);
                 }
-                description.append(color + " " + String.format(getContext().getString(R.string.target_a11y), element.getX(), element.getY()) + ". ");
+                description.append(color + " " + String.format(getContext().getString(R.string.target_a11y), element.getX() + 1, element.getY() + 1) + ". ");
                 break;
             }
         }

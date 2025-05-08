@@ -49,8 +49,8 @@
     <string name="level_squares_format">Felder: %1$d</string>
     <string name="level_robots_format">Roboter: %1$d</string>
     <string name="robot_description">Roboter %1$s auf Position %2$d, %3$d</string>
-    <string name="robot_a11y">Roboter %1$s auf Position %2$d, %3$d</string>
-    <string name="target_a11y">Ziel auf Position %1$d, %2$d</string>
+    <string name="robot_a11y">Roboter auf Position</string>
+    <string name="target_a11y">Ziel auf Position</string>
     <string name="minimap_description">Übersichtskarte zeigt das gesamte Spielfeld</string>
     <string name="minimap_a11y">Übersichtskarte zeigt das gesamte Spielfeld</string>
     
@@ -126,10 +126,10 @@
     <string name="game_complete_a11y">Level abgeschlossen! Du hast das Rätsel in %1$d Zügen gelöst</string>
     <string name="wall_hit_a11y">%1$s Roboter ist gegen eine Wand gestoßen</string>
     <string name="robot_hit_a11y">%1$s Roboter ist gegen den %2$s Roboter gestoßen</string>
-    <string name="robot_position_a11y">Roboter auf Position</string>
-    <string name="target_position_a11y">Sein Ziel ist auf Position</string>
+    <string name="robot_position_a11y">Roboter auf</string>
+    <string name="target_position_a11y">Sein Ziel ist auf</string>
     <string name="position_a11y">Position</string>
-    <string name="at_position_a11y">auf Position</string>
+    <string name="at_position_a11y">auf</string>
     <string name="multicolored_a11y">Mehrfarbig</string>
     <string name="walls_on_a11y">Wände an</string>
     <string name="north_a11y">Norden</string>
@@ -137,6 +137,11 @@
     <string name="east_a11y">Osten</string>
     <string name="west_a11y">Westen</string>
     <string name="empty_space_a11y">Leerer Bereich</string>
+    <string name="possible_moves_a11y">Mögliche Züge</string>
+    <string name="edge_a11y">Rand</string>
+    <string name="wall_a11y">Wand</string>
+    <string name="walls_a11y">Wände</string>
+    <string name="target_reached_a11y">mit erreichtem Ziel</string>
     
     <!-- TalkBack language constant - do not translate -->
     <string name="talkback_language_same_value" translatable="false">same</string>
@@ -292,6 +297,22 @@
     <string name="color_white_dative">weißen</string>
     <string name="color_black_dative">schwarzen</string>
     <string name="color_teal_dative">türkisen</string>
+    
+    <!-- Adjektivformen für deutsche Grammatik -->
+    <string name="color_red_adj">Roter</string>
+    <string name="color_blue_adj">Blauer</string>
+    <string name="color_green_adj">Grüner</string>
+    <string name="color_yellow_adj">Gelber</string>
+    <string name="color_pink_adj">Pinker</string>
+    <string name="color_silver_adj">Silberner</string>
+    
+    <!-- Neutrum Adjektivformen für Ziele -->
+    <string name="color_red_target">Rotes</string>
+    <string name="color_blue_target">Blaues</string>
+    <string name="color_green_target">Grünes</string>
+    <string name="color_yellow_target">Gelbes</string>
+    <string name="color_pink_target">Pinkes</string>
+    <string name="color_silver_target">Silbernes</string>
     <string name="color_silver_dative">silbernen</string>
     
     <!-- Game UI text -->
@@ -325,7 +346,7 @@
     <string name="move_robot_first">Bewege zuerst den %1$s Roboter</string>
 
     <!-- Accessibility versions -->
-    <string name="target_reached_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
+    <string name="game_completed_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
     <string name="robot_move_initiated_a11y">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
     <string name="starting_level_a11y">Starte Level %1$d</string>
 
@@ -380,12 +401,14 @@
     <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
 
     <!-- Additional game text -->
-    <string name="possible_moves_a11y">Mögliche Züge</string>
+    <!-- Removed duplicate possible_moves_a11y -->
     <string name="squares_north">Felder nach Norden</string>
     <string name="squares_south">Felder nach Süden</string>
     <string name="squares_east">Felder nach Osten</string>
     <string name="squares_west">Felder nach Westen</string>
-    <string name="until">bis zum</string>
+    <string name="until">bis zur</string>
+    <string name="until_masculine">bis zum</string>
+    <string name="until_feminine">bis zur</string>
     <string name="edge">Rand</string>
     <string name="no_movement_north">keine Bewegung nach Norden</string>
     <string name="no_movement_south">keine Bewegung nach Süden</string>

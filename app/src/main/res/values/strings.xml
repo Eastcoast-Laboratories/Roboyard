@@ -92,7 +92,7 @@
     <string name="level_squares_format">Squares: %1$d</string>
     <string name="level_robots_format">Robots: %1$d</string>
     <string name="robot_description">Robot %1$s at position %2$d, %3$d</string>
-    <string name="robot_a11y">Robot %1$s at position %2$d, %3$d</string>
+    <string name="robot_a11y">Robot at position</string>
     <string name="minimap_description">Minimap showing overall board layout</string>
     <string name="minimap_a11y">Minimap showing overall board layout</string>
     
@@ -304,6 +304,22 @@
     <string name="color_black_dative">Black</string>
     <string name="color_silver_dative">Silver</string>
 
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">Red</string>
+    <string name="color_blue_adj">Blue</string>
+    <string name="color_green_adj">Green</string>
+    <string name="color_yellow_adj">Yellow</string>
+    <string name="color_pink_adj">Pink</string>
+    <string name="color_silver_adj">Silver</string>
+
+    <!-- Target color forms -->
+    <string name="color_red_target">Red</string>
+    <string name="color_blue_target">Blue</string>
+    <string name="color_green_target">Green</string>
+    <string name="color_yellow_target">Yellow</string>
+    <string name="color_pink_target">Pink</string>
+    <string name="color_silver_target">Silver</string>
+
     <!-- Game UI text for ModernGameFragment -->
     <string name="no_robot_selected" comment="Status message when no robot is currently selected [ModernGameFragment]">No robot selected</string>
     <string name="robot_selected" comment="Status message showing which robot is selected">Selected: %1$s robot at (%2$d, %3$d)</string>
@@ -339,7 +355,7 @@
     <string name="solution_found_moves">Solution found: %1$d moves</string>
 
     <!-- Accessibility versions -->
-    <string name="target_reached_a11y" comment="Accessibility announcement when target is reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="game_completed_a11y" comment="Accessibility announcement when target is reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
     <string name="robot_move_initiated_a11y" comment="Accessibility announcement when robot moves">%1$s robot move initiated, starting at %2$d, %3$d</string>
     <string name="starting_level_a11y" comment="Accessibility announcement when level starts">Starting level %1$d</string>
 
@@ -413,11 +429,17 @@
 
     <!-- Game text -->
     <string name="possible_moves_a11y">Possible moves</string>
+    <string name="edge_a11y">edge</string>
+    <string name="wall_a11y">wall</string>
+    <string name="walls_a11y">walls</string>
+    <string name="target_reached_a11y">with target reached</string>
     <string name="squares_north">squares north</string>
     <string name="squares_south">squares south</string>
     <string name="squares_east">squares east</string>
     <string name="squares_west">squares west</string>
     <string name="until">until</string>
+    <string name="until_masculine">until</string>
+    <string name="until_feminine">until</string>
     <string name="edge">edge</string>
     <string name="no_movement_north">no movement north</string>
     <string name="no_movement_south">no movement south</string>
@@ -435,7 +457,7 @@
     <string name="target_position_a11y">Its target is at position</string>
     <string name="position_a11y">Position</string>
     <string name="multicolored_a11y">Multi-colored</string>
-    <string name="target_a11y">Target at position %1$d, %2$d</string>
+    <string name="target_a11y">Target at position</string>
     <string name="at_position_a11y">at position</string>
     <string name="walls_on_a11y">Walls on</string>
     <string name="north_a11y">North</string>
