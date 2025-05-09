@@ -130,20 +130,14 @@ public class GameLogic {
             wallsPerQuadrant = (int) (boardWidth/3.3);
 
             loneWallsAllowed = true;
-        } else { // For easier/medium difficulties
+        } else { 
             // Keep targetMustBeInCorner = true
-            Timber.d("[DIFFICULTY] Using MEDIUM settings (targets in corners only)");
+            Timber.d("[DIFFICULTY] Using INSANE or IMPOSSIBLE settings");
             
             allowMulticolorTarget = false;
 
-            maxWallsInOneVerticalCol = 3;
-            maxWallsInOneHorizontalRow = 3;
-            wallsPerQuadrant = (int) (boardWidth/3.3);
-
             loneWallsAllowed = true;
-        }
-
-        if(level == DIFFICULTY_INSANE || level == DIFFICULTY_IMPOSSIBLE) {
+            
             // For Insane and Impossible difficulties, targets can appear anywhere except the center
             targetMustBeInCorner = false;
             Timber.d("[DIFFICULTY] Using INSANE/IMPOSSIBLE settings, targets fully random");
@@ -324,11 +318,23 @@ public class GameLogic {
                 currentLevel, targetMustBeInCorner);
         
         // Use our color management methods to generate target and robot type strings
-        String[] typesOfTargets = new String[Constants.NUM_ROBOTS + 1]; // standard targets + multi-colored target
-        for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
-            typesOfTargets[i] = getObjectType(i, false); // false = target
+        String[] typesOfTargets;
+        if (allowMulticolorTarget) {
+            // Include multi-color target if allowed
+            typesOfTargets = new String[Constants.NUM_ROBOTS + 1]; // standard targets + multi-colored target
+            for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
+                typesOfTargets[i] = getObjectType(i, false); // false = target
+            }
+            typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Add multi-target at the last index
+            Timber.d("[TARGET_MULTI] Multi-color target INCLUDED in available targets");
+        } else {
+            // Exclude multi-color target if not allowed
+            typesOfTargets = new String[Constants.NUM_ROBOTS]; // standard targets only
+            for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
+                typesOfTargets[i] = getObjectType(i, false); // false = target
+            }
+            Timber.d("[TARGET_MULTI] Multi-color target EXCLUDED from available targets");
         }
-        typesOfTargets[Constants.NUM_ROBOTS] = "target_multi"; // Only add multitarget at the last index 
         
         String[] typesOfRobots = new String[Constants.NUM_ROBOTS]; 
         for (int i = 0; i < Constants.NUM_ROBOTS; i++) {
@@ -343,7 +349,7 @@ public class GameLogic {
         
         // Create targets based on targetCount and targetColors settings
         // We'll create targets for each color (or multi-color) up to the targetColors limit
-        int maxTargetTypes = allowMulticolorTarget ? Constants.NUM_ROBOTS + 1 : Constants.NUM_ROBOTS;
+        int maxTargetTypes = typesOfTargets.length; // Use the actual array length which already accounts for allowMulticolorTarget
         int targetTypesCount = Math.min(targetColors, maxTargetTypes); // Limit to targetColors
         targetTypesCount = Math.max(1, targetTypesCount); // Ensure at least one target is always created
         
