@@ -323,7 +323,7 @@
     <string name="no_target_for_robot">Kein Ziel für diesen Roboter</string>
     <string name="move_count_text">Züge: %1$d</string>
     <string name="moves_count">Züge: %1$d</string>
-    <string name="squares_moved">Felder bewegt: %1$d</string>
+    <string name="squares_moved">Felder: %1$d</string>
     <string name="board_size">Spielfeld: %1$dx%2$d</string>
     <string name="solution_error">Keine Lösung gefunden: %1$s</string>
 

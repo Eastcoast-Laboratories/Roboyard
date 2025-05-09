@@ -95,30 +95,30 @@
     <string name="no_game_to_save">Aucune partie disponible à sauvegarder</string>
     
     <!-- Game UI text for ModernGameFragment -->
-    <string name="no_robot_selected" comment="Status message when no robot is currently selected">Aucun robot sélectionné</string>
-    <string name="robot_selected" comment="Status message showing which robot is selected">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
-    <string name="robot_selected_info" comment="More detailed information about selected robot">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
-    <string name="robot_target_info" comment="Information about a target on the board">Cible %1$s: (%2$d, %3$d)</string>
-    <string name="no_target_for_robot" comment="Message when a robot has no matching target">Pas de cible pour ce robot</string>
-    <string name="move_count_text" comment="Text showing number of moves made">Coups: %1$d</string>
-    <string name="moves_count" comment="Text showing number of moves made">Coups: %1$d</string>
-    <string name="squares_moved" comment="Text showing number of squares moved">Cases déplacées: %1$d</string>
-    <string name="board_size" comment="Text showing the board dimensions">Plateau: %1$dx%2$d</string>
+    <string name="no_robot_selected">Aucun robot sélectionné</string>
+    <string name="robot_selected">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
+    <string name="robot_selected_info">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
+    <string name="robot_target_info">Cible %1$s: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">Pas de cible pour ce robot</string>
+    <string name="move_count_text">Coups: %1$d</string>
+    <string name="moves_count">Coups: %1$d</string>
+    <string name="squares_moved">Carrés: %1$d</string>
+    <string name="board_size">Plateau: %1$dx%2$d</string>
 
     <!-- Game UI Buttons and Messages -->
-    <string name="reset_button" comment="Button to reset the current game/level">Réinitialiser</string>
-    <string name="hint_button" comment="Button to get a hint">Indice</string>
-    <string name="cancel_hint_button" comment="Button to hide hints">Masquer</string>
+    <string name="reset_button">Réinitialiser</string>
+    <string name="hint_button">Indice</string>
+    <string name="cancel_hint_button">Masquer</string>
     
     <!-- Game directions -->
-    <string name="direction_up" comment="Direction name for movement hints">vers le haut</string>
-    <string name="direction_down" comment="Direction name for movement hints">vers le bas</string>
-    <string name="direction_right" comment="Direction name for movement hints">vers la droite</string>
-    <string name="direction_left" comment="Direction name for movement hints">vers la gauche</string>
+    <string name="direction_up">vers le haut</string>
+    <string name="direction_down">vers le bas</string>
+    <string name="direction_right">vers la droite</string>
+    <string name="direction_left">vers la gauche</string>
 
     <!-- Game status messages -->
-    <string name="target_reached" comment="Message shown when a robot reaches its target">Cible atteinte! Partie terminée en %1$d coups et %2$d cases déplacées</string>
-    <string name="starting_level" comment="Message shown when starting a level">Démarrage du niveau %1$d</string>
+    <string name="target_reached">Cible atteinte! Partie terminée en %1$d coups et %2$d cases déplacées</string>
+    <string name="starting_level">Démarrage du niveau %1$d</string>
     
     <!-- Game buttons -->
     <string name="hint_button_a11y">Indice</string>
