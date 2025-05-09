@@ -1468,17 +1468,27 @@ public class GameState implements Serializable {
         
         // Find matching target
         for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET && 
-                element.getColor() == robotColor &&
+            if (element.getType() == GameElement.TYPE_TARGET &&
                 element.getX() == robotX &&
                 element.getY() == robotY) {
-                return true;
+                // Allow any robot to match a multi-color target
+                if (element.getColor() == Constants.COLOR_MULTI) {
+                    Timber.d("[TARGET_MULTI_MATCH] Robot %d matches multi target at (%d,%d)", robot.getColor(), robotX, robotY);
+                    return true;
+                }
+                // Otherwise, require color match
+                if (element.getColor() == robotColor) {
+                    return true;
+                }
             }
         }
-        
         return false;
     }
 
+    /**
+     * Get all robots in the game state
+     * @return List of robot game elements
+     */
     public List<GameElement> getRobots() {
         List<GameElement> robots = new ArrayList<>();
         for (GameElement element : gameElements) {
