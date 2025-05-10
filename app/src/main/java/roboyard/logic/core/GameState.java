@@ -277,6 +277,11 @@ public class GameState implements Serializable {
     public boolean areAllRobotsAtTargets() {
         // Get all robots in the game
         List<GameElement> robots = getRobots();
+        
+        // Get all targets in the game
+        List<GameElement> targets = getTargets();
+        
+        // Count how many robots are at their matching targets
         int robotsAtTarget = 0;
         
         // For each robot, check if it's on a target of its matching color
@@ -290,10 +295,15 @@ public class GameState implements Serializable {
             }
         }
         
-        // Game is complete when the number of robots at targets matches the robot count setting
-        boolean allRobotsAtTargets = (robotsAtTarget >= robotCount);
-        Timber.d("[GOAL DEBUG] %d/%d robots at targets (robot count: %d) -> Game complete: %b", 
-                robotsAtTarget, robots.size(), robotCount, allRobotsAtTargets);
+        // Calculate how many robots need to be at targets to win
+        // If there are fewer targets than robotCount, we only need as many robots at targets as there are targets
+        int requiredRobots = Math.min(robotCount, targets.size());
+        
+        // Game is complete when the number of robots at targets matches the required count
+        boolean allRobotsAtTargets = (robotsAtTarget >= requiredRobots);
+        
+        Timber.d("[GOAL DEBUG] %d/%d robots at targets (required: %d, total targets: %d) -> Game complete: %b", 
+                robotsAtTarget, robots.size(), requiredRobots, targets.size(), allRobotsAtTargets);
         
         return allRobotsAtTargets;
     }
@@ -1499,6 +1509,10 @@ public class GameState implements Serializable {
         return robots;
     }
 
+    /**
+     * Get a single target (first one found)
+     * @return The first target found, or null if no targets exist
+     */
     public GameElement getTarget() {
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
@@ -1506,6 +1520,20 @@ public class GameState implements Serializable {
             }
         }
         return null;
+    }
+    
+    /**
+     * Get all targets in the game state
+     * @return List of target game elements
+     */
+    public List<GameElement> getTargets() {
+        List<GameElement> targets = new ArrayList<>();
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                targets.add(element);
+            }
+        }
+        return targets;
     }
     
     /**

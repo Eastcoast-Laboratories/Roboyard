@@ -1039,7 +1039,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 robot.setY(targetY);
 
                 // Check for game completion after animation
-                if (state.isRobotAtTarget(robot)) {
+                if (state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
                 }
 
@@ -1089,8 +1089,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 robot.setX(targetX);
                 robot.setY(targetY);
 
-                // Check for game completion
-                if (state.isRobotAtTarget(robot)) {
+                // Check for game completion - use areAllRobotsAtTargets to properly check win conditions
+                if (state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
                 }
 
