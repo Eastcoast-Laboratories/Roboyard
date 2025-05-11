@@ -40,30 +40,57 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
+- Verbesserte Accessibility-Übersetzungen
 - Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
+- Sound-Einstellung funktioniert jetzt korrekt
+- Gewinnbedingung bei mehreren Zielen prüft jetzt korrekt, ob die gewählte Anzahl an Robotern auf ihren Zielen steht
+- Mehrfarben-Ziele wiederhergestellt im Beginner Mode
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
+- Enhanced accessibility translations
+- Make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
+- Fixed sound settings to properly respect user preferences
+- Fixed win condition to correctly check if the selected number of robots are at their targets
+- Freenable multi-color targets in Beginner mode
 EOF
 )
 
 # Play Store has a limit of 500 characters
 PLAYSTORE_DE_DE=$(cat << EOF
 <de-DE>
-- Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
 </de-DE>
 EOF
 )
 
 PLAYSTORE_EN_GB=$(cat << EOF
 <en-GB>
-- make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
 </en-GB>
 EOF
 )
+
+# If PLAYSTORE sections are empty, use content from DE_CHANGES and EN_CHANGES
+if [ "$(echo "$PLAYSTORE_DE_DE" | grep -v '^<.*>$' | tr -d '\n' | tr -d ' ')" = "" ]; then
+  PLAYSTORE_DE_DE=$(cat << EOF
+<de-DE>
+$DE_CHANGES
+</de-DE>
+EOF
+)
+  echo "Using DE_CHANGES for PLAYSTORE_DE_DE as it was empty"
+fi
+
+if [ "$(echo "$PLAYSTORE_EN_GB" | grep -v '^<.*>$' | tr -d '\n' | tr -d ' ')" = "" ]; then
+  PLAYSTORE_EN_GB=$(cat << EOF
+<en-GB>
+$EN_CHANGES
+</en-GB>
+EOF
+)
+  echo "Using EN_CHANGES for PLAYSTORE_EN_GB as it was empty"
+fi
 
 # Fastlane-Changelogs erstellen
 # Deutsches Changelog

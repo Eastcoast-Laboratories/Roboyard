@@ -2,8 +2,12 @@
 =========
 
 
-## Version 26 (2025-05-08)
-- make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
+## Version 26 (2025-05-11)
+- Enhanced accessibility translations
+- Make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
+- Fixed sound settings to properly respect user preferences
+- Fixed win condition to correctly check if the selected number of robots are at their targets
+- Freenable multi-color targets in Beginner mode
 
 ## Version 25 (2025-05-03)
 - Fullscreen toggle option in settings

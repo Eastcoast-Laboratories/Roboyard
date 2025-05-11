@@ -2,8 +2,12 @@ Changelog Deutsch
 =================
 
 
-## Version 26 (2025-05-08)
+## Version 26 (2025-05-11)
+- Verbesserte Accessibility-Übersetzungen
 - Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
+- Sound-Einstellung funktioniert jetzt korrekt
+- Gewinnbedingung bei mehreren Zielen prüft jetzt korrekt, ob die gewählte Anzahl an Robotern auf ihren Zielen steht
+- Mehrfarben-Ziele wiederhergestellt im Beginner Mode
 
 ## Version 25 (2025-05-03)
 - Fullscreen Option in Settings
