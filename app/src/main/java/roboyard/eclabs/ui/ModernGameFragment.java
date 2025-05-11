@@ -2033,11 +2033,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param soundType Type of sound to play ("move", "hit_wall", "hit_robot", "win")
      */
     public void playSound(String soundType) {
-        if (soundManager != null) {
+        // Only play sound if it's enabled in global preferences
+        if (soundManager != null && roboyard.logic.core.Preferences.soundEnabled) {
             Timber.d("ModernGameFragment: Playing sound %s", soundType);
             soundManager.playSound(soundType);
-        } else {
+        } else if (soundManager == null) {
             Timber.e("ModernGameFragment: SoundManager is null, cannot play sound %s", soundType);
+        } else {
+            Timber.d("ModernGameFragment: Sound disabled in preferences, not playing %s", soundType);
         }
     }
 
