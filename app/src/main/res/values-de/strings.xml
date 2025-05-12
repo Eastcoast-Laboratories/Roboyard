@@ -93,9 +93,6 @@
     <string name="language_settings_a11y">App-Anzeigesprache auswählen</string>
     <string name="accessibility_language_label">TalkBack-Sprache:</string>
     <string name="accessibility_language_a11y">TalkBack-Ansagesprache auswählen</string>
-    <string name="language_english">Englisch</string>
-    <string name="language_german">Deutsch</string>
-    <string name="language_french">Französisch</string>
     <string name="language_same_as_app">Gleich wie App-Sprache</string>
     <string name="language_changed_title">Sprache geändert</string>
     <string name="language_changed_message">Die Spracheinstellung wurde aktualisiert. Einige Änderungen werden sofort wirksam, andere erst, wenn du zum Hauptmenü zurückkehrst.</string>
@@ -164,12 +161,6 @@
     <string name="level_category_intermediate">Fortgeschritten</string>
     <string name="level_category_advanced">Experte</string>
     <string name="level_category_expert">Meister</string>
-    <string name="level_format">Level %1$d</string>
-    <string name="level_filter_all">Alle</string>
-    <string name="level_filter_played">Gespielt</string>
-    <string name="level_filter_unsolved">Ungelöst</string>
-    <string name="level_difficulty_format">Schwierigkeit: %1$s</string>
-    <string name="level_size_format">Größe: %1$s</string>
 
     <!-- Save game screen -->
     <string name="save_game_title">Spiel speichern</string>
@@ -221,15 +212,11 @@
     <string name="button_reset">Reset</string>
     <string name="hint_button_a11y">Hinweis</string>
     <string name="button_new_game">Neue Map</string>
-    <string name="new_game">Neues Spiel</string>
     <string name="button_menu">Menü</string>
-    <string name="menu">Menü</string>
     <string name="button_back_game">Zurück</string>
     <string name="button_back">Zurück</string>
     <string name="back">Zurück</string>
     <string name="back_description">Zurück zum vorherigen Bildschirm</string>
-    <string name="reset">Reset</string>
-    <string name="save_map">Speichern</string>
     <string name="button_save_map">Speichern</string>
 
     <!-- Game screen -->
@@ -272,7 +259,6 @@
     <string name="color_orange">Orange</string>
     <string name="color_white">Weiß</string>
     <string name="color_black">Schwarz</string>
-    <string name="color_teal">Türkis</string>
     <string name="color_silver">Silber</string>
     
     <!-- Color names for accessibility -->
@@ -284,8 +270,7 @@
     <string name="color_orange_a11y">Orange</string>
     <string name="color_white_a11y">Weiß</string>
     <string name="color_black_a11y">Schwarz</string>
-    <string name="color_teal_a11y">Türkis</string>
-    <string name="color_silver_a11y">Silber</string>    
+    <string name="color_silver_a11y">Silber</string>
     
     <!-- Deklinierte Farbformen für deutsche Grammatik -->
     <string name="color_red_dative">roten</string>
@@ -296,8 +281,7 @@
     <string name="color_orange_dative">orangen</string>
     <string name="color_white_dative">weißen</string>
     <string name="color_black_dative">schwarzen</string>
-    <string name="color_teal_dative">türkisen</string>
-    
+
     <!-- Adjektivformen für deutsche Grammatik -->
     <string name="color_red_adj">Roter</string>
     <string name="color_blue_adj">Blauer</string>
@@ -332,7 +316,6 @@
     <string name="unique_map_id">%1$s</string>
     <string name="empty_text"></string>
     <string name="level_id_text">Level %1$d</string>
-    <string name="level_completed">Level %1$d abgeschlossen mit %2$d Zügen</string>
     <string name="stars_earned">Du hast %1$d Sterne verdient</string>
     <string name="completed_in_moves">Abgeschlossen mit %1$d Zügen</string>
     <string name="starting_level">Starte Level %1$d</string>
@@ -343,7 +326,6 @@
     <string name="ai_solution_less_moves">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
     <string name="ai_solution_exact_moves">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
     <string name="solution_found_moves">Lösung gefunden: %1$d Züge</string>
-    <string name="move_robot_first">Bewege zuerst den %1$s Roboter</string>
 
     <!-- Accessibility versions -->
     <string name="game_completed_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>
