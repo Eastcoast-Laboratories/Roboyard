@@ -79,7 +79,9 @@ public class RRGetMap {
         colors.put("target_blue", Constants.COLOR_BLUE);      // Constants.COLOR_BLUE
         colors.put("target_yellow", Constants.COLOR_YELLOW);  // Constants.COLOR_YELLOW
         colors.put("target_silver", Constants.COLOR_SILVER);  // Constants.COLOR_SILVER
-        colors.put("target_multi", -1);
+        // Explicitly setting multi-color target to use wildcard value (-1)
+        // This tells the DriftingDroids solver that any robot can match this target
+        colors.put("target_multi", Constants.COLOR_MULTI);
 
         int robotCounter = 0;
         boolean targetFound = false;
@@ -110,8 +112,10 @@ public class RRGetMap {
                 
                 // Set this as the active target
                 board.setGoal(position);
-                Timber.d("[SOLUTION_SOLVER] Setting goal at position %d (%d,%d) for robot color %d", 
+                Timber.d("[SOLUTION_SOLVER_TARGET] Setting goal at position %d (%d,%d) for robot color %d", 
                         position, x, y, targetColor);
+            }else if (type.startsWith("target_")){
+                Timber.w("[SOLUTION_SOLVER_TARGET] Unknown target type: %s", type);
             }
             
             // Handle robots of different colors

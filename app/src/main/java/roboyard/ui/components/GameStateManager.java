@@ -435,9 +435,25 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     break;
 
                 case GameElement.TYPE_TARGET:
-                    String targetType = "target_" + GameLogic.getColorName(element.getColor(), false);
+                    // Get the raw color value from the element
+                    int targetColorId = element.getColor();
+                    String colorName = GameLogic.getColorName(targetColorId, false);
+                    String targetType = "target_" + colorName;
+                    
+                    // Detailed logging for target conversion
+                    Timber.d("[POSSIBLE_UNREACHEABLE_CODE][SOLUTION_SOLVER_TARGET] Converting GameElement target with color ID %d (%s) to GridElement type '%s'",
+                            targetColorId, (targetColorId == Constants.COLOR_MULTI ? "MULTI" : colorName), targetType);
+                    
+                    // Create GridElement with the correct type
                     gridElement = new GridElement(element.getX(), element.getY(), targetType);
-                    Timber.d("[SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.getX(), element.getY());
+                    
+                    // More verbose logging for multi-color targets
+                    if (targetColorId == Constants.COLOR_MULTI) {
+                        Timber.d("[POSSIBLE_UNREACHEABLE_CODE][SOLUTION_SOLVER_TARGET] Created multi-color target GridElement: %s at (%d,%d)", 
+                                targetType, element.getX(), element.getY());
+                    } else {
+                        Timber.d("[POSSIBLE_UNREACHEABLE_CODE][SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.getX(), element.getY());
+                    }
                     break;
 
                 case GameElement.TYPE_HORIZONTAL_WALL:

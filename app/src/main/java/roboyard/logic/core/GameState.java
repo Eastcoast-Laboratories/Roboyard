@@ -415,7 +415,11 @@ public class GameState implements Serializable {
                     String gridElementType;
                     int targetColor = getTargetColor(x, y);
                     
-                    if (targetColor == 0) {
+                    // Special handling for multi-color target
+                    if (targetColor == Constants.COLOR_MULTI) {
+                        gridElementType = "target_multi";
+                        Timber.d("[SOLUTION_SOLVER_TARGET] Found multi-color target at (%d,%d) in board", x, y);
+                    } else if (targetColor == 0) {
                         gridElementType = "target_red";
                     } else if (targetColor == 1) {
                         gridElementType = "target_green";
@@ -428,6 +432,7 @@ public class GameState implements Serializable {
                     } else {
                         // Fallback
                         gridElementType = "target_red";
+                        Timber.w("[SOLUTION_SOLVER_TARGET] Unknown target color: %d at (%d,%d), defaulting to red", targetColor, x, y);
                     }
                     
                     elements.add(new GridElement(x, y, gridElementType));

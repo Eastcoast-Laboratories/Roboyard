@@ -60,6 +60,14 @@ public class SolverDD implements ISolver{
             }
         }
         
+        // Search for and log any multi-color targets
+        for (GridElement element : elements) {
+            if (element.getType() != null && element.getType().equals("target_multi")) {
+                Timber.d("[SOLUTION_SOLVER_TARGET] SolverDD.init(): Found multi-color target at position (%d,%d)",
+                        element.getX(), element.getY());
+            }
+        }
+        
         // Initialize new board and solver
         Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Creating DD World from elements");
         board = RRGetMap.createDDWorld(elements, pieces);
