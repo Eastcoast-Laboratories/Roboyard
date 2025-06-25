@@ -2371,16 +2371,22 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Format the list of robots with commas and "and" for the last item
             for (int i = 0; i < robotsInvolved.size(); i++) {
                 if (i == robotsInvolved.size() - 1 && robotsInvolved.size() > 1) {
+                    // For the last item with multiple items, add 'and' without comma
                     message.append(getString(R.string.and)).append(" ").append(robotsInvolved.get(i));
                     if (Locale.getDefault().getLanguage().equals("en")) {
                         message.append(robotsInvolved.size() > 1 ? " robots" : " robot");
                     }
                 } else if (i == robotsInvolved.size() - 1) {
+                    // For a single item or the very last one
                     message.append(robotsInvolved.get(i));
                     if (Locale.getDefault().getLanguage().equals("en")) {
                         message.append(" robot");
                     }
+                } else if (i == robotsInvolved.size() - 2) {
+                    // Second-to-last item - add without trailing comma before 'and'
+                    message.append(robotsInvolved.get(i)).append(" ");
                 } else {
+                    // Any other item - add with comma
                     message.append(robotsInvolved.get(i)).append(", ");
                 }
             }

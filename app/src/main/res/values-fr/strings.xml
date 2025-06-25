@@ -135,6 +135,16 @@
     <string name="ai_calculating">IA calcule une solution...</string>
     <string name="nothing_to_undo">Rien à annuler</string>
     <string name="solution_found">IA a trouvé une solution!</string>
+    <string name="pre_hint_less_than_x">L\'IA a trouvé une solution en moins de %1$d mouvements</string>
+    <string name="pre_hint_exact_solution">L\'IA a trouvé une solution en %1$d mouvements</string>
+    <string name="pre_hint_involved_robots">Déplacez les robots</string>
+    <string name="and">et</string>
+    <string name="pre_hint_first_move">Déplacez d\'abord le robot %1$s</string>
+    <string name="pre_hint_ready">Prêt à afficher des indices étape par étape</string>
+    <string name="all_hints_shown">Tous les indices ont été affichés</string>
+    <string name="no_valid_hint">Aucun indice valide disponible</string>
+    <string name="error_displaying_hint">Erreur lors de l\'affichage de l\'indice</string>
+    <string name="no_solution_found">Aucune solution trouvée</string>
     <string name="robot_color_down">%1$s vers le bas</string>
 
     <!-- Settings Screen -->
