@@ -2,6 +2,11 @@
 =========
 
 
+## Version 27 (2025-06-25)
+- Multi-color target functionality restored
+- Accessibility announcements (TalkBack) fixed and improved for blind players
+
+
 ## Version 26 (2025-05-11)
 - Enhanced accessibility translations
 - Make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7

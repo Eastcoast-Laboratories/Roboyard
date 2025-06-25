@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 27 (2025-06-25)
+- mehrfarbiges Ziel wieder aktiviert
+- Ansagen für blinde Spieler repariert (Talkback) und optimiert
+
+
 ## Version 26 (2025-05-11)
 - Verbesserte Accessibility-Übersetzungen
 - Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7

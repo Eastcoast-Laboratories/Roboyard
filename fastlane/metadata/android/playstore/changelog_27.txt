@@ -1,0 +1,10 @@
+# Play Store Changelogs für Version 27
+
+<en-GB>
+- Multi-color target functionality restored
+- Accessibility announcements (TalkBack) fixed and improved for blind players
+</en-GB>
+<de-DE>
+- mehrfarbiges Ziel wieder aktiviert
+- Ansagen für blinde Spieler repariert (Talkback) und optimiert
+</de-DE>

@@ -40,21 +40,15 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Verbesserte Accessibility-Übersetzungen
-- Alle Koordinaten in der Accessibility-Announcement von 1,1 bis 8,8 statt von 0,0 bis 7,7
-- Sound-Einstellung funktioniert jetzt korrekt
-- Gewinnbedingung bei mehreren Zielen prüft jetzt korrekt, ob die gewählte Anzahl an Robotern auf ihren Zielen steht
-- Mehrfarben-Ziele wiederhergestellt im Beginner Mode
+- mehrfarbiges Ziel wieder aktiviert
+- Ansagen für blinde Spieler repariert (Talkback) und optimiert
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Enhanced accessibility translations
-- Make all accessibility coordinate announcements from 1,1 to 8,8 instead of 0,0 to 7,7
-- Fixed sound settings to properly respect user preferences
-- Fixed win condition to correctly check if the selected number of robots are at their targets
-- Freenable multi-color targets in Beginner mode
+- Multi-color target functionality restored
+- Accessibility announcements (TalkBack) fixed and improved for blind players
 EOF
 )
 

@@ -1,0 +1,2 @@
+- Multi-color target functionality restored
+- Accessibility announcements (TalkBack) fixed and improved for blind players

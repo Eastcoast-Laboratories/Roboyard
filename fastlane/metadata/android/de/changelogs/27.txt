@@ -1,0 +1,2 @@
+- mehrfarbiges Ziel wieder aktiviert
+- Ansagen für blinde Spieler repariert (Talkback) und optimiert
