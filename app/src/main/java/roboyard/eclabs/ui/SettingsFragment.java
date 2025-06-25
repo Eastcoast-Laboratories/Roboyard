@@ -1147,6 +1147,11 @@ public class SettingsFragment extends Fragment {
                         updateTalkbackLanguageVisibility(accessibilityMode);
                         
                         Timber.d("[PREFERENCES] Accessibility mode set to %b", accessibilityMode);
+                        
+                        if (accessibilityMode) {
+                            // Show message about TalkBack
+                            showTalkBackMessage();
+                        }
                     } catch (Exception e) {
                         Timber.e(e, "Error processing accessibility selection");
                     }

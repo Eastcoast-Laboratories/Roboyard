@@ -116,8 +116,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - multi-color target is gone
 
-- fdroid entry enhancements
-
 - multiple sources of truth concept ausführen
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
 
@@ -130,3 +128,11 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - choose num_robots in settings (2-5)
 
 - only add the same color at the end of the hint if it is not the same as the last color
+
+- Wenn man eine Karte mit einem anderen ratio spielt und dann neues Spiel drückt, dann fehlt rechts und links etwas am Rand. die neue ratio soll auch die volle bildbreite ausnutzen
+
+# most important
+- accessibility mode hat fehler in den ansagen:
+ - Ziel auf Position.... fehlt die koordinate in der ansage
+ - "KI berechnet Lösung ..." muss weg
+ - bei den Hinweisen nur letzten Schritt Ansagen, nicht die history
