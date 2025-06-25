@@ -372,6 +372,12 @@
     <string name="level_robots_label">Roboter:</string>
     <string name="level_squares_label">Felder:</string>
     
+    <!-- Directions for hints -->
+    <string name="direction_up">hoch</string>
+    <string name="direction_down">runter</string>
+    <string name="direction_right">rechts</string>
+    <string name="direction_left">links</string>
+
     <!-- Hint Direction Symbols -->
     <string name="hint_direction_up">▲</string>
     <string name="hint_direction_down">▼</string>

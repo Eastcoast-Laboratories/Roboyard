@@ -2066,6 +2066,28 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
 
+
+    /**
+     * Get the direction name from a move direction for accessibility messages
+     * @param direction Direction constant from ERRGameMove
+     * @return Human-readable direction name
+     */
+    private String getLocalizedDirectionName_a11y(int direction) {
+        
+        switch (direction) {
+            case 1: // ERRGameMove.UP.getDirection()
+                return getString(R.string.direction_up);
+            case 4: // ERRGameMove.DOWN.getDirection()
+                return getString(R.string.direction_down);
+            case 2: // ERRGameMove.RIGHT.getDirection()
+                return getString(R.string.direction_right);
+            case 8: // ERRGameMove.LEFT.getDirection()
+                return getString(R.string.direction_left);
+            default:
+                return "unknown direction";
+        }
+    }
+
     /**
      * Get the direction name from a move direction
      * @param direction Direction constant from ERRGameMove
@@ -2388,9 +2410,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 StringBuilder hintMessage = new StringBuilder();
                 // Create a separate accessibility hint message that only includes the current step
                 StringBuilder accessibilityHintMessage = new StringBuilder();
+                // Get the accessibility-specific direction name
+                String directionNameA11y = getLocalizedDirectionName_a11y(rrMove.getDirection());
                 // For accessibility, just announce the current step without the history
                 accessibilityHintMessage.append(displayHintNumber).append(". ")
-                    .append(robotColorName).append(" ").append(directionName);
+                    .append(robotColorName).append(" ").append(directionNameA11y);
                 Timber.d("[ACCESSIBILITY][HINT] Simplified hint: %s", accessibilityHintMessage.toString());
                 
                 // Create the visual hint message with full history
