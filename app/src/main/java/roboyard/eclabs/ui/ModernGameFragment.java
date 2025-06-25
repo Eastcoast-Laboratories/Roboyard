@@ -95,7 +95,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private boolean accessibilityControlsVisible = false;
 
     // Hint managing
-    private static final int NUM_FIXED_PRE_HINTS = 2; // Number of fixed pre-hints that always appear
+    private static final int NUM_FIXED_PRE_HINTS = 3; // Number of fixed pre-hints that always appear
     private int numPreHints = ThreadLocalRandom.current().nextInt(2, 5); // Randomize between 2-4 by default
     private int totalPossibleHints = 0; // Total possible hints including pre-hints
     private int currentHintStep = 0; // Current hint step (includes pre-hints and regular hints)
@@ -2332,7 +2332,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[HINT_SYSTEM] Showing regular pre-hint %d/%d: less than %d moves", 
                     currentHintStep + 1, numPreHints, hintValue);
         }
-        // Next fixed pre-hint: Show exact solution length
+        // First fixed pre-hint: Show exact solution length
         else if (currentHintStep == numPreHints) {
             preHintText = getString(R.string.pre_hint_exact_solution, totalMoves);
             Timber.d("[HINT_SYSTEM] Showing exact solution length: %d moves", totalMoves);
@@ -2345,8 +2345,51 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);
         }
-        // Last fixed pre-hint: Show which robot to move first
+        // Second fixed pre-hint: Show involved robot colors
         else if (currentHintStep == numPreHints + 1) {
+            // Create hint message with the correct hint number format
+            StringBuilder message = new StringBuilder();
+            int displayHintNumber = currentHintStep + 1;
+            int totalPossibleHints = numPreHints + NUM_FIXED_PRE_HINTS + solution.getMoves().size();
+            message.append(displayHintNumber).append("/").append(totalPossibleHints).append(": ");
+            message.append(getString(R.string.pre_hint_involved_robots)).append(" ");
+            
+            // Analyze ALL moves to see which robots are involved
+            ArrayList<String> robotsInvolved = new ArrayList<>();
+            List<IGameMove> moves = solution.getMoves();
+            for (IGameMove move : moves) {
+                if (move instanceof RRGameMove) {
+                    RRGameMove rrMove = (RRGameMove) move;
+                    String robotColor = getLocalizedRobotColorName(rrMove.getColor());
+                    // Only add if not already in the list
+                    if (!robotsInvolved.contains(robotColor)) {
+                        robotsInvolved.add(robotColor);
+                    }
+                }
+            }
+            
+            // Format the list of robots with commas and "and" for the last item
+            for (int i = 0; i < robotsInvolved.size(); i++) {
+                if (i == robotsInvolved.size() - 1 && robotsInvolved.size() > 1) {
+                    message.append(getString(R.string.and)).append(" ").append(robotsInvolved.get(i));
+                    if (Locale.getDefault().getLanguage().equals("en")) {
+                        message.append(robotsInvolved.size() > 1 ? " robots" : " robot");
+                    }
+                } else if (i == robotsInvolved.size() - 1) {
+                    message.append(robotsInvolved.get(i));
+                    if (Locale.getDefault().getLanguage().equals("en")) {
+                        message.append(" robot");
+                    }
+                } else {
+                    message.append(robotsInvolved.get(i)).append(", ");
+                }
+            }
+            
+            preHintText = message.toString();
+            Timber.d("[HINT_SYSTEM] Showing involved robot colors: %s", preHintText);
+        }
+        // Last fixed pre-hint: Show which robot to move first
+        else if (currentHintStep == numPreHints + 2) {
             if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
                 RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
                 String robotColorName = getLocalizedRobotColorNameDative(firstMove.getColor());

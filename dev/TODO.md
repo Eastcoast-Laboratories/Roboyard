@@ -125,3 +125,27 @@ check if this all works:
             
             // Display the hint in the status text view
             updateStatusText(message.toString(), true);
+
+Aufgabe: Dritten Pre-Hint implementieren, der beteiligte Roboterfarben anzeigt
+
+1. Aktualisieren der Pre-Hint-Struktur:
+   - Konstante NUM_FIXED_PRE_HINTS von 2 auf 3 erhöhen
+   - Die bestehenden Pre-Hints "less than X moves" bleiben als erste dynamischen Pre-Hints
+   - Der bestehende fixed-Pre-Hint "exact solution length" bleibt als erster fester Pre-Hint
+   - Neuer fixed-Pre-Hint "involved robot colors" als zweiter fester Pre-Hint einfügen
+   - Der bestehende fixed-Pre-Hint "which robot to move first" wird zum dritten und letzten fixed-Pre-Hint
+
+2. Code für den neuen Pre-Hint:
+   - Analysieren ALLER Züge der Lösung (nicht nur der ersten 5 wie in dem code beispiel)
+   - Sammlung aller einzigartigen beteiligten Roboterfarben
+   - Formatierung der Roboterliste mit Kommas und "and" für das letzte Element 
+   - Anzeige im selben format, wie die anderen hints, e.g. "N/X: The solution involves moving: Red, Blue, and Green robots"
+
+3. Änderungen in showPreHint:
+   - Bestehende else-if-Struktur anpassen
+   - Nach "exact solution length" den neuen Pre-Hint einfügen
+   - Alle nachfolgenden Indizes und Bedingungen entsprechend anpassen
+
+4. Accessibility-Unterstützung:
+   - Sicherstellen, dass der neue Pre-Hint für Screenreader zugänglich ist
+   - Lokalisierte Roboterfarbennamen verwenden

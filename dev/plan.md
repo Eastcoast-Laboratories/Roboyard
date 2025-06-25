@@ -7,6 +7,7 @@
 - Confirmed `target_a11y` string exists and is used for target announcements; bug may be in usage (possible double-appending or formatting error).
 - Located code for "KI berechnet Lösung ..." announcement and hint accessibility announcement logic in ModernGameFragment.java for targeted fixes.
 - User requested: Accessibility hint message should use translated direction words from strings.xml instead of arrows.
+- New feature request: Add a second pre-hint that lists the involved robot colors in the solution (before the first-move pre-hint).
 
 ## Task List
 - [x] Diagnose and fix multi-color target mapping bug
@@ -15,6 +16,7 @@
 - [x] Remove announcement: "KI berechnet Lösung ..."
 - [x] Announce only the last step in hints, not the history
 - [x] Use translated direction words (not arrows) in accessibility hints
+- [x] Implement second pre-hint: show involved robot colors before first-move pre-hint
 
 ## Current Goal
 All planned accessibility and solver fixes complete

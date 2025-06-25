@@ -368,7 +368,9 @@
     <string name="pre_hint_less_than_x">The A.I. found a solution in less than %1$d moves</string>
     <string name="pre_hint_exact_solution">The A.I. found a solution in %1$d moves</string>
     <string name="solution_found">A.I. found a solution!</string>
+    <string name="pre_hint_involved_robots">The solution involves moving:</string>
     <string name="pre_hint_first_move">Move the %1$s robot first</string>
+    <string name="and">and</string>
     <string name="no_solution_found">No solution found</string>
     <string name="pre_hint_ready">Ready to show step-by-step hints</string>
     <string name="all_hints_shown">All hints have been shown</string>
