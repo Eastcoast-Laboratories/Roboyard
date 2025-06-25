@@ -50,7 +50,7 @@
     <string name="level_robots_format">Roboter: %1$d</string>
     <string name="robot_description">Roboter %1$s auf Position %2$d, %3$d</string>
     <string name="robot_a11y">Roboter auf Position</string>
-    <string name="target_a11y">Ziel auf Position</string>
+    <string name="target_a11y">Ziel auf Position %1$d, %2$d</string>
     <string name="minimap_description">Übersichtskarte zeigt das gesamte Spielfeld</string>
     <string name="minimap_a11y">Übersichtskarte zeigt das gesamte Spielfeld</string>
     

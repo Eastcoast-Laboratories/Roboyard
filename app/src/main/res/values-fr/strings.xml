@@ -172,7 +172,7 @@
     <string name="target_position_a11y">Sa cible est à la position</string>
     <string name="position_a11y">Position</string>
     <string name="multicolored_a11y">Multicolore</string>
-    <string name="target_a11y">Cible à la position</string>
+    <string name="target_a11y">Cible à la position %1$d, %2$d</string>
     <string name="at_position_a11y">à la position</string>
     <string name="walls_on_a11y">Murs au</string>
     <string name="north_a11y">Nord</string>

@@ -112,7 +112,7 @@
     <string name="target_position_a11y">목표 위치</string>
     <string name="position_a11y">위치</string>
     <string name="multicolored_a11y">다색</string>
-    <string name="target_a11y">목표 위치</string>
+    <string name="target_a11y">목표 위치 %1$d, %2$d</string>
     <string name="at_position_a11y">위치에</string>
     <string name="walls_on_a11y">벽 방향</string>
     <string name="north_a11y">북쪽</string>

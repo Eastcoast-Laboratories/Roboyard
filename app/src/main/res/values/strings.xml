@@ -457,7 +457,7 @@
     <string name="target_position_a11y">Its target is at position</string>
     <string name="position_a11y">Position</string>
     <string name="multicolored_a11y">Multi-colored</string>
-    <string name="target_a11y">Target at position</string>
+    <string name="target_a11y">Target at position %1$d, %2$d</string>
     <string name="at_position_a11y">at position</string>
     <string name="walls_on_a11y">Walls on</string>
     <string name="north_a11y">North</string>

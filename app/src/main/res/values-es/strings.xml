@@ -335,7 +335,7 @@
     <string name="target_position_a11y">Su objetivo está en posición</string>
     <string name="position_a11y">Posición</string>
     <string name="multicolored_a11y">Multicolor</string>
-    <string name="target_a11y">Objetivo en posición</string>
+    <string name="target_a11y">Objetivo en posición %1$d, %2$d</string>
     <string name="at_position_a11y">en posición</string>
     <string name="walls_on_a11y">Paredes en</string>
     <string name="north_a11y">Norte</string>

@@ -1698,9 +1698,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 String targetColor = getLocalizedTargetColorName(element.getColor());
-                String targetPosition = String.format("%d,%d", element.getX() + 1, element.getY() + 1);
-                announcement.append(targetColor).append(" ").append(getString(R.string.target_a11y))
-                          .append(" ").append(targetPosition).append(". ");
+                // Use format parameters directly in the target_a11y string
+                announcement.append(targetColor).append(" ")
+                          .append(getString(R.string.target_a11y, element.getX() + 1, element.getY() + 1))
+                          .append(". ");
                 break; // Only announce one target
             }
         }
@@ -2273,8 +2274,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             counterInfo += ")";
         }
         
-        updateStatusText(messageBase + counterInfo, true);
-        Timber.d("[SOLVER_STATUS] %s", messageBase + counterInfo);
+        // Display calculation status visually but don't announce it through accessibility
+        if (statusTextView != null) {
+            statusTextView.setText(messageBase + counterInfo);
+            statusTextView.setVisibility(View.VISIBLE);
+            
+            // Prevent this particular status from being announced via accessibility
+            // by setting it as an announcement for another accessibility event type
+            statusTextView.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_NONE);
+        }
+        Timber.d("[SOLVER_STATUS] %s (not announced to accessibility)", messageBase + counterInfo);
     }
     
     /**
