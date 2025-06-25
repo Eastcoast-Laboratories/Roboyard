@@ -2386,6 +2386,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 
                 // Create the hint message with shortened format
                 StringBuilder hintMessage = new StringBuilder();
+                // Create a separate accessibility hint message that only includes the current step
+                StringBuilder accessibilityHintMessage = new StringBuilder();
+                // For accessibility, just announce the current step without the history
+                accessibilityHintMessage.append(displayHintNumber).append(". ")
+                    .append(robotColorName).append(" ").append(directionName);
+                Timber.d("[ACCESSIBILITY][HINT] Simplified hint: %s", accessibilityHintMessage.toString());
+                
+                // Create the visual hint message with full history
                 hintMessage.append(displayHintNumber).append(". "); // append(totalMoves).append(": ");
                 
                 // For the first hint, just show which robot to move
@@ -2436,7 +2444,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.d("[HINT_SYSTEM] Displayed hint: %s", hintMessage);
 
                 // Announce hint
-        		announceAccessibility(hintMessage.toString());
+                announceAccessibility(accessibilityHintMessage.toString());
         		
                 if (hintIndex == 0) {
                     Timber.d("[HINT_SYSTEM] First normal hint shown");
