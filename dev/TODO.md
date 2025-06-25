@@ -23,13 +23,12 @@ neu fuer openai:
 A traditional cel-shaded anime-style painting depicting a lush green hedge maze with a warm, soft lighting atmosphere. portrays a small, glowing blue robot speeding through a winding hedge maze in the background three glowing pink, green and yellow robots. The hedges are thick and full of life, with twisted blue roots and patches of yellow and also a few red flowers scattered throughout. The perspective is from a slightly elevated angle, showing the depth of the maze and showcasing the winding paths and intersections of the maze. At the end of one of the paths, a mysterious swirling wormhole-like portal glows softly, inviting curiosity. The main character is a blue robot, the other three are the pink, green and yellow robots. use the last four robot images, i uploaded. The environment feels magical and inviting, with intricate details in the leaves and hedges, giving it a hand-painted Studio Ghibli-inspired look.
 
 # Difficulty
+check if this all works:
 - Beginner
   - show any puzzles with solutions with at least 4-6 moves (max 6 not always works )
   - goals are always in corners with two walls
 - Advanced
   - solutions with at least 6-8 moves
-  - keep initial playing field when starting the next game
-  - keep playing field when loading a saved game
   - three lines allowed in the same row/column
   - no multi-color target
 - Insane mode
@@ -37,16 +36,11 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - Impossible mode
   - five lines allowed in the same row/column
 
-
 # Accessibility
 - Add a preference setting to customize the order of information in TalkBack announcements
 - Create custom button sounds to provide audio feedback for different actions
 - Add a high-contrast mode for better visibility
-- Remove "AI calculating solution..." on game start.
 - die ganzen buttons unten sollen, wenn accessibility acitive, viel niedriger, damit sie unter die navigation buttons noch passen
-
-# achievements
-- add achievement system
 
 # levels 
 - winning a level: this overwrites the old saved stars and data, so you can "loose" stars this way if you play a level again with less stars
@@ -60,7 +54,6 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 - add sound effect background for game
 - Back-Undo Button should also undo the last painted robot path 
 
-
 - im start menu schon die Mini-Maps cachen
 
 - Wenn Map ratio sehr gross, dann die Buttons unten alle kleiner und nur mit Icons statt text und alle in eine Reihe anstatt 2
@@ -73,10 +66,31 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
 
 - settings: when setting a higher robotCount than targets, then automatically set the targetCount to the same value
 
-
-
 - if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
  - suggestion: create a temporary map for the solver, where you delete all other targets and let the solver run with only one target at the time. store the solutions and take only the shortest solution
+
+
+# current
+
+- multiple sources of truth concept ausführen
+- walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
+
+- deep link support
+
+- im save slot anzeigen, wieviel die optimal moves sind und wieviel man gebraucht hat, wenn man den level completed hat
+
+- wenn man einen level ohne hints geschafft hat, anzeigen, wieviel die optimal moves wären
+
+- choose num_robots in settings (2-5)
+
+- only add the same color at the end of the hint if it is not the same as the last color
+
+- Wenn man eine Karte mit einem anderen ratio spielt und dann neues Spiel drückt, dann fehlt rechts und links etwas am Rand. die neue ratio soll auch die volle bildbreite ausnutzen
+
+# achievements
+- add achievement system
+
+# most important
 
 - new Second pre-hint - show the involved robot colors:
 
@@ -111,28 +125,3 @@ A traditional cel-shaded anime-style painting depicting a lush green hedge maze 
             
             // Display the hint in the status text view
             updateStatusText(message.toString(), true);
-
-# current
-
-- multi-color target is gone
-
-- multiple sources of truth concept ausführen
-- walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
-
-- deep link support
-
-- im save slot anzeigen, wieviel die optimal moves sind und wieviel man gebraucht hat, wenn man den level completed hat
-
-- wenn man einen level ohne hints geschafft hat, anzeigen, wieviel die optimal moves wären
-
-- choose num_robots in settings (2-5)
-
-- only add the same color at the end of the hint if it is not the same as the last color
-
-- Wenn man eine Karte mit einem anderen ratio spielt und dann neues Spiel drückt, dann fehlt rechts und links etwas am Rand. die neue ratio soll auch die volle bildbreite ausnutzen
-
-# most important
-- accessibility mode hat fehler in den ansagen:
- - Ziel auf Position.... fehlt die koordinate in der ansage
- - "KI berechnet Lösung ..." muss weg
- - bei den Hinweisen nur letzten Schritt Ansagen, nicht die history
