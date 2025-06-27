@@ -51,8 +51,15 @@ TOTAL_FILES=$(wc -l < "$TMP_DIR/source_files.txt")
 echo "Searching through $TOTAL_FILES source files for string usage..."
 
 # Initialize unused strings file
-UNUSED_STRINGS_FILE="$TMP_DIR/unused_strings.txt"
-> "$UNUSED_STRINGS_FILE"
+UNUSED_STRINGS_FILE="$LOG_DIR/unused_strings.txt"
+
+# Only create the file if not in dry run mode or create it in temp dir if in dry run mode
+if [ "$DRY_RUN" = false ]; then
+  > "$UNUSED_STRINGS_FILE"
+else
+  UNUSED_STRINGS_FILE="$TMP_DIR/unused_strings.txt"
+  > "$UNUSED_STRINGS_FILE"
+fi
 
 # Check each string for usage
 echo "Checking each string for usage..."
@@ -166,6 +173,14 @@ while read -r values_dir; do
   while read -r string_name; do
     # Check if this string exists in this language file
     if grep -q "<string name=\"$string_name\"" "$TEMP_STRINGS"; then
+      # Check if the string has comment="keep" attribute - if so, skip it
+      if grep -q "<string name=\"$string_name\".*comment=\"keep\"" "$TEMP_STRINGS"; then
+        if [ "$VERBOSE" = true ]; then
+          echo "  Preserving string with comment=\"keep\": $string_name"
+        fi
+        continue
+      fi
+      
       # Get the entire string entry for logging
       STRING_ENTRY=$(grep -n "<string name=\"$string_name\"" "$TEMP_STRINGS" -A 1 | head -2)
       LINE_NUM=$(echo "$STRING_ENTRY" | head -1 | cut -d- -f1)
