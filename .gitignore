@@ -18,3 +18,5 @@ zzbak~*
 *.odt\#
 *.~lock.upgrade_path_AI.odt\#
 /.idea/appInsightsSettings.xml
+/dev/translation_analysis/
+/dev/translation_stats/
