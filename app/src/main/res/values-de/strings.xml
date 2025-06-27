@@ -97,11 +97,7 @@
     <string name="language_changed_title">Sprache geändert</string>
     <string name="language_changed_message">Die Spracheinstellung wurde aktualisiert. Einige Änderungen werden sofort wirksam, andere erst, wenn du zum Hauptmenü zurückkehrst.</string>
     <string name="ok">OK</string>
-    <!-- Plurals example for robot count message -->
-    <plurals name="robot_count_message">
-        <item quantity="one">%1$d Roboter</item>
-        <item quantity="other">%1$d Roboter</item>
-    </plurals>
+
     <!-- Non-translatable string example -->
     <string name="app_version" translatable="false">Version: 1.0.0</string>
     <!-- Direction strings -->
@@ -173,12 +169,6 @@
     <!-- Game screen -->
     <string name="game_move_count">Züge: %1$d</string>
     <string name="game_time_format">%1$02d:%2$02d</string>
-    
-    <!-- Hint messages -->
-    <plurals name="hint_robot_count">
-        <item quantity="one">Hinweis: Bewege den %1$s Roboter</item>
-        <item quantity="other">Hinweis: Bewege den %1$s und %2$s Roboter</item>
-    </plurals>
     
     <!-- Autosave tags - non-translatable -->
     <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>

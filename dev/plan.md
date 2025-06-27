@@ -21,6 +21,13 @@
 - New request: Create a script to parse the English strings.xml and list all string names.
 - User renamed the script to remove_unused_strings.sh and is preparing to extend it to search for unused strings in Java files.
 - New request: Remove all unused strings from all language strings.xml files and log exactly which strings are removed per file in dev/logs/remove_strings_en.log, remove_strings_de.log, etc.
+- User reverted the removal after discovering a string was still in use; requests a --dry-run option for the script to preview removals without modifying files or creating logs.
+- --dry-run option for unused string removal script is now implemented and has been verified to work as intended. Script now also uses improved string usage detection patterns.
+- User requested: The unused string removal script should only search for usages in Java files, not in XML or other files, to avoid false positives from other translations.
+- User reconsidered: The script should search for usages in all files except strings.xml files, to catch references in other code (e.g. Kotlin, C++, Gradle, etc). Next step: run a dry-run and analyze the results.
+- User noticed that the string `robot_move_initiated` is not detected as unused, even though it appears to be unused, indicating a possible limitation or bug in the detection logic. Further investigation may be needed.
+- Investigation revealed `robot_move_initiated` is only referenced in build artifacts and translation reports, not in actual code, so the script's logic is correct in not marking it as unused.
+- Script was improved to exclude build, logs, and translation analysis directories from the unused string search, so now truly unused strings (like `robot_move_initiated`) are detected correctly.
 
 ## Task List
 - [x] Diagnose and fix multi-color target mapping bug
@@ -33,9 +40,13 @@
 - [x] Verify all English strings exist in all other language translations
 - [x] Create dev/translate.md to log missing translations and save the check script
 - [x] Create a script that lists all string names from English strings.xml
-- [ ] Fill in missing translations for all non-English languages
 - [x] Extend remove_unused_strings.sh to find unused strings in codebase
 - [x] Remove all unused strings from all language strings.xml files and log removals per file
+- [x] Implement --dry-run option for unused string removal script
+- [x] Restrict unused string detection to all files except strings.xml
+- [x] Run dry-run and analyze unused string detection results
+- [x] Improve unused string detection by excluding build, logs, and translation analysis dirs
+- [ ] Fill in missing translations for all non-English languages
 
 ## Current Goal
 Use generated reports to systematically fill in missing translations
