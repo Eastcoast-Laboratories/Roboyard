@@ -1089,6 +1089,11 @@ public class SettingsFragment extends Fragment {
                         
                         Preferences.setDifficulty(difficulty);
                         Timber.d("[PREFERENCES] Difficulty set to %d", difficulty);
+                        
+                        // Automatically adjust board size if switching to beginner mode
+                        if (difficulty == Constants.DIFFICULTY_BEGINNER) {
+                            adjustBoardSizeForBeginnerMode();
+                        }
                     } catch (Exception e) {
                         Timber.e(e, "Error processing difficulty selection");
                     }
@@ -1276,6 +1281,47 @@ public class SettingsFragment extends Fragment {
      */
     public String getScreenTitle() {
         return "Settings";
+    }
+    
+    /**
+     * Check if current board size needs to be adjusted for beginner difficulty.
+     * If board size is larger than 12x14, automatically set it to 12x14.
+     */
+    private void adjustBoardSizeForBeginnerMode() {
+        try {
+            int currentWidth = Preferences.boardSizeWidth;
+            int currentHeight = Preferences.boardSizeHeight;
+            
+            // Check if current board size is larger than 12x14
+            if (currentWidth > 12 || currentHeight > 14) {
+                Timber.d("[BOARD_SIZE] Current size %dx%d is larger than 12x14, adjusting for beginner mode", 
+                        currentWidth, currentHeight);
+                
+                // Set board size to 12x14
+                isUpdatingUI = true; // Prevent recursive updates
+                Preferences.setBoardSize(12, 14);
+                
+                // Update the spinner UI to reflect the change
+                if (boardSizeSpinner != null && validBoardSizes != null) {
+                    for (int i = 0; i < validBoardSizes.size(); i++) {
+                        int[] size = validBoardSizes.get(i);
+                        if (size[0] == 12 && size[1] == 14) {
+                            boardSizeSpinner.setSelection(i);
+                            Timber.d("[BOARD_SIZE] Updated spinner to show 12x14 at position %d", i);
+                            break;
+                        }
+                    }
+                }
+                isUpdatingUI = false;
+                
+                Timber.d("[BOARD_SIZE] Board size automatically adjusted to 12x14 for beginner difficulty");
+            } else {
+                Timber.d("[BOARD_SIZE] Current size %dx%d is suitable for beginner mode", currentWidth, currentHeight);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error adjusting board size for beginner mode");
+            isUpdatingUI = false; // Reset flag in case of error
+        }
     }
     
     /**
