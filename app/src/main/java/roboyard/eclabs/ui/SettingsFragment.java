@@ -1075,6 +1075,7 @@ public class SettingsFragment extends Fragment {
                     try {
                         if (isUpdatingUI) return;
                         
+                        int previousDifficulty = Preferences.difficulty;
                         int difficulty = Constants.DIFFICULTY_BEGINNER; // Default
                         
                         if (checkedId == R.id.difficulty_beginner) {
@@ -1090,8 +1091,8 @@ public class SettingsFragment extends Fragment {
                         Preferences.setDifficulty(difficulty);
                         Timber.d("[PREFERENCES] Difficulty set to %d", difficulty);
                         
-                        // Automatically adjust board size if switching to beginner mode
-                        if (difficulty == Constants.DIFFICULTY_BEGINNER) {
+                        // Automatically adjust board size only if switching TO beginner mode from another difficulty
+                        if (difficulty == Constants.DIFFICULTY_BEGINNER && previousDifficulty != Constants.DIFFICULTY_BEGINNER) {
                             adjustBoardSizeForBeginnerMode();
                         }
                     } catch (Exception e) {
