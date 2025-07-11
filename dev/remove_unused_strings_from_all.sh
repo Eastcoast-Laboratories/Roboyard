@@ -225,10 +225,64 @@ while read -r values_dir; do
 done < "$TMP_DIR/values_dirs.txt"
 
 if [ "$UNUSED_COUNT" -gt 0 ]; then
-  cp "$UNUSED_STRINGS_FILE" "./unused_strings.txt"
-  echo -e "\nList of potentially unused strings saved to ./unused_strings.txt"
+  # If in dry run mode, copy from temp directory to log directory
+  if [ "$DRY_RUN" = true ]; then
+    if [ ! -d "$LOG_DIR" ]; then
+      mkdir -p "$LOG_DIR"
+    fi
+    cp "$UNUSED_STRINGS_FILE" "$LOG_DIR/unused_strings.txt"
+  fi
+  
+  echo -e "\nList of potentially unused strings saved to $LOG_DIR/unused_strings.txt"
 fi
 
+# Step 3: Extract and compare with Lint data
+echo -e "\nStep 3: Extracting Android Lint unused strings data..."
+
+# Define paths for lint data
+LINT_XML="$SOURCE_DIR/app/build/reports/lint-results-debug.xml"
+LINT_UNUSED_FILE="$LOG_DIR/lint_unused_strings.txt"
+LINT_COMPARISON_FILE="$LOG_DIR/lint_comparison.txt"
+
+if [ ! -f "$LINT_XML" ]; then
+  echo "Warning: Lint XML report not found at $LINT_XML"
+  echo "Run Android Lint first to generate the report."
+else
+  echo "Found lint report at $LINT_XML"
+  
+  # Extract unused strings from Lint XML report
+  echo "Extracting unused strings from Lint report..."
+  grep -o 'message="The resource `R.string[^`]*' "$LINT_XML" | \
+    sed 's/message="The resource `R.string.\([^`]*\).*/\1/' | \
+    sort > "$LINT_UNUSED_FILE"
+  
+  # Count unused strings found by Lint
+  LINT_UNUSED_COUNT=$(wc -l < "$LINT_UNUSED_FILE")
+  echo "Found $LINT_UNUSED_COUNT unused strings reported by Android Lint"
+  
+  # Compare with our results
+  echo "Comparing with script's findings..."
+  
+  # Create simple lint comparison files with only the differing strings
+  # Strings only in script (not in lint)
+  comm -23 "$UNUSED_STRINGS_FILE" "$LINT_UNUSED_FILE" > "$LINT_COMPARISON_FILE"
+  
+  # Count strings for summary output
+  SCRIPT_ONLY_COUNT=$(wc -l < "$LINT_COMPARISON_FILE")
+  LINT_ONLY_COUNT=$(comm -13 "$UNUSED_STRINGS_FILE" "$LINT_UNUSED_FILE" | wc -l)
+  BOTH_COUNT=$(comm -12 "$UNUSED_STRINGS_FILE" "$LINT_UNUSED_FILE" | wc -l)
+
+  echo "Comparison statistics:"
+  echo "* Script found $UNUSED_COUNT unused strings"
+  echo "* Android Lint found $LINT_UNUSED_COUNT unused strings"
+  echo "* Strings found by both tools: $BOTH_COUNT"
+  echo "* Strings only found by script: $SCRIPT_ONLY_COUNT"
+  echo "* Strings only found by Lint: $LINT_ONLY_COUNT"
+  
+  echo "Differing strings saved to $LINT_COMPARISON_FILE"
+fi
+
+# Final messages
 if [ "$DRY_RUN" = true ]; then
   echo -e "\nDRY RUN completed. No files were modified."
   echo "Run without --dry-run to actually remove the strings."

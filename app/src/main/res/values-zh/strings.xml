@@ -56,8 +56,7 @@
     <string name="color_green">绿色</string>
     <string name="color_yellow">黄色</string>
     <string name="color_silver">银色</string>
-    <string name="color_none">无</string>
-    
+
     <!-- Accessibility Color Names -->
     <string name="color_red_a11y">红色机器人</string>
     <string name="color_blue_a11y">蓝色机器人</string>
@@ -98,33 +97,6 @@
     <string name="game_completed_a11y">目标已达成！游戏完成，共走了 %1$d 步，移动了 %2$d 格</string>
     <!-- Removed duplicate color_silver_dative -->
     
-    <!-- Save Game -->
-    <string name="save_slot">位置 %1$d</string>
-    <string name="save_game">保存游戏</string>
-    <string name="save_game_success">游戏保存成功</string>
-    <string name="save_game_failed">保存游戏失败</string>
-    <string name="save_date">保存于: %1$s</string>
-    <string name="confirm_overwrite">确定要覆盖这个存档吗？</string>
-    <string name="delete_save">删除</string>
-    <string name="confirm_delete">确定要删除这个存档吗？</string>
-    <string name="delete_save_success">存档删除成功</string>
-    <string name="delete_save_failed">删除存档失败</string>
-    
-    <!-- Load Game -->
-    <string name="load_game_button">加载游戏</string>
-    <string name="load_game_success">游戏加载成功</string>
-    <string name="load_game_failed">加载游戏失败</string>
-    <string name="no_save_data">没有保存数据</string>
-    <string name="no_saves">没有可用的存档</string>
-    
-    <!-- Credits Screen -->
-    <string name="credits_title">制作人员</string>
-    <string name="credits_developers">开发者</string>
-    <string name="credits_designers">设计师</string>
-    <string name="credits_testers">测试人员</string>
-    <string name="credits_special_thanks">特别鸣谢</string>
-    <string name="credits_version">版本 %1$s</string>
-    <string name="credits_eclabs">ECLabs</string>
     <string name="credits_eclabs_description">由ECLabs创建</string>
     
     <!-- Level Selection screen -->
@@ -135,44 +107,20 @@
     <string name="level_category_expert">专家</string>
     <string name="level_difficulty">难度: %1$s</string>
     <string name="level_stars">星星: %1$d/%2$d</string>
-    <string name="level_size">大小: %1$dx%2$d</string>
-    <string name="filter_all">全部</string>
-    <string name="filter_unsolved">未解决</string>
-    <string name="filter_played">已玩</string>
-    <string name="level_filter">筛选: %1$s</string>
-    <string name="robots_label">机器人:</string>
-    <string name="squares_label">方格:</string>
-    
+
     <!-- Game UI text -->
-    <string name="move_count">步数: %1$d</string>
-    <string name="robot_count">机器人: %1$d</string>
-    <string name="optimum_moves">最优: %1$d</string>
-    <string name="game_over">游戏结束！</string>
-    <string name="game_completion_message">游戏完成，用了 %1$d 步！</string>
-    <string name="restart_game">重新开始</string>
-    <string name="quit_game">退出</string>
-    <string name="continue_game">继续</string>
     <string name="robot_selected">已选择 %1$s 机器人</string>
     <string name="robot_selected_info">已选择: %1$s 机器人在 (%2$d, %3$d)</string>
-    <string name="robot_moved">%1$s 机器人移动到 (%2$d, %3$d)</string>
     <string name="no_target_for_robot">这个机器人没有目标</string>
     <string name="move_count_text">步数: %1$d</string>
     <string name="moves_count">步数: %1$d</string>
-    <string name="distance_moved">距离: %1$d</string>
     <string name="squares_moved">方格: %1$d</string>
-    <string name="robot_info">%1$s 机器人在 (%2$d, %3$d)</string>
-    <string name="target_info">%1$s 机器人的目标在 (%2$d, %3$d)</string>
-    
+
     <!-- Hint System -->
     <string name="hint_button">提示</string>
     <string name="hint_button_a11y">提示</string>
-    <string name="hint_next_button">下一提示</string>
-    <string name="hint_previous_button">上一提示</string>
     <string name="cancel_hint_button">隐藏</string>
     <string name="hint_cancel_button">✖️ 提示</string>
-    <string name="hint_loading">计算解决方案...</string>
-    <string name="hint_move_robot">移动 %1$s 机器人</string>
-    <string name="hint_move_robot_direction">将 %1$s 机器人向 %2$s 移动</string>
     <string name="hint_move_robot_first">先移动 %1$s 机器人</string>
     <string name="pre_hint_less_than_x">AI找到了少于 %1$d 步的解决方案</string>
     <string name="pre_hint_exact_solution">AI找到了 %1$d 步的解决方案</string>
@@ -199,7 +147,6 @@
     <string name="retry_button">重试</string>
     <string name="restart_button">重新开始</string>
     <string name="save_map_button">保存地图</string>
-    <string name="new_game_button">新游戏</string>
     <string name="reset_button">重置</string>
     
     <!-- Accessibility Descriptions -->
