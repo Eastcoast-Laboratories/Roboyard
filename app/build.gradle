@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'androidx.navigation.safeargs'
 
 android {
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId "de.z11.roboyard"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode 92
         versionName "27"
 
@@ -23,7 +23,7 @@ android {
         }
     }
     namespace 'roboyard.eclabs'
-    buildToolsVersion '34.0.0'
+    buildToolsVersion '36.0.0'
     
     java {
         toolchain {
