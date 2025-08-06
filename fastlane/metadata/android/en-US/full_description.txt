@@ -11,3 +11,7 @@ Can you find the solution with the fewest moves?
 This game is open source and shipped without adds. 
 
 Source code: https://roboyard.z11.de/
+
+Supported languages: English, German (Deutsch), French (Français), Spanish (Español), Chinese (中文), Korean (한국어)
+
+Full accessibility: The game is fully playable for blind players and supports all accessibility features with TalkBack.

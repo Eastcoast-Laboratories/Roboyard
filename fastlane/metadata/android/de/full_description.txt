@@ -9,3 +9,7 @@ Kannst du die Lösung mit den wenigsten Zügen finden?
 Dieses Spiel ist Open Source und wird ohne Adds ausgeliefert. Inspiriert von Rasender Roboter
 
 Quellcode unter https://roboyard.z11.de/
+
+Unterstützte Sprachen: Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Koreanisch
+
+Vollständige Barrierefreiheit: Das Spiel ist komplett für blinde Spieler spielbar und unterstützt alle Bedienungshilfen mit TalkBack.
