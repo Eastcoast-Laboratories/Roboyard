@@ -107,8 +107,8 @@
 
     <!-- Game UI Buttons and Messages -->
     <string name="reset_button">Réinitialiser</string>
-    <string name="hint_button">Indice</string>
-    <string name="cancel_hint_button">Masquer</string>
+    <string name="hint_button">💡 Indice</string>
+    <string name="hint_cancel_button">❌ Indice</string>
     
     <!-- Game directions -->
     <string name="direction_up">vers le haut</string>

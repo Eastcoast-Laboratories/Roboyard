@@ -220,9 +220,9 @@
     <string name="help_tips_point_3">- If you\'re stuck, use the Hint feature to get a suggestion.</string>
     
     <!-- Game Buttons -->
-    <string name="hint_button">Hint</string>
+    <string name="hint_button">💡Hint</string>
+    <string name="hint_cancel_button" comment="Generic cancel button text [ModernGameFragment]">❌ Hint</string>
     <string name="hint_button_a11y">Hint</string>
-    <string name="cancel_hint_button">Hide</string>
     <string name="button_back_game">Back</string>
     <string name="button_reset">Reset</string>
     <string name="button_save_map">Save Map</string>
@@ -327,7 +327,6 @@
 
     <!-- Game UI Buttons and Messages -->
     <string name="cancel_button" comment="Generic cancel button text [ModernGameFragment]">Cancel</string>
-    <string name="hint_cancel_button" comment="Generic cancel button text [ModernGameFragment]">✖️ Hint</string>
     <string name="reset_button" comment="Button to reset the current game/level [ModernGameFragment]">Reset</string>
     <string name="unique_map_id" comment="Unique identifier for a game map [ModernGameFragment]">%1$s</string>
     <string name="empty_text" comment="Empty placeholder text"></string>

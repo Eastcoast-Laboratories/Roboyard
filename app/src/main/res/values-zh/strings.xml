@@ -117,10 +117,9 @@
     <string name="squares_moved">方格: %1$d</string>
 
     <!-- Hint System -->
-    <string name="hint_button">提示</string>
+    <string name="hint_button">💡 提示</string>
     <string name="hint_button_a11y">提示</string>
-    <string name="cancel_hint_button">隐藏</string>
-    <string name="hint_cancel_button">✖️ 提示</string>
+    <string name="hint_cancel_button">❌ 提示</string>
     <string name="hint_move_robot_first">先移动 %1$s 机器人</string>
     <string name="pre_hint_less_than_x">AI找到了少于 %1$d 步的解决方案</string>
     <string name="pre_hint_exact_solution">AI找到了 %1$d 步的解决方案</string>
@@ -169,7 +168,6 @@
     <string name="right_direction_a11y">向右移动</string>
     <string name="hint_next_button_a11y">显示下一提示</string>
     <string name="hint_previous_button_a11y">显示上一提示</string>
-    <string name="cancel_hint_button_a11y">隐藏提示</string>
     <string name="help_accessibility_title">无障碍功能</string>
     <string name="help_accessibility_description">本游戏完全兼容TalkBack屏幕阅读器。使用触摸探索来听取关于游戏元素和按钮的信息。双击激活按钮或选择机器人。</string>
     

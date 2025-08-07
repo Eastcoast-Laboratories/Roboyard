@@ -62,11 +62,9 @@
     <string name="menu">메뉴</string>
     
     <!-- Hint related strings -->
-    <string name="hint_button">힌트</string>
+    <string name="hint_button">💡 힌트</string>
     <string name="hint_button_a11y">힌트 보기</string>
-    <string name="cancel_hint_button">숨기기</string>
-    <string name="cancel_hint_button_a11y">힌트 숨기기</string>
-    <string name="hint_cancel_button">✖️ 힌트</string>
+    <string name="hint_cancel_button">❌ 힌트</string>
     <string name="pre_hint_less_than_x">AI가 %1$d번 이하의 이동으로 해결책을 찾았습니다</string>
     <string name="pre_hint_exact_solution">AI가 %1$d번의 이동으로 해결책을 찾았습니다</string>
     <string name="perfect_solution">완벽해요! 최적의 해결책을 찾았습니다!</string>

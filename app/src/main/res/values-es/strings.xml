@@ -163,10 +163,10 @@
     <string name="target_info">Objetivo para robot %1$s en (%2$d, %3$d)</string>
     
     <!-- Hint System -->
-    <string name="hint_button">Pista</string>
+    <string name="hint_button">💡 Pista</string>
+    <string name="hint_cancel_button">❌ Pista</string>
     <string name="hint_next_button">Siguiente Pista</string>
     <string name="hint_previous_button">Pista Anterior</string>
-    <string name="cancel_hint_button">Ocultar</string>
     <string name="hint_loading">Calculando solución...</string>
     <string name="hint_move_robot">Mueve el robot %1$s</string>
     <string name="hint_move_robot_direction">Mueve el robot %1$s %2$s</string>
@@ -182,7 +182,6 @@
     <string name="reset_button">Restablecer</string>
     <string name="next_robot_button">Siguiente Robot</string>
     <string name="announce_hint">Anunciar Pista</string>
-    <string name="hint_cancel_button">✖️ Pista</string>
     
     <!-- Accessibility Descriptions -->
     <string name="back_button_a11y">Volver</string>
@@ -205,7 +204,6 @@
     <string name="hint_button_a11y">Mostrar pista</string>
     <string name="hint_next_button_a11y">Mostrar siguiente pista</string>
     <string name="hint_previous_button_a11y">Mostrar pista anterior</string>
-    <string name="cancel_hint_button_a11y">Ocultar pistas</string>
     <string name="help_accessibility_title">Accesibilidad</string>
     <string name="help_accessibility_description">Este juego es totalmente compatible con el lector de pantalla TalkBack. Usa explorar por tacto para escuchar información sobre los elementos del juego y los botones. Toca dos veces para activar botones o seleccionar robots.</string>
     

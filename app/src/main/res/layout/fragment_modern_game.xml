@@ -302,7 +302,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button_rounded_gray_outline"
                 android:padding="@dimen/game_button_padding"
-                android:textOn="@string/cancel_hint_button"
+                android:textOn="@string/hint_cancel_button"
                 android:textOff="@string/hint_button"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size" />

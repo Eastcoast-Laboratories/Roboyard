@@ -353,10 +353,9 @@
     <string name="error_email_app">E-Mail-App konnte nicht geöffnet werden</string>
     <string name="robot_movement_canceled">Roboterbewegung abgebrochen</string>
     <string name="no_game_to_save">Kein Spiel zum Speichern verfügbar</string>
-    <string name="hint_cancel_button">✖️ Hinweis</string>
     <string name="cancel_button">Cancel</string>
     <string name="hint_button">💡Hinweis</string>
-    <string name="cancel_hint_button">✖️ Hinweis</string>
+    <string name="hint_cancel_button">❌ Hinweis</string>
 
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">Roboter:</string>
