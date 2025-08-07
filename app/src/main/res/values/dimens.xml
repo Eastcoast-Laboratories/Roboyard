@@ -26,4 +26,7 @@
     <dimen name="game_info_secondary_text_size">14sp</dimen>
     <dimen name="game_info_small_text_size">12sp</dimen>
     <dimen name="game_info_optimal_moves_text_size">24sp</dimen>
+    
+    <!-- Game area top margin (default: no margin) -->
+    <dimen name="game_area_top_margin">0dp</dimen>
 </resources>

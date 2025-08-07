@@ -10,6 +10,9 @@
     <dimen name="status_text_size">22sp</dimen>
     <dimen name="status_text_padding">5dp</dimen>
     
+    <!-- Game area top margin for very tall displays -->
+    <dimen name="game_area_top_margin">16sp</dimen>
+    
     <!-- Level selection screen dimensions -->
     <dimen name="stars_count_text_size">24dp</dimen>
     <dimen name="level_item_stats_text_size">14dp</dimen>
