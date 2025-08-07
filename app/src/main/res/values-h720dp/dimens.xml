@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dimensions for small height screens (720dp and similar) -->
+    <!-- Ultra-compact button dimensions for space optimization -->
+    <dimen name="game_button_height">24dp</dimen>
+    <dimen name="game_button_text_size">12sp</dimen>
+    <dimen name="game_button_margin">2dp</dimen>
+    <dimen name="game_button_padding">1dp</dimen>
+    
+    <!-- Normal text sizes for larger displays -->
+    <dimen name="status_text_size">14sp</dimen>
+    <dimen name="status_text_padding">4dp</dimen>
+</resources>

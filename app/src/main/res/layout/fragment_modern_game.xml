@@ -5,35 +5,148 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Game grid view at the top -->
+    <!-- Game grid view - always full width, maintains aspect ratio -->
     <roboyard.ui.components.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/hint_container" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Status text view to display hints with navigation buttons -->
+    <!-- Game information area - below game grid -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/game_info_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#000000"
+        android:padding="8dp"
+        app:layout_constraintTop_toBottomOf="@id/hint_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Left block: Moves and Difficulty (45% width) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/left_info_block"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/optimal_moves_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_weight="0.45">
+
+            <TextView
+                android:id="@+id/move_count_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Moves: 0"
+                android:textColor="#EEEEEE"
+                android:textSize="@dimen/game_info_primary_text_size"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/squares_moved_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Squares: 0"
+                android:textColor="#EEEEEE"
+                android:textSize="@dimen/game_info_primary_text_size"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/move_count_text"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/difficulty_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Difficulty: Easy"
+                android:textColor="#EEEEEE"
+                android:textSize="@dimen/game_info_secondary_text_size"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/squares_moved_text"
+                android:layout_marginTop="2dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Center block: Optimal Moves Button (20% width) -->
+        <Button
+            android:id="@+id/optimal_moves_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/button_rounded_green_outline"
+            android:padding="8dp"
+            android:text="Show Optimal"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/game_info_optimal_moves_text_size"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/left_info_block"
+            app:layout_constraintEnd_toStartOf="@id/right_info_block"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_weight="0.20"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Right block: Timer and Map ID (35% width) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/right_info_block"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/optimal_moves_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_weight="0.35">
+
+            <TextView
+                android:id="@+id/game_timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00"
+                android:textColor="#EEEEEE"
+                android:textSize="@dimen/game_info_primary_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/unique_map_id_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#EEEEEE"
+                android:textSize="@dimen/game_info_small_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/game_timer"
+                android:layout_marginTop="4dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Flexible spacer - grows with available space -->
+    <Space
+        android:id="@+id/flexible_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/game_info_container"
+        app:layout_constraintBottom_toTopOf="@id/accessibility_section"
+        app:layout_constraintVertical_weight="1" />
+
+    <!-- Hint container - pushes content down when active -->
     <LinearLayout
         android:id="@+id/hint_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:visibility="invisible"
-        android:paddingTop="1dp"
-        android:paddingBottom="0dp"
-        android:layout_margin="0dp"
-        android:background="#33000000"
+        android:visibility="gone"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:layout_margin="4dp"
+        android:background="#DD000000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/game_grid_view"
-        app:layout_constraintBottom_toTopOf="@id/game_info_container"
-        app:layout_goneMarginTop="0dp">
+        app:layout_constraintBottom_toTopOf="@id/game_info_container">
         
         <!-- Previous hint button -->
         <TextView
@@ -41,164 +154,52 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="◂"
-            android:textSize="20sp"
+            android:textSize="@dimen/status_text_size"
             android:gravity="center"
             android:contentDescription="Previous hint"
             android:textColor="#000000"
             android:background="@drawable/status_text_background"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:visibility="gone"
-            android:layout_margin="0dp" />
-            
-        <!-- Status text view (clickable for next hint) with right arrow -->
-        <FrameLayout
+            android:layout_marginEnd="1dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
+        
+        <!-- Status text view to display hints -->
+        <TextView
+            android:id="@+id/status_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_margin="0dp">
-            
-            <TextView
-                android:id="@+id/status_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="@dimen/status_text_padding"
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:background="@drawable/status_text_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:text="Press Hint to see which robot to move first"
-                android:layout_margin="0dp" />
-                
-            <TextView
-                android:id="@+id/next_hint_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="▸"
-                android:textSize="20sp"
-                android:gravity="center"
-                android:contentDescription="Next hint"
-                android:textColor="#000000"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:layout_gravity="end|center_vertical"
-                android:visibility="gone"
-                android:layout_margin="0dp" />
-        </FrameLayout>
+            android:background="@drawable/status_text_background"
+            android:gravity="center"
+            android:padding="@dimen/status_text_padding"
+            android:text="@string/empty_text"
+            android:textColor="#000000"
+            android:textSize="@dimen/status_text_size" />
+        
+        <!-- Next hint button -->
+        <TextView
+            android:id="@+id/next_hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="▸"
+            android:textSize="@dimen/status_text_size"
+            android:gravity="center"
+            android:contentDescription="Next hint"
+            android:textColor="#000000"
+            android:background="@drawable/status_text_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="1dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
     </LinearLayout>
 
-    <!-- Game information above the buttons -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/game_info_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#000000"
-        android:padding="2dp"
-        app:layout_constraintTop_toBottomOf="@id/hint_container"
-        app:layout_constraintBottom_toTopOf="@id/accessibility_section"
-        app:layout_goneMarginTop="0dp">
 
-        <TextView
-            android:id="@+id/move_count_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Moves: 0"
-            android:textColor="#EEEEEE"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/squares_moved_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:text="Squares moved: 0"
-            android:textColor="#EEEEEE"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/move_count_text" />
 
-        <TextView
-            android:id="@+id/difficulty_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:text="Difficulty: Normal"
-            android:textColor="#EEEEEE"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/squares_moved_text" />
 
-        <TextView
-            android:id="@+id/board_size_text"
-            android:layout_width="wrap_content"
-            android:visibility="gone"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:text="Board: "
-            android:textColor="#EEEEEE"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
-
-        <!-- Optimal Moves Button - Now inside game_info_container aligned with map ID -->
-        <Button
-            android:id="@+id/optimal_moves_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="45sp"
-            android:textStyle="bold"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="0dp"
-            android:paddingBottom="0dp"
-            android:layout_marginTop="20dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:background="@drawable/button_optimal_moves"
-            android:textColor="#FFFFFF"
-            android:text="0"
-            android:visibility="gone"
-            android:layout_marginEnd="10dp"
-            app:layout_constraintEnd_toStartOf="@id/unique_map_id_text"
-            app:layout_constraintTop_toTopOf="@id/unique_map_id_text"
-            app:layout_constraintBottom_toBottomOf="@id/unique_map_id_text"/>
-
-        <!-- Unique Map ID -->
-        <TextView
-            android:id="@+id/unique_map_id_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:text="XXXXX"
-            android:textColor="#EEEEEE"
-            android:layout_marginRight="4dp"
-            android:textSize="36dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- Timer -->
-        <TextView
-            android:id="@+id/game_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textColor="#EEEEEE"
-            android:textSize="26dp"
-            android:layout_marginRight="14dp"
-            app:layout_constraintBaseline_toBaselineOf="@id/board_size_text"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Accessibility controls container, always visible when accessibility mode is active -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -262,38 +263,6 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/reset_robots_button"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/game_button_height"
-                android:layout_marginEnd="@dimen/game_button_margin"
-                android:layout_weight="1"
-                android:background="@drawable/button_rounded_blue_outline"
-                android:padding="@dimen/game_button_padding"
-                android:text="@string/button_reset"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
-                android:textStyle="bold" />
-
-            <ToggleButton
-                android:id="@+id/hint_button"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/game_button_height"
-                android:layout_weight="1"
-                android:background="@drawable/button_rounded_blue_outline"
-                android:padding="@dimen/game_button_padding"
-                android:textOn="@string/cancel_hint_button"
-                android:textOff="@string/hint_button"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <Button
                 android:id="@+id/save_map_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/game_button_height"
@@ -305,6 +274,38 @@
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/reset_robots_button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/game_button_height"
+                android:layout_weight="1"
+                android:background="@drawable/button_rounded_blue_outline"
+                android:padding="@dimen/game_button_padding"
+                android:text="@string/button_reset"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/game_button_text_size"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ToggleButton
+                android:id="@+id/hint_button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/game_button_height"
+                android:layout_marginEnd="@dimen/game_button_margin"
+                android:layout_weight="1"
+                android:background="@drawable/button_rounded_gray_outline"
+                android:padding="@dimen/game_button_padding"
+                android:textOn="@string/cancel_hint_button"
+                android:textOff="@string/hint_button"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/game_button_text_size" />
 
             <Button
                 android:id="@+id/new_map_button"

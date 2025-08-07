@@ -63,7 +63,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private TextView moveCountTextView;
     private TextView squaresMovedTextView;
     private TextView difficultyTextView;
-    private TextView boardSizeTextView;
+
     private TextView uniqueMapIdTextView; // Added for unique map ID display
     private Button backButton;
     private Button resetRobotsButton;
@@ -395,10 +395,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         moveCountTextView = view.findViewById(R.id.move_count_text);
         squaresMovedTextView = view.findViewById(R.id.squares_moved_text);
         difficultyTextView = view.findViewById(R.id.difficulty_text);
-        boardSizeTextView = view.findViewById(R.id.board_size_text);
+
         uniqueMapIdTextView = view.findViewById(R.id.unique_map_id_text); // Initialize unique map ID text view
         timerTextView = view.findViewById(R.id.game_timer);
-        statusTextView = view.findViewById(R.id.status_text_view);
+        statusTextView = view.findViewById(R.id.status_text);
         optimalMovesButton = view.findViewById(R.id.optimal_moves_button);
         hintContainer = view.findViewById(R.id.hint_container);
         prevHintButton = view.findViewById(R.id.prev_hint_button);
@@ -441,7 +441,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Update difficulty and board size text
         updateDifficulty();
-        updateBoardSizeText();
+
         
         // Set up observers for game state
         setupObservers();
@@ -959,9 +959,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 }
             } else {
                 // Hide hint container when button is unchecked
-                hintContainer.setVisibility(View.INVISIBLE);
+                hintContainer.setVisibility(View.GONE);
                 prevHintButton.setVisibility(View.GONE);
-                nextHintButton.setVisibility(View.INVISIBLE);
+                nextHintButton.setVisibility(View.GONE);
                 
                 // Reset hint step to start from the beginning next time
                 currentHintStep = 0;
@@ -1878,7 +1878,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameGridView.invalidate(); // Force redraw
         
         // Update board size text
-        updateBoardSizeText();
+
         
         // Update unique map ID text
         updateUniqueMapIdText(state);
@@ -1907,11 +1907,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int boardWidth = currentState.getWidth();
             int boardHeight = currentState.getHeight();
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
-            boardSizeTextView.setText(getString(R.string.board_size, boardWidth, boardHeight));
+            //boardSizeTextView.setText(getString(R.string.board_size, boardWidth, boardHeight));
         } else {
             // If no game state yet, get it
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-            boardSizeTextView.setText(getString(R.string.board_size, Preferences.boardSizeWidth, Preferences.boardSizeHeight));
+            //boardSizeTextView.setText(getString(R.string.board_size, Preferences.boardSizeWidth, Preferences.boardSizeHeight));
         }
     }
     
@@ -2729,9 +2729,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void hideHintContainer() {
         if (hintContainer != null) {
-            hintContainer.setVisibility(View.INVISIBLE);
+            hintContainer.setVisibility(View.GONE);
             prevHintButton.setVisibility(View.GONE);
-            nextHintButton.setVisibility(View.INVISIBLE);
+            nextHintButton.setVisibility(View.GONE);
             Timber.d("[HINT_CONTAINER] Explicitly hiding hint container and navigation buttons");
         } else {
             Timber.w("[HINT_CONTAINER] Cannot hide hint container - it is null");
@@ -2826,7 +2826,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 hintButton.setEnabled(false);
                 hintButton.setAlpha(0.5f);
                 hintButton.setChecked(false); // Ensure it's unchecked
-                hintContainer.setVisibility(View.INVISIBLE); // Hide hint container
+                hintContainer.setVisibility(View.GONE); // Hide hint container
                 Timber.d("[HINT] Level > 10 - disabling hint button completely");
             }
         } else {

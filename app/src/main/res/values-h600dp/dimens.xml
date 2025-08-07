@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Medium height screens - default dimensions -->
-    <dimen name="game_button_height">48dp</dimen>
+    <!-- Medium height screens - compact button dimensions -->
+    <dimen name="game_button_height">32dp</dimen>
     <dimen name="game_button_text_size">14sp</dimen>
-    <dimen name="game_button_margin">8dp</dimen>
+    <dimen name="game_button_margin">1dp</dimen>
     <dimen name="game_button_padding">1dp</dimen>
     
     <!-- Text sizes for medium screens -->
-    <dimen name="status_text_size">20dp</dimen>
-    <dimen name="status_text_padding">6dp</dimen>
+    <dimen name="status_text_size">14dp</dimen>
+    <dimen name="status_text_padding">2dp</dimen>
     
     <!-- Level selection screen dimensions for medium screens -->
     <dimen name="stars_count_text_size">14dp</dimen>

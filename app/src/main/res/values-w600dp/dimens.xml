@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dimensions for low aspect ratio displays (wide screens) -->
+    <!-- Smaller hint font sizes to prevent horizontal overflow -->
+    <dimen name="status_text_size">14sp</dimen>
+    <dimen name="status_text_padding">4dp</dimen>
+    
+    <!-- Compact button dimensions for wide screens -->
+    <dimen name="game_button_text_size">12sp</dimen>
+    <dimen name="game_button_margin">6dp</dimen>
+</resources>

@@ -3,9 +3,9 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     
-    <!-- Text sizes -->
+    <!-- Text sizes - smaller for compact displays -->
     <dimen name="status_text_size">18sp</dimen>
-    <dimen name="status_text_padding">8dp</dimen>
+    <dimen name="status_text_padding">4dp</dimen>
     <dimen name="settings_title_text_size">32dp</dimen>
     <dimen name="settings_label_text_size">24dp</dimen>
     <dimen name="settings_option_text_size">20dp</dimen>
@@ -20,4 +20,10 @@
     <dimen name="stars_count_text_size">12dp</dimen>
     <dimen name="level_item_stats_text_size">12dp</dimen>
     <dimen name="level_item_name_text_size">14dp</dimen>
+    
+    <!-- Game info text sizes -->
+    <dimen name="game_info_primary_text_size">16sp</dimen>
+    <dimen name="game_info_secondary_text_size">14sp</dimen>
+    <dimen name="game_info_small_text_size">12sp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">24sp</dimen>
 </resources>
