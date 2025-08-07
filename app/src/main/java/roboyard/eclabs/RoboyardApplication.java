@@ -18,6 +18,38 @@ import timber.log.Timber;
  */
 public class RoboyardApplication extends Application {
     
+    /**
+     * Custom Timber tree that filters out unwanted log messages.
+     * 
+     * This filter reduces noise from performance statistics like app_time_stats messages
+     * but doesn't eliminate them entirely. The filtering works by checking message content
+     * rather than log tags or sources, so it catches most repetitive performance logs
+     * while still allowing some through for debugging purposes.
+     * 
+     * Why not all messages are filtered:
+     * - Some app_time_stats messages may come from different sources with slightly different formats
+     * - Android system logs and third-party libraries may use variations of the pattern
+     * - The filter is intentionally conservative to avoid blocking legitimate debug information
+     * - This approach reduces log spam while maintaining debugging capability
+     */
+    private static class FilteredDebugTree extends Timber.DebugTree {
+        @Override
+        protected void log(int priority, String tag, String message, Throwable t) {
+            // Filter out app_time_stats messages
+            if (message != null && message.contains("app_time_stats:")) {
+                return; // Don't log these messages
+            }
+            
+            // Filter out other performance stats that might be noisy
+            if (message != null && (message.contains("avg=") && message.contains("min=") && message.contains("max=") && message.contains("count="))) {
+                return; // Don't log performance stats
+            }
+            
+            // Log everything else normally
+            super.log(priority, tag, message, t);
+        }
+    }
+    
     private static Context appContext;
     
     /**
@@ -60,7 +92,7 @@ public class RoboyardApplication extends Application {
         appContext = getApplicationContext();
         
         // Initialize Timber for logging - always enable it for debugging
-            Timber.plant(new Timber.DebugTree());
+        Timber.plant(new FilteredDebugTree());
 
         // Initialize the Preferences system at app startup
         Preferences.initialize(appContext);
