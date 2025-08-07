@@ -645,17 +645,41 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         announceAccessibility(completionMessage);
                     } else {
                         // This is a random game
-                        updateStatusText(getString(R.string.random_game_complete), true);
                         
                         // Show new game button instead of next level
                         nextLevelButton.setText(R.string.new_random_game_button);
                         nextLevelButton.setVisibility(View.VISIBLE);
                         
                         // Show completion message
-                        String completionMessage = getString(R.string.random_game_complete) +
+                        String completionMessage = getString(R.string.random_game_complete);
+                        String completionMessage_a11y = completionMessage +
                                 " Completed in " + gameStateManager.getMoveCount().getValue() + " moves.";
-                        announceAccessibility(completionMessage);
-                        // Toast.makeText(requireContext(), completionMessage, Toast.LENGTH_LONG).show();
+                        
+                        // Add optimal moves information if no hints were used
+                        GameSolution solution = gameStateManager.getCurrentSolution();
+                        if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty() && currentHintStep < 4) {
+                            int optimalMoves = solution.getMoves().size();
+                            int actualMoves = gameStateManager.getMoveCount().getValue();
+                            
+                            if (actualMoves == optimalMoves) {
+                                String extraMessage = getString(R.string.perfect_solution);
+                                if (currentHintStep == 0){
+                                    completionMessage += " \n" + extraMessage;
+                                }
+                                completionMessage_a11y += " " + extraMessage;
+                                Timber.d("[COMPLETION_MESSAGE] Perfect solution: %d moves (optimal)", actualMoves);
+                            } else {
+                                 // show hit to optimal moves if nohints were used
+                                // show the hint step if the hint was shown already how many total moves were used
+                                String extraMessage = getString(R.string.pre_hint_less_than_x, actualMoves);
+                                completionMessage += " \n" + extraMessage;
+                                completionMessage_a11y += " " + extraMessage;
+                                Timber.d("[COMPLETION_MESSAGE] Showing optimal moves: %d (actual: %d, no hints used)", optimalMoves, actualMoves);
+                            }
+                        }
+                        
+                        announceAccessibility(completionMessage_a11y);
+                        updateStatusText(completionMessage, true);
                     }
 
                     // change the "Reset" Button to "Retry"

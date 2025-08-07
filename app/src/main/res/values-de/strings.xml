@@ -313,9 +313,7 @@
     <string name="robot_move_initiated">%1$s beginnt Bewegung, startend bei %2$d, %3$d</string>
     <string name="unknown_robot">Unbekannt: %1$d</string>
     <string name="unknown_color">Unbekannt: %1$s</string>
-    <string name="ai_solution_less_moves">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
-    <string name="ai_solution_exact_moves">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
-    <string name="solution_found_moves">Lösung gefunden: %1$d Züge</string>
+    <string name="perfect_solution">Perfekt! Du hast die optimale Lösung gefunden!</string>
 
     <!-- Accessibility versions -->
     <string name="game_completed_a11y">Ziel erreicht! Spiel beendet mit %1$d Zügen und %2$d Feldern</string>

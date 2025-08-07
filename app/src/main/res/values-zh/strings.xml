@@ -178,8 +178,8 @@
     <string name="robot_move_initiated">%1$s 开始移动，起始位置 %2$d, %3$d</string>
     <string name="unknown_robot">未知: %1$d</string>
     <string name="unknown_color">未知: %1$s</string>
-    <string name="ai_solution_less_moves">AI找到了一个少于 %1$d 步的解决方案</string>
     <string name="solution_found">AI找到了一个解决方案！</string>
+    <string name="perfect_solution">完美！你找到了最优解决方案！</string>
     <string name="pre_hint_first_move">先移动 %1$s 机器人</string>
     <string name="no_solution_found">未找到解决方案</string>
 

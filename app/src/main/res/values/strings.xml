@@ -339,9 +339,6 @@
     <string name="robot_move_initiated" comment="Message when robot starts moving">%1$s initiating move, starting at %2$d, %3$d</string>
     <string name="unknown_robot">Unknown: %1$d</string>
     <string name="unknown_color">Unknown: %1$s</string>
-    <string name="ai_solution_less_moves">The A.I. found a solution in less than %1$d moves</string>
-    <string name="ai_solution_exact_moves">The A.I. found a solution in %1$d moves</string>
-    <string name="solution_found_moves">Solution found: %1$d moves</string>
 
     <!-- Accessibility versions -->
     <string name="game_completed_a11y" comment="Accessibility announcement when target is reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
@@ -356,6 +353,7 @@
     <string name="cannot_move_in_this_direction">Cannot move in this direction</string>
     <string name="pre_hint_less_than_x">The A.I. found a solution in less than %1$d moves</string>
     <string name="pre_hint_exact_solution">The A.I. found a solution in %1$d moves</string>
+    <string name="perfect_solution">Perfect! You found the optimal solution!</string>
     <string name="solution_found">A.I. found a solution!</string>
     <string name="pre_hint_involved_robots">Move the</string>
     <string name="pre_hint_first_move">Move the %1$s robot first</string>

@@ -1,8 +1,6 @@
 about_screen_title
 action_settings
-ai_solution_exact_moves
 ai_solution_format
-ai_solution_less_moves
 at_position_a11y
 autosave_tag
 back_button_a11y
@@ -116,7 +114,6 @@ save_success
 settings_back
 settings_screen_title
 settings_vibration
-solution_found_moves
 stars_earned
 starting_level
 starting_level_a11y
