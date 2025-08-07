@@ -2,6 +2,11 @@
 =========
 
 
+## Version 28 (2025-08-07)
+- New extra hint, which robots play a role in the solution.
+- Refactored UI for different display sizes.
+
+
 ## Version 27 (2025-06-25)
 - Multi-color target functionality restored
 - Accessibility announcements (TalkBack) fixed and improved for blind players

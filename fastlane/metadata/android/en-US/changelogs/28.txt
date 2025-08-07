@@ -1,0 +1,2 @@
+- New extra hint, which robots play a role in the solution.
+- Refactored UI for different display sizes.

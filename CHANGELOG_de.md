@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 28 (2025-08-07)
+- Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
+- Überarbeitete UI für verschiedene Display-Größen
+
+
 ## Version 27 (2025-06-25)
 - mehrfarbiges Ziel wieder aktiviert
 - Ansagen für blinde Spieler repariert (Talkback) und optimiert

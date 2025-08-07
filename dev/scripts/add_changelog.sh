@@ -40,15 +40,15 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- mehrfarbiges Ziel wieder aktiviert
-- Ansagen für blinde Spieler repariert (Talkback) und optimiert
+- Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
+- Überarbeitete UI für verschiedene Display-Größen
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Multi-color target functionality restored
-- Accessibility announcements (TalkBack) fixed and improved for blind players
+- New extra hint, which robots play a role in the solution.
+- Refactored UI for different display sizes.
 EOF
 )
 

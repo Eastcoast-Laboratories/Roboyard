@@ -1,0 +1,10 @@
+# Play Store Changelogs für Version 28
+
+<en-GB>
+- New extra hint, which robots play a role in the solution.
+- Refactored UI for different display sizes.
+</en-GB>
+<de-DE>
+- Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
+- Überarbeitete UI für verschiedene Display-Größen
+</de-DE>

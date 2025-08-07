@@ -1,0 +1,2 @@
+- Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
+- Überarbeitete UI für verschiedene Display-Größen
