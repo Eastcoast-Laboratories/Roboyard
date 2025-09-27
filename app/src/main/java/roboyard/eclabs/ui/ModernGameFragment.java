@@ -73,6 +73,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private Button menuButton;
     private Button nextLevelButton;
     private Button optimalMovesButton; // Button to display optimal number of moves
+    private Button layoutToggleButton; // Button to toggle layout direction in landscape mode
     private TextView timerTextView;
     private TextView statusTextView;
     // Hint navigation components
@@ -374,8 +375,27 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Apply language settings before inflating the view
         applyLanguageSettings();
         
-        // Inflate the layout
-        View view = inflater.inflate(R.layout.fragment_modern_game, container, false);
+        // Choose layout based on orientation and preference
+        int layoutId = R.layout.fragment_modern_game; // Default layout
+        
+        Configuration config = getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // In landscape mode, check preference for layout direction
+            boolean isGridRight = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                    .getBoolean("landscape_grid_right", true); // Default: grid on right
+            
+            if (isGridRight) {
+                layoutId = R.layout.fragment_modern_game; // Current layout (grid right)
+            } else {
+                layoutId = R.layout.fragment_modern_game_alt; // Alternative layout (grid left)
+            }
+            
+            Timber.d("[LAYOUT_SELECTION] Landscape mode: using %s layout (grid_right=%s)", 
+                    isGridRight ? "standard" : "alternative", isGridRight);
+        }
+        
+        // Inflate the chosen layout
+        View view = inflater.inflate(layoutId, container, false);
         return view;
     }
     
@@ -400,6 +420,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         timerTextView = view.findViewById(R.id.game_timer);
         statusTextView = view.findViewById(R.id.status_text);
         optimalMovesButton = view.findViewById(R.id.optimal_moves_button);
+        layoutToggleButton = view.findViewById(R.id.layout_toggle_button);
         hintContainer = view.findViewById(R.id.hint_container);
         prevHintButton = view.findViewById(R.id.prev_hint_button);
         nextHintButton = view.findViewById(R.id.next_hint_button);
@@ -1144,6 +1165,22 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             MainMenuFragment menuFragment = new MainMenuFragment();
             navigateToDirect(menuFragment);
         });
+        
+        // Layout toggle button - only available in landscape mode
+        if (layoutToggleButton != null) {
+            layoutToggleButton.setOnClickListener(v -> {
+                Timber.d("ModernGameFragment: Layout toggle button clicked");
+                toggleLayoutDirection();
+            });
+            
+            // Set initial button text based on current preference
+            Configuration config = getResources().getConfiguration();
+            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                boolean isGridRight = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                        .getBoolean("landscape_grid_right", true);
+                layoutToggleButton.setText(isGridRight ? "⇄" : "⇆");
+            }
+        }
         
         // "Next Level" button - go to the next level when a level is completed
         // big "new Game" button - in random game mode
@@ -2932,6 +2969,39 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 Timber.e("[AUTOSAVE] Failed to autosave game to slot 0");
             }
         }
+    }
+    
+    /**
+     * Toggle layout direction in landscape mode
+     */
+    private void toggleLayoutDirection() {
+        // Check if we're in landscape mode
+        Configuration config = getResources().getConfiguration();
+        if (config.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            Timber.d("[LAYOUT_TOGGLE] Not in landscape mode, ignoring toggle");
+            return;
+        }
+        
+        // Get current layout direction from shared preferences
+        boolean isGridRight = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                .getBoolean("landscape_grid_right", true); // Default: grid on right
+        
+        // Toggle the preference
+        boolean newGridRight = !isGridRight;
+        requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("landscape_grid_right", newGridRight)
+                .apply();
+        
+        Timber.d("[LAYOUT_TOGGLE] Toggled layout: grid_right=%s -> %s", isGridRight, newGridRight);
+        
+        // Update button text to show current state
+        if (layoutToggleButton != null) {
+            layoutToggleButton.setText(newGridRight ? "⇄" : "⇆");
+        }
+        
+        // Recreate the activity to apply the new layout
+        requireActivity().recreate();
     }
     
     /**

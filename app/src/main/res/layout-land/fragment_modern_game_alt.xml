@@ -5,21 +5,34 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Left panel containing all other elements - takes remaining space -->
+    <!-- Game grid view - left side, square (width = screen height) -->
+    <roboyard.ui.components.GameGridView
+        android:id="@+id/game_grid_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/right_panel"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1" />
+
+    <!-- Right panel containing all other elements - takes remaining space -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/left_panel"
+        android:id="@+id/right_panel"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/game_grid_view"
+        app:layout_constraintStart_toEndOf="@id/game_grid_view"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Hint container - top of left panel -->
+        <!-- Hint container - top of right panel -->
         <LinearLayout
             android:id="@+id/hint_container"
             android:layout_width="match_parent"
@@ -149,7 +162,7 @@
                 app:layout_constraintTop_toBottomOf="@id/game_timer"
                 android:layout_marginTop="4dp" />
 
-            <!-- Layout toggle button positioned at the right edge (near game grid) -->
+            <!-- Layout toggle button positioned at the left edge (near game grid) -->
             <Button
                 android:id="@+id/layout_toggle_button"
                 android:layout_width="wrap_content"
@@ -157,13 +170,13 @@
                 android:layout_marginTop="8dp"
                 android:background="@drawable/button_rounded_gray_outline"
                 android:padding="4dp"
-                android:text="⇄"
+                android:text="⇆"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:minWidth="32dp"
                 android:contentDescription="Toggle layout direction"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
 
             <!-- Optimal Moves Button centered -->
@@ -179,8 +192,8 @@
                 android:textSize="@dimen/game_info_optimal_moves_text_size"
                 android:textStyle="bold"
                 android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/layout_toggle_button"
+                app:layout_constraintStart_toEndOf="@id/layout_toggle_button"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -213,7 +226,7 @@
             app:layout_constraintBottom_toTopOf="@id/button_container"
             app:layout_constraintVertical_weight="1" />
 
-        <!-- Buttons at the bottom of left panel -->
+        <!-- Buttons at the bottom of right panel -->
         <LinearLayout
             android:id="@+id/button_container"
             android:layout_width="match_parent"
@@ -333,17 +346,4 @@
                 android:visibility="gone" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Game grid view - right side, square (width = screen height) -->
-    <roboyard.ui.components.GameGridView
-        android:id="@+id/game_grid_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintStart_toEndOf="@id/left_panel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="1:1" />
 </androidx.constraintlayout.widget.ConstraintLayout>
