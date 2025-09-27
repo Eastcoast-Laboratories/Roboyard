@@ -482,55 +482,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Set up status text view to act as a button for showing the next hint
         statusTextView.setOnClickListener(v -> {
             Timber.d("[HINT_SYSTEM] Status text view clicked for next hint");
-            
-            // Check if this is a level game with level > 10 (no hints allowed)
-            GameState currentState = gameStateManager.getCurrentState().getValue();
-            if (currentState != null && currentState.getLevelId() > 10) {
-                Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled for status text view");
-                return;
-            }
-            
-            // For level games 1-10, limit to only 2 hints
-            if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
-                // Limit to only the first two hints for levels 1-10
-                if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
-                    Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for status text view", MAX_HINTS_UP_TO_LEVEL_10);
-                    return;
-                }
-            }
-            
-            GameSolution solution = gameStateManager.getCurrentSolution();
-            if (solution == null || solution.getMoves().isEmpty()) {
-                Timber.d("[HINT_SYSTEM] No solution available for next hint");
-                return;
-            }
-            
-            int totalMoves = solution.getMoves().size();
-            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
-            
-            // Increment hint step if possible
-            if (currentHintStep < totalPossibleHints - 1) {
-                currentHintStep++;
-                Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
-                GameState currentGameState = gameStateManager.getCurrentState().getValue();
-                
-                // Show the appropriate hint
-                if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                    showPreHint(solution, totalMoves, currentHintStep);
-                } else {
-                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
-                }
-                
-                // Update the game state manager's current solution step
-                gameStateManager.resetSolutionStep();
-                for (int i = 0; i < currentHintStep; i++) {
-                    gameStateManager.incrementSolutionStep();
-                }
-                Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
-            } else {
-                Timber.d("[HINT_SYSTEM] Already at last hint, can't go further");
-            }
+            showNextHint("status text view");
         });
         
         // Set up optimal moves button to also act as a next hint button
@@ -538,23 +490,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[HINT_SYSTEM] Optimal moves button clicked for next hint");
             // Only show next hint if the hint container is visible
             if (hintContainer.getVisibility() == View.VISIBLE && hintButton.isChecked()) {
-                // Check if this is a level game with level > 10 (no hints allowed)
-                GameState currentState = gameStateManager.getCurrentState().getValue();
-                if (currentState != null && currentState.getLevelId() > 10) {
-                    Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled for optimal moves button");
-                    return;
-                }
-                
-                // For level games 1-10, limit to only 2 hints
-                if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
-                    // Limit to only the first two hints for levels 1-10
-                    if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
-                        Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for optimal moves button", MAX_HINTS_UP_TO_LEVEL_10);
-                        return;
-                    }
-                }
-                
-                showNextHint();
+                showNextHint("optimal moves button");
             }
         });
         
@@ -563,23 +499,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[HINT_SYSTEM] Unique map ID text view clicked for next hint");
             // Only show next hint if the hint container is visible
             if (hintContainer.getVisibility() == View.VISIBLE && hintButton.isChecked()) {
-                // Check if this is a level game with level > 10 (no hints allowed)
-                GameState currentState = gameStateManager.getCurrentState().getValue();
-                if (currentState != null && currentState.getLevelId() > 10) {
-                    Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled for unique map ID text view");
-                    return;
-                }
-                
-                // For level games 1-10, limit to only 2 hints
-                if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
-                    // Limit to only the first two hints for levels 1-10
-                    if (currentHintStep >= 2) {
-                        Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (2) for unique map ID text view");
-                        return;
-                    }
-                }
-                
-                showNextHint();
+                showNextHint("unique map ID text view");
             }
         });
         
@@ -1030,38 +950,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Set up next hint button
         nextHintButton.setOnClickListener(v -> {
             Timber.d("[HINT_SYSTEM] Next hint button clicked");
-            GameSolution solution = gameStateManager.getCurrentSolution();
-            if (solution == null || solution.getMoves().isEmpty()) {
-                Timber.d("[HINT_SYSTEM] No solution available for next hint");
-                return;
-            }
-            
-            int totalMoves = solution.getMoves().size();
-            totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
-            
-            // Increment hint step if possible
-            if (currentHintStep < totalPossibleHints - 1) {
-                currentHintStep++;
-                Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
-                GameState currentGameState = gameStateManager.getCurrentState().getValue();
-                
-                // Show the appropriate hint
-                if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                    showPreHint(solution, totalMoves, currentHintStep);
-                } else {
-                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
-                }
-                
-                // Update the game state manager's current solution step
-                gameStateManager.resetSolutionStep();
-                for (int i = 0; i < currentHintStep; i++) {
-                    gameStateManager.incrementSolutionStep();
-                }
-                Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
-            } else {
-                Timber.d("[HINT_SYSTEM] Already at last hint, can't go further");
-            }
+            showNextHint("next hint button");
         });
         
         // (Button text: "Save Map")
@@ -2622,32 +2511,32 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Die Pfeile werden bereits von getDirectionArrow() zurückgegeben
         return directionName;
     }
-
+    
     /**
-     * Shows the next hint in the sequence
+     * Common method to show the next hint with level restrictions
+     * used by status text view, next hint button, etc.
      */
-    private void showNextHint() {
-        Timber.d("[HINT_SYSTEM] Showing next hint");
-        GameSolution solution = gameStateManager.getCurrentSolution();
-        if (solution == null || solution.getMoves().isEmpty()) {
-            Timber.d("[HINT_SYSTEM] No solution available for next hint");
-            return;
-        }
-        
+    private void showNextHint(String source) {
         // Check if this is a level game with level > 10 (no hints allowed)
         GameState currentState = gameStateManager.getCurrentState().getValue();
         if (currentState != null && currentState.getLevelId() > 10) {
-            Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled");
+            Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled for %s", source);
             return;
         }
         
         // For level games 1-10, limit to only 2 hints
         if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
             // Limit to only the first two hints for levels 1-10
-            if (currentHintStep >= 2) {
-                Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (2)");
+            if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
+                Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for %s", MAX_HINTS_UP_TO_LEVEL_10, source);
                 return;
             }
+        }
+        
+        GameSolution solution = gameStateManager.getCurrentSolution();
+        if (solution == null || solution.getMoves().isEmpty()) {
+            Timber.d("[HINT_SYSTEM] No solution available for next hint from %s", source);
+            return;
         }
         
         int totalMoves = solution.getMoves().size();
@@ -2656,14 +2545,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Increment hint step if possible
         if (currentHintStep < totalPossibleHints - 1) {
             currentHintStep++;
-            Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
+            Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d (from %s)", currentHintStep, totalPossibleHints - 1, source);
+            GameState currentGameState = gameStateManager.getCurrentState().getValue();
             
             // Show the appropriate hint
             if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
                 showPreHint(solution, totalMoves, currentHintStep);
             } else {
                 int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                showNormalHint(solution, currentState, totalMoves, normalHintIndex);
+                showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
             }
             
             // Update the game state manager's current solution step
@@ -2673,10 +2563,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
         } else {
-            Timber.d("[HINT_SYSTEM] Already at last hint, can't advance further");
+            Timber.d("[HINT_SYSTEM] Already at last hint, can't go further (from %s)", source);
         }
     }
-    
+
     /**
      * Helper method to update the status text with a consistent approach
      * @param message The message to display
