@@ -67,11 +67,21 @@ public class MainFragmentActivity extends AppCompatActivity {
         // Initialize the GameStateManager as a ViewModel
         gameStateManager = new ViewModelProvider(this).get(GameStateManager.class);
         
-        // Set up the Navigation controller
-        NavHostFragment navHostFragment = 
-            (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-        if (navHostFragment != null) {
-            navController = navHostFragment.getNavController();
+        // Set up the Navigation controller with proper error handling
+        try {
+            androidx.fragment.app.Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+            if (fragment instanceof NavHostFragment) {
+                NavHostFragment navHostFragment = (NavHostFragment) fragment;
+                navController = navHostFragment.getNavController();
+                Timber.d("[NAV] Navigation controller initialized successfully");
+            } else {
+                Timber.w("[NAV] Fragment with id nav_host_fragment is not a NavHostFragment: %s", 
+                        fragment != null ? fragment.getClass().getSimpleName() : "null");
+            }
+        } catch (ClassCastException e) {
+            Timber.e(e, "[NAV] ClassCastException when setting up navigation controller");
+        } catch (Exception e) {
+            Timber.e(e, "[NAV] Unexpected error when setting up navigation controller");
         }
         
         // Set up accessibility services
@@ -96,8 +106,25 @@ public class MainFragmentActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         
+        // Log orientation change for debugging
+        String orientation = "unknown";
+        switch (newConfig.orientation) {
+            case Configuration.ORIENTATION_PORTRAIT:
+                orientation = "portrait";
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                orientation = "landscape";
+                break;
+        }
+        Timber.d("[ORIENTATION] Configuration changed to: %s", orientation);
+        
         // Re-apply fullscreen mode on configuration changes (e.g. rotation)
         applyFullscreenMode();
+        
+        // Force layout refresh to ensure proper layout selection
+        if (getCurrentFocus() != null) {
+            getCurrentFocus().clearFocus();
+        }
     }
     
     @Override

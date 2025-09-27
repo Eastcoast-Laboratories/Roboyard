@@ -68,12 +68,22 @@ public class MainActivity extends FragmentActivity
         initScreenSize();
         initGameSettings();
         
-        // Setup navigation
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            // Additional navigation setup if needed
+        // Setup navigation with proper error handling
+        try {
+            androidx.fragment.app.Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+            if (fragment instanceof NavHostFragment) {
+                NavHostFragment navHostFragment = (NavHostFragment) fragment;
+                NavController navController = navHostFragment.getNavController();
+                // Additional navigation setup if needed
+                Timber.d("[NAV] Navigation controller initialized successfully in MainActivity");
+            } else {
+                Timber.w("[NAV] Fragment with id nav_host_fragment is not a NavHostFragment in MainActivity: %s", 
+                        fragment != null ? fragment.getClass().getSimpleName() : "null");
+            }
+        } catch (ClassCastException e) {
+            Timber.e(e, "[NAV] ClassCastException when setting up navigation controller in MainActivity");
+        } catch (Exception e) {
+            Timber.e(e, "[NAV] Unexpected error when setting up navigation controller in MainActivity");
         }
         
         FrameLayout content = new FrameLayout(this);
