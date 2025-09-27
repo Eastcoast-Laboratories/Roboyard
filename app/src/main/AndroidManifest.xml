@@ -16,8 +16,7 @@
             android:name="roboyard.eclabs.ui.MainFragmentActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="fullSensor"
-            android:configChanges="orientation|screenSize|keyboardHidden">
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

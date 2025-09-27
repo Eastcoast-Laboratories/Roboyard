@@ -275,7 +275,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Announce selection and goal via TalkBack
                     String message = getString(R.string.robot_selected_a11y, colorName) + ". ";
-                    message += getString(R.string.target_a11y, goalX, goalY); // target at position
+                    message += getString(R.string.target_a11y, goalX + 1, goalY + 1); // target at position
                     announceAccessibility(message);
                     
                     // Announce possible moves

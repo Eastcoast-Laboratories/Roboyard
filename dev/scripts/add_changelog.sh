@@ -40,15 +40,15 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
-- Überarbeitete UI für verschiedene Display-Größen
+- Landscape-Modus hinzugefügt
+- Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- New extra hint, which robots play a role in the solution.
-- Refactored UI for different display sizes.
+- Added landscape mode
+- fix Accessibility message where goal was announced one square off
 EOF
 )
 
