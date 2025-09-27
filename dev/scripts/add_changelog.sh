@@ -40,15 +40,17 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Landscape-Modus hinzugefügt
+- Landscape-Modus hinzugefügt mit Toggle-Button für die Ausrichtung des Spielfeldes
 - Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
+- UI verbessert mit modernen Material Design Elementen
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Added landscape mode
+- Added landscape mode with toggle button for left or right orientation of the gamegrid
 - fix Accessibility message where goal was announced one square off
+- enhance UI with modern material design elements
 EOF
 )
 

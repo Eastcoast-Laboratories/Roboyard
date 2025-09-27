@@ -27,7 +27,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="110dp">
+        android:layout_marginBottom="80dp">
         
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -67,8 +67,8 @@
                     android:text="@string/level_game"
                     android:contentDescription="@string/level_game_a11y"
                     android:padding="12dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
@@ -83,7 +83,7 @@
                     android:text="@string/help"
                     android:contentDescription="@string/help_a11y"
                     android:padding="12dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
                     android:textColor="#1A1A1A"
                     android:textStyle="bold"
                     android:textSize="20sp"
@@ -98,7 +98,7 @@
                     android:text="@string/load_game"
                     android:contentDescription="@string/load_game_a11y"
                     android:padding="12dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
@@ -116,7 +116,7 @@
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
                     android:background="@drawable/button_fancy_gray"
                     android:elevation="8dp" />
 
@@ -161,7 +161,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginLeft="80dp" 
         android:layout_marginRight="80dp" 
-        android:layout_marginBottom="60dp" 
+        android:layout_marginBottom="20dp" 
         android:importantForAccessibility="no"
         />
 

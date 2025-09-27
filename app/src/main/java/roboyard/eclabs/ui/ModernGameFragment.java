@@ -1170,6 +1170,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (layoutToggleButton != null) {
             layoutToggleButton.setOnClickListener(v -> {
                 Timber.d("ModernGameFragment: Layout toggle button clicked");
+                // Add fancy button animation
+                addButtonClickAnimation(v);
                 toggleLayoutDirection();
             });
             
@@ -2691,7 +2693,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             int darkgreen = Color.parseColor("#008f00");
             if (isVisible && hintContainer != null) {
                 Timber.d("[HINT_SYSTEM] Ensuring hint container is visible when showing hint text");
-                hintContainer.setVisibility(View.VISIBLE);
+                
+                // Add fancy fade-in animation if container was previously hidden
+                if (hintContainer.getVisibility() != View.VISIBLE) {
+                    hintContainer.setVisibility(View.VISIBLE);
+                    android.view.animation.Animation fadeIn = android.view.animation.AnimationUtils.loadAnimation(
+                        requireContext(), R.anim.hint_fade_in);
+                    hintContainer.startAnimation(fadeIn);
+                } else {
+                    hintContainer.setVisibility(View.VISIBLE);
+                }
                 
                 // Check if the hint message contains a robot color name and change background color accordingly
                 String lowerMessage = message.toLowerCase();
@@ -3002,6 +3013,35 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Recreate the activity to apply the new layout
         requireActivity().recreate();
+    }
+    
+    /**
+     * Add fancy button click animation
+     */
+    private void addButtonClickAnimation(View button) {
+        // Scale down animation
+        android.view.animation.ScaleAnimation scaleDown = new android.view.animation.ScaleAnimation(
+            1.0f, 0.95f, 1.0f, 0.95f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f);
+        scaleDown.setDuration(100);
+        scaleDown.setInterpolator(new android.view.animation.AccelerateInterpolator());
+        
+        // Scale up animation
+        android.view.animation.ScaleAnimation scaleUp = new android.view.animation.ScaleAnimation(
+            0.95f, 1.0f, 0.95f, 1.0f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+            android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f);
+        scaleUp.setDuration(100);
+        scaleUp.setStartOffset(100);
+        scaleUp.setInterpolator(new android.view.animation.OvershootInterpolator());
+        
+        // Animation set
+        android.view.animation.AnimationSet animationSet = new android.view.animation.AnimationSet(false);
+        animationSet.addAnimation(scaleDown);
+        animationSet.addAnimation(scaleUp);
+        
+        button.startAnimation(animationSet);
     }
     
     /**

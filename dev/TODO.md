@@ -79,7 +79,6 @@ check if this all works:
 
 - im save slot anzeigen, wieviel die optimal moves sind und wieviel man gebraucht hat, wenn man den level completed hat
 
-
 - choose num_robots in settings (2-5)
 
 - only add the same color at the end of the hint if it is not the same as the last color
