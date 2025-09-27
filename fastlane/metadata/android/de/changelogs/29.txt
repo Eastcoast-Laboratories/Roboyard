@@ -1,0 +1,2 @@
+- Landscape-Modus hinzugefügt
+- Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde

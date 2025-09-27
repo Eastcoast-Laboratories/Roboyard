@@ -2,6 +2,11 @@
 =========
 
 
+## Version 29 (2025-09-27)
+- Added landscape mode
+- fix Accessibility message where goal was announced one square off
+
+
 ## Version 28 (2025-08-07)
 - New extra hint, which robots play a role in the solution.
 - Refactored UI for different display sizes.

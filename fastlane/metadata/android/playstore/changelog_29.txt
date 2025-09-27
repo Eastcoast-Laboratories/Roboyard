@@ -1,0 +1,10 @@
+# Play Store Changelogs für Version 29
+
+<en-GB>
+- Added landscape mode
+- fix Accessibility message where goal was announced one square off
+</en-GB>
+<de-DE>
+- Landscape-Modus hinzugefügt
+- Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
+</de-DE>

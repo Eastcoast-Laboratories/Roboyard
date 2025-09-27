@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 29 (2025-09-27)
+- Landscape-Modus hinzugefügt
+- Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
+
+
 ## Version 28 (2025-08-07)
 - Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
 - Überarbeitete UI für verschiedene Display-Größen
