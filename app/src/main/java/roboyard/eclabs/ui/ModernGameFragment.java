@@ -871,8 +871,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[HINT_SYSTEM] Hint button toggled: %s", isChecked ? "ON" : "OFF");
             
             if (isChecked) {
-                // Show hint container when button is checked
-                hintContainer.setVisibility(View.VISIBLE);
+                // Show hint container with slide down animation
+                slideDownHintContainer();
                 prevHintButton.setVisibility(View.VISIBLE);
                 nextHintButton.setVisibility(View.VISIBLE);
                 
@@ -920,8 +920,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     Timber.d("[HINT_SYSTEM] RE-SET compact info box padding AFTER hint display");
                 }
             } else {
-                // Hide hint container when button is unchecked
-                hintContainer.setVisibility(View.GONE);
+                // Hide hint container with slide up animation
+                slideUpHintContainer();
                 prevHintButton.setVisibility(View.GONE);
                 nextHintButton.setVisibility(View.GONE);
                 
@@ -2692,6 +2692,83 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
             }
         }
+    }
+    
+    /**
+     * Slides the hint container down with smooth animation
+     */
+    private void slideDownHintContainer() {
+        if (hintContainer == null) return;
+        
+        // Clear any previous animation and reset state
+        hintContainer.clearAnimation();
+        hintContainer.animate().cancel();
+        
+        // Make sure container is visible first to measure height
+        hintContainer.setVisibility(View.VISIBLE);
+        hintContainer.setAlpha(0f);
+        hintContainer.setTranslationY(0f); // Reset position first
+        
+        // Post to ensure layout is measured
+        hintContainer.post(() -> {
+            // Get the measured height or use a default
+            int height = hintContainer.getHeight();
+            if (height == 0) {
+                height = 120; // Default height in pixels
+            }
+            
+            // Start from above the screen
+            hintContainer.setTranslationY(-height);
+            
+            // Animate slide down with ease transition
+            hintContainer.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(300)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .setListener(null) // Clear any previous listener
+                .start();
+        });
+        
+        Timber.d("[HINT_SYSTEM] Sliding hint container DOWN with animation");
+    }
+    
+    /**
+     * Slides the hint container up with smooth animation
+     */
+    private void slideUpHintContainer() {
+        if (hintContainer == null) return;
+        
+        // Clear any previous animation
+        hintContainer.clearAnimation();
+        hintContainer.animate().cancel();
+        
+        // Get the current height
+        int height = hintContainer.getHeight();
+        if (height == 0) {
+            height = 120; // Default height in pixels
+        }
+        
+        // Animate slide up with ease transition
+        hintContainer.animate()
+            .translationY(-height)
+            .alpha(0f)
+            .setDuration(300)
+            .setInterpolator(new android.view.animation.AccelerateInterpolator())
+            .setListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    // Reset all properties for next animation
+                    hintContainer.setVisibility(View.GONE);
+                    hintContainer.setTranslationY(0f);
+                    hintContainer.setAlpha(1f);
+                    hintContainer.clearAnimation();
+                    Timber.d("[HINT_SYSTEM] Animation UP completed, container reset");
+                }
+            })
+            .start();
+        
+        Timber.d("[HINT_SYSTEM] Sliding hint container UP with animation");
     }
     
     /**
