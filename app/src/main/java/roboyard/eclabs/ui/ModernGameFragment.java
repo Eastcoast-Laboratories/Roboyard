@@ -882,6 +882,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     Timber.d("[HINT_SYSTEM] Removed vertical padding from status text view");
                 }
                 
+                // Make info box padding compact when hints are visible
+                View gameInfoContainer = getView().findViewById(R.id.game_info_container);
+                if (gameInfoContainer != null) {
+                    gameInfoContainer.setPadding(16, 0, 16, 5);
+                    Timber.d("[HINT_SYSTEM] Set compact info box padding when hints ON");
+                }
+                
                 Timber.d("[HINT_SYSTEM] Showing hint container and navigation buttons");
                 
                 // Check if we have a solution object at all
@@ -905,6 +912,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     int normalHintIndex = showingPreHints ? currentStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentStep;
                     showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
                 }
+                
+                // WICHTIG: Info Box Padding NACH showPreHint/showNormalHint setzen (kompakt)
+                View gameInfoContainer2 = getView().findViewById(R.id.game_info_container);
+                if (gameInfoContainer2 != null) {
+                    gameInfoContainer2.setPadding(16, 0, 16, 5);
+                    Timber.d("[HINT_SYSTEM] RE-SET compact info box padding AFTER hint display");
+                }
             } else {
                 // Hide hint container when button is unchecked
                 hintContainer.setVisibility(View.GONE);
@@ -915,6 +929,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 if (statusTextView != null) {
                     statusTextView.setPadding(16, 0, 16, 0);
                     Timber.d("[HINT_SYSTEM] Maintained consistent padding for status text view");
+                }
+                
+                // Set bigger info box padding when hints are hidden
+                View gameInfoContainer = getView().findViewById(R.id.game_info_container);
+                if (gameInfoContainer != null) {
+                    gameInfoContainer.setPadding(16, 16, 16, 16);
+                    Timber.d("[HINT_SYSTEM] Set bigger info box padding when hints OFF");
                 }
                 
                 // Reset hint step to start from the beginning next time
