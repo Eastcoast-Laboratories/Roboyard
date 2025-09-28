@@ -2700,9 +2700,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void slideDownHintContainer() {
         if (hintContainer == null) return;
         
+        // Get info box for synchronized animation
+        View gameInfoContainer = getView().findViewById(R.id.game_info_container);
+        
         // Clear any previous animation and reset state
         hintContainer.clearAnimation();
         hintContainer.animate().cancel();
+        if (gameInfoContainer != null) {
+            gameInfoContainer.clearAnimation();
+            gameInfoContainer.animate().cancel();
+        }
         
         // Make sure container is visible first to measure height
         hintContainer.setVisibility(View.VISIBLE);
@@ -2720,7 +2727,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Start from above the screen
             hintContainer.setTranslationY(-height);
             
-            // Animate slide down with ease transition
+            // Animate hint container slide down with ease transition
             hintContainer.animate()
                 .translationY(0f)
                 .alpha(1f)
@@ -2728,9 +2735,19 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 .setInterpolator(new android.view.animation.DecelerateInterpolator())
                 .setListener(null) // Clear any previous listener
                 .start();
+            
+            // Animate info box slide down synchronously
+            if (gameInfoContainer != null) {
+                gameInfoContainer.setTranslationY(-height); // Start from same position as hint container
+                gameInfoContainer.animate()
+                    .translationY(0f)
+                    .setDuration(300)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
+            }
         });
         
-        Timber.d("[HINT_SYSTEM] Sliding hint container DOWN with animation");
+        Timber.d("[HINT_SYSTEM] Sliding hint container and info box DOWN with synchronized animation");
     }
     
     /**
@@ -2739,9 +2756,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void slideUpHintContainer() {
         if (hintContainer == null) return;
         
+        // Get info box for synchronized animation
+        View gameInfoContainer = getView().findViewById(R.id.game_info_container);
+        
         // Clear any previous animation
         hintContainer.clearAnimation();
         hintContainer.animate().cancel();
+        if (gameInfoContainer != null) {
+            gameInfoContainer.clearAnimation();
+            gameInfoContainer.animate().cancel();
+        }
         
         // Get the current height
         int height = hintContainer.getHeight();
@@ -2749,7 +2773,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             height = 120; // Default height in pixels
         }
         
-        // Animate slide up with ease transition
+        // Animate hint container slide up with ease transition
         hintContainer.animate()
             .translationY(-height)
             .alpha(0f)
@@ -2768,7 +2792,24 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             })
             .start();
         
-        Timber.d("[HINT_SYSTEM] Sliding hint container UP with animation");
+        // Animate info box slide up synchronously
+        if (gameInfoContainer != null) {
+            gameInfoContainer.animate()
+                .translationY(-height)
+                .setDuration(300)
+                .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                .setListener(new android.animation.AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(android.animation.Animator animation) {
+                        // Reset info box position
+                        gameInfoContainer.setTranslationY(0f);
+                        gameInfoContainer.clearAnimation();
+                    }
+                })
+                .start();
+        }
+        
+        Timber.d("[HINT_SYSTEM] Sliding hint container and info box UP with synchronized animation");
     }
     
     /**
