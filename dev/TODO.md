@@ -89,3 +89,5 @@ check if this all works:
 - add achievement system
 
 # most important
+
+Der Margin unter dem game grid ist zu klein, die untere Zeile des Games ist verdeckt. der game screen darf niemals verdeckt werden, er muss in der hchsten z-ebene liegen

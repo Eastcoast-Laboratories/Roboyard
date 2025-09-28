@@ -875,6 +875,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 hintContainer.setVisibility(View.VISIBLE);
                 prevHintButton.setVisibility(View.VISIBLE);
                 nextHintButton.setVisibility(View.VISIBLE);
+                
+                // Remove vertical padding from status text when hint is visible (keep horizontal)
+                if (statusTextView != null) {
+                    statusTextView.setPadding(16, 0, 16, 0);
+                    Timber.d("[HINT_SYSTEM] Removed vertical padding from status text view");
+                }
+                
                 Timber.d("[HINT_SYSTEM] Showing hint container and navigation buttons");
                 
                 // Check if we have a solution object at all
@@ -903,6 +910,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 hintContainer.setVisibility(View.GONE);
                 prevHintButton.setVisibility(View.GONE);
                 nextHintButton.setVisibility(View.GONE);
+                
+                // Keep consistent padding (no vertical padding needed)
+                if (statusTextView != null) {
+                    statusTextView.setPadding(16, 0, 16, 0);
+                    Timber.d("[HINT_SYSTEM] Maintained consistent padding for status text view");
+                }
                 
                 // Reset hint step to start from the beginning next time
                 currentHintStep = 0;
@@ -2644,8 +2657,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
                 }
                 
-                // Add some padding for better text readability
-                statusTextView.setPadding(16, 8, 16, 8);
+                // No vertical padding for compact hint display
+                statusTextView.setPadding(16, 0, 16, 0);
 
                 // Set content description for accessibility
                 statusTextView.setContentDescription(message);
@@ -2656,7 +2669,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             } else {
                 // Reset background to default green with rounded corners when hiding the hint
                 statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
-                statusTextView.setPadding(16, 8, 16, 8);
             }
         }
     }
