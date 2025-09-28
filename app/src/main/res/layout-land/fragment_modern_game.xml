@@ -348,16 +348,17 @@
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Game grid view - right side, square (width = screen height) -->
+    <!-- Game grid view - left side, maintains aspect ratio, highest z-index -->
     <roboyard.ui.components.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintStart_toEndOf="@id/left_panel"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/game_area_top_margin"
+        android:elevation="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/right_panel"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

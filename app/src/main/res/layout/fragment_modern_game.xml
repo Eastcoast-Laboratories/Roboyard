@@ -5,12 +5,13 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Game grid view - always full width, maintains aspect ratio -->
+    <!-- Game grid view - always full width, maintains aspect ratio, highest z-index -->
     <roboyard.ui.components.GameGridView
         android:id="@+id/game_grid_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/game_area_top_margin"
+        android:elevation="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
