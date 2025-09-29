@@ -197,6 +197,14 @@
     <string name="help_tips_point_1">- Versuche, Rätsel mit der minimalen Anzahl von Zügen zu lösen.</string>
     <string name="help_tips_point_2">- Manchmal musst du Roboter an bestimmte Positionen bewegen, um Wege für andere Roboter freizumachen.</string>
     <string name="help_tips_point_3">- Wenn du feststeckst, nutze die Hinweis-Funktion, um einen Vorschlag zu erhalten.</string>
+    <string name="help_star_system_section_title">Sterne-Bewertungssystem</string>
+    <string name="help_star_system_description">Deine Leistung in jedem Level wird mit Sternen bewertet, basierend darauf, wie effizient du das Rätsel löst:</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Hyper-optimale Lösung: Du hast eine Lösung gefunden, die besser ist als die optimale Lösung der KI!</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - Optimale Lösung: Du hast es in der gleichen Anzahl von Zügen wie die optimale Lösung der KI gelöst, ohne Hinweise zu verwenden.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - Fast optimale Lösung: Du hast einen Zug mehr als optimal verwendet ohne Hinweise, ODER du hast die optimale Lösung mit einem Hinweis gefunden.</string>
+    <string name="help_star_system_1_star">⭐ - Gute Lösung: Du hast die optimale Lösung mit zwei Hinweisen gefunden, ODER du hast zwei Züge mehr als optimal verwendet ohne Hinweise.</string>
+    <string name="help_star_system_0_stars">Keine Sterne: Alle anderen Fälle. Übe weiter, um deine Leistung zu verbessern!</string>
+    <string name="help_star_system_hint_penalty">Hinweis: Die Verwendung von Hinweisen reduziert deine Sterne-Bewertung und ermutigt dich, Rätsel selbstständig zu lösen.</string>
     
     <!-- Game Buttons -->
     <string name="button_reset">Reset</string>

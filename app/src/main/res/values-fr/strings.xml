@@ -208,14 +208,21 @@
     <string name="direction_south">vers le sud</string>
     <string name="direction_east">vers l\'est</string>
     <string name="direction_west">vers l\'ouest</string>
+    
+    <!-- Help system -->
+    <string name="help_tips_section_title">Conseils</string>
+    <string name="help_tips_point_1">- Essayez de résoudre les puzzles avec le nombre minimum de mouvements.</string>
+    <string name="help_tips_point_2">- Parfois, vous devez déplacer des robots vers des positions spécifiques pour dégager des chemins pour d\'autres robots.</string>
+    <string name="help_tips_point_3">- Si vous êtes bloqué, utilisez la fonction Indice pour obtenir une suggestion.</string>
+    <string name="help_star_system_section_title">Système de Notation par Étoiles</string>
+    <string name="help_star_system_description">Votre performance sur chaque niveau est notée avec des étoiles basées sur l\'efficacité avec laquelle vous résolvez le puzzle :</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Solution hyper-optimale : Vous avez trouvé une solution meilleure que la solution optimale de l\'IA !</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - Solution optimale : Vous l\'avez résolu dans le même nombre de mouvements que la solution optimale de l\'IA sans utiliser d\'indices.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - Solution quasi-optimale : Vous avez utilisé un mouvement de plus que l\'optimal sans indices, OU vous avez trouvé la solution optimale avec un indice.</string>
+    <string name="help_star_system_1_star">⭐ - Bonne solution : Vous avez trouvé la solution optimale avec deux indices, OU vous avez utilisé deux mouvements de plus que l\'optimal sans indices.</string>
+    <string name="help_star_system_0_stars">Aucune étoile : Tous les autres cas. Continuez à vous entraîner pour améliorer vos performances !</string>
+    <string name="help_star_system_hint_penalty">Note : Utiliser des indices réduira votre notation par étoiles, vous encourageant à résoudre les puzzles de manière indépendante.</string>
 
-    <!-- Navigation buttons -->
-    <string name="button_back">Retour</string>
-    <string name="button_save_map">Sauver</string>
-    <string name="button_new_game">Recréer</string>
-    <string name="button_menu">Menu</string>
-    <string name="back">Retour</string>
-    <string name="reset">Rétablir</string>
     <string name="save_map">Sauver</string>
     <string name="new_game">Recréer</string>
     <string name="menu">Menu</string>

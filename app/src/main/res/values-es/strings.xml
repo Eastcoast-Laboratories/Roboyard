@@ -206,6 +206,18 @@
     <string name="hint_previous_button_a11y">Mostrar pista anterior</string>
     <string name="help_accessibility_title">Accesibilidad</string>
     <string name="help_accessibility_description">Este juego es totalmente compatible con el lector de pantalla TalkBack. Usa explorar por tacto para escuchar información sobre los elementos del juego y los botones. Toca dos veces para activar botones o seleccionar robots.</string>
+    <string name="help_tips_section_title">Consejos</string>
+    <string name="help_tips_point_1">- Trata de resolver los rompecabezas con el mínimo número de movimientos.</string>
+    <string name="help_tips_point_2">- A veces necesitas mover robots a posiciones específicas para despejar caminos para otros robots.</string>
+    <string name="help_tips_point_3">- Si te quedas atascado, usa la función de Pista para obtener una sugerencia.</string>
+    <string name="help_star_system_section_title">Sistema de Calificación con Estrellas</string>
+    <string name="help_star_system_description">Tu rendimiento en cada nivel se califica con estrellas basándose en qué tan eficientemente resuelves el rompecabezas:</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Solución hiper-óptima: ¡Encontraste una solución mejor que la solución óptima de la IA!</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - Solución óptima: Lo resolviste en el mismo número de movimientos que la solución óptima de la IA sin usar pistas.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - Solución casi óptima: Usaste un movimiento más que el óptimo sin pistas, O encontraste la solución óptima con una pista.</string>
+    <string name="help_star_system_1_star">⭐ - Buena solución: Encontraste la solución óptima con dos pistas, O usaste dos movimientos más que el óptimo sin pistas.</string>
+    <string name="help_star_system_0_stars">Sin estrellas: Todos los demás casos. ¡Sigue practicando para mejorar tu rendimiento!</string>
+    <string name="help_star_system_hint_penalty">Nota: Usar pistas reducirá tu calificación de estrellas, animándote a resolver rompecabezas de forma independiente.</string>
     
     <!-- Game Status Messages -->
     <string name="target_reached">¡Objetivo alcanzado! Juego completado en %1$d movimientos y %2$d casillas movidas</string>

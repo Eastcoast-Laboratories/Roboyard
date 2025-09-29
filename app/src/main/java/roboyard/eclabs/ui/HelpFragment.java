@@ -77,7 +77,17 @@ public class HelpFragment extends BaseGameFragment {
         helpContent.append(getString(R.string.help_tips_section_title)).append("\n");
         helpContent.append(getString(R.string.help_tips_point_1)).append("\n");
         helpContent.append(getString(R.string.help_tips_point_2)).append("\n");
-        helpContent.append(getString(R.string.help_tips_point_3));
+        helpContent.append(getString(R.string.help_tips_point_3)).append("\n\n");
+        
+        // Star system section
+        helpContent.append(getString(R.string.help_star_system_section_title)).append("\n");
+        helpContent.append(getString(R.string.help_star_system_description)).append("\n\n");
+        helpContent.append(getString(R.string.help_star_system_4_stars)).append("\n");
+        helpContent.append(getString(R.string.help_star_system_3_stars)).append("\n");
+        helpContent.append(getString(R.string.help_star_system_2_stars)).append("\n");
+        helpContent.append(getString(R.string.help_star_system_1_star)).append("\n");
+        helpContent.append(getString(R.string.help_star_system_0_stars)).append("\n\n");
+        helpContent.append(getString(R.string.help_star_system_hint_penalty));
         
         // Set the help text
         helpText.setText(helpContent.toString());

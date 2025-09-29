@@ -218,6 +218,14 @@
     <string name="help_tips_point_1">- Try to solve puzzles in the minimum number of moves.</string>
     <string name="help_tips_point_2">- Sometimes you need to move robots to specific positions to clear paths for other robots.</string>
     <string name="help_tips_point_3">- If you\'re stuck, use the Hint feature to get a suggestion.</string>
+    <string name="help_star_system_section_title">Star Rating System</string>
+    <string name="help_star_system_description">Your performance on each level is rated with stars based on how efficiently you solve the puzzle:</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Hyper-optimal solution: You found a solution better than the AI\'s optimal solution!</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - Optimal solution: You solved it in the same number of moves as the AI\'s optimal solution without using hints.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - Near-optimal solution: You used one move more than optimal without hints, OR you found the optimal solution with one hint.</string>
+    <string name="help_star_system_1_star">⭐ - Good solution: You found the optimal solution with two hints, OR you used two moves more than optimal without hints.</string>
+    <string name="help_star_system_0_stars">No stars: All other cases. Keep practicing to improve your performance!</string>
+    <string name="help_star_system_hint_penalty">Note: Using hints will reduce your star rating, encouraging you to solve puzzles independently.</string>
     
     <!-- Game Buttons -->
     <string name="hint_button">💡Hint</string>

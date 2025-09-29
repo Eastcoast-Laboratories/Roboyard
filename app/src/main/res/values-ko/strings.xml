@@ -166,4 +166,18 @@
     <string name="walls_a11y">벽들</string>
     <string name="target_reached_a11y">목표에 도달함</string>
     <string name="game_completed_a11y">목표 도달! 게임 완료, %1$d번 이동하고 %2$d칸 지남</string>
+    
+    <!-- Help system -->
+    <string name="help_tips_section_title">팁</string>
+    <string name="help_tips_point_1">- 최소한의 움직임으로 퍼즐을 해결해보세요.</string>
+    <string name="help_tips_point_2">- 때로는 다른 로봇들의 길을 열어주기 위해 로봇을 특정 위치로 이동해야 합니다.</string>
+    <string name="help_tips_point_3">- 막혔을 때는 힌트 기능을 사용해서 제안을 받아보세요.</string>
+    <string name="help_star_system_section_title">별점 시스템</string>
+    <string name="help_star_system_description">각 레벨에서의 성과는 퍼즐을 얼마나 효율적으로 해결했는지에 따라 별점으로 평가됩니다:</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - 초최적 해결책: AI의 최적 해결책보다 더 좋은 해결책을 찾았습니다!</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - 최적 해결책: 힌트를 사용하지 않고 AI의 최적 해결책과 같은 수의 움직임으로 해결했습니다.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - 거의 최적 해결책: 힌트 없이 최적보다 한 번 더 움직였거나, 힌트 하나로 최적 해결책을 찾았습니다.</string>
+    <string name="help_star_system_1_star">⭐ - 좋은 해결책: 힌트 두 개로 최적 해결책을 찾았거나, 힌트 없이 최적보다 두 번 더 움직였습니다.</string>
+    <string name="help_star_system_0_stars">별 없음: 다른 모든 경우. 계속 연습해서 실력을 향상시키세요!</string>
+    <string name="help_star_system_hint_penalty">참고: 힌트를 사용하면 별점이 줄어들어, 독립적으로 퍼즐을 해결하도록 격려합니다.</string>
 </resources>

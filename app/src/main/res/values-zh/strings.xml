@@ -313,4 +313,18 @@
     <string name="west_a11y">西</string>
     <string name="empty_space_a11y">空格</string>
     
+    <!-- Help system -->
+    <string name="help_tips_section_title">提示</string>
+    <string name="help_tips_point_1">- 尝试用最少的步数解决谜题。</string>
+    <string name="help_tips_point_2">- 有时你需要将机器人移动到特定位置，为其他机器人清理路径。</string>
+    <string name="help_tips_point_3">- 如果遇到困难，使用提示功能获取建议。</string>
+    <string name="help_star_system_section_title">星级评分系统</string>
+    <string name="help_star_system_description">你在每个关卡的表现根据解决谜题的效率用星星评分：</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - 超优解决方案：你找到了比AI最优解决方案更好的解决方案！</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - 最优解决方案：你在不使用提示的情况下，用与AI最优解决方案相同的步数解决了问题。</string>
+    <string name="help_star_system_2_stars">⭐⭐ - 接近最优解决方案：你在不使用提示的情况下比最优多用了一步，或者用一个提示找到了最优解决方案。</string>
+    <string name="help_star_system_1_star">⭐ - 良好解决方案：你用两个提示找到了最优解决方案，或者在不使用提示的情况下比最优多用了两步。</string>
+    <string name="help_star_system_0_stars">无星：所有其他情况。继续练习以提高你的表现！</string>
+    <string name="help_star_system_hint_penalty">注意：使用提示会降低你的星级评分，鼓励你独立解决谜题。</string>
+    
 </resources>
