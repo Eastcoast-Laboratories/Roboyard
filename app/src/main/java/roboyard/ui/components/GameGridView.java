@@ -37,7 +37,12 @@ import timber.log.Timber;
  * Provides proper accessibility support for TalkBack.
  */
 public class GameGridView extends View {
-    // Configuration constants for robot paths
+    private static final String TAG = "GameGridView";
+    
+    // Ultra-verbose debug logging flag (higher than VERBOSE)
+    private static final boolean ENABLE_ULTRA_DEBUG = false; // Set to true for maximum detail
+    
+    // Grid and drawing properties
     private static final int PATH_STROKE_WIDTH = 6; // Width of the robot path lines
     private static final float BASE_ROBOT_OFFSET_RANGE = 25.0f; // Maximum random offset in pixels (will be -range to +range)
     private static final float PERPENDICULAR_OFFSET_STEP = 2.0f; // Pixels to offset per repeated traversal
@@ -617,18 +622,20 @@ public class GameGridView extends View {
         gridWidth = state.getWidth();
         gridHeight = state.getHeight();
         
-        // DEBUG: Count robots that will be drawn
-        int robotsDrawn = 0;
-        Timber.d("[DEBUG_ROBOTS] Starting debug of robots drawn in GameGridView.onDraw()");
-        for (GameElement element : state.getGameElements()) {
-            if (element.isRobot()) {
-                robotsDrawn++;
-                Timber.d("[DEBUG_ROBOTS] Will draw robot #%d at (%d,%d) with color %d (colorName: %s)",
-                        robotsDrawn, element.getX(), element.getY(), element.getColor(), 
-                        GameLogic.getColorName(element.getColor(), true));
+        // ULTRA-DEBUG: Count robots that will be drawn (only when ENABLE_ULTRA_DEBUG = true)
+        if (ENABLE_ULTRA_DEBUG) {
+            int robotsDrawn = 0;
+            Timber.d("[ULTRA_DEBUG_ROBOTS] Starting debug of robots drawn in GameGridView.onDraw()");
+            for (GameElement element : state.getGameElements()) {
+                if (element.isRobot()) {
+                    robotsDrawn++;
+                    Timber.d("[ULTRA_DEBUG_ROBOTS] Will draw robot #%d at (%d,%d) with color %d (colorName: %s)",
+                            robotsDrawn, element.getX(), element.getY(), element.getColor(), 
+                            GameLogic.getColorName(element.getColor(), true));
+                }
             }
+            Timber.d("[ULTRA_DEBUG_ROBOTS] Total robots to be drawn: %d", robotsDrawn);
         }
-        Timber.d("[DEBUG_ROBOTS] Total robots to be drawn: %d", robotsDrawn);
         
         // Calculate offsets to center the board
         float offsetX = (getWidth() - (gridWidth * cellSize)) / 2f;
