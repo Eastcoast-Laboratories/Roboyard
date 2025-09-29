@@ -569,7 +569,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         updateStatusText(getString(R.string.level_complete) + " " + starString.toString().trim(), true);
                         
                         String starsMessage = getString(R.string.level_stars_description, stars);
-                        Toast.makeText(requireContext(), starsMessage, Toast.LENGTH_LONG).show();
+                        // Toast.makeText(requireContext(), starsMessage, Toast.LENGTH_LONG).show();
 
                         // Announce level completion for accessibility
                         String completionMessage = getString(R.string.level_complete) + 

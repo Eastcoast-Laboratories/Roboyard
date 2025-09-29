@@ -1470,7 +1470,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
                 // Show a toast to indicate the level was completed
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(context, "Level " + state.getLevelId() + " completed!", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(context, "Level " + state.getLevelId() + " completed!", Toast.LENGTH_SHORT).show();
+                    Timber.d("Level " + state.getLevelId() + " completed!");
                 });
             }
         }
