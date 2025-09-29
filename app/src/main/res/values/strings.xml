@@ -249,7 +249,6 @@
     
     <!-- AI and game direction strings -->
     <string name="ai_solution_format">The A.I. found a solution in %1$d moves</string>
-    <string name="direction_less_than">less than</string>
     <string name="robot_color_down" comment="Instruction for robot movement downward">%1$s down</string>
     
     <!-- Accessibility versions -->

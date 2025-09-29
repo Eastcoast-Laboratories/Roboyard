@@ -45,7 +45,6 @@ dialog_button_exit
 dialog_button_no
 dialog_button_yes
 direction_east_a11y
-direction_less_than
 direction_north_a11y
 direction_south_a11y
 direction_west_a11y

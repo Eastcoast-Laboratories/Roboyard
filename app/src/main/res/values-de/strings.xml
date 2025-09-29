@@ -229,7 +229,6 @@
 
     <!-- AI and game direction strings -->
     <string name="ai_solution_format">Die KI hat eine Lösung in %1$d Zügen gefunden</string>
-    <string name="direction_less_than">weniger als</string>
     <string name="robot_color_down">%1$s nach unten</string>
     
     <!-- Accessibility versions -->

@@ -610,9 +610,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                                 completionMessage_a11y += " " + extraMessage;
                                 Timber.d("[COMPLETION_MESSAGE] Perfect solution: %d moves (optimal)", actualMoves);
                             } else {
-                                 // show hit to optimal moves if nohints were used
+                                 // show hint to optimal moves if nohints were used
                                 // show the hint step if the hint was shown already how many total moves were used
-                                String extraMessage = getString(R.string.pre_hint_less_than_x, actualMoves);
+                                String extraMessage;
+                                if (optimalMoves < 1) {
+                                    extraMessage = getString(R.string.no_solution_found) + "!";
+                                    Timber.d("[COMPLETION_MESSAGE] Optimal is less than 1 move (" + optimalMoves + "), showing no solution found");
+                                } else {
+                                    extraMessage = getString(R.string.pre_hint_less_than_x, actualMoves);
+
+                                }
                                 completionMessage += " \n" + extraMessage;
                                 completionMessage_a11y += " " + extraMessage;
                                 Timber.d("[COMPLETION_MESSAGE] Showing optimal moves: %d (actual: %d, no hints used)", optimalMoves, actualMoves);
