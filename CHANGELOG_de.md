@@ -2,10 +2,10 @@ Changelog Deutsch
 =================
 
 
-## Version 29 (2025-09-27)
-- Landscape-Modus hinzugefügt
+## Version 29 (2025-09-29)
+- Landscape-Modus hinzugefügt mit Toggle-Button für die Ausrichtung des Spielfeldes
 - Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
-
+- UI verbessert mit modernen Material Design Elementen
 
 ## Version 28 (2025-08-07)
 - Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.

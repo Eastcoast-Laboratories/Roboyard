@@ -1,2 +1,3 @@
-- Landscape-Modus hinzugefügt
+- Landscape-Modus hinzugefügt mit Toggle-Button für die Ausrichtung des Spielfeldes
 - Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
+- UI verbessert mit modernen Material Design Elementen

@@ -2,10 +2,10 @@
 =========
 
 
-## Version 29 (2025-09-27)
-- Added landscape mode
+## Version 29 (2025-09-29)
+- Added landscape mode with toggle button for left or right orientation of the gamegrid
 - fix Accessibility message where goal was announced one square off
-
+- enhance UI with modern material design elements
 
 ## Version 28 (2025-08-07)
 - New extra hint, which robots play a role in the solution.

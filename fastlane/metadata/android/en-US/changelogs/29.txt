@@ -1,2 +1,3 @@
-- Added landscape mode
+- Added landscape mode with toggle button for left or right orientation of the gamegrid
 - fix Accessibility message where goal was announced one square off
+- enhance UI with modern material design elements
