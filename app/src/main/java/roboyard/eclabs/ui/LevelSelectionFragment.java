@@ -77,8 +77,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Set title
         titleTextView.setText(getString(R.string.level_selection_title));
 
-        // Set up RecyclerView with grid layout (3 columns)
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
+        // Set up RecyclerView with grid layout (3 columns in portrait, 6 in landscape)
+        int spanCount = getResources().getConfiguration().orientation == 
+                android.content.res.Configuration.ORIENTATION_LANDSCAPE ? 6 : 3;
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
         levelRecyclerView.setLayoutManager(layoutManager);
 
         // Add a custom ItemDecoration to reduce spacing between grid items

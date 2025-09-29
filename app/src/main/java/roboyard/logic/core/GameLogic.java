@@ -344,6 +344,9 @@ public class GameLogic {
         typesOfRobots[0] = "robot_red";
         typesOfTargets[0] = "target_red";
 
+        // debug: set target to pink (red)
+        // typesOfTargets = new String[1]; typesOfTargets[0] = "target_red";
+
         // Store all positions of game elements to avoid overlapping
         ArrayList<GridElement> allElements = new ArrayList<>();
         

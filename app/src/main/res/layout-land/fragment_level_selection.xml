@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- Colorful border using tiled wall graphics -->
+    <ImageView
+        android:id="@+id/top_wall"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no"
+        android:focusable="false"
+        android:clickable="false"
+        android:contentDescription="@null"
+        />
+    
+    <ImageView
+        android:id="@+id/left_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    
+    <ImageView
+        android:id="@+id/right_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no"
+        />
+    
+    <ImageView
+        android:id="@+id/bottom_wall"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAccessibility="no"
+        />
+
+    <!-- Header area with title and stars in landscape orientation -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        app:layout_constraintTop_toBottomOf="@id/top_wall"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintEnd_toStartOf="@id/right_wall">
+
+        <!-- Title on the left -->
+        <TextView
+            android:id="@+id/level_selection_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/level_selection_title"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            android:textAlignment="textStart"
+            android:gravity="start|center_vertical"
+            android:textColor="#212121"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
+
+        <!-- Stars counter on the right -->
+        <TextView
+            android:id="@+id/stars_count_text"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/stars_count"
+            android:textSize="@dimen/stars_count_text_size"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:drawableStart="@drawable/star"
+            android:drawablePadding="0dp"
+            android:background="@drawable/button_rounded_blue_outline"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="#FFFFFF"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:minWidth="120dp" />
+
+    </LinearLayout>
+
+    <!-- Back button at the bottom of the screen with reduced height -->
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/back"
+        android:contentDescription="@string/back_description"
+        android:padding="4dp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="14dp"
+        android:background="@drawable/button_rounded_gray_outline"
+        app:layout_constraintEnd_toStartOf="@id/right_wall"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
+        app:layout_constraintWidth_max="200dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Scrollable content area for levels -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/header_layout"
+        app:layout_constraintBottom_toTopOf="@id/back_button"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintEnd_toStartOf="@id/right_wall">
+        
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <!-- RecyclerView for level grid with 6 columns in landscape -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/level_recycler_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
