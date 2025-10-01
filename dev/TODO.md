@@ -90,4 +90,7 @@ check if this all works:
 
 # most important
 
-Der Margin unter dem game grid ist zu klein, die untere Zeile des Games ist verdeckt. der game screen darf niemals verdeckt werden, er muss in der hchsten z-ebene liegen
+- Wenn man jetzt den bildschrm dreht, dreht er immer die app ausrichtung (landscape oder protrait) unabhngig von den einstellungen im system.
+die app soll aber der systemeinstellung für automatisch drehen gehorchen, also z.b. nicht drehen, wenn dies im system ausgeschaltet ist
+
+Wenn man den fullscreen ausschaltet, ist die app trotzdem noch bildschirmfüllend, das soll aber nicht, es soll dann die obere statuszeile des systems ihren eigenen platz haben, (also das normale verhalten, wie bei den meisten apps sonst auch)

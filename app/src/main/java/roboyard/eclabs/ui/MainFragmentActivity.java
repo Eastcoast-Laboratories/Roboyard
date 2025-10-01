@@ -6,6 +6,9 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -49,6 +52,10 @@ public class MainFragmentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Enable edge-to-edge display for modern Android versions
+        // This is safe for all versions as WindowCompat handles compatibility
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
         // Apply fullscreen mode if enabled
         applyFullscreenMode();
         
@@ -665,9 +672,64 @@ public class MainFragmentActivity extends AppCompatActivity {
     private void applyFullscreenMode() {
         // Check if fullscreen is enabled in preferences
         boolean fullscreenEnabled = Preferences.fullscreenEnabled;
-        
+
         if (fullscreenEnabled) {
-            // Apply fullscreen mode by hiding the system UI
+            // Apply fullscreen mode for edge-to-edge compatibility
+            applyFullscreenModeForEdgeToEdge();
+        } else {
+            // Apply normal mode for edge-to-edge compatibility
+            applyNormalModeForEdgeToEdge();
+        }
+    }
+
+    private void applyFullscreenModeForEdgeToEdge() {
+        try {
+            // Use modern WindowInsets API for API 30+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                WindowInsetsControllerCompat windowInsetsController =
+                    WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+                windowInsetsController.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            } else {
+                // Fallback for older Android versions
+                getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            }
+            Timber.d("[FULLSCREEN] Edge-to-edge fullscreen mode enabled");
+        } catch (Exception e) {
+            Timber.e(e, "[FULLSCREEN] Error applying edge-to-edge fullscreen mode, falling back to legacy");
+            // Fallback to legacy fullscreen
+            applyLegacyFullscreen();
+        }
+    }
+
+    private void applyNormalModeForEdgeToEdge() {
+        try {
+            // Use modern WindowInsets API for API 30+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                WindowInsetsControllerCompat windowInsetsController =
+                    WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            } else {
+                // Fallback for older Android versions
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            }
+            Timber.d("[FULLSCREEN] Edge-to-edge normal mode - system bars visible");
+        } catch (Exception e) {
+            Timber.e(e, "[FULLSCREEN] Error applying edge-to-edge normal mode, falling back to legacy");
+            // Fallback to legacy normal mode
+            applyLegacyNormalMode();
+        }
+    }
+
+    private void applyLegacyFullscreen() {
+        try {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -675,12 +737,18 @@ public class MainFragmentActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_FULLSCREEN);
-            
-            Timber.d("[FULLSCREEN] Fullscreen mode enabled");
-        } else {
-            // Ensure normal mode with system UI visible
+            Timber.d("[FULLSCREEN] Legacy fullscreen mode applied");
+        } catch (Exception e) {
+            Timber.e(e, "[FULLSCREEN] Error applying legacy fullscreen");
+        }
+    }
+
+    private void applyLegacyNormalMode() {
+        try {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-            Timber.d("[FULLSCREEN] Fullscreen mode disabled");
+            Timber.d("[FULLSCREEN] Legacy normal mode applied");
+        } catch (Exception e) {
+            Timber.e(e, "[FULLSCREEN] Error applying legacy normal mode");
         }
     }
 }
