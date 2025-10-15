@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.RoboyardApplication;
 import roboyard.eclabs.ui.MainFragmentActivity;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
@@ -882,6 +883,9 @@ public class SettingsFragment extends Fragment {
         config.setLocale(locale);
         
         resources.updateConfiguration(config, resources.getDisplayMetrics());
+        
+        // Update the application context locale so difficulty strings use the correct language
+        RoboyardApplication.updateAppContextLocale();
         
         // If TalkBack language is set to "Same as app", update it as well
         if (Preferences.talkbackLanguage.equals(getString(R.string.language_same_as_app))) {
