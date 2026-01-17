@@ -407,6 +407,10 @@
     <string name="settings_fullscreen">Fullscreen Mode:</string>
     <string name="settings_fullscreen_a11y">Toggle fullscreen mode</string>
     <string name="settings_fullscreen_applying">Applying Fullscreen settings</string>
+    <string name="settings_puzzle_parameters">Puzzle Parameters:</string>
+    <string name="settings_min_solution_moves">Min Solution Moves:</string>
+    <string name="settings_max_solution_moves">Max Solution Moves:</string>
+    <string name="settings_allow_multicolor_target">Allow Multicolor Target:</string>
     
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>

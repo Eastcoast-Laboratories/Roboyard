@@ -75,6 +75,13 @@ public class SettingsFragment extends Fragment {
     private Spinner talkbackLanguageSpinner;
     private LinearLayout talkbackLanguageContainer;
     
+    // Puzzle parameter settings
+    private Spinner minSolutionMovesSpinner;
+    private Spinner maxSolutionMovesSpinner;
+    private RadioGroup allowMulticolorTargetRadioGroup;
+    private RadioButton allowMulticolorTargetYes;
+    private RadioButton allowMulticolorTargetNo;
+    
     private List<int[]> validBoardSizes;
     
     // Add a flag to track if this is the first selection event
@@ -177,6 +184,13 @@ public class SettingsFragment extends Fragment {
             talkbackLanguageSpinner = view.findViewById(R.id.talkback_language_spinner);
             talkbackLanguageContainer = view.findViewById(R.id.talkback_language_container);
             
+            // Puzzle parameter settings
+            minSolutionMovesSpinner = view.findViewById(R.id.min_solution_moves_spinner);
+            maxSolutionMovesSpinner = view.findViewById(R.id.max_solution_moves_spinner);
+            allowMulticolorTargetRadioGroup = view.findViewById(R.id.allow_multicolor_target_radio_group);
+            allowMulticolorTargetYes = view.findViewById(R.id.allow_multicolor_target_yes);
+            allowMulticolorTargetNo = view.findViewById(R.id.allow_multicolor_target_no);
+            
             // Set up board size options
             setupBoardSizeOptions();
             
@@ -188,6 +202,9 @@ public class SettingsFragment extends Fragment {
             
             // Set up language spinners
             setupLanguageSpinners();
+            
+            // Set up puzzle parameter spinners
+            setupSolutionMovesSpinners();
             
             // Load current settings
             loadSettings();
@@ -627,6 +644,25 @@ public class SettingsFragment extends Fragment {
                 if (targetCountContainer != null) targetCountContainer.setVisibility(View.VISIBLE);
             }
             
+            // Load puzzle parameters
+            int minMoves = Preferences.minSolutionMoves;
+            int maxMoves = Preferences.maxSolutionMoves;
+            boolean allowMulticolor = Preferences.allowMulticolorTarget;
+            
+            if (minSolutionMovesSpinner != null && minMoves >= 1 && minMoves <= 20) {
+                minSolutionMovesSpinner.setSelection(minMoves - 1);
+            }
+            if (maxSolutionMovesSpinner != null && maxMoves >= 1 && maxMoves <= 20) {
+                maxSolutionMovesSpinner.setSelection(maxMoves - 1);
+            }
+            if (allowMulticolorTargetRadioGroup != null) {
+                if (allowMulticolor) {
+                    if (allowMulticolorTargetYes != null) allowMulticolorTargetYes.setChecked(true);
+                } else {
+                    if (allowMulticolorTargetNo != null) allowMulticolorTargetNo.setChecked(true);
+                }
+            }
+            
             isUpdatingUI = false;
             Timber.d("Settings loaded successfully");
         } catch (Exception e) {
@@ -776,6 +812,101 @@ public class SettingsFragment extends Fragment {
             });
         } catch (Exception e) {
             Timber.e(e, "Error setting up target colors spinner");
+        }
+    }
+    
+    /**
+     * Sets up the solution moves spinners (min and max)
+     */
+    private void setupSolutionMovesSpinners() {
+        try {
+            if (minSolutionMovesSpinner == null || maxSolutionMovesSpinner == null) {
+                Timber.e("setupSolutionMovesSpinners: One or both spinners are null");
+                return;
+            }
+            
+            // Create adapter with values 1-20
+            ArrayAdapter<Integer> minAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
+            minAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            for (int i = 1; i <= 20; i++) {
+                minAdapter.add(i);
+            }
+            minSolutionMovesSpinner.setAdapter(minAdapter);
+            
+            ArrayAdapter<Integer> maxAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
+            maxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            for (int i = 1; i <= 20; i++) {
+                maxAdapter.add(i);
+            }
+            maxSolutionMovesSpinner.setAdapter(maxAdapter);
+            
+            // Set current values from preferences
+            int minMoves = Preferences.minSolutionMoves;
+            int maxMoves = Preferences.maxSolutionMoves;
+            
+            if (minMoves >= 1 && minMoves <= 20) {
+                minSolutionMovesSpinner.setSelection(minMoves - 1);
+            }
+            if (maxMoves >= 1 && maxMoves <= 20) {
+                maxSolutionMovesSpinner.setSelection(maxMoves - 1);
+            }
+            
+            // Set listeners
+            minSolutionMovesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        int selectedMin = position + 1;
+                        int currentMax = Preferences.maxSolutionMoves;
+                        
+                        if (selectedMin > currentMax) {
+                            selectedMin = currentMax;
+                            minSolutionMovesSpinner.setSelection(selectedMin - 1);
+                            Toast.makeText(requireContext(), 
+                                    "Min moves cannot exceed max moves", 
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        
+                        Preferences.setMinSolutionMoves(selectedMin);
+                        Timber.d("[PREFERENCES] Min solution moves set to %d", selectedMin);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error processing min solution moves selection");
+                    }
+                }
+                
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+            
+            maxSolutionMovesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        int selectedMax = position + 1;
+                        int currentMin = Preferences.minSolutionMoves;
+                        
+                        if (selectedMax < currentMin) {
+                            selectedMax = currentMin;
+                            maxSolutionMovesSpinner.setSelection(selectedMax - 1);
+                            Toast.makeText(requireContext(), 
+                                    "Max moves cannot be less than min moves", 
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        
+                        Preferences.setMaxSolutionMoves(selectedMax);
+                        Timber.d("[PREFERENCES] Max solution moves set to %d", selectedMax);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error processing max solution moves selection");
+                    }
+                }
+                
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+        } catch (Exception e) {
+            Timber.e(e, "Error setting up solution moves spinners");
         }
     }
     
@@ -1095,6 +1226,9 @@ public class SettingsFragment extends Fragment {
                         if (difficulty == Constants.DIFFICULTY_BEGINNER && previousDifficulty != Constants.DIFFICULTY_BEGINNER) {
                             adjustBoardSizeForBeginnerMode();
                         }
+                        
+                        // Automatically adjust puzzle parameters based on difficulty
+                        adjustPuzzleParametersForDifficulty(difficulty);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing difficulty selection");
                     }
@@ -1253,6 +1387,24 @@ public class SettingsFragment extends Fragment {
                 Timber.e("[GAME_MODE] gameModeRadioGroup is null");
             }
             
+            // Allow multicolor target radio group
+            if (allowMulticolorTargetRadioGroup != null) {
+                allowMulticolorTargetRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                    try {
+                        if (isUpdatingUI) return;
+                        
+                        boolean allowMulticolor = checkedId == R.id.allow_multicolor_target_yes;
+                        
+                        Preferences.setAllowMulticolorTarget(allowMulticolor);
+                        Timber.d("[PREFERENCES] Allow multicolor target set to %b", allowMulticolor);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error processing allow multicolor target selection");
+                    }
+                });
+            } else {
+                Timber.e("allowMulticolorTargetRadioGroup is null");
+            }
+            
             // Back button
             if (backButton != null) {
                 backButton.setOnClickListener(v -> {
@@ -1322,6 +1474,75 @@ public class SettingsFragment extends Fragment {
         } catch (Exception e) {
             Timber.e(e, "Error adjusting board size for beginner mode");
             isUpdatingUI = false; // Reset flag in case of error
+        }
+    }
+    
+    /**
+     * Adjust puzzle parameters (min/max moves and multicolor target) based on difficulty level
+     * Mirrors the difficulty settings from README.md
+     */
+    private void adjustPuzzleParametersForDifficulty(int difficulty) {
+        try {
+            isUpdatingUI = true;
+            
+            int minMoves = 4;
+            int maxMoves = 6;
+            boolean allowMulticolor = true;
+            
+            switch (difficulty) {
+                case Constants.DIFFICULTY_BEGINNER:
+                    // Beginner: 4-6 moves, multicolor allowed
+                    minMoves = 4;
+                    maxMoves = 6;
+                    allowMulticolor = true;
+                    break;
+                case Constants.DIFFICULTY_ADVANCED:
+                    // Advanced: 6-10 moves, no multicolor
+                    minMoves = 6;
+                    maxMoves = 10;
+                    allowMulticolor = false;
+                    break;
+                case Constants.DIFFICULTY_INSANE:
+                    // Insane: 10+ moves, no multicolor
+                    minMoves = 10;
+                    maxMoves = 20;
+                    allowMulticolor = false;
+                    break;
+                case Constants.DIFFICULTY_IMPOSSIBLE:
+                    // Impossible: 17+ moves, no multicolor
+                    minMoves = 17;
+                    maxMoves = 20;
+                    allowMulticolor = false;
+                    break;
+            }
+            
+            // Update preferences
+            Preferences.setMinSolutionMoves(minMoves);
+            Preferences.setMaxSolutionMoves(maxMoves);
+            Preferences.setAllowMulticolorTarget(allowMulticolor);
+            
+            // Update UI
+            if (minSolutionMovesSpinner != null) {
+                minSolutionMovesSpinner.setSelection(minMoves - 1);
+            }
+            if (maxSolutionMovesSpinner != null) {
+                maxSolutionMovesSpinner.setSelection(maxMoves - 1);
+            }
+            if (allowMulticolorTargetRadioGroup != null) {
+                if (allowMulticolor) {
+                    if (allowMulticolorTargetYes != null) allowMulticolorTargetYes.setChecked(true);
+                } else {
+                    if (allowMulticolorTargetNo != null) allowMulticolorTargetNo.setChecked(true);
+                }
+            }
+            
+            Timber.d("[DIFFICULTY_PARAMS] Adjusted puzzle parameters for difficulty %d: min=%d, max=%d, allowMulticolor=%b", 
+                    difficulty, minMoves, maxMoves, allowMulticolor);
+            
+            isUpdatingUI = false;
+        } catch (Exception e) {
+            Timber.e(e, "Error adjusting puzzle parameters for difficulty");
+            isUpdatingUI = false;
         }
     }
     

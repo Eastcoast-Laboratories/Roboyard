@@ -2225,43 +2225,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Gets the minimum required moves based on current difficulty setting
+     * Uses configurable preferences if available, otherwise falls back to defaults
      *
      * @return minimum number of moves required for current difficulty
      */
     private int getMinimumRequiredMoves() {
-        int difficulty = Preferences.difficulty;
-        int minMoves = 0;
-        switch (difficulty) {
-            case Constants.DIFFICULTY_ADVANCED:
-                minMoves = MIN_MOVES_ADVANCED;
-                break;
-            case Constants.DIFFICULTY_INSANE:
-                minMoves = MIN_MOVES_INSANE;
-                break;
-            case Constants.DIFFICULTY_IMPOSSIBLE:
-                minMoves = MIN_MOVES_IMPOSSIBLE;
-                break;
-            default:
-                minMoves = MIN_MOVES_BEGINNER; // Default to beginner if unknown difficulty
-        }
-        Timber.d("[SOLUTION_SOLVER][MOVES] Minimum required moves for difficulty %d: %d", difficulty, minMoves);
+        int minMoves = Preferences.minSolutionMoves;
+        Timber.d("[SOLUTION_SOLVER][MOVES] Minimum required moves from preferences: %d", minMoves);
         return minMoves;
     }
 
     private int getMaximumRequiredMoves() {
-        int difficulty = Preferences.difficulty;
-        int maxMoves = 9999;
-        switch (difficulty) {
-            case Constants.DIFFICULTY_ADVANCED:
-                maxMoves = MAX_MOVES_ADVANCED;
-                break;
-            case Constants.DIFFICULTY_INSANE:
-            case Constants.DIFFICULTY_IMPOSSIBLE:
-                break;
-            default:
-                maxMoves = MAX_MOVES_BEGINNER;
-        }
-        Timber.d("[SOLUTION_SOLVER][MOVES] Maximum required moves for difficulty %d: %d", difficulty, maxMoves);
+        int maxMoves = Preferences.maxSolutionMoves;
+        Timber.d("[SOLUTION_SOLVER][MOVES] Maximum required moves from preferences: %d", maxMoves);
         return maxMoves;
     }
 

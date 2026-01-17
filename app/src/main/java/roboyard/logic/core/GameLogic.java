@@ -111,6 +111,9 @@ public class GameLogic {
         // Store the current level for use in other methods
         currentLevel = level;
         
+        // Use configurable preference for multicolor target, or fall back to difficulty-based setting
+        allowMulticolorTarget = Preferences.allowMulticolorTarget;
+        
         Timber.d("[DIFFICULTY] Setting difficulty level %d (BEGINNER=%d, ADVANCED=%d, INSANE=%d, IMPOSSIBLE=%d)", 
                 level, DIFFICULTY_BEGINNER, DIFFICULTY_ADVANCED, DIFFICULTY_INSANE, DIFFICULTY_IMPOSSIBLE);
         
@@ -123,8 +126,6 @@ public class GameLogic {
             targetMustBeInCorner = false;
             Timber.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement");
 
-            allowMulticolorTarget = false;
-
             maxWallsInOneVerticalCol = 3;
             maxWallsInOneHorizontalRow = 3;
             wallsPerQuadrant = (int) (boardWidth/3.3);
@@ -133,8 +134,6 @@ public class GameLogic {
         } else { 
             // Keep targetMustBeInCorner = true
             Timber.d("[DIFFICULTY] Using INSANE or IMPOSSIBLE settings");
-            
-            allowMulticolorTarget = false;
 
             loneWallsAllowed = true;
             
@@ -156,8 +155,8 @@ public class GameLogic {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
         
-        Timber.d("[DIFFICULTY] Final settings: targetMustBeInCorner=%b, maxWallsInOneVerticalCol=%d, maxWallsInOneHorizontalRow=%d, wallsPerQuadrant=%d, boardSize=%dx%d", 
-                targetMustBeInCorner, maxWallsInOneVerticalCol, maxWallsInOneHorizontalRow, wallsPerQuadrant, boardWidth, boardHeight);
+        Timber.d("[DIFFICULTY] Final settings: targetMustBeInCorner=%b, allowMulticolorTarget=%b, maxWallsInOneVerticalCol=%d, maxWallsInOneHorizontalRow=%d, wallsPerQuadrant=%d, boardSize=%dx%d", 
+                targetMustBeInCorner, allowMulticolorTarget, maxWallsInOneVerticalCol, maxWallsInOneHorizontalRow, wallsPerQuadrant, boardWidth, boardHeight);
     }
     
     /**

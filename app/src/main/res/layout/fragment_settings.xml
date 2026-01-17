@@ -171,6 +171,110 @@
                     android:contentDescription="Impossible difficulty" />
             </RadioGroup>
 
+            <!-- Puzzle Parameters Section -->
+            <TextView
+                android:id="@+id/puzzle_parameters_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_puzzle_parameters"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Min Solution Moves -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_min_solution_moves"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#ffffff"
+                    android:gravity="center_vertical" />
+
+                <Spinner
+                    android:id="@+id/min_solution_moves_spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Select minimum solution moves"
+                    android:minHeight="48dp" />
+            </LinearLayout>
+
+            <!-- Max Solution Moves -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_max_solution_moves"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#ffffff"
+                    android:gravity="center_vertical" />
+
+                <Spinner
+                    android:id="@+id/max_solution_moves_spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Select maximum solution moves"
+                    android:minHeight="48dp" />
+            </LinearLayout>
+
+            <!-- Allow Multicolor Target -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_allow_multicolor_target"
+                android:textSize="@dimen/settings_option_text_size"
+                android:textColor="#ffffff"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/allow_multicolor_target_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/allow_multicolor_target_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_yes"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Allow multicolor targets"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+
+                <RadioButton
+                    android:id="@+id/allow_multicolor_target_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_no"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Disallow multicolor targets"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+            </RadioGroup>
+
             <!-- New Map Section -->
             <TextView
                 android:id="@+id/new_map_label"

@@ -30,6 +30,9 @@ public class Preferences {
     private static final String KEY_TALKBACK_LANGUAGE = "talkback_language";
     private static final String KEY_GAME_MODE = "game_mode";
     private static final String KEY_FULLSCREEN_ENABLED = "fullscreen_enabled";
+    private static final String KEY_MIN_SOLUTION_MOVES = "min_solution_moves";
+    private static final String KEY_MAX_SOLUTION_MOVES = "max_solution_moves";
+    private static final String KEY_ALLOW_MULTICOLOR_TARGET = "allow_multicolor_target";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -44,6 +47,9 @@ public class Preferences {
     public static final String DEFAULT_TALKBACK_LANGUAGE = "same";
     public static final int DEFAULT_GAME_MODE = Constants.GAME_MODE_STANDARD;
     public static final boolean DEFAULT_FULLSCREEN_ENABLED = true;
+    public static final int DEFAULT_MIN_SOLUTION_MOVES = 4;
+    public static final int DEFAULT_MAX_SOLUTION_MOVES = 6;
+    public static final boolean DEFAULT_ALLOW_MULTICOLOR_TARGET = true;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -58,6 +64,9 @@ public class Preferences {
     public static String talkbackLanguage;
     public static int gameMode;
     public static boolean fullscreenEnabled;
+    public static int minSolutionMoves;
+    public static int maxSolutionMoves;
+    public static boolean allowMulticolorTarget;
     
     // For compatibility with existing code
     public static int boardSizeX;
@@ -280,6 +289,30 @@ public class Preferences {
                 fullscreenEnabled = DEFAULT_FULLSCREEN_ENABLED;
             }
             
+            try {
+                minSolutionMoves = prefs.getInt(KEY_MIN_SOLUTION_MOVES, DEFAULT_MIN_SOLUTION_MOVES);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading min solution moves: %s", e.getMessage());
+                prefs.edit().remove(KEY_MIN_SOLUTION_MOVES).apply();
+                minSolutionMoves = DEFAULT_MIN_SOLUTION_MOVES;
+            }
+            
+            try {
+                maxSolutionMoves = prefs.getInt(KEY_MAX_SOLUTION_MOVES, DEFAULT_MAX_SOLUTION_MOVES);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading max solution moves: %s", e.getMessage());
+                prefs.edit().remove(KEY_MAX_SOLUTION_MOVES).apply();
+                maxSolutionMoves = DEFAULT_MAX_SOLUTION_MOVES;
+            }
+            
+            try {
+                allowMulticolorTarget = prefs.getBoolean(KEY_ALLOW_MULTICOLOR_TARGET, DEFAULT_ALLOW_MULTICOLOR_TARGET);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading allow multicolor target: %s", e.getMessage());
+                prefs.edit().remove(KEY_ALLOW_MULTICOLOR_TARGET).apply();
+                allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET;
+            }
+            
             // For compatibility with existing code
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
@@ -314,6 +347,9 @@ public class Preferences {
         talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE;
         gameMode = DEFAULT_GAME_MODE;
         fullscreenEnabled = DEFAULT_FULLSCREEN_ENABLED;
+        minSolutionMoves = DEFAULT_MIN_SOLUTION_MOVES;
+        maxSolutionMoves = DEFAULT_MAX_SOLUTION_MOVES;
+        allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET;
         
         // Clear all preferences
         if (prefs != null) {
@@ -884,5 +920,80 @@ public class Preferences {
         // For any other keys, save the value directly
         prefs.edit().putString(key, value).apply();
         Timber.d("[PREFERENCES] Set custom preference %s = %s", key, value);
+    }
+    
+    /**
+     * Set the minimum solution moves and save to preferences
+     * @param moves Minimum number of moves required for a solution
+     */
+    public static void setMinSolutionMoves(int moves) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setMinSolutionMoves, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                minSolutionMoves = moves;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_MIN_SOLUTION_MOVES, moves);
+        editor.apply();
+        
+        minSolutionMoves = moves;
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Min solution moves set to %d", moves);
+    }
+    
+    /**
+     * Set the maximum solution moves and save to preferences
+     * @param moves Maximum number of moves required for a solution
+     */
+    public static void setMaxSolutionMoves(int moves) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setMaxSolutionMoves, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                maxSolutionMoves = moves;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_MAX_SOLUTION_MOVES, moves);
+        editor.apply();
+        
+        maxSolutionMoves = moves;
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Max solution moves set to %d", moves);
+    }
+    
+    /**
+     * Set whether multicolor targets are allowed and save to preferences
+     * @param allowed True to allow multicolor targets, false to disallow
+     */
+    public static void setAllowMulticolorTarget(boolean allowed) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setAllowMulticolorTarget, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                allowMulticolorTarget = allowed;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_ALLOW_MULTICOLOR_TARGET, allowed);
+        editor.apply();
+        
+        allowMulticolorTarget = allowed;
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Allow multicolor target set to %b", allowed);
     }
 }
