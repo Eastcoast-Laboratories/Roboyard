@@ -669,13 +669,28 @@ public class GameGridView extends View {
                     
                     // Set bounds and draw the rotated tile
                     gridTileDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
+                    
+                    // Apply high contrast lightening effect
+                    if (Preferences.highContrastMode) {
+                        gridTileDrawable.setColorFilter(Color.WHITE, android.graphics.PorterDuff.Mode.LIGHTEN);
+                    }
+                    
                     gridTileDrawable.draw(canvas);
+                    
+                    // Remove color filter after drawing
+                    if (Preferences.highContrastMode) {
+                        gridTileDrawable.setColorFilter(null);
+                    }
                     
                     // Restore the canvas to its original state
                     canvas.restore();
                 } else {
                     // Fallback to colored background if drawable is not available
-                    cellPaint.setColor(Color.rgb(30, 30, 60));
+                    if (Preferences.highContrastMode) {
+                        cellPaint.setColor(Color.WHITE);
+                    } else {
+                        cellPaint.setColor(Color.rgb(30, 30, 60));
+                    }
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
                 
@@ -938,8 +953,22 @@ public class GameGridView extends View {
                 (int) (left + offsetX2 + size), 
                 (int) (top + offsetY2 + size));
         
-        // Draw the sprite
+        // Draw the robot
         robotDrawable.draw(canvas);
+        
+        /* Apply high contrast darkening overlay for green robot
+        if (Preferences.highContrastMode && robotColor == GameElement.COLOR_GREEN) {
+            // Draw a semi-transparent dark green overlay to darken the green robot
+            Paint darkGreenPaint = new Paint();
+            darkGreenPaint.setColor(Color.rgb(0, 80, 0));
+            darkGreenPaint.setAlpha(55); // Semi-transparent
+            canvas.drawRect(
+                    robotDrawable.getBounds().left,
+                    robotDrawable.getBounds().top,
+                    robotDrawable.getBounds().right,
+                    robotDrawable.getBounds().bottom,
+                    darkGreenPaint);
+        } */
         
         // Draw position text when accessibility features are enabled
         if (isSelected && isAccessibilityActive()) {
