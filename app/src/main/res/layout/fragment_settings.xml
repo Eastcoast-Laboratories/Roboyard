@@ -188,24 +188,44 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="@string/settings_min_solution_moves"
                     android:textSize="@dimen/settings_option_text_size"
                     android:textColor="#ffffff"
-                    android:gravity="center_vertical" />
+                    android:layout_marginEnd="8dp" />
 
-                <Spinner
-                    android:id="@+id/min_solution_moves_spinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="Select minimum solution moves"
-                    android:minHeight="48dp" />
+                <Button
+                    android:id="@+id/min_solution_moves_minus"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="-"
+                    android:textSize="18sp"
+                    android:contentDescription="Decrease minimum moves"
+                    android:layout_marginEnd="4dp" />
+
+                <EditText
+                    android:id="@+id/min_solution_moves_input"
+                    android:layout_width="60dp"
+                    android:layout_height="48dp"
+                    android:inputType="number"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#ffffff"
+                    android:backgroundTint="#ffffff"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/min_solution_moves_plus"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="+"
+                    android:textSize="18sp"
+                    android:contentDescription="Increase minimum moves" />
             </LinearLayout>
 
             <!-- Max Solution Moves -->
@@ -213,24 +233,54 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="@string/settings_max_solution_moves"
                     android:textSize="@dimen/settings_option_text_size"
                     android:textColor="#ffffff"
-                    android:gravity="center_vertical" />
+                    android:layout_marginEnd="8dp" />
 
-                <Spinner
-                    android:id="@+id/max_solution_moves_spinner"
-                    android:layout_width="0dp"
+                <Button
+                    android:id="@+id/max_solution_moves_minus"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="-"
+                    android:textSize="18sp"
+                    android:contentDescription="Decrease maximum moves"
+                    android:layout_marginEnd="4dp" />
+
+                <EditText
+                    android:id="@+id/max_solution_moves_input"
+                    android:layout_width="60dp"
+                    android:layout_height="48dp"
+                    android:inputType="number"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#ffffff"
+                    android:backgroundTint="#ffffff"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/max_solution_moves_plus"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="+"
+                    android:textSize="18sp"
+                    android:contentDescription="Increase maximum moves" />
+
+                <TextView
+                    android:id="@+id/max_solution_moves_infinity"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="Select maximum solution moves"
-                    android:minHeight="48dp" />
+                    android:text="∞"
+                    android:textSize="24sp"
+                    android:textColor="#ffffff"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <!-- Allow Multicolor Target -->
@@ -271,6 +321,49 @@
                     android:focusable="true"
                     android:clickable="true"
                     android:contentDescription="Disallow multicolor targets"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+            </RadioGroup>
+
+            <!-- High Contrast Mode Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_high_contrast_mode"
+                android:textSize="@dimen/settings_option_text_size"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/high_contrast_mode_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/high_contrast_mode_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_yes"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Enable high contrast mode"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+
+                <RadioButton
+                    android:id="@+id/high_contrast_mode_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_no"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Disable high contrast mode"
                     android:textColor="#ffffff"
                     android:buttonTint="#ffffff" />
             </RadioGroup>

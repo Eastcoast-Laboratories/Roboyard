@@ -33,6 +33,7 @@ public class Preferences {
     private static final String KEY_MIN_SOLUTION_MOVES = "min_solution_moves";
     private static final String KEY_MAX_SOLUTION_MOVES = "max_solution_moves";
     private static final String KEY_ALLOW_MULTICOLOR_TARGET = "allow_multicolor_target";
+    private static final String KEY_HIGH_CONTRAST_MODE = "high_contrast_mode";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -50,6 +51,7 @@ public class Preferences {
     public static final int DEFAULT_MIN_SOLUTION_MOVES = 4;
     public static final int DEFAULT_MAX_SOLUTION_MOVES = 6;
     public static final boolean DEFAULT_ALLOW_MULTICOLOR_TARGET = true;
+    public static final boolean DEFAULT_HIGH_CONTRAST_MODE = false;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -67,6 +69,7 @@ public class Preferences {
     public static int minSolutionMoves;
     public static int maxSolutionMoves;
     public static boolean allowMulticolorTarget;
+    public static boolean highContrastMode;
     
     // For compatibility with existing code
     public static int boardSizeX;
@@ -313,6 +316,14 @@ public class Preferences {
                 allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET;
             }
             
+            try {
+                highContrastMode = prefs.getBoolean(KEY_HIGH_CONTRAST_MODE, DEFAULT_HIGH_CONTRAST_MODE);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading high contrast mode: %s", e.getMessage());
+                prefs.edit().remove(KEY_HIGH_CONTRAST_MODE).apply();
+                highContrastMode = DEFAULT_HIGH_CONTRAST_MODE;
+            }
+            
             // For compatibility with existing code
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
@@ -350,6 +361,7 @@ public class Preferences {
         minSolutionMoves = DEFAULT_MIN_SOLUTION_MOVES;
         maxSolutionMoves = DEFAULT_MAX_SOLUTION_MOVES;
         allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET;
+        highContrastMode = DEFAULT_HIGH_CONTRAST_MODE;
         
         // Clear all preferences
         if (prefs != null) {
@@ -995,5 +1007,30 @@ public class Preferences {
         allowMulticolorTarget = allowed;
         notifyPreferencesChanged();
         Timber.d("[PREFERENCES] Allow multicolor target set to %b", allowed);
+    }
+    
+    /**
+     * Set high contrast mode and save to preferences
+     * @param enabled True to enable high contrast mode, false to disable
+     */
+    public static void setHighContrastMode(boolean enabled) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setHighContrastMode, attempting to initialize");
+            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                highContrastMode = enabled;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_HIGH_CONTRAST_MODE, enabled);
+        editor.apply();
+        
+        highContrastMode = enabled;
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] High contrast mode set to %b", enabled);
     }
 }

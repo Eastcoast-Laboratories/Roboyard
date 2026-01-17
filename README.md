@@ -44,10 +44,10 @@ The game is fully playable for blind players and supports all accessibility feat
 
 # Difficulty
 - Beginner
-  - show any puzzles with solutions with at least 4-6 moves
+  - show any puzzles with solutions with 4-6 moves
   - targets are always in corners with two walls
 - Advanced
-  - solutions with at least 6-10 moves
+  - solutions with 6-10 moves
   - three lines allowed in the same row/column
   - no multi-color target
 - Insane mode

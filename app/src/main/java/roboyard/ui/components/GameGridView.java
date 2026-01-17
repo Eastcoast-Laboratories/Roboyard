@@ -679,8 +679,12 @@ public class GameGridView extends View {
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
                 
-                // Draw grid lines (disabled)
-                gridPaint.setColor(Color.parseColor("#4ae600")); // green gridstrokes
+                // Draw grid lines with high contrast mode support
+                if (Preferences.highContrastMode) {
+                    gridPaint.setColor(Color.parseColor("#7fff00")); // bright lime green for high contrast
+                } else {
+                    gridPaint.setColor(Color.parseColor("#4ae600")); // standard green gridstrokes
+                }
                 canvas.drawRect(left, top, right, bottom, gridPaint);
                 
                 // Highlight focused cell for accessibility

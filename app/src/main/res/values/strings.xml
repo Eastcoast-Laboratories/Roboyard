@@ -411,6 +411,7 @@
     <string name="settings_min_solution_moves">Min Solution Moves:</string>
     <string name="settings_max_solution_moves">Max Solution Moves:</string>
     <string name="settings_allow_multicolor_target">Allow Multicolor Target:</string>
+    <string name="settings_high_contrast_mode">High Contrast Mode:</string>
     
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -76,11 +77,20 @@ public class SettingsFragment extends Fragment {
     private LinearLayout talkbackLanguageContainer;
     
     // Puzzle parameter settings
-    private Spinner minSolutionMovesSpinner;
-    private Spinner maxSolutionMovesSpinner;
+    private EditText minSolutionMovesInput;
+    private EditText maxSolutionMovesInput;
+    private Button minSolutionMovesMinus;
+    private Button minSolutionMovesPlus;
+    private Button maxSolutionMovesMinus;
+    private Button maxSolutionMovesPlus;
+    private TextView maxSolutionMovesInfinity;
     private RadioGroup allowMulticolorTargetRadioGroup;
     private RadioButton allowMulticolorTargetYes;
     private RadioButton allowMulticolorTargetNo;
+    
+    private RadioGroup highContrastModeRadioGroup;
+    private RadioButton highContrastModeYes;
+    private RadioButton highContrastModeNo;
     
     private List<int[]> validBoardSizes;
     
@@ -185,11 +195,20 @@ public class SettingsFragment extends Fragment {
             talkbackLanguageContainer = view.findViewById(R.id.talkback_language_container);
             
             // Puzzle parameter settings
-            minSolutionMovesSpinner = view.findViewById(R.id.min_solution_moves_spinner);
-            maxSolutionMovesSpinner = view.findViewById(R.id.max_solution_moves_spinner);
+            minSolutionMovesInput = view.findViewById(R.id.min_solution_moves_input);
+            maxSolutionMovesInput = view.findViewById(R.id.max_solution_moves_input);
+            minSolutionMovesMinus = view.findViewById(R.id.min_solution_moves_minus);
+            minSolutionMovesPlus = view.findViewById(R.id.min_solution_moves_plus);
+            maxSolutionMovesMinus = view.findViewById(R.id.max_solution_moves_minus);
+            maxSolutionMovesPlus = view.findViewById(R.id.max_solution_moves_plus);
+            maxSolutionMovesInfinity = view.findViewById(R.id.max_solution_moves_infinity);
             allowMulticolorTargetRadioGroup = view.findViewById(R.id.allow_multicolor_target_radio_group);
             allowMulticolorTargetYes = view.findViewById(R.id.allow_multicolor_target_yes);
             allowMulticolorTargetNo = view.findViewById(R.id.allow_multicolor_target_no);
+            
+            highContrastModeRadioGroup = view.findViewById(R.id.high_contrast_mode_radio_group);
+            highContrastModeYes = view.findViewById(R.id.high_contrast_mode_yes);
+            highContrastModeNo = view.findViewById(R.id.high_contrast_mode_no);
             
             // Set up board size options
             setupBoardSizeOptions();
@@ -649,17 +668,27 @@ public class SettingsFragment extends Fragment {
             int maxMoves = Preferences.maxSolutionMoves;
             boolean allowMulticolor = Preferences.allowMulticolorTarget;
             
-            if (minSolutionMovesSpinner != null && minMoves >= 1 && minMoves <= 20) {
-                minSolutionMovesSpinner.setSelection(minMoves - 1);
+            if (minSolutionMovesInput != null) {
+                minSolutionMovesInput.setText(String.valueOf(minMoves));
             }
-            if (maxSolutionMovesSpinner != null && maxMoves >= 1 && maxMoves <= 20) {
-                maxSolutionMovesSpinner.setSelection(maxMoves - 1);
+            if (maxSolutionMovesInput != null) {
+                updateMaxMovesDisplay(maxMoves);
             }
             if (allowMulticolorTargetRadioGroup != null) {
                 if (allowMulticolor) {
                     if (allowMulticolorTargetYes != null) allowMulticolorTargetYes.setChecked(true);
                 } else {
                     if (allowMulticolorTargetNo != null) allowMulticolorTargetNo.setChecked(true);
+                }
+            }
+            
+            // Load high contrast mode
+            boolean highContrast = Preferences.highContrastMode;
+            if (highContrastModeRadioGroup != null) {
+                if (highContrast) {
+                    if (highContrastModeYes != null) highContrastModeYes.setChecked(true);
+                } else {
+                    if (highContrastModeNo != null) highContrastModeNo.setChecked(true);
                 }
             }
             
@@ -816,97 +845,212 @@ public class SettingsFragment extends Fragment {
     }
     
     /**
-     * Sets up the solution moves spinners (min and max)
+     * Sets up the solution moves input fields with +/- buttons
      */
     private void setupSolutionMovesSpinners() {
         try {
-            if (minSolutionMovesSpinner == null || maxSolutionMovesSpinner == null) {
-                Timber.e("setupSolutionMovesSpinners: One or both spinners are null");
+            if (minSolutionMovesInput == null || maxSolutionMovesInput == null) {
+                Timber.e("setupSolutionMovesSpinners: Input fields are null");
                 return;
             }
-            
-            // Create adapter with values 1-20
-            ArrayAdapter<Integer> minAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
-            minAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            for (int i = 1; i <= 20; i++) {
-                minAdapter.add(i);
-            }
-            minSolutionMovesSpinner.setAdapter(minAdapter);
-            
-            ArrayAdapter<Integer> maxAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
-            maxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            for (int i = 1; i <= 20; i++) {
-                maxAdapter.add(i);
-            }
-            maxSolutionMovesSpinner.setAdapter(maxAdapter);
             
             // Set current values from preferences
             int minMoves = Preferences.minSolutionMoves;
             int maxMoves = Preferences.maxSolutionMoves;
             
-            if (minMoves >= 1 && minMoves <= 20) {
-                minSolutionMovesSpinner.setSelection(minMoves - 1);
-            }
-            if (maxMoves >= 1 && maxMoves <= 20) {
-                maxSolutionMovesSpinner.setSelection(maxMoves - 1);
+            minSolutionMovesInput.setText(String.valueOf(minMoves));
+            updateMaxMovesDisplay(maxMoves);
+            
+            // Min moves minus button
+            if (minSolutionMovesMinus != null) {
+                minSolutionMovesMinus.setOnClickListener(v -> {
+                    try {
+                        int currentValue = getIntFromEditText(minSolutionMovesInput, 4);
+                        if (currentValue > 1) {
+                            currentValue--;
+                            minSolutionMovesInput.setText(String.valueOf(currentValue));
+                            validateAndSaveMinMoves(currentValue);
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "Error in min moves minus button");
+                    }
+                });
             }
             
-            // Set listeners
-            minSolutionMovesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            // Min moves plus button
+            if (minSolutionMovesPlus != null) {
+                minSolutionMovesPlus.setOnClickListener(v -> {
                     try {
-                        int selectedMin = position + 1;
-                        int currentMax = Preferences.maxSolutionMoves;
-                        
-                        if (selectedMin > currentMax) {
-                            selectedMin = currentMax;
-                            minSolutionMovesSpinner.setSelection(selectedMin - 1);
-                            Toast.makeText(requireContext(), 
-                                    "Min moves cannot exceed max moves", 
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        
-                        Preferences.setMinSolutionMoves(selectedMin);
-                        Timber.d("[PREFERENCES] Min solution moves set to %d", selectedMin);
+                        int currentValue = getIntFromEditText(minSolutionMovesInput, 4);
+                        currentValue++;
+                        minSolutionMovesInput.setText(String.valueOf(currentValue));
+                        validateAndSaveMinMoves(currentValue);
                     } catch (Exception e) {
-                        Timber.e(e, "Error processing min solution moves selection");
+                        Timber.e(e, "Error in min moves plus button");
                     }
-                }
-                
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                }
-            });
+                });
+            }
             
-            maxSolutionMovesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            // Max moves minus button
+            if (maxSolutionMovesMinus != null) {
+                maxSolutionMovesMinus.setOnClickListener(v -> {
                     try {
-                        int selectedMax = position + 1;
-                        int currentMin = Preferences.minSolutionMoves;
+                        int currentValue = Preferences.maxSolutionMoves;
                         
-                        if (selectedMax < currentMin) {
-                            selectedMax = currentMin;
-                            maxSolutionMovesSpinner.setSelection(selectedMax - 1);
-                            Toast.makeText(requireContext(), 
-                                    "Max moves cannot be less than min moves", 
-                                    Toast.LENGTH_SHORT).show();
+                        // If at 99 (infinity), jump to 39
+                        if (currentValue >= 99) {
+                            currentValue = 39;
+                        } else if (currentValue > 1) {
+                            currentValue--;
                         }
                         
-                        Preferences.setMaxSolutionMoves(selectedMax);
-                        Timber.d("[PREFERENCES] Max solution moves set to %d", selectedMax);
+                        updateMaxMovesDisplay(currentValue);
+                        validateAndSaveMaxMoves(currentValue);
                     } catch (Exception e) {
-                        Timber.e(e, "Error processing max solution moves selection");
+                        Timber.e(e, "Error in max moves minus button");
                     }
-                }
-                
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                }
-            });
+                });
+            }
+            
+            // Max moves plus button
+            if (maxSolutionMovesPlus != null) {
+                maxSolutionMovesPlus.setOnClickListener(v -> {
+                    try {
+                        int currentValue = getIntFromEditText(maxSolutionMovesInput, 99);
+                        currentValue++;
+                        updateMaxMovesDisplay(currentValue);
+                        validateAndSaveMaxMoves(currentValue);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error in max moves plus button");
+                    }
+                });
+            }
+            
+            // Min moves input field listener
+            if (minSolutionMovesInput != null) {
+                minSolutionMovesInput.setOnFocusChangeListener((v, hasFocus) -> {
+                    if (!hasFocus) {
+                        try {
+                            int value = getIntFromEditText(minSolutionMovesInput, 4);
+                            if (value < 1) value = 1;
+                            minSolutionMovesInput.setText(String.valueOf(value));
+                            validateAndSaveMinMoves(value);
+                        } catch (Exception e) {
+                            Timber.e(e, "Error in min moves input focus change");
+                        }
+                    }
+                });
+            }
+            
+            // Max moves input field listener
+            if (maxSolutionMovesInput != null) {
+                maxSolutionMovesInput.setOnFocusChangeListener((v, hasFocus) -> {
+                    if (!hasFocus) {
+                        try {
+                            int value = getIntFromEditText(maxSolutionMovesInput, 99);
+                            if (value <= 0) value = 99;
+                            updateMaxMovesDisplay(value);
+                            validateAndSaveMaxMoves(value);
+                        } catch (Exception e) {
+                            Timber.e(e, "Error in max moves input focus change");
+                        }
+                    }
+                });
+            }
         } catch (Exception e) {
-            Timber.e(e, "Error setting up solution moves spinners");
+            Timber.e(e, "Error setting up solution moves input fields");
+        }
+    }
+    
+    /**
+     * Get integer value from EditText, return default if empty or invalid
+     */
+    private int getIntFromEditText(EditText editText, int defaultValue) {
+        try {
+            String text = editText.getText().toString().trim();
+            if (text.isEmpty()) {
+                return defaultValue;
+            }
+            return Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            Timber.w("Invalid number in EditText: %s", e.getMessage());
+            return defaultValue;
+        }
+    }
+    
+    /**
+     * Update max moves display (show infinity symbol if >= 40)
+     * This only updates the UI, does not save to preferences
+     */
+    private void updateMaxMovesDisplay(int value) {
+        try {
+            if (value >= 40) {
+                maxSolutionMovesInput.setText("∞");
+                if (maxSolutionMovesInfinity != null) {
+                    maxSolutionMovesInfinity.setVisibility(View.VISIBLE);
+                }
+            } else {
+                maxSolutionMovesInput.setText(String.valueOf(value));
+                if (maxSolutionMovesInfinity != null) {
+                    maxSolutionMovesInfinity.setVisibility(View.GONE);
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error updating max moves display");
+        }
+    }
+    
+    /**
+     * Validate and save min moves
+     */
+    private void validateAndSaveMinMoves(int value) {
+        try {
+            int currentMax = Preferences.maxSolutionMoves;
+            if (value > currentMax) {
+                value = currentMax;
+                minSolutionMovesInput.setText(String.valueOf(value));
+                Toast.makeText(requireContext(), 
+                        "Min moves cannot exceed max moves", 
+                        Toast.LENGTH_SHORT).show();
+            }
+            if (value < 1) value = 1;
+            
+            Preferences.setMinSolutionMoves(value);
+            Timber.d("[PREFERENCES] Min solution moves set to %d", value);
+        } catch (Exception e) {
+            Timber.e(e, "Error validating and saving min moves");
+        }
+    }
+    
+    /**
+     * Validate and save max moves
+     */
+    private void validateAndSaveMaxMoves(int value) {
+        try {
+            int currentMin = Preferences.minSolutionMoves;
+            
+            // If empty or 0, set to 99
+            if (value <= 0) {
+                value = 99;
+            }
+            
+            // If less than min, set to min
+            if (value < currentMin) {
+                value = currentMin;
+                Toast.makeText(requireContext(), 
+                        "Max moves cannot be less than min moves", 
+                        Toast.LENGTH_SHORT).show();
+            }
+            
+            // Show infinity if >= 40
+            if (value >= 40) {
+                value = 99;
+            }
+            
+            Preferences.setMaxSolutionMoves(value);
+            Timber.d("[PREFERENCES] Max solution moves set to %d", value);
+        } catch (Exception e) {
+            Timber.e(e, "Error validating and saving max moves");
         }
     }
     
@@ -1207,8 +1351,7 @@ public class SettingsFragment extends Fragment {
                         if (isUpdatingUI) return;
                         
                         int previousDifficulty = Preferences.difficulty;
-                        int difficulty = Constants.DIFFICULTY_BEGINNER; // Default
-                        
+                        int difficulty = Constants.DIFFICULTY_BEGINNER;
                         if (checkedId == R.id.difficulty_beginner) {
                             difficulty = Constants.DIFFICULTY_BEGINNER;
                         } else if (checkedId == R.id.difficulty_advanced) {
@@ -1233,6 +1376,36 @@ public class SettingsFragment extends Fragment {
                         Timber.e(e, "Error processing difficulty selection");
                     }
                 });
+                
+                // Add OnClickListener to detect repeated clicks on the same difficulty
+                if (difficultyBeginner != null) {
+                    difficultyBeginner.setOnClickListener(v -> {
+                        if (Preferences.difficulty == Constants.DIFFICULTY_BEGINNER) {
+                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_BEGINNER);
+                        }
+                    });
+                }
+                if (difficultyAdvanced != null) {
+                    difficultyAdvanced.setOnClickListener(v -> {
+                        if (Preferences.difficulty == Constants.DIFFICULTY_ADVANCED) {
+                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_ADVANCED);
+                        }
+                    });
+                }
+                if (difficultyInsane != null) {
+                    difficultyInsane.setOnClickListener(v -> {
+                        if (Preferences.difficulty == Constants.DIFFICULTY_INSANE) {
+                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_INSANE);
+                        }
+                    });
+                }
+                if (difficultyImpossible != null) {
+                    difficultyImpossible.setOnClickListener(v -> {
+                        if (Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE) {
+                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_IMPOSSIBLE);
+                        }
+                    });
+                }
             } else {
                 Timber.e("difficultyRadioGroup is null");
             }
@@ -1405,6 +1578,24 @@ public class SettingsFragment extends Fragment {
                 Timber.e("allowMulticolorTargetRadioGroup is null");
             }
             
+            // High contrast mode radio group
+            if (highContrastModeRadioGroup != null) {
+                highContrastModeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                    try {
+                        if (isUpdatingUI) return;
+                        
+                        boolean highContrast = checkedId == R.id.high_contrast_mode_yes;
+                        
+                        Preferences.setHighContrastMode(highContrast);
+                        Timber.d("[PREFERENCES] High contrast mode set to %b", highContrast);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error processing high contrast mode selection");
+                    }
+                });
+            } else {
+                Timber.e("highContrastModeRadioGroup is null");
+            }
+            
             // Back button
             if (backButton != null) {
                 backButton.setOnClickListener(v -> {
@@ -1478,6 +1669,22 @@ public class SettingsFragment extends Fragment {
     }
     
     /**
+     * Reset puzzle parameters to defaults for a specific difficulty
+     * Called when the same difficulty is clicked again
+     */
+    private void resetPuzzleParametersForDifficulty(int difficulty) {
+        try {
+            adjustPuzzleParametersForDifficulty(difficulty);
+            Toast.makeText(requireContext(), 
+                    "Puzzle parameters reset to defaults", 
+                    Toast.LENGTH_SHORT).show();
+            Timber.d("[DIFFICULTY] Same difficulty clicked again, reset to defaults");
+        } catch (Exception e) {
+            Timber.e(e, "Error resetting puzzle parameters");
+        }
+    }
+    
+    /**
      * Adjust puzzle parameters (min/max moves and multicolor target) based on difficulty level
      * Mirrors the difficulty settings from README.md
      */
@@ -1505,13 +1712,13 @@ public class SettingsFragment extends Fragment {
                 case Constants.DIFFICULTY_INSANE:
                     // Insane: 10+ moves, no multicolor
                     minMoves = 10;
-                    maxMoves = 20;
+                    maxMoves = 99;
                     allowMulticolor = false;
                     break;
                 case Constants.DIFFICULTY_IMPOSSIBLE:
-                    // Impossible: 17+ moves, no multicolor
+                    // Impossible: 17+ moves, no multicolor, max 99
                     minMoves = 17;
-                    maxMoves = 20;
+                    maxMoves = 99;
                     allowMulticolor = false;
                     break;
             }
@@ -1522,11 +1729,11 @@ public class SettingsFragment extends Fragment {
             Preferences.setAllowMulticolorTarget(allowMulticolor);
             
             // Update UI
-            if (minSolutionMovesSpinner != null) {
-                minSolutionMovesSpinner.setSelection(minMoves - 1);
+            if (minSolutionMovesInput != null) {
+                minSolutionMovesInput.setText(String.valueOf(minMoves));
             }
-            if (maxSolutionMovesSpinner != null) {
-                maxSolutionMovesSpinner.setSelection(maxMoves - 1);
+            if (maxSolutionMovesInput != null) {
+                updateMaxMovesDisplay(maxMoves);
             }
             if (allowMulticolorTargetRadioGroup != null) {
                 if (allowMulticolor) {
