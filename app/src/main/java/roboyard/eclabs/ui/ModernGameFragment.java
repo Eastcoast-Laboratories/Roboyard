@@ -15,6 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -424,6 +427,19 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintContainer = view.findViewById(R.id.hint_container);
         prevHintButton = view.findViewById(R.id.prev_hint_button);
         nextHintButton = view.findViewById(R.id.next_hint_button);
+        
+        // Set up close button for game info container
+        ImageButton closeButton = view.findViewById(R.id.game_info_close_button);
+        if (closeButton != null) {
+            closeButton.setOnClickListener(v -> {
+                View gameInfoContainer = view.findViewById(R.id.game_info_container);
+                if (gameInfoContainer != null) {
+                    gameInfoContainer.setElevation(-100); // Send to back with negative elevation
+                    closeButton.setVisibility(View.GONE); // Hide the close button
+                    view.requestLayout();
+                }
+            });
+        }
         
         // Prevent automatic selection of gameGridView by setting focusable to false
         gameGridView.setFocusable(false);
