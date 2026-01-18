@@ -877,6 +877,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     Timber.d("[ROBOTS] Forced additional UI invalidation after reset");
                 });
                 
+                // Make the close button visible again
+                ImageButton closeButton = view.findViewById(R.id.game_info_close_button);
+                if (closeButton != null) {
+                    closeButton.setVisibility(View.VISIBLE);
+                }
+                
                 // Play a sound to indicate reset
                 playSound("move");
                 
@@ -1085,6 +1091,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Hide the optimal moves button when starting a new game
             if (optimalMovesButton != null) {
                 optimalMovesButton.setVisibility(View.GONE);
+            }
+            
+            // Make the close button visible again
+            ImageButton closeButton = view.findViewById(R.id.game_info_close_button);
+            if (closeButton != null) {
+                closeButton.setVisibility(View.VISIBLE);
             }
             
             // Clear any hint text from the status display

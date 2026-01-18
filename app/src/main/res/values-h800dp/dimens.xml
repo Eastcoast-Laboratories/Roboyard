@@ -20,7 +20,7 @@
     <dimen name="settings_label_text_size">24dp</dimen>
     <dimen name="settings_option_text_size">20dp</dimen>
     
-    <!-- Game info text sizes - double size for large displays -->
+    <!-- Game info text sizes -->
     <dimen name="game_info_primary_text_size">32sp</dimen>
     <dimen name="game_info_secondary_text_size">28sp</dimen>
     <dimen name="game_info_small_text_size">24sp</dimen>

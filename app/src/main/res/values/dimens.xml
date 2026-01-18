@@ -3,7 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     
-    <!-- Text sizes - smaller for compact displays -->
+    <!-- Text sizes - smaller for compact displays (Hints) -->
     <dimen name="status_text_size">18sp</dimen>
     <dimen name="status_text_padding">4dp</dimen>
     <dimen name="settings_title_text_size">32dp</dimen>

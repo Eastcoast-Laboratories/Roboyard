@@ -6,8 +6,8 @@
     <dimen name="game_button_margin">4dp</dimen>
     <dimen name="game_button_padding">1dp</dimen>
     
-    <!-- Text sizes for small screens -->
-    <dimen name="status_text_size">10dp</dimen>
+    <!-- Text sizes for small screens (Hints) -->
+    <dimen name="status_text_size">14dp</dimen>
     <dimen name="status_text_padding">4dp</dimen>
     
     <!-- Level selection screen dimensions for small screens -->
@@ -19,4 +19,10 @@
     <dimen name="settings_title_text_size">24dp</dimen>
     <dimen name="settings_label_text_size">18dp</dimen>
     <dimen name="settings_option_text_size">16dp</dimen>
+
+    <!-- Game info text sizes -->
+    <dimen name="game_info_primary_text_size">26sp</dimen>
+    <dimen name="game_info_secondary_text_size">22sp</dimen>
+    <dimen name="game_info_small_text_size">20sp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">36sp</dimen>
 </resources>
