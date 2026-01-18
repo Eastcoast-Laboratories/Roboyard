@@ -60,7 +60,7 @@ import roboyard.logic.core.Preferences;
  */
 public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
 
-    private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10
+    private static final int MAX_HINTS_UP_TO_LEVEL_10 = 20; // Maximum hints allowed for levels 1-10 (increased for debugging)
     private static final int MAX_HINT_HISTORY = 6;
     private GameGridView gameGridView;
     private TextView moveCountTextView;
@@ -2597,7 +2597,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
             // Limit to only the first two hints for levels 1-10
             if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
-                Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for %s", MAX_HINTS_UP_TO_LEVEL_10, source);
+                Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for %s, currentHintStep=%d", MAX_HINTS_UP_TO_LEVEL_10, source, currentHintStep);
                 return;
             }
         }
