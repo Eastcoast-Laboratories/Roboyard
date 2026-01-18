@@ -409,8 +409,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         moveCount.setValue(newState.getMoveCount());
         isGameComplete.setValue(newState.isComplete());
 
-        // Initialize solver with grid elements
+        // Clear old game data and force solver re-initialization with new map
+        stateHistory.clear();
+        squaresMovedHistory.clear();
+        currentSolution = null;
+        currentSolutionStep = 0;
+        getSolverManager().resetInitialization();
+        Timber.d("[GAME_LOAD] Cleared old game data and reset solver for new map");
+
+        // Initialize solver with grid elements from the loaded map
         initializeSolverForState(newState);
+        
+        // Start calculating the solution automatically for the loaded map
+        Timber.d("[GAME_LOAD] Starting solver for loaded map");
+        calculateSolutionAsync(null);
 
         return true;
     }

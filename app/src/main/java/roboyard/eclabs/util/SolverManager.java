@@ -145,6 +145,13 @@ public class SolverManager implements Runnable {
      * Starts the solver in a background thread
      */
     public void startSolver() {
+        // FATAL CHECK: Abort if solver was never initialized with map data
+        if (!isInitialized) {
+            Timber.e("[SOLUTION_SOLVER] FATAL: startSolver() called but solver was never initialized with map data!");
+            Timber.e("[SOLUTION_SOLVER] This indicates a bug: the map was not passed to the solver before trying to calculate a solution.");
+            throw new IllegalStateException("[SOLUTION_SOLVER] Cannot start solver: no map data was provided. Call initialize() first.");
+        }
+        
         if (solverThread != null && solverThread.isAlive()) {
             Timber.d("[SOLUTION_SOLVER][ID:%d] SolverManager.startSolver() - Solver thread is already running", solverInvocationId);
             return;
