@@ -7,8 +7,8 @@
     <dimen name="game_button_padding">1dp</dimen>
     
     <!-- Status text size for tablets (slightly smaller than default) -->
-    <dimen name="status_text_size">16dp</dimen>
-    <dimen name="status_text_padding">5dp</dimen>
+    <dimen name="status_text_size">36dp</dimen>
+    <dimen name="status_text_padding">10dp</dimen>
     
     <!-- Level selection screen dimensions for tablets -->
     <dimen name="stars_count_text_size">18dp</dimen>
@@ -19,4 +19,10 @@
     <dimen name="settings_title_text_size">36dp</dimen>
     <dimen name="settings_label_text_size">28dp</dimen>
     <dimen name="settings_option_text_size">24dp</dimen>
+    
+    <!-- Game info text sizes for tablets -->
+    <dimen name="game_info_primary_text_size">46sp</dimen>
+    <dimen name="game_info_secondary_text_size">42sp</dimen>
+    <dimen name="game_info_small_text_size">38sp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">62sp</dimen>
 </resources>
