@@ -397,28 +397,30 @@ public class GameState implements Serializable {
     public ArrayList<GridElement> getGridElements() {
         ArrayList<GridElement> elements = new ArrayList<>();
         
-        // Add wall cells
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // Add horizontal walls (mh) - for each cell, check if there's a horizontal wall on its north side
-                if (hasHorizontalWall(x, y)) {
-                    elements.add(new GridElement(x, y, "mh"));
-                }
-                
-                // Add vertical walls (mv) - for each cell, check if there's a vertical wall on its west side
-                if (hasVerticalWall(x, y)) {
-                    elements.add(new GridElement(x, y, "mv"));
-                }
-                
-                // Add targets
-                if (getCellType(x, y) == Constants.TYPE_TARGET) {
-                    String gridElementType;
-                    int targetColor = getTargetColor(x, y);
+        // SSOT: Read ALL elements from gameElements, not from board[][]
+        // This ensures the solver receives the same data as the game display
+        
+        // Track which robot colors we've already added
+        boolean[] robotColorsAdded = new boolean[Constants.MAX_NUM_ROBOTS];
+        
+        // Convert all GameElements to GridElements
+        for (GameElement element : gameElements) {
+            String gridElementType = null;
+            
+            switch (element.getType()) {
+                case GameElement.TYPE_HORIZONTAL_WALL:
+                    gridElementType = "mh";
+                    break;
                     
-                    // Special handling for multi-color target
+                case GameElement.TYPE_VERTICAL_WALL:
+                    gridElementType = "mv";
+                    break;
+                    
+                case GameElement.TYPE_TARGET:
+                    int targetColor = element.getColor();
                     if (targetColor == Constants.COLOR_MULTI) {
                         gridElementType = "target_multi";
-                        Timber.d("[SOLUTION_SOLVER_TARGET] Found multi-color target at (%d,%d) in board", x, y);
+                        Timber.d("[SOLUTION_SOLVER_TARGET] Found multi-color target at (%d,%d) in gameElements", element.getX(), element.getY());
                     } else if (targetColor == 0) {
                         gridElementType = "target_red";
                     } else if (targetColor == 1) {
@@ -430,57 +432,33 @@ public class GameState implements Serializable {
                     } else if (targetColor == 4) {
                         gridElementType = "target_silver";
                     } else {
-                        // Fallback
                         gridElementType = "target_red";
-                        Timber.w("[SOLUTION_SOLVER_TARGET] Unknown target color: %d at (%d,%d), defaulting to red", targetColor, x, y);
+                        Timber.w("[SOLUTION_SOLVER_TARGET] Unknown target color: %d at (%d,%d), defaulting to red", targetColor, element.getX(), element.getY());
                     }
+                    break;
                     
-                    elements.add(new GridElement(x, y, gridElementType));
-                }
+                case GameElement.TYPE_ROBOT:
+                    int robotColor = element.getColor();
+                    if (robotColor == 0) {
+                        gridElementType = "robot_red";
+                    } else if (robotColor == 1) {
+                        gridElementType = "robot_green";
+                    } else if (robotColor == 2) {
+                        gridElementType = "robot_blue";
+                    } else if (robotColor == 3) {
+                        gridElementType = "robot_yellow";
+                    } else if (robotColor == 4) {
+                        gridElementType = "robot_silver";
+                    } else {
+                        gridElementType = "robot_red";
+                        robotColor = 0;
+                    }
+                    robotColorsAdded[robotColor] = true;
+                    break;
             }
-        }
-
-        // Add right border walls (vertical walls on the right edge of the grid)
-        for (int y = 0; y < height; y++) {
-            // TODO: if not already, then add right border wall
-            // elements.add(new GridElement(width - 1, y, "mv"));
-        }
-        
-        // Add bottom border walls (horizontal walls on the bottom edge of the grid)
-        for (int x = 0; x < width; x++) {
-            // TODO: if not already, then add bottom border wall
-            // elements.add(new GridElement(x, height - 1, "mh"));
-        }
-
-        // TODO: if not already, then add left and top border walls
-        
-        // Track which robot colors we've already added
-        boolean[] robotColorsAdded = new boolean[Constants.MAX_NUM_ROBOTS]; // For the 4 standard colors
-        
-        // Add robots from game elements
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                String gridElementType;
-                int robotColor = element.getColor();
-                
-                if (robotColor == 0) {
-                    gridElementType = "robot_red";
-                } else if (robotColor == 1) {
-                    gridElementType = "robot_green";
-                } else if (robotColor == 2) {
-                    gridElementType = "robot_blue";
-                } else if (robotColor == 3) {
-                    gridElementType = "robot_yellow";
-                } else if (robotColor == 4) {
-                    gridElementType = "robot_silver";
-                } else {
-                    // Fallback
-                    gridElementType = "robot_red";
-                    robotColor = 0;
-                }
-                
+            
+            if (gridElementType != null) {
                 elements.add(new GridElement(element.getX(), element.getY(), gridElementType));
-                robotColorsAdded[robotColor] = true;
             }
         }
         
@@ -492,7 +470,7 @@ public class GameState implements Serializable {
         
         for (int color = 0; color < Constants.NUM_ROBOTS; color++) {
             if (!robotColorsAdded[color]) {
-                // Add a placeholder robot off-screen (the solver needs exactly 4 robots)
+                // Add a placeholder robot (the solver needs exactly 4 robots)
                 String gridElementType;
                 switch(color) {
                     case 0: gridElementType = "robot_red"; break;
@@ -508,8 +486,8 @@ public class GameState implements Serializable {
                 int ry = cornerY[cornerIndex];
                 cornerIndex = (cornerIndex + 1) % 4;
                 
-                // Make sure the spot is empty
-                while (getCellType(rx, ry) != Constants.TYPE_EMPTY || getRobotAt(rx, ry) != null) {
+                // Make sure the spot is empty (check gameElements, not board[][])
+                while (isPositionOccupied(rx, ry)) {
                     rx = (rx + 1) % (width - 2) + 1; // Keep within bounds, avoiding edges
                     ry = (ry + 1) % (height - 2) + 1;
                 }
@@ -521,6 +499,22 @@ public class GameState implements Serializable {
         }
         
         return elements;
+    }
+    
+    /**
+     * Check if a position is occupied by any game element (SSOT: uses gameElements only)
+     */
+    private boolean isPositionOccupied(int x, int y) {
+        for (GameElement element : gameElements) {
+            if (element.getX() == x && element.getY() == y) {
+                // Position is occupied by a wall, target, or robot
+                if (element.getType() == GameElement.TYPE_TARGET ||
+                    element.getType() == GameElement.TYPE_ROBOT) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     /**
