@@ -372,5 +372,12 @@
     <string name="next_robot">Siguiente robot</string>
     <string name="announce_a11y">Anunciar la situación del juego</string>
     <string name="next_robot_a11y">Seleccionar el siguiente robot</string>
+    
+    <!-- Puzzle Parameters -->
+    <string name="settings_puzzle_parameters">Número de movimientos:</string>
+    <string name="settings_min_solution_moves">Mín:</string>
+    <string name="settings_max_solution_moves">Máx:</string>
+    <string name="settings_allow_multicolor_target">Permitir objetivos multicolor:</string>
+    <string name="settings_high_contrast_mode">Modo de alto contraste:</string>
 
 </resources>

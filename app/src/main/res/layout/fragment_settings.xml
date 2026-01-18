@@ -325,49 +325,6 @@
                     android:buttonTint="#ffffff" />
             </RadioGroup>
 
-            <!-- High Contrast Mode Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_high_contrast_mode"
-                android:textSize="@dimen/settings_option_text_size"
-                android:textColor="#ffffff"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
-
-            <RadioGroup
-                android:id="@+id/high_contrast_mode_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
-
-                <RadioButton
-                    android:id="@+id/high_contrast_mode_yes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_yes"
-                    android:textSize="@dimen/settings_option_text_size"
-                    android:layout_marginEnd="32dp"
-                    android:focusable="true"
-                    android:clickable="true"
-                    android:contentDescription="Enable high contrast mode"
-                    android:textColor="#ffffff"
-                    android:buttonTint="#ffffff" />
-
-                <RadioButton
-                    android:id="@+id/high_contrast_mode_no"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_no"
-                    android:textSize="@dimen/settings_option_text_size"
-                    android:focusable="true"
-                    android:clickable="true"
-                    android:contentDescription="Disable high contrast mode"
-                    android:textColor="#ffffff"
-                    android:buttonTint="#ffffff" />
-            </RadioGroup>
-
             <!-- New Map Section -->
             <TextView
                 android:id="@+id/new_map_label"
@@ -609,6 +566,50 @@
                     android:textColor="#ffffff"
                     android:buttonTint="#ffffff"
                     android:contentDescription="@string/settings_fullscreen_a11y" />
+            </RadioGroup>
+
+            <!-- High Contrast Mode Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_high_contrast_mode"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/high_contrast_mode_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/high_contrast_mode_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_yes"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Enable high contrast mode"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
+
+                <RadioButton
+                    android:id="@+id/high_contrast_mode_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_no"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:contentDescription="Disable high contrast mode"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
             </RadioGroup>
 
             <!-- Accessibility Mode Section (secret: black on black) -->

@@ -404,4 +404,11 @@
     <string name="next_robot">Nächster Roboter</string>
     <string name="announce_a11y">Spielsituation ansagen</string>
     <string name="next_robot_a11y">Nächsten Roboter auswählen</string>
+    
+    <!-- Puzzle Parameters -->
+    <string name="settings_puzzle_parameters">Anzahl Züge:</string>
+    <string name="settings_min_solution_moves">Min:</string>
+    <string name="settings_max_solution_moves">Max:</string>
+    <string name="settings_allow_multicolor_target">Mehrfarbige Ziele erlauben:</string>
+    <string name="settings_high_contrast_mode">Hoher Kontrast:</string>
 </resources>

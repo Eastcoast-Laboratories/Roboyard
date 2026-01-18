@@ -327,4 +327,11 @@
     <string name="help_star_system_0_stars">无星：所有其他情况。继续练习以提高你的表现！</string>
     <string name="help_star_system_hint_penalty">注意：使用提示会降低你的星级评分，鼓励你独立解决谜题。</string>
     
+    <!-- Puzzle Parameters -->
+    <string name="settings_puzzle_parameters">移动次数:</string>
+    <string name="settings_min_solution_moves">最小:</string>
+    <string name="settings_max_solution_moves">最大:</string>
+    <string name="settings_allow_multicolor_target">允许多色目标:</string>
+    <string name="settings_high_contrast_mode">高对比度模式:</string>
+    
 </resources>

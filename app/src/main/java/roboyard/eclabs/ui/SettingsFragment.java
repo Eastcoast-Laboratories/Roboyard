@@ -1675,9 +1675,6 @@ public class SettingsFragment extends Fragment {
     private void resetPuzzleParametersForDifficulty(int difficulty) {
         try {
             adjustPuzzleParametersForDifficulty(difficulty);
-            Toast.makeText(requireContext(), 
-                    "Puzzle parameters reset to defaults", 
-                    Toast.LENGTH_SHORT).show();
             Timber.d("[DIFFICULTY] Same difficulty clicked again, reset to defaults");
         } catch (Exception e) {
             Timber.e(e, "Error resetting puzzle parameters");

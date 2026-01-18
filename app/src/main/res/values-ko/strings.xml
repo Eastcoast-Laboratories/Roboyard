@@ -180,4 +180,11 @@
     <string name="help_star_system_1_star">⭐ - 좋은 해결책: 힌트 두 개로 최적 해결책을 찾았거나, 힌트 없이 최적보다 두 번 더 움직였습니다.</string>
     <string name="help_star_system_0_stars">별 없음: 다른 모든 경우. 계속 연습해서 실력을 향상시키세요!</string>
     <string name="help_star_system_hint_penalty">참고: 힌트를 사용하면 별점이 줄어들어, 독립적으로 퍼즐을 해결하도록 격려합니다.</string>
+    
+    <!-- Puzzle Parameters -->
+    <string name="settings_puzzle_parameters">이동 수:</string>
+    <string name="settings_min_solution_moves">최소:</string>
+    <string name="settings_max_solution_moves">최대:</string>
+    <string name="settings_allow_multicolor_target">다중색 목표 허용:</string>
+    <string name="settings_high_contrast_mode">고대비 모드:</string>
 </resources>

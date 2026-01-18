@@ -226,4 +226,11 @@
     <string name="save_map">Sauver</string>
     <string name="new_game">Recréer</string>
     <string name="menu">Menu</string>
+    
+    <!-- Puzzle Parameters -->
+    <string name="settings_puzzle_parameters">Nombre de mouvements:</string>
+    <string name="settings_min_solution_moves">Min:</string>
+    <string name="settings_max_solution_moves">Max:</string>
+    <string name="settings_allow_multicolor_target">Autoriser les cibles multicolores:</string>
+    <string name="settings_high_contrast_mode">Mode contraste élevé:</string>
 </resources>
