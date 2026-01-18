@@ -7,8 +7,34 @@ CHANGELOG_MD="CHANGELOG.md"
 CHANGELOG_DE_MD="CHANGELOG_de.md"
 PLAYSTORE_DIR="fastlane/metadata/android/playstore"
 
+# Parse command line arguments
+UPDATE_VERSION=false
+if [ "$1" = "-u" ]; then
+  UPDATE_VERSION=true
+fi
+
 # Get version from build.gradle
 VERSION_NAME=$(grep versionName $BUILD_GRADLE | awk -F\" '{print $2}')
+VERSION_CODE=$(grep versionCode $BUILD_GRADLE | awk '{print $2}')
+
+# If -u flag is set, increment version and versionCode
+if [ "$UPDATE_VERSION" = true ]; then
+  NEW_VERSION_NAME=$((VERSION_NAME + 1))
+  NEW_VERSION_CODE=$((VERSION_CODE + 1))
+  
+  echo "Updating version from $VERSION_NAME to $NEW_VERSION_NAME"
+  echo "Updating versionCode from $VERSION_CODE to $NEW_VERSION_CODE"
+  
+  # Update build.gradle
+  sed -i "s/versionCode $VERSION_CODE/versionCode $NEW_VERSION_CODE/" "$BUILD_GRADLE"
+  sed -i "s/versionName \"$VERSION_NAME\"/versionName \"$NEW_VERSION_NAME\"/" "$BUILD_GRADLE"
+  
+  VERSION_NAME=$NEW_VERSION_NAME
+  VERSION_CODE=$NEW_VERSION_CODE
+  
+  echo "✔️ Version updated in $BUILD_GRADLE"
+  echo ""
+fi
 
 # Get current date
 CURRENT_DATE=$(date +"%Y-%m-%d")
@@ -40,17 +66,21 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Landscape-Modus hinzugefügt mit Toggle-Button für die Ausrichtung des Spielfeldes
-- Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
-- UI verbessert mit modernen Material Design Elementen
+- Die maximale und minimale Anzahl Züge ist jetzt beliebig einstellbar
+- Das mehrfarbige Ziel ist jetzt einstellbar
+- Neuer Hoher-Kontrast-Modus
+- Verbesserte Schriftgrößen für unterschiedliche Displays
+- Ein Schließen-Button im Info-Display in der Spielanzeige um zu verhindern, dass es die Spielknöpfe überlappt
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Added landscape mode with toggle button for left or right orientation of the gamegrid
-- fix Accessibility message where goal was announced one square off
-- enhance UI with modern material design elements
+- The maximum and minimum number of moves is now adjustable
+- The multi-color goal is now adjustable
+- New High Contrast Mode
+- Improved font sizes for different screen sizes
+- add close button to info display in case it overlaps game buttons
 EOF
 )
 
