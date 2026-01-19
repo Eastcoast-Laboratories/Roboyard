@@ -59,9 +59,14 @@ public class RRGetMap {
         // Generate the ASCII map for debugging
         String asciiMap = generateAsciiMap(gridElements);
         Timber.d(asciiMap);
-        // Create the board with the current dimensions
-        Board board = Board.createBoardFreestyle(null, MainActivity.boardSizeX, MainActivity.boardSizeY, MainActivity.numRobots);
+        // Create the board with dimensions from GridElements
+        // IMPORTANT: Use boardWidth/boardHeight calculated from GridElements, not MainActivity dimensions
+        // The GridElements may have coordinates up to boardWidth-1, so we need a board of that size
+        // Using MainActivity dimensions caused walls at x=12 to wrap around to x=0 of the next row
+        Board board = Board.createBoardFreestyle(null, boardWidth, boardHeight, MainActivity.numRobots);
         board.removeGoals();
+        
+        Timber.d("[SOLUTION_SOLVER] Board created with width=%d, height=%d", board.width, board.height);
 
         // Color mappings for robots and targets
         Map<String, Integer> colors = new HashMap<>();
@@ -171,6 +176,7 @@ public class RRGetMap {
                 board.setWall(position, "W", true);  // treated as "W" of the current field in driftingdroids solver
                 
                 Timber.d("[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)", position, x, y);
+                
             }
         }
         

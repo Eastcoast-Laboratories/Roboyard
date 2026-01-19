@@ -435,8 +435,20 @@ Complete implementation of MSOT architecture:
 3. Verify solver initialization uses correct map data
 4. Test that solver finds optimal solution after fix
 
-### Status
-This issue will be resolved once the complete MSOT refactoring is finished and all direct `board[][]` modifications are removed.
+### Fix Applied (18.01.2026)
+
+**Commit:** `01fa3f2f` - Fix MSOT: getGridElements() now reads all elements from gameElements
+
+**Changes:**
+- Refactored `getGridElements()` to read ALL elements (walls, targets, robots) from `gameElements` instead of `board[][]`
+- Added `isPositionOccupied()` helper that uses `gameElements` only
+- This ensures Single Source of Truth: solver receives same data as UI
+
+**Verification Required:**
+1. Start Level 5 on emulator
+2. Click Hint button
+3. Verify solution has fewer than 9 moves
+4. Verify solution is playable (moves work as shown)
 
 ---
 
