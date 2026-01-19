@@ -60,7 +60,7 @@ import roboyard.logic.core.Preferences;
  */
 public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
 
-    private static final int MAX_HINTS_UP_TO_LEVEL_10 = 20; // Maximum hints allowed for levels 1-10 (increased for debugging)
+    private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10 (increase this for debugging)
     private static final int MAX_HINT_HISTORY = 6;
     private GameGridView gameGridView;
     private TextView moveCountTextView;

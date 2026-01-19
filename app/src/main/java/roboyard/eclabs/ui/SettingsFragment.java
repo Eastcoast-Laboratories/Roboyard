@@ -901,7 +901,7 @@ public class SettingsFragment extends Fragment {
                         // If at 99 (infinity), jump to 39
                         if (currentValue >= 99) {
                             currentValue = 39;
-                        } else if (currentValue > 1) {
+                        } else if (currentValue > 2) {
                             currentValue--;
                         }
                         
@@ -1008,11 +1008,9 @@ public class SettingsFragment extends Fragment {
         try {
             int currentMax = Preferences.maxSolutionMoves;
             if (value > currentMax) {
-                value = currentMax;
-                minSolutionMovesInput.setText(String.valueOf(value));
-                Toast.makeText(requireContext(), 
-                        "Min moves cannot exceed max moves", 
-                        Toast.LENGTH_SHORT).show();
+                Preferences.setMaxSolutionMoves(value);
+                maxSolutionMovesInput.setText(String.valueOf(value));
+                Timber.d("[PREFERENCES] Max solution moves adjusted to %d to match min moves", value);
             }
             if (value < 1) value = 1;
             

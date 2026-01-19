@@ -203,6 +203,25 @@ public class LevelCompletionManager {
     }
     
     /**
+     * Unlock all 420 stars for all levels (used for level design editor)
+     */
+    public void unlockAllStars() {
+        Timber.d("[LEVEL_COMPLETION] Unlocking all 420 stars for level design editor");
+        
+        for (int levelId = 1; levelId <= 140; levelId++) {
+            LevelCompletionData data = getLevelCompletionData(levelId);
+            data.setCompleted(true);
+            data.setStars(3);
+            data.setOptimalMoves(1);
+            data.setTimeNeeded(1);
+            data.setSquaresSurpassed(0);
+        }
+        
+        saveCompletionData();
+        Timber.d("[LEVEL_COMPLETION] All 420 stars unlocked successfully");
+    }
+    
+    /**
      * Save all completion data to SharedPreferences
      */
     private void saveCompletionData() {
