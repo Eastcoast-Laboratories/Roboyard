@@ -1953,6 +1953,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void updateOptimalMovesButton(int optimalMoves, boolean showButton) {
         if (optimalMovesButton != null) {
             optimalMovesButton.setText(String.valueOf(optimalMoves));
+            optimalMovesButton.setSingleLine(true);
+            optimalMovesButton.setEllipsize(android.text.TextUtils.TruncateAt.END);
             optimalMovesButton.setVisibility(showButton ? View.VISIBLE : View.GONE);
             
             // Change button background color based on move count (cycle through 5 colors)
