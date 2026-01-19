@@ -61,6 +61,7 @@ import roboyard.logic.core.Preferences;
 public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
 
     private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10 (increase this for debugging)
+    private static final int LEVEL_10_THRESHHOLD = 10; // this should be set to 10, increase only for debugging
     private static final int MAX_HINT_HISTORY = 6;
     private GameGridView gameGridView;
     private TextView moveCountTextView;
@@ -2588,13 +2589,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void showNextHint(String source) {
         // Check if this is a level game with level > 10 (no hints allowed)
         GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState != null && currentState.getLevelId() > 10) {
+        if (currentState != null && currentState.getLevelId() > LEVEL_10_THRESHHOLD) {
             Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled for %s", source);
             return;
         }
         
         // For level games 1-10, limit to only 2 hints
-        if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= 10) {
+        if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= LEVEL_10_THRESHHOLD) {
             // Limit to only the first two hints for levels 1-10
             if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
                 Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for %s, currentHintStep=%d", MAX_HINTS_UP_TO_LEVEL_10, source, currentHintStep);

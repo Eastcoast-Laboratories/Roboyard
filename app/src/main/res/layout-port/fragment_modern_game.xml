@@ -105,7 +105,7 @@
             app:layout_constraintHorizontal_weight="0.20"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Right block: Timer and Map ID (40% width) -->
+        <!-- Right block: Timer and Map ID (30% width) -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/right_info_block"
             android:layout_width="0dp"
@@ -113,7 +113,7 @@
             app:layout_constraintStart_toEndOf="@id/optimal_moves_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintHorizontal_weight="0.40">
+            app:layout_constraintHorizontal_weight="0.30">
 
             <TextView
                 android:id="@+id/game_timer"

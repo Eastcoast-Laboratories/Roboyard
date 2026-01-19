@@ -71,6 +71,8 @@ DE_CHANGES=$(cat << EOF
 - Neuer Hoher-Kontrast-Modus
 - Verbesserte Schriftgrößen für unterschiedliche Displays
 - Ein Schließen-Button im Info-Display in der Spielanzeige um zu verhindern, dass es die Spielknöpfe überlappt
+- Fix: alle Levels werden jetzt korrekt gelöst
+- Fix: Solver startet jetzt korrekt nach Laden eines Spielstands
 EOF
 )
 
@@ -81,6 +83,8 @@ EN_CHANGES=$(cat << EOF
 - New High Contrast Mode
 - Improved font sizes for different screen sizes
 - add close button to info display in case it overlaps game buttons
+- Fix: all levels are solved correctly now
+- Fix: solver now starts correctly after loading a game
 EOF
 )
 
