@@ -2,6 +2,16 @@ Changelog Deutsch
 =================
 
 
+## Version 30 (2026-01-19)
+- Die maximale und minimale Anzahl Züge ist jetzt beliebig einstellbar
+- Das mehrfarbige Ziel ist jetzt einstellbar
+- Neuer Hoher-Kontrast-Modus
+- Verbesserte Schriftgrößen für unterschiedliche Displays
+- Ein Schließen-Button im Info-Display in der Spielanzeige um zu verhindern, dass es die Spielknöpfe überlappt
+- Fix: alle Levels werden jetzt korrekt gelöst
+- Fix: Solver startet jetzt korrekt nach Laden eines Spielstands
+
+
 ## Version 29 (2025-09-29)
 - Landscape-Modus hinzugefügt mit Toggle-Button für die Ausrichtung des Spielfeldes
 - Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde

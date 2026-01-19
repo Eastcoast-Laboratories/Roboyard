@@ -2,6 +2,16 @@
 =========
 
 
+## Version 30 (2026-01-19)
+- The maximum and minimum number of moves is now adjustable
+- The multi-color goal is now adjustable
+- New High Contrast Mode
+- Improved font sizes for different screen sizes
+- add close button to info display in case it overlaps game buttons
+- Fix: all levels are solved correctly now
+- Fix: solver now starts correctly after loading a game
+
+
 ## Version 29 (2025-09-29)
 - Added landscape mode with toggle button for left or right orientation of the gamegrid
 - fix Accessibility message where goal was announced one square off
