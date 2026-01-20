@@ -21,16 +21,21 @@ Google Play Games Sidekick (Beta) is an overlay that presents relevant content a
 #### Branch 1: `main-playstore` (Google Play Store)
 - Full Sidekick integration
 - Google Play Games Services enabled
-- Achievements, streaks, quests, Play Points
+- Achievements with Sidekick sharing & comparison
+- Streaks, quests, Play Points
 - All monetization features
 - Target: Play Store distribution
 
 #### Branch 2: `main-fdroid` (F-Droid)
 - NO Sidekick integration
 - NO Google Play Services dependencies
+- Achievements collected locally (in-game only)
+- NO achievement sharing/comparison
 - Community features via roboyard.z11.de
 - Open-source focus
 - Target: F-Droid distribution
+
+**Important**: Achievements are available in BOTH branches, but with different functionality
 
 ### Implementation Strategy
 
@@ -68,9 +73,50 @@ if (BuildConfig.FLAVOR.equals("playstore")) {
 
 **Conditional Compilation:**
 - Create separate source sets: `src/playstore/` and `src/fdroid/`
+- `AchievementManager` in BOTH flavors (core achievement logic)
+- `SidekickAchievementSync` only in playstore flavor (Sidekick sharing/comparison)
 - `SidekickManager` only in playstore flavor
 - `CommunityWebsiteManager` in both flavors
 - Shared core game logic in `src/main/`
+
+**Architecture for Achievements:**
+```
+src/main/java/
+├── roboyard/logic/achievements/
+│   ├── AchievementManager.java          (SHARED - both flavors)
+│   ├── Achievement.java                 (SHARED - data model)
+│   ├── AchievementStorage.java          (SHARED - local storage)
+│   └── AchievementUI.java               (SHARED - in-game display)
+│
+src/playstore/java/
+├── roboyard/logic/achievements/
+│   ├── SidekickAchievementSync.java     (PLAYSTORE ONLY)
+│   └── AchievementComparison.java       (PLAYSTORE ONLY)
+│
+src/fdroid/java/
+├── roboyard/logic/achievements/
+│   └── AchievementStub.java             (FDROID - no-op implementations)
+```
+
+**Achievement Flow:**
+
+Play Store (with Sidekick):
+1. Player unlocks achievement
+2. `AchievementManager.unlockAchievement()` called
+3. Stored locally in SharedPreferences
+4. `SidekickAchievementSync.syncToSidekick()` called
+5. Synced to Google Play Games Services
+6. Visible in Sidekick overlay + in-game UI
+7. Can be compared with other players
+
+F-Droid (without Sidekick):
+1. Player unlocks achievement
+2. `AchievementManager.unlockAchievement()` called
+3. Stored locally in SharedPreferences
+4. `AchievementStub.syncToSidekick()` called (no-op)
+5. Only visible in in-game UI
+6. NO comparison with other players
+7. NO Sidekick overlay
 
 ### Version Management
 
@@ -128,29 +174,44 @@ jobs:
 - Maintain open-source integrity for F-Droid
 - Clear separation of concerns
 - Easy to toggle features per platform
+- Achievements work in BOTH versions (feature parity for core gameplay)
+- Only Sidekick-specific features differ (sharing/comparison)
 
 **Cons:**
-- Dual codebase maintenance
+- Dual codebase maintenance (but shared achievement core)
 - Different release cycles possible
-- Testing overhead
+- Testing overhead (but core achievement logic tested once)
 - Documentation needs to cover both versions
+- Need to maintain interface contracts for achievement sync
 
 ### Recommended Rollout
 
-**Phase 1: Play Store Only**
-- Develop and test Sidekick integration
-- Release to Play Store with full features
+**Phase 1: Shared Achievement Core**
+- Develop `AchievementManager` and related classes in `src/main/`
+- Implement local achievement storage (SharedPreferences)
+- Create in-game achievement UI
+- Test achievement unlock logic
+- This is the foundation for BOTH branches
+
+**Phase 2: Play Store Implementation**
+- Create `src/playstore/` flavor with Sidekick integration
+- Implement `SidekickAchievementSync` for sharing/comparison
+- Integrate Google Play Games Services
+- Release to Play Store with full Sidekick features
 - Gather user feedback
 
-**Phase 2: F-Droid Maintenance**
-- Keep F-Droid version updated with core game fixes
-- No Sidekick features
-- Focus on community website integration
+**Phase 3: F-Droid Implementation**
+- Create `src/fdroid/` flavor with stub implementations
+- Implement `AchievementStub` (no-op for Sidekick)
+- Remove Google Play Services dependencies
+- Release to F-Droid with local-only achievements
+- Ensure feature parity for core gameplay
 
-**Phase 3: Long-term Strategy**
-- Monitor Sidekick adoption on Play Store
-- Evaluate if F-Droid branch is worth maintaining
-- Consider consolidating if Sidekick becomes standard
+**Phase 4: Maintenance & Sync**
+- Keep achievement core logic in sync between branches
+- Update both branches when new achievements are added
+- Monitor achievement unlock rates in both versions
+- Gather feedback from both communities
 
 ## Available Sidekick Features for Roboyard
 
