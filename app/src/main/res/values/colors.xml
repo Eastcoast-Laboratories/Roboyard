@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1976D2</color>
+    <color name="colorPrimaryDark">#1565C0</color>
+    <color name="colorAccent">#4CAF50</color>
+    
+    <color name="background_dark">#1A1A2E</color>
+    <color name="background_light">#16213E</color>
+    
+    <color name="achievement_unlocked">#2E4A3E</color>
+    <color name="achievement_locked">#2A2A3E</color>
+</resources>
