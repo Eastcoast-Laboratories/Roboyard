@@ -105,6 +105,21 @@
                     android:background="@drawable/button_fancy_red"
                     android:elevation="8dp" />
 
+                <!-- Achievements button - Gold with round corners -->
+                <Button
+                    android:id="@+id/achievements_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/achievements_title"
+                    android:contentDescription="@string/achievements_title"
+                    android:padding="12dp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/button_fancy_yellow"
+                    android:elevation="8dp" />
+
                 <!-- Settings button - Gray with round corners and black outline -->
                 <Button
                     android:id="@+id/settings_button"
