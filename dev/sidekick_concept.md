@@ -335,11 +335,17 @@ jobs:
 - `impossible_mode_streak_10` - Complete 10 games in a row in Impossible mode with optimal moves
 
 **Random Game Achievements (Solution Length):**
-- `solution_20_moves` - Complete a game with exactly 20 moves
-- `solution_21_moves` - Complete a game with exactly 21 moves
-- `solution_22_moves` - Complete a game with exactly 22 moves
-- `solution_25_plus_moves` - Complete a game with 25+ moves
-- `solution_30_plus_moves` - Complete a game with 30+ moves
+- `solution_20_moves` - Complete a game with optimal solution of 20 moves
+- `solution_21_moves` - Complete a game with optimal solution of 21 moves
+- `solution_22_moves` - Complete a game with optimal solution of 22 moves
+- `solution_23_moves` - Complete a game with optimal solution of 23 moves
+- `solution_24_moves` - Complete a game with optimal solution of 24 moves
+- `solution_25_moves` - Complete a game with optimal solution of 25 moves
+- `solution_26_moves` - Complete a game with optimal solution of 26 moves
+- `solution_27_moves` - Complete a game with optimal solution of 27 moves
+- `solution_28_moves` - Complete a game with optimal solution of 28 moves
+- `solution_29_moves` - Complete a game with optimal solution of 29 moves
+- `solution_30_plus_moves` - Complete a game with optimal solution of 30+ moves
 
 **Random Game Achievements (Screen Resolutions):**
 - `play_10_move_games_all_resolutions` - Play games with 10+ moves on all screen resolutions
@@ -352,16 +358,14 @@ jobs:
 - `game_4_targets` - Complete a game with 4 targets
 - `game_2_of_3_targets` - Complete a game where you need 2 out of 3 targets
 - `game_2_of_4_targets` - Complete a game where you need 2 out of 4 targets
+- `game_3_of_4_targets` - Complete a game where you need 3 out of 4 targets
 
 **Random Game Achievements (Robot Count):**
 - `game_5_robots` - Complete a game with 5 robots
-- `game_4_robots_10_times` - Complete 10 games with 4 robots
-- `game_5_robots_5_times` - Complete 5 games with 5 robots
 
-**Random Game Achievements (Field Coverage):**
-- `traverse_all_fields_1_robot` - Visit all fields on the board with 1 robot before reaching goal
-- `traverse_all_fields_all_robots` - Visit all fields on the board with all robots before reaching goal
-- `traverse_all_fields_5_games` - Visit all fields in 5 consecutive games
+**Random Game Achievements (Square Coverage):**
+- `traverse_all_squares_1_robot` - Visit all squares on the board with 1 robot before reaching goal
+- `traverse_all_squares_all_robots` - Visit all squares on the board with all robots before reaching goal
 
 **Random Game Achievements (Streaks & Challenges):**
 - `perfect_random_games_5` - Complete 5 random games with optimal moves
@@ -416,31 +420,30 @@ Track consecutive days of gameplay:
 - Strategy suggestions
 - Real-time problem solving
 
-## Implementation Roadmap
+## Implementation Roadmap (AI-Driven Development)
 
-### Phase 1: Foundation (Weeks 1-2)
-- [ ] Integrate Google Play Games Services
-- [ ] Set up Sidekick SDK
-- [ ] Implement basic achievement system
-- [ ] Test on internal/closed testing track
+### Phase 1: Foundation (2-3 hours)
+- [ ] Create Achievement data model
+- [ ] Implement AchievementStorage (SharedPreferences)
+- [ ] Implement AchievementManager with unlock logic
+- [ ] Create AchievementUI for in-game display
 
-### Phase 2: Core Features (Weeks 3-4)
-- [ ] Implement all achievement categories
-- [ ] Set up gaming streaks tracking
-- [ ] Integrate Play Points (if applicable)
+### Phase 2: Achievement Integration (2-3 hours)
+- [ ] Integrate achievement triggers in game completion
+- [ ] Add level game achievements
+- [ ] Add random game achievements
 - [ ] Test achievement unlock triggers
 
-### Phase 3: Advanced Features (Weeks 5-6)
-- [ ] Implement quest system
-- [ ] Add game tips integration
-- [ ] Set up analytics tracking
-- [ ] Prepare for Play Store submission
+### Phase 3: Streaks & Advanced (2-3 hours)
+- [ ] Implement StreakManager
+- [ ] Add streak UI
+- [ ] Add Sidekick sync (guarded by BuildConfig.ENABLE_SIDEKICK)
+- [ ] Test both Play Store and F-Droid builds
 
-### Phase 4: Optimization (Weeks 7-8)
-- [ ] Gather user feedback
-- [ ] Optimize achievement unlock rates
-- [ ] Fine-tune quest difficulty
-- [ ] Prepare for production release
+### Phase 4: Polish & Release (1-2 hours)
+- [ ] Test all achievements
+- [ ] Verify UI/UX
+- [ ] Prepare for release
 
 ## Technical Requirements
 
