@@ -8,13 +8,162 @@ Google Play Games Sidekick (Beta) is an overlay that presents relevant content a
 - Requires Google Play Games Services integration
 - Features vary based on integration status and registration
 
+## Distribution Strategy: Play Store vs F-Droid
+
+### Important Consideration
+**Sidekick is ONLY available on Google Play Store.** F-Droid users cannot access Sidekick features since:
+- F-Droid doesn't include Google Play Services
+- Sidekick requires Google Play Games Services SDK
+- F-Droid focuses on open-source, privacy-first distribution
+
+### Recommended Approach: Dual Branch Strategy
+
+#### Branch 1: `main-playstore` (Google Play Store)
+- Full Sidekick integration
+- Google Play Games Services enabled
+- Achievements, streaks, quests, Play Points
+- All monetization features
+- Target: Play Store distribution
+
+#### Branch 2: `main-fdroid` (F-Droid)
+- NO Sidekick integration
+- NO Google Play Services dependencies
+- Community features via roboyard.z11.de
+- Open-source focus
+- Target: F-Droid distribution
+
+### Implementation Strategy
+
+**Build Configuration:**
+```gradle
+// build.gradle
+flavorDimensions "store"
+
+productFlavors {
+    playstore {
+        dimension "store"
+        // Include Google Play Services
+        implementation 'com.google.android.gms:play-services-games:21.0.0'
+    }
+    
+    fdroid {
+        dimension "store"
+        // NO Google Play Services
+        // Community features only
+    }
+}
+```
+
+**Feature Flags:**
+```java
+// In code, check which flavor is being used
+if (BuildConfig.FLAVOR.equals("playstore")) {
+    // Initialize Sidekick
+    initializeSidekick();
+} else {
+    // F-Droid: use community website only
+    showCommunityWebsiteOption();
+}
+```
+
+**Conditional Compilation:**
+- Create separate source sets: `src/playstore/` and `src/fdroid/`
+- `SidekickManager` only in playstore flavor
+- `CommunityWebsiteManager` in both flavors
+- Shared core game logic in `src/main/`
+
+### Version Management
+
+**Play Store Version:**
+- Version: `X.Y.Z` (e.g., 1.0.0)
+- Includes all Sidekick features
+- Published to Google Play Store
+
+**F-Droid Version:**
+- Version: `X.Y.Z-fdroid` (e.g., 1.0.0-fdroid)
+- No Sidekick features
+- Published to F-Droid repository
+
+### CI/CD Pipeline
+
+**GitHub Actions Workflow:**
+```yaml
+# .github/workflows/build.yml
+jobs:
+  build-playstore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Play Store APK
+        run: ./gradlew assemblePlaystore
+      - name: Upload to Play Store
+        # Upload to Play Console
+        
+  build-fdroid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build F-Droid APK
+        run: ./gradlew assembleFdroid
+      - name: Upload to F-Droid
+        # F-Droid build process
+```
+
+### User Communication
+
+**In App:**
+- Play Store version: Show Sidekick features prominently
+- F-Droid version: Show community website link instead
+- Clear messaging about feature availability
+
+**In Store Listings:**
+- Play Store: Highlight Sidekick integration
+- F-Droid: Highlight open-source, privacy-first approach
+- Different feature lists for each platform
+
+### Maintenance Considerations
+
+**Pros:**
+- Maximize features for Play Store users
+- Maintain open-source integrity for F-Droid
+- Clear separation of concerns
+- Easy to toggle features per platform
+
+**Cons:**
+- Dual codebase maintenance
+- Different release cycles possible
+- Testing overhead
+- Documentation needs to cover both versions
+
+### Recommended Rollout
+
+**Phase 1: Play Store Only**
+- Develop and test Sidekick integration
+- Release to Play Store with full features
+- Gather user feedback
+
+**Phase 2: F-Droid Maintenance**
+- Keep F-Droid version updated with core game fixes
+- No Sidekick features
+- Focus on community website integration
+
+**Phase 3: Long-term Strategy**
+- Monitor Sidekick adoption on Play Store
+- Evaluate if F-Droid branch is worth maintaining
+- Consider consolidating if Sidekick becomes standard
+
 ## Available Sidekick Features for Roboyard
 
 ### 1. Gaming Tools (Immediately Available)
-- **Screenshot**: Allow players to capture and share their solutions
+- **Screenshot**: Capture gameplay (note: solution sharing already integrated via roboyard.z11.de)
 - **Screen Recording**: Record gameplay for sharing on YouTube/social media
 - **YouTube Livestream**: Stream gameplay directly to YouTube
 - **Do Not Disturb**: Minimize interruptions during gameplay
+
+**Note on Solution Sharing**: Roboyard already has a community website (roboyard.z11.de) for sharing solutions. Sidekick should **NOT duplicate** this functionality. Instead:
+- Direct players to the existing community website for solution sharing
+- Use Sidekick only for built-in gaming tools (screenshot, recording, livestream)
+- Keep solution sharing centralized on the community platform
 
 ### 2. Achievements System (Requires Implementation)
 **Status**: Must be implemented before Sidekick can display achievements
