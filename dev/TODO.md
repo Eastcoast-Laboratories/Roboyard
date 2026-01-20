@@ -86,7 +86,7 @@ check if this all works:
 - Wenn man eine Karte mit einem anderen ratio spielt und dann neues Spiel drückt, dann fehlt rechts und links etwas am Rand. die neue ratio soll auch die volle bildbreite ausnutzen
 
 # achievements
-- add achievement system
+- add achievement system: siehe sidekick_concept.md
 
 # most important
 

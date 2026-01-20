@@ -328,6 +328,53 @@ jobs:
 - `daily_login_30` - Log in 30 days in a row
 - `comeback_player` - Return after 30 days of inactivity
 
+**Random Game Achievements (Difficulty):**
+- `impossible_mode_1` - Complete 1 game in Impossible mode
+- `impossible_mode_5` - Complete 5 games in Impossible mode
+- `impossible_mode_streak_5` - Complete 5 games in a row in Impossible mode with optimal moves
+- `impossible_mode_streak_10` - Complete 10 games in a row in Impossible mode with optimal moves
+
+**Random Game Achievements (Solution Length):**
+- `solution_20_moves` - Complete a game with exactly 20 moves
+- `solution_21_moves` - Complete a game with exactly 21 moves
+- `solution_22_moves` - Complete a game with exactly 22 moves
+- `solution_25_plus_moves` - Complete a game with 25+ moves
+- `solution_30_plus_moves` - Complete a game with 30+ moves
+
+**Random Game Achievements (Screen Resolutions):**
+- `play_10_move_games_all_resolutions` - Play games with 10+ moves on all screen resolutions
+- `play_12_move_games_all_resolutions` - Play games with 12+ moves on all screen resolutions
+- `play_15_move_games_all_resolutions` - Play games with 15+ moves on all screen resolutions
+
+**Random Game Achievements (Multiple Targets):**
+- `game_2_targets` - Complete a game with 2 targets
+- `game_3_targets` - Complete a game with 3 targets
+- `game_4_targets` - Complete a game with 4 targets
+- `game_2_of_3_targets` - Complete a game where you need 2 out of 3 targets
+- `game_2_of_4_targets` - Complete a game where you need 2 out of 4 targets
+
+**Random Game Achievements (Robot Count):**
+- `game_5_robots` - Complete a game with 5 robots
+- `game_4_robots_10_times` - Complete 10 games with 4 robots
+- `game_5_robots_5_times` - Complete 5 games with 5 robots
+
+**Random Game Achievements (Field Coverage):**
+- `traverse_all_fields_1_robot` - Visit all fields on the board with 1 robot before reaching goal
+- `traverse_all_fields_all_robots` - Visit all fields on the board with all robots before reaching goal
+- `traverse_all_fields_5_games` - Visit all fields in 5 consecutive games
+
+**Random Game Achievements (Streaks & Challenges):**
+- `perfect_random_games_5` - Complete 5 random games with optimal moves
+- `perfect_random_games_10` - Complete 10 random games with optimal moves
+- `perfect_random_games_20` - Complete 20 random games with optimal moves
+- `no_hints_random_10` - Complete 10 random games without using hints
+- `no_hints_random_50` - Complete 50 random games without using hints
+
+**Random Game Achievements (Speed):**
+- `speedrun_random_under_20s` - Complete a random game in under 20 seconds
+- `speedrun_random_under_10s` - Complete a random game in under 10 seconds
+- `speedrun_random_5_games_under_30s` - Complete 5 random games in under 30 seconds each
+
 ### 3. Gaming Streaks (Available)
 Track consecutive days of gameplay:
 - Daily streak counter
