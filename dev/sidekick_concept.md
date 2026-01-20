@@ -290,94 +290,21 @@ jobs:
 - Use Sidekick only for built-in gaming tools (screenshot, recording, livestream)
 - Keep solution sharing centralized on the community platform
 
-### 2. Achievements System (Requires Implementation)
-**Status**: Must be implemented before Sidekick can display achievements
+### 2. Achievements System ✅ IMPLEMENTED
+**Status**: Core achievement system implemented. See [achievements.md](achievements.md) for full list.
 
-#### Achievement Categories:
+**Implementation Status:**
+- [x] Achievement data model (`Achievement.java`)
+- [x] Achievement categories (`AchievementCategory.java`)
+- [x] Achievement definitions (`AchievementDefinitions.java`) - 53 achievements
+- [x] Achievement manager with unlock logic (`AchievementManager.java`)
+- [x] Achievement UI (`AchievementsFragment.java`)
+- [x] Achievement unlock popup (`AchievementPopup.java`)
+- [x] Achievement triggers in game completion
+- [x] Main menu button to view achievements (purple)
+- [ ] Sidekick sync (Play Store only, guarded by BuildConfig.ENABLE_SIDEKICK)
 
-**Progression Achievements:**
-- `level_1_complete` - Complete Level 1
-- `level_10_complete` - Complete 10 levels
-- `level_50_complete` - Complete 50 levels
-- `level_140_complete` - Complete all 140 levels (Platinum)
-- `all_stars_collected` - Collect all 420 stars
-
-**Performance Achievements:**
-- `perfect_solution_1` - Solve a level with optimal moves
-- `perfect_solutions_10` - Solve 10 levels with optimal moves
-- `perfect_solutions_50` - Solve 50 levels with optimal moves
-- `speedrun_under_30s` - Complete a level in under 30 seconds
-- `speedrun_under_10s` - Complete a level in under 10 seconds
-
-**Challenge Achievements:**
-- `no_hints_10` - Complete 10 levels without using hints
-- `no_hints_50` - Complete 50 levels without using hints
-- `solve_custom_level` - Solve a custom-created level
-- `create_custom_level` - Create and save a custom level
-- `share_custom_level` - Share a custom level with others
-
-**Mastery Achievements:**
-- `3_star_level` - Achieve 3 stars on a level
-- `3_star_10_levels` - Achieve 3 stars on 10 levels
-- `3_star_50_levels` - Achieve 3 stars on 50 levels
-- `3_star_all_levels` - Achieve 3 stars on all 140 levels (Gold)
-
-**Special Achievements:**
-- `first_game` - Play your first game
-- `daily_login_7` - Log in 7 days in a row
-- `daily_login_30` - Log in 30 days in a row
-- `comeback_player` - Return after 30 days of inactivity
-
-**Random Game Achievements (Difficulty):**
-- `impossible_mode_1` - Complete 1 game in Impossible mode
-- `impossible_mode_5` - Complete 5 games in Impossible mode
-- `impossible_mode_streak_5` - Complete 5 games in a row in Impossible mode with optimal moves
-- `impossible_mode_streak_10` - Complete 10 games in a row in Impossible mode with optimal moves
-
-**Random Game Achievements (Solution Length):**
-- `solution_20_moves` - Complete a game with optimal solution of 20 moves
-- `solution_21_moves` - Complete a game with optimal solution of 21 moves
-- `solution_22_moves` - Complete a game with optimal solution of 22 moves
-- `solution_23_moves` - Complete a game with optimal solution of 23 moves
-- `solution_24_moves` - Complete a game with optimal solution of 24 moves
-- `solution_25_moves` - Complete a game with optimal solution of 25 moves
-- `solution_26_moves` - Complete a game with optimal solution of 26 moves
-- `solution_27_moves` - Complete a game with optimal solution of 27 moves
-- `solution_28_moves` - Complete a game with optimal solution of 28 moves
-- `solution_29_moves` - Complete a game with optimal solution of 29 moves
-- `solution_30_plus_moves` - Complete a game with optimal solution of 30+ moves
-
-**Random Game Achievements (Screen Resolutions):**
-- `play_10_move_games_all_resolutions` - Play games with 10+ moves on all screen resolutions
-- `play_12_move_games_all_resolutions` - Play games with 12+ moves on all screen resolutions
-- `play_15_move_games_all_resolutions` - Play games with 15+ moves on all screen resolutions
-
-**Random Game Achievements (Multiple Targets):**
-- `game_2_targets` - Complete a game with 2 targets
-- `game_3_targets` - Complete a game with 3 targets
-- `game_4_targets` - Complete a game with 4 targets
-- `game_2_of_3_targets` - Complete a game where you need 2 out of 3 targets
-- `game_2_of_4_targets` - Complete a game where you need 2 out of 4 targets
-- `game_3_of_4_targets` - Complete a game where you need 3 out of 4 targets
-
-**Random Game Achievements (Robot Count):**
-- `game_5_robots` - Complete a game with 5 robots
-
-**Random Game Achievements (Square Coverage):**
-- `traverse_all_squares_1_robot` - Visit all squares on the board with 1 robot before reaching goal
-- `traverse_all_squares_all_robots` - Visit all squares on the board with all robots before reaching goal
-
-**Random Game Achievements (Streaks & Challenges):**
-- `perfect_random_games_5` - Complete 5 random games with optimal moves
-- `perfect_random_games_10` - Complete 10 random games with optimal moves
-- `perfect_random_games_20` - Complete 20 random games with optimal moves
-- `no_hints_random_10` - Complete 10 random games without using hints
-- `no_hints_random_50` - Complete 50 random games without using hints
-
-**Random Game Achievements (Speed):**
-- `speedrun_random_under_20s` - Complete a random game in under 20 seconds
-- `speedrun_random_under_10s` - Complete a random game in under 10 seconds
-- `speedrun_random_5_games_under_30s` - Complete 5 random games in under 30 seconds each
+**Full achievement list:** See [dev/achievements.md](achievements.md)
 
 ### 3. Gaming Streaks (Available)
 Track consecutive days of gameplay:
@@ -422,17 +349,18 @@ Track consecutive days of gameplay:
 
 ## Implementation Roadmap (AI-Driven Development)
 
-### Phase 1: Foundation (2-3 hours)
-- [ ] Create Achievement data model
-- [ ] Implement AchievementStorage (SharedPreferences)
-- [ ] Implement AchievementManager with unlock logic
-- [ ] Create AchievementUI for in-game display
+### Phase 1: Foundation (2-3 hours) ✅ COMPLETED
+- [x] Create Achievement data model
+- [x] Implement AchievementStorage (SharedPreferences)
+- [x] Implement AchievementManager with unlock logic
+- [x] Create AchievementUI for in-game display
+- [x] Create AchievementPopup for unlock notifications
 
-### Phase 2: Achievement Integration (2-3 hours)
-- [ ] Integrate achievement triggers in game completion
-- [ ] Add level game achievements
-- [ ] Add random game achievements
-- [ ] Test achievement unlock triggers
+### Phase 2: Achievement Integration (2-3 hours) ✅ COMPLETED
+- [x] Integrate achievement triggers in game completion
+- [x] Add level game achievements
+- [x] Add random game achievements
+- [x] Test achievement unlock triggers
 
 ### Phase 3: Streaks & Advanced (2-3 hours)
 - [ ] Implement StreakManager
@@ -441,8 +369,8 @@ Track consecutive days of gameplay:
 - [ ] Test both Play Store and F-Droid builds
 
 ### Phase 4: Polish & Release (1-2 hours)
-- [ ] Test all achievements
-- [ ] Verify UI/UX
+- [x] Test all achievements (unit tests)
+- [x] Verify UI/UX
 - [ ] Prepare for release
 
 ## Technical Requirements
