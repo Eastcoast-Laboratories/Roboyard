@@ -8,7 +8,7 @@ Google Play Games Sidekick (Beta) is an overlay that presents relevant content a
 - Requires Google Play Games Services integration
 - Features vary based on integration status and registration
 
-## Distribution Strategy: Play Store vs F-Droid
+## Distribution Strategy: Single Codebase with Build Flags
 
 ### Important Consideration
 **Sidekick is ONLY available on Google Play Store.** F-Droid users cannot access Sidekick features since:
@@ -16,106 +16,123 @@ Google Play Games Sidekick (Beta) is an overlay that presents relevant content a
 - Sidekick requires Google Play Games Services SDK
 - F-Droid focuses on open-source, privacy-first distribution
 
-### Recommended Approach: Dual Branch Strategy
+### Recommended Approach: Single Branch with Build Flags
 
-#### Branch 1: `main-playstore` (Google Play Store)
-- Full Sidekick integration
-- Google Play Games Services enabled
-- Achievements with Sidekick sharing & comparison
-- Streaks, quests, Play Points
-- All monetization features
-- Target: Play Store distribution
-
-#### Branch 2: `main-fdroid` (F-Droid)
-- NO Sidekick integration
-- NO Google Play Services dependencies
-- Achievements collected locally (in-game only)
-- NO achievement sharing/comparison
-- Streaks tracked locally (in-game only)
-- NO streak comparison/leaderboards
-- Community features via roboyard.z11.de
-- Open-source focus
-- Target: F-Droid distribution
-
-**Important**: Achievements AND Streaks are available in BOTH branches, but with different functionality:
-- Play Store: Shared via Sidekick, comparable with other players
-- F-Droid: Local-only, visible in-game only
-
-### Implementation Strategy
+Maintain a single codebase with build flags to conditionally enable/disable Play Store features. All Sidekick-dependent code is wrapped with `BuildConfig.ENABLE_SIDEKICK` constant.
 
 **Build Configuration:**
 ```gradle
 // build.gradle
+buildTypes {
+    debug {
+        buildConfigField "boolean", "ENABLE_SIDEKICK", "true"
+    }
+    
+    release {
+        buildConfigField "boolean", "ENABLE_SIDEKICK", "true"
+    }
+}
+
 flavorDimensions "store"
 
 productFlavors {
     playstore {
         dimension "store"
+        buildConfigField "boolean", "ENABLE_SIDEKICK", "true"
         // Include Google Play Services
         implementation 'com.google.android.gms:play-services-games:21.0.0'
     }
     
     fdroid {
         dimension "store"
+        buildConfigField "boolean", "ENABLE_SIDEKICK", "false"
         // NO Google Play Services
-        // Community features only
     }
 }
 ```
 
-**Feature Flags:**
+**Versioning:**
+- All versions use same version number: `X.Y.Z` (whole numbers only)
+- No `-fdroid` suffix needed
+- Same version across all stores
+
+### Implementation Strategy
+
+**Feature Flag Pattern:**
+All Sidekick-dependent code wrapped with `BuildConfig.ENABLE_SIDEKICK`:
+
 ```java
-// In code, check which flavor is being used
-if (BuildConfig.FLAVOR.equals("playstore")) {
-    // Initialize Sidekick
-    initializeSidekick();
-} else {
-    // F-Droid: use community website only
-    showCommunityWebsiteOption();
+// Example: Achievement unlock
+public void unlockAchievement(Achievement achievement) {
+    // Always store locally
+    achievementStorage.save(achievement);
+    
+    // Conditionally sync to Sidekick
+    if (BuildConfig.ENABLE_SIDEKICK) {
+        sidekickAchievementSync.syncToSidekick(achievement);
+    }
+    
+    // Always show in-game UI
+    showAchievementNotification(achievement);
+}
+
+// Example: Streak tracking
+public void recordDailyLogin() {
+    // Always track locally
+    streakManager.incrementStreak();
+    
+    // Conditionally show leaderboard
+    if (BuildConfig.ENABLE_SIDEKICK) {
+        showStreakLeaderboard();
+    } else {
+        showLocalStreakUI();
+    }
+}
+
+// Example: Initialization
+public void initializeFeatures() {
+    // Always initialize achievements and streaks
+    achievementManager.initialize();
+    streakManager.initialize();
+    
+    // Conditionally initialize Sidekick
+    if (BuildConfig.ENABLE_SIDEKICK) {
+        sidekickManager.initialize();
+        googlePlayGamesManager.initialize();
+    }
 }
 ```
 
-**Conditional Compilation:**
-- Create separate source sets: `src/playstore/` and `src/fdroid/`
-- `AchievementManager` in BOTH flavors (core achievement logic)
-- `StreakManager` in BOTH flavors (core streak tracking)
-- `SidekickAchievementSync` only in playstore flavor (Sidekick sharing/comparison)
-- `SidekickStreakSync` only in playstore flavor (Sidekick streak sharing)
-- `SidekickManager` only in playstore flavor
-- `CommunityWebsiteManager` in both flavors
-- Shared core game logic in `src/main/`
-
-**Architecture for Achievements & Streaks:**
+**Code Organization:**
 ```
 src/main/java/
 ├── roboyard/logic/achievements/
-│   ├── AchievementManager.java          (SHARED - both flavors)
+│   ├── AchievementManager.java          (SHARED - uses BuildConfig.ENABLE_SIDEKICK)
 │   ├── Achievement.java                 (SHARED - data model)
 │   ├── AchievementStorage.java          (SHARED - local storage)
-│   └── AchievementUI.java               (SHARED - in-game display)
+│   ├── AchievementUI.java               (SHARED - in-game display)
+│   └── SidekickAchievementSync.java     (SHARED - guarded by BuildConfig.ENABLE_SIDEKICK)
 │
 ├── roboyard/logic/streaks/
-│   ├── StreakManager.java               (SHARED - both flavors)
+│   ├── StreakManager.java               (SHARED - uses BuildConfig.ENABLE_SIDEKICK)
 │   ├── Streak.java                      (SHARED - data model)
 │   ├── StreakStorage.java               (SHARED - local storage)
-│   └── StreakUI.java                    (SHARED - in-game display)
+│   ├── StreakUI.java                    (SHARED - in-game display)
+│   ├── SidekickStreakSync.java          (SHARED - guarded by BuildConfig.ENABLE_SIDEKICK)
+│   └── StreakLeaderboard.java           (SHARED - guarded by BuildConfig.ENABLE_SIDEKICK)
 │
-src/playstore/java/
-├── roboyard/logic/achievements/
-│   ├── SidekickAchievementSync.java     (PLAYSTORE ONLY)
-│   └── AchievementComparison.java       (PLAYSTORE ONLY)
-│
-├── roboyard/logic/streaks/
-│   ├── SidekickStreakSync.java          (PLAYSTORE ONLY)
-│   └── StreakLeaderboard.java           (PLAYSTORE ONLY)
-│
-src/fdroid/java/
-├── roboyard/logic/achievements/
-│   └── AchievementStub.java             (FDROID - no-op implementations)
-│
-├── roboyard/logic/streaks/
-│   └── StreakStub.java                  (FDROID - no-op implementations)
+└── roboyard/logic/sidekick/
+    ├── SidekickManager.java             (SHARED - guarded by BuildConfig.ENABLE_SIDEKICK)
+    └── GooglePlayGamesManager.java      (SHARED - guarded by BuildConfig.ENABLE_SIDEKICK)
 ```
+
+**Advantages:**
+- Single codebase to maintain
+- No branch merging complexity
+- Easy to toggle features per build flavor
+- Same version number for all distributions
+- Achievements and streaks work in both versions
+- Only Sidekick sync/comparison differs
 
 **Achievement & Streak Flow:**
 
@@ -233,30 +250,32 @@ jobs:
 - Implement local storage (SharedPreferences) for both
 - Create in-game UI for achievements and streaks
 - Test unlock logic and streak tracking
-- This is the foundation for BOTH branches
+- This is the foundation for ALL builds
 
-**Phase 2: Play Store Implementation**
-- Create `src/playstore/` flavor with Sidekick integration
-- Implement `SidekickAchievementSync` for achievement sharing/comparison
-- Implement `SidekickStreakSync` for streak sharing/leaderboard
-- Implement `StreakLeaderboard` for streak comparison
-- Integrate Google Play Games Services
-- Release to Play Store with full Sidekick features
-- Gather user feedback
+**Phase 2: Sidekick Integration (Guarded by BuildConfig.ENABLE_SIDEKICK)**
+- Implement `SidekickAchievementSync` in `src/main/` (guarded by flag)
+- Implement `SidekickStreakSync` in `src/main/` (guarded by flag)
+- Implement `StreakLeaderboard` in `src/main/` (guarded by flag)
+- Implement `SidekickManager` in `src/main/` (guarded by flag)
+- Integrate Google Play Games Services (optional dependency)
+- Add build flavor configuration for Play Store and F-Droid
+- Test with `ENABLE_SIDEKICK=true` for Play Store
+- Test with `ENABLE_SIDEKICK=false` for F-Droid
 
-**Phase 3: F-Droid Implementation**
-- Create `src/fdroid/` flavor with stub implementations
-- Implement `AchievementStub` (no-op for Sidekick)
-- Implement `StreakStub` (no-op for Sidekick)
-- Remove Google Play Services dependencies
-- Release to F-Droid with local-only achievements and streaks
-- Ensure feature parity for core gameplay
+**Phase 3: Build Flavor Configuration**
+- Configure `playstore` flavor with `ENABLE_SIDEKICK=true`
+- Configure `fdroid` flavor with `ENABLE_SIDEKICK=false`
+- Remove Google Play Services from F-Droid flavor
+- Verify all `BuildConfig.ENABLE_SIDEKICK` guards work correctly
+- Test both flavors build successfully
 
-**Phase 4: Maintenance & Sync**
-- Keep achievement and streak core logic in sync between branches
-- Update both branches when new achievements/streaks are added
-- Monitor unlock rates and streak patterns in both versions
-- Gather feedback from both communities
+**Phase 4: Release & Maintenance**
+- Release Play Store version with full Sidekick features
+- Release F-Droid version with local-only achievements/streaks
+- Both use same version number (X.Y.Z)
+- Monitor unlock rates and streak patterns across both versions
+- Update both versions simultaneously when adding new features
+- All code changes go to single `main` branch
 
 ## Available Sidekick Features for Roboyard
 
