@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Colorful border using tiled wall graphics -->
+    <ImageView
+        android:id="@+id/top_wall"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no"
+        android:focusable="false"
+        android:clickable="false"
+        android:contentDescription="@null" />
+    
+    <ImageView
+        android:id="@+id/left_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no" />
+    
+    <ImageView
+        android:id="@+id/right_wall"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/mv"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAccessibility="no" />
+    
+    <ImageView
+        android:id="@+id/bottom_wall"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:src="@drawable/mh"
+        android:scaleType="fitXY"
+        android:tileMode="repeat"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAccessibility="no" />
+
+    <!-- Back button at top -->
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/back_button"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:padding="12dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/button_fancy_blue"
+        android:elevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/achievements_title"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/back_button" />
+
+    <!-- Progress text -->
+    <TextView
+        android:id="@+id/progress_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#666666"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text" />
+
+    <!-- Scrollable achievements list -->
+    <ScrollView
+        android:id="@+id/achievements_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
+        app:layout_constraintEnd_toStartOf="@id/right_wall"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintTop_toBottomOf="@id/progress_text">
+
+        <LinearLayout
+            android:id="@+id/achievements_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp" />
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

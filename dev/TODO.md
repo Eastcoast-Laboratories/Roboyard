@@ -88,6 +88,28 @@ check if this all works:
 # achievements
 - add achievement system: siehe sidekick_concept.md
 
+
+
+es fehlt ein back button on top of the achievementss creen
+
+der achievements button muss lila
+
+es fehlt eine erfolgs-popup, wenn man ein achievement geschafft hat, sollte von oben rein faden und wieder raus faden, nach 10s. und einen button haben zur acheivements übersicht
+
+wenn mehrere acheeivements auf einmal erledigt werden, alle untereinander mit einem haken und wenn die nicht auf den bildschirm passen scrollable
+
+die hintergrundfarbe der achievement seite muss weis sein und die selben gestreckten walls als ränder wie bei der levels seite.
+
+extrahiere die achievements aus dem concept file in eine extra dev/achievements.md file und verlinke nur zu dem file in dem concept. 
+
+mache überall in dem concept häkchen, was schon umgesetzt ist
+
+merke dir: synchronisiere immer alle acheivements mit der liste in dem md file , wenn wir was ändern.
+
+ erstelle unittests, die das im emulator starten, der ist jetzt widerr gestartet in AS mit dem "small phone"
+
+es sollen alle achievements in unittests durchgetestet werden, soweit möglich, dokumentiere die unittests gut, schau dir existierende unittests an, wie die funktionieren falls du nicht weiter kommst.
+
 # most important
 
 - Wenn man jetzt den bildschrm dreht, dreht er immer die app ausrichtung (landscape oder protrait) unabhngig von den einstellungen im system.

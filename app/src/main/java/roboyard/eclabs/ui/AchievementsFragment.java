@@ -1,19 +1,18 @@
 package roboyard.eclabs.ui;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-
-import java.util.List;
 
 import roboyard.eclabs.R;
 import roboyard.eclabs.achievements.Achievement;
@@ -27,73 +26,30 @@ import timber.log.Timber;
 public class AchievementsFragment extends BaseGameFragment {
     
     private AchievementManager achievementManager;
+    private LinearLayout achievementsContainer;
+    private TextView progressText;
     
     @Override
     public String getScreenTitle() {
         return getString(R.string.achievements_title);
     }
-    private LinearLayout achievementsContainer;
-    private TextView progressText;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Create the layout programmatically
-        ScrollView scrollView = new ScrollView(requireContext());
-        scrollView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        scrollView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background_dark));
-        scrollView.setPadding(32, 32, 32, 32);
+        View view = inflater.inflate(R.layout.fragment_achievements, container, false);
         
-        LinearLayout mainLayout = new LinearLayout(requireContext());
-        mainLayout.setOrientation(LinearLayout.VERTICAL);
-        mainLayout.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        
-        // Title
-        TextView titleText = new TextView(requireContext());
-        titleText.setText(R.string.achievements_title);
-        titleText.setTextSize(28);
-        titleText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-        titleText.setPadding(0, 0, 0, 16);
-        mainLayout.addView(titleText);
-        
-        // Progress
-        progressText = new TextView(requireContext());
-        progressText.setTextSize(18);
-        progressText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
-        progressText.setPadding(0, 0, 0, 32);
-        mainLayout.addView(progressText);
-        
-        // Achievements container
-        achievementsContainer = new LinearLayout(requireContext());
-        achievementsContainer.setOrientation(LinearLayout.VERTICAL);
-        achievementsContainer.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        mainLayout.addView(achievementsContainer);
-        
-        // Back button
-        TextView backButton = new TextView(requireContext());
-        backButton.setText(R.string.back_button);
-        backButton.setTextSize(20);
-        backButton.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-        backButton.setBackgroundResource(R.drawable.button_fancy_blue);
-        backButton.setPadding(48, 24, 48, 24);
+        // Set up back button
+        Button backButton = view.findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
             requireActivity().getSupportFragmentManager().popBackStack();
         });
-        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        backParams.topMargin = 32;
-        backButton.setLayoutParams(backParams);
-        mainLayout.addView(backButton);
         
-        scrollView.addView(mainLayout);
-        return scrollView;
+        // Get references to UI elements
+        progressText = view.findViewById(R.id.progress_text);
+        achievementsContainer = view.findViewById(R.id.achievements_container);
+        
+        return view;
     }
     
     @Override
@@ -159,9 +115,10 @@ public class AchievementsFragment extends BaseGameFragment {
         LinearLayout itemLayout = new LinearLayout(requireContext());
         itemLayout.setOrientation(LinearLayout.HORIZONTAL);
         itemLayout.setPadding(16, 16, 16, 16);
+        // White background with green tint for unlocked, light gray for locked
         itemLayout.setBackgroundColor(achievement.isUnlocked() ? 
-                ContextCompat.getColor(requireContext(), R.color.achievement_unlocked) :
-                ContextCompat.getColor(requireContext(), R.color.achievement_locked));
+                Color.parseColor("#E8F5E9") : // Light green for unlocked
+                Color.parseColor("#F5F5F5")); // Light gray for locked
         
         LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -189,15 +146,15 @@ public class AchievementsFragment extends BaseGameFragment {
         nameText.setText(getStringByName(achievement.getNameKey()));
         nameText.setTextSize(16);
         nameText.setTextColor(achievement.isUnlocked() ?
-                ContextCompat.getColor(requireContext(), android.R.color.white) :
-                ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
+                Color.parseColor("#1B5E20") : // Dark green for unlocked
+                Color.parseColor("#9E9E9E")); // Gray for locked
         textContainer.addView(nameText);
         
         // Description
         TextView descText = new TextView(requireContext());
         descText.setText(getStringByName(achievement.getDescriptionKey()));
         descText.setTextSize(12);
-        descText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
+        descText.setTextColor(Color.parseColor("#666666"));
         textContainer.addView(descText);
         
         itemLayout.addView(textContainer);
