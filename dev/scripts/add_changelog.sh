@@ -66,25 +66,13 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Die maximale und minimale Anzahl Züge ist jetzt beliebig einstellbar
-- Das mehrfarbige Ziel ist jetzt einstellbar
-- Neuer Hoher-Kontrast-Modus
-- Verbesserte Schriftgrößen für unterschiedliche Displays
-- Ein Schließen-Button im Info-Display in der Spielanzeige um zu verhindern, dass es die Spielknöpfe überlappt
-- Fix: alle Levels werden jetzt korrekt gelöst
-- Fix: Solver startet jetzt korrekt nach Laden eines Spielstands
+- Menu Button führt jetzt zur Levelauswahl statt zur Hauptmenü
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- The maximum and minimum number of moves is now adjustable
-- The multi-color goal is now adjustable
-- New High Contrast Mode
-- Improved font sizes for different screen sizes
-- add close button to info display in case it overlaps game buttons
-- Fix: all levels are solved correctly now
-- Fix: solver now starts correctly after loading a game
+- Menu button now returns to level selection instead of main menu
 EOF
 )
 

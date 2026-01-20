@@ -1115,14 +1115,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         });
         
         // (Button text: "Menu")
-        // Menu button - go back to main menu
+        // Menu button - go back to level selection
         menuButton = view.findViewById(R.id.menu_button);
         menuButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Menu button clicked");
+            Timber.d("ModernGameFragment: Menu button clicked - returning to level selection");
             
-            // Create a new MainMenuFragment instance
-            MainMenuFragment menuFragment = new MainMenuFragment();
-            navigateToDirect(menuFragment);
+            // if playing a level game
+            if(isLevelGame) {
+                // Create a new LevelSelectionFragment instance
+                LevelSelectionFragment levelSelectionFragment = new LevelSelectionFragment();
+                navigateToDirect(levelSelectionFragment);
+            } else {
+                // Create a new MainMenuFragment instance
+                MainMenuFragment mainMenuFragment = new MainMenuFragment();
+                navigateToDirect(mainMenuFragment);
+            }
         });
         
         // Layout toggle button - only available in landscape mode
