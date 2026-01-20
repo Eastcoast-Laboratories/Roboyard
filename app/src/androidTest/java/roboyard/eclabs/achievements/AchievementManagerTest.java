@@ -54,7 +54,7 @@ public class AchievementManagerTest {
     public void testAllAchievementsLoaded() {
         List<Achievement> all = achievementManager.getAllAchievements();
         assertNotNull("Achievement list should not be null", all);
-        assertEquals("Should have 53 achievements", 53, all.size());
+        assertEquals("Should have 58 achievements", 58, all.size());
     }
 
     /**

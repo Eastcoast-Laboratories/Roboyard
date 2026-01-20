@@ -20,7 +20,7 @@ public class MockGameStateManager extends GameStateManager {
     public MockGameStateManager() {
         super(null);
         // Initialize with a default state
-        currentState.setValue(GameState.createRandom(16, 1));
+        currentState.setValue(GameState.createRandom());
     }
     
     @Override
@@ -30,25 +30,23 @@ public class MockGameStateManager extends GameStateManager {
     
     @Override
     public void startNewGame() {
-        GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
+        GameState newState = GameState.createRandom();
         currentState.setValue(newState);
     }
     
     @Override
     public void loadLevel(int level) {
         // Simplified level loading for testing
-        GameState newState = GameState.createRandom(boardSize.getValue(), difficulty.getValue());
+        GameState newState = GameState.createRandom();
         newState.setLevelId(level);
         currentState.setValue(newState);
     }
     
-    @Override
-    public LiveData<Integer> getBoardSize() {
+    public LiveData<Integer> getMockBoardSize() {
         return boardSize;
     }
     
-    @Override
-    public LiveData<Integer> getDifficulty() {
+    public LiveData<Integer> getMockDifficulty() {
         return difficulty;
     }
     

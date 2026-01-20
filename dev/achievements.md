@@ -147,7 +147,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ---
 
-## Total: 53 Achievements
+## Total: 58 Achievements
 
 | Category | Count |
 |----------|-------|
@@ -164,7 +164,9 @@ This document defines all achievements in the game. Keep this file synchronized 
 | Random - Square Coverage | 2 |
 | Random - Streaks | 5 |
 | Random - Speed | 3 |
-| **Total** | **53** |
+| **Total** | **58** |
+
+Note: The solution length achievements include 20-29 (10 achievements) plus 30+ (1 achievement) = 11 total.
 
 ---
 
