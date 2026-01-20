@@ -44,6 +44,7 @@ import roboyard.pm.ia.GameSolution;
 
 import roboyard.ui.components.GameGridView;
 import roboyard.ui.components.GameStateManager;
+import roboyard.eclabs.achievements.AchievementManager;
 import timber.log.Timber;
 
 // Added imports for accessibility
@@ -601,6 +602,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         }
                         
                         announceAccessibility(completionMessage);
+                        
+                        // Trigger achievements for level completion
+                        long elapsedTime = SystemClock.elapsedRealtime() - startTime;
+                        AchievementManager.getInstance(requireContext())
+                            .onLevelCompleted(state.getLevelId(), playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
                     } else {
                         // This is a random game
                         
@@ -645,6 +651,26 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         
                         announceAccessibility(completionMessage_a11y);
                         updateStatusText(completionMessage, true);
+                        
+                        // Trigger achievements for random game completion
+                        int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
+                                gameStateManager.getMoveCount().getValue() : 0;
+                        int optimalMoves = 0;
+                        GameSolution sol = gameStateManager.getCurrentSolution();
+                        if (sol != null && sol.getMoves() != null) {
+                            optimalMoves = sol.getMoves().size();
+                        }
+                        int hintsUsed = state.getHintCount();
+                        long elapsedTime = SystemClock.elapsedRealtime() - startTime;
+                        boolean isImpossibleMode = Preferences.difficulty == 4; // Impossible mode
+                        int robotCount = state.getRobots() != null ? state.getRobots().size() : 4;
+                        // TODO: Get actual target count from game state when multi-target is implemented
+                        int targetCount = 1;
+                        int targetsNeeded = 1;
+                        
+                        AchievementManager.getInstance(requireContext())
+                            .onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
+                                isImpossibleMode, robotCount, targetCount, targetsNeeded);
                     }
 
                     // change the "Reset" Button to "Retry"
