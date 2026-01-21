@@ -218,9 +218,10 @@ public class AchievementManager {
             threeStarLevels++;
             saveCounter("three_star_levels", threeStarLevels);
             unlock("3_star_level");
-            if (threeStarLevels >= 10) unlock("3_star_10_levels");
-            if (threeStarLevels >= 50) unlock("3_star_50_levels");
-            if (threeStarLevels >= 140) unlock("3_star_all_levels");
+            // Achievement unlocked when reaching specific level milestones with 3 stars
+            if (levelId >= 10) unlock("3_star_10_levels");
+            if (levelId >= 50) unlock("3_star_50_levels");
+            if (levelId >= 140) unlock("3_star_all_levels");
         }
         
         // Speedrun
