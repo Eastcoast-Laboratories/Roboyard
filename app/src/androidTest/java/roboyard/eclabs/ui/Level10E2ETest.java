@@ -109,6 +109,17 @@ public class Level10E2ETest {
                 fail("Level " + level + " should be completed");
             }
             
+            // Check achievement status after each level
+            Thread.sleep(1000);
+            boolean achievement3Star10Unlocked = achievementManager.isUnlocked("3_star_10_levels");
+            Timber.d("[E2E_10LEVELS] After Level %d: 3_star_10_levels = %s", level, achievement3Star10Unlocked);
+            
+            // ASSERTION: Achievement should NOT be unlocked before Level 10
+            if (level < 10) {
+                assertFalse("3_star_10_levels should NOT be unlocked before Level 10 (currently at Level " + level + ")", 
+                        achievement3Star10Unlocked);
+            }
+            
             // After Level 10, check if 3_star_10_levels achievement is unlocked
             if (level == 10) {
                 Timber.d("[E2E_10LEVELS] ===== CHECKING ACHIEVEMENT AFTER LEVEL 10 =====");
@@ -116,10 +127,10 @@ public class Level10E2ETest {
                 // Wait longer for achievement to be processed
                 for (int wait = 0; wait < 5; wait++) {
                     Thread.sleep(2000);
-                    boolean achievement3Star10Unlocked = achievementManager.isUnlocked("3_star_10_levels");
-                    Timber.d("[E2E_10LEVELS] Achievement check %d/5: 3_star_10_levels = %s", wait + 1, achievement3Star10Unlocked);
+                    boolean achievement3Star10Check = achievementManager.isUnlocked("3_star_10_levels");
+                    Timber.d("[E2E_10LEVELS] Achievement check %d/5: 3_star_10_levels = %s", wait + 1, achievement3Star10Check);
                     
-                    if (achievement3Star10Unlocked) {
+                    if (achievement3Star10Check) {
                         Timber.d("[E2E_10LEVELS] ✓ VISUAL CONFIRMATION: 3_star_10_levels achievement UNLOCKED after %d seconds!", (wait + 1) * 2);
                         break;
                     }
