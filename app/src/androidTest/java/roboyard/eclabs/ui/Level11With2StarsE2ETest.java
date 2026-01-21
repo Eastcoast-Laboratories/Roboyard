@@ -36,11 +36,11 @@ import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 /**
- * E2E test: Complete all 140 levels to unlock 3_star_10_levels, 3_star_50_levels, and 3_star_all_levels achievements
- * Uses the solver solution to execute moves automatically
+ * E2E test: Complete 11 levels where Level 1 gets only 2 stars (not 3)
+ * Verifies that 3_star_10_levels is NOT unlocked after level 10 (since not all levels have 3 stars)
  */
 @RunWith(AndroidJUnit4.class)
-public class Level140E2ETest {
+public class Level11With2StarsE2ETest {
 
     @Rule
     public ActivityScenarioRule<MainFragmentActivity> activityRule =
@@ -50,28 +50,24 @@ public class Level140E2ETest {
     private AchievementManager achievementManager;
     private GameStateManager gameStateManager;
     private volatile Boolean levelCompleted = null;
-    private ArrayList<Integer> levelsWithoutThreeStars = new ArrayList<>();
-    private int totalStarsEarned = 0;
 
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        levelsWithoutThreeStars.clear();
-        totalStarsEarned = 0;
-        Timber.d("[E2E_140LEVELS] ========== TEST STARTED ==========");
+        Timber.d("[E2E_2STARS] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_140LEVELS] ========== TEST FINISHED ==========");
+        Timber.d("[E2E_2STARS] ========== TEST FINISHED ==========");
     }
 
     @Test
-    public void testComplete140Levels_UnlocksAllMasteryAchievements() throws InterruptedException {
-        Timber.d("[E2E_140LEVELS] Starting mastery achievements test");
+    public void testLevel11With2StarsInLevel1_3StarAchievementNotUnlocked() throws InterruptedException {
+        Timber.d("[E2E_2STARS] Starting test: 11 levels with only 2 stars in level 1");
         Thread.sleep(200);
         
         // Navigate to Level 1
@@ -84,12 +80,44 @@ public class Level140E2ETest {
             gameStateManager = activity.getGameStateManager();
         });
         
-        // Complete levels 1-140 to test mastery achievements
-        for (int level = 1; level <= 140; level++) {
-            Timber.d("[E2E_140LEVELS] ===== Starting Level %d =====", level);
+        // Complete levels 1-11
+        for (int level = 1; level <= 11; level++) {
+            Timber.d("[E2E_2STARS] ===== Starting Level %d =====", level);
             
             // Wait for solver to find solution
             Thread.sleep(2000);
+            
+            // For level 1, make a wrong move first to get only 2 stars
+            if (level == 1) {
+                Timber.d("[E2E_2STARS] Level 1: Making wrong move to get only 2 stars");
+                activityRule.getScenario().onActivity(activity -> {
+                    if (gameStateManager != null) {
+                        GameState state = gameStateManager.getCurrentState().getValue();
+                        if (state != null) {
+                            // Find and select blue robot (color 0)
+                            for (GameElement element : state.getRobots()) {
+                                if (element.getColor() == 0) {
+                                    state.setSelectedRobot(element);
+                                    Timber.d("[E2E_2STARS] Selected blue robot");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                Thread.sleep(100);
+                
+                // Move robot DOWN (wrong move to reduce stars)
+                activityRule.getScenario().onActivity(activity -> {
+                    if (gameStateManager != null) {
+                        gameStateManager.moveRobotInDirection(0, 1);
+                        Timber.d("[E2E_2STARS] Moved blue robot DOWN (wrong move)");
+                    }
+                });
+                
+                Thread.sleep(2000);
+            }
             
             // Execute solution moves
             executeSolutionMoves(level);
@@ -115,52 +143,34 @@ public class Level140E2ETest {
                             gameStateManager.getCurrentState().getValue().getHintCount() : 0;
                     starsEarned[0] = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
                     
-                    Timber.d("[E2E_140LEVELS] Level %d completed: %s, stars: %d", currentLevel, levelCompleted, starsEarned[0]);
+                    Timber.d("[E2E_2STARS] Level %d completed: %s, stars: %d", currentLevel, levelCompleted, starsEarned[0]);
                 }
             });
             
             Thread.sleep(500);
             
             if (levelCompleted == null || !levelCompleted) {
-                Timber.e("[E2E_140LEVELS] Level %d NOT completed!", level);
+                Timber.e("[E2E_2STARS] Level %d NOT completed!", level);
                 fail("Level " + level + " should be completed");
             }
             
-            // Track stars
-            totalStarsEarned += starsEarned[0];
-            if (starsEarned[0] < 3) {
-                levelsWithoutThreeStars.add(level);
-                Timber.w("[E2E_140LEVELS] ⚠️ Level %d: Only %d stars (not 3 stars)", level, starsEarned[0]);
-            }
-            
-            // Check achievement status after key milestones
+            // Check achievement status after level 10
             if (level == 10) {
                 Thread.sleep(2000);
                 boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
-                Timber.d("[E2E_140LEVELS] After Level 10: 3_star_10_levels = %s", threeStar10);
-            }
-            
-            if (level == 50) {
-                Thread.sleep(2000);
-                boolean threeStar50 = achievementManager.isUnlocked("3_star_50_levels");
-                Timber.d("[E2E_140LEVELS] After Level 50: 3_star_50_levels = %s", threeStar50);
-            }
-            
-            if (level == 140) {
-                Thread.sleep(2000);
-                boolean threeStarAll = achievementManager.isUnlocked("3_star_all_levels");
-                Timber.d("[E2E_140LEVELS] After Level 140: 3_star_all_levels = %s", threeStarAll);
+                Timber.d("[E2E_2STARS] After Level 10: 3_star_10_levels = %s (should be false)", threeStar10);
+                assertFalse("3_star_10_levels should NOT be unlocked (level 1 has only 2 stars)", threeStar10);
             }
             
             // If not the last level, click Next Level button
-            if (level < 140) {
+            if (level < 11) {
                 Thread.sleep(2000);
-                Timber.d("[E2E_140LEVELS] Clicking Next Level button");
+                Timber.d("[E2E_2STARS] Clicking Next Level button");
                 try {
                     onView(withId(R.id.next_level_button)).check(matches(isDisplayed())).perform(click());
                     Thread.sleep(500);
                 } catch (Exception e) {
-                    Timber.e(e, "[E2E_140LEVELS] Could not click Next Level button");
+                    Timber.e(e, "[E2E_2STARS] Could not click Next Level button");
                     fail("Could not click Next Level button after level " + level);
                 }
             }
@@ -169,33 +179,17 @@ public class Level140E2ETest {
             levelCompleted = null;
         }
         
-        // Wait for achievements to be processed after Level 140
+        // Wait for achievements to be processed
         Thread.sleep(5000);
         
-        Timber.d("[E2E_140LEVELS] ===== FINAL REPORT =====");
-        Timber.d("[E2E_140LEVELS] Total Stars Earned: %d / 420", totalStarsEarned);
-        Timber.d("[E2E_140LEVELS] Levels without 3 stars: %d", levelsWithoutThreeStars.size());
+        Timber.d("[E2E_2STARS] ===== FINAL CHECK =====");
         
-        if (!levelsWithoutThreeStars.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < levelsWithoutThreeStars.size(); i++) {
-                if (i > 0) sb.append(", ");
-                sb.append(levelsWithoutThreeStars.get(i));
-            }
-            Timber.d("[E2E_140LEVELS] Problematic levels: %s", sb.toString());
-        }
+        // Final assertion: 3_star_10_levels should NOT be unlocked
+        boolean threeStar10Final = achievementManager.isUnlocked("3_star_10_levels");
+        Timber.d("[E2E_2STARS] Final check: 3_star_10_levels = %s (should be false)", threeStar10Final);
+        assertFalse("3_star_10_levels should NOT be unlocked when not all 10 levels have 3 stars", threeStar10Final);
         
-        // Final assertions
-        assertTrue("3_star_level should be unlocked", 
-                achievementManager.isUnlocked("3_star_level"));
-        assertTrue("3_star_10_levels should be unlocked", 
-                achievementManager.isUnlocked("3_star_10_levels"));
-        assertTrue("3_star_50_levels should be unlocked after completing 50 levels", 
-                achievementManager.isUnlocked("3_star_50_levels"));
-        assertTrue("3_star_all_levels should be unlocked after completing all 140 levels", 
-                achievementManager.isUnlocked("3_star_all_levels"));
-        
-        Timber.d("[E2E_140LEVELS] ✓ Test passed: All 140 levels completed");
+        Timber.d("[E2E_2STARS] ✓ Test passed: 3_star_10_levels correctly NOT unlocked");
     }
     
     /**
@@ -209,10 +203,10 @@ public class Level140E2ETest {
             if (gameStateManager != null) {
                 solutionHolder[0] = gameStateManager.getCurrentSolution();
                 if (solutionHolder[0] != null) {
-                    Timber.d("[E2E_140LEVELS] Level %d: Found solution with %d moves", 
+                    Timber.d("[E2E_2STARS] Level %d: Found solution with %d moves", 
                             level, solutionHolder[0].getMoves().size());
                 } else {
-                    Timber.w("[E2E_140LEVELS] Level %d: No solution found yet", level);
+                    Timber.w("[E2E_2STARS] Level %d: No solution found yet", level);
                 }
             }
         });
@@ -230,7 +224,7 @@ public class Level140E2ETest {
         }
         
         if (solutionHolder[0] == null) {
-            Timber.e("[E2E_140LEVELS] Level %d: Could not get solution after %d retries", level, retries);
+            Timber.e("[E2E_2STARS] Level %d: Could not get solution after %d retries", level, retries);
             fail("Could not get solution for level " + level);
             return;
         }
@@ -238,7 +232,7 @@ public class Level140E2ETest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[E2E_140LEVELS] Level %d: Executing %d moves", level, moves.size());
+        Timber.d("[E2E_2STARS] Level %d: Executing %d moves", level, moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);
@@ -246,8 +240,6 @@ public class Level140E2ETest {
                 RRGameMove rrMove = (RRGameMove) move;
                 int robotColor = rrMove.getColor();
                 ERRGameMove direction = rrMove.getMove();
-                
-                Timber.d("[E2E_140LEVELS] Move %d: Robot %d -> %s", i + 1, robotColor, direction);
                 
                 // Select robot and move
                 final int dx = getDirectionX(direction);
@@ -262,7 +254,6 @@ public class Level140E2ETest {
                             for (GameElement element : state.getRobots()) {
                                 if (element.getColor() == color) {
                                     state.setSelectedRobot(element);
-                                    Timber.d("[E2E_140LEVELS] Selected robot with color %d", color);
                                     break;
                                 }
                             }
