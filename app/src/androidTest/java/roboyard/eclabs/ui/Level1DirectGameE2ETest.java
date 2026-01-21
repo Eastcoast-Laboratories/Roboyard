@@ -28,10 +28,7 @@ import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 /**
- * Simple E2E test that:
- * 1. Clicks "Level Game" button
- * 2. Clicks Level 1 button
- * 3. Moves blue robot UP and RIGHT
+ * E2E tests for Level 1 with proper assertions.
  * 
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.Level1DirectGameE2ETest
  */
@@ -43,167 +40,205 @@ public class Level1DirectGameE2ETest {
             new ActivityScenarioRule<>(MainFragmentActivity.class);
 
     private Context context;
+    private AchievementManager achievementManager;
     private GameStateManager gameStateManager;
+    private volatile Boolean levelCompleted = null;
 
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AchievementManager.getInstance(context).resetAll();
+        achievementManager = AchievementManager.getInstance(context);
+        achievementManager.resetAll();
         
-        Timber.d("[E2E_SIMPLE] ========== TEST STARTED ==========");
+        Timber.d("[E2E] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
-        AchievementManager.getInstance(context).resetAll();
-        Timber.d("[E2E_SIMPLE] ========== TEST FINISHED ==========");
+        achievementManager.resetAll();
+        Timber.d("[E2E] ========== TEST FINISHED ==========");
     }
 
     /**
-     * Simple test: Click Level Game, Click Level 1, Move robot UP and RIGHT
+     * Helper: Navigate to Level 1 via UI clicks
      */
-    @Test
-    public void testLevel1SimpleNavigation() throws InterruptedException {
-        Timber.d("[E2E_SIMPLE] STEP 1: App starting - waiting for main menu");
-        Thread.sleep(200);
-        
-        Timber.d("[E2E_SIMPLE] STEP 2: Clicking 'Level Game' button");
-        try {
-            onView(withId(R.id.level_game_button))
-                    .check(matches(isDisplayed()))
-                    .perform(click());
-            Timber.d("[E2E_SIMPLE] ✓ Clicked Level Game button");
-        } catch (Exception e) {
-            Timber.e(e, "[E2E_SIMPLE] ERROR: Could not find level_game_button");
-            throw e;
-        }
+    private void navigateToLevel1() throws InterruptedException {
+        Timber.d("[E2E] Clicking 'Level Game' button");
+        onView(withId(R.id.level_game_button))
+                .check(matches(isDisplayed()))
+                .perform(click());
         
         Thread.sleep(200);
         
-        Timber.d("[E2E_SIMPLE] STEP 3: Clicking Level 1 button");
-        try {
-            onView(allOf(withId(R.id.level_button), withText("1")))
-                    .check(matches(isDisplayed()))
-                    .perform(click());
-            Timber.d("[E2E_SIMPLE] ✓ Clicked Level 1 button");
-        } catch (Exception e) {
-            Timber.e(e, "[E2E_SIMPLE] ERROR: Could not find level_button with text '1'");
-            throw e;
-        }
+        Timber.d("[E2E] Clicking Level 1 button");
+        onView(allOf(withId(R.id.level_button), withText("1")))
+                .check(matches(isDisplayed()))
+                .perform(click());
         
         Thread.sleep(300);
         
-        Timber.d("[E2E_SIMPLE] STEP 4: Getting GameStateManager");
         activityRule.getScenario().onActivity(activity -> {
             gameStateManager = activity.getGameStateManager();
-            assertNotNull("GameStateManager should not be null", gameStateManager);
-            Timber.d("[E2E_SIMPLE] ✓ GameStateManager obtained");
         });
+    }
+
+    /**
+     * Test 1: Complete Level 1 slowly (31s) - only level_1_complete achievement
+     * Moves: DOWN, UP, RIGHT (takes 31 seconds total)
+     */
+    @Test
+    public void testLevel1SlowCompletion_OnlyLevelAchievement() throws InterruptedException {
+        Timber.d("[E2E_SLOW] Starting slow completion test (31s)");
+        Thread.sleep(200);
         
-        Timber.d("[E2E_SIMPLE] STEP 5: Moving blue robot UP");
+        navigateToLevel1();
+        
+        // Move DOWN (wrong direction first)
+        Timber.d("[E2E_SLOW] Moving robot DOWN");
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                gameStateManager.moveRobotInDirection(0, 1);
+            }
+        });
+        Thread.sleep(2000);
+        
+        // Wait 25 seconds to exceed 30s threshold
+        Timber.d("[E2E_SLOW] Waiting 25 seconds to exceed speedrun threshold...");
+        Thread.sleep(25000);
+        
+        // Move UP
+        Timber.d("[E2E_SLOW] Moving robot UP");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
-                Timber.d("[E2E_SIMPLE] ✓ Robot moved UP");
             }
         });
-        
         Thread.sleep(2000);
         
-        Timber.d("[E2E_SIMPLE] STEP 6: Moving blue robot RIGHT");
+        // Move RIGHT to complete
+        Timber.d("[E2E_SLOW] Moving robot RIGHT to complete level");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(1, 0);
-                Timber.d("[E2E_SIMPLE] ✓ Robot moved RIGHT");
+            }
+        });
+        Thread.sleep(2000);
+        
+        // Check level completion
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                levelCompleted = gameStateManager.isGameComplete().getValue();
             }
         });
         
-        Thread.sleep(2000);
+        Thread.sleep(500);
         
-        Timber.d("[E2E_SIMPLE] ========== TEST COMPLETE ==========");
+        // Assertions
+        assertTrue("Level should be completed", levelCompleted != null && levelCompleted);
+        assertTrue("level_1_complete achievement should be unlocked", 
+                achievementManager.isUnlocked("level_1_complete"));
+        assertFalse("speedrun_under_30s should NOT be unlocked (took >30s)", 
+                achievementManager.isUnlocked("speedrun_under_30s"));
+        assertFalse("speedrun_under_10s should NOT be unlocked (took >30s)", 
+                achievementManager.isUnlocked("speedrun_under_10s"));
+        
+        Timber.d("[E2E_SLOW] ✓ Test passed: Level completed, only level_1_complete unlocked");
     }
 
     /**
-     * Test with WRONG moves: UP and LEFT - should FAIL to demonstrate assertion works
+     * Test 2: Complete Level 1 fast (<10s) - both speedrun achievements
+     * Moves: UP, RIGHT (fast)
      */
     @Test
-    public void testLevel1WrongSolution() throws InterruptedException {
-        Timber.d("[E2E_WRONG] STEP 1: App starting - waiting for main menu");
+    public void testLevel1FastCompletion_BothSpeedrunAchievements() throws InterruptedException {
+        Timber.d("[E2E_FAST] Starting fast completion test (<10s)");
         Thread.sleep(200);
         
-        Timber.d("[E2E_WRONG] STEP 2: Clicking 'Level Game' button");
-        try {
-            onView(withId(R.id.level_game_button))
-                    .check(matches(isDisplayed()))
-                    .perform(click());
-            Timber.d("[E2E_WRONG] ✓ Clicked Level Game button");
-        } catch (Exception e) {
-            Timber.e(e, "[E2E_WRONG] ERROR: Could not find level_game_button");
-            throw e;
-        }
+        navigateToLevel1();
         
-        Thread.sleep(200);
-        
-        Timber.d("[E2E_WRONG] STEP 3: Clicking Level 1 button");
-        try {
-            onView(allOf(withId(R.id.level_button), withText("1")))
-                    .check(matches(isDisplayed()))
-                    .perform(click());
-            Timber.d("[E2E_WRONG] ✓ Clicked Level 1 button");
-        } catch (Exception e) {
-            Timber.e(e, "[E2E_WRONG] ERROR: Could not find level_button with text '1'");
-            throw e;
-        }
-        
-        Thread.sleep(300);
-        
-        Timber.d("[E2E_WRONG] STEP 4: Getting GameStateManager");
-        activityRule.getScenario().onActivity(activity -> {
-            gameStateManager = activity.getGameStateManager();
-            assertNotNull("GameStateManager should not be null", gameStateManager);
-            Timber.d("[E2E_WRONG] ✓ GameStateManager obtained");
-        });
-        
-        Timber.d("[E2E_WRONG] STEP 5: Moving blue robot UP");
+        // Move UP immediately
+        Timber.d("[E2E_FAST] Moving robot UP");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
-                Timber.d("[E2E_WRONG] ✓ Robot moved UP");
+            }
+        });
+        Thread.sleep(2000);
+        
+        // Move RIGHT to complete
+        Timber.d("[E2E_FAST] Moving robot RIGHT to complete level");
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                gameStateManager.moveRobotInDirection(1, 0);
+            }
+        });
+        Thread.sleep(2000);
+        
+        // Check level completion
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                levelCompleted = gameStateManager.isGameComplete().getValue();
             }
         });
         
+        Thread.sleep(500);
+        
+        // Assertions
+        assertTrue("Level should be completed", levelCompleted != null && levelCompleted);
+        assertTrue("level_1_complete achievement should be unlocked", 
+                achievementManager.isUnlocked("level_1_complete"));
+        assertTrue("speedrun_under_30s should be unlocked (took <10s)", 
+                achievementManager.isUnlocked("speedrun_under_30s"));
+        assertTrue("speedrun_under_10s should be unlocked (took <10s)", 
+                achievementManager.isUnlocked("speedrun_under_10s"));
+        
+        Timber.d("[E2E_FAST] ✓ Test passed: Level completed, all speedrun achievements unlocked");
+    }
+
+    /**
+     * Test 3: Wrong moves - verify level is NOT completed (test should PASS)
+     * Moves: UP, LEFT (wrong direction)
+     */
+    @Test
+    public void testLevel1WrongMoves_LevelNotCompleted() throws InterruptedException {
+        Timber.d("[E2E_WRONG] Starting wrong moves test");
+        Thread.sleep(200);
+        
+        navigateToLevel1();
+        
+        // Move UP
+        Timber.d("[E2E_WRONG] Moving robot UP");
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                gameStateManager.moveRobotInDirection(0, -1);
+            }
+        });
         Thread.sleep(2000);
         
-        Timber.d("[E2E_WRONG] STEP 6: Moving blue robot LEFT (WRONG - should be RIGHT)");
+        // Move LEFT (WRONG - should be RIGHT)
+        Timber.d("[E2E_WRONG] Moving robot LEFT (wrong direction)");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(-1, 0);
-                Timber.d("[E2E_WRONG] ✓ Robot moved LEFT (WRONG DIRECTION)");
             }
         });
-        
         Thread.sleep(2000);
         
-        Timber.d("[E2E_WRONG] STEP 7: Checking if level is completed");
+        // Check level completion
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
-                Boolean isComplete = gameStateManager.isGameComplete().getValue();
-                Timber.d("[E2E_WRONG] Game complete: %s", isComplete);
-                
-                if (isComplete != null && isComplete) {
-                    Timber.d("[E2E_WRONG] ✗ LEVEL COMPLETED - This should NOT happen!");
-                } else {
-                    Timber.d("[E2E_WRONG] ✓ LEVEL NOT COMPLETED - This is EXPECTED with LEFT move!");
-                }
-                
-                // This assertion should FAIL because LEFT is wrong
-                assertTrue("Level should be completed - but LEFT move is wrong, so this FAILS", 
-                        isComplete != null && isComplete);
+                levelCompleted = gameStateManager.isGameComplete().getValue();
             }
         });
         
-        Thread.sleep(2000);
+        Thread.sleep(500);
         
-        Timber.d("[E2E_WRONG] ========== TEST COMPLETE ==========");
+        // Assertions - level should NOT be completed
+        assertFalse("Level should NOT be completed with wrong moves", 
+                levelCompleted != null && levelCompleted);
+        assertFalse("level_1_complete should NOT be unlocked", 
+                achievementManager.isUnlocked("level_1_complete"));
+        
+        Timber.d("[E2E_WRONG] ✓ Test passed: Level correctly NOT completed with wrong moves");
     }
 }
