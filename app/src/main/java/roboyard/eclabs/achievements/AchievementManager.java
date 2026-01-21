@@ -184,6 +184,10 @@ public class AchievementManager {
      */
     public void onLevelCompleted(int levelId, int playerMoves, int optimalMoves, 
                                   int hintsUsed, int stars, long timeMs) {
+        // Log the levelId for debugging
+        Timber.d("[ACHIEVEMENTS] onLevelCompleted called: levelId=%d, levelsCompleted=%d->%d, playerMoves=%d, optimalMoves=%d, hintsUsed=%d, stars=%d, time=%dms",
+                levelId, levelsCompleted, levelsCompleted + 1, playerMoves, optimalMoves, hintsUsed, stars, timeMs);
+        
         // First game achievement (any game completion)
         unlock("first_game");
         
