@@ -177,8 +177,8 @@ public class Level11With2StarsE2ETest {
             if (level == 10) {
                 Thread.sleep(2000);
                 boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
-                Timber.d("[E2E_2STARS] After Level 10: 3_star_10_levels = %s (should be false)", threeStar10);
-                assertFalse("3_star_10_levels should NOT be unlocked (level 1 has only 2 stars)", threeStar10);
+                Timber.d("[E2E_2STARS] After Level 10: 3_star_10_levels = %s (should be false - only 9 levels with 3 stars)", threeStar10);
+                assertFalse("3_star_10_levels should NOT be unlocked yet (only 9 levels with 3 stars)", threeStar10);
             }
             
             // If not the last level, click Next Level button
@@ -203,12 +203,12 @@ public class Level11With2StarsE2ETest {
         
         Timber.d("[E2E_2STARS] ===== FINAL CHECK =====");
         
-        // Final assertion: 3_star_10_levels should NOT be unlocked
+        // Final assertion: 3_star_10_levels SHOULD be unlocked after 11 levels (10 with 3 stars)
         boolean threeStar10Final = achievementManager.isUnlocked("3_star_10_levels");
-        Timber.d("[E2E_2STARS] Final check: 3_star_10_levels = %s (should be false)", threeStar10Final);
-        assertFalse("3_star_10_levels should NOT be unlocked when not all 10 levels have 3 stars", threeStar10Final);
+        Timber.d("[E2E_2STARS] Final check: 3_star_10_levels = %s (should be true after 11 levels)", threeStar10Final);
+        assertTrue("3_star_10_levels should be unlocked after 11 levels (10 with 3 stars)", threeStar10Final);
         
-        Timber.d("[E2E_2STARS] ✓ Test passed: 3_star_10_levels correctly NOT unlocked");
+        Timber.d("[E2E_2STARS] ✓ Test passed: 3_star_10_levels correctly unlocked after 11 levels");
     }
     
     /**
