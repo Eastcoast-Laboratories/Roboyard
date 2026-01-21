@@ -119,6 +119,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private boolean historySaveRunning = false;
     private static final int AUTOSAVE_INTERVAL_MS = 60 * 1000; // 60 seconds
     private static final int HISTORY_CHECK_INTERVAL_MS = 3000; // Check every 3 seconds
+    
+    // Guard to prevent onLevelCompleted from being called multiple times for the same level
+    private int lastCompletedLevelId = -1;
+    private long lastCompletedTime = 0;
     private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -624,10 +628,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         
                         announceAccessibility(completionMessage);
                         
-                        // Trigger achievements for level completion
+                        // Trigger achievements for level completion (guard against multiple calls)
                         long elapsedTime = SystemClock.elapsedRealtime() - startTime;
-                        AchievementManager.getInstance(requireContext())
-                            .onLevelCompleted(state.getLevelId(), playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
+                        int currentLevelId = state.getLevelId();
+                        long currentTime = System.currentTimeMillis();
+                        
+                        // Only call onLevelCompleted if this is a different level or enough time has passed
+                        if (currentLevelId != lastCompletedLevelId || (currentTime - lastCompletedTime) > 1000) {
+                            Timber.d("[ACHIEVEMENT_GUARD] Calling onLevelCompleted for levelId=%d (last was %d)", currentLevelId, lastCompletedLevelId);
+                            AchievementManager.getInstance(requireContext())
+                                .onLevelCompleted(currentLevelId, playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
+                            lastCompletedLevelId = currentLevelId;
+                            lastCompletedTime = currentTime;
+                        } else {
+                            Timber.d("[ACHIEVEMENT_GUARD] Skipping duplicate onLevelCompleted call for levelId=%d", currentLevelId);
+                        }
                     } else {
                         // This is a random game
                         
