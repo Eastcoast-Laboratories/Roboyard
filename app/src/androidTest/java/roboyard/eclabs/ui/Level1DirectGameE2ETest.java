@@ -65,7 +65,7 @@ public class Level1DirectGameE2ETest {
     @Test
     public void testLevel1SimpleNavigation() throws InterruptedException {
         Timber.d("[E2E_SIMPLE] STEP 1: App starting - waiting for main menu");
-        Thread.sleep(2000);
+        Thread.sleep(200);
         
         Timber.d("[E2E_SIMPLE] STEP 2: Clicking 'Level Game' button");
         try {
@@ -78,7 +78,7 @@ public class Level1DirectGameE2ETest {
             throw e;
         }
         
-        Thread.sleep(2000);
+        Thread.sleep(200);
         
         Timber.d("[E2E_SIMPLE] STEP 3: Clicking Level 1 button");
         try {
@@ -91,7 +91,7 @@ public class Level1DirectGameE2ETest {
             throw e;
         }
         
-        Thread.sleep(3000);
+        Thread.sleep(300);
         
         Timber.d("[E2E_SIMPLE] STEP 4: Getting GameStateManager");
         activityRule.getScenario().onActivity(activity -> {
