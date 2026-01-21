@@ -80,6 +80,10 @@ public class Level1DirectGameE2ETest {
                 gameStateManager.startNewGame();
                 gameStateManager.loadLevel(1);
                 Timber.d("[E2E_SIMPLE] ✓ Level 1 loaded");
+                
+                // Debug: Check initial game state
+                Object state = gameStateManager.getCurrentState().getValue();
+                Timber.d("[E2E_SIMPLE] Initial game state: %s", state != null ? "LOADED" : "NULL");
             }
         });
         
@@ -103,22 +107,23 @@ public class Level1DirectGameE2ETest {
             }
         });
         
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         
         Timber.d("[E2E_SIMPLE] STEP 6: Checking if level is completed");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 Boolean isComplete = gameStateManager.isGameComplete().getValue();
-                Timber.d("[E2E_SIMPLE] Game complete: %s", isComplete);
+                Timber.d("[E2E_SIMPLE] Game complete value: %s", isComplete);
                 
                 if (isComplete != null && isComplete) {
                     Timber.d("[E2E_SIMPLE] ✓ LEVEL COMPLETED - Robot reached the goal!");
                 } else {
                     Timber.d("[E2E_SIMPLE] ✗ LEVEL NOT COMPLETED - Robot did not reach the goal!");
+                    Timber.d("[E2E_SIMPLE] This means UP+RIGHT is NOT the correct solution for Level 1");
                 }
                 
                 // Assert that the level is completed
-                assertTrue("Level should be completed - robot must reach the goal", 
+                assertTrue("Level should be completed - robot must reach the goal. If this fails, UP+RIGHT is wrong.", 
                         isComplete != null && isComplete);
             }
         });
