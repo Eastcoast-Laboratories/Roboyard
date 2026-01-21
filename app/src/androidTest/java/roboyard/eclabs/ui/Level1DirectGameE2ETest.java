@@ -177,7 +177,7 @@ public class Level1DirectGameE2ETest {
             }
         });
         
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         
         Timber.d("[E2E_WRONG] STEP 6: Checking if level is completed");
         activityRule.getScenario().onActivity(activity -> {
@@ -189,16 +189,17 @@ public class Level1DirectGameE2ETest {
                     Timber.d("[E2E_WRONG] ✓ LEVEL COMPLETED - Robot reached the goal!");
                 } else {
                     Timber.d("[E2E_WRONG] ✗ LEVEL NOT COMPLETED - Robot did not reach the goal!");
+                    Timber.d("[E2E_WRONG] This is EXPECTED - LEFT is the wrong direction!");
                 }
                 
-                // Assert that the level is completed - this should FAIL because we moved LEFT
-                assertTrue("Level should be completed - robot must reach the goal (this will FAIL with LEFT move)", 
+                // Assert that the level is NOT completed - this should PASS because we moved LEFT
+                assertFalse("Level should NOT be completed with LEFT move - this test verifies the assertion works", 
                         isComplete != null && isComplete);
             }
         });
         
         Thread.sleep(2000);
         
-        Timber.d("[E2E_WRONG] ========== TEST COMPLETE ==========");
+        Timber.d("[E2E_WRONG] ========== TEST COMPLETE - CORRECTLY FAILED ==========");
     }
 }
