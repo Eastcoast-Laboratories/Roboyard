@@ -91,14 +91,17 @@ public class AchievementPopup {
         containerParams.leftMargin = 32;
         containerParams.rightMargin = 32;
         popupContainer.setLayoutParams(containerParams);
-        popupContainer.setElevation(16);
+        // Very high elevation to ensure it's on top of all other views
+        popupContainer.setElevation(1000);
+        popupContainer.setZ(1000);
         
         // Main card layout
         LinearLayout cardLayout = new LinearLayout(context);
         cardLayout.setOrientation(LinearLayout.VERTICAL);
         cardLayout.setBackgroundColor(Color.WHITE);
         cardLayout.setPadding(32, 32, 32, 32);
-        cardLayout.setElevation(8);
+        cardLayout.setElevation(1000);
+        cardLayout.setZ(1000);
         
         // Title
         TextView titleText = new TextView(context);
