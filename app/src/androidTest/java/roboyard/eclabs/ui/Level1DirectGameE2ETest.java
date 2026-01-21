@@ -10,14 +10,14 @@ import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.*;
 
 import android.content.Context;
+import android.content.Intent;
 
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,19 +29,17 @@ import timber.log.Timber;
 
 /**
  * E2E tests for Level 1 with proper assertions.
+ * Each test launches a fresh Activity to ensure clean state.
  * 
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.Level1DirectGameE2ETest
  */
 @RunWith(AndroidJUnit4.class)
 public class Level1DirectGameE2ETest {
 
-    @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
-
     private Context context;
     private AchievementManager achievementManager;
     private GameStateManager gameStateManager;
+    private ActivityScenario<MainFragmentActivity> scenario;
     private volatile Boolean levelCompleted = null;
 
     @Before
@@ -55,14 +53,24 @@ public class Level1DirectGameE2ETest {
 
     @After
     public void tearDown() {
+        if (scenario != null) {
+            scenario.close();
+        }
         achievementManager.resetAll();
         Timber.d("[E2E] ========== TEST FINISHED ==========");
     }
 
     /**
-     * Helper: Navigate to Level 1 via UI clicks
+     * Helper: Launch fresh activity and navigate to Level 1 via UI clicks
      */
-    private void navigateToLevel1() throws InterruptedException {
+    private void launchAndNavigateToLevel1() throws InterruptedException {
+        // Launch fresh activity
+        Intent intent = new Intent(context, MainFragmentActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        scenario = ActivityScenario.launch(intent);
+        
+        Thread.sleep(200);
+        
         Timber.d("[E2E] Clicking 'Level Game' button");
         onView(withId(R.id.level_game_button))
                 .check(matches(isDisplayed()))
@@ -77,7 +85,7 @@ public class Level1DirectGameE2ETest {
         
         Thread.sleep(300);
         
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             gameStateManager = activity.getGameStateManager();
         });
     }
@@ -91,11 +99,11 @@ public class Level1DirectGameE2ETest {
         Timber.d("[E2E_SLOW] Starting slow completion test (31s)");
         Thread.sleep(200);
         
-        navigateToLevel1();
+        launchAndNavigateToLevel1();
         
         // Move DOWN (wrong direction first)
         Timber.d("[E2E_SLOW] Moving robot DOWN");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, 1);
             }
@@ -103,12 +111,12 @@ public class Level1DirectGameE2ETest {
         Thread.sleep(2000);
         
         // Wait 25 seconds to exceed 30s threshold
-        Timber.d("[E2E_SLOW] Waiting 25 seconds to exceed speedrun threshold...");
-        Thread.sleep(25000);
+        Timber.d("[E2E_SLOW] Waiting 28 seconds to exceed speedrun threshold...");
+        Thread.sleep(28000);
         
         // Move UP
         Timber.d("[E2E_SLOW] Moving robot UP");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
             }
@@ -117,7 +125,7 @@ public class Level1DirectGameE2ETest {
         
         // Move RIGHT to complete
         Timber.d("[E2E_SLOW] Moving robot RIGHT to complete level");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(1, 0);
             }
@@ -125,13 +133,13 @@ public class Level1DirectGameE2ETest {
         Thread.sleep(2000);
         
         // Check level completion
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 levelCompleted = gameStateManager.isGameComplete().getValue();
             }
         });
         
-        Thread.sleep(500);
+        Thread.sleep(5000);
         
         // Assertions
         assertTrue("Level should be completed", levelCompleted != null && levelCompleted);
@@ -154,11 +162,11 @@ public class Level1DirectGameE2ETest {
         Timber.d("[E2E_FAST] Starting fast completion test (<10s)");
         Thread.sleep(200);
         
-        navigateToLevel1();
+        launchAndNavigateToLevel1();
         
         // Move UP immediately
         Timber.d("[E2E_FAST] Moving robot UP");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
             }
@@ -167,7 +175,7 @@ public class Level1DirectGameE2ETest {
         
         // Move RIGHT to complete
         Timber.d("[E2E_FAST] Moving robot RIGHT to complete level");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(1, 0);
             }
@@ -175,13 +183,13 @@ public class Level1DirectGameE2ETest {
         Thread.sleep(2000);
         
         // Check level completion
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 levelCompleted = gameStateManager.isGameComplete().getValue();
             }
         });
         
-        Thread.sleep(500);
+        Thread.sleep(5000);
         
         // Assertions
         assertTrue("Level should be completed", levelCompleted != null && levelCompleted);
@@ -204,11 +212,11 @@ public class Level1DirectGameE2ETest {
         Timber.d("[E2E_WRONG] Starting wrong moves test");
         Thread.sleep(200);
         
-        navigateToLevel1();
+        launchAndNavigateToLevel1();
         
         // Move UP
         Timber.d("[E2E_WRONG] Moving robot UP");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
             }
@@ -217,7 +225,7 @@ public class Level1DirectGameE2ETest {
         
         // Move LEFT (WRONG - should be RIGHT)
         Timber.d("[E2E_WRONG] Moving robot LEFT (wrong direction)");
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(-1, 0);
             }
@@ -225,13 +233,13 @@ public class Level1DirectGameE2ETest {
         Thread.sleep(2000);
         
         // Check level completion
-        activityRule.getScenario().onActivity(activity -> {
+        scenario.onActivity(activity -> {
             if (gameStateManager != null) {
                 levelCompleted = gameStateManager.isGameComplete().getValue();
             }
         });
         
-        Thread.sleep(500);
+        Thread.sleep(5000);
         
         // Assertions - level should NOT be completed
         assertFalse("Level should NOT be completed with wrong moves", 
