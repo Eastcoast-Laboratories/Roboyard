@@ -44,7 +44,9 @@ import roboyard.pm.ia.GameSolution;
 
 import roboyard.ui.components.GameGridView;
 import roboyard.ui.components.GameStateManager;
+import roboyard.eclabs.achievements.Achievement;
 import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.eclabs.achievements.AchievementPopup;
 import timber.log.Timber;
 
 // Added imports for accessibility
@@ -149,6 +151,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     
     // Sound manager for game sound effects
     private SoundManager soundManager;
+    
+    // Achievement popup for showing unlock notifications
+    private AchievementPopup achievementPopup;
+    private List<Achievement> pendingAchievements = new ArrayList<>();
     
     /**
      * Check if TalkBack is enabled
@@ -448,6 +454,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Initialize sound manager
         soundManager = SoundManager.getInstance(requireContext());
+        
+        // Initialize achievement popup and listener
+        ViewGroup rootView = (ViewGroup) view;
+        achievementPopup = new AchievementPopup(requireContext(), rootView);
+        AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
+            Timber.d("[ACHIEVEMENT_POPUP] Achievement unlocked: %s", achievement.getId());
+            pendingAchievements.add(achievement);
+            // Show popup after a short delay to allow game completion UI to settle
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (!pendingAchievements.isEmpty() && achievementPopup != null) {
+                    achievementPopup.show(new ArrayList<>(pendingAchievements));
+                    pendingAchievements.clear();
+                }
+            }, 500);
+        });
         
         // Initialize accessibility controls
         accessibilityControlsContainer = view.findViewById(R.id.accessibility_container);

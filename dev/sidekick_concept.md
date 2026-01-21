@@ -423,17 +423,58 @@ implementation 'com.google.android.gms:play-services-tasks:18.0.2'
 
 ## Monetization Opportunities
 
-### Free-to-Play Model
-- Achievements and streaks drive engagement
-- Daily quests encourage regular play
-- Play Points redemption for cosmetics
-- Optional ads for bonus rewards
+### Core Principle: 100% Free Gameplay
+**The entire game is completely free to play.** All levels, achievements, streaks, and gameplay features are available to everyone without any payment. Monetization is **strictly cosmetic** and does not affect gameplay.
 
-### Premium Features (Future)
-- Exclusive achievement badges
-- Premium quest tracks
-- Cosmetic rewards
-- Ad-free experience
+### Free Features (Always Available)
+- All 140 levels
+- All achievements (58 total)
+- Streak tracking and rewards
+- Random game mode with all difficulties
+- Custom level creation and sharing
+- Full hint system
+
+### Cosmetic-Only Purchases (Optional)
+All purchases are purely visual and do not provide any gameplay advantage:
+
+**Robot Skins:**
+- `skin_golden_robot` - Golden metallic finish for robots
+- `skin_neon_robot` - Glowing neon outline robots
+- `skin_pixel_robot` - Retro 8-bit pixel art style
+- `skin_steampunk_robot` - Victorian steampunk design
+- `skin_hologram_robot` - Translucent holographic effect
+
+**Board Themes:**
+- `theme_space` - Space station with stars background
+- `theme_underwater` - Ocean floor with bubbles
+- `theme_forest` - Enchanted forest with leaves
+- `theme_volcano` - Lava and fire effects
+- `theme_ice` - Frozen winter wonderland
+
+**Wall Styles:**
+- `wall_crystal` - Sparkling crystal walls
+- `wall_brick` - Classic brick texture
+- `wall_laser` - Glowing laser barriers
+- `wall_vines` - Overgrown plant walls
+
+**Target Markers:**
+- `target_star` - Star-shaped targets
+- `target_gem` - Gemstone targets
+- `target_portal` - Swirling portal effect
+
+**Achievement Badges:**
+- `badge_gold_frame` - Golden frame for achievement icons
+- `badge_animated` - Animated achievement badges
+- `badge_3d` - 3D effect badges
+
+**Sound Packs:**
+- `sound_retro` - 8-bit chiptune sounds
+- `sound_scifi` - Futuristic sci-fi effects
+- `sound_nature` - Natural ambient sounds
+
+### Ad-Free Option
+- One-time purchase to remove optional ads
+- Ads are never required to play
 
 ## Analytics & Metrics
 

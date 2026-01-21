@@ -184,6 +184,9 @@ public class AchievementManager {
      */
     public void onLevelCompleted(int levelId, int playerMoves, int optimalMoves, 
                                   int hintsUsed, int stars, long timeMs) {
+        // First game achievement (any game completion)
+        unlock("first_game");
+        
         levelsCompleted++;
         saveCounter("levels_completed", levelsCompleted);
         
