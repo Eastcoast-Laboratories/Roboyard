@@ -120,6 +120,26 @@ public class Level1DirectGameE2ETest {
         
         Thread.sleep(2000);
         
+        Timber.d("[E2E_SIMPLE] STEP 7: Checking if level is completed");
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                Boolean isComplete = gameStateManager.isGameComplete().getValue();
+                Timber.d("[E2E_SIMPLE] Game complete: %s", isComplete);
+                
+                if (isComplete != null && isComplete) {
+                    Timber.d("[E2E_SIMPLE] ✓ LEVEL COMPLETED - Robot reached the goal!");
+                } else {
+                    Timber.d("[E2E_SIMPLE] ✗ LEVEL NOT COMPLETED - Robot did not reach the goal!");
+                }
+                
+                // Assert that the level is completed
+                assertTrue("Level should be completed - robot must reach the goal", 
+                        isComplete != null && isComplete);
+            }
+        });
+        
+        Thread.sleep(2000);
+        
         Timber.d("[E2E_SIMPLE] ========== TEST COMPLETE ==========");
     }
 }
