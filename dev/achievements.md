@@ -52,12 +52,13 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `3_star_level` | Hard Level Star | Achieve 3 stars on a level with 5+ optimal moves | ✅ Implemented |
+| `3_star_hard_level` | Hard Level Star | Achieve 3 stars on a level with 5+ optimal moves | ✅ Implemented |
 | `3_star_10_levels` | Rising Star | Achieve 3 stars on 10 levels | ✅ Implemented |
+| `3_star_10_hard_levels` | denkdirwas aus | Achieve 3 stars on 10 levels with 5+ optimal moves | not yet implemented |
 | `3_star_50_levels` | Superstar | Achieve 3 stars on 50 levels | ✅ Implemented |
 | `3_star_all_levels` | Perfect Master | Achieve 3 stars on all levels | ✅ Implemented |
 
-### Special Achievements (4)
+### Streak Achievements (4)
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|

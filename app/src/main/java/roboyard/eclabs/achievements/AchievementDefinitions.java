@@ -123,7 +123,7 @@ public class AchievementDefinitions {
         //     AchievementCategory.CHALLENGE, ICON_NETWORK));
             
         // ========== MASTERY ACHIEVEMENTS ==========
-        add(new Achievement("3_star_level", 
+        add(new Achievement("3_star_hard_level", 
             "achievement_3_star_1", "achievement_3_star_1_desc",
             AchievementCategory.MASTERY, ICON_STAR));
         add(new Achievement("3_star_10_levels", 

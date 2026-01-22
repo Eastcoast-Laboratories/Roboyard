@@ -236,8 +236,8 @@ public class Level140E2ETest {
         printFinalReport();
         
         // Final assertions with detailed error messages
-        assertTrue("3_star_level should be unlocked", 
-                achievementManager.isUnlocked("3_star_level"));
+        assertTrue("3_star_hard_level should be unlocked", 
+                achievementManager.isUnlocked("3_star_hard_level"));
         assertTrue("3_star_10_levels should be unlocked", 
                 achievementManager.isUnlocked("3_star_10_levels"));
         assertTrue("3_star_50_levels should be unlocked after completing 50 levels", 

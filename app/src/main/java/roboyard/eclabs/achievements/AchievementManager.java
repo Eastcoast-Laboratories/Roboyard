@@ -222,9 +222,9 @@ public class AchievementManager {
             threeStarLevels++;
             saveCounter("three_star_levels", threeStarLevels);
             
-            // 3_star_level only unlocks for levels with 5+ optimal moves
+            // 3_star_hard_level only unlocks for levels with 5+ optimal moves
             if (optimalMoves >= 5) {
-                unlock("3_star_level");
+                unlock("3_star_hard_level");
             }
             
             // Other 3-star achievements count all levels regardless of move count

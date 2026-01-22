@@ -149,14 +149,14 @@ public class AchievementManagerTest {
 
     /**
      * Test 3-star achievements
-     * - 3_star_level requires 5+ optimal moves
+     * - 3_star_hard_level requires 5+ optimal moves
      * - Other 3-star achievements count all levels
      */
     @Test
     public void testThreeStarAchievements() {
-        // Get 3 stars on a level with 5+ optimal moves - should unlock 3_star_level
+        // Get 3 stars on a level with 5+ optimal moves - should unlock 3_star_hard_level
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
-        assertTrue("3_star_level should be unlocked for 5+ moves", achievementManager.isUnlocked("3_star_level"));
+        assertTrue("3_star_hard_level should be unlocked for 5+ moves", achievementManager.isUnlocked("3_star_hard_level"));
         
         // Get 3 stars on 10 levels (any move count) - should unlock 3_star_10_levels
         for (int i = 2; i <= 10; i++) {
@@ -166,20 +166,20 @@ public class AchievementManagerTest {
     }
     
     /**
-     * Test that 3_star_level requires 5+ optimal moves
+     * Test that 3_star_hard_level requires 5+ optimal moves
      */
     @Test
     public void testThreeStarLevelRequires5PlusMoves() {
         achievementManager.resetAll();
-        // Get 3 stars on a level with only 4 optimal moves - should NOT unlock 3_star_level
+        // Get 3 stars on a level with only 4 optimal moves - should NOT unlock 3_star_hard_level
         achievementManager.onLevelCompleted(1, 4, 4, 0, 3, 10000);
-        assertFalse("3_star_level should NOT be unlocked for level with <5 moves", 
-                achievementManager.isUnlocked("3_star_level"));
+        assertFalse("3_star_hard_level should NOT be unlocked for level with <5 moves", 
+                achievementManager.isUnlocked("3_star_hard_level"));
         
         // Get 3 stars on a level with 5 optimal moves - should unlock
         achievementManager.onLevelCompleted(2, 5, 5, 0, 3, 10000);
-        assertTrue("3_star_level should be unlocked for level with 5+ moves", 
-                achievementManager.isUnlocked("3_star_level"));
+        assertTrue("3_star_hard_level should be unlocked for level with 5+ moves", 
+                achievementManager.isUnlocked("3_star_hard_level"));
     }
 
     /**

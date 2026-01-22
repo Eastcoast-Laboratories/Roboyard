@@ -268,7 +268,7 @@ public class LevelSolutionData {
         addLevel(137, 18, "2 -> Left,2 -> Up,3 -> Right,1 -> Right,1 -> Down,1 -> Left,0 -> Up,0 -> Left,0 -> Down,0 -> Right,0 -> Down,0 -> Right,3 -> Up,3 -> Left,0 -> Left,0 -> Down,0 -> Right,0 -> Up");
         addLevel(138, 17, "0 -> Up,0 -> Left,0 -> Down,0 -> Left,1 -> Up,1 -> Left,1 -> Up,1 -> Left,1 -> Up,2 -> Up,2 -> Left,2 -> Down,2 -> Left,2 -> Up,2 -> Left,2 -> Up,2 -> Right");
         addLevel(139, 17, "0 -> Left,0 -> Down,0 -> Right,0 -> Down,0 -> Left,0 -> Down,3 -> Down,3 -> Left,3 -> Up,1 -> Down,1 -> Left,1 -> Up,2 -> Up,2 -> Right,2 -> Down,2 -> Left,2 -> Up");
-
+        addLevel(140, 26, "2 -> Right,2 -> Up,2 -> Right,2 -> Down,2 -> Left,2 -> Up,3 -> Up,0 -> Down,0 -> Right,0 -> Down,0 -> Left,0 -> Down,0 -> Left,0 -> Up,2 -> Left,3 -> Left,3 -> Up,3 -> Right,3 -> Up,1 -> Left,1 -> Up,1 -> Right,0 -> Up,2 -> Right,2 -> Up,1 -> Up");
     }
     
     /**

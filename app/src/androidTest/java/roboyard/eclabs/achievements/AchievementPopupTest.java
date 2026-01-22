@@ -102,11 +102,11 @@ public class AchievementPopupTest {
         // Complete level 1 with optimal moves and 3 stars
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
         
-        // Should trigger: first_game, level_1_complete, perfect_solution_1, 3_star_level
+        // Should trigger: first_game, level_1_complete, perfect_solution_1, 3_star_hard_level
         assertTrue("first_game should be unlocked", unlockedIds.contains("first_game"));
         assertTrue("level_1_complete should be unlocked", unlockedIds.contains("level_1_complete"));
         assertTrue("perfect_solution_1 should be unlocked", unlockedIds.contains("perfect_solution_1"));
-        assertTrue("3_star_level should be unlocked", unlockedIds.contains("3_star_level"));
+        assertTrue("3_star_hard_level should be unlocked", unlockedIds.contains("3_star_hard_level"));
         
         // Verify at least 4 achievements were unlocked
         assertTrue("At least 4 achievements should be unlocked", unlockedIds.size() >= 4);
