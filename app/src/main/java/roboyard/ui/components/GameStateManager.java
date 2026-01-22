@@ -1749,6 +1749,46 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public int getDifficulty() {
         return Preferences.difficulty;
     }
+    
+    /**
+     * Calculate difficulty based on level number.
+     * Levels 1-35: Beginner
+     * Levels 36-70: Advanced
+     * Levels 71-105: Insane
+     * Levels 106-140: Impossible
+     * 
+     * @param levelId The level ID
+     * @return The difficulty constant
+     */
+    private int calculateDifficultyForLevel(int levelId) {
+        if (levelId <= 35) {
+            return Constants.DIFFICULTY_BEGINNER;
+        } else if (levelId <= 70) {
+            return Constants.DIFFICULTY_ADVANCED;
+        } else if (levelId <= 105) {
+            return Constants.DIFFICULTY_INSANE;
+        } else {
+            return Constants.DIFFICULTY_IMPOSSIBLE;
+        }
+    }
+    
+    /**
+     * Get the effective difficulty for the current game.
+     * For level games: returns difficulty based on level number
+     * For random games: returns difficulty from preferences
+     * 
+     * @return The effective difficulty level
+     */
+    public int getEffectiveDifficulty() {
+        GameState state = currentState.getValue();
+        if (state != null && state.getLevelId() > 0) {
+            // Level game: calculate difficulty based on level
+            return calculateDifficultyForLevel(state.getLevelId());
+        } else {
+            // Random game: use difficulty from preferences
+            return Preferences.difficulty;
+        }
+    }
 
     /**
      * Get a string representation of the current difficulty level
@@ -1758,10 +1798,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public String getLocalizedDifficultyString() {
         // Verwende den bereits lokalisierten Anwendungskontext
         Context localizedContext = RoboyardApplication.getAppContext();
+        
+        int difficulty = getEffectiveDifficulty();
 
-        Timber.d("[DIFFICULTY] getLocalizedDifficultyString() called, using difficulty level %d", getDifficulty());
+        Timber.d("[DIFFICULTY] getLocalizedDifficultyString() called, using effective difficulty level %d", difficulty);
 
-        switch (getDifficulty()) {
+        switch (difficulty) {
             case Constants.DIFFICULTY_BEGINNER:
                 return localizedContext.getString(R.string.difficulty_beginner);
             case Constants.DIFFICULTY_ADVANCED:
