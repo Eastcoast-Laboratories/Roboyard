@@ -161,7 +161,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     }
 
     /**
-     * Scroll to the last played level automatically
+     * Scroll to the last played level automatically, positioning it in the middle of the screen
      */
     private void scrollToLastPlayedLevel() {
         int lastPlayedLevel = completionManager.getLastPlayedLevel();
@@ -171,8 +171,27 @@ public class LevelSelectionFragment extends BaseGameFragment {
         
         if (position >= 0) {
             final int scrollPosition = position;
-            levelRecyclerView.post(() -> levelRecyclerView.smoothScrollToPosition(scrollPosition));
-            Timber.d("Scrolling to last played level %d at position %d", lastPlayedLevel, scrollPosition);
+            levelRecyclerView.post(() -> {
+                // Get the LinearLayoutManager to scroll to position with offset
+                androidx.recyclerview.widget.LinearLayoutManager layoutManager = 
+                    (androidx.recyclerview.widget.LinearLayoutManager) levelRecyclerView.getLayoutManager();
+                
+                if (layoutManager != null) {
+                    // Calculate offset to center the item on screen
+                    // Get the height of the RecyclerView and item height
+                    int recyclerViewHeight = levelRecyclerView.getHeight();
+                    int itemHeight = 120; // Approximate height of level item
+                    int offset = (recyclerViewHeight / 2) - (itemHeight / 2);
+                    
+                    // Scroll to position with offset to center it
+                    layoutManager.scrollToPositionWithOffset(scrollPosition, offset);
+                    Timber.d("Scrolling to last played level %d at position %d with offset %d", 
+                            lastPlayedLevel, scrollPosition, offset);
+                } else {
+                    // Fallback to smooth scroll
+                    levelRecyclerView.smoothScrollToPosition(scrollPosition);
+                }
+            });
         } else {
             // Fallback: scroll to first level
             Timber.d("Last played level %d not found, scrolling to first level", lastPlayedLevel);

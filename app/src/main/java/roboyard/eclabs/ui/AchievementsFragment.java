@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import roboyard.eclabs.R;
 import roboyard.eclabs.achievements.Achievement;
 import roboyard.eclabs.achievements.AchievementCategory;
+import roboyard.eclabs.achievements.AchievementIconHelper;
 import roboyard.eclabs.achievements.AchievementManager;
 import timber.log.Timber;
 
@@ -143,11 +144,11 @@ public class AchievementsFragment extends BaseGameFragment {
         itemParams.bottomMargin = 8;
         itemLayout.setLayoutParams(itemParams);
         
-        // Icon
+        // Icon from sprite sheet with achievement-specific color (larger, 128x128)
         ImageView icon = new ImageView(requireContext());
-        icon.setImageResource(achievement.getIconResId());
+        AchievementIconHelper.setIconWithAchievementColor(requireContext(), icon, achievement.getSpriteIndex(), achievement.getId());
         icon.setAlpha(achievement.isUnlocked() ? 1.0f : 0.3f);
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(64, 64);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(128, 128);
         iconParams.rightMargin = 16;
         icon.setLayoutParams(iconParams);
         itemLayout.addView(icon);
@@ -175,7 +176,7 @@ public class AchievementsFragment extends BaseGameFragment {
         // Add NEW badge if recently unlocked
         if (isNew) {
             TextView newBadge = new TextView(requireContext());
-            newBadge.setText(" NEW");
+            newBadge.setText(" >NEW<");
             newBadge.setTextSize(12);
             newBadge.setTextColor(Color.parseColor("#FF6F00")); // Orange
             newBadge.setTypeface(null, android.graphics.Typeface.BOLD);

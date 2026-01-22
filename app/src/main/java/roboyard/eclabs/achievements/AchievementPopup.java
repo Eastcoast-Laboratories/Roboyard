@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.achievements.AchievementIconHelper;
 import roboyard.eclabs.ui.AchievementsFragment;
 import timber.log.Timber;
 
@@ -188,18 +189,10 @@ public class AchievementPopup {
             itemLayout.setPadding(16, 12, 16, 12);
             itemLayout.setGravity(Gravity.CENTER_VERTICAL);
             
-            // Checkmark
-            TextView checkmark = new TextView(context);
-            checkmark.setText("✓");
-            checkmark.setTextSize(24);
-            checkmark.setTextColor(Color.parseColor("#4CAF50"));
-            checkmark.setPadding(0, 0, 16, 0);
-            itemLayout.addView(checkmark);
-            
-            // Icon
+            // Icon from sprite sheet with achievement-specific color (larger, 128x128)
             ImageView icon = new ImageView(context);
-            icon.setImageResource(achievement.getIconResId());
-            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(48, 48);
+            AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.getSpriteIndex(), achievement.getId());
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(128, 128);
             iconParams.rightMargin = 16;
             icon.setLayoutParams(iconParams);
             itemLayout.addView(icon);
