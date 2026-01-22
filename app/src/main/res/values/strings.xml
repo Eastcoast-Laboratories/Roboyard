@@ -481,8 +481,8 @@
     <string name="achievement_all_stars_desc">Collect all 420 stars</string>
     
     <!-- Performance Achievements -->
-    <string name="achievement_perfect_1">Perfect Move</string>
-    <string name="achievement_perfect_1_desc">Solve a level with optimal moves</string>
+    <string name="achievement_perfect_5">Perfect Mover</string>
+    <string name="achievement_perfect_5_desc">Solve 5 levels with optimal moves</string>
     <string name="achievement_perfect_10">Precision Player</string>
     <string name="achievement_perfect_10_desc">Solve 10 levels with optimal moves</string>
     <string name="achievement_perfect_50">Optimization Expert</string>
@@ -505,8 +505,8 @@
     <string name="achievement_share_custom_desc">Share a custom level with others</string>
     
     <!-- Mastery Achievements -->
-    <string name="achievement_3_star_1">First Star</string>
-    <string name="achievement_3_star_1_desc">Achieve 3 stars on a level</string>
+    <string name="achievement_3_star_1">Hard Level Star</string>
+    <string name="achievement_3_star_1_desc">Achieve 3 stars on a level with 5+ optimal moves</string>
     <string name="achievement_3_star_10">Rising Star</string>
     <string name="achievement_3_star_10_desc">Achieve 3 stars on 10 levels</string>
     <string name="achievement_3_star_50">Superstar</string>

@@ -32,30 +32,30 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `perfect_solution_1` | Perfect Move | Solve a level with optimal moves | ✅ Implemented |
+| `perfect_solutions_5` | Perfect Mover | Solve 5 levels with optimal moves | ✅ Implemented |
 | `perfect_solutions_10` | Precision Player | Solve 10 levels with optimal moves | ✅ Implemented |
 | `perfect_solutions_50` | Optimization Expert | Solve 50 levels with optimal moves | ✅ Implemented |
 | `speedrun_under_30s` | Quick Thinker | Complete a level in under 30 seconds | ✅ Implemented |
 | `speedrun_under_10s` | Lightning Fast | Complete a level in under 10 seconds | ✅ Implemented |
 
-### Challenge Achievements (5)
+### Challenge Achievements (2 active, 3 pending)
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
 | `no_hints_10` | Independent Thinker | Complete 10 levels without using hints | ✅ Implemented |
 | `no_hints_50` | Self-Reliant | Complete 50 levels without using hints | ✅ Implemented |
-| `solve_custom_level` | Custom Solver | Solve a custom-created level | ✅ Implemented |
-| `create_custom_level` | Level Designer | Create and save a custom level | ✅ Implemented |
-| `share_custom_level` | Sharing is Caring | Share a custom level with others | ✅ Implemented |
+| `solve_custom_level` | Custom Solver | Solve a custom-created level | ⏳ Disabled (custom levels not implemented) |
+| `create_custom_level` | Level Designer | Create and save a custom level | ⏳ Disabled (custom levels not implemented) |
+| `share_custom_level` | Sharing is Caring | Share a custom level with others | ⏳ Disabled (custom levels not implemented) |
 
 ### Mastery Achievements (4)
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `3_star_level` | First Star | Achieve 3 stars on a level | ✅ Implemented |
+| `3_star_level` | Hard Level Star | Achieve 3 stars on a level with 5+ optimal moves | ✅ Implemented |
 | `3_star_10_levels` | Rising Star | Achieve 3 stars on 10 levels | ✅ Implemented |
 | `3_star_50_levels` | Superstar | Achieve 3 stars on 50 levels | ✅ Implemented |
-| `3_star_all_levels` | Perfect Master | Achieve 3 stars on all 140 levels | ✅ Implemented |
+| `3_star_all_levels` | Perfect Master | Achieve 3 stars on all levels | ✅ Implemented |
 
 ### Special Achievements (4)
 

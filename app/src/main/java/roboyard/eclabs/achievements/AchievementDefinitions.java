@@ -88,8 +88,8 @@ public class AchievementDefinitions {
             AchievementCategory.PROGRESSION, ICON_STARS));
             
         // ========== PERFORMANCE ACHIEVEMENTS ==========
-        add(new Achievement("perfect_solution_1", 
-            "achievement_perfect_1", "achievement_perfect_1_desc",
+        add(new Achievement("perfect_solutions_5", 
+            "achievement_perfect_5", "achievement_perfect_5_desc",
             AchievementCategory.PERFORMANCE, ICON_SHIELD_STAR));
         add(new Achievement("perfect_solutions_10", 
             "achievement_perfect_10", "achievement_perfect_10_desc",
@@ -111,15 +111,16 @@ public class AchievementDefinitions {
         add(new Achievement("no_hints_50", 
             "achievement_no_hints_50", "achievement_no_hints_50_desc",
             AchievementCategory.CHALLENGE, ICON_SHIELD_RED));
-        add(new Achievement("solve_custom_level", 
-            "achievement_solve_custom", "achievement_solve_custom_desc",
-            AchievementCategory.CHALLENGE, ICON_LIGHTBULB));
-        add(new Achievement("create_custom_level", 
-            "achievement_create_custom", "achievement_create_custom_desc",
-            AchievementCategory.CHALLENGE, ICON_TOOLS));
-        add(new Achievement("share_custom_level", 
-            "achievement_share_custom", "achievement_share_custom_desc",
-            AchievementCategory.CHALLENGE, ICON_NETWORK));
+        // Custom level achievements - not yet implemented, custom levels feature pending
+        // add(new Achievement("solve_custom_level", 
+        //     "achievement_solve_custom", "achievement_solve_custom_desc",
+        //     AchievementCategory.CHALLENGE, ICON_LIGHTBULB));
+        // add(new Achievement("create_custom_level", 
+        //     "achievement_create_custom", "achievement_create_custom_desc",
+        //     AchievementCategory.CHALLENGE, ICON_TOOLS));
+        // add(new Achievement("share_custom_level", 
+        //     "achievement_share_custom", "achievement_share_custom_desc",
+        //     AchievementCategory.CHALLENGE, ICON_NETWORK));
             
         // ========== MASTERY ACHIEVEMENTS ==========
         add(new Achievement("3_star_level", 

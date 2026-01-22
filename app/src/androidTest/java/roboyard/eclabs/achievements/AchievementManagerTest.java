@@ -54,7 +54,8 @@ public class AchievementManagerTest {
     public void testAllAchievementsLoaded() {
         List<Achievement> all = achievementManager.getAllAchievements();
         assertNotNull("Achievement list should not be null", all);
-        assertEquals("Should have 58 achievements", 58, all.size());
+        // 55 achievements (58 - 3 custom level achievements which are disabled)
+        assertEquals("Should have 55 achievements", 55, all.size());
     }
 
     /**
@@ -119,12 +120,14 @@ public class AchievementManagerTest {
      */
     @Test
     public void testPerfectSolutionAchievements() {
-        // Complete with optimal moves
-        achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
-        assertTrue("perfect_solution_1 should be unlocked", achievementManager.isUnlocked("perfect_solution_1"));
+        // Complete 5 with optimal moves for perfect_solutions_5
+        for (int i = 1; i <= 5; i++) {
+            achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
+        }
+        assertTrue("perfect_solutions_5 should be unlocked", achievementManager.isUnlocked("perfect_solutions_5"));
         
         // Complete 10 with optimal moves
-        for (int i = 2; i <= 10; i++) {
+        for (int i = 6; i <= 10; i++) {
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         assertTrue("perfect_solutions_10 should be unlocked", achievementManager.isUnlocked("perfect_solutions_10"));
@@ -146,18 +149,37 @@ public class AchievementManagerTest {
 
     /**
      * Test 3-star achievements
+     * - 3_star_level requires 5+ optimal moves
+     * - Other 3-star achievements count all levels
      */
     @Test
     public void testThreeStarAchievements() {
-        // Get 3 stars on a level
+        // Get 3 stars on a level with 5+ optimal moves - should unlock 3_star_level
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
-        assertTrue("3_star_level should be unlocked", achievementManager.isUnlocked("3_star_level"));
+        assertTrue("3_star_level should be unlocked for 5+ moves", achievementManager.isUnlocked("3_star_level"));
         
-        // Get 3 stars on 10 levels
+        // Get 3 stars on 10 levels (any move count) - should unlock 3_star_10_levels
         for (int i = 2; i <= 10; i++) {
-            achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
+            achievementManager.onLevelCompleted(i, 3, 3, 0, 3, 10000);
         }
         assertTrue("3_star_10_levels should be unlocked", achievementManager.isUnlocked("3_star_10_levels"));
+    }
+    
+    /**
+     * Test that 3_star_level requires 5+ optimal moves
+     */
+    @Test
+    public void testThreeStarLevelRequires5PlusMoves() {
+        achievementManager.resetAll();
+        // Get 3 stars on a level with only 4 optimal moves - should NOT unlock 3_star_level
+        achievementManager.onLevelCompleted(1, 4, 4, 0, 3, 10000);
+        assertFalse("3_star_level should NOT be unlocked for level with <5 moves", 
+                achievementManager.isUnlocked("3_star_level"));
+        
+        // Get 3 stars on a level with 5 optimal moves - should unlock
+        achievementManager.onLevelCompleted(2, 5, 5, 0, 3, 10000);
+        assertTrue("3_star_level should be unlocked for level with 5+ moves", 
+                achievementManager.isUnlocked("3_star_level"));
     }
 
     /**
@@ -354,18 +376,19 @@ public class AchievementManagerTest {
 
     /**
      * Test custom level achievements
+     * NOTE: Custom level achievements are currently disabled since custom levels are not yet implemented
      */
-    @Test
-    public void testCustomLevelAchievements() {
-        achievementManager.onCustomLevelCreated();
-        assertTrue("create_custom_level should be unlocked", achievementManager.isUnlocked("create_custom_level"));
-        
-        achievementManager.onCustomLevelSolved();
-        assertTrue("solve_custom_level should be unlocked", achievementManager.isUnlocked("solve_custom_level"));
-        
-        achievementManager.onCustomLevelShared();
-        assertTrue("share_custom_level should be unlocked", achievementManager.isUnlocked("share_custom_level"));
-    }
+    // @Test
+    // public void testCustomLevelAchievements() {
+    //     achievementManager.onCustomLevelCreated();
+    //     assertTrue("create_custom_level should be unlocked", achievementManager.isUnlocked("create_custom_level"));
+    //     
+    //     achievementManager.onCustomLevelSolved();
+    //     assertTrue("solve_custom_level should be unlocked", achievementManager.isUnlocked("solve_custom_level"));
+    //     
+    //     achievementManager.onCustomLevelShared();
+    //     assertTrue("share_custom_level should be unlocked", achievementManager.isUnlocked("share_custom_level"));
+    // }
 
     /**
      * Test square coverage achievements
@@ -422,10 +445,12 @@ public class AchievementManagerTest {
     @Test
     public void testNonOptimalMovesNoAchievement() {
         achievementManager.resetAll();
-        // Complete with more moves than optimal
-        achievementManager.onLevelCompleted(1, 10, 5, 0, 2, 30000);
-        assertFalse("perfect_solution_1 should NOT be unlocked with non-optimal moves", 
-                achievementManager.isUnlocked("perfect_solution_1"));
+        // Complete 5 levels with more moves than optimal
+        for (int i = 1; i <= 5; i++) {
+            achievementManager.onLevelCompleted(i, 10, 5, 0, 2, 30000);
+        }
+        assertFalse("perfect_solutions_5 should NOT be unlocked with non-optimal moves", 
+                achievementManager.isUnlocked("perfect_solutions_5"));
     }
 
     /**

@@ -204,7 +204,7 @@ public class AchievementManager {
         if (playerMoves == optimalMoves) {
             perfectSolutions++;
             saveCounter("perfect_solutions", perfectSolutions);
-            unlock("perfect_solution_1");
+            if (perfectSolutions >= 5) unlock("perfect_solutions_5");
             if (perfectSolutions >= 10) unlock("perfect_solutions_10");
             if (perfectSolutions >= 50) unlock("perfect_solutions_50");
         }
@@ -217,11 +217,17 @@ public class AchievementManager {
             if (noHintLevels >= 50) unlock("no_hints_50");
         }
         
-        // 3 stars
+        // 3 stars achievements
         if (stars >= 3) {
             threeStarLevels++;
             saveCounter("three_star_levels", threeStarLevels);
-            unlock("3_star_level");
+            
+            // 3_star_level only unlocks for levels with 5+ optimal moves
+            if (optimalMoves >= 5) {
+                unlock("3_star_level");
+            }
+            
+            // Other 3-star achievements count all levels regardless of move count
             if (threeStarLevels >= 10) unlock("3_star_10_levels");
             if (threeStarLevels >= 50) unlock("3_star_50_levels");
             if (threeStarLevels >= 140) unlock("3_star_all_levels");
