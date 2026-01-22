@@ -586,6 +586,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
          * 3. Shows the appropriate number of stars for completed levels
          * 4. Shows the statistics directly on the button for completed levels
          * 5. Enables or disables the button based on whether the level is unlocked
+         * 6. Highlights the last played level with a light green background
          * 
          * @param levelId The ID of the level to display
          * @param listener The listener to handle level selection events
@@ -598,6 +599,14 @@ public class LevelSelectionFragment extends BaseGameFragment {
             // Set level number (only visible for non-completed levels)
             levelButton.setText(String.valueOf(levelId));
             levelButton.setContentDescription("Level " + levelId);
+            
+            // Highlight the last played level with a light green background
+            int lastPlayedLevel = LevelCompletionManager.getInstance(itemView.getContext()).getLastPlayedLevel();
+            if (levelId == lastPlayedLevel) {
+                itemView.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9")); // Light green
+            } else {
+                itemView.setBackgroundColor(android.graphics.Color.TRANSPARENT); // Transparent for others
+            }
 
             // Get the completion data if the level is completed
             final LevelCompletionData completionData = isCompleted ?
