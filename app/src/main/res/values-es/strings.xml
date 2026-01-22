@@ -226,7 +226,7 @@
     <string name="unknown_color">Desconocido: %1$s</string>
     <string name="solution_found">¡La IA encontró una solución!</string>
     <string name="perfect_solution">¡Perfecto! ¡Encontraste la solución óptima!</string>
-    <string name="pre_hint_involved_robots">Mueve los robots</string>
+    <string name="pre_hint_involved_robots">Mueve</string>
     <string name="and">y</string>
     <string name="pre_hint_first_move">Mueve primero el robot %1$s</string>
     <string name="no_solution_found">No se encontró solución</string>

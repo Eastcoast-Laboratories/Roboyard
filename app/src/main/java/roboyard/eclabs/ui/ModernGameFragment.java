@@ -2467,12 +2467,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // For the last item with multiple items, add 'and' without comma
                     message.append(getString(R.string.and)).append(" ").append(robotsInvolved.get(i));
                     if (Locale.getDefault().getLanguage().equals("en")) {
+                        // hardcoded word "robots" at the end of the hint only in english
                         message.append(robotsInvolved.size() > 1 ? " robots" : " robot");
                     }
                 } else if (i == robotsInvolved.size() - 1) {
                     // For a single item or the very last one
                     message.append(robotsInvolved.get(i));
                     if (Locale.getDefault().getLanguage().equals("en")) {
+                        // hardcoded word "robot" at the end of the hint only in english
                         message.append(" robot");
                     }
                 } else if (i == robotsInvolved.size() - 2) {

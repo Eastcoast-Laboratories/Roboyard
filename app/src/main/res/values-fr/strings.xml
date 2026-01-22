@@ -138,7 +138,7 @@
     <string name="pre_hint_less_than_x">L\'IA a trouvé une solution en moins de %1$d mouvements</string>
     <string name="pre_hint_exact_solution">L\'IA a trouvé une solution en %1$d mouvements</string>
     <string name="perfect_solution">Parfait! Vous avez trouvé la solution optimale!</string>
-    <string name="pre_hint_involved_robots">Déplacez les robots</string>
+    <string name="pre_hint_involved_robots">Déplacez</string>
     <string name="and">et</string>
     <string name="pre_hint_first_move">Déplacez d\'abord le robot %1$s</string>
     <string name="pre_hint_ready">Prêt à afficher des indices étape par étape</string>

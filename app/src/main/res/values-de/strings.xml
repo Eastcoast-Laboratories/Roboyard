@@ -336,7 +336,7 @@
     <string name="pre_hint_less_than_x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
     <string name="pre_hint_exact_solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
     <string name="solution_found">KI hat Lösung gefunden!</string>
-    <string name="pre_hint_involved_robots">Bewege die Roboter</string>
+    <string name="pre_hint_involved_robots">Bewege</string>
     <string name="and">und</string>
     <string name="pre_hint_first_move">Bewege zuerst den %1$s Roboter</string>
     <string name="no_solution_found">Keine Lösung gefunden</string>
