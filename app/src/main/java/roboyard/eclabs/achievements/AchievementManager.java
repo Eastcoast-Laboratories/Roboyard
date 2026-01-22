@@ -30,6 +30,7 @@ public class AchievementManager {
     private int perfectSolutions;
     private int noHintLevels;
     private int threeStarLevels;
+    private int threeStarHardLevels;
     private int impossibleModeGames;
     private int impossibleModeStreak;
     private int perfectRandomGames;
@@ -73,6 +74,7 @@ public class AchievementManager {
         perfectSolutions = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_solutions", 0);
         noHintLevels = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_levels", 0);
         threeStarLevels = prefs.getInt(KEY_COUNTER_PREFIX + "three_star_levels", 0);
+        threeStarHardLevels = prefs.getInt(KEY_COUNTER_PREFIX + "three_star_hard_levels", 0);
         impossibleModeGames = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_games", 0);
         impossibleModeStreak = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_streak", 0);
         perfectRandomGames = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_random_games", 0);
@@ -225,6 +227,9 @@ public class AchievementManager {
             // 3_star_hard_level only unlocks for levels with 5+ optimal moves
             if (optimalMoves >= 5) {
                 unlock("3_star_hard_level");
+                threeStarHardLevels++;
+                saveCounter("three_star_hard_levels", threeStarHardLevels);
+                if (threeStarHardLevels >= 10) unlock("3_star_10_hard_levels");
             }
             
             // Other 3-star achievements count all levels regardless of move count

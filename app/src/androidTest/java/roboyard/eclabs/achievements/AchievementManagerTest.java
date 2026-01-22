@@ -54,8 +54,8 @@ public class AchievementManagerTest {
     public void testAllAchievementsLoaded() {
         List<Achievement> all = achievementManager.getAllAchievements();
         assertNotNull("Achievement list should not be null", all);
-        // 55 achievements (58 - 3 custom level achievements which are disabled)
-        assertEquals("Should have 55 achievements", 55, all.size());
+        // 56 achievements (58 - 3 custom level achievements which are disabled + 1 new 3_star_10_hard_levels)
+        assertEquals("Should have 56 achievements", 56, all.size());
     }
 
     /**

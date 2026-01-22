@@ -509,6 +509,8 @@
     <string name="achievement_3_star_1_desc">Achieve 3 stars on a level with 5+ optimal moves</string>
     <string name="achievement_3_star_10">Rising Star</string>
     <string name="achievement_3_star_10_desc">Achieve 3 stars on 10 levels</string>
+    <string name="achievement_3_star_10_hard">Hard Level Master</string>
+    <string name="achievement_3_star_10_hard_desc">Achieve 3 stars on 10 levels with 5+ optimal moves</string>
     <string name="achievement_3_star_50">Superstar</string>
     <string name="achievement_3_star_50_desc">Achieve 3 stars on 50 levels</string>
     <string name="achievement_3_star_all">Perfect Master</string>

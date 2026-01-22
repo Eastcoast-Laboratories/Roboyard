@@ -177,6 +177,93 @@ public class ThreeStarAchievementTest {
     }
 
     /**
+     * Test that 3_star_10_hard_levels counts only levels with 5+ optimal moves
+     */
+    @Test
+    public void testThreeStar10HardLevelsCountsOnlyHardLevels() {
+        Log.i(TAG, "========== TESTING 3_star_10_hard_levels ==========");
+        
+        // Complete hard levels (5+ moves) with 3 stars until we reach 10
+        int hardLevelsCompleted = 0;
+        int levelAtWhichUnlocked = -1;
+        
+        for (int levelId = 1; levelId <= 140; levelId++) {
+            int optimalMoves = LevelSolutionData.getOptimalMoves(levelId);
+            
+            if (optimalMoves == -1) continue;
+            
+            // Only complete levels with 5+ optimal moves
+            if (optimalMoves >= 5) {
+                // Complete with 3 stars
+                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                hardLevelsCompleted++;
+                
+                Log.d(TAG, "Completed hard level " + levelId + " (" + optimalMoves + " moves), hard total: " + hardLevelsCompleted);
+                
+                // Check if achievement was unlocked at exactly 10 hard levels
+                if (hardLevelsCompleted == 10 && levelAtWhichUnlocked == -1) {
+                    if (achievementManager.isUnlocked("3_star_10_hard_levels")) {
+                        levelAtWhichUnlocked = levelId;
+                        Log.i(TAG, "3_star_10_hard_levels UNLOCKED at level " + levelId);
+                    }
+                }
+                
+                // Stop after 10 hard levels
+                if (hardLevelsCompleted >= 10) break;
+            }
+        }
+        
+        Log.i(TAG, "Completed " + hardLevelsCompleted + " hard levels with 3 stars");
+        Log.i(TAG, "Achievement unlocked at level: " + levelAtWhichUnlocked);
+        
+        // Verify 3_star_10_hard_levels is unlocked
+        assertTrue("Should have completed 10 hard levels", hardLevelsCompleted >= 10);
+        assertTrue("3_star_10_hard_levels should be unlocked after 10 hard levels with 3 stars",
+            achievementManager.isUnlocked("3_star_10_hard_levels"));
+        
+        Log.i(TAG, "========== TEST PASSED ==========");
+    }
+
+    /**
+     * Test that 3_star_10_hard_levels is NOT unlocked by completing only short levels
+     */
+    @Test
+    public void testThreeStar10HardLevelsNotUnlockedByShortLevels() {
+        Log.i(TAG, "========== TESTING 3_star_10_hard_levels with short levels ==========");
+        
+        // Complete only short levels (< 5 moves) with 3 stars
+        int shortLevelsCompleted = 0;
+        
+        for (int levelId = 1; levelId <= 140 && shortLevelsCompleted < 20; levelId++) {
+            int optimalMoves = LevelSolutionData.getOptimalMoves(levelId);
+            
+            if (optimalMoves == -1) continue;
+            
+            // Only complete levels with < 5 optimal moves
+            if (optimalMoves < 5) {
+                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                shortLevelsCompleted++;
+                
+                Log.d(TAG, "Completed short level " + levelId + " (" + optimalMoves + " moves), total: " + shortLevelsCompleted);
+            }
+        }
+        
+        Log.i(TAG, "Completed " + shortLevelsCompleted + " short levels with 3 stars");
+        
+        // Verify 3_star_10_hard_levels is NOT unlocked
+        assertFalse("3_star_10_hard_levels should NOT be unlocked by short levels only",
+            achievementManager.isUnlocked("3_star_10_hard_levels"));
+        
+        // But 3_star_10_levels should be unlocked (counts all levels)
+        if (shortLevelsCompleted >= 10) {
+            assertTrue("3_star_10_levels should be unlocked after 10 levels with 3 stars",
+                achievementManager.isUnlocked("3_star_10_levels"));
+        }
+        
+        Log.i(TAG, "========== TEST PASSED ==========");
+    }
+
+    /**
      * Test the distribution of levels by optimal move count
      */
     @Test

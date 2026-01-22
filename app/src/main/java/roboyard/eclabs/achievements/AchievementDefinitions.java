@@ -129,6 +129,9 @@ public class AchievementDefinitions {
         add(new Achievement("3_star_10_levels", 
             "achievement_3_star_10", "achievement_3_star_10_desc",
             AchievementCategory.MASTERY, ICON_STARS));
+        add(new Achievement("3_star_10_hard_levels", 
+            "achievement_3_star_10_hard", "achievement_3_star_10_hard_desc",
+            AchievementCategory.MASTERY, ICON_STARS));
         add(new Achievement("3_star_50_levels", 
             "achievement_3_star_50", "achievement_3_star_50_desc",
             AchievementCategory.MASTERY, ICON_WREATH));
