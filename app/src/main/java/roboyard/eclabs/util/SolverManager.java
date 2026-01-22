@@ -33,6 +33,10 @@ public class SolverManager implements Runnable {
     // Track initialization state
     private boolean isInitialized = false;
     
+    // Predefined solution from level file (for levels too complex to solve at runtime)
+    private String predefinedSolution = null;
+    private int predefinedNumMoves = 0;
+    
     // Unique solver invocation ID for log tracing
     private static final Object solverIdLock = new Object();
     private static long solverInvocationCounter = 0;
@@ -139,6 +143,27 @@ public class SolverManager implements Runnable {
     public void resetInitialization() {
         Timber.d("[SOLUTION_SOLVER] SolverManager.resetInitialization(): Resetting initialization state");
         this.isInitialized = false;
+        this.predefinedSolution = null;
+        this.predefinedNumMoves = 0;
+    }
+    
+    /**
+     * Set a predefined solution from the level file
+     * @param solution The solution string (e.g., "gE gN gE gS gW...")
+     * @param numMoves The number of moves in the solution
+     */
+    public void setPredefinedSolution(String solution, int numMoves) {
+        this.predefinedSolution = solution;
+        this.predefinedNumMoves = numMoves;
+        Timber.d("[SOLUTION_SOLVER] SolverManager.setPredefinedSolution(): Set predefined solution with %d moves", numMoves);
+    }
+    
+    /**
+     * Check if a predefined solution is available
+     * @return true if a predefined solution exists
+     */
+    public boolean hasPredefinedSolution() {
+        return predefinedSolution != null && !predefinedSolution.isEmpty();
     }
     
     /**
@@ -319,6 +344,22 @@ public class SolverManager implements Runnable {
      */
     private void startSolverInternal(long idForLog) {
         try {
+            // Check if we have a predefined solution - use it instead of running the solver
+            if (hasPredefinedSolution()) {
+                Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Using predefined solution with %d moves", idForLog, predefinedNumMoves);
+                currentSolution = parsePredefinedSolution(predefinedSolution);
+                if (currentSolution != null && currentSolution.getMoves() != null) {
+                    int moveCount = currentSolution.getMoves().size();
+                    Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Parsed predefined solution with %d moves", idForLog, moveCount);
+                    if (listener != null) {
+                        listener.onSolverFinished(true, moveCount, 1);
+                    }
+                    return;
+                } else {
+                    Timber.w("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Failed to parse predefined solution, falling back to solver", idForLog);
+                }
+            }
+            
             Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Starting solver with status: %s", idForLog, solver.getSolverStatus());
             solver.run();
             Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Solver.run() completed, checking status...", idForLog);
@@ -395,5 +436,67 @@ public class SolverManager implements Runnable {
      */
     public ISolver getSolver() {
         return solver;
+    }
+    
+    /**
+     * Parse a predefined solution string into a GameSolution
+     * Format: "gE gN gE gS gW gN yN rS rE rS rW rS rW rN gW yW yN yE yN bW bN bE rN gE gN bN"
+     * Each move is: [robot color letter][direction letter]
+     * Robot colors: r=red(0), g=green(1), b=blue(2), y=yellow(3)
+     * Directions: N=up, S=down, E=right, W=left
+     * 
+     * @param solutionStr The solution string to parse
+     * @return A GameSolution with the parsed moves, or null if parsing fails
+     */
+    private GameSolution parsePredefinedSolution(String solutionStr) {
+        if (solutionStr == null || solutionStr.isEmpty()) {
+            return null;
+        }
+        
+        GameSolution solution = new GameSolution();
+        String[] moves = solutionStr.trim().split("\\s+");
+        
+        for (String move : moves) {
+            if (move.length() != 2) {
+                Timber.w("[SOLUTION_SOLVER] Invalid move format: %s", move);
+                continue;
+            }
+            
+            char robotChar = move.charAt(0);
+            char dirChar = move.charAt(1);
+            
+            // Parse robot color
+            int robotColor;
+            switch (robotChar) {
+                case 'r': robotColor = 0; break; // red
+                case 'g': robotColor = 1; break; // green
+                case 'b': robotColor = 2; break; // blue
+                case 'y': robotColor = 3; break; // yellow
+                default:
+                    Timber.w("[SOLUTION_SOLVER] Unknown robot color: %c", robotChar);
+                    continue;
+            }
+            
+            // Parse direction
+            roboyard.pm.ia.ricochet.ERRGameMove direction;
+            switch (dirChar) {
+                case 'N': direction = roboyard.pm.ia.ricochet.ERRGameMove.UP; break;
+                case 'S': direction = roboyard.pm.ia.ricochet.ERRGameMove.DOWN; break;
+                case 'E': direction = roboyard.pm.ia.ricochet.ERRGameMove.RIGHT; break;
+                case 'W': direction = roboyard.pm.ia.ricochet.ERRGameMove.LEFT; break;
+                default:
+                    Timber.w("[SOLUTION_SOLVER] Unknown direction: %c", dirChar);
+                    continue;
+            }
+            
+            // Create a RRPiece for this robot color (position 0,0 is placeholder, color and id are what matter)
+            roboyard.pm.ia.ricochet.RRPiece piece = new roboyard.pm.ia.ricochet.RRPiece(0, 0, robotColor, robotColor);
+            
+            // Add the move to the solution
+            solution.addMove(new roboyard.pm.ia.ricochet.RRGameMove(piece, direction));
+        }
+        
+        Timber.d("[SOLUTION_SOLVER] Parsed predefined solution: %d moves", solution.getMoves().size());
+        return solution;
     }
 }

@@ -65,6 +65,10 @@ public class GameState implements Serializable {
     
     // Store initial robot positions for reset functionality
     public Map<Integer, int[]> initialRobotPositions;
+    
+    // Predefined solution from level file (for levels that are too complex to solve at runtime)
+    private String predefinedSolution = null;
+    private int predefinedNumMoves = 0;
 
     /**
      * Create a new game state with specified dimensions
@@ -320,6 +324,44 @@ public class GameState implements Serializable {
      */
     public void setLevelId(int levelId) {
         this.levelId = levelId;
+    }
+    
+    /**
+     * Get the predefined solution string from the level file
+     * @return The solution string (e.g., "gE gN gE gS gW...") or null if not defined
+     */
+    public String getPredefinedSolution() {
+        return predefinedSolution;
+    }
+    
+    /**
+     * Set the predefined solution string
+     */
+    public void setPredefinedSolution(String solution) {
+        this.predefinedSolution = solution;
+    }
+    
+    /**
+     * Get the predefined number of moves from the level file
+     * @return The number of moves or 0 if not defined
+     */
+    public int getPredefinedNumMoves() {
+        return predefinedNumMoves;
+    }
+    
+    /**
+     * Set the predefined number of moves
+     */
+    public void setPredefinedNumMoves(int numMoves) {
+        this.predefinedNumMoves = numMoves;
+    }
+    
+    /**
+     * Check if this level has a predefined solution
+     * @return true if a predefined solution exists
+     */
+    public boolean hasPredefinedSolution() {
+        return predefinedSolution != null && !predefinedSolution.isEmpty();
     }
     
     /**
@@ -1135,6 +1177,26 @@ public class GameState implements Serializable {
                     }
                 } else {
                     Timber.e("[LEVEL LOADING] Error parsing robot line, no digits found: %s", line);
+                }
+                continue;
+            }
+            
+            // Parse predefined solution
+            if (line.startsWith("solution:")) {
+                String solutionStr = line.substring(9).trim();
+                state.setPredefinedSolution(solutionStr);
+                Timber.d("[LEVEL LOADING] Found predefined solution: %s", solutionStr);
+                continue;
+            }
+            
+            // Parse predefined number of moves
+            if (line.startsWith("num_moves:")) {
+                try {
+                    int numMoves = Integer.parseInt(line.substring(10).trim());
+                    state.setPredefinedNumMoves(numMoves);
+                    Timber.d("[LEVEL LOADING] Found predefined num_moves: %d", numMoves);
+                } catch (NumberFormatException e) {
+                    Timber.e(e, "[LEVEL LOADING] Error parsing num_moves: %s", line);
                 }
                 continue;
             }

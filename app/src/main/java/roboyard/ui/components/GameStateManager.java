@@ -255,6 +255,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION_SOLVER] Initializing solver with %d grid elements from level %d",
                 gridElements.size(), levelId);
         getSolverManager().initialize(gridElements);
+        
+        // Check if level has a predefined solution (for complex levels like 140)
+        if (state.hasPredefinedSolution()) {
+            Timber.d("[SOLUTION_SOLVER] Level %d has predefined solution with %d moves", 
+                    levelId, state.getPredefinedNumMoves());
+            getSolverManager().setPredefinedSolution(
+                    state.getPredefinedSolution(), 
+                    state.getPredefinedNumMoves());
+        }
 
         // Start calculating the solution automatically
         calculateSolutionAsync(null);
