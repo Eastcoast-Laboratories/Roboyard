@@ -19,6 +19,7 @@ import timber.log.Timber;
 public class LevelCompletionManager {
     private static final String PREFS_NAME = "level_completion_prefs";
     private static final String COMPLETION_DATA_KEY = "completion_data";
+    private static final String LAST_PLAYED_LEVEL_KEY = "last_played_level";
     
     private static LevelCompletionManager instance;
     private Map<Integer, LevelCompletionData> completionDataMap;
@@ -200,6 +201,25 @@ public class LevelCompletionManager {
         } else {
             Timber.d("No completion data found in SharedPreferences");
         }
+    }
+    
+    /**
+     * Set the last played level ID
+     * @param levelId The level ID that was last played
+     */
+    public void setLastPlayedLevel(int levelId) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(LAST_PLAYED_LEVEL_KEY, levelId).apply();
+        Timber.d("[LEVEL_COMPLETION] Set last played level to %d", levelId);
+    }
+    
+    /**
+     * Get the last played level ID
+     * @return The last played level ID, or 1 if none was set
+     */
+    public int getLastPlayedLevel() {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getInt(LAST_PLAYED_LEVEL_KEY, 1);
     }
     
     /**

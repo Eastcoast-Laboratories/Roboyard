@@ -83,17 +83,41 @@ public class LevelSelectionFragment extends BaseGameFragment {
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
         levelRecyclerView.setLayoutManager(layoutManager);
 
-        // Add a custom ItemDecoration to reduce spacing between grid items
+        // Add a custom ItemDecoration with thin separator lines between grid items
         levelRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            private final android.graphics.Paint paint = new android.graphics.Paint();
+            
+            {
+                paint.setColor(android.graphics.Color.parseColor("#20000000")); // Very light gray (20% opacity)
+                paint.setStrokeWidth(1); // 1px thin line
+            }
+            
             @Override
             public void getItemOffsets(@NonNull android.graphics.Rect outRect, @NonNull View view, 
                                        @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                // Set very minimal margins (1dp) to maintain minimal separation
+                // Set minimal margins for separator lines
                 int spacing = 1; // 1dp
                 outRect.left = spacing;
                 outRect.right = spacing;
                 outRect.top = spacing;
                 outRect.bottom = spacing;
+            }
+            
+            @Override
+            public void onDraw(@NonNull android.graphics.Canvas c, @NonNull RecyclerView parent, 
+                              @NonNull RecyclerView.State state) {
+                int childCount = parent.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    View child = parent.getChildAt(i);
+                    
+                    // Draw bottom line
+                    c.drawLine(child.getLeft(), child.getBottom(), 
+                              child.getRight(), child.getBottom(), paint);
+                    
+                    // Draw right line
+                    c.drawLine(child.getRight(), child.getTop(), 
+                              child.getRight(), child.getBottom(), paint);
+                }
             }
         });
 
@@ -115,8 +139,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
         levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars);
         levelRecyclerView.setAdapter(levelAdapter);
 
-        // Auto-scroll to the latest unlocked level
-        scrollToLatestUnlockedLevel();
+        // Auto-scroll to the last played level
+        scrollToLastPlayedLevel();
 
         // Add secret button for Level Editor (long press on title)
         titleTextView.setOnLongClickListener(v -> {
@@ -137,25 +161,21 @@ public class LevelSelectionFragment extends BaseGameFragment {
     }
 
     /**
-     * Scroll to the latest unlocked level automatically
+     * Scroll to the last played level automatically
      */
-    private void scrollToLatestUnlockedLevel() {
-        for (int i = 0; i < availableLevels.size(); i++) {
-            int levelId = availableLevels.get(i);
-            if (levelId > totalStars + 1) {
-                // This is the first locked level, scroll to the previous one (the last unlocked)
-                if (i > 0) {
-                    final int position = Math.max(0, i - 1);
-                    levelRecyclerView.post(() -> levelRecyclerView.smoothScrollToPosition(position));
-                }
-                return;
-            }
-        }
-
-        // If we reached here, all levels are unlocked, scroll to the last one
-        if (!availableLevels.isEmpty()) {
-            final int lastPosition = availableLevels.size() - 1;
-            levelRecyclerView.post(() -> levelRecyclerView.smoothScrollToPosition(lastPosition));
+    private void scrollToLastPlayedLevel() {
+        int lastPlayedLevel = completionManager.getLastPlayedLevel();
+        
+        // Find the position of the last played level in the list
+        int position = availableLevels.indexOf(lastPlayedLevel);
+        
+        if (position >= 0) {
+            final int scrollPosition = position;
+            levelRecyclerView.post(() -> levelRecyclerView.smoothScrollToPosition(scrollPosition));
+            Timber.d("Scrolling to last played level %d at position %d", lastPlayedLevel, scrollPosition);
+        } else {
+            // Fallback: scroll to first level
+            Timber.d("Last played level %d not found, scrolling to first level", lastPlayedLevel);
         }
     }
 
@@ -188,8 +208,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
             levelAdapter.notifyDataSetChanged();
         }
 
-        // Auto-scroll to the latest unlocked level
-        scrollToLatestUnlockedLevel();
+        // Auto-scroll to the last played level
+        scrollToLastPlayedLevel();
     }
 
     /**

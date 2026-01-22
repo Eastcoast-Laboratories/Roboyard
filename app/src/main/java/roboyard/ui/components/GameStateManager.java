@@ -233,6 +233,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         state.setLevelId(levelId);
         state.setLevelName("Level " + levelId);
 
+        // Save last played level for scroll position in level selection
+        LevelCompletionManager.getInstance(getApplication()).setLastPlayedLevel(levelId);
+
         // Set reference to this GameStateManager in the new state
         state.setGameStateManager(this);
 

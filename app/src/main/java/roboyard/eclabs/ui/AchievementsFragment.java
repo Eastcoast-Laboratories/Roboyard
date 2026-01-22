@@ -111,14 +111,31 @@ public class AchievementsFragment extends BaseGameFragment {
         }
     }
     
+    private static final long NEW_ACHIEVEMENT_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+    
+    private boolean isNewAchievement(Achievement achievement) {
+        if (!achievement.isUnlocked() || achievement.getUnlockedTimestamp() == 0) {
+            return false;
+        }
+        long timeSinceUnlock = System.currentTimeMillis() - achievement.getUnlockedTimestamp();
+        return timeSinceUnlock <= NEW_ACHIEVEMENT_THRESHOLD_MS;
+    }
+    
     private void addAchievementItem(Achievement achievement) {
         LinearLayout itemLayout = new LinearLayout(requireContext());
         itemLayout.setOrientation(LinearLayout.HORIZONTAL);
         itemLayout.setPadding(16, 16, 16, 16);
-        // White background with green tint for unlocked, light gray for locked
-        itemLayout.setBackgroundColor(achievement.isUnlocked() ? 
-                Color.parseColor("#E8F5E9") : // Light green for unlocked
-                Color.parseColor("#F5F5F5")); // Light gray for locked
+        
+        boolean isNew = isNewAchievement(achievement);
+        
+        // Background color: golden for new, green for unlocked, gray for locked
+        if (isNew) {
+            itemLayout.setBackgroundColor(Color.parseColor("#FFF8E1")); // Light gold for new
+        } else if (achievement.isUnlocked()) {
+            itemLayout.setBackgroundColor(Color.parseColor("#E8F5E9")); // Light green for unlocked
+        } else {
+            itemLayout.setBackgroundColor(Color.parseColor("#F5F5F5")); // Light gray for locked
+        }
         
         LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -141,14 +158,31 @@ public class AchievementsFragment extends BaseGameFragment {
         textContainer.setLayoutParams(new LinearLayout.LayoutParams(
                 0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         
-        // Name
+        // Name with NEW badge if recently unlocked
+        LinearLayout nameRow = new LinearLayout(requireContext());
+        nameRow.setOrientation(LinearLayout.HORIZONTAL);
+        nameRow.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        
         TextView nameText = new TextView(requireContext());
         nameText.setText(getStringByName(achievement.getNameKey()));
         nameText.setTextSize(16);
         nameText.setTextColor(achievement.isUnlocked() ?
                 Color.parseColor("#1B5E20") : // Dark green for unlocked
                 Color.parseColor("#9E9E9E")); // Gray for locked
-        textContainer.addView(nameText);
+        nameRow.addView(nameText);
+        
+        // Add NEW badge if recently unlocked
+        if (isNew) {
+            TextView newBadge = new TextView(requireContext());
+            newBadge.setText(" NEW");
+            newBadge.setTextSize(12);
+            newBadge.setTextColor(Color.parseColor("#FF6F00")); // Orange
+            newBadge.setTypeface(null, android.graphics.Typeface.BOLD);
+            nameRow.addView(newBadge);
+        }
+        
+        textContainer.addView(nameRow);
         
         // Description
         TextView descText = new TextView(requireContext());
