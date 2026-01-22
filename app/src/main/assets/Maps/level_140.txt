@@ -118,3 +118,5 @@ robot_red11,0;
 robot_blue1,10;
 robot_yellow12,15;
 robot_green5,15;
+solution:gE gN gE gS gW gN yN rS rE rS rW rS rW rN gW yW yN yE yN bW bN bE rN gE gN bN
+num_moves:26
