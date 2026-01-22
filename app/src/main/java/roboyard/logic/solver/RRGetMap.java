@@ -230,7 +230,7 @@ public class RRGetMap {
         for(int i = 0; i < Constants.NUM_ROBOTS; i++) {
             // Check if the piece exists at this position
             if (pieces[i] == null) {
-                Timber.e("[ROBOT_MAPPING] Missing robot at position %d. Creating a dummy robot at (0,0)", i);
+                Timber.e("[ROBOT_MAPPING][ERRROR] Fatal: Missing robot at position %d. Creating a dummy robot at (0,0)", i);
                 // Create a dummy piece at position (0,0) as a fallback
                 // This ensures the solver can proceed but may not produce correct solutions
                 pieces[i] = new RRPiece(0, 0, i, i);
@@ -240,6 +240,12 @@ public class RRGetMap {
             Timber.d("[ROBOT_MAPPING] Setting robot %d at board position %d (x=%d, y=%d)", 
                     i, position, pieces[i].getX(), pieces[i].getY());
             board.setRobot(i, position, false);
+
+            // Verify that setRobot succeeded
+            if (!board.setRobot(i, position, false)) {
+                Timber.e("[ROBOT_MAPPING][ERRROR] FATAL: Could not set robot %d at position %d (%d,%d). Position may be occupied or invalid.", 
+                        i, position, pieces[i].getX(), pieces[i].getY());
+            }
         }
         
         // If no target was found, throw an exception

@@ -379,6 +379,10 @@ public class Board {
         }
         final Board newBoard = new Board(width, height, numRobots);
         newBoard.setFreestyleBoard();
+        // Reset robot positions to -1 so they can be set correctly later
+        // The constructor sets default positions, but for freestyle boards
+        // the robots will be positioned by the caller (e.g., RRGetMap.createDDWorld)
+        Arrays.fill(newBoard.robots, -1);
         if (null != oldBoard) {
             // copy walls, goals and active goal
             oldBoard.removeOuterWalls();
