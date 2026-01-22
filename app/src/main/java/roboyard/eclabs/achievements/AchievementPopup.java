@@ -30,19 +30,22 @@ import timber.log.Timber;
 
 /**
  * Popup that shows when achievements are unlocked.
- * Fades in from top, shows for 10 seconds, then fades out.
+ * Fades in from top, shows for 20 seconds, then fades out.
+ * If clicked, stays visible until manually closed with X button.
  * Supports multiple achievements with scrollable list.
  */
 public class AchievementPopup {
     
-    private static final int DISPLAY_DURATION_MS = 10000; // 10 seconds
+    private static final int DISPLAY_DURATION_MS = 20000; // 20 seconds
     private static final int FADE_DURATION_MS = 500;
+    private static final int BACKGROUND_COLOR_SEMI_TRANSPARENT = Color.argb(230, 255, 255, 255); // White with ~90% opacity
     
     private final Context context;
     private final ViewGroup rootView;
     private FrameLayout popupContainer;
     private final List<Achievement> pendingAchievements = new ArrayList<>();
     private boolean isShowing = false;
+    private boolean isPermanent = false; // When true, popup won't auto-close
     private final Handler handler = new Handler(Looper.getMainLooper());
     
     public AchievementPopup(Context context, ViewGroup rootView) {
@@ -81,6 +84,7 @@ public class AchievementPopup {
         }
         
         isShowing = true;
+        isPermanent = false;
         
         // Create popup container
         popupContainer = new FrameLayout(context);
@@ -96,13 +100,19 @@ public class AchievementPopup {
         popupContainer.setElevation(1000);
         popupContainer.setZ(1000);
         
-        // Main card layout
+        // Main card layout with semi-transparent white background
         LinearLayout cardLayout = new LinearLayout(context);
         cardLayout.setOrientation(LinearLayout.VERTICAL);
-        cardLayout.setBackgroundColor(Color.WHITE);
+        cardLayout.setBackgroundColor(BACKGROUND_COLOR_SEMI_TRANSPARENT);
         cardLayout.setPadding(32, 32, 32, 32);
         cardLayout.setElevation(1000);
         cardLayout.setZ(1000);
+        
+        // Header with title and close button
+        FrameLayout headerLayout = new FrameLayout(context);
+        headerLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
         
         // Title
         TextView titleText = new TextView(context);
@@ -112,8 +122,39 @@ public class AchievementPopup {
         titleText.setTextSize(20);
         titleText.setTextColor(Color.parseColor("#4CAF50"));
         titleText.setGravity(Gravity.CENTER);
-        titleText.setPadding(0, 0, 0, 16);
-        cardLayout.addView(titleText);
+        titleText.setPadding(40, 0, 40, 16); // Extra padding for close button space
+        FrameLayout.LayoutParams titleParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        titleText.setLayoutParams(titleParams);
+        headerLayout.addView(titleText);
+        
+        // Close button (X) - initially hidden, shown when popup becomes permanent
+        TextView closeButton = new TextView(context);
+        closeButton.setText("✕");
+        closeButton.setTextSize(24);
+        closeButton.setTextColor(Color.parseColor("#666666"));
+        closeButton.setPadding(16, 0, 16, 0);
+        closeButton.setVisibility(View.GONE);
+        FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        closeParams.gravity = Gravity.END | Gravity.TOP;
+        closeButton.setLayoutParams(closeParams);
+        closeButton.setOnClickListener(v -> hidePopup());
+        headerLayout.addView(closeButton);
+        
+        cardLayout.addView(headerLayout);
+        
+        // Make popup permanent when clicked (cancel auto-close, show X button)
+        cardLayout.setOnClickListener(v -> {
+            if (!isPermanent) {
+                isPermanent = true;
+                handler.removeCallbacksAndMessages(null); // Cancel auto-close
+                closeButton.setVisibility(View.VISIBLE);
+                Timber.d("[ACHIEVEMENT_POPUP] Popup clicked, now permanent");
+            }
+        });
         
         // Achievements list (scrollable if many)
         if (pendingAchievements.size() > 3) {
