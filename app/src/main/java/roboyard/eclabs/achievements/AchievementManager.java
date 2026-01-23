@@ -364,6 +364,17 @@ public class AchievementManager {
     }
     
     /**
+     * For testing only: Disable the gameCompleted check so multiple achievements can be tested in sequence.
+     * This should only be used in unit tests.
+     */
+    public void setTestMode(boolean enabled) {
+        if (enabled) {
+            gameCompleted = false;
+        }
+        Timber.d("[ACHIEVEMENTS] Test mode: gameCompleted check disabled");
+    }
+    
+    /**
      * Called when the hint button is pressed during a game.
      * This tracks hint usage for the current game session.
      */

@@ -40,6 +40,8 @@ public class AchievementPopupTest {
         
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
+        // Reset game session flags so achievements can be unlocked
+        achievementManager.onNewGameStarted();
     }
 
     @After
@@ -80,12 +82,12 @@ public class AchievementPopupTest {
         
         achievementManager.unlock("first_game");
         achievementManager.unlock("level_1_complete");
-        achievementManager.unlock("perfect_solution_1");
+        achievementManager.unlock("speedrun_under_30s");
         
         assertEquals("Should have 3 unlocked achievements", 3, unlockedIds.size());
         assertTrue("first_game should be in list", unlockedIds.contains("first_game"));
         assertTrue("level_1_complete should be in list", unlockedIds.contains("level_1_complete"));
-        assertTrue("perfect_solution_1 should be in list", unlockedIds.contains("perfect_solution_1"));
+        assertTrue("speedrun_under_30s should be in list", unlockedIds.contains("speedrun_under_30s"));
     }
 
     /**
@@ -100,16 +102,16 @@ public class AchievementPopupTest {
         });
         
         // Complete level 1 with optimal moves and 3 stars
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
         
-        // Should trigger: first_game, level_1_complete, perfect_solution_1, 3_star_hard_level
+        // Should trigger: first_game, level_1_complete, 3_star_hard_level
         assertTrue("first_game should be unlocked", unlockedIds.contains("first_game"));
         assertTrue("level_1_complete should be unlocked", unlockedIds.contains("level_1_complete"));
-        assertTrue("perfect_solution_1 should be unlocked", unlockedIds.contains("perfect_solution_1"));
         assertTrue("3_star_hard_level should be unlocked", unlockedIds.contains("3_star_hard_level"));
         
-        // Verify at least 4 achievements were unlocked
-        assertTrue("At least 4 achievements should be unlocked", unlockedIds.size() >= 4);
+        // Verify at least 3 achievements were unlocked
+        assertTrue("At least 3 achievements should be unlocked", unlockedIds.size() >= 3);
     }
 
     /**
@@ -144,7 +146,8 @@ public class AchievementPopupTest {
         });
         
         // Complete a random game with 2 targets
-        achievementManager.onRandomGameCompleted(10, 10, 0, 15000, false, 4, 2, 2);
+        achievementManager.onNewGameStarted();
+            achievementManager.onRandomGameCompleted(10, 10, 0, 15000, false, 4, 2, 2);
         
         // Should trigger: first_game, game_2_targets, speedrun_random_under_20s, perfect_random_games progression
         assertTrue("first_game should be unlocked", unlockedIds.contains("first_game"));

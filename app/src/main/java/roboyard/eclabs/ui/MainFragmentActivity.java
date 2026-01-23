@@ -16,6 +16,7 @@ import android.view.View;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
+import roboyard.eclabs.achievements.StreakManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
@@ -73,6 +74,11 @@ public class MainFragmentActivity extends AppCompatActivity {
         
         // Initialize the GameStateManager as a ViewModel
         gameStateManager = new ViewModelProvider(this).get(GameStateManager.class);
+        
+        // Record daily login for streak tracking
+        StreakManager streakManager = StreakManager.getInstance(getApplicationContext());
+        streakManager.recordDailyLogin();
+        Timber.d("[STREAK] Daily login recorded at app startup");
         
         // Set up the Navigation controller with proper error handling
         try {

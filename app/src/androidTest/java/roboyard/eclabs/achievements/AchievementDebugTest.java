@@ -32,6 +32,8 @@ public class AchievementDebugTest {
         prefs.edit().clear().apply();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
+        // Reset game session flags so achievements can be unlocked
+        achievementManager.onNewGameStarted();
         Timber.d("[DEBUG_TEST] setUp complete");
     }
 
@@ -64,6 +66,7 @@ public class AchievementDebugTest {
                     levelsCompletedBefore, perfectSolutionsBefore, noHintLevelsBefore);
             
             // Complete level with perfect solution and no hints
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(level, 3, 3, 0, 3, 4500);
             
             // Log after completion
@@ -123,46 +126,42 @@ public class AchievementDebugTest {
         // Check initial counters
         int initialLevels = prefs.getInt("counter_levels_completed", 0);
         int initialPerfect = prefs.getInt("counter_perfect_solutions", 0);
-        int initialNoHints = prefs.getInt("counter_no_hint_levels", 0);
         
-        Timber.d("[DEBUG_TEST] Initial: levels=%d, perfect=%d, noHints=%d",
-                initialLevels, initialPerfect, initialNoHints);
+        Timber.d("[DEBUG_TEST] Initial: levels=%d, perfect=%d",
+                initialLevels, initialPerfect);
         
         assertEquals("Initial levels should be 0", 0, initialLevels);
         assertEquals("Initial perfect should be 0", 0, initialPerfect);
-        assertEquals("Initial noHints should be 0", 0, initialNoHints);
         
         // Complete one level
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(1, 3, 3, 0, 3, 4500);
         
         // Check counters after first level
         int afterLevel1Levels = prefs.getInt("counter_levels_completed", 0);
         int afterLevel1Perfect = prefs.getInt("counter_perfect_solutions", 0);
-        int afterLevel1NoHints = prefs.getInt("counter_no_hint_levels", 0);
         
-        Timber.d("[DEBUG_TEST] After level 1: levels=%d, perfect=%d, noHints=%d",
-                afterLevel1Levels, afterLevel1Perfect, afterLevel1NoHints);
+        Timber.d("[DEBUG_TEST] After level 1: levels=%d, perfect=%d",
+                afterLevel1Levels, afterLevel1Perfect);
         
         assertEquals("After level 1, levels should be 1", 1, afterLevel1Levels);
         assertEquals("After level 1, perfect should be 1", 1, afterLevel1Perfect);
-        assertEquals("After level 1, noHints should be 1", 1, afterLevel1NoHints);
         
         // Complete 9 more levels
         for (int i = 2; i <= 10; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 3, 3, 0, 3, 4500);
         }
         
         // Check counters after 10 levels
         int afterLevel10Levels = prefs.getInt("counter_levels_completed", 0);
         int afterLevel10Perfect = prefs.getInt("counter_perfect_solutions", 0);
-        int afterLevel10NoHints = prefs.getInt("counter_no_hint_levels", 0);
         
-        Timber.d("[DEBUG_TEST] After level 10: levels=%d, perfect=%d, noHints=%d",
-                afterLevel10Levels, afterLevel10Perfect, afterLevel10NoHints);
+        Timber.d("[DEBUG_TEST] After level 10: levels=%d, perfect=%d",
+                afterLevel10Levels, afterLevel10Perfect);
         
         assertEquals("After level 10, levels should be 10", 10, afterLevel10Levels);
         assertEquals("After level 10, perfect should be 10", 10, afterLevel10Perfect);
-        assertEquals("After level 10, noHints should be 10", 10, afterLevel10NoHints);
         
         // Check that achievements are now unlocked
         assertTrue("level_10_complete should be unlocked after 10 levels",

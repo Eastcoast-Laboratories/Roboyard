@@ -32,6 +32,8 @@ public class AchievementCounterTest {
         prefs.edit().clear().apply();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
+        // Reset game session flags so achievements can be unlocked
+        achievementManager.onNewGameStarted();
     }
 
     @After
@@ -69,6 +71,7 @@ public class AchievementCounterTest {
     public void testLevel10CompleteUnlockedAfter10Levels() {
         // Complete levels 1-10 with perfect solutions and no hints
         for (int i = 1; i <= 10; i++) {
+            achievementManager.onNewGameStarted();
             Timber.d("[TEST] Completing level %d", i);
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
@@ -89,10 +92,12 @@ public class AchievementCounterTest {
     public void testPerfectSolutions10NotUnlockedWithNonOptimalMoves() {
         // Complete 9 levels with perfect solutions
         for (int i = 1; i <= 9; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         
         // Complete 10th level with NON-optimal moves
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(10, 7, 5, 0, 3, 10000);
         
         // Check that perfect_solutions_10 is NOT unlocked

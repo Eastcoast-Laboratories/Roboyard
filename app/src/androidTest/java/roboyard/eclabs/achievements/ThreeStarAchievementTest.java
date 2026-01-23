@@ -45,6 +45,8 @@ public class ThreeStarAchievementTest {
         // Get fresh instance
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
+        // Reset game session flags so achievements can be unlocked
+        achievementManager.onNewGameStarted();
     }
 
     @After
@@ -84,7 +86,8 @@ public class ThreeStarAchievementTest {
                 }
                 
                 // Simulate completing this level with 3 stars (optimal moves)
-                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                achievementManager.onNewGameStarted();
+            achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
                 
                 // Check if achievement was unlocked
                 if (!achievementUnlocked && achievementManager.isUnlocked("3_star_hard_level")) {
@@ -94,7 +97,8 @@ public class ThreeStarAchievementTest {
                 }
             } else {
                 // Level with less than 5 moves - complete but should NOT unlock 3_star_hard_level
-                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                achievementManager.onNewGameStarted();
+            achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
             }
         }
         
@@ -128,7 +132,8 @@ public class ThreeStarAchievementTest {
             
             if (optimalMoves < 5) {
                 // Complete this short level with 3 stars
-                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                achievementManager.onNewGameStarted();
+            achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
                 shortLevelsCompleted++;
                 
                 // Verify achievement is NOT unlocked
@@ -161,6 +166,7 @@ public class ThreeStarAchievementTest {
             if (optimalMoves == -1) continue;
             
             // Complete with 3 stars
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
             levelsCompleted++;
             
@@ -195,7 +201,8 @@ public class ThreeStarAchievementTest {
             // Only complete levels with 5+ optimal moves
             if (optimalMoves >= 5) {
                 // Complete with 3 stars
-                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                achievementManager.onNewGameStarted();
+            achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
                 hardLevelsCompleted++;
                 
                 Log.d(TAG, "Completed hard level " + levelId + " (" + optimalMoves + " moves), hard total: " + hardLevelsCompleted);
@@ -241,7 +248,8 @@ public class ThreeStarAchievementTest {
             
             // Only complete levels with < 5 optimal moves
             if (optimalMoves < 5) {
-                achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
+                achievementManager.onNewGameStarted();
+            achievementManager.onLevelCompleted(levelId, optimalMoves, optimalMoves, 0, 3, 10000);
                 shortLevelsCompleted++;
                 
                 Log.d(TAG, "Completed short level " + levelId + " (" + optimalMoves + " moves), total: " + shortLevelsCompleted);

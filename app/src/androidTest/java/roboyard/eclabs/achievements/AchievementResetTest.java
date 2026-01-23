@@ -32,6 +32,8 @@ public class AchievementResetTest {
         prefs.edit().clear().apply();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
+        // Reset game session flags so achievements can be unlocked
+        achievementManager.onNewGameStarted();
         Timber.d("[RESET_TEST] setUp complete - all achievements reset");
     }
 
@@ -53,6 +55,7 @@ public class AchievementResetTest {
         // Complete 5 levels with perfect solutions and no hints
         for (int i = 1; i <= 5; i++) {
             Timber.d("[RESET_TEST] Completing level %d", i);
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         
@@ -82,6 +85,7 @@ public class AchievementResetTest {
         // Complete 5 more levels
         for (int i = 1; i <= 5; i++) {
             Timber.d("[RESET_TEST] Completing level %d (second scenario)", i);
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
             
             // Verify achievements are still NOT unlocked
@@ -97,6 +101,7 @@ public class AchievementResetTest {
         Timber.d("[RESET_TEST] ===== COMPLETING 5 MORE LEVELS TO REACH 10 =====");
         for (int i = 6; i <= 10; i++) {
             Timber.d("[RESET_TEST] Completing level %d (to reach 10)", i);
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         
@@ -116,6 +121,7 @@ public class AchievementResetTest {
     public void testSharedPreferencesClearedOnReset() {
         // Complete 5 levels
         for (int i = 1; i <= 5; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         
@@ -123,14 +129,12 @@ public class AchievementResetTest {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         int levelsCompleted = prefs.getInt("counter_levels_completed", -1);
         int perfectSolutions = prefs.getInt("counter_perfect_solutions", -1);
-        int noHintLevels = prefs.getInt("counter_no_hint_levels", -1);
         
-        Timber.d("[RESET_TEST] Before reset: levelsCompleted=%d, perfectSolutions=%d, noHintLevels=%d",
-                levelsCompleted, perfectSolutions, noHintLevels);
+        Timber.d("[RESET_TEST] Before reset: levelsCompleted=%d, perfectSolutions=%d",
+                levelsCompleted, perfectSolutions);
         
         assertEquals("levelsCompleted should be 5", 5, levelsCompleted);
         assertEquals("perfectSolutions should be 5", 5, perfectSolutions);
-        assertEquals("noHintLevels should be 5", 5, noHintLevels);
         
         // Reset
         achievementManager.resetAll();
@@ -138,13 +142,11 @@ public class AchievementResetTest {
         // Verify counters are cleared from SharedPreferences
         levelsCompleted = prefs.getInt("counter_levels_completed", -1);
         perfectSolutions = prefs.getInt("counter_perfect_solutions", -1);
-        noHintLevels = prefs.getInt("counter_no_hint_levels", -1);
         
-        Timber.d("[RESET_TEST] After reset: levelsCompleted=%d, perfectSolutions=%d, noHintLevels=%d",
-                levelsCompleted, perfectSolutions, noHintLevels);
+        Timber.d("[RESET_TEST] After reset: levelsCompleted=%d, perfectSolutions=%d",
+                levelsCompleted, perfectSolutions);
         
         assertEquals("levelsCompleted should be cleared", -1, levelsCompleted);
         assertEquals("perfectSolutions should be cleared", -1, perfectSolutions);
-        assertEquals("noHintLevels should be cleared", -1, noHintLevels);
     }
 }

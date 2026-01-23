@@ -37,6 +37,8 @@ public class AchievementManagerTest {
         // Get fresh instance
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
+        // Reset game session flags so achievements can be unlocked
+        achievementManager.onNewGameStarted();
     }
 
     @After
@@ -105,11 +107,13 @@ public class AchievementManagerTest {
     @Test
     public void testLevelCompletionAchievements() {
         // Complete first level
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
         assertTrue("level_1_complete should be unlocked", achievementManager.isUnlocked("level_1_complete"));
         
         // Complete 10 levels
         for (int i = 2; i <= 10; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         assertTrue("level_10_complete should be unlocked", achievementManager.isUnlocked("level_10_complete"));
@@ -122,12 +126,14 @@ public class AchievementManagerTest {
     public void testPerfectSolutionAchievements() {
         // Complete 5 with optimal moves for perfect_solutions_5
         for (int i = 1; i <= 5; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         assertTrue("perfect_solutions_5 should be unlocked", achievementManager.isUnlocked("perfect_solutions_5"));
         
         // Complete 10 with optimal moves
         for (int i = 6; i <= 10; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         assertTrue("perfect_solutions_10 should be unlocked", achievementManager.isUnlocked("perfect_solutions_10"));
@@ -139,10 +145,12 @@ public class AchievementManagerTest {
     @Test
     public void testSpeedrunAchievements() {
         // Complete in under 30 seconds
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 25000);
         assertTrue("speedrun_under_30s should be unlocked", achievementManager.isUnlocked("speedrun_under_30s"));
         
         // Complete in under 10 seconds
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(2, 5, 5, 0, 3, 8000);
         assertTrue("speedrun_under_10s should be unlocked", achievementManager.isUnlocked("speedrun_under_10s"));
     }
@@ -155,11 +163,13 @@ public class AchievementManagerTest {
     @Test
     public void testThreeStarAchievements() {
         // Get 3 stars on a level with 5+ optimal moves - should unlock 3_star_hard_level
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 10000);
         assertTrue("3_star_hard_level should be unlocked for 5+ moves", achievementManager.isUnlocked("3_star_hard_level"));
         
         // Get 3 stars on 10 levels (any move count) - should unlock 3_star_10_levels
         for (int i = 2; i <= 10; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 3, 3, 0, 3, 10000);
         }
         assertTrue("3_star_10_levels should be unlocked", achievementManager.isUnlocked("3_star_10_levels"));
@@ -171,12 +181,14 @@ public class AchievementManagerTest {
     @Test
     public void testThreeStarLevelRequires5PlusMoves() {
         achievementManager.resetAll();
+        achievementManager.onNewGameStarted();
         // Get 3 stars on a level with only 4 optimal moves - should NOT unlock 3_star_hard_level
         achievementManager.onLevelCompleted(1, 4, 4, 0, 3, 10000);
         assertFalse("3_star_hard_level should NOT be unlocked for level with <5 moves", 
                 achievementManager.isUnlocked("3_star_hard_level"));
         
         // Get 3 stars on a level with 5 optimal moves - should unlock
+        achievementManager.onNewGameStarted();
         achievementManager.onLevelCompleted(2, 5, 5, 0, 3, 10000);
         assertTrue("3_star_hard_level should be unlocked for level with 5+ moves", 
                 achievementManager.isUnlocked("3_star_hard_level"));
@@ -191,6 +203,7 @@ public class AchievementManagerTest {
      */
     @Test
     public void testFirstGameAchievement() {
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(5, 5, 0, 15000, false, 4, 1, 1);
         assertTrue("first_game should be unlocked", achievementManager.isUnlocked("first_game"));
     }
@@ -201,11 +214,13 @@ public class AchievementManagerTest {
     @Test
     public void testImpossibleModeAchievements() {
         // Complete 1 game in impossible mode
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(10, 10, 0, 30000, true, 4, 1, 1);
         assertTrue("impossible_mode_1 should be unlocked", achievementManager.isUnlocked("impossible_mode_1"));
         
         // Complete 5 games in impossible mode
         for (int i = 0; i < 4; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(10, 10, 0, 30000, true, 4, 1, 1);
         }
         assertTrue("impossible_mode_5 should be unlocked", achievementManager.isUnlocked("impossible_mode_5"));
@@ -218,6 +233,7 @@ public class AchievementManagerTest {
     public void testImpossibleModeStreakAchievements() {
         // Complete 5 games in a row with optimal moves in impossible mode
         for (int i = 0; i < 5; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(10, 10, 0, 30000, true, 4, 1, 1);
         }
         assertTrue("impossible_mode_streak_5 should be unlocked", 
@@ -230,14 +246,17 @@ public class AchievementManagerTest {
     @Test
     public void testSolutionLengthAchievements() {
         // Test 20 moves
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 1, 1);
         assertTrue("solution_20_moves should be unlocked", achievementManager.isUnlocked("solution_20_moves"));
         
         // Test 25 moves
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(25, 25, 0, 90000, false, 4, 1, 1);
         assertTrue("solution_25_moves should be unlocked", achievementManager.isUnlocked("solution_25_moves"));
         
         // Test 30+ moves
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(35, 35, 0, 120000, false, 4, 1, 1);
         assertTrue("solution_30_plus_moves should be unlocked", achievementManager.isUnlocked("solution_30_plus_moves"));
     }
@@ -248,14 +267,17 @@ public class AchievementManagerTest {
     @Test
     public void testMultipleTargetsAchievements() {
         // 2 targets
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(10, 10, 0, 30000, false, 4, 2, 2);
         assertTrue("game_2_targets should be unlocked", achievementManager.isUnlocked("game_2_targets"));
         
         // 3 targets
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(15, 15, 0, 45000, false, 4, 3, 3);
         assertTrue("game_3_targets should be unlocked", achievementManager.isUnlocked("game_3_targets"));
         
         // 4 targets
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 4, 4);
         assertTrue("game_4_targets should be unlocked", achievementManager.isUnlocked("game_4_targets"));
     }
@@ -266,14 +288,17 @@ public class AchievementManagerTest {
     @Test
     public void testXofYTargetsAchievements() {
         // 2 of 3 targets
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(10, 10, 0, 30000, false, 4, 3, 2);
         assertTrue("game_2_of_3_targets should be unlocked", achievementManager.isUnlocked("game_2_of_3_targets"));
         
         // 2 of 4 targets
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(10, 10, 0, 30000, false, 4, 4, 2);
         assertTrue("game_2_of_4_targets should be unlocked", achievementManager.isUnlocked("game_2_of_4_targets"));
         
         // 3 of 4 targets
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(15, 15, 0, 45000, false, 4, 4, 3);
         assertTrue("game_3_of_4_targets should be unlocked", achievementManager.isUnlocked("game_3_of_4_targets"));
     }
@@ -283,6 +308,7 @@ public class AchievementManagerTest {
      */
     @Test
     public void testFiveRobotsAchievement() {
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(10, 10, 0, 30000, false, 5, 1, 1);
         assertTrue("game_5_robots should be unlocked", achievementManager.isUnlocked("game_5_robots"));
     }
@@ -294,6 +320,7 @@ public class AchievementManagerTest {
     public void testPerfectRandomGamesAchievements() {
         // Complete 5 random games with optimal moves
         for (int i = 0; i < 5; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(10, 10, 0, 30000, false, 4, 1, 1);
         }
         assertTrue("perfect_random_games_5 should be unlocked", 
@@ -307,6 +334,7 @@ public class AchievementManagerTest {
     public void testNoHintsRandomGamesAchievements() {
         // Complete 10 random games without hints
         for (int i = 0; i < 10; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(12, 10, 0, 30000, false, 4, 1, 1);
         }
         assertTrue("no_hints_random_10 should be unlocked", 
@@ -319,11 +347,13 @@ public class AchievementManagerTest {
     @Test
     public void testRandomGameSpeedAchievements() {
         // Under 20 seconds
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(5, 5, 0, 15000, false, 4, 1, 1);
         assertTrue("speedrun_random_under_20s should be unlocked", 
                 achievementManager.isUnlocked("speedrun_random_under_20s"));
         
         // Under 10 seconds
+        achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(3, 3, 0, 8000, false, 4, 1, 1);
         assertTrue("speedrun_random_under_10s should be unlocked", 
                 achievementManager.isUnlocked("speedrun_random_under_10s"));
@@ -335,6 +365,7 @@ public class AchievementManagerTest {
     @Test
     public void testSpeedStreakAchievement() {
         for (int i = 0; i < 5; i++) {
+            achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(8, 8, 0, 25000, false, 4, 1, 1);
         }
         assertTrue("speedrun_random_5_games_under_30s should be unlocked", 
