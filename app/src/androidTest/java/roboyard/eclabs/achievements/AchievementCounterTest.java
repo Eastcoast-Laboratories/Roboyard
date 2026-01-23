@@ -57,9 +57,6 @@ public class AchievementCounterTest {
             assertFalse("perfect_solutions_10 should NOT be unlocked after level " + i,
                     achievementManager.isUnlocked("perfect_solutions_10"));
             
-            // Check that no_hints_10 is NOT unlocked yet
-            assertFalse("no_hints_10 should NOT be unlocked after level " + i,
-                    achievementManager.isUnlocked("no_hints_10"));
         }
         
         Timber.d("[TEST] All assertions passed - achievements NOT unlocked before level 10");
@@ -81,8 +78,6 @@ public class AchievementCounterTest {
                 achievementManager.isUnlocked("level_10_complete"));
         assertTrue("perfect_solutions_10 should be unlocked after 10 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
-        assertTrue("no_hints_10 should be unlocked after 10 levels without hints",
-                achievementManager.isUnlocked("no_hints_10"));
         
         Timber.d("[TEST] All assertions passed - achievements unlocked after level 10");
     }
@@ -120,10 +115,6 @@ public class AchievementCounterTest {
         // Complete 10th level WITH hints
         achievementManager.onLevelCompleted(10, 5, 5, 1, 3, 10000);
         
-        // Check that no_hints_10 is NOT unlocked
-        assertFalse("no_hints_10 should NOT be unlocked when hints were used",
-                achievementManager.isUnlocked("no_hints_10"));
         
-        Timber.d("[TEST] Assertion passed - no_hints_10 NOT unlocked when hints used");
     }
 }

@@ -61,8 +61,6 @@ public class AchievementResetTest {
                 achievementManager.isUnlocked("level_10_complete"));
         assertFalse("perfect_solutions_10 should NOT be unlocked after 5 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
-        assertFalse("no_hints_10 should NOT be unlocked after 5 levels without hints",
-                achievementManager.isUnlocked("no_hints_10"));
         
         Timber.d("[RESET_TEST] ✓ After 5 levels: achievements NOT unlocked");
         
@@ -75,8 +73,6 @@ public class AchievementResetTest {
                 achievementManager.isUnlocked("level_10_complete"));
         assertFalse("perfect_solutions_10 should be locked after reset",
                 achievementManager.isUnlocked("perfect_solutions_10"));
-        assertFalse("no_hints_10 should be locked after reset",
-                achievementManager.isUnlocked("no_hints_10"));
         
         Timber.d("[RESET_TEST] ✓ After reset: all achievements locked");
         
@@ -93,8 +89,6 @@ public class AchievementResetTest {
                     achievementManager.isUnlocked("level_10_complete"));
             assertFalse("perfect_solutions_10 should NOT be unlocked after level " + i + " in second scenario",
                     achievementManager.isUnlocked("perfect_solutions_10"));
-            assertFalse("no_hints_10 should NOT be unlocked after level " + i + " in second scenario",
-                    achievementManager.isUnlocked("no_hints_10"));
         }
         
         Timber.d("[RESET_TEST] ✓ After 5 more levels: achievements still NOT unlocked");
@@ -111,8 +105,6 @@ public class AchievementResetTest {
                 achievementManager.isUnlocked("level_10_complete"));
         assertTrue("perfect_solutions_10 should be unlocked after 10 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
-        assertTrue("no_hints_10 should be unlocked after 10 levels without hints",
-                achievementManager.isUnlocked("no_hints_10"));
         
         Timber.d("[RESET_TEST] ✓ After 10 levels: all achievements unlocked");
     }

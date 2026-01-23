@@ -54,8 +54,8 @@ public class AchievementManagerTest {
     public void testAllAchievementsLoaded() {
         List<Achievement> all = achievementManager.getAllAchievements();
         assertNotNull("Achievement list should not be null", all);
-        // 56 achievements (58 - 3 custom level achievements which are disabled + 1 new 3_star_10_hard_levels)
-        assertEquals("Should have 56 achievements", 56, all.size());
+        // 54 achievements (58 - 3 custom level achievements - 2 no_hints level achievements + 1 new 3_star_10_hard_levels)
+        assertEquals("Should have 54 achievements", 54, all.size());
     }
 
     /**
@@ -182,17 +182,7 @@ public class AchievementManagerTest {
                 achievementManager.isUnlocked("3_star_hard_level"));
     }
 
-    /**
-     * Test no hints achievements
-     */
-    @Test
-    public void testNoHintsAchievements() {
-        // Complete 10 levels without hints
-        for (int i = 1; i <= 10; i++) {
-            achievementManager.onLevelCompleted(i, 6, 5, 0, 2, 20000);
-        }
-        assertTrue("no_hints_10 should be unlocked", achievementManager.isUnlocked("no_hints_10"));
-    }
+    // Note: no_hints_10 and no_hints_50 achievements removed - hints are not allowed in levels
 
     // ==================== RANDOM GAME ACHIEVEMENTS TESTS ====================
 
@@ -453,19 +443,7 @@ public class AchievementManagerTest {
                 achievementManager.isUnlocked("perfect_solutions_5"));
     }
 
-    /**
-     * Test that hints used prevents no-hints achievements
-     */
-    @Test
-    public void testHintsUsedNoAchievement() {
-        achievementManager.resetAll();
-        // Complete 10 levels with hints
-        for (int i = 1; i <= 10; i++) {
-            achievementManager.onLevelCompleted(i, 5, 5, 1, 2, 20000);
-        }
-        assertFalse("no_hints_10 should NOT be unlocked when hints were used", 
-                achievementManager.isUnlocked("no_hints_10"));
-    }
+    // Note: testHintsUsedNoAchievement removed - no_hints_10/50 achievements are removed (hints not allowed in levels)
 
     /**
      * Test impossible mode streak breaks on non-optimal

@@ -105,12 +105,7 @@ public class AchievementDefinitions {
             AchievementCategory.PERFORMANCE, ICON_LIGHTNING));
             
         // ========== CHALLENGE ACHIEVEMENTS ==========
-        add(new Achievement("no_hints_10", 
-            "achievement_no_hints_10", "achievement_no_hints_10_desc",
-            AchievementCategory.CHALLENGE, ICON_BRAIN));
-        add(new Achievement("no_hints_50", 
-            "achievement_no_hints_50", "achievement_no_hints_50_desc",
-            AchievementCategory.CHALLENGE, ICON_SHIELD_RED));
+        // no_hints_10 and no_hints_50 removed - hints are not allowed in levels
         // Custom level achievements - not yet implemented, custom levels feature pending
         // add(new Achievement("solve_custom_level", 
         //     "achievement_solve_custom", "achievement_solve_custom_desc",

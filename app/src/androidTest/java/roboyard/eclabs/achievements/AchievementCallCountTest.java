@@ -53,22 +53,18 @@ public class AchievementCallCountTest {
             // Check achievements after each level
             boolean level10 = achievementManager.isUnlocked("level_10_complete");
             boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
-            boolean noHints10 = achievementManager.isUnlocked("no_hints_10");
             boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
             
-            Timber.d("[CALL_COUNT_TEST] After level %d: level_10_complete=%s, perfect_solutions_10=%s, no_hints_10=%s, 3_star_10_levels=%s",
                     i, level10, perfect10, noHints10, threeStar10);
             
             // These should all be false
             if (level10 || perfect10 || noHints10 || threeStar10) {
                 Timber.e("[CALL_COUNT_TEST] ERROR: Achievements unlocked too early after level %d!", i);
-                Timber.e("[CALL_COUNT_TEST] level_10_complete=%s, perfect_solutions_10=%s, no_hints_10=%s, 3_star_10_levels=%s",
                         level10, perfect10, noHints10, threeStar10);
             }
             
             assertFalse("level_10_complete should NOT be unlocked after level " + i, level10);
             assertFalse("perfect_solutions_10 should NOT be unlocked after level " + i, perfect10);
-            assertFalse("no_hints_10 should NOT be unlocked after level " + i, noHints10);
             assertFalse("3_star_10_levels should NOT be unlocked after level " + i, threeStar10);
         }
         
@@ -99,15 +95,12 @@ public class AchievementCallCountTest {
         // Check if achievements are unlocked (they should be false because resetAll clears them)
         boolean level10 = achievementManager.isUnlocked("level_10_complete");
         boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
-        boolean noHints10 = achievementManager.isUnlocked("no_hints_10");
         
-        Timber.d("[CALL_COUNT_TEST] After resetAll: level_10_complete=%s, perfect_solutions_10=%s, no_hints_10=%s",
                 level10, perfect10, noHints10);
         
         // These should be false because resetAll clears everything
         assertFalse("level_10_complete should be false after resetAll", level10);
         assertFalse("perfect_solutions_10 should be false after resetAll", perfect10);
-        assertFalse("no_hints_10 should be false after resetAll", noHints10);
         
         Timber.d("[CALL_COUNT_TEST] ✓ Test passed - resetAll properly clears achievements");
     }

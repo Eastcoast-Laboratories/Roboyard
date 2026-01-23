@@ -38,15 +38,15 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `speedrun_under_30s` | Quick Thinker | Complete a level in under 30 seconds | ✅ Implemented |
 | `speedrun_under_10s` | Lightning Fast | Complete a level in under 10 seconds | ✅ Implemented |
 
-### Challenge Achievements (2 active, 3 pending)
+### Challenge Achievements (0 active, 3 pending)
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `no_hints_10` | Independent Thinker | Complete 10 levels without using hints | ✅ Implemented |
-| `no_hints_50` | Self-Reliant | Complete 50 levels without using hints | ✅ Implemented |
 | `solve_custom_level` | Custom Solver | Solve a custom-created level | ⏳ Disabled (custom levels not implemented) |
 | `create_custom_level` | Level Designer | Create and save a custom level | ⏳ Disabled (custom levels not implemented) |
 | `share_custom_level` | Sharing is Caring | Share a custom level with others | ⏳ Disabled (custom levels not implemented) |
+
+> **Note:** `no_hints_10` and `no_hints_50` were removed because hints are not allowed in levels.
 
 ### Mastery Achievements (5)
 

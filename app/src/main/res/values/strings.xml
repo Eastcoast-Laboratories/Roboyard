@@ -493,10 +493,6 @@
     <string name="achievement_speedrun_10s_desc">Complete a level in under 10 seconds</string>
     
     <!-- Challenge Achievements -->
-    <string name="achievement_no_hints_10">Independent Thinker</string>
-    <string name="achievement_no_hints_10_desc">Complete 10 levels without using hints</string>
-    <string name="achievement_no_hints_50">Self-Reliant</string>
-    <string name="achievement_no_hints_50_desc">Complete 50 levels without using hints</string>
     <string name="achievement_solve_custom">Custom Solver</string>
     <string name="achievement_solve_custom_desc">Solve a custom-created level</string>
     <string name="achievement_create_custom">Level Designer</string>

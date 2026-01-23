@@ -77,10 +77,8 @@ public class AchievementDebugTest {
             // Check achievements
             boolean level10Complete = achievementManager.isUnlocked("level_10_complete");
             boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
-            boolean noHints10 = achievementManager.isUnlocked("no_hints_10");
             boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
             
-            Timber.d("[DEBUG_TEST] ACHIEVEMENTS: level_10_complete=%s, perfect_solutions_10=%s, no_hints_10=%s, 3_star_10_levels=%s",
                     level10Complete, perfect10, noHints10, threeStar10);
             
             // CRITICAL: Assert that achievements are NOT unlocked
@@ -88,7 +86,6 @@ public class AchievementDebugTest {
                     level10Complete);
             assertFalse("perfect_solutions_10 should NOT be unlocked after level " + level,
                     perfect10);
-            assertFalse("no_hints_10 should NOT be unlocked after level " + level,
                     noHints10);
             assertFalse("3_star_10_levels should NOT be unlocked after level " + level,
                     threeStar10);
@@ -172,8 +169,6 @@ public class AchievementDebugTest {
                 achievementManager.isUnlocked("level_10_complete"));
         assertTrue("perfect_solutions_10 should be unlocked after 10 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
-        assertTrue("no_hints_10 should be unlocked after 10 levels without hints",
-                achievementManager.isUnlocked("no_hints_10"));
         
         Timber.d("[DEBUG_TEST] ✓ Counter incrementation is correct");
     }

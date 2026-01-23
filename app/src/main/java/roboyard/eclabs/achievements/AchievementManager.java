@@ -28,7 +28,6 @@ public class AchievementManager {
     // Counters for tracking progress
     private int levelsCompleted;
     private int perfectSolutions;
-    private int noHintLevels;
     private int threeStarLevels;
     private int threeStarHardLevels;
     private int impossibleModeGames;
@@ -76,7 +75,6 @@ public class AchievementManager {
         // Load counters
         levelsCompleted = prefs.getInt(KEY_COUNTER_PREFIX + "levels_completed", 0);
         perfectSolutions = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_solutions", 0);
-        noHintLevels = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_levels", 0);
         threeStarLevels = prefs.getInt(KEY_COUNTER_PREFIX + "three_star_levels", 0);
         threeStarHardLevels = prefs.getInt(KEY_COUNTER_PREFIX + "three_star_hard_levels", 0);
         impossibleModeGames = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_games", 0);
@@ -224,13 +222,7 @@ public class AchievementManager {
             if (perfectSolutions >= 50) unlock("perfect_solutions_50");
         }
         
-        // No hints
-        if (hintsUsed == 0) {
-            noHintLevels++;
-            saveCounter("no_hint_levels", noHintLevels);
-            if (noHintLevels >= 10) unlock("no_hints_10");
-            if (noHintLevels >= 50) unlock("no_hints_50");
-        }
+        // Note: no_hints_10 and no_hints_50 removed - hints are not allowed in levels
         
         // 3 stars achievements
         if (stars >= 3) {
@@ -488,7 +480,6 @@ public class AchievementManager {
         }
         levelsCompleted = 0;
         perfectSolutions = 0;
-        noHintLevels = 0;
         threeStarLevels = 0;
         impossibleModeGames = 0;
         impossibleModeStreak = 0;
