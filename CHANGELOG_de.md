@@ -2,6 +2,13 @@ Changelog Deutsch
 =================
 
 
+## Version 31 (2026-01-23)
+- Achievements
+- Zuletzt gespieltes Level wird in der Levelauswahl hervorgehoben
+- Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
+- Fehler behoben, der ungültige Lösungswege vorschlug
+
+
 ## Version 30 (2026-01-19)
 - Die maximale und minimale Anzahl Züge ist jetzt beliebig einstellbar
 - Das mehrfarbige Ziel ist jetzt einstellbar

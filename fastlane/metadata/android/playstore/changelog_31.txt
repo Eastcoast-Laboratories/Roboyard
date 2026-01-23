@@ -1,0 +1,14 @@
+# Play Store Changelogs für Version 31
+
+<en-GB>
+- Achievements
+- Last played level is highlighted in level selection
+- Menu button now returns to level selection instead of main menu
+- Bugfix that suggested invalid solution paths
+</en-GB>
+<de-DE>
+- Achievements
+- Zuletzt gespieltes Level wird in der Levelauswahl hervorgehoben
+- Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
+- Fehler behoben, der ungültige Lösungswege vorschlug
+</de-DE>

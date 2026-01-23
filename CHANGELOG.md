@@ -2,6 +2,13 @@
 =========
 
 
+## Version 31 (2026-01-23)
+- Achievements
+- Last played level is highlighted in level selection
+- Menu button now returns to level selection instead of main menu
+- Bugfix that suggested invalid solution paths
+
+
 ## Version 30 (2026-01-19)
 - The maximum and minimum number of moves is now adjustable
 - The multi-color goal is now adjustable

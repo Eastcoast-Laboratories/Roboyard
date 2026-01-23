@@ -1,0 +1,4 @@
+- Achievements
+- Last played level is highlighted in level selection
+- Menu button now returns to level selection instead of main menu
+- Bugfix that suggested invalid solution paths

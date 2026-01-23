@@ -66,13 +66,19 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Menu Button führt jetzt zur Levelauswahl statt zur Hauptmenü
+- Achievements
+- Zuletzt gespieltes Level wird in der Levelauswahl hervorgehoben
+- Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
+- Fehler behoben, der ungültige Lösungswege vorschlug
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
+- Achievements
+- Last played level is highlighted in level selection
 - Menu button now returns to level selection instead of main menu
+- Bugfix that suggested invalid solution paths
 EOF
 )
 
