@@ -1003,19 +1003,32 @@ public class SettingsFragment extends Fragment {
     
     /**
      * Validate and save min moves
+     * Min moves must be at least robotCount + 1
      */
     private void validateAndSaveMinMoves(int value) {
         try {
             int currentMax = Preferences.maxSolutionMoves;
+            int robotCount = Preferences.robotCount;
+            int minimumRequired = robotCount + 1;
+            
+            // Ensure minimum is at least robotCount + 1
+            if (value < minimumRequired) {
+                value = minimumRequired;
+                minSolutionMovesInput.setText(String.valueOf(value));
+                Toast.makeText(requireContext(), 
+                    "Min moves must be at least " + minimumRequired + " (robot count + 1)", 
+                    Toast.LENGTH_SHORT).show();
+                Timber.d("[PREFERENCES] Min solution moves adjusted to %d (robot count: %d)", value, robotCount);
+            }
+            
             if (value > currentMax) {
                 Preferences.setMaxSolutionMoves(value);
                 maxSolutionMovesInput.setText(String.valueOf(value));
                 Timber.d("[PREFERENCES] Max solution moves adjusted to %d to match min moves", value);
             }
-            if (value < 1) value = 1;
             
             Preferences.setMinSolutionMoves(value);
-            Timber.d("[PREFERENCES] Min solution moves set to %d", value);
+            Timber.d("[PREFERENCES] Min solution moves set to %d (robot count: %d)", value, robotCount);
         } catch (Exception e) {
             Timber.e(e, "Error validating and saving min moves");
         }
