@@ -2,12 +2,14 @@
 =========
 
 
-## Version 31 (2026-01-23)
+## Version 31 (2026-01-25)
 - Achievements
+- Login Streaks
+- Dynamic robot collision sounds - the pitch changes based on the involved robots
 - Last played level is highlighted in level selection
 - Menu button now returns to level selection instead of main menu
 - Bugfix that suggested invalid solution paths
-
+- Accessibility messages when using control via accessibility buttons were optimized
 
 ## Version 30 (2026-01-19)
 - The maximum and minimum number of moves is now adjustable
