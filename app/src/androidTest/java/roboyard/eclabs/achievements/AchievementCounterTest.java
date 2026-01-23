@@ -102,19 +102,5 @@ public class AchievementCounterTest {
         Timber.d("[TEST] Assertion passed - perfect_solutions_10 NOT unlocked with non-optimal moves");
     }
 
-    /**
-     * Test that no_hints_10 is NOT unlocked if any level uses hints
-     */
-    @Test
-    public void testNoHints10NotUnlockedWithHints() {
-        // Complete 9 levels without hints
-        for (int i = 1; i <= 9; i++) {
-            achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
-        }
-        
-        // Complete 10th level WITH hints
-        achievementManager.onLevelCompleted(10, 5, 5, 1, 3, 10000);
-        
-        
-    }
+    // Note: testNoHints10NotUnlockedWithHints removed - no_hints_10/50 achievements are removed (hints not allowed in levels)
 }

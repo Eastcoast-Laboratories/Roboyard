@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.achievements.AchievementManager;
 import timber.log.Timber;
 import java.util.Locale;
 import android.content.res.Resources;
@@ -91,6 +92,9 @@ public class MainMenuFragment extends BaseGameFragment {
     private void setupButtons() {
         // New Game button - start a game
         newGameButton.setOnClickListener(v -> {
+            // Reset achievement game session flags for new game
+            AchievementManager.getInstance(requireContext()).onNewGameStarted();
+            
             // Start a new game
             Timber.d("MainMenuFragment: Calling gameStateManager.startModernGame()");
             gameStateManager.startModernGame();

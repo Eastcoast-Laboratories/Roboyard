@@ -79,14 +79,14 @@ public class AchievementDebugTest {
             boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
             boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
             
-                    level10Complete, perfect10, noHints10, threeStar10);
+            Timber.d("[DEBUG_TEST] ACHIEVEMENTS: level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
+                    level10Complete, perfect10, threeStar10);
             
             // CRITICAL: Assert that achievements are NOT unlocked
             assertFalse("level_10_complete should NOT be unlocked after level " + level,
                     level10Complete);
             assertFalse("perfect_solutions_10 should NOT be unlocked after level " + level,
                     perfect10);
-                    noHints10);
             assertFalse("3_star_10_levels should NOT be unlocked after level " + level,
                     threeStar10);
         }

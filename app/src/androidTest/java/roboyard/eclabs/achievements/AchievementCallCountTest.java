@@ -55,12 +55,14 @@ public class AchievementCallCountTest {
             boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
             boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
             
-                    i, level10, perfect10, noHints10, threeStar10);
+            Timber.d("[CALL_COUNT_TEST] After level %d: level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
+                    i, level10, perfect10, threeStar10);
             
             // These should all be false
-            if (level10 || perfect10 || noHints10 || threeStar10) {
+            if (level10 || perfect10 || threeStar10) {
                 Timber.e("[CALL_COUNT_TEST] ERROR: Achievements unlocked too early after level %d!", i);
-                        level10, perfect10, noHints10, threeStar10);
+                Timber.e("[CALL_COUNT_TEST] level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
+                        level10, perfect10, threeStar10);
             }
             
             assertFalse("level_10_complete should NOT be unlocked after level " + i, level10);
@@ -96,7 +98,8 @@ public class AchievementCallCountTest {
         boolean level10 = achievementManager.isUnlocked("level_10_complete");
         boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
         
-                level10, perfect10, noHints10);
+        Timber.d("[CALL_COUNT_TEST] After resetAll: level_10_complete=%s, perfect_solutions_10=%s",
+                level10, perfect10);
         
         // These should be false because resetAll clears everything
         assertFalse("level_10_complete should be false after resetAll", level10);

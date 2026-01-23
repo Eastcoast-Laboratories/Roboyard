@@ -1217,6 +1217,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         nextLevelButton = view.findViewById(R.id.next_level_button);
         nextLevelButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Next Level button clicked");
+            
+            // Reset achievement game session flags for new game
+            AchievementManager.getInstance(requireContext()).onNewGameStarted();
+            
             // Get the current level ID
             GameState gameState = gameStateManager.getCurrentState().getValue();
             if (gameState != null) {

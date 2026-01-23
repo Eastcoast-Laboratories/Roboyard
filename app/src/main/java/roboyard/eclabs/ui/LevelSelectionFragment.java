@@ -22,6 +22,7 @@ import java.util.List;
 
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
+import roboyard.eclabs.achievements.AchievementManager;
 import timber.log.Timber;
 
 /**
@@ -326,6 +327,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
             return;
         }
 
+        // Reset achievement game session flags for new game
+        AchievementManager.getInstance(requireContext()).onNewGameStarted();
+        
         // Start a new game with the selected level
         gameStateManager.startLevelGame(levelId);
 
