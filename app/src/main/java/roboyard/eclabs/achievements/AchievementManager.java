@@ -38,6 +38,10 @@ public class AchievementManager {
     private int dailyLoginStreak;
     private int speedrunRandomGamesUnder30s;
     
+    // Game session tracking - prevents achievements after game completion until new game starts
+    private boolean gameCompleted = false;
+    private boolean hintUsedInCurrentGame = false;
+    
     public interface AchievementUnlockListener {
         void onAchievementUnlocked(Achievement achievement);
     }
@@ -186,6 +190,15 @@ public class AchievementManager {
      */
     public void onLevelCompleted(int levelId, int playerMoves, int optimalMoves, 
                                   int hintsUsed, int stars, long timeMs) {
+        // Prevent achievements if game was already completed (robot moved off and back on target)
+        if (gameCompleted) {
+            Timber.d("[ACHIEVEMENTS] onLevelCompleted ignored - game already completed, waiting for new game");
+            return;
+        }
+        
+        // Mark game as completed - no more achievements until new game starts
+        gameCompleted = true;
+        
         // Log the levelId for debugging
         Timber.d("[ACHIEVEMENTS] onLevelCompleted called: levelId=%d, levelsCompleted=%d->%d, playerMoves=%d, optimalMoves=%d, hintsUsed=%d, stars=%d, time=%dms",
                 levelId, levelsCompleted, levelsCompleted + 1, playerMoves, optimalMoves, hintsUsed, stars, timeMs);
@@ -261,6 +274,21 @@ public class AchievementManager {
     public void onRandomGameCompleted(int playerMoves, int optimalMoves, int hintsUsed, 
                                        long timeMs, boolean isImpossibleMode, int robotCount,
                                        int targetCount, int targetsNeeded) {
+        // Prevent achievements if game was already completed (robot moved off and back on target)
+        if (gameCompleted) {
+            Timber.d("[ACHIEVEMENTS] onRandomGameCompleted ignored - game already completed, waiting for new game");
+            return;
+        }
+        
+        // Check if hint was used during this game session
+        if (hintUsedInCurrentGame) {
+            hintsUsed = Math.max(hintsUsed, 1); // Ensure hintsUsed reflects that a hint was used
+            Timber.d("[ACHIEVEMENTS] Hint was used during this game session");
+        }
+        
+        // Mark game as completed - no more achievements until new game starts
+        gameCompleted = true;
+        
         // First game
         onFirstGame();
         
@@ -331,6 +359,32 @@ public class AchievementManager {
         
         Timber.d("[ACHIEVEMENTS] Random game completed: moves=%d/%d, hints=%d, time=%dms, impossible=%s, robots=%d, targets=%d/%d",
             playerMoves, optimalMoves, hintsUsed, timeMs, isImpossibleMode, robotCount, targetsNeeded, targetCount);
+    }
+    
+    /**
+     * Called when a new game starts (level or random game).
+     * Resets the game session tracking flags.
+     */
+    public void onNewGameStarted() {
+        gameCompleted = false;
+        hintUsedInCurrentGame = false;
+        Timber.d("[ACHIEVEMENTS] New game started - session flags reset");
+    }
+    
+    /**
+     * Called when the hint button is pressed during a game.
+     * This tracks hint usage for the current game session.
+     */
+    public void onHintUsed() {
+        hintUsedInCurrentGame = true;
+        Timber.d("[ACHIEVEMENTS] Hint used in current game session");
+    }
+    
+    /**
+     * Check if a hint was used in the current game session.
+     */
+    public boolean wasHintUsedInCurrentGame() {
+        return hintUsedInCurrentGame;
     }
     
     /**
