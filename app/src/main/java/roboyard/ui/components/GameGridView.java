@@ -1527,7 +1527,7 @@ public class GameGridView extends View {
         }
         
         if (state.checkCompletion()) {
-            Timber.d("[GOAL DEBUG] Target reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
+            Timber.d("[GOAL DEBUG][ACHIEVEMENTS] Target reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
             
             // Mark goal as reached for square coverage achievements
             onGoalReached();
@@ -1539,7 +1539,7 @@ public class GameGridView extends View {
                 gameStateManager.getMoveCount().getValue() + " moves and " +
                 gameStateManager.getSquaresMoved().getValue() + " squares moved");
         } else {
-            Timber.d("[bbb    n          ddf DEBUG] Robot moved");
+            Timber.d("[DEBUG] Robot moved");
             announceForAccessibility(getRobotDescription(selectedRobot));
         }
         
@@ -1668,7 +1668,13 @@ public class GameGridView extends View {
                     roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
                         .onAllSquaresTraversed(false, true, false, false);
                     Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot_goal unlocked! (%d/%d squares, goal not yet reached, excluding carré)", visitedCount, totalSquares);
+                } else if (goalReached) {
+                    Timber.d("[ACHIEVEMENT] one robot - goalReached true");
+                } else {
+                    Timber.d("[ACHIEVEMENT] one robot - allSquaresOneRobotGoalUnlocked false");
                 }
+            } else {
+                Timber.d("[ACHIEVEMENT] one robot - Not all squares traversed yet (%d/%d squares, excluding carré)", visitedCount, totalSquares);
             }
         }
         
@@ -1689,7 +1695,11 @@ public class GameGridView extends View {
                 roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
                     .onAllSquaresTraversed(false, false, false, true);
                 Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots_goal unlocked! (%d/%d squares, goal not yet reached, excluding carré)", allVisitedCount, totalSquares);
+            } else if (goalReached) {
+                Timber.d("[ACHIEVEMENT] all robots - goalReached true");
             }
+        } else {
+            Timber.d("[ACHIEVEMENT] Not all squares unlocked yet");
         }
     }
     

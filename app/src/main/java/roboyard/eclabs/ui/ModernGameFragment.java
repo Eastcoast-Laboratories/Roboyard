@@ -703,6 +703,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         int hintsUsed = state.getHintCount();
                         long elapsedTime = SystemClock.elapsedRealtime() - startTime;
                         boolean isImpossibleMode = Preferences.difficulty == 4; // Impossible mode
+                        Timber.d("[ACHIEVEMENTS] Game completion: isImpossibleMode=%b (Preferences.difficulty=%d), optimalMoves=%d", 
+                                isImpossibleMode, Preferences.difficulty, optimalMoves);
                         int robotCount = state.getRobots() != null ? state.getRobots().size() : 4;
                         // TODO: Get actual target count from game state when multi-target is implemented
                         int targetCount = 1;

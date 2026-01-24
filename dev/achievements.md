@@ -20,8 +20,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Progression Achievements (5)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `level_1_complete` | First Steps | Complete Level 1 | ✅ Implemented |
 | `level_10_complete` | Getting Started | Complete 10 levels | ✅ Implemented |
 | `level_50_complete` | Halfway There | Complete 50 levels | ✅ Implemented |
@@ -30,8 +30,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Performance Achievements (5)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `perfect_solutions_5` | Perfect Mover | Solve 5 levels with optimal moves | ✅ Implemented |
 | `perfect_solutions_10` | Precision Player | Solve 10 levels with optimal moves | ✅ Implemented |
 | `perfect_solutions_50` | Optimization Expert | Solve 50 levels with optimal moves | ✅ Implemented |
@@ -40,8 +40,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Challenge Achievements (0 active, 3 pending)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `solve_custom_level` | Custom Solver | Solve a custom-created level | ❌ Not Implemented (custom levels feature pending) |
 | `create_custom_level` | Level Designer | Create and save a custom level | ❌ Not Implemented (custom levels feature pending) |
 | `share_custom_level` | Sharing is Caring | Share a custom level with others | ❌ Not Implemented (custom levels feature pending) |
@@ -50,8 +50,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Mastery Achievements (5)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `3_star_hard_level` | Hard Level Star | Achieve 3 stars on a level with 5+ optimal moves | ✅ Implemented |
 | `3_star_10_levels` | Rising Star | Achieve 3 stars on 10 levels | ✅ Implemented |
 | `3_star_10_hard_levels` | Hard Level Master | Achieve 3 stars on 10 levels with 5+ optimal moves | ✅ Implemented |
@@ -60,8 +60,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Streak Achievements (4)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `first_game` | Welcome! | Play your first game | ✅ Implemented |
 | `daily_login_7` | Weekly Player | Log in 7 days in a row | ✅ Implemented |
 | `daily_login_30` | Dedicated Player | Log in 30 days in a row | ✅ Implemented |
@@ -73,8 +73,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Difficulty (4)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `impossible_mode_1` | Impossible Dream | Complete 1 game in Impossible mode | ✅ Implemented |
 | `impossible_mode_5` | Impossible Champion | Complete 5 games in Impossible mode | ✅ Implemented |
 | `impossible_mode_streak_5` | Impossible Streak | Complete 5 games in a row in Impossible mode with optimal moves | ✅ Implemented |
@@ -82,8 +82,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Solution Length (11)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `solution_18_moves` | 18 Move Master | Complete a game with optimal solution of 18 moves | ✅ Implemented |
 | `solution_19_moves` | 19 Move Master | Complete a game with optimal solution of 19 moves | ✅ Implemented |
 | `solution_20_moves` | 20 Move Master | Complete a game with optimal solution of 20 moves | ✅ Implemented |
@@ -100,7 +100,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Screen Resolutions (3)
 
-| ID | Name | Description | Status |
+| ID | Name | Description | Status | tested |
 |----|------|-------------|--------|
 | `play_10_move_games_all_resolutions` | Resolution Explorer 10 | Play games with 10+ moves on all screen resolutions | ✅ Implemented |
 | `play_12_move_games_all_resolutions` | Resolution Explorer 12 | Play games with 12+ moves on all screen resolutions | ✅ Implemented |
@@ -108,7 +108,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Multiple Targets (6)
 
-| ID | Name | Description | Status |
+| ID | Name | Description | Status | tested |
 |----|------|-------------|--------|
 | `game_2_targets` | Double Target | Complete a game with 2 targets | ✅ Implemented |
 | `game_3_targets` | Triple Target | Complete a game with 3 targets | ✅ Implemented |
@@ -120,23 +120,23 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Robot Count (1)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
-| `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented |
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
+| `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented | ✅ |
 
 ### Square Coverage (4)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
-| `traverse_all_squares_1_robot` | Solo Explorer | Visit all squares on the board with 1 robot (after goal allowed) | ✅ Implemented |
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
+| `traverse_all_squares_1_robot` | Solo Explorer | Visit all squares on the board with 1 robot (after goal allowed) | ✅ Implemented | ✅ |
 | `traverse_all_squares_1_robot_goal` | Solo Goal Explorer | Visit all squares with 1 robot, reaching the goal last | ✅ Implemented |
-| `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots combined (after goal allowed) | ✅ Implemented |
-| `traverse_all_squares_all_robots_goal` | Team Goal Explorer | Visit all squares with all robots, reaching the goal last | ✅ Implemented |
+| `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots combined (after goal allowed) | ✅ Implemented | ✅ |
+| `traverse_all_squares_all_robots_goal` | Team Goal Explorer | Visit all squares with all robots, reaching the goal last | ✅ Implemented | ✅ |
 
 ### Streaks & Challenges (5)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `perfect_random_games_5` | Perfect 5 | Complete 5 random games with optimal moves | ✅ Implemented |
 | `perfect_random_games_10` | Perfect 10 | Complete 10 random games with optimal moves | ✅ Implemented |
 | `perfect_random_games_20` | Perfect 20 | Complete 20 random games with optimal moves | ✅ Implemented |
@@ -145,8 +145,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ### Speed (3)
 
-| ID | Name | Description | Status |
-|----|------|-------------|--------|
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
 | `speedrun_random_under_20s` | Speed Demon | Complete a random game in under 20 seconds | ✅ Implemented |
 | `speedrun_random_under_10s` | Lightning Speed | Complete a random game in under 10 seconds | ✅ Implemented |
 | `speedrun_random_5_games_under_30s` | Speed Streak | Complete 5 random games in under 30 seconds each | ✅ Implemented |
