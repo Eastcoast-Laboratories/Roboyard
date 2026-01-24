@@ -381,7 +381,7 @@ public class Preferences {
     
     /**
      * Set the robot count and save to preferences
-     * @param count Number of robots (1-4)
+     * @param count Number of robots
      */
     public static void setRobotCount(int count) {
         // Ensure preferences are initialized
@@ -392,12 +392,12 @@ public class Preferences {
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
-                robotCount = Math.max(1, Math.min(4, count));
+                robotCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
                 return;
             }
         }
         
-        // Ensure count is between 1 and 4
+        // Ensure count is between 1 and NUM_ROBOTS
         int validCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         
         // Save to preferences
@@ -415,7 +415,7 @@ public class Preferences {
     
     /**
      * Set the target colors count and save to preferences
-     * @param count Number of target colors (1-4)
+     * @param count Number of target colors
      */
     public static void setTargetColors(int count) {
         // Ensure preferences are initialized
@@ -431,7 +431,7 @@ public class Preferences {
             }
         }
         
-        // Ensure count is between 1 and 4
+        // Ensure count is between 1 and Constants.NUM_ROBOTS
         int validCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
         
         // Save to preferences

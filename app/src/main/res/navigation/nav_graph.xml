@@ -158,7 +158,17 @@
         android:id="@+id/settingsFragment"
         android:name="roboyard.eclabs.ui.SettingsFragment"
         android:label="Settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/actionSettingsToDebugSettings"
+            app:destination="@id/debugSettingsFragment" />
+    </fragment>
+
+    <!-- Debug Settings Fragment -->
+    <fragment
+        android:id="@+id/debugSettingsFragment"
+        android:name="roboyard.eclabs.ui.DebugSettingsFragment"
+        android:label="Debug Settings" />
 
     <!-- Help Fragment -->
     <fragment

@@ -481,6 +481,29 @@ public class AchievementManager {
     }
     
     /**
+     * Unlock all achievements (for testing/debug)
+     */
+    public void unlockAll() {
+        for (Achievement achievement : achievements.values()) {
+            unlock(achievement.getId());
+        }
+        Timber.d("[ACHIEVEMENTS] All achievements unlocked");
+    }
+    
+    /**
+     * Lock an achievement by ID (for testing/debug)
+     */
+    public void lock(String achievementId) {
+        Achievement achievement = achievements.get(achievementId);
+        if (achievement != null) {
+            achievement.setUnlocked(false);
+            achievement.setUnlockedTimestamp(0);
+            prefs.edit().putBoolean(achievementId, false).apply();
+            Timber.d("[ACHIEVEMENTS] Achievement locked: %s", achievementId);
+        }
+    }
+    
+    /**
      * Reset all achievements (for testing)
      */
     public void resetAll() {

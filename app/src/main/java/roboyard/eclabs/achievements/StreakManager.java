@@ -19,6 +19,7 @@ public class StreakManager {
     private static final String KEY_LAST_LOGIN_DATE = "last_login_date";
     private static final String KEY_CURRENT_STREAK = "current_streak";
     private static final String KEY_LAST_STREAK_DATE = "last_streak_date";
+    private static final String KEY_TEST_MODE = "test_mode";
     
     // Normal mode: 1 day = 24 hours
     private static final long NORMAL_DAY_MS = 24L * 60L * 60L * 1000L;
@@ -40,6 +41,9 @@ public class StreakManager {
         this.context = context.getApplicationContext();
         this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         this.achievementManager = AchievementManager.getInstance(context);
+        // Load test mode setting from preferences
+        this.testMode = prefs.getBoolean(KEY_TEST_MODE, false);
+        Timber.d("[STREAK] Test mode loaded from preferences: %s", testMode);
     }
     
     public static synchronized StreakManager getInstance(Context context) {
@@ -129,9 +133,20 @@ public class StreakManager {
     /**
      * Enable or disable test mode for quick streak testing.
      * In test mode, 1 "day" = 10 seconds.
+     * Note: Changing test mode resets the streak because time units are incompatible.
      */
     public void setTestMode(boolean enabled) {
+        boolean wasTestMode = testMode;
         testMode = enabled;
+        // Persist test mode setting to preferences
+        prefs.edit().putBoolean(KEY_TEST_MODE, enabled).apply();
+        
+        // Reset streak when switching modes because time units are incompatible
+        if (wasTestMode != enabled) {
+            resetStreak();
+            Timber.d("[STREAK] Streak reset due to test mode change");
+        }
+        
         Timber.d("[STREAK] Test mode %s - 1 day = %d ms", enabled ? "ENABLED" : "DISABLED", 
                 enabled ? TEST_DAY_MS : NORMAL_DAY_MS);
     }

@@ -101,6 +101,10 @@ public class SettingsFragment extends Fragment {
     // Flag to prevent recursive updates
     private boolean isUpdatingUI = false;
     
+    // Debug view
+    private long lastTitleClickTime = 0;
+    private android.view.GestureDetector debugGestureDetector;
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
                              @Nullable Bundle savedInstanceState) {
@@ -231,6 +235,9 @@ public class SettingsFragment extends Fragment {
             
             // Set up listeners
             setupListeners();
+            
+            // Set up debug view with long-press on title
+            setupDebugView(view);
             
             return view;
         } catch (Exception e) {
@@ -1780,5 +1787,90 @@ public class SettingsFragment extends Fragment {
             Timber.e(e, "Error getting app version");
         }
         return "Unknown";
+    }
+    
+    /**
+     * Set up debug view with long-press listener on settings title
+     */
+    private void setupDebugView(View view) {
+        try {
+            // Find the settings title view by searching the view hierarchy
+            ViewGroup parent = (ViewGroup) view;
+            TextView settingsTitle = findSettingsTitleInView(parent);
+            
+            if (settingsTitle != null) {
+                // Create a custom GestureDetector for the debug long press
+                debugGestureDetector = new android.view.GestureDetector(requireContext(), 
+                    new android.view.GestureDetector.SimpleOnGestureListener() {
+                        @Override
+                        public void onLongPress(android.view.MotionEvent e) {
+                            showDebugView();
+                            Timber.d("[DEBUG] Long-press detected (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                        }
+                    });
+                
+                // Set the long press timeout to our custom value
+                android.view.ViewConfiguration vc = android.view.ViewConfiguration.get(requireContext());
+                try {
+                    java.lang.reflect.Field field = android.view.ViewConfiguration.class.getDeclaredField("mLongPressTimeout");
+                    field.setAccessible(true);
+                    field.setInt(vc, (int) Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                    Timber.d("[DEBUG] Set ViewConfiguration long press timeout to %dms", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                } catch (Exception ex) {
+                    Timber.w(ex, "[DEBUG] Could not set ViewConfiguration timeout, using default");
+                }
+                
+                // Use touch listener to forward events to gesture detector
+                settingsTitle.setOnTouchListener((v, event) -> {
+                    return debugGestureDetector.onTouchEvent(event);
+                });
+                Timber.d("[DEBUG] Settings title long-press listener attached (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+            } else {
+                Timber.w("[DEBUG] Could not find settings title view");
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[DEBUG] Error setting up debug view");
+        }
+    }
+    
+    /**
+     * Find settings title view by searching the view hierarchy
+     */
+    private TextView findSettingsTitleInView(ViewGroup parent) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            if (child instanceof TextView) {
+                TextView tv = (TextView) child;
+                CharSequence text = tv.getText();
+                if (text != null && text.toString().toLowerCase().contains("settings")) {
+                    return tv;
+                }
+            } else if (child instanceof ViewGroup) {
+                TextView found = findSettingsTitleInView((ViewGroup) child);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Navigate to the debug settings fragment using standard fragment transaction
+     */
+    private void showDebugView() {
+        try {
+            DebugSettingsFragment debugFragment = new DebugSettingsFragment();
+            
+            // Use fragment transaction like other fragments in the app
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, debugFragment)
+                    .addToBackStack(null)
+                    .commit();
+            
+            Timber.d("[DEBUG] Navigating to debug settings fragment");
+        } catch (Exception e) {
+            Timber.e(e, "[DEBUG] Error navigating to debug view");
+            Toast.makeText(requireContext(), "Error opening debug view: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

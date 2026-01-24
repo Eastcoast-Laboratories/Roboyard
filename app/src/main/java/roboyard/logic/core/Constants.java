@@ -75,6 +75,9 @@ public class Constants {
 
     public static final int NUM_ROBOTS = 4; // number of robots
     public static final int MAX_NUM_ROBOTS = 5; // maximal allowed num robots
+    
+    // Debug settings
+    public static final long DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS = 1000; // 2 seconds to open debug screen
 
     // RGB color values for robots (used in solver)
     public static final int[] colors_rgb = {
