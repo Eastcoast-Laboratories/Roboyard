@@ -445,11 +445,20 @@ public class AchievementManager {
     }
     
     /**
-     * Called when all squares are traversed
+     * Called when all squares are traversed.
+     * 
+     * 4 achievements:
+     * - traverse_all_squares_1_robot: One robot visits all squares (after goal allowed)
+     * - traverse_all_squares_1_robot_goal: One robot visits all squares, goal must be last
+     * - traverse_all_squares_all_robots: All robots visit all squares (after goal allowed)
+     * - traverse_all_squares_all_robots_goal: All robots visit all squares, goal must be last
      */
-    public void onAllSquaresTraversed(boolean byOneRobot, boolean byAllRobots) {
-        if (byOneRobot) unlock("traverse_all_squares_1_robot");
-        if (byAllRobots) unlock("traverse_all_squares_all_robots");
+    public void onAllSquaresTraversed(boolean oneRobot, boolean oneRobotGoal, 
+                                       boolean allRobots, boolean allRobotsGoal) {
+        if (oneRobot) unlock("traverse_all_squares_1_robot");
+        if (oneRobotGoal) unlock("traverse_all_squares_1_robot_goal");
+        if (allRobots) unlock("traverse_all_squares_all_robots");
+        if (allRobotsGoal) unlock("traverse_all_squares_all_robots_goal");
     }
     
     /**

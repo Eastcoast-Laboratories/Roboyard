@@ -72,8 +72,16 @@ public class GameGridView extends View {
     // Track visited squares for achievements (per robot and combined)
     private final HashMap<Integer, java.util.HashSet<String>> visitedSquaresPerRobot = new HashMap<>();
     private final java.util.HashSet<String> visitedSquaresAllRobots = new java.util.HashSet<>();
-    private boolean allSquaresOneRobotAchievementUnlocked = false;
-    private boolean allSquaresAllRobotsAchievementUnlocked = false;
+    // 4 achievement flags: with/without goal requirement, 1 robot/all robots
+    private boolean allSquaresOneRobotUnlocked = false;        // traverse_all_squares_1_robot (after goal allowed)
+    private boolean allSquaresOneRobotGoalUnlocked = false;    // traverse_all_squares_1_robot_goal (goal must be last)
+    private boolean allSquaresAllRobotsUnlocked = false;       // traverse_all_squares_all_robots (after goal allowed)
+    private boolean allSquaresAllRobotsGoalUnlocked = false;   // traverse_all_squares_all_robots_goal (goal must be last)
+    private boolean goalReached = false;                        // Track if goal was already reached
+    
+    // Carré (center square) coordinates - 4 middle squares that don't count for achievement
+    private int carrePosX = -1;
+    private int carrePosY = -1;
     
     // Robot drawables for each color
     private Drawable pinkRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight, silverRobotRight;
@@ -362,6 +370,12 @@ public class GameGridView extends View {
             GameState state = gameStateManager.getCurrentState().getValue();
             gridWidth = state.getWidth();
             gridHeight = state.getHeight();
+            
+            // Calculate carré (center square) coordinates - same as GameLogic
+            carrePosX = (gridWidth / 2) - 1;
+            carrePosY = (gridHeight / 2) - 1;
+            Timber.d("[ACHIEVEMENTS] Carré position set to (%d,%d) for grid %dx%d", 
+                    carrePosX, carrePosY, gridWidth, gridHeight);
             
             // Store starting positions of robots when game state is first set
             storeRobotStartingPositions(state);
@@ -1515,6 +1529,9 @@ public class GameGridView extends View {
         if (state.checkCompletion()) {
             Timber.d("[GOAL DEBUG] Target reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
             
+            // Mark goal as reached for square coverage achievements
+            onGoalReached();
+            
             // Critical fix: Tell the GameStateManager the game is complete
             gameStateManager.setGameComplete(true);
             
@@ -1603,7 +1620,14 @@ public class GameGridView extends View {
     }
     
     /**
-     * Check if all squares have been visited and unlock achievements
+     * Check if all squares have been visited and unlock achievements.
+     * Excludes the 4 carré (center square) fields from the count.
+     * 
+     * 4 achievements:
+     * - traverse_all_squares_1_robot: One robot visits all squares (after goal allowed)
+     * - traverse_all_squares_1_robot_goal: One robot visits all squares, goal must be last
+     * - traverse_all_squares_all_robots: All robots visit all squares (after goal allowed)
+     * - traverse_all_squares_all_robots_goal: All robots visit all squares, goal must be last
      */
     private void checkSquareCoverageAchievements(int robotColor) {
         if (gameStateManager == null) return;
@@ -1611,29 +1635,91 @@ public class GameGridView extends View {
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null) return;
         
-        // Calculate total traversable squares (grid size minus walls/obstacles)
-        int totalSquares = gridWidth * gridHeight;
+        // Calculate total traversable squares (grid size minus 4 carré squares)
+        int totalSquares = (gridWidth * gridHeight) - 4;
         
-        // Check if one robot has visited all squares
-        if (!allSquaresOneRobotAchievementUnlocked) {
-            java.util.HashSet<String> robotVisited = visitedSquaresPerRobot.get(robotColor);
-            if (robotVisited != null && robotVisited.size() >= totalSquares) {
-                allSquaresOneRobotAchievementUnlocked = true;
-                roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
-                    .onAllSquaresTraversed(true, false);
-                Timber.d("[ACHIEVEMENT] All squares visited by one robot! (%d squares)", robotVisited.size());
+        // Check if one robot has visited all squares (excluding carré)
+        java.util.HashSet<String> robotVisited = visitedSquaresPerRobot.get(robotColor);
+        if (robotVisited != null) {
+            // Count visited squares excluding carré
+            int visitedCount = countVisitedSquaresExcludingCarre(robotVisited);
+            
+            if (visitedCount >= totalSquares) {
+                // traverse_all_squares_1_robot: Unlock anytime (after goal allowed)
+                if (!allSquaresOneRobotUnlocked) {
+                    allSquaresOneRobotUnlocked = true;
+                    roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                        .onAllSquaresTraversed(true, false, false, false);
+                    Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot unlocked! (%d/%d squares, excluding carré)", visitedCount, totalSquares);
+                }
+                
+                // traverse_all_squares_1_robot_goal: Only if goal not yet reached (goal must be last)
+                if (!allSquaresOneRobotGoalUnlocked && !goalReached) {
+                    allSquaresOneRobotGoalUnlocked = true;
+                    roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                        .onAllSquaresTraversed(false, true, false, false);
+                    Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot_goal unlocked! (%d/%d squares, goal not yet reached, excluding carré)", visitedCount, totalSquares);
+                }
             }
         }
         
-        // Check if all robots combined have visited all squares
-        if (!allSquaresAllRobotsAchievementUnlocked) {
-            if (visitedSquaresAllRobots.size() >= totalSquares) {
-                allSquaresAllRobotsAchievementUnlocked = true;
+        // Check if all robots combined have visited all squares (excluding carré)
+        int allVisitedCount = countVisitedSquaresExcludingCarre(visitedSquaresAllRobots);
+        if (allVisitedCount >= totalSquares) {
+            // traverse_all_squares_all_robots: Unlock anytime (after goal allowed)
+            if (!allSquaresAllRobotsUnlocked) {
+                allSquaresAllRobotsUnlocked = true;
                 roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
-                    .onAllSquaresTraversed(false, true);
-                Timber.d("[ACHIEVEMENT] All squares visited by all robots! (%d squares)", visitedSquaresAllRobots.size());
+                    .onAllSquaresTraversed(false, false, true, false);
+                Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots unlocked! (%d/%d squares, excluding carré)", allVisitedCount, totalSquares);
+            }
+            
+            // traverse_all_squares_all_robots_goal: Only if goal not yet reached (goal must be last)
+            if (!allSquaresAllRobotsGoalUnlocked && !goalReached) {
+                allSquaresAllRobotsGoalUnlocked = true;
+                roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                    .onAllSquaresTraversed(false, false, false, true);
+                Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots_goal unlocked! (%d/%d squares, goal not yet reached, excluding carré)", allVisitedCount, totalSquares);
             }
         }
+    }
+    
+    /**
+     * Count visited squares excluding the 4 carré (center square) fields
+     */
+    private int countVisitedSquaresExcludingCarre(java.util.HashSet<String> visitedSquares) {
+        int count = 0;
+        for (String squareKey : visitedSquares) {
+            String[] coords = squareKey.split(",");
+            if (coords.length == 2) {
+                int x = Integer.parseInt(coords[0]);
+                int y = Integer.parseInt(coords[1]);
+                
+                // Check if this square is part of the carré (4 center squares)
+                if (!isInCarre(x, y)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Check if a square is part of the carré (center 2x2 square)
+     */
+    private boolean isInCarre(int x, int y) {
+        return (x == carrePosX && y == carrePosY)
+            || (x == carrePosX && y == carrePosY + 1)
+            || (x == carrePosX + 1 && y == carrePosY)
+            || (x == carrePosX + 1 && y == carrePosY + 1);
+    }
+    
+    /**
+     * Called when the goal is reached. Sets goalReached flag to prevent _goal achievements.
+     */
+    public void onGoalReached() {
+        goalReached = true;
+        Timber.d("[ACHIEVEMENT] Goal reached - _goal achievements no longer available");
     }
     
     /**
@@ -1645,8 +1731,11 @@ public class GameGridView extends View {
         segmentCounts.clear();
         visitedSquaresPerRobot.clear();
         visitedSquaresAllRobots.clear();
-        allSquaresOneRobotAchievementUnlocked = false;
-        allSquaresAllRobotsAchievementUnlocked = false;
+        allSquaresOneRobotUnlocked = false;
+        allSquaresOneRobotGoalUnlocked = false;
+        allSquaresAllRobotsUnlocked = false;
+        allSquaresAllRobotsGoalUnlocked = false;
+        goalReached = false;
         invalidate();
     }
 

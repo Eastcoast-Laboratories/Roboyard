@@ -124,14 +124,14 @@ This document defines all achievements in the game. Keep this file synchronized 
 |----|------|-------------|--------|
 | `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented |
 
-### Square Coverage (1)
+### Square Coverage (4)
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `traverse_all_squares_1_robot` | Solo Explorer | Visit all squares on the board with 1 robot |  |
-| `traverse_all_squares_1_robot_goal` | Solo Explorer | Visit all squares on the board with 1 robot before reaching goal |  |
-| `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots |  |
-| `traverse_all_squares_all_robots_goal` | Team Explorer | Visit all squares on the board with all robots before reaching goal |  |
+| `traverse_all_squares_1_robot` | Solo Explorer | Visit all squares on the board with 1 robot (after goal allowed) | ✅ Implemented |
+| `traverse_all_squares_1_robot_goal` | Solo Goal Explorer | Visit all squares with 1 robot, reaching the goal last | ✅ Implemented |
+| `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots combined (after goal allowed) | ✅ Implemented |
+| `traverse_all_squares_all_robots_goal` | Team Goal Explorer | Visit all squares with all robots, reaching the goal last | ✅ Implemented |
 
 ### Streaks & Challenges (5)
 

@@ -590,9 +590,13 @@
     
     <!-- Random Game - Square Coverage -->
     <string name="achievement_traverse_1_robot">Solo Explorer</string>
-    <string name="achievement_traverse_1_robot_desc">Visit all squares on the board with 1 robot before reaching goal</string>
+    <string name="achievement_traverse_1_robot_desc">Visit all squares on the board with 1 robot</string>
+    <string name="achievement_traverse_1_robot_goal">Solo Goal Explorer</string>
+    <string name="achievement_traverse_1_robot_goal_desc">Visit all squares with 1 robot, reaching the goal last</string>
     <string name="achievement_traverse_all_robots">Team Explorer</string>
-    <string name="achievement_traverse_all_robots_desc">Visit all squares on the board with all robots before reaching goal</string>
+    <string name="achievement_traverse_all_robots_desc">Visit all squares on the board with all robots combined</string>
+    <string name="achievement_traverse_all_robots_goal">Team Goal Explorer</string>
+    <string name="achievement_traverse_all_robots_goal_desc">Visit all squares with all robots, reaching the goal last</string>
     
     <!-- Random Game - Streaks -->
     <string name="achievement_perfect_random_5">Perfect 5</string>
