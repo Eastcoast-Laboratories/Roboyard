@@ -241,11 +241,11 @@ public class AchievementDefinitions {
         add(new Achievement("perfect_random_games_20", 
             "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
-        add(new Achievement("no_hints_random_10", 
-            "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
+        add(new Achievement("no_hints_streak_random_10", 
+            "achievement_no_hints_streak_random_10", "achievement_no_hints_streak_random_10_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
-        add(new Achievement("no_hints_random_50", 
-            "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
+        add(new Achievement("no_hints_streak_random_50", 
+            "achievement_no_hints_streak_random_50", "achievement_no_hints_streak_random_50_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR));
             
         // ========== RANDOM GAME - SPEED ==========

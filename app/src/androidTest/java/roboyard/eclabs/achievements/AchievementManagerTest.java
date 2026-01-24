@@ -337,8 +337,8 @@ public class AchievementManagerTest {
             achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(12, 10, 0, 30000, false, 4, 1, 1);
         }
-        assertTrue("no_hints_random_10 should be unlocked", 
-                achievementManager.isUnlocked("no_hints_random_10"));
+        assertTrue("no_hints_streak_random_10 should be unlocked", 
+                achievementManager.isUnlocked("no_hints_streak_random_10"));
     }
 
     /**
@@ -500,7 +500,7 @@ public class AchievementManagerTest {
     }
 
     /**
-     * Test no_hints_random_10 achievement:
+     * Test no_hints_streak_random_10 achievement:
      * - Complete 9 games without hints -> achievement NOT unlocked
      * - Complete 10th game WITH hint -> achievement NOT unlocked (hint resets counter)
      * - Complete 11th game without hint -> achievement still NOT unlocked (only 1 game without hint after reset)
@@ -523,8 +523,8 @@ public class AchievementManagerTest {
         }
         
         // After 9 games without hints, achievement should NOT be unlocked yet
-        assertFalse("no_hints_random_10 should NOT be unlocked after only 9 games", 
-                achievementManager.isUnlocked("no_hints_random_10"));
+        assertFalse("no_hints_streak_random_10 should NOT be unlocked after only 9 games", 
+                achievementManager.isUnlocked("no_hints_streak_random_10"));
         
         // 10th game: Use a hint (this should reset the counter)
         achievementManager.onNewGameStarted();
@@ -533,16 +533,16 @@ public class AchievementManagerTest {
         achievementManager.onRandomGameCompleted(10, 10, 1, 30000, false, 4, 1, 1);
         
         // After using hint on 10th game, achievement should still NOT be unlocked
-        assertFalse("no_hints_random_10 should NOT be unlocked after using hint on 10th game", 
-                achievementManager.isUnlocked("no_hints_random_10"));
+        assertFalse("no_hints_streak_random_10 should NOT be unlocked after using hint on 10th game", 
+                achievementManager.isUnlocked("no_hints_streak_random_10"));
         
         // 11th game: No hint used
         achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(10, 10, 0, 30000, false, 4, 1, 1);
         
         // After 11th game (1 game without hint after reset), achievement should NOT be unlocked
-        assertFalse("no_hints_random_10 should NOT be unlocked after only 1 game without hint (post-reset)", 
-                achievementManager.isUnlocked("no_hints_random_10"));
+        assertFalse("no_hints_streak_random_10 should NOT be unlocked after only 1 game without hint (post-reset)", 
+                achievementManager.isUnlocked("no_hints_streak_random_10"));
         
         // Complete 9 more games without hints (total 10 games without hints after the hint-reset)
         for (int i = 2; i <= 10; i++) {
@@ -551,7 +551,7 @@ public class AchievementManagerTest {
         }
         
         // Now achievement SHOULD be unlocked (10 consecutive games without hints)
-        assertTrue("no_hints_random_10 SHOULD be unlocked after 10 games without hints", 
-                achievementManager.isUnlocked("no_hints_random_10"));
+        assertTrue("no_hints_streak_random_10 SHOULD be unlocked after 10 games without hints", 
+                achievementManager.isUnlocked("no_hints_streak_random_10"));
     }
 }

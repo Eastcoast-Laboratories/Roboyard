@@ -323,8 +323,8 @@ public class AchievementManager {
         if (hintsUsed == 0) {
             noHintRandomGames++;
             saveCounter("no_hint_random_games", noHintRandomGames);
-            if (noHintRandomGames >= 10) unlock("no_hints_random_10");
-            if (noHintRandomGames >= 50) unlock("no_hints_random_50");
+            if (noHintRandomGames >= 10) unlock("no_hints_streak_random_10");
+            if (noHintRandomGames >= 50) unlock("no_hints_streak_random_50");
             Timber.d("[ACHIEVEMENTS] No hints used - counter: %d", noHintRandomGames);
         } else {
             // Reset counter when hint is used

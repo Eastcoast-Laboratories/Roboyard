@@ -263,7 +263,7 @@ public class DebugSettingsFragment extends Fragment {
                 "3_star_hard_level", "3_star_10_levels",
                 "speedrun_under_30s", "speedrun_random_5_games_under_30s",
                 "daily_login_7", "daily_login_30", "comeback_player",
-                "perfect_random_games_10", "no_hints_random_10",
+                "perfect_random_games_10", "no_hints_streak_random_10",
                 "play_10_move_games_all_resolutions",
                 "play_12_move_games_all_resolutions",
                 "play_15_move_games_all_resolutions"

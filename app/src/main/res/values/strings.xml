@@ -605,10 +605,10 @@
     <string name="achievement_perfect_random_10_desc">Complete 10 random games with optimal moves</string>
     <string name="achievement_perfect_random_20">Perfect 20</string>
     <string name="achievement_perfect_random_20_desc">Complete 20 random games with optimal moves</string>
-    <string name="achievement_no_hints_random_10">No Help Needed 10</string>
-    <string name="achievement_no_hints_random_10_desc">Complete 10 random games without using hints in a row</string>
-    <string name="achievement_no_hints_random_50">No Help Needed 50</string>
-    <string name="achievement_no_hints_random_50_desc">Complete 50 random games without using hints in a row</string>
+    <string name="achievement_no_hints_streak_random_10">No Help Needed 10</string>
+    <string name="achievement_no_hints_streak_random_10_desc">Complete 10 random games without using hints in a row</string>
+    <string name="achievement_no_hints_streak_random_50">No Help Needed 50</string>
+    <string name="achievement_no_hints_streak_random_50_desc">Complete 50 random games without using hints in a row</string>
     
     <!-- Random Game - Speed -->
     <string name="achievement_speedrun_random_20s">Speed Demon</string>

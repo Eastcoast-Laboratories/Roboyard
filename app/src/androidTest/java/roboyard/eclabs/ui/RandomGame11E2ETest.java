@@ -34,15 +34,15 @@ import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 /**
- * E2E test: Complete 11 random games to test perfect_random_games_10 and no_hints_random_10 achievements
+ * E2E test: Complete 11 random games to test perfect_random_games_10 and no_hints_streak_random_10 achievements
  * - Games 1-9: Play with optimal moves, no hints
  * - Game 10: Press hint button, then play with optimal moves
  * - Game 11: Play with optimal moves, no hints
  * 
  * Expected results:
  * - perfect_random_games_10 should be unlocked after game 10 (10 perfect games)
- * - no_hints_random_10 should NOT be unlocked (hint was used in game 10)
- * - no_hints_random_10 should be unlocked after game 11 (10 perfect games without hints)
+ * - no_hints_streak_random_10 should NOT be unlocked (hint was used in game 10)
+ * - no_hints_streak_random_10 should be unlocked after game 11 (10 perfect games without hints)
  */
 @RunWith(AndroidJUnit4.class)
 public class RandomGame11E2ETest {
@@ -133,16 +133,16 @@ public class RandomGame11E2ETest {
             // Check achievement status after each game
             Thread.sleep(1000);
             boolean perfectRandom10 = achievementManager.isUnlocked("perfect_random_games_10");
-            boolean noHintsRandom10 = achievementManager.isUnlocked("no_hints_random_10");
+            boolean noHintsRandom10 = achievementManager.isUnlocked("no_hints_streak_random_10");
             
-            Timber.d("[E2E_RANDOM11] After Game %d: perfect_random_games_10=%s, no_hints_random_10=%s", 
+            Timber.d("[E2E_RANDOM11] After Game %d: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
                     game, perfectRandom10, noHintsRandom10);
             
             // ASSERTIONS before game 10
             if (game < 10) {
                 assertFalse("perfect_random_games_10 should NOT be unlocked before Game 10 (currently at Game " + game + ")", 
                         perfectRandom10);
-                assertFalse("no_hints_random_10 should NOT be unlocked before Game 10 (currently at Game " + game + ")", 
+                assertFalse("no_hints_streak_random_10 should NOT be unlocked before Game 10 (currently at Game " + game + ")", 
                         noHintsRandom10);
             }
             
@@ -154,17 +154,17 @@ public class RandomGame11E2ETest {
                 Thread.sleep(2000);
                 
                 boolean perfectRandom10Check = achievementManager.isUnlocked("perfect_random_games_10");
-                boolean noHintsRandom10Check = achievementManager.isUnlocked("no_hints_random_10");
+                boolean noHintsRandom10Check = achievementManager.isUnlocked("no_hints_streak_random_10");
                 
-                Timber.d("[E2E_RANDOM11] Game 10 final check: perfect_random_games_10=%s, no_hints_random_10=%s", 
+                Timber.d("[E2E_RANDOM11] Game 10 final check: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
                         perfectRandom10Check, noHintsRandom10Check);
                 
                 // perfect_random_games_10 SHOULD be unlocked (10 perfect games)
                 assertTrue("perfect_random_games_10 SHOULD be unlocked after 10 perfect games", 
                         perfectRandom10Check);
                 
-                // no_hints_random_10 should NOT be unlocked (hint was used in game 10)
-                assertFalse("no_hints_random_10 should NOT be unlocked because hint was used in game 10", 
+                // no_hints_streak_random_10 should NOT be unlocked (hint was used in game 10)
+                assertFalse("no_hints_streak_random_10 should NOT be unlocked because hint was used in game 10", 
                         noHintsRandom10Check);
             }
             
@@ -192,15 +192,15 @@ public class RandomGame11E2ETest {
         Timber.d("[E2E_RANDOM11] ===== FINAL ACHIEVEMENT CHECK =====");
         
         boolean finalPerfectRandom10 = achievementManager.isUnlocked("perfect_random_games_10");
-        boolean finalNoHintsRandom10 = achievementManager.isUnlocked("no_hints_random_10");
+        boolean finalNoHintsRandom10 = achievementManager.isUnlocked("no_hints_streak_random_10");
         
-        Timber.d("[E2E_RANDOM11] Final: perfect_random_games_10=%s, no_hints_random_10=%s", 
+        Timber.d("[E2E_RANDOM11] Final: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
                 finalPerfectRandom10, finalNoHintsRandom10);
         
         // Final assertions
         assertTrue("perfect_random_games_10 should be unlocked after 11 perfect games", 
                 finalPerfectRandom10);
-        assertFalse("no_hints_random_10 should NOT be unlocked because hint was used in game 10", 
+        assertFalse("no_hints_streak_random_10 should NOT be unlocked because hint was used in game 10", 
                 finalNoHintsRandom10);
         
         Timber.d("[E2E_RANDOM11] ✓ Test passed: 11 random games completed, achievements verified");
