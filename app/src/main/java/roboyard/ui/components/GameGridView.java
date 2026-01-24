@@ -69,6 +69,12 @@ public class GameGridView extends View {
     private final HashMap<Integer, float[]> robotBaseOffsets = new HashMap<>(); // Base offset for each robot
     private final HashMap<Integer, HashMap<String, Integer>> segmentCounts = new HashMap<>(); // Track segment traversal count
     
+    // Track visited squares for achievements (per robot and combined)
+    private final HashMap<Integer, java.util.HashSet<String>> visitedSquaresPerRobot = new HashMap<>();
+    private final java.util.HashSet<String> visitedSquaresAllRobots = new java.util.HashSet<>();
+    private boolean allSquaresOneRobotAchievementUnlocked = false;
+    private boolean allSquaresAllRobotsAchievementUnlocked = false;
+    
     // Robot drawables for each color
     private Drawable pinkRobotRight, yellowRobotRight, blueRobotRight, greenRobotRight, silverRobotRight;
     private Drawable pinkRobotLeft, yellowRobotLeft, blueRobotLeft, greenRobotLeft, silverRobotLeft;
@@ -1552,6 +1558,11 @@ public class GameGridView extends View {
             
             // Add the starting position
             robotPaths.get(color).add(new int[]{fromX, fromY});
+            
+            // Initialize visited squares for this robot
+            visitedSquaresPerRobot.put(color, new java.util.HashSet<>());
+            visitedSquaresPerRobot.get(color).add(fromX + "," + fromY);
+            visitedSquaresAllRobots.add(fromX + "," + fromY);
         }
         
         // Create a path segment key (direction matters)
@@ -1567,8 +1578,62 @@ public class GameGridView extends View {
         // Add the new position to the path
         robotPaths.get(color).add(new int[]{toX, toY});
         
+        // Track all squares visited along the path (not just endpoints)
+        int dx = Integer.compare(toX, fromX);
+        int dy = Integer.compare(toY, fromY);
+        int x = fromX;
+        int y = fromY;
+        java.util.HashSet<String> robotVisited = visitedSquaresPerRobot.get(color);
+        
+        while (x != toX || y != toY) {
+            x += dx;
+            y += dy;
+            String squareKey = x + "," + y;
+            if (robotVisited != null) {
+                robotVisited.add(squareKey);
+            }
+            visitedSquaresAllRobots.add(squareKey);
+        }
+        
+        // Check for square coverage achievements (before reaching goal)
+        checkSquareCoverageAchievements(color);
+        
         // Redraw the view
         invalidate();
+    }
+    
+    /**
+     * Check if all squares have been visited and unlock achievements
+     */
+    private void checkSquareCoverageAchievements(int robotColor) {
+        if (gameStateManager == null) return;
+        
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) return;
+        
+        // Calculate total traversable squares (grid size minus walls/obstacles)
+        int totalSquares = gridWidth * gridHeight;
+        
+        // Check if one robot has visited all squares
+        if (!allSquaresOneRobotAchievementUnlocked) {
+            java.util.HashSet<String> robotVisited = visitedSquaresPerRobot.get(robotColor);
+            if (robotVisited != null && robotVisited.size() >= totalSquares) {
+                allSquaresOneRobotAchievementUnlocked = true;
+                roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                    .onAllSquaresTraversed(true, false);
+                Timber.d("[ACHIEVEMENT] All squares visited by one robot! (%d squares)", robotVisited.size());
+            }
+        }
+        
+        // Check if all robots combined have visited all squares
+        if (!allSquaresAllRobotsAchievementUnlocked) {
+            if (visitedSquaresAllRobots.size() >= totalSquares) {
+                allSquaresAllRobotsAchievementUnlocked = true;
+                roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                    .onAllSquaresTraversed(false, true);
+                Timber.d("[ACHIEVEMENT] All squares visited by all robots! (%d squares)", visitedSquaresAllRobots.size());
+            }
+        }
     }
     
     /**
@@ -1578,6 +1643,10 @@ public class GameGridView extends View {
         robotPaths.clear();
         robotBaseOffsets.clear();
         segmentCounts.clear();
+        visitedSquaresPerRobot.clear();
+        visitedSquaresAllRobots.clear();
+        allSquaresOneRobotAchievementUnlocked = false;
+        allSquaresAllRobotsAchievementUnlocked = false;
         invalidate();
     }
 

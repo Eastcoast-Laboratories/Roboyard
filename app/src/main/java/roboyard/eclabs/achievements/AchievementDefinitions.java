@@ -163,14 +163,15 @@ public class AchievementDefinitions {
             AchievementCategory.RANDOM_DIFFICULTY, ICON_CROWN));
             
         // ========== RANDOM GAME - SOLUTION LENGTH ==========
-        // Use different icons for different move counts
-        int[] solutionIcons = {ICON_PUZZLE, ICON_CHECKLIST, ICON_CHART_UP, ICON_BUILDINGS, 
-                               ICON_TROPHY_MEDAL, ICON_TROPHY_STAR, ICON_WREATH, ICON_TROPHY_GOLD,
-                               ICON_DIAMOND_CUP, ICON_CROWN};
-        for (int moves = 20; moves <= 29; moves++) {
+        // Use different icons for different move counts (18-29)
+        int[] solutionIcons = {ICON_CHART_UP, ICON_BUILDINGS,  // 18, 19
+                               ICON_PUZZLE, ICON_CHECKLIST, ICON_CHART_UP, ICON_BUILDINGS, // 20-23
+                               ICON_TROPHY_MEDAL, ICON_TROPHY_STAR, ICON_WREATH, ICON_TROPHY_GOLD, // 24-27
+                               ICON_DIAMOND_CUP, ICON_CROWN}; // 28, 29
+        for (int moves = 18; moves <= 29; moves++) {
             add(new Achievement("solution_" + moves + "_moves", 
                 "achievement_solution_" + moves, "achievement_solution_" + moves + "_desc",
-                AchievementCategory.RANDOM_SOLUTION, solutionIcons[moves - 20]));
+                AchievementCategory.RANDOM_SOLUTION, solutionIcons[moves - 18]));
         }
         add(new Achievement("solution_30_plus_moves", 
             "achievement_solution_30_plus", "achievement_solution_30_plus_desc",
@@ -206,6 +207,9 @@ public class AchievementDefinitions {
         add(new Achievement("game_3_of_4_targets", 
             "achievement_3_of_4_targets", "achievement_3_of_4_targets_desc",
             AchievementCategory.RANDOM_TARGETS, 49)); // Triangle eye
+        add(new Achievement("game_4_of_4_targets", 
+            "achievement_4_of_4_targets", "achievement_4_of_4_targets_desc",
+            AchievementCategory.RANDOM_TARGETS, ICON_CROWN)); // Crown for completing all 4
             
         // ========== RANDOM GAME - ROBOT COUNT ==========
         add(new Achievement("game_5_robots", 

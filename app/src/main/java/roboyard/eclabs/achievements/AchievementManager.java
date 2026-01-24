@@ -284,8 +284,8 @@ public class AchievementManager {
         // First game
         onFirstGame();
         
-        // Impossible mode
-        if (isImpossibleMode) {
+        // Impossible mode - only count if optimal moves >= 17 (to prevent easy games via settings)
+        if (isImpossibleMode && optimalMoves >= 17) {
             impossibleModeGames++;
             saveCounter("impossible_mode_games", impossibleModeGames);
             unlock("impossible_mode_1");
@@ -301,10 +301,13 @@ public class AchievementManager {
                 impossibleModeStreak = 0;
                 saveCounter("impossible_mode_streak", 0);
             }
+            Timber.d("[ACHIEVEMENTS] Impossible mode game counted (optimalMoves=%d >= 17)", optimalMoves);
+        } else if (isImpossibleMode) {
+            Timber.d("[ACHIEVEMENTS] Impossible mode game NOT counted (optimalMoves=%d < 17)", optimalMoves);
         }
         
-        // Solution length achievements
-        if (optimalMoves >= 20 && optimalMoves <= 29) {
+        // Solution length achievements (18-29 moves individually, 30+ as one)
+        if (optimalMoves >= 18 && optimalMoves <= 29) {
             unlock("solution_" + optimalMoves + "_moves");
         } else if (optimalMoves >= 30) {
             unlock("solution_30_plus_moves");
@@ -319,6 +322,7 @@ public class AchievementManager {
         if (targetsNeeded == 2 && targetCount == 3) unlock("game_2_of_3_targets");
         if (targetsNeeded == 2 && targetCount == 4) unlock("game_2_of_4_targets");
         if (targetsNeeded == 3 && targetCount == 4) unlock("game_3_of_4_targets");
+        if (targetsNeeded == 4 && targetCount == 4) unlock("game_4_of_4_targets");
         
         // Robot count
         if (robotCount >= 5) unlock("game_5_robots");
