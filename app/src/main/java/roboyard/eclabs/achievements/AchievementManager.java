@@ -372,10 +372,15 @@ public class AchievementManager {
     
     /**
      * Called when a new game starts (level or random game).
-     * Resets the game session tracking flags.
+     * Resets the game session tracking flags and checks daily login achievements.
      */
     public void onNewGameStarted() {
         hintUsedInCurrentGame = false;
+        
+        // Check daily login achievements
+        if (dailyLoginStreak >= 7) unlock("daily_login_7");
+        if (dailyLoginStreak >= 30) unlock("daily_login_30");
+        
         Timber.d("[ACHIEVEMENTS] New game started - session flags reset");
     }
     

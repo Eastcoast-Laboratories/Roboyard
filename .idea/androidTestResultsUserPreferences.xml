@@ -89,6 +89,7 @@
               <option name="preferredColumnWidths">
                 <map>
                   <entry key="Duration" value="90" />
+                  <entry key="Pixel_6_Pro" value="120" />
                   <entry key="Small_Phone" value="120" />
                   <entry key="Tests" value="360" />
                 </map>

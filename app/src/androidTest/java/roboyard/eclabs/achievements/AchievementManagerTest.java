@@ -213,15 +213,15 @@ public class AchievementManagerTest {
      */
     @Test
     public void testImpossibleModeAchievements() {
-        // Complete 1 game in impossible mode
+        // Complete 1 game in impossible mode (optimalMoves >= 17)
         achievementManager.onNewGameStarted();
-        achievementManager.onRandomGameCompleted(10, 10, 0, 30000, true, 4, 1, 1);
+        achievementManager.onRandomGameCompleted(20, 20, 0, 30000, true, 4, 1, 1);
         assertTrue("impossible_mode_1 should be unlocked", achievementManager.isUnlocked("impossible_mode_1"));
         
         // Complete 5 games in impossible mode
         for (int i = 0; i < 4; i++) {
             achievementManager.onNewGameStarted();
-            achievementManager.onRandomGameCompleted(10, 10, 0, 30000, true, 4, 1, 1);
+            achievementManager.onRandomGameCompleted(20, 20, 0, 30000, true, 4, 1, 1);
         }
         assertTrue("impossible_mode_5 should be unlocked", achievementManager.isUnlocked("impossible_mode_5"));
     }
@@ -231,10 +231,10 @@ public class AchievementManagerTest {
      */
     @Test
     public void testImpossibleModeStreakAchievements() {
-        // Complete 5 games in a row with optimal moves in impossible mode
+        // Complete 5 games in a row with optimal moves in impossible mode (optimalMoves >= 17)
         for (int i = 0; i < 5; i++) {
             achievementManager.onNewGameStarted();
-            achievementManager.onRandomGameCompleted(10, 10, 0, 30000, true, 4, 1, 1);
+            achievementManager.onRandomGameCompleted(20, 20, 0, 30000, true, 4, 1, 1);
         }
         assertTrue("impossible_mode_streak_5 should be unlocked", 
                 achievementManager.isUnlocked("impossible_mode_streak_5"));
@@ -379,10 +379,13 @@ public class AchievementManagerTest {
      */
     @Test
     public void testDailyLoginStreakAchievements() {
+        // Set daily login streak and start a game to trigger achievement check
         achievementManager.onDailyLogin(7);
+        achievementManager.onNewGameStarted();
         assertTrue("daily_login_7 should be unlocked", achievementManager.isUnlocked("daily_login_7"));
         
         achievementManager.onDailyLogin(30);
+        achievementManager.onNewGameStarted();
         assertTrue("daily_login_30 should be unlocked", achievementManager.isUnlocked("daily_login_30"));
     }
 
