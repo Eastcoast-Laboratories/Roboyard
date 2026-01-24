@@ -1636,13 +1636,22 @@ public class GameGridView extends View {
         if (state == null) return;
         
         // Calculate total traversable squares (grid size minus 4 carré squares)
-        int totalSquares = (gridWidth * gridHeight) - 4;
+        int totalSquares = ((gridWidth - 1) * (gridHeight - 1)) - 4;
         
-        // Check if one robot has visited all squares (excluding carré)
-        java.util.HashSet<String> robotVisited = visitedSquaresPerRobot.get(robotColor);
-        if (robotVisited != null) {
+        // Check ALL robots for the 1_robot achievement (not just the current one)
+        for (java.util.Map.Entry<Integer, java.util.HashSet<String>> entry : visitedSquaresPerRobot.entrySet()) {
+            int color = entry.getKey();
+            java.util.HashSet<String> robotVisited = entry.getValue();
+            
             // Count visited squares excluding carré
             int visitedCount = countVisitedSquaresExcludingCarre(robotVisited);
+            
+            // Log progress every 10 new squares or when close to completion
+            int remaining = totalSquares - visitedCount;
+            if (remaining <= 10 || visitedCount % 10 == 0) {
+                Timber.d("[ACHIEVEMENT_DEBUG] Robot color %d: %d/%d unique squares (%d remaining), carré at (%d,%d)", 
+                        color, visitedCount, totalSquares, remaining, carrePosX, carrePosY);
+            }
             
             if (visitedCount >= totalSquares) {
                 // traverse_all_squares_1_robot: Unlock anytime (after goal allowed)
