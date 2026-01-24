@@ -2544,6 +2544,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             return;
         }
         
+        // Track hint usage for achievements - only count real hints (not pre-hints)
+        if (currentState != null) {
+            currentState.incrementHintCount();
+            AchievementManager.getInstance(requireContext()).onHintUsed();
+            Timber.d("[HINT_SYSTEM] Hint counted for achievements: hintCount=%d", currentState.getHintCount());
+        }
+        
         try {
             // Get the specific move for this hint
             IGameMove hintMove = solution.getMoves().get(hintIndex);

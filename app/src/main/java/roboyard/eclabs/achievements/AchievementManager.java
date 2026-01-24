@@ -319,12 +319,18 @@ public class AchievementManager {
             if (perfectRandomGames >= 20) unlock("perfect_random_games_20");
         }
         
-        // No hints random games
+        // No hints random games - reset counter if hint was used (streak)
         if (hintsUsed == 0) {
             noHintRandomGames++;
             saveCounter("no_hint_random_games", noHintRandomGames);
             if (noHintRandomGames >= 10) unlock("no_hints_random_10");
             if (noHintRandomGames >= 50) unlock("no_hints_random_50");
+            Timber.d("[ACHIEVEMENTS] No hints used - counter: %d", noHintRandomGames);
+        } else {
+            // Reset counter when hint is used
+            noHintRandomGames = 0;
+            saveCounter("no_hint_random_games", noHintRandomGames);
+            Timber.d("[ACHIEVEMENTS] Hint used - no_hint counter reset to 0");
         }
         
         // Speed achievements

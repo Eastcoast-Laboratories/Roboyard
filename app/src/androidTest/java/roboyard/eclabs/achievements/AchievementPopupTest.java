@@ -16,6 +16,9 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 
+import roboyard.logic.core.Constants;
+import roboyard.logic.core.Preferences;
+
 /**
  * Tests for AchievementPopup and unlock listener integration.
  * Tests that achievements trigger the unlock listener correctly.
