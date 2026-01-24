@@ -133,20 +133,20 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots combined (after goal allowed) | ✅ Implemented | ✅ |
 | `traverse_all_squares_all_robots_goal` | Team Goal Explorer | Visit all squares with all robots, reaching the goal last | ✅ Implemented | ✅ |
 
-### Streaks & Challenges (5)
+### Streaks & Challenges (10)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
-| `perfect_random_games_5` | Perfect 5 | Complete 5 random games with optimal moves |  |
-| `perfect_random_games_10` | Perfect 10 | Complete 10 random games with optimal moves |  |
-| `perfect_random_games_20` | Perfect 20 | Complete 20 random games with optimal moves |  |
-| `perfect_random_games_streak_5` | Perfect Streak 5 | Complete 5 random games with optimal moves in a row |  |
-| `perfect_random_games_streak_10` | Perfect Streak 10 | Complete 10 random games with optimal moves in a row |  |
-| `perfect_random_games_streak_20` | Perfect Streak 20 | Complete 20 random games with optimal moves in a row |  |
-| `no_hints_random_10` | No Help Needed 10 | Complete 10 random games without using hints | |
-| `no_hints_random_50` | No Help Needed 50 | Complete 50 random games without using hints | |
-| `no_hints_streak_random_10` | No Help Needed 10 | Complete 10 random games without using hints in a row (streak) | ✅ Implemented |
-| `no_hints_streak_random_50` | No Help Needed 50 | Complete 50 random games without using hints in a row (streak) | ✅ Implemented |
+| `perfect_random_games_5` | Perfect 5 | Complete 5 random games with optimal moves (cumulative) | ✅ Implemented | |
+| `perfect_random_games_10` | Perfect 10 | Complete 10 random games with optimal moves (cumulative) | ✅ Implemented | |
+| `perfect_random_games_20` | Perfect 20 | Complete 20 random games with optimal moves (cumulative) | ✅ Implemented | |
+| `perfect_random_games_streak_5` | Perfect Streak 5 | Complete 5 random games with optimal moves in a row | ✅ Implemented | |
+| `perfect_random_games_streak_10` | Perfect Streak 10 | Complete 10 random games with optimal moves in a row | ✅ Implemented | |
+| `perfect_random_games_streak_20` | Perfect Streak 20 | Complete 20 random games with optimal moves in a row | ✅ Implemented | |
+| `no_hints_random_10` | No Help Needed 10 | Complete 10 random games without using hints (cumulative) | ✅ Implemented | |
+| `no_hints_random_50` | No Help Needed 50 | Complete 50 random games without using hints (cumulative) | ✅ Implemented | |
+| `no_hints_streak_random_10` | No Help Streak 10 | Complete 10 random games without using hints in a row | ✅ Implemented | |
+| `no_hints_streak_random_50` | No Help Streak 50 | Complete 50 random games without using hints in a row | ✅ Implemented | |
 
 ### Speed (3)
 

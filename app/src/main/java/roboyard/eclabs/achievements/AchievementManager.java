@@ -33,7 +33,9 @@ public class AchievementManager {
     private int impossibleModeGames;
     private int impossibleModeStreak;
     private int perfectRandomGames;
+    private int perfectRandomGamesStreak;
     private int noHintRandomGames;
+    private int noHintRandomGamesTotal;
     private int dailyLoginStreak;
     private int speedrunRandomGamesUnder30s;
     
@@ -79,7 +81,9 @@ public class AchievementManager {
         impossibleModeGames = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_games", 0);
         impossibleModeStreak = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_streak", 0);
         perfectRandomGames = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_random_games", 0);
+        perfectRandomGamesStreak = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_random_games_streak", 0);
         noHintRandomGames = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games", 0);
+        noHintRandomGamesTotal = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games_total", 0);
         dailyLoginStreak = prefs.getInt(KEY_COUNTER_PREFIX + "daily_login_streak", 0);
         speedrunRandomGamesUnder30s = prefs.getInt(KEY_COUNTER_PREFIX + "speedrun_random_30s", 0);
         
@@ -310,27 +314,47 @@ public class AchievementManager {
         // Robot count
         if (robotCount >= 5) unlock("game_5_robots");
         
-        // Perfect random games
+        // Perfect random games (cumulative - no reset)
         if (playerMoves == optimalMoves) {
             perfectRandomGames++;
             saveCounter("perfect_random_games", perfectRandomGames);
             if (perfectRandomGames >= 5) unlock("perfect_random_games_5");
             if (perfectRandomGames >= 10) unlock("perfect_random_games_10");
             if (perfectRandomGames >= 20) unlock("perfect_random_games_20");
+            
+            // Perfect random games streak (resets on non-optimal)
+            perfectRandomGamesStreak++;
+            saveCounter("perfect_random_games_streak", perfectRandomGamesStreak);
+            if (perfectRandomGamesStreak >= 5) unlock("perfect_random_games_streak_5");
+            if (perfectRandomGamesStreak >= 10) unlock("perfect_random_games_streak_10");
+            if (perfectRandomGamesStreak >= 20) unlock("perfect_random_games_streak_20");
+            Timber.d("[ACHIEVEMENTS] Perfect game - total: %d, streak: %d", perfectRandomGames, perfectRandomGamesStreak);
+        } else {
+            // Reset streak when non-optimal
+            perfectRandomGamesStreak = 0;
+            saveCounter("perfect_random_games_streak", perfectRandomGamesStreak);
+            Timber.d("[ACHIEVEMENTS] Non-optimal game - perfect streak reset to 0");
         }
         
-        // No hints random games - reset counter if hint was used (streak)
+        // No hints random games - both cumulative and streak
         if (hintsUsed == 0) {
+            // Cumulative counter (never resets)
+            noHintRandomGamesTotal++;
+            saveCounter("no_hint_random_games_total", noHintRandomGamesTotal);
+            if (noHintRandomGamesTotal >= 10) unlock("no_hints_random_10");
+            if (noHintRandomGamesTotal >= 50) unlock("no_hints_random_50");
+            
+            // Streak counter (resets on hint usage)
             noHintRandomGames++;
             saveCounter("no_hint_random_games", noHintRandomGames);
             if (noHintRandomGames >= 10) unlock("no_hints_streak_random_10");
             if (noHintRandomGames >= 50) unlock("no_hints_streak_random_50");
-            Timber.d("[ACHIEVEMENTS] No hints used - counter: %d", noHintRandomGames);
+            Timber.d("[ACHIEVEMENTS] No hints used - total: %d, streak: %d", noHintRandomGamesTotal, noHintRandomGames);
         } else {
-            // Reset counter when hint is used
+            // Reset streak counter when hint is used
             noHintRandomGames = 0;
             saveCounter("no_hint_random_games", noHintRandomGames);
-            Timber.d("[ACHIEVEMENTS] Hint used - no_hint counter reset to 0");
+            Timber.d("[ACHIEVEMENTS] Hint used - no_hint streak reset to 0 (total stays: %d)", noHintRandomGamesTotal);
         }
         
         // Speed achievements
@@ -524,7 +548,9 @@ public class AchievementManager {
         impossibleModeGames = 0;
         impossibleModeStreak = 0;
         perfectRandomGames = 0;
+        perfectRandomGamesStreak = 0;
         noHintRandomGames = 0;
+        noHintRandomGamesTotal = 0;
         dailyLoginStreak = 0;
         speedrunRandomGamesUnder30s = 0;
         

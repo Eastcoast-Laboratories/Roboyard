@@ -232,6 +232,7 @@ public class AchievementDefinitions {
             AchievementCategory.RANDOM_COVERAGE, ICON_TARGET_BLUE));
             
         // ========== RANDOM GAME - STREAKS & CHALLENGES ==========
+        // Perfect random games (cumulative - no reset)
         add(new Achievement("perfect_random_games_5", 
             "achievement_perfect_random_5", "achievement_perfect_random_5_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_FLAME));
@@ -241,6 +242,24 @@ public class AchievementDefinitions {
         add(new Achievement("perfect_random_games_20", 
             "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
+        // Perfect random games streak (resets on non-optimal)
+        add(new Achievement("perfect_random_games_streak_5", 
+            "achievement_perfect_random_streak_5", "achievement_perfect_random_streak_5_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_FLAME));
+        add(new Achievement("perfect_random_games_streak_10", 
+            "achievement_perfect_random_streak_10", "achievement_perfect_random_streak_10_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_INFINITY));
+        add(new Achievement("perfect_random_games_streak_20", 
+            "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
+        // No hints random games (cumulative - no reset)
+        add(new Achievement("no_hints_random_10", 
+            "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
+        add(new Achievement("no_hints_random_50", 
+            "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR));
+        // No hints random games streak (resets on hint usage)
         add(new Achievement("no_hints_streak_random_10", 
             "achievement_no_hints_streak_random_10", "achievement_no_hints_streak_random_10_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
