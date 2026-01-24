@@ -84,11 +84,15 @@ public class StreakManager {
             }
             // Start new streak
             currentStreak = 1;
-            Timber.d("[STREAK] New streak started");
+            Timber.d("[STREAK] Streak broken after %d days away, new streak started", daysAway);
         } else if (lastLoginDate == 0) {
             // First login ever - don't trigger comeback
             currentStreak = 1;
             Timber.d("[STREAK] First login recorded");
+        } else {
+            // This shouldn't happen, but handle it gracefully
+            Timber.w("[STREAK] Unexpected state: today=%d, lastLogin=%d, streak=%d", today, lastLoginDate, currentStreak);
+            currentStreak = 1;
         }
         
         // Save updated values
@@ -116,6 +120,13 @@ public class StreakManager {
      */
     public long getLastLoginDate() {
         return prefs.getLong(KEY_LAST_LOGIN_DATE, 0);
+    }
+    
+    /**
+     * Get stored streak days from SharedPreferences (for debug display)
+     */
+    public int getStoredStreakDays() {
+        return prefs.getInt(KEY_CURRENT_STREAK, 0);
     }
     
     /**

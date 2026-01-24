@@ -75,10 +75,8 @@ public class MainFragmentActivity extends AppCompatActivity {
         // Initialize the GameStateManager as a ViewModel
         gameStateManager = new ViewModelProvider(this).get(GameStateManager.class);
         
-        // Record daily login for streak tracking
-        StreakManager streakManager = StreakManager.getInstance(getApplicationContext());
-        streakManager.recordDailyLogin();
-        Timber.d("[STREAK] Daily login recorded at app startup");
+        // Note: Daily login is now recorded when starting a new game (random or level)
+        // instead of at app startup, to ensure the user actually plays
         
         // Set up the Navigation controller with proper error handling
         try {

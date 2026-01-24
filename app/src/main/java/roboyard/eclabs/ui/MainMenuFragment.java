@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
 import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.eclabs.achievements.StreakManager;
 import timber.log.Timber;
 import java.util.Locale;
 import android.content.res.Resources;
@@ -92,6 +93,10 @@ public class MainMenuFragment extends BaseGameFragment {
     private void setupButtons() {
         // New Game button - start a game
         newGameButton.setOnClickListener(v -> {
+            // Record daily login when starting a new game
+            StreakManager.getInstance(requireContext()).recordDailyLogin();
+            Timber.d("[STREAK] Daily login recorded on new random game start");
+            
             // Reset achievement game session flags for new game
             AchievementManager.getInstance(requireContext()).onNewGameStarted();
             
@@ -106,6 +111,10 @@ public class MainMenuFragment extends BaseGameFragment {
         
         // Level Game button - go to level selection screen
         levelGameButton.setOnClickListener(v -> {
+            // Record daily login when starting a level game
+            StreakManager.getInstance(requireContext()).recordDailyLogin();
+            Timber.d("[STREAK] Daily login recorded on level game start");
+            
             LevelSelectionFragment levelSelectionFragment = new LevelSelectionFragment();
             navigateToDirect(levelSelectionFragment);
         });

@@ -412,14 +412,23 @@ public class AchievementManager {
     }
     
     /**
-     * Called on daily login
+     * Called on daily login - only updates streak counter, doesn't unlock achievements
+     * Achievements are unlocked when player starts a game (onNewGameStarted)
      */
     public void onDailyLogin(int streakDays) {
         dailyLoginStreak = streakDays;
         saveCounter("daily_login_streak", dailyLoginStreak);
-        
+        Timber.d("[ACHIEVEMENT] Daily login recorded - streak: %d days", streakDays);
+    }
+    
+    /**
+     * Called when player starts a new game - check and unlock streak achievements
+     */
+    public void checkAndUnlockStreakAchievements() {
+        int streakDays = dailyLoginStreak;
         if (streakDays >= 7) unlock("daily_login_7");
         if (streakDays >= 30) unlock("daily_login_30");
+        Timber.d("[ACHIEVEMENT] Checked streak achievements at game start - streak: %d days", streakDays);
     }
     
     /**
