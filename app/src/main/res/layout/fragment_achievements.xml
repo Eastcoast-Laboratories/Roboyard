@@ -73,7 +73,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Title -->
+    <!-- Title - centered on page, pushed right by back button if needed -->
     <TextView
         android:id="@+id/title_text"
         android:layout_width="wrap_content"
@@ -82,10 +82,12 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#333333"
-        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/back_button" />
+        app:layout_constraintStart_toEndOf="@id/back_button"
+        app:layout_constraintTop_toTopOf="@id/back_button"
+        app:layout_constraintBottom_toBottomOf="@id/back_button"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0.5" />
 
     <!-- Progress text -->
     <TextView
