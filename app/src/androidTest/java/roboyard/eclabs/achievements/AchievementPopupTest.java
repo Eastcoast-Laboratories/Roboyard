@@ -147,7 +147,7 @@ public class AchievementPopupTest {
         
         // Complete a random game with 2 targets
         achievementManager.onNewGameStarted();
-        boolean isImpossibleMode = roboyard.eclabs.preferences.Preferences.difficulty == 4;
+        boolean isImpossibleMode = Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE;
         achievementManager.onRandomGameCompleted(10, 10, 0, 15000, isImpossibleMode, 4, 2, 2);
         
         // Should trigger: first_game, game_2_targets, speedrun_random_under_20s, perfect_random_games progression

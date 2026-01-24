@@ -285,8 +285,8 @@ public class AchievementManager {
                 saveCounter("impossible_mode_streak", 0);
             }
             Timber.d("[ACHIEVEMENTS] Impossible mode game counted (optimalMoves=%d >= 17)", optimalMoves);
-        } else if (isImpossibleMode) {
-            Timber.d("[ACHIEVEMENTS] Impossible mode game NOT counted (optimalMoves=%d < 17)", optimalMoves);
+        } else {
+            Timber.d("[ACHIEVEMENTS] Impossible mode game NOT counted (optimalMoves=%d < 17), isImpossibleMode=%b", optimalMoves, isImpossibleMode);
         }
         
         // Solution length achievements (18-29 moves individually, 30+ as one)

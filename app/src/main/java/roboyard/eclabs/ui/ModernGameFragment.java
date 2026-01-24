@@ -702,7 +702,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         }
                         int hintsUsed = state.getHintCount();
                         long elapsedTime = SystemClock.elapsedRealtime() - startTime;
-                        boolean isImpossibleMode = Preferences.difficulty == 4; // Impossible mode
+                        // Reload preferences to ensure we have the latest difficulty setting
+                        Preferences.reloadPreferences();
+                        boolean isImpossibleMode = Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE; // Impossible mode
                         Timber.d("[ACHIEVEMENTS] Game completion: isImpossibleMode=%b (Preferences.difficulty=%d), optimalMoves=%d", 
                                 isImpossibleMode, Preferences.difficulty, optimalMoves);
                         int robotCount = state.getRobots() != null ? state.getRobots().size() : 4;

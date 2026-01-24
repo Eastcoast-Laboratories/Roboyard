@@ -1530,7 +1530,7 @@ public class GameGridView extends View {
             Timber.d("[GOAL DEBUG][ACHIEVEMENTS] Target reached! Game complete in " + gameStateManager.getMoveCount().getValue() + " moves and " + gameStateManager.getSquaresMoved().getValue() + " squares moved");
             
             // Mark goal as reached for square coverage achievements
-            onGoalReached();
+            onGoalReached(selectedRobot);
             
             // Critical fix: Tell the GameStateManager the game is complete
             gameStateManager.setGameComplete(true);
@@ -1661,20 +1661,7 @@ public class GameGridView extends View {
                         .onAllSquaresTraversed(true, false, false, false);
                     Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot unlocked! (%d/%d squares, excluding carré)", visitedCount, totalSquares);
                 }
-                
-                // traverse_all_squares_1_robot_goal: Only if goal not yet reached (goal must be last)
-                if (!allSquaresOneRobotGoalUnlocked && !goalReached) {
-                    allSquaresOneRobotGoalUnlocked = true;
-                    roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
-                        .onAllSquaresTraversed(false, true, false, false);
-                    Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot_goal unlocked! (%d/%d squares, goal not yet reached, excluding carré)", visitedCount, totalSquares);
-                } else if (goalReached) {
-                    Timber.d("[ACHIEVEMENT] one robot - goalReached true");
-                } else {
-                    Timber.d("[ACHIEVEMENT] one robot - allSquaresOneRobotGoalUnlocked false");
-                }
-            } else {
-                Timber.d("[ACHIEVEMENT] one robot - Not all squares traversed yet (%d/%d squares, excluding carré)", visitedCount, totalSquares);
+                // Note: traverse_all_squares_1_robot_goal is checked in onGoalReached() when goal is actually reached
             }
         }
         
@@ -1688,18 +1675,7 @@ public class GameGridView extends View {
                     .onAllSquaresTraversed(false, false, true, false);
                 Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots unlocked! (%d/%d squares, excluding carré)", allVisitedCount, totalSquares);
             }
-            
-            // traverse_all_squares_all_robots_goal: Only if goal not yet reached (goal must be last)
-            if (!allSquaresAllRobotsGoalUnlocked && !goalReached) {
-                allSquaresAllRobotsGoalUnlocked = true;
-                roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
-                    .onAllSquaresTraversed(false, false, false, true);
-                Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots_goal unlocked! (%d/%d squares, goal not yet reached, excluding carré)", allVisitedCount, totalSquares);
-            } else if (goalReached) {
-                Timber.d("[ACHIEVEMENT] all robots - goalReached true");
-            }
-        } else {
-            Timber.d("[ACHIEVEMENT] Not all squares unlocked yet");
+            // Note: traverse_all_squares_all_robots_goal is checked in onGoalReached() when goal is actually reached
         }
     }
     
@@ -1734,11 +1710,48 @@ public class GameGridView extends View {
     }
     
     /**
-     * Called when the goal is reached. Sets goalReached flag to prevent _goal achievements.
+     * Called when the goal is reached. Checks if the goal robot visited all squares for _goal achievements.
      */
-    public void onGoalReached() {
+    public void onGoalReached(GameElement goalRobot) {
         goalReached = true;
-        Timber.d("[ACHIEVEMENT] Goal reached - _goal achievements no longer available");
+        
+        if (gameStateManager == null) {
+            Timber.d("[ACHIEVEMENT] Goal reached but gameStateManager is null");
+            return;
+        }
+        
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null) {
+            Timber.d("[ACHIEVEMENT] Goal reached but gameState is null");
+            return;
+        }
+        
+        // Calculate total traversable squares (grid size minus 4 carré squares)
+        int totalSquares = (gridWidth * gridHeight) - 4;
+        
+        // Check if the goal robot visited all squares for traverse_all_squares_1_robot_goal
+        if (goalRobot != null && visitedSquaresPerRobot.containsKey(goalRobot.getColor())) {
+            int visitedCount = countVisitedSquaresExcludingCarre(visitedSquaresPerRobot.get(goalRobot.getColor()));
+            if (visitedCount >= totalSquares && !allSquaresOneRobotGoalUnlocked) {
+                allSquaresOneRobotGoalUnlocked = true;
+                roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                    .onAllSquaresTraversed(false, true, false, false);
+                Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot_goal unlocked! Goal robot %d visited %d/%d squares", 
+                        goalRobot.getColor(), visitedCount, totalSquares);
+            }
+        }
+        
+        // Check if all robots combined visited all squares for traverse_all_squares_all_robots_goal
+        int allVisitedCount = countVisitedSquaresExcludingCarre(visitedSquaresAllRobots);
+        if (allVisitedCount >= totalSquares && !allSquaresAllRobotsGoalUnlocked) {
+            allSquaresAllRobotsGoalUnlocked = true;
+            roboyard.eclabs.achievements.AchievementManager.getInstance(getContext())
+                .onAllSquaresTraversed(false, false, false, true);
+            Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots_goal unlocked! All robots visited %d/%d squares", 
+                    allVisitedCount, totalSquares);
+        }
+        
+        Timber.d("[ACHIEVEMENT] Goal reached - _goal achievements checked");
     }
     
     /**
