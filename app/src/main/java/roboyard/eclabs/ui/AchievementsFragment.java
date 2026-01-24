@@ -104,7 +104,7 @@ public class AchievementsFragment extends BaseGameFragment {
             case RANDOM_SOLUTION: return "Random - Solution Length";
             case RANDOM_RESOLUTION: return "Random - Screen Resolutions";
             case RANDOM_TARGETS: return "Random - Multiple Targets";
-            case RANDOM_ROBOTS: return "Random - Robot Count";
+            case RANDOM_ROBOTS: return "Random - Fun Challenges";
             case RANDOM_COVERAGE: return "Random - Square Coverage";
             case RANDOM_STREAKS: return "Random - Streaks";
             case RANDOM_SPEED: return "Random - Speed";

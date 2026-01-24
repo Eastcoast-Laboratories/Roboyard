@@ -22,6 +22,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
+| `first_game` | Welcome! | Play your first game | ✅ Implemented |
 | `level_1_complete` | First Steps | Complete Level 1 | ✅ Implemented |
 | `level_10_complete` | Getting Started | Complete 10 levels | ✅ Implemented |
 | `level_50_complete` | Halfway There | Complete 50 levels | ✅ Implemented |
@@ -62,7 +63,6 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
-| `first_game` | Welcome! | Play your first game | ✅ Implemented |
 | `daily_login_7` | Weekly Player | Log in 7 days in a row | ✅ Implemented |
 | `daily_login_30` | Dedicated Player | Log in 30 days in a row | ✅ Implemented |
 | `comeback_player` | Welcome Back! | Return after 30 days of inactivity | ✅ Implemented |
@@ -113,16 +113,19 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `game_2_targets` | Double Target | Complete a game with 2 targets | ✅ Implemented |
 | `game_3_targets` | Triple Target | Complete a game with 3 targets | ✅ Implemented |
 | `game_4_targets` | Quad Target | Complete a game with 4 targets | ✅ Implemented |
+| `game_2_of_2_targets` | 2 of 2 | Complete a game where you need 2 out of 2 targets | ✅ Implemented |
 | `game_2_of_3_targets` | 2 of 3 | Complete a game where you need 2 out of 3 targets | ✅ Implemented |
 | `game_2_of_4_targets` | 2 of 4 | Complete a game where you need 2 out of 4 targets | ✅ Implemented |
+| `game_3_of_3_targets` | 3 of 3 | Complete a game where you need 3 out of 3 targets | ✅ Implemented |
 | `game_3_of_4_targets` | 3 of 4 | Complete a game where you need 3 out of 4 targets | ✅ Implemented |
 | `game_4_of_4_targets` | 4 of 4 | Complete a game where you need all 4 targets | ✅ Implemented |
 
-### Robot Count (1)
+### Fun Challenges (2)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
 | `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented | ✅ |
+| `gimme_five` | Gimme Five | All Robots must touch each other | ✅ Implemented |
 
 ### Square Coverage (4)
 
@@ -158,24 +161,23 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ---
 
-## Total: 58 Achievements
+## Total: 60 Achievements
 
 | Category | Count |
 |----------|-------|
-| Progression | 5 |
+| Progression | 6 |
 | Performance | 5 |
 | Challenge | 5 |
-| Mastery | 4 |
+| Mastery | 5 |
 | Special | 4 |
 | Random - Difficulty | 4 |
 | Random - Solution Length | 11 |
 | Random - Screen Resolutions | 3 |
-| Random - Multiple Targets | 6 |
-| Random - Robot Count | 1 |
-| Random - Square Coverage | 2 |
+| Random - Multiple Targets | 8 |
+| Random - Fun Challenges | 2 |
+| Random - Square Coverage | 4 |
 | Random - Streaks | 5 |
 | Random - Speed | 3 |
-| **Total** | **58** |
 
 Note: The solution length achievements include 20-29 (10 achievements) plus 30+ (1 achievement) = 11 total.
 

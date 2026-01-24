@@ -469,6 +469,8 @@
 
     <!-- Achievement Strings -->
     <!-- Progression Achievements -->
+    <string name="achievement_first_game">Welcome!</string>
+    <string name="achievement_first_game_desc">Play your first game</string>
     <string name="achievement_level_1_complete">First Steps</string>
     <string name="achievement_level_1_complete_desc">Complete Level 1</string>
     <string name="achievement_level_10_complete">Getting Started</string>
@@ -513,8 +515,6 @@
     <string name="achievement_3_star_all_desc">Achieve 3 stars on all 140 levels</string>
     
     <!-- Special Achievements -->
-    <string name="achievement_first_game">Welcome!</string>
-    <string name="achievement_first_game_desc">Play your first game</string>
     <string name="achievement_streak_7">Weekly Player</string>
     <string name="achievement_streak_7_desc">Log in 7 days in a row</string>
     <string name="achievement_streak_30">Dedicated Player</string>
@@ -584,7 +584,7 @@
     <string name="achievement_4_of_4_targets">4 of 4</string>
     <string name="achievement_4_of_4_targets_desc">Complete a game where you need all 4 targets</string>
     
-    <!-- Random Game - Robot Count -->
+    <!-- Random Game - Fun Challenges -->
     <string name="achievement_5_robots">Full Team</string>
     <string name="achievement_5_robots_desc">Complete a game with 5 robots</string>
     

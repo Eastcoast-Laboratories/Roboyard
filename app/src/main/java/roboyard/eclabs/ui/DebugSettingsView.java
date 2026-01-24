@@ -82,7 +82,7 @@ public class DebugSettingsView extends LinearLayout {
         addGameDataButtons(contentLayout);
         
         // Robot Count Section
-        addSectionTitle(contentLayout, "ROBOT COUNT");
+        addSectionTitle(contentLayout, "FUN CHALLENGES");
         addRobotCountInput(contentLayout);
         
         scrollView.addView(contentLayout);

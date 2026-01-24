@@ -311,7 +311,7 @@ public class AchievementManager {
         if (targetsNeeded == 3 && targetCount == 4) unlock("game_3_of_4_targets");
         if (targetsNeeded == 4 && targetCount == 4) unlock("game_4_of_4_targets");
         
-        // Robot count
+        // Fun Challenges
         if (robotCount >= 5) unlock("game_5_robots");
         
         // Perfect random games (cumulative - no reset)

@@ -71,6 +71,9 @@ public class AchievementDefinitions {
     
     private static void initializeAchievements() {
         // ========== PROGRESSION ACHIEVEMENTS ==========
+        add(new Achievement("first_game", 
+            "achievement_first_game", "achievement_first_game_desc",
+            AchievementCategory.PROGRESSION, ICON_HEART_GEAR));
         add(new Achievement("level_1_complete", 
             "achievement_level_1_complete", "achievement_level_1_complete_desc",
             AchievementCategory.PROGRESSION, ICON_MEDAL));
@@ -135,9 +138,6 @@ public class AchievementDefinitions {
             AchievementCategory.MASTERY, ICON_TROPHY_GOLD));
             
         // ========== SPECIAL ACHIEVEMENTS ==========
-        add(new Achievement("first_game", 
-            "achievement_first_game", "achievement_first_game_desc",
-            AchievementCategory.SPECIAL, ICON_HEART_GEAR));
         add(new Achievement("daily_login_7", 
             "achievement_streak_7", "achievement_streak_7_desc",
             AchievementCategory.SPECIAL, ICON_FLAME));
