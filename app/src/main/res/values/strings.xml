@@ -533,6 +533,10 @@
     <string name="achievement_impossible_streak_10_desc">Complete 10 games in a row in Impossible mode with optimal moves</string>
     
     <!-- Random Game - Solution Length -->
+    <string name="achievement_solution_18">18 Move Master</string>
+    <string name="achievement_solution_18_desc">Complete a game with optimal solution of 18 moves</string>
+    <string name="achievement_solution_19">19 Move Master</string>
+    <string name="achievement_solution_19_desc">Complete a game with optimal solution of 19 moves</string>
     <string name="achievement_solution_20">20 Move Master</string>
     <string name="achievement_solution_20_desc">Complete a game with optimal solution of 20 moves</string>
     <string name="achievement_solution_21">21 Move Master</string>
@@ -577,6 +581,8 @@
     <string name="achievement_2_of_4_targets_desc">Complete a game where you need 2 out of 4 targets</string>
     <string name="achievement_3_of_4_targets">3 of 4</string>
     <string name="achievement_3_of_4_targets_desc">Complete a game where you need 3 out of 4 targets</string>
+    <string name="achievement_4_of_4_targets">4 of 4</string>
+    <string name="achievement_4_of_4_targets_desc">Complete a game where you need all 4 targets</string>
     
     <!-- Random Game - Robot Count -->
     <string name="achievement_5_robots">Full Team</string>

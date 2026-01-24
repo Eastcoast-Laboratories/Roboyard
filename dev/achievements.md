@@ -42,9 +42,9 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `solve_custom_level` | Custom Solver | Solve a custom-created level | ⏳ Disabled (custom levels not implemented) |
-| `create_custom_level` | Level Designer | Create and save a custom level | ⏳ Disabled (custom levels not implemented) |
-| `share_custom_level` | Sharing is Caring | Share a custom level with others | ⏳ Disabled (custom levels not implemented) |
+| `solve_custom_level` | Custom Solver | Solve a custom-created level | ❌ Not Implemented (custom levels feature pending) |
+| `create_custom_level` | Level Designer | Create and save a custom level | ❌ Not Implemented (custom levels feature pending) |
+| `share_custom_level` | Sharing is Caring | Share a custom level with others | ❌ Not Implemented (custom levels feature pending) |
 
 > **Note:** `no_hints_10` and `no_hints_50` were removed because hints are not allowed in levels.
 
@@ -84,6 +84,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
+| `solution_18_moves` | 18 Move Master | Complete a game with optimal solution of 18 moves | ✅ Implemented |
+| `solution_19_moves` | 19 Move Master | Complete a game with optimal solution of 19 moves | ✅ Implemented |
 | `solution_20_moves` | 20 Move Master | Complete a game with optimal solution of 20 moves | ✅ Implemented |
 | `solution_21_moves` | 21 Move Master | Complete a game with optimal solution of 21 moves | ✅ Implemented |
 | `solution_22_moves` | 22 Move Master | Complete a game with optimal solution of 22 moves | ✅ Implemented |
@@ -114,6 +116,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `game_2_of_3_targets` | 2 of 3 | Complete a game where you need 2 out of 3 targets | ✅ Implemented |
 | `game_2_of_4_targets` | 2 of 4 | Complete a game where you need 2 out of 4 targets | ✅ Implemented |
 | `game_3_of_4_targets` | 3 of 4 | Complete a game where you need 3 out of 4 targets | ✅ Implemented |
+| `game_4_of_4_targets` | 4 of 4 | Complete a game where you need all 4 targets | ✅ Implemented |
 
 ### Robot Count (1)
 
@@ -121,12 +124,14 @@ This document defines all achievements in the game. Keep this file synchronized 
 |----|------|-------------|--------|
 | `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented |
 
-### Square Coverage (2)
+### Square Coverage (1)
 
 | ID | Name | Description | Status |
 |----|------|-------------|--------|
-| `traverse_all_squares_1_robot` | Solo Explorer | Visit all squares on the board with 1 robot before reaching goal | ✅ Implemented |
-| `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots before reaching goal | ✅ Implemented |
+| `traverse_all_squares_1_robot` | Solo Explorer | Visit all squares on the board with 1 robot |  |
+| `traverse_all_squares_1_robot_goal` | Solo Explorer | Visit all squares on the board with 1 robot before reaching goal |  |
+| `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots |  |
+| `traverse_all_squares_all_robots_goal` | Team Explorer | Visit all squares on the board with all robots before reaching goal |  |
 
 ### Streaks & Challenges (5)
 
