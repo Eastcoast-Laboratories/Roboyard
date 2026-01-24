@@ -1566,6 +1566,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Play appropriate sound
             if (hitRobot) {
                 playSound("hit_robot");
+                // ModernGameFragment.onRobotTouched();
             } else if (hitWall) {
                 playSound("hit_wall");
             } else {

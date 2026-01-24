@@ -42,6 +42,9 @@ public class AchievementManager {
     // Game session tracking
     private boolean hintUsedInCurrentGame = false;
     
+    // Robot touch tracking for gimme_five achievement
+    private int[] robotsTouched = new int[5]; // Track which robots have been touched (0-4 for up to 5 robots)
+    
     public interface AchievementUnlockListener {
         void onAchievementUnlocked(Achievement achievement);
     }
@@ -371,11 +374,55 @@ public class AchievementManager {
     }
     
     /**
+     * Track robot-to-robot collision for gimme_five achievement.
+     * Called when a robot hits another robot (hit_robot sound plays).
+     * 
+     * @param robotIndex The index of the robot that was hit (0-4)
+     * @param robotCount Total number of robots in the game
+     */
+    public void onRobotTouched(int robotIndex, int robotCount) {
+        if (robotIndex < 0 || robotIndex >= robotCount || robotCount > 5) {
+            return;
+        }
+        
+        // Mark this robot as touched
+        if (robotIndex < robotsTouched.length) {
+            robotsTouched[robotIndex]++;
+        }
+        
+        // Check if all robots have touched each other
+        if (robotCount >= 2) {
+            boolean allTouched = true;
+            for (int i = 0; i < robotCount; i++) {
+                if (robotsTouched[i] == 0) {
+                    allTouched = false;
+                    break;
+                }
+            }
+            
+            if (allTouched) {
+                unlock("gimme_five");
+                Timber.d("[ACHIEVEMENTS] All %d robots have touched each other - gimme_five unlocked", robotCount);
+            }
+        }
+    }
+    
+    /**
+     * Reset robot touch tracking for a new game.
+     */
+    private void resetRobotTouchTracking() {
+        for (int i = 0; i < robotsTouched.length; i++) {
+            robotsTouched[i] = 0;
+        }
+    }
+    
+    /**
      * Called when a new game starts (level or random game).
      * Resets the game session tracking flags and checks daily login achievements.
      */
     public void onNewGameStarted() {
         hintUsedInCurrentGame = false;
+        resetRobotTouchTracking();
         
         // Check daily login achievements
         if (dailyLoginStreak >= 7) unlock("daily_login_7");

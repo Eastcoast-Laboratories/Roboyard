@@ -198,12 +198,18 @@ public class AchievementDefinitions {
         add(new Achievement("game_4_targets", 
             "achievement_4_targets", "achievement_4_targets_desc",
             AchievementCategory.RANDOM_TARGETS, 50)); // Pyramid/triangle
+        add(new Achievement("game_2_of_2_targets", 
+            "achievement_2_of_2_targets", "achievement_2_of_2_targets_desc",
+            AchievementCategory.RANDOM_TARGETS, 32)); // Target blue
         add(new Achievement("game_2_of_3_targets", 
             "achievement_2_of_3_targets", "achievement_2_of_3_targets_desc",
             AchievementCategory.RANDOM_TARGETS, 52)); // Hexagon
         add(new Achievement("game_2_of_4_targets", 
             "achievement_2_of_4_targets", "achievement_2_of_4_targets_desc",
             AchievementCategory.RANDOM_TARGETS, 53)); // Cube
+        add(new Achievement("game_3_of_3_targets", 
+            "achievement_3_of_3_targets", "achievement_3_of_3_targets_desc",
+            AchievementCategory.RANDOM_TARGETS, 36)); // Map
         add(new Achievement("game_3_of_4_targets", 
             "achievement_3_of_4_targets", "achievement_3_of_4_targets_desc",
             AchievementCategory.RANDOM_TARGETS, 49)); // Triangle eye
@@ -211,10 +217,13 @@ public class AchievementDefinitions {
             "achievement_4_of_4_targets", "achievement_4_of_4_targets_desc",
             AchievementCategory.RANDOM_TARGETS, ICON_CROWN)); // Crown for completing all 4
             
-        // ========== RANDOM GAME - ROBOT COUNT ==========
+        // ========== RANDOM GAME - FUN CHALLENGES ==========
         add(new Achievement("game_5_robots", 
             "achievement_5_robots", "achievement_5_robots_desc",
             AchievementCategory.RANDOM_ROBOTS, ICON_ROBOT_YELLOW));
+        add(new Achievement("gimme_five", 
+            "achievement_gimme_five", "achievement_gimme_five_desc",
+            AchievementCategory.RANDOM_ROBOTS, ICON_SPARKLES));
             
         // ========== RANDOM GAME - SQUARE COVERAGE ==========
         // 4 achievements: with/without goal requirement, 1 robot/all robots

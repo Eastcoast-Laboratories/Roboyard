@@ -581,12 +581,18 @@
     <string name="achievement_2_of_4_targets_desc">Complete a game where you need 2 out of 4 targets</string>
     <string name="achievement_3_of_4_targets">3 of 4</string>
     <string name="achievement_3_of_4_targets_desc">Complete a game where you need 3 out of 4 targets</string>
+    <string name="achievement_2_of_2_targets">2 of 2</string>
+    <string name="achievement_2_of_2_targets_desc">Complete a game where you need 2 out of 2 targets</string>
+    <string name="achievement_3_of_3_targets">3 of 3</string>
+    <string name="achievement_3_of_3_targets_desc">Complete a game where you need 3 out of 3 targets</string>
     <string name="achievement_4_of_4_targets">4 of 4</string>
     <string name="achievement_4_of_4_targets_desc">Complete a game where you need all 4 targets</string>
     
     <!-- Random Game - Fun Challenges -->
     <string name="achievement_5_robots">Full Team</string>
     <string name="achievement_5_robots_desc">Complete a game with 5 robots</string>
+    <string name="achievement_gimme_five">Gimme Five</string>
+    <string name="achievement_gimme_five_desc">All robots must touch each other</string>
     
     <!-- Random Game - Square Coverage -->
     <string name="achievement_traverse_1_robot">Solo Explorer</string>
