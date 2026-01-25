@@ -136,6 +136,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
     private WeakReference<Activity> activityRef;
+    
+    // Last movement collision info (set by moveRobotInDirection, read by GameGridView)
+    private boolean lastMoveHitWall = false;
+    private boolean lastMoveHitRobot = false;
+    private GameElement lastMoveHitRobotElement = null;
 
     // Store the difficulty level from a deep link
     private int deepLinkDifficulty = -1;
@@ -996,6 +1001,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         squaresMovedHistory.add(getSquaresMoved().getValue());
         Timber.d("[ROBOTS] Saved complete state to history. History size now: %d", stateHistory.size());
 
+        // Reset collision info
+        GameElement hitRobotElement = null;
+        
         // Check for movement in X direction
         if (dx != 0) {
             int step = dx > 0 ? 1 : -1;
@@ -1007,6 +1015,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     GameElement robotAtPosition = state.getRobotAt(i, startY);
                     if (robotAtPosition != null) {
                         hitRobot = true;
+                        hitRobotElement = robotAtPosition;
                     } else {
                         hitWall = true;
                     }
@@ -1026,6 +1035,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     GameElement robotAtPosition = state.getRobotAt(startX, i);
                     if (robotAtPosition != null) {
                         hitRobot = true;
+                        hitRobotElement = robotAtPosition;
                     } else {
                         hitWall = true;
                     }
@@ -1033,6 +1043,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
         }
+        
+        // Store collision info for GameGridView to use (DRY - avoid recalculating)
+        this.lastMoveHitWall = hitWall;
+        this.lastMoveHitRobot = hitRobot;
+        this.lastMoveHitRobotElement = hitRobotElement;
 
         // Calculate the distance moved
         int distanceMoved = Math.abs(endX - startX) + Math.abs(endY - startY);
@@ -2743,5 +2758,29 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Start the solver in the background
         calculateSolutionAsync(null);
+    }
+    
+    /**
+     * Get collision info from the last movement (DRY - avoid recalculating in GameGridView).
+     * @return true if the last movement hit a wall
+     */
+    public boolean getLastMoveHitWall() {
+        return lastMoveHitWall;
+    }
+    
+    /**
+     * Get collision info from the last movement (DRY - avoid recalculating in GameGridView).
+     * @return true if the last movement hit another robot
+     */
+    public boolean getLastMoveHitRobot() {
+        return lastMoveHitRobot;
+    }
+    
+    /**
+     * Get the robot that was hit in the last movement (DRY - avoid recalculating in GameGridView).
+     * @return the robot element that was hit, or null if no robot was hit
+     */
+    public GameElement getLastMoveHitRobotElement() {
+        return lastMoveHitRobotElement;
     }
 }

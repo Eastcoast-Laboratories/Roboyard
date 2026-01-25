@@ -1499,17 +1499,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Move the selected robot in the specified direction
+     * Move the selected robot in the specified direction.
      * 
      * Note: This method is only called by the accessibility directional buttons
-     * (btnMoveNorth, btnMoveSouth, btnMoveEast, btnMoveWest) and not by normal touch
-     * interactions on the GameGridView, which handles movement directly.
+     * (btnMoveNorth, btnMoveSouth, btnMoveEast, btnMoveWest). Sound effects,
+     * achievement tracking, and collision detection are handled by GameGridView
+     * to avoid code duplication.
      * 
      * @param dx Horizontal movement (-1 = left, 1 = right)
      * @param dy Vertical movement (-1 = up, 1 = down)
      */
     private void moveRobotInDirection(int dx, int dy) {
-        Timber.d("Moving robot in direction: dx=%d, dy=%d", dx, dy);
+        Timber.d("[ACCESSIBILITY] Moving robot in direction: dx=%d, dy=%d", dx, dy);
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null || state.getSelectedRobot() == null) {
             announceAccessibility(getString(R.string.no_robot_selected));
@@ -1517,77 +1518,24 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
         
         GameElement robot = state.getSelectedRobot();
-        // Store original position for sound and announcements
         int startX = robot.getX();
         int startY = robot.getY();
         
-        // Use the unified method in GameStateManager
-        boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
+        // Use GameGridView to handle the movement - it will handle sounds, achievements, and announcements
+        boolean moved = gameGridView.moveRobotInDirectionWithEffects(robot, dx, dy);
         
         if (moved) {
-            // Robot moved - play appropriate sound and make announcements
-            // Calculate the distance from start to end
+            // Calculate distance for accessibility announcement
             int endX = robot.getX();
             int endY = robot.getY();
             int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
             
-            // Check if the robot hit a wall or another robot
-            boolean hitWall = false;
-            boolean hitRobotElement = false;
-            GameElement hitRobot = null;
-            
-            Timber.d("[ACCESSIBILITY] Checking for obstacles in the direction of movement: robot=%s, dx=%d, dy=%d", robot, dx, dy);
-            // Check for obstacles in the direction of movement
-            if (dx != 0) {
-                // Moving horizontally, check the next position in that direction
-                int nextX = endX + dx;
-                if (nextX >= 0 && nextX < state.getWidth()) {
-                    GameElement robotAtPosition = state.getRobotAt(nextX, endY);
-                    if (robotAtPosition != null) {
-                        hitRobotElement = true;
-                        hitRobot = robotAtPosition;
-                    } else if (!state.canRobotMoveTo(robot, nextX, endY)) {
-                        hitWall = true;
-                    }
-                }
-            } else if (dy != 0) {
-                // Moving vertically, check the next position in that direction
-                int nextY = endY + dy;
-                if (nextY >= 0 && nextY < state.getHeight()) {
-                    GameElement robotAtPosition = state.getRobotAt(endX, nextY);
-                    if (robotAtPosition != null) {
-                        hitRobotElement = true;
-                        hitRobot = robotAtPosition;
-                    } else if (!state.canRobotMoveTo(robot, endX, nextY)) {
-                        hitWall = true;
-                    }
-                }
-            }
-            
-            // Update the game grid view to show the movement
-            gameGridView.invalidate();
-            
-            // Handle sounds and achievements (DRY - shared with GameGridView)
-            handleRobotMovementSounds(state, robot, hitRobot, hitWall, "Accessibility");
-            
-            // Check for goal completion - although GameStateManager also does this
-            if (state.isRobotAtTarget(robot)) {
-                announceAccessibility(getString(R.string.game_completed_a11y, 
-                        gameStateManager.getMoveCount().getValue(),
-                        gameStateManager.getSquaresMoved().getValue()));
-                
-                // Play win sound
-                playSound("win");
-                Timber.d("[ACCESSIBILITY] Goal reached! Announced completion");
-            } else {
-                // Announce the robot that moved and distance traveled
-                String robotColor = getLocalizedRobotColorNameByGridElement(robot);
-                announceAccessibility(robotColor + " moved " + dist + " squares");
-                Timber.d("[ACCESSIBILITY] Robot %s moved %d squares", robotColor, dist);
-            }
+            // Announce the movement for accessibility
+            String robotColor = getLocalizedRobotColorNameByGridElement(robot);
+            announceAccessibility(robotColor + " moved " + dist + " squares");
+            Timber.d("[ACCESSIBILITY] Robot %s moved %d squares", robotColor, dist);
         } else {
-            // Did not move, play wall hit sound
-            playSound("hit_wall");
+            // Did not move - sound already played by GameGridView
             announceAccessibility(getString(R.string.cannot_move_in_this_direction));
             Timber.d("[ACCESSIBILITY] Movement blocked in direction dx=%d, dy=%d", dx, dy);
         }

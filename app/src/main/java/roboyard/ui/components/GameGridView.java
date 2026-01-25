@@ -1466,6 +1466,40 @@ public class GameGridView extends View {
     }
     
     /**
+     * Move a robot in the specified direction and handle all effects (sounds, achievements, announcements).
+     * This is the single entry point for robot movement from accessibility buttons.
+     * 
+     * @param robot The robot to move
+     * @param dx Horizontal direction (-1 = left, 1 = right, 0 = no horizontal movement)
+     * @param dy Vertical direction (-1 = up, 1 = down, 0 = no vertical movement)
+     * @return true if the robot moved, false if blocked
+     */
+    public boolean moveRobotInDirectionWithEffects(GameElement robot, int dx, int dy) {
+        GameState state = gameStateManager.getCurrentState().getValue();
+        if (state == null || robot == null) {
+            return false;
+        }
+        
+        int oldX = robot.getX();
+        int oldY = robot.getY();
+        
+        // Use GameStateManager to perform the actual movement
+        boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
+        
+        if (moved) {
+            // Handle all effects (sounds, achievements, path updates, etc.)
+            handleRobotMovementEffects(state, robot, oldX, oldY);
+        } else {
+            // Play wall hit sound for blocked movement
+            if (fragment instanceof ModernGameFragment) {
+                ((ModernGameFragment) fragment).playSound("hit_wall");
+            }
+        }
+        
+        return moved;
+    }
+    
+    /**
      * Handle effects after a robot has moved (sound, animation, game completion check)
      */
     void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
@@ -1480,41 +1514,11 @@ public class GameGridView extends View {
         // Update the robot's path
         updateRobotPath(selectedRobot, oldX, oldY, selectedRobot.getX(), selectedRobot.getY());
         
-        // Calculate if robot hit a wall or another robot
-        boolean hitWall = false;
-        boolean hitRobot = false;
-        GameElement hitRobotElement = null;
-        int dx = selectedRobot.getX() - oldX;
-        int dy = selectedRobot.getY() - oldY;
+        // Get collision info from GameStateManager (DRY - already calculated during movement)
+        boolean hitWall = gameStateManager.getLastMoveHitWall();
+        GameElement hitRobotElement = gameStateManager.getLastMoveHitRobotElement();
         
-        // Determine if we hit something
-        if (dx != 0) {
-            // Moving horizontally
-            int nextX = selectedRobot.getX() + (dx > 0 ? 1 : -1);
-            if (nextX >= 0 && nextX < state.getWidth()) {
-                GameElement robotAtPosition = state.getRobotAt(nextX, selectedRobot.getY());
-                if (robotAtPosition != null) {
-                    hitRobot = true;
-                    hitRobotElement = robotAtPosition;
-                } else if (!state.canRobotMoveTo(selectedRobot, nextX, selectedRobot.getY())) {
-                    hitWall = true;
-                }
-            }
-        } else if (dy != 0) {
-            // Moving vertically
-            int nextY = selectedRobot.getY() + (dy > 0 ? 1 : -1);
-            if (nextY >= 0 && nextY < state.getHeight()) {
-                GameElement robotAtPosition = state.getRobotAt(selectedRobot.getX(), nextY);
-                if (robotAtPosition != null) {
-                    hitRobot = true;
-                    hitRobotElement = robotAtPosition;
-                } else if (!state.canRobotMoveTo(selectedRobot, selectedRobot.getX(), nextY)) {
-                    hitWall = true;
-                }
-            }
-        }
-        
-        // Play the appropriate sound effect based on what happened (DRY - shared with Accessibility)
+        // Play the appropriate sound effect based on what happened
         if (fragment instanceof ModernGameFragment) {
             ModernGameFragment modernFragment = (ModernGameFragment) fragment;
             // Use shared method to handle sounds and achievements
