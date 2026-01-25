@@ -1483,6 +1483,7 @@ public class GameGridView extends View {
         // Calculate if robot hit a wall or another robot
         boolean hitWall = false;
         boolean hitRobot = false;
+        GameElement hitRobotElement = null;
         int dx = selectedRobot.getX() - oldX;
         int dy = selectedRobot.getY() - oldY;
         
@@ -1494,6 +1495,7 @@ public class GameGridView extends View {
                 GameElement robotAtPosition = state.getRobotAt(nextX, selectedRobot.getY());
                 if (robotAtPosition != null) {
                     hitRobot = true;
+                    hitRobotElement = robotAtPosition;
                 } else if (!state.canRobotMoveTo(selectedRobot, nextX, selectedRobot.getY())) {
                     hitWall = true;
                 }
@@ -1505,25 +1507,21 @@ public class GameGridView extends View {
                 GameElement robotAtPosition = state.getRobotAt(selectedRobot.getX(), nextY);
                 if (robotAtPosition != null) {
                     hitRobot = true;
+                    hitRobotElement = robotAtPosition;
                 } else if (!state.canRobotMoveTo(selectedRobot, selectedRobot.getX(), nextY)) {
                     hitWall = true;
                 }
             }
         }
         
-        // Play the appropriate sound effect based on what happened
-        Timber.d("[SOUND] Playing sound from GameGridView: " + (hitRobot ? "hit_robot" : hitWall ? "hit_wall" : "move"));
+        // Play the appropriate sound effect based on what happened (DRY - shared with Accessibility)
         if (fragment instanceof ModernGameFragment) {
-            if (hitRobot) {
-                ((ModernGameFragment) fragment).playSound("hit_robot");
-            } else if (hitWall) {
-                ((ModernGameFragment) fragment).playSound("hit_wall");
-            } else {
-                ((ModernGameFragment) fragment).playSound("move");
-            }
+            ModernGameFragment modernFragment = (ModernGameFragment) fragment;
+            // Use shared method to handle sounds and achievements
+            modernFragment.handleRobotMovementSounds(state, selectedRobot, hitRobotElement, hitWall, "GameGridView");
             
             // Also announce possible moves after movement
-            ((ModernGameFragment) fragment).announcePossibleMoves(selectedRobot);
+            modernFragment.announcePossibleMoves(selectedRobot);
         }
         
         if (state.checkCompletion()) {

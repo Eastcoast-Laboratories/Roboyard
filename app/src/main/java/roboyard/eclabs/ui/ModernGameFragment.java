@@ -1533,8 +1533,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // Check if the robot hit a wall or another robot
             boolean hitWall = false;
-            boolean hitRobot = false;
+            boolean hitRobotElement = false;
+            GameElement hitRobot = null;
             
+            Timber.d("[ACCESSIBILITY] Checking for obstacles in the direction of movement: robot=%s, dx=%d, dy=%d", robot, dx, dy);
             // Check for obstacles in the direction of movement
             if (dx != 0) {
                 // Moving horizontally, check the next position in that direction
@@ -1542,7 +1544,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 if (nextX >= 0 && nextX < state.getWidth()) {
                     GameElement robotAtPosition = state.getRobotAt(nextX, endY);
                     if (robotAtPosition != null) {
-                        hitRobot = true;
+                        hitRobotElement = true;
+                        hitRobot = robotAtPosition;
                     } else if (!state.canRobotMoveTo(robot, nextX, endY)) {
                         hitWall = true;
                     }
@@ -1553,7 +1556,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 if (nextY >= 0 && nextY < state.getHeight()) {
                     GameElement robotAtPosition = state.getRobotAt(endX, nextY);
                     if (robotAtPosition != null) {
-                        hitRobot = true;
+                        hitRobotElement = true;
+                        hitRobot = robotAtPosition;
                     } else if (!state.canRobotMoveTo(robot, endX, nextY)) {
                         hitWall = true;
                     }
@@ -1563,15 +1567,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Update the game grid view to show the movement
             gameGridView.invalidate();
             
-            // Play appropriate sound
-            if (hitRobot) {
-                playSound("hit_robot");
-                // ModernGameFragment.onRobotTouched();
-            } else if (hitWall) {
-                playSound("hit_wall");
-            } else {
-                playSound("move");
-            }
+            // Handle sounds and achievements (DRY - shared with GameGridView)
+            handleRobotMovementSounds(state, robot, hitRobot, hitWall, "Accessibility");
             
             // Check for goal completion - although GameStateManager also does this
             if (state.isRobotAtTarget(robot)) {
@@ -1581,17 +1578,81 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 
                 // Play win sound
                 playSound("win");
+                Timber.d("[ACCESSIBILITY] Goal reached! Announced completion");
             } else {
-                // // announce initiating move, starting at
-                // announceAccessibility(getLocalizedRobotColorNameByGridElement(robot) + " initiating move, starting at " + endX + ", " + endY);
-                
-                // // Log the announcement for diagnostics
-                // Timber.d("[MOVE_ANNOUNCE] Announced initiating move, starting at %d, %d", endX, endY);
+                // Announce the robot that moved and distance traveled
+                String robotColor = getLocalizedRobotColorNameByGridElement(robot);
+                announceAccessibility(robotColor + " moved " + dist + " squares");
+                Timber.d("[ACCESSIBILITY] Robot %s moved %d squares", robotColor, dist);
             }
         } else {
             // Did not move, play wall hit sound
             playSound("hit_wall");
             announceAccessibility(getString(R.string.cannot_move_in_this_direction));
+            Timber.d("[ACCESSIBILITY] Movement blocked in direction dx=%d, dy=%d", dx, dy);
+        }
+    }
+    
+    /**
+     * Handle robot movement sounds and achievements (DRY principle).
+     * This method is called from both GameGridView (normal touch) and moveRobotInDirection (accessibility buttons).
+     * 
+     * @param state The current game state
+     * @param movingRobot The robot that moved
+     * @param hitRobotElement The robot that was hit (null if no collision)
+     * @param hitWall True if robot hit a wall
+     * @param source "GameGridView" or "Accessibility" for logging
+     */
+    public void handleRobotMovementSounds(GameState state, GameElement movingRobot, 
+                                         GameElement hitRobotElement, boolean hitWall, String source) {
+        if (state == null || movingRobot == null) {
+            return;
+        }
+        
+        // Play appropriate sound
+        if (hitRobotElement != null) {
+            playSound("hit_robot");
+            // Track robot touch for gimme_five achievement
+            trackRobotTouch(state, movingRobot, hitRobotElement);
+            Timber.d("[SOUND][%s] Robot collision detected - hit_robot sound played", source);
+        } else if (hitWall) {
+            playSound("hit_wall");
+            Timber.d("[SOUND][%s] Wall collision detected - hit_wall sound played", source);
+        } else {
+            playSound("move");
+            Timber.d("[SOUND][%s] Normal movement - move sound played", source);
+        }
+    }
+    
+    /**
+     * Track robot touch for gimme_five achievement.
+     * Called when a robot hits another robot.
+     * 
+     * @param state The current game state
+     * @param movingRobot The robot that moved
+     * @param hitRobot The robot that was hit
+     */
+    public void trackRobotTouch(GameState state, GameElement movingRobot, GameElement hitRobot) {
+        Timber.d("[ACHIEVEMENTS][GIMME_FIVE] Tracking robot touch: Robot %s touched %s", movingRobot, hitRobot);
+        if (state == null || movingRobot == null || hitRobot == null) {
+            return;
+        }
+        
+        // Get the list of robots to determine indices
+        java.util.List<GameElement> robots = state.getRobots();
+        if (robots == null || robots.size() < 2) {
+            return;
+        }
+        
+        int movingRobotIndex = robots.indexOf(movingRobot);
+        int hitRobotIndex = robots.indexOf(hitRobot);
+        int robotCount = robots.size();
+        
+        if (movingRobotIndex >= 0 && hitRobotIndex >= 0) {
+            AchievementManager.getInstance(requireContext())
+                    .onRobotTouched(movingRobotIndex, hitRobotIndex, robotCount);
+            Timber.d("[ACHIEVEMENTS][GIMME_FIVE] Robot %d touched robot %d (total robots: %d)", 
+                    movingRobotIndex, hitRobotIndex, robotCount);
         }
     }
     
@@ -2142,12 +2203,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     public void playSound(String soundType) {
         // Only play sound if it's enabled in global preferences
         if (soundManager != null && roboyard.logic.core.Preferences.soundEnabled) {
-            Timber.d("ModernGameFragment: Playing sound %s", soundType);
+            Timber.d("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: Playing sound %s", soundType);
             soundManager.playSound(soundType);
         } else if (soundManager == null) {
-            Timber.e("ModernGameFragment: SoundManager is null, cannot play sound %s", soundType);
+            Timber.e("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: SoundManager is null, cannot play sound %s", soundType);
         } else {
-            Timber.d("ModernGameFragment: Sound disabled in preferences, not playing %s", soundType);
+            Timber.d("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: Sound disabled in preferences, not playing %s", soundType);
         }
     }
 

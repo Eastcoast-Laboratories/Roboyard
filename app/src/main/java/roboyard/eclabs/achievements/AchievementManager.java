@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import timber.log.Timber;
 
@@ -43,7 +45,9 @@ public class AchievementManager {
     private boolean hintUsedInCurrentGame = false;
     
     // Robot touch tracking for gimme_five achievement
-    private int[] robotsTouched = new int[5]; // Track which robots have been touched (0-4 for up to 5 robots)
+    // Stores pairs of robots that have touched each other (e.g., "0-1" means robot 0 touched robot 1)
+    private Set<String> robotTouchPairs = new HashSet<>();
+    private int currentGameRobotCount = 0;
     
     public interface AchievementUnlockListener {
         void onAchievementUnlocked(Achievement achievement);
@@ -309,8 +313,10 @@ public class AchievementManager {
         if (targetCount >= 4) unlock("game_4_targets");
         
         // X of Y targets
+        if (targetsNeeded == 2 && targetCount == 2) unlock("game_2_of_2_targets");
         if (targetsNeeded == 2 && targetCount == 3) unlock("game_2_of_3_targets");
         if (targetsNeeded == 2 && targetCount == 4) unlock("game_2_of_4_targets");
+        if (targetsNeeded == 3 && targetCount == 3) unlock("game_3_of_3_targets");
         if (targetsNeeded == 3 && targetCount == 4) unlock("game_3_of_4_targets");
         if (targetsNeeded == 4 && targetCount == 4) unlock("game_4_of_4_targets");
         
@@ -377,43 +383,57 @@ public class AchievementManager {
      * Track robot-to-robot collision for gimme_five achievement.
      * Called when a robot hits another robot (hit_robot sound plays).
      * 
-     * @param robotIndex The index of the robot that was hit (0-4)
+     * @param movingRobotIndex The index of the robot that moved and hit another (0-4)
+     * @param hitRobotIndex The index of the robot that was hit (0-4)
      * @param robotCount Total number of robots in the game
      */
-    public void onRobotTouched(int robotIndex, int robotCount) {
-        if (robotIndex < 0 || robotIndex >= robotCount || robotCount > 5) {
+    public void onRobotTouched(int movingRobotIndex, int hitRobotIndex, int robotCount) {
+        if (movingRobotIndex < 0 || hitRobotIndex < 0 || 
+            movingRobotIndex >= robotCount || hitRobotIndex >= robotCount || 
+            robotCount < 2 || robotCount > 5) {
             return;
         }
         
-        // Mark this robot as touched
-        if (robotIndex < robotsTouched.length) {
-            robotsTouched[robotIndex]++;
+        currentGameRobotCount = robotCount;
+        
+        // Store the touch pair (normalized so 0-1 and 1-0 are the same)
+        int minIndex = Math.min(movingRobotIndex, hitRobotIndex);
+        int maxIndex = Math.max(movingRobotIndex, hitRobotIndex);
+        String touchPair = minIndex + "-" + maxIndex;
+        
+        boolean isNewTouch = robotTouchPairs.add(touchPair);
+        if (isNewTouch) {
+            Timber.d("[ACHIEVEMENTS] Robot %d touched robot %d (pair: %s)", movingRobotIndex, hitRobotIndex, touchPair);
         }
         
         // Check if all robots have touched each other
-        if (robotCount >= 2) {
-            boolean allTouched = true;
-            for (int i = 0; i < robotCount; i++) {
-                if (robotsTouched[i] == 0) {
-                    allTouched = false;
-                    break;
-                }
-            }
-            
-            if (allTouched) {
-                unlock("gimme_five");
-                Timber.d("[ACHIEVEMENTS] All %d robots have touched each other - gimme_five unlocked", robotCount);
-            }
+        // For n robots, we need n*(n-1)/2 unique pairs
+        int requiredPairs = (robotCount * (robotCount - 1)) / 2;
+        
+        if (robotTouchPairs.size() >= requiredPairs) {
+            unlock("gimme_five");
+            Timber.d("[ACHIEVEMENTS] All %d robots have touched each other (%d pairs) - gimme_five unlocked!", 
+                    robotCount, robotTouchPairs.size());
+        } else {
+            Timber.d("[ACHIEVEMENTS] Robot touch progress: %d/%d pairs", robotTouchPairs.size(), requiredPairs);
         }
+    }
+    
+    /**
+     * Get current robot touch progress for debugging/UI.
+     * @return Array with [currentPairs, requiredPairs]
+     */
+    public int[] getRobotTouchProgress() {
+        int requiredPairs = (currentGameRobotCount * (currentGameRobotCount - 1)) / 2;
+        return new int[] { robotTouchPairs.size(), requiredPairs };
     }
     
     /**
      * Reset robot touch tracking for a new game.
      */
     private void resetRobotTouchTracking() {
-        for (int i = 0; i < robotsTouched.length; i++) {
-            robotsTouched[i] = 0;
-        }
+        robotTouchPairs.clear();
+        currentGameRobotCount = 0;
     }
     
     /**
