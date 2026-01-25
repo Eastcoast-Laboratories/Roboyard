@@ -1469,6 +1469,10 @@ public class GameGridView extends View {
      * Move a robot in the specified direction and handle all effects (sounds, achievements, announcements).
      * This is the single entry point for robot movement from accessibility buttons.
      * 
+     * Note: Sound effects and achievements are handled by GameStateManager's animation callback
+     * which calls handleRobotMovementEffects() after the animation completes. We don't call it
+     * here to avoid duplicate sound playback.
+     * 
      * @param robot The robot to move
      * @param dx Horizontal direction (-1 = left, 1 = right, 0 = no horizontal movement)
      * @param dy Vertical direction (-1 = up, 1 = down, 0 = no vertical movement)
@@ -1480,17 +1484,12 @@ public class GameGridView extends View {
             return false;
         }
         
-        int oldX = robot.getX();
-        int oldY = robot.getY();
-        
         // Use GameStateManager to perform the actual movement
+        // GameStateManager's animation callback will call handleRobotMovementEffects() after animation
         boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
         
-        if (moved) {
-            // Handle all effects (sounds, achievements, path updates, etc.)
-            handleRobotMovementEffects(state, robot, oldX, oldY);
-        } else {
-            // Play wall hit sound for blocked movement
+        if (!moved) {
+            // Play wall hit sound for blocked movement (no animation callback in this case)
             if (fragment instanceof ModernGameFragment) {
                 ((ModernGameFragment) fragment).playSound("hit_wall");
             }
