@@ -39,7 +39,17 @@ public class SoundManager {
      * @param soundType Type of sound: "move", "hit_wall", "hit_robot", "win", "lose"
      */
     public void playSound(String soundType) {
-        Timber.d("[SOUND] Attempting to play sound: %s", soundType);
+        playSound(soundType, -1, -1);
+    }
+    
+    /**
+     * Play a robot-specific collision sound
+     * @param soundType Type of sound: "hit_robot" for robot-specific collision sounds
+     * @param attackerRobotId ID of the robot that moved (0-4)
+     * @param targetRobotId ID of the robot that was hit (0-4)
+     */
+    public void playSound(String soundType, int attackerRobotId, int targetRobotId) {
+        Timber.d("[SOUND] Attempting to play sound: %s (attacker=%d, target=%d)", soundType, attackerRobotId, targetRobotId);
         // Skip if another sound is playing
         if (isSoundPlaying && currentPlayer != null && currentPlayer.isPlaying()) {
             Timber.d("[SOUND] Not playing sound %s - another sound is already playing", soundType);
@@ -53,34 +63,46 @@ public class SoundManager {
         int soundResId = 0;
         
         // Get the sound resource ID
-        switch (soundType) {
-            case "move":
-                Timber.d("[SOUND] Selected robot_move sound");
-                soundResId = R.raw.robot_move;
-                break;
-            case "hit_wall":
-                Timber.d("[SOUND] Selected robot_hit_wall sound");
-                soundResId = R.raw.robot_hit_wall;
-                break;
-            case "hit_robot":
-                Timber.d("[SOUND] Selected robot_hit_robot sound");
+        if ("hit_robot".equals(soundType) && attackerRobotId >= 0 && attackerRobotId <= 4 && targetRobotId >= 0 && targetRobotId <= 4) {
+            // Play robot-specific collision sound
+            String soundName = "robot_" + attackerRobotId + "_hits_robot_" + targetRobotId;
+            soundResId = getSoundResourceId(soundName);
+            if (soundResId != 0) {
+                Timber.d("[SOUND] Selected robot-specific collision sound: %s (resourceId=%d)", soundName, soundResId);
+            } else {
+                Timber.w("[SOUND] Robot-specific sound not found: %s, falling back to generic hit_robot", soundName);
                 soundResId = R.raw.robot_hit_robot;
-                break;
-            case "win":
-                Timber.d("[SOUND] Selected robot_win sound");
-                soundResId = R.raw.robot_win;
-                break;
-            case "lose":
-                Timber.d("[SOUND] Selected robot_hit_wall sound as fallback for lose");
-                // We'll use hit_wall sound for now as a fallback
-                soundResId = R.raw.robot_hit_wall;
-                break;
-            case "none":
-                Timber.d("[SOUND] No sound to play");
-                return;
-            default:
-                Timber.e("[SOUND] Unknown sound type: %s", soundType);
-                return;
+            }
+        } else {
+            // Fall back to generic sounds
+            switch (soundType) {
+                case "move":
+                    Timber.d("[SOUND] Selected robot_move sound");
+                    soundResId = R.raw.robot_move;
+                    break;
+                case "hit_wall":
+                    Timber.d("[SOUND] Selected robot_hit_wall sound");
+                    soundResId = R.raw.robot_hit_wall;
+                    break;
+                case "hit_robot":
+                    Timber.d("[SOUND] Selected robot_hit_robot sound (generic fallback)");
+                    soundResId = R.raw.robot_hit_robot;
+                    break;
+                case "win":
+                    Timber.d("[SOUND] Selected robot_win sound");
+                    soundResId = R.raw.robot_win;
+                    break;
+                case "lose":
+                    Timber.d("[SOUND] Selected robot_hit_wall sound as fallback for lose");
+                    soundResId = R.raw.robot_hit_wall;
+                    break;
+                case "none":
+                    Timber.d("[SOUND] No sound to play");
+                    return;
+                default:
+                    Timber.e("[SOUND] Unknown sound type: %s", soundType);
+                    return;
+            }
         }
         
         if (soundResId != 0) {
@@ -117,6 +139,21 @@ public class SoundManager {
             }
         } else {
             Timber.e("[SOUND] No valid sound resource ID for type: %s", soundType);
+        }
+    }
+    
+    /**
+     * Get sound resource ID by name using reflection
+     * @param soundName Name of the sound file (e.g., "robot_0_hits_robot_1")
+     * @return Resource ID or 0 if not found
+     */
+    private int getSoundResourceId(String soundName) {
+        try {
+            java.lang.reflect.Field field = R.raw.class.getField(soundName);
+            return field.getInt(null);
+        } catch (Exception e) {
+            Timber.e(e, "[SOUND] Could not find sound resource: %s", soundName);
+            return 0;
         }
     }
     

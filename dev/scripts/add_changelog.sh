@@ -67,18 +67,24 @@ check_length() {
 # German Changelog
 DE_CHANGES=$(cat << EOF
 - Achievements
+- Login-Streaks
+- Dynamische Roboter-Kollisionsgeräusche - die Tonhöhe ändert sich basierend auf den beteiligten Robotern
 - Zuletzt gespieltes Level wird in der Levelauswahl hervorgehoben
 - Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
 - Fehler behoben, der ungültige Lösungswege vorschlug
+- Die Sprachausgaben bei der Steuerung über Barrierefreiheits-Buttons wurde optimiert
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
 - Achievements
+- Login Streaks
+- Dynamic robot collision sounds - the pitch changes based on the involved robots
 - Last played level is highlighted in level selection
 - Menu button now returns to level selection instead of main menu
 - Bugfix that suggested invalid solution paths
+- Accessibility messages when using control via accessibility buttons were optimized
 EOF
 )
 

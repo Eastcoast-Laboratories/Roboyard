@@ -1559,10 +1559,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Play appropriate sound
         if (hitRobotElement != null) {
-            playSound("hit_robot");
+            // Play robot-specific collision sound based on attacker and target robot IDs
+            int attackerRobotId = movingRobot.getColor();
+            int targetRobotId = hitRobotElement.getColor();
+            playSoundWithRobotIds("hit_robot", attackerRobotId, targetRobotId);
             // Track robot touch for gimme_five achievement
             trackRobotTouch(state, movingRobot, hitRobotElement);
-            Timber.d("[SOUND][%s] Robot collision detected - hit_robot sound played", source);
+            Timber.d("[SOUND][%s] Robot collision detected - hit_robot sound played (robot %d hits robot %d)", source, attackerRobotId, targetRobotId);
         } else if (hitWall) {
             playSound("hit_wall");
             Timber.d("[SOUND][%s] Wall collision detected - hit_wall sound played", source);
@@ -2153,6 +2156,24 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (soundManager != null && roboyard.logic.core.Preferences.soundEnabled) {
             Timber.d("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: Playing sound %s", soundType);
             soundManager.playSound(soundType);
+        } else if (soundManager == null) {
+            Timber.e("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: SoundManager is null, cannot play sound %s", soundType);
+        } else {
+            Timber.d("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: Sound disabled in preferences, not playing %s", soundType);
+        }
+    }
+    
+    /**
+     * Play a robot-specific collision sound
+     * @param soundType Type of sound to play (typically "hit_robot")
+     * @param attackerRobotId ID of the robot that moved (0-4)
+     * @param targetRobotId ID of the robot that was hit (0-4)
+     */
+    public void playSoundWithRobotIds(String soundType, int attackerRobotId, int targetRobotId) {
+        // Only play sound if it's enabled in global preferences
+        if (soundManager != null && roboyard.logic.core.Preferences.soundEnabled) {
+            Timber.d("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: Playing sound %s (robot %d hits robot %d)", soundType, attackerRobotId, targetRobotId);
+            soundManager.playSound(soundType, attackerRobotId, targetRobotId);
         } else if (soundManager == null) {
             Timber.e("[SOUND][ACHIEVEMENTS][GIMME_FIVE]: SoundManager is null, cannot play sound %s", soundType);
         } else {
