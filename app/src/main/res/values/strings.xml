@@ -413,6 +413,20 @@
     <string name="settings_allow_multicolor_target">Allow Multicolor Target:</string>
     <string name="settings_high_contrast_mode">High Contrast Mode:</string>
     
+    <!-- Data Export/Import Section -->
+    <string name="settings_data_section">Data Management</string>
+    <string name="settings_data_description">Export or import all your game data including preferences, achievements, level progress, and save games.</string>
+    <string name="settings_export_data">Export Data</string>
+    <string name="settings_import_data">Import Data</string>
+    <string name="settings_reset_data">Reset All Data</string>
+    <string name="settings_export_success">Data exported successfully</string>
+    <string name="settings_export_failed">Export failed: %1$s</string>
+    <string name="settings_import_success">Data imported successfully. Please restart the app.</string>
+    <string name="settings_import_failed">Import failed: %1$s</string>
+    <string name="settings_reset_confirm_title">Reset All Data?</string>
+    <string name="settings_reset_confirm_message">This will delete all your preferences, achievements, level progress, and save games. This action cannot be undone.</string>
+    <string name="settings_reset_success">All data has been reset. Please restart the app.</string>
+    
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>
     <string name="level_squares_label">squares:</string>

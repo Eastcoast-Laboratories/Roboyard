@@ -659,6 +659,59 @@
                     android:contentDescription="Disable accessibility mode" />
             </RadioGroup>
 
+            <!-- Data Export/Import Section -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#444444"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/data_section_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_data_section"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_data_description"
+                android:textSize="@dimen/settings_option_text_size"
+                android:textColor="#aaaaaa"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/export_data_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_export_data"
+                android:focusable="true"
+                android:clickable="true" />
+
+            <Button
+                android:id="@+id/import_data_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_import_data"
+                android:layout_marginTop="8dp"
+                android:focusable="true"
+                android:clickable="true" />
+
+            <Button
+                android:id="@+id/reset_data_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_reset_data"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#aa3333"
+                android:focusable="true"
+                android:clickable="true" />
+
         </LinearLayout>
     </ScrollView>
 

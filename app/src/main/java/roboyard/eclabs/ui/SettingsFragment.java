@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import roboyard.eclabs.DataExportImportManager;
 import roboyard.eclabs.R;
 import roboyard.eclabs.RoboyardApplication;
 import roboyard.eclabs.ui.MainFragmentActivity;
@@ -1851,6 +1852,111 @@ public class SettingsFragment extends Fragment {
             }
         }
         return null;
+    }
+    
+    /**
+    /**
+     * Set up data management button listeners
+     */
+    private void setupDataManagementListeners() {
+        if (exportDataButton != null) {
+            exportDataButton.setOnClickListener(v -> exportData());
+        }
+        
+        if (importDataButton != null) {
+            importDataButton.setOnClickListener(v -> importData());
+        }
+        
+        if (resetDataButton != null) {
+            resetDataButton.setOnClickListener(v -> showResetConfirmDialog());
+        }
+    }
+    /**
+     * Export all app data
+     */
+    private void exportData() {
+        try {
+            DataExportImportManager manager = new DataExportImportManager(requireContext());
+            String jsonData = manager.exportAllData();
+            
+            if (jsonData != null) {
+                // Share the JSON data via intent
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("application/json");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, jsonData);
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Roboyard Data Export");
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.settings_export_data)));
+                
+                Toast.makeText(requireContext(), R.string.settings_export_success, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.settings_export_failed, "Unknown error"), Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error exporting data");
+            Toast.makeText(requireContext(), getString(R.string.settings_export_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    /**
+     * Import app data from clipboard or file
+     */
+    private void importData() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(R.string.settings_import_data);
+        
+        EditText input = new EditText(requireContext());
+        input.setHint("Paste JSON data here");
+        input.setMinLines(5);
+        input.setMaxLines(10);
+        input.setVerticalScrollBarEnabled(true);
+        builder.setView(input);
+        
+        builder.setPositiveButton(R.string.settings_import_data, (dialog, which) -> {
+            String jsonData = input.getText().toString().trim();
+            
+            if (jsonData.isEmpty()) {
+                Toast.makeText(requireContext(), "Please paste the exported data", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            try {
+                DataExportImportManager manager = new DataExportImportManager(requireContext());
+                boolean success = manager.importAllData(jsonData);
+                
+                if (success) {
+                    Toast.makeText(requireContext(), R.string.settings_import_success, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.settings_import_failed, "Invalid data format"), Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception e) {
+                Timber.e(e, "Error importing data");
+                Toast.makeText(requireContext(), getString(R.string.settings_import_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+            }
+        });
+        
+        builder.setNegativeButton(R.string.button_cancel, null);
+        builder.show();
+    }
+    
+    /**
+     * Show reset confirmation dialog
+     */
+    private void showResetConfirmDialog() {
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.settings_reset_confirm_title)
+            .setMessage(R.string.settings_reset_confirm_message)
+            .setPositiveButton(R.string.settings_reset_data, (dialog, which) -> {
+                try {
+                    DataExportImportManager manager = new DataExportImportManager(requireContext());
+                    manager.resetAllData();
+                    Toast.makeText(requireContext(), R.string.settings_reset_success, Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Timber.e(e, "Error resetting data");
+                    Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            })
+            .setNegativeButton(R.string.button_cancel, null)
+            .show();
     }
     
     /**
