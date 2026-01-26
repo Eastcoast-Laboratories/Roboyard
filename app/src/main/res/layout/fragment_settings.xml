@@ -659,6 +659,82 @@
                     android:contentDescription="Disable accessibility mode" />
             </RadioGroup>
 
+            <!-- Roboyard Account Section -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#444444"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/account_section_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_account_section"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/account_logged_out_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_account_description"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#aaaaaa"
+                    android:layout_marginBottom="16dp" />
+
+                <Button
+                    android:id="@+id/login_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_login"
+                    android:focusable="true"
+                    android:clickable="true" />
+
+                <Button
+                    android:id="@+id/register_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_register"
+                    android:layout_marginTop="8dp"
+                    android:focusable="true"
+                    android:clickable="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/account_logged_in_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/logged_in_as_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_logged_in_as"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#ffffff"
+                    android:layout_marginBottom="16dp" />
+
+                <Button
+                    android:id="@+id/logout_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_logout"
+                    android:focusable="true"
+                    android:clickable="true" />
+            </LinearLayout>
+
             <!-- Data Export/Import Section -->
             <View
                 android:layout_width="match_parent"

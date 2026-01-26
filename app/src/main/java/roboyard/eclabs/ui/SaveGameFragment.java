@@ -49,6 +49,7 @@ import roboyard.logic.core.Preferences;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.components.GameStateManager;
 import roboyard.eclabs.GameHistoryManager;
+import roboyard.eclabs.RoboyardApiClient;
 import timber.log.Timber;
 
 /**
@@ -880,6 +881,132 @@ public class SaveGameFragment extends BaseGameFragment {
      * @param slotId The save slot ID
      */
     private void shareSaveSlot(int slotId) {
+        try {
+            // Check if user is logged in - if so, offer to share directly to account
+            RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+            if (apiClient.isLoggedIn()) {
+                // Show dialog to choose between direct share and URL share
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.share_dialog_title)
+                    .setMessage(getString(R.string.share_dialog_logged_in_message, apiClient.getUserName()))
+                    .setPositiveButton(R.string.share_to_account, (dialog, which) -> shareToAccount(slotId))
+                    .setNegativeButton(R.string.share_via_url, (dialog, which) -> shareViaUrl(slotId))
+                    .setNeutralButton(R.string.button_cancel, null)
+                    .show();
+                return;
+            }
+            
+            // Not logged in - share via URL
+            shareViaUrl(slotId);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error sharing save: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Timber.e(e, "[SHARE] Error sharing save slot %d", slotId);
+        }
+    }
+    
+    /**
+     * Share a save slot directly to the user's roboyard.z11.de account
+     * @param slotId The save slot ID
+     */
+    private void shareToAccount(int slotId) {
+        try {
+            // Build the map data string
+            String mapData = buildMapDataForShare(slotId);
+            if (mapData == null) {
+                Toast.makeText(requireContext(), "No data to share", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Get map name from save slot
+            String mapName = getMapNameFromSlot(slotId);
+            
+            // Share via API
+            RoboyardApiClient.getInstance(requireContext()).shareMap(mapData, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
+                @Override
+                public void onSuccess(RoboyardApiClient.ShareResult result) {
+                    Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
+                    
+                    // Open the share URL in browser
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.shareUrl));
+                    startActivity(intent);
+                    
+                    Timber.d("[SHARE] Map shared to account, ID: %d, URL: %s", result.mapId, result.shareUrl);
+                }
+                
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), getString(R.string.share_failed, error), Toast.LENGTH_LONG).show();
+                    Timber.e("[SHARE] API share failed: %s", error);
+                }
+            });
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error sharing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Timber.e(e, "[SHARE] Error sharing to account");
+        }
+    }
+    
+    /**
+     * Get map name from a save slot
+     */
+    private String getMapNameFromSlot(int slotId) {
+        try {
+            File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
+            String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
+            File saveFile = new File(savesDir, filename);
+            
+            if (saveFile.exists()) {
+                String saveData = FileReadWrite.loadAbsoluteData(saveFile.getAbsolutePath());
+                if (saveData != null && !saveData.isEmpty()) {
+                    String[] lines = saveData.split("\n");
+                    if (lines.length > 0 && lines[0].startsWith("#")) {
+                        String[] metadata = lines[0].substring(1).split(";");
+                        for (String item : metadata) {
+                            if (item.startsWith("MAPNAME:")) {
+                                return item.substring("MAPNAME:".length());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[SHARE] Error getting map name from slot %d", slotId);
+        }
+        return "Shared Map";
+    }
+    
+    /**
+     * Build map data string for sharing
+     */
+    private String buildMapDataForShare(int slotId) {
+        // This reuses the logic from shareViaUrl but returns the data string
+        // For now, we'll build a simplified version
+        try {
+            File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
+            String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
+            File saveFile = new File(savesDir, filename);
+            
+            if (!saveFile.exists()) {
+                return null;
+            }
+            
+            String saveData = FileReadWrite.loadAbsoluteData(saveFile.getAbsolutePath());
+            if (saveData == null || saveData.isEmpty()) {
+                return null;
+            }
+            
+            // Return the raw save data - the API will parse it
+            return saveData;
+        } catch (Exception e) {
+            Timber.e(e, "[SHARE] Error building map data for slot %d", slotId);
+            return null;
+        }
+    }
+    
+    /**
+     * Share a save slot via URL (original method)
+     * @param slotId The save slot ID
+     */
+    private void shareViaUrl(int slotId) {
         try {
             // First try to load the game state and synchronize targets
             GameState gameState = null;

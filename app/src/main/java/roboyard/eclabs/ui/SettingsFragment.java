@@ -30,6 +30,7 @@ import java.util.List;
 
 import roboyard.eclabs.DataExportImportManager;
 import roboyard.eclabs.R;
+import roboyard.eclabs.RoboyardApiClient;
 import roboyard.eclabs.RoboyardApplication;
 import roboyard.eclabs.ui.MainFragmentActivity;
 import roboyard.logic.core.Constants;
@@ -93,6 +94,19 @@ public class SettingsFragment extends Fragment {
     private RadioGroup highContrastModeRadioGroup;
     private RadioButton highContrastModeYes;
     private RadioButton highContrastModeNo;
+    
+    // Account section
+    private LinearLayout accountLoggedOutContainer;
+    private LinearLayout accountLoggedInContainer;
+    private TextView loggedInAsText;
+    private Button loginButton;
+    private Button registerButton;
+    private Button logoutButton;
+    
+    // Data export/import section
+    private Button exportDataButton;
+    private Button importDataButton;
+    private Button resetDataButton;
     
     private List<int[]> validBoardSizes;
     
@@ -216,6 +230,19 @@ public class SettingsFragment extends Fragment {
             highContrastModeYes = view.findViewById(R.id.high_contrast_mode_yes);
             highContrastModeNo = view.findViewById(R.id.high_contrast_mode_no);
             
+            // Account section
+            accountLoggedOutContainer = view.findViewById(R.id.account_logged_out_container);
+            accountLoggedInContainer = view.findViewById(R.id.account_logged_in_container);
+            loggedInAsText = view.findViewById(R.id.logged_in_as_text);
+            loginButton = view.findViewById(R.id.login_button);
+            registerButton = view.findViewById(R.id.register_button);
+            logoutButton = view.findViewById(R.id.logout_button);
+            
+            // Data export/import section
+            exportDataButton = view.findViewById(R.id.export_data_button);
+            importDataButton = view.findViewById(R.id.import_data_button);
+            resetDataButton = view.findViewById(R.id.reset_data_button);
+            
             // Set up board size options
             setupBoardSizeOptions();
             
@@ -236,6 +263,13 @@ public class SettingsFragment extends Fragment {
             
             // Set up listeners
             setupListeners();
+            
+            // Set up account and data management listeners
+            setupAccountListeners();
+            setupDataManagementListeners();
+            
+            // Update account UI state
+            updateAccountUI();
             
             // Set up debug view with long-press on title
             setupDebugView(view);
@@ -1855,6 +1889,26 @@ public class SettingsFragment extends Fragment {
     }
     
     /**
+     * Set up account-related button listeners
+     */
+    private void setupAccountListeners() {
+        if (loginButton != null) {
+            loginButton.setOnClickListener(v -> showLoginDialog());
+        }
+        
+        if (registerButton != null) {
+            registerButton.setOnClickListener(v -> showRegisterDialog());
+        }
+        
+        if (logoutButton != null) {
+            logoutButton.setOnClickListener(v -> {
+                RoboyardApiClient.getInstance(requireContext()).logout();
+                updateAccountUI();
+                Toast.makeText(requireContext(), R.string.settings_logout_success, Toast.LENGTH_SHORT).show();
+            });
+        }
+    }
+    
     /**
      * Set up data management button listeners
      */
@@ -1871,6 +1925,145 @@ public class SettingsFragment extends Fragment {
             resetDataButton.setOnClickListener(v -> showResetConfirmDialog());
         }
     }
+    
+    /**
+     * Update account UI based on login state
+     */
+    private void updateAccountUI() {
+        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+        boolean isLoggedIn = apiClient.isLoggedIn();
+        
+        if (accountLoggedOutContainer != null) {
+            accountLoggedOutContainer.setVisibility(isLoggedIn ? View.GONE : View.VISIBLE);
+        }
+        
+        if (accountLoggedInContainer != null) {
+            accountLoggedInContainer.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
+        }
+        
+        if (loggedInAsText != null && isLoggedIn) {
+            String userName = apiClient.getUserName();
+            if (userName == null) userName = apiClient.getUserEmail();
+            loggedInAsText.setText(getString(R.string.settings_logged_in_as, userName));
+        }
+    }
+    
+    /**
+     * Show login dialog
+     */
+    private void showLoginDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(R.string.login_dialog_title);
+        
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(48, 24, 48, 24);
+        
+        EditText emailInput = new EditText(requireContext());
+        emailInput.setHint(R.string.login_dialog_email);
+        emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        layout.addView(emailInput);
+        
+        EditText passwordInput = new EditText(requireContext());
+        passwordInput.setHint(R.string.login_dialog_password);
+        passwordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(passwordInput);
+        
+        builder.setView(layout);
+        
+        builder.setPositiveButton(R.string.settings_login, (dialog, which) -> {
+            String email = emailInput.getText().toString().trim();
+            String password = passwordInput.getText().toString();
+            
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter email and password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            RoboyardApiClient.getInstance(requireContext()).login(email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
+                @Override
+                public void onSuccess(RoboyardApiClient.LoginResult result) {
+                    Toast.makeText(requireContext(), R.string.settings_login_success, Toast.LENGTH_SHORT).show();
+                    updateAccountUI();
+                }
+                
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), getString(R.string.settings_login_failed, error), Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+        
+        builder.setNegativeButton(R.string.button_cancel, null);
+        builder.show();
+    }
+    
+    /**
+     * Show register dialog
+     */
+    private void showRegisterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(R.string.register_dialog_title);
+        
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(48, 24, 48, 24);
+        
+        EditText nameInput = new EditText(requireContext());
+        nameInput.setHint(R.string.register_dialog_name);
+        layout.addView(nameInput);
+        
+        EditText emailInput = new EditText(requireContext());
+        emailInput.setHint(R.string.login_dialog_email);
+        emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        layout.addView(emailInput);
+        
+        EditText passwordInput = new EditText(requireContext());
+        passwordInput.setHint(R.string.login_dialog_password);
+        passwordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(passwordInput);
+        
+        EditText confirmPasswordInput = new EditText(requireContext());
+        confirmPasswordInput.setHint(R.string.register_dialog_confirm_password);
+        confirmPasswordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(confirmPasswordInput);
+        
+        builder.setView(layout);
+        
+        builder.setPositiveButton(R.string.settings_register, (dialog, which) -> {
+            String name = nameInput.getText().toString().trim();
+            String email = emailInput.getText().toString().trim();
+            String password = passwordInput.getText().toString();
+            String confirmPassword = confirmPasswordInput.getText().toString();
+            
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            RoboyardApiClient.getInstance(requireContext()).register(name, email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
+                @Override
+                public void onSuccess(RoboyardApiClient.LoginResult result) {
+                    Toast.makeText(requireContext(), R.string.settings_register_success, Toast.LENGTH_SHORT).show();
+                    updateAccountUI();
+                }
+                
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), getString(R.string.settings_register_failed, error), Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+        
+        builder.setNegativeButton(R.string.button_cancel, null);
+        builder.show();
+    }
+    
     /**
      * Export all app data
      */

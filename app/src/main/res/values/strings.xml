@@ -413,6 +413,25 @@
     <string name="settings_allow_multicolor_target">Allow Multicolor Target:</string>
     <string name="settings_high_contrast_mode">High Contrast Mode:</string>
     
+    <!-- Account Section -->
+    <string name="settings_account_section">Roboyard Account</string>
+    <string name="settings_account_description">Login to share maps directly to roboyard.z11.de</string>
+    <string name="settings_login">Login</string>
+    <string name="settings_register">Register</string>
+    <string name="settings_logout">Logout</string>
+    <string name="settings_logged_in_as">Logged in as: %1$s</string>
+    <string name="settings_login_success">Login successful</string>
+    <string name="settings_login_failed">Login failed: %1$s</string>
+    <string name="settings_register_success">Registration successful</string>
+    <string name="settings_register_failed">Registration failed: %1$s</string>
+    <string name="settings_logout_success">Logged out</string>
+    <string name="login_dialog_title">Login to Roboyard</string>
+    <string name="login_dialog_email">Email</string>
+    <string name="login_dialog_password">Password</string>
+    <string name="register_dialog_title">Register for Roboyard</string>
+    <string name="register_dialog_name">Name</string>
+    <string name="register_dialog_confirm_password">Confirm Password</string>
+    
     <!-- Data Export/Import Section -->
     <string name="settings_data_section">Data Management</string>
     <string name="settings_data_description">Export or import all your game data including preferences, achievements, level progress, and save games.</string>
@@ -426,6 +445,14 @@
     <string name="settings_reset_confirm_title">Reset All Data?</string>
     <string name="settings_reset_confirm_message">This will delete all your preferences, achievements, level progress, and save games. This action cannot be undone.</string>
     <string name="settings_reset_success">All data has been reset. Please restart the app.</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">Share Map</string>
+    <string name="share_dialog_logged_in_message">You are logged in as %1$s. Share directly to your roboyard.z11.de account?</string>
+    <string name="share_to_account">Share to Account</string>
+    <string name="share_via_url">Share via URL</string>
+    <string name="share_success">Map shared successfully!</string>
+    <string name="share_failed">Share failed: %1$s</string>
     
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>
