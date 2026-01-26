@@ -15,11 +15,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField "boolean", "ENABLE_PLAY_GAMES", "true"
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
+            buildConfigField "boolean", "ENABLE_PLAY_GAMES", "true"
         }
     }
     namespace 'roboyard.eclabs'
@@ -56,9 +60,10 @@ android {
         checkReleaseBuilds false
     }
 
-    // Enable view binding
+    // Enable view binding and BuildConfig
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
     
     // Add this to ensure test resources are properly used
@@ -101,6 +106,9 @@ dependencies {
     
     // Gson for JSON serialization/deserialization
     implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // Google Play Games Services
+    implementation 'com.google.android.gms:play-services-games-v2:20.1.2'
     
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'

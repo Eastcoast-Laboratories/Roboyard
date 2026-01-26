@@ -361,17 +361,28 @@ Track consecutive days of gameplay:
 - [x] Add level game achievements
 - [x] Add random game achievements
 - [x] Test achievement unlock triggers
+- [x] Implement gimme_five achievement (robot collision tracking)
+- [x] Add Espresso UI tests for achievements
 
-### Phase 3: Streaks & Advanced (2-3 hours)
-- [ ] Implement StreakManager
-- [ ] Add streak UI
-- [ ] Add Sidekick sync (guarded by BuildConfig.ENABLE_SIDEKICK)
-- [ ] Test both Play Store and F-Droid builds
+### Phase 3: Streaks & Advanced (2-3 hours) ✅ COMPLETED
+- [x] Implement StreakManager
+- [x] Add streak UI (DebugSettingsFragment, DebugSettingsView)
+- [x] Add test mode for streak simulation
+- [x] Implement daily login detection
+- [x] Add Play Games Services sync (guarded by BuildConfig.ENABLE_PLAY_GAMES)
+- [x] Create PlayGamesManager class
+- [x] Extend AchievementManager for PGS sync
+- [x] Create games-ids.xml template for achievement IDs
+- [x] Create setup documentation (dev/google_play_games_setup.md)
+- [ ] visualize streak-progress in UI
 
-### Phase 4: Polish & Release (1-2 hours)
+### Phase 4: Polish & Release (1-2 hours) 🔄 IN PROGRESS
 - [x] Test all achievements (unit tests)
 - [x] Verify UI/UX
-- [ ] Prepare for release
+- [x] Update button styling (Achievements/Settings with icons)
+- [ ] Configure Play Games Services in Google Play Console
+- [ ] Replace placeholder achievement IDs in games-ids.xml
+- [ ] Create build flavors (playstore/fdroid) - optional
 
 ## Technical Requirements
 

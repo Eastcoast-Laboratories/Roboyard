@@ -1,14 +1,18 @@
 package roboyard.eclabs.achievements;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import roboyard.eclabs.BuildConfig;
+import roboyard.eclabs.PlayGamesManager;
 import timber.log.Timber;
 
 /**
@@ -26,6 +30,7 @@ public class AchievementManager {
     private final SharedPreferences prefs;
     private final Map<String, Achievement> achievements;
     private AchievementUnlockListener unlockListener;
+    private WeakReference<Activity> currentActivity;
     
     // Counters for tracking progress
     private int levelsCompleted;
@@ -69,6 +74,14 @@ public class AchievementManager {
     
     public void setUnlockListener(AchievementUnlockListener listener) {
         this.unlockListener = listener;
+    }
+    
+    /**
+     * Set the current activity for Play Games integration.
+     * Call this from your activity's onResume().
+     */
+    public void setCurrentActivity(Activity activity) {
+        this.currentActivity = new WeakReference<>(activity);
     }
     
     private void loadState() {
@@ -129,12 +142,39 @@ public class AchievementManager {
         
         Timber.d("[ACHIEVEMENTS] Unlocked: %s", achievementId);
         
+        // Sync to Google Play Games if enabled
+        syncToPlayGames(achievementId);
+        
         // Notify listener
         if (unlockListener != null) {
             unlockListener.onAchievementUnlocked(achievement);
         }
         
         return true;
+    }
+    
+    /**
+     * Sync achievement unlock to Google Play Games Services.
+     * Only works if ENABLE_PLAY_GAMES is true and user is signed in.
+     */
+    private void syncToPlayGames(String achievementId) {
+        if (!BuildConfig.ENABLE_PLAY_GAMES) {
+            return;
+        }
+        
+        Activity activity = currentActivity != null ? currentActivity.get() : null;
+        if (activity == null) {
+            Timber.d("[ACHIEVEMENTS] Cannot sync to Play Games - no activity set");
+            return;
+        }
+        
+        try {
+            PlayGamesManager playGames = PlayGamesManager.getInstance(context);
+            playGames.unlockAchievement(activity, achievementId);
+            Timber.d("[ACHIEVEMENTS] Synced to Play Games: %s", achievementId);
+        } catch (Exception e) {
+            Timber.e(e, "[ACHIEVEMENTS] Failed to sync to Play Games: %s", achievementId);
+        }
     }
     
     public boolean isUnlocked(String achievementId) {

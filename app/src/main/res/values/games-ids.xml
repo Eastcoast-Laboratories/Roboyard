@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Google Play game services IDs. Save this file as res/values/games-ids.xml in your project.-->
+<resources>
+  <!--app_id-->
+  <string name="app_id" translatable="false">525205624802</string>
+  <!--package_name-->
+  <string name="package_name" translatable="false">de.z11.roboyard</string>
+  <!--achievement Resolution Explorer 10-->
+  <string name="pgs_resolution_explorer_10" translatable="false">CgkI4q_HxaQPEAIQQw</string>
+  <!--achievement Resolution Explorer 12-->
+  <string name="pgs_resolution_explorer_12" translatable="false">CgkI4q_HxaQPEAIQQg</string>
+  <!--achievement Impossible Champion-->
+  <string name="pgs_impossible_champion" translatable="false">CgkI4q_HxaQPEAIQQQ</string>
+  <!--achievement Hard Level Master-->
+  <string name="pgs_hard_level_master" translatable="false">CgkI4q_HxaQPEAIQQA</string>
+  <!--achievement No Help Needed 10-->
+  <string name="pgs_no_help_needed_10" translatable="false">CgkI4q_HxaQPEAIQPw</string>
+  <!--achievement 20 Move Master-->
+  <string name="pgs_20_move_master" translatable="false">CgkI4q_HxaQPEAIQPg</string>
+  <!--achievement Triple Target-->
+  <string name="pgs_triple_target" translatable="false">CgkI4q_HxaQPEAIQPQ</string>
+  <!--achievement Perfect Master-->
+  <string name="pgs_perfect_master" translatable="false">CgkI4q_HxaQPEAIQPA</string>
+  <!--achievement Rising Star-->
+  <string name="pgs_rising_star" translatable="false">CgkI4q_HxaQPEAIQOw</string>
+  <!--achievement Team Goal Explorer-->
+  <string name="pgs_team_goal_explorer" translatable="false">CgkI4q_HxaQPEAIQOg</string>
+  <!--achievement Quad Target-->
+  <string name="pgs_quad_target" translatable="false">CgkI4q_HxaQPEAIQOQ</string>
+  <!--achievement No Help Needed 50-->
+  <string name="pgs_no_help_needed_50" translatable="false">CgkI4q_HxaQPEAIQOA</string>
+  <!--achievement 23 Move Master-->
+  <string name="pgs_23_move_master" translatable="false">CgkI4q_HxaQPEAIQNw</string>
+  <!--achievement Star Collector-->
+  <string name="pgs_star_collector" translatable="false">CgkI4q_HxaQPEAIQNg</string>
+  <!--achievement 22 Move Master-->
+  <string name="pgs_22_move_master" translatable="false">CgkI4q_HxaQPEAIQNQ</string>
+  <!--achievement 21 Move Master-->
+  <string name="pgs_21_move_master" translatable="false">CgkI4q_HxaQPEAIQNA</string>
+  <!--achievement Perfect Streak 10-->
+  <string name="pgs_perfect_streak_10" translatable="false">CgkI4q_HxaQPEAIQMw</string>
+  <!--achievement Optimization Expert-->
+  <string name="pgs_optimization_expert" translatable="false">CgkI4q_HxaQPEAIQMg</string>
+  <!--achievement Resolution Explorer 15-->
+  <string name="pgs_resolution_explorer_15" translatable="false">CgkI4q_HxaQPEAIQMQ</string>
+  <!--achievement 30+ Move Master-->
+  <string name="pgs_30_move_master" translatable="false">CgkI4q_HxaQPEAIQMA</string>
+  <!--achievement 27 Move Master-->
+  <string name="pgs_27_move_master" translatable="false">CgkI4q_HxaQPEAIQLw</string>
+  <!--achievement 28 Move Master-->
+  <string name="pgs_28_move_master" translatable="false">CgkI4q_HxaQPEAIQLg</string>
+  <!--achievement Gimme Five-->
+  <string name="pgs_gimme_five" translatable="false">CgkI4q_HxaQPEAIQLQ</string>
+  <!--achievement 29 Move Master-->
+  <string name="pgs_29_move_master" translatable="false">CgkI4q_HxaQPEAIQLA</string>
+  <!--achievement 25 Move Master-->
+  <string name="pgs_25_move_master" translatable="false">CgkI4q_HxaQPEAIQKw</string>
+  <!--achievement Welcome Back!-->
+  <string name="pgs_welcome_back" translatable="false">CgkI4q_HxaQPEAIQKg</string>
+  <!--achievement Hard Level Star-->
+  <string name="pgs_hard_level_star" translatable="false">CgkI4q_HxaQPEAIQKQ</string>
+  <!--achievement 26 Move Master-->
+  <string name="pgs_26_move_master" translatable="false">CgkI4q_HxaQPEAIQKA</string>
+  <!--achievement 24 Move Master-->
+  <string name="pgs_24_move_master" translatable="false">CgkI4q_HxaQPEAIQJw</string>
+  <!--achievement Team Explorer-->
+  <string name="pgs_team_explorer" translatable="false">CgkI4q_HxaQPEAIQJg</string>
+  <!--achievement Welcome!-->
+  <string name="pgs_welcome" translatable="false">CgkI4q_HxaQPEAIQJQ</string>
+  <!--achievement No Help Streak 10-->
+  <string name="pgs_no_help_streak_10" translatable="false">CgkI4q_HxaQPEAIQJA</string>
+  <!--achievement Perfect 5-->
+  <string name="pgs_perfect_5" translatable="false">CgkI4q_HxaQPEAIQIw</string>
+  <!--achievement Impossible Legend-->
+  <string name="pgs_impossible_legend" translatable="false">CgkI4q_HxaQPEAIQIg</string>
+  <!--achievement Perfect 10-->
+  <string name="pgs_perfect_10" translatable="false">CgkI4q_HxaQPEAIQIQ</string>
+  <!--achievement Dedicated Player-->
+  <string name="pgs_dedicated_player" translatable="false">CgkI4q_HxaQPEAIQIA</string>
+  <!--achievement Full Team-->
+  <string name="pgs_full_team" translatable="false">CgkI4q_HxaQPEAIQHw</string>
+  <!--achievement Perfect Mover-->
+  <string name="pgs_perfect_mover" translatable="false">CgkI4q_HxaQPEAIQHg</string>
+  <!--achievement Level Master-->
+  <string name="pgs_level_master" translatable="false">CgkI4q_HxaQPEAIQHQ</string>
+  <!--achievement Quick Thinker-->
+  <string name="pgs_quick_thinker" translatable="false">CgkI4q_HxaQPEAIQHA</string>
+  <!--achievement No Help Streak 50-->
+  <string name="pgs_no_help_streak_50" translatable="false">CgkI4q_HxaQPEAIQGw</string>
+  <!--achievement Lightning Speed-->
+  <string name="pgs_lightning_speed" translatable="false">CgkI4q_HxaQPEAIQGg</string>
+  <!--achievement Perfect 20-->
+  <string name="pgs_perfect_20" translatable="false">CgkI4q_HxaQPEAIQGQ</string>
+  <!--achievement Halfway There-->
+  <string name="pgs_halfway_there" translatable="false">CgkI4q_HxaQPEAIQGA</string>
+  <!--achievement 4 of 4-->
+  <string name="pgs_4_of_4" translatable="false">CgkI4q_HxaQPEAIQFw</string>
+  <!--achievement Solo Explorer-->
+  <string name="pgs_solo_explorer" translatable="false">CgkI4q_HxaQPEAIQFg</string>
+  <!--achievement Lightning Fast-->
+  <string name="pgs_lightning_fast" translatable="false">CgkI4q_HxaQPEAIQFQ</string>
+  <!--achievement Impossible Dream-->
+  <string name="pgs_impossible_dream" translatable="false">CgkI4q_HxaQPEAIQFA</string>
+  <!--achievement Weekly Player-->
+  <string name="pgs_weekly_player" translatable="false">CgkI4q_HxaQPEAIQEw</string>
+  <!--achievement Speed Streak-->
+  <string name="pgs_speed_streak" translatable="false">CgkI4q_HxaQPEAIQEg</string>
+  <!--achievement 2 of 2-->
+  <string name="pgs_2_of_2" translatable="false">CgkI4q_HxaQPEAIQEQ</string>
+  <!--achievement Double Target-->
+  <string name="pgs_double_target" translatable="false">CgkI4q_HxaQPEAIQEA</string>
+  <!--achievement 18 Move Master-->
+  <string name="pgs_18_move_master" translatable="false">CgkI4q_HxaQPEAIQDw</string>
+  <!--achievement Impossible Streak-->
+  <string name="pgs_impossible_streak" translatable="false">CgkI4q_HxaQPEAIQDg</string>
+  <!--achievement Perfect Streak 5-->
+  <string name="pgs_perfect_streak_5" translatable="false">CgkI4q_HxaQPEAIQDQ</string>
+  <!--achievement 2 of 3-->
+  <string name="pgs_2_of_3" translatable="false">CgkI4q_HxaQPEAIQDA</string>
+  <!--achievement 2 of 4-->
+  <string name="pgs_2_of_4" translatable="false">CgkI4q_HxaQPEAIQCw</string>
+  <!--achievement 3 of 3-->
+  <string name="pgs_3_of_3" translatable="false">CgkI4q_HxaQPEAIQCg</string>
+  <!--achievement First Steps-->
+  <string name="pgs_first_steps" translatable="false">CgkI4q_HxaQPEAIQCQ</string>
+  <!--achievement 19 Move Master-->
+  <string name="pgs_19_move_master" translatable="false">CgkI4q_HxaQPEAIQCA</string>
+  <!--achievement Speed Demon-->
+  <string name="pgs_speed_demon" translatable="false">CgkI4q_HxaQPEAIQBw</string>
+  <!--achievement 3 of 4-->
+  <string name="pgs_3_of_4" translatable="false">CgkI4q_HxaQPEAIQBg</string>
+  <!--achievement Perfect Streak 20-->
+  <string name="pgs_perfect_streak_20" translatable="false">CgkI4q_HxaQPEAIQBQ</string>
+  <!--achievement Superstar-->
+  <string name="pgs_superstar" translatable="false">CgkI4q_HxaQPEAIQBA</string>
+  <!--achievement Precision Player-->
+  <string name="pgs_precision_player" translatable="false">CgkI4q_HxaQPEAIQAw</string>
+  <!--achievement Getting Started-->
+  <string name="pgs_getting_started" translatable="false">CgkI4q_HxaQPEAIQAg</string>
+  <!--achievement Solo Goal Explorer-->
+  <string name="pgs_solo_goal_explorer" translatable="false">CgkI4q_HxaQPEAIQAQ</string>
+</resources>
