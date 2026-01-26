@@ -113,15 +113,18 @@
                     android:id="@+id/achievements_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Achievements"
-                    android:contentDescription="View achievements"
+                    android:text="@string/achievements_title"
+                    android:contentDescription="@string/achievements_title"
+                    android:drawableStart="@drawable/achievements_tropy_scaled"
+                    android:drawablePadding="12dp"
                     android:padding="12dp"
                     android:layout_marginBottom="8dp"
                     android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
                     android:background="@drawable/button_fancy_purple"
-                    android:elevation="8dp" />
+                    android:elevation="8dp"
+                    android:minHeight="48dp" />
 
                 <!-- Settings button - Gray with round corners and black outline -->
                 <Button
@@ -130,13 +133,16 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings"
                     android:contentDescription="@string/settings_a11y"
+                    android:drawableStart="@drawable/settings_grid_scaled"
+                    android:drawablePadding="12dp"
                     android:padding="12dp"
                     android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
                     android:layout_marginBottom="8dp"
                     android:background="@drawable/button_fancy_gray"
-                    android:elevation="8dp" />
+                    android:elevation="8dp"
+                    android:minHeight="48dp" />
 
                 <!-- hidden Level Design Editor button - Purple with round corners and black outline -->
                 <!-- a hidden button to the Level Design Editor is a long press on the title in the level selection screen -->

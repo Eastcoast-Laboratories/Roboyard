@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/achievements_tropy"
+        android:width="32dp"
+        android:height="32dp" />
+</layer-list>
