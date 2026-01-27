@@ -374,11 +374,11 @@
     <string name="direction_right">rechts</string>
     <string name="direction_left">links</string>
 
-    <!-- Hint Direction Symbols -->
-    <string name="hint_direction_up">▲</string>
-    <string name="hint_direction_down">▼</string>
-    <string name="hint_direction_right">▶</string>
-    <string name="hint_direction_left">◀</string>
+    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
+    <string name="hint_direction_up">\u25B2</string>
+    <string name="hint_direction_down">\u25BC</string>
+    <string name="hint_direction_right">\u25B6</string>
+    <string name="hint_direction_left">\u25C0</string>
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">Lösung gefunden in %1$d Zügen</string>
@@ -411,4 +411,12 @@
     <string name="settings_max_solution_moves">Max:</string>
     <string name="settings_allow_multicolor_target">Mehrfarbige Ziele erlauben:</string>
     <string name="settings_high_contrast_mode">Hoher Kontrast:</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">Karte teilen</string>
+    <string name="share_dialog_logged_in_message">Du bist angemeldet als %1$s. Direkt zu deinem roboyard.z11.de-Konto teilen?</string>
+    <string name="share_to_account">Zum Konto teilen</string>
+    <string name="share_via_url">Via URL teilen</string>
+    <string name="share_success">Karte erfolgreich geteilt!</string>
+    <string name="share_failed">Teilen fehlgeschlagen: %1$s</string>
 </resources>

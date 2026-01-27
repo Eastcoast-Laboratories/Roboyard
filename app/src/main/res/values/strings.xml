@@ -458,11 +458,11 @@
     <string name="level_robots_label">robots:</string>
     <string name="level_squares_label">squares:</string>
     
-    <!-- Hint Direction Symbols -->
-    <string name="hint_direction_left">◀</string>
-    <string name="hint_direction_right">▶</string>
-    <string name="hint_direction_up">▲</string>
-    <string name="hint_direction_down">▼</string>
+    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
+    <string name="hint_direction_left">\u25C0</string>
+    <string name="hint_direction_right">\u25B6</string>
+    <string name="hint_direction_up">\u25B2</string>
+    <string name="hint_direction_down">\u25BC</string>
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">Found a solution in %1$d moves</string>

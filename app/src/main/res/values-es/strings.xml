@@ -321,11 +321,11 @@
     <string name="direction_right">hacia la derecha</string>
     <string name="direction_left">hacia la izquierda</string>
     
-    <!-- Direction symbols -->
-    <string name="hint_direction_up">▲</string>
-    <string name="hint_direction_down">▼</string>
-    <string name="hint_direction_right">▶</string>
-    <string name="hint_direction_left">◀</string>
+    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
+    <string name="hint_direction_left">\u25C0</string>
+    <string name="hint_direction_right">\u25B6</string>
+    <string name="hint_direction_up">\u25B2</string>
+    <string name="hint_direction_down">\u25BC</string>
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">Encontrada solución en %1$d movimientos</string>
@@ -379,5 +379,13 @@
     <string name="settings_max_solution_moves">Máx:</string>
     <string name="settings_allow_multicolor_target">Permitir objetivos multicolor:</string>
     <string name="settings_high_contrast_mode">Modo de alto contraste:</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">Compartir Mapa</string>
+    <string name="share_dialog_logged_in_message">Has iniciado sesión como %1$s. ¿Compartir directamente a tu cuenta roboyard.z11.de?</string>
+    <string name="share_to_account">Compartir a Cuenta</string>
+    <string name="share_via_url">Compartir via URL</string>
+    <string name="share_success">¡Mapa compartido exitosamente!</string>
+    <string name="share_failed">Error al compartir: %1$s</string>
 
 </resources>

@@ -115,6 +115,12 @@
     <string name="direction_down">vers le bas</string>
     <string name="direction_right">vers la droite</string>
     <string name="direction_left">vers la gauche</string>
+    
+    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
+    <string name="hint_direction_up">\u25B2</string>
+    <string name="hint_direction_down">\u25BC</string>
+    <string name="hint_direction_right">\u25B6</string>
+    <string name="hint_direction_left">\u25C0</string>
 
     <!-- Game status messages -->
     <string name="target_reached">Cible atteinte! Partie terminée en %1$d coups et %2$d cases déplacées</string>
@@ -233,4 +239,12 @@
     <string name="settings_max_solution_moves">Max:</string>
     <string name="settings_allow_multicolor_target">Autoriser les cibles multicolores:</string>
     <string name="settings_high_contrast_mode">Mode contraste élevé:</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">Partager la Carte</string>
+    <string name="share_dialog_logged_in_message">Vous êtes connecté en tant que %1$s. Partager directement à votre compte roboyard.z11.de?</string>
+    <string name="share_to_account">Partager au Compte</string>
+    <string name="share_via_url">Partager via URL</string>
+    <string name="share_success">Carte partagée avec succès!</string>
+    <string name="share_failed">Erreur lors du partage: %1$s</string>
 </resources>

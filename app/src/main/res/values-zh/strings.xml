@@ -248,11 +248,11 @@
     <string name="direction_right">向右</string>
     <string name="direction_left">向左</string>
     
-    <!-- Direction symbols -->
-    <string name="hint_direction_up">▲</string>
-    <string name="hint_direction_down">▼</string>
-    <string name="hint_direction_right">▶</string>
-    <string name="hint_direction_left">◀</string>
+    <!-- Direction symbols - Using Unicode escape sequences for consistent rendering across devices -->
+    <string name="hint_direction_up">\u25B2</string>
+    <string name="hint_direction_down">\u25BC</string>
+    <string name="hint_direction_right">\u25B6</string>
+    <string name="hint_direction_left">\u25C0</string>
     
     <!-- Additional hint strings -->
     <string name="hint_solution_found">已找到 %1$d 步的解决方案</string>
@@ -333,5 +333,13 @@
     <string name="settings_max_solution_moves">最大:</string>
     <string name="settings_allow_multicolor_target">允许多色目标:</string>
     <string name="settings_high_contrast_mode">高对比度模式:</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">分享地图</string>
+    <string name="share_dialog_logged_in_message">您已登录为 %1$s。直接分享到您的 roboyard.z11.de 账户？</string>
+    <string name="share_to_account">分享到账户</string>
+    <string name="share_via_url">通过 URL 分享</string>
+    <string name="share_success">地图分享成功！</string>
+    <string name="share_failed">分享失败: %1$s</string>
     
 </resources>

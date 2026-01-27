@@ -92,11 +92,11 @@
     <string name="direction_right">오른쪽</string>
     <string name="direction_left">왼쪽</string>
     
-    <!-- Hint Direction Symbols -->
-    <string name="hint_direction_left">◀</string>
-    <string name="hint_direction_right">▶</string>
-    <string name="hint_direction_up">▲</string>
-    <string name="hint_direction_down">▼</string>
+    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
+    <string name="hint_direction_left">\u25C0</string>
+    <string name="hint_direction_right">\u25B6</string>
+    <string name="hint_direction_up">\u25B2</string>
+    <string name="hint_direction_down">\u25BC</string>
     
     <!-- Settings strings -->
     <string name="settings_game_mode">게임 모드:</string>
@@ -187,4 +187,12 @@
     <string name="settings_max_solution_moves">최대:</string>
     <string name="settings_allow_multicolor_target">다중색 목표 허용:</string>
     <string name="settings_high_contrast_mode">고대비 모드:</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">지도 공유</string>
+    <string name="share_dialog_logged_in_message">%1$s로 로그인되었습니다. roboyard.z11.de 계정으로 직접 공유하시겠습니까?</string>
+    <string name="share_to_account">계정으로 공유</string>
+    <string name="share_via_url">URL로 공유</string>
+    <string name="share_success">지도가 성공적으로 공유되었습니다!</string>
+    <string name="share_failed">공유 실패: %1$s</string>
 </resources>
