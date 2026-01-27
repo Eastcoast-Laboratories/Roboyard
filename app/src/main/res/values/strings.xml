@@ -453,6 +453,7 @@
     <string name="share_via_url">Share via URL</string>
     <string name="share_success">Map shared successfully!</string>
     <string name="share_failed">Share failed: %1$s</string>
+    <string name="sharing_map">Sharing map...</string>
     
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">robots:</string>

@@ -921,10 +921,16 @@ public class SaveGameFragment extends BaseGameFragment {
             // Get map name from save slot
             String mapName = getMapNameFromSlot(slotId);
             
+            // Show loading spinner overlay
+            View loadingOverlay = showLoadingSpinner();
+            
             // Share via API
             RoboyardApiClient.getInstance(requireContext()).shareMap(mapData, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
                 @Override
                 public void onSuccess(RoboyardApiClient.ShareResult result) {
+                    // Hide loading spinner
+                    hideLoadingSpinner(loadingOverlay);
+                    
                     if (result.isDuplicate) {
                         Toast.makeText(requireContext(), "Map already exists", Toast.LENGTH_SHORT).show();
                     } else {
@@ -940,6 +946,9 @@ public class SaveGameFragment extends BaseGameFragment {
                 
                 @Override
                 public void onError(String error) {
+                    // Hide loading spinner
+                    hideLoadingSpinner(loadingOverlay);
+                    
                     Toast.makeText(requireContext(), getString(R.string.share_failed, error), Toast.LENGTH_LONG).show();
                     Timber.e("[SHARE] API share failed: %s", error);
                 }
@@ -1987,5 +1996,49 @@ public class SaveGameFragment extends BaseGameFragment {
         
         Timber.d("[TARGET_CHECK] Save data has targets: %s", hasTargets);
         return hasTargets;
+    }
+    
+    /**
+     * Show a semi-transparent loading spinner overlay
+     * @return The overlay view that can be used to hide it later
+     */
+    private View showLoadingSpinner() {
+        try {
+            // Inflate the loading spinner layout
+            View loadingOverlay = LayoutInflater.from(requireContext()).inflate(R.layout.loading_spinner_overlay, null);
+            
+            // Add the overlay to the root view of the fragment
+            ViewGroup rootView = (ViewGroup) getView();
+            if (rootView != null) {
+                rootView.addView(loadingOverlay, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                ));
+                Timber.d("[SHARE] Loading spinner shown");
+            }
+            
+            return loadingOverlay;
+        } catch (Exception e) {
+            Timber.e(e, "[SHARE] Error showing loading spinner");
+            return null;
+        }
+    }
+    
+    /**
+     * Hide the loading spinner overlay
+     * @param loadingOverlay The overlay view to hide
+     */
+    private void hideLoadingSpinner(View loadingOverlay) {
+        try {
+            if (loadingOverlay != null) {
+                ViewGroup parent = (ViewGroup) loadingOverlay.getParent();
+                if (parent != null) {
+                    parent.removeView(loadingOverlay);
+                    Timber.d("[SHARE] Loading spinner hidden");
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[SHARE] Error hiding loading spinner");
+        }
     }
 }

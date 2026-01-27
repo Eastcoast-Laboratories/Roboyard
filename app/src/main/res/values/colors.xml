@@ -9,4 +9,7 @@
     
     <color name="achievement_unlocked">#2E4A3E</color>
     <color name="achievement_locked">#2A2A3E</color>
+    
+    <color name="semi_transparent_black">#80000000</color>
+    <color name="white">#FFFFFF</color>
 </resources>
