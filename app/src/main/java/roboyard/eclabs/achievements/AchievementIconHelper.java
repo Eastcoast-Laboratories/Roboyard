@@ -85,26 +85,33 @@ public class AchievementIconHelper {
      * Get a bitmap for a specific icon drawable name.
      * 
      * @param context The context for loading resources
-     * @param drawableName The drawable resource name (e.g., "1_lightning")
+     * @param drawableName The drawable resource name (e.g., "icon_1_lightning")
      * @return The icon bitmap
      * @throws IllegalArgumentException if drawable resource not found
      */
     public static Bitmap getIconBitmap(Context context, String drawableName) {
         if (drawableName == null || drawableName.isEmpty()) {
+            Timber.e("[ACHIEVEMENT_ICONS] ERROR: Icon drawable name cannot be null or empty");
             throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Icon drawable name cannot be null or empty");
         }
         
+        Timber.d("[ACHIEVEMENT_ICONS] Attempting to load icon: %s from package: %s", drawableName, context.getPackageName());
+        
         int resId = context.getResources().getIdentifier(drawableName, "drawable", context.getPackageName());
         if (resId == 0) {
+            Timber.e("[ACHIEVEMENT_ICONS] ERROR: Icon drawable not found in resources: %s (resId=0)", drawableName);
             throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Icon drawable not found: " + drawableName);
         }
         
+        Timber.d("[ACHIEVEMENT_ICONS] Found resource ID: %d for icon: %s", resId, drawableName);
+        
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
         if (bitmap == null) {
+            Timber.e("[ACHIEVEMENT_ICONS] ERROR: Failed to decode drawable: %s (resId=%d)", drawableName, resId);
             throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Failed to decode drawable: " + drawableName);
         }
         
-        Timber.d("[ACHIEVEMENT_ICONS] Loaded icon: %s (%dx%d)", drawableName, bitmap.getWidth(), bitmap.getHeight());
+        Timber.d("[ACHIEVEMENT_ICONS] SUCCESS: Loaded icon %s (%dx%d pixels)", drawableName, bitmap.getWidth(), bitmap.getHeight());
         return bitmap;
     }
     
