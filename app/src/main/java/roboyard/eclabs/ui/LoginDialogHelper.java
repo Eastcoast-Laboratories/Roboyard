@@ -47,8 +47,8 @@ public class LoginDialogHelper {
         // Add register link
         TextView registerLink = new TextView(context);
         registerLink.setText(R.string.settings_register);
-        registerLink.setTextColor(0xFF0066CC);
-        registerLink.setPadding(0, 16, 0, 0);
+        registerLink.setTextColor(0xFF000000);
+        registerLink.setPadding(16, 16, 0, 0);
         registerLink.setClickable(true);
         layout.addView(registerLink);
         
@@ -63,10 +63,11 @@ public class LoginDialogHelper {
             Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(v -> performLogin(context, emailInput, passwordInput, callback, dialog));
             
-            // Set up Enter key handling for password field to trigger login
+            // Set up Enter key handling for password field to trigger login and focus login button
             passwordInput.setOnKeyListener((v, keyCode, event) -> {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                     performLogin(context, emailInput, passwordInput, callback, dialog);
+                    positiveButton.requestFocus();
                     return true;
                 }
                 return false;

@@ -138,12 +138,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/user_profile_button"
-        android:layout_marginStart="66dp"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:importantForAccessibility="no"
-        />
+        app:layout_constraintWidth_max="400dp" />
 
     <!-- Top right user profile button / login button -->
     <Button

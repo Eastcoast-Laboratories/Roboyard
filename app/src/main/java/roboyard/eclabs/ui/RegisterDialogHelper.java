@@ -42,6 +42,8 @@ public class RegisterDialogHelper {
         EditText nameInput = new EditText(context);
         nameInput.setHint(R.string.register_dialog_name);
         nameInput.setText(cachedRegisterName);
+        nameInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        nameInput.setSingleLine(true);
         layout.addView(nameInput);
         
         EditText emailInput = new EditText(context);
@@ -64,8 +66,8 @@ public class RegisterDialogHelper {
         // Add login link
         TextView loginLink = new TextView(context);
         loginLink.setText(R.string.settings_login);
-        loginLink.setTextColor(0xFF0066CC);
-        loginLink.setPadding(0, 16, 0, 0);
+        loginLink.setTextColor(0xFF000000);
+        loginLink.setPadding(16, 16, 0, 0);
         loginLink.setClickable(true);
         layout.addView(loginLink);
         
