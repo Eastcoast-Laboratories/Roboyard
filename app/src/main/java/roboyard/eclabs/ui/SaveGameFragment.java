@@ -975,11 +975,9 @@ public class SaveGameFragment extends BaseGameFragment {
     }
     
     /**
-     * Build map data string for sharing
+     * Build map data string for sharing - formats save data for API
      */
     private String buildMapDataForShare(int slotId) {
-        // This reuses the logic from shareViaUrl but returns the data string
-        // For now, we'll build a simplified version
         try {
             File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
             String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
@@ -994,8 +992,107 @@ public class SaveGameFragment extends BaseGameFragment {
                 return null;
             }
             
-            // Return the raw save data - the API will parse it
-            return saveData;
+            // Parse and format the save data for API
+            StringBuilder formattedData = new StringBuilder();
+            String[] lines = saveData.split("\n");
+            
+            String mapName = "Shared Map";
+            int width = 12;
+            int height = 12;
+            int numMoves = 0;
+            
+            // Extract metadata from first line
+            if (lines.length > 0 && lines[0].startsWith("#")) {
+                String[] metadata = lines[0].substring(1).split(";");
+                for (String item : metadata) {
+                    if (item.startsWith("MAPNAME:")) {
+                        mapName = item.substring("MAPNAME:".length());
+                    } else if (item.startsWith("SIZE:")) {
+                        String[] size = item.substring("SIZE:".length()).split(",");
+                        if (size.length == 2) {
+                            width = Integer.parseInt(size[0]);
+                            height = Integer.parseInt(size[1]);
+                        }
+                    } else if (item.startsWith("MOVES:")) {
+                        try {
+                            numMoves = Integer.parseInt(item.substring("MOVES:".length()));
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+            
+            // Start with name and board size
+            formattedData.append("name:").append(mapName).append(";");
+            formattedData.append("num_moves:").append(numMoves).append(";");
+            formattedData.append("solution:board:").append(width).append(",").append(height).append(";");
+            
+            // Parse sections
+            boolean inTargetsSection = false;
+            boolean inWallsSection = false;
+            boolean inRobotsSection = false;
+            Set<String> targetEntries = new HashSet<>();
+            Set<String> wallEntries = new HashSet<>();
+            Set<String> robotEntries = new HashSet<>();
+            
+            for (String line : lines) {
+                if (line.equals("TARGET_SECTION:")) {
+                    inTargetsSection = true;
+                    inWallsSection = false;
+                    inRobotsSection = false;
+                } else if (line.equals("WALLS:")) {
+                    inTargetsSection = false;
+                    inWallsSection = true;
+                    inRobotsSection = false;
+                } else if (line.equals("ROBOTS:")) {
+                    inTargetsSection = false;
+                    inWallsSection = false;
+                    inRobotsSection = true;
+                } else if (inTargetsSection && line.startsWith("TARGET_SECTION:") && line.length() > 15) {
+                    String targetData = line.substring("TARGET_SECTION:".length());
+                    String[] parts = targetData.split(",");
+                    if (parts.length >= 3 && parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("-?\\d+")) {
+                        int x = Integer.parseInt(parts[0]);
+                        int y = Integer.parseInt(parts[1]);
+                        int color = Integer.parseInt(parts[2].replace(";", ""));
+                        String colorName = getRobotColorName(color);
+                        String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
+                        if (targetEntries.add(targetEntry)) {
+                            formattedData.append(targetEntry);
+                        }
+                    }
+                } else if (inWallsSection && !line.isEmpty() && !line.equals("WALLS:")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        try {
+                            int x = Integer.parseInt(parts[1]);
+                            int y = Integer.parseInt(parts[2].replace(";", ""));
+                            String direction = parts[0];
+                            String wallEntry = "\nm" + direction.toLowerCase() + y + "," + x + ";";
+                            if (wallEntries.add(wallEntry)) {
+                                formattedData.append(wallEntry);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Skip invalid lines
+                        }
+                    }
+                } else if (inRobotsSection && !line.isEmpty() && !line.equals("ROBOTS:")) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3 && parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                        int x = Integer.parseInt(parts[0]);
+                        int y = Integer.parseInt(parts[1]);
+                        int color = Integer.parseInt(parts[2].replace(";", ""));
+                        String colorName = getRobotColorName(color);
+                        String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
+                        if (robotEntries.add(robotEntry)) {
+                            formattedData.append(robotEntry);
+                        }
+                    }
+                }
+            }
+            
+            return formattedData.toString();
         } catch (Exception e) {
             Timber.e(e, "[SHARE] Error building map data for slot %d", slotId);
             return null;
