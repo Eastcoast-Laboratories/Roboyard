@@ -188,6 +188,39 @@
     <string name="settings_allow_multicolor_target">다중색 목표 허용:</string>
     <string name="settings_high_contrast_mode">고대비 모드:</string>
     
+    <!-- Account Section -->
+    <string name="settings_account_section">Roboyard 계정</string>
+    <string name="settings_account_description">로그인하여 지도를 roboyard.z11.de에 직접 공유하세요</string>
+    <string name="settings_login">로그인</string>
+    <string name="settings_register">가입</string>
+    <string name="settings_logout">로그아웃</string>
+    <string name="settings_logged_in_as">로그인됨: %1$s</string>
+    <string name="settings_login_success">로그인 성공</string>
+    <string name="settings_login_failed">로그인 실패: %1$s</string>
+    <string name="settings_register_success">가입 성공</string>
+    <string name="settings_register_failed">가입 실패: %1$s</string>
+    <string name="settings_logout_success">로그아웃됨</string>
+    <string name="login_dialog_title">Roboyard 로그인</string>
+    <string name="login_dialog_email">이메일</string>
+    <string name="login_dialog_password">비밀번호</string>
+    <string name="register_dialog_title">Roboyard 가입</string>
+    <string name="register_dialog_name">이름</string>
+    <string name="register_dialog_confirm_password">비밀번호 확인</string>
+    
+    <!-- Data Export/Import Section -->
+    <string name="settings_data_section">데이터 관리</string>
+    <string name="settings_data_description">설정, 업적, 레벨 진행 상황 및 저장된 게임을 포함한 모든 게임 데이터를 내보내거나 가져오세요.</string>
+    <string name="settings_export_data">데이터 내보내기</string>
+    <string name="settings_import_data">데이터 가져오기</string>
+    <string name="settings_reset_data">모든 데이터 초기화</string>
+    <string name="settings_export_success">데이터가 성공적으로 내보내졌습니다</string>
+    <string name="settings_export_failed">내보내기 실패: %1$s</string>
+    <string name="settings_import_success">데이터가 성공적으로 가져와졌습니다. 앱을 다시 시작하세요.</string>
+    <string name="settings_import_failed">가져오기 실패: %1$s</string>
+    <string name="settings_reset_confirm_title">모든 데이터를 초기화하시겠습니까?</string>
+    <string name="settings_reset_confirm_message">이렇게 하면 모든 설정, 업적, 레벨 진행 상황 및 저장된 게임이 삭제됩니다. 이 작업은 취소할 수 없습니다.</string>
+    <string name="settings_reset_success">모든 데이터가 초기화되었습니다. 앱을 다시 시작하세요.</string>
+    
     <!-- Share Dialog -->
     <string name="share_dialog_title">지도 공유</string>
     <string name="share_dialog_logged_in_message">%1$s로 로그인되었습니다. roboyard.z11.de 계정으로 직접 공유하시겠습니까?</string>

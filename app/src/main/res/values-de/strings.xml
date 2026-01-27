@@ -79,6 +79,7 @@
     <string name="settings_sound">Ton:</string>
     <string name="settings_yes">Ja</string>
     <string name="settings_no">Nein</string>
+    <string name="settings_back">Zurück</string>
     <string name="settings_game_mode">Spielmodus:</string>
     <string name="settings_standard_game">Standard-Spielmodus</string>
     <string name="settings_standard_game_a11y">Standard-Spielmodus</string>
@@ -411,6 +412,39 @@
     <string name="settings_max_solution_moves">Max:</string>
     <string name="settings_allow_multicolor_target">Mehrfarbige Ziele erlauben:</string>
     <string name="settings_high_contrast_mode">Hoher Kontrast:</string>
+    
+    <!-- Account Section -->
+    <string name="settings_account_section">Roboyard-Konto</string>
+    <string name="settings_account_description">Melde dich an, um Karten direkt zu roboyard.z11.de zu teilen</string>
+    <string name="settings_login">Anmelden</string>
+    <string name="settings_register">Registrieren</string>
+    <string name="settings_logout">Abmelden</string>
+    <string name="settings_logged_in_as">Angemeldet als: %1$s</string>
+    <string name="settings_login_success">Anmeldung erfolgreich</string>
+    <string name="settings_login_failed">Anmeldung fehlgeschlagen: %1$s</string>
+    <string name="settings_register_success">Registrierung erfolgreich</string>
+    <string name="settings_register_failed">Registrierung fehlgeschlagen: %1$s</string>
+    <string name="settings_logout_success">Abgemeldet</string>
+    <string name="login_dialog_title">Bei Roboyard anmelden</string>
+    <string name="login_dialog_email">E-Mail</string>
+    <string name="login_dialog_password">Passwort</string>
+    <string name="register_dialog_title">Bei Roboyard registrieren</string>
+    <string name="register_dialog_name">Name</string>
+    <string name="register_dialog_confirm_password">Passwort bestätigen</string>
+    
+    <!-- Data Export/Import Section -->
+    <string name="settings_data_section">Datenverwaltung</string>
+    <string name="settings_data_description">Exportiere oder importiere alle deine Spieldaten einschließlich Einstellungen, Erfolge, Level-Fortschritt und Spielstände.</string>
+    <string name="settings_export_data">Daten exportieren</string>
+    <string name="settings_import_data">Daten importieren</string>
+    <string name="settings_reset_data">Alle Daten zurücksetzen</string>
+    <string name="settings_export_success">Daten erfolgreich exportiert</string>
+    <string name="settings_export_failed">Export fehlgeschlagen: %1$s</string>
+    <string name="settings_import_success">Daten erfolgreich importiert. Bitte starten Sie die App neu.</string>
+    <string name="settings_import_failed">Import fehlgeschlagen: %1$s</string>
+    <string name="settings_reset_confirm_title">Alle Daten zurücksetzen?</string>
+    <string name="settings_reset_confirm_message">Dies löscht alle deine Einstellungen, Erfolge, Level-Fortschritt und Spielstände. Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="settings_reset_success">Alle Daten wurden zurückgesetzt. Bitte starten Sie die App neu.</string>
     
     <!-- Share Dialog -->
     <string name="share_dialog_title">Karte teilen</string>

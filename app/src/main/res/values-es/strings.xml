@@ -380,6 +380,39 @@
     <string name="settings_allow_multicolor_target">Permitir objetivos multicolor:</string>
     <string name="settings_high_contrast_mode">Modo de alto contraste:</string>
     
+    <!-- Account Section -->
+    <string name="settings_account_section">Cuenta Roboyard</string>
+    <string name="settings_account_description">Inicia sesión para compartir mapas directamente a roboyard.z11.de</string>
+    <string name="settings_login">Iniciar Sesión</string>
+    <string name="settings_register">Registrarse</string>
+    <string name="settings_logout">Cerrar Sesión</string>
+    <string name="settings_logged_in_as">Iniciado sesión como: %1$s</string>
+    <string name="settings_login_success">Inicio de sesión exitoso</string>
+    <string name="settings_login_failed">Inicio de sesión fallido: %1$s</string>
+    <string name="settings_register_success">Registro exitoso</string>
+    <string name="settings_register_failed">Registro fallido: %1$s</string>
+    <string name="settings_logout_success">Sesión cerrada</string>
+    <string name="login_dialog_title">Iniciar Sesión en Roboyard</string>
+    <string name="login_dialog_email">Correo Electrónico</string>
+    <string name="login_dialog_password">Contraseña</string>
+    <string name="register_dialog_title">Registrarse en Roboyard</string>
+    <string name="register_dialog_name">Nombre</string>
+    <string name="register_dialog_confirm_password">Confirmar Contraseña</string>
+    
+    <!-- Data Export/Import Section -->
+    <string name="settings_data_section">Gestión de Datos</string>
+    <string name="settings_data_description">Exporta o importa todos tus datos de juego incluyendo preferencias, logros, progreso de niveles y partidas guardadas.</string>
+    <string name="settings_export_data">Exportar Datos</string>
+    <string name="settings_import_data">Importar Datos</string>
+    <string name="settings_reset_data">Restablecer Todos los Datos</string>
+    <string name="settings_export_success">Datos exportados exitosamente</string>
+    <string name="settings_export_failed">Error al exportar: %1$s</string>
+    <string name="settings_import_success">Datos importados exitosamente. Por favor reinicia la aplicación.</string>
+    <string name="settings_import_failed">Error al importar: %1$s</string>
+    <string name="settings_reset_confirm_title">¿Restablecer Todos los Datos?</string>
+    <string name="settings_reset_confirm_message">Esto eliminará todas tus preferencias, logros, progreso de niveles y partidas guardadas. Esta acción no se puede deshacer.</string>
+    <string name="settings_reset_success">Todos los datos han sido restablecidos. Por favor reinicia la aplicación.</string>
+    
     <!-- Share Dialog -->
     <string name="share_dialog_title">Compartir Mapa</string>
     <string name="share_dialog_logged_in_message">Has iniciado sesión como %1$s. ¿Compartir directamente a tu cuenta roboyard.z11.de?</string>

@@ -334,6 +334,39 @@
     <string name="settings_allow_multicolor_target">允许多色目标:</string>
     <string name="settings_high_contrast_mode">高对比度模式:</string>
     
+    <!-- Account Section -->
+    <string name="settings_account_section">Roboyard 账户</string>
+    <string name="settings_account_description">登录以直接将地图分享到 roboyard.z11.de</string>
+    <string name="settings_login">登录</string>
+    <string name="settings_register">注册</string>
+    <string name="settings_logout">登出</string>
+    <string name="settings_logged_in_as">登录为: %1$s</string>
+    <string name="settings_login_success">登录成功</string>
+    <string name="settings_login_failed">登录失败: %1$s</string>
+    <string name="settings_register_success">注册成功</string>
+    <string name="settings_register_failed">注册失败: %1$s</string>
+    <string name="settings_logout_success">已登出</string>
+    <string name="login_dialog_title">登录 Roboyard</string>
+    <string name="login_dialog_email">电子邮件</string>
+    <string name="login_dialog_password">密码</string>
+    <string name="register_dialog_title">注册 Roboyard</string>
+    <string name="register_dialog_name">名称</string>
+    <string name="register_dialog_confirm_password">确认密码</string>
+    
+    <!-- Data Export/Import Section -->
+    <string name="settings_data_section">数据管理</string>
+    <string name="settings_data_description">导出或导入您的所有游戏数据，包括偏好设置、成就、关卡进度和保存的游戏。</string>
+    <string name="settings_export_data">导出数据</string>
+    <string name="settings_import_data">导入数据</string>
+    <string name="settings_reset_data">重置所有数据</string>
+    <string name="settings_export_success">数据导出成功</string>
+    <string name="settings_export_failed">导出失败: %1$s</string>
+    <string name="settings_import_success">数据导入成功。请重启应用。</string>
+    <string name="settings_import_failed">导入失败: %1$s</string>
+    <string name="settings_reset_confirm_title">重置所有数据？</string>
+    <string name="settings_reset_confirm_message">这将删除您的所有偏好设置、成就、关卡进度和保存的游戏。此操作无法撤销。</string>
+    <string name="settings_reset_success">所有数据已重置。请重启应用。</string>
+    
     <!-- Share Dialog -->
     <string name="share_dialog_title">分享地图</string>
     <string name="share_dialog_logged_in_message">您已登录为 %1$s。直接分享到您的 roboyard.z11.de 账户？</string>
