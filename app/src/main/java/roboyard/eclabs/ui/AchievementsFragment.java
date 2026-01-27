@@ -144,9 +144,9 @@ public class AchievementsFragment extends BaseGameFragment {
         itemParams.bottomMargin = 8;
         itemLayout.setLayoutParams(itemParams);
         
-        // Icon from sprite sheet with achievement-specific color (larger, 128x128)
+        // Icon with achievement-specific color (larger, 128x128)
         ImageView icon = new ImageView(requireContext());
-        AchievementIconHelper.setIconWithAchievementColor(requireContext(), icon, achievement.getSpriteIndex(), achievement.getId());
+        AchievementIconHelper.setIconWithAchievementColor(requireContext(), icon, achievement.getIconDrawableName(), achievement.getId());
         icon.setAlpha(achievement.isUnlocked() ? 1.0f : 0.3f);
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(128, 128);
         iconParams.rightMargin = 16;

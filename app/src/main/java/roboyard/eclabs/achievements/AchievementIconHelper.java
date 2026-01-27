@@ -14,17 +14,13 @@ import roboyard.eclabs.R;
 import timber.log.Timber;
 
 /**
- * Helper class for loading achievement icons from the sprite sheet.
- * The sprite sheet contains 64 icons in an 8x8 grid, each icon is exactly 1/8 of the total width.
+ * Helper class for loading achievement icons from individual drawable resources.
+ * Each achievement icon is a separate drawable file (e.g., 1_lightning.png, 46_flame.png).
  * Each icon is displayed with a circular background in a unique color.
  */
 public class AchievementIconHelper {
     
-    private static final int GRID_COLS = 8;
-    private static final int GRID_ROWS = 8;
-    private static final int TOTAL_ICONS = 64;
-    
-    // Predefined color palette for achievement circles (58 colors for 58 achievements)
+    // Predefined color palette for achievement circles
     private static final int[] ACHIEVEMENT_COLORS = {
         0xFF4CAF50, // Green
         0xFFFF9800, // Orange
@@ -85,68 +81,44 @@ public class AchievementIconHelper {
         0xFFFFAB91, // Deep Orange 200
     };
     
-    private static Bitmap spriteSheet = null;
-    private static int iconWidth = 0;
-    private static int iconHeight = 0;
-    
     /**
-     * Initialize the sprite sheet from resources.
-     * Call this once at app startup or lazily on first use.
+     * Get a bitmap for a specific icon drawable name.
+     * 
+     * @param context The context for loading resources
+     * @param drawableName The drawable resource name (e.g., "1_lightning")
+     * @return The icon bitmap
+     * @throws IllegalArgumentException if drawable resource not found
      */
-    public static synchronized void initialize(Context context) {
-        if (spriteSheet == null) {
-            spriteSheet = BitmapFactory.decodeResource(context.getResources(), 
-                    R.drawable.achievements_icons_64);
-            if (spriteSheet != null) {
-                // Each icon is exactly 1/8 of the total width
-                iconWidth = spriteSheet.getWidth() / GRID_COLS;
-                iconHeight = spriteSheet.getHeight() / GRID_ROWS;
-                Timber.d("[ACHIEVEMENT_ICONS] Sprite sheet loaded: %dx%d, icon size: %dx%d",
-                        spriteSheet.getWidth(), spriteSheet.getHeight(), iconWidth, iconHeight);
-            } else {
-                Timber.e("[ACHIEVEMENT_ICONS] Failed to load sprite sheet!");
-            }
+    public static Bitmap getIconBitmap(Context context, String drawableName) {
+        if (drawableName == null || drawableName.isEmpty()) {
+            throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Icon drawable name cannot be null or empty");
         }
+        
+        int resId = context.getResources().getIdentifier(drawableName, "drawable", context.getPackageName());
+        if (resId == 0) {
+            throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Icon drawable not found: " + drawableName);
+        }
+        
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
+        if (bitmap == null) {
+            throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Failed to decode drawable: " + drawableName);
+        }
+        
+        Timber.d("[ACHIEVEMENT_ICONS] Loaded icon: %s (%dx%d)", drawableName, bitmap.getWidth(), bitmap.getHeight());
+        return bitmap;
     }
     
     /**
-     * Get a bitmap for a specific icon index (0-63).
-     * Icons are numbered left-to-right, top-to-bottom.
+     * Get a drawable for a specific icon with a circular background.
      * 
      * @param context The context for loading resources
-     * @param index The icon index (0-63)
-     * @return The icon bitmap, or null if invalid index or not initialized
-     */
-    public static Bitmap getIconBitmap(Context context, int index) {
-        initialize(context);
-        
-        if (spriteSheet == null || index < 0 || index >= TOTAL_ICONS) {
-            Timber.w("[ACHIEVEMENT_ICONS] Invalid icon index: %d", index);
-            return null;
-        }
-        
-        int col = index % GRID_COLS;
-        int row = index / GRID_COLS;
-        
-        int x = col * iconWidth;
-        int y = row * iconHeight;
-        
-        return Bitmap.createBitmap(spriteSheet, x, y, iconWidth, iconHeight);
-    }
-    
-    /**
-     * Get a drawable for a specific icon index with a circular background.
-     * 
-     * @param context The context for loading resources
-     * @param index The icon index (0-63)
+     * @param drawableName The drawable resource name (e.g., "1_lightning")
      * @param backgroundColor The color of the circular background
-     * @return The icon drawable with circular background, or null if invalid index
+     * @return The icon drawable with circular background
+     * @throws IllegalArgumentException if drawable resource not found
      */
-    public static Drawable getIconDrawableWithCircle(Context context, int index, int backgroundColor) {
-        Bitmap iconBitmap = getIconBitmap(context, index);
-        if (iconBitmap == null) {
-            return null;
-        }
+    public static Drawable getIconDrawableWithCircle(Context context, String drawableName, int backgroundColor) {
+        Bitmap iconBitmap = getIconBitmap(context, drawableName);
         
         // Create a larger circular background (2x the icon size for better appearance)
         int iconSize = Math.max(iconBitmap.getWidth(), iconBitmap.getHeight());
@@ -193,74 +165,61 @@ public class AchievementIconHelper {
     }
     
     /**
-     * Get a drawable for a specific icon index with a circular background.
+     * Get a drawable for a specific icon with a circular background.
      * Uses a default light gray background color.
      * 
      * @param context The context for loading resources
-     * @param index The icon index (0-63)
-     * @return The icon drawable with circular background, or null if invalid index
+     * @param drawableName The drawable resource name (e.g., "1_lightning")
+     * @return The icon drawable with circular background
+     * @throws IllegalArgumentException if drawable resource not found
      */
-    public static Drawable getIconDrawable(Context context, int index) {
-        return getIconDrawableWithCircle(context, index, Color.parseColor("#E0E0E0"));
+    public static Drawable getIconDrawable(Context context, String drawableName) {
+        return getIconDrawableWithCircle(context, drawableName, Color.parseColor("#E0E0E0"));
     }
     
     /**
-     * Set an ImageView to display a specific icon from the sprite sheet with circular background.
+     * Set an ImageView to display a specific icon with circular background.
      * 
      * @param context The context for loading resources
      * @param imageView The ImageView to set
-     * @param index The icon index (0-63)
+     * @param drawableName The drawable resource name (e.g., "1_lightning")
+     * @throws IllegalArgumentException if drawable resource not found
      */
-    public static void setIcon(Context context, ImageView imageView, int index) {
-        setIconWithColor(context, imageView, index, Color.parseColor("#E0E0E0"));
+    public static void setIcon(Context context, ImageView imageView, String drawableName) {
+        setIconWithColor(context, imageView, drawableName, Color.parseColor("#E0E0E0"));
     }
     
     /**
-     * Set an ImageView to display a specific icon from the sprite sheet with circular background.
+     * Set an ImageView to display a specific icon with circular background.
      * Uses the achievement color based on its ID.
      * 
      * @param context The context for loading resources
      * @param imageView The ImageView to set
-     * @param index The icon index (0-63)
+     * @param drawableName The drawable resource name (e.g., "1_lightning")
      * @param achievementId The achievement ID for color determination
+     * @throws IllegalArgumentException if drawable resource not found
      */
-    public static void setIconWithAchievementColor(Context context, ImageView imageView, int index, String achievementId) {
+    public static void setIconWithAchievementColor(Context context, ImageView imageView, String drawableName, String achievementId) {
         int color = getAchievementColor(achievementId);
-        setIconWithColor(context, imageView, index, color);
+        setIconWithColor(context, imageView, drawableName, color);
     }
     
     /**
-     * Set an ImageView to display a specific icon from the sprite sheet with circular background.
+     * Set an ImageView to display a specific icon with circular background.
      * 
      * @param context The context for loading resources
      * @param imageView The ImageView to set
-     * @param index The icon index (0-63)
+     * @param drawableName The drawable resource name (e.g., "1_lightning")
      * @param backgroundColor The color of the circular background
+     * @throws IllegalArgumentException if drawable resource not found
      */
-    public static void setIconWithColor(Context context, ImageView imageView, int index, int backgroundColor) {
-        Drawable drawable = getIconDrawableWithCircle(context, index, backgroundColor);
-        if (drawable != null) {
+    public static void setIconWithColor(Context context, ImageView imageView, String drawableName, int backgroundColor) {
+        try {
+            Drawable drawable = getIconDrawableWithCircle(context, drawableName, backgroundColor);
             imageView.setImageDrawable(drawable);
-        } else {
-            // Fallback to first icon in sprite sheet (index 0)
-            Drawable fallback = getIconDrawableWithCircle(context, 0, backgroundColor);
-            if (fallback != null) {
-                imageView.setImageDrawable(fallback);
-            }
+        } catch (IllegalArgumentException e) {
+            Timber.e(e, "[ACHIEVEMENT_ICONS] Failed to load icon: %s", drawableName);
+            throw e;
         }
-    }
-    
-    /**
-     * Clear the cached sprite sheet to free memory.
-     * Call this when the app is low on memory.
-     */
-    public static synchronized void clearCache() {
-        if (spriteSheet != null && !spriteSheet.isRecycled()) {
-            spriteSheet.recycle();
-        }
-        spriteSheet = null;
-        iconWidth = 0;
-        iconHeight = 0;
-        Timber.d("[ACHIEVEMENT_ICONS] Cache cleared");
     }
 }
