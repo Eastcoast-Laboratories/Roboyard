@@ -75,7 +75,7 @@
         android:id="@+id/back_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Back"
+        android:text="@string/settings_back"
         android:layout_margin="16dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_wall"
         app:layout_constraintStart_toEndOf="@id/left_wall" />

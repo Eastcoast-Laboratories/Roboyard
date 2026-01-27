@@ -6,6 +6,7 @@
     <!-- Main Menu Strings -->
     <string name="action_settings">설정</string>
     <string name="settings_back">뒤로</string>
+    <string name="empty_slot">비어있음</string>
 
     <string name="new_random_game">새 게임</string>
     <string name="new_random_game_a11y">새 게임 시작</string>

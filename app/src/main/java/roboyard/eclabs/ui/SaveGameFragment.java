@@ -428,7 +428,8 @@ public class SaveGameFragment extends BaseGameFragment {
                 newSaveSlots.add(new SaveSlotInfo(0, name, date, minimap, boardSize, difficulty, movesCount, completionStatus, saveData));
             } else {
                 // Empty autosave slot
-                newSaveSlots.add(new SaveSlotInfo(0, "Auto-save (Empty)", null, null, null, null, null, null, null));
+                String emptySlotText = getString(R.string.autosave_tag) + " (" + getString(R.string.save_empty) + ")";
+                newSaveSlots.add(new SaveSlotInfo(0, emptySlotText, null, null, null, null, null, null, null));
             }
         } catch (Exception e) {
             Timber.e(e, "Error loading autosave slot");
@@ -975,6 +976,82 @@ public class SaveGameFragment extends BaseGameFragment {
     }
     
     /**
+     * Parse wall data from save file format and add to formatted data
+     * Extracted to DRY principle - used by both shareToAccount and shareViaUrl
+     */
+    private void parseAndAddWalls(String[] lines, int width, int height, StringBuilder formattedData, Set<String> wallEntries) {
+        boolean inWallsSection = false;
+        
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            
+            if (trimmedLine.equals("WALLS:")) {
+                inWallsSection = true;
+                continue;
+            } else if (trimmedLine.equals("TARGET_SECTION:") || trimmedLine.equals("ROBOTS:") || trimmedLine.equals("BOARD:")) {
+                inWallsSection = false;
+                continue;
+            }
+            
+            if (inWallsSection && !trimmedLine.isEmpty()) {
+                String[] parts = trimmedLine.split(",");
+                if (parts.length >= 3) {
+                    try {
+                        // Check if format is 'H,y,x' or 'V,y,x'
+                        if (parts[0].equals("H") || parts[0].equals("V")) {
+                            if (parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                int y = Integer.parseInt(parts[1]);
+                                int x = Integer.parseInt(parts[2].replace(";", ""));
+                                
+                                // Skip border walls
+                                if (isBorderWall(x, y, width, height)) {
+                                    continue;
+                                }
+                                
+                                String wallEntry;
+                                if ("H".equals(parts[0])) {
+                                    wallEntry = "\nmh" + y + "," + x + ";";
+                                } else {
+                                    wallEntry = "\nmv" + y + "," + x + ";";
+                                }
+                                
+                                if (wallEntries.add(wallEntry)) {
+                                    formattedData.append(wallEntry);
+                                }
+                            }
+                        } else {
+                            // Try format 'x,y,direction'
+                            if (parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
+                                int x = Integer.parseInt(parts[0]);
+                                int y = Integer.parseInt(parts[1]);
+                                String direction = parts[2].replace(";", "");
+                                
+                                // Skip border walls
+                                if (isBorderWall(x, y, width, height)) {
+                                    continue;
+                                }
+                                
+                                String wallEntry;
+                                if ("h".equals(direction)) {
+                                    wallEntry = "\nmh" + y + "," + x + ";";
+                                } else {
+                                    wallEntry = "\nmv" + y + "," + x + ";";
+                                }
+                                
+                                if (wallEntries.add(wallEntry)) {
+                                    formattedData.append(wallEntry);
+                                }
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        Timber.e(e, "[SHARE] Error parsing wall: %s", trimmedLine);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
      * Build map data string for sharing - formats save data for API
      */
     private String buildMapDataForShare(int slotId) {
@@ -1030,27 +1107,21 @@ public class SaveGameFragment extends BaseGameFragment {
             
             // Parse sections
             boolean inTargetsSection = false;
-            boolean inWallsSection = false;
             boolean inRobotsSection = false;
             Set<String> targetEntries = new HashSet<>();
             Set<String> wallEntries = new HashSet<>();
             Set<String> robotEntries = new HashSet<>();
             
             for (String line : lines) {
-                if (line.equals("TARGET_SECTION:")) {
+                String trimmedLine = line.trim();
+                if (trimmedLine.equals("TARGET_SECTION:")) {
                     inTargetsSection = true;
-                    inWallsSection = false;
                     inRobotsSection = false;
-                } else if (line.equals("WALLS:")) {
+                } else if (trimmedLine.equals("ROBOTS:")) {
                     inTargetsSection = false;
-                    inWallsSection = true;
-                    inRobotsSection = false;
-                } else if (line.equals("ROBOTS:")) {
-                    inTargetsSection = false;
-                    inWallsSection = false;
                     inRobotsSection = true;
-                } else if (inTargetsSection && line.startsWith("TARGET_SECTION:") && line.length() > 15) {
-                    String targetData = line.substring("TARGET_SECTION:".length());
+                } else if (inTargetsSection && trimmedLine.startsWith("TARGET_SECTION:") && trimmedLine.length() > 15) {
+                    String targetData = trimmedLine.substring("TARGET_SECTION:".length());
                     String[] parts = targetData.split(",");
                     if (parts.length >= 3 && parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("-?\\d+")) {
                         int x = Integer.parseInt(parts[0]);
@@ -1062,23 +1133,8 @@ public class SaveGameFragment extends BaseGameFragment {
                             formattedData.append(targetEntry);
                         }
                     }
-                } else if (inWallsSection && !line.isEmpty() && !line.equals("WALLS:")) {
-                    String[] parts = line.split(",");
-                    if (parts.length >= 3) {
-                        try {
-                            int x = Integer.parseInt(parts[1]);
-                            int y = Integer.parseInt(parts[2].replace(";", ""));
-                            String direction = parts[0];
-                            String wallEntry = "\nm" + direction.toLowerCase() + y + "," + x + ";";
-                            if (wallEntries.add(wallEntry)) {
-                                formattedData.append(wallEntry);
-                            }
-                        } catch (NumberFormatException e) {
-                            // Skip invalid lines
-                        }
-                    }
-                } else if (inRobotsSection && !line.isEmpty() && !line.equals("ROBOTS:")) {
-                    String[] parts = line.split(",");
+                } else if (inRobotsSection && !trimmedLine.isEmpty() && !trimmedLine.equals("ROBOTS:")) {
+                    String[] parts = trimmedLine.split(",");
                     if (parts.length >= 3 && parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
                         int x = Integer.parseInt(parts[0]);
                         int y = Integer.parseInt(parts[1]);
@@ -1091,6 +1147,9 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                 }
             }
+            
+            // Parse walls using shared method
+            parseAndAddWalls(lines, width, height, formattedData, wallEntries);
             
             return formattedData.toString();
         } catch (Exception e) {

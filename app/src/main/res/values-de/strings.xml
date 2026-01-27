@@ -80,6 +80,7 @@
     <string name="settings_yes">Ja</string>
     <string name="settings_no">Nein</string>
     <string name="settings_back">Zurück</string>
+    <string name="empty_slot">Leer</string>
     <string name="settings_game_mode">Spielmodus:</string>
     <string name="settings_standard_game">Standard-Spielmodus</string>
     <string name="settings_standard_game_a11y">Standard-Spielmodus</string>

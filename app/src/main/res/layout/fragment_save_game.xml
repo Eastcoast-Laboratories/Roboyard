@@ -46,7 +46,7 @@
         android:id="@+id/back_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Back"
+        android:text="@string/settings_back"
         android:contentDescription="Return to the previous screen"
         app:layout_constraintBottom_toBottomOf="parent" />
 
