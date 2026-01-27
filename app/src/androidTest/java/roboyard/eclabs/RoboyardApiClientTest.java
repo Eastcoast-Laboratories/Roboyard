@@ -10,6 +10,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import roboyard.eclabs.RoboyardApiClient;
+import timber.log.Timber;
 
 /**
  * Integration tests for user registration API.
@@ -264,5 +269,152 @@ public class RoboyardApiClientTest {
         // Registration should fail with duplicate email
         assert !success.get() : "Registration should fail with duplicate email";
         assert !errorMessage.get().isEmpty() : "Error message should not be empty";
+    }
+
+    /**
+     * Test map sharing and verify the share URL loads without errors.
+     * This test registers a user, shares a map, and then fetches the share URL
+     * to check for database errors or other server-side issues.
+     */
+    @Test
+    public void testMapSharingAndShareUrlWorks() throws Exception {
+        // Generate unique email
+        String uniqueEmail = "test_share_" + UUID.randomUUID().toString().substring(0, 8) + "@test.com";
+        String testName = "Test Share User";
+        String testPassword = "testpassword123";
+
+        // First register
+        CountDownLatch registerLatch = new CountDownLatch(1);
+        AtomicBoolean registerSuccess = new AtomicBoolean(false);
+        AtomicReference<String> registerError = new AtomicReference<>("");
+
+        apiClient.register(testName, uniqueEmail, testPassword, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
+            @Override
+            public void onSuccess(RoboyardApiClient.LoginResult result) {
+                registerSuccess.set(true);
+                registerLatch.countDown();
+            }
+
+            @Override
+            public void onError(String error) {
+                registerError.set(error);
+                registerLatch.countDown();
+            }
+        });
+
+        boolean registerCompleted = registerLatch.await(30, TimeUnit.SECONDS);
+        if (!registerCompleted || !registerSuccess.get()) {
+            throw new AssertionError("Registration failed: " + registerError.get());
+        }
+
+        // Now share a map
+        CountDownLatch shareLatch = new CountDownLatch(1);
+        AtomicBoolean shareSuccess = new AtomicBoolean(false);
+        AtomicReference<String> shareError = new AtomicReference<>("");
+        AtomicReference<String> shareUrl = new AtomicReference<>("");
+
+        String testMapData = "16,16,W0-0,W0-1,W0-2,R1-5,B2-8,T3-10"; // Sample map data
+        
+        apiClient.shareMap(testMapData, "Test Map " + System.currentTimeMillis(), new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
+            @Override
+            public void onSuccess(RoboyardApiClient.ShareResult result) {
+                shareSuccess.set(true);
+                shareUrl.set(result.shareUrl);
+                shareLatch.countDown();
+            }
+
+            @Override
+            public void onError(String error) {
+                shareError.set(error);
+                shareLatch.countDown();
+            }
+        });
+
+        boolean shareCompleted = shareLatch.await(30, TimeUnit.SECONDS);
+        if (!shareCompleted || !shareSuccess.get()) {
+            throw new AssertionError("Map sharing failed: " + shareError.get());
+        }
+
+        // Verify share URL is not empty
+        assert !shareUrl.get().isEmpty() : "Share URL should not be empty";
+
+        // Now fetch the share URL and check for errors
+        String urlToCheck = shareUrl.get();
+        String pageContent = fetchUrlContent(urlToCheck);
+        
+        // Check for common error patterns in the page content
+        checkForServerErrors(pageContent, urlToCheck);
+    }
+
+    /**
+     * Fetch content from a URL
+     */
+    private String fetchUrlContent(String urlString) throws Exception {
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(15000);
+        
+        int responseCode = conn.getResponseCode();
+        
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(responseCode >= 400 ? conn.getErrorStream() : conn.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        }
+        
+        conn.disconnect();
+        
+        // If we got an error response code, include it in the error message
+        if (responseCode >= 400) {
+            throw new AssertionError("HTTP error " + responseCode + " when fetching " + urlString + "\nContent: " + content.toString().substring(0, Math.min(500, content.length())));
+        }
+        
+        return content.toString();
+    }
+
+    /**
+     * Check page content for common server-side errors
+     */
+    private void checkForServerErrors(String content, String url) {
+        // Check for SQL errors
+        if (content.contains("SQLSTATE[")) {
+            // Extract the error message
+            int start = content.indexOf("SQLSTATE[");
+            int end = content.indexOf("</", start);
+            if (end == -1) end = Math.min(start + 200, content.length());
+            String errorSnippet = content.substring(start, end);
+            throw new AssertionError("SQL error found on " + url + ": " + errorSnippet);
+        }
+        
+        // Check for Laravel/PHP exceptions
+        if (content.contains("Illuminate\\Database\\QueryException")) {
+            throw new AssertionError("Database QueryException found on " + url);
+        }
+        
+        if (content.contains("ErrorException") || content.contains("FatalErrorException")) {
+            throw new AssertionError("PHP Exception found on " + url);
+        }
+        
+        // Check for "Column not found" errors
+        if (content.contains("Column not found")) {
+            int start = content.indexOf("Column not found");
+            String errorSnippet = content.substring(start, Math.min(start + 100, content.length()));
+            throw new AssertionError("Missing column error on " + url + ": " + errorSnippet);
+        }
+        
+        // Check for "Table not found" errors
+        if (content.contains("Base table or view not found") || content.contains("Table") && content.contains("doesn't exist")) {
+            throw new AssertionError("Missing table error on " + url);
+        }
+        
+        // Check for generic 500 error page
+        if (content.contains("500 | Server Error") || content.contains("Whoops, looks like something went wrong")) {
+            throw new AssertionError("Server error (500) found on " + url);
+        }
     }
 }

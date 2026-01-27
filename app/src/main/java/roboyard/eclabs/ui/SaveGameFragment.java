@@ -1237,13 +1237,13 @@ public class SaveGameFragment extends BaseGameFragment {
                                     String targetData = line.substring("TARGET_SECTION:".length());
                                     String[] parts = targetData.split(",");
                                     if (parts.length >= 3) {
-                                        // Validate that all parts are numbers
-                                        if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
+                                        // Validate that all parts are numbers (allow negative for color -1 = multicolor)
+                                        if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("-?\\d+")) {
                                             int x = Integer.parseInt(parts[0]);
                                             int y = Integer.parseInt(parts[1]);
                                             int color = Integer.parseInt(parts[2].replace(";", ""));
                                             
-                                            // Map color code to color name
+                                            // Map color code to color name (-1 = multicolor target)
                                             String colorName = getRobotColorName(color);
                                             String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
                                             
@@ -1251,7 +1251,7 @@ public class SaveGameFragment extends BaseGameFragment {
                                             if (targetEntries.add(targetEntry)) {
                                                 formattedData.append(targetEntry);
                                                 targetCount++;
-                                                Timber.d("[SHARE] Added target at (%d,%d) with color %d", x, y, color);
+                                                Timber.d("[SHARE] Added target at (%d,%d) with color %d (%s)", x, y, color, colorName);
                                             }
                                         } else {
                                             Timber.e("[SHARE] Invalid target data format: %s", targetData);
@@ -1380,6 +1380,8 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private String getRobotColorName(int color) {
         switch (color) {
+            case -1: // Multicolor target (any robot can reach it)
+                return "multi";
             case 0: // Constants.COLOR_PINK
                 return "pink";
             case 1: // Constants.COLOR_GREEN
