@@ -97,3 +97,15 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 - export all data to json
 - import all data from json
 - sidekick_concept.md
+
+
+
+es sollen unten 4 gleichförmige buttons sein, credits auch als runder button mit neuem Icon, das du ausdenken sollst. how to play auch eine passende farbe. achievements lila, settings grau.
+
+oben rechts in der ecke  soll ein runder button  
+continue
+
+Und der runde achievements button soll lila sein und der credits link soll auch ein gleicher runder button werden mit einem icon das du dir ausdenken sollst.  der how to play button soll auch eine passsende farbe bekommen. alle 4 buttons sollen im gleichen abstand unten stehen.
+
+ausser dem soll oben rechts ein runder kreis mit dem anfangsbuchstaben des eingeloggten users angezeigt werden der zum profil auf der laravel anwendung im browser linken soll, also ein externer link zur profil seite https://roboyard.z11.de/profile
+wenn man noch nicht eingeloggt ist, dann soll das ein button zum einloggen sein, das den selben fragment öffnet wie in den settings unten, wenn man auf login drückt (DRY)

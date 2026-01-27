@@ -691,4 +691,7 @@
     <string name="achievement_unlocked">Achievement Unlocked!</string>
     <string name="achievements_unlocked_multiple">Achievements Unlocked!</string>
     <string name="view_achievements">View Achievements</string>
+    
+    <!-- Login and Account Strings -->
+    <string name="profile_a11y">User profile</string>
 </resources>

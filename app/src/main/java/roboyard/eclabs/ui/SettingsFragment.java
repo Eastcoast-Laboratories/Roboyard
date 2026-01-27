@@ -1957,50 +1957,17 @@ public class SettingsFragment extends Fragment {
      * Show login dialog
      */
     private void showLoginDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(R.string.login_dialog_title);
-        
-        LinearLayout layout = new LinearLayout(requireContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 24, 48, 24);
-        
-        EditText emailInput = new EditText(requireContext());
-        emailInput.setHint(R.string.login_dialog_email);
-        emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        layout.addView(emailInput);
-        
-        EditText passwordInput = new EditText(requireContext());
-        passwordInput.setHint(R.string.login_dialog_password);
-        passwordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(passwordInput);
-        
-        builder.setView(layout);
-        
-        builder.setPositiveButton(R.string.settings_login, (dialog, which) -> {
-            String email = emailInput.getText().toString().trim();
-            String password = passwordInput.getText().toString();
-            
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter email and password", Toast.LENGTH_SHORT).show();
-                return;
+        LoginDialogHelper.showLoginDialog(requireContext(), new LoginDialogHelper.LoginCallback() {
+            @Override
+            public void onLoginSuccess(RoboyardApiClient.LoginResult result) {
+                updateAccountUI();
             }
             
-            RoboyardApiClient.getInstance(requireContext()).login(email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
-                @Override
-                public void onSuccess(RoboyardApiClient.LoginResult result) {
-                    Toast.makeText(requireContext(), R.string.settings_login_success, Toast.LENGTH_SHORT).show();
-                    updateAccountUI();
-                }
-                
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(requireContext(), getString(R.string.settings_login_failed, error), Toast.LENGTH_LONG).show();
-                }
-            });
+            @Override
+            public void onLoginError(String error) {
+                // Error handling is done in LoginDialogHelper
+            }
         });
-        
-        builder.setNegativeButton(R.string.button_cancel, null);
-        builder.show();
     }
     
     /**

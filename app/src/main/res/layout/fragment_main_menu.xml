@@ -186,21 +186,85 @@
         android:importantForAccessibility="no"
         />
 
-    <!-- Credits Link - Positioned at the bottom left corner -->
-    <TextView
-        android:id="@+id/credits_link"
-        android:layout_width="wrap_content"
+    <!-- Top right user profile button -->
+    <ImageButton
+        android:id="@+id/user_profile_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_user_profile"
+        android:contentDescription="@string/profile_a11y"
+        android:background="@drawable/circular_button_background"
+        android:scaleType="centerInside"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp" />
+
+    <!-- Bottom button bar with Credits and icon buttons -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/credits"
-        android:textColor="#000000"
-        android:shadowColor="#FFFFFF"
-        android:shadowDx="1"
-        android:shadowDy="1"
-        android:shadowRadius="2"
+        android:orientation="horizontal"
+        android:gravity="center"
         android:padding="8dp"
         android:background="@drawable/hint_text_fancy_background"
         android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="8dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="8dp">
+
+        <!-- Credits button - Clock icon -->
+        <ImageButton
+            android:id="@+id/credits_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_credits"
+            android:contentDescription="@string/credits"
+            android:background="@drawable/circular_button_yellow"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- How to Play button - Question mark icon -->
+        <ImageButton
+            android:id="@+id/help_icon_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_help_outline"
+            android:contentDescription="@string/help_a11y"
+            android:background="@drawable/circular_button_yellow"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Settings button - Gear icon -->
+        <ImageButton
+            android:id="@+id/settings_icon_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/settings_grid_scaled"
+            android:contentDescription="@string/settings_a11y"
+            android:background="@drawable/circular_button_gray"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Achievements button - Trophy icon -->
+        <ImageButton
+            android:id="@+id/achievements_icon_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/achievements_tropy_scaled"
+            android:contentDescription="@string/achievements_title"
+            android:background="@drawable/circular_button_purple"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

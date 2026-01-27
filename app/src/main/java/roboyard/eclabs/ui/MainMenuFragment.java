@@ -5,17 +5,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
+import roboyard.eclabs.RoboyardApiClient;
 import roboyard.eclabs.achievements.AchievementManager;
 import roboyard.eclabs.achievements.StreakManager;
 import timber.log.Timber;
 import java.util.Locale;
 import android.content.res.Resources;
 import android.content.res.Configuration;
+import android.content.Intent;
+import android.net.Uri;
 
 /**
  * Main menu screen implemented as a Fragment with modern Android UI components.
@@ -29,6 +33,11 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button settingsButton;
     private Button helpButton;
     private Button levelEditorButton;
+    private ImageButton helpIconButton;
+    private ImageButton settingsIconButton;
+    private ImageButton achievementsIconButton;
+    private ImageButton creditsButton;
+    private ImageButton userProfileButton;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -48,18 +57,18 @@ public class MainMenuFragment extends BaseGameFragment {
         helpButton = view.findViewById(R.id.help_button);
         levelEditorButton = view.findViewById(R.id.level_editor_button);
         
-        // Set up credits link
-        TextView creditsLink = view.findViewById(R.id.credits_link);
-        creditsLink.setPaintFlags(creditsLink.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
-        creditsLink.setOnClickListener(v -> {
-            Timber.d("MainMenuFragment: Credits link clicked");
-            // Create a new CreditsFragment instance
-            CreditsFragment creditsFragment = new CreditsFragment();
-            navigateToDirect(creditsFragment);
-        });
+        // Set up icon buttons
+        helpIconButton = view.findViewById(R.id.help_icon_button);
+        settingsIconButton = view.findViewById(R.id.settings_icon_button);
+        achievementsIconButton = view.findViewById(R.id.achievements_icon_button);
+        creditsButton = view.findViewById(R.id.credits_button);
+        userProfileButton = view.findViewById(R.id.user_profile_button);
         
         // Set up button listeners
         setupButtons();
+        
+        // Update user profile button UI
+        updateUserProfileButton();
         
         return view;
     }
@@ -166,6 +175,73 @@ public class MainMenuFragment extends BaseGameFragment {
             
             Timber.d("MainMenuFragment: Opening Level Design Editor");
         });
+        
+        // Credits button - go to credits screen
+        creditsButton.setOnClickListener(v -> {
+            Timber.d("MainMenuFragment: Credits button clicked");
+            CreditsFragment creditsFragment = new CreditsFragment();
+            navigateToDirect(creditsFragment);
+        });
+        
+        // Help icon button - go to help screen
+        helpIconButton.setOnClickListener(v -> {
+            Timber.d("MainMenuFragment: Help icon button clicked");
+            HelpFragment helpFragment = new HelpFragment();
+            navigateToDirect(helpFragment);
+        });
+        
+        // Settings icon button - go to settings screen
+        settingsIconButton.setOnClickListener(v -> {
+            Timber.d("MainMenuFragment: Settings icon button clicked");
+            SettingsFragment settingsFragment = new SettingsFragment();
+            navigateToDirect(settingsFragment);
+        });
+        
+        // Achievements icon button - go to achievements screen
+        achievementsIconButton.setOnClickListener(v -> {
+            Timber.d("MainMenuFragment: Achievements icon button clicked");
+            AchievementsFragment achievementsFragment = new AchievementsFragment();
+            navigateToDirect(achievementsFragment);
+        });
+        
+        // User profile button - login or open profile
+        userProfileButton.setOnClickListener(v -> {
+            Timber.d("MainMenuFragment: User profile button clicked");
+            RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+            if (apiClient.isLoggedIn()) {
+                // Open profile in browser
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://roboyard.z11.de/profile"));
+                startActivity(intent);
+            } else {
+                // Show login dialog
+                LoginDialogHelper.showLoginDialog(requireContext(), new LoginDialogHelper.LoginCallback() {
+                    @Override
+                    public void onLoginSuccess(RoboyardApiClient.LoginResult result) {
+                        updateUserProfileButton();
+                    }
+                    
+                    @Override
+                    public void onLoginError(String error) {
+                        // Error handling is done in LoginDialogHelper
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Update user profile button based on login state
+     */
+    private void updateUserProfileButton() {
+        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+        if (apiClient.isLoggedIn()) {
+            String userName = apiClient.getUserName();
+            if (userName == null) userName = apiClient.getUserEmail();
+            if (userName != null && !userName.isEmpty()) {
+                String initials = String.valueOf(userName.charAt(0)).toUpperCase();
+                userProfileButton.setContentDescription(initials);
+            }
+        }
     }
     
     @Override
