@@ -34,7 +34,7 @@ public class MainMenuFragment extends BaseGameFragment {
     private ImageButton settingsIconButton;
     private ImageButton achievementsIconButton;
     private ImageButton creditsButton;
-    private ImageButton userProfileButton;
+    private Button userProfileButton;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 

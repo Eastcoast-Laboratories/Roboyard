@@ -145,16 +145,18 @@
         android:importantForAccessibility="no"
         />
 
-    <!-- Top right user profile button -->
-    <ImageButton
+    <!-- Top right user profile button / login button -->
+    <Button
         android:id="@+id/user_profile_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_user_profile"
+        android:text=""
         android:contentDescription="@string/profile_a11y"
         android:background="@drawable/circular_button_background"
-        android:scaleType="centerInside"
         android:padding="8dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp" />

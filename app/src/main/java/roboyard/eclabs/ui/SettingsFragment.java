@@ -1974,91 +1974,17 @@ public class SettingsFragment extends Fragment {
      * Show register dialog
      */
     private void showRegisterDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(R.string.register_dialog_title);
-        
-        LinearLayout layout = new LinearLayout(requireContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 24, 48, 24);
-        
-        EditText nameInput = new EditText(requireContext());
-        nameInput.setHint(R.string.register_dialog_name);
-        nameInput.setText(cachedRegisterName);
-        layout.addView(nameInput);
-        
-        EditText emailInput = new EditText(requireContext());
-        emailInput.setHint(R.string.login_dialog_email);
-        emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        emailInput.setText(cachedRegisterEmail);
-        layout.addView(emailInput);
-        
-        EditText passwordInput = new EditText(requireContext());
-        passwordInput.setHint(R.string.login_dialog_password);
-        passwordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        passwordInput.setText(cachedRegisterPassword);
-        layout.addView(passwordInput);
-        
-        EditText confirmPasswordInput = new EditText(requireContext());
-        confirmPasswordInput.setHint(R.string.register_dialog_confirm_password);
-        confirmPasswordInput.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(confirmPasswordInput);
-        
-        builder.setView(layout);
-        builder.setPositiveButton(R.string.settings_register, null);
-        builder.setNegativeButton(R.string.button_cancel, (dialogInterface, which) -> {
-            // Save form data when canceling
-            cachedRegisterName = nameInput.getText().toString().trim();
-            cachedRegisterEmail = emailInput.getText().toString().trim();
-            cachedRegisterPassword = passwordInput.getText().toString();
+        RegisterDialogHelper.showRegisterDialog(requireContext(), new RegisterDialogHelper.RegisterCallback() {
+            @Override
+            public void onRegisterSuccess(RoboyardApiClient.LoginResult result) {
+                updateAccountUI();
+            }
+            
+            @Override
+            public void onRegisterError(String error) {
+                // Error handling is done in RegisterDialogHelper
+            }
         });
-        
-        AlertDialog dialog = builder.create();
-        
-        dialog.setOnShowListener(dialogInterface -> {
-            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(v -> {
-                String name = nameInput.getText().toString().trim();
-                String email = emailInput.getText().toString().trim();
-                String password = passwordInput.getText().toString();
-                String confirmPassword = confirmPasswordInput.getText().toString();
-                
-                // Save form data
-                cachedRegisterName = name;
-                cachedRegisterEmail = email;
-                cachedRegisterPassword = password;
-                
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                
-                if (!password.equals(confirmPassword)) {
-                    Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                
-                RoboyardApiClient.getInstance(requireContext()).register(name, email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
-                    @Override
-                    public void onSuccess(RoboyardApiClient.LoginResult result) {
-                        // Clear cached data on success
-                        cachedRegisterName = "";
-                        cachedRegisterEmail = "";
-                        cachedRegisterPassword = "";
-                        
-                        Toast.makeText(requireContext(), R.string.settings_register_success, Toast.LENGTH_SHORT).show();
-                        updateAccountUI();
-                        dialog.dismiss();
-                    }
-                    
-                    @Override
-                    public void onError(String error) {
-                        Toast.makeText(requireContext(), getString(R.string.settings_register_failed, error), Toast.LENGTH_LONG).show();
-                    }
-                });
-            });
-        });
-        
-        dialog.show();
     }
     
     /**
