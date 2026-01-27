@@ -110,7 +110,6 @@ save_slot_autosave
 save_slot_empty
 save_slot_format
 save_success
-settings_back
 settings_screen_title
 settings_vibration
 stars_earned

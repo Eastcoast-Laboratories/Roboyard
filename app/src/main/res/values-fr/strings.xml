@@ -165,6 +165,7 @@
     <string name="settings_sound">Son:</string>
     <string name="settings_yes">Oui</string>
     <string name="settings_no">Non</string>
+    <string name="settings_back">Retour</string>
 
     <!-- Settings strings -->
     <string name="settings_game_mode">Mode de jeu:</string>

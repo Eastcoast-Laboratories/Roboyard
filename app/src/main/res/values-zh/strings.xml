@@ -5,6 +5,7 @@
     
     <!-- Main Menu Strings -->
     <string name="action_settings">设置</string>
+    <string name="settings_back">返回</string>
 
     <string name="new_random_game">新游戏</string>
     <string name="new_random_game_a11y">开始新游戏</string>

@@ -448,8 +448,8 @@
     
     <!-- Share Dialog -->
     <string name="share_dialog_title">Karte teilen</string>
-    <string name="share_dialog_logged_in_message">Du bist angemeldet als %1$s. Direkt zu deinem roboyard.z11.de-Konto teilen?</string>
-    <string name="share_to_account">Zum Konto teilen</string>
+    <string name="share_dialog_logged_in_message">Du bist angemeldet als %1$s. Direkt in deinem roboyard.z11.de-Konto veröffentlichen?</string>
+    <string name="share_to_account">Im Konto veröffentlichen</string>
     <string name="share_via_url">Via URL teilen</string>
     <string name="share_success">Karte erfolgreich geteilt!</string>
     <string name="share_failed">Teilen fehlgeschlagen: %1$s</string>

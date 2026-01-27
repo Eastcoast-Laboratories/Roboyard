@@ -287,6 +287,7 @@
     <string name="settings_cancel">Cancelar</string>
     <string name="settings_yes">Sí</string>
     <string name="settings_no">No</string>
+    <string name="settings_back">Atrás</string>
     <string name="settings_contact">Contacto</string>
     <string name="settings_contact_us">Contáctanos</string>
     <string name="settings_contact_email">soporte@roboyard.com</string>
