@@ -28,7 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="110dp"
-        android:layout_marginTop="80dp">
+        android:layout_marginTop="50dp">
         
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -119,13 +119,13 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Title centered with user profile button on the right -->
+    <!-- Roboyard Title centered with user profile button on the right -->
     <TextView
         android:id="@+id/main_menu_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/main_menu_title"
-        android:textSize="32sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textAlignment="center"
         android:gravity="center"
@@ -138,7 +138,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/user_profile_button"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="66dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
@@ -211,14 +211,14 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- Settings button - Gear icon -->
+        <!-- Achievements button - Trophy icon -->
         <ImageButton
-            android:id="@+id/settings_icon_button"
+            android:id="@+id/achievements_icon_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/settings_grid_scaled"
-            android:contentDescription="@string/settings_a11y"
-            android:background="@drawable/circular_button_gray"
+            android:src="@drawable/achievements_tropy_scaled"
+            android:contentDescription="@string/achievements_title"
+            android:background="@drawable/circular_button_purple"
             android:scaleType="centerInside"
             android:padding="8dp"
             android:layout_weight="0"
@@ -230,14 +230,14 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- Achievements button - Trophy icon -->
+        <!-- Settings button - Gear icon -->
         <ImageButton
-            android:id="@+id/achievements_icon_button"
+            android:id="@+id/settings_icon_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/achievements_tropy_scaled"
-            android:contentDescription="@string/achievements_title"
-            android:background="@drawable/circular_button_purple"
+            android:src="@drawable/settings_grid_scaled"
+            android:contentDescription="@string/settings_a11y"
+            android:background="@drawable/circular_button_gray"
             android:scaleType="centerInside"
             android:padding="8dp"
             android:layout_weight="0"
