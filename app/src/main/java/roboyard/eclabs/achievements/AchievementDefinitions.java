@@ -5,55 +5,46 @@ import java.util.Map;
 
 /**
  * Defines all achievements in the game.
- * Each achievement uses a sprite index (0-63) from the achievements_icons_64.png sprite sheet.
- * 
- * Sprite sheet layout (8x8 grid, left-to-right, top-to-bottom):
- * Row 0: 0-7   (lightning, heart gear, robot, power, monitor, key, trophy, target)
- * Row 1: 8-15  (trophy star, medal, chart up, buildings, hourglass, checklist, lightbulb, speedometer)
- * Row 2: 16-23 (trophy red, tools, gear, computer, hand, document, gamepad, puzzle)
- * Row 3: 24-31 (shield gray, shield red, shield star, anchor, brain, list, battery, infinity)
- * Row 4: 32-39 (target blue, magnifier, tablet, circle, map, satellite, sparkles, lamp)
- * Row 5: 40-47 (crown, wreath, trophy medal, trophy gold, diamond cup, flame, star, stars)
- * Row 6: 48-55 (robot yellow, triangle eye, pyramid, network, hexagon, cube, rocket, circle white)
- * Row 7: 56-63 (additional icons)
+ * Each achievement uses individual drawable resources from achievements_icons_cropped folder.
+ * Icons are named: {number}_{icon_name}.png (e.g., 1_lightning.png, 46_flame.png)
  */
 public class AchievementDefinitions {
     
-    // Sprite indices for different achievement types
-    private static final int ICON_TROPHY_STAR = 8;      // Trophy with star - progression
-    private static final int ICON_MEDAL = 9;            // Medal - level completion
-    private static final int ICON_CHART_UP = 10;        // Chart going up - progress
-    private static final int ICON_TROPHY_GOLD = 43;     // Gold trophy - mastery
-    private static final int ICON_STAR = 46;            // Star - stars collected
-    private static final int ICON_STARS = 47;           // Multiple stars - all stars
-    private static final int ICON_CROWN = 40;           // Crown - master achievement
-    private static final int ICON_DIAMOND_CUP = 44;     // Diamond cup - platinum
-    private static final int ICON_CHECKLIST = 13;       // Checklist - completion
-    private static final int ICON_SPEEDOMETER = 15;     // Speedometer - speed
-    private static final int ICON_LIGHTNING = 0;        // Lightning - fast
-    private static final int ICON_FLAME = 45;           // Flame - streak/hot
-    private static final int ICON_SHIELD_STAR = 26;     // Shield with star - perfect
-    private static final int ICON_SHIELD_RED = 25;      // Shield red - challenge
-    private static final int ICON_BRAIN = 28;           // Brain - thinking/no hints
-    private static final int ICON_LIGHTBULB = 14;       // Lightbulb - idea/custom
-    private static final int ICON_TOOLS = 17;           // Tools - create
-    private static final int ICON_NETWORK = 51;         // Network - share
-    private static final int ICON_HEART_GEAR = 1;       // Heart gear - first game
-    private static final int ICON_INFINITY = 31;        // Infinity - streak
-    private static final int ICON_ROBOT = 2;            // Robot - robot related
-    private static final int ICON_ROBOT_YELLOW = 48;    // Yellow robot - 5 robots
-    private static final int ICON_TARGET = 7;           // Target - targets
-    private static final int ICON_TARGET_BLUE = 32;     // Blue target - multi targets
-    private static final int ICON_PUZZLE = 23;          // Puzzle - solution
-    private static final int ICON_TABLET = 34;          // Tablet - resolution
-    private static final int ICON_MAP = 36;             // Map - coverage
-    private static final int ICON_SATELLITE = 37;       // Satellite - explorer
-    private static final int ICON_SPARKLES = 38;        // Sparkles - special
-    private static final int ICON_WREATH = 41;          // Wreath - achievement
-    private static final int ICON_TROPHY_MEDAL = 42;    // Trophy with medal
-    private static final int ICON_POWER = 3;            // Power button - comeback
-    private static final int ICON_HOURGLASS = 12;       // Hourglass - time
-    private static final int ICON_BUILDINGS = 11;       // Buildings - levels
+    // Icon resource names for different achievement types
+    private static final String ICON_TROPHY_STAR = "9_trophy";           // Trophy with star - progression
+    private static final String ICON_MEDAL = "10_gear";                  // Medal - level completion
+    private static final String ICON_CHART_UP = "11_chart";              // Chart going up - progress
+    private static final String ICON_TROPHY_GOLD = "43_trophy_gold";     // Gold trophy - mastery
+    private static final String ICON_STAR = "27_star";                   // Star - stars collected
+    private static final String ICON_STARS = "48_stars_gold";            // Multiple stars - all stars
+    private static final String ICON_CROWN = "41_crown";                 // Crown - master achievement
+    private static final String ICON_DIAMOND_CUP = "45_diamond_blue";    // Diamond cup - platinum
+    private static final String ICON_CHECKLIST = "14_checkmark";         // Checklist - completion
+    private static final String ICON_SPEEDOMETER = "16_compass";         // Speedometer - speed
+    private static final String ICON_LIGHTNING = "1_lightning";          // Lightning - fast
+    private static final String ICON_FLAME = "46_flame";                 // Flame - streak/hot
+    private static final String ICON_SHIELD_STAR = "27_star";            // Shield with star - perfect
+    private static final String ICON_SHIELD_RED = "26_shield_red";       // Shield red - challenge
+    private static final String ICON_BRAIN = "29_brain_green";           // Brain - thinking/no hints
+    private static final String ICON_LIGHTBULB = "15_lightbulb";         // Lightbulb - idea/custom
+    private static final String ICON_TOOLS = "18_wrench";                // Tools - create
+    private static final String ICON_NETWORK = "52_network";             // Network - share
+    private static final String ICON_HEART_GEAR = "2_heart";             // Heart gear - first game
+    private static final String ICON_INFINITY = "32_infinity";           // Infinity - streak
+    private static final String ICON_ROBOT = "3_robot";                  // Robot - robot related
+    private static final String ICON_ROBOT_YELLOW = "49_armor";          // Yellow robot - 5 robots
+    private static final String ICON_TARGET = "8_target";                // Target - targets
+    private static final String ICON_TARGET_BLUE = "33_target_blue";     // Blue target - multi targets
+    private static final String ICON_PUZZLE = "24_robot_gold";           // Puzzle - solution
+    private static final String ICON_TABLET = "35_door";                 // Tablet - resolution
+    private static final String ICON_MAP = "36_ring";                    // Map - coverage
+    private static final String ICON_SATELLITE = "40_planet";            // Satellite - explorer
+    private static final String ICON_SPARKLES = "39_stars";              // Sparkles - special
+    private static final String ICON_WREATH = "42_laurel";               // Wreath - achievement
+    private static final String ICON_TROPHY_MEDAL = "43_trophy_gold";    // Trophy with medal
+    private static final String ICON_POWER = "4_power";                  // Power button - comeback
+    private static final String ICON_HOURGLASS = "13_hourglass";         // Hourglass - time
+    private static final String ICON_BUILDINGS = "12_bars";              // Buildings - levels
     
     private static Map<String, Achievement> achievements;
     
@@ -164,10 +155,10 @@ public class AchievementDefinitions {
             
         // ========== RANDOM GAME - SOLUTION LENGTH ==========
         // Use different icons for different move counts (18-29)
-        int[] solutionIcons = {ICON_CHART_UP, ICON_BUILDINGS,  // 18, 19
-                               ICON_PUZZLE, ICON_CHECKLIST, ICON_CHART_UP, ICON_BUILDINGS, // 20-23
-                               ICON_TROPHY_MEDAL, ICON_TROPHY_STAR, ICON_WREATH, ICON_TROPHY_GOLD, // 24-27
-                               ICON_DIAMOND_CUP, ICON_CROWN}; // 28, 29
+        String[] solutionIcons = {ICON_CHART_UP, ICON_BUILDINGS,  // 18, 19
+                                  ICON_PUZZLE, ICON_CHECKLIST, ICON_CHART_UP, ICON_BUILDINGS, // 20-23
+                                  ICON_TROPHY_MEDAL, ICON_TROPHY_STAR, ICON_WREATH, ICON_TROPHY_GOLD, // 24-27
+                                  ICON_DIAMOND_CUP, ICON_CROWN}; // 28, 29
         for (int moves = 18; moves <= 29; moves++) {
             add(new Achievement("solution_" + moves + "_moves", 
                 "achievement_solution_" + moves, "achievement_solution_" + moves + "_desc",
@@ -183,10 +174,10 @@ public class AchievementDefinitions {
             AchievementCategory.RANDOM_RESOLUTION, ICON_TABLET));
         add(new Achievement("play_12_move_games_all_resolutions", 
             "achievement_resolution_12", "achievement_resolution_12_desc",
-            AchievementCategory.RANDOM_RESOLUTION, 35)); // Monitor icon
+            AchievementCategory.RANDOM_RESOLUTION, "5_monitor")); // Monitor icon
         add(new Achievement("play_15_move_games_all_resolutions", 
             "achievement_resolution_15", "achievement_resolution_15_desc",
-            AchievementCategory.RANDOM_RESOLUTION, 4)); // Computer monitor
+            AchievementCategory.RANDOM_RESOLUTION, "5_monitor")); // Computer monitor
             
         // ========== RANDOM GAME - MULTIPLE TARGETS ==========
         add(new Achievement("game_2_targets", 
@@ -197,22 +188,22 @@ public class AchievementDefinitions {
             AchievementCategory.RANDOM_TARGETS, ICON_TARGET_BLUE));
         add(new Achievement("game_4_targets", 
             "achievement_4_targets", "achievement_4_targets_desc",
-            AchievementCategory.RANDOM_TARGETS, 50)); // Pyramid/triangle
+            AchievementCategory.RANDOM_TARGETS, "51_spiral")); // Pyramid/triangle
         add(new Achievement("game_2_of_2_targets", 
             "achievement_2_of_2_targets", "achievement_2_of_2_targets_desc",
-            AchievementCategory.RANDOM_TARGETS, 32)); // Target blue
+            AchievementCategory.RANDOM_TARGETS, ICON_TARGET_BLUE)); // Target blue
         add(new Achievement("game_2_of_3_targets", 
             "achievement_2_of_3_targets", "achievement_2_of_3_targets_desc",
-            AchievementCategory.RANDOM_TARGETS, 52)); // Hexagon
+            AchievementCategory.RANDOM_TARGETS, "53_ring_blue")); // Hexagon
         add(new Achievement("game_2_of_4_targets", 
             "achievement_2_of_4_targets", "achievement_2_of_4_targets_desc",
-            AchievementCategory.RANDOM_TARGETS, 53)); // Cube
+            AchievementCategory.RANDOM_TARGETS, "54_cube")); // Cube
         add(new Achievement("game_3_of_3_targets", 
             "achievement_3_of_3_targets", "achievement_3_of_3_targets_desc",
-            AchievementCategory.RANDOM_TARGETS, 36)); // Map
+            AchievementCategory.RANDOM_TARGETS, ICON_MAP)); // Map
         add(new Achievement("game_3_of_4_targets", 
             "achievement_3_of_4_targets", "achievement_3_of_4_targets_desc",
-            AchievementCategory.RANDOM_TARGETS, 49)); // Triangle eye
+            AchievementCategory.RANDOM_TARGETS, "50_folders")); // Triangle eye
         add(new Achievement("game_4_of_4_targets", 
             "achievement_4_of_4_targets", "achievement_4_of_4_targets_desc",
             AchievementCategory.RANDOM_TARGETS, ICON_CROWN)); // Crown for completing all 4
@@ -285,6 +276,6 @@ public class AchievementDefinitions {
             AchievementCategory.RANDOM_SPEED, ICON_LIGHTNING));
         add(new Achievement("speedrun_random_5_games_under_30s", 
             "achievement_speedrun_random_5x30s", "achievement_speedrun_random_5x30s_desc",
-            AchievementCategory.RANDOM_SPEED, 54)); // Rocket
+            AchievementCategory.RANDOM_SPEED, "55_cone")); // Rocket
     }
 }
