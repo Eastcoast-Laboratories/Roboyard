@@ -2030,7 +2030,9 @@ public class SettingsFragment extends Fragment {
         
         builder.setView(layout);
         
-        builder.setPositiveButton(R.string.settings_register, (dialog, which) -> {
+        AlertDialog dialog = builder.create();
+        
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, requireContext().getString(R.string.settings_register), (dialogInterface, which) -> {
             String name = nameInput.getText().toString().trim();
             String email = emailInput.getText().toString().trim();
             String password = passwordInput.getText().toString();
@@ -2051,6 +2053,7 @@ public class SettingsFragment extends Fragment {
                 public void onSuccess(RoboyardApiClient.LoginResult result) {
                     Toast.makeText(requireContext(), R.string.settings_register_success, Toast.LENGTH_SHORT).show();
                     updateAccountUI();
+                    dialog.dismiss();
                 }
                 
                 @Override
@@ -2060,8 +2063,11 @@ public class SettingsFragment extends Fragment {
             });
         });
         
-        builder.setNegativeButton(R.string.button_cancel, null);
-        builder.show();
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, requireContext().getString(R.string.button_cancel), (dialogInterface, which) -> {
+            dialog.dismiss();
+        });
+        
+        dialog.show();
     }
     
     /**
