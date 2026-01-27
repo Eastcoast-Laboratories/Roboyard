@@ -61,10 +61,16 @@ public class RoboyardApiClient {
     public static class ShareResult {
         public final int mapId;
         public final String shareUrl;
+        public final boolean isDuplicate;
         
         public ShareResult(int mapId, String shareUrl) {
+            this(mapId, shareUrl, false);
+        }
+        
+        public ShareResult(int mapId, String shareUrl, boolean isDuplicate) {
             this.mapId = mapId;
             this.shareUrl = shareUrl;
+            this.isDuplicate = isDuplicate;
         }
     }
     
@@ -242,11 +248,16 @@ public class RoboyardApiClient {
                 
                 int mapId = json.getInt("map_id");
                 String shareUrl = json.optString("share_url", BASE_URL + "/maps/" + mapId);
+                boolean isDuplicate = json.optBoolean("duplicate", false);
                 
-                ShareResult result = new ShareResult(mapId, shareUrl);
+                ShareResult result = new ShareResult(mapId, shareUrl, isDuplicate);
                 postSuccess(callback, result);
                 
-                Timber.tag(TAG).d("Map shared successfully: %d", mapId);
+                if (isDuplicate) {
+                    Timber.tag(TAG).d("Map already exists: %d", mapId);
+                } else {
+                    Timber.tag(TAG).d("Map shared successfully: %d", mapId);
+                }
                 
             } catch (JSONException e) {
                 Timber.tag(TAG).e(e, "JSON error during map share");

@@ -925,13 +925,17 @@ public class SaveGameFragment extends BaseGameFragment {
             RoboyardApiClient.getInstance(requireContext()).shareMap(mapData, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
                 @Override
                 public void onSuccess(RoboyardApiClient.ShareResult result) {
-                    Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
+                    if (result.isDuplicate) {
+                        Toast.makeText(requireContext(), "Map already exists", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
+                    }
                     
                     // Open the share URL in browser
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.shareUrl));
                     startActivity(intent);
                     
-                    Timber.d("[SHARE] Map shared to account, ID: %d, URL: %s", result.mapId, result.shareUrl);
+                    Timber.d("[SHARE] Map shared to account, ID: %d, URL: %s, Duplicate: %b", result.mapId, result.shareUrl, result.isDuplicate);
                 }
                 
                 @Override
