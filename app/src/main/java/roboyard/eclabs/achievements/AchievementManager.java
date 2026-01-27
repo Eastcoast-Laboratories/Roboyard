@@ -385,6 +385,12 @@ public class AchievementManager {
             Timber.d("[ACHIEVEMENTS] Non-optimal game - perfect streak reset to 0");
         }
         
+        // Perfect solution with no hints (10+ moves optimal)
+        if (playerMoves == optimalMoves && hintsUsed == 0 && optimalMoves >= 10) {
+            unlock("perfect_no_hints_random_1");
+            Timber.d("[ACHIEVEMENTS] Perfect no hints achievement unlocked - optimal: %d moves, no hints used", optimalMoves);
+        }
+        
         // No hints random games - both cumulative and streak
         if (hintsUsed == 0) {
             // Cumulative counter (never resets)

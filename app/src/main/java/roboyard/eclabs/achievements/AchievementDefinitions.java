@@ -252,6 +252,10 @@ public class AchievementDefinitions {
         add(new Achievement("perfect_random_games_streak_20", 
             "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
             AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
+        // Perfect solution with no hints (10+ moves optimal)
+        add(new Achievement("perfect_no_hints_random_1", 
+            "achievement_perfect_no_hints_random_1", "achievement_perfect_no_hints_random_1_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
         // No hints random games (cumulative - no reset)
         add(new Achievement("no_hints_random_10", 
             "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",

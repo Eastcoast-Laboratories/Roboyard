@@ -660,6 +660,9 @@
     <string name="achievement_perfect_random_streak_10_desc">Complete 10 random games with optimal moves in a row</string>
     <string name="achievement_perfect_random_streak_20">Perfect Streak 20</string>
     <string name="achievement_perfect_random_streak_20_desc">Complete 20 random games with optimal moves in a row</string>
+    <!-- Perfect solution with no hints -->
+    <string name="achievement_perfect_no_hints_random_1">Perfect No Help</string>
+    <string name="achievement_perfect_no_hints_random_1_desc">Complete a random game with optimal moves (10+ moves) without using hints</string>
     <!-- No hints random games (cumulative) -->
     <string name="achievement_no_hints_random_10">No Help Needed 10</string>
     <string name="achievement_no_hints_random_10_desc">Complete 10 random games without using hints</string>

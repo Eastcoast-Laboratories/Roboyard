@@ -146,6 +146,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `perfect_random_games_streak_5` | Perfect Streak 5 | Complete 5 random games with optimal moves in a row | ✅ Implemented | |
 | `perfect_random_games_streak_10` | Perfect Streak 10 | Complete 10 random games with optimal moves in a row | ✅ Implemented | |
 | `perfect_random_games_streak_20` | Perfect Streak 20 | Complete 20 random games with optimal moves in a row | ✅ Implemented | |
+| `perfect_no_hints_random_1` | Perfect No Help | Complete a random game with optimal moves (10+ moves) without using hints | not Implemented | |
 | `no_hints_random_10` | No Help Needed 10 | Complete 10 random games without using hints (cumulative) | ✅ Implemented | |
 | `no_hints_random_50` | No Help Needed 50 | Complete 50 random games without using hints (cumulative) | ✅ Implemented | |
 | `no_hints_streak_random_10` | No Help Streak 10 | Complete 10 random games without using hints in a row | ✅ Implemented | |
