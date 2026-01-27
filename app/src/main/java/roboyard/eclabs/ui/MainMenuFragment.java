@@ -29,9 +29,6 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button newGameButton;
     private Button levelGameButton;
     private Button loadGameButton;
-    private Button achievementsButton;
-    private Button settingsButton;
-    private Button helpButton;
     private Button levelEditorButton;
     private ImageButton helpIconButton;
     private ImageButton settingsIconButton;
@@ -52,9 +49,6 @@ public class MainMenuFragment extends BaseGameFragment {
         
         levelGameButton = view.findViewById(R.id.level_game_button);
         loadGameButton = view.findViewById(R.id.load_game_button);
-        achievementsButton = view.findViewById(R.id.achievements_button);
-        settingsButton = view.findViewById(R.id.settings_button);
-        helpButton = view.findViewById(R.id.help_button);
         levelEditorButton = view.findViewById(R.id.level_editor_button);
         
         // Set up icon buttons
@@ -143,26 +137,6 @@ public class MainMenuFragment extends BaseGameFragment {
             
             // Navigate to the save game fragment
             navigateToDirect(saveGameFragment);
-        });
-        
-        // Achievements button - go to achievements screen
-        achievementsButton.setOnClickListener(v -> {
-            AchievementsFragment achievementsFragment = new AchievementsFragment();
-            navigateToDirect(achievementsFragment);
-        });
-        
-        // Settings button - go to settings screen
-        settingsButton.setOnClickListener(v -> {
-            // Create a new SettingsFragment instance
-            SettingsFragment settingsFragment = new SettingsFragment();
-            navigateToDirect(settingsFragment);
-        });
-        
-        // Help button - go to help screen
-        helpButton.setOnClickListener(v -> {
-            // Create a new HelpFragment instance
-            HelpFragment helpFragment = new HelpFragment();
-            navigateToDirect(helpFragment);
         });
         
         // Level Design Editor button - go to level design editor
