@@ -213,8 +213,11 @@ public class MainMenuFragment extends BaseGameFragment {
             if (userName == null) userName = apiClient.getUserEmail();
             if (userName != null && !userName.isEmpty()) {
                 String initials = String.valueOf(userName.charAt(0)).toUpperCase();
+                userProfileButton.setText(initials);
                 userProfileButton.setContentDescription(initials);
             }
+        } else {
+            userProfileButton.setText("");
         }
     }
     
