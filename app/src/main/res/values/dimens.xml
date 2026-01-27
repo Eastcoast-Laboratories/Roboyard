@@ -29,4 +29,7 @@
     
     <!-- Game area top margin (default: no margin) -->
     <dimen name="game_area_top_margin">0dp</dimen>
+    
+    <!-- Achievement icon dimensions -->
+    <dimen name="achievement_icon_size">90dp</dimen>
 </resources>

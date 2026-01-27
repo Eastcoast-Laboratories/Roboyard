@@ -230,10 +230,11 @@ public class AchievementPopup {
             itemLayout.setPadding(16, 12, 16, 12);
             itemLayout.setGravity(Gravity.CENTER_VERTICAL);
             
-            // Icon with achievement-specific color (larger, 128x128)
+            // Icon with achievement-specific color
             ImageView icon = new ImageView(context);
             AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.getIconDrawableName(), achievement.getId());
-            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(128, 128);
+            int iconSize = (int) context.getResources().getDimension(R.dimen.achievement_icon_size);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
             iconParams.rightMargin = 16;
             icon.setLayoutParams(iconParams);
             itemLayout.addView(icon);

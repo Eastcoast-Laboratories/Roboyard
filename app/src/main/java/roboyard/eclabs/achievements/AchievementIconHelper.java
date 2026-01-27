@@ -139,8 +139,9 @@ public class AchievementIconHelper {
         circlePaint.setColor(backgroundColor);
         canvas.drawCircle(circleSize / 2f, circleSize / 2f, circleSize / 2f, circlePaint);
         
-        // Scale icon to 1.7x larger while keeping it centered in the circle
-        float scaleFactor = 1.7f;
+        // Scale icon to 1.2x larger while keeping it centered in the circle
+        // This makes the icon smaller within the circle, leaving visible space around it
+        float scaleFactor = 1.2f;
         int scaledIconWidth = (int) (iconBitmap.getWidth() * scaleFactor);
         int scaledIconHeight = (int) (iconBitmap.getHeight() * scaleFactor);
         
