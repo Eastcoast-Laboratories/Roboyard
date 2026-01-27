@@ -27,7 +27,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="110dp">
+        android:layout_marginBottom="110dp"
+        android:layout_marginTop="80dp">
         
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -43,7 +44,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_max="240dp">
+                app:layout_constraintWidth_max="240dp"
+                android:minHeight="0dp">
 
                 <!-- Modern UI Game button - green with round corners and black outline -->
                 <Button
@@ -52,14 +54,15 @@
                     android:layout_height="wrap_content"
                     android:text="@string/new_random_game"
                     android:contentDescription="@string/new_random_game_a11y"
-                    android:drawableEnd="@drawable/new_game_scaled"
+                    android:drawableEnd="@drawable/new_game_scaled_large"
                     android:drawablePadding="12dp"
-                    android:padding="12dp"
+                    android:padding="10.8dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_green"
-                    android:elevation="8dp" />
+                    android:elevation="8dp"
+                    android:minHeight="0dp" />
                     
                 <!-- Level Game button - Blue with round corners and black outline -->
                 <Button
@@ -68,16 +71,17 @@
                     android:layout_height="wrap_content"
                     android:text="@string/level_game"
                     android:contentDescription="@string/level_game_a11y"
-                    android:drawableEnd="@drawable/level_game_scaled"
+                    android:drawableEnd="@drawable/level_game_scaled_large"
                     android:drawablePadding="12dp"
-                    android:padding="12dp"
+                    android:padding="10.8dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_blue"
-                    android:elevation="8dp" />
+                    android:elevation="8dp"
+                    android:minHeight="0dp" />
                     
                 <!-- Load Game button - red with round corners and black outline -->
                 <Button
@@ -86,13 +90,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/load_game"
                     android:contentDescription="@string/load_game_a11y"
-                    android:padding="12dp"
+                    android:padding="10.8dp"
                     android:layout_marginBottom="16dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_red"
-                    android:elevation="8dp" />
+                    android:elevation="8dp"
+                    android:minHeight="0dp" />
 
                 <!-- hidden Level Design Editor button - Purple with round corners and black outline -->
                 <!-- a hidden button to the Level Design Editor is a long press on the title in the level selection screen -->
@@ -114,7 +119,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Title at top right next to user profile button -->
+    <!-- Title centered with user profile button on the right -->
     <TextView
         android:id="@+id/main_menu_title"
         android:layout_width="0dp"
@@ -133,7 +138,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/user_profile_button"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:importantForAccessibility="no"
         />
 
@@ -158,7 +166,7 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:padding="0dp"
-        android:background="@drawable/hint_text_fancy_background"
+        android:background="@drawable/bottom_bar_dark_gray"
         android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -191,7 +199,7 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_help_outline"
             android:contentDescription="@string/help_a11y"
-            android:background="@drawable/circular_button_yellow"
+            android:background="@drawable/circular_button_orange"
             android:scaleType="centerInside"
             android:padding="8dp"
             android:layout_weight="0"
