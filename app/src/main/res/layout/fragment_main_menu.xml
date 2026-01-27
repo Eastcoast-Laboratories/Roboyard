@@ -52,6 +52,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/new_random_game"
                     android:contentDescription="@string/new_random_game_a11y"
+                    android:drawableEnd="@drawable/level_game"
+                    android:drawablePadding="12dp"
                     android:padding="12dp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
@@ -66,6 +68,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/level_game"
                     android:contentDescription="@string/level_game_a11y"
+                    android:drawableEnd="@drawable/level_game"
+                    android:drawablePadding="12dp"
                     android:padding="12dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
@@ -73,21 +77,6 @@
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_blue"
-                    android:elevation="8dp" />
-                    
-                <!-- How to Play button - Yellow with round corners and black outline -->
-                <Button
-                    android:id="@+id/help_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/help"
-                    android:contentDescription="@string/help_a11y"
-                    android:padding="12dp"
-                    android:layout_marginBottom="16dp"
-                    android:textColor="#1A1A1A"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
-                    android:background="@drawable/button_fancy_yellow"
                     android:elevation="8dp" />
                     
                 <!-- Load Game button - red with round corners and black outline -->
@@ -104,42 +93,6 @@
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_red"
                     android:elevation="8dp" />
-
-                <!-- Achievements button - Purple with round corners -->
-                <Button
-                    android:id="@+id/achievements_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/achievements_title"
-                    android:contentDescription="@string/achievements_title"
-                    android:drawableStart="@drawable/achievements_tropy_scaled"
-                    android:drawablePadding="12dp"
-                    android:padding="12dp"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:textAllCaps="false"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/button_fancy_purple"
-                    android:elevation="8dp"
-                    android:minHeight="48dp" />
-
-                <!-- Settings button - Gray with round corners and black outline -->
-                <Button
-                    android:id="@+id/settings_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings"
-                    android:contentDescription="@string/settings_a11y"
-                    android:drawableStart="@drawable/settings_grid_scaled"
-                    android:drawablePadding="12dp"
-                    android:padding="12dp"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:textAllCaps="false"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/button_fancy_gray"
-                    android:elevation="8dp"
-                    android:minHeight="48dp" />
 
                 <!-- hidden Level Design Editor button - Purple with round corners and black outline -->
                 <!-- a hidden button to the Level Design Editor is a long press on the title in the level selection screen -->
@@ -161,10 +114,10 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Title centered and positioned at the bottom -->
+    <!-- Title at top right next to user profile button -->
     <TextView
         android:id="@+id/main_menu_title"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/main_menu_title"
         android:textSize="32sp"
@@ -177,12 +130,10 @@
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
         android:background="@drawable/title_rounded_background"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginLeft="80dp" 
-        android:layout_marginRight="80dp" 
-        android:layout_marginBottom="60dp" 
+        app:layout_constraintEnd_toStartOf="@+id/user_profile_button"
+        android:layout_margin="16dp"
         android:importantForAccessibility="no"
         />
 
@@ -206,7 +157,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="8dp"
+        android:padding="0dp"
         android:background="@drawable/hint_text_fancy_background"
         android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -224,8 +175,14 @@
             android:background="@drawable/circular_button_yellow"
             android:scaleType="centerInside"
             android:padding="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_weight="0"
+            android:layout_margin="8dp" />
+
+        <!-- Spacer -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- How to Play button - Question mark icon -->
         <ImageButton
@@ -237,8 +194,14 @@
             android:background="@drawable/circular_button_yellow"
             android:scaleType="centerInside"
             android:padding="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_weight="0"
+            android:layout_margin="8dp" />
+
+        <!-- Spacer -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- Settings button - Gear icon -->
         <ImageButton
@@ -250,8 +213,14 @@
             android:background="@drawable/circular_button_gray"
             android:scaleType="centerInside"
             android:padding="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_weight="0"
+            android:layout_margin="8dp" />
+
+        <!-- Spacer -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- Achievements button - Trophy icon -->
         <ImageButton
@@ -263,8 +232,8 @@
             android:background="@drawable/circular_button_purple"
             android:scaleType="centerInside"
             android:padding="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_weight="0"
+            android:layout_margin="8dp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
