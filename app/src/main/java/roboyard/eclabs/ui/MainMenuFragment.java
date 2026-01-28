@@ -9,6 +9,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import android.text.TextPaint;
+import android.graphics.Canvas;
 
 import roboyard.eclabs.R;
 import roboyard.eclabs.RoboyardApiClient;
@@ -30,10 +32,10 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button levelGameButton;
     private Button loadGameButton;
     private Button levelEditorButton;
-    private ImageButton helpIconButton;
+    private Button helpIconButton;
     private ImageButton settingsIconButton;
     private ImageButton achievementsIconButton;
-    private ImageButton creditsButton;
+    private Button creditsButton;
     private Button userProfileButton;
     
     @Override
@@ -63,6 +65,9 @@ public class MainMenuFragment extends BaseGameFragment {
         
         // Update user profile button UI
         updateUserProfileButton();
+        
+        // Apply outline effect to title
+        applyTitleOutline(view);
         
         return view;
     }
@@ -204,6 +209,17 @@ public class MainMenuFragment extends BaseGameFragment {
     }
     
     /**
+     * Apply white outline effect to the title
+     */
+    private void applyTitleOutline(View view) {
+        TextView titleView = view.findViewById(R.id.main_menu_title);
+        if (titleView != null) {
+            titleView.setShadowLayer(1f, 1f, 0f, 0xFFFFFFFF);
+            titleView.invalidate();
+        }
+    }
+    
+    /**
      * Update user profile button based on login state
      */
     private void updateUserProfileButton() {
@@ -214,10 +230,14 @@ public class MainMenuFragment extends BaseGameFragment {
             if (userName != null && !userName.isEmpty()) {
                 String initials = String.valueOf(userName.charAt(0)).toUpperCase();
                 userProfileButton.setText(initials);
+                userProfileButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                userProfileButton.setGravity(android.view.Gravity.CENTER);
                 userProfileButton.setContentDescription(initials);
             }
         } else {
             userProfileButton.setText("");
+            userProfileButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_user_profile, 0, 0);
+            userProfileButton.setGravity(android.view.Gravity.CENTER);
         }
     }
     
