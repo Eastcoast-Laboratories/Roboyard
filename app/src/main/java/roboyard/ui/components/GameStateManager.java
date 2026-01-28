@@ -1822,10 +1822,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             return calculateDifficultyForLevel(state.getLevelId());
         } else if (isLoadedFromSave && loadedSaveDifficulty >= 0) {
             // Loaded savegame: use difficulty from the savegame
-            Timber.d("[DIFFICULTY] Using difficulty from loaded savegame: %d", loadedSaveDifficulty);
+            Timber.d("[DIFFICULTY] Using difficulty from loaded savegame: %d (isLoadedFromSave=%s, loadedSaveDifficulty=%d)", 
+                    loadedSaveDifficulty, isLoadedFromSave, loadedSaveDifficulty);
             return loadedSaveDifficulty;
         } else {
             // Random game: use difficulty from preferences
+            Timber.d("[DIFFICULTY] Using difficulty from preferences: %d (isLoadedFromSave=%s, loadedSaveDifficulty=%d)", 
+                    Preferences.difficulty, isLoadedFromSave, loadedSaveDifficulty);
             return Preferences.difficulty;
         }
     }

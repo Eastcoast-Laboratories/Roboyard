@@ -564,6 +564,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
             updateGameState(state);
             
+            // Update difficulty display when game state changes (e.g., after loading or starting new game)
+            updateDifficulty();
+            
             // Check if a hint is being shown and if the move matches the current hint
             checkIfMoveMatchesHint(state);
         });
@@ -1278,6 +1281,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 } else {
                     // Random game - start a new random game
                     gameStateManager.startModernGame();
+                    
+                    // Update difficulty display to reflect current settings (not savegame)
+                    updateDifficulty();
+                    Timber.d("[NEW_GAME] Updated difficulty display after starting new random game");
                     
                     // Clear robot paths
                     if (gameGridView != null) {
