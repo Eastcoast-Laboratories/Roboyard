@@ -145,6 +145,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Store the difficulty level from a deep link
     private int deepLinkDifficulty = -1;
 
+    // Flag to indicate if the current game was loaded from a savegame
+    // When true, skip min/max moves validation to allow playing saved games regardless of current difficulty settings
+    private boolean isLoadedFromSave = false;
+    
+    // Store the difficulty level from the loaded savegame (for display purposes)
+    private int loadedSaveDifficulty = -1;
+
     public GameStateManager(Application application) {
         super(application);
         // We'll use lazy initialization for solver now - do not create it here
@@ -186,6 +193,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void startModernGame() {
         Timber.d("GameStateManager: startModernGame() called");
+
+        // Reset loaded game flags - new games should use current difficulty settings
+        isLoadedFromSave = false;
+        loadedSaveDifficulty = -1;
+        Timber.d("[NEW_GAME] Reset isLoadedFromSave flag, using current difficulty settings");
 
         // Reset any existing solver state to ensure a clean calculation for the new game
         SolverManager solverManager = getSolverManager();
@@ -313,6 +325,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Load saved game using the original method
             GameState newState = GameState.loadSavedGame(getApplication(), saveId);
             if (newState != null) {
+                // Set flag to skip min/max moves validation for loaded games
+                isLoadedFromSave = true;
+                
+                // Store the difficulty from the savegame for display purposes
+                loadedSaveDifficulty = newState.getDifficulty();
+                Timber.d("[LOAD_GAME] Loading saved game with difficulty: %d (current settings difficulty: %d)", 
+                        loadedSaveDifficulty, Preferences.difficulty);
+                
                 // Apply the loaded game state using the shared method
                 applyLoadedGameState(newState);
                 Timber.d("Successfully loaded game from slot %d", saveId);
@@ -1790,6 +1810,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     /**
      * Get the effective difficulty for the current game.
      * For level games: returns difficulty based on level number
+     * For loaded savegames: returns difficulty stored in the savegame
      * For random games: returns difficulty from preferences
      * 
      * @return The effective difficulty level
@@ -1799,10 +1820,30 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         if (state != null && state.getLevelId() > 0) {
             // Level game: calculate difficulty based on level
             return calculateDifficultyForLevel(state.getLevelId());
+        } else if (isLoadedFromSave && loadedSaveDifficulty >= 0) {
+            // Loaded savegame: use difficulty from the savegame
+            Timber.d("[DIFFICULTY] Using difficulty from loaded savegame: %d", loadedSaveDifficulty);
+            return loadedSaveDifficulty;
         } else {
             // Random game: use difficulty from preferences
             return Preferences.difficulty;
         }
+    }
+    
+    /**
+     * Check if the current game was loaded from a savegame
+     * @return true if loaded from savegame, false otherwise
+     */
+    public boolean isLoadedFromSave() {
+        return isLoadedFromSave;
+    }
+    
+    /**
+     * Get the difficulty level from the loaded savegame
+     * @return The difficulty level from the savegame, or -1 if not loaded from savegame
+     */
+    public int getLoadedSaveDifficulty() {
+        return loadedSaveDifficulty;
     }
 
     /**
@@ -2080,7 +2121,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int maxRequiredMoves = getMaximumRequiredMoves();
 
             // BEGINNER MODE: Check if solution is too easy (below minimum) or too hard (above maximum)
-            if (!isLevelMode && regenerationCount < MAX_AUTO_REGENERATIONS) {
+            // Skip validation for loaded savegames - they should be playable regardless of current difficulty settings
+            if (!isLevelMode && !isLoadedFromSave && regenerationCount < MAX_AUTO_REGENERATIONS) {
                 boolean isTooEasy = moveCount < minRequiredMoves;
                 boolean isTooHard = moveCount > maxRequiredMoves;
 

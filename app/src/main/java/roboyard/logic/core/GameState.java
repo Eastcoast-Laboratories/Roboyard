@@ -69,6 +69,9 @@ public class GameState implements Serializable {
     // Predefined solution from level file (for levels that are too complex to solve at runtime)
     private String predefinedSolution = null;
     private int predefinedNumMoves = 0;
+    
+    // Difficulty level when the game was created (for savegame restoration)
+    private int difficulty = Constants.DIFFICULTY_BEGINNER;
 
     /**
      * Create a new game state with specified dimensions
@@ -1668,6 +1671,22 @@ public class GameState implements Serializable {
     }
     
     /**
+     * Get the difficulty level of this game
+     * @return The difficulty level (Constants.DIFFICULTY_*)
+     */
+    public int getDifficulty() {
+        return difficulty;
+    }
+    
+    /**
+     * Set the difficulty level of this game
+     * @param difficulty The difficulty level (Constants.DIFFICULTY_*)
+     */
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
+    
+    /**
      * Converts difficulty integer to string for the original GridGameView class
      */
     private static String difficultyIntToString(int difficulty) {
@@ -1716,6 +1735,10 @@ public class GameState implements Serializable {
         
         // Create new game state with specified dimensions
         GameState state = new GameState(boardSizeX, boardSizeY);
+        
+        // Store the current difficulty level in the game state for savegame restoration
+        state.setDifficulty(Preferences.difficulty);
+        Timber.tag(TAG).d("[DIFFICULTY] Set game difficulty to %d", Preferences.difficulty);
 
         // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
