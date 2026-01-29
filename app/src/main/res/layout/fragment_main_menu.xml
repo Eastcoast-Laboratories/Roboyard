@@ -52,7 +52,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/new_random_game"
                     android:contentDescription="@string/new_random_game_a11y"
-                    android:drawableEnd="@drawable/new_game_scaled_large"
                     android:drawablePadding="12dp"
                     android:padding="10.8dp"
                     android:textColor="#FFFFFF"
@@ -60,7 +59,8 @@
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_green_transparent"
                     android:elevation="8dp"
-                    android:minHeight="0dp" />
+                    android:minHeight="0dp"
+                    android:gravity="center_vertical" />
                     
                 <!-- Level Game button - Blue with round corners and black outline -->
                 <Button
@@ -69,7 +69,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/level_game"
                     android:contentDescription="@string/level_game_a11y"
-                    android:drawableEnd="@drawable/level_game_scaled_large"
                     android:drawablePadding="12dp"
                     android:padding="10.8dp"
                     android:layout_marginTop="16dp"
@@ -79,7 +78,8 @@
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_blue_transparent"
                     android:elevation="8dp"
-                    android:minHeight="0dp" />
+                    android:minHeight="0dp"
+                    android:gravity="center_vertical" />
                     
                 <!-- Load Game button - red with round corners and black outline -->
                 <Button
@@ -88,14 +88,18 @@
                     android:layout_height="wrap_content"
                     android:text="@string/load_game"
                     android:contentDescription="@string/load_game_a11y"
+                    android:drawableStart="@drawable/ic_load_game"
+                    android:drawablePadding="12dp"
                     android:padding="10.8dp"
                     android:layout_marginBottom="16dp"
-                    android:textColor="#000000"
+                    android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="20sp"
-                    android:background="@drawable/button_fancy_red_transparent"
+                    android:background="@drawable/button_fancy_red_dark_transparent"
                     android:elevation="8dp"
-                    android:minHeight="0dp" />
+                    android:minHeight="0dp"
+                    android:gravity="center_vertical"
+                    android:visibility="gone" />
 
                 <!-- hidden Level Design Editor button - Purple with round corners and black outline -->
                 <!-- a hidden button to the Level Design Editor is a long press on the title in the level selection screen -->
@@ -139,7 +143,7 @@
             android:paddingBottom="8dp"
             android:background="@drawable/bar_semi_transparent_black">
         
-        <!-- Roboyard Title -->
+        <!-- Roboyard Title - White with black shadow, centered on screen -->
         <TextView
             android:id="@+id/main_menu_title"
             android:layout_width="0dp"
@@ -150,13 +154,13 @@
             android:textStyle="bold"
             android:textAlignment="center"
             android:gravity="center"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:importantForAccessibility="no"
             android:textAllCaps="true"
-            android:shadowColor="#FFFFFF"
-            android:shadowDx="1"
-            android:shadowDy="1"
-            android:shadowRadius="1" />
+            android:shadowColor="#000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="3" />
         
         <!-- User profile button / login button -->
         <Button
@@ -209,20 +213,22 @@
             android:background="@drawable/bar_semi_transparent_black"
             android:elevation="0dp">
 
-        <!-- Credits button - Large C -->
+        <!-- Credits button - X symbol -->
         <Button
             android:id="@+id/credits_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="C"
+            android:text="©"
             android:contentDescription="@string/credits"
             android:background="@drawable/circular_button_yellow"
-            android:textSize="28sp"
+            android:textSize="30sp"
             android:textStyle="bold"
             android:textColor="#000000"
             android:layout_weight="0"
             android:layout_margin="8dp"
-            android:padding="0dp" />
+            android:padding="0dp"
+            android:paddingBottom="10dp"
+            android:gravity="center_horizontal|center_vertical" />
 
         <!-- Spacer -->
         <Space
@@ -230,20 +236,18 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- How to Play button - Question mark -->
-        <Button
+        <!-- How to Play button - Help icon -->
+        <ImageButton
             android:id="@+id/help_icon_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="?"
+            android:src="@drawable/help"
             android:contentDescription="@string/help_a11y"
             android:background="@drawable/circular_button_orange"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
+            android:scaleType="centerInside"
             android:layout_weight="0"
             android:layout_margin="8dp"
-            android:padding="0dp" />
+            android:padding="8dp" />
 
         <!-- Spacer -->
         <Space

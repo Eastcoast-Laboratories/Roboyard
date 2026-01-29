@@ -32,7 +32,7 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button levelGameButton;
     private Button loadGameButton;
     private Button levelEditorButton;
-    private Button helpIconButton;
+    private ImageButton helpIconButton;
     private ImageButton settingsIconButton;
     private ImageButton achievementsIconButton;
     private Button creditsButton;
@@ -100,6 +100,7 @@ public class MainMenuFragment extends BaseGameFragment {
      */
     private void setupButtons() {
         // New Game button - start a game
+        newGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.new_random_game_scaled_large, 0, 0, 0);
         newGameButton.setOnClickListener(v -> {
             // Record daily login when starting a new game
             StreakManager.getInstance(requireContext()).recordDailyLogin();
@@ -118,6 +119,7 @@ public class MainMenuFragment extends BaseGameFragment {
         });
         
         // Level Game button - go to level selection screen
+        levelGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.level_game_scaled_large, 0, 0, 0);
         levelGameButton.setOnClickListener(v -> {
             // Record daily login when starting a level game
             StreakManager.getInstance(requireContext()).recordDailyLogin();
@@ -128,6 +130,9 @@ public class MainMenuFragment extends BaseGameFragment {
         });
         
         // Load Game button - go to save game screen in load mode
+        // Check if there are saved games and only show button if there are
+        checkAndUpdateLoadGameButton();
+        loadGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_load_game, 0, 0, 0);
         loadGameButton.setOnClickListener(v -> {
             // Create a new SaveGameFragment instance
             SaveGameFragment saveGameFragment = new SaveGameFragment();
@@ -214,8 +219,29 @@ public class MainMenuFragment extends BaseGameFragment {
     private void applyTitleOutline(View view) {
         TextView titleView = view.findViewById(R.id.main_menu_title);
         if (titleView != null) {
-            titleView.setShadowLayer(1f, 1f, 0f, 0xFFFFFFFF);
+            // White text with black shadow
+            titleView.setTextColor(0xFFFFFFFF);
+            titleView.setShadowLayer(3f, 2f, 2f, 0xFF000000);
             titleView.invalidate();
+        }
+    }
+    
+    /**
+     * Check if there are saved games and update Load Game button visibility
+     */
+    private void checkAndUpdateLoadGameButton() {
+        try {
+            // Check if there are any saved games
+            java.io.File savesDir = new java.io.File(requireContext().getFilesDir(), "saves");
+            boolean hasSavedGames = savesDir.exists() && savesDir.listFiles() != null && savesDir.listFiles().length > 0;
+            
+            // Show/hide load game button based on saved games
+            loadGameButton.setVisibility(hasSavedGames ? View.VISIBLE : View.GONE);
+            Timber.d("MainMenuFragment: Load Game button visibility set to %s (hasSavedGames=%s)", 
+                hasSavedGames ? "VISIBLE" : "GONE", hasSavedGames);
+        } catch (Exception e) {
+            Timber.e(e, "MainMenuFragment: Error checking for saved games");
+            loadGameButton.setVisibility(View.GONE);
         }
     }
     
