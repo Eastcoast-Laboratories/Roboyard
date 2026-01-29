@@ -101,12 +101,8 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 
 1.
-Die Reihenfolge, die Icons Titel und Farben der achievement-icon-Kreise und die Kategorie Titel müssen in einer zentralen Datei definiert werden und von dort überall benutzt, im moment werden die icons hier definierrts in @AchievementDefinitions.java#L194-201 
-und die category names @DebugSettingsView.java#L84-86 und @AchievementsFragment.java#L108-109 
-und die hintergrundfarben der icons in denkreisen noch woanders, di e musst du selbasst suchen.
-das soll aber alles Zentral in einer datei definiert werden und die categories auch aus der englischen strings.xml (noch nicht lokalisieren)
+der titel der credits und der help seite sollen in der leicht grauen box soll unten keine extra linie haben, die ist ja schon von dem content block oben, sonst ist die doppelt
 
-2. 
-editiere die how to play seite im stil, die soll genau so aussehen vom stil wie https://roboyard.z11.de/maps und https://roboyard.z11.de/impressum , analysiere den stil schriftart, farben, tabellen-borders, trennstriche, buttons usw. im css und mache ein style md file in dev/ danach dann richten und die howto seite und die credits seite genau in dem stil anpassen, es soll alles wie aus einem guss aussehen in der app und online, also auch den back button genau wie online
+- die back buttons sollen runde ecken haben
 
-teste deine änderungen ausgiebig und benutze playwright um online durchzuklicken , dich einzuloggen und den stil genau zu analysieren
+- teste deine änderungen ausgiebig und benutze playwright um online durchzuklicken , dich einzuloggen und den stil genau zu analysieren

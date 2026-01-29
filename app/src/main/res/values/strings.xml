@@ -195,7 +195,7 @@
     <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
     
     <!-- URLs - non-translatable -->
-    <string name="url_imprint" translatable="false">https://eclabs.de/datenschutz.html</string>
+    <string name="url_imprint" translatable="false">https://roboyard.z11.de/impressum</string>
     <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
     <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
     

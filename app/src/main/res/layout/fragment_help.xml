@@ -3,20 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/title_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Help"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:background="#f8fafc">
 
     <!-- ScrollView for help content -->
     <ScrollView
@@ -24,33 +11,59 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/back_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_text">
+        app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Help text content -->
-        <TextView
-            android:id="@+id/help_text"
+        <!-- Card container - Laravel style -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:lineSpacingMultiplier="1.2"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:importantForAccessibility="yes"
-            android:focusable="true" />
+            android:orientation="vertical">
+
+            <!-- Card header - gray background with border like Laravel -->
+            <TextView
+                android:id="@+id/title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/help_title"
+                android:textSize="16sp"
+                android:textColor="#212529"
+                android:padding="12dp"
+                android:background="@drawable/card_header_background" />
+
+            <!-- Card body with border -->
+            <LinearLayout
+                android:id="@+id/help_content_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/card_background" />
+
+        </LinearLayout>
 
     </ScrollView>
 
-    <!-- Back button -->
+    <!-- Back button at bottom - Laravel primary blue style with rounded corners -->
     <Button
         android:id="@+id/back_button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/settings_back"
+        android:layout_margin="16dp"
+        android:text="← Back"
+        android:textColor="#ffffff"
+        android:background="@drawable/button_rounded"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:contentDescription="Return to the previous screen"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

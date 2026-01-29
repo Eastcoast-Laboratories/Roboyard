@@ -3,216 +3,191 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B0CC99">
+    android:background="#f8fafc">
 
-    <!-- Colorful border using tiled wall graphics -->
-    <ImageView
-        android:id="@+id/top_wall"
-        android:layout_width="0dp"
-        android:layout_height="10dp"
-        android:src="@drawable/mh"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:importantForAccessibility="no"
-        android:focusable="false"
-        android:clickable="false"
-        android:contentDescription="@null"
-        />
-    
-    <ImageView
-        android:id="@+id/left_wall"
-        android:layout_width="10dp"
-        android:layout_height="0dp"
-        android:src="@drawable/mv"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:importantForAccessibility="no"
-        android:focusable="false"
-        android:clickable="false"
-        android:contentDescription="@null"
-        />
-    
-    <ImageView
-        android:id="@+id/right_wall"
-        android:layout_width="10dp"
-        android:layout_height="0dp"
-        android:src="@drawable/mv"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:importantForAccessibility="no"
-        android:focusable="false"
-        android:clickable="false"
-        android:contentDescription="@null"
-        />
-    
-    <ImageView
-        android:id="@+id/bottom_wall"
-        android:layout_width="0dp"
-        android:layout_height="10dp"
-        android:src="@drawable/mh"
-        android:scaleType="fitXY"
-        android:tileMode="repeat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:importantForAccessibility="no"
-        android:focusable="false"
-        android:clickable="false"
-        android:contentDescription="@null"
-        />
+    <!-- Hidden wall views for backwards compatibility -->
+    <View android:id="@+id/top_wall" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <View android:id="@+id/left_wall" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <View android:id="@+id/right_wall" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <View android:id="@+id/bottom_wall" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
 
-    <!-- Back button -->
+    <!-- Scrollable content area -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/back_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <!-- Card container - Laravel style -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <!-- Card header - gray background with border like Laravel -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/credits"
+                android:textSize="16sp"
+                android:textColor="#212529"
+                android:padding="12dp"
+                android:background="@drawable/card_header_background" />
+            
+            <!-- Card body with border -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/card_background">
+                
+                <!-- Based on Section - h3 style like Laravel -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Based on"
+                    android:textSize="18sp"
+                    android:textColor="#212529" />
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ricochet Robots®"
+                    android:textSize="14sp"
+                    android:textColor="#212529"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginTop="8dp" />
+                
+                <!-- Imprint/privacy policy Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Imprint / Privacy Policy"
+                    android:textSize="18sp"
+                    android:textColor="#212529"
+                    android:layout_marginTop="16dp" />
+                
+                <TextView
+                    android:id="@+id/imprint_link"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="roboyard.z11.de/impressum"
+                    android:textSize="14sp"
+                    android:textColor="#0d6efd"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginTop="8dp" />
+                
+                <!-- Open Source Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Open Source"
+                    android:textSize="18sp"
+                    android:textColor="#212529"
+                    android:layout_marginTop="16dp" />
+                
+                <TextView
+                    android:id="@+id/opensource_link"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="github.com/Eastcoast-Laboratories/Roboyard"
+                    android:textSize="14sp"
+                    android:textColor="#0d6efd"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginTop="8dp" />
+                
+                <TextView
+                    android:id="@+id/version_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Version: 1.0.0 (Build 1)"
+                    android:textSize="14sp"
+                    android:textColor="#6c757d"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginTop="8dp" />
+                
+                <!-- Contact Us Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Contact Us"
+                    android:textSize="18sp"
+                    android:textColor="#212529"
+                    android:layout_marginTop="16dp" />
+                
+                <TextView
+                    android:id="@+id/contact_link"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="eclabs.de/#kontakt"
+                    android:textSize="14sp"
+                    android:textColor="#0d6efd"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginTop="8dp" />
+                
+                <!-- Created by Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Created by"
+                    android:textSize="18sp"
+                    android:textColor="#212529"
+                    android:layout_marginTop="16dp" />
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Alain Caillaud"
+                    android:textSize="14sp"
+                    android:textColor="#212529"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginTop="8dp" />
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Pierre Michel"
+                    android:textSize="14sp"
+                    android:textColor="#212529"
+                    android:lineSpacingMultiplier="1.6" />
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ruben Barkow-Kuder"
+                    android:textSize="14sp"
+                    android:textColor="#212529"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginBottom="8dp" />
+                
+            </LinearLayout>
+            
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Back button at bottom - Laravel primary blue style with rounded corners -->
     <Button
         android:id="@+id/back_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/settings_back"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
-        app:layout_constraintStart_toEndOf="@id/left_wall" />
+        android:text="← Back"
+        android:textColor="#ffffff"
+        android:background="@drawable/button_rounded"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:contentDescription="Return to the previous screen"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Scrollable content area with padding -->
-    <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/top_wall"
-        app:layout_constraintBottom_toTopOf="@id/back_button"
-        app:layout_constraintStart_toEndOf="@id/left_wall"
-        app:layout_constraintEnd_toStartOf="@id/right_wall">
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-            
-            <!-- Based on Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Based on"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_marginTop="24dp" />
-            
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ricochet Robots(r)"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:layout_marginTop="8dp" />
-            
-            <!-- Imprint/privacy policy Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Imprint/privacy policy"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_marginTop="24dp" />
-            
-            <!-- link targets and colors have to be set also in setupClickableLink() -->
-            <TextView
-                android:id="@+id/imprint_link"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="www.eclabs.de/datenschutz.html"
-                android:textSize="18sp"
-                android:layout_marginTop="8dp" />
-            
-            <!-- Open Source Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Open Source"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_marginTop="24dp" />
-            
-            <TextView
-                android:id="@+id/opensource_link"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="https://git.io/fjs5H"
-                android:textSize="18sp"
-                android:layout_marginTop="8dp" />
-            
-            <TextView
-                android:id="@+id/version_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Version: 1.0.0 (Build 1)"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:layout_marginTop="8dp" />
-            
-            <!-- Contact Us Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contact Us"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_marginTop="24dp" />
-            
-            <TextView
-                android:id="@+id/contact_link"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="www.eclabs.de/#kontakt"
-                android:textSize="18sp"
-                android:layout_marginTop="8dp" />
-            
-            <!-- Created by Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Created by"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_marginTop="24dp" />
-            
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Alain Caillaud"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:layout_marginTop="8dp" />
-            
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Pierre Michel"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:layout_marginTop="4dp" />
-            
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ruben Barkow-Kuder"
-                android:textSize="18sp"
-                android:textColor="#000000"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="24dp" />
-            
-        </LinearLayout>
-    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

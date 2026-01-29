@@ -17,7 +17,7 @@ CREDITS
 
 ### Imprint/privacy policy
 
-https://eclabs.de/datenschutz.html
+https://roboyard.z11.de/datenschutz.html
 
 Open Source
 
