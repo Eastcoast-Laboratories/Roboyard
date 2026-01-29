@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -380,5 +381,71 @@ public class RoboyardApiClient {
      */
     private <T> void postError(ApiCallback<T> callback, String error) {
         mainHandler.post(() -> callback.onError(error));
+    }
+    
+    /**
+     * Result class for achievement sync.
+     */
+    public static class AchievementSyncResult {
+        public final boolean success;
+        public final int syncedCount;
+        public final int newAchievements;
+        public final boolean statsUpdated;
+        
+        public AchievementSyncResult(boolean success, int syncedCount, int newAchievements, boolean statsUpdated) {
+            this.success = success;
+            this.syncedCount = syncedCount;
+            this.newAchievements = newAchievements;
+            this.statsUpdated = statsUpdated;
+        }
+    }
+    
+    /**
+     * Sync achievements to roboyard.z11.de.
+     * 
+     * @param achievements List of achievement data (id, unlocked, timestamp)
+     * @param stats Game statistics
+     * @param callback Callback for result
+     */
+    public void syncAchievements(JSONArray achievements, JSONObject stats, ApiCallback<AchievementSyncResult> callback) {
+        if (!isLoggedIn()) {
+            postError(callback, "Not logged in");
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("achievements", achievements);
+                if (stats != null) {
+                    requestBody.put("stats", stats);
+                }
+                
+                String response = makeAuthenticatedPostRequest("/api/mobile/achievements/sync", requestBody.toString());
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    postError(callback, json.getString("error"));
+                    return;
+                }
+                
+                boolean success = json.optBoolean("success", false);
+                int syncedCount = json.optInt("synced_count", 0);
+                int newAchievements = json.optInt("new_achievements", 0);
+                boolean statsUpdated = json.optBoolean("stats_updated", false);
+                
+                AchievementSyncResult result = new AchievementSyncResult(success, syncedCount, newAchievements, statsUpdated);
+                postSuccess(callback, result);
+                
+                Timber.tag(TAG).d("[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new", syncedCount, newAchievements);
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "[ACHIEVEMENT_SYNC] JSON error during sync");
+                postError(callback, "Invalid response from server");
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "[ACHIEVEMENT_SYNC] Network error during sync");
+                postError(callback, "Network error: " + e.getMessage());
+            }
+        });
     }
 }

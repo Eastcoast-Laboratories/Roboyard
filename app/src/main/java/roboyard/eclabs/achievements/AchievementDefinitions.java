@@ -127,18 +127,58 @@ public class AchievementDefinitions {
         add(new Achievement("3_star_all_levels", 
             "achievement_3_star_all", "achievement_3_star_all_desc",
             AchievementCategory.MASTERY, ICON_TROPHY_GOLD));
-            
-        // ========== SPECIAL ACHIEVEMENTS ==========
-        add(new Achievement("daily_login_7", 
-            "achievement_streak_7", "achievement_streak_7_desc",
-            AchievementCategory.SPECIAL, ICON_FLAME));
-        add(new Achievement("daily_login_30", 
-            "achievement_streak_30", "achievement_streak_30_desc",
-            AchievementCategory.SPECIAL, ICON_INFINITY));
-        add(new Achievement("comeback_player", 
-            "achievement_comeback", "achievement_comeback_desc",
-            AchievementCategory.SPECIAL, ICON_POWER));
-            
+
+        // ========== RANDOM GAME - SPEED ==========
+        add(new Achievement("speedrun_random_under_20s", 
+            "achievement_speedrun_random_20s", "achievement_speedrun_random_20s_desc",
+            AchievementCategory.RANDOM_SPEED, ICON_HOURGLASS));
+        add(new Achievement("speedrun_random_under_10s", 
+            "achievement_speedrun_random_10s", "achievement_speedrun_random_10s_desc",
+            AchievementCategory.RANDOM_SPEED, ICON_LIGHTNING));
+        add(new Achievement("speedrun_random_5_games_under_30s", 
+            "achievement_speedrun_random_5x30s", "achievement_speedrun_random_5x30s_desc",
+            AchievementCategory.RANDOM_SPEED, "icon_55_cone")); // Rocket
+        
+        // ========== RANDOM GAME - STREAKS & CHALLENGES ==========
+        // Perfect random games (cumulative - no reset)
+        add(new Achievement("perfect_random_games_5", 
+            "achievement_perfect_random_5", "achievement_perfect_random_5_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_FLAME));
+        add(new Achievement("perfect_random_games_10", 
+            "achievement_perfect_random_10", "achievement_perfect_random_10_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_INFINITY));
+        add(new Achievement("perfect_random_games_20", 
+            "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
+        // Perfect random games streak (resets on non-optimal)
+        add(new Achievement("perfect_random_games_streak_5", 
+            "achievement_perfect_random_streak_5", "achievement_perfect_random_streak_5_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_FLAME));
+        add(new Achievement("perfect_random_games_streak_10", 
+            "achievement_perfect_random_streak_10", "achievement_perfect_random_streak_10_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_INFINITY));
+        add(new Achievement("perfect_random_games_streak_20", 
+            "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
+        // Perfect solution with no hints (10+ moves optimal)
+        add(new Achievement("perfect_no_hints_random_1", 
+            "achievement_perfect_no_hints_random_1", "achievement_perfect_no_hints_random_1_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
+        // No hints random games (cumulative - no reset)
+        add(new Achievement("no_hints_random_10", 
+            "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
+        add(new Achievement("no_hints_random_50", 
+            "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR));
+        // No hints random games streak (resets on hint usage)
+        add(new Achievement("no_hints_streak_random_10", 
+            "achievement_no_hints_streak_random_10", "achievement_no_hints_streak_random_10_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
+        add(new Achievement("no_hints_streak_random_50", 
+            "achievement_no_hints_streak_random_50", "achievement_no_hints_streak_random_50_desc",
+            AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR));
+        
         // ========== RANDOM GAME - DIFFICULTY ==========
         add(new Achievement("impossible_mode_1", 
             "achievement_impossible_1", "achievement_impossible_1_desc",
@@ -231,55 +271,17 @@ public class AchievementDefinitions {
             "achievement_traverse_all_robots_goal", "achievement_traverse_all_robots_goal_desc",
             AchievementCategory.RANDOM_COVERAGE, ICON_TARGET_BLUE));
             
-        // ========== RANDOM GAME - STREAKS & CHALLENGES ==========
-        // Perfect random games (cumulative - no reset)
-        add(new Achievement("perfect_random_games_5", 
-            "achievement_perfect_random_5", "achievement_perfect_random_5_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_FLAME));
-        add(new Achievement("perfect_random_games_10", 
-            "achievement_perfect_random_10", "achievement_perfect_random_10_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_INFINITY));
-        add(new Achievement("perfect_random_games_20", 
-            "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
-        // Perfect random games streak (resets on non-optimal)
-        add(new Achievement("perfect_random_games_streak_5", 
-            "achievement_perfect_random_streak_5", "achievement_perfect_random_streak_5_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_FLAME));
-        add(new Achievement("perfect_random_games_streak_10", 
-            "achievement_perfect_random_streak_10", "achievement_perfect_random_streak_10_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_INFINITY));
-        add(new Achievement("perfect_random_games_streak_20", 
-            "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_CROWN));
-        // Perfect solution with no hints (10+ moves optimal)
-        add(new Achievement("perfect_no_hints_random_1", 
-            "achievement_perfect_no_hints_random_1", "achievement_perfect_no_hints_random_1_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
-        // No hints random games (cumulative - no reset)
-        add(new Achievement("no_hints_random_10", 
-            "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
-        add(new Achievement("no_hints_random_50", 
-            "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR));
-        // No hints random games streak (resets on hint usage)
-        add(new Achievement("no_hints_streak_random_10", 
-            "achievement_no_hints_streak_random_10", "achievement_no_hints_streak_random_10_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_BRAIN));
-        add(new Achievement("no_hints_streak_random_50", 
-            "achievement_no_hints_streak_random_50", "achievement_no_hints_streak_random_50_desc",
-            AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR));
-            
-        // ========== RANDOM GAME - SPEED ==========
-        add(new Achievement("speedrun_random_under_20s", 
-            "achievement_speedrun_random_20s", "achievement_speedrun_random_20s_desc",
-            AchievementCategory.RANDOM_SPEED, ICON_HOURGLASS));
-        add(new Achievement("speedrun_random_under_10s", 
-            "achievement_speedrun_random_10s", "achievement_speedrun_random_10s_desc",
-            AchievementCategory.RANDOM_SPEED, ICON_LIGHTNING));
-        add(new Achievement("speedrun_random_5_games_under_30s", 
-            "achievement_speedrun_random_5x30s", "achievement_speedrun_random_5x30s_desc",
-            AchievementCategory.RANDOM_SPEED, "icon_55_cone")); // Rocket
+        
+        // ========== SPECIAL ACHIEVEMENTS ==========
+        add(new Achievement("daily_login_7", 
+            "achievement_streak_7", "achievement_streak_7_desc",
+            AchievementCategory.SPECIAL, ICON_FLAME));
+        add(new Achievement("daily_login_30", 
+            "achievement_streak_30", "achievement_streak_30_desc",
+            AchievementCategory.SPECIAL, ICON_INFINITY));
+        add(new Achievement("comeback_player", 
+            "achievement_comeback", "achievement_comeback_desc",
+            AchievementCategory.SPECIAL, ICON_POWER));
+        
     }
 }

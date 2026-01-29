@@ -100,14 +100,14 @@ public class AchievementsFragment extends BaseGameFragment {
             case CHALLENGE: return "Challenge";
             case MASTERY: return "Mastery";
             case SPECIAL: return "Special";
+            case RANDOM_SPEED: return "Random - Speed";
             case RANDOM_DIFFICULTY: return "Random - Difficulty";
             case RANDOM_SOLUTION: return "Random - Solution Length";
             case RANDOM_RESOLUTION: return "Random - Screen Resolutions";
             case RANDOM_TARGETS: return "Random - Multiple Targets";
-            case RANDOM_ROBOTS: return "Random - Fun Challenges";
-            case RANDOM_COVERAGE: return "Random - Square Coverage";
-            case RANDOM_STREAKS: return "Random - Streaks";
-            case RANDOM_SPEED: return "Random - Speed";
+            case RANDOM_ROBOTS: return "Fun Challenges";
+            case RANDOM_COVERAGE: return "Square Coverage";
+            case RANDOM_STREAKS: return "Streaks";
             default: return category.name();
         }
     }

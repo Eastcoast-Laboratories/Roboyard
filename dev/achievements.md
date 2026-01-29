@@ -171,6 +171,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | Challenge | 5 |
 | Mastery | 5 |
 | Special | 4 |
+| Random - Speed | 3 |
 | Random - Difficulty | 4 |
 | Random - Solution Length | 11 |
 | Random - Screen Resolutions | 3 |
@@ -178,7 +179,6 @@ This document defines all achievements in the game. Keep this file synchronized 
 | Random - Fun Challenges | 2 |
 | Random - Square Coverage | 4 |
 | Random - Streaks | 5 |
-| Random - Speed | 3 |
 
 Note: The solution length achievements include 20-29 (10 achievements) plus 30+ (1 achievement) = 11 total.
 

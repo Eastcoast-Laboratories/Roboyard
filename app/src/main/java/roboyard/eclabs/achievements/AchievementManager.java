@@ -11,8 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import roboyard.eclabs.BuildConfig;
 import roboyard.eclabs.PlayGamesManager;
+import roboyard.eclabs.RoboyardApiClient;
 import timber.log.Timber;
 
 /**
@@ -144,6 +149,9 @@ public class AchievementManager {
         
         // Sync to Google Play Games if enabled
         syncToPlayGames(achievementId);
+        
+        // Sync to roboyard.z11.de server
+        syncAfterUnlock();
         
         // Notify listener
         if (unlockListener != null) {
@@ -673,5 +681,63 @@ public class AchievementManager {
         speedrunRandomGamesUnder30s = 0;
         
         Timber.d("[ACHIEVEMENTS] All achievements reset");
+    }
+    
+    // ========== SERVER SYNC ==========
+    
+    /**
+     * Sync all achievements to roboyard.z11.de server.
+     * Only syncs if user is logged in.
+     */
+    public void syncToServer() {
+        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
+        if (!apiClient.isLoggedIn()) {
+            Timber.d("[ACHIEVEMENT_SYNC] Not logged in, skipping sync");
+            return;
+        }
+        
+        try {
+            // Build achievements array
+            JSONArray achievementsArray = new JSONArray();
+            for (Achievement achievement : achievements.values()) {
+                JSONObject achievementJson = new JSONObject();
+                achievementJson.put("id", achievement.getId());
+                achievementJson.put("unlocked", achievement.isUnlocked());
+                achievementJson.put("unlocked_timestamp", achievement.getUnlockedTimestamp());
+                achievementsArray.put(achievementJson);
+            }
+            
+            // Build stats object
+            JSONObject stats = new JSONObject();
+            stats.put("total_games_solved", levelsCompleted + perfectRandomGames);
+            stats.put("total_games_solved_no_hints", noHintRandomGamesTotal);
+            stats.put("total_perfect_solutions", perfectSolutions + perfectRandomGames);
+            
+            // Send to server
+            apiClient.syncAchievements(achievementsArray, stats, new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult>() {
+                @Override
+                public void onSuccess(RoboyardApiClient.AchievementSyncResult result) {
+                    Timber.d("[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new achievements", 
+                            result.syncedCount, result.newAchievements);
+                }
+                
+                @Override
+                public void onError(String error) {
+                    Timber.e("[ACHIEVEMENT_SYNC] Sync failed: %s", error);
+                }
+            });
+            
+        } catch (JSONException e) {
+            Timber.e(e, "[ACHIEVEMENT_SYNC] Failed to build sync request");
+        }
+    }
+    
+    /**
+     * Sync achievements to server after unlocking.
+     * Called automatically when an achievement is unlocked.
+     */
+    private void syncAfterUnlock() {
+        // Delay sync slightly to batch multiple unlocks
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this::syncToServer, 2000);
     }
 }

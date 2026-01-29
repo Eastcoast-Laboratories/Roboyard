@@ -6,7 +6,7 @@ package roboyard.eclabs.achievements;
 public enum AchievementCategory {
     PROGRESSION,      // Level completion achievements
     PERFORMANCE,      // Optimal moves, speedruns
-    CHALLENGE,        // No hints, custom levels
+    CHALLENGE,        // No hints, custom levels (DISABLED)
     MASTERY,          // 3-star achievements
     SPECIAL,          // First game, streaks, comeback
     RANDOM_DIFFICULTY,    // Impossible mode
