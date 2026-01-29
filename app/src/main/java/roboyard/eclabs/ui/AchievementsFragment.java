@@ -86,30 +86,12 @@ public class AchievementsFragment extends BaseGameFragment {
     
     private void addCategoryHeader(AchievementCategory category) {
         TextView header = new TextView(requireContext());
-        header.setText(getCategoryName(category));
+        // Use centralized category display name from AchievementCategory enum
+        header.setText(category.getDisplayName(requireContext()));
         header.setTextSize(20);
         header.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
         header.setPadding(0, 32, 0, 16);
         achievementsContainer.addView(header);
-    }
-    
-    private String getCategoryName(AchievementCategory category) {
-        switch (category) {
-            case PROGRESSION: return "Progression";
-            case PERFORMANCE: return "Performance";
-            case CHALLENGE: return "Challenge";
-            case MASTERY: return "Mastery";
-            case SPECIAL: return "Special";
-            case RANDOM_SPEED: return "Random - Speed";
-            case RANDOM_DIFFICULTY: return "Random - Difficulty";
-            case RANDOM_SOLUTION: return "Random - Solution Length";
-            case RANDOM_RESOLUTION: return "Random - Screen Resolutions";
-            case RANDOM_TARGETS: return "Random - Multiple Targets";
-            case RANDOM_ROBOTS: return "Fun Challenges";
-            case RANDOM_COVERAGE: return "Square Coverage";
-            case RANDOM_STREAKS: return "Streaks";
-            default: return category.name();
-        }
     }
     
     private static final long NEW_ACHIEVEMENT_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes

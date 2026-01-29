@@ -510,6 +510,22 @@
 
 
     <!-- Achievement Strings -->
+    
+    <!-- Achievement Category Names -->
+    <string name="achievement_category_progression">Progression</string>
+    <string name="achievement_category_performance">Performance</string>
+    <string name="achievement_category_challenge">Challenge</string>
+    <string name="achievement_category_mastery">Mastery</string>
+    <string name="achievement_category_special">Special</string>
+    <string name="achievement_category_random_speed">Speed</string>
+    <string name="achievement_category_random_difficulty">Difficulty</string>
+    <string name="achievement_category_random_solution">Solution Length</string>
+    <string name="achievement_category_random_resolution">Screen Resolutions</string>
+    <string name="achievement_category_random_targets">Multiple Targets</string>
+    <string name="achievement_category_random_robots">Fun Challenges</string>
+    <string name="achievement_category_random_coverage">Square Coverage</string>
+    <string name="achievement_category_random_streaks">Streaks</string>
+    
     <!-- Progression Achievements -->
     <string name="achievement_first_game">Welcome!</string>
     <string name="achievement_first_game_desc">Play your first game</string>
