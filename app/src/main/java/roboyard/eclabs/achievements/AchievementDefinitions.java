@@ -7,8 +7,91 @@ import java.util.Map;
  * Defines all achievements in the game.
  * Each achievement uses individual drawable resources from achievements_icons_cropped folder.
  * Icons are named: {number}_{icon_name}.png (e.g., 1_lightning.png, 46_flame.png)
+ * 
+ * This is the central configuration for all achievement-related data:
+ * - Achievement definitions (ID, name, description, category, icon)
+ * - Achievement icon background colors (ACHIEVEMENT_COLORS)
+ * - Category display names (via AchievementCategory enum)
  */
 public class AchievementDefinitions {
+    
+    /**
+     * Predefined color palette for achievement icon circle backgrounds.
+     * Colors are assigned deterministically based on achievement ID hash.
+     * This array is also mirrored in Laravel: app/Config/AchievementDefinitions.php
+     */
+    public static final int[] ACHIEVEMENT_COLORS = {
+        0xFF4CAF50, // Green
+        0xFFFF9800, // Orange
+        0xFF2196F3, // Blue
+        0xFFE91E63, // Pink
+        0xFF9C27B0, // Purple
+        0xFF00BCD4, // Cyan
+        0xFFFFC107, // Amber
+        0xFF8BC34A, // Light Green
+        0xFFFF5722, // Deep Orange
+        0xFF3F51B5, // Indigo
+        0xFFF44336, // Red
+        0xFF009688, // Teal
+        0xFFBF360C, // Dark Red
+        0xFF1565C0, // Dark Blue
+        0xFF00897B, // Dark Teal
+        0xFFD32F2F, // Red 700
+        0xFF1976D2, // Blue 700
+        0xFF0097A7, // Cyan 700
+        0xFFC2185B, // Pink 700
+        0xFF6A1B9A, // Purple 700
+        0xFF00695C, // Teal 700
+        0xFFF57F17, // Amber 900
+        0xFF33691E, // Light Green 900
+        0xFFBF360C, // Deep Orange 900
+        0xFF1A237E, // Indigo 900
+        0xFFB71C1C, // Red 900
+        0xFF004D40, // Teal 900
+        0xFF880E4F, // Pink 900
+        0xFF4A148C, // Purple 900
+        0xFF1B5E20, // Green 900
+        0xFFE65100, // Deep Orange 800
+        0xFF0D47A1, // Blue 900
+        0xFF006064, // Cyan 900
+        0xFFAD1457, // Pink 800
+        0xFF512DA8, // Purple 800
+        0xFF00838F, // Cyan 800
+        0xFFFBC02D, // Amber 600
+        0xFF7CB342, // Light Green 600
+        0xFFFF6E40, // Deep Orange 400
+        0xFF5C6BC0, // Indigo 400
+        0xFFEF5350, // Red 400
+        0xFF26C6DA, // Cyan 400
+        0xFFAB47BC, // Purple 400
+        0xFF29B6F6, // Light Blue 400
+        0xFFEC407A, // Pink 400
+        0xFF66BB6A, // Green 400
+        0xFFFFCA28, // Amber 400
+        0xFFFF7043, // Deep Orange 300
+        0xFF7986CB, // Indigo 300
+        0xFFEF9A9A, // Red 200
+        0xFF80DEEA, // Cyan 200
+        0xFFCE93D8, // Purple 200
+        0xFF81D4FA, // Light Blue 200
+        0xFFF48FB1, // Pink 200
+        0xFFA5D6A7, // Green 200
+        0xFFFFE082, // Amber 200
+        0xFFFFAB91, // Deep Orange 200
+    };
+    
+    /**
+     * Get a color for an achievement based on its ID.
+     * Each achievement gets a unique color from the predefined palette.
+     * 
+     * @param achievementId The achievement ID (used to determine color)
+     * @return The color for this achievement
+     */
+    public static int getAchievementColor(String achievementId) {
+        int hash = achievementId.hashCode();
+        int colorIndex = Math.abs(hash) % ACHIEVEMENT_COLORS.length;
+        return ACHIEVEMENT_COLORS[colorIndex];
+    }
     
     // Icon resource names for different achievement types
     private static final String ICON_TROPHY_STAR = "icon_9_trophy";           // Trophy with star - progression
