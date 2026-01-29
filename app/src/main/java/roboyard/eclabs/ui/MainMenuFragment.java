@@ -132,7 +132,7 @@ public class MainMenuFragment extends BaseGameFragment {
         // Load Game button - go to save game screen in load mode
         // Check if there are saved games and only show button if there are
         checkAndUpdateLoadGameButton();
-        loadGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_load_game, 0, 0, 0);
+        loadGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_load_game_scaled_large, 0, 0, 0);
         loadGameButton.setOnClickListener(v -> {
             // Create a new SaveGameFragment instance
             SaveGameFragment saveGameFragment = new SaveGameFragment();

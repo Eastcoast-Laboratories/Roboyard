@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/load_game"
                     android:contentDescription="@string/load_game_a11y"
-                    android:drawableStart="@drawable/ic_load_game"
+                    android:drawableStart="@drawable/ic_load_game_scaled_large"
                     android:drawablePadding="12dp"
                     android:padding="10.8dp"
                     android:layout_marginBottom="16dp"
@@ -97,7 +97,7 @@
                     android:textSize="20sp"
                     android:background="@drawable/button_fancy_red_dark_transparent"
                     android:elevation="8dp"
-                    android:minHeight="0dp"
+                    android:minHeight="56dp"
                     android:gravity="center_vertical"
                     android:visibility="gone" />
 
