@@ -39,11 +39,11 @@ GAMES_IDS_FILE = PROJECT_ROOT / "app/src/main/res/values/games-ids.xml"
 
 # Achievement points mapping by category
 POINTS_BY_CATEGORY = {
+    "LOGIN_STREAK": 20,
     "PROGRESSION": 10,
     "PERFORMANCE": 15,
     "CHALLENGE": 20,
     "MASTERY": 25,
-    "SPECIAL": 20,
     "RANDOM_DIFFICULTY": 30,
     "RANDOM_SOLUTION": 15,
     "RANDOM_RESOLUTION": 20,

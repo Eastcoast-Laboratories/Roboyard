@@ -560,13 +560,13 @@ public class AchievementManager {
     }
     
     /**
-     * Called when player starts a new game - check and unlock streak achievements
+     * Called when player starts a new game - check and unlock login streak achievements
      */
     public void checkAndUnlockStreakAchievements() {
         int streakDays = dailyLoginStreak;
         if (streakDays >= 7) unlock("daily_login_7");
         if (streakDays >= 30) unlock("daily_login_30");
-        Timber.d("[ACHIEVEMENT] Checked streak achievements at game start - streak: %d days", streakDays);
+        Timber.d("[ACHIEVEMENT] Checked Login Streak achievements at game start - streak: %d days", streakDays);
     }
     
     /**

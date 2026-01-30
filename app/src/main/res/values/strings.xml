@@ -512,11 +512,11 @@
     <!-- Achievement Strings -->
     
     <!-- Achievement Category Names -->
+    <string name="achievement_login_streak">Login Streak</string>
     <string name="achievement_category_progression">Progression</string>
     <string name="achievement_category_performance">Performance</string>
     <string name="achievement_category_challenge">Challenge</string>
     <string name="achievement_category_mastery">Mastery</string>
-    <string name="achievement_category_special">Special</string>
     <string name="achievement_category_random_speed">Speed</string>
     <string name="achievement_category_random_difficulty">Difficulty</string>
     <string name="achievement_category_random_solution">Solution Length</string>
@@ -525,6 +525,14 @@
     <string name="achievement_category_random_robots">Fun Challenges</string>
     <string name="achievement_category_random_coverage">Square Coverage</string>
     <string name="achievement_category_random_streaks">Streaks</string>
+    
+    <!-- Login Streak -->
+    <string name="achievement_streak_7">Weekly Player</string>
+    <string name="achievement_streak_7_desc">Log in 7 days in a row</string>
+    <string name="achievement_streak_30">Dedicated Player</string>
+    <string name="achievement_streak_30_desc">Log in 30 days in a row</string>
+    <string name="achievement_comeback">Welcome Back!</string>
+    <string name="achievement_comeback_desc">Return after 30 days of inactivity</string>
     
     <!-- Progression Achievements -->
     <string name="achievement_first_game">Welcome!</string>
@@ -571,14 +579,6 @@
     <string name="achievement_3_star_50_desc">Achieve 3 stars on 50 levels</string>
     <string name="achievement_3_star_all">Perfect Master</string>
     <string name="achievement_3_star_all_desc">Achieve 3 stars on all 140 levels</string>
-    
-    <!-- Special Achievements -->
-    <string name="achievement_streak_7">Weekly Player</string>
-    <string name="achievement_streak_7_desc">Log in 7 days in a row</string>
-    <string name="achievement_streak_30">Dedicated Player</string>
-    <string name="achievement_streak_30_desc">Log in 30 days in a row</string>
-    <string name="achievement_comeback">Welcome Back!</string>
-    <string name="achievement_comeback_desc">Return after 30 days of inactivity</string>
     
     <!-- Random Game - Difficulty -->
     <string name="achievement_impossible_1">Impossible Dream</string>

@@ -18,6 +18,15 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ## Achievement Categories
 
+
+### Login Streak Achievements (4)
+
+| ID | Name | Description | Status | tested |
+|----|------|-------------|--------|--------|
+| `daily_login_7` | Weekly Player | Log in 7 days in a row | ✅ Implemented |
+| `daily_login_30` | Dedicated Player | Log in 30 days in a row | ✅ Implemented |
+| `comeback_player` | Welcome Back! | Return after 30 days of inactivity | ✅ Implemented |
+
 ### Progression Achievements (5)
 
 | ID | Name | Description | Status | tested |
@@ -58,14 +67,6 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `3_star_10_hard_levels` | Hard Level Master | Achieve 3 stars on 10 levels with 5+ optimal moves | ✅ Implemented |
 | `3_star_50_levels` | Superstar | Achieve 3 stars on 50 levels | ✅ Implemented |
 | `3_star_all_levels` | Perfect Master | Achieve 3 stars on all levels | ✅ Implemented |
-
-### Streak Achievements (4)
-
-| ID | Name | Description | Status | tested |
-|----|------|-------------|--------|--------|
-| `daily_login_7` | Weekly Player | Log in 7 days in a row | ✅ Implemented |
-| `daily_login_30` | Dedicated Player | Log in 30 days in a row | ✅ Implemented |
-| `comeback_player` | Welcome Back! | Return after 30 days of inactivity | ✅ Implemented |
 
 ---
 

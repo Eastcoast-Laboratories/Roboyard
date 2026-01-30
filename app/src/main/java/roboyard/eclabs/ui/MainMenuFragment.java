@@ -14,7 +14,11 @@ import android.graphics.Canvas;
 
 import roboyard.eclabs.R;
 import roboyard.eclabs.RoboyardApiClient;
+import roboyard.eclabs.RoboyardApplication;
+import roboyard.eclabs.achievements.Achievement;
+import roboyard.eclabs.achievements.AchievementCategory;
 import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.eclabs.achievements.AchievementPopup;
 import roboyard.eclabs.achievements.StreakManager;
 import timber.log.Timber;
 import java.util.Locale;
@@ -37,6 +41,8 @@ public class MainMenuFragment extends BaseGameFragment {
     private ImageButton achievementsIconButton;
     private Button creditsButton;
     private Button userProfileButton;
+    private ViewGroup rootViewGroup;
+    private AchievementPopup achievementPopup;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -59,6 +65,15 @@ public class MainMenuFragment extends BaseGameFragment {
         achievementsIconButton = view.findViewById(R.id.achievements_icon_button);
         creditsButton = view.findViewById(R.id.credits_button);
         userProfileButton = view.findViewById(R.id.user_profile_button);
+
+        if (view instanceof ViewGroup) {
+            rootViewGroup = (ViewGroup) view;
+            achievementPopup = new AchievementPopup(requireContext(), rootViewGroup);
+        } else {
+            rootViewGroup = null;
+            achievementPopup = null;
+            Timber.w("[MAIN_MENU] Root view is not a ViewGroup; achievement popups disabled");
+        }
         
         // Set up button listeners
         setupButtons();
@@ -70,6 +85,38 @@ public class MainMenuFragment extends BaseGameFragment {
         applyTitleOutline(view);
         
         return view;
+    }
+    
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
+            if (achievementPopup == null) {
+                Timber.w("[ACHIEVEMENT_POPUP] Root view missing, cannot show achievement %s", achievement.getId());
+                return;
+            }
+            achievementPopup.show(achievement);
+            Timber.d("[ACHIEVEMENT_POPUP] Main menu displayed achievement: %s", achievement.getId());
+        });
+        maybeShowDailyStreakPopup();
+    }
+
+    @Override
+    public void onPause() {
+        AchievementManager.getInstance(requireContext()).setUnlockListener(null);
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        achievementPopup = null;
+        rootViewGroup = null;
     }
     
     /**
@@ -92,6 +139,33 @@ public class MainMenuFragment extends BaseGameFragment {
             resources.updateConfiguration(config, resources.getDisplayMetrics());
         } catch (Exception e) {
             Timber.e(e, "ROBOYARD_LANGUAGE: Error loading language settings");
+        }
+    }
+    
+    private boolean showDailyStreakPopup() {
+        if (achievementPopup == null || rootViewGroup == null) {
+            Timber.w("[STREAK_POPUP] Root view unavailable, skipping streak popup");
+            return false;
+        }
+        int streakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
+        Achievement streakAchievement = new Achievement(
+                AchievementPopup.STREAK_POPUP_ID,
+                "streak_popup_name",
+                "streak_popup_message",
+                AchievementCategory.PROGRESSION,
+                "icon_46_flame");
+        streakAchievement.setDescriptionFormatArgs(new Object[]{streakDays});
+        achievementPopup.show(streakAchievement);
+        Timber.d("[STREAK_POPUP] Displayed streak popup for %d days", streakDays);
+        return true;
+    }
+
+    private void maybeShowDailyStreakPopup() {
+        if (!RoboyardApplication.shouldShowStreakPopup()) {
+            return;
+        }
+        if (showDailyStreakPopup()) {
+            RoboyardApplication.markStreakPopupShown();
         }
     }
     

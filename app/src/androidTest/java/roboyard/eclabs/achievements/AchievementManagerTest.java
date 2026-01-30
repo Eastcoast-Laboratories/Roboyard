@@ -373,7 +373,7 @@ public class AchievementManagerTest {
                 achievementManager.isUnlocked("speedrun_random_5_games_under_30s"));
     }
 
-    // ==================== SPECIAL ACHIEVEMENTS TESTS ====================
+    // ==================== Login Streak TESTS ====================
 
     /**
      * Test daily login streak achievements

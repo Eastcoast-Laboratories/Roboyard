@@ -22,7 +22,7 @@ public enum AchievementCategory {
     RANDOM_TARGETS("achievement_category_random_targets", 8),
     RANDOM_ROBOTS("achievement_category_random_robots", 9),
     RANDOM_COVERAGE("achievement_category_random_coverage", 10),
-    SPECIAL("achievement_category_special", 11),
+    SPECIAL("achievement_login_streak", 11),
     CHALLENGE("achievement_category_challenge", 99); // Disabled, high order to sort last
 
     private final String stringResName;

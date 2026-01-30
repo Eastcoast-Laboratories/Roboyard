@@ -506,9 +506,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Update difficulty and board size text
         updateDifficulty();
         
-        // Check and unlock streak achievements when entering game screen
+        // Check and unlock login streak achievements when entering game screen
         AchievementManager.getInstance(requireContext()).checkAndUnlockStreakAchievements();
-        Timber.d("[ACHIEVEMENT] Checked streak achievements on game screen entry");
+        Timber.d("[ACHIEVEMENT] Checked login streak achievements on game screen entry");
 
         
         // Set up observers for game state

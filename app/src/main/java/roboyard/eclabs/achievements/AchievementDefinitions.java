@@ -144,6 +144,17 @@ public class AchievementDefinitions {
     }
     
     private static void initializeAchievements() {
+        // ========== Login Streak ==========
+        add(new Achievement("daily_login_7", 
+            "achievement_streak_7", "achievement_streak_7_desc",
+            AchievementCategory.SPECIAL, ICON_FLAME));
+        add(new Achievement("daily_login_30", 
+            "achievement_streak_30", "achievement_streak_30_desc",
+            AchievementCategory.SPECIAL, ICON_INFINITY));
+        add(new Achievement("comeback_player", 
+            "achievement_comeback", "achievement_comeback_desc",
+            AchievementCategory.SPECIAL, ICON_POWER));
+            
         // ========== PROGRESSION ACHIEVEMENTS ==========
         add(new Achievement("first_game", 
             "achievement_first_game", "achievement_first_game_desc",
@@ -353,18 +364,7 @@ public class AchievementDefinitions {
         add(new Achievement("traverse_all_squares_all_robots_goal", 
             "achievement_traverse_all_robots_goal", "achievement_traverse_all_robots_goal_desc",
             AchievementCategory.RANDOM_COVERAGE, ICON_TARGET_BLUE));
-            
         
-        // ========== SPECIAL ACHIEVEMENTS ==========
-        add(new Achievement("daily_login_7", 
-            "achievement_streak_7", "achievement_streak_7_desc",
-            AchievementCategory.SPECIAL, ICON_FLAME));
-        add(new Achievement("daily_login_30", 
-            "achievement_streak_30", "achievement_streak_30_desc",
-            AchievementCategory.SPECIAL, ICON_INFINITY));
-        add(new Achievement("comeback_player", 
-            "achievement_comeback", "achievement_comeback_desc",
-            AchievementCategory.SPECIAL, ICON_POWER));
         
     }
 }

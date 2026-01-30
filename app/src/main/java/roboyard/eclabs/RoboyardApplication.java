@@ -1,11 +1,13 @@
 package roboyard.eclabs;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.os.Bundle;
 
 import java.util.Locale;
 
@@ -16,7 +18,7 @@ import timber.log.Timber;
  * Custom Application class for Roboyard app.
  * Initializes app-wide components like Timber logging.
  */
-public class RoboyardApplication extends Application {
+public class RoboyardApplication extends Application implements Application.ActivityLifecycleCallbacks {
     
     /**
      * Custom Timber tree that filters out unwanted log messages.
@@ -51,6 +53,8 @@ public class RoboyardApplication extends Application {
     }
     
     private static Context appContext;
+    private int startedActivityCount = 0;
+    private static boolean streakPopupPending = true;
     
     /**
      * Get the application context
@@ -58,6 +62,14 @@ public class RoboyardApplication extends Application {
      */
     public static Context getAppContext() {
         return appContext;
+    }
+
+    public static boolean shouldShowStreakPopup() {
+        return streakPopupPending;
+    }
+
+    public static void markStreakPopupShown() {
+        streakPopupPending = false;
     }
     
     /**
@@ -90,6 +102,9 @@ public class RoboyardApplication extends Application {
         
         // Store the application context for global access
         appContext = getApplicationContext();
+
+        registerActivityLifecycleCallbacks(this);
+        streakPopupPending = true;
         
         // Initialize Timber for logging - always enable it for debugging
         Timber.plant(new FilteredDebugTree());
@@ -108,6 +123,48 @@ public class RoboyardApplication extends Application {
         
         // Initialize other components
         Timber.d("Application created");
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        // No-op
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+        if (startedActivityCount == 0) {
+            streakPopupPending = true;
+            Timber.d("[STREAK_POPUP] App entered foreground - popup flag reset");
+        }
+        startedActivityCount++;
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+        // No-op
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+        // No-op
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+        startedActivityCount = Math.max(0, startedActivityCount - 1);
+        if (startedActivityCount == 0) {
+            Timber.d("[STREAK_POPUP] App moved to background");
+        }
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        // No-op
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+        // No-op
     }
     
     /**
