@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.view.Gravity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +20,7 @@ import roboyard.eclabs.achievements.Achievement;
 import roboyard.eclabs.achievements.AchievementCategory;
 import roboyard.eclabs.achievements.AchievementIconHelper;
 import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.eclabs.achievements.StreakManager;
 import timber.log.Timber;
 
 /**
@@ -29,6 +31,7 @@ public class AchievementsFragment extends BaseGameFragment {
     private AchievementManager achievementManager;
     private LinearLayout achievementsContainer;
     private TextView progressText;
+    private int currentLoginStreakDays = 1;
     
     @Override
     public String getScreenTitle() {
@@ -62,6 +65,7 @@ public class AchievementsFragment extends BaseGameFragment {
     }
     
     private void loadAchievements() {
+        currentLoginStreakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
         int unlocked = achievementManager.getUnlockedCount();
         int total = achievementManager.getTotalCount();
         progressText.setText(getString(R.string.achievements_progress, unlocked, total));
@@ -85,13 +89,28 @@ public class AchievementsFragment extends BaseGameFragment {
     }
     
     private void addCategoryHeader(AchievementCategory category) {
+        LinearLayout headerLayout = new LinearLayout(requireContext());
+        headerLayout.setOrientation(LinearLayout.HORIZONTAL);
+        headerLayout.setGravity(Gravity.CENTER_VERTICAL);
+        headerLayout.setPadding(0, 32, 0, 16);
+
         TextView header = new TextView(requireContext());
         // Use centralized category display name from AchievementCategory enum
         header.setText(category.getDisplayName(requireContext()));
         header.setTextSize(20);
         header.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
-        header.setPadding(0, 32, 0, 16);
-        achievementsContainer.addView(header);
+        headerLayout.addView(header);
+
+        if (category == AchievementCategory.SPECIAL) {
+            TextView streakInfo = new TextView(requireContext());
+            streakInfo.setText(getString(R.string.achievement_login_streak_days_label, currentLoginStreakDays));
+            streakInfo.setTextSize(14);
+            streakInfo.setTextColor(Color.parseColor("#000000"));
+            streakInfo.setPadding(16, 0, 0, 0);
+            headerLayout.addView(streakInfo);
+        }
+
+        achievementsContainer.addView(headerLayout);
     }
     
     private static final long NEW_ACHIEVEMENT_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes

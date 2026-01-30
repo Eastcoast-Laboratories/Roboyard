@@ -42,7 +42,7 @@ public class DebugSettingsNavigationTest {
         
         // Step 1: Navigate to Settings from Main Menu
         Timber.d("[TEST] Step 1: Clicking Settings button");
-        onView(withId(R.id.settings_button)).perform(click());
+        onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
         
         // Verify we're in Settings

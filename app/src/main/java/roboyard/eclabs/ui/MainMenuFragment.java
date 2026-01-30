@@ -148,15 +148,28 @@ public class MainMenuFragment extends BaseGameFragment {
             return false;
         }
         int streakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
+        
+        // Determine headline based on streak day
+        // For days 1-31, use specific headlines; for day 31+, always use "Legend status"
+        String headlineKey;
+        if (streakDays >= 31) {
+            headlineKey = "streak_popup_day_31_headline";
+        } else {
+            headlineKey = "streak_popup_day_" + streakDays + "_headline";
+        }
+        
+        // Use day 1 message for first day, regular message for other days
+        String messageKey = (streakDays == 1) ? "streak_popup_day_1_message" : "streak_popup_message";
+        
         Achievement streakAchievement = new Achievement(
                 AchievementPopup.STREAK_POPUP_ID,
-                "streak_popup_name",
-                "streak_popup_message",
+                headlineKey,
+                messageKey,
                 AchievementCategory.PROGRESSION,
                 "icon_46_flame");
         streakAchievement.setDescriptionFormatArgs(new Object[]{streakDays});
         achievementPopup.show(streakAchievement);
-        Timber.d("[STREAK_POPUP] Displayed streak popup for %d days", streakDays);
+        Timber.d("[STREAK_POPUP] Displayed streak popup for %d days with headline: %s", streakDays, headlineKey);
         return true;
     }
 
