@@ -56,7 +56,7 @@ public class StreakManager {
     /**
      * Record a daily login and update streak
      */
-    public void recordDailyLogin() {
+    public StreakUpdate recordDailyLogin() {
         long today = getTodayDate();
         long lastLoginDate = prefs.getLong(KEY_LAST_LOGIN_DATE, 0);
         int currentStreak = prefs.getInt(KEY_CURRENT_STREAK, 0);
@@ -66,8 +66,12 @@ public class StreakManager {
         // Check if already logged in today
         if (lastLoginDate == today) {
             Timber.d("[STREAK] Already logged in today, skipping");
-            return;
+            return new StreakUpdate(false, currentStreak, false, false, false);
         }
+        
+        boolean isContinuation = false;
+        boolean isNewStreak = false;
+        boolean triggeredComebackAchievement = false;
         
         // Check if this is a new streak or continuation
         long yesterday = today - 1;
@@ -75,24 +79,29 @@ public class StreakManager {
             // Continue the streak
             currentStreak++;
             Timber.d("[STREAK] Streak continued: %d days", currentStreak);
+            isContinuation = true;
         } else if (lastLoginDate > 0 && lastLoginDate < yesterday) {
             // Streak broken (but user was active before), check for comeback
             long daysAway = today - lastLoginDate;
             if (daysAway > 30) {
                 Timber.d("[STREAK] Comeback after %d days away", daysAway);
                 achievementManager.onComebackPlayer((int) daysAway);
+                triggeredComebackAchievement = true;
             }
             // Start new streak
             currentStreak = 1;
             Timber.d("[STREAK] Streak broken after %d days away, new streak started", daysAway);
+            isNewStreak = true;
         } else if (lastLoginDate == 0) {
             // First login ever - don't trigger comeback
             currentStreak = 1;
             Timber.d("[STREAK] First login recorded");
+            isNewStreak = true;
         } else {
             // This shouldn't happen, but handle it gracefully
             Timber.w("[STREAK] Unexpected state: today=%d, lastLogin=%d, streak=%d", today, lastLoginDate, currentStreak);
             currentStreak = 1;
+            isNewStreak = true;
         }
         
         // Save updated values
@@ -106,6 +115,44 @@ public class StreakManager {
         achievementManager.onDailyLogin(currentStreak);
         
         Timber.d("[STREAK] Daily login recorded - new streak: %d days", currentStreak);
+        return new StreakUpdate(true, currentStreak, isContinuation, isNewStreak, triggeredComebackAchievement);
+    }
+
+    public static class StreakUpdate {
+        private final boolean newDayRecorded;
+        private final int streakDays;
+        private final boolean continuation;
+        private final boolean newStreak;
+        private final boolean comebackTriggered;
+
+        public StreakUpdate(boolean newDayRecorded, int streakDays, boolean continuation,
+                            boolean newStreak, boolean comebackTriggered) {
+            this.newDayRecorded = newDayRecorded;
+            this.streakDays = streakDays;
+            this.continuation = continuation;
+            this.newStreak = newStreak;
+            this.comebackTriggered = comebackTriggered;
+        }
+
+        public boolean isNewDayRecorded() {
+            return newDayRecorded;
+        }
+
+        public int getStreakDays() {
+            return streakDays;
+        }
+
+        public boolean isContinuation() {
+            return continuation;
+        }
+
+        public boolean isNewStreak() {
+            return newStreak;
+        }
+
+        public boolean isComebackTriggered() {
+            return comebackTriggered;
+        }
     }
     
     /**

@@ -13,6 +13,8 @@ public class Achievement {
     private final String iconDrawableName; // Name of drawable resource (e.g., "1_lightning")
     private boolean unlocked;
     private long unlockedTimestamp;
+    private transient Object[] nameFormatArgs;
+    private transient Object[] descriptionFormatArgs;
     
     /**
      * Create an achievement with a sprite sheet icon index (deprecated).
@@ -66,6 +68,24 @@ public class Achievement {
     
     public String getDescriptionKey() {
         return descriptionKey;
+    }
+    
+    public Achievement setNameFormatArgs(Object... args) {
+        this.nameFormatArgs = args;
+        return this;
+    }
+
+    public Achievement setDescriptionFormatArgs(Object... args) {
+        this.descriptionFormatArgs = args;
+        return this;
+    }
+    
+    public Object[] getNameFormatArgs() {
+        return nameFormatArgs;
+    }
+
+    public Object[] getDescriptionFormatArgs() {
+        return descriptionFormatArgs;
     }
     
     public AchievementCategory getCategory() {

@@ -22,6 +22,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import roboyard.eclabs.R;
 import roboyard.eclabs.achievements.AchievementIconHelper;
@@ -39,6 +40,8 @@ public class AchievementPopup {
     private static final int DISPLAY_DURATION_MS = 20000; // 20 seconds
     private static final int FADE_DURATION_MS = 500;
     private static final int BACKGROUND_COLOR_SEMI_TRANSPARENT = Color.argb(230, 255, 255, 255); // White with ~90% opacity
+    
+    public static final String STREAK_POPUP_ID = "daily_streak_popup";
     
     private final Context context;
     private final ViewGroup rootView;
@@ -114,11 +117,18 @@ public class AchievementPopup {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         
+        boolean isSingleStreakPopup = pendingAchievements.size() == 1 &&
+                STREAK_POPUP_ID.equals(pendingAchievements.get(0).getId());
+        
         // Title
         TextView titleText = new TextView(context);
-        titleText.setText(pendingAchievements.size() == 1 ? 
-                context.getString(R.string.achievement_unlocked) : 
-                context.getString(R.string.achievements_unlocked_multiple));
+        if (isSingleStreakPopup) {
+            titleText.setText(getStringByName("streak_popup_title", null));
+        } else {
+            titleText.setText(pendingAchievements.size() == 1 ?
+                    context.getString(R.string.achievement_unlocked) :
+                    context.getString(R.string.achievements_unlocked_multiple));
+        }
         titleText.setTextSize(20);
         titleText.setTextColor(Color.parseColor("#4CAF50"));
         titleText.setGravity(Gravity.CENTER);
@@ -247,14 +257,14 @@ public class AchievementPopup {
             
             // Name
             TextView nameText = new TextView(context);
-            nameText.setText(getStringByName(achievement.getNameKey()));
+            nameText.setText(getStringByName(achievement.getNameKey(), achievement.getNameFormatArgs()));
             nameText.setTextSize(16);
             nameText.setTextColor(Color.parseColor("#333333"));
             textContainer.addView(nameText);
             
             // Description
             TextView descText = new TextView(context);
-            descText.setText(getStringByName(achievement.getDescriptionKey()));
+            descText.setText(getStringByName(achievement.getDescriptionKey(), achievement.getDescriptionFormatArgs()));
             descText.setTextSize(12);
             descText.setTextColor(Color.parseColor("#666666"));
             textContainer.addView(descText);
@@ -315,10 +325,19 @@ public class AchievementPopup {
         }
     }
     
-    private String getStringByName(String name) {
+    private String getStringByName(String name, Object[] formatArgs) {
+        if (name == null) {
+            return "";
+        }
         int resId = context.getResources().getIdentifier(name, "string", context.getPackageName());
         if (resId != 0) {
+            if (formatArgs != null && formatArgs.length > 0) {
+                return context.getString(resId, formatArgs);
+            }
             return context.getString(resId);
+        }
+        if (formatArgs != null && formatArgs.length > 0) {
+            return String.format(Locale.getDefault(), name, formatArgs);
         }
         return name;
     }
