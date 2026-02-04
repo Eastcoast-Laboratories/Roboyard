@@ -116,9 +116,12 @@ public class AchievementPopup {
         final int BUTTON_HEIGHT_DP = 50;
         int buttonHeightPx = (int) (BUTTON_HEIGHT_DP * density);
         
-        // Horizontal padding (tunable)
-        final int HORIZONTAL_MARGIN_DP = 24;
-        int horizontalMarginPx = (int) (HORIZONTAL_MARGIN_DP * density);
+        // Horizontal padding (tunable) - more in landscape, less in portrait
+        final int HORIZONTAL_MARGIN_PORTRAIT_DP = 32;
+        final int HORIZONTAL_MARGIN_LANDSCAPE_DP = 48;
+        int horizontalMarginPx = isLandscape ? 
+                (int) (HORIZONTAL_MARGIN_LANDSCAPE_DP * density) : 
+                (int) (HORIZONTAL_MARGIN_PORTRAIT_DP * density);
         
         // ========== POPUP CONTAINER ==========
         popupContainer = new FrameLayout(context);
@@ -197,7 +200,7 @@ public class AchievementPopup {
         contentLayout.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        contentLayout.setPadding((int)(16 * density), (int)(12 * density), (int)(16 * density), 0);
+        contentLayout.setPadding(horizontalMarginPx, (int)(12 * density), horizontalMarginPx, 0);
         
         // Close button (X) - top right, initially hidden
         final TextView closeButton = new TextView(context);
