@@ -43,6 +43,9 @@ public class MainMenuFragment extends BaseGameFragment {
     private Button userProfileButton;
     private ViewGroup rootViewGroup;
     private AchievementPopup achievementPopup;
+    private Integer prevNewGameVisibility;
+    private Integer prevLevelGameVisibility;
+    private Integer prevLoadGameVisibility;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -69,6 +72,32 @@ public class MainMenuFragment extends BaseGameFragment {
         if (view instanceof ViewGroup) {
             rootViewGroup = (ViewGroup) view;
             achievementPopup = new AchievementPopup(requireContext(), rootViewGroup);
+            achievementPopup.setPopupVisibilityListener((isVisible, isStreakPopup) -> {
+                if (!isStreakPopup) {
+                    return;
+                }
+                if (isVisible) {
+                    prevNewGameVisibility = newGameButton.getVisibility();
+                    prevLevelGameVisibility = levelGameButton.getVisibility();
+                    prevLoadGameVisibility = loadGameButton.getVisibility();
+
+                    newGameButton.setVisibility(View.INVISIBLE);
+                    levelGameButton.setVisibility(View.INVISIBLE);
+                    loadGameButton.setVisibility(View.INVISIBLE);
+                    Timber.d("[STREAK_POPUP] Hid main menu navigation buttons while streak popup is visible");
+                } else {
+                    if (prevNewGameVisibility != null) {
+                        newGameButton.setVisibility(prevNewGameVisibility);
+                    }
+                    if (prevLevelGameVisibility != null) {
+                        levelGameButton.setVisibility(prevLevelGameVisibility);
+                    }
+                    if (prevLoadGameVisibility != null) {
+                        loadGameButton.setVisibility(prevLoadGameVisibility);
+                    }
+                    Timber.d("[STREAK_POPUP] Restored main menu navigation buttons after streak popup hidden");
+                }
+            });
         } else {
             rootViewGroup = null;
             achievementPopup = null;
@@ -115,6 +144,9 @@ public class MainMenuFragment extends BaseGameFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (achievementPopup != null) {
+            achievementPopup.setPopupVisibilityListener(null);
+        }
         achievementPopup = null;
         rootViewGroup = null;
     }

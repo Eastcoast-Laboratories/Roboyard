@@ -4,14 +4,17 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -39,7 +42,6 @@ public class AchievementPopup {
     
     private static final int DISPLAY_DURATION_MS = 20000; // 20 seconds
     private static final int FADE_DURATION_MS = 500;
-    private static final int BACKGROUND_COLOR_SEMI_TRANSPARENT = Color.argb(230, 255, 255, 255); // White with ~90% opacity
     
     public static final String STREAK_POPUP_ID = "daily_streak_popup";
     
@@ -50,10 +52,20 @@ public class AchievementPopup {
     private boolean isShowing = false;
     private boolean isPermanent = false; // When true, popup won't auto-close
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private PopupVisibilityListener popupVisibilityListener;
+    private boolean isCurrentStreakPopup = false;
+
+    public interface PopupVisibilityListener {
+        void onPopupVisibilityChanged(boolean isVisible, boolean isStreakPopup);
+    }
     
     public AchievementPopup(Context context, ViewGroup rootView) {
         this.context = context;
         this.rootView = rootView;
+    }
+    
+    public void setPopupVisibilityListener(PopupVisibilityListener listener) {
+        this.popupVisibilityListener = listener;
     }
     
     /**
@@ -88,118 +100,156 @@ public class AchievementPopup {
         
         isShowing = true;
         isPermanent = false;
+        isCurrentStreakPopup = pendingAchievements.size() == 1 &&
+                STREAK_POPUP_ID.equals(pendingAchievements.get(0).getId());
         
-        // Create popup container
+        // Screen metrics
+        float density = context.getResources().getDisplayMetrics().density;
+        int screenWidthDp = (int) (context.getResources().getDisplayMetrics().widthPixels / density);
+        boolean isLandscape = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        
+        // Popup height constant (tunable)
+        final int POPUP_HEIGHT_DP = 220;
+        int popupHeightPx = (int) (POPUP_HEIGHT_DP * density);
+        
+        // Button height constant (tunable)
+        final int BUTTON_HEIGHT_DP = 50;
+        int buttonHeightPx = (int) (BUTTON_HEIGHT_DP * density);
+        
+        // Horizontal padding (tunable)
+        final int HORIZONTAL_MARGIN_DP = 24;
+        int horizontalMarginPx = (int) (HORIZONTAL_MARGIN_DP * density);
+        
+        // ========== POPUP CONTAINER ==========
         popupContainer = new FrameLayout(context);
         FrameLayout.LayoutParams containerParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+                popupHeightPx);
         containerParams.gravity = Gravity.TOP;
-        containerParams.topMargin = 50;
-        containerParams.leftMargin = 32;
-        containerParams.rightMargin = 32;
+        containerParams.topMargin = (int) (40 * density);
+        containerParams.leftMargin = horizontalMarginPx;
+        containerParams.rightMargin = horizontalMarginPx;
         popupContainer.setLayoutParams(containerParams);
-        // Very high elevation to ensure it's on top of all other views
         popupContainer.setElevation(1000);
         popupContainer.setZ(1000);
+        popupContainer.setClipChildren(false);
+        popupContainer.setClipToPadding(false);
         
-        // Main card layout with semi-transparent white background
-        LinearLayout cardLayout = new LinearLayout(context);
-        cardLayout.setOrientation(LinearLayout.VERTICAL);
-        cardLayout.setBackgroundColor(BACKGROUND_COLOR_SEMI_TRANSPARENT);
-        cardLayout.setPadding(32, 32, 32, 32);
-        cardLayout.setElevation(1000);
-        cardLayout.setZ(1000);
+        // ========== MAIN BOX WITH BACKGROUND ==========
+        FrameLayout mainBox = new FrameLayout(context);
+        mainBox.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        int popupBgResId = isLandscape ? R.drawable.achievement_popup_bg_landscape : R.drawable.achievement_popup_bg;
+        mainBox.setBackgroundResource(popupBgResId);
+        mainBox.setElevation(1000);
+        mainBox.setZ(1000);
+        Timber.d("[ACHIEVEMENT_POPUP_BG] isLandscape=%b bg=%s", isLandscape, context.getResources().getResourceEntryName(popupBgResId));
         
-        // Header with title and close button
-        FrameLayout headerLayout = new FrameLayout(context);
-        headerLayout.setLayoutParams(new LinearLayout.LayoutParams(
+        // ========== VIEW ACHIEVEMENTS BUTTON (BOTTOM ALIGNED, NO MARGINS) ==========
+        FrameLayout buttonContainer = new FrameLayout(context);
+        FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                buttonHeightPx);
+        buttonParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+        buttonContainer.setLayoutParams(buttonParams);
+        buttonContainer.setOnClickListener(v -> {
+            hidePopup();
+            navigateToAchievements();
+        });
+        
+        // Button image
+        ImageView buttonImage = new ImageView(context);
+        buttonImage.setImageResource(R.drawable.achievement_button);
+        buttonImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        buttonImage.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        buttonContainer.addView(buttonImage);
+        
+        // Button text overlay
+        TextView buttonText = new TextView(context);
+        buttonText.setText(R.string.view_achievements);
+        buttonText.setTextColor(Color.WHITE);
+        buttonText.setTextSize(14);
+        buttonText.setGravity(Gravity.CENTER);
+        buttonText.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        buttonContainer.addView(buttonText);
+        
+        mainBox.addView(buttonContainer);
+        
+        // ========== SCROLLABLE CONTENT AREA (ABOVE BUTTON) ==========
+        ScrollView scrollView = new ScrollView(context);
+        FrameLayout.LayoutParams scrollParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                popupHeightPx - buttonHeightPx);
+        scrollParams.gravity = Gravity.TOP;
+        scrollView.setLayoutParams(scrollParams);
+        scrollView.setVerticalScrollBarEnabled(true);
+        scrollView.setScrollbarFadingEnabled(false);
+        scrollView.setFillViewport(true);
+        
+        // Content inside scroll: title + achievements list
+        LinearLayout contentLayout = new LinearLayout(context);
+        contentLayout.setOrientation(LinearLayout.VERTICAL);
+        contentLayout.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
+        contentLayout.setPadding((int)(16 * density), (int)(12 * density), (int)(16 * density), 0);
         
-        boolean isSingleStreakPopup = pendingAchievements.size() == 1 &&
-                STREAK_POPUP_ID.equals(pendingAchievements.get(0).getId());
-        
-        // Title
-        TextView titleText = new TextView(context);
-        if (isSingleStreakPopup) {
-            titleText.setText(getStringByName("streak_popup_title", null));
-        } else {
-            titleText.setText(pendingAchievements.size() == 1 ?
-                    context.getString(R.string.achievement_unlocked) :
-                    context.getString(R.string.achievements_unlocked_multiple));
-        }
-        titleText.setTextSize(20);
-        titleText.setTextColor(Color.parseColor("#4CAF50"));
-        titleText.setGravity(Gravity.CENTER);
-        titleText.setPadding(40, 0, 40, 16); // Extra padding for close button space
-        FrameLayout.LayoutParams titleParams = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        titleText.setLayoutParams(titleParams);
-        headerLayout.addView(titleText);
-        
-        // Close button (X) - initially hidden, shown when popup becomes permanent
-        TextView closeButton = new TextView(context);
+        // Close button (X) - top right, initially hidden
+        final TextView closeButton = new TextView(context);
         closeButton.setText("✕");
         closeButton.setTextSize(24);
         closeButton.setTextColor(Color.parseColor("#666666"));
-        closeButton.setPadding(16, 0, 16, 0);
+        closeButton.setPadding((int)(16 * density), 0, (int)(16 * density), 0);
         closeButton.setVisibility(View.GONE);
+        closeButton.setOnClickListener(v -> hidePopup());
+        
+        // Title (only for streak popup or single achievement)
+        boolean showTitle = isCurrentStreakPopup || pendingAchievements.size() == 1;
+        if (showTitle) {
+            TextView titleText = new TextView(context);
+            if (isCurrentStreakPopup) {
+                titleText.setText(getStringByName("streak_popup_title", null));
+            } else {
+                titleText.setText(context.getString(R.string.achievement_unlocked));
+            }
+            titleText.setTextSize(18);
+            titleText.setTextColor(Color.parseColor("#4CAF50"));
+            titleText.setGravity(Gravity.CENTER);
+            titleText.setPadding(0, 0, 0, (int)(8 * density));
+            contentLayout.addView(titleText);
+        }
+        
+        // Achievements list
+        LinearLayout achievementsList = createAchievementsList();
+        contentLayout.addView(achievementsList);
+        
+        scrollView.addView(contentLayout);
+        mainBox.addView(scrollView);
+        
+        // Add close button overlay (top right of mainBox)
         FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         closeParams.gravity = Gravity.END | Gravity.TOP;
         closeButton.setLayoutParams(closeParams);
-        closeButton.setOnClickListener(v -> hidePopup());
-        headerLayout.addView(closeButton);
+        mainBox.addView(closeButton);
         
-        cardLayout.addView(headerLayout);
-        
-        // Make popup permanent when clicked (cancel auto-close, show X button)
-        cardLayout.setOnClickListener(v -> {
+        // Make popup permanent when clicked
+        mainBox.setOnClickListener(v -> {
             if (!isPermanent) {
                 isPermanent = true;
-                handler.removeCallbacksAndMessages(null); // Cancel auto-close
+                handler.removeCallbacksAndMessages(null);
                 closeButton.setVisibility(View.VISIBLE);
                 Timber.d("[ACHIEVEMENT_POPUP] Popup clicked, now permanent");
             }
         });
         
-        // Achievements list (scrollable if many)
-        if (pendingAchievements.size() > 3) {
-            ScrollView scrollView = new ScrollView(context);
-            scrollView.setLayoutParams(new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    400)); // Max height
-            
-            LinearLayout achievementsList = createAchievementsList();
-            scrollView.addView(achievementsList);
-            cardLayout.addView(scrollView);
-        } else {
-            LinearLayout achievementsList = createAchievementsList();
-            cardLayout.addView(achievementsList);
-        }
-        
-        // View Achievements button
-        Button viewButton = new Button(context);
-        viewButton.setText(R.string.view_achievements);
-        viewButton.setTextColor(Color.WHITE);
-        viewButton.setBackgroundResource(R.drawable.button_fancy_purple);
-        viewButton.setPadding(32, 16, 32, 16);
-        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        buttonParams.gravity = Gravity.CENTER;
-        buttonParams.topMargin = 16;
-        viewButton.setLayoutParams(buttonParams);
-        viewButton.setOnClickListener(v -> {
-            hidePopup();
-            navigateToAchievements();
-        });
-        cardLayout.addView(viewButton);
-        
-        popupContainer.addView(cardLayout);
+        popupContainer.addView(mainBox);
         
         // Start off-screen (above)
         popupContainer.setTranslationY(-500);
@@ -208,13 +258,15 @@ public class AchievementPopup {
         // Add to root view
         rootView.addView(popupContainer);
         
+        if (popupVisibilityListener != null) {
+            popupVisibilityListener.onPopupVisibilityChanged(true, isCurrentStreakPopup);
+        }
+        
         // Animate in
         ObjectAnimator fadeIn = ObjectAnimator.ofFloat(popupContainer, "alpha", 0f, 1f);
         fadeIn.setDuration(FADE_DURATION_MS);
-        
         ObjectAnimator slideIn = ObjectAnimator.ofFloat(popupContainer, "translationY", -500f, 0f);
         slideIn.setDuration(FADE_DURATION_MS);
-        
         fadeIn.start();
         slideIn.start();
         
@@ -299,6 +351,11 @@ public class AchievementPopup {
                 }
                 popupContainer = null;
                 isShowing = false;
+
+                if (popupVisibilityListener != null) {
+                    popupVisibilityListener.onPopupVisibilityChanged(false, isCurrentStreakPopup);
+                }
+                isCurrentStreakPopup = false;
                 
                 // Show next batch if any
                 if (!pendingAchievements.isEmpty()) {

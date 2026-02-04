@@ -99,10 +99,11 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
+main menu:
+3. der random game buton einen würfel
+4. den load game button erst anzeigen, wenn auch welche gespeihert sind
+5. der load button braucht auch ein icon
+6. Roboyard weiss mit schwarzem schatten
+7. alle icons sollen links von der schrift auf den buttons
 
-1.
-der titel der credits und der help seite sollen in der leicht grauen box soll unten keine extra linie haben, die ist ja schon von dem content block oben, sonst ist die doppelt
-
-- die back buttons sollen runde ecken haben
-
-- teste deine änderungen ausgiebig und benutze playwright um online durchzuklicken , dich einzuloggen und den stil genau zu analysieren
+Wenn man die app neu startet, dann zeigt er streak 0 an, das sol aber defualt streak 1 sein und beim allerersten mal direkt nach installation soll es gar nicht angezeigt werden
