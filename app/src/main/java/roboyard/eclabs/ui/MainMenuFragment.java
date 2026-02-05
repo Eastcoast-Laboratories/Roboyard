@@ -181,6 +181,13 @@ public class MainMenuFragment extends BaseGameFragment {
         }
         int streakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
         
+        // If streak is 0 (first app launch), treat it as day 1
+        // because recordDailyLogin() will set it to 1 when called
+        if (streakDays == 0) {
+            streakDays = 1;
+            Timber.d("[STREAK_POPUP] Streak was 0, treating as day 1 for first launch");
+        }
+        
         // Determine headline based on streak day
         // For days 1-31, use specific headlines; for day 31+, always use "Legend status"
         String headlineKey;

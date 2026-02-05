@@ -99,11 +99,6 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
-main menu:
-3. der random game buton einen würfel
-4. den load game button erst anzeigen, wenn auch welche gespeihert sind
-5. der load button braucht auch ein icon
-6. Roboyard weiss mit schwarzem schatten
-7. alle icons sollen links von der schrift auf den buttons
+Wenn man in einem leel game einen erfolg hat und auf "view achievements" geht, dann auf back, dann is tman nciht mehr im level game mode, sondern im random game mode, man soll aber im selben level landen, wo man war, der mode muss sich also gemerkt werden
 
-Wenn man die app neu startet, dann zeigt er streak 0 an, das sol aber defualt streak 1 sein und beim allerersten mal direkt nach installation soll es gar nicht angezeigt werden
+- die flamme im streak popup soll als background 00331b haben
