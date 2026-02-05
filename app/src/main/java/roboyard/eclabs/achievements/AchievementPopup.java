@@ -329,7 +329,12 @@ public class AchievementPopup {
             
             // Icon with achievement-specific color
             ImageView icon = new ImageView(context);
-            AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.getIconDrawableName(), achievement.getId());
+            // For streak popup, use special background color #00331b for the flame
+            if (isStreakPopup && "icon_46_flame".equals(achievement.getIconDrawableName())) {
+                AchievementIconHelper.setIconWithColor(context, icon, achievement.getIconDrawableName(), Color.parseColor("#00331b"));
+            } else {
+                AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.getIconDrawableName(), achievement.getId());
+            }
             int iconSize = (int) context.getResources().getDimension(R.dimen.achievement_icon_size);
             // Increase icon size by 50% for single achievement or streak popup
             if (enlargeContent) {
