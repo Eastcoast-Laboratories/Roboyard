@@ -67,7 +67,10 @@
         android:textStyle="bold"
         android:textSize="16sp"
         android:padding="12dp"
-        android:layout_margin="16dp"
+        android:layout_marginTop="@dimen/back_button_margin"
+        android:layout_marginBottom="@dimen/back_button_margin"
+        android:layout_marginRight="@dimen/back_button_margin"
+        android:layout_marginLeft="@dimen/back_button_margin_left"
         android:background="@drawable/button_fancy_blue"
         android:elevation="4dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -106,8 +109,8 @@
         android:id="@+id/achievements_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="16dp"
-        android:padding="8dp"
+        android:layout_margin="@dimen/achievements_scroll_margin"
+        android:padding="@dimen/achievements_scroll_padding"
         app:layout_constraintBottom_toTopOf="@id/bottom_wall"
         app:layout_constraintEnd_toStartOf="@id/right_wall"
         app:layout_constraintStart_toEndOf="@id/left_wall"
@@ -118,7 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp" />
+            android:padding="@dimen/achievements_container_padding" />
 
     </ScrollView>
 

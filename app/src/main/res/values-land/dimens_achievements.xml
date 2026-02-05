@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Landscape mode values -->
+    <dimen name="back_button_margin">26dp</dimen>
+    <dimen name="back_button_margin_left">40dp</dimen>
+    <dimen name="achievements_scroll_margin">16dp</dimen>
+    <dimen name="achievements_scroll_padding">8dp</dimen>
+    <dimen name="achievements_container_padding">8dp</dimen>
+</resources>

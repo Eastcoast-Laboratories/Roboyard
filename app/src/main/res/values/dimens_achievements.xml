@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default values (portrait mode) -->
+    <dimen name="back_button_margin">16dp</dimen>
+    <dimen name="back_button_margin_left">20dp</dimen>
+    <dimen name="achievements_scroll_margin">4dp</dimen>
+    <dimen name="achievements_scroll_padding">4dp</dimen>
+    <dimen name="achievements_container_padding">4dp</dimen>
+</resources>
