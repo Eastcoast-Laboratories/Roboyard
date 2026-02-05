@@ -209,9 +209,11 @@ public class AchievementPopup {
         // Close button (X) - top right, initially hidden
         final TextView closeButton = new TextView(context);
         closeButton.setText("✕");
-        closeButton.setTextSize(28);
-        closeButton.setTextColor(Color.parseColor("#333333"));
-        closeButton.setPadding((int)(12 * density), (int)(8 * density), (int)(12 * density), (int)(8 * density));
+        closeButton.setTextSize(32);
+        closeButton.setTextColor(Color.parseColor("#0f5a11"));
+        closeButton.setPadding((int)(16 * density), (int)(12 * density), (int)(16 * density), (int)(12 * density));
+        closeButton.setBackground(context.getResources().getDrawable(R.drawable.close_button_bg));
+        closeButton.setGravity(Gravity.CENTER);
         closeButton.setVisibility(View.GONE);
         closeButton.setOnClickListener(v -> hidePopup());
         closeButton.setClickable(true);
@@ -251,20 +253,28 @@ public class AchievementPopup {
         });
         
         mainBox.addView(scrollView);
+        popupContainer.addView(mainBox);
         
-        // Add close button overlay (top right of mainBox) - MUST be added AFTER scrollView so it's on top
+        // Add close button to popupContainer (not mainBox) so it can be positioned at screen top
+        // Position at top right with upper edge outside viewport
         FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         closeParams.gravity = Gravity.END | Gravity.TOP;
-        closeParams.topMargin = (int)(8 * density);
-        closeParams.rightMargin = (int)(8 * density);
+        
+        // Right margin: more in landscape, less in portrait
+        int rightMarginPx = isLandscape ? 
+                (int)(48 * density) : 
+                (int)(32 * density);
+        closeParams.rightMargin = rightMarginPx;
+        
+        // Top margin: negative so upper edge goes outside viewport, positioned deeper
+        closeParams.topMargin = (int)(-20 * density);
+        
         closeButton.setLayoutParams(closeParams);
         closeButton.setElevation(2000);
         closeButton.setZ(2000);
-        mainBox.addView(closeButton);
-        
-        popupContainer.addView(mainBox);
+        popupContainer.addView(closeButton);
         
         // Start off-screen (above)
         popupContainer.setTranslationY(-500);
