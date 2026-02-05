@@ -43,11 +43,9 @@ public class AchievementsFragment extends BaseGameFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_achievements, container, false);
         
-        // Set up back button
+        // Set up back button - always navigate to MainMenuFragment
         Button backButton = view.findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().popBackStack();
-        });
+        backButton.setOnClickListener(v -> navigateToMainMenu());
         
         // Get references to UI elements
         progressText = view.findViewById(R.id.progress_text);
@@ -60,8 +58,28 @@ public class AchievementsFragment extends BaseGameFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
+        // Intercept system back button to navigate to MainMenuFragment
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), 
+            new androidx.activity.OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    navigateToMainMenu();
+                }
+            });
+        
         achievementManager = AchievementManager.getInstance(requireContext());
         loadAchievements();
+    }
+    
+    /**
+     * Navigate to MainMenuFragment
+     */
+    private void navigateToMainMenu() {
+        MainMenuFragment fragment = new MainMenuFragment();
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment)
+                .commit();
     }
     
     private void loadAchievements() {
