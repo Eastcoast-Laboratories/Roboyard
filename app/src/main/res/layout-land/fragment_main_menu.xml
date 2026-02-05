@@ -181,12 +181,12 @@
             <!-- Credits button - Large C -->
             <Button
                 android:id="@+id/credits_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:text="©"
                 android:contentDescription="@string/credits"
                 android:background="@drawable/circular_button_yellow"
-                android:textSize="30sp"
+                android:textSize="25sp"
                 android:textStyle="bold"
                 android:textColor="#000000"
                 android:layout_marginEnd="8dp"
@@ -196,8 +196,8 @@
             <!-- How to Play button - Question mark -->
             <ImageButton
                 android:id="@+id/help_icon_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:src="@drawable/help"
                 android:contentDescription="@string/help_a11y"
                 android:background="@drawable/circular_button_orange"
@@ -237,7 +237,7 @@
                 android:text=""
                 android:contentDescription="@string/profile_a11y"
                 android:background="@drawable/circular_button_turquoise"
-                android:padding="8dp"
+                android:padding="2dp"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF" />
