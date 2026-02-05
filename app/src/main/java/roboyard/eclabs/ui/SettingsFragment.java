@@ -124,6 +124,8 @@ public class SettingsFragment extends Fragment {
     // Debug view
     private long lastTitleClickTime = 0;
     private android.view.GestureDetector debugGestureDetector;
+    private android.os.Handler longPressHandler;
+    private Runnable longPressRunnable;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
@@ -1839,30 +1841,39 @@ public class SettingsFragment extends Fragment {
             TextView settingsTitle = findSettingsTitleInView(parent);
             
             if (settingsTitle != null) {
-                // Create a custom GestureDetector for the debug long press
-                debugGestureDetector = new android.view.GestureDetector(requireContext(), 
-                    new android.view.GestureDetector.SimpleOnGestureListener() {
-                        @Override
-                        public void onLongPress(android.view.MotionEvent e) {
-                            showDebugView();
-                            Timber.d("[DEBUG_LONG_PRESS] Long-press detected (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
-                        }
-                    });
+                // Initialize handler for long-press detection
+                longPressHandler = new android.os.Handler(android.os.Looper.getMainLooper());
                 
-                // Set the long press timeout to our custom value
-                android.view.ViewConfiguration vc = android.view.ViewConfiguration.get(requireContext());
-                try {
-                    java.lang.reflect.Field field = android.view.ViewConfiguration.class.getDeclaredField("mLongPressTimeout");
-                    field.setAccessible(true);
-                    field.setInt(vc, (int) Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
-                    Timber.d("[DEBUG_LONG_PRESS] Set ViewConfiguration long press timeout to %dms", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
-                } catch (Exception ex) {
-                    Timber.w(ex, "[DEBUG_LONG_PRESS] Could not set ViewConfiguration timeout, using default");
-                }
-                
-                // Use touch listener to forward events to gesture detector
+                // Set up custom touch listener with manual long-press timeout
                 settingsTitle.setOnTouchListener((v, event) -> {
-                    return debugGestureDetector.onTouchEvent(event);
+                    switch (event.getAction()) {
+                        case android.view.MotionEvent.ACTION_DOWN:
+                            // Cancel any pending long-press runnable
+                            if (longPressRunnable != null) {
+                                longPressHandler.removeCallbacks(longPressRunnable);
+                            }
+                            
+                            // Create a new long-press runnable
+                            longPressRunnable = () -> {
+                                showDebugView();
+                                Timber.d("[DEBUG_LONG_PRESS] Long-press detected (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                            };
+                            
+                            // Post the runnable with the custom timeout
+                            longPressHandler.postDelayed(longPressRunnable, Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                            Timber.d("[DEBUG_LONG_PRESS] Long-press timer started (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                            return true;
+                            
+                        case android.view.MotionEvent.ACTION_UP:
+                        case android.view.MotionEvent.ACTION_CANCEL:
+                            // Cancel the long-press runnable if user releases before timeout
+                            if (longPressRunnable != null) {
+                                longPressHandler.removeCallbacks(longPressRunnable);
+                                Timber.d("[DEBUG_LONG_PRESS] Long-press timer cancelled");
+                            }
+                            return true;
+                    }
+                    return false;
                 });
                 Timber.d("[DEBUG_LONG_PRESS] Settings title long-press listener attached (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
             } else {
