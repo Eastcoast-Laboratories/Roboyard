@@ -99,6 +99,4 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
-Wenn man in einem level game einen erfolg hat und auf "view achievements" geht, dann auf back, dann ist man nicht mehr im level game mode, sondern im random game mode, man soll aber im selben level landen, wo man war, der mode muss sich also gemerkt werden
-
-- die flamme im streak popup soll als background 00331b haben
+- beim small phone sind die pfade, die die roboter zeichnen wenn sie sich bewegen zu dick und zu weit vom zentrum des weges entfernt. im large phone ist das korrekt, die siind ein wenig versetzt on der mitte, aber dieser versatz ist anscheinend nicht von der auflösung abhöngig. passe das an, dass auf einem kleinen ohone der versatz kleiner ist
