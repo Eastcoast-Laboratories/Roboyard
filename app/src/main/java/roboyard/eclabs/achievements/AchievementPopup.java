@@ -225,10 +225,13 @@ public class AchievementPopup {
             TextView titleText = new TextView(context);
             if (isCurrentStreakPopup) {
                 titleText.setText(getStringByName("streak_popup_title", null));
+                // Streak popup: 4sp larger (18 + 4 = 22)
+                titleText.setTextSize(22);
             } else {
                 titleText.setText(context.getString(R.string.achievement_unlocked));
+                // Single achievement: keep original size
+                titleText.setTextSize(18);
             }
-            titleText.setTextSize(18);
             titleText.setTextColor(Color.parseColor("#0f5a11"));
             titleText.setTypeface(null, android.graphics.Typeface.BOLD);
             titleText.setGravity(Gravity.CENTER);
@@ -237,7 +240,7 @@ public class AchievementPopup {
         }
         
         // Achievements list
-        LinearLayout achievementsList = createAchievementsList();
+        LinearLayout achievementsList = createAchievementsList(isCurrentStreakPopup, pendingAchievements.size(), isLandscape);
         contentLayout.addView(achievementsList);
         
         scrollView.addView(contentLayout);
@@ -262,9 +265,9 @@ public class AchievementPopup {
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         closeParams.gravity = Gravity.END | Gravity.TOP;
         
-        // Right margin: more in landscape, less in portrait
+        // Right margin: more in landscape (10dp further left), less in portrait
         int rightMarginPx = isLandscape ? 
-                (int)(48 * density) : 
+                (int)(58 * density) : 
                 (int)(32 * density);
         closeParams.rightMargin = rightMarginPx;
         
@@ -304,12 +307,19 @@ public class AchievementPopup {
         Timber.d("[ACHIEVEMENT_POPUP] Showing popup");
     }
     
-    private LinearLayout createAchievementsList() {
+    private LinearLayout createAchievementsList(boolean isStreakPopup, int achievementCount, boolean isLandscape) {
         LinearLayout list = new LinearLayout(context);
         list.setOrientation(LinearLayout.VERTICAL);
         list.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
+        
+        float density = context.getResources().getDisplayMetrics().density;
+        
+        // Determine text sizes and icon size: larger for single achievement or streak popup
+        boolean enlargeContent = isStreakPopup || achievementCount == 1;
+        int nameTextSize = enlargeContent ? 20 : 16;
+        int descTextSize = enlargeContent ? 18 : 14;
         
         for (Achievement achievement : pendingAchievements) {
             LinearLayout itemLayout = new LinearLayout(context);
@@ -321,8 +331,13 @@ public class AchievementPopup {
             ImageView icon = new ImageView(context);
             AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.getIconDrawableName(), achievement.getId());
             int iconSize = (int) context.getResources().getDimension(R.dimen.achievement_icon_size);
+            // Increase icon size by 50% for single achievement or streak popup
+            if (enlargeContent) {
+                iconSize = (int) (iconSize * 1.5);
+            }
             LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
-            iconParams.rightMargin = 16;
+            // Increase right margin in landscape mode
+            iconParams.rightMargin = isLandscape ? (int)(32 * density) : 16;
             icon.setLayoutParams(iconParams);
             itemLayout.addView(icon);
             
@@ -335,7 +350,7 @@ public class AchievementPopup {
             // Name
             TextView nameText = new TextView(context);
             nameText.setText(getStringByName(achievement.getNameKey(), achievement.getNameFormatArgs()));
-            nameText.setTextSize(16);
+            nameText.setTextSize(nameTextSize);
             nameText.setTextColor(Color.parseColor("#333333"));
             nameText.setTypeface(null, android.graphics.Typeface.BOLD);
             textContainer.addView(nameText);
@@ -343,7 +358,7 @@ public class AchievementPopup {
             // Description
             TextView descText = new TextView(context);
             descText.setText(getStringByName(achievement.getDescriptionKey(), achievement.getDescriptionFormatArgs()));
-            descText.setTextSize(14);
+            descText.setTextSize(descTextSize);
             descText.setTextColor(Color.parseColor("#0f5a11"));
             textContainer.addView(descText);
             
