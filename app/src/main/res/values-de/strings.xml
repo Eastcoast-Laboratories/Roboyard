@@ -247,6 +247,7 @@
     <string name="retry_button_a11y">Dieses Level wiederholen</string>
     <string name="restart_button_a11y">Dieses Level neu starten</string>
     <string name="save_map_button_a11y">Aktuelle Karte speichern</string>
+    <string name="dice_button_a11y">Neue Karte generieren</string>
     <string name="robot_color_down_a11y">Bewege %1$s Roboter nach unten</string>
 
     <!-- Color names for robots and game elements -->

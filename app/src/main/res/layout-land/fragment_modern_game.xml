@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape layout with game grid on the right side (default) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -152,9 +153,24 @@
                 android:text=""
                 android:textColor="#EEEEEE"
                 android:textSize="@dimen/game_info_small_text_size"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/dice_button"
                 app:layout_constraintTop_toBottomOf="@id/game_timer"
                 android:layout_marginTop="4dp" />
+
+            <!-- Dice button for generating new map (only visible when generateNewMapEachTime is false) -->
+            <ImageButton
+                android:id="@+id/dice_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_dice"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/dice_button_a11y"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/game_timer"
+                android:layout_marginTop="7dp"
+                android:layout_marginStart="8dp" />
 
             <!-- Layout toggle button positioned at the right edge (near game grid) -->
             <Button

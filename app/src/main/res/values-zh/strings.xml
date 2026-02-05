@@ -156,6 +156,7 @@
     <string name="retry_button_a11y">重试此关卡</string>
     <string name="restart_button_a11y">重新开始此关卡</string>
     <string name="save_map_button_a11y">保存当前地图</string>
+    <string name="dice_button_a11y">生成新地图</string>
     <string name="new_game_button_a11y">开始新游戏</string>
     <string name="reset_button_a11y">重置游戏</string>
     <string name="help_button_a11y">显示游戏说明</string>

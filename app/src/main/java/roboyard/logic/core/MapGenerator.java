@@ -32,6 +32,10 @@ public class MapGenerator {
     Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
     Boolean allowMulticolorTarget = true;
     public static Boolean generateNewMapEachTime = true; // option in settings
+    
+    // Flag to force generating a new map once (used by dice button in game screen)
+    // This flag is automatically reset to false after the next map generation
+    public static boolean forceGenerateNewMapOnce = false;
     private int robotCount = 1; // Default to 1 robot per color
     private int targetColors = Constants.NUM_ROBOTS; // Default to 4 different target colors
 
@@ -195,9 +199,16 @@ public class MapGenerator {
         // Update board size to ensure we're using the right storage
         wallStorage.updateCurrentBoardSize();
         
-        boolean preserveWalls = !Preferences.generateNewMapEachTime && wallStorage.hasStoredWalls();
-        Timber.d("[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s, Preserving walls: %s, hasStoredWalls: %s", 
-                Preferences.generateNewMapEachTime, preserveWalls, wallStorage.hasStoredWalls());
+        // Check if dice button was pressed (one-time override)
+        boolean forceNewMap = forceGenerateNewMapOnce;
+        if (forceGenerateNewMapOnce) {
+            Timber.d("[DICE_BUTTON] Force new map flag is set, generating new map once");
+            forceGenerateNewMapOnce = false; // Reset the flag after use
+        }
+        
+        boolean preserveWalls = !Preferences.generateNewMapEachTime && !forceNewMap && wallStorage.hasStoredWalls();
+        Timber.d("[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s, forceNewMap: %s, Preserving walls: %s, hasStoredWalls: %s", 
+                Preferences.generateNewMapEachTime, forceNewMap, preserveWalls, wallStorage.hasStoredWalls());
         
         if (preserveWalls) {
             Timber.d("[WALL STORAGE] Preserving walls from stored configuration");

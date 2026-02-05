@@ -128,6 +128,7 @@
     
     <!-- Game buttons -->
     <string name="hint_button_a11y">Indice</string>
+    <string name="dice_button_a11y">Générer une nouvelle carte</string>
     <string name="cancel_button">Annuler</string>
     <string name="back_button">Retour</string>
     <string name="menu_button">Menu</string>

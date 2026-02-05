@@ -265,6 +265,7 @@
     <string name="retry_button_a11y">Retry this level</string>
     <string name="restart_button_a11y">Restart this level</string>
     <string name="save_map_button_a11y">Save current map</string>
+    <string name="dice_button_a11y">Generate a new map</string>
     <string name="robot_color_down_a11y">Move %1$s robot down</string>
 
     <!-- Color names for robots and game elements -->

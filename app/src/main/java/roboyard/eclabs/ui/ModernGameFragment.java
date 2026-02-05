@@ -77,6 +77,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private ToggleButton hintButton;
     private Button saveMapButton;
     private Button newMapButton;
+    private ImageButton diceButton; // Dice button for generating new map when generateNewMapEachTime is false
     private Button menuButton;
     private Button nextLevelButton;
     private Button optimalMovesButton; // Button to display optimal number of moves
@@ -1131,6 +1132,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             newMapButton.setVisibility(View.VISIBLE);
             saveMapButton.setVisibility(View.VISIBLE);
         }
+        
+        // Dice button for generating new map (only visible when generateNewMapEachTime is false and not in level game)
+        diceButton = view.findViewById(R.id.dice_button);
+        updateDiceButtonVisibility();
 
         // "New Game" Button
         newMapButton.setOnClickListener(v -> {
@@ -2012,6 +2017,67 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
             //boardSizeTextView.setText(getString(R.string.board_size, Preferences.boardSizeWidth, Preferences.boardSizeHeight));
         }
+    }
+    
+    /**
+     * Update dice button visibility based on generateNewMapEachTime setting and game type
+     * Dice button is only visible when:
+     * - generateNewMapEachTime is false (user wants to keep the same map)
+     * - Not in level game mode (only for random games)
+     */
+    private void updateDiceButtonVisibility() {
+        if (diceButton == null) return;
+        
+        GameState state = gameStateManager.getCurrentState().getValue();
+        boolean isLevelGame = state != null && state.getLevelId() > 0;
+        
+        // Show dice button only when generateNewMapEachTime is false AND not in level game
+        boolean showDiceButton = !Preferences.generateNewMapEachTime && !isLevelGame;
+        diceButton.setVisibility(showDiceButton ? View.VISIBLE : View.GONE);
+        
+        Timber.d("[DICE_BUTTON] Visibility updated: generateNewMapEachTime=%s, isLevelGame=%s, visible=%s",
+                Preferences.generateNewMapEachTime, isLevelGame, showDiceButton);
+        
+        // Set up click listener if not already set
+        diceButton.setOnClickListener(v -> {
+            Timber.d("[DICE_BUTTON] Dice button clicked - generating new map");
+            
+            // Set the flag to force new map generation once
+            roboyard.logic.core.MapGenerator.forceGenerateNewMapOnce = true;
+            
+            // Clear robot paths before starting new game
+            if (gameGridView != null) {
+                gameGridView.clearRobotPaths();
+                Timber.d("[DICE_BUTTON] Cleared robot paths before generating new map");
+            }
+            
+            // Reset move counts and history
+            gameStateManager.resetMoveCountsAndHistory();
+            
+            // Start a new game (this will use the forceGenerateNewMapOnce flag)
+            gameStateManager.startModernGame();
+            
+            // Reset timer
+            stopTimer();
+            startTimer();
+            
+            // Randomize pre-hints count for the new game
+            numPreHints = ThreadLocalRandom.current().nextInt(2, 5);
+            Timber.d("[DICE_BUTTON] Randomized pre-hints for new game: %d", numPreHints);
+            
+            // Reset hint system for new game
+            gameStateManager.resetSolutionStep();
+            showingPreHints = true;
+            hintButton.setEnabled(true);
+            hintButton.setAlpha(1.0f);
+            
+            // Hide the optimal moves button when starting a new game
+            if (optimalMovesButton != null) {
+                optimalMovesButton.setVisibility(View.GONE);
+            }
+            
+            Timber.d("[DICE_BUTTON] New map generated successfully");
+        });
     }
     
     private void updateUniqueMapIdText(GameState state) {

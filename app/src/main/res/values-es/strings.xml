@@ -189,6 +189,7 @@
     <string name="retry_button_a11y">Reintentar este nivel</string>
     <string name="restart_button_a11y">Reiniciar este nivel</string>
     <string name="save_map_button_a11y">Guardar el mapa actual</string>
+    <string name="dice_button_a11y">Generar un nuevo mapa</string>
     <string name="new_game_button_a11y">Comenzar un nuevo juego</string>
     <string name="reset_button_a11y">Reiniciar el juego</string>
     <string name="help_button_a11y">Mostrar instrucciones de juego</string>

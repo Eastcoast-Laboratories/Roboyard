@@ -58,15 +58,12 @@ check if this all works:
 
 - Wenn Map ratio sehr gross, dann die Buttons unten alle kleiner und nur mit Icons statt text und alle in eine Reihe anstatt 2
 
-- Bug: Beim Wischen no Sound, beim Tappen Sound, obwohl ausgeschaltet
-
 - drück mal 10 x reset hintereinander
 
-- Einen Würfel Button für die Maps, wenn generateNewmapeachtime no ist
 
-- settings: when setting a higher robotCount than targets, then automatically set the targetCount to the same value
 
-- if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
+
+- enhance solution in multi-target mode: if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
  - suggestion: create a temporary map for the solver, where you delete all other targets and let the solver run with only one target at the time. store the solutions and take only the shortest solution
 
 
@@ -99,4 +96,4 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
-- beim small phone sind die pfade, die die roboter zeichnen wenn sie sich bewegen zu dick und zu weit vom zentrum des weges entfernt. im large phone ist das korrekt, die siind ein wenig versetzt on der mitte, aber dieser versatz ist anscheinend nicht von der auflösung abhöngig. passe das an, dass auf einem kleinen ohone der versatz kleiner ist
+- wenn generateNewmapeachtime == "no" ist, dann soll da im random game Ein neuer Würfel-Button links neben den map namen im game screen, wenn man den drückt, dann wird einmalig eine neue map generiert (also der button macht das selbe, wie der "new game" button ganz unten im game screen, nur mit einem einmal override fpr generateNewmapeachtime)
