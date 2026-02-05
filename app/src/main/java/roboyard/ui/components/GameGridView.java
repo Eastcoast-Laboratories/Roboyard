@@ -43,9 +43,9 @@ public class GameGridView extends View {
     private static final boolean ENABLE_ULTRA_DEBUG = false; // Set to true for maximum detail
     
     // Grid and drawing properties
-    private static final int PATH_STROKE_WIDTH = 6; // Width of the robot path lines
-    private static final float BASE_ROBOT_OFFSET_RANGE = 25.0f; // Maximum random offset in pixels (will be -range to +range)
-    private static final float PERPENDICULAR_OFFSET_STEP = 2.0f; // Pixels to offset per repeated traversal
+    private static final float PATH_STROKE_WIDTH_RATIO = 0.15f; // Width of robot path as ratio of cellSize
+    private static final float BASE_ROBOT_OFFSET_RANGE_RATIO = 0.2f; // Maximum random offset as ratio of cellSize
+    private static final float PERPENDICULAR_OFFSET_STEP_RATIO = 0.05f; // Perpendicular offset per traversal as ratio of cellSize
 
     private GameStateManager gameStateManager;
     private Paint cellPaint;
@@ -55,6 +55,11 @@ public class GameGridView extends View {
     private Paint gridPaint;
     private Paint[] pathPaints; // Paints for robot movement paths
     private float cellSize;
+    
+    // Calculated path rendering values based on cellSize
+    private float pathStrokeWidth = 6.0f;
+    private float baseRobotOffsetRange = 25.0f;
+    private float perpendicularOffsetStep = 2.0f;
     
     // Grid dimensions
     private int gridWidth = 14;
@@ -317,7 +322,7 @@ public class GameGridView extends View {
     private Paint createPathPaint(int color) {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(PATH_STROKE_WIDTH);
+        paint.setStrokeWidth(pathStrokeWidth);
         paint.setColor(color);
         paint.setAlpha(128); // 50% transparency
         paint.setAntiAlias(true);
@@ -571,6 +576,11 @@ public class GameGridView extends View {
         float cellWidth = (float) width / gridWidth;
         float cellHeight = (float) height / gridHeight;
         cellSize = Math.min(cellWidth, cellHeight);
+        
+        // Calculate path rendering values based on cellSize for responsive design
+        pathStrokeWidth = cellSize * PATH_STROKE_WIDTH_RATIO;
+        baseRobotOffsetRange = cellSize * BASE_ROBOT_OFFSET_RANGE_RATIO;
+        perpendicularOffsetStep = cellSize * PERPENDICULAR_OFFSET_STEP_RATIO;
         
         // Adjust view size to maintain aspect ratio
         int newWidth = (int) (cellSize * gridWidth);
@@ -874,7 +884,7 @@ public class GameGridView extends View {
                         float perpY = dx / length;
                         
                         // Add perpendicular offset based on traversal count
-                        float perpOffset = (count - 1) * PERPENDICULAR_OFFSET_STEP; // 2 pixels per repeated traversal
+                        float perpOffset = (count - 1) * perpendicularOffsetStep;
                         
                         // Apply both base offset and perpendicular offset
                         canvas.drawLine(
@@ -1566,8 +1576,8 @@ public class GameGridView extends View {
         // Initialize data structures if they don't exist
         if (!robotPaths.containsKey(color)) {
             // Generate a consistent base offset for this robot
-            float offsetX = (float) (Math.random() * 2 * BASE_ROBOT_OFFSET_RANGE - BASE_ROBOT_OFFSET_RANGE);
-            float offsetY = (float) (Math.random() * 2 * BASE_ROBOT_OFFSET_RANGE - BASE_ROBOT_OFFSET_RANGE);
+            float offsetX = (float) (Math.random() * 2 * baseRobotOffsetRange - baseRobotOffsetRange);
+            float offsetY = (float) (Math.random() * 2 * baseRobotOffsetRange - baseRobotOffsetRange);
             robotBaseOffsets.put(color, new float[]{offsetX, offsetY});
             
             // Initialize path and segment count
