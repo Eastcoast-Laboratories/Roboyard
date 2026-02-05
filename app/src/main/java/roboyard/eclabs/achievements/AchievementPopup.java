@@ -193,6 +193,8 @@ public class AchievementPopup {
         scrollView.setVerticalScrollBarEnabled(true);
         scrollView.setScrollbarFadingEnabled(false);
         scrollView.setFillViewport(true);
+        scrollView.setClickable(true);
+        scrollView.setFocusable(true);
         
         // Content inside scroll: title + achievements list
         LinearLayout contentLayout = new LinearLayout(context);
@@ -201,15 +203,19 @@ public class AchievementPopup {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         contentLayout.setPadding(horizontalMarginPx, (int)(12 * density), horizontalMarginPx, 0);
+        contentLayout.setClickable(true);
+        contentLayout.setFocusable(true);
         
         // Close button (X) - top right, initially hidden
         final TextView closeButton = new TextView(context);
         closeButton.setText("✕");
-        closeButton.setTextSize(24);
-        closeButton.setTextColor(Color.parseColor("#666666"));
-        closeButton.setPadding((int)(16 * density), 0, (int)(16 * density), 0);
+        closeButton.setTextSize(28);
+        closeButton.setTextColor(Color.parseColor("#333333"));
+        closeButton.setPadding((int)(12 * density), (int)(8 * density), (int)(12 * density), (int)(8 * density));
         closeButton.setVisibility(View.GONE);
         closeButton.setOnClickListener(v -> hidePopup());
+        closeButton.setClickable(true);
+        closeButton.setFocusable(true);
         
         // Title (only for streak popup or single achievement)
         boolean showTitle = isCurrentStreakPopup || pendingAchievements.size() == 1;
@@ -221,7 +227,8 @@ public class AchievementPopup {
                 titleText.setText(context.getString(R.string.achievement_unlocked));
             }
             titleText.setTextSize(18);
-            titleText.setTextColor(Color.parseColor("#4CAF50"));
+            titleText.setTextColor(Color.parseColor("#0f5a11"));
+            titleText.setTypeface(null, android.graphics.Typeface.BOLD);
             titleText.setGravity(Gravity.CENTER);
             titleText.setPadding(0, 0, 0, (int)(8 * density));
             contentLayout.addView(titleText);
@@ -232,25 +239,30 @@ public class AchievementPopup {
         contentLayout.addView(achievementsList);
         
         scrollView.addView(contentLayout);
-        mainBox.addView(scrollView);
         
-        // Add close button overlay (top right of mainBox)
-        FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        closeParams.gravity = Gravity.END | Gravity.TOP;
-        closeButton.setLayoutParams(closeParams);
-        mainBox.addView(closeButton);
-        
-        // Make popup permanent when clicked
-        mainBox.setOnClickListener(v -> {
+        // Set OnClickListener on contentLayout - this works because contentLayout is clickable
+        contentLayout.setOnClickListener(v -> {
             if (!isPermanent) {
                 isPermanent = true;
                 handler.removeCallbacksAndMessages(null);
                 closeButton.setVisibility(View.VISIBLE);
-                Timber.d("[ACHIEVEMENT_POPUP] Popup clicked, now permanent");
+                Timber.d("[ACHIEVEMENT_POPUP] Content area clicked, now permanent - timer paused, close button shown. closeButton visibility=%d", closeButton.getVisibility());
             }
         });
+        
+        mainBox.addView(scrollView);
+        
+        // Add close button overlay (top right of mainBox) - MUST be added AFTER scrollView so it's on top
+        FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        closeParams.gravity = Gravity.END | Gravity.TOP;
+        closeParams.topMargin = (int)(8 * density);
+        closeParams.rightMargin = (int)(8 * density);
+        closeButton.setLayoutParams(closeParams);
+        closeButton.setElevation(2000);
+        closeButton.setZ(2000);
+        mainBox.addView(closeButton);
         
         popupContainer.addView(mainBox);
         
@@ -315,13 +327,14 @@ public class AchievementPopup {
             nameText.setText(getStringByName(achievement.getNameKey(), achievement.getNameFormatArgs()));
             nameText.setTextSize(16);
             nameText.setTextColor(Color.parseColor("#333333"));
+            nameText.setTypeface(null, android.graphics.Typeface.BOLD);
             textContainer.addView(nameText);
             
             // Description
             TextView descText = new TextView(context);
             descText.setText(getStringByName(achievement.getDescriptionKey(), achievement.getDescriptionFormatArgs()));
-            descText.setTextSize(12);
-            descText.setTextColor(Color.parseColor("#666666"));
+            descText.setTextSize(14);
+            descText.setTextColor(Color.parseColor("#0f5a11"));
             textContainer.addView(descText);
             
             itemLayout.addView(textContainer);
