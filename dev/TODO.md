@@ -99,6 +99,6 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
-Wenn man in einem leel game einen erfolg hat und auf "view achievements" geht, dann auf back, dann is tman nciht mehr im level game mode, sondern im random game mode, man soll aber im selben level landen, wo man war, der mode muss sich also gemerkt werden
+Wenn man in einem level game einen erfolg hat und auf "view achievements" geht, dann auf back, dann ist man nicht mehr im level game mode, sondern im random game mode, man soll aber im selben level landen, wo man war, der mode muss sich also gemerkt werden
 
 - die flamme im streak popup soll als background 00331b haben
