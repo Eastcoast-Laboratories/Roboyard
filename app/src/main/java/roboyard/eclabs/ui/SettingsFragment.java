@@ -1845,7 +1845,7 @@ public class SettingsFragment extends Fragment {
                         @Override
                         public void onLongPress(android.view.MotionEvent e) {
                             showDebugView();
-                            Timber.d("[DEBUG] Long-press detected (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                            Timber.d("[DEBUG_LONG_PRESS] Long-press detected (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
                         }
                     });
                 
@@ -1855,21 +1855,21 @@ public class SettingsFragment extends Fragment {
                     java.lang.reflect.Field field = android.view.ViewConfiguration.class.getDeclaredField("mLongPressTimeout");
                     field.setAccessible(true);
                     field.setInt(vc, (int) Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
-                    Timber.d("[DEBUG] Set ViewConfiguration long press timeout to %dms", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                    Timber.d("[DEBUG_LONG_PRESS] Set ViewConfiguration long press timeout to %dms", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
                 } catch (Exception ex) {
-                    Timber.w(ex, "[DEBUG] Could not set ViewConfiguration timeout, using default");
+                    Timber.w(ex, "[DEBUG_LONG_PRESS] Could not set ViewConfiguration timeout, using default");
                 }
                 
                 // Use touch listener to forward events to gesture detector
                 settingsTitle.setOnTouchListener((v, event) -> {
                     return debugGestureDetector.onTouchEvent(event);
                 });
-                Timber.d("[DEBUG] Settings title long-press listener attached (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
+                Timber.d("[DEBUG_LONG_PRESS] Settings title long-press listener attached (timeout: %dms)", Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS);
             } else {
-                Timber.w("[DEBUG] Could not find settings title view");
+                Timber.w("[DEBUG_LONG_PRESS] Could not find settings title view");
             }
         } catch (Exception e) {
-            Timber.e(e, "[DEBUG] Error setting up debug view");
+            Timber.e(e, "[DEBUG_LONG_PRESS] Error setting up debug view");
         }
     }
     

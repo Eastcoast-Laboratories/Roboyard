@@ -387,7 +387,7 @@
     <string name="no_game_to_save" comment="Message when there is no game available to save">No game available to save</string>
 
     <!-- Settings Screen -->
-    <string name="settings_title">Roboyard Settings</string>
+    <string name="settings_title">Settings</string>
     <string name="settings_board_size">Board Size:</string>
     <string name="settings_difficulty">Difficulty Level:</string>
     <string name="settings_new_map_each_time">Generate New Map Each Time:</string>
