@@ -1671,9 +1671,17 @@ public class SaveGameFragment extends BaseGameFragment {
             
             // Set up click listener to load or save a game on touch
             holder.itemView.setOnClickListener(v -> {
+                int slotId = slot.getSlotId();
+                
                 if (saveMode) {
+                    // Slot 0 is reserved for auto-save only - prevent manual saves
+                    if (slotId == 0) {
+                        Toast.makeText(requireContext(), "Slot 0 is reserved for auto-save. Please use another slot.", Toast.LENGTH_SHORT).show();
+                        Timber.d("[SAVE_PROTECTION] User attempted to save to slot 0 - blocked");
+                        return;
+                    }
+                    
                     // Save current game to this slot
-                    int slotId = slot.getSlotId();
                     Timber.d("Saving game to slot " + slotId);
                     if (gameStateManager.saveGame(slotId)) {
                         Toast.makeText(requireContext(), "Game saved to slot " + slotId, Toast.LENGTH_SHORT).show();
@@ -1700,7 +1708,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 } else {
                     if (slot.getDate() != null) { // Only load if slot has a save
                         // Load the game first
-                        gameStateManager.loadGame(slot.getSlotId());
+                        gameStateManager.loadGame(slotId);
                         
                         // Verify that the game state was loaded successfully
                         if (gameStateManager.getCurrentState().getValue() != null) {

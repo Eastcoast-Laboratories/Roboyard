@@ -577,6 +577,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return true if the game was saved successfully, false otherwise
      */
     public boolean saveGame(int saveId) {
+        // Slot 0 is reserved for auto-save only - prevent manual saves
+        if (saveId == 0) {
+            Timber.e("[SAVE_PROTECTION] Attempted manual save to slot 0 (auto-save slot) - blocked");
+            return false;
+        }
+        
         Timber.d("Saving game to slot %d", saveId);
 
         // Get the current game state
