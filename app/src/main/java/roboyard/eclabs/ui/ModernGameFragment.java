@@ -3243,9 +3243,17 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Perform autosave
      */
     private void autosave() {
-        // Only autosave if game is in progress and not solved
+        // Only autosave if game is in progress, not solved, and NOT a level game
         if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
-            Timber.d("[AUTOSAVE] Performing autosave to slot 0");
+            GameState currentState = gameStateManager.getCurrentState().getValue();
+            
+            // Check if this is a level game (levelId > 0 means it's a level game)
+            if (currentState != null && currentState.getLevelId() > 0) {
+                Timber.d("[AUTOSAVE] Skipping autosave for level game (levelId: %d)", currentState.getLevelId());
+                return;
+            }
+            
+            Timber.d("[AUTOSAVE] Performing autosave to slot 0 (random game)");
             boolean saved = gameStateManager.saveGame(0); // Save to slot 0
             if (saved) {
                 Timber.d("[AUTOSAVE] Game successfully autosaved to slot 0");
@@ -3323,7 +3331,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void checkHistorySave() {
         // Only check for history saving if game is in progress and not already saved
         if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
-            Timber.d("[HISTORY] Checking if game should be saved to history");
+            GameState currentState = gameStateManager.getCurrentState().getValue();
+            
+            // Check if this is a level game (levelId > 0 means it's a level game)
+            if (currentState != null && currentState.getLevelId() > 0) {
+                Timber.d("[HISTORY] Skipping history save for level game (levelId: %d)", currentState.getLevelId());
+                return;
+            }
+            
+            Timber.d("[HISTORY] Checking if game should be saved to history (random game)");
             gameStateManager.updateGameTimer(); // This handles threshold checking and saving
         }
     }

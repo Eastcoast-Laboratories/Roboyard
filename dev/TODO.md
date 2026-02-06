@@ -96,4 +96,6 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
-- wenn generateNewmapeachtime == "no" ist, dann soll da im random game Ein neuer Würfel-Button links neben den map namen im game screen, wenn man den drückt, dann wird einmalig eine neue map generiert (also der button macht das selbe, wie der "new game" button ganz unten im game screen, nur mit einem einmal override fpr generateNewmapeachtime)
+- man darf im ersten auto-save slot ncihts speichern
+- die history muss noch getestet werden, im moment werden dort auch die levels gespeichert und man kann darüber dann einen level als random game aufrufen.
+-  die levels sollten nicht im auto-save gespeichert werden
