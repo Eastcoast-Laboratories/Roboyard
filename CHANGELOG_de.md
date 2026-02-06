@@ -2,6 +2,17 @@ Changelog Deutsch
 =================
 
 
+## Version 33 (2026-02-06)
+- Achievements
+- Login-Streaks
+- Dynamische Roboter-Kollisionsgeräusche - die Tonhöhe ändert sich basierend auf den beteiligten Robotern
+- Zuletzt gespieltes Level wird in der Levelauswahl hervorgehoben
+- Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
+- Fehler behoben, der ungültige Lösungswege vorschlug
+- Die Sprachausgaben bei der Steuerung über Barrierefreiheits-Buttons wurde optimiert
+- Synchronisation des Spielfortschritts und Achievements mit dem online server
+
+
 ## Version 32 (2026-02-06)
 - Achievements
 - Login-Streaks

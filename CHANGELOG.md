@@ -2,6 +2,17 @@
 =========
 
 
+## Version 33 (2026-02-06)
+- Achievements
+- Login Streaks
+- Dynamic robot collision sounds - the pitch changes based on the involved robots
+- Last played level is highlighted in level selection
+- Menu button now returns to level selection instead of main menu
+- Bugfix that suggested invalid solution paths
+- Accessibility messages when using control via accessibility buttons were optimized
+- Synchronizing progress and achievements with online server
+
+
 ## Version 32 (2026-02-06)
 - Achievements
 - Login Streaks

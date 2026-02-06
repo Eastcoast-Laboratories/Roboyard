@@ -73,6 +73,7 @@ DE_CHANGES=$(cat << EOF
 - Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
 - Fehler behoben, der ungültige Lösungswege vorschlug
 - Die Sprachausgaben bei der Steuerung über Barrierefreiheits-Buttons wurde optimiert
+- Synchronisation des Spielfortschritts und Achievements mit dem online server
 EOF
 )
 
@@ -85,6 +86,7 @@ EN_CHANGES=$(cat << EOF
 - Menu button now returns to level selection instead of main menu
 - Bugfix that suggested invalid solution paths
 - Accessibility messages when using control via accessibility buttons were optimized
+- Synchronizing progress and achievements with online server
 EOF
 )
 
