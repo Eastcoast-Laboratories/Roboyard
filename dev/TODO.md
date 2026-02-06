@@ -97,5 +97,3 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 # last prompt:
 
 - man darf im ersten auto-save slot ncihts speichern
-- die history muss noch getestet werden, im moment werden dort auch die levels gespeichert und man kann darüber dann einen level als random game aufrufen.
--  die levels sollten nicht im auto-save gespeichert werden
