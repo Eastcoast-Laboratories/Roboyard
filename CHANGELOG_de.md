@@ -2,7 +2,7 @@ Changelog Deutsch
 =================
 
 
-## Version 31 (2026-01-25)
+## Version 32 (2026-02-06)
 - Achievements
 - Login-Streaks
 - Dynamische Roboter-Kollisionsgeräusche - die Tonhöhe ändert sich basierend auf den beteiligten Robotern
@@ -10,6 +10,10 @@ Changelog Deutsch
 - Menü-Button führt in Level-Spielen jetzt zurück zur Levelauswahl statt zum Hauptmenu
 - Fehler behoben, der ungültige Lösungswege vorschlug
 - Die Sprachausgaben bei der Steuerung über Barrierefreiheits-Buttons wurde optimiert
+
+
+## Version 31 (2026-01-25)
+- unreleased
 
 ## Version 30 (2026-01-19)
 - Die maximale und minimale Anzahl Züge ist jetzt beliebig einstellbar

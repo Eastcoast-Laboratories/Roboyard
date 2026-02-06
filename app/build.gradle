@@ -9,8 +9,8 @@ android {
         applicationId "de.z11.roboyard"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 99
-        versionName "31"
+        versionCode 101
+        versionName "32"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
