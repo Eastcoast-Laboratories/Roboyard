@@ -740,4 +740,95 @@ public class AchievementManager {
         // Delay sync slightly to batch multiple unlocks
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this::syncToServer, 2000);
     }
+    
+    /**
+     * Sync achievements FROM server to local device.
+     * Used after login to restore achievements on a new device.
+     * Merges server achievements with local ones (union - never removes local achievements).
+     * 
+     * @param callback Optional callback for sync result
+     */
+    public void syncFromServer(RoboyardApiClient.ApiCallback<Integer> callback) {
+        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
+        if (!apiClient.isLoggedIn()) {
+            Timber.d("[ACHIEVEMENT_SYNC_DOWN] Not logged in, skipping download");
+            if (callback != null) callback.onError("Not logged in");
+            return;
+        }
+        
+        Timber.d("[ACHIEVEMENT_SYNC_DOWN] Starting achievement download from server");
+        
+        apiClient.fetchAchievements(new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementFetchResult>() {
+            @Override
+            public void onSuccess(RoboyardApiClient.AchievementFetchResult result) {
+                int restoredCount = 0;
+                
+                try {
+                    JSONArray serverAchievements = result.achievements;
+                    Timber.d("[ACHIEVEMENT_SYNC_DOWN] Received %d achievements from server", serverAchievements.length());
+                    
+                    for (int i = 0; i < serverAchievements.length(); i++) {
+                        JSONObject serverAchievement = serverAchievements.getJSONObject(i);
+                        String id = serverAchievement.getString("id");
+                        boolean unlocked = serverAchievement.optBoolean("unlocked", false);
+                        String unlockedAt = serverAchievement.optString("unlocked_at", null);
+                        
+                        if (!unlocked) continue;
+                        
+                        // Check if we have this achievement locally
+                        Achievement localAchievement = achievements.get(id);
+                        if (localAchievement == null) {
+                            Timber.d("[ACHIEVEMENT_SYNC_DOWN] Unknown achievement ID from server: %s", id);
+                            continue;
+                        }
+                        
+                        // Only restore if not already unlocked locally
+                        if (!localAchievement.isUnlocked()) {
+                            long timestamp = 0;
+                            if (unlockedAt != null && !unlockedAt.isEmpty()) {
+                                try {
+                                    // Parse ISO 8601 timestamp
+                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US);
+                                    java.util.Date date = sdf.parse(unlockedAt);
+                                    if (date != null) {
+                                        timestamp = date.getTime();
+                                    }
+                                } catch (Exception e) {
+                                    Timber.w("[ACHIEVEMENT_SYNC_DOWN] Could not parse timestamp for %s: %s", id, unlockedAt);
+                                    timestamp = System.currentTimeMillis();
+                                }
+                            }
+                            
+                            localAchievement.setUnlocked(true);
+                            localAchievement.setUnlockedTimestamp(timestamp > 0 ? timestamp : System.currentTimeMillis());
+                            
+                            // Save to SharedPreferences
+                            prefs.edit()
+                                .putBoolean(id + "_unlocked", true)
+                                .putLong(id + "_timestamp", localAchievement.getUnlockedTimestamp())
+                                .apply();
+                            
+                            restoredCount++;
+                            Timber.d("[ACHIEVEMENT_SYNC_DOWN] Restored achievement: %s", id);
+                        }
+                    }
+                    
+                    Timber.d("[ACHIEVEMENT_SYNC_DOWN] Download complete: %d achievements restored", restoredCount);
+                    
+                } catch (JSONException e) {
+                    Timber.e(e, "[ACHIEVEMENT_SYNC_DOWN] Error parsing server achievements");
+                    if (callback != null) callback.onError("Error parsing achievements: " + e.getMessage());
+                    return;
+                }
+                
+                if (callback != null) callback.onSuccess(restoredCount);
+            }
+            
+            @Override
+            public void onError(String error) {
+                Timber.e("[ACHIEVEMENT_SYNC_DOWN] Download failed: %s", error);
+                if (callback != null) callback.onError(error);
+            }
+        });
+    }
 }

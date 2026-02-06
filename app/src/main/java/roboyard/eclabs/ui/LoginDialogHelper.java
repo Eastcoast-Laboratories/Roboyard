@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
 import roboyard.eclabs.RoboyardApiClient;
+import roboyard.eclabs.SyncManager;
+import roboyard.eclabs.achievements.AchievementManager;
 import timber.log.Timber;
 
 /**
@@ -110,6 +112,44 @@ public class LoginDialogHelper {
             @Override
             public void onSuccess(RoboyardApiClient.LoginResult result) {
                 Toast.makeText(context, R.string.settings_login_success, Toast.LENGTH_SHORT).show();
+                
+                // Sync achievements from server after successful login
+                Timber.d("[LOGIN_SYNC] Login successful, starting achievement sync from server");
+                AchievementManager.getInstance(context).syncFromServer(new RoboyardApiClient.ApiCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer restoredCount) {
+                        Timber.d("[LOGIN_SYNC] Achievement sync complete: %d achievements restored", restoredCount);
+                        if (restoredCount > 0) {
+                            Toast.makeText(context, restoredCount + " achievements restored from server", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(String error) {
+                        Timber.e("[LOGIN_SYNC] Achievement sync failed: %s", error);
+                    }
+                });
+                
+                // Also upload local achievements to server (bidirectional sync)
+                AchievementManager.getInstance(context).syncToServer();
+                
+                // Sync save games and history (bidirectional)
+                if (context instanceof android.app.Activity) {
+                    android.app.Activity activity = (android.app.Activity) context;
+                    SyncManager.getInstance(context).fullSyncOnLogin(activity, new RoboyardApiClient.ApiCallback<String>() {
+                        @Override
+                        public void onSuccess(String summary) {
+                            Timber.d("[LOGIN_SYNC] Full sync complete: %s", summary);
+                            Toast.makeText(context, "Sync: " + summary, Toast.LENGTH_SHORT).show();
+                        }
+                        
+                        @Override
+                        public void onError(String error) {
+                            Timber.e("[LOGIN_SYNC] Full sync failed: %s", error);
+                        }
+                    });
+                }
+                
                 if (callback != null) {
                     callback.onLoginSuccess(result);
                 }

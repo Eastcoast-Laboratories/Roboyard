@@ -331,6 +331,32 @@ public class RoboyardApiClient {
     }
     
     /**
+     * Make a GET request with authentication.
+     */
+    private String makeAuthenticatedGetRequest(String endpoint) throws IOException {
+        String token = prefs.getString(KEY_AUTH_TOKEN, null);
+        if (token == null) {
+            throw new IOException("Not authenticated");
+        }
+        
+        URL url = new URL(BASE_URL + endpoint);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        
+        try {
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + token);
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            
+            return readResponse(conn);
+            
+        } finally {
+            conn.disconnect();
+        }
+    }
+    
+    /**
      * Read the response from an HTTP connection.
      */
     private String readResponse(HttpURLConnection conn) throws IOException {
@@ -399,6 +425,208 @@ public class RoboyardApiClient {
             this.statsUpdated = statsUpdated;
         }
     }
+    
+    /**
+     * Result class for fetching achievements from server.
+     */
+    public static class AchievementFetchResult {
+        public final JSONArray achievements;
+        public final JSONObject stats;
+        
+        public AchievementFetchResult(JSONArray achievements, JSONObject stats) {
+            this.achievements = achievements;
+            this.stats = stats;
+        }
+    }
+    
+    /**
+     * Fetch achievements from roboyard.z11.de for the logged-in user.
+     * Used to restore achievements on a new device after login.
+     * 
+     * @param callback Callback for result
+     */
+    public void fetchAchievements(ApiCallback<AchievementFetchResult> callback) {
+        if (!isLoggedIn()) {
+            postError(callback, "Not logged in");
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                String response = makeAuthenticatedGetRequest("/api/mobile/achievements");
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    postError(callback, json.getString("error"));
+                    return;
+                }
+                
+                JSONObject user = json.getJSONObject("user");
+                JSONArray achievements = user.getJSONArray("achievements");
+                JSONObject stats = user.optJSONObject("stats");
+                
+                AchievementFetchResult result = new AchievementFetchResult(achievements, stats);
+                postSuccess(callback, result);
+                
+                Timber.tag(TAG).d("[ACHIEVEMENT_FETCH] Fetched %d achievements from server", achievements.length());
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "[ACHIEVEMENT_FETCH] JSON error during fetch");
+                postError(callback, "Invalid response from server");
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "[ACHIEVEMENT_FETCH] Network error during fetch");
+                postError(callback, "Network error: " + e.getMessage());
+            }
+        });
+    }
+    
+    // ========== SAVE GAME SYNC ==========
+    
+    /**
+     * Upload save games to server.
+     */
+    public void syncSaveGames(JSONArray saves, ApiCallback<Integer> callback) {
+        if (!isLoggedIn()) {
+            postError(callback, "Not logged in");
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("saves", saves);
+                
+                String response = makeAuthenticatedPostRequest("/api/mobile/saves/sync", requestBody.toString());
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    postError(callback, json.getString("error"));
+                    return;
+                }
+                
+                int syncedCount = json.optInt("synced_count", 0);
+                postSuccess(callback, syncedCount);
+                
+                Timber.tag(TAG).d("[SAVE_SYNC] Uploaded %d save games to server", syncedCount);
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "[SAVE_SYNC] JSON error during upload");
+                postError(callback, "Invalid response from server");
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "[SAVE_SYNC] Network error during upload");
+                postError(callback, "Network error: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Download save games from server.
+     */
+    public void fetchSaveGames(ApiCallback<JSONArray> callback) {
+        if (!isLoggedIn()) {
+            postError(callback, "Not logged in");
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                String response = makeAuthenticatedGetRequest("/api/mobile/saves");
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    postError(callback, json.getString("error"));
+                    return;
+                }
+                
+                JSONArray saves = json.getJSONArray("saves");
+                postSuccess(callback, saves);
+                
+                Timber.tag(TAG).d("[SAVE_SYNC] Fetched %d save games from server", saves.length());
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "[SAVE_SYNC] JSON error during fetch");
+                postError(callback, "Invalid response from server");
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "[SAVE_SYNC] Network error during fetch");
+                postError(callback, "Network error: " + e.getMessage());
+            }
+        });
+    }
+    
+    // ========== GAME HISTORY SYNC ==========
+    
+    /**
+     * Upload game history to server.
+     */
+    public void syncHistory(JSONArray history, ApiCallback<Integer> callback) {
+        if (!isLoggedIn()) {
+            postError(callback, "Not logged in");
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("history", history);
+                
+                String response = makeAuthenticatedPostRequest("/api/mobile/history/sync", requestBody.toString());
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    postError(callback, json.getString("error"));
+                    return;
+                }
+                
+                int syncedCount = json.optInt("synced_count", 0);
+                postSuccess(callback, syncedCount);
+                
+                Timber.tag(TAG).d("[HISTORY_SYNC] Uploaded %d history entries to server", syncedCount);
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "[HISTORY_SYNC] JSON error during upload");
+                postError(callback, "Invalid response from server");
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "[HISTORY_SYNC] Network error during upload");
+                postError(callback, "Network error: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Download game history from server.
+     */
+    public void fetchHistory(ApiCallback<JSONArray> callback) {
+        if (!isLoggedIn()) {
+            postError(callback, "Not logged in");
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                String response = makeAuthenticatedGetRequest("/api/mobile/history");
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    postError(callback, json.getString("error"));
+                    return;
+                }
+                
+                JSONArray history = json.getJSONArray("history");
+                postSuccess(callback, history);
+                
+                Timber.tag(TAG).d("[HISTORY_SYNC] Fetched %d history entries from server", history.length());
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "[HISTORY_SYNC] JSON error during fetch");
+                postError(callback, "Invalid response from server");
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "[HISTORY_SYNC] Network error during fetch");
+                postError(callback, "Network error: " + e.getMessage());
+            }
+        });
+    }
+    
+    // ========== ACHIEVEMENT SYNC ==========
     
     /**
      * Sync achievements to roboyard.z11.de.
