@@ -349,6 +349,9 @@ public class PlayGamesManager {
                 case "solution_29_moves":
                     resId = R.string.pgs_29_move_master;
                     break;
+                case "perfect_no_hints_random_1":
+                    resId = R.string.pgs_perfect_no_help;
+                    break;
                 default:
                     Timber.w("%s Unknown achievement ID: %s", TAG, localId);
                     return null;

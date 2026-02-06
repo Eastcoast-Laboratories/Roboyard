@@ -1,0 +1,68 @@
+Weekly Player,Log in 7 days in a row,False,,Revealed,20,1
+Dedicated Player,Log in 30 days in a row,False,,Revealed,20,2
+Welcome Back!,Return after 30 days of inactivity,False,,Revealed,20,3
+Welcome!,Play your first game,False,,Revealed,10,4
+First Steps,Complete Level 1,False,,Revealed,10,5
+Getting Started,Complete 10 levels,False,,Revealed,10,6
+Halfway There,Complete 50 levels,False,,Revealed,10,7
+Level Master,Complete all 140 levels,False,,Revealed,10,8
+Star Collector,Collect all 420 stars,False,,Revealed,10,9
+Perfect Mover,Solve 5 levels with optimal moves,False,,Revealed,15,10
+Precision Player,Solve 10 levels with optimal moves,False,,Revealed,15,11
+Optimization Expert,Solve 50 levels with optimal moves,False,,Revealed,15,12
+Quick Thinker,Complete a level in under 30 seconds,False,,Revealed,15,13
+Lightning Fast,Complete a level in under 10 seconds,False,,Revealed,15,14
+Hard Level Star,Achieve 3 stars on a level with 5+ optimal moves,False,,Revealed,25,15
+Rising Star,Achieve 3 stars on 10 levels,False,,Revealed,25,16
+Hard Level Master,Achieve 3 stars on 10 levels with 5+ optimal moves,False,,Revealed,25,17
+Superstar,Achieve 3 stars on 50 levels,False,,Revealed,25,18
+Perfect Master,Achieve 3 stars on all 140 levels,False,,Revealed,25,19
+Speed Demon,Complete a random game in under 20 seconds,False,,Revealed,15,20
+Lightning Speed,Complete a random game in under 10 seconds,False,,Revealed,15,21
+Speed Streak,Complete 5 random games in under 30 seconds each,False,,Revealed,15,22
+Perfect 5,Complete 5 random games with optimal moves,False,,Revealed,20,23
+Perfect 10,Complete 10 random games with optimal moves,False,,Revealed,20,24
+Perfect 20,Complete 20 random games with optimal moves,False,,Revealed,20,25
+Perfect Streak 5,Complete 5 random games with optimal moves in a row,False,,Revealed,20,26
+Perfect Streak 10,Complete 10 random games with optimal moves in a row,False,,Revealed,20,27
+Perfect Streak 20,Complete 20 random games with optimal moves in a row,False,,Revealed,20,28
+Perfect No Help,Complete a random game with optimal moves (10+ moves) without using hints,False,,Revealed,20,29
+No Help Needed 10,Complete 10 random games without using hints,False,,Revealed,20,30
+No Help Needed 50,Complete 50 random games without using hints,False,,Revealed,20,31
+No Help Streak 10,Complete 10 random games without using hints in a row,False,,Revealed,20,32
+No Help Streak 50,Complete 50 random games without using hints in a row,False,,Revealed,20,33
+Impossible Dream,Complete 1 game in Impossible mode,False,,Revealed,30,34
+Impossible Champion,Complete 5 games in Impossible mode,False,,Revealed,30,35
+Impossible Streak,Complete 5 games in a row in Impossible mode with optimal moves,False,,Revealed,30,36
+Impossible Legend,Complete 10 games in a row in Impossible mode with optimal moves,False,,Revealed,30,37
+30+ Move Master,Complete a game with optimal solution of 30+ moves,False,,Revealed,15,38
+Resolution Explorer 10,Play games with 10+ moves on all screen resolutions,False,,Revealed,20,39
+Resolution Explorer 12,Play games with 12+ moves on all screen resolutions,False,,Revealed,20,40
+Resolution Explorer 15,Play games with 15+ moves on all screen resolutions,False,,Revealed,20,41
+Double Target,Complete a game with 2 targets,False,,Revealed,15,42
+Triple Target,Complete a game with 3 targets,False,,Revealed,15,43
+Quad Target,Complete a game with 4 targets,False,,Revealed,15,44
+2 of 2,Complete a game where you need 2 out of 2 targets,False,,Revealed,15,45
+2 of 3,Complete a game where you need 2 out of 3 targets,False,,Revealed,15,46
+2 of 4,Complete a game where you need 2 out of 4 targets,False,,Revealed,15,47
+3 of 3,Complete a game where you need 3 out of 3 targets,False,,Revealed,15,48
+3 of 4,Complete a game where you need 3 out of 4 targets,False,,Revealed,15,49
+4 of 4,Complete a game where you need all 4 targets,False,,Revealed,15,50
+Full Team,Complete a game with 5 robots,False,,Revealed,20,51
+Gimme Five,All robots must touch each other,False,,Revealed,20,52
+Solo Explorer,Visit all squares on the board with 1 robot,False,,Revealed,25,53
+Solo Goal Explorer,Visit all squares with 1 robot - reaching the goal last,False,,Revealed,25,54
+Team Explorer,Visit all squares on the board with all robots combined,False,,Revealed,25,55
+Team Goal Explorer,Visit all squares with all robots - reaching the goal last,False,,Revealed,25,56
+18 Move Master,Complete a game with optimal solution of 18 moves,False,,Revealed,15,57
+19 Move Master,Complete a game with optimal solution of 19 moves,False,,Revealed,15,58
+20 Move Master,Complete a game with optimal solution of 20 moves,False,,Revealed,15,59
+21 Move Master,Complete a game with optimal solution of 21 moves,False,,Revealed,15,60
+22 Move Master,Complete a game with optimal solution of 22 moves,False,,Revealed,15,61
+23 Move Master,Complete a game with optimal solution of 23 moves,False,,Revealed,15,62
+24 Move Master,Complete a game with optimal solution of 24 moves,False,,Revealed,15,63
+25 Move Master,Complete a game with optimal solution of 25 moves,False,,Revealed,15,64
+26 Move Master,Complete a game with optimal solution of 26 moves,False,,Revealed,15,65
+27 Move Master,Complete a game with optimal solution of 27 moves,False,,Revealed,15,66
+28 Move Master,Complete a game with optimal solution of 28 moves,False,,Revealed,15,67
+29 Move Master,Complete a game with optimal solution of 29 moves,False,,Revealed,15,68
