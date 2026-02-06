@@ -16,6 +16,7 @@ import android.view.View;
 
 import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
+import roboyard.eclabs.SyncManager;
 import roboyard.eclabs.achievements.StreakManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
@@ -111,6 +112,9 @@ public class MainFragmentActivity extends AppCompatActivity {
         // Re-apply fullscreen mode when resuming
         // This is needed in case the user changed the setting in the settings screen
         applyFullscreenMode();
+        
+        // Auto-sync when coming back online (uploads offline achievements/saves/history/streak)
+        SyncManager.getInstance(this).syncOnResume(this);
     }
     
     @Override

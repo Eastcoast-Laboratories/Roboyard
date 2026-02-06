@@ -2,6 +2,8 @@ package roboyard.eclabs;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +30,8 @@ public class SyncManager {
     
     private static SyncManager instance;
     private final Context context;
+    private long lastSyncTimestamp = 0;
+    private static final long MIN_SYNC_INTERVAL_MS = 60_000; // 1 minute between auto-syncs
     
     private SyncManager(Context context) {
         this.context = context.getApplicationContext();
@@ -38,6 +42,50 @@ public class SyncManager {
             instance = new SyncManager(context);
         }
         return instance;
+    }
+    
+    /**
+     * Check if network is available.
+     */
+    public boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
+    
+    /**
+     * Sync on app resume: upload all local data if online and logged in.
+     * Called from Activity.onResume() to catch offline-to-online transitions.
+     * Throttled to avoid excessive syncs.
+     */
+    public void syncOnResume(Activity activity) {
+        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
+        if (!apiClient.isLoggedIn()) {
+            Timber.d("[AUTO_SYNC] Not logged in, skipping auto-sync");
+            return;
+        }
+        
+        if (!isNetworkAvailable()) {
+            Timber.d("[AUTO_SYNC] No network, skipping auto-sync");
+            return;
+        }
+        
+        long now = System.currentTimeMillis();
+        if (now - lastSyncTimestamp < MIN_SYNC_INTERVAL_MS) {
+            Timber.d("[AUTO_SYNC] Throttled - last sync was %d ms ago", now - lastSyncTimestamp);
+            return;
+        }
+        
+        lastSyncTimestamp = now;
+        Timber.d("[AUTO_SYNC] Starting auto-sync on resume");
+        
+        // Upload achievements (includes streak data)
+        roboyard.eclabs.achievements.AchievementManager.getInstance(context).syncToServer();
+        
+        // Upload save games and history
+        uploadSaveGames();
+        uploadHistory(activity);
     }
     
     // ========== SAVE GAMES ==========

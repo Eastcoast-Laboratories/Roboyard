@@ -118,6 +118,13 @@ public class RoboyardApiClient {
     }
     
     /**
+     * Get the auth token for auto-login URL.
+     */
+    public String getAuthToken() {
+        return prefs.getString(KEY_AUTH_TOKEN, null);
+    }
+    
+    /**
      * Login to roboyard.z11.de.
      */
     public void login(String email, String password, ApiCallback<LoginResult> callback) {

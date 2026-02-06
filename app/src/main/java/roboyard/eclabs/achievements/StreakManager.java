@@ -233,6 +233,33 @@ public class StreakManager {
     }
     
     /**
+     * Get last login date as ISO date string for server sync.
+     */
+    public String getLastLoginDateString() {
+        long lastLoginDate = prefs.getLong(KEY_LAST_LOGIN_DATE, 0);
+        if (lastLoginDate == 0) return null;
+        long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
+        long timestampMs = lastLoginDate * dayDuration;
+        return new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(timestampMs));
+    }
+    
+    /**
+     * Restore streak data from server (bidirectional sync).
+     * Takes the higher streak value.
+     */
+    public void restoreFromServer(int serverStreak, String serverLastDate) {
+        int localStreak = getCurrentStreak();
+        if (serverStreak > localStreak) {
+            prefs.edit()
+                .putInt(KEY_CURRENT_STREAK, serverStreak)
+                .apply();
+            Timber.d("[STREAK_SYNC] Restored streak from server: %d (was %d locally)", serverStreak, localStreak);
+        } else {
+            Timber.d("[STREAK_SYNC] Local streak %d >= server streak %d, keeping local", localStreak, serverStreak);
+        }
+    }
+    
+    /**
      * Reset streak (for testing)
      */
     public void resetStreak() {

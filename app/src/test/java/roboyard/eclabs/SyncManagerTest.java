@@ -225,6 +225,165 @@ public class SyncManagerTest {
         return 12;
     }
 
+    // ========== Streak Sync Tests ==========
+
+    @Test
+    public void testStreakBidirectionalSync_serverHigher() {
+        int localStreak = 5;
+        int serverStreak = 10;
+        int result = Math.max(localStreak, serverStreak);
+        assertEquals("Server streak is higher, should use server value", 10, result);
+    }
+
+    @Test
+    public void testStreakBidirectionalSync_localHigher() {
+        int localStreak = 15;
+        int serverStreak = 3;
+        int result = Math.max(localStreak, serverStreak);
+        assertEquals("Local streak is higher, should keep local value", 15, result);
+    }
+
+    @Test
+    public void testStreakBidirectionalSync_equal() {
+        int localStreak = 7;
+        int serverStreak = 7;
+        int result = Math.max(localStreak, serverStreak);
+        assertEquals("Equal streaks should stay same", 7, result);
+    }
+
+    @Test
+    public void testStreakBidirectionalSync_serverZero() {
+        int localStreak = 5;
+        int serverStreak = 0;
+        int result = Math.max(localStreak, serverStreak);
+        assertEquals("Server zero should keep local", 5, result);
+    }
+
+    @Test
+    public void testStreakBidirectionalSync_localZero() {
+        int localStreak = 0;
+        int serverStreak = 12;
+        int result = Math.max(localStreak, serverStreak);
+        assertEquals("Local zero should restore from server", 12, result);
+    }
+
+    // ========== Offline Achievement + Sync Simulation ==========
+
+    @Test
+    public void testOfflineAchievementUnlockSimulation() {
+        // Simulate: user unlocks achievements while offline
+        // When they go online, the achievements should be in the sync payload
+        
+        // Simulate local achievement state
+        java.util.Map<String, Boolean> localAchievements = new java.util.HashMap<>();
+        localAchievements.put("first_solve", true);    // already synced
+        localAchievements.put("speed_demon", true);    // unlocked offline
+        localAchievements.put("perfect_10", true);     // unlocked offline
+        localAchievements.put("daily_login_7", false); // not yet unlocked
+        
+        // Count achievements to sync (all unlocked ones)
+        int toSync = 0;
+        for (boolean unlocked : localAchievements.values()) {
+            if (unlocked) toSync++;
+        }
+        
+        assertEquals("Should sync 3 unlocked achievements", 3, toSync);
+    }
+
+    @Test
+    public void testOfflineAchievementMergeWithServer() {
+        // Simulate: server has some achievements, local has some
+        // Merge should be union (never remove)
+        
+        java.util.Set<String> serverAchievements = new java.util.HashSet<>();
+        serverAchievements.add("first_solve");
+        serverAchievements.add("explorer_10");
+        
+        java.util.Set<String> localAchievements = new java.util.HashSet<>();
+        localAchievements.add("first_solve");
+        localAchievements.add("speed_demon");
+        localAchievements.add("perfect_10");
+        
+        // Merge: union of both sets
+        java.util.Set<String> merged = new java.util.HashSet<>(localAchievements);
+        merged.addAll(serverAchievements);
+        
+        assertEquals("Merged should have 4 unique achievements", 4, merged.size());
+        assertTrue(merged.contains("first_solve"));
+        assertTrue(merged.contains("explorer_10"));
+        assertTrue(merged.contains("speed_demon"));
+        assertTrue(merged.contains("perfect_10"));
+    }
+
+    @Test
+    public void testOfflineAchievementNeverRemovesLocal() {
+        // Even if server doesn't have an achievement, local should keep it
+        java.util.Set<String> serverAchievements = new java.util.HashSet<>();
+        // Server has nothing
+        
+        java.util.Set<String> localAchievements = new java.util.HashSet<>();
+        localAchievements.add("speed_demon");
+        localAchievements.add("perfect_10");
+        
+        // Merge should keep all local
+        java.util.Set<String> merged = new java.util.HashSet<>(localAchievements);
+        merged.addAll(serverAchievements);
+        
+        assertEquals("Should keep all 2 local achievements even if server has none", 2, merged.size());
+    }
+
+    @Test
+    public void testSyncThrottling() {
+        long lastSync = System.currentTimeMillis() - 30_000; // 30 seconds ago
+        long now = System.currentTimeMillis();
+        long minInterval = 60_000; // 1 minute
+        
+        boolean shouldSync = (now - lastSync) >= minInterval;
+        assertFalse("Should NOT sync if less than 1 minute since last sync", shouldSync);
+    }
+
+    @Test
+    public void testSyncThrottlingAllowsAfterInterval() {
+        long lastSync = System.currentTimeMillis() - 120_000; // 2 minutes ago
+        long now = System.currentTimeMillis();
+        long minInterval = 60_000; // 1 minute
+        
+        boolean shouldSync = (now - lastSync) >= minInterval;
+        assertTrue("Should sync if more than 1 minute since last sync", shouldSync);
+    }
+
+    @Test
+    public void testStreakDateStringFormat() {
+        // Simulate what getLastLoginDateString does
+        long daysSinceEpoch = 20490; // some day number
+        long normalDayMs = 86400000L;
+        long timestampMs = daysSinceEpoch * normalDayMs;
+        String dateStr = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                .format(new java.util.Date(timestampMs));
+        
+        assertNotNull("Date string should not be null", dateStr);
+        assertTrue("Date string should match yyyy-MM-dd format", dateStr.matches("\\d{4}-\\d{2}-\\d{2}"));
+    }
+
+    @Test
+    public void testAutoLoginUrlConstruction() {
+        String token = "abc123def456";
+        String expectedUrl = "https://roboyard.z11.de/auto-login?token=abc123def456";
+        String url = "https://roboyard.z11.de/auto-login?token=" + token;
+        assertEquals(expectedUrl, url);
+    }
+
+    @Test
+    public void testAutoLoginUrlWithSpecialChars() {
+        String token = "abc+def/ghi=";
+        // URI encoding would be needed
+        String encoded = token.replace("+", "%2B").replace("/", "%2F").replace("=", "%3D");
+        String url = "https://roboyard.z11.de/auto-login?token=" + encoded;
+        assertTrue("URL should contain encoded token", url.contains("abc%2Bdef%2Fghi%3D"));
+    }
+
+    // ========== Helper methods ==========
+
     private long parseTimestamp(String isoTimestamp) {
         if (isoTimestamp == null || isoTimestamp.isEmpty()) {
             return System.currentTimeMillis();

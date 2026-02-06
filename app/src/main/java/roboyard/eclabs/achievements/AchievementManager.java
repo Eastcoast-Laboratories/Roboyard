@@ -713,6 +713,11 @@ public class AchievementManager {
             stats.put("total_games_solved_no_hints", noHintRandomGamesTotal);
             stats.put("total_perfect_solutions", perfectSolutions + perfectRandomGames);
             
+            // Include streak data for bidirectional sync
+            StreakManager streakManager = StreakManager.getInstance(context);
+            stats.put("daily_login_streak", streakManager.getCurrentStreak());
+            stats.put("last_streak_date", streakManager.getLastLoginDateString());
+            
             // Send to server
             apiClient.syncAchievements(achievementsArray, stats, new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult>() {
                 @Override
@@ -814,6 +819,13 @@ public class AchievementManager {
                     }
                     
                     Timber.d("[ACHIEVEMENT_SYNC_DOWN] Download complete: %d achievements restored", restoredCount);
+                    
+                    // Restore streak data from server (bidirectional)
+                    if (result.stats != null) {
+                        int serverStreak = result.stats.optInt("daily_login_streak", 0);
+                        String serverLastDate = result.stats.optString("last_streak_date", null);
+                        StreakManager.getInstance(context).restoreFromServer(serverStreak, serverLastDate);
+                    }
                     
                 } catch (JSONException e) {
                     Timber.e(e, "[ACHIEVEMENT_SYNC_DOWN] Error parsing server achievements");
