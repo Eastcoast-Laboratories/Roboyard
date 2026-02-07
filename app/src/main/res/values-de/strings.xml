@@ -655,4 +655,38 @@
     <string name="view_achievements">Erfolge anzeigen</string>
     <string name="streak_popup_title">Täglicher Streak</string>
     <string name="streak_popup_message">Du hast dich %1$d Tage hintereinander angemeldet.</string>
+    
+    <!-- Streak Popup Headlines -->
+    <string name="streak_popup_day_1_headline">Starten Sie Ihren Streak!</string>
+    <string name="streak_popup_day_1_message">Du hast einen neuen Streak gestartet. Melde dich morgen wieder an, um deinen Streak zu halten.</string>
+    <string name="streak_popup_day_2_headline">Du bist zurück!</string>
+    <string name="streak_popup_day_3_headline">Weiter so!</string>
+    <string name="streak_popup_day_4_headline">Halbzeit!</string>
+    <string name="streak_popup_day_5_headline">Du brennst!</string>
+    <string name="streak_popup_day_6_headline">Fast eine Woche!</string>
+    <string name="streak_popup_day_7_headline">Eine Woche Streak!</string>
+    <string name="streak_popup_day_8_headline">Du bist der Beste!</string>
+    <string name="streak_popup_day_9_headline">Neun und zählend!</string>
+    <string name="streak_popup_day_10_headline">Zweistellig!</string>
+    <string name="streak_popup_day_11_headline">Zwei Wochen minus 3!</string>
+    <string name="streak_popup_day_12_headline">Unaufhaltsam!</string>
+    <string name="streak_popup_day_13_headline">Dreizehn ist Glück!</string>
+    <string name="streak_popup_day_14_headline">Zwei Wochen!</string>
+    <string name="streak_popup_day_15_headline">Halbzeit zum Monat!</string>
+    <string name="streak_popup_day_16_headline">Unaufhaltsamer Streak!</string>
+    <string name="streak_popup_day_17_headline">Im Rollen!</string>
+    <string name="streak_popup_day_18_headline">Unglaublich!</string>
+    <string name="streak_popup_day_19_headline">Fast geschafft!</string>
+    <string name="streak_popup_day_20_headline">Superstar!</string>
+    <string name="streak_popup_day_21_headline">Drei Wochen!</string>
+    <string name="streak_popup_day_22_headline">Phänomenal!</string>
+    <string name="streak_popup_day_23_headline">Außergewöhnlich!</string>
+    <string name="streak_popup_day_24_headline">Legendär!</string>
+    <string name="streak_popup_day_25_headline">Unaufhaltsame Kraft!</string>
+    <string name="streak_popup_day_26_headline">Absolut großartig!</string>
+    <string name="streak_popup_day_27_headline">Fast ein Monat!</string>
+    <string name="streak_popup_day_28_headline">Vier Wochen!</string>
+    <string name="streak_popup_day_29_headline">Noch ein Tag!</string>
+    <string name="streak_popup_day_30_headline">Fast ein Monat!</string>
+    <string name="streak_popup_day_31_headline">Legendenstatus!</string>
 </resources>
