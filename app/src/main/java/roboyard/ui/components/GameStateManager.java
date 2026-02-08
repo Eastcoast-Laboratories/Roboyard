@@ -1607,6 +1607,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Calculate stars based on the criteria
         int playerMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
         int starCount = calculateStars(playerMoves, optimalMoves, hintsShown);
+        // Completing a level always earns at least 1 star
+        if (starCount < 1) {
+            starCount = 1;
+        }
         data.setStars(starCount);
 
         Timber.d("[STARS] gameStateManager: Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars",
