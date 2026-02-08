@@ -218,6 +218,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Reset regeneration counter
         regenerationCount = 0;
 
+        // Reset UI timer for the new game
+        resetUiTimer();
+
         // Create a new valid game (will regenerate if solution is too simple)
         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
 
@@ -289,6 +292,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Start calculating the solution automatically
         calculateSolutionAsync(null);
+
+        // Reset UI timer for the new level
+        resetUiTimer();
 
         // Record start time
         startTime = System.currentTimeMillis();
@@ -1212,6 +1218,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @param levelId Level ID to load
      */
     public void handleDeepLink(int levelId) {
+        resetUiTimer();
         loadLevel(levelId);
     }
 
@@ -2850,6 +2857,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         Timber.d("[DEEPLINK] Setting game state from deep link");
+
+        // Reset UI timer for the new deep link game
+        resetUiTimer();
 
         // --- VALIDATION LOGGING [RANDOM_STATE_VALIDATION] ---
         // Check if the state is a random state (i.e., not from a level, save, or deep link)

@@ -1153,9 +1153,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
             // Start a new game
             gameStateManager.startModernGame();
-            // Reset timer
-            stopTimer();
-            startTimer();
+            // Reset timer to 0 for the new game
+            resetAndStartTimer();
             
             // Randomize pre-hints count for the new game
             numPreHints = ThreadLocalRandom.current().nextInt(2, 5);
