@@ -128,6 +128,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private int solverRestartCount = 0;
     private int lastSolutionMinMoves = 0;
 
+    // UI timer tracking (survives fragment recreation)
+    private long uiTimerStartTimeMs = 0;
+    private long uiTimerElapsedMs = 0;
+    private boolean uiTimerWasRunning = false;
+
     // Game history tracking variables
     private long gameStartTime;
     private int totalPlayTime = 0;
@@ -1675,6 +1680,59 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public long getStartTime() {
         return startTime;
+    }
+
+    /**
+     * Save the current UI timer elapsed time (called from fragment onPause/stopTimer)
+     * @param elapsedMs elapsed time in milliseconds
+     */
+    public void saveUiTimerElapsed(long elapsedMs) {
+        this.uiTimerElapsedMs = elapsedMs;
+        this.uiTimerWasRunning = true;
+        Timber.d("[TIMER] Saved UI timer elapsed: %d ms", elapsedMs);
+    }
+
+    /**
+     * Get the saved UI timer elapsed time
+     * @return elapsed time in milliseconds, or 0 if no timer was running
+     */
+    public long getUiTimerElapsedMs() {
+        return uiTimerElapsedMs;
+    }
+
+    /**
+     * Check if a UI timer was running before fragment recreation
+     * @return true if timer was running
+     */
+    public boolean wasUiTimerRunning() {
+        return uiTimerWasRunning;
+    }
+
+    /**
+     * Reset the UI timer state (called when starting a new game)
+     */
+    public void resetUiTimer() {
+        this.uiTimerElapsedMs = 0;
+        this.uiTimerWasRunning = false;
+        Timber.d("[TIMER] Reset UI timer state");
+    }
+
+    /**
+     * Check if the current game is a level game (not a random game)
+     * @return true if playing a level
+     */
+    public boolean isInLevelGame() {
+        GameState state = currentState.getValue();
+        return state != null && state.getLevelId() > 0;
+    }
+
+    /**
+     * Get the current level ID
+     * @return level ID, or -1 if not in a level game
+     */
+    public int getCurrentLevelId() {
+        GameState state = currentState.getValue();
+        return state != null ? state.getLevelId() : -1;
     }
 
     /**

@@ -112,6 +112,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     // Timer variables
     private long startTime = 0L;
+    private long elapsedTimeBeforePause = 0L;
     private long lastHistoryCheckTime = 0;
     private long lastAutosaveTime = 0;
     private final Handler timerHandler = new Handler(Looper.getMainLooper());
@@ -2180,9 +2181,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (gameStateManager != null) {
                 gameStateManager.startGameTimer();
             }
-            startTime = SystemClock.elapsedRealtime();
-            lastHistoryCheckTime = startTime;
-            lastAutosaveTime = startTime;
+            // Subtract already elapsed time so the timer continues from where it was
+            startTime = SystemClock.elapsedRealtime() - elapsedTimeBeforePause;
+            lastHistoryCheckTime = SystemClock.elapsedRealtime();
+            lastAutosaveTime = SystemClock.elapsedRealtime();
             timerHandler.post(timerRunnable);
             timerRunning = true;
             historySaveRunning = true;
@@ -2195,10 +2197,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void stopTimer() {
         if (timerRunning) {
+            // Save elapsed time so we can resume from the same point
+            elapsedTimeBeforePause = SystemClock.elapsedRealtime() - startTime;
             timerHandler.removeCallbacks(timerRunnable);
             timerRunning = false;
             historySaveRunning = false;
             autosaveRunning = false;
+            // Persist to ViewModel so it survives fragment recreation
+            if (gameStateManager != null) {
+                gameStateManager.saveUiTimerElapsed(elapsedTimeBeforePause);
+            }
         }
     }
     
@@ -2207,10 +2215,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void resetAndStartTimer() {
         stopTimer();
+        elapsedTimeBeforePause = 0L;
         startTime = SystemClock.elapsedRealtime();
         lastHistoryCheckTime = startTime;
         lastAutosaveTime = startTime;
         timerTextView.setText("00:00");
+        // Reset ViewModel timer state for new game
+        if (gameStateManager != null) {
+            gameStateManager.resetUiTimer();
+        }
         startTimer();
     }
     
@@ -3081,8 +3094,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Clear any previous hint or status text
         updateStatusText("", false);
 
-        // Reset and start the timer
-        resetAndStartTimer();
+        // Resume timer from ViewModel if it was running, otherwise reset
+        if (gameStateManager != null && gameStateManager.wasUiTimerRunning()) {
+            elapsedTimeBeforePause = gameStateManager.getUiTimerElapsedMs();
+            Timber.d("[TIMER] Resuming timer from ViewModel: %d ms", elapsedTimeBeforePause);
+            startTimer();
+        } else {
+            resetAndStartTimer();
+        }
         
         // Clear robot paths
         if (gameGridView != null) {
