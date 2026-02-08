@@ -124,6 +124,7 @@
     <string name="hint_cancel_button">❌ 提示</string>
     <string name="hint_move_robot_first">先移动 %1$s 机器人</string>
     <string name="pre_hint_less_than_x">AI找到了少于 %1$d 步的解决方案</string>
+    <string name="pre_hint_less_than_1">你找到了比AI更好的解决方案!</string>
     <string name="pre_hint_exact_solution">AI找到了 %1$d 步的解决方案</string>
     <string name="pre_hint_involved_robots">移动机器人</string>
     <string name="and">和</string>
@@ -257,9 +258,6 @@
     <string name="hint_direction_right">\u25B6</string>
     <string name="hint_direction_left">\u25C0</string>
     
-    <!-- Additional hint strings -->
-    <string name="hint_solution_found">已找到 %1$d 步的解决方案</string>
-
     <!-- Accessibility Controls -->
     <string name="next_robot_button">下一个机器人</string>
     <string name="announce_hint">提示</string>

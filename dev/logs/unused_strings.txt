@@ -56,7 +56,6 @@ game_move_count
 game_screen_title
 game_time_format
 hint_move_robot_first
-hint_solution_found
 imprint_link_text
 language_changed_message
 language_changed_title

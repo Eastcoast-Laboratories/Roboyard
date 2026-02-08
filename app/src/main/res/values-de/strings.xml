@@ -238,7 +238,6 @@
     <string name="ai_calculating">KI berechnet Lösung...</string>
 
     <!-- AI and game direction strings -->
-    <string name="ai_solution_format">Die KI hat eine Lösung in %1$d Zügen gefunden</string>
     <string name="robot_color_down">%1$s nach unten</string>
     
     <!-- Accessibility versions -->
@@ -337,6 +336,7 @@
     <string name="no_robots_available">Keine Roboter verfügbar</string>
     <string name="cannot_move_in_this_direction">Kann in diese Richtung nicht bewegen</string>
     <string name="pre_hint_less_than_x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
+    <string name="pre_hint_less_than_1">Du hast eine bessere Lösung als die KI gefunden!</string>
     <string name="pre_hint_exact_solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
     <string name="solution_found">KI hat Lösung gefunden!</string>
     <string name="pre_hint_involved_robots">Bewege</string>
@@ -384,7 +384,6 @@
     <string name="hint_direction_left">\u25C0</string>
     
     <!-- Additional hint strings -->
-    <string name="hint_solution_found">Lösung gefunden in %1$d Zügen</string>
     <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
 
     <!-- Additional game text -->

@@ -69,13 +69,13 @@
     <string name="dice_button_a11y">새 맵 생성</string>
     <string name="hint_cancel_button">❌ 힌트</string>
     <string name="pre_hint_less_than_x">AI가 %1$d번 이하의 이동으로 해결책을 찾았습니다</string>
+    <string name="pre_hint_less_than_1">AI보다 더 나은 해결책을 찾았습니다!</string>
     <string name="pre_hint_exact_solution">AI가 %1$d번의 이동으로 해결책을 찾았습니다</string>
     <string name="perfect_solution">완벽해요! 최적의 해결책을 찾았습니다!</string>
     <string name="pre_hint_involved_robots">로봇을 이동하세요</string>
     <string name="and">그리고</string>
     <string name="pre_hint_first_move">%1$s 로봇을 먼저 이동하세요</string>
     <string name="pre_hint_ready">단계별 힌트를 보여줄 준비가 되었습니다</string>
-    <string name="hint_solution_found">%1$d번의 이동으로 해결책을 찾았습니다</string>
     <string name="hint_move_robot_first">%1$s 로봇을 먼저 이동하세요</string>
     <string name="all_hints_shown">모든 힌트가 표시되었습니다</string>
     <string name="no_valid_hint">유효한 힌트가 없습니다</string>

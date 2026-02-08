@@ -227,6 +227,9 @@
     <string name="unknown_color">Desconocido: %1$s</string>
     <string name="solution_found">¡La IA encontró una solución!</string>
     <string name="perfect_solution">¡Perfecto! ¡Encontraste la solución óptima!</string>
+    <string name="pre_hint_less_than_x">La IA ha encontrado una solución en menos de %1$d movimientos</string>
+    <string name="pre_hint_less_than_1">¡Encontraste una solución mejor que la IA!</string>
+    <string name="pre_hint_exact_solution">La IA ha encontrado una solución en %1$d movimientos</string>
     <string name="pre_hint_involved_robots">Mueve</string>
     <string name="and">y</string>
     <string name="pre_hint_first_move">Mueve primero el robot %1$s</string>
@@ -237,7 +240,6 @@
     <string name="error_displaying_hint">Error al mostrar la pista</string>
 
     <!-- AI messages -->
-    <string name="ai_solution_format">La IA ha encontrado una solución en %1$d movimientos</string>
     <string name="completed_in_moves">Completado en %1$d movimientos</string>
     
     <!-- Difficulty Levels -->
@@ -330,9 +332,6 @@
     <string name="hint_direction_up">\u25B2</string>
     <string name="hint_direction_down">\u25BC</string>
     
-    <!-- Additional hint strings -->
-    <string name="hint_solution_found">Encontrada solución en %1$d movimientos</string>
-
     <!-- Settings strings -->
     <string name="settings_game_mode">Modo de juego:</string>
     <string name="settings_standard_game">Juego estándar</string>

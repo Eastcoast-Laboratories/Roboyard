@@ -143,6 +143,7 @@
     <string name="nothing_to_undo">Rien à annuler</string>
     <string name="solution_found">IA a trouvé une solution!</string>
     <string name="pre_hint_less_than_x">L\'IA a trouvé une solution en moins de %1$d mouvements</string>
+    <string name="pre_hint_less_than_1">Vous avez trouvé une meilleure solution que l\'IA!</string>
     <string name="pre_hint_exact_solution">L\'IA a trouvé une solution en %1$d mouvements</string>
     <string name="perfect_solution">Parfait! Vous avez trouvé la solution optimale!</string>
     <string name="pre_hint_involved_robots">Déplacez</string>

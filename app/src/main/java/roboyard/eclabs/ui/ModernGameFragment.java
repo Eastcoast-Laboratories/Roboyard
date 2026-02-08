@@ -686,7 +686,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                                     Timber.d("[COMPLETION_MESSAGE] Optimal is less than 1 move (" + optimalMoves + "), showing no solution found");
                                 } else {
                                     extraMessage = getString(R.string.pre_hint_less_than_x, actualMoves);
-
+                                    if (actualMoves == 1) {
+                                        // Woekaround, if there is still a map with optimal solution 1 which was not solved by the solver in one moves
+                                        extraMessage = getString(R.string.pre_hint_less_than_1);
+                                    }
                                 }
                                 completionMessage += " \n" + extraMessage;
                                 completionMessage_a11y += " " + extraMessage;
