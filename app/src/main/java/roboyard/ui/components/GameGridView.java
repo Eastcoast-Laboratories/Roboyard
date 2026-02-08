@@ -575,6 +575,22 @@ public class GameGridView extends View {
         // Calculate cell size to fit the grid
         float cellWidth = (float) width / gridWidth;
         float cellHeight = (float) height / gridHeight;
+        // constant to ensure the grid is not too small
+        float gridSizeMultiplier = 1.125f;
+        // if board-size > 10x10, decrease the multiplier
+        if (gridWidth > 10 || gridHeight > 10) {
+            gridSizeMultiplier = 1.085f;
+        }
+        // if >14x14, decrease the multiplier
+        if (gridWidth > 14 || gridHeight > 14) {
+            gridSizeMultiplier = 1.07f;
+        }
+        // if >18x18, decrease the multiplier
+        if (gridWidth > 18 || gridHeight > 18) {
+            gridSizeMultiplier = 1.05f;
+        }
+        cellWidth *= gridSizeMultiplier;
+        cellHeight *= gridSizeMultiplier;
         cellSize = Math.min(cellWidth, cellHeight);
         
         // Calculate path rendering values based on cellSize for responsive design
