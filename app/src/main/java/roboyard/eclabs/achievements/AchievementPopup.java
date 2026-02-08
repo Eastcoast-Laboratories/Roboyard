@@ -40,7 +40,8 @@ import timber.log.Timber;
  */
 public class AchievementPopup {
     
-    private static final int DISPLAY_DURATION_MS = 20000; // 20 seconds
+    private static final int DISPLAY_DURATION_SINGLE_MS = 7000; // 7 seconds for single achievement
+    private static final int DISPLAY_DURATION_MULTIPLE_MS = 15000; // longer for multiple achievements
     private static final int FADE_DURATION_MS = 500;
     
     public static final String STREAK_POPUP_ID = "daily_streak_popup";
@@ -298,8 +299,10 @@ public class AchievementPopup {
         fadeIn.start();
         slideIn.start();
         
-        // Schedule auto-hide
-        handler.postDelayed(this::hidePopup, DISPLAY_DURATION_MS);
+        // Schedule auto-hide: 7s for single achievement, 20s for multiple
+        int displayDuration = pendingAchievements.size() == 1 ? 
+                DISPLAY_DURATION_SINGLE_MS : DISPLAY_DURATION_MULTIPLE_MS;
+        handler.postDelayed(this::hidePopup, displayDuration);
         
         // Clear pending achievements
         pendingAchievements.clear();
