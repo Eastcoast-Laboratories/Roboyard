@@ -572,9 +572,9 @@ public class GameGridView extends View {
         int width = getMeasuredWidth();
         int height = getMeasuredHeight();
         
-        // Calculate cell size to fit the grid - use integer division to avoid rounding errors
-        int cellWidth = width / gridWidth;
-        int cellHeight = height / gridHeight;
+        // Calculate cell size to fit the grid
+        float cellWidth = (float) width / gridWidth;
+        float cellHeight = (float) height / gridHeight;
         cellSize = Math.min(cellWidth, cellHeight);
         
         // Calculate path rendering values based on cellSize for responsive design
