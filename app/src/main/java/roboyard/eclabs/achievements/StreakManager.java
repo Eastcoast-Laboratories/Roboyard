@@ -19,6 +19,7 @@ public class StreakManager {
     private static final String KEY_LAST_LOGIN_DATE = "last_login_date";
     private static final String KEY_CURRENT_STREAK = "current_streak";
     private static final String KEY_LAST_STREAK_DATE = "last_streak_date";
+    private static final String KEY_LAST_POPUP_DATE = "last_popup_date";
     private static final String KEY_TEST_MODE = "test_mode";
     
     // Normal mode: 1 day = 24 hours
@@ -177,6 +178,27 @@ public class StreakManager {
     }
     
     /**
+     * Check if the streak popup should be shown today.
+     * Returns true only if it hasn't been shown for the current day yet.
+     */
+    public boolean shouldShowStreakPopupToday() {
+        long today = getTodayDate();
+        long lastPopupDate = prefs.getLong(KEY_LAST_POPUP_DATE, 0);
+        boolean shouldShow = lastPopupDate < today;
+        Timber.d("[STREAK_POPUP] shouldShowStreakPopupToday: today=%d, lastPopup=%d, shouldShow=%b", today, lastPopupDate, shouldShow);
+        return shouldShow;
+    }
+
+    /**
+     * Mark the streak popup as shown for today.
+     */
+    public void markStreakPopupShownToday() {
+        long today = getTodayDate();
+        prefs.edit().putLong(KEY_LAST_POPUP_DATE, today).apply();
+        Timber.d("[STREAK_POPUP] Marked popup shown for day %d", today);
+    }
+
+    /**
      * Get today's date as number of "days" since epoch.
      * In test mode, a "day" is 10 seconds for quick testing.
      */
@@ -267,6 +289,7 @@ public class StreakManager {
             .remove(KEY_LAST_LOGIN_DATE)
             .remove(KEY_CURRENT_STREAK)
             .remove(KEY_LAST_STREAK_DATE)
+            .remove(KEY_LAST_POPUP_DATE)
             .apply();
         Timber.d("[STREAK] Streak reset");
     }

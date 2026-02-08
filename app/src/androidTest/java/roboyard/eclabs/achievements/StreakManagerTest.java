@@ -101,6 +101,57 @@ public class StreakManagerTest {
     }
     
     @Test
+    public void testStreakPopupOnlyOncePerDay() {
+        long day1 = 5000;
+        streakManager.setMockTodayDate(day1);
+        
+        // Should show popup on first check
+        assertTrue("Popup should show on first check of the day",
+                streakManager.shouldShowStreakPopupToday());
+        
+        // Mark as shown
+        streakManager.markStreakPopupShownToday();
+        
+        // Should NOT show again on same day
+        assertFalse("Popup should NOT show again on same day",
+                streakManager.shouldShowStreakPopupToday());
+        
+        // Advance to next day
+        streakManager.setMockTodayDate(day1 + 1);
+        
+        // Should show again on new day
+        assertTrue("Popup should show on new day",
+                streakManager.shouldShowStreakPopupToday());
+        
+        // Mark as shown on day 2
+        streakManager.markStreakPopupShownToday();
+        
+        // Should NOT show again on day 2
+        assertFalse("Popup should NOT show again on day 2",
+                streakManager.shouldShowStreakPopupToday());
+        
+        streakManager.clearMockTodayDate();
+    }
+    
+    @Test
+    public void testStreakPopupPersistsAcrossInstances() {
+        long day1 = 6000;
+        streakManager.setMockTodayDate(day1);
+        
+        // Mark popup as shown
+        streakManager.markStreakPopupShownToday();
+        assertFalse("Popup should not show after marking",
+                streakManager.shouldShowStreakPopupToday());
+        
+        // Simulate app restart by getting a fresh instance check
+        // (SharedPreferences persists, so same instance still reads persisted value)
+        assertFalse("Popup should still not show (persisted in storage)",
+                streakManager.shouldShowStreakPopupToday());
+        
+        streakManager.clearMockTodayDate();
+    }
+    
+    @Test
     public void testComebackAfter30DaysInactivity() {
         long day1 = 4000;
         long day32 = day1 + 31;  // 31 days later

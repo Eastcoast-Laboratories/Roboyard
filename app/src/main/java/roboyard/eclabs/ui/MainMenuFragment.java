@@ -213,11 +213,11 @@ public class MainMenuFragment extends BaseGameFragment {
     }
 
     private void maybeShowDailyStreakPopup() {
-        if (!RoboyardApplication.shouldShowStreakPopup()) {
+        if (!StreakManager.getInstance(requireContext()).shouldShowStreakPopupToday()) {
             return;
         }
         if (showDailyStreakPopup()) {
-            RoboyardApplication.markStreakPopupShown();
+            StreakManager.getInstance(requireContext()).markStreakPopupShownToday();
         }
     }
     
