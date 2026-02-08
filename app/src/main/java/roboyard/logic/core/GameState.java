@@ -983,6 +983,13 @@ public class GameState implements Serializable {
                         targetsAdded, targetElementsCount, targetsInBoard);
             }
             
+            // Adjust robotCount to match the actual number of targets in this save/external map
+            int actualTargets = Math.max(targetElementsCount, targetsInBoard);
+            if (actualTargets > 0) {
+                state.setRobotCount(actualTargets);
+                Timber.d("[TARGET LOADING] Set robotCount to %d based on actual target count", actualTargets);
+            }
+            
             Timber.d("Successfully parsed game state from save data: %d walls, %d targets", wallsAdded, targetsAdded);
             return state;
             
@@ -1214,6 +1221,13 @@ public class GameState implements Serializable {
             Throwable t = new Throwable();
             Timber.e(t, "[LEVEL LOADING] Stack trace for no target found");
             throw new IllegalStateException("[LEVEL LOADING] Level has no target, cannot create a valid game state");
+        }
+        
+        // Adjust robotCount to match the actual number of targets in this level
+        List<GameElement> targets = state.getTargets();
+        if (!targets.isEmpty()) {
+            state.setRobotCount(targets.size());
+            Timber.d("[LEVEL LOADING] Set robotCount from %d to %d based on actual target count", Preferences.robotCount, targets.size());
         }
         
         // Store initial robot positions for reset functionality

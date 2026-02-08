@@ -431,6 +431,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             throw new IllegalStateException(errorMessage);
         }
 
+        // Adjust robotCount to match the actual number of targets in this game.
+        // This is important for levels and external maps that may have fewer targets
+        // than the settings value (Preferences.robotCount).
+        int actualTargetCount = Math.max(targetCount, boardTargetCount);
+        int previousRobotCount = newState.getRobotCount();
+        if (actualTargetCount > 0 && actualTargetCount != previousRobotCount) {
+            newState.setRobotCount(actualTargetCount);
+            Timber.d("[GAME_LOAD] Adjusted robotCount from %d to %d to match actual target count",
+                    previousRobotCount, actualTargetCount);
+        }
+
         // Ensure robots are reset to their initial positions
         newState.resetRobotPositions();
         Timber.d("[GAME_LOAD] Robots reset to initial positions after loading");
