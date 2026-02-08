@@ -1016,6 +1016,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         stateBeforeMove.setLevelName(state.getLevelName());
         stateBeforeMove.setMoveCount(state.getMoveCount());
         stateBeforeMove.setCompleted(state.isComplete());
+        stateBeforeMove.setRobotCount(state.getRobotCount());
+        stateBeforeMove.setTargetColors(state.getTargetColors());
+        stateBeforeMove.setDifficulty(state.getDifficulty());
 
         // Copy the hint count
         for (int i = 0; i < state.getHintCount(); i++) {

@@ -309,8 +309,8 @@ public class GameState implements Serializable {
         // Game is complete when the number of robots at targets matches the required count
         boolean allRobotsAtTargets = (robotsAtTarget >= requiredRobots);
         
-        Timber.d("[GOAL DEBUG] %d/%d robots at targets (required: %d, total targets: %d) -> Game complete: %b", 
-                robotsAtTarget, robots.size(), requiredRobots, targets.size(), allRobotsAtTargets);
+        Timber.d("[GOAL DEBUG] %d/%d robots at targets (required: %d, total targets: %d, robotCount: %d) -> Game complete: %b", 
+                robotsAtTarget, robots.size(), requiredRobots, targets.size(), robotCount, allRobotsAtTargets);
         
         return allRobotsAtTargets;
     }
