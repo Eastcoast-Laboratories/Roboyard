@@ -3065,12 +3065,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void initializeGame() {
         Timber.d("ModernGameFragment: initializeGame() called");
         
-        // Apply settings to game state
+        // Get current game state (robotCount and targetColors are already set
+        // correctly during game creation - by Preferences for random games,
+        // or by actual target count for levels and external maps)
         GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState != null) {
-            currentState.setRobotCount(roboyard.logic.core.Preferences.robotCount);
-            currentState.setTargetColors(roboyard.logic.core.Preferences.targetColors);
-        }
         
         // Check if this is a random game (not a level) and randomize pre-hints
         if (currentState != null && currentState.getLevelId() <= 0) {
