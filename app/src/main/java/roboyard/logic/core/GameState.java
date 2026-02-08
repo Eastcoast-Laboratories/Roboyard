@@ -1129,9 +1129,6 @@ public class GameState implements Serializable {
                             
                             if (colorId >= 0) {
                                 state.addTarget(x, y, colorId);
-                                GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                                target.setColor(colorId);
-                                state.getGameElements().add(target);
                                 hasTarget = true;
                                 Timber.d("[LEVEL LOADING] Adding %s target at (%d,%d)", color, x, y);
                             }
