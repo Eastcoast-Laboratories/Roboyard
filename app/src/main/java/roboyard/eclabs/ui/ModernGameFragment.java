@@ -597,6 +597,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         // This is a level game, show the Next Level button
                         nextLevelButton.setVisibility(View.VISIBLE);
                         
+                        // Hide accessibility controls if accessibility mode is enabled
+                        // so user can click the completion buttons below
+                        if (accessibilityControlsContainer != null && accessibilityControlsVisible) {
+                            accessibilityControlsContainer.setVisibility(View.GONE);
+                            Timber.d("[ACCESSIBILITY] Hidden controls on level complete to allow button access");
+                        }
+                        
                         // Get stars for display
                         int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
                                 gameStateManager.getMoveCount().getValue() : 0;
@@ -1275,6 +1282,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Hide the Next Level button
                     nextLevelButton.setVisibility(View.GONE);
+                    
+                    // Restore accessibility controls if they were hidden on completion
+                    if (accessibilityControlsContainer != null && accessibilityControlsVisible) {
+                        accessibilityControlsContainer.setVisibility(View.VISIBLE);
+                        Timber.d("[ACCESSIBILITY] Restored controls on next level");
+                    }
                     
                     // Hide the optimal moves button when advancing to next level
                     if (optimalMovesButton != null) {
