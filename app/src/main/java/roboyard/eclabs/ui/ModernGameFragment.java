@@ -608,8 +608,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         }
                         int hintsUsed = state.getHintCount();
                         int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
-                        // Completing a level always earns at least 1 star
-                        if (stars < 1) {
+                        // For beginner levels (1-10), always earn at least 1 star
+                        if (stars < 1 && state.getLevelId() <= Constants.MIN_STAR_GUARANTEE_LEVEL) {
                             stars = 1;
                         }
                         

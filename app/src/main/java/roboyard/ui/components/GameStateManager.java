@@ -1607,8 +1607,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Calculate stars based on the criteria
         int playerMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
         int starCount = calculateStars(playerMoves, optimalMoves, hintsShown);
-        // Completing a level always earns at least 1 star
-        if (starCount < 1) {
+        // For beginner levels (1-10), always earn at least 1 star
+        if (starCount < 1 && levelId <= Constants.MIN_STAR_GUARANTEE_LEVEL) {
             starCount = 1;
         }
         data.setStars(starCount);

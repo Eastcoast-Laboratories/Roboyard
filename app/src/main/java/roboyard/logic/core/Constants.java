@@ -103,4 +103,9 @@ public class Constants {
     public static final long ACCESSIBILITY_FOCUS_DELAY_MS = 500;
     public static final int MIN_BOARD_SIZE = 8;
     public static final int MAX_BOARD_SIZE = 22;
+    
+    // Level completion stars configuration
+    // Levels 1-10: always earn at least 1 star (beginner-friendly)
+    // Levels 11+: must earn stars based on performance (no guaranteed star)
+    public static final int MIN_STAR_GUARANTEE_LEVEL = 10;
 }
