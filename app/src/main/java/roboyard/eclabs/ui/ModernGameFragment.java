@@ -666,6 +666,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     } else {
                         // This is a random game
                         
+                        // Hide accessibility controls if accessibility mode is enabled
+                        // so user can click the completion buttons below
+                        if (accessibilityControlsContainer != null && accessibilityControlsVisible) {
+                            accessibilityControlsContainer.setVisibility(View.GONE);
+                            Timber.d("[ACCESSIBILITY] Hidden controls on random game complete to allow button access");
+                        }
+                        
                         // Show new game button instead of next level
                         nextLevelButton.setText(R.string.new_random_game_button);
                         nextLevelButton.setVisibility(View.VISIBLE);
@@ -973,6 +980,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     closeButton.setVisibility(View.VISIBLE);
                 }
                 
+                // Restore accessibility controls if they were hidden
+                if (accessibilityControlsContainer != null && accessibilityControlsVisible) {
+                    accessibilityControlsContainer.setVisibility(View.VISIBLE);
+                    Timber.d("[ACCESSIBILITY] Restored controls on retry");
+                }
+                
                 // Play a sound to indicate reset
                 playSound("move");
                 
@@ -1190,6 +1203,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             ImageButton closeButton = view.findViewById(R.id.game_info_close_button);
             if (closeButton != null) {
                 closeButton.setVisibility(View.VISIBLE);
+            }
+            
+            // Restore accessibility controls if they were hidden
+            if (accessibilityControlsContainer != null && accessibilityControlsVisible) {
+                accessibilityControlsContainer.setVisibility(View.VISIBLE);
+                Timber.d("[ACCESSIBILITY] Restored controls on restart");
             }
             
             // Clear any hint text from the status display

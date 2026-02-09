@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accessibility controls button dimensions for small phones (even smaller) -->
+    <dimen name="accessibility_button_width">40dp</dimen>
+    <dimen name="accessibility_button_height">16dp</dimen>
+    <dimen name="accessibility_button_text_size">10sp</dimen>
+    <dimen name="accessibility_text_size">8sp</dimen>
+    <dimen name="accessibility_button_padding">0dp</dimen>
+    <dimen name="accessibility_button_margin">2dp</dimen>
+</resources>

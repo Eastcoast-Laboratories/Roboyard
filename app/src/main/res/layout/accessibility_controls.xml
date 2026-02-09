@@ -28,35 +28,39 @@
             <!-- Announce Positions Button (small) -->
             <Button
                 android:id="@+id/btn_announce_positions"
-                android:layout_width="120dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/accessibility_button_width"
+                android:layout_height="@dimen/accessibility_button_height"
                 android:text="@string/announce"
-                android:textSize="12sp"
+                android:textSize="@dimen/accessibility_button_text_size"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_rounded_purple"
-                android:layout_marginEnd="8dp"
+                android:padding="@dimen/accessibility_button_padding"
+                android:layout_marginEnd="@dimen/accessibility_button_margin"
                 android:contentDescription="@string/announce_a11y" />
             
             <!-- North button -->
             <Button
                 android:id="@+id/btn_move_north"
-                android:layout_width="120dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/accessibility_button_width"
+                android:layout_height="@dimen/accessibility_button_height"
                 android:text="North"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="@dimen/accessibility_button_text_size"
+                android:padding="@dimen/accessibility_button_padding"
                 android:background="@drawable/button_rounded_blue_outline" />
                 
             <!-- Select Robot Button (small) -->
             <Button
                 android:id="@+id/btn_select_robot"
-                android:layout_width="120dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/accessibility_button_width"
+                android:layout_height="@dimen/accessibility_button_height"
                 android:text="@string/next_robot"
-                android:textSize="12sp"
+                android:textSize="@dimen/accessibility_button_text_size"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_rounded_purple"
-                android:layout_marginStart="28dp"
+                android:padding="@dimen/accessibility_button_padding"
+                android:layout_marginStart="@dimen/accessibility_button_margin"
                 android:contentDescription="@string/next_robot_a11y" />
         </LinearLayout>
 
@@ -75,24 +79,28 @@
             <!-- West button -->
             <Button
                 android:id="@+id/btn_move_west"
-                android:layout_width="120dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/accessibility_button_width"
+                android:layout_height="@dimen/accessibility_button_height"
                 android:text="West"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="@dimen/accessibility_button_text_size"
+                android:padding="@dimen/accessibility_button_padding"
                 android:background="@drawable/button_rounded_blue_outline"
-                android:layout_marginEnd="28dp" />
+                android:layout_marginEnd="@dimen/accessibility_button_margin" />
                 
             <!-- East button -->
             <Button
                 android:id="@+id/btn_move_east"
-                android:layout_width="120dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/accessibility_button_width"
+                android:layout_height="@dimen/accessibility_button_height"
                 android:text="East"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="@dimen/accessibility_button_text_size"
+                android:padding="@dimen/accessibility_button_padding"
                 android:background="@drawable/button_rounded_blue_outline"
-                android:layout_marginStart="28dp" />
+                android:layout_marginStart="@dimen/accessibility_button_margin" />
         </LinearLayout>
 
         <!-- Bottom row with Selected Robot text, South button, and Goal text -->
@@ -114,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="No robot selected"
-                android:textSize="12sp"
+                android:textSize="@dimen/accessibility_text_size"
                 android:textStyle="bold"
                 android:gravity="left"
                 android:textColor="#FFFFFF"
@@ -127,11 +135,13 @@
             <!-- South button -->
             <Button
                 android:id="@+id/btn_move_south"
-                android:layout_width="120dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/accessibility_button_width"
+                android:layout_height="@dimen/accessibility_button_height"
                 android:text="South"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="@dimen/accessibility_button_text_size"
+                android:padding="@dimen/accessibility_button_padding"
                 android:background="@drawable/button_rounded_blue_outline" />
                 
             <!-- Robot Goal text (small, right of south button) -->
@@ -141,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Target: Not selected"
-                android:textSize="12sp"
+                android:textSize="@dimen/accessibility_text_size"
                 android:gravity="left"
                 android:textColor="#FFFFFF"
                 android:contentDescription="Selected robot target information"
