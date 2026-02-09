@@ -110,5 +110,5 @@ mv12,13;
 target_yellow9,11;
 robot_red1,1;
 robot_blue1,12;
-robot_yellow1,7;
+robot_yellow11,0;
 robot_green2,4;
