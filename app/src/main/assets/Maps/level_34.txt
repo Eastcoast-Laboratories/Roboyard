@@ -105,7 +105,7 @@ mv12,10;
 mv12,11;
 mv12,12;
 mv12,13;
-target_green5,2;
+target_green6,2;
 robot_red9,4;
 robot_blue3,3;
 robot_yellow2,6;
