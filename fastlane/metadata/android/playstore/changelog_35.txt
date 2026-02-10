@@ -1,0 +1,16 @@
+# Play Store Changelogs für Version 35
+
+<en-GB>
+- Difficulty adjustments for many levels
+- More fine-tuning for beginner levels
+- The first 10 completed levels now always give at least one star
+- Landscape mode now uses the screen better
+- Accessibility controls for blind users are now more compact
+</en-GB>
+<de-DE>
+- Schwierigkeitsanpassungen für viele Levels
+- Mehr Feinschliff für Anfänger-Levels
+- die ersten 10 abgeschlossenen Levels geben jetzt immer mindestens einen Stern
+- Landschaftsmodus nutzt jetzt den Bildschirm besser
+- Accessibility-Steuerung für blinden Spieler kompakter gestaltet
+</de-DE>

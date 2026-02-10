@@ -2,6 +2,14 @@ Changelog Deutsch
 =================
 
 
+## Version 35 (2026-02-10)
+- Schwierigkeitsanpassungen für viele Levels
+- Mehr Feinschliff für Anfänger-Levels
+- die ersten 10 abgeschlossenen Levels geben jetzt immer mindestens einen Stern
+- Landschaftsmodus nutzt jetzt den Bildschirm besser
+- Accessibility-Steuerung für blinden Spieler kompakter gestaltet
+
+
 ## Version 34 (2026-02-07)
 - Achievements
 - Login-Streaks

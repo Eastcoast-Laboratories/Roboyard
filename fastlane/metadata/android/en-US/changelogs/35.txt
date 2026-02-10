@@ -1,0 +1,5 @@
+- Difficulty adjustments for many levels
+- More fine-tuning for beginner levels
+- The first 10 completed levels now always give at least one star
+- Landscape mode now uses the screen better
+- Accessibility controls for blind users are now more compact

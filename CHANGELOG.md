@@ -2,6 +2,14 @@
 =========
 
 
+## Version 35 (2026-02-10)
+- Difficulty adjustments for many levels
+- More fine-tuning for beginner levels
+- The first 10 completed levels now always give at least one star
+- Landscape mode now uses the screen better
+- Accessibility controls for blind users are now more compact
+
+
 ## Version 34 (2026-02-07)
 - Achievements
 - Login Streaks
