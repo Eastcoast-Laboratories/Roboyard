@@ -527,6 +527,7 @@
     <string name="achievement_category_random_streaks">Streaks</string>
     
     <!-- Login Streak -->
+    <string name="achievement_login_streak_day_label">%d day</string>
     <string name="achievement_login_streak_days_label">%d days</string>
     <string name="achievement_streak_7">Weekly Player</string>
     <string name="achievement_streak_7_desc">Log in 7 days in a row</string>

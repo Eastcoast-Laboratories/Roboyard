@@ -121,7 +121,11 @@ public class AchievementsFragment extends BaseGameFragment {
 
         if (category == AchievementCategory.SPECIAL) {
             TextView streakInfo = new TextView(requireContext());
-            streakInfo.setText(getString(R.string.achievement_login_streak_days_label, currentLoginStreakDays));
+            // Use singular "Day" for 1, plural "Days" for other values
+            String streakLabel = currentLoginStreakDays == 1 
+                ? getString(R.string.achievement_login_streak_day_label, currentLoginStreakDays)
+                : getString(R.string.achievement_login_streak_days_label, currentLoginStreakDays);
+            streakInfo.setText(streakLabel);
             streakInfo.setTextSize(14);
             streakInfo.setTextColor(Color.parseColor("#000000"));
             streakInfo.setPadding(16, 0, 0, 0);
