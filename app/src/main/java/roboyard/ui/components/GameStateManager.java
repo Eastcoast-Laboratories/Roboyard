@@ -208,6 +208,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         SolverManager solverManager = getSolverManager();
         solverManager.resetInitialization();
         solverManager.cancelSolver(); // Cancel any running solver process
+        isSolverRunning.setValue(false); // Reset immediately to avoid race condition with calculateSolutionAsync guard
 
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
@@ -248,6 +249,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         SolverManager solverManager = getSolverManager();
         solverManager.resetInitialization();
         solverManager.cancelSolver(); // Cancel any running solver process
+        isSolverRunning.setValue(false); // Reset immediately to avoid race condition with calculateSolutionAsync guard
 
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
@@ -2872,6 +2874,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         Timber.d("[DEEPLINK] Setting game state from deep link");
+
+        // Skip difficulty validation for externally loaded maps (deeplinks)
+        isLoadedFromSave = true;
+        Timber.d("[DEEPLINK] Set isLoadedFromSave=true to skip difficulty move validation");
+
+        // Reset the solver singleton so it picks up the new map instead of the old one
+        SolverManager solverManager = getSolverManager();
+        solverManager.resetInitialization();
+        solverManager.cancelSolver();
+        isSolverRunning.setValue(false); // Reset immediately to avoid race condition with calculateSolutionAsync guard
+        Timber.d("[DEEPLINK] Reset SolverManager for new deeplink map");
 
         // Reset UI timer for the new deep link game
         resetUiTimer();
