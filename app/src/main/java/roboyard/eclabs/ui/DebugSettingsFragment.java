@@ -76,6 +76,10 @@ public class DebugSettingsFragment extends Fragment {
         addSectionTitle(contentLayout, "ACHIEVEMENT MANAGEMENT");
         addAchievementButtons(contentLayout);
         
+        // Level Editor Section
+        addSectionTitle(contentLayout, "LEVEL EDITOR");
+        addLevelEditorButton(contentLayout);
+        
         // Level Reset Section
         addSectionTitle(contentLayout, "GAME DATA");
         addGameDataButtons(contentLayout);
@@ -305,6 +309,24 @@ public class DebugSettingsFragment extends Fragment {
                 .setView(scrollView)
                 .setNegativeButton("Close", null)
                 .show();
+    }
+    
+    private void addLevelEditorButton(LinearLayout parent) {
+        Button levelEditorBtn = new Button(requireContext());
+        levelEditorBtn.setText("Open Level Editor");
+        levelEditorBtn.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        levelEditorBtn.setOnClickListener(v -> {
+            Timber.d("[DEBUG] Opening Level Design Editor");
+            LevelDesignEditorFragment editorFragment = LevelDesignEditorFragment.newInstance(0);
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(roboyard.eclabs.R.id.nav_host_fragment, editorFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+        parent.addView(levelEditorBtn);
     }
     
     private void addGameDataButtons(LinearLayout parent) {

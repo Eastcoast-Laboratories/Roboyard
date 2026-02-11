@@ -143,13 +143,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Auto-scroll to the last played level
         scrollToLastPlayedLevel();
 
-        // Add secret button for Level Editor (long press on title)
-        titleTextView.setOnLongClickListener(v -> {
-            Timber.d("Title long pressed, opening Level Design Editor");
-            openLevelDesignEditor(0); // Open with new level
-            return true;
-        });
-        
         // Set up back button
         Button backButton = view.findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
