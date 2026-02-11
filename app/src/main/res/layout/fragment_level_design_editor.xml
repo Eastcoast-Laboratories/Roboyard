@@ -247,6 +247,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancel" />
+
+            <Button
+                android:id="@+id/load_autosave_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Load Autosave" />
         </LinearLayout>
 
         <Button

@@ -3309,7 +3309,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
             
             Timber.d("[AUTOSAVE] Performing autosave to slot 0 (random game)");
-            boolean saved = gameStateManager.saveGame(0); // Save to slot 0
+            boolean saved = gameStateManager.saveGame(0, true); // Autosave to slot 0
             if (saved) {
                 Timber.d("[AUTOSAVE] Game successfully autosaved to slot 0");
             } else {

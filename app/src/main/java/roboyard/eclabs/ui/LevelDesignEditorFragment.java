@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import roboyard.eclabs.FileReadWrite;
 import roboyard.eclabs.RoboyardApiClient;
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
@@ -155,9 +156,8 @@ public class LevelDesignEditorFragment extends Fragment {
         // Set up mode selection
         setupEditModeRadioGroup();
         
-        // Load the initial level
+        // Load the initial level (last played level, fallback to level 1)
         if (currentLevelId == 0) {
-            // Load last played level, fallback to level 1
             int lastPlayed = completionManager.getLastPlayedLevel();
             
             if (lastPlayed > 0 && levelExistsInSpinner(lastPlayed)) {
@@ -168,7 +168,6 @@ public class LevelDesignEditorFragment extends Fragment {
                 currentLevelId = 1;
                 loadLevel(currentLevelId);
                 setSpinnerToLevel(1);
-                Toast.makeText(requireContext(), "No last played level found, loading Level 1", Toast.LENGTH_SHORT).show();
             }
         } else {
             loadLevel(currentLevelId);
@@ -343,6 +342,62 @@ public class LevelDesignEditorFragment extends Fragment {
         return false;
     }
     
+    /**
+     * Try to load the last played random/web map from autosave slot 0.
+     * @return true if a random/web map was loaded, false otherwise
+     */
+    private boolean loadLastRandomMap() {
+        try {
+            String autosavePath = FileReadWrite.getSaveGamePath(requireActivity(), 0);
+            java.io.File autosaveFile = new java.io.File(autosavePath);
+            
+            if (!autosaveFile.exists()) {
+                Timber.d("[EDITOR] No autosave file found");
+                return false;
+            }
+            
+            String saveData = FileReadWrite.loadAbsoluteData(autosavePath);
+            if (saveData == null || saveData.isEmpty()) {
+                Timber.d("[EDITOR] Autosave file is empty");
+                return false;
+            }
+            
+            // Parse the save data into a GameState
+            GameState state = GameState.parseFromSaveData(saveData, requireContext());
+            if (state == null) {
+                Timber.d("[EDITOR] Failed to parse autosave data");
+                return false;
+            }
+            
+            // Successfully loaded - set as current state
+            currentState = state;
+            currentLevelId = -1; // Mark as non-level (random/web map)
+            
+            // Update board size fields
+            EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
+            EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
+            widthEdit.setText(String.valueOf(currentState.getWidth()));
+            heightEdit.setText(String.valueOf(currentState.getHeight()));
+            
+            // Set spinner to "New Level" (index 0) since this is not a built-in level
+            editLevelSpinner.setSelection(0);
+            
+            String mapName = state.getLevelName() != null ? state.getLevelName() : "Random Map";
+            levelIdTextView.setText(mapName);
+            
+            updateUI();
+            
+            Timber.d("[EDITOR] Loaded last random/web map: %s (%dx%d, %d elements)", 
+                    mapName, state.getWidth(), state.getHeight(), state.getGameElements().size());
+            Toast.makeText(requireContext(), "Loaded last played map: " + mapName, Toast.LENGTH_SHORT).show();
+            return true;
+            
+        } catch (Exception e) {
+            Timber.e(e, "[EDITOR] Error loading autosave for editor");
+            return false;
+        }
+    }
+    
     private void setSpinnerToLevel(int levelId) {
         if (editLevelSpinner == null || editLevelSpinner.getAdapter() == null) return;
         String target = "Level " + levelId;
@@ -402,6 +457,14 @@ public class LevelDesignEditorFragment extends Fragment {
         cancelButton.setOnClickListener(v -> {
             // Navigate back to level selection
             requireActivity().getSupportFragmentManager().popBackStack();
+        });
+        
+        // Load Autosave button
+        Button loadAutosaveButton = requireView().findViewById(R.id.load_autosave_button);
+        loadAutosaveButton.setOnClickListener(v -> {
+            if (!loadLastRandomMap()) {
+                Toast.makeText(requireContext(), "No autosave found", Toast.LENGTH_SHORT).show();
+            }
         });
         
         // Export button

@@ -21,6 +21,7 @@ import roboyard.eclabs.achievements.StreakManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
+import roboyard.eclabs.util.MapIdGenerator;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -586,6 +587,13 @@ public class MainFragmentActivity extends AppCompatActivity {
                 if (mapName != null && !mapName.isEmpty()) {
                     gameState.setLevelName(mapName);
                     Timber.d("[DEEPLINK_PROCESS] Set custom map name: %s", mapName);
+                } else {
+                    // No name provided: generate "Web <hash>" like random maps do
+                    String uniqueId = MapIdGenerator.generateUniqueId(gameState.getGridElements());
+                    String generatedName = "Web " + uniqueId;
+                    gameState.setLevelName(generatedName);
+                    gameState.setUniqueMapId(uniqueId);
+                    Timber.d("[DEEPLINK_PROCESS] Generated web map name: %s", generatedName);
                 }
                 
                 // Override the difficulty if specified in the deep link
