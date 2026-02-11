@@ -464,13 +464,14 @@
     <string name="achievement_category_random_speed">Geschwindigkeit</string>
     <string name="achievement_category_random_difficulty">Schwierigkeit</string>
     <string name="achievement_category_random_solution">Lösungslänge</string>
-    <string name="achievement_category_random_resolution">Bildschirmauflösungen</string>
-    <string name="achievement_category_random_targets">Mehrere Ziele</string>
+    <string name="achievement_category_random_resolution">Spielfeldgrößen</string>
+    <string name="achievement_category_random_targets">Multi Ziele</string>
     <string name="achievement_category_random_robots">Spaß-Herausforderungen</string>
     <string name="achievement_category_random_coverage">Feldabdeckung</string>
     <string name="achievement_category_random_streaks">Streaks</string>
     
     <!-- Login Streak -->
+    <string name="achievement_login_streak_day_label">%d Tag</string>
     <string name="achievement_login_streak_days_label">%d Tage</string>
     <string name="achievement_streak_7">Wöchentlicher Spieler</string>
     <string name="achievement_streak_7_desc">Melde dich 7 Tage hintereinander an</string>
@@ -483,14 +484,14 @@
     <string name="achievement_first_game">Willkommen!</string>
     <string name="achievement_first_game_desc">Spiele dein erstes Spiel</string>
     <string name="achievement_level_1_complete">Erste Schritte</string>
-    <string name="achievement_level_1_complete_desc">Absolviere Level 1</string>
+    <string name="achievement_level_1_complete_desc">Schaffe Level 1</string>
     <string name="achievement_level_10_complete">Erste Erfolge</string>
-    <string name="achievement_level_10_complete_desc">Absolviere 10 Level</string>
+    <string name="achievement_level_10_complete_desc">Schaffe 10 Level</string>
     <string name="achievement_level_50_complete">Halbzeit</string>
-    <string name="achievement_level_50_complete_desc">Absolviere 50 Level</string>
+    <string name="achievement_level_50_complete_desc">Schaffe 50 Level</string>
     <string name="achievement_level_140_complete">Level-Meister</string>
-    <string name="achievement_level_140_complete_desc">Absolviere alle 140 Level</string>
-    <string name="achievement_all_stars">Sternesammler</string>
+    <string name="achievement_level_140_complete_desc">Schaffe alle 140 Level</string>
+    <string name="achievement_all_stars">Sternensammler</string>
     <string name="achievement_all_stars_desc">Sammle alle 420 Sterne</string>
     
     <!-- Performance Achievements -->
@@ -501,9 +502,9 @@
     <string name="achievement_perfect_50">Optimierungs-Experte</string>
     <string name="achievement_perfect_50_desc">Löse 50 Level mit optimalen Zügen</string>
     <string name="achievement_speedrun_30s">Schneller Denker</string>
-    <string name="achievement_speedrun_30s_desc">Absolviere ein Level in unter 30 Sekunden</string>
+    <string name="achievement_speedrun_30s_desc">Löse ein Level in unter 30 Sekunden</string>
     <string name="achievement_speedrun_10s">Blitzschnell</string>
-    <string name="achievement_speedrun_10s_desc">Absolviere ein Level in unter 10 Sekunden</string>
+    <string name="achievement_speedrun_10s_desc">Löse ein Level in unter 10 Sekunden</string>
     
     <!-- Challenge Achievements -->
     <string name="achievement_solve_custom">Custom-Löser</string>
@@ -527,41 +528,41 @@
     
     <!-- Random Game - Difficulty -->
     <string name="achievement_impossible_1">Unmöglicher Traum</string>
-    <string name="achievement_impossible_1_desc">Absolviere 1 Spiel im unmöglichen Modus</string>
+    <string name="achievement_impossible_1_desc">Schaffe 1 Spiel im unmöglichen Modus</string>
     <string name="achievement_impossible_5">Unmöglicher Champion</string>
-    <string name="achievement_impossible_5_desc">Absolviere 5 Spiele im unmöglichen Modus</string>
+    <string name="achievement_impossible_5_desc">Schaffe 5 Spiele im unmöglichen Modus</string>
     <string name="achievement_impossible_streak_5">Unmöglicher Streak</string>
-    <string name="achievement_impossible_streak_5_desc">Absolviere 5 Spiele hintereinander im unmöglichen Modus mit optimalen Zügen</string>
+    <string name="achievement_impossible_streak_5_desc">Schaffe 5 Spiele hintereinander im unmöglichen Modus mit optimalen Zügen</string>
     <string name="achievement_impossible_streak_10">Unmögliche Legende</string>
-    <string name="achievement_impossible_streak_10_desc">Absolviere 10 Spiele hintereinander im unmöglichen Modus mit optimalen Zügen</string>
+    <string name="achievement_impossible_streak_10_desc">Schaffe 10 Spiele hintereinander im unmöglichen Modus mit optimalen Zügen</string>
     
     <!-- Random Game - Solution Length -->
     <string name="achievement_solution_18">18-Zug-Meister</string>
-    <string name="achievement_solution_18_desc">Absolviere ein Spiel mit optimaler Lösung von 18 Zügen</string>
+    <string name="achievement_solution_18_desc">Schaffe ein Spiel mit optimaler Lösung von 18 Zügen</string>
     <string name="achievement_solution_19">19-Zug-Meister</string>
-    <string name="achievement_solution_19_desc">Absolviere ein Spiel mit optimaler Lösung von 19 Zügen</string>
+    <string name="achievement_solution_19_desc">Schaffe ein Spiel mit optimaler Lösung von 19 Zügen</string>
     <string name="achievement_solution_20">20-Zug-Meister</string>
-    <string name="achievement_solution_20_desc">Absolviere ein Spiel mit optimaler Lösung von 20 Zügen</string>
+    <string name="achievement_solution_20_desc">Schaffe ein Spiel mit optimaler Lösung von 20 Zügen</string>
     <string name="achievement_solution_21">21-Zug-Meister</string>
-    <string name="achievement_solution_21_desc">Absolviere ein Spiel mit optimaler Lösung von 21 Zügen</string>
+    <string name="achievement_solution_21_desc">Schaffe ein Spiel mit optimaler Lösung von 21 Zügen</string>
     <string name="achievement_solution_22">22-Zug-Meister</string>
-    <string name="achievement_solution_22_desc">Absolviere ein Spiel mit optimaler Lösung von 22 Zügen</string>
+    <string name="achievement_solution_22_desc">Schaffe ein Spiel mit optimaler Lösung von 22 Zügen</string>
     <string name="achievement_solution_23">23-Zug-Meister</string>
-    <string name="achievement_solution_23_desc">Absolviere ein Spiel mit optimaler Lösung von 23 Zügen</string>
+    <string name="achievement_solution_23_desc">Schaffe ein Spiel mit optimaler Lösung von 23 Zügen</string>
     <string name="achievement_solution_24">24-Zug-Meister</string>
-    <string name="achievement_solution_24_desc">Absolviere ein Spiel mit optimaler Lösung von 24 Zügen</string>
+    <string name="achievement_solution_24_desc">Schaffe ein Spiel mit optimaler Lösung von 24 Zügen</string>
     <string name="achievement_solution_25">25-Zug-Meister</string>
-    <string name="achievement_solution_25_desc">Absolviere ein Spiel mit optimaler Lösung von 25 Zügen</string>
+    <string name="achievement_solution_25_desc">Schaffe ein Spiel mit optimaler Lösung von 25 Zügen</string>
     <string name="achievement_solution_26">26-Zug-Meister</string>
-    <string name="achievement_solution_26_desc">Absolviere ein Spiel mit optimaler Lösung von 26 Zügen</string>
+    <string name="achievement_solution_26_desc">Schaffe ein Spiel mit optimaler Lösung von 26 Zügen</string>
     <string name="achievement_solution_27">27-Zug-Meister</string>
-    <string name="achievement_solution_27_desc">Absolviere ein Spiel mit optimaler Lösung von 27 Zügen</string>
+    <string name="achievement_solution_27_desc">Schaffe ein Spiel mit optimaler Lösung von 27 Zügen</string>
     <string name="achievement_solution_28">28-Zug-Meister</string>
-    <string name="achievement_solution_28_desc">Absolviere ein Spiel mit optimaler Lösung von 28 Zügen</string>
+    <string name="achievement_solution_28_desc">Schaffe ein Spiel mit optimaler Lösung von 28 Zügen</string>
     <string name="achievement_solution_29">29-Zug-Meister</string>
-    <string name="achievement_solution_29_desc">Absolviere ein Spiel mit optimaler Lösung von 29 Zügen</string>
+    <string name="achievement_solution_29_desc">Schaffe ein Spiel mit optimaler Lösung von 29 Zügen</string>
     <string name="achievement_solution_30_plus">30+-Zug-Meister</string>
-    <string name="achievement_solution_30_plus_desc">Absolviere ein Spiel mit optimaler Lösung von 30+ Zügen</string>
+    <string name="achievement_solution_30_plus_desc">Schaffe ein Spiel mit optimaler Lösung von 30+ Zügen</string>
     
     <!-- Random Game - Screen Resolutions -->
     <string name="achievement_resolution_10">Auflösungs-Entdecker 10</string>
@@ -573,27 +574,27 @@
     
     <!-- Random Game - Multiple Targets -->
     <string name="achievement_2_targets">Doppeltes Ziel</string>
-    <string name="achievement_2_targets_desc">Absolviere ein Spiel mit 2 Zielen</string>
+    <string name="achievement_2_targets_desc">Schaffe ein Spiel mit 2 Zielen</string>
     <string name="achievement_3_targets">Dreifaches Ziel</string>
-    <string name="achievement_3_targets_desc">Absolviere ein Spiel mit 3 Zielen</string>
+    <string name="achievement_3_targets_desc">Schaffe ein Spiel mit 3 Zielen</string>
     <string name="achievement_4_targets">Vierfaches Ziel</string>
-    <string name="achievement_4_targets_desc">Absolviere ein Spiel mit 4 Zielen</string>
+    <string name="achievement_4_targets_desc">Schaffe ein Spiel mit 4 Zielen</string>
     <string name="achievement_2_of_3_targets">2 von 3</string>
-    <string name="achievement_2_of_3_targets_desc">Absolviere ein Spiel, bei dem du 2 von 3 Zielen brauchst</string>
+    <string name="achievement_2_of_3_targets_desc">Schaffe ein Spiel, bei dem du 2 von 3 Zielen brauchst</string>
     <string name="achievement_2_of_4_targets">2 von 4</string>
-    <string name="achievement_2_of_4_targets_desc">Absolviere ein Spiel, bei dem du 2 von 4 Zielen brauchst</string>
+    <string name="achievement_2_of_4_targets_desc">Schaffe ein Spiel, bei dem du 2 von 4 Zielen brauchst</string>
     <string name="achievement_3_of_4_targets">3 von 4</string>
-    <string name="achievement_3_of_4_targets_desc">Absolviere ein Spiel, bei dem du 3 von 4 Zielen brauchst</string>
+    <string name="achievement_3_of_4_targets_desc">Schaffe ein Spiel, bei dem du 3 von 4 Zielen brauchst</string>
     <string name="achievement_2_of_2_targets">2 von 2</string>
-    <string name="achievement_2_of_2_targets_desc">Absolviere ein Spiel, bei dem du 2 von 2 Zielen brauchst</string>
+    <string name="achievement_2_of_2_targets_desc">Schaffe ein Spiel, bei dem du 2 von 2 Zielen brauchst</string>
     <string name="achievement_3_of_3_targets">3 von 3</string>
-    <string name="achievement_3_of_3_targets_desc">Absolviere ein Spiel, bei dem du 3 von 3 Zielen brauchst</string>
+    <string name="achievement_3_of_3_targets_desc">Schaffe ein Spiel, bei dem du 3 von 3 Zielen brauchst</string>
     <string name="achievement_4_of_4_targets">4 von 4</string>
-    <string name="achievement_4_of_4_targets_desc">Absolviere ein Spiel, bei dem du alle 4 Ziele brauchst</string>
+    <string name="achievement_4_of_4_targets_desc">Schaffe ein Spiel, bei dem du alle 4 Ziele brauchst</string>
     
     <!-- Random Game - Fun Challenges -->
     <string name="achievement_5_robots">Volles Team</string>
-    <string name="achievement_5_robots_desc">Absolviere ein Spiel mit 5 Robotern</string>
+    <string name="achievement_5_robots_desc">Schaffe ein Spiel mit 5 Robotern</string>
     <string name="achievement_gimme_five">Gimme Five</string>
     <string name="achievement_gimme_five_desc">Alle Roboter müssen sich gegenseitig berühren</string>
     
@@ -610,39 +611,39 @@
     <!-- Random Game - Streaks -->
     <!-- Perfect random games (cumulative) -->
     <string name="achievement_perfect_random_5">Perfekt 5</string>
-    <string name="achievement_perfect_random_5_desc">Absolviere 5 Zufallsspiele mit optimalen Zügen</string>
+    <string name="achievement_perfect_random_5_desc">Schaffe 5 Zufallsspiele mit optimalen Zügen</string>
     <string name="achievement_perfect_random_10">Perfekt 10</string>
-    <string name="achievement_perfect_random_10_desc">Absolviere 10 Zufallsspiele mit optimalen Zügen</string>
+    <string name="achievement_perfect_random_10_desc">Schaffe 10 Zufallsspiele mit optimalen Zügen</string>
     <string name="achievement_perfect_random_20">Perfekt 20</string>
-    <string name="achievement_perfect_random_20_desc">Absolviere 20 Zufallsspiele mit optimalen Zügen</string>
+    <string name="achievement_perfect_random_20_desc">Schaffe 20 Zufallsspiele mit optimalen Zügen</string>
     <!-- Perfect random games streak -->
     <string name="achievement_perfect_random_streak_5">Perfekter Streak 5</string>
-    <string name="achievement_perfect_random_streak_5_desc">Absolviere 5 Zufallsspiele hintereinander mit optimalen Zügen</string>
+    <string name="achievement_perfect_random_streak_5_desc">Schaffe 5 Zufallsspiele hintereinander mit optimalen Zügen</string>
     <string name="achievement_perfect_random_streak_10">Perfekter Streak 10</string>
-    <string name="achievement_perfect_random_streak_10_desc">Absolviere 10 Zufallsspiele hintereinander mit optimalen Zügen</string>
+    <string name="achievement_perfect_random_streak_10_desc">Schaffe 10 Zufallsspiele hintereinander mit optimalen Zügen</string>
     <string name="achievement_perfect_random_streak_20">Perfekter Streak 20</string>
-    <string name="achievement_perfect_random_streak_20_desc">Absolviere 20 Zufallsspiele hintereinander mit optimalen Zügen</string>
+    <string name="achievement_perfect_random_streak_20_desc">Schaffe 20 Zufallsspiele hintereinander mit optimalen Zügen</string>
     <!-- Perfect solution with no hints -->
     <string name="achievement_perfect_no_hints_random_1">Perfekt ohne Hilfe</string>
-    <string name="achievement_perfect_no_hints_random_1_desc">Absolviere ein Zufallsspiel mit optimalen Zügen (10+ Züge) ohne Hinweise zu verwenden</string>
+    <string name="achievement_perfect_no_hints_random_1_desc">Schaffe ein Zufallsspiel mit optimalen Zügen (10+ Züge) ohne Hinweise zu verwenden</string>
     <!-- No hints random games (cumulative) -->
     <string name="achievement_no_hints_random_10">Keine Hilfe nötig 10</string>
-    <string name="achievement_no_hints_random_10_desc">Absolviere 10 Zufallsspiele ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_random_10_desc">Schaffe 10 Zufallsspiele ohne Hinweise zu verwenden</string>
     <string name="achievement_no_hints_random_50">Keine Hilfe nötig 50</string>
-    <string name="achievement_no_hints_random_50_desc">Absolviere 50 Zufallsspiele ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_random_50_desc">Schaffe 50 Zufallsspiele ohne Hinweise zu verwenden</string>
     <!-- No hints random games streak -->
     <string name="achievement_no_hints_streak_random_10">Kein-Hilfe-Streak 10</string>
-    <string name="achievement_no_hints_streak_random_10_desc">Absolviere 10 Zufallsspiele hintereinander ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_streak_random_10_desc">Schaffe 10 Zufallsspiele hintereinander ohne Hinweise zu verwenden</string>
     <string name="achievement_no_hints_streak_random_50">Kein-Hilfe-Streak 50</string>
-    <string name="achievement_no_hints_streak_random_50_desc">Absolviere 50 Zufallsspiele hintereinander ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_streak_random_50_desc">Schaffe 50 Zufallsspiele hintereinander ohne Hinweise zu verwenden</string>
     
     <!-- Random Game - Speed -->
     <string name="achievement_speedrun_random_20s">Geschwindigkeits-Dämon</string>
-    <string name="achievement_speedrun_random_20s_desc">Absolviere ein Zufallsspiel in unter 20 Sekunden</string>
+    <string name="achievement_speedrun_random_20s_desc">Schaffe ein Zufallsspiel in unter 20 Sekunden</string>
     <string name="achievement_speedrun_random_10s">Blitzgeschwindigkeit</string>
-    <string name="achievement_speedrun_random_10s_desc">Absolviere ein Zufallsspiel in unter 10 Sekunden</string>
+    <string name="achievement_speedrun_random_10s_desc">Schaffe ein Zufallsspiel in unter 10 Sekunden</string>
     <string name="achievement_speedrun_random_5x30s">Geschwindigkeits-Streak</string>
-    <string name="achievement_speedrun_random_5x30s_desc">Absolviere 5 Zufallsspiele in unter 30 Sekunden jeweils</string>
+    <string name="achievement_speedrun_random_5x30s_desc">Schaffe 5 Zufallsspiele in unter 30 Sekunden jeweils</string>
     
     <!-- Achievement UI -->
     <string name="achievements_title">Erfolge</string>
