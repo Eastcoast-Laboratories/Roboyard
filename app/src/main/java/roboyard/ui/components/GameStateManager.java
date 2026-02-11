@@ -579,16 +579,45 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("Loading history entry: %s", mapPath);
 
         try {
-            // Load game state from file
+            // Resolve relative path to absolute
             File historyFile = new File(mapPath);
+            if (!historyFile.isAbsolute()) {
+                historyFile = getApplication().getFileStreamPath(mapPath);
+                Timber.d("[HISTORY_LOAD] Resolved relative path to: %s", historyFile.getAbsolutePath());
+            }
             if (!historyFile.exists()) {
-                Timber.e("History file does not exist: %s", mapPath);
+                Timber.e("History file does not exist: %s", historyFile.getAbsolutePath());
                 return;
             }
 
-            // TODO: Implement proper loading from history file
+            // Read the save data from the history file
+            StringBuilder saveData = new StringBuilder();
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(historyFile);
+                 java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(fis))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    saveData.append(line).append("\n");
+                }
+            }
 
-            Timber.d("Loaded history entry");
+            Timber.d("[HISTORY_LOAD] Read %d characters from history file: %s", saveData.length(), historyFile.getAbsolutePath());
+
+            // Parse the save data into a GameState
+            GameState newState = GameState.parseFromSaveData(saveData.toString(), getApplication());
+            if (newState != null) {
+                // Set flag to skip min/max moves validation for loaded games
+                isLoadedFromSave = true;
+
+                // Store the difficulty from the save for display purposes
+                loadedSaveDifficulty = newState.getDifficulty();
+                Timber.d("[HISTORY_LOAD] Loaded history entry with difficulty: %d", loadedSaveDifficulty);
+
+                // Apply the loaded game state using the shared method
+                applyLoadedGameState(newState);
+                Timber.d("[HISTORY_LOAD] Successfully loaded history entry: %s", mapPath);
+            } else {
+                Timber.e("[HISTORY_LOAD] Failed to parse game state from history file: %s", mapPath);
+            }
         } catch (Exception e) {
             Timber.e(e, "Error loading history entry: %s", mapPath);
         }
@@ -2037,7 +2066,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Get next available history index
             int historyIndex = GameHistoryManager.getNextHistoryIndex(activity);
             String historyFileName = "history_" + historyIndex + ".txt";
-            String historyPath = "history/" + historyFileName;
+            String historyPath = historyFileName;
 
             // Get a proper map name directly from the game state
             String mapName = null;
@@ -2065,9 +2094,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 Timber.e("[HISTORY] ERROR: No game state available, using default name: %s", mapName);
             }
 
-            // For now, use a simplified approach for saving the game state
-            // This avoids calling the missing methods
-            String saveData = gameState.toString();
+            // Serialize the game state using the same format as save games
+            String saveData = gameState.serialize();
             FileReadWrite.writePrivateData(activity, historyPath, saveData);
 
             // Use static values for missing board dimensions
@@ -2075,9 +2103,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int boardHeight = 16; // Default value
             String boardSize = boardWidth + "x" + boardHeight;
 
-            // Simplified approach for preview image
-            String previewImagePath = "history/" + historyFileName + "_preview.txt";
-            FileReadWrite.writePrivateData(activity, previewImagePath, "");
+            // Preview image path (flat filename, no directory separator)
+            String previewImagePath = historyFileName + "_preview.txt";
 
             // Create history entry with available information
             GameHistoryEntry entry = new GameHistoryEntry(

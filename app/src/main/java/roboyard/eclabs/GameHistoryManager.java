@@ -28,17 +28,6 @@ public class GameHistoryManager {
      */
     public static void initialize(Activity activity) {
         try {
-            // Create history directory if it doesn't exist
-            File historyDir = new File(activity.getFilesDir(), HISTORY_DIR);
-            if (!historyDir.exists()) {
-                boolean created = historyDir.mkdir();
-                if (created) {
-                    Timber.d("Created history directory: %s", historyDir.getAbsolutePath());
-                } else {
-                    Timber.e("Failed to create history directory");
-                }
-            }
-
             // Create empty history index file if it doesn't exist
             if (!FileReadWrite.privateDataExists(activity, HISTORY_INDEX_FILE)) {
                 JSONObject indexJson = new JSONObject();

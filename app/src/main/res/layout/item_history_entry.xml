@@ -54,35 +54,54 @@
             app:layout_constraintTop_toBottomOf="@+id/name_text"
             tools:text="2025-03-19 12:45" />
 
-        <!-- Duration and moves layout -->        
-        <LinearLayout
-            android:id="@+id/stats_layout"
-            android:layout_width="0dp"
+        <!-- Board size -->
+        <TextView
+            android:id="@+id/board_size_text"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toStartOf="@+id/delete_button"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
             app:layout_constraintStart_toEndOf="@+id/minimap_view"
-            app:layout_constraintTop_toBottomOf="@+id/date_text">
+            app:layout_constraintTop_toBottomOf="@+id/date_text"
+            tools:text="Board: 12×12" />
 
-            <!-- Duration -->            
-            <TextView
-                android:id="@+id/duration_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:textSize="14sp"
-                tools:text="Duration: 10:30" />
+        <!-- Difficulty -->
+        <TextView
+            android:id="@+id/difficulty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@+id/board_size_text"
+            app:layout_constraintTop_toBottomOf="@+id/date_text"
+            tools:text="Beginner" />
 
-            <!-- Moves count -->            
-            <TextView
-                android:id="@+id/moves_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                tools:text="Moves: 42" />
-        </LinearLayout>
+        <!-- Moves count -->
+        <TextView
+            android:id="@+id/moves_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintTop_toBottomOf="@+id/board_size_text"
+            tools:text="5 moves" />
+
+        <!-- Completion status -->
+        <TextView
+            android:id="@+id/completion_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toEndOf="@+id/moves_text"
+            app:layout_constraintTop_toBottomOf="@+id/board_size_text"
+            tools:text="Completed" />
 
         <!-- Delete button -->
         <ImageButton

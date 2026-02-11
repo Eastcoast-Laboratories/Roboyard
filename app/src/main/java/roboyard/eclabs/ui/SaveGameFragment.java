@@ -296,6 +296,108 @@ public class SaveGameFragment extends BaseGameFragment {
     }
     
     /**
+     * Helper class to hold metadata extracted from save data (DRY - used by both save slots and history)
+     */
+    private static class SaveDataMetadata {
+        String mapName;
+        String boardSize;
+        String difficulty;
+        String movesCount;
+        String completionStatus;
+        Bitmap minimap;
+        int moves;
+    }
+    
+    /**
+     * Extract metadata from save data string (DRY - shared between save slots and history entries)
+     */
+    private SaveDataMetadata extractSaveMetadata(String saveData, String filePath) {
+        SaveDataMetadata meta = new SaveDataMetadata();
+        if (saveData == null || saveData.isEmpty()) return meta;
+        
+        // Extract map name
+        Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
+        if (metadata != null && metadata.containsKey("MAPNAME")) {
+            meta.mapName = metadata.get("MAPNAME");
+        }
+        
+        // Extract board size from #SIZE:width,height or WIDTH/HEIGHT lines
+        Pattern sizePattern = Pattern.compile("(#SIZE:|SIZE:)(\\d+),(\\d+)");
+        Matcher sizeMatcher = sizePattern.matcher(saveData);
+        if (sizeMatcher.find()) {
+            int width = Integer.parseInt(sizeMatcher.group(2));
+            int height = Integer.parseInt(sizeMatcher.group(3));
+            meta.boardSize = "Board: " + width + "\u00D7" + height;
+        } else {
+            Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
+            Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
+            Matcher widthMatcher = widthPattern.matcher(saveData);
+            Matcher heightMatcher = heightPattern.matcher(saveData);
+            int width = 0, height = 0;
+            if (widthMatcher.find()) width = Integer.parseInt(widthMatcher.group(1));
+            if (heightMatcher.find()) height = Integer.parseInt(heightMatcher.group(1));
+            if (width > 0 && height > 0) {
+                meta.boardSize = "Board: " + width + "\u00D7" + height;
+            }
+        }
+        
+        // Extract difficulty
+        Pattern difficultyPattern = Pattern.compile("(DIFFICULTY:|#DIFFICULTY:)([^;\\n]+)");
+        Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
+        if (difficultyMatcher.find()) {
+            String diffValue = difficultyMatcher.group(2);
+            try {
+                int difficultyInt = Integer.parseInt(diffValue.trim());
+                meta.difficulty = difficultyIntToString(difficultyInt);
+            } catch (NumberFormatException e) {
+                meta.difficulty = diffValue.trim();
+            }
+        } else {
+            meta.difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
+        }
+        
+        // Extract move count
+        Pattern movesPattern1 = Pattern.compile("\\|MOVES:(\\d+)");
+        Pattern movesPattern2 = Pattern.compile("MOVES:(\\d+);");
+        Pattern movesPattern3 = Pattern.compile("#MOVES:(\\d+)");
+        Matcher movesMatcher1 = movesPattern1.matcher(saveData);
+        Matcher movesMatcher2 = movesPattern2.matcher(saveData);
+        Matcher movesMatcher3 = movesPattern3.matcher(saveData);
+        
+        meta.moves = 0;
+        if (movesMatcher1.find()) {
+            meta.moves = Integer.parseInt(movesMatcher1.group(1));
+        } else if (movesMatcher2.find()) {
+            meta.moves = Integer.parseInt(movesMatcher2.group(1));
+        } else if (movesMatcher3.find()) {
+            meta.moves = Integer.parseInt(movesMatcher3.group(1));
+        }
+        
+        if (meta.moves > 0) {
+            meta.movesCount = "Moves: " + meta.moves;
+            
+            // Extract completion status
+            Pattern solvedPattern = Pattern.compile("(#SOLVED:|SOLVED:)(true|false)");
+            Matcher solvedMatcher = solvedPattern.matcher(saveData);
+            if (solvedMatcher.find()) {
+                boolean solved = Boolean.parseBoolean(solvedMatcher.group(2));
+                meta.completionStatus = solved ? "Completed" : "Incomplete";
+            }
+        }
+        
+        // Create minimap
+        if (filePath != null) {
+            try {
+                meta.minimap = createMinimapFromPath(requireContext(), filePath, 100, 100);
+            } catch (Exception e) {
+                Timber.e(e, "Error creating minimap for %s", filePath);
+            }
+        }
+        
+        return meta;
+    }
+    
+    /**
      * Load save slots from storage
      */
     private void loadSaveSlots() {
@@ -321,107 +423,17 @@ public class SaveGameFragment extends BaseGameFragment {
                 // Dump the whole save data for debugging
                 // Timber.d("[SAVEDATA] Autosave data dump: %s", saveData);
                 
-                // Extract metadata if available
+                // Extract metadata using shared method (DRY)
                 if (saveData != null && !saveData.isEmpty()) {
-                    Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
-                    if (metadata != null && metadata.containsKey("MAPNAME")) {
-                        name = metadata.get("MAPNAME") + "    auto-save";
-                        Timber.d("Found map name in autosave slot: %s", name);
+                    SaveDataMetadata meta = extractSaveMetadata(saveData, autosavePath);
+                    if (meta.mapName != null) {
+                        name = meta.mapName + "    auto-save";
                     }
-                    
-                    // Extract additional metadata using regex patterns
-                    // Extract board size from #SIZE:width,height or WIDTH/HEIGHT lines
-                    Pattern sizePattern = Pattern.compile("(#SIZE:|SIZE:)(\\d+),(\\d+)");
-                    Matcher sizeMatcher = sizePattern.matcher(saveData);
-                    int width = 0, height = 0;
-                    
-                    if (sizeMatcher.find()) {
-                        width = Integer.parseInt(sizeMatcher.group(2));
-                        height = Integer.parseInt(sizeMatcher.group(3));
-                        Timber.d("[SAVEDATA] Found size in SIZE tag: %dx%d", width, height);
-                    } else {
-                        // Try WIDTH/HEIGHT format
-                        Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
-                        Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
-                        Matcher widthMatcher = widthPattern.matcher(saveData);
-                        Matcher heightMatcher = heightPattern.matcher(saveData);
-                        
-                        if (widthMatcher.find()) {
-                            width = Integer.parseInt(widthMatcher.group(1));
-                            Timber.d("[SAVEDATA] Found width: %d", width);
-                        }
-                        
-                        if (heightMatcher.find()) {
-                            height = Integer.parseInt(heightMatcher.group(1));
-                            Timber.d("[SAVEDATA] Found height: %d", height);
-                        }
-                        
-                        if (width > 0 && height > 0) {
-                            boardSize = "Board: " + width + "\u00D7" + height;
-                        }
-                    }
-                    
-                    // Extract difficulty from DIFFICULTY:level
-                    Pattern difficultyPattern = Pattern.compile("(DIFFICULTY:|#DIFFICULTY:)([^;\\n]+)");
-                    Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
-                    if (difficultyMatcher.find()) {
-                        String diffValue = difficultyMatcher.group(2);
-                        try {
-                            // Try parsing as integer first
-                            int difficultyInt = Integer.parseInt(diffValue.trim());
-                            difficulty = difficultyIntToString(difficultyInt);
-                        } catch (NumberFormatException e) {
-                            // If it's already a string value, use it directly
-                            difficulty = diffValue.trim();
-                        }
-                        Timber.d("[SAVEDATA] Found difficulty in save data: %s", difficulty);
-                    } else {
-                        // If difficulty not found, use beginner difficulty as fallback
-                        difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
-                        Timber.d("[SAVEDATA] No difficulty in save data, using beginner difficulty: %s", difficulty);
-                    }
-                    
-                    // Extract move count - try multiple patterns
-                    Pattern movesPattern1 = Pattern.compile("\\|MOVES:(\\d+)");
-                    Pattern movesPattern2 = Pattern.compile("MOVES:(\\d+);");
-                    Pattern movesPattern3 = Pattern.compile("#MOVES:(\\d+)");
-                    
-                    Matcher movesMatcher1 = movesPattern1.matcher(saveData);
-                    Matcher movesMatcher2 = movesPattern2.matcher(saveData);
-                    Matcher movesMatcher3 = movesPattern3.matcher(saveData);
-                    
-                    int moves = 0;
-                    if (movesMatcher1.find()) {
-                        moves = Integer.parseInt(movesMatcher1.group(1));
-                        Timber.d("[SAVEDATA] Found moves with pipe pattern: %d", moves);
-                    } else if (movesMatcher2.find()) {
-                        moves = Integer.parseInt(movesMatcher2.group(1));
-                        Timber.d("[SAVEDATA] Found moves with semicolon pattern: %d", moves);
-                    } else if (movesMatcher3.find()) {
-                        moves = Integer.parseInt(movesMatcher3.group(1));
-                        Timber.d("[SAVEDATA] Found moves with hash pattern: %d", moves);
-                    }
-                    
-                    if (moves > 0) {
-                        movesCount = "Moves: " + moves;
-                        
-                        // Only show completion status if game has been started (moves > 0)
-                        // Extract completion status from #SOLVED:true
-                        Pattern solvedPattern = Pattern.compile("(#SOLVED:|SOLVED:)(true|false)");
-                        Matcher solvedMatcher = solvedPattern.matcher(saveData);
-                        if (solvedMatcher.find()) {
-                            boolean solved = Boolean.parseBoolean(solvedMatcher.group(2));
-                            completionStatus = solved ? "Completed" : "Incomplete";
-                            Timber.d("[SAVEDATA] Found solved status: %s", completionStatus);
-                        }
-                    }
-                    
-                    // Create minimap
-                    try {
-                        minimap = createMinimapFromPath(requireContext(), autosavePath, 100, 100);
-                    } catch (Exception e) {
-                        Timber.e(e, "Error creating minimap for autosave slot");
-                    }
+                    boardSize = meta.boardSize;
+                    difficulty = meta.difficulty;
+                    movesCount = meta.movesCount;
+                    completionStatus = meta.completionStatus;
+                    minimap = meta.minimap;
                 }
                 
                 // Create the SaveSlotInfo with the save data included
@@ -454,106 +466,17 @@ public class SaveGameFragment extends BaseGameFragment {
                     String movesCount = null;
                     String completionStatus = null;
                     
-                    // Extract metadata if available
+                    // Extract metadata using shared method (DRY)
                     if (saveData != null && !saveData.isEmpty()) {
-                        Map<String, String> metadata = GameStateManager.extractMetadataFromSaveData(saveData);
-                        if (metadata != null && metadata.containsKey("MAPNAME")) {
-                            name = metadata.get("MAPNAME");
-                            Timber.d("Found map name in slot %d: %s", i, name);
+                        SaveDataMetadata meta = extractSaveMetadata(saveData, savePath);
+                        if (meta.mapName != null) {
+                            name = meta.mapName;
                         }
-                        
-                        // Extract additional metadata using regex patterns
-                        // Extract board size from #SIZE:width,height
-                        Pattern sizePattern = Pattern.compile("(#SIZE:|SIZE:)(\\d+),(\\d+)");
-                        Matcher sizeMatcher = sizePattern.matcher(saveData);
-                        if (sizeMatcher.find()) {
-                            int width = Integer.parseInt(sizeMatcher.group(2));
-                            int height = Integer.parseInt(sizeMatcher.group(3));
-                            boardSize = "Board: " + width + "\u00D7" + height;
-                            Timber.d("[SAVEDATA] Found board size in slot %d: %s", i, boardSize);
-                        } else {
-                            // Try WIDTH/HEIGHT format
-                            Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
-                            Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
-                            Matcher widthMatcher = widthPattern.matcher(saveData);
-                            Matcher heightMatcher = heightPattern.matcher(saveData);
-                            int width = 0, height = 0;
-                            
-                            if (widthMatcher.find()) {
-                                width = Integer.parseInt(widthMatcher.group(1));
-                                Timber.d("[SAVEDATA] Found width in slot %d: %d", i, width);
-                            }
-                            
-                            if (heightMatcher.find()) {
-                                height = Integer.parseInt(heightMatcher.group(1));
-                                Timber.d("[SAVEDATA] Found height in slot %d: %d", i, height);
-                            }
-                            
-                            if (width > 0 && height > 0) {
-                                boardSize = "Board: " + width + "\u00D7" + height;
-                            }
-                        }
-                        
-                        // Extract difficulty from DIFFICULTY:level
-                        Pattern difficultyPattern = Pattern.compile("(DIFFICULTY:|#DIFFICULTY:)([^;\\n]+)");
-                        Matcher difficultyMatcher = difficultyPattern.matcher(saveData);
-                        if (difficultyMatcher.find()) {
-                            String diffValue = difficultyMatcher.group(2);
-                            try {
-                                // Try parsing as integer first
-                                int difficultyInt = Integer.parseInt(diffValue.trim());
-                                difficulty = difficultyIntToString(difficultyInt);
-                            } catch (NumberFormatException e) {
-                                // If it's already a string value, use it directly
-                                difficulty = diffValue.trim();
-                            }
-                            Timber.d("[SAVEDATA] Found difficulty in slot %d: %s", i, difficulty);
-                        } else {
-                            // If difficulty not found, use beginner difficulty as fallback
-                            difficulty = difficultyIntToString(Constants.DIFFICULTY_BEGINNER);
-                        }
-                        
-                        // Extract move count - try multiple patterns
-                        Pattern movesPattern1 = Pattern.compile("\\|MOVES:(\\d+)");
-                        Pattern movesPattern2 = Pattern.compile("MOVES:(\\d+);");
-                        Pattern movesPattern3 = Pattern.compile("#MOVES:(\\d+)");
-                        
-                        Matcher movesMatcher1 = movesPattern1.matcher(saveData);
-                        Matcher movesMatcher2 = movesPattern2.matcher(saveData);
-                        Matcher movesMatcher3 = movesPattern3.matcher(saveData);
-                        
-                        int moves = 0;
-                        if (movesMatcher1.find()) {
-                            moves = Integer.parseInt(movesMatcher1.group(1));
-                            Timber.d("[SAVEDATA] Found moves with pipe pattern in slot %d: %d", i, moves);
-                        } else if (movesMatcher2.find()) {
-                            moves = Integer.parseInt(movesMatcher2.group(1));
-                            Timber.d("[SAVEDATA] Found moves with semicolon pattern in slot %d: %d", i, moves);
-                        } else if (movesMatcher3.find()) {
-                            moves = Integer.parseInt(movesMatcher3.group(1));
-                            Timber.d("[SAVEDATA] Found moves with hash pattern in slot %d: %d", i, moves);
-                        }
-                        
-                        if (moves > 0) {
-                            movesCount = "Moves: " + moves;
-                            
-                            // Only show completion status if game has been started (moves > 0)
-                            // Extract completion status from #SOLVED:true
-                            Pattern solvedPattern = Pattern.compile("(#SOLVED:|SOLVED:)(true|false)");
-                            Matcher solvedMatcher = solvedPattern.matcher(saveData);
-                            if (solvedMatcher.find()) {
-                                boolean solved = Boolean.parseBoolean(solvedMatcher.group(2));
-                                completionStatus = solved ? "Completed" : "Incomplete";
-                                Timber.d("[SAVEDATA] Found solved status in slot %d: %s", i, completionStatus);
-                            }
-                        }
-                        
-                        // Create minimap
-                        try {
-                            minimap = createMinimapFromPath(requireContext(), savePath, 100, 100);
-                        } catch (Exception e) {
-                            Timber.e(e, "Error creating minimap for slot %d", i);
-                        }
+                        boardSize = meta.boardSize;
+                        difficulty = meta.difficulty;
+                        movesCount = meta.movesCount;
+                        completionStatus = meta.completionStatus;
+                        minimap = meta.minimap;
                     }
                     
                     // Add save slot with metadata
@@ -597,25 +520,27 @@ public class SaveGameFragment extends BaseGameFragment {
             if (historyEntries != null && !historyEntries.isEmpty()) {
                 List<HistoryEntry> entries = new ArrayList<>();
                 for (GameHistoryEntry entry : historyEntries) {
-                    // Create a history item with data from the entry
                     String name = entry.getMapName();
-                    // Format date manually since getFormattedDate() might not exist
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
-                    String date = sdf.format(new Date(entry.getTimestamp()));
                     int moves = entry.getMovesMade();
                     String mapPath = entry.getMapPath();
                     
-                    // Create a bitmap from the map file
-                    Bitmap minimap = null;
-                    try {
-                        // Create a bitmap for the map minimap
-                        minimap = createMinimapFromPath(requireContext(), mapPath, 100, 100);
-                    } catch (Exception e) {
-                        Timber.e(e, "Error creating minimap");
+                    // Resolve to absolute path for loadAbsoluteData
+                    String absolutePath = mapPath;
+                    if (mapPath != null && !mapPath.startsWith("/")) {
+                        absolutePath = requireContext().getFileStreamPath(mapPath).getAbsolutePath();
                     }
                     
-                    // Create a history item and add it to the adapter
-                    HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves, "16×16", mapPath, minimap);
+                    // Extract metadata using shared method (DRY - same as save slots)
+                    String saveData = FileReadWrite.loadAbsoluteData(absolutePath);
+                    SaveDataMetadata meta = extractSaveMetadata(saveData, absolutePath);
+                    
+                    // Use map name from metadata if entry name is missing
+                    if ((name == null || name.isEmpty()) && meta.mapName != null) {
+                        name = meta.mapName;
+                    }
+                    
+                    HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
+                            meta.boardSize, mapPath, meta.minimap, meta.difficulty, meta.completionStatus);
                     entries.add(historyEntry);
                 }
                 
@@ -1792,9 +1717,36 @@ public class SaveGameFragment extends BaseGameFragment {
             // Set moves
             holder.movesText.setText(entry.getMoves() + " moves");
             
+            // Set board size (DRY - same metadata as save slots)
+            if (entry.getBoardSize() != null && !entry.getBoardSize().isEmpty()) {
+                holder.boardSizeText.setVisibility(View.VISIBLE);
+                holder.boardSizeText.setText(entry.getBoardSize());
+            } else {
+                holder.boardSizeText.setVisibility(View.GONE);
+            }
+            
+            // Set difficulty (DRY - same metadata as save slots)
+            if (entry.getDifficulty() != null && !entry.getDifficulty().isEmpty()) {
+                holder.difficultyText.setVisibility(View.VISIBLE);
+                holder.difficultyText.setText(entry.getDifficulty());
+            } else {
+                holder.difficultyText.setVisibility(View.GONE);
+            }
+            
+            // Set completion status (DRY - same metadata as save slots)
+            if (entry.getCompletionStatus() != null && !entry.getCompletionStatus().isEmpty()) {
+                holder.completionStatus.setVisibility(View.VISIBLE);
+                holder.completionStatus.setText(entry.getCompletionStatus());
+            } else {
+                holder.completionStatus.setVisibility(View.GONE);
+            }
+            
             // Set minimap if available
             if (entry.getMinimap() != null) {
                 holder.minimapView.setImageBitmap(entry.getMinimap());
+                holder.minimapView.setVisibility(View.VISIBLE);
+            } else {
+                holder.minimapView.setVisibility(View.GONE);
             }
             
             // Content description for accessibility
@@ -1906,7 +1858,9 @@ public class SaveGameFragment extends BaseGameFragment {
         TextView nameText;
         TextView dateText;
         TextView movesText;
-        TextView durationText;
+        TextView boardSizeText;
+        TextView difficultyText;
+        TextView completionStatus;
         ImageView minimapView;
         ImageButton deleteButton;
         
@@ -1915,7 +1869,9 @@ public class SaveGameFragment extends BaseGameFragment {
             nameText = itemView.findViewById(R.id.name_text);
             dateText = itemView.findViewById(R.id.date_text);
             movesText = itemView.findViewById(R.id.moves_text);
-            durationText = itemView.findViewById(R.id.duration_text);
+            boardSizeText = itemView.findViewById(R.id.board_size_text);
+            difficultyText = itemView.findViewById(R.id.difficulty_text);
+            completionStatus = itemView.findViewById(R.id.completion_status);
             minimapView = itemView.findViewById(R.id.minimap_view);
             deleteButton = itemView.findViewById(R.id.delete_button);
         }
@@ -1965,28 +1921,32 @@ public class SaveGameFragment extends BaseGameFragment {
         private final String name;
         private final Date date;
         private final int moves;
-        private final String size;
+        private final String boardSize;
         private final String mapPath;
         private final Bitmap minimap;
-        private final int id;
+        private final String difficulty;
+        private final String completionStatus;
         
-        public HistoryEntry(String name, Date date, int moves, String size, String mapPath, Bitmap minimap) {
+        public HistoryEntry(String name, Date date, int moves, String boardSize, String mapPath, Bitmap minimap,
+                String difficulty, String completionStatus) {
             this.name = name;
             this.date = date;
             this.moves = moves;
-            this.size = size;
+            this.boardSize = boardSize;
             this.mapPath = mapPath;
             this.minimap = minimap;
-            this.id = 0; // default id
+            this.difficulty = difficulty;
+            this.completionStatus = completionStatus;
         }
         
-        public int getId() { return id; }
         public String getName() { return name; }
         public Date getDate() { return date; }
         public int getMoves() { return moves; }
-        public String getSize() { return size; }
+        public String getBoardSize() { return boardSize; }
         public String getMapPath() { return mapPath; }
         public Bitmap getMinimap() { return minimap; }
+        public String getDifficulty() { return difficulty; }
+        public String getCompletionStatus() { return completionStatus; }
     }
 
     private boolean hasTargets(String saveData) {
