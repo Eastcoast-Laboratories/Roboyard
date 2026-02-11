@@ -1005,8 +1005,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (isChecked) {
                 // Show hint container with slide down animation
                 slideDownHintContainer();
-                prevHintButton.setVisibility(View.VISIBLE);
-                nextHintButton.setVisibility(View.VISIBLE);
                 
                 // Remove vertical padding from status text when hint is visible (keep horizontal)
                 if (statusTextView != null) {
@@ -1051,6 +1049,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     gameInfoContainer2.setPadding(16, 0, 16, 5);
                     Timber.d("[HINT_SYSTEM] RE-SET compact info box padding AFTER hint display");
                 }
+                
+                // Update arrow visibility based on current hint position
+                updateHintNavigationArrows();
             } else {
                 // Hide hint container with slide up animation
                 slideUpHintContainer();
@@ -1108,6 +1109,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     gameStateManager.incrementSolutionStep();
                 }
                 Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
+                
+                // Update arrow visibility
+                updateHintNavigationArrows();
             } else {
                 Timber.d("[HINT_SYSTEM] Already at first hint, can't go back further");
             }
@@ -2830,6 +2834,41 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
+     * Update hint navigation arrow visibility based on current hint position
+     */
+    private void updateHintNavigationArrows() {
+        GameSolution solution = gameStateManager.getCurrentSolution();
+        if (solution == null || solution.getMoves().isEmpty()) {
+            // No solution yet, hide both arrows
+            prevHintButton.setVisibility(View.GONE);
+            nextHintButton.setVisibility(View.GONE);
+            return;
+        }
+        
+        int totalMoves = solution.getMoves().size();
+        int totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
+        
+        // Hide prev arrow if at first hint
+        if (currentHintStep == 0) {
+            prevHintButton.setVisibility(View.GONE);
+        } else {
+            prevHintButton.setVisibility(View.VISIBLE);
+        }
+        
+        // Hide next arrow if at last hint
+        if (currentHintStep >= totalPossibleHints - 1) {
+            nextHintButton.setVisibility(View.GONE);
+        } else {
+            nextHintButton.setVisibility(View.VISIBLE);
+        }
+        
+        Timber.d("[HINT_SYSTEM] Updated arrow visibility: step=%d/%d, prev=%s, next=%s",
+                currentHintStep, totalPossibleHints - 1,
+                prevHintButton.getVisibility() == View.VISIBLE ? "visible" : "hidden",
+                nextHintButton.getVisibility() == View.VISIBLE ? "visible" : "hidden");
+    }
+    
+    /**
      * Common method to show the next hint with level restrictions
      * used by status text view, next hint button, etc.
      */
@@ -2879,6 +2918,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 gameStateManager.incrementSolutionStep();
             }
             Timber.d("[HINT_SYSTEM] Updated solution step to %d", currentHintStep);
+            
+            // Update arrow visibility
+            updateHintNavigationArrows();
         } else {
             Timber.d("[HINT_SYSTEM] Already at last hint, can't go further (from %s)", source);
         }
