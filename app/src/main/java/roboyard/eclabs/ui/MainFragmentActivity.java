@@ -162,15 +162,36 @@ public class MainFragmentActivity extends AppCompatActivity {
             // This is a deep link
             Timber.d("[DEEPLINK] Received deep link: %s", data.toString());
             
-            // Extract parameters
+            // Extract parameters - name & difficulty may be separate query params or embedded in data
             String mapData = data.getQueryParameter("data");
             String mapName = data.getQueryParameter("name");
             String difficultyStr = data.getQueryParameter("difficulty");
             
+            // The play button on roboyard.z11.de embeds &name=...&difficulty=... inside the data value.
+            // Extract them from mapData if not found as separate query parameters.
+            if (mapData != null && mapData.contains("&name=")) {
+                int nameIdx = mapData.indexOf("&name=");
+                String tail = mapData.substring(nameIdx); // "&name=ZUQAV&difficulty=..."
+                mapData = mapData.substring(0, nameIdx);  // pure map string
+                
+                // Parse embedded parameters
+                String[] params = tail.split("&");
+                for (String param : params) {
+                    if (param.startsWith("name=") && mapName == null) {
+                        String val = param.substring("name=".length());
+                        try { val = java.net.URLDecoder.decode(val, "UTF-8"); } catch (Exception ignored) {}
+                        if (!val.isEmpty()) mapName = val;
+                    } else if (param.startsWith("difficulty=") && difficultyStr == null) {
+                        String val = param.substring("difficulty=".length());
+                        if (!val.isEmpty()) difficultyStr = val;
+                    }
+                }
+                Timber.d("[DEEPLINK] Extracted embedded params - name: %s, difficulty: %s", mapName, difficultyStr);
+            }
+            
             // Log the raw map data for debugging
             if (mapData != null) {
                 Timber.d("[DEEPLINK_RAW] Raw map data length: %d", mapData.length());
-                // Log first 100 chars to see format
                 String previewData = mapData.length() > 100 ? mapData.substring(0, 100) + "..." : mapData;
                 Timber.d("[DEEPLINK_RAW] Map data preview: %s", previewData);
             } else {
