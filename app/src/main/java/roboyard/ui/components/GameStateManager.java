@@ -176,10 +176,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.getSolverManager(): Getting SolverManager singleton instance");
         SolverManager solverManager = SolverManager.getInstance();
 
-        // Set solver listener if not already set
-        if (solverManager.getListener() == null) {
+        // Always set this GameStateManager as the listener.
+        // The SolverManager is a singleton that survives Activity recreation,
+        // so it may hold a stale listener from a destroyed GameStateManager.
+        if (solverManager.getListener() != this) {
+            Timber.d("[SOLUTION_SOLVER][DEEPLINK_DIAG] GameStateManager replacing SolverListener (old=%s, new=%s)", solverManager.getListener(), this);
             solverManager.setListener(this);
-            Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager registered itself as the SolverListener");
         }
         return solverManager;
     }
