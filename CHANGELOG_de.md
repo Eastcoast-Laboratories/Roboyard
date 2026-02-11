@@ -2,6 +2,12 @@ Changelog Deutsch
 =================
 
 
+## Version 36 (2026-02-11)
+- bei Gespeicherten Spielen findet die K.I. wieder Lösungen
+- In der History werden alle Karten nach 30s gespeichert
+- Bugfixes
+
+
 ## Version 35 (2026-02-10)
 - Schwierigkeitsanpassungen für viele Levels
 - Mehr Feinschliff für Anfänger-Levels

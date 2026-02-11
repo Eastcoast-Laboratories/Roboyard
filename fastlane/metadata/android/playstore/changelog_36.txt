@@ -1,0 +1,12 @@
+# Play Store Changelogs für Version 36
+
+<en-GB>
+- Loaded games are solvable by the A.I. again
+- History stores all maps after 30s
+- Bugfixes
+</en-GB>
+<de-DE>
+- bei Gespeicherten Spielen findet die K.I. wieder Lösungen
+- In der History werden alle Karten nach 30s gespeichert
+- Bugfixes
+</de-DE>

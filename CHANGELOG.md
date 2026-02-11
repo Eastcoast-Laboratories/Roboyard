@@ -2,6 +2,12 @@
 =========
 
 
+## Version 36 (2026-02-11)
+- Loaded games are solvable by the A.I. again
+- History stores all maps after 30s
+- Bugfixes
+
+
 ## Version 35 (2026-02-10)
 - Difficulty adjustments for many levels
 - More fine-tuning for beginner levels

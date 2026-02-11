@@ -1,0 +1,3 @@
+- Loaded games are solvable by the A.I. again
+- History stores all maps after 30s
+- Bugfixes

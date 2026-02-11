@@ -1,0 +1,3 @@
+- bei Gespeicherten Spielen findet die K.I. wieder Lösungen
+- In der History werden alle Karten nach 30s gespeichert
+- Bugfixes
