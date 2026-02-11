@@ -578,7 +578,7 @@ public class GameGridView extends View {
         float cellHeight = (float) height / gridHeight;
         // In landscape mode, scale up to use the extra horizontal space
         boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-        if (isLandscape) {
+        if (true || isLandscape) { // also in portrait mode
             float gridSizeMultiplier = 1.125f;
             // if board-size > 10x10, decrease the multiplier
             if (gridWidth > 10 || gridHeight > 10) {
@@ -669,15 +669,15 @@ public class GameGridView extends View {
         }
         
         GameState state = gameStateManager.getCurrentState().getValue();
-        int newGridWidth = state.getWidth();
-        int newGridHeight = state.getHeight();
-        if (newGridWidth != gridWidth || newGridHeight != gridHeight) {
-            gridWidth = newGridWidth;
-            gridHeight = newGridHeight;
-            Timber.d("[GRID_LAYOUT] Dimensions changed to %dx%d, requesting layout", gridWidth, gridHeight);
-            post(this::requestLayout);
-            return;
-        }
+        gridWidth = state.getWidth();
+        gridHeight = state.getHeight();
+        // if (newGridWidth != gridWidth || newGridHeight != gridHeight) {
+        //     gridWidth = newGridWidth;
+        //     gridHeight = newGridHeight;
+        //     Timber.d("[GRID_LAYOUT] Dimensions changed to %dx%d, requesting layout", gridWidth, gridHeight);
+        //     post(this::requestLayout);
+        //     return;
+        // }
         
         // ULTRA-DEBUG: Count robots that will be drawn (only when ENABLE_ULTRA_DEBUG = true)
         if (ENABLE_ULTRA_DEBUG) {
