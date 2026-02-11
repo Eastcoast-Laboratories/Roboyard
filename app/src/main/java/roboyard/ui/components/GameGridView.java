@@ -2,6 +2,7 @@ package roboyard.ui.components;
 
 import android.view.accessibility.AccessibilityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -575,22 +576,25 @@ public class GameGridView extends View {
         // Calculate cell size to fit the grid
         float cellWidth = (float) width / gridWidth;
         float cellHeight = (float) height / gridHeight;
-        // constant to ensure the grid is not too small
-        float gridSizeMultiplier = 1.125f;
-        // if board-size > 10x10, decrease the multiplier
-        if (gridWidth > 10 || gridHeight > 10) {
-            gridSizeMultiplier = 1.085f;
+        // In landscape mode, scale up to use the extra horizontal space
+        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        if (isLandscape) {
+            float gridSizeMultiplier = 1.125f;
+            // if board-size > 10x10, decrease the multiplier
+            if (gridWidth > 10 || gridHeight > 10) {
+                gridSizeMultiplier = 1.085f;
+            }
+            // if >14x14, decrease the multiplier
+            if (gridWidth > 14 || gridHeight > 14) {
+                gridSizeMultiplier = 1.07f;
+            }
+            // if >18x18, decrease the multiplier
+            if (gridWidth > 18 || gridHeight > 18) {
+                gridSizeMultiplier = 1.05f;
+            }
+            cellWidth *= gridSizeMultiplier;
+            cellHeight *= gridSizeMultiplier;
         }
-        // if >14x14, decrease the multiplier
-        if (gridWidth > 14 || gridHeight > 14) {
-            gridSizeMultiplier = 1.07f;
-        }
-        // if >18x18, decrease the multiplier
-        if (gridWidth > 18 || gridHeight > 18) {
-            gridSizeMultiplier = 1.05f;
-        }
-        cellWidth *= gridSizeMultiplier;
-        cellHeight *= gridSizeMultiplier;
         cellSize = Math.min(cellWidth, cellHeight);
         
         // Calculate path rendering values based on cellSize for responsive design
@@ -665,8 +669,15 @@ public class GameGridView extends View {
         }
         
         GameState state = gameStateManager.getCurrentState().getValue();
-        gridWidth = state.getWidth();
-        gridHeight = state.getHeight();
+        int newGridWidth = state.getWidth();
+        int newGridHeight = state.getHeight();
+        if (newGridWidth != gridWidth || newGridHeight != gridHeight) {
+            gridWidth = newGridWidth;
+            gridHeight = newGridHeight;
+            Timber.d("[GRID_LAYOUT] Dimensions changed to %dx%d, requesting layout", gridWidth, gridHeight);
+            post(this::requestLayout);
+            return;
+        }
         
         // ULTRA-DEBUG: Count robots that will be drawn (only when ENABLE_ULTRA_DEBUG = true)
         if (ENABLE_ULTRA_DEBUG) {
@@ -2021,10 +2032,13 @@ public class GameGridView extends View {
         if (dimensionsChanged) {
             gridWidth = maxX + 1;
             gridHeight = maxY + 1;
-            Timber.d("[ROBOTS] Grid dimensions updated to %dx%d", gridWidth, gridHeight);
+            Timber.d("[GRID_LAYOUT] Grid dimensions updated to %dx%d in setGridElements, requesting layout", gridWidth, gridHeight);
             
             // Re-initialize tile rotations for the new dimensions
             initializeTileRotations();
+            
+            // Request re-measure so cellSize is recalculated for the new dimensions
+            requestLayout();
         }
         
         // Log positions of robots for debugging
