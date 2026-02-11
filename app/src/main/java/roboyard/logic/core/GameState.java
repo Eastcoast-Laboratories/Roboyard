@@ -20,6 +20,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -778,6 +779,20 @@ public class GameState implements Serializable {
                     boardDataStarted = false;
                     Timber.d("[TARGET LOADING] Entering TARGET_SECTION section");
                     inTargetSection = true;
+                    // Remove any target GameElements already added from board data parsing
+                    // to avoid duplicates — TARGET_SECTION is the authoritative source
+                    int removedCount = 0;
+                    Iterator<GameElement> it = state.gameElements.iterator();
+                    while (it.hasNext()) {
+                        if (it.next().getType() == GameElement.TYPE_TARGET) {
+                            it.remove();
+                            removedCount++;
+                        }
+                    }
+                    if (removedCount > 0) {
+                        Timber.d("[TARGET LOADING] Removed %d duplicate target GameElements from board data (TARGET_SECTION takes precedence)", removedCount);
+                        targetsAdded -= removedCount;
+                    }
                     continue;
                 } else if (line.startsWith("TARGET_SECTION:") && line.length() > 15) {
                     // Format: TARGET_SECTION:x,y,color (each TARGET_SECTION entry is on its own line)
