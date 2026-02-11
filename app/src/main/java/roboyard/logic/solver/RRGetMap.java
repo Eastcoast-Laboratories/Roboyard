@@ -267,11 +267,21 @@ public class RRGetMap {
             return "[ASCII_MAP] Empty or null grid elements provided.";
         }
         
+        // Determine actual board dimensions from grid elements (including border walls at +1)
+        int maxX = 0;
+        int maxY = 0;
+        for (GridElement element : gridElements) {
+            maxX = Math.max(maxX, element.getX());
+            maxY = Math.max(maxY, element.getY());
+        }
+        int mapWidth = maxX + 1;
+        int mapHeight = maxY + 1;
+        
         // Create a double-width ASCII map to separate walls from robots/targets
         // For each grid cell (x,y), we'll use:
         // - asciiMap[x*2][y] for vertical walls
         // - asciiMap[x*2+1][y] for robots and targets
-        String[][] asciiMap = new String[2*Constants.MAX_BOARD_SIZE+1][Constants.MAX_BOARD_SIZE]; // Double width to handle separate positions
+        String[][] asciiMap = new String[2 * mapWidth + 1][mapHeight];
         
         // Track cells that have both a robot and a horizontal wall
         Map<String, String> cellContents = new HashMap<>();
@@ -392,26 +402,18 @@ public class RRGetMap {
         // Build the ASCII map as a string
         StringBuilder result = new StringBuilder("[ASCII_MAP] Board state:\n");
         
-        // Find the actual dimensions of the board from the grid elements
-        int maxX = 0;
-        int maxY = 0;
-        for (GridElement element : gridElements) {
-            maxX = Math.max(maxX, element.getX());
-            maxY = Math.max(maxY, element.getY());
-        }
-        
         // Add column headers (X coordinates)
         result.append("   "); // Space for row labels
-        for (int x = 0; x <= maxX; x++) {
+        for (int x = 0; x < mapWidth; x++) {
             result.append(String.format("%2d", x));
         }
         result.append("\n");
         
         // Add each row with row header (Y coordinate)
-        for (int y = 0; y <= maxY; y++) {
+        for (int y = 0; y < mapHeight; y++) {
             result.append(String.format("%2d ", y));
             
-            for (int x = 0; x <= maxX; x++) {
+            for (int x = 0; x < mapWidth; x++) {
                 // Add vertical wall or space
                 String vWall = (asciiMap[x*2][y] != null) ? asciiMap[x*2][y] : " ";
                 result.append(vWall);
