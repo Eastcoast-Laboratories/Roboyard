@@ -157,13 +157,22 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Load the initial level
         if (currentLevelId == 0) {
-            // Default to level 1 if no level was specified
-            currentLevelId = 1;
-            loadLevel(currentLevelId);
-            // Update the spinner selection to match level 1
-            editLevelSpinner.setSelection(1); // Second item (level 1)
+            // Load last played level, fallback to level 1
+            int lastPlayed = completionManager.getLastPlayedLevel();
+            
+            if (lastPlayed > 0 && levelExistsInSpinner(lastPlayed)) {
+                currentLevelId = lastPlayed;
+                loadLevel(currentLevelId);
+                setSpinnerToLevel(currentLevelId);
+            } else {
+                currentLevelId = 1;
+                loadLevel(currentLevelId);
+                setSpinnerToLevel(1);
+                Toast.makeText(requireContext(), "No last played level found, loading Level 1", Toast.LENGTH_SHORT).show();
+            }
         } else {
             loadLevel(currentLevelId);
+            setSpinnerToLevel(currentLevelId);
         }
         
         Timber.d("LevelDesignEditorFragment: onViewCreated, loaded level %d", currentLevelId);
@@ -321,6 +330,30 @@ public class LevelDesignEditorFragment extends Fragment {
                 // Do nothing
             }
         });
+    }
+    
+    private boolean levelExistsInSpinner(int levelId) {
+        if (editLevelSpinner == null || editLevelSpinner.getAdapter() == null) return false;
+        String target = "Level " + levelId;
+        String customTarget = "Custom Level " + levelId;
+        for (int i = 0; i < editLevelSpinner.getAdapter().getCount(); i++) {
+            String item = (String) editLevelSpinner.getAdapter().getItem(i);
+            if (target.equals(item) || customTarget.equals(item)) return true;
+        }
+        return false;
+    }
+    
+    private void setSpinnerToLevel(int levelId) {
+        if (editLevelSpinner == null || editLevelSpinner.getAdapter() == null) return;
+        String target = "Level " + levelId;
+        String customTarget = "Custom Level " + levelId;
+        for (int i = 0; i < editLevelSpinner.getAdapter().getCount(); i++) {
+            String item = (String) editLevelSpinner.getAdapter().getItem(i);
+            if (target.equals(item) || customTarget.equals(item)) {
+                editLevelSpinner.setSelection(i);
+                return;
+            }
+        }
     }
     
     private void setupMapTouchEvents() {
