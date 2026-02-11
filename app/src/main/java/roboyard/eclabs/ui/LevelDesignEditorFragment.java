@@ -24,7 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import roboyard.eclabs.RoboyardApiClient;
 import roboyard.logic.core.Constants;
 import roboyard.eclabs.R;
 
@@ -69,7 +69,6 @@ public class LevelDesignEditorFragment extends Fragment {
     private TextView levelIdTextView;
     private Spinner editLevelSpinner;
     private RadioGroup editModeRadioGroup;
-    private Button saveButton;
     private Button cancelButton;
     private Button exportButton;
     private TextView levelTextView;
@@ -78,7 +77,6 @@ public class LevelDesignEditorFragment extends Fragment {
     private Button applyBoardSizeButton;
     private RadioGroup robotColorRadioGroup;
     private RadioGroup targetColorRadioGroup;
-    private Switch overwriteSwitch;
     
     // Edit modes
     private static final int EDIT_MODE_ROBOT = 0;
@@ -133,7 +131,6 @@ public class LevelDesignEditorFragment extends Fragment {
         levelIdTextView = view.findViewById(R.id.level_id_text);
         editLevelSpinner = view.findViewById(R.id.edit_level_spinner);
         editModeRadioGroup = view.findViewById(R.id.edit_mode_radio_group);
-        saveButton = view.findViewById(R.id.save_level_button);
         cancelButton = view.findViewById(R.id.cancel_button);
         exportButton = view.findViewById(R.id.export_level_button);
         levelTextView = view.findViewById(R.id.level_text_view);
@@ -142,7 +139,6 @@ public class LevelDesignEditorFragment extends Fragment {
         applyBoardSizeButton = view.findViewById(R.id.apply_board_size_button);
         robotColorRadioGroup = view.findViewById(R.id.robot_color_radio_group);
         targetColorRadioGroup = view.findViewById(R.id.target_color_radio_group);
-        overwriteSwitch = view.findViewById(R.id.overwrite_switch);
         
         // Set up robot color radio buttons for selection
         setupColorRadioButtons();
@@ -191,6 +187,8 @@ public class LevelDesignEditorFragment extends Fragment {
                 currentRobotColor = Constants.COLOR_BLUE;
             } else if (checkedId == R.id.robot_yellow_radio) {
                 currentRobotColor = Constants.COLOR_YELLOW;
+            } else if (checkedId == R.id.robot_silver_radio) {
+                currentRobotColor = Constants.COLOR_SILVER;
             }
         });
         
@@ -249,17 +247,20 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void setupLevelSpinner() {
-        // Populate spinner with all available levels
+        // Populate spinner with all available levels, sorted numerically
         List<String> levelOptions = new ArrayList<>();
         levelOptions.add("New Level");
         
-        // Add existing levels
+        // Collect level IDs for numeric sorting
+        List<Integer> builtInIds = new ArrayList<>();
+        List<Integer> customIds = new ArrayList<>();
+        
+        // Add existing built-in levels
         try {
             String[] files = requireContext().getAssets().list("Maps");
             for (String file : files) {
                 if (file.startsWith("level_") && file.endsWith(".txt")) {
-                    int levelId = Integer.parseInt(file.substring(6, file.length() - 4));
-                    levelOptions.add("Level " + levelId);
+                    builtInIds.add(Integer.parseInt(file.substring(6, file.length() - 4)));
                 }
             }
         } catch (IOException e) {
@@ -273,10 +274,20 @@ public class LevelDesignEditorFragment extends Fragment {
             for (File file : internalFiles) {
                 String fileName = file.getName();
                 if (fileName.startsWith("custom_level_") && fileName.endsWith(".txt")) {
-                    int levelId = Integer.parseInt(fileName.substring(13, fileName.length() - 4));
-                    levelOptions.add("Custom Level " + levelId);
+                    customIds.add(Integer.parseInt(fileName.substring(13, fileName.length() - 4)));
                 }
             }
+        }
+        
+        // Sort numerically
+        java.util.Collections.sort(builtInIds);
+        java.util.Collections.sort(customIds);
+        
+        for (int id : builtInIds) {
+            levelOptions.add("Level " + id);
+        }
+        for (int id : customIds) {
+            levelOptions.add("Custom Level " + id);
         }
         
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -353,9 +364,6 @@ public class LevelDesignEditorFragment extends Fragment {
                 Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show();
             }
         });
-        
-        // Save button
-        saveButton.setOnClickListener(v -> saveLevel());
         
         // Cancel button
         cancelButton.setOnClickListener(v -> {
@@ -463,32 +471,58 @@ public class LevelDesignEditorFragment extends Fragment {
         dialog.show();
     }
     
-    private void shareLevelOnline(String levelText, String userName) {
-        try {
-            // URL encode the level text
-            String encodedLevelText = URLEncoder.encode(levelText, "UTF-8");
+    private void shareLevelOnline(String levelText, String mapName) {
+        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+        
+        if (apiClient.isLoggedIn()) {
+            // Logged in: post directly via API
+            Toast.makeText(requireContext(), "Sharing to account...", Toast.LENGTH_SHORT).show();
             
-            // Add user name to the data if provided
-            if (!TextUtils.isEmpty(userName)) {
-                encodedLevelText += "&name=" + URLEncoder.encode(userName, "UTF-8");
+            apiClient.shareMap(levelText, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
+                @Override
+                public void onSuccess(RoboyardApiClient.ShareResult result) {
+                    if (result.isDuplicate) {
+                        Toast.makeText(requireContext(), "Map already exists", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
+                    }
+                    
+                    // Open the share URL in browser
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.shareUrl));
+                    startActivity(intent);
+                    
+                    Timber.d("[SHARE] Map shared to account, ID: %d, URL: %s, Duplicate: %b", result.mapId, result.shareUrl, result.isDuplicate);
+                }
+                
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), getString(R.string.share_failed, error), Toast.LENGTH_LONG).show();
+                    Timber.e("[SHARE] API share failed: %s", error);
+                }
+            });
+        } else {
+            // Not logged in: open share URL in browser
+            try {
+                String encodedLevelText = URLEncoder.encode(levelText, "UTF-8");
+                String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedLevelText;
+                
+                if (!TextUtils.isEmpty(mapName)) {
+                    shareUrl += "&name=" + URLEncoder.encode(mapName, "UTF-8");
+                }
+                
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
+                startActivity(intent);
+                
+                Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
+                Timber.d("[SHARE] Sharing level with URL: %s", shareUrl);
+                
+            } catch (UnsupportedEncodingException e) {
+                Timber.e(e, "[SHARE] Error encoding level text");
+                Toast.makeText(requireContext(), "Error creating share URL", Toast.LENGTH_SHORT).show();
+            } catch (ActivityNotFoundException e) {
+                Timber.e(e, "[SHARE] No browser available to open URL");
+                Toast.makeText(requireContext(), "No browser available to open URL", Toast.LENGTH_SHORT).show();
             }
-            
-            // Create the share URL
-            String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedLevelText;
-            
-            // Create an intent to open the URL
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
-            startActivity(intent);
-            
-            Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
-            Timber.d("Sharing level with URL: %s", shareUrl);
-            
-        } catch (UnsupportedEncodingException e) {
-            Timber.e(e, "Error encoding level text");
-            Toast.makeText(requireContext(), "Error creating share URL", Toast.LENGTH_SHORT).show();
-        } catch (ActivityNotFoundException e) {
-            Timber.e(e, "No browser available to open URL");
-            Toast.makeText(requireContext(), "No browser available to open URL", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -520,7 +554,7 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         try {
-            String levelFileName = String.format("level%d.txt", levelId);
+            String levelFileName = String.format("level_%d.txt", levelId);
             Timber.d("Attempting to load level file: %s", levelFileName);
             
             // Try to load the level from internal storage first (custom levels)
@@ -606,18 +640,20 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void createBorderWalls(int width, int height) {
         // Add border walls to the level
+        // Outer walls sit at the boundary: x=0..width-1 for horizontal, y=0..height-1 for vertical
+        // Bottom wall row is at y=height, right wall column is at x=width
         for (int x = 0; x < width; x++) {
             // Top horizontal walls
             currentState.addHorizontalWall(x, 0);
             // Bottom horizontal walls
-            currentState.addHorizontalWall(x, height - 1);
+            currentState.addHorizontalWall(x, height);
         }
         
         for (int y = 0; y < height; y++) {
             // Left vertical walls
             currentState.addVerticalWall(0, y);
             // Right vertical walls
-            currentState.addVerticalWall(width - 1, y);
+            currentState.addVerticalWall(width, y);
         }
     }
     
@@ -666,92 +702,60 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private String generateLevelText() {
-        // Generate the level format text based on the current game state
+        // Generate the level format text matching the standard level file format:
+        // board:W,H; then mhX,Y; then mvX,Y; then target_colorX,Y; then robot_colorX,Y;
+        // Sorted numerically (by X first, then Y) within each section
         StringBuilder sb = new StringBuilder();
         
         // Board dimensions
         sb.append("board:").append(currentState.getWidth()).append(",").append(currentState.getHeight()).append(";\n");
         
-        // Add robots
-        for (GameElement element : currentState.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                sb.append("robot:").append(element.getX()).append(",")
-                  .append(element.getY()).append(",")
-                  .append(element.getColor()).append(";\n");
-            }
-        }
+        // Collect elements by type with their coordinates for numeric sorting
+        List<GameElement> horizontalWalls = new ArrayList<>();
+        List<GameElement> verticalWalls = new ArrayList<>();
+        List<GameElement> targets = new ArrayList<>();
+        List<GameElement> robots = new ArrayList<>();
         
-        // Add targets
-        for (GameElement element : currentState.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                sb.append("target:").append(element.getX()).append(",")
-                  .append(element.getY()).append(",")
-                  .append(element.getColor()).append(";\n");
-            }
-        }
-        
-        // Add horizontal walls
         for (GameElement element : currentState.getGameElements()) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                sb.append("mh:").append(element.getX()).append(",")
-                  .append(element.getY()).append(";\n");
+                horizontalWalls.add(element);
+            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                verticalWalls.add(element);
+            } else if (element.getType() == GameElement.TYPE_TARGET) {
+                targets.add(element);
+            } else if (element.getType() == GameElement.TYPE_ROBOT) {
+                robots.add(element);
             }
         }
         
-        // Add vertical walls
-        for (GameElement element : currentState.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                sb.append("mv:").append(element.getX()).append(",")
-                  .append(element.getY()).append(";\n");
-            }
+        // Sort numerically by X first, then Y
+        java.util.Comparator<GameElement> numericSort = (a, b) -> {
+            if (a.getX() != b.getX()) return Integer.compare(a.getX(), b.getX());
+            return Integer.compare(a.getY(), b.getY());
+        };
+        java.util.Collections.sort(horizontalWalls, numericSort);
+        java.util.Collections.sort(verticalWalls, numericSort);
+        java.util.Collections.sort(targets, numericSort);
+        java.util.Collections.sort(robots, numericSort);
+        
+        for (GameElement e : horizontalWalls) {
+            sb.append("mh").append(e.getX()).append(",").append(e.getY()).append(";\n");
+        }
+        for (GameElement e : verticalWalls) {
+            sb.append("mv").append(e.getX()).append(",").append(e.getY()).append(";\n");
+        }
+        for (GameElement e : targets) {
+            sb.append("target_").append(getColorNameLower(e.getColor()))
+              .append(e.getX()).append(",").append(e.getY()).append(";\n");
+        }
+        for (GameElement e : robots) {
+            sb.append("robot_").append(getColorNameLower(e.getColor()))
+              .append(e.getX()).append(",").append(e.getY()).append(";\n");
         }
         
         return sb.toString();
     }
     
-    private void saveLevel() {
-        if (currentLevelId == 0) {
-            // This is a new level, find the next available custom level ID
-            currentLevelId = FIRST_CUSTOM_LEVEL_ID;
-            while (levelExists(currentLevelId) && currentLevelId <= MAX_CUSTOM_LEVEL_ID) {
-                currentLevelId++;
-            }
-            
-            if (currentLevelId > MAX_CUSTOM_LEVEL_ID) {
-                Toast.makeText(requireContext(), "No available custom level slots", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } else if (currentLevelId <= 140 && !overwriteSwitch.isChecked()) {
-            // Can't overwrite built-in levels unless explicitly requested
-            Toast.makeText(requireContext(), "Can't overwrite built-in levels", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // Generate level text content
-        String levelText = generateLevelText();
-        
-        try {
-            // Save to internal storage with custom_level_ prefix for custom levels
-            String fileName = currentLevelId <= 140 ? "level_" + currentLevelId + ".txt" : 
-                                                 "custom_level_" + currentLevelId + ".txt";
-            
-            // Always save custom levels to internal storage
-            File file = new File(requireContext().getFilesDir(), fileName);
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(levelText.getBytes());
-            fos.close();
-            
-            Toast.makeText(requireContext(), "Level saved with ID: " + currentLevelId, Toast.LENGTH_SHORT).show();
-            levelIdTextView.setText("Level ID: " + currentLevelId);
-            
-            // Refresh the spinner
-            setupLevelSpinner();
-            
-        } catch (IOException e) {
-            Toast.makeText(requireContext(), "Error saving level", Toast.LENGTH_SHORT).show();
-            Timber.e(e, "Error saving level %d", currentLevelId);
-        }
-    }
     
     private void addRobotAt(int x, int y) {
         Timber.d("Adding robot at (%d, %d) with color %d", x, y, currentRobotColor);
@@ -856,11 +860,23 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private String getColorName(int colorIndex) {
         switch (colorIndex) {
-            case 0: return "Red";
-            case 1: return "Green";
-            case 2: return "Blue";
-            case 3: return "Yellow";
+            case Constants.COLOR_PINK: return "Red";
+            case Constants.COLOR_GREEN: return "Green";
+            case Constants.COLOR_BLUE: return "Blue";
+            case Constants.COLOR_YELLOW: return "Yellow";
+            case Constants.COLOR_SILVER: return "Silver";
             default: return "Unknown";
+        }
+    }
+    
+    private String getColorNameLower(int colorIndex) {
+        switch (colorIndex) {
+            case Constants.COLOR_PINK: return "red";
+            case Constants.COLOR_GREEN: return "green";
+            case Constants.COLOR_BLUE: return "blue";
+            case Constants.COLOR_YELLOW: return "yellow";
+            case Constants.COLOR_SILVER: return "silver";
+            default: return "unknown";
         }
     }
     
@@ -920,86 +936,9 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private GameState parseLevelContent(String content) {
         Timber.d("Parsing level content: %d characters", content.length());
-        
-        // Split the content by lines
-        String[] lines = content.split("\\n");
-        
-        if (lines.length < 1) {
-            Timber.e("Invalid level format: empty content");
-            return new GameState(12, 14); // Default to 12x14 board
-        }
-        
-        // First line contains board dimensions
-        String[] dimensions = lines[0].trim().split("\\s+");
-        if (dimensions.length < 2) {
-            Timber.e("Invalid level format: first line should have width and height");
-            return new GameState(12, 14); // Default to 12x14 board
-        }
-        
-        // Parse board dimensions
-        int width = 12;
-        int height = 14;
-        try {
-            width = Integer.parseInt(dimensions[0]);
-            height = Integer.parseInt(dimensions[1]);
-            Timber.d("Parsed board dimensions: %dx%d", width, height);
-        } catch (NumberFormatException e) {
-            Timber.e(e, "Error parsing board dimensions");
-        }
-        
-        // Create a new GameState with the parsed dimensions
-        GameState state = new GameState(width, height);
-        
-        // Keep track of how many elements we add
-        int elementCount = 0;
-        
-        // Process remaining lines to add walls, robots, and targets
-        for (int i = 1; i < lines.length; i++) {
-            String line = lines[i].trim();
-            if (line.isEmpty()) continue;
-            
-            String[] parts = line.split("\\s+");
-            if (parts.length < 3) continue;
-            
-            try {
-                int x = Integer.parseInt(parts[1]);
-                int y = Integer.parseInt(parts[2]);
-                
-                if (parts[0].startsWith("wall")) {
-                    // Wall: wall h/v x y
-                    if (parts[0].equals("wall_h")) {
-                        state.setCellType(x, y, Constants.TYPE_HORIZONTAL_WALL);
-                        // Timber.d("Added horizontal wall at (%d, %d)", x, y);
-                        elementCount++;
-                    } else if (parts[0].equals("wall_v")) {
-                        state.setCellType(x, y, Constants.TYPE_VERTICAL_WALL);
-                        // Timber.d("Added vertical wall at (%d, %d)", x, y);
-                        elementCount++;
-                    }
-                } else if (parts[0].startsWith("robot") && parts.length >= 4) {
-                    // Robot: robot colorIndex x y
-                    int color = Integer.parseInt(parts[3]);
-                    state.addRobot(x, y, color);
-                    Timber.d("Added robot at (%d, %d) with color %d", x, y, color);
-                    elementCount++;
-                } else if (parts[0].startsWith("target") && parts.length >= 4) {
-                    // Target: target colorIndex x y
-                    int color = Integer.parseInt(parts[3]);
-                    state.addTarget(x, y, color);
-                    Timber.d("Added target at (%d, %d) with color %d", x, y, color);
-                    elementCount++;
-                }
-            } catch (NumberFormatException e) {
-                Timber.e(e, "Error parsing line: %s", line);
-            } catch (Exception e) {
-                Timber.e(e, "Error processing line: %s", line);
-            }
-        }
-        
-        Timber.d("Successfully parsed level content. Added %d elements to board size %dx%d", 
-                elementCount, width, height);
-        
-        return state;
+        // Delegate to the existing GameState.parseLevel which correctly handles
+        // the board:W,H; mhX,Y; mvX,Y; target_colorX,Y; robot_colorX,Y; format
+        return GameState.parseLevel(requireContext(), content, currentLevelId);
     }
     
     /**
@@ -1067,18 +1006,19 @@ public class LevelDesignEditorFragment extends Fragment {
                                offsetX + boardWidth * cellSize, offsetY + y * cellSize, gridPaint);
             }
             
-            // Draw walls
-            for (int y = 0; y < boardHeight; y++) {
-                for (int x = 0; x < boardWidth; x++) {
-                    int cellType = currentState.getCellType(x, y);
-                    
-                    if (cellType == Constants.TYPE_HORIZONTAL_WALL) {
-                        canvas.drawRect(offsetX + x * cellSize, offsetY + y * cellSize - cellSize/8, 
-                                      offsetX + (x+1) * cellSize, offsetY + y * cellSize + cellSize/8, wallPaint);
-                    } else if (cellType == Constants.TYPE_VERTICAL_WALL) {
-                        canvas.drawRect(offsetX + x * cellSize - cellSize/8, offsetY + y * cellSize, 
-                                      offsetX + x * cellSize + cellSize/8, offsetY + (y+1) * cellSize, wallPaint);
-                    }
+            // Draw walls from GameElements directly to include boundary walls
+            // (outer walls at x=boardWidth and y=boardHeight are outside the grid array)
+            for (GameElement element : currentState.getGameElements()) {
+                int ex = element.getX();
+                int ey = element.getY();
+                if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                    // Horizontal wall drawn as a bar along the top edge of cell (ex, ey)
+                    canvas.drawRect(offsetX + ex * cellSize, offsetY + ey * cellSize - cellSize/8,
+                                  offsetX + (ex+1) * cellSize, offsetY + ey * cellSize + cellSize/8, wallPaint);
+                } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                    // Vertical wall drawn as a bar along the left edge of cell (ex, ey)
+                    canvas.drawRect(offsetX + ex * cellSize - cellSize/8, offsetY + ey * cellSize,
+                                  offsetX + ex * cellSize + cellSize/8, offsetY + (ey+1) * cellSize, wallPaint);
                 }
             }
             
@@ -1110,10 +1050,11 @@ public class LevelDesignEditorFragment extends Fragment {
         
         private int getColorForIndex(int colorIndex) {
             switch (colorIndex) {
-                case 0: return Color.RED;
-                case 1: return Color.GREEN;
-                case 2: return Color.BLUE;
-                case 3: return Color.YELLOW;
+                case Constants.COLOR_PINK: return Color.RED;
+                case Constants.COLOR_GREEN: return Color.GREEN;
+                case Constants.COLOR_BLUE: return Color.BLUE;
+                case Constants.COLOR_YELLOW: return Color.YELLOW;
+                case Constants.COLOR_SILVER: return Color.GRAY;
                 default: return Color.WHITE;
             }
         }

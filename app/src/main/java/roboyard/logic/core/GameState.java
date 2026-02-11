@@ -1044,7 +1044,7 @@ public class GameState implements Serializable {
     /**
      * Parse level content from a level file
      */
-    private static GameState parseLevel(Context context, String levelContent, int levelId) {
+    public static GameState parseLevel(Context context, String levelContent, int levelId) {
         // Default board size
         int width = 14;
         int height = 14;

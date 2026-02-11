@@ -172,6 +172,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Yellow" />
+
+            <RadioButton
+                android:id="@+id/robot_silver_radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Silver" />
         </RadioGroup>
 
         <RadioGroup
@@ -236,29 +242,11 @@
             android:orientation="horizontal"
             android:layout_marginBottom="8dp">
 
-            <Switch
-                android:id="@+id/overwrite_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Overwrite if exists " />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/save_level_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Save" />
-
             <Button
                 android:id="@+id/cancel_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancel"
-                android:layout_marginStart="8dp" />
+                android:text="Cancel" />
         </LinearLayout>
 
         <Button
