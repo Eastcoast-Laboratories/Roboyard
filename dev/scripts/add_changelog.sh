@@ -66,21 +66,17 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Schwierigkeitsanpassungen für viele Levels
-- Mehr Feinschliff für Anfänger-Levels
-- die ersten 10 abgeschlossenen Levels geben jetzt immer mindestens einen Stern
-- Landschaftsmodus nutzt jetzt den Bildschirm besser
-- Accessibility-Steuerung für blinden Spieler kompakter gestaltet
+- bei Gespeicherten Spielen findet die K.I. wieder Lösungen
+- In der History werden alle Karten nach 30s gespeichert
+- Bugfixes
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Difficulty adjustments for many levels
-- More fine-tuning for beginner levels
-- The first 10 completed levels now always give at least one star
-- Landscape mode now uses the screen better
-- Accessibility controls for blind users are now more compact
+- Loaded games are solvable by the A.I. again
+- History stores all maps after 30s
+- Bugfixes
 EOF
 )
 

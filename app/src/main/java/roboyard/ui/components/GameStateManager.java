@@ -137,7 +137,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long gameStartTime;
     private int totalPlayTime = 0;
     private boolean isHistorySaved = false;
-    private static final int HISTORY_SAVE_THRESHOLD = 3; // 3 seconds threshold for saving to history (reduced for testing)
+    private static final int HISTORY_SAVE_THRESHOLD = 30; // seconds threshold for saving to history
 
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
     private WeakReference<Activity> activityRef;
