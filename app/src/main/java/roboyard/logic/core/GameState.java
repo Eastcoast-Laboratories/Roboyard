@@ -1318,22 +1318,21 @@ public class GameState implements Serializable {
         }
         
         // Add dedicated WALLS section to ensure all walls are properly serialized
+        // IMPORTANT: loops go to <= width/height to include outer boundary walls at grid+1
         sb.append("WALLS:\n");
-        // Save horizontal walls
-        for (int y = 0; y < height; y++) {
+        // Save horizontal walls (y goes to height to include bottom boundary)
+        for (int y = 0; y <= height; y++) {
             for (int x = 0; x < width; x++) {
                 if (hasHorizontalWall(x, y)) {
                     sb.append("H,").append(x).append(",").append(y).append("\n");
-                    // Timber.d("Serializing horizontal wall at (%d,%d)", x, y);
                 }
             }
         }
-        // Save vertical walls
+        // Save vertical walls (x goes to width to include right boundary)
         for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+            for (int x = 0; x <= width; x++) {
                 if (hasVerticalWall(x, y)) {
                     sb.append("V,").append(x).append(",").append(y).append("\n");
-                    // Timber.d("Serializing vertical wall at (%d,%d)", x, y);
                 }
             }
         }
