@@ -2834,7 +2834,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Update hint navigation arrow visibility based on current hint position
+     * Update hint navigation arrow visibility based on current hint position and level restrictions
      */
     private void updateHintNavigationArrows() {
         GameSolution solution = gameStateManager.getCurrentSolution();
@@ -2855,15 +2855,30 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             prevHintButton.setVisibility(View.VISIBLE);
         }
         
-        // Hide next arrow if at last hint
-        if (currentHintStep >= totalPossibleHints - 1) {
+        // Check if next hint is allowed
+        boolean canShowNextHint = true;
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        
+        // For level games > 10, no hints allowed
+        if (currentState != null && currentState.getLevelId() > LEVEL_10_THRESHHOLD) {
+            canShowNextHint = false;
+        }
+        // For level games 1-10, limit to MAX_HINTS_UP_TO_LEVEL_10
+        else if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= LEVEL_10_THRESHHOLD) {
+            if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10 - 1) {
+                canShowNextHint = false;
+            }
+        }
+        
+        // Hide next arrow if at last hint or if next hint is not allowed
+        if (!canShowNextHint || currentHintStep >= totalPossibleHints - 1) {
             nextHintButton.setVisibility(View.GONE);
         } else {
             nextHintButton.setVisibility(View.VISIBLE);
         }
         
-        Timber.d("[HINT_SYSTEM] Updated arrow visibility: step=%d/%d, prev=%s, next=%s",
-                currentHintStep, totalPossibleHints - 1,
+        Timber.d("[HINT_SYSTEM] Updated arrow visibility: step=%d/%d, canShowNext=%b, prev=%s, next=%s",
+                currentHintStep, totalPossibleHints - 1, canShowNextHint,
                 prevHintButton.getVisibility() == View.VISIBLE ? "visible" : "hidden",
                 nextHintButton.getVisibility() == View.VISIBLE ? "visible" : "hidden");
     }
