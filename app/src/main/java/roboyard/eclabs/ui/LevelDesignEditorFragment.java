@@ -448,9 +448,12 @@ public class LevelDesignEditorFragment extends Fragment {
                 // Update the board size
                 updateBoardSize(width, height);
                 
-                // Remove focus from input fields alone does not  hide the overlay keyboard
-                // boardWidthEditText.clearFocus();
-                // boardHeightEditText.clearFocus();
+                // Hide keyboard using InputMethodManager
+                android.view.inputmethod.InputMethodManager imm = 
+                    (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(boardWidthEditText.getWindowToken(), 0);
+                }
                 
             } catch (NumberFormatException e) {
                 Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show();
@@ -1022,13 +1025,12 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("Adding horizontal wall at (%d, %d)", x, y);
         // Check if there's already a wall at this position
         if (currentState.getCellType(x, y) == Constants.TYPE_HORIZONTAL_WALL) {
-            // Remove it (toggle behavior)
-            removeElementsAt(x, y);
+            // Remove it (toggle behavior) - only remove the wall, not other elements
+            removeWallsAt(x, y);
             Toast.makeText(requireContext(), String.format("Removed horizontal wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         } else {
-            // Add a new horizontal wall
-            removeElementsAt(x, y);
+            // Add a new horizontal wall - don't remove other elements
             currentState.addHorizontalWall(x, y);
             Toast.makeText(requireContext(), String.format("Added horizontal wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
@@ -1042,13 +1044,12 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("Adding vertical wall at (%d, %d)", x, y);
         // Check if there's already a wall at this position
         if (currentState.getCellType(x, y) == Constants.TYPE_VERTICAL_WALL) {
-            // Remove it (toggle behavior)
-            removeElementsAt(x, y);
+            // Remove it (toggle behavior) - only remove the wall, not other elements
+            removeWallsAt(x, y);
             Toast.makeText(requireContext(), String.format("Removed vertical wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         } else {
-            // Add a new vertical wall
-            removeElementsAt(x, y);
+            // Add a new vertical wall - don't remove other elements
             currentState.addVerticalWall(x, y);
             Toast.makeText(requireContext(), String.format("Added vertical wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
@@ -1090,6 +1091,33 @@ public class LevelDesignEditorFragment extends Fragment {
         // Remove the robots and targets
         for (GameElement element : elementsToRemove) {
             currentState.getGameElements().remove(element);
+        }
+    }
+    
+    /**
+     * Remove only walls at the specified position, preserving robots and targets
+     */
+    private void removeWallsAt(int x, int y) {
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        
+        // Find and remove only walls, NOT robots and targets
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getX() == x && element.getY() == y) {
+                if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL || element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                    elementsToRemove.add(element);
+                }
+            }
+        }
+        
+        // Remove the walls
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
+        
+        // Also clear cell type if it was a wall
+        if (currentState.getCellType(x, y) == Constants.TYPE_HORIZONTAL_WALL || 
+            currentState.getCellType(x, y) == Constants.TYPE_VERTICAL_WALL) {
+            currentState.setCellType(x, y, 0);
         }
     }
     
