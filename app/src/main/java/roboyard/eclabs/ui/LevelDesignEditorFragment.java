@@ -448,6 +448,10 @@ public class LevelDesignEditorFragment extends Fragment {
                 // Update the board size
                 updateBoardSize(width, height);
                 
+                // Remove focus from input fields alone does not  hide the overlay keyboard
+                // boardWidthEditText.clearFocus();
+                // boardHeightEditText.clearFocus();
+                
             } catch (NumberFormatException e) {
                 Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show();
             }
@@ -854,13 +858,26 @@ public class LevelDesignEditorFragment extends Fragment {
     
     /**
      * Trim content when board is shrunk (remove elements from top and right)
+     * Shifts content down-left to keep bottom-left corner intact
      */
     private void trimContent(int oldWidth, int oldHeight, int newWidth, int newHeight) {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
-        Timber.d("[LEVEL_EDITOR] Trimming content to fit %dx%d", newWidth, newHeight);
+        Timber.d("[LEVEL_EDITOR] Trimming content to fit %dx%d (removing from top and right)", newWidth, newHeight);
         
-        // Remove elements that fall outside the new board bounds
+        // Calculate how much to shift content down-left to keep bottom-left corner
+        int shiftX = oldWidth - newWidth;
+        int shiftY = oldHeight - newHeight;
+        
+        for (GameElement element : currentState.getGameElements()) {
+            // don't need to schift horizontally, it already cuts off on the right
+            // element.setX(element.getX() - shiftX); this would cut off on the left
+
+            // Shift all elements up
+            element.setY(element.getY() - shiftY);
+        }
+        
+        // Remove elements that now fall outside the new board bounds
         for (GameElement element : currentState.getGameElements()) {
             int x = element.getX();
             int y = element.getY();
@@ -868,7 +885,7 @@ public class LevelDesignEditorFragment extends Fragment {
             // Remove if outside new bounds
             if (x >= newWidth || y >= newHeight) {
                 elementsToRemove.add(element);
-                Timber.d("[LEVEL_EDITOR] Removing element at (%d, %d) - outside new bounds", x, y);
+                Timber.d("[LEVEL_EDITOR] Removing element at (%d, %d) - outside new bounds after shift", x, y);
             }
         }
         
@@ -977,8 +994,8 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void addRobotAt(int x, int y) {
         Timber.d("Adding robot at (%d, %d) with color %d", x, y, currentRobotColor);
-        // Check if there's already something at this position and remove it
-        removeElementsAt(x, y);
+        // Remove only robots and targets at this position, NOT walls
+        removeRobotsAndTargetsAt(x, y);
         // Add a new robot
         currentState.addRobot(x, y, currentRobotColor);
         Toast.makeText(requireContext(), String.format("Added %s robot at (%d, %d)", 
@@ -990,8 +1007,8 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void addTargetAt(int x, int y) {
         Timber.d("Adding target at (%d, %d) with color %d", x, y, currentTargetColor);
-        // Check if there's already something at this position and remove it
-        removeElementsAt(x, y);
+        // Remove only robots and targets at this position, NOT walls
+        removeRobotsAndTargetsAt(x, y);
         // Add a new target
         currentState.addTarget(x, y, currentTargetColor);
         Toast.makeText(requireContext(), String.format("Added %s target at (%d, %d)", 
@@ -1053,6 +1070,27 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Immediately update UI
         updateUI();
+    }
+    
+    /**
+     * Remove only robots and targets at the specified position, preserving walls
+     */
+    private void removeRobotsAndTargetsAt(int x, int y) {
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        
+        // Find and remove only robots and targets, NOT walls
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getX() == x && element.getY() == y) {
+                if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
+                    elementsToRemove.add(element);
+                }
+            }
+        }
+        
+        // Remove the robots and targets
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
     }
     
     private boolean removeElementsAt(int x, int y) {
@@ -1168,6 +1206,7 @@ public class LevelDesignEditorFragment extends Fragment {
         private final Paint wallPaint = new Paint();
         private final Paint gridPaint = new Paint();
         private final Paint textPaint = new Paint();
+        private final Paint targetTextPaint = new Paint();
         private int cellSize = 0;
         
         public GameBoardView(Context context) {
@@ -1190,6 +1229,10 @@ public class LevelDesignEditorFragment extends Fragment {
             textPaint.setColor(Color.WHITE);
             textPaint.setTextSize(20);
             textPaint.setTextAlign(Paint.Align.CENTER);
+            
+            targetTextPaint.setColor(Color.BLACK);
+            targetTextPaint.setTextSize(20);
+            targetTextPaint.setTextAlign(Paint.Align.CENTER);
         }
         
         @Override
@@ -1260,8 +1303,8 @@ public class LevelDesignEditorFragment extends Fragment {
                     targetPaint.setColor(colorValue);
                     canvas.drawRect(centerX - radius, centerY - radius, 
                                  centerX + radius, centerY + radius, targetPaint);
-                    // Draw "T" label
-                    canvas.drawText("T", centerX, centerY + radius/2, textPaint);
+                    // Draw "T" label with black text
+                    canvas.drawText("T", centerX, centerY + radius/2, targetTextPaint);
                 }
             }
         }
