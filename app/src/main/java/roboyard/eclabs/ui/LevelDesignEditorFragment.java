@@ -734,11 +734,76 @@ public class LevelDesignEditorFragment extends Fragment {
         boardWidthEditText.setText(String.valueOf(width));
         boardHeightEditText.setText(String.valueOf(height));
         
-        // Create default border walls
+        // Create default border walls and center carree
         createBorderWalls(width, height);
+        createCenterCarree(width, height);
         
         // Update the UI
         updateUI();
+    }
+    
+    /**
+     * Remove the center carree (2x2 square) walls based on old board dimensions
+     */
+    private void removeCenterCarree(int width, int height) {
+        int centerX = (width / 2) - 1;
+        int centerY = (height / 2) - 1;
+        
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        
+        for (GameElement element : currentState.getGameElements()) {
+            int x = element.getX();
+            int y = element.getY();
+            
+            boolean isCarreeWall = false;
+            
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                // Top edge of carree: (centerX, centerY) and (centerX+1, centerY)
+                // Bottom edge of carree: (centerX, centerY+2) and (centerX+1, centerY+2)
+                if ((y == centerY || y == centerY + 2) && (x == centerX || x == centerX + 1)) {
+                    isCarreeWall = true;
+                }
+            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                // Left edge of carree: (centerX, centerY) and (centerX, centerY+1)
+                // Right edge of carree: (centerX+2, centerY) and (centerX+2, centerY+1)
+                if ((x == centerX || x == centerX + 2) && (y == centerY || y == centerY + 1)) {
+                    isCarreeWall = true;
+                }
+            }
+            
+            if (isCarreeWall) {
+                elementsToRemove.add(element);
+            }
+        }
+        
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
+        
+        Timber.d("[LEVEL_EDITOR] Removed %d center carree walls", elementsToRemove.size());
+    }
+    
+    /**
+     * Create the center carree (2x2 square) walls for the given board dimensions
+     */
+    private void createCenterCarree(int width, int height) {
+        int centerX = (width / 2) - 1;
+        int centerY = (height / 2) - 1;
+        
+        // Top edge
+        currentState.addHorizontalWall(centerX, centerY);
+        currentState.addHorizontalWall(centerX + 1, centerY);
+        // Bottom edge
+        currentState.addHorizontalWall(centerX, centerY + 2);
+        currentState.addHorizontalWall(centerX + 1, centerY + 2);
+        // Left edge
+        currentState.addVerticalWall(centerX, centerY);
+        currentState.addVerticalWall(centerX, centerY + 1);
+        // Right edge
+        currentState.addVerticalWall(centerX + 2, centerY);
+        currentState.addVerticalWall(centerX + 2, centerY + 1);
+        
+        Timber.d("[LEVEL_EDITOR] Created center carree at (%d,%d) for %dx%d board", centerX, centerY, width, height);
     }
     
     private void createBorderWalls(int width, int height) {
@@ -766,8 +831,9 @@ public class LevelDesignEditorFragment extends Fragment {
         
         Timber.d("[LEVEL_EDITOR] Resizing board from %dx%d to %dx%d", oldWidth, oldHeight, newWidth, newHeight);
         
-        // Step 1: Remove all outer walls (boundary walls)
+        // Step 1: Remove all outer walls and center carree
         removeOuterWalls();
+        removeCenterCarree(oldWidth, oldHeight);
         
         // Step 2: Adjust content based on resize direction
         if (newWidth > oldWidth || newHeight > oldHeight) {
@@ -792,8 +858,9 @@ public class LevelDesignEditorFragment extends Fragment {
         
         currentState = newState;
         
-        // Step 4: Add new outer walls
+        // Step 4: Add new outer walls and center carree
         createBorderWalls(newWidth, newHeight);
+        createCenterCarree(newWidth, newHeight);
         
         Timber.d("[LEVEL_EDITOR] Board resized successfully. New element count: %d", currentState.getGameElements().size());
         
