@@ -476,6 +476,12 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Export button
         exportButton.setOnClickListener(v -> showLevelText());
+        
+        // Shift buttons
+        requireView().findViewById(R.id.shift_up_button).setOnClickListener(v -> shiftContent(0, -1));
+        requireView().findViewById(R.id.shift_down_button).setOnClickListener(v -> shiftContent(0, 1));
+        requireView().findViewById(R.id.shift_left_button).setOnClickListener(v -> shiftContent(-1, 0));
+        requireView().findViewById(R.id.shift_right_button).setOnClickListener(v -> shiftContent(1, 0));
     }
     
     private void showLevelText() {
@@ -784,11 +790,28 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     /**
-     * Create the center carree (2x2 square) walls for the given board dimensions
+     * Create the center carree (2x2 square) walls for the given board dimensions.
+     * Also removes any elements (robots, targets, walls) that fall inside the carree area.
      */
     private void createCenterCarree(int width, int height) {
         int centerX = (width / 2) - 1;
         int centerY = (height / 2) - 1;
+        
+        // Remove any elements inside the carree 2x2 cells
+        List<GameElement> insideCarree = new ArrayList<>();
+        for (GameElement element : currentState.getGameElements()) {
+            int x = element.getX();
+            int y = element.getY();
+            if (x >= centerX && x <= centerX + 1 && y >= centerY && y <= centerY + 1) {
+                insideCarree.add(element);
+            }
+        }
+        for (GameElement element : insideCarree) {
+            currentState.getGameElements().remove(element);
+        }
+        if (!insideCarree.isEmpty()) {
+            Timber.d("[LEVEL_EDITOR] Removed %d elements inside carree area", insideCarree.size());
+        }
         
         // Top edge
         currentState.addHorizontalWall(centerX, centerY);
@@ -865,6 +888,46 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("[LEVEL_EDITOR] Board resized successfully. New element count: %d", currentState.getGameElements().size());
         
         // Update UI
+        updateUI();
+    }
+    
+    /**
+     * Shift all content by dx/dy, removing outer walls and carree first, then re-creating them.
+     * Elements that fall outside the board after shifting are removed.
+     */
+    private void shiftContent(int dx, int dy) {
+        int width = currentState.getWidth();
+        int height = currentState.getHeight();
+        
+        // Step 1: Remove outer walls and carree
+        removeOuterWalls();
+        removeCenterCarree(width, height);
+        
+        // Step 2: Shift all remaining elements
+        for (GameElement element : currentState.getGameElements()) {
+            element.setX(element.getX() + dx);
+            element.setY(element.getY() + dy);
+        }
+        
+        // Step 3: Remove elements that fell outside the board
+        List<GameElement> outsideElements = new ArrayList<>();
+        for (GameElement element : currentState.getGameElements()) {
+            int x = element.getX();
+            int y = element.getY();
+            if (x < 0 || y < 0 || x >= width || y >= height) {
+                outsideElements.add(element);
+            }
+        }
+        for (GameElement element : outsideElements) {
+            currentState.getGameElements().remove(element);
+        }
+        
+        // Step 4: Re-create outer walls and carree
+        createBorderWalls(width, height);
+        createCenterCarree(width, height);
+        
+        Timber.d("[LEVEL_EDITOR] Shifted content by (%d, %d), removed %d out-of-bounds elements", dx, dy, outsideElements.size());
+        
         updateUI();
     }
     
@@ -1090,10 +1153,10 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void addHorizontalWallAt(int x, int y) {
         Timber.d("Adding horizontal wall at (%d, %d)", x, y);
-        // Check if there's already a wall at this position
-        if (currentState.getCellType(x, y) == Constants.TYPE_HORIZONTAL_WALL) {
-            // Remove it (toggle behavior) - only remove the wall, not other elements
-            removeWallsAt(x, y);
+        // Check if there's already a horizontal wall at this position
+        if (hasWallOfType(x, y, GameElement.TYPE_HORIZONTAL_WALL)) {
+            // Remove only the horizontal wall (toggle behavior)
+            removeWallByTypeAt(x, y, GameElement.TYPE_HORIZONTAL_WALL);
             Toast.makeText(requireContext(), String.format("Removed horizontal wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         } else {
@@ -1109,10 +1172,10 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void addVerticalWallAt(int x, int y) {
         Timber.d("Adding vertical wall at (%d, %d)", x, y);
-        // Check if there's already a wall at this position
-        if (currentState.getCellType(x, y) == Constants.TYPE_VERTICAL_WALL) {
-            // Remove it (toggle behavior) - only remove the wall, not other elements
-            removeWallsAt(x, y);
+        // Check if there's already a vertical wall at this position
+        if (hasWallOfType(x, y, GameElement.TYPE_VERTICAL_WALL)) {
+            // Remove only the vertical wall (toggle behavior)
+            removeWallByTypeAt(x, y, GameElement.TYPE_VERTICAL_WALL);
             Toast.makeText(requireContext(), String.format("Removed vertical wall at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         } else {
@@ -1162,12 +1225,40 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     /**
-     * Remove only walls at the specified position, preserving robots and targets
+     * Check if a wall of a specific type exists at the given position
+     */
+    private boolean hasWallOfType(int x, int y, int wallType) {
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getX() == x && element.getY() == y && element.getType() == wallType) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Remove only walls of a specific type at the specified position, preserving all other elements
+     */
+    private void removeWallByTypeAt(int x, int y, int wallType) {
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getX() == x && element.getY() == y && element.getType() == wallType) {
+                elementsToRemove.add(element);
+            }
+        }
+        
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
+    }
+    
+    /**
+     * Remove all walls at the specified position, preserving robots and targets
      */
     private void removeWallsAt(int x, int y) {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
-        // Find and remove only walls, NOT robots and targets
         for (GameElement element : currentState.getGameElements()) {
             if (element.getX() == x && element.getY() == y) {
                 if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL || element.getType() == GameElement.TYPE_VERTICAL_WALL) {
@@ -1176,12 +1267,10 @@ public class LevelDesignEditorFragment extends Fragment {
             }
         }
         
-        // Remove the walls
         for (GameElement element : elementsToRemove) {
             currentState.getGameElements().remove(element);
         }
         
-        // Also clear cell type if it was a wall
         if (currentState.getCellType(x, y) == Constants.TYPE_HORIZONTAL_WALL || 
             currentState.getCellType(x, y) == Constants.TYPE_VERTICAL_WALL) {
             currentState.setCellType(x, y, 0);
