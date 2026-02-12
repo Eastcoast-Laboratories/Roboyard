@@ -753,9 +753,131 @@ public class LevelDesignEditorFragment extends Fragment {
         }
     }
     
-    private void updateBoardSize(int width, int height) {
-        // Create a new level with the specified dimensions
-        createNewLevel(width, height);
+    private void updateBoardSize(int newWidth, int newHeight) {
+        int oldWidth = currentState.getWidth();
+        int oldHeight = currentState.getHeight();
+        
+        Timber.d("[LEVEL_EDITOR] Resizing board from %dx%d to %dx%d", oldWidth, oldHeight, newWidth, newHeight);
+        
+        // Step 1: Remove all outer walls (boundary walls)
+        removeOuterWalls();
+        
+        // Step 2: Adjust content based on resize direction
+        if (newWidth > oldWidth || newHeight > oldHeight) {
+            // Vergrößerung: zentriere den alten Inhalt
+            centerContent(oldWidth, oldHeight, newWidth, newHeight);
+        } else if (newWidth < oldWidth || newHeight < oldHeight) {
+            // Verkleinerung: trimme oben und rechts
+            trimContent(oldWidth, oldHeight, newWidth, newHeight);
+        }
+        
+        // Step 3: Create a new GameState with the new dimensions and copy content
+        GameState newState = new GameState(newWidth, newHeight);
+        
+        // Copy game elements to the new state
+        for (GameElement element : currentState.getGameElements()) {
+            newState.getGameElements().add(element);
+        }
+        
+        // Copy other properties
+        newState.setLevelId(currentState.getLevelId());
+        newState.setLevelName(currentState.getLevelName());
+        
+        currentState = newState;
+        
+        // Step 4: Add new outer walls
+        createBorderWalls(newWidth, newHeight);
+        
+        Timber.d("[LEVEL_EDITOR] Board resized successfully. New element count: %d", currentState.getGameElements().size());
+        
+        // Update UI
+        updateUI();
+    }
+    
+    /**
+     * Remove all outer walls (boundary walls at x=0, x=width, y=0, y=height)
+     */
+    private void removeOuterWalls() {
+        int width = currentState.getWidth();
+        int height = currentState.getHeight();
+        
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        
+        for (GameElement element : currentState.getGameElements()) {
+            int x = element.getX();
+            int y = element.getY();
+            
+            // Check if this is an outer wall
+            boolean isOuterWall = false;
+            
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                // Top or bottom wall
+                if (y == 0 || y == height) {
+                    isOuterWall = true;
+                }
+            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                // Left or right wall
+                if (x == 0 || x == width) {
+                    isOuterWall = true;
+                }
+            }
+            
+            if (isOuterWall) {
+                elementsToRemove.add(element);
+            }
+        }
+        
+        // Remove outer walls
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
+        
+        Timber.d("[LEVEL_EDITOR] Removed %d outer walls", elementsToRemove.size());
+    }
+    
+    /**
+     * Center content when board is enlarged
+     */
+    private void centerContent(int oldWidth, int oldHeight, int newWidth, int newHeight) {
+        // Calculate offset to center the old content in the new board
+        int offsetX = (newWidth - oldWidth) / 2;
+        int offsetY = (newHeight - oldHeight) / 2;
+        
+        Timber.d("[LEVEL_EDITOR] Centering content with offset (%d, %d)", offsetX, offsetY);
+        
+        // Move all elements by the offset
+        for (GameElement element : currentState.getGameElements()) {
+            element.setX(element.getX() + offsetX);
+            element.setY(element.getY() + offsetY);
+        }
+    }
+    
+    /**
+     * Trim content when board is shrunk (remove elements from top and right)
+     */
+    private void trimContent(int oldWidth, int oldHeight, int newWidth, int newHeight) {
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        
+        Timber.d("[LEVEL_EDITOR] Trimming content to fit %dx%d", newWidth, newHeight);
+        
+        // Remove elements that fall outside the new board bounds
+        for (GameElement element : currentState.getGameElements()) {
+            int x = element.getX();
+            int y = element.getY();
+            
+            // Remove if outside new bounds
+            if (x >= newWidth || y >= newHeight) {
+                elementsToRemove.add(element);
+                Timber.d("[LEVEL_EDITOR] Removing element at (%d, %d) - outside new bounds", x, y);
+            }
+        }
+        
+        // Remove the elements
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
+        
+        Timber.d("[LEVEL_EDITOR] Removed %d elements that didn't fit", elementsToRemove.size());
     }
     
     private void updateUI() {
