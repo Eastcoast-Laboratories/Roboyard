@@ -439,9 +439,9 @@ public class LevelDesignEditorFragment extends Fragment {
                 int width = Integer.parseInt(boardWidthEditText.getText().toString());
                 int height = Integer.parseInt(boardHeightEditText.getText().toString());
                 
-                // Validate board size (minimum 8x8, maximum 16x16)
-                if (width < 8 || width > 16 || height < 8 || height > 16) {
-                    Toast.makeText(requireContext(), "Board size must be between 8x8 and 16x16", Toast.LENGTH_SHORT).show();
+                // Validate board size (minimum 4x4, maximum 24x24)
+                if (width < 4 || width > 24 || height < 4 || height > 24) {
+                    Toast.makeText(requireContext(), "Board size must be between 4x4 and 24x24", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 
@@ -880,13 +880,13 @@ public class LevelDesignEditorFragment extends Fragment {
             element.setY(element.getY() - shiftY);
         }
         
-        // Remove elements that now fall outside the new board bounds
+        // Remove elements that now fall outside the new board bounds or have invalid coordinates
         for (GameElement element : currentState.getGameElements()) {
             int x = element.getX();
             int y = element.getY();
             
-            // Remove if outside new bounds
-            if (x >= newWidth || y >= newHeight) {
+            // Remove if outside new bounds or has negative/invalid coordinates
+            if (x < 0 || y < 0 || x >= newWidth || y >= newHeight) {
                 elementsToRemove.add(element);
                 Timber.d("[LEVEL_EDITOR] Removing element at (%d, %d) - outside new bounds after shift", x, y);
             }
