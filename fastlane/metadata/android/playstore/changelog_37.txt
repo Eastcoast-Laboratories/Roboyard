@@ -1,0 +1,12 @@
+# Play Store Changelogs für Version 37
+
+<en-GB>
+- Dynamic robot collision sounds - the pitch changes based on the involved robots
+- Improve green target visibility in high contrast mode
+- Beginner levels improved: The user is now introduced to all important game tactics
+</en-GB>
+<de-DE>
+- Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter
+- Verbesserte Sichtbarkeit des grünen Ziels im Hohen Kontrast Modus
+- Anfänger-Levels überarbeitet: Der User wird nun in alle wichtigen Spieltaktiken hineingeführt 
+</de-DE>

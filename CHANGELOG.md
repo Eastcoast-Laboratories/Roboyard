@@ -2,6 +2,11 @@
 =========
 
 
+## Version 37 (2026-02-13)
+- Dynamic robot collision sounds - the pitch changes based on the involved robots
+- Improve green target visibility in high contrast mode
+- Beginner levels improved: The user is now introduced to all important game tactics
+
 ## Version 36 (2026-02-11)
 - Loaded games are solvable by the A.I. again
 - History stores all maps after 30s

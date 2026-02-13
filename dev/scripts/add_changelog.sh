@@ -67,13 +67,16 @@ check_length() {
 # German Changelog
 DE_CHANGES=$(cat << EOF
 - Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter
+- Verbesserte Sichtbarkeit des grünen Ziels im Hohen Kontrast Modus
+- Anfänger-Levels überarbeitet: Der User wird nun in alle wichtigen Spieltaktiken hineingeführt 
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
 - Dynamic robot collision sounds - the pitch changes based on the involved robots
-
+- Improve green target visibility in high contrast mode
+- Beginner levels improved: The user is now introduced to all important game tactics
 EOF
 )
 

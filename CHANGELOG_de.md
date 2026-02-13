@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 37 (2026-02-13)
+- Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter
+- Verbesserte Sichtbarkeit des grünen Ziels im Hohen Kontrast Modus
+- Anfänger-Levels überarbeitet: Der User wird nun in alle wichtigen Spieltaktiken hineingeführt 
+
 ## Version 36 (2026-02-11)
 - bei Gespeicherten Spielen findet die K.I. wieder Lösungen
 - In der History werden alle Karten nach 30s gespeichert
