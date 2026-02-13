@@ -2,6 +2,10 @@
 =========
 
 
+## Version 38 (2026-02-13)
+- Live move counter button, that shows the remaining optimal moves from the current position
+
+
 ## Version 37 (2026-02-13)
 - Dynamic robot collision sounds - the pitch changes based on the involved robots
 - Improve green target visibility in high contrast mode
