@@ -223,6 +223,17 @@ public class LevelCompletionManager {
     }
     
     /**
+     * Reset all level completion data
+     */
+    public void resetAll() {
+        Timber.d("[LEVEL_COMPLETION] Resetting all level completion data");
+        completionDataMap.clear();
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        Timber.d("[LEVEL_COMPLETION] All level data reset successfully");
+    }
+    
+    /**
      * Unlock all 420 stars for all levels (used for level design editor)
      */
     public void unlockAllStars() {

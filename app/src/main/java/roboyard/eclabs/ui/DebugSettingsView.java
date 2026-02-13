@@ -22,7 +22,7 @@ import timber.log.Timber;
 
 /**
  * Hidden debug view for testing achievements and streaks.
- * Accessible by long-pressing (3 seconds) the settings title.
+ * Accessible by long-pressing (some seconds) the settings title.
  */
 public class DebugSettingsView extends LinearLayout {
     
@@ -311,8 +311,8 @@ public class DebugSettingsView extends LinearLayout {
                     .setTitle("Reset All Levels?")
                     .setMessage("This will mark all levels as unplayed.")
                     .setPositiveButton("Yes", (dialog, which) -> {
-                        SharedPreferences prefs = context.getSharedPreferences("roboyard_levels", Context.MODE_PRIVATE);
-                        prefs.edit().clear().apply();
+                        LevelCompletionManager completionManager = LevelCompletionManager.getInstance(context);
+                        completionManager.resetAll();
                         Toast.makeText(context, "All levels reset", Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton("Cancel", null)

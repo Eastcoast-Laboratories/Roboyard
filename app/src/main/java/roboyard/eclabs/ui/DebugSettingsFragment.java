@@ -24,7 +24,7 @@ import timber.log.Timber;
 
 /**
  * Debug settings fragment for testing achievements and streaks.
- * Accessible by long-pressing (3 seconds) the settings title.
+ * Accessible by long-pressing (4 seconds) the settings title.
  */
 public class DebugSettingsFragment extends Fragment {
     
@@ -76,13 +76,10 @@ public class DebugSettingsFragment extends Fragment {
         addSectionTitle(contentLayout, "ACHIEVEMENT MANAGEMENT");
         addAchievementButtons(contentLayout);
         
-        // Level Editor Section
-        addSectionTitle(contentLayout, "LEVEL EDITOR");
+        // Levels Section
+        addSectionTitle(contentLayout, "LEVELS");
+        addLevelButtons(contentLayout);
         addLevelEditorButton(contentLayout);
-        
-        // Level Reset Section
-        addSectionTitle(contentLayout, "GAME DATA");
-        addGameDataButtons(contentLayout);
         
         // App Control Section
         addSectionTitle(contentLayout, "APP CONTROL");
@@ -329,13 +326,28 @@ public class DebugSettingsFragment extends Fragment {
         parent.addView(levelEditorBtn);
     }
     
-    private void addGameDataButtons(LinearLayout parent) {
+    private void addLevelButtons(LinearLayout parent) {
         LinearLayout buttonLayout = new LinearLayout(requireContext());
         buttonLayout.setOrientation(LinearLayout.VERTICAL);
         buttonLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         
+        // Unlock All Stars button
+        Button unlockStarsBtn = new Button(requireContext());
+        unlockStarsBtn.setText("Unlock All Stars");
+        unlockStarsBtn.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        unlockStarsBtn.setOnClickListener(v -> {
+            LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+            completionManager.unlockAllStars();
+            Toast.makeText(requireContext(), "All 420 stars unlocked", Toast.LENGTH_SHORT).show();
+            Timber.d("[DEBUG] Unlocked all 420 stars via debug button");
+        });
+        buttonLayout.addView(unlockStarsBtn);
+        
+        // Reset All Levels button
         Button resetLevelsBtn = new Button(requireContext());
         resetLevelsBtn.setText("Reset All Levels");
         resetLevelsBtn.setLayoutParams(new LinearLayout.LayoutParams(
@@ -346,11 +358,10 @@ public class DebugSettingsFragment extends Fragment {
                     .setTitle("Reset Levels")
                     .setMessage("Are you sure you want to reset all level progress?")
                     .setPositiveButton("Reset", (dialog, which) -> {
-                        // Reset level progress
-                        android.content.SharedPreferences prefs = requireContext()
-                                .getSharedPreferences("roboyard_levels", android.content.Context.MODE_PRIVATE);
-                        prefs.edit().clear().apply();
+                        LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+                        completionManager.resetAll();
                         Toast.makeText(requireContext(), "All levels reset", Toast.LENGTH_SHORT).show();
+                        Timber.d("[DEBUG] All levels reset via debug button");
                     })
                     .setNegativeButton("Cancel", null)
                     .show();

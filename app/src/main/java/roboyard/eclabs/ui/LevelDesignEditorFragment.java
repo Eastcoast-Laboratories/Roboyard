@@ -123,10 +123,8 @@ public class LevelDesignEditorFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Unlock all 420 stars when opening the level design editor
+        // Initialize completion manager
         LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
-        completionManager.unlockAllStars();
-        Timber.d("LevelDesignEditorFragment: Unlocked all 420 stars for level design editor");
 
         // Initialize UI elements
         levelIdTextView = view.findViewById(R.id.level_id_text);
