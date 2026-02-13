@@ -596,8 +596,9 @@ public class LevelDesignEditorFragment extends Fragment {
                         Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
                     }
                     
-                    // Open the share URL in browser
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.shareUrl));
+                    // Open the share URL in browser with auto-login
+                    String autoLoginUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(result.shareUrl);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(autoLoginUrl));
                     startActivity(intent);
                     
                     Timber.d("[SHARE] Map shared to account, ID: %d, URL: %s, Duplicate: %b", result.mapId, result.shareUrl, result.isDuplicate);
@@ -619,7 +620,10 @@ public class LevelDesignEditorFragment extends Fragment {
                     shareUrl += "&name=" + URLEncoder.encode(mapName, "UTF-8");
                 }
                 
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
+                // Wrap with auto-login if user is logged in
+                String finalUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(shareUrl);
+                
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
                 startActivity(intent);
                 
                 Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();

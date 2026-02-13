@@ -320,8 +320,7 @@ public class MainMenuFragment extends BaseGameFragment {
             RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
             if (apiClient.isLoggedIn()) {
                 // Open profile in browser with auto-login token
-                String token = apiClient.getAuthToken();
-                String url = "https://roboyard.z11.de/auto-login?token=" + Uri.encode(token);
+                String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(intent);
             } else {

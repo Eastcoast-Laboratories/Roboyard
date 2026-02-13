@@ -125,6 +125,35 @@ public class RoboyardApiClient {
     }
     
     /**
+     * Build a URL that auto-logs the user in via token before redirecting to the target page.
+     * If the user is not logged in, returns the original URL unchanged.
+     * @param targetUrl The target URL path (e.g. "/share_map?data=...")
+     * @return Auto-login URL with token and redirect, or original URL if not logged in
+     */
+    public String buildAutoLoginUrl(String targetUrl) {
+        String token = getAuthToken();
+        if (token == null) {
+            return targetUrl;
+        }
+        
+        // Extract the path from the target URL (strip BASE_URL if present)
+        String redirectPath = targetUrl;
+        if (redirectPath.startsWith(BASE_URL)) {
+            redirectPath = redirectPath.substring(BASE_URL.length());
+        }
+        
+        try {
+            String encodedRedirect = java.net.URLEncoder.encode(redirectPath, "UTF-8");
+            String autoLoginUrl = BASE_URL + "/auto-login?token=" + token + "&redirect=" + encodedRedirect;
+            Timber.d("[AUTO_LOGIN] Built auto-login URL for redirect: %s", redirectPath);
+            return autoLoginUrl;
+        } catch (java.io.UnsupportedEncodingException e) {
+            Timber.e(e, "[AUTO_LOGIN] Error encoding redirect URL");
+            return targetUrl;
+        }
+    }
+    
+    /**
      * Login to roboyard.z11.de.
      */
     public void login(String email, String password, ApiCallback<LoginResult> callback) {

@@ -66,17 +66,14 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- bei Gespeicherten Spielen findet die K.I. wieder Lösungen
-- In der History werden alle Karten nach 30s gespeichert
-- Bugfixes
+- Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Loaded games are solvable by the A.I. again
-- History stores all maps after 30s
-- Bugfixes
+- Dynamic robot collision sounds - the pitch changes based on the involved robots
+
 EOF
 )
 

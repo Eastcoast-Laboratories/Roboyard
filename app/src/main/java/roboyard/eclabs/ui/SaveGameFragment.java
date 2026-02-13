@@ -862,8 +862,9 @@ public class SaveGameFragment extends BaseGameFragment {
                         Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
                     }
                     
-                    // Open the share URL in browser
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.shareUrl));
+                    // Open the share URL in browser with auto-login
+                    String autoLoginUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(result.shareUrl);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(autoLoginUrl));
                     startActivity(intent);
                     
                     Timber.d("[SHARE] Map shared to account, ID: %d, URL: %s, Duplicate: %b", result.mapId, result.shareUrl, result.isDuplicate);
@@ -1431,8 +1432,11 @@ public class SaveGameFragment extends BaseGameFragment {
                     // Log the full URL for debugging - use a separate log entry for the clickable URL
                     Timber.d("[SHARE] Share URL: %s", shareUrl);  // Log only the URL to make it clickable in the console
                     
+                    // Wrap with auto-login if user is logged in
+                    String finalUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(shareUrl);
+                    
                     // Create an intent to open the URL
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(shareUrl));
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
                     startActivity(intent);
                     
                     Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
