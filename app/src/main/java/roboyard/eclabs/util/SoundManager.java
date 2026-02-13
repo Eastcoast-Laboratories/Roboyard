@@ -64,13 +64,12 @@ public class SoundManager {
         
         // Get the sound resource ID
         if ("hit_robot".equals(soundType) && attackerRobotId >= 0 && attackerRobotId <= 4 && targetRobotId >= 0 && targetRobotId <= 4) {
-            // Play robot-specific collision sound
-            String soundName = "robot_" + attackerRobotId + "_hits_robot_" + targetRobotId;
-            soundResId = getSoundResourceId(soundName);
+            // Try to play robot-specific collision sound using direct resource ID lookup
+            soundResId = getRobotCollisionSoundId(attackerRobotId, targetRobotId);
             if (soundResId != 0) {
-                Timber.d("[SOUND] Selected robot-specific collision sound: %s (resourceId=%d)", soundName, soundResId);
+                Timber.d("[SOUND] Selected robot-specific collision sound: robot_%d_hits_robot_%d (resourceId=%d)", attackerRobotId, targetRobotId, soundResId);
             } else {
-                Timber.w("[SOUND] Robot-specific sound not found: %s, falling back to generic hit_robot", soundName);
+                Timber.w("[SOUND] Robot-specific sound not found for robot_%d_hits_robot_%d, falling back to generic hit_robot", attackerRobotId, targetRobotId);
                 soundResId = R.raw.robot_hit_robot;
             }
         } else {
@@ -143,6 +142,67 @@ public class SoundManager {
     }
     
     /**
+     * Get robot collision sound resource ID using direct mapping
+     * This avoids reflection issues and ensures sounds are found even if R.raw has issues
+     * @param attackerRobotId ID of attacking robot (0-4)
+     * @param targetRobotId ID of target robot (0-4)
+     * @return Resource ID or 0 if not found
+     */
+    private int getRobotCollisionSoundId(int attackerRobotId, int targetRobotId) {
+        // Direct mapping of robot collision sounds
+        // This ensures sounds are found even if reflection fails
+        switch (attackerRobotId) {
+            case 0:
+                switch (targetRobotId) {
+                    case 0: return R.raw.robot_0_hits_robot_0;
+                    case 1: return R.raw.robot_0_hits_robot_1;
+                    case 2: return R.raw.robot_0_hits_robot_2;
+                    case 3: return R.raw.robot_0_hits_robot_3;
+                    case 4: return R.raw.robot_0_hits_robot_4;
+                }
+                break;
+            case 1:
+                switch (targetRobotId) {
+                    case 0: return R.raw.robot_1_hits_robot_0;
+                    case 1: return R.raw.robot_1_hits_robot_1;
+                    case 2: return R.raw.robot_1_hits_robot_2;
+                    case 3: return R.raw.robot_1_hits_robot_3;
+                    case 4: return R.raw.robot_1_hits_robot_4;
+                }
+                break;
+            case 2:
+                switch (targetRobotId) {
+                    case 0: return R.raw.robot_2_hits_robot_0;
+                    case 1: return R.raw.robot_2_hits_robot_1;
+                    case 2: return R.raw.robot_2_hits_robot_2;
+                    case 3: return R.raw.robot_2_hits_robot_3;
+                    case 4: return R.raw.robot_2_hits_robot_4;
+                }
+                break;
+            case 3:
+                switch (targetRobotId) {
+                    case 0: return R.raw.robot_3_hits_robot_0;
+                    case 1: return R.raw.robot_3_hits_robot_1;
+                    case 2: return R.raw.robot_3_hits_robot_2;
+                    case 3: return R.raw.robot_3_hits_robot_3;
+                    case 4: return R.raw.robot_3_hits_robot_4;
+                }
+                break;
+            case 4:
+                switch (targetRobotId) {
+                    case 0: return R.raw.robot_4_hits_robot_0;
+                    case 1: return R.raw.robot_4_hits_robot_1;
+                    case 2: return R.raw.robot_4_hits_robot_2;
+                    case 3: return R.raw.robot_4_hits_robot_3;
+                    case 4: return R.raw.robot_4_hits_robot_4;
+                }
+                break;
+        }
+        Timber.w("[SOUND] No resource ID found for robot_%d_hits_robot_%d", attackerRobotId, targetRobotId);
+        return 0;
+    }
+    
+    /**
      * Get sound resource ID by name using reflection
      * @param soundName Name of the sound file (e.g., "robot_0_hits_robot_1")
      * @return Resource ID or 0 if not found
@@ -150,9 +210,25 @@ public class SoundManager {
     private int getSoundResourceId(String soundName) {
         try {
             java.lang.reflect.Field field = R.raw.class.getField(soundName);
-            return field.getInt(null);
+            int resourceId = field.getInt(null);
+            Timber.d("[SOUND] Successfully resolved resource ID for %s: %d", soundName, resourceId);
+            return resourceId;
+        } catch (NoSuchFieldException e) {
+            // Field not found - log available fields for debugging
+            Timber.e("[SOUND] Field not found: %s. Available raw resources:", soundName);
+            try {
+                java.lang.reflect.Field[] fields = R.raw.class.getFields();
+                for (java.lang.reflect.Field f : fields) {
+                    if (f.getName().contains("robot")) {
+                        Timber.d("[SOUND] Available: %s", f.getName());
+                    }
+                }
+            } catch (Exception ex) {
+                Timber.e(ex, "[SOUND] Could not list available resources");
+            }
+            return 0;
         } catch (Exception e) {
-            Timber.e(e, "[SOUND] Could not find sound resource: %s", soundName);
+            Timber.e(e, "[SOUND] Error resolving sound resource: %s", soundName);
             return 0;
         }
     }
