@@ -19,6 +19,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.fragment.app.Fragment;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -809,8 +810,28 @@ public class GameGridView extends View {
                     // Draw target using drawable
                     targetDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
                     targetDrawable.draw(canvas);
+                    
+                    // High contrast adjustments for green and blue targets
+                    if (Preferences.highContrastMode) {
+                        int targetColor = element.getColor();
+                        if (targetColor == Constants.COLOR_GREEN) {
+                            // Lighten green target with semi-transparent overlay
+                            Paint lightenPaint = new Paint();
+                            lightenPaint.setColor(Color.rgb(144, 255, 144));
+                            lightenPaint.setAlpha(100);
+                            canvas.drawRect(left, top, right, bottom, lightenPaint);
+                        }
+                        //  else if (targetColor == Constants.COLOR_BLUE) {
+                        //     // Darken blue target with semi-transparent dark blue overlay
+                        //     Paint darkenPaint = new Paint();
+                        //     darkenPaint.setColor(Color.rgb(0, 0, 80));
+                        //     darkenPaint.setAlpha(80);
+                        //     canvas.drawRect(left, top, right, bottom, darkenPaint);
+                        // }
+                    }
                 } else {
                     // Fallback to color
+                    Timber.e("Target drawable is null for element: %s", element);
                     cellPaint.setColor(Color.rgb(60, 60, 90));
                     canvas.drawRect(left, top, right, bottom, cellPaint);
                 }
