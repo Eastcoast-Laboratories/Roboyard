@@ -225,7 +225,7 @@ public class MainMenuFragment extends BaseGameFragment {
      * Set up button click listeners
      */
     private void setupButtons() {
-        // New Game button - start a game
+        // Play button - resume auto-save if available, otherwise start new game
         newGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.new_random_game_scaled_large, 0, 0, 0);
         newGameButton.setOnClickListener(v -> {
             // Record daily login when starting a new game
@@ -234,6 +234,24 @@ public class MainMenuFragment extends BaseGameFragment {
             
             // Reset achievement game session flags for new game
             AchievementManager.getInstance(requireContext()).onNewGameStarted();
+            
+            // Check if auto-save (slot 0) exists and load it
+            String autosavePath = roboyard.eclabs.FileReadWrite.getSaveGamePath(requireActivity(), 0);
+            java.io.File autosaveFile = new java.io.File(autosavePath);
+            if (autosaveFile.exists()) {
+                Timber.d("[PLAY] Auto-save found, loading from slot 0");
+                gameStateManager.loadGame(0);
+                if (gameStateManager.getCurrentState().getValue() != null) {
+                    Timber.d("[PLAY] Auto-save loaded successfully, resuming game");
+                    UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
+                    ModernGameFragment gameFragment = new ModernGameFragment();
+                    navigateToDirect(gameFragment);
+                    return;
+                }
+                Timber.w("[PLAY] Auto-save load failed, starting new game instead");
+            } else {
+                Timber.d("[PLAY] No auto-save found, starting new game");
+            }
             
             // Start a new game
             Timber.d("MainMenuFragment: Calling gameStateManager.startModernGame()");
