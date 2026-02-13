@@ -548,7 +548,8 @@ public class SaveGameFragment extends BaseGameFragment {
                 historyAdapter.updateHistoryEntries(entries);
                 historyAdapter.notifyDataSetChanged();
             } else {
-                // No history entries
+                // No history entries - clear the adapter
+                historyAdapter.updateHistoryEntries(new ArrayList<>());
             }
         } catch (Exception e) {
             Timber.e(e, "Error loading history entries");
@@ -1802,7 +1803,6 @@ public class SaveGameFragment extends BaseGameFragment {
                         // Reload all history entries instead of trying to remove a specific one
                         // This avoids IndexOutOfBoundsException
                         loadHistoryEntries();
-                        Toast.makeText(requireContext(), "History entry deleted", Toast.LENGTH_SHORT).show();
                     } else {
                         // Re-enable the button if deletion failed
                         holder.deleteButton.setEnabled(true);

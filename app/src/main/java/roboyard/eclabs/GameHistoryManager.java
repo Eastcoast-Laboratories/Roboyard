@@ -356,7 +356,7 @@ public class GameHistoryManager {
      */
     public static boolean deleteHistoryEntry(Activity activity, String mapPath) {
         try {
-            Timber.d("Attempting to delete history entry: %s", mapPath);
+            Timber.d("[HISTORY_DELETE] Attempting to delete history entry: %s", mapPath);
             
             // Initialize if needed
             initialize(activity);
@@ -370,8 +370,13 @@ public class GameHistoryManager {
             // Load existing history entries
             List<GameHistoryEntry> historyEntries = getHistoryEntries(activity);
             if (historyEntries == null) {
-                Timber.e("Failed to load history entries");
+                Timber.e("[HISTORY_DELETE] Failed to load history entries");
                 return false;
+            }
+            
+            Timber.d("[HISTORY_DELETE] Loaded %d history entries, looking for: '%s' (fileName: '%s')", historyEntries.size(), mapPath, fileName);
+            for (int i = 0; i < historyEntries.size(); i++) {
+                Timber.d("[HISTORY_DELETE] Entry %d: mapPath='%s'", i, historyEntries.get(i).getMapPath());
             }
             
             // Find the entry to delete
