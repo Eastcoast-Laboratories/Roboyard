@@ -21,6 +21,8 @@ public class StreakManager {
     private static final String KEY_LAST_STREAK_DATE = "last_streak_date";
     private static final String KEY_LAST_POPUP_DATE = "last_popup_date";
     private static final String KEY_TEST_MODE = "test_mode";
+    private static final String KEY_LONGEST_STREAK = "longest_streak";
+    private static final String KEY_LONGEST_STREAK_DATE = "longest_streak_date";
     
     // Normal mode: 1 day = 24 hours
     private static final long NORMAL_DAY_MS = 24L * 60L * 60L * 1000L;
@@ -105,11 +107,20 @@ public class StreakManager {
             isNewStreak = true;
         }
         
+        // Update longest streak if current exceeds it
+        int longestStreak = prefs.getInt(KEY_LONGEST_STREAK, 0);
+        if (currentStreak > longestStreak) {
+            longestStreak = currentStreak;
+            Timber.d("[STREAK] New longest streak record: %d days", longestStreak);
+        }
+        
         // Save updated values
         prefs.edit()
             .putLong(KEY_LAST_LOGIN_DATE, today)
             .putInt(KEY_CURRENT_STREAK, currentStreak)
             .putLong(KEY_LAST_STREAK_DATE, today)
+            .putInt(KEY_LONGEST_STREAK, longestStreak)
+            .putString(KEY_LONGEST_STREAK_DATE, getLongestStreakDateString(today))
             .apply();
         
         // Notify achievement manager
@@ -255,6 +266,29 @@ public class StreakManager {
     }
     
     /**
+     * Get the longest streak ever achieved
+     */
+    public int getLongestStreak() {
+        return prefs.getInt(KEY_LONGEST_STREAK, 0);
+    }
+    
+    /**
+     * Get the date when the longest streak was achieved (ISO format)
+     */
+    public String getLongestStreakDate() {
+        return prefs.getString(KEY_LONGEST_STREAK_DATE, null);
+    }
+    
+    /**
+     * Convert a day number to ISO date string
+     */
+    private String getLongestStreakDateString(long dayNumber) {
+        long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
+        long timestampMs = dayNumber * dayDuration;
+        return new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(timestampMs));
+    }
+    
+    /**
      * Get last login date as ISO date string for server sync.
      */
     public String getLastLoginDateString() {
@@ -267,7 +301,7 @@ public class StreakManager {
     
     /**
      * Restore streak data from server (bidirectional sync).
-     * Takes the higher streak value.
+     * Takes the higher streak value. Also syncs longest streak.
      */
     public void restoreFromServer(int serverStreak, String serverLastDate) {
         int localStreak = getCurrentStreak();
@@ -282,6 +316,23 @@ public class StreakManager {
     }
     
     /**
+     * Restore longest streak data from server (bidirectional sync).
+     * Takes the higher value.
+     */
+    public void restoreLongestStreakFromServer(int serverLongestStreak, String serverLongestStreakDate) {
+        int localLongest = getLongestStreak();
+        if (serverLongestStreak > localLongest) {
+            prefs.edit()
+                .putInt(KEY_LONGEST_STREAK, serverLongestStreak)
+                .putString(KEY_LONGEST_STREAK_DATE, serverLongestStreakDate)
+                .apply();
+            Timber.d("[STREAK_SYNC] Restored longest streak from server: %d (was %d locally)", serverLongestStreak, localLongest);
+        } else {
+            Timber.d("[STREAK_SYNC] Local longest streak %d >= server %d, keeping local", localLongest, serverLongestStreak);
+        }
+    }
+    
+    /**
      * Reset streak (for testing)
      */
     public void resetStreak() {
@@ -290,7 +341,9 @@ public class StreakManager {
             .remove(KEY_CURRENT_STREAK)
             .remove(KEY_LAST_STREAK_DATE)
             .remove(KEY_LAST_POPUP_DATE)
+            .remove(KEY_LONGEST_STREAK)
+            .remove(KEY_LONGEST_STREAK_DATE)
             .apply();
-        Timber.d("[STREAK] Streak reset");
+        Timber.d("[STREAK] Streak reset (including longest streak)");
     }
 }

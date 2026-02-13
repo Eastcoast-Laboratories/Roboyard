@@ -717,6 +717,8 @@ public class AchievementManager {
             StreakManager streakManager = StreakManager.getInstance(context);
             stats.put("daily_login_streak", streakManager.getCurrentStreak());
             stats.put("last_streak_date", streakManager.getLastLoginDateString());
+            stats.put("longest_streak", streakManager.getLongestStreak());
+            stats.put("longest_streak_date", streakManager.getLongestStreakDate());
             
             // Send to server
             apiClient.syncAchievements(achievementsArray, stats, new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult>() {
