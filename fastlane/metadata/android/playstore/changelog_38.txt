@@ -1,0 +1,8 @@
+# Play Store Changelogs für Version 38
+
+<en-GB>
+- Live move counter button, that shows the remaining optimal moves from the current position
+</en-GB>
+<de-DE>
+- Live Move Counter Button, der die optimale Anzahl der Züge von der aktuellen Position zeigt
+</de-DE>

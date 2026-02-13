@@ -1,0 +1,1 @@
+- Live move counter button, that shows the remaining optimal moves from the current position

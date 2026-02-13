@@ -2,6 +2,10 @@ Changelog Deutsch
 =================
 
 
+## Version 38 (2026-02-13)
+- Live Move Counter Button, der die optimale Anzahl der Züge von der aktuellen Position zeigt
+
+
 ## Version 37 (2026-02-13)
 - Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter
 - Verbesserte Sichtbarkeit des grünen Ziels im Hohen Kontrast Modus
