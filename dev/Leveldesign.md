@@ -26,3 +26,6 @@ Level 5:
 
 Level 6:
 - from now on all board size: 12x14
+
+TODO:
+- Check all levels for different solutions so that solving it with only 1 or 2 stars is possible too in a way htat is different from the 3 star solution
