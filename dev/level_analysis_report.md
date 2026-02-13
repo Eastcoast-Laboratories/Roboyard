@@ -1,6 +1,6 @@
 # Level Analysis Report
 
-Generated: 13.02.2026 22:34
+Generated: 13.02.2026 23:13
 
 ## 1. Target Duplicate Analysis (Levels 90+)
 
@@ -12,7 +12,7 @@ Generated: 13.02.2026 22:34
 
 ### Summary
 - **Total levels analyzed:** 140
-- **Levels with anomalies** (excluding normal carré): 86
+- **Levels with anomalies** (excluding normal carré): 84
 - **Levels with trapped robots:** 0
 - **Levels with unreachable target:** 0
 
@@ -54,7 +54,6 @@ Generated: 13.02.2026 22:34
 |    54 | 12x14 |           1 |       1 | 1                 |
 |    55 | 12x14 |           2 |       1 | 2                 |
 |    56 | 12x14 |           1 |       1 | 1                 |
-|    57 | 12x14 |           4 |       1 | 4                 |
 |    58 | 12x14 |           2 |       1 | 2                 |
 |    59 | 12x14 |           2 |       1 | 2                 |
 |    61 | 12x14 |           1 |       1 | 1                 |
@@ -86,7 +85,6 @@ Generated: 13.02.2026 22:34
 |   102 | 12x14 |           3 |       2 | 1, 2              |
 |   103 | 12x14 |           2 |       2 | 1, 1              |
 |   104 | 12x14 |           2 |       2 | 1, 1              |
-|   105 | 12x14 |           4 |       1 | 4                 |
 |   109 | 12x14 |           2 |       2 | 1, 1              |
 |   112 | 12x14 |           1 |       1 | 1                 |
 |   114 | 12x14 |           2 |       1 | 2                 |
@@ -110,4 +108,4 @@ Generated: 13.02.2026 22:34
 |   137 | 12x14 |           5 |       1 | 5                 |
 
 ---
-Report generated: 13.02.2026 22:34
+Report generated: 13.02.2026 23:13
