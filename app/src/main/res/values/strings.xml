@@ -6,10 +6,10 @@
     <!-- Main Menu Strings -->
     <string name="action_settings">Settings</string>
 
-    <string name="new_random_game">New Game</string>
+    <string name="new_random_game">Play</string>
     <string name="new_random_game_a11y">Start a new game</string>
     
-    <string name="level_game">Level Game</string>
+    <string name="level_game">Levels</string>
     <string name="level_game_a11y">Play predefined game levels</string>
     
     <string name="load_game">Load Game</string>

@@ -2653,9 +2653,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[HINT_SYSTEM] Showing exact solution length: %d moves", totalMoves);
             
             // Show an additional toast message for the exact solution hint
-            Toast.makeText(requireContext(), 
-                getString(R.string.solution_found, totalMoves), 
-                Toast.LENGTH_SHORT).show();
+            // Toast.makeText(requireContext(), getString(R.string.solution_found, totalMoves), Toast.LENGTH_SHORT).show();
             
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);

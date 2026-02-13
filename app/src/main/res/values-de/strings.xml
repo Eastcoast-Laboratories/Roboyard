@@ -6,7 +6,7 @@
     <!-- Main Menu Strings -->
     <string name="action_settings">Einstellungen</string>
 
-    <string name="new_random_game">Neues Spiel</string>
+    <string name="new_random_game">Spielen</string>
     <string name="new_random_game_a11y">Starte ein neues Spiel</string>
     
     <string name="level_game">Levels</string>
@@ -338,7 +338,7 @@
     <string name="pre_hint_less_than_x">Die KI hat eine Lösung mit weniger als %1$d Zügen gefunden</string>
     <string name="pre_hint_less_than_1">Du hast eine bessere Lösung als die KI gefunden!</string>
     <string name="pre_hint_exact_solution">Die KI hat eine Lösung mit %1$d Zügen gefunden</string>
-    <string name="solution_found">KI hat Lösung gefunden!</string>
+    <string name="solution_found">Die KI hat eine Lösung gefunden!</string>
     <string name="pre_hint_involved_robots">Bewege</string>
     <string name="and">und</string>
     <string name="pre_hint_first_move">Bewege zuerst den %1$s Roboter</string>
