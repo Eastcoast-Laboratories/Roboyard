@@ -133,6 +133,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long uiTimerStartTimeMs = 0;
     private long uiTimerElapsedMs = 0;
     private boolean uiTimerWasRunning = false;
+    private boolean isNewGameLoaded = false; // Flag to indicate if a new game was just loaded (timer should reset)
 
     // Game history tracking variables
     private long gameStartTime;
@@ -372,6 +373,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return true if successful, false otherwise
      */
     public boolean applyLoadedGameState(GameState newState) {
+        // Mark that a new game was loaded - timer should reset
+        isNewGameLoaded = true;
+        Timber.d("[TIMER] New game loaded - timer will reset");
+        
         // Set reference to this GameStateManager in the new state
         newState.setGameStateManager(this);
 
@@ -1782,7 +1787,24 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void resetUiTimer() {
         this.uiTimerElapsedMs = 0;
         this.uiTimerWasRunning = false;
+        this.isNewGameLoaded = false;
         Timber.d("[TIMER] Reset UI timer state");
+    }
+
+    /**
+     * Check if a new game was just loaded (timer should reset)
+     * @return true if a new game was loaded
+     */
+    public boolean isNewGameLoaded() {
+        return isNewGameLoaded;
+    }
+
+    /**
+     * Clear the new game loaded flag (called after timer is reset)
+     */
+    public void clearNewGameLoadedFlag() {
+        this.isNewGameLoaded = false;
+        Timber.d("[TIMER] Cleared new game loaded flag");
     }
 
     /**

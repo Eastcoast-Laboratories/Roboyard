@@ -3255,13 +3255,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Clear any previous hint or status text
         updateStatusText("", false);
 
-        // Resume timer from ViewModel if it was running, otherwise reset
-        if (gameStateManager != null && gameStateManager.wasUiTimerRunning()) {
+        // Resume timer from ViewModel if it was running AND no new game was loaded
+        // If a new game was loaded (from SaveGame/History/Level), reset the timer to 0
+        if (gameStateManager != null && gameStateManager.wasUiTimerRunning() && !gameStateManager.isNewGameLoaded()) {
             elapsedTimeBeforePause = gameStateManager.getUiTimerElapsedMs();
             Timber.d("[TIMER] Resuming timer from ViewModel: %d ms", elapsedTimeBeforePause);
             startTimer();
+            // Clear the flag after resuming
+            gameStateManager.clearNewGameLoadedFlag();
         } else {
+            // Reset timer for new games or when no timer was running
             resetAndStartTimer();
+            // Clear the flag after resetting
+            if (gameStateManager != null) {
+                gameStateManager.clearNewGameLoadedFlag();
+            }
         }
         
         // Clear robot paths
