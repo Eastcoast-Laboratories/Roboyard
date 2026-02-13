@@ -660,12 +660,15 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 timeText.setVisibility(View.GONE);
             }
 
-            // Set click listener for level button
-            levelButton.setOnClickListener(v -> fragment.onLevelSelected(levelId));
+            // Set click listener on the entire item view AND the button
+            View.OnClickListener clickListener = v -> fragment.onLevelSelected(levelId);
+            levelButton.setOnClickListener(clickListener);
+            itemView.setOnClickListener(clickListener);
 
-            // Enable/disable button based on unlock status
+            // Enable/disable based on unlock status
             levelButton.setEnabled(isUnlocked);
-            levelButton.setAlpha(isUnlocked ? 1.0f : 0.5f); // Visual feedback for locked levels
+            itemView.setEnabled(isUnlocked);
+            itemView.setAlpha(isUnlocked ? 1.0f : 0.5f); // Visual feedback for locked levels
         }
     }
 }
