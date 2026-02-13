@@ -483,6 +483,7 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void showLevelText() {
+        Timber.d("[EDITOR_EXPORT] showLevelText() called - opening export dialog");
         String levelText = generateLevelText();
         
         // Create a dialog for displaying level text with copy and share options
@@ -529,6 +530,26 @@ public class LevelDesignEditorFragment extends Fragment {
         buttonParams.setMargins(0, 20, 0, 20);
         copyButton.setLayoutParams(buttonParams);
         container.addView(copyButton);
+        
+        // Add "Save to Sourcecode" button (only visible if receiver is reachable)
+        Button saveToSourceButton = new Button(requireContext());
+        saveToSourceButton.setText("\uD83D\uDCBE Save to Sourcecode");
+        saveToSourceButton.setVisibility(View.GONE);
+        LinearLayout.LayoutParams saveParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        saveParams.setMargins(0, 0, 0, 20);
+        saveToSourceButton.setLayoutParams(saveParams);
+        container.addView(saveToSourceButton);
+        
+        saveToSourceButton.setOnClickListener(v -> {
+            saveToSourceButton.setEnabled(false);
+            saveToSourceButton.setText("Saving...");
+            saveToSourcecode(currentLevelId, levelText, saveToSourceButton);
+        });
+        
+        // Check if receiver is reachable in background
+        checkReceiverReachable(saveToSourceButton);
         
         // Add a TextView for the share link
         TextView shareInfoText = new TextView(requireContext());
@@ -637,6 +658,101 @@ public class LevelDesignEditorFragment extends Fragment {
         }
     }
     
+    private static final String RECEIVER_URL = "http://10.0.2.2:8787";
+
+    /**
+     * Check if the local level receiver is reachable (GET /ping).
+     * If reachable, show the Save to Sourcecode button.
+     */
+    private void checkReceiverReachable(Button saveToSourceButton) {
+        Timber.d("[EDITOR_EXPORT] Checking receiver at %s/ping", RECEIVER_URL);
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(RECEIVER_URL + "/ping");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                Timber.d("[EDITOR_EXPORT] Connecting to %s...", url);
+                int code = conn.getResponseCode();
+                conn.disconnect();
+                Timber.d("[EDITOR_EXPORT] Receiver responded with code %d", code);
+                if (code == 200) {
+                    if (isAdded()) {
+                        requireActivity().runOnUiThread(() -> {
+                            saveToSourceButton.setVisibility(View.VISIBLE);
+                            Timber.d("[EDITOR_EXPORT] Receiver reachable, showing Save to Sourcecode button");
+                        });
+                    }
+                } else {
+                    Timber.d("[EDITOR_EXPORT] Receiver returned %d, hiding button", code);
+                }
+            } catch (Exception e) {
+                Timber.d("[EDITOR_EXPORT] Receiver not reachable: %s", e.getMessage());
+            }
+        }).start();
+    }
+
+    /**
+     * Send level data to the local receiver via HTTP POST.
+     */
+    private void saveToSourcecode(int levelId, String levelText, Button saveToSourceButton) {
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(RECEIVER_URL + "/save-level");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+
+                org.json.JSONObject json = new org.json.JSONObject();
+                json.put("level_id", levelId);
+                json.put("level_data", levelText);
+
+                byte[] body = json.toString().getBytes("UTF-8");
+                conn.getOutputStream().write(body);
+
+                int responseCode = conn.getResponseCode();
+                java.io.InputStream is = (responseCode >= 200 && responseCode < 300)
+                        ? conn.getInputStream() : conn.getErrorStream();
+                String response = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A").next();
+                conn.disconnect();
+
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> {
+                        saveToSourceButton.setEnabled(true);
+                        if (responseCode == 200) {
+                            saveToSourceButton.setText("\u2713 Saved to Sourcecode");
+                            Toast.makeText(requireContext(),
+                                    "Level " + levelId + " saved to sourcecode!",
+                                    Toast.LENGTH_SHORT).show();
+                            Timber.d("[EDITOR_EXPORT] Level %d saved: %s", levelId, response);
+                        } else {
+                            saveToSourceButton.setText("\uD83D\uDCBE Save to Sourcecode");
+                            Toast.makeText(requireContext(),
+                                    "Save failed: " + response,
+                                    Toast.LENGTH_LONG).show();
+                            Timber.e("[EDITOR_EXPORT] Save failed (%d): %s", responseCode, response);
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                Timber.e(e, "[EDITOR_EXPORT] Failed to save to sourcecode");
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> {
+                        saveToSourceButton.setEnabled(true);
+                        saveToSourceButton.setText("\uD83D\uDCBE Save to Sourcecode");
+                        Toast.makeText(requireContext(),
+                                "Connection failed. Is level_receiver.py running?",
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+            }
+        }).start();
+    }
+
     private boolean levelExists(int levelId) {
         try {
             if (levelId <= 140) {
