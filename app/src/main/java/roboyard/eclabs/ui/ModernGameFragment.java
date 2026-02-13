@@ -806,6 +806,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @param state The current game state
      */
     private void checkIfMoveMatchesHint(GameState state) {
+        // Update live move counter toggle visibility if we're on the exact solution pre-hint
+        // This ensures the toggle appears immediately when the first move is made
+        if (showingPreHints && currentHintStep == numPreHints && liveMoveCounterToggle != null) {
+            int moveCount = state.getMoveCount();
+            liveMoveCounterToggle.setVisibility(moveCount >= 1 ? View.VISIBLE : View.GONE);
+            Timber.d("[HINT_SYSTEM] Updated eye toggle visibility: moveCount=%d, visible=%b", 
+                moveCount, moveCount >= 1);
+        }
+        
         // Check if a hint is being shown
         if (hintContainer.getVisibility() == View.VISIBLE) {
             Timber.d("[HINT_SYSTEM] Checking if move matches hint");
