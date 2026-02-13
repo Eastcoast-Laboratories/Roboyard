@@ -366,6 +366,8 @@
     <string name="pre_hint_first_move">Move the %1$s robot first</string>
     <string name="and">and</string>
     <string name="no_solution_found">No solution found</string>
+    <string name="live_move_counter_label_a11y">Show remaining moves</string>
+    <string name="live_move_counter_optimal">%1$d moves from here</string>
     <string name="pre_hint_ready">Ready to show step-by-step hints</string>
     <string name="all_hints_shown">All hints have been shown</string>
     <string name="no_valid_hint">No valid hint available</string>

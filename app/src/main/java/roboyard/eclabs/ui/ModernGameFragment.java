@@ -88,6 +88,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private ViewGroup hintContainer;
     private TextView prevHintButton;
     private TextView nextHintButton;
+    private ToggleButton liveMoveCounterToggle;
+    private android.animation.ObjectAnimator eyeBlinkAnimator;
     
     // Class member to track if a robot is currently selected
     private boolean isRobotSelected = false;
@@ -441,6 +443,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         hintContainer = view.findViewById(R.id.hint_container);
         prevHintButton = view.findViewById(R.id.prev_hint_button);
         nextHintButton = view.findViewById(R.id.next_hint_button);
+        liveMoveCounterToggle = view.findViewById(R.id.live_move_counter_toggle);
         
         // Set up close button for game info container
         ImageButton closeButton = view.findViewById(R.id.game_info_close_button);
@@ -772,6 +775,28 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 hintButton.setChecked(false);
                 // Don't update the status text here - let callbacks handle it appropriately
                 // This prevents text flashing/flickering between states
+            }
+        });
+
+        // Observe live move counter text
+        gameStateManager.getLiveMoveCounterText().observe(getViewLifecycleOwner(), text -> {
+            if (text != null && !text.isEmpty() && gameStateManager.isLiveMoveCounterEnabled()) {
+                // Show live counter text in dark green instead of current hint
+                if (statusTextView != null) {
+                    statusTextView.setText(text);
+                    statusTextView.setTextColor(android.graphics.Color.parseColor("#006400"));
+                }
+            }
+        });
+
+        // Observe live solver calculating state for eye blink animation
+        gameStateManager.isLiveSolverCalculating().observe(getViewLifecycleOwner(), isCalculating -> {
+            if (liveMoveCounterToggle != null && liveMoveCounterToggle.isChecked()) {
+                if (isCalculating) {
+                    startEyeBlinkAnimation();
+                } else {
+                    stopEyeBlinkAnimation();
+                }
             }
         });
     }
@@ -1122,6 +1147,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[HINT_SYSTEM] Next hint button clicked");
             showNextHint("next hint button");
         });
+        
+        // Set up live move counter eye toggle
+        if (liveMoveCounterToggle != null) {
+            liveMoveCounterToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                Timber.d("[LIVE_SOLVER] Eye toggle changed: %s", isChecked ? "ON" : "OFF");
+                gameStateManager.setLiveMoveCounterEnabled(isChecked);
+                if (isChecked) {
+                    // Trigger an immediate solve for the current position
+                    gameStateManager.triggerLiveSolver();
+                }
+            });
+        }
         
         // (Button text: "Save Map")
         // Save map button - navigate to save screen
@@ -2583,6 +2620,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[HINT_SYSTEM] Showing pre-hint #%d (total pre-hints: %d + %d fixed)", 
                 currentHintStep + 1, numPreHints, NUM_FIXED_PRE_HINTS);
         
+        // Hide the eye toggle by default; only the exact solution pre-hint shows it
+        if (liveMoveCounterToggle != null && currentHintStep != numPreHints) {
+            liveMoveCounterToggle.setVisibility(View.GONE);
+        }
+        
         // Calculate total number of pre-hints (regular + fixed)
         int totalPreHints = numPreHints + NUM_FIXED_PRE_HINTS;
         
@@ -2608,6 +2650,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);
+            
+            // Show the live move counter eye toggle on this specific pre-hint
+            if (liveMoveCounterToggle != null) {
+                liveMoveCounterToggle.setVisibility(View.VISIBLE);
+            }
         }
         // Second fixed pre-hint: Show involved robot colors
         else if (currentHintStep == numPreHints + 1) {
@@ -2696,6 +2743,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
         Timber.d("[HINT_SYSTEM] showNormalHint called with hintIndex: %d", hintIndex);
+        
+        // Hide the eye toggle during normal hints
+        if (liveMoveCounterToggle != null) {
+            liveMoveCounterToggle.setVisibility(View.GONE);
+        }
+        
         // Validate that the hint index is within bounds
         if (hintIndex < 0 || hintIndex >= totalMoves) {
             Timber.e("[HINT_SYSTEM] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
@@ -3438,8 +3491,31 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Check if the game should be saved to history
+     * Start blinking animation on the eye toggle while the live solver is calculating
      */
+    private void startEyeBlinkAnimation() {
+        if (liveMoveCounterToggle == null) return;
+        stopEyeBlinkAnimation();
+        eyeBlinkAnimator = android.animation.ObjectAnimator.ofFloat(liveMoveCounterToggle, "alpha", 1f, 0.2f);
+        eyeBlinkAnimator.setDuration(400);
+        eyeBlinkAnimator.setRepeatCount(android.animation.ObjectAnimator.INFINITE);
+        eyeBlinkAnimator.setRepeatMode(android.animation.ObjectAnimator.REVERSE);
+        eyeBlinkAnimator.start();
+    }
+
+    /**
+     * Stop blinking animation on the eye toggle
+     */
+    private void stopEyeBlinkAnimation() {
+        if (eyeBlinkAnimator != null) {
+            eyeBlinkAnimator.cancel();
+            eyeBlinkAnimator = null;
+        }
+        if (liveMoveCounterToggle != null) {
+            liveMoveCounterToggle.setAlpha(1f);
+        }
+    }
+
     private void checkHistorySave() {
         // Only check for history saving if game is in progress and not already saved
         if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {

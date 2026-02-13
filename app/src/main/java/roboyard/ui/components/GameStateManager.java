@@ -44,6 +44,7 @@ import roboyard.eclabs.ui.LevelCompletionData;
 import roboyard.eclabs.ui.LevelCompletionManager;
 import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.SolutionAnimator;
+import roboyard.eclabs.util.LiveSolverManager;
 import roboyard.eclabs.util.SolverManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
@@ -156,6 +157,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     // Store the difficulty level from the loaded savegame (for display purposes)
     private int loadedSaveDifficulty = -1;
+
+    // Live move counter feature
+    private LiveSolverManager liveSolverManager;
+    private boolean liveMoveCounterEnabled = false;
+    private final MutableLiveData<String> liveMoveCounterText = new MutableLiveData<>("");
+    private final MutableLiveData<Boolean> liveSolverCalculating = new MutableLiveData<>(false);
 
     public GameStateManager(Application application) {
         super(application);
@@ -1198,6 +1205,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 if (currentStateLiveData instanceof MutableLiveData) {
                     ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
                 }
+
+                // Trigger live solver after move completes
+                triggerLiveSolver();
             };
 
             // Queue this movement for animation
@@ -1249,6 +1259,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 if (currentStateLiveData instanceof MutableLiveData) {
                     ((MutableLiveData<GameState>) currentStateLiveData).setValue(state);
                 }
+
+                // Trigger live solver after move completes (immediate mode)
+                triggerLiveSolver();
             }
             return true;
         }
@@ -2972,5 +2985,123 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public GameElement getLastMoveHitRobotElement() {
         return lastMoveHitRobotElement;
+    }
+
+    // --- Live Move Counter Feature ---
+
+    public LiveData<String> getLiveMoveCounterText() {
+        return liveMoveCounterText;
+    }
+
+    public LiveData<Boolean> isLiveSolverCalculating() {
+        return liveSolverCalculating;
+    }
+
+    public boolean isLiveMoveCounterEnabled() {
+        return liveMoveCounterEnabled;
+    }
+
+    public void setLiveMoveCounterEnabled(boolean enabled) {
+        this.liveMoveCounterEnabled = enabled;
+        Timber.d("[LIVE_SOLVER] Live move counter %s", enabled ? "enabled" : "disabled");
+        if (!enabled) {
+            liveMoveCounterText.setValue("");
+            liveSolverCalculating.setValue(false);
+            if (liveSolverManager != null) {
+                liveSolverManager.cancel();
+            }
+        }
+    }
+
+    /**
+     * Trigger the live solver to calculate optimal moves from the current robot positions.
+     * Called after each player move when the live move counter is enabled.
+     */
+    public void triggerLiveSolver() {
+        if (!liveMoveCounterEnabled) return;
+
+        GameState state = currentState.getValue();
+        if (state == null) return;
+
+        // Don't solve if game is already complete
+        if (Boolean.TRUE.equals(isGameComplete.getValue())) {
+            liveMoveCounterText.setValue("");
+            liveSolverCalculating.setValue(false);
+            return;
+        }
+
+        // Lazy-init the live solver manager
+        if (liveSolverManager == null) {
+            liveSolverManager = new LiveSolverManager();
+        }
+
+        liveSolverCalculating.setValue(true);
+
+        // Build grid elements from current state (current robot positions)
+        ArrayList<GridElement> gridElements = new ArrayList<>();
+        for (GameElement element : state.getGameElements()) {
+            GridElement gridElement = null;
+            switch (element.getType()) {
+                case GameElement.TYPE_ROBOT:
+                    String robotType = "robot_" + GameLogic.getColorName(element.getColor(), false);
+                    gridElement = new GridElement(element.getX(), element.getY(), robotType);
+                    break;
+                case GameElement.TYPE_TARGET:
+                    String targetType = "target_" + GameLogic.getColorName(element.getColor(), false);
+                    gridElement = new GridElement(element.getX(), element.getY(), targetType);
+                    break;
+                case GameElement.TYPE_HORIZONTAL_WALL:
+                    gridElement = new GridElement(element.getX(), element.getY(), "mh");
+                    break;
+                case GameElement.TYPE_VERTICAL_WALL:
+                    gridElement = new GridElement(element.getX(), element.getY(), "mv");
+                    break;
+            }
+            if (gridElement != null) {
+                gridElements.add(gridElement);
+            }
+        }
+
+        Timber.d("[LIVE_SOLVER] Triggering live solve with %d elements", gridElements.size());
+
+        liveSolverManager.solveAsync(gridElements, new LiveSolverManager.LiveSolverListener() {
+            @Override
+            public void onLiveSolverFinished(int optimalMoves) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    liveSolverCalculating.setValue(false);
+                    String text = context.getString(R.string.live_move_counter_optimal, optimalMoves);
+                    liveMoveCounterText.setValue(text);
+                    Timber.d("[LIVE_SOLVER] Result: %d moves from current position", optimalMoves);
+                });
+            }
+
+            @Override
+            public void onLiveSolverFailed() {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    liveSolverCalculating.setValue(false);
+                    liveMoveCounterText.setValue("?");
+                    Timber.d("[LIVE_SOLVER] No solution found from current position");
+                });
+            }
+        });
+    }
+
+    /**
+     * Cancel and clean up the live solver.
+     */
+    public void cancelLiveSolver() {
+        if (liveSolverManager != null) {
+            liveSolverManager.cancel();
+        }
+        liveMoveCounterText.setValue("");
+        liveSolverCalculating.setValue(false);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        if (liveSolverManager != null) {
+            liveSolverManager.shutdown();
+        }
     }
 }
