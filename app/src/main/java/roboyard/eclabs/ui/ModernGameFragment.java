@@ -2651,9 +2651,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);
             
-            // Show the live move counter eye toggle on this specific pre-hint
+            // Show the live move counter eye toggle only if at least 1 move has been made
             if (liveMoveCounterToggle != null) {
-                liveMoveCounterToggle.setVisibility(View.VISIBLE);
+                GameState currentState = gameStateManager.getCurrentState().getValue();
+                int moveCount = (currentState != null) ? currentState.getMoveCount() : 0;
+                liveMoveCounterToggle.setVisibility(moveCount >= 1 ? View.VISIBLE : View.GONE);
             }
         }
         // Second fixed pre-hint: Show involved robot colors
@@ -3003,6 +3005,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[STATUS_TEXT] Updating status text: '%s', visible: %b", message, isVisible);
         if (statusTextView != null) {
             statusTextView.setText(message);
+            // Reset text color to default black (live counter sets it to green)
+            statusTextView.setTextColor(android.graphics.Color.parseColor("#1A1A1A"));
             statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space
             
             // Ensure the hint container is visible when showing a hint
