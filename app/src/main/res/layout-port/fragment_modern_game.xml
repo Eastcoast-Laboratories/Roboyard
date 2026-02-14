@@ -333,8 +333,13 @@
                 android:padding="@dimen/game_button_padding"
                 android:text="@string/button_back_game"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
 
             <Button
@@ -347,8 +352,13 @@
                 android:padding="@dimen/game_button_padding"
                 android:text="@string/button_save_map"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
 
             <Button
@@ -360,8 +370,13 @@
                 android:padding="@dimen/game_button_padding"
                 android:text="@string/button_reset"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
         </LinearLayout>
 
@@ -382,7 +397,12 @@
                 android:textOn="@string/hint_cancel_button"
                 android:textOff="@string/hint_button"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
 
             <Button
@@ -395,8 +415,13 @@
                 android:padding="@dimen/game_button_padding"
                 android:text="@string/button_new_game"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
 
             <Button
@@ -408,8 +433,13 @@
                 android:padding="@dimen/game_button_padding"
                 android:text="@string/button_menu"
                 android:textColor="#FFFFFF"
-                android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
         </LinearLayout>
         
@@ -424,8 +454,13 @@
             android:text="@string/next_level"
             android:contentDescription="@string/next_level_description"
             android:textColor="#FFFFFF"
-            android:textSize="@dimen/game_button_text_size"
             android:textStyle="bold"
+            android:singleLine="true"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+            app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+            app:autoSizeStepGranularity="1sp"
             android:visibility="gone"
             android:elevation="6dp" />
     </LinearLayout>

@@ -77,7 +77,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/save_map_button"
+            android:text="@string/button_save_map"
             android:contentDescription="@string/save_map_button_a11y"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />

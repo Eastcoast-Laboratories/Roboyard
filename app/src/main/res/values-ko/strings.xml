@@ -56,6 +56,7 @@
     <string name="button_reset">초기화</string>
     <string name="button_save_map">맵 저장</string>
     <string name="button_new_game">새 게임</string>
+    <string name="new_random_game_button">새 게임</string>
     <string name="button_menu">메뉴</string>
     <string name="back">뒤로</string>
     <string name="reset">초기화</string>
