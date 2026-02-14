@@ -936,8 +936,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             if (gameStateManager.undoLastMove()) {
                 // Force grid view update after undo
                 if (gameGridView != null) {
-                    // Clear paths if needed
-                    gameGridView.clearRobotPaths();
+                    // Remove only the last path segment instead of clearing all paths
+                    gameGridView.undoLastPathSegment();
                     // Force the grid view to redraw completely
                     gameGridView.invalidate();
                     

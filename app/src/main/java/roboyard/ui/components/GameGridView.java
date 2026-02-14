@@ -75,6 +75,9 @@ public class GameGridView extends View {
     private final HashMap<Integer, float[]> robotBaseOffsets = new HashMap<>(); // Base offset for each robot
     private final HashMap<Integer, HashMap<String, Integer>> segmentCounts = new HashMap<>(); // Track segment traversal count
     
+    // Path history for undo support: each entry stores [robotColor, fromX, fromY, toX, toY]
+    private final ArrayList<int[]> pathHistory = new ArrayList<>();
+    
     // Track visited squares for achievements (per robot and combined)
     private final HashMap<Integer, java.util.HashSet<String>> visitedSquaresPerRobot = new HashMap<>();
     private final java.util.HashSet<String> visitedSquaresAllRobots = new java.util.HashSet<>();
@@ -1627,6 +1630,9 @@ public class GameGridView extends View {
         // Add the new position to the path
         robotPaths.get(color).add(new int[]{toX, toY});
         
+        // Save to path history for undo support
+        pathHistory.add(new int[]{color, fromX, fromY, toX, toY});
+        
         // Track all squares visited along the path (not just endpoints)
         int dx = Integer.compare(toX, fromX);
         int dy = Integer.compare(toY, fromY);
@@ -1793,6 +1799,7 @@ public class GameGridView extends View {
         robotPaths.clear();
         robotBaseOffsets.clear();
         segmentCounts.clear();
+        pathHistory.clear();
         visitedSquaresPerRobot.clear();
         visitedSquaresAllRobots.clear();
         allSquaresOneRobotUnlocked = false;
@@ -1800,6 +1807,42 @@ public class GameGridView extends View {
         allSquaresAllRobotsUnlocked = false;
         allSquaresAllRobotsGoalUnlocked = false;
         goalReached = false;
+        invalidate();
+    }
+    
+    /**
+     * Undo the last path segment (called when player presses Back/Undo).
+     * Removes the last point from the robot's path and decrements the segment count.
+     */
+    public void undoLastPathSegment() {
+        if (pathHistory.isEmpty()) return;
+        
+        // Pop the last path entry
+        int[] last = pathHistory.remove(pathHistory.size() - 1);
+        int color = last[0];
+        int fromX = last[1];
+        int fromY = last[2];
+        int toX = last[3];
+        int toY = last[4];
+        
+        // Remove the last position from this robot's path
+        ArrayList<int[]> path = robotPaths.get(color);
+        if (path != null && path.size() > 1) {
+            path.remove(path.size() - 1);
+        }
+        
+        // Decrement the segment count
+        HashMap<String, Integer> robotSegments = segmentCounts.get(color);
+        if (robotSegments != null) {
+            String segmentKey = fromX + "," + fromY + ":" + toX + "," + toY;
+            int count = robotSegments.getOrDefault(segmentKey, 0) - 1;
+            if (count <= 0) {
+                robotSegments.remove(segmentKey);
+            } else {
+                robotSegments.put(segmentKey, count);
+            }
+        }
+        
         invalidate();
     }
 
