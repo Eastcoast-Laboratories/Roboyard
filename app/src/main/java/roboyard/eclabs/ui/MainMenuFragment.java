@@ -9,12 +9,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.text.TextPaint;
-import android.graphics.Canvas;
 
 import roboyard.eclabs.R;
 import roboyard.eclabs.RoboyardApiClient;
-import roboyard.eclabs.RoboyardApplication;
 import roboyard.eclabs.achievements.Achievement;
 import roboyard.eclabs.achievements.AchievementCategory;
 import roboyard.eclabs.achievements.AchievementManager;

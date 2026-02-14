@@ -2,7 +2,6 @@ package roboyard.eclabs.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -22,7 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,7 +43,6 @@ import roboyard.logic.core.GameState;
 import roboyard.eclabs.R;
 import roboyard.eclabs.FileReadWrite;
 import roboyard.logic.core.Constants;
-import roboyard.logic.core.Preferences;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.components.GameStateManager;
 import roboyard.eclabs.GameHistoryManager;

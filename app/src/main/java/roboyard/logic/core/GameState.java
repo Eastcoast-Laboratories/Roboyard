@@ -1,22 +1,18 @@
 package roboyard.logic.core;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.Log;
 
 import roboyard.eclabs.ui.GameElement;
-import roboyard.eclabs.ui.MinimapGenerator;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;

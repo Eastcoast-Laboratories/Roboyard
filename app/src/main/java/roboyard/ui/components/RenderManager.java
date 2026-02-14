@@ -10,13 +10,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
 
 import java.util.Random;
 
-import timber.log.Timber;
 
 /**
  * Manages rendering operations such as drawing shapes, images, and text on a canvas.

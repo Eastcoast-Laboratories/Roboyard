@@ -14,10 +14,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import android.view.View;
 
-import roboyard.eclabs.GameManager;
 import roboyard.eclabs.R;
 import roboyard.eclabs.SyncManager;
-import roboyard.eclabs.achievements.StreakManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;

@@ -3,7 +3,6 @@ package roboyard.ui.components;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
-import roboyard.eclabs.ui.GameElement;
 import roboyard.logic.core.Wall;
 import roboyard.logic.core.WallModel;
 import roboyard.logic.core.WallType;
