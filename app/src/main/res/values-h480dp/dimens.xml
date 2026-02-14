@@ -23,7 +23,7 @@
     <!-- Game info text sizes -->
     <dimen name="game_info_primary_text_size">26sp</dimen>
     <dimen name="game_info_secondary_text_size">22sp</dimen>
-    <dimen name="game_info_small_text_size">20sp</dimen>
+    <dimen name="game_info_small_text_size">18sp</dimen>
     <dimen name="game_info_optimal_moves_text_size">36sp</dimen>
     
     <!-- Achievement icon dimensions (70% of standard size for small phones) -->

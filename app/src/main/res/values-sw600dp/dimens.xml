@@ -23,6 +23,6 @@
     <!-- Game info text sizes for tablets -->
     <dimen name="game_info_primary_text_size">46sp</dimen>
     <dimen name="game_info_secondary_text_size">42sp</dimen>
-    <dimen name="game_info_small_text_size">38sp</dimen>
+    <dimen name="game_info_small_text_size">32sp</dimen>
     <dimen name="game_info_optimal_moves_text_size">62sp</dimen>
 </resources>

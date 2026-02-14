@@ -96,4 +96,25 @@ die app soll aber der systemeinstellung für automatisch drehen gehorchen, also 
 
 # last prompt:
 
-- man darf im ersten auto-save slot ncihts speichern
+- merke: du sollst immer eine englische commit message vorschlagen, wenn du fertig bist.
+
+schlage eine vor jetzt.
+
+2.
+warum wurden in Commit a68af9cc  updateMoveCount() und updateSquaresMoved() in ModernGameFragment.java geändert — getString(R.string.moves_count, count) wurde durch String.valueOf(count) ersetzt, wodurch die Wörter "Moves:" und "Squares:" verloren gingen? analysieree ob noch mehr solche falschen ersetzungen in dem commit vorgenommen wurden. falls ja, reverte diese auch und committe das
+
+3.
+der backround sound erklingt nicht:
+@SoundService.java#L18-26 
+dieser soll aber immer klingen und in den settings soll ein schieberegler dafür sein, wie laut "Background sound" in allen sprachen.
+baue dazu einen espresso test .
+und committe das wenn fertig
+
+4. @concept_hotcold_mode.md#L26-29 Problems to Fix
+Toggle resets when navigating away — needs SharedPreferences persistence
+Display text ("X moves from here") — needs to add the delta Y like: X moves from here (Δ+Y), so player can see if they're on track
+schlage ab hier wieder  nur die englische  message vor, nicht committen
+
+
+
+
