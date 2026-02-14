@@ -6,6 +6,7 @@ import roboyard.ui.components.RenderManager;
 import roboyard.ui.components.InputManager;
 import roboyard.logic.core.Preferences;
 
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.content.Context;
 import android.os.Bundle;
@@ -54,6 +55,13 @@ public class MainActivity extends FragmentActivity
         
         // Initialize static Preferences
         Preferences.initialize(getApplicationContext());
+        
+        // Start background sound service if volume > 0
+        if (Preferences.backgroundSoundVolume > 0) {
+            Intent soundIntent = new Intent(this, roboyard.SoundService.class);
+            soundIntent.putExtra(roboyard.SoundService.EXTRA_VOLUME, Preferences.backgroundSoundVolume);
+            startService(soundIntent);
+        }
         
         // Hide the status bar
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

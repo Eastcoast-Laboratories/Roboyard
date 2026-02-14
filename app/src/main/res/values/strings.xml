@@ -397,6 +397,8 @@
     <string name="settings_out_of">of</string>
     <string name="settings_targets">Targets</string>
     <string name="settings_sound">Sound Effects:</string>
+    <string name="settings_background_sound">Background Sound:</string>
+    <string name="settings_background_sound_a11y">Background sound volume slider</string>
     <string name="settings_vibration">Vibration Effects:</string>
     <string name="settings_yes">Yes</string>
     <string name="settings_no">No</string>

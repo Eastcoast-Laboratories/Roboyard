@@ -34,6 +34,7 @@ public class Preferences {
     private static final String KEY_MAX_SOLUTION_MOVES = "max_solution_moves";
     private static final String KEY_ALLOW_MULTICOLOR_TARGET = "allow_multicolor_target";
     private static final String KEY_HIGH_CONTRAST_MODE = "high_contrast_mode";
+    private static final String KEY_BACKGROUND_SOUND_VOLUME = "background_sound_volume";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -52,6 +53,7 @@ public class Preferences {
     public static final int DEFAULT_MAX_SOLUTION_MOVES = 6;
     public static final boolean DEFAULT_ALLOW_MULTICOLOR_TARGET = true;
     public static final boolean DEFAULT_HIGH_CONTRAST_MODE = false;
+    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 0;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -70,6 +72,7 @@ public class Preferences {
     public static int maxSolutionMoves;
     public static boolean allowMulticolorTarget;
     public static boolean highContrastMode;
+    public static int backgroundSoundVolume;
     
     // For compatibility with existing code
     public static int boardSizeX;
@@ -324,6 +327,14 @@ public class Preferences {
                 highContrastMode = DEFAULT_HIGH_CONTRAST_MODE;
             }
             
+            try {
+                backgroundSoundVolume = prefs.getInt(KEY_BACKGROUND_SOUND_VOLUME, DEFAULT_BACKGROUND_SOUND_VOLUME);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading background sound volume: %s", e.getMessage());
+                prefs.edit().remove(KEY_BACKGROUND_SOUND_VOLUME).apply();
+                backgroundSoundVolume = DEFAULT_BACKGROUND_SOUND_VOLUME;
+            }
+            
             // For compatibility with existing code
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
@@ -362,6 +373,7 @@ public class Preferences {
         maxSolutionMoves = DEFAULT_MAX_SOLUTION_MOVES;
         allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET;
         highContrastMode = DEFAULT_HIGH_CONTRAST_MODE;
+        backgroundSoundVolume = DEFAULT_BACKGROUND_SOUND_VOLUME;
         
         // Clear all preferences
         if (prefs != null) {
@@ -476,6 +488,32 @@ public class Preferences {
         // Notify listeners
         notifyPreferencesChanged();
         Timber.d("[PREFERENCES] Sound enabled set to %s", enabled);
+    }
+    
+    /**
+     * Set the background sound volume and save to preferences
+     * @param volume Volume level 0-100 (0 = off)
+     */
+    public static void setBackgroundSoundVolume(int volume) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setBackgroundSoundVolume, attempting to initialize");
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                backgroundSoundVolume = volume;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_BACKGROUND_SOUND_VOLUME, volume);
+        editor.apply();
+        
+        backgroundSoundVolume = volume;
+        
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Background sound volume set to %d", volume);
     }
     
     /**

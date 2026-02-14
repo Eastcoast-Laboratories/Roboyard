@@ -275,6 +275,7 @@
     <string name="settings_language">Idioma</string>
     <string name="settings_vibration">Vibración</string>
     <string name="settings_sound">Sonido</string>
+    <string name="settings_background_sound">Sonido de fondo:</string>
     <string name="settings_music">Música</string>
     <string name="settings_enhanced_accessibility">Accesibilidad mejorada</string>
     <string name="settings_accessibility">Accesibilidad</string>

@@ -522,6 +522,27 @@
                     android:buttonTint="#ffffff"/>
             </RadioGroup>
 
+            <!-- Background Sound Volume Section -->
+            <TextView
+                android:id="@+id/background_sound_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_background_sound"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <SeekBar
+                android:id="@+id/background_sound_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="0"
+                android:layout_marginBottom="24dp"
+                android:contentDescription="@string/settings_background_sound_a11y" />
+
             <!-- Fullscreen Mode Section -->
             <TextView
                 android:id="@+id/fullscreen_label"
