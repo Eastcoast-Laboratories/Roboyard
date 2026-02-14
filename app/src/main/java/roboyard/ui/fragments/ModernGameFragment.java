@@ -1142,8 +1142,15 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             showNextHint("next hint button");
         });
         
-        // Set up live move counter eye toggle
+        // Set up live move counter eye toggle — restore persisted state first
         if (liveMoveCounterToggle != null) {
+            boolean savedEnabled = Preferences.liveMoveCounterEnabled;
+            liveMoveCounterToggle.setOnCheckedChangeListener(null);
+            liveMoveCounterToggle.setChecked(savedEnabled);
+            if (savedEnabled) {
+                gameStateManager.setLiveMoveCounterEnabled(true);
+                gameStateManager.triggerLiveSolver();
+            }
             liveMoveCounterToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 Timber.d("[LIVE_SOLVER] Eye toggle changed: %s", isChecked ? "ON" : "OFF");
                 gameStateManager.setLiveMoveCounterEnabled(isChecked);

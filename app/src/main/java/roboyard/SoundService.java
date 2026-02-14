@@ -42,10 +42,13 @@ public class SoundService extends Service {
             volumePercent = intent.getIntExtra(EXTRA_VOLUME, 10);
         }
 
-        float volume = volumePercent / 100f;
-        player.setVolume(volume, volume);
-        Timber.d("[SOUND_SERVICE] Volume set to %d%% (%.2f)", volumePercent, volume);
+        // Map slider 0-100 to actual volume 0-73%
+        float actualVolume = (volumePercent / 100f) * 0.73f;
+        player.setVolume(actualVolume, actualVolume);
+        Timber.d("[SOUND_SERVICE] Volume slider %d%%, actual %.0f%% (%.2f)", volumePercent, actualVolume * 100, actualVolume);
 
+        // Always restart from beginning so user hears the loudest part for calibration
+        player.seekTo(0);
         if (!player.isPlaying()) {
             player.start();
             Timber.d("[SOUND_SERVICE] Playback started");
