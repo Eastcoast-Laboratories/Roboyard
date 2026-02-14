@@ -6,7 +6,7 @@ The migration is **partially complete**. Some files have been moved to `roboyard
 but many remain in the legacy `roboyard.eclabs.*` package. This document tracks the remaining migration.
 
 ### Already Migrated
-- `roboyard.logic.core` — GameLogic, GameState, Constants, GameBoard, GridElement, etc. (14 files)
+- `roboyard.logic.core` — GameLogic, GameState, Constants, GridElement, etc. (15 files)
 - `roboyard.logic.solver` — RRGameMove, RRPiece, RRGameState, etc. (5 files)
 - `roboyard.ui.activities` — MainActivity (1 file)
 - `roboyard.ui.animation` — RobotAnimationManager (1 file)
@@ -100,7 +100,7 @@ All imports referencing the old package must be updated across the entire codeba
 | File | Target | Reason |
 |------|--------|--------|
 | `AGameState.java` | `roboyard.logic.core` | Abstract game state |
-| `AWorld.java` | `roboyard.logic.core` | Abstract world |
+| ~~`AWorld.java`~~ | ~~deleted~~ | ~~Unused, no references~~ |
 | `GameSolution.java` | `roboyard.logic.core` | Solution model |
 | `IGameMove.java` | `roboyard.logic.core` | Move interface |
 

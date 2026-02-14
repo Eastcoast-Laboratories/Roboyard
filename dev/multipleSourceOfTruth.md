@@ -94,7 +94,7 @@ public class GridElement {
 | File | Usage |
 |------|-------|
 | `GameState.java` | Primary storage, 11 references |
-| `GameBoard.java` | Singleton (currently unused), 7 references |
+| ~~`GameBoard.java`~~ | ~~Deleted (was unused)~~ |
 
 ### Files using GridElement:
 | File | Usage |
@@ -133,10 +133,8 @@ public class GridElement {
    - Stores walls separately for persistence
    - Not always correctly synchronized with gameElements
 
-4. **GameBoard Singleton Unused:**
-   - `GameBoard.java` exists as singleton
-   - Currently NOT actively used
-   - Was planned as central source but not implemented
+4. **GameBoard Singleton — DELETED:**
+   - `GameBoard.java` was deleted (unused, zero references in code)
 
 ---
 
@@ -481,7 +479,7 @@ Complete implementation of MSOT architecture:
 - `rebuildBoardCache()` - central cache regeneration (OK)
 - `validateBoardCache()` - temporary array for validation (OK)
 - `serialize()` - read access for saving (OK)
-- `GameBoard.java` - unused singleton class (can be removed later)
+- ~~`GameBoard.java`~~ - deleted (was unused singleton class)
 
 ---
 
