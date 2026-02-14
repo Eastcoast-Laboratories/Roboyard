@@ -111,33 +111,6 @@ public class GameBoard {
     }
     
     /**
-     * Add border walls to the board
-     */
-    public void addBorderWalls() {
-        // Set top and bottom borders
-        for (int x = 0; x <= boardWidth; x++) {
-            board[x][0] = Constants.TYPE_HORIZONTAL_WALL;               // Top border
-            board[x][boardHeight] = Constants.TYPE_HORIZONTAL_WALL;     // Bottom border
-        }
-        
-        // Set left and right borders
-        for (int y = 0; y <= boardHeight; y++) {
-            board[0][y] = Constants.TYPE_VERTICAL_WALL;               // Left border
-            board[boardWidth][y] = Constants.TYPE_VERTICAL_WALL;      // Right border
-        }
-        
-        Timber.tag(TAG).d("Added border walls to board %dx%d", boardWidth, boardHeight);
-    }
-    
-    /**
-     * Reset the board to a clean state with only border walls
-     */
-    public void resetBoard() {
-        clearBoard();
-        addBorderWalls();
-    }
-    
-    /**
      * Get the current board width
      */
     public int getBoardWidth() {

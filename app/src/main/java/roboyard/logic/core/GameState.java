@@ -49,7 +49,6 @@ public class GameState implements Serializable {
     private String levelName;
     private long startTime;
     private int moveCount;
-    private int squaresMoved;
     private int robotCount = 1; // Default to 1 robot per color
     private int targetColorsCount = Constants.NUM_ROBOTS; // Default to 4 different target colors
     private boolean completed = false;
@@ -563,39 +562,6 @@ public class GameState implements Serializable {
         return false;
     }
     
-    /**
-     * Save the game state to a file
-     */
-    public boolean saveToFile(Context context, int slotId) {
-        try {
-            // Create saves directory if it doesn't exist
-            File savesDir = new File(context.getFilesDir(), Constants.SAVE_DIRECTORY);
-            if (!savesDir.exists()) {
-                savesDir.mkdirs();
-            }
-            
-            // Determine filename based on slot ID
-            String filename;
-            if (slotId == 0) {
-                filename = Constants.AUTO_SAVE_FILENAME;
-            } else {
-                filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
-            }
-            
-            // Create file
-            File saveFile = new File(savesDir, filename);
-            
-            // Write object to file
-            try (FileOutputStream fos = new FileOutputStream(saveFile);
-                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-                oos.writeObject(this);
-                return true;
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Error saving game to slot " + slotId, e);
-            return false;
-        }
-    }
     
     /**
      * Load a saved game from a file
@@ -1489,54 +1455,21 @@ public class GameState implements Serializable {
         return moves;
     }
 
+    
     /**
-     * Find a robot by its ID
-     * @param robotId The robot ID to find
+     * Find a robot element by its ID
+     * @param robotId The robot ID to search for
      * @return The robot game element or null if not found
      */
     public GameElement findRobotById(int robotId) {
-        // First try to find by exact color match
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotId) {
                 return element;
             }
         }
-        
-        // If no exact match, try finding robots by RGB color constants
-        // Common Android color constants
-        if (robotId == -16777216) { // Color.BLACK
-            return findRobotByColor(0); // Assuming BLACK is represented as 0 in our system
-        } else if (robotId == -16711936) { // Color.GREEN
-            return findRobotByColor(2); // Assuming GREEN is represented as 2 in our system
-        } else if (robotId == -256) { // Color.BLUE
-            return findRobotByColor(1); // Assuming BLUE is represented as 1 in our system
-        } else if (robotId == -65536) { // Color.RED
-            return findRobotByColor(3); // Assuming RED is represented as 3 in our system
-        } else if (robotId == -16711681) { // Color.CYAN
-            return findRobotByColor(4); // Assuming CYAN is represented as 4 in our system
-        } else if (robotId == -16776961) { // Color.YELLOW
-            return findRobotByColor(5); // Assuming YELLOW is represented as 5 in our system
-        }
-        
-        // If still not found, log detailed information
-        boolean hasRobots = false;
-        StringBuilder robotInfo = new StringBuilder("Available robots: ");
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                hasRobots = true;
-                robotInfo.append("[ID: ").append(element.getColor()).append(" at ").append(element.getX()).append(",").append(element.getY()).append("] ");
-            }
-        }
-        
-        if (hasRobots) {
-            Timber.d("findRobotById: Could not find robot with ID %d. %s", robotId, robotInfo.toString());
-        } else {
-            Timber.d("findRobotById: No robots found in the game state!");
-        }
-        
         return null;
     }
-    
+
     /**
      * Helper method to find a robot by color index
      * @param colorIndex The color index to search for

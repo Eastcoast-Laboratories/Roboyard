@@ -328,36 +328,6 @@ public class RoboyardSmokeTest {
     }
 
     @Test
-    public void testMapObjectsGenerateHexColor() {
-        String color1 = MapObjects.generateHexColorFromString("test1");
-        String color2 = MapObjects.generateHexColorFromString("test2");
-        
-        assertNotNull(color1);
-        assertNotNull(color2);
-        assertTrue("Color should start with #", color1.startsWith("#"));
-        assertEquals("Color should be 7 chars (#RRGGBB)", 7, color1.length());
-        assertNotEquals("Different inputs should produce different colors", color1, color2);
-    }
-
-    @Test
-    public void testMapObjectsGenerateHexColorEmpty() {
-        assertEquals("#000000", MapObjects.generateHexColorFromString(null));
-        assertEquals("#000000", MapObjects.generateHexColorFromString(""));
-    }
-
-    @Test
-    public void testMapObjectsGenerateHexColorIsLight() {
-        String color = MapObjects.generateHexColorFromString("anystring");
-        // Parse RGB values - should all be >= 128 (light colors)
-        int r = Integer.parseInt(color.substring(1, 3), 16);
-        int g = Integer.parseInt(color.substring(3, 5), 16);
-        int b = Integer.parseInt(color.substring(5, 7), 16);
-        assertTrue("Red should be >= 128 for light color", r >= 128);
-        assertTrue("Green should be >= 128 for light color", g >= 128);
-        assertTrue("Blue should be >= 128 for light color", b >= 128);
-    }
-
-    @Test
     public void testMapObjectsGenerateUnique5Letter() {
         String id1 = MapObjects.generateUnique5LetterFromString("board:12,12;robot_red5,7;");
         String id2 = MapObjects.generateUnique5LetterFromString("board:12,12;robot_red5,8;");

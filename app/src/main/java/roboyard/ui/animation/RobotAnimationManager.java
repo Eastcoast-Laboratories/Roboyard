@@ -26,7 +26,6 @@ public class RobotAnimationManager {
     private GameGridView gameGridView;
     
     // Track active animations by robot
-    private final Map<GameElement, ValueAnimator> activeAnimations = new HashMap<>();
     
     // Queues for pending robot moves
     private final Map<GameElement, Queue<RobotMoveInfo>> robotMoveQueues = new HashMap<>();
@@ -377,32 +376,6 @@ public class RobotAnimationManager {
         // Request redraw
         if (gameGridView != null) {
             gameGridView.invalidate();
-        }
-    }
-    
-    /**
-     * Update animation settings (for GameStateManager compatibility)
-     */
-    public void updateSettings(float accelerationDuration, float maxSpeed, float decelerationDuration, 
-                             float overshootPercentage, float springBackDuration, 
-                             AnimationCancellationStrategy strategy, long frameDelay) {
-        // This is now a compatibility method - animation parameters are internally managed
-        Timber.d("[ANIM_FRAMERATE] Animation settings updated: frameDelay=%d ms", frameDelay);
-        
-        // MEMORY OPTIMIZATION: Reduce object allocation during animations
-        if (frameDelay > 16) {
-            // Lower animations per second = less memory pressure
-            // This is especially important for faster animations that create many object allocations
-            int keyframes = (int) Math.max(5, 60 / (frameDelay / 16)); // Reduce keyframes based on framerate
-            Timber.d("[ANIM_FRAMERATE] Using %d keyframes per animation instead of default", keyframes);
-            
-            try {
-                // ValueAnimator.setFrameDelay() affects all animations globally,
-                // but we found this isn't always reliable, so we also use frame throttling
-                ValueAnimator.setFrameDelay(frameDelay);
-            } catch (Exception e) {
-                Timber.e(e, "[ANIM_FRAMERATE] Failed to set global frame delay");
-            }
         }
     }
     

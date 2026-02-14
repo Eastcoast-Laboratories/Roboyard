@@ -2,13 +2,8 @@ package roboyard.eclabs;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-
-import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.PlayGames;
 import com.google.android.gms.games.PlayGamesSdk;
-import com.google.android.gms.tasks.OnSuccessListener;
-
 import timber.log.Timber;
 
 /**
@@ -62,26 +57,6 @@ public class PlayGamesManager {
     }
     
     /**
-     * Attempt to sign in silently. Call this after initialization.
-     */
-    public void signInSilently(Activity activity) {
-        if (!BuildConfig.ENABLE_PLAY_GAMES || !isInitialized) {
-            return;
-        }
-        
-        PlayGames.getGamesSignInClient(activity)
-            .isAuthenticated()
-            .addOnCompleteListener(task -> {
-                isSignedIn = task.isSuccessful() && task.getResult().isAuthenticated();
-                if (isSignedIn) {
-                    Timber.d("%s User is signed in", TAG);
-                } else {
-                    Timber.d("%s User is not signed in", TAG);
-                }
-            });
-    }
-    
-    /**
      * Check if user is signed in to Play Games.
      */
     public boolean isSignedIn() {
@@ -114,28 +89,6 @@ public class PlayGamesManager {
         } catch (Exception e) {
             Timber.e(e, "%s Failed to unlock achievement: %s", TAG, localAchievementId);
         }
-    }
-    
-    /**
-     * Show the Play Games achievements UI.
-     * 
-     * @param activity The current activity
-     * @param requestCode Request code for onActivityResult
-     */
-    public void showAchievementsUI(Activity activity, int requestCode) {
-        if (!BuildConfig.ENABLE_PLAY_GAMES || !isInitialized || !isSignedIn) {
-            Timber.d("%s Cannot show achievements UI - not ready", TAG);
-            return;
-        }
-        
-        PlayGames.getAchievementsClient(activity)
-            .getAchievementsIntent()
-            .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                @Override
-                public void onSuccess(Intent intent) {
-                    activity.startActivityForResult(intent, requestCode);
-                }
-            });
     }
     
     /**
