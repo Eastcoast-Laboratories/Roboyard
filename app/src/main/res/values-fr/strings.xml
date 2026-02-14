@@ -4,7 +4,7 @@
     
     <!-- Main Menu Strings -->
     <string name="action_settings">Paramètres</string>
-    <string name="new_random_game">Nouvelle partie</string>
+    <string name="new_random_game">Play</string>
     <string name="new_random_game_a11y">Commencer une nouvelle partie</string>
     <string name="level_game">Niveaux</string>
     <string name="level_game_a11y">Commencer un niveau</string>
@@ -132,9 +132,10 @@
     <string name="cancel_button">Annuler</string>
     <string name="back_button">Retour</string>
     <string name="menu_button">Menu</string>
-    <string name="retry_button">Recommencer</string>
+    <string name="retry_button">Retry</string>
     <string name="restart_button">Rejouer</string>
-    <string name="save_map_button">Sauvegarder</string>
+    <string name="button_save_map">Sauv.</string>
+    <string name="new_random_game_button">Nouvelle Partie</string>
     <string name="button_back_game">Retour</string>
     <string name="button_reset">Rétablir</string>
 
@@ -233,7 +234,6 @@
     <string name="help_star_system_0_stars">Aucune étoile : Tous les autres cas. Continuez à vous entraîner pour améliorer vos performances !</string>
     <string name="help_star_system_hint_penalty">Note : Utiliser des indices réduira votre notation par étoiles, vous encourageant à résoudre les puzzles de manière indépendante.</string>
 
-    <string name="save_map">Sauver</string>
     <string name="new_game">Recréer</string>
     <string name="menu">Menu</string>
     

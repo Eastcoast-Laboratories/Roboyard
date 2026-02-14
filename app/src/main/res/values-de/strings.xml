@@ -217,7 +217,7 @@
     <string name="button_back">Zurück</string>
     <string name="back">Zurück</string>
     <string name="back_description">Zurück zum vorherigen Bildschirm</string>
-    <string name="button_save_map">Speichern</string>
+    <string name="button_save_map">Save</string>
 
     <!-- Game screen -->
     <string name="save_tab_title">Speichern</string>

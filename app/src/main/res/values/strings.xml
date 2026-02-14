@@ -253,7 +253,6 @@
     <string name="menu_button">Menu</string>
     <string name="retry_button">Retry</string>
     <string name="restart_button">Restart</string>
-    <string name="save_map_button">Save Map</string>
     
     <!-- AI and game direction strings -->
     <string name="robot_color_down" comment="Instruction for robot movement downward">%1$s down</string>
