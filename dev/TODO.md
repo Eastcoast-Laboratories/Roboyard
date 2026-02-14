@@ -69,10 +69,8 @@ check if this all works:
 
 # current
 
-- multiple sources of truth concept ausführen
 - walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
 
-- deep link support
 
 - im save slot anzeigen, wieviel die optimal moves sind und wieviel man gebraucht hat, wenn man den level completed hat
 
@@ -80,16 +78,11 @@ check if this all works:
 
 - only add the same color at the end of the hint if it is not the same as the last color
 
-- Wenn man eine Karte mit einem anderen ratio spielt und dann neues Spiel drückt, dann fehlt rechts und links etwas am Rand. die neue ratio soll auch die volle bildbreite ausnutzen
 
 
 
 # most important
 
-- Wenn man jetzt den bildschrm dreht, dreht er immer die app ausrichtung (landscape oder protrait) unabhngig von den einstellungen im system.
-die app soll aber der systemeinstellung für automatisch drehen gehorchen, also z.b. nicht drehen, wenn dies im system ausgeschaltet ist
-
-- Wenn man den fullscreen ausschaltet, ist die app trotzdem noch bildschirmfüllend, das soll aber nicht, es soll dann die obere statuszeile des systems ihren eigenen platz haben, (also das normale verhalten, wie bei den meisten apps sonst auch)
 
 - sidekick_concept.md
 

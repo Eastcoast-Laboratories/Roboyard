@@ -77,6 +77,7 @@
     <string name="settings_targets">Zielen</string>
     <string name="settings_out_of">von</string>
     <string name="settings_sound">Ton:</string>
+    <string name="settings_background_sound">Hintergrundmusik:</string>
     <string name="settings_yes">Ja</string>
     <string name="settings_no">Nein</string>
     <string name="settings_back">Zurück</string>

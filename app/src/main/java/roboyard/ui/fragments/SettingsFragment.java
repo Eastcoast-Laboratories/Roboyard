@@ -97,6 +97,8 @@ public class SettingsFragment extends Fragment {
     private RadioButton highContrastModeYes;
     private RadioButton highContrastModeNo;
     
+    private android.widget.SeekBar backgroundSoundSeekbar;
+    
     // Account section
     private LinearLayout accountLoggedOutContainer;
     private LinearLayout accountLoggedInContainer;
@@ -233,6 +235,8 @@ public class SettingsFragment extends Fragment {
             highContrastModeRadioGroup = view.findViewById(R.id.high_contrast_mode_radio_group);
             highContrastModeYes = view.findViewById(R.id.high_contrast_mode_yes);
             highContrastModeNo = view.findViewById(R.id.high_contrast_mode_no);
+            
+            backgroundSoundSeekbar = view.findViewById(R.id.background_sound_seekbar);
             
             // Account section
             accountLoggedOutContainer = view.findViewById(R.id.account_logged_out_container);
@@ -737,6 +741,11 @@ public class SettingsFragment extends Fragment {
                 } else {
                     if (highContrastModeNo != null) highContrastModeNo.setChecked(true);
                 }
+            }
+            
+            // Set background sound volume seekbar
+            if (backgroundSoundSeekbar != null) {
+                backgroundSoundSeekbar.setProgress(Preferences.backgroundSoundVolume);
             }
             
             isUpdatingUI = false;
@@ -1507,6 +1516,25 @@ public class SettingsFragment extends Fragment {
                 Timber.e("soundRadioGroup is null");
             }
             
+            // Background sound volume seekbar
+            if (backgroundSoundSeekbar != null) {
+                backgroundSoundSeekbar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+                        if (!fromUser || isUpdatingUI) return;
+                        Preferences.setBackgroundSoundVolume(progress);
+                        updateBackgroundSoundService(progress);
+                        Timber.d("[PREFERENCES] Background sound volume set to %d", progress);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+                });
+            }
+            
             // Accessibility radio group
             if (accessibilityRadioGroup != null) {
                 accessibilityRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -2101,6 +2129,23 @@ public class SettingsFragment extends Fragment {
         } catch (Exception e) {
             Timber.e(e, "[DEBUG] Error navigating to debug view");
             Toast.makeText(requireContext(), "Error opening debug view: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    /**
+     * Start, update, or stop the background sound service based on volume level.
+     * @param volume Volume level 0-100 (0 stops the service)
+     */
+    private void updateBackgroundSoundService(int volume) {
+        Context context = getContext();
+        if (context == null) return;
+        
+        Intent intent = new Intent(context, roboyard.SoundService.class);
+        if (volume > 0) {
+            intent.putExtra(roboyard.SoundService.EXTRA_VOLUME, volume);
+            context.startService(intent);
+        } else {
+            context.stopService(intent);
         }
     }
 }
