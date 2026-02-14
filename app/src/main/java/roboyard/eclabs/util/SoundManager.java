@@ -202,36 +202,6 @@ public class SoundManager {
         return 0;
     }
     
-    /**
-     * Get sound resource ID by name using reflection
-     * @param soundName Name of the sound file (e.g., "robot_0_hits_robot_1")
-     * @return Resource ID or 0 if not found
-     */
-    private int getSoundResourceId(String soundName) {
-        try {
-            java.lang.reflect.Field field = R.raw.class.getField(soundName);
-            int resourceId = field.getInt(null);
-            Timber.d("[SOUND] Successfully resolved resource ID for %s: %d", soundName, resourceId);
-            return resourceId;
-        } catch (NoSuchFieldException e) {
-            // Field not found - log available fields for debugging
-            Timber.e("[SOUND] Field not found: %s. Available raw resources:", soundName);
-            try {
-                java.lang.reflect.Field[] fields = R.raw.class.getFields();
-                for (java.lang.reflect.Field f : fields) {
-                    if (f.getName().contains("robot")) {
-                        Timber.d("[SOUND] Available: %s", f.getName());
-                    }
-                }
-            } catch (Exception ex) {
-                Timber.e(ex, "[SOUND] Could not list available resources");
-            }
-            return 0;
-        } catch (Exception e) {
-            Timber.e(e, "[SOUND] Error resolving sound resource: %s", soundName);
-            return 0;
-        }
-    }
     
     /**
      * Stop the currently playing sound

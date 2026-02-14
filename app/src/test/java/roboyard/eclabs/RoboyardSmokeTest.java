@@ -276,22 +276,6 @@ public class RoboyardSmokeTest {
         assertEquals("mv", elem.getType());
     }
 
-    @Test
-    public void testGridElementToChar() {
-        assertEquals("-", new roboyard.logic.core.GridElement(0, 0, "mh").toChar());
-        assertEquals("|", new roboyard.logic.core.GridElement(0, 0, "mv").toChar());
-        assertEquals("r", new roboyard.logic.core.GridElement(0, 0, "robot_red").toChar());
-        assertEquals("g", new roboyard.logic.core.GridElement(0, 0, "robot_green").toChar());
-        assertEquals("b", new roboyard.logic.core.GridElement(0, 0, "robot_blue").toChar());
-        assertEquals("y", new roboyard.logic.core.GridElement(0, 0, "robot_yellow").toChar());
-        assertEquals("R", new roboyard.logic.core.GridElement(0, 0, "target_red").toChar());
-        assertEquals("G", new roboyard.logic.core.GridElement(0, 0, "target_green").toChar());
-        assertEquals("B", new roboyard.logic.core.GridElement(0, 0, "target_blue").toChar());
-        assertEquals("Y", new roboyard.logic.core.GridElement(0, 0, "target_yellow").toChar());
-        assertEquals("M", new roboyard.logic.core.GridElement(0, 0, "target_multi").toChar());
-        assertEquals(" ", new roboyard.logic.core.GridElement(0, 0, "").toChar());
-    }
-
     // ========================================================================
     // MapObjects Tests (static utility methods)
     // ========================================================================

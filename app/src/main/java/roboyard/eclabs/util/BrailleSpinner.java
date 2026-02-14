@@ -60,21 +60,7 @@ public class BrailleSpinner {
         };
     }
     
-    /**
-     * Sets the spinner update listener
-     * @param listener The listener to receive spinner updates
-     */
-    public void setSpinnerListener(SpinnerListener listener) {
-        this.spinnerListener = listener;
-    }
     
-    /**
-     * Sets the update interval for the spinner animation
-     * @param intervalMs The interval in milliseconds between frame updates
-     */
-    public void setUpdateInterval(int intervalMs) {
-        this.updateIntervalMs = intervalMs;
-    }
     
     /**
      * Starts the spinner animation
@@ -119,19 +105,5 @@ public class BrailleSpinner {
         }
     }
     
-    /**
-     * Gets the current spinner frame.
-     * This method supports direct access to the spinner state for legacy code.
-     * @return The current spinner character
-     */
-    public String getCurrentFrame() {
-        return currentText;
-    }
     
-    /**
-     * @return Whether the spinner is currently spinning
-     */
-    public boolean isSpinning() {
-        return isSpinning;
-    }
 }

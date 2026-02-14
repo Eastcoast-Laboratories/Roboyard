@@ -56,12 +56,6 @@ public class PlayGamesManager {
         }
     }
     
-    /**
-     * Check if user is signed in to Play Games.
-     */
-    public boolean isSignedIn() {
-        return isSignedIn;
-    }
     
     /**
      * Unlock an achievement by its local ID.

@@ -56,25 +56,6 @@ public class GameManager {
     }
 
     /**
-     * Requests to display a toast message.
-     *
-     * @param str The message to display.
-     * @param big Flag indicating if the toast should be large.
-     */
-    public void requestToast(CharSequence str, boolean big) {
-        this.activity.doToast(str, big);
-    }
-
-    /**
-     * Returns the SparseArray containing all game screens.
-     *
-     * @return SparseArray of GameScreens.
-     */
-    public SparseArray<GameScreen> getScreens() {
-        return this.screens;
-    }
-
-    /**
      * Returns the render manager instance.
      *
      * @return RenderManager instance.
@@ -115,9 +96,5 @@ public class GameManager {
      */
     public void draw() {
         this.currentScreen.draw(this.renderManager);
-    }
-
-    public void announce(String s) {
-        requestToast(s, false);
     }
 }

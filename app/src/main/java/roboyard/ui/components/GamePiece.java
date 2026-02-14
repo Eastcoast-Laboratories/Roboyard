@@ -53,19 +53,11 @@ public class GamePiece implements IGameObject {
     
     // Add movement state constants
     private static final String MOVEMENT_STATE_IDLE = "IDLE";
-    private static final String MOVEMENT_STATE_MOVING = "MOVING";
     private static final String MOVEMENT_STATE_COMPLETED = "COMPLETED";
     private String movementState = MOVEMENT_STATE_IDLE;
     private long moveStartTime;
     private int moveDistance;
 
-    /**
-     * Check if the piece is currently moving
-     * @return true if the piece is in movement
-     */
-    public boolean isInMovement() {
-        return inMovement;
-    }
 
     private int image               = 0;
 
@@ -86,32 +78,12 @@ public class GamePiece implements IGameObject {
     public int getColor() {
         return color;
     }
-
-    public int getxObjective() {
-        return xObjective;
-    }
-
-    public int getyObjective() {
-        return yObjective;
-    }
-
-    public void setyObjective(int yObjective) {
-        this.yObjective = yObjective;
-    }
-
-    public void setxObjective(int xObjective) {
-        this.xObjective = xObjective;
-    }
     public int getY() {
         return y;
     }
 
     public int getX() {
         return x;
-    }
-
-    public void setDirection(int direction) {
-        this.direction = direction;
     }
 
     public int getDirection(){
@@ -154,15 +126,6 @@ public class GamePiece implements IGameObject {
                 break;
         }
         // Z-index will be set by GridGameView.updateAllZIndices()
-    }
-
-    public void setGridDimensions(int xGrid, int yGrid, float cellSize){
-        this.xGrid = xGrid;
-        this.yGrid = yGrid;
-        this.numSquaresX = this.numSquaresY = cellSize;
-        this.radius = (int) (cellSize / 2) * (100 + extraSizeForRobotsAndTargets)/100;
-        this.robotOffsetX = (int) (cellSize / 20) * (100 + robotOffsetX)/100; // this is adjusted by 20 so 1 is a reasonable offset
-        this.robotOffsetY = (int) (cellSize / 20) * (100 + robotOffsetY)/100;
     }
 
     @Override
@@ -391,21 +354,7 @@ public class GamePiece implements IGameObject {
         }
     }
     
-    /**
-     * Set the type of collision that occurred
-     * @param collisionType The type of collision ("robot" or "wall")
-     */
-    public void setLastCollisionType(String collisionType) {
-        this.lastCollisionType = collisionType;
-    }
     
-    /**
-     * Get the type of the last collision
-     * @return The last collision type ("none", "robot", or "wall")
-     */
-    public String getLastCollisionType() {
-        return this.lastCollisionType;
-    }
     
     /**
      * Plays the robot movement sound effect
@@ -511,34 +460,7 @@ public class GamePiece implements IGameObject {
         this.zIndex = zIndex;
     }
     
-    /**
-     * Set the amount of overshoot for the spring effect
-     * @param amount The amount of overshoot (0.5f is subtle, 1.0f is more noticeable)
-     */
-    public void setOvershootAmount(float amount) {
-        this.overshootAmount = amount;
-    }
 
-    /**
-     * Sets the destination for the robot to move to
-     * @param xx X coordinate to move to
-     * @param yy Y coordinate to move to
-     */
-    public void setObjective(int xx, int yy) {
-        // Calculate movement statistics
-        moveDistance = calculateDistance(x, y, xx, yy);
-        moveStartTime = System.currentTimeMillis();
-        movementState = MOVEMENT_STATE_MOVING;
-        
-        // Set movement objective
-        xObjective = xx;
-        yObjective = yy;
-        inMovement = true;
-        curMoveSquares = 0;
-        
-        Timber.d("GamePiece.setObjective: Robot " + color + " moving from (" + x + "," + y + ") to (" + 
-                 xx + "," + yy + "), distance: " + moveDistance);
-    }
     
     /**
      * Calculate Manhattan distance between two points

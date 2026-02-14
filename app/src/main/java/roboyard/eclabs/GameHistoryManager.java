@@ -241,57 +241,7 @@ public class GameHistoryManager {
         }
     }
     
-    /**
-     * Update an existing history entry
-     */
-    public static void updateHistoryEntry(Activity activity, GameHistoryEntry updatedEntry) {
-        try {
-            // Load existing entries
-            List<GameHistoryEntry> entries = getHistoryEntries(activity);
-            
-            // Find and update the entry
-            boolean updated = false;
-            for (int i = 0; i < entries.size(); i++) {
-                if (entries.get(i).getMapPath().equals(updatedEntry.getMapPath())) {
-                    entries.set(i, updatedEntry);
-                    updated = true;
-                    break;
-                }
-            }
-            
-            if (updated) {
-                // Save updated index
-                saveHistoryIndex(activity, entries);
-                Timber.d("Updated history entry: %s", updatedEntry.getMapPath());
-            }
-        } catch (Exception e) {
-            Timber.e("Error updating history entry: %s", e.getMessage());
-        }
-    }
     
-    /**
-     * Get a history entry by index
-     */
-    public static GameHistoryEntry getHistoryEntry(Activity activity, int index) {
-        try {
-            // Look for entry by its file path, not by array index
-            String targetPath = indexToPath(index);
-            Timber.d("Looking for history entry with path: %s", targetPath);
-            
-            List<GameHistoryEntry> entries = getHistoryEntries(activity);
-            for (GameHistoryEntry entry : entries) {
-                if (entry.getMapPath().equals(targetPath)) {
-                    Timber.d("Found history entry for index %d: %s", index, entry.getMapPath());
-                    return entry;
-                }
-            }
-            
-            Timber.d("No history entry found for index: %d (path: %s)", index, targetPath);
-        } catch (Exception e) {
-            Timber.e("Error getting history entry: %s", e.getMessage());
-        }
-        return null;
-    }
     
     /**
      * Find the index of a history entry by map path
@@ -313,40 +263,7 @@ public class GameHistoryManager {
         return "history_" + index + ".txt";
     }
     
-    /**
-     * Extrahiert den Index aus einem History-Pfad
-     * @return den Index oder -1 bei ungültigem Format
-     */
-    public static int pathToIndex(String path) {
-        if (path == null || !path.startsWith("history_") || !path.endsWith(".txt")) {
-            return -1;
-        }
-        
-        try {
-            return Integer.parseInt(path.substring(8, path.length() - 4));
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
     
-    /**
-     * Ermittelt den höchsten History-Index aller vorhandenen Einträge
-     * @return den höchsten Index oder -1 wenn keine Einträge vorhanden
-     */
-    public static int getHighestHistoryIndex(Activity activity) {
-        int highestIndex = -1;
-        List<GameHistoryEntry> entries = getHistoryEntries(activity);
-        
-        for (GameHistoryEntry entry : entries) {
-            String path = entry.getMapPath();
-            int index = pathToIndex(path);
-            if (index > highestIndex) {
-                highestIndex = index;
-            }
-        }
-        
-        return highestIndex;
-    }
 
     /**
      * Delete a history entry by path

@@ -69,17 +69,6 @@ public class WallModel {
         return boardHeight;
     }
     
-    /**
-     * Checks if there is a wall at the specified position with the specified type.
-     *
-     * @param x The x-coordinate to check
-     * @param y The y-coordinate to check
-     * @param type The wall type to check for
-     * @return true if a wall exists at the position with the specified type, false otherwise
-     */
-    public boolean hasWallAt(int x, int y, WallType type) {
-        return walls.contains(new Wall(x, y, type));
-    }
     
     /**
      * Creates a WallModel from a list of GameElement objects.

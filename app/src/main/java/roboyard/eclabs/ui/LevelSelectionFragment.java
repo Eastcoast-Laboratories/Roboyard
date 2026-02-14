@@ -341,21 +341,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
         return getString(R.string.level_selection_title);
     }
 
-    /**
-     * Open the Level Design Editor fragment
-     * @param levelId Level ID to edit, or 0 for a new level
-     */
-    private void openLevelDesignEditor(int levelId) {
-        // Create a new instance of LevelDesignEditorFragment
-        LevelDesignEditorFragment editorFragment = LevelDesignEditorFragment.newInstance(levelId);
-
-        // Navigate to the editor fragment
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.nav_host_fragment, editorFragment)
-                .addToBackStack(null)
-                .commit();
-    }
 
     /**
      * Adapter for the level selection grid.

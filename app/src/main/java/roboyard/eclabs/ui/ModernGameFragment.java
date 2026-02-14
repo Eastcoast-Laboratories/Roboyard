@@ -228,21 +228,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
     
-    /**
-     * Find target for a specific robot
-     */
-    private GameElement findTargetForRobot(GameElement robot, GameState state) {
-        if (robot == null || state == null) return null;
-        
-        // Find the target with the same color as the robot
-        for (GameElement element : state.getGameElements()) {
-            if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                return element;
-            }
-        }
-        
-        return null;
-    }
     
     /**
      * Update the robot selection information in the UI
@@ -2077,12 +2062,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         updateUniqueMapIdText(state);
     }
     
-    private void updateMoveCount(int moveCount) {
-        moveCountTextView.setText(getString(R.string.moves_count, moveCount));
+    private void updateMoveCount(Integer count) {
+        if (moveCountTextView != null && count != null) {
+            moveCountTextView.setText(String.valueOf(count));
+        }
     }
     
-    private void updateSquaresMoved(int squaresMoved) {
-        squaresMovedTextView.setText(getString(R.string.squares_moved, squaresMoved));
+    private void updateSquaresMoved(Integer squares) {
+        if (squaresMovedTextView != null && squares != null) {
+            squaresMovedTextView.setText(String.valueOf(squares));
+        }
     }
     
     private void updateDifficulty() {
@@ -2526,25 +2515,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
     
-    /**
-     * Get color name for a robot (internal usage only)
-     * Returns fixed English names regardless of locale for internal identification.
-     */
-    private String getRobotColorNameByGridElement(GameElement robot) {
-        if (robot == null) return "";
-        
-        int c = robot.getColor();
-        switch (c) {
-            case 0: return "Pink";
-            case 1: return "Green";
-            case 2: return "Blue";
-            case 3: return "Yellow";
-            case 4: return "Silver";
-            default:
-                Timber.e("Unknown robot color: '%d'", c);
-                return "Unknown: " + c;
-        }
-    }
 
     /**
      * Apply language settings
@@ -3216,20 +3186,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[HINT_SYSTEM] Sliding hint container and info box UP with synchronized animation");
     }
     
-    /**
-     * Hides the hint container and its navigation buttons directly
-     * This can be called explicitly when we need to hide the hint UI regardless of button state
-     */
-    private void hideHintContainer() {
-        if (hintContainer != null) {
-            hintContainer.setVisibility(View.GONE);
-            prevHintButton.setVisibility(View.GONE);
-            nextHintButton.setVisibility(View.GONE);
-            Timber.d("[HINT_CONTAINER] Explicitly hiding hint container and navigation buttons");
-        } else {
-            Timber.w("[HINT_CONTAINER] Cannot hide hint container - it is null");
-        }
-    }
     
     /**
      * Initialize a new game
@@ -3382,23 +3338,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         });
     }
     
-    /**
-     * Check if the game is complete (all robots on their target positions).
-     * 
-     * @return true if all robots are on their correct targets.
-     */
-    private boolean checkGameCompletion() {
-        GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState == null) {
-            return false;
-        }
-        
-        // Use the new method to check if all robots are at their targets
-        boolean allRobotsAtTargets = currentState.areAllRobotsAtTargets();
-        Timber.d("[GAME COMPLETION] All robots at targets: %s", allRobotsAtTargets);
-        
-        return allRobotsAtTargets;
-    }
     
     /**
      * Start autosave
@@ -3414,14 +3353,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
     
-    /**
-     * Stop autosave
-     */
-    private void stopAutosave() {
-        if (autosaveRunning) {
-            autosaveRunning = false;
-        }
-    }
     
     /**
      * Perform autosave

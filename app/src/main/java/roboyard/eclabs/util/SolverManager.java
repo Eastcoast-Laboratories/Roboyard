@@ -27,7 +27,6 @@ public class SolverManager implements Runnable {
     private Thread solverThread;
     private boolean isSolved = false;
     private int solutionMoves = 0;
-    private int numDifferentSolutionsFound = 0;
     private GameSolution currentSolution;
     private SolverListener listener;
     // Track initialization state
@@ -227,21 +226,7 @@ public class SolverManager implements Runnable {
         return null;
     }
     
-    /**
-     * Gets the number of moves in the current solution
-     * @return The number of moves in the current solution
-     */
-    public int getSolutionMoves() {
-        return solutionMoves;
-    }
     
-    /**
-     * Gets the number of different solutions found
-     * @return The number of different solutions found
-     */
-    public int getNumDifferentSolutionsFound() {
-        return numDifferentSolutionsFound;
-    }
     
     /**
      * Gets the list of solutions
@@ -388,21 +373,7 @@ public class SolverManager implements Runnable {
         }
     }
     
-    /**
-     * Checks if the solver has found a solution
-     * @return True if a solution has been found, false otherwise
-     */
-    public boolean isSolved() {
-        return isSolved;
-    }
     
-    /**
-     * Gets the underlying solver instance
-     * @return The solver instance
-     */
-    public ISolver getSolver() {
-        return solver;
-    }
     
     /**
      * Parse a predefined solution string into a GameSolution

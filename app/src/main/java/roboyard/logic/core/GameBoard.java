@@ -64,40 +64,7 @@ public class GameBoard {
         clearBoard();
     }
     
-    /**
-     * Get the value of a cell on the board
-     * 
-     * @param x The x-coordinate
-     * @param y The y-coordinate
-     * @return The cell value, or -1 if coordinates are out of bounds
-     */
-    public int getCellValue(int x, int y) {
-        if (x >= 0 && x <= boardWidth && y >= 0 && y <= boardHeight) {
-            return board[x][y];
-        }
-        
-        // Out of bounds
-        return -1;
-    }
     
-    /**
-     * Set the value of a cell on the board
-     * 
-     * @param x The x-coordinate
-     * @param y The y-coordinate
-     * @param value The new cell value
-     * @return true if the cell was set, false if coordinates are out of bounds
-     */
-    public boolean setCellValue(int x, int y, int value) {
-        if (x >= 0 && x <= boardWidth && y >= 0 && y <= boardHeight) {
-            board[x][y] = value;
-            return true;
-        }
-        
-        // Out of bounds
-        Timber.tag(TAG).w("Attempted to set cell value out of bounds: (%d,%d)", x, y);
-        return false;
-    }
     
     /**
      * Clear the board by setting all cells to empty

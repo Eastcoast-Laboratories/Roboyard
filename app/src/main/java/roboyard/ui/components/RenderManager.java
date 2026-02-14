@@ -68,20 +68,7 @@ public class RenderManager {
         this.target = target;
     }
 
-    /**
-     * Sets the target canvas for rendering.
-     * @param target The canvas to target.
-     */
-    public void setTarget(Canvas target){
-        this.target = target;
-    }
 
-    /**
-     * Resets the target canvas to the main canvas.
-     */
-    public void resetTarget(){
-        this.target = this.mainTarget;
-    }
 
     /**
      * Changes the color used for rendering.
@@ -91,12 +78,6 @@ public class RenderManager {
         this.brush.setColor(color);
     }
 
-    /**
-     * Fills the entire target canvas with the default color.
-     */
-    public void paintScreen(){
-        this.target.drawColor(this.brush.getColor());
-    }
 
     /**
      * Draws an image on the target canvas.
@@ -115,43 +96,8 @@ public class RenderManager {
         d.draw(this.target);
     }
 
-    /**
-     * Loads an image into memory.
-     * @param image The index of the image to load.
-     */
-    public void loadImage(int image){
-        if (image != 0) {
-            try {
-                this.resourceMap.append(image, this.resources.getDrawable(image));
-            } catch (Exception e) {
-                Timber.e("Error loading image resource %d: %s", image, e.getMessage());
-            }
-        }
-    }
 
-    /**
-     * Loads a bitmap into memory.
-     * @param bmp The bitmap to load.
-     * @return The ID of the loaded bitmap.
-     */
-    public int loadBitmap(Bitmap bmp){
-        int id = this.random.nextInt();
-        while(this.resourceMap.indexOfKey(id) >= 0){
-            id = this.random.nextInt();
-        }
-        this.resourceMap.append(id, new BitmapDrawable(this.resources, bmp));
-        return id;
-    }
 
-    /**
-     * Unloads a bitmap from memory.
-     * @param id The ID of the bitmap to unload.
-     */
-    public void unloadBitmap(int id){
-        if(this.resourceMap.indexOfKey(id) >= 0){
-            this.resourceMap.delete(id);
-        }
-    }
 
     /**
      * Retrieves the resources associated with the RenderManager.
@@ -205,16 +151,6 @@ public class RenderManager {
         return (int) this.brush.getTextSize();
     }
 
-    public Rect drawLinkText(int x, int y, String text, int color, int textSize) {
-        Rect bounds = new Rect();
-        brush.setColor(color);
-        brush.setTextSize(textSize);
-        brush.getTextBounds(text, 0, text.length(), bounds);
-        target.drawText(text, x, y + bounds.height() - textSize, brush);
-
-        return new Rect(x, y - textSize, x + bounds.width(), y + bounds.height());
-    }
-
     /**
      * Saves the current canvas state.
      */
@@ -262,21 +198,6 @@ public class RenderManager {
         this.target.drawRect(left, top, right, bottom, this.brush);
     }
 
-    /**
-     * Draws a filled rectangle on the canvas.
-     * @param left The left coordinate of the rectangle.
-     * @param top The top coordinate of the rectangle.
-     * @param right The right coordinate of the rectangle.
-     * @param bottom The bottom coordinate of the rectangle.
-     */
-    public void fillRect(float left, float top, float right, float bottom) {
-        if (target != null) {
-            Paint.Style oldStyle = brush.getStyle();
-            brush.setStyle(Paint.Style.FILL);
-            target.drawRect(left, top, right, bottom, brush);
-            brush.setStyle(oldStyle);
-        }
-    }
 
     /**
      * Measures the width of text with current text settings.
@@ -287,20 +208,6 @@ public class RenderManager {
         return this.brush.measureText(text);
     }
 
-    /**
-     * Draws a drawable directly to the canvas at the specified coordinates.
-     * @param left Left coordinate
-     * @param top Top coordinate
-     * @param right Right coordinate
-     * @param bottom Bottom coordinate
-     * @param drawable The drawable to draw
-     */
-    public void drawDrawable(int left, int top, int right, int bottom, Drawable drawable) {
-        if (drawable != null) {
-            drawable.setBounds(left, top, right, bottom);
-            drawable.draw(target);
-        }
-    }
 
     /**
      * Gets a drawable from the resource map.

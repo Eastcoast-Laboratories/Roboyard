@@ -105,20 +105,8 @@ public class InputManager {
     }
 
     /*
-     * Retourne la l'avant-dernière position x touchée sur l'écran
-     * @return Avant-dernière position x de l'écran
-     */
-    public float getPrevTouchX(){
-        return this.prevTouchX;
-    }
 
     /*
-     * Retourne la l'avant-dernière position y touchée sur l'écran
-     * @return Avant-dernière position y de l'écran
-     */
-    public float getPrevTouchY(){
-        return this.prevTouchY;
-    }
 
     /*
      * Retourne vrai si un événement a eu lieu, faux sinon.
@@ -136,35 +124,4 @@ public class InputManager {
         return this.down;
     }
 
-    /*
-     * Retourne vrai si un événement du type déplacement a eu lieu, faux sinon.
-     * @return Vrai si l'énénement s'est produit
-     */
-    public boolean moveOccurred(){
-        return this.move;
-    }
-
-    /*
-     * Retourne vrai si un événement du type fin d'appui a eu lieu, faux sinon.
-     * @return Vrai si l'énénement s'est produit
-     */
-    public boolean upOccurred(){
-        return this.up;
-    }
-
-    /*
-     * Retourne vrai si un événement d'appui sur la touche retour a eu lieu.
-     * @return Vrai si l'énénement s'est produit
-     */
-    public boolean backOccurred(){
-        return this.back;
-    }
-
-    /**
-     * Consumes the current event to prevent other UI elements from processing it.
-     * This is particularly useful for accessibility features like TalkBack.
-     */
-    public void consumeEvent() {
-        this.eventOccurred = false;
-    }
 }

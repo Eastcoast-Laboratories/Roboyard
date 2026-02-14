@@ -61,13 +61,6 @@ public class SolutionAnimator {
         this.listener = listener;
     }
     
-    /**
-     * Sets the delay between animation steps
-     * @param delayMs The delay in milliseconds
-     */
-    public void setAnimationDelay(int delayMs) {
-        this.animationDelayMs = delayMs;
-    }
     
     /**
      * Animates a solution by executing each move with a delay
@@ -120,45 +113,9 @@ public class SolutionAnimator {
         return move;
     }
     
-    /**
-     * Returns the list of remaining moves.
-     * This method helps the old game access moves directly.
-     * @return The current list of remaining moves
-     */
-    public List<IGameMove> getRemainingMoves() {
-        if (moves == null) {
-            return new ArrayList<>();
-        }
-        
-        if (currentMoveIndex >= moves.size()) {
-            return new ArrayList<>();
-        }
-        
-        return moves.subList(currentMoveIndex, moves.size());
-    }
     
-    /**
-     * Gets the current move index
-     * @return The index of the current move being animated
-     */
-    public int getCurrentMoveIndex() {
-        return currentMoveIndex;
-    }
     
-    /**
-     * Gets the total number of moves in the current solution
-     * @return The total number of moves, or 0 if no solution is loaded
-     */
-    public int getTotalMoves() {
-        return moves != null ? moves.size() : 0;
-    }
     
-    /**
-     * @return Whether the animator is currently animating a solution
-     */
-    public boolean isAnimating() {
-        return isAnimating;
-    }
     
     /**
      * Animates the next move in the solution

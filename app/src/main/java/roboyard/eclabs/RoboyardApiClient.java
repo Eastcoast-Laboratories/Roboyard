@@ -110,12 +110,6 @@ public class RoboyardApiClient {
         return prefs.getString(KEY_USER_NAME, null);
     }
     
-    /**
-     * Get the logged-in user's ID.
-     */
-    public int getUserId() {
-        return prefs.getInt(KEY_USER_ID, -1);
-    }
     
     /**
      * Get the auth token for auto-login URL.
