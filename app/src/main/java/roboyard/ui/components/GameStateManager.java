@@ -42,7 +42,6 @@ import roboyard.eclabs.RoboyardApplication;
 import roboyard.eclabs.ui.GameElement;
 import roboyard.eclabs.ui.LevelCompletionData;
 import roboyard.eclabs.ui.LevelCompletionManager;
-import roboyard.eclabs.util.BrailleSpinner;
 import roboyard.eclabs.util.SolutionAnimator;
 import roboyard.eclabs.util.LiveSolverManager;
 import roboyard.eclabs.util.SolverManager;

@@ -2,8 +2,6 @@ package roboyard.eclabs.util;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.Resources;
 
 import timber.log.Timber;
 import roboyard.eclabs.R;

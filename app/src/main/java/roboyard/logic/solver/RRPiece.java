@@ -1,6 +1,5 @@
 package roboyard.pm.ia.ricochet;
 
-import java.util.Comparator;
 
 /**
  * Represents a robot piece in the game.

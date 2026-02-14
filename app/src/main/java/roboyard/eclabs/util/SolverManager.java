@@ -8,7 +8,6 @@ import driftingdroids.model.Solution;
 import roboyard.eclabs.solver.GameLevelSolver;
 import roboyard.eclabs.solver.ISolver;
 import roboyard.eclabs.solver.SolverDD;
-import roboyard.eclabs.solver.SolverStatus;
 import roboyard.logic.core.GridElement;
 import roboyard.pm.ia.GameSolution;
 import timber.log.Timber;

@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
 import roboyard.eclabs.RoboyardApiClient;
-import timber.log.Timber;
 
 /**
  * Helper class for showing register dialog.

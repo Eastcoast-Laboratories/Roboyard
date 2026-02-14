@@ -3,12 +3,9 @@ package roboyard.logic.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import android.graphics.Color;
-import driftingdroids.model.Solution;
-import roboyard.pm.ia.GameSolution;
 import timber.log.Timber;
 
 import roboyard.logic.core.Constants;
