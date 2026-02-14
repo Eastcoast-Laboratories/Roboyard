@@ -91,39 +91,8 @@ public abstract class GameScreen implements IGameObject {
         }
     }
 
-    /**
-     * Get all game objects in this screen
-     * @return List of game objects
-     */
-    public List<IGameObject> getGameObjects() {
-        return instances;
-    }
     
-    /**
-     * Add a game object to this screen
-     * @param object The object to add
-     */
-    public void addGameObject(IGameObject object) {
-        if (processingUpdates) {
-            pendingAdditions.add(object);
-        } else {
-            this.instances.add(object);
-            markUnsorted(); // Mark for re-sorting
-        }
-    }
     
-    /**
-     * Remove a game object from this screen
-     * @param object The object to remove
-     */
-    public void removeGameObject(IGameObject object) {
-        if (processingUpdates) {
-            pendingRemovals.add(object);
-        } else {
-            this.instances.remove(object);
-            markUnsorted(); // Mark for re-sorting
-        }
-    }
     
     private void processPendingChanges() {
         for (IGameObject object : pendingAdditions) {

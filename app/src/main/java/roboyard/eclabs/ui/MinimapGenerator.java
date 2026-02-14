@@ -210,10 +210,4 @@ public class MinimapGenerator {
     }
     
 
-    /**
-     * Clear any cached resources
-     */
-    public void clearCache() {
-        // Reset any cached resources
-    }
 }

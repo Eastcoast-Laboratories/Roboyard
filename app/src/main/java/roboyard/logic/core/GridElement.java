@@ -81,49 +81,4 @@ public class GridElement {
         this.type = objectType;
     }
 
-    /* returns a character representation of the grid element, used for debugging:
-        * - 'h' for horizontal walls
-        * - 'v' for vertical walls
-        * - 'r' for red robot
-        * - 'g' for green robot
-        * - 'b' for blue robot
-        * - 'y' for yellow robot
-        * - 'R' for red target
-        * - 'G' for green target
-        * - 'B' for blue target
-        * - 'Y' for yellow target
-        * - 'M' for multi-colored target
-        * - ' ' for empty space
-        * @return The character representation of the grid element.
-     */
-    public String toChar() {
-        switch (this.type) {
-            case "mh":
-                return "-";  // Horizontal wall
-            case "mv":
-                return "|";  // Vertical wall
-            case "robot_red":
-                return "r";
-            case "robot_green":
-                return "g";
-            case "robot_blue":
-                return "b";
-            case "robot_yellow":
-                return "y";
-            case "target_red":
-                return "R";
-            case "target_green":
-                return "G";
-            case "target_blue":
-                return "B";
-            case "target_yellow":
-                return "Y";
-            case "target_multi":
-                return "M";
-            case "":
-                return " ";
-            default:
-                return this.type;
-        }
-    }
 }

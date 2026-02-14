@@ -117,38 +117,7 @@ public class GameHistoryEntry {
         this.previewImagePath = previewImagePath;
     }
 
-    public String getOriginalMapPath() {
-        return originalMapPath;
-    }
 
-    public void setOriginalMapPath(String originalMapPath) {
-        this.originalMapPath = originalMapPath;
-    }
-
-    /**
-     * Format the timestamp as a readable date/time string
-     */
-    public String getFormattedDateTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM d, HH:mm", Locale.getDefault());
-        return sdf.format(new Date(timestamp));
-    }
-
-    /**
-     * Format the play duration as a readable string
-     */
-    public String getFormattedDuration() {
-        if (playDuration < 60) {
-            return playDuration + "s";
-        } else if (playDuration < 3600) {
-            int minutes = playDuration / 60;
-            int seconds = playDuration % 60;
-            return minutes + "m" + (seconds > 0 ? " " + seconds + "s" : "");
-        } else {
-            int hours = playDuration / 3600;
-            int minutes = (playDuration % 3600) / 60;
-            return hours + "h" + (minutes > 0 ? " " + minutes + "m" : "");
-        }
-    }
 
     /**
      * Get the history index from the map path

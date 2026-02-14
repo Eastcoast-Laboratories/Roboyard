@@ -246,17 +246,6 @@ public class SaveGameFragment extends BaseGameFragment {
         updateTitle();
     }
 
-    /**
-     * Helper method to find position of a slot by its ID
-     */
-    private int position(int slotId) {
-        for (int i = 0; i < saveSlots.size(); i++) {
-            if (saveSlots.get(i).getSlotId() == slotId) {
-                return i;
-            }
-        }
-        return -1;
-    }
     
     /**
      * Update content based on selected tab

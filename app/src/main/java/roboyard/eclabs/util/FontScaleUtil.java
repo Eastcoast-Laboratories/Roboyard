@@ -44,28 +44,4 @@ public class FontScaleUtil {
         return newContext;
     }
     
-    /**
-     * Applies a fixed font scale to the given context's resources
-     * This is a more direct approach that modifies the existing resources
-     * 
-     * @param context Context to modify
-     */
-    public static void applyFixedFontScale(Context context) {
-        Resources resources = context.getResources();
-        Configuration configuration = resources.getConfiguration();
-        
-        // Check if font scaling is already at the standard scale
-        if (Math.abs(configuration.fontScale - STANDARD_FONT_SCALE) < 0.01) {
-            return; // Already at standard scale
-        }
-        
-        // Apply the standard font scale
-        configuration.fontScale = STANDARD_FONT_SCALE;
-        
-        // Update the configuration
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        resources.updateConfiguration(configuration, metrics);
-        
-        Timber.d("Applied fixed font scale. New scale: %f", STANDARD_FONT_SCALE);
-    }
 }

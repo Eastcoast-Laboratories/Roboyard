@@ -92,10 +92,6 @@ public class Achievement {
         return category;
     }
     
-    public int getIconResId() {
-        return iconResId;
-    }
-    
     /**
      * Get the sprite sheet icon index (0-63).
      * @return The sprite index

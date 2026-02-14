@@ -280,13 +280,6 @@ public class WallStorage {
         return new ArrayList<>(storedWalls);
     }
     
-    /**
-     * Clear all stored walls for the current board size
-     */
-    public void clearStoredWalls() {
-        updateCurrentBoardSize();
-        clearStoredWallsForBoardSize(currentBoardWidth, currentBoardHeight);
-    }
     
     /**
      * Apply stored walls to a list of grid elements

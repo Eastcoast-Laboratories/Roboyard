@@ -750,23 +750,6 @@ public class LevelDesignEditorFragment extends Fragment {
             }
         }).start();
     }
-
-    private boolean levelExists(int levelId) {
-        try {
-            if (levelId <= 140) {
-                // Check if built-in level exists
-                InputStream is = requireContext().getAssets().open("Maps/level_" + levelId + ".txt");
-                is.close();
-                return true;
-            } else {
-                // Check if custom level exists in internal storage
-                File file = new File(requireContext().getFilesDir(), "custom_level_" + levelId + ".txt");
-                return file.exists();
-            }
-        } catch (IOException e) {
-            return false;
-        }
-    }
     
     private void loadLevel(int levelId) {
         Timber.d("Loading level %d", levelId);
@@ -1369,29 +1352,6 @@ public class LevelDesignEditorFragment extends Fragment {
         }
     }
     
-    /**
-     * Remove all walls at the specified position, preserving robots and targets
-     */
-    private void removeWallsAt(int x, int y) {
-        List<GameElement> elementsToRemove = new ArrayList<>();
-        
-        for (GameElement element : currentState.getGameElements()) {
-            if (element.getX() == x && element.getY() == y) {
-                if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL || element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                    elementsToRemove.add(element);
-                }
-            }
-        }
-        
-        for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
-        }
-        
-        if (currentState.getCellType(x, y) == Constants.TYPE_HORIZONTAL_WALL || 
-            currentState.getCellType(x, y) == Constants.TYPE_VERTICAL_WALL) {
-            currentState.setCellType(x, y, 0);
-        }
-    }
     
     private boolean removeElementsAt(int x, int y) {
         boolean removed = false;
@@ -1433,28 +1393,6 @@ public class LevelDesignEditorFragment extends Fragment {
             case Constants.COLOR_YELLOW: return "yellow";
             case Constants.COLOR_SILVER: return "silver";
             default: return "unknown";
-        }
-    }
-    
-    private int getCurrentBoardWidth() {
-        EditText widthEditText = requireView().findViewById(R.id.board_width_edit_text);
-        String widthStr = widthEditText.getText().toString();
-        try {
-            return Integer.parseInt(widthStr);
-        } catch (NumberFormatException e) {
-            Timber.e(e, "Error parsing board width");
-            return 12; // Default width
-        }
-    }
-    
-    private int getCurrentBoardHeight() {
-        EditText heightEditText = requireView().findViewById(R.id.board_height_edit_text);
-        String heightStr = heightEditText.getText().toString();
-        try {
-            return Integer.parseInt(heightStr);
-        } catch (NumberFormatException e) {
-            Timber.e(e, "Error parsing board height");
-            return 14; // Default height
         }
     }
     

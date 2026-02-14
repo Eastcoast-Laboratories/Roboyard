@@ -157,12 +157,6 @@ public class MapGenerator {
         return targetColors;
     }
 
-    /**
-     * gets the value of generateNewMapEachTime
-     */
-    public static boolean getgenerateNewMapEachTime() {
-        return generateNewMapEachTime;
-    }
 
     public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {
         // Delegate to GameLogic

@@ -38,13 +38,6 @@ public class UIModeManager {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
     
-    /**
-     * Get the current UI mode
-     * @return Current UI mode (MODE_LEGACY or MODE_MODERN)
-     */
-    public int getUIMode() {
-        return prefs.getInt(KEY_UI_MODE, MODE_LEGACY); // Default to legacy mode
-    }
     
     /**
      * Set the UI mode
@@ -58,30 +51,6 @@ public class UIModeManager {
         prefs.edit().putInt(KEY_UI_MODE, mode).apply();
     }
     
-    /**
-     * Toggle the UI mode between legacy and modern
-     * @return The new UI mode after toggling
-     */
-    public int toggleUIMode() {
-        int currentMode = getUIMode();
-        int newMode = (currentMode == MODE_LEGACY) ? MODE_MODERN : MODE_LEGACY;
-        setUIMode(newMode);
-        return newMode;
-    }
     
-    /**
-     * Check if the current UI mode is legacy
-     * @return true if in legacy mode, false otherwise
-     */
-    public boolean isLegacyMode() {
-        return getUIMode() == MODE_LEGACY;
-    }
     
-    /**
-     * Check if the current UI mode is modern
-     * @return true if in modern mode, false otherwise
-     */
-    public boolean isModernMode() {
-        return getUIMode() == MODE_MODERN;
-    }
 }

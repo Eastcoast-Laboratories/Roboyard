@@ -190,19 +190,4 @@ public class GameMove implements Serializable {
         return colorName + " robot moves " + directionName + " by " + distance + " space(s)";
     }
     
-    /**
-     * Check if this move is a target move (robot reaches a target)
-     * @param state The game state to check against
-     * @return True if this move reaches a target
-     */
-    public boolean isTargetMove(GameState state) {
-        // A target move is one where the robot ends on a target of the same color
-        if (state == null) return false;
-        
-        // Get the cell type at the destination
-        int cellType = state.getCellType(toX, toY);
-        
-        // Check if there's a target at the destination matching the robot's color
-        return cellType == 2 && state.getTargetColor(toX, toY) == robotColor;
-    }
 }

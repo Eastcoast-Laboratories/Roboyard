@@ -110,30 +110,7 @@ public class AchievementIconHelper {
         return AchievementDefinitions.getAchievementColor(achievementId);
     }
     
-    /**
-     * Get a drawable for a specific icon with a circular background.
-     * Uses a default light gray background color.
-     * 
-     * @param context The context for loading resources
-     * @param drawableName The drawable resource name (e.g., "1_lightning")
-     * @return The icon drawable with circular background
-     * @throws IllegalArgumentException if drawable resource not found
-     */
-    public static Drawable getIconDrawable(Context context, String drawableName) {
-        return getIconDrawableWithCircle(context, drawableName, Color.parseColor("#E0E0E0"));
-    }
     
-    /**
-     * Set an ImageView to display a specific icon with circular background.
-     * 
-     * @param context The context for loading resources
-     * @param imageView The ImageView to set
-     * @param drawableName The drawable resource name (e.g., "1_lightning")
-     * @throws IllegalArgumentException if drawable resource not found
-     */
-    public static void setIcon(Context context, ImageView imageView, String drawableName) {
-        setIconWithColor(context, imageView, drawableName, Color.parseColor("#E0E0E0"));
-    }
     
     /**
      * Set an ImageView to display a specific icon with circular background.

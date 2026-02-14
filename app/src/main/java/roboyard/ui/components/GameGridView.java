@@ -609,32 +609,6 @@ public class GameGridView extends View {
         setMeasuredDimension(newWidth, newHeight);
     }
     
-    /**
-     * Determine if a wall at the given position is horizontal or vertical
-     * @param state Current game state
-     * @param x Wall X position
-     * @param y Wall Y position
-     * @return true if horizontal wall, false if vertical wall
-     */
-    private boolean isHorizontalWall(GameState state, int x, int y) {
-        // Check cells to the left and right
-        boolean hasLeftWall = (x > 0) && (state.getCellType(x-1, y) == 1);
-        boolean hasRightWall = (x < gridWidth-1) && (state.getCellType(x+1, y) == 1);
-        
-        // If has walls on either side, it's likely horizontal
-        if (hasLeftWall || hasRightWall) {
-            return true;
-        }
-        
-        // Otherwise check top and bottom
-        boolean hasTopWall = (y > 0) && (state.getCellType(x, y-1) == 1);
-        boolean hasBottomWall = (y < gridHeight-1) && (state.getCellType(x, y+1) == 1);
-        
-        // If has vertical neighbors, it's likely vertical
-        return !hasTopWall && !hasBottomWall;
-        
-        // Default to horizontal for isolated walls
-    }
     
     /**
      * Get the appropriate target drawable based on target color
@@ -2095,10 +2069,6 @@ public class GameGridView extends View {
         // Timber.d("[ACCESSIBILITY] Coordinate display: %s (TalkBack: %s, App setting: %s)", isActive ? "showing" : "hidden", talkbackActive ? "enabled" : "disabled", Preferences.accessibilityMode ? "enabled" : "disabled");
         
         return isActive;
-    }
-    
-    public boolean isRobotAnimationInProgress() {
-        return robotAnimationInProgress;
     }
     
     /**

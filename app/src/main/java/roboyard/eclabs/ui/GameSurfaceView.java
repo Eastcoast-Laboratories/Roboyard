@@ -18,7 +18,6 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     private final GameManager gameManager;
     private GameRenderThread renderThread;
-    private final boolean isRunning = false;
 
     public GameSurfaceView(Context context, GameManager gameManager) {
         super(context);
@@ -151,10 +150,6 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         public void setRunning(boolean running) {
             // Timber.d("GameSurfaceView: setRunning() called with value %b", running);
             this.running = running;
-        }
-
-        public boolean isRunning() {
-            return running;
         }
 
         @Override

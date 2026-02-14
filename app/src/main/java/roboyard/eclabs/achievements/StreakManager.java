@@ -145,26 +145,6 @@ public class StreakManager {
             this.newStreak = newStreak;
             this.comebackTriggered = comebackTriggered;
         }
-
-        public boolean isNewDayRecorded() {
-            return newDayRecorded;
-        }
-
-        public int getStreakDays() {
-            return streakDays;
-        }
-
-        public boolean isContinuation() {
-            return continuation;
-        }
-
-        public boolean isNewStreak() {
-            return newStreak;
-        }
-
-        public boolean isComebackTriggered() {
-            return comebackTriggered;
-        }
     }
     
     /**
@@ -174,12 +154,6 @@ public class StreakManager {
         return prefs.getInt(KEY_CURRENT_STREAK, 0);
     }
     
-    /**
-     * Get last login date (as day number since epoch)
-     */
-    public long getLastLoginDate() {
-        return prefs.getLong(KEY_LAST_LOGIN_DATE, 0);
-    }
     
     /**
      * Get stored streak days from SharedPreferences (for debug display)
@@ -315,22 +289,6 @@ public class StreakManager {
         }
     }
     
-    /**
-     * Restore longest streak data from server (bidirectional sync).
-     * Takes the higher value.
-     */
-    public void restoreLongestStreakFromServer(int serverLongestStreak, String serverLongestStreakDate) {
-        int localLongest = getLongestStreak();
-        if (serverLongestStreak > localLongest) {
-            prefs.edit()
-                .putInt(KEY_LONGEST_STREAK, serverLongestStreak)
-                .putString(KEY_LONGEST_STREAK_DATE, serverLongestStreakDate)
-                .apply();
-            Timber.d("[STREAK_SYNC] Restored longest streak from server: %d (was %d locally)", serverLongestStreak, localLongest);
-        } else {
-            Timber.d("[STREAK_SYNC] Local longest streak %d >= server %d, keeping local", localLongest, serverLongestStreak);
-        }
-    }
     
     /**
      * Reset streak (for testing)

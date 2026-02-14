@@ -112,8 +112,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private float accelerationDuration = 300f;  // Reduced from 300f for faster animations
     private float maxSpeed = 1500f;             // Higher speed but not extreme
     private float decelerationDuration = 50f;  // Reduced from 400f for faster animations
-    private float overshootPercentage = 0.20f;  // Keep original value, extreme values cause memory issues
-    private float springBackDuration = 220f;    // Reduced from 400f for faster animations
     private long animationFrameDelay = 25;     // Animation frame delay in ms (default Android is ~16ms = 60fps)
 
     private boolean isResetting = false;
@@ -1286,50 +1284,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return null;
     }
 
-    /**
-     * Check if a valid solution is available
-     *
-     * @return true if a solution is available, false otherwise
-     */
-    public boolean hasSolution() {
-        return currentSolution != null && currentSolution.getMoves() != null &&
-                currentSolutionStep < currentSolution.getMoves().size();
-    }
 
-    /**
-     * Navigate to specific level screen (beginner, intermediate, advanced, expert)
-     *
-     * @param screenId Screen ID from Constants (SCREEN_LEVEL_BEGINNER, etc)
-     */
-    public void navigateToLevelScreen(int screenId) {
-        // Store the selected level screen for the GamePlayFragment to use
-        MutableLiveData<Integer> levelScreen = new MutableLiveData<>(screenId);
-
-        // The GamePlayFragment will check this value and load the appropriate level screen
-        // This corresponds to the Constants.SCREEN_LEVEL_BEGINNER etc. values
-        switch (screenId) {
-            case Constants.SCREEN_LEVEL_BEGINNER:
-                // Load first beginner level (level 1)
-                loadLevel(1);
-                break;
-            case Constants.SCREEN_LEVEL_INTERMEDIATE:
-                // Load first intermediate level (level 36)
-                loadLevel(36);
-                break;
-            case Constants.SCREEN_LEVEL_ADVANCED:
-                // Load first advanced level (level 71)
-                loadLevel(71);
-                break;
-            case Constants.SCREEN_LEVEL_EXPERT:
-                // Load first expert level (level 106)
-                loadLevel(106);
-                break;
-            default:
-                // Default to beginner level 1
-                loadLevel(1);
-                break;
-        }
-    }
 
     /**
      * Navigate to main menu
@@ -1353,90 +1308,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         navController.navigate(R.id.actionGlobalSettings);
     }
 
-    /**
-     * Navigate to save screen
-     *
-     * @param saveMode True for save mode, false for load mode
-     */
-    public void navigateToSaveScreen(boolean saveMode) {
-        Timber.d("Navigating to save screen, saveMode=%s", saveMode);
-        // Check if we have a valid state before navigation
-        GameState currentGameState = currentState.getValue();
-        Timber.d("Current state before navigation: %s", currentGameState != null ? "valid" : "null");
 
-        if (currentGameState == null) {
-            Timber.e("Cannot navigate to save screen: No valid GameState available");
-            return;
-        }
 
-        // We should only proceed if the context is a FragmentActivity
-        if (!(context instanceof androidx.fragment.app.FragmentActivity activity)) {
-            Timber.e("Cannot navigate to save screen: context is not a FragmentActivity");
-            return;
-        }
-
-        // Get the current activity context
-
-        // Check if we're on the main thread
-        if (android.os.Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            // We're on the main thread, safe to navigate
-            performNavigation(activity, saveMode);
-        } else {
-            // We're on a background thread, post navigation to main thread
-            Timber.d("GameStateManager: Posting navigation to main thread");
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                Timber.d("GameStateManager: Now on main thread, proceeding with navigation");
-                performNavigation(activity, saveMode);
-            });
-        }
-    }
-
-    /**
-     * Perform the actual navigation on the main thread
-     */
-    private void performNavigation(androidx.fragment.app.FragmentActivity activity, boolean saveMode) {
-        try {
-            // Create a bundle to pass the save mode parameter
-            android.os.Bundle args = new android.os.Bundle();
-            args.putBoolean("saveMode", saveMode);
-
-            // Find the NavController for the current fragment
-            androidx.navigation.NavController navController = androidx.navigation.Navigation.findNavController(
-                    activity, R.id.nav_host_fragment);
-
-            // Get the current destination ID
-            int currentDestId = navController.getCurrentDestination().getId();
-            Timber.d("Current destination ID: %d", currentDestId);
-
-            // Choose the appropriate action based on the current fragment
-            if (currentDestId == R.id.gameCanvasFragment) {
-                Timber.d("Navigating from GameCanvasFragment to SaveGame");
-                navController.navigate(R.id.actionGameToSaveGame, args);
-            } else if (currentDestId == R.id.gamePlayFragment) {
-                Timber.d("Navigating from GamePlayFragment to SaveGame");
-                navController.navigate(R.id.actionGamePlayToSaveGame, args);
-            } else {
-                // For other fragments, use the global action
-                Timber.d("Using global action to navigate to SaveGame");
-                navController.navigate(R.id.actionGlobalSaveGame, args);
-            }
-        } catch (Exception e) {
-            // Log any navigation errors
-            Timber.e(e, "Navigation error");
-        }
-    }
-
-    /**
-     * Update the context to a valid activity context for fragment navigation
-     *
-     * @param activityContext The activity context
-     */
-    public void updateContext(Context activityContext) {
-        if (activityContext instanceof androidx.fragment.app.FragmentActivity) {
-            Timber.d("GameStateManager: Updating context to activity: %s", activityContext.getClass().getSimpleName());
-            this.context = activityContext;
-        }
-    }
 
     /**
      * Get the context from application
@@ -1466,10 +1339,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return isGameComplete;
     }
 
-    public LiveData<Boolean> getSoundEnabled() {
-        return soundEnabled;
-    }
-
     public LiveData<Boolean> isSolverRunning() {
         return isSolverRunning;
     }
@@ -1483,15 +1352,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         roboyard.logic.core.Preferences.setSoundEnabled(enabled);
     }
 
-    /**
-     * Increment the move count
-     */
-    public void incrementMoveCount() {
-        Integer currentCount = moveCount.getValue();
-        if (currentCount != null) {
-            moveCount.setValue(currentCount + 1);
-        }
-    }
 
     /**
      * Undo the last move if possible
@@ -1718,14 +1578,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return currentMapName;
     }
 
-    /**
-     * Get the start time
-     *
-     * @return The start time as a long value
-     */
-    public long getStartTime() {
-        return startTime;
-    }
 
     /**
      * Save the current UI timer elapsed time (called from fragment onPause/stopTimer)
@@ -1820,25 +1672,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return createMinimap(context, elements, 100, 100);
     }
 
-    /**
-     * Get a minimap for the current game state
-     *
-     * @param context The context
-     * @param width   The minimap width
-     * @param height  The minimap height
-     * @return The minimap bitmap
-     */
-    public Bitmap getMiniMap(Context context, int width, int height) {
-        if (minimap != null) {
-            return minimap;
-        }
-
-        // If no minimap is available, create a placeholder
-        Bitmap placeholder = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(placeholder);
-        canvas.drawColor(Color.LTGRAY);
-        return placeholder;
-    }
 
     /**
      * Create a minimap from grid elements
@@ -1981,13 +1814,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return isLoadedFromSave;
     }
     
-    /**
-     * Get the difficulty level from the loaded savegame
-     * @return The difficulty level from the savegame, or -1 if not loaded from savegame
-     */
-    public int getLoadedSaveDifficulty() {
-        return loadedSaveDifficulty;
-    }
 
     /**
      * Get a string representation of the current difficulty level
@@ -2425,28 +2251,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         void onSolutionCalculationFailed(String errorMessage);
     }
 
-    /**
-     * Shows a spinner animation while a solution is being calculated.
-     * This method can be used by any UI implementation to show a standardized
-     * loading indicator during solver processing.
-     *
-     * @param callback A callback that will receive the Braille spinner character
-     *                 updates for display
-     * @param show     True to show the spinner, false to hide it
-     * @return The BrailleSpinner instance (so the caller can store and stop it later)
-     */
-    public BrailleSpinner showSpinner(BrailleSpinner.SpinnerListener callback, boolean show) {
-        if (show) {
-            BrailleSpinner spinner = new BrailleSpinner();
-            spinner.setSpinnerListener(callback);
-            spinner.start();
-            return spinner;
-        } else if (callback != null) {
-            // Just send an empty character to hide it
-            callback.onSpinnerUpdate("");
-        }
-        return null;
-    }
 
     /**
      * Animate a solution by moving robots according to the solution steps.
@@ -2687,14 +2491,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         });
     }
 
-    /**
-     * Get the robot animation manager
-     *
-     * @return The robot animation manager
-     */
-    public RobotAnimationManager getRobotAnimationManager() {
-        return robotAnimationManager;
-    }
 
     /**
      * Get the current animation frame delay in milliseconds
@@ -2732,23 +2528,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return decelerationDuration;
     }
 
-    /**
-     * Get overshoot percentage for animations
-     *
-     * @return Overshoot percentage (0.0-1.0)
-     */
-    public float getOvershootPercentage() {
-        return overshootPercentage;
-    }
 
-    /**
-     * Get spring back duration for animations
-     *
-     * @return Spring back duration in milliseconds
-     */
-    public float getSpringBackDuration() {
-        return springBackDuration;
-    }
 
     /**
      * Reset the game to its initial state (Soft Reset)
@@ -2965,13 +2745,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return lastMoveHitWall;
     }
     
-    /**
-     * Get collision info from the last movement (DRY - avoid recalculating in GameGridView).
-     * @return true if the last movement hit another robot
-     */
-    public boolean getLastMoveHitRobot() {
-        return lastMoveHitRobot;
-    }
     
     /**
      * Get the robot that was hit in the last movement (DRY - avoid recalculating in GameGridView).

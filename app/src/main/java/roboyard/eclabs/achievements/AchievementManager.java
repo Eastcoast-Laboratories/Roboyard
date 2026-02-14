@@ -81,13 +81,6 @@ public class AchievementManager {
         this.unlockListener = listener;
     }
     
-    /**
-     * Set the current activity for Play Games integration.
-     * Call this from your activity's onResume().
-     */
-    public void setCurrentActivity(Activity activity) {
-        this.currentActivity = new WeakReference<>(activity);
-    }
     
     private void loadState() {
         // Load unlock status for all achievements
@@ -190,32 +183,8 @@ public class AchievementManager {
         return achievement != null && achievement.isUnlocked();
     }
     
-    public Achievement getAchievement(String achievementId) {
-        return achievements.get(achievementId);
-    }
-    
     public List<Achievement> getAllAchievements() {
         return new ArrayList<>(achievements.values());
-    }
-    
-    public List<Achievement> getUnlockedAchievements() {
-        List<Achievement> unlocked = new ArrayList<>();
-        for (Achievement achievement : achievements.values()) {
-            if (achievement.isUnlocked()) {
-                unlocked.add(achievement);
-            }
-        }
-        return unlocked;
-    }
-    
-    public List<Achievement> getLockedAchievements() {
-        List<Achievement> locked = new ArrayList<>();
-        for (Achievement achievement : achievements.values()) {
-            if (!achievement.isUnlocked()) {
-                locked.add(achievement);
-            }
-        }
-        return locked;
     }
     
     public int getTotalCount() {
@@ -301,14 +270,6 @@ public class AchievementManager {
             levelId, playerMoves, optimalMoves, hintsUsed, stars, timeMs);
     }
     
-    /**
-     * Called when total stars are updated
-     */
-    public void onTotalStarsUpdated(int totalStars) {
-        if (totalStars >= 420) {
-            unlock("all_stars_collected");
-        }
-    }
     
     /**
      * Called when a random game is completed
@@ -521,12 +482,6 @@ public class AchievementManager {
         Timber.d("[ACHIEVEMENTS] Hint used in current game session");
     }
     
-    /**
-     * Check if a hint was used in the current game session.
-     */
-    public boolean wasHintUsedInCurrentGame() {
-        return hintUsedInCurrentGame;
-    }
     
     /**
      * Called when a custom level is created
@@ -593,47 +548,6 @@ public class AchievementManager {
         if (oneRobotGoal) unlock("traverse_all_squares_1_robot_goal");
         if (allRobots) unlock("traverse_all_squares_all_robots");
         if (allRobotsGoal) unlock("traverse_all_squares_all_robots_goal");
-    }
-    
-    /**
-     * Called when a game is played on a specific resolution
-     */
-    public void onResolutionPlayed(String resolution, int optimalMoves) {
-        // Track resolutions played with specific move counts
-        String key10 = "resolution_10_" + resolution;
-        String key12 = "resolution_12_" + resolution;
-        String key15 = "resolution_15_" + resolution;
-        
-        if (optimalMoves >= 10) {
-            prefs.edit().putBoolean(key10, true).apply();
-        }
-        if (optimalMoves >= 12) {
-            prefs.edit().putBoolean(key12, true).apply();
-        }
-        if (optimalMoves >= 15) {
-            prefs.edit().putBoolean(key15, true).apply();
-        }
-        
-        // Check if all resolutions are covered
-        // This would need to know all available resolutions
-        // For now, we'll check common ones
-        checkResolutionAchievements();
-    }
-    
-    private void checkResolutionAchievements() {
-        // Common board sizes
-        String[] resolutions = {"8x8", "10x10", "12x12", "14x14", "16x16", "18x18"};
-        
-        boolean all10 = true, all12 = true, all15 = true;
-        for (String res : resolutions) {
-            if (!prefs.getBoolean("resolution_10_" + res, false)) all10 = false;
-            if (!prefs.getBoolean("resolution_12_" + res, false)) all12 = false;
-            if (!prefs.getBoolean("resolution_15_" + res, false)) all15 = false;
-        }
-        
-        if (all10) unlock("play_10_move_games_all_resolutions");
-        if (all12) unlock("play_12_move_games_all_resolutions");
-        if (all15) unlock("play_15_move_games_all_resolutions");
     }
     
     /**

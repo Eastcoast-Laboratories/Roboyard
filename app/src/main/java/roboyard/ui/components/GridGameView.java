@@ -12,8 +12,6 @@ import timber.log.Timber;
  */
 public class GridGameView extends GameScreen {
     private static String levelDifficulty = "Beginner";
-    private static boolean newMapEachTime = true;
-    private static final int level = 1;
     public String mapName = "Dummy Map";
     public int solutionMoves = 0;
     public Object solution = null;
@@ -32,53 +30,8 @@ public class GridGameView extends GameScreen {
         Timber.d("Dummy GridGameView: Difficulty set to %s", difficulty);
     }
     
-    public static void setNewMapEachTime(boolean value) {
-        newMapEachTime = value;
-        Timber.d("Dummy GridGameView: NewMapEachTime set to %s", value);
-    }
-    
-    public static void setMap(Object map) {
-        Timber.d("Dummy GridGameView: Map set");
-    }
-    
-    public static int getLevel() {
-        return level;
-    }
-    
-    public static ArrayList<GridElement> getMap() {
-        return new ArrayList<>();
-    }
-    
     public ArrayList<GridElement> getGridElements() {
         return new ArrayList<>();
-    }
-    
-    public void setRandomGame() {
-        Timber.d("Dummy GridGameView: Random game set");
-    }
-    
-    public void setSavedGame(String mapPath) {
-        Timber.d("Dummy GridGameView: Saved game set to %s", mapPath);
-    }
-    
-    public void setLevelGame(String mapPath) {
-        Timber.d("Dummy GridGameView: Level game set to %s", mapPath);
-    }
-    
-    public boolean isRandomGame() {
-        return false;
-    }
-    
-    public boolean isHistorySaved() {
-        return false;
-    }
-    
-    public void updateHistoryEntry() {
-        Timber.d("Dummy GridGameView: History entry updated");
-    }
-    
-    public void editDestination(GamePiece target, int decision, boolean value) {
-        Timber.d("Dummy GridGameView: Edit destination");
     }
     
     public boolean win(Object robot) {
@@ -101,10 +54,6 @@ public class GridGameView extends GameScreen {
     
     public void setCurrentMovedSquares(int squares) {
         Timber.d("Dummy GridGameView: Current moved squares set to %d", squares);
-    }
-    
-    public void loadMap() {
-        Timber.d("Dummy GridGameView: Map loaded");
     }
     
     // GameScreen abstract methods

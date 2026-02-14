@@ -10,12 +10,10 @@ import android.graphics.Canvas;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
@@ -135,16 +133,6 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onBackPressed() {
         this.inputManager.startBack();
-    }
-
-    public void doToast(final CharSequence str, final boolean big){
-        this.runOnUiThread(() -> {
-            Toast t = Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT);
-            if(big) {
-               t.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-            }
-            t.show();
-        });
     }
 
     @Override

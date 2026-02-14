@@ -381,12 +381,6 @@ public class GameState implements Serializable {
         this.levelName = levelName;
     }
     
-    /**
-     * Get the start time
-     */
-    public long getStartTime() {
-        return startTime;
-    }
     
     /**
      * Get the move count
@@ -418,13 +412,6 @@ public class GameState implements Serializable {
         this.completed = completed;
     }
     
-    /**
-     * Generate a minimap of the game state
-     * This addresses the minimap issue mentioned in the memory
-     */
-    public Bitmap getMiniMap(Context context, int width, int height) {
-        return MinimapGenerator.getInstance().generateMinimap(context, this, width, height);
-    }
     
     /**
      * Get map data for minimap generation (used by GameButtonGotoSavedGame)
@@ -1392,97 +1379,9 @@ public class GameState implements Serializable {
         Timber.d("[ROBOTS] resetRobotPositions: Reset complete");
     }
 
-    /**
-     * Calculate how far a robot can move in each direction
-     * @param robotId Robot ID to check movement for
-     * @return Map with directions ("north", "south", "east", "west") as keys and distance as values
-     */
-    public Map<String, Integer> calculatePossibleMoves(int robotId) {
-        Map<String, Integer> moves = new HashMap<>();
-        GameElement robot = findRobotById(robotId);
-        if (robot == null) {
-            return moves;
-        }
-        
-        int x = robot.getX();
-        int y = robot.getY();
-        
-        // Calculate distance in each direction
-        // North (up)
-        int northDist = 0;
-        for (int i = y - 1; i >= 0; i--) {
-            if (canRobotMoveTo(robot, x, i)) {
-                northDist++;
-            } else {
-                break;
-            }
-        }
-        moves.put("north", northDist);
-        
-        // South (down)
-        int southDist = 0;
-        for (int i = y + 1; i < height; i++) {
-            if (canRobotMoveTo(robot, x, i)) {
-                southDist++;
-            } else {
-                break;
-            }
-        }
-        moves.put("south", southDist);
-        
-        // East (right)
-        int eastDist = 0;
-        for (int i = x + 1; i < width; i++) {
-            if (canRobotMoveTo(robot, i, y)) {
-                eastDist++;
-            } else {
-                break;
-            }
-        }
-        moves.put("east", eastDist);
-        
-        // West (left)
-        int westDist = 0;
-        for (int i = x - 1; i >= 0; i--) {
-            if (canRobotMoveTo(robot, i, y)) {
-                westDist++;
-            } else {
-                break;
-            }
-        }
-        moves.put("west", westDist);
-        
-        return moves;
-    }
 
     
-    /**
-     * Find a robot element by its ID
-     * @param robotId The robot ID to search for
-     * @return The robot game element or null if not found
-     */
-    public GameElement findRobotById(int robotId) {
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotId) {
-                return element;
-            }
-        }
-        return null;
-    }
 
-    /**
-     * Helper method to find a robot by color index
-     * @param colorIndex The color index to search for
-     * @return The robot game element or null if not found
-     */
-    private GameElement findRobotByColor(int colorIndex) {
-        for (GameElement element : gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == colorIndex) {
-                return element;
-            }
-        }
-        return null;
-    }
 
     /**
      * Check if a robot has reached its target
