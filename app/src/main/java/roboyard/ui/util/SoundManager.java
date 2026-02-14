@@ -112,9 +112,10 @@ public class SoundManager {
                     return;
                 }
                 
-                // Set volume to half (0.5) of the maximum for both left and right channels
-                mp.setVolume(0.5f, 0.5f);
-                Timber.d("[SOUND] Set volume to 50%% for sound: %s", soundType);
+                // Use sound effects volume from preferences
+                float sfxVol = roboyard.logic.core.Preferences.soundEffectsVolume / 100f;
+                mp.setVolume(sfxVol, sfxVol);
+                Timber.d("[SOUND] Set volume to %d%% for sound: %s", roboyard.logic.core.Preferences.soundEffectsVolume, soundType);
                 
                 // Set the global current player
                 currentPlayer = mp;

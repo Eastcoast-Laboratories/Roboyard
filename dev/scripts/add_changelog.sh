@@ -67,12 +67,18 @@ check_length() {
 # German Changelog
 DE_CHANGES=$(cat << EOF
 - Live Move Counter Button, der die optimale Anzahl der Züge von der aktuellen Position zeigt
+- Neuer optionaler Ambient Hintergrundsound
+- Sound Effects Lautstärke einstellbar in Settings
+- Es wird immer das letzte Auto-Save geöffnet, wenn man das zufällige Spiel startet
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
 - Live move counter button, that shows the remaining optimal moves from the current position
+- New optional ambient background sound
+- Sound-effects volume slider in settings
+- Always open last Auto-Save when entering random game
 EOF
 )
 

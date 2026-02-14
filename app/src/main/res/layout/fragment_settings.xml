@@ -543,6 +543,26 @@
                 android:layout_marginBottom="24dp"
                 android:contentDescription="@string/settings_background_sound_a11y" />
 
+            <!-- Sound Effects Volume Section -->
+            <TextView
+                android:id="@+id/sound_effects_volume_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_sound_effects_volume"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginBottom="8dp" />
+
+            <SeekBar
+                android:id="@+id/sound_effects_volume_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="80"
+                android:layout_marginBottom="24dp"
+                android:contentDescription="@string/settings_sound_effects_volume_a11y" />
+
             <!-- Fullscreen Mode Section -->
             <TextView
                 android:id="@+id/fullscreen_label"

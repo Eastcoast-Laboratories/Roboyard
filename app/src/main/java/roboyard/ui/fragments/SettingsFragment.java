@@ -98,6 +98,8 @@ public class SettingsFragment extends Fragment {
     private RadioButton highContrastModeNo;
     
     private android.widget.SeekBar backgroundSoundSeekbar;
+    private android.widget.SeekBar soundEffectsVolumeSeekbar;
+    private android.media.MediaPlayer sfxPreviewPlayer;
     
     // Account section
     private LinearLayout accountLoggedOutContainer;
@@ -237,6 +239,7 @@ public class SettingsFragment extends Fragment {
             highContrastModeNo = view.findViewById(R.id.high_contrast_mode_no);
             
             backgroundSoundSeekbar = view.findViewById(R.id.background_sound_seekbar);
+            soundEffectsVolumeSeekbar = view.findViewById(R.id.sound_effects_volume_seekbar);
             
             // Account section
             accountLoggedOutContainer = view.findViewById(R.id.account_logged_out_container);
@@ -746,6 +749,11 @@ public class SettingsFragment extends Fragment {
             // Set background sound volume seekbar
             if (backgroundSoundSeekbar != null) {
                 backgroundSoundSeekbar.setProgress(Preferences.backgroundSoundVolume);
+            }
+            
+            // Set sound effects volume seekbar
+            if (soundEffectsVolumeSeekbar != null) {
+                soundEffectsVolumeSeekbar.setProgress(Preferences.soundEffectsVolume);
             }
             
             isUpdatingUI = false;
@@ -1535,6 +1543,27 @@ public class SettingsFragment extends Fragment {
                 });
             }
             
+            // Sound effects volume seekbar
+            if (soundEffectsVolumeSeekbar != null) {
+                soundEffectsVolumeSeekbar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+                        if (!fromUser || isUpdatingUI) return;
+                        Preferences.setSoundEffectsVolume(progress);
+                        Timber.d("[PREFERENCES] Sound effects volume set to %d", progress);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(android.widget.SeekBar seekBar) {
+                        // Play preview sound when user finishes dragging
+                        playSfxPreview(seekBar.getProgress());
+                    }
+                });
+            }
+            
             // Accessibility radio group
             if (accessibilityRadioGroup != null) {
                 accessibilityRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -2129,6 +2158,39 @@ public class SettingsFragment extends Fragment {
         } catch (Exception e) {
             Timber.e(e, "[DEBUG] Error navigating to debug view");
             Toast.makeText(requireContext(), "Error opening debug view: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    /**
+     * Play robot_hit_robot sound as a preview at the given volume level.
+     * @param volumePercent Volume level 0-100
+     */
+    private void playSfxPreview(int volumePercent) {
+        try {
+            if (sfxPreviewPlayer != null) {
+                sfxPreviewPlayer.release();
+            }
+            sfxPreviewPlayer = android.media.MediaPlayer.create(requireContext(), R.raw.robot_hit_robot);
+            if (sfxPreviewPlayer != null) {
+                float vol = volumePercent / 100f;
+                sfxPreviewPlayer.setVolume(vol, vol);
+                sfxPreviewPlayer.setOnCompletionListener(mp -> {
+                    mp.release();
+                    if (sfxPreviewPlayer == mp) sfxPreviewPlayer = null;
+                });
+                sfxPreviewPlayer.start();
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[SFX_PREVIEW] Error playing preview sound");
+        }
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (sfxPreviewPlayer != null) {
+            sfxPreviewPlayer.release();
+            sfxPreviewPlayer = null;
         }
     }
     

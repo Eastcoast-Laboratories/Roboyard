@@ -38,29 +38,19 @@ check if this all works:
 
 # Accessibility
 - Add a preference setting to customize the order of information in TalkBack announcements
-- Create custom button sounds to provide audio feedback for different actions
-- Add a high-contrast mode for better visibility
 - die ganzen buttons unten sollen, wenn accessibility acitive, viel niedriger, damit sie unter die navigation buttons noch passen
 
 # levels 
 - winning a level: this overwrites the old saved stars and data, so you can "loose" stars this way if you play a level again with less stars
-- for debugging: add a skip button to levels, which will just move the robot to its target in one move
 - In den Leveln, wenn man die schon mal gespielt hat, dann die optimale Zahl gleich anzeigen
 
 # Sonstige Features & Fixes
 - show the big 90% transparent blue robot image in the background of the level screen too
 - walls around level selection screen are not tiled 
 - add sound effects for buttons
-- add sound effect background for game
-- Back-Undo Button should also undo the last painted robot path 
-
-- im start menu schon die Mini-Maps cachen
+- Create custom button sounds to provide audio feedback for different actions
 
 - Wenn Map ratio sehr gross, dann die Buttons unten alle kleiner und nur mit Icons statt text und alle in eine Reihe anstatt 2
-
-- drück mal 10 x reset hintereinander
-
-
 
 
 - enhance solution in multi-target mode: if Preferences.robotCount is > 1, find out, which robot can get to its target the fastest by a loop through all tartets:
@@ -68,9 +58,6 @@ check if this all works:
 
 
 # current
-
-- walls missing: in ensureOuterWalls() the return should just return data and instead we should search, where the outer walls are missing to be generated in the first place
-
 
 - im save slot anzeigen, wieviel die optimal moves sind und wieviel man gebraucht hat, wenn man den level completed hat
 
