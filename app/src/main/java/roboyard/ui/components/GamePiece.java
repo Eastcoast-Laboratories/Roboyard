@@ -2,7 +2,7 @@ package roboyard.ui.components;
 import roboyard.logic.core.Preferences;
 import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.IGameObject;
-import roboyard.eclabs.GameManager;
+import roboyard.ui.components.GameManager;
 import roboyard.eclabs.R;
 import roboyard.logic.core.Constants;
 

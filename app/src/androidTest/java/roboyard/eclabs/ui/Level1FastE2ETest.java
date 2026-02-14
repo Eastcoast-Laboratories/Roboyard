@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.ui.achievements.AchievementManager;
 import roboyard.ui.components.GameStateManager;
 
 import timber.log.Timber;

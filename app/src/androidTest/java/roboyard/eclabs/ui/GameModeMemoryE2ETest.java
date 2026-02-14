@@ -22,10 +22,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameState;
-import roboyard.pm.ia.GameSolution;
-import roboyard.pm.ia.IGameMove;
+import roboyard.logic.core.GameSolution;
+import roboyard.logic.core.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.ui.components.GameStateManager;
 

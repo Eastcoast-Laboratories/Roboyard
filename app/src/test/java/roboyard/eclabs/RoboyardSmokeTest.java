@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import roboyard.logic.core.MapObjects;
+
 /**
  * Comprehensive smoke test for Roboyard.
  * Tests all core game logic, data classes, and utility functions
@@ -32,7 +34,7 @@ public class RoboyardSmokeTest {
     @Test
     public void testGameElementCreation() {
         // TYPE_ROBOT = 1 (from Constants)
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 5, 7);
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 5, 7);
         assertEquals(1, robot.getType());
         assertEquals(5, robot.getX());
         assertEquals(7, robot.getY());
@@ -42,7 +44,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameElementPositionUpdate() {
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 0, 0);
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
         robot.setX(10);
         robot.setY(12);
         assertEquals(10, robot.getX());
@@ -51,7 +53,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameElementColorAndSelection() {
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 0, 0);
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
         robot.setColor(3); // yellow
         robot.setSelected(true);
         assertEquals(3, robot.getColor());
@@ -63,15 +65,15 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameElementIsRobot() {
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 0, 0); // TYPE_ROBOT
-        roboyard.eclabs.ui.GameElement target = new roboyard.eclabs.ui.GameElement(2, 0, 0); // TYPE_TARGET
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0); // TYPE_ROBOT
+        roboyard.logic.core.GameElement target = new roboyard.logic.core.GameElement(2, 0, 0); // TYPE_TARGET
         assertTrue(robot.isRobot());
         assertFalse(target.isRobot());
     }
 
     @Test
     public void testGameElementDirectionX() {
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 0, 0);
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
         assertEquals(1, robot.getDirectionX()); // default right
         
         robot.setDirectionX(-1);
@@ -86,7 +88,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameElementAnimationPosition() {
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 0, 0);
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
         assertFalse(robot.hasAnimationPosition());
         
         robot.setAnimationPosition(3.5f, 7.2f);
@@ -100,7 +102,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameElementRejectsInvalidAnimationPosition() {
-        roboyard.eclabs.ui.GameElement robot = new roboyard.eclabs.ui.GameElement(1, 0, 0);
+        roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
         robot.setAnimationPosition(Float.NaN, 5.0f);
         assertFalse("NaN should be rejected", robot.hasAnimationPosition());
         
@@ -110,11 +112,11 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameElementColorConstants() {
-        assertEquals(0, roboyard.eclabs.ui.GameElement.COLOR_RED);
-        assertEquals(1, roboyard.eclabs.ui.GameElement.COLOR_GREEN);
-        assertEquals(2, roboyard.eclabs.ui.GameElement.COLOR_BLUE);
-        assertEquals(3, roboyard.eclabs.ui.GameElement.COLOR_YELLOW);
-        assertEquals(4, roboyard.eclabs.ui.GameElement.COLOR_SILVER);
+        assertEquals(0, roboyard.logic.core.GameElement.COLOR_RED);
+        assertEquals(1, roboyard.logic.core.GameElement.COLOR_GREEN);
+        assertEquals(2, roboyard.logic.core.GameElement.COLOR_BLUE);
+        assertEquals(3, roboyard.logic.core.GameElement.COLOR_YELLOW);
+        assertEquals(4, roboyard.logic.core.GameElement.COLOR_SILVER);
     }
 
     // ========================================================================
@@ -123,50 +125,50 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameMoveCreationHorizontal() {
-        roboyard.eclabs.ui.GameMove move = new roboyard.eclabs.ui.GameMove(0, 0, 2, 5, 8, 5);
+        roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(0, 0, 2, 5, 8, 5);
         assertEquals(0, move.getRobotId());
         assertEquals(0, move.getRobotColor());
         assertEquals(2, move.getFromX());
         assertEquals(5, move.getFromY());
         assertEquals(8, move.getToX());
         assertEquals(5, move.getToY());
-        assertEquals(roboyard.eclabs.ui.GameMove.RIGHT, move.getDirection());
+        assertEquals(roboyard.logic.core.GameMove.RIGHT, move.getDirection());
         assertEquals(6, move.getDistance());
     }
 
     @Test
     public void testGameMoveCreationVertical() {
-        roboyard.eclabs.ui.GameMove move = new roboyard.eclabs.ui.GameMove(1, 2, 3, 10, 3, 2);
-        assertEquals(roboyard.eclabs.ui.GameMove.UP, move.getDirection());
+        roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(1, 2, 3, 10, 3, 2);
+        assertEquals(roboyard.logic.core.GameMove.UP, move.getDirection());
         assertEquals(8, move.getDistance());
     }
 
     @Test
     public void testGameMoveDirectionLeft() {
-        roboyard.eclabs.ui.GameMove move = new roboyard.eclabs.ui.GameMove(0, 0, 10, 5, 3, 5);
-        assertEquals(roboyard.eclabs.ui.GameMove.LEFT, move.getDirection());
+        roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(0, 0, 10, 5, 3, 5);
+        assertEquals(roboyard.logic.core.GameMove.LEFT, move.getDirection());
         assertEquals(7, move.getDistance());
     }
 
     @Test
     public void testGameMoveDirectionDown() {
-        roboyard.eclabs.ui.GameMove move = new roboyard.eclabs.ui.GameMove(0, 0, 5, 2, 5, 9);
-        assertEquals(roboyard.eclabs.ui.GameMove.DOWN, move.getDirection());
+        roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(0, 0, 5, 2, 5, 9);
+        assertEquals(roboyard.logic.core.GameMove.DOWN, move.getDirection());
         assertEquals(7, move.getDistance());
     }
 
     @Test
     public void testGameMoveColorNames() {
-        assertEquals("Red", new roboyard.eclabs.ui.GameMove(0, 0, 0, 0, 1, 0).getRobotColorName());
-        assertEquals("Green", new roboyard.eclabs.ui.GameMove(0, 1, 0, 0, 1, 0).getRobotColorName());
-        assertEquals("Blue", new roboyard.eclabs.ui.GameMove(0, 2, 0, 0, 1, 0).getRobotColorName());
-        assertEquals("Yellow", new roboyard.eclabs.ui.GameMove(0, 3, 0, 0, 1, 0).getRobotColorName());
-        assertEquals("Unknown", new roboyard.eclabs.ui.GameMove(0, 99, 0, 0, 1, 0).getRobotColorName());
+        assertEquals("Red", new roboyard.logic.core.GameMove(0, 0, 0, 0, 1, 0).getRobotColorName());
+        assertEquals("Green", new roboyard.logic.core.GameMove(0, 1, 0, 0, 1, 0).getRobotColorName());
+        assertEquals("Blue", new roboyard.logic.core.GameMove(0, 2, 0, 0, 1, 0).getRobotColorName());
+        assertEquals("Yellow", new roboyard.logic.core.GameMove(0, 3, 0, 0, 1, 0).getRobotColorName());
+        assertEquals("Unknown", new roboyard.logic.core.GameMove(0, 99, 0, 0, 1, 0).getRobotColorName());
     }
 
     @Test
     public void testGameMoveToString() {
-        roboyard.eclabs.ui.GameMove move = new roboyard.eclabs.ui.GameMove(0, 0, 0, 0, 5, 0);
+        roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(0, 0, 0, 0, 5, 0);
         String str = move.toString();
         assertNotNull(str);
         assertTrue(str.contains("Red"));
@@ -176,17 +178,17 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testGameMoveDirectionConstants() {
-        assertEquals(0, roboyard.eclabs.ui.GameMove.UP);
-        assertEquals(1, roboyard.eclabs.ui.GameMove.RIGHT);
-        assertEquals(2, roboyard.eclabs.ui.GameMove.DOWN);
-        assertEquals(3, roboyard.eclabs.ui.GameMove.LEFT);
+        assertEquals(0, roboyard.logic.core.GameMove.UP);
+        assertEquals(1, roboyard.logic.core.GameMove.RIGHT);
+        assertEquals(2, roboyard.logic.core.GameMove.DOWN);
+        assertEquals(3, roboyard.logic.core.GameMove.LEFT);
     }
 
     @Test
     public void testGameMoveFromDirectionConstructor() {
-        roboyard.eclabs.ui.GameMove move = new roboyard.eclabs.ui.GameMove(2, roboyard.eclabs.ui.GameMove.DOWN, 4);
+        roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(2, roboyard.logic.core.GameMove.DOWN, 4);
         assertEquals(2, move.getRobotId());
-        assertEquals(roboyard.eclabs.ui.GameMove.DOWN, move.getDirection());
+        assertEquals(roboyard.logic.core.GameMove.DOWN, move.getDirection());
         assertEquals(4, move.getDistance());
         assertEquals(-1, move.getRobotColor()); // unknown color
     }
@@ -197,7 +199,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testLevelCompletionDataDefaults() {
-        roboyard.eclabs.ui.LevelCompletionData data = new roboyard.eclabs.ui.LevelCompletionData(42);
+        roboyard.logic.core.LevelCompletionData data = new roboyard.logic.core.LevelCompletionData(42);
         assertEquals(42, data.getLevelId());
         assertFalse(data.isCompleted());
         assertEquals(0, data.getHintsShown());
@@ -211,7 +213,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testLevelCompletionDataSetters() {
-        roboyard.eclabs.ui.LevelCompletionData data = new roboyard.eclabs.ui.LevelCompletionData(1);
+        roboyard.logic.core.LevelCompletionData data = new roboyard.logic.core.LevelCompletionData(1);
         data.setCompleted(true);
         data.setHintsShown(2);
         data.setTimeNeeded(45000);
@@ -233,7 +235,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testLevelCompletionDataStarsClamping() {
-        roboyard.eclabs.ui.LevelCompletionData data = new roboyard.eclabs.ui.LevelCompletionData(1);
+        roboyard.logic.core.LevelCompletionData data = new roboyard.logic.core.LevelCompletionData(1);
         
         data.setStars(-5);
         assertEquals("Negative stars should clamp to 0", 0, data.getStars());
@@ -247,7 +249,7 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testLevelCompletionDataToString() {
-        roboyard.eclabs.ui.LevelCompletionData data = new roboyard.eclabs.ui.LevelCompletionData(7);
+        roboyard.logic.core.LevelCompletionData data = new roboyard.logic.core.LevelCompletionData(7);
         String str = data.toString();
         assertNotNull(str);
         assertTrue(str.contains("levelId=7"));
@@ -352,14 +354,14 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCreationWithDrawable() {
-        roboyard.eclabs.achievements.Achievement ach = new roboyard.eclabs.achievements.Achievement(
+        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
             "test_id", "name_key", "desc_key",
-            roboyard.eclabs.achievements.AchievementCategory.PROGRESSION, "icon_1_lightning");
+            roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon_1_lightning");
         
         assertEquals("test_id", ach.getId());
         assertEquals("name_key", ach.getNameKey());
         assertEquals("desc_key", ach.getDescriptionKey());
-        assertEquals(roboyard.eclabs.achievements.AchievementCategory.PROGRESSION, ach.getCategory());
+        assertEquals(roboyard.ui.achievements.AchievementCategory.PROGRESSION, ach.getCategory());
         assertEquals("icon_1_lightning", ach.getIconDrawableName());
         assertEquals(-1, ach.getSpriteIndex());
         assertFalse(ach.isUnlocked());
@@ -368,9 +370,9 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCreationWithSpriteIndex() {
-        roboyard.eclabs.achievements.Achievement ach = new roboyard.eclabs.achievements.Achievement(
+        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
             "test_id", "name_key", "desc_key",
-            roboyard.eclabs.achievements.AchievementCategory.PERFORMANCE, 42);
+            roboyard.ui.achievements.AchievementCategory.PERFORMANCE, 42);
         
         assertEquals(42, ach.getSpriteIndex());
         assertNull(ach.getIconDrawableName());
@@ -378,8 +380,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementUnlock() {
-        roboyard.eclabs.achievements.Achievement ach = new roboyard.eclabs.achievements.Achievement(
-            "test", "n", "d", roboyard.eclabs.achievements.AchievementCategory.PROGRESSION, "icon");
+        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
+            "test", "n", "d", roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon");
         
         assertFalse(ach.isUnlocked());
         assertEquals(0, ach.getUnlockedTimestamp());
@@ -395,8 +397,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementUnlockTimestampNotOverwritten() {
-        roboyard.eclabs.achievements.Achievement ach = new roboyard.eclabs.achievements.Achievement(
-            "test", "n", "d", roboyard.eclabs.achievements.AchievementCategory.PROGRESSION, "icon");
+        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
+            "test", "n", "d", roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon");
         
         ach.setUnlocked(true);
         long firstTimestamp = ach.getUnlockedTimestamp();
@@ -408,8 +410,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementFormatArgs() {
-        roboyard.eclabs.achievements.Achievement ach = new roboyard.eclabs.achievements.Achievement(
-            "test", "n", "d", roboyard.eclabs.achievements.AchievementCategory.PROGRESSION, "icon");
+        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
+            "test", "n", "d", roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon");
         
         assertNull(ach.getNameFormatArgs());
         assertNull(ach.getDescriptionFormatArgs());
@@ -431,27 +433,27 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementDefinitionsNotEmpty() {
-        Map<String, roboyard.eclabs.achievements.Achievement> all = 
-            roboyard.eclabs.achievements.AchievementDefinitions.getAll();
+        Map<String, roboyard.ui.achievements.Achievement> all = 
+            roboyard.ui.achievements.AchievementDefinitions.getAll();
         assertNotNull(all);
         assertTrue("Should have achievements defined", all.size() > 0);
     }
 
     @Test
     public void testAchievementDefinitionsHaveUniqueIds() {
-        Map<String, roboyard.eclabs.achievements.Achievement> all = 
-            roboyard.eclabs.achievements.AchievementDefinitions.getAll();
+        Map<String, roboyard.ui.achievements.Achievement> all = 
+            roboyard.ui.achievements.AchievementDefinitions.getAll();
         Set<String> ids = new HashSet<>();
-        for (roboyard.eclabs.achievements.Achievement ach : all.values()) {
+        for (roboyard.ui.achievements.Achievement ach : all.values()) {
             assertTrue("Duplicate achievement ID: " + ach.getId(), ids.add(ach.getId()));
         }
     }
 
     @Test
     public void testAchievementDefinitionsAllHaveRequiredFields() {
-        Map<String, roboyard.eclabs.achievements.Achievement> all = 
-            roboyard.eclabs.achievements.AchievementDefinitions.getAll();
-        for (roboyard.eclabs.achievements.Achievement ach : all.values()) {
+        Map<String, roboyard.ui.achievements.Achievement> all = 
+            roboyard.ui.achievements.AchievementDefinitions.getAll();
+        for (roboyard.ui.achievements.Achievement ach : all.values()) {
             assertNotNull("Achievement should have ID: " + ach, ach.getId());
             assertFalse("Achievement ID should not be empty", ach.getId().isEmpty());
             assertNotNull("Achievement should have name key: " + ach.getId(), ach.getNameKey());
@@ -465,8 +467,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementDefinitionsKnownAchievementsExist() {
-        Map<String, roboyard.eclabs.achievements.Achievement> all = 
-            roboyard.eclabs.achievements.AchievementDefinitions.getAll();
+        Map<String, roboyard.ui.achievements.Achievement> all = 
+            roboyard.ui.achievements.AchievementDefinitions.getAll();
         
         // Core achievements that must exist
         String[] requiredIds = {
@@ -481,16 +483,16 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementColorDeterministic() {
-        int color1 = roboyard.eclabs.achievements.AchievementDefinitions.getAchievementColor("test_id");
-        int color2 = roboyard.eclabs.achievements.AchievementDefinitions.getAchievementColor("test_id");
+        int color1 = roboyard.ui.achievements.AchievementDefinitions.getAchievementColor("test_id");
+        int color2 = roboyard.ui.achievements.AchievementDefinitions.getAchievementColor("test_id");
         assertEquals("Same ID should produce same color", color1, color2);
     }
 
     @Test
     public void testAchievementColorFromPalette() {
-        int color = roboyard.eclabs.achievements.AchievementDefinitions.getAchievementColor("any_id");
+        int color = roboyard.ui.achievements.AchievementDefinitions.getAchievementColor("any_id");
         boolean found = false;
-        for (int c : roboyard.eclabs.achievements.AchievementDefinitions.ACHIEVEMENT_COLORS) {
+        for (int c : roboyard.ui.achievements.AchievementDefinitions.ACHIEVEMENT_COLORS) {
             if (c == color) { found = true; break; }
         }
         assertTrue("Color should be from the predefined palette", found);
@@ -502,36 +504,36 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCategoryValues() {
-        roboyard.eclabs.achievements.AchievementCategory[] categories = 
-            roboyard.eclabs.achievements.AchievementCategory.values();
+        roboyard.ui.achievements.AchievementCategory[] categories = 
+            roboyard.ui.achievements.AchievementCategory.values();
         assertTrue("Should have categories", categories.length > 0);
     }
 
     @Test
     public void testAchievementCategoryDisplayOrder() {
-        assertEquals(0, roboyard.eclabs.achievements.AchievementCategory.PROGRESSION.getDisplayOrder());
-        assertEquals(1, roboyard.eclabs.achievements.AchievementCategory.PERFORMANCE.getDisplayOrder());
-        assertEquals(2, roboyard.eclabs.achievements.AchievementCategory.MASTERY.getDisplayOrder());
+        assertEquals(0, roboyard.ui.achievements.AchievementCategory.PROGRESSION.getDisplayOrder());
+        assertEquals(1, roboyard.ui.achievements.AchievementCategory.PERFORMANCE.getDisplayOrder());
+        assertEquals(2, roboyard.ui.achievements.AchievementCategory.MASTERY.getDisplayOrder());
     }
 
     @Test
     public void testAchievementCategoryStringResName() {
-        assertNotNull(roboyard.eclabs.achievements.AchievementCategory.PROGRESSION.getStringResName());
+        assertNotNull(roboyard.ui.achievements.AchievementCategory.PROGRESSION.getStringResName());
         assertEquals("achievement_category_progression", 
-            roboyard.eclabs.achievements.AchievementCategory.PROGRESSION.getStringResName());
+            roboyard.ui.achievements.AchievementCategory.PROGRESSION.getStringResName());
     }
 
     @Test
     public void testAchievementCategoryChallengeDisabled() {
         assertFalse("CHALLENGE category should be disabled",
-            roboyard.eclabs.achievements.AchievementCategory.CHALLENGE.isEnabled());
+            roboyard.ui.achievements.AchievementCategory.CHALLENGE.isEnabled());
     }
 
     @Test
     public void testAchievementCategoryOthersEnabled() {
-        for (roboyard.eclabs.achievements.AchievementCategory cat : 
-                roboyard.eclabs.achievements.AchievementCategory.values()) {
-            if (cat != roboyard.eclabs.achievements.AchievementCategory.CHALLENGE) {
+        for (roboyard.ui.achievements.AchievementCategory cat : 
+                roboyard.ui.achievements.AchievementCategory.values()) {
+            if (cat != roboyard.ui.achievements.AchievementCategory.CHALLENGE) {
                 assertTrue("Category " + cat + " should be enabled", cat.isEnabled());
             }
         }

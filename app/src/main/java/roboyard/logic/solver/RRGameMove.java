@@ -1,6 +1,6 @@
 package roboyard.pm.ia.ricochet;
 
-import roboyard.pm.ia.IGameMove;
+import roboyard.logic.core.IGameMove;
 
 /**
  * Represents a single move in the game.
@@ -13,7 +13,7 @@ import roboyard.pm.ia.IGameMove;
  *
  * @author Pierre Michel
  * @author Alain Caillaud
- * @see roboyard.pm.ia.IGameMove
+ * @see roboyard.logic.core.IGameMove
  * @see roboyard.pm.ia.ricochet.RRPiece
  * @see roboyard.pm.ia.ricochet.ERRGameMove
  */

@@ -18,12 +18,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import driftingdroids.model.Solution;
-import roboyard.eclabs.solver.SolverDD;
-import roboyard.eclabs.solver.SolverStatus;
+import roboyard.logic.solver.SolverDD;
+import roboyard.logic.solver.SolverStatus;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
-import roboyard.pm.ia.GameSolution;
-import roboyard.pm.ia.IGameMove;
+import roboyard.logic.core.GameSolution;
+import roboyard.logic.core.IGameMove;
 
 /**
  * Test that solves all 140 levels and generates solution data.

@@ -1,5 +1,5 @@
 package roboyard.ui.components;
-import roboyard.eclabs.GameManager;
+import roboyard.ui.components.GameManager;
 
 import java.util.ArrayList;
 

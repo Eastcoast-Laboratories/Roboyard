@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import roboyard.eclabs.RoboyardApiClient;
+import roboyard.ui.components.RoboyardApiClient;
 import timber.log.Timber;
 
 /**
@@ -30,7 +30,7 @@ import timber.log.Timber;
  * NOTE: These tests require network access to roboyard.z11.de.
  * They may fail on emulators without proper network configuration.
  * 
- * Run with: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.RoboyardApiClientTest
+ * Run with: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.ui.components.RoboyardApiClientTest
  */
 @RunWith(AndroidJUnit4.class)
 public class RoboyardApiClientTest {

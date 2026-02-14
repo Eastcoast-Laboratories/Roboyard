@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import roboyard.eclabs.ui.GameElement;
+import roboyard.logic.core.GameElement;
 import roboyard.logic.core.Constants;
 import timber.log.Timber;
 

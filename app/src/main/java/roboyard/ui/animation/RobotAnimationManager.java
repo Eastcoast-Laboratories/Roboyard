@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import roboyard.eclabs.ui.GameElement;
+import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameLogic;
 import roboyard.ui.components.GameGridView;
 import roboyard.ui.components.GameStateManager;
