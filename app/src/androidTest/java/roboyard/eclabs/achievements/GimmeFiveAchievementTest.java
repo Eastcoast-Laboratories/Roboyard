@@ -14,10 +14,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.eclabs.ui.MainFragmentActivity;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.ui.components.GameStateManager;
 import roboyard.logic.core.GameState;
-import roboyard.eclabs.ui.GameElement;
+import roboyard.logic.core.GameElement;
 
 import timber.log.Timber;
 

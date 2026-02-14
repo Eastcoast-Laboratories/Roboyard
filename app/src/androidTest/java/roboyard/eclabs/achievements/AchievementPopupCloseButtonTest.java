@@ -25,14 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.eclabs.ui.MainFragmentActivity;
+import roboyard.ui.activities.MainFragmentActivity;
 import timber.log.Timber;
 
 /**
  * Espresso UI test for AchievementPopup close button functionality.
  * Tests that the X close button appears when tapping the popup and can be clicked.
  * 
- * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.achievements.AchievementPopupCloseButtonTest
+ * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.ui.achievements.AchievementPopupCloseButtonTest
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementPopupCloseButtonTest {

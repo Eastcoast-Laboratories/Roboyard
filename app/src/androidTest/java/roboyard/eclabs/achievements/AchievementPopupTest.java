@@ -23,7 +23,7 @@ import roboyard.logic.core.Preferences;
  * Tests for AchievementPopup and unlock listener integration.
  * Tests that achievements trigger the unlock listener correctly.
  * 
- * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.achievements.AchievementPopupTest
+ * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.ui.achievements.AchievementPopupTest
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementPopupTest {

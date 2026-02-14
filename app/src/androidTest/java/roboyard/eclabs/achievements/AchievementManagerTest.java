@@ -19,7 +19,7 @@ import java.util.List;
  * Instrumented tests for AchievementManager.
  * Tests achievement unlocking, storage, and event handlers.
  * 
- * Run with: ./gradlew connectedAndroidTest --tests "roboyard.eclabs.achievements.AchievementManagerTest"
+ * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.achievements.AchievementManagerTest"
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementManagerTest {

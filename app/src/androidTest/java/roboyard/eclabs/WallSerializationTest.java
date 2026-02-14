@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import roboyard.eclabs.ui.GameElement;
+import roboyard.logic.core.GameElement;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import timber.log.Timber;

@@ -1,7 +1,7 @@
 package roboyard.ui.components;
 import roboyard.ui.components.RenderManager;
 import roboyard.eclabs.IGameObject;
-import roboyard.eclabs.GameManager;
+import roboyard.ui.components.GameManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

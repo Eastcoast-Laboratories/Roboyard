@@ -1,7 +1,7 @@
 package roboyard.pm.ia.ricochet;
 
-import roboyard.pm.ia.AGameState;
-import roboyard.pm.ia.IGameMove;
+import roboyard.logic.core.AGameState;
+import roboyard.logic.core.IGameMove;
 import java.util.ArrayList;
 import java.util.Arrays;
 

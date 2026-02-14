@@ -3,7 +3,7 @@ package roboyard.logic.core;
 import android.content.Context;
 import android.util.Log;
 
-import roboyard.eclabs.ui.GameElement;
+import roboyard.logic.core.GameElement;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import roboyard.eclabs.util.MapIdGenerator;
+import roboyard.ui.util.MapIdGenerator;
 import roboyard.ui.activities.MainActivity;
 
 /**

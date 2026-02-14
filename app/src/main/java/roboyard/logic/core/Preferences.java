@@ -387,8 +387,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setRobotCount, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -421,8 +421,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setTargetColors, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -455,8 +455,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setSoundEnabled, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -486,8 +486,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setDifficulty, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -521,8 +521,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setBoardSize, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -587,8 +587,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setgenerateNewMapEachTime, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -618,8 +618,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setAccessibilityMode, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -669,8 +669,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setAppLanguage, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -700,8 +700,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setTalkbackLanguage, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -731,8 +731,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setGameMode, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -762,8 +762,8 @@ public class Preferences {
         // Ensure preferences are initialized
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setFullscreenEnabled, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 // Set the static field but don't save to preferences
@@ -941,8 +941,8 @@ public class Preferences {
     public static void setMinSolutionMoves(int moves) {
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setMinSolutionMoves, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 minSolutionMoves = moves;
@@ -966,8 +966,8 @@ public class Preferences {
     public static void setMaxSolutionMoves(int moves) {
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setMaxSolutionMoves, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 maxSolutionMoves = moves;
@@ -991,8 +991,8 @@ public class Preferences {
     public static void setAllowMulticolorTarget(boolean allowed) {
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setAllowMulticolorTarget, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 allowMulticolorTarget = allowed;
@@ -1016,8 +1016,8 @@ public class Preferences {
     public static void setHighContrastMode(boolean enabled) {
         if (prefs == null) {
             Timber.w("[PREFERENCES] SharedPreferences is null in setHighContrastMode, attempting to initialize");
-            if (roboyard.eclabs.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.eclabs.RoboyardApplication.getAppContext());
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
             } else {
                 Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
                 highContrastMode = enabled;

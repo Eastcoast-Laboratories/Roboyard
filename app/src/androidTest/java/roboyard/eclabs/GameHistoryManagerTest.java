@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import roboyard.eclabs.ui.MainFragmentActivity;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.logic.core.GameHistoryEntry;
 import timber.log.Timber;
 
@@ -24,7 +24,7 @@ import timber.log.Timber;
  * Instrumented tests for GameHistoryManager.
  * Tests history entry creation, retrieval, deletion, and path handling.
  *
- * Run with: ./gradlew connectedAndroidTest --tests "roboyard.eclabs.GameHistoryManagerTest"
+ * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.components.GameHistoryManagerTest"
  */
 @RunWith(AndroidJUnit4.class)
 public class GameHistoryManagerTest {

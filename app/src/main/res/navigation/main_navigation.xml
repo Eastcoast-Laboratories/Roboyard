@@ -8,7 +8,7 @@
     <!-- Main Menu Fragment -->
     <fragment
         android:id="@+id/mainMenuFragment"
-        android:name="roboyard.eclabs.ui.MainMenuFragment"
+        android:name="roboyard.ui.fragments.MainMenuFragment"
         android:label="Main Menu"
         tools:layout="@layout/fragment_main_menu">
         <action
@@ -50,7 +50,7 @@
     <!-- Settings Fragment -->
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="roboyard.eclabs.ui.SettingsFragment"
+        android:name="roboyard.ui.fragments.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings">
         <action
@@ -61,7 +61,7 @@
     <!-- Help Fragment -->
     <fragment
         android:id="@+id/helpFragment"
-        android:name="roboyard.eclabs.ui.HelpFragment"
+        android:name="roboyard.ui.fragments.HelpFragment"
         android:label="Help"
         tools:layout="@layout/fragment_help">
         <action
@@ -72,7 +72,7 @@
     <!-- Save Game Fragment -->
     <fragment
         android:id="@+id/saveGameFragment"
-        android:name="roboyard.eclabs.ui.SaveGameFragment"
+        android:name="roboyard.ui.fragments.SaveGameFragment"
         android:label="Save Game"
         tools:layout="@layout/fragment_save_game">
         <action
@@ -90,7 +90,7 @@
     <!-- Modern Game Fragment -->
     <fragment
         android:id="@+id/modernGameFragment"
-        android:name="roboyard.eclabs.ui.ModernGameFragment"
+        android:name="roboyard.ui.fragments.ModernGameFragment"
         android:label="Modern Game"
         tools:layout="@layout/fragment_modern_game">
         <action

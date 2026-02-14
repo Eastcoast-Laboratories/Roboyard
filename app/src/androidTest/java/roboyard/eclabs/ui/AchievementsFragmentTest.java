@@ -21,14 +21,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.eclabs.achievements.AchievementManager;
+import roboyard.ui.achievements.AchievementManager;
 import roboyard.eclabs.ui.mock.MockMainActivity;
 
 /**
  * UI tests for the AchievementsFragment.
  * Tests that the achievements screen displays correctly and responds to user interaction.
  * 
- * Run with: ./gradlew connectedAndroidTest --tests "roboyard.eclabs.ui.AchievementsFragmentTest"
+ * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.fragments.AchievementsFragmentTest"
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementsFragmentTest {

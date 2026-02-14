@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name="roboyard.eclabs.RoboyardApplication"
+        android:name="roboyard.ui.RoboyardApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -14,7 +14,7 @@
 
         <!-- Modern UI Activity hosting fragments is now the main entry point -->
         <activity 
-            android:name="roboyard.eclabs.ui.MainFragmentActivity"
+            android:name="roboyard.ui.activities.MainFragmentActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="user">
