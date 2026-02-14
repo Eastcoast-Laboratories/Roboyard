@@ -2064,13 +2064,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     
     private void updateMoveCount(Integer count) {
         if (moveCountTextView != null && count != null) {
-            moveCountTextView.setText(String.valueOf(count));
+            moveCountTextView.setText(getString(R.string.moves_count, count));
         }
     }
     
     private void updateSquaresMoved(Integer squares) {
         if (squaresMovedTextView != null && squares != null) {
-            squaresMovedTextView.setText(String.valueOf(squares));
+            squaresMovedTextView.setText(getString(R.string.squares_moved, squares));
         }
     }
     

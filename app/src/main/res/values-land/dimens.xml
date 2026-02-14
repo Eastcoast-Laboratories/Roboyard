@@ -3,7 +3,7 @@
     <!-- Game info text sizes - 50% larger for landscape high-DPI displays -->
     <dimen name="game_info_primary_text_size">24sp</dimen>
     <dimen name="game_info_secondary_text_size">21sp</dimen>
-    <dimen name="game_info_small_text_size">18sp</dimen>
+    <dimen name="game_info_small_text_size">15sp</dimen>
     <dimen name="game_info_optimal_moves_text_size">36sp</dimen>
     
     <!-- Achievement icon dimensions for landscape mode (40% of standard size) -->

@@ -148,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:text="Squares: 0"
                 android:textColor="#EEEEEE"
-                android:textSize="@dimen/game_info_primary_text_size"
+                android:textSize="@dimen/game_info_small_text_size"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/move_count_text"
                 android:layout_marginTop="2dp" />
