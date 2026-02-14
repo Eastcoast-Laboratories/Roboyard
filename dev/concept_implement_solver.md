@@ -55,7 +55,7 @@
 - dont extract the hint solution tracking, the rest start now. use gradlew to check
 - To extract these components without changing the old game:
     1. Create utility classes for reusable components:
-        - BrailleSpinner.java - Extract the Braille spinner animation
+        - ~~BrailleSpinner.java~~ - (deleted, was unused)
         - SolutionAnimator.java - Extract the solution animation logic
     2. Use interfaces to standardize communication between UI and logic:
         - SolutionDisplayManager to handle animation across different UIs
