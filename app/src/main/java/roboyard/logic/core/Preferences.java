@@ -35,6 +35,8 @@ public class Preferences {
     private static final String KEY_ALLOW_MULTICOLOR_TARGET = "allow_multicolor_target";
     private static final String KEY_HIGH_CONTRAST_MODE = "high_contrast_mode";
     private static final String KEY_BACKGROUND_SOUND_VOLUME = "background_sound_volume";
+    private static final String KEY_LIVE_MOVE_COUNTER_ENABLED = "live_move_counter_enabled";
+    private static final String KEY_SOUND_EFFECTS_VOLUME = "sound_effects_volume";
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -53,7 +55,9 @@ public class Preferences {
     public static final int DEFAULT_MAX_SOLUTION_MOVES = 6;
     public static final boolean DEFAULT_ALLOW_MULTICOLOR_TARGET = true;
     public static final boolean DEFAULT_HIGH_CONTRAST_MODE = false;
-    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 0;
+    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 15;
+    public static final boolean DEFAULT_LIVE_MOVE_COUNTER_ENABLED = false;
+    public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 80;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -73,6 +77,8 @@ public class Preferences {
     public static boolean allowMulticolorTarget;
     public static boolean highContrastMode;
     public static int backgroundSoundVolume;
+    public static boolean liveMoveCounterEnabled;
+    public static int soundEffectsVolume;
     
     // For compatibility with existing code
     public static int boardSizeX;
@@ -335,6 +341,22 @@ public class Preferences {
                 backgroundSoundVolume = DEFAULT_BACKGROUND_SOUND_VOLUME;
             }
             
+            try {
+                liveMoveCounterEnabled = prefs.getBoolean(KEY_LIVE_MOVE_COUNTER_ENABLED, DEFAULT_LIVE_MOVE_COUNTER_ENABLED);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading live move counter enabled: %s", e.getMessage());
+                prefs.edit().remove(KEY_LIVE_MOVE_COUNTER_ENABLED).apply();
+                liveMoveCounterEnabled = DEFAULT_LIVE_MOVE_COUNTER_ENABLED;
+            }
+            
+            try {
+                soundEffectsVolume = prefs.getInt(KEY_SOUND_EFFECTS_VOLUME, DEFAULT_SOUND_EFFECTS_VOLUME);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading sound effects volume: %s", e.getMessage());
+                prefs.edit().remove(KEY_SOUND_EFFECTS_VOLUME).apply();
+                soundEffectsVolume = DEFAULT_SOUND_EFFECTS_VOLUME;
+            }
+            
             // For compatibility with existing code
             boardSizeX = boardSizeWidth;
             boardSizeY = boardSizeHeight;
@@ -374,6 +396,8 @@ public class Preferences {
         allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET;
         highContrastMode = DEFAULT_HIGH_CONTRAST_MODE;
         backgroundSoundVolume = DEFAULT_BACKGROUND_SOUND_VOLUME;
+        liveMoveCounterEnabled = DEFAULT_LIVE_MOVE_COUNTER_ENABLED;
+        soundEffectsVolume = DEFAULT_SOUND_EFFECTS_VOLUME;
         
         // Clear all preferences
         if (prefs != null) {
@@ -514,6 +538,57 @@ public class Preferences {
         
         notifyPreferencesChanged();
         Timber.d("[PREFERENCES] Background sound volume set to %d", volume);
+    }
+    
+    /**
+     * Set the live move counter enabled state and save to preferences
+     * @param enabled True to enable live move counter, false to disable
+     */
+    public static void setLiveMoveCounterEnabled(boolean enabled) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setLiveMoveCounterEnabled, attempting to initialize");
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                liveMoveCounterEnabled = enabled;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_LIVE_MOVE_COUNTER_ENABLED, enabled);
+        editor.apply();
+        
+        liveMoveCounterEnabled = enabled;
+        
+        Timber.d("[PREFERENCES] Live move counter enabled set to %s", enabled);
+    }
+    
+    /**
+     * Set the sound effects volume and save to preferences
+     * @param volume Volume level 0-100
+     */
+    public static void setSoundEffectsVolume(int volume) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setSoundEffectsVolume, attempting to initialize");
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                soundEffectsVolume = volume;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_SOUND_EFFECTS_VOLUME, volume);
+        editor.apply();
+        
+        soundEffectsVolume = volume;
+        
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Sound effects volume set to %d", volume);
     }
     
     /**

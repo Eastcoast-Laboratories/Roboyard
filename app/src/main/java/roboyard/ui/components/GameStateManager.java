@@ -1393,6 +1393,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 Timber.d("[ROBOTS] undoLastMove: Reset game complete flag");
             }
 
+            // Re-trigger live solver so the display updates instead of disappearing
+            triggerLiveSolver();
+
             return true;
         } else {
             Timber.e("[ROBOTS] undoLastMove: Previous state was null, this should not happen");
@@ -2769,7 +2772,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     public void setLiveMoveCounterEnabled(boolean enabled) {
         this.liveMoveCounterEnabled = enabled;
-        Timber.d("[LIVE_SOLVER] Live move counter %s", enabled ? "enabled" : "disabled");
+        Preferences.setLiveMoveCounterEnabled(enabled);
+        Timber.d("[LIVE_SOLVER] Live move counter %s (persisted)", enabled ? "enabled" : "disabled");
         if (!enabled) {
             liveMoveCounterText.setValue("");
             liveSolverCalculating.setValue(false);
@@ -2832,12 +2836,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         liveSolverManager.solveAsync(gridElements, new LiveSolverManager.LiveSolverListener() {
             @Override
-            public void onLiveSolverFinished(int optimalMoves) {
+            public void onLiveSolverFinished(int remainingMoves) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     liveSolverCalculating.setValue(false);
-                    String text = context.getString(R.string.live_move_counter_optimal, optimalMoves);
+                    int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
+                    int optimal = lastSolutionMinMoves;
+                    int deviation = (optimal > 0) ? (currentMoves + remainingMoves) - optimal : 0;
+                    String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
+                    String text = context.getString(R.string.live_move_counter_optimal, remainingMoves) + deviationStr;
                     liveMoveCounterText.setValue(text);
-                    Timber.d("[LIVE_SOLVER] Result: %d moves from current position", optimalMoves);
+                    Timber.d("[LIVE_SOLVER] Result: %d remaining, %d current, %d optimal, Δ%+d", remainingMoves, currentMoves, optimal, deviation);
                 });
             }
 
