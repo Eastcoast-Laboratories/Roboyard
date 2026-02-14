@@ -59,8 +59,6 @@ import timber.log.Timber;
 public class LevelDesignEditorFragment extends Fragment {
 
     private static final String ARG_LEVEL_ID = "level_id";
-    private static final int MAX_CUSTOM_LEVEL_ID = 999;
-    private static final int FIRST_CUSTOM_LEVEL_ID = 141;
     
     private int currentLevelId = 0;
     private GameState currentState;

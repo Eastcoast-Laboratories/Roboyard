@@ -194,40 +194,6 @@ public class SolverManager implements Runnable {
     }
     
     /**
-     * Checks if the solver has finished and processes the result if it has
-     * @return True if the solver has finished, false otherwise
-     */
-    public boolean checkSolverStatus() {
-        if (!isSolved && solver.getSolverStatus().isFinished()) {
-            isSolved = true;
-            numDifferentSolutionsFound = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
-            
-            if (numDifferentSolutionsFound > 0) {
-                currentSolution = solver.getSolution(0);
-                solutionMoves = 0;
-                if (currentSolution != null && currentSolution.getMoves() != null) {
-                    solutionMoves = currentSolution.getMoves().size();
-                }
-                
-                if (solver.isSolution01()) {
-                    solutionMoves = 1;
-                }
-                
-                if (listener != null) {
-                    listener.onSolverFinished(true, solutionMoves, numDifferentSolutionsFound);
-                }
-                return true;
-            } else {
-                if (listener != null) {
-                    listener.onSolverFinished(false, 0, 0);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
      * Cancels the solver execution
      */
     public void cancelSolver() {

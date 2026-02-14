@@ -17,7 +17,6 @@ public class MapObjects {
 
     // Compile patterns once as static fields for reuse
     private static final Pattern BOARD_SIZE_PATTERN = Pattern.compile("board:(\\d+),(\\d+);");
-    private static final Pattern COORDINATE_PATTERN = Pattern.compile("(\\d+),(\\d+);");
 
     /*
      * Constructor of the class
@@ -114,93 +113,6 @@ public class MapObjects {
         }
         
         return elements;
-    }
-
-    /**
-     * Create a data string from a list of grid elements
-     * @param elements List of grid elements to serialize
-     * @return String representation of the grid elements
-     */
-    public static String createDataString(List<GridElement> elements) {
-        StringBuilder dataString = new StringBuilder();
-        
-        // Add board size information if available
-        int boardWidth = MainActivity.getBoardWidth();
-        int boardHeight = MainActivity.getBoardHeight();
-        dataString.append("board:").append(boardWidth).append(",").append(boardHeight).append(";");
-        
-        // Process each grid element
-        for (GridElement element : elements) {
-            String type = element.getType();
-            int x = element.getX();
-            int y = element.getY();
-            
-            // Append the element type and coordinates
-            dataString.append(type).append(x).append(",").append(y).append(";");
-        }
-        
-        return dataString.toString();
-    }
-
-    /*
-     * Generate a string containing all the information from the list
-     * @param data List of GridElement containing all the content of the map
-     * @param shortString Boolean if the string is squeezed into 5 letters
-     * @return String containing all the map information like
-     *   mv16,14;
-     *   mv16,15;
-     *   cj14,6;
-     *   rr12,9;
-     *   ...
-     */
-    public static String createStringFromList( ArrayList<GridElement> data, boolean shortString)
-    {
-        StringBuilder content = new StringBuilder();
-
-        // Add board size information
-        content.append("board:").append(MainActivity.boardSizeX).append(",").append(MainActivity.boardSizeY).append(";\n");
-
-        // For each element, add a line containing the type as well as the x and y position
-        for(GridElement currentElement : data)
-        {
-            content.append(currentElement.getType()).append(currentElement.getX()).append(",").append(currentElement.getY()).append(";\n");
-        }
-
-        String stringContent;
-        if (shortString) {
-            stringContent = generateUnique5LetterFromString(content.toString());
-        }else{
-            stringContent = content.toString();
-        }
-
-        return stringContent;
-    }
-
-    /*
-     * set a color for the unique string depending on the value of the string,
-     * the color is generated from the hex value of the string
-     * - there are only generated light colors
-     *
-     * @param input The input string
-     * @return A light color in hexadecimal format
-     */
-    public static String generateHexColorFromString(String input) {
-        if (input == null || input.isEmpty()) {
-            return "#000000";
-        }
-        
-        // Simple and fast hash function
-        int hash = 0;
-        for (int i = 0; i < input.length(); i++) {
-            hash = 31 * hash + input.charAt(i);
-        }
-        
-        // Ensure colors are light by setting high base values
-        int red = 128 + Math.abs(hash % 128);        // 128-255
-        int green = 128 + Math.abs((hash >> 8) % 128);  // 128-255
-        int blue = 128 + Math.abs((hash >> 16) % 128);  // 128-255
-        
-        return String.format("#%02X%02X%02X", red, green, blue);
     }
 
     /*

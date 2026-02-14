@@ -59,12 +59,8 @@ public class GameLogic {
     private boolean placeWallsInCorners = true;
     private boolean placeWallsOnEdges = true;
     private boolean placeWallsInMiddleSquare = false;
-    private boolean placeBorderPerpendicularWalls = true;
-    private boolean placeWallsOnOuterBorders = true;
     private int minCornerWalls = 4;
     private int minEdgeWalls = 4;
-    private int minBorderPerpendicularWalls = 4;
-    private int minOuterBorderWalls = 4;
     private int minTotalWalls = 10;
     private int maxTotalWalls = 20;
     

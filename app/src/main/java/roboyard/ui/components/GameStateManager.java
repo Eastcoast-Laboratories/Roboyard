@@ -67,12 +67,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
 
     // Minimum required moves for each difficulty level (as per documentation)
-    private static final int MIN_MOVES_BEGINNER = 4;      // 4-6 moves
-    private static final int MAX_MOVES_BEGINNER = 6;    // 4-6 moves
-    private static final int MIN_MOVES_ADVANCED = 6;    // 6-10 moves
-    private static final int MAX_MOVES_ADVANCED = 10;    // 6-10 moves
-    private static final int MIN_MOVES_INSANE = 10;     // 10+ moves
-    private static final int MIN_MOVES_IMPOSSIBLE = 17; // 17+ moves
 
     private boolean validateDifficulty = true;
     private int regenerationCount = 0;
@@ -130,7 +124,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private int lastSolutionMinMoves = 0;
 
     // UI timer tracking (survives fragment recreation)
-    private long uiTimerStartTimeMs = 0;
     private long uiTimerElapsedMs = 0;
     private boolean uiTimerWasRunning = false;
     private boolean isNewGameLoaded = false; // Flag to indicate if a new game was just loaded (timer should reset)
@@ -150,7 +143,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private GameElement lastMoveHitRobotElement = null;
 
     // Store the difficulty level from a deep link
-    private int deepLinkDifficulty = -1;
 
     // Flag to indicate if the current game was loaded from a savegame
     // When true, skip min/max moves validation to allow playing saved games regardless of current difficulty settings
@@ -1274,15 +1266,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return false;
     }
 
-    /**
-     * Handle deep link to a specific level
-     *
-     * @param levelId Level ID to load
-     */
-    public void handleDeepLink(int levelId) {
-        resetUiTimer();
-        loadLevel(levelId);
-    }
 
     /**
      * Get a hint for the next move
@@ -1568,17 +1551,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         moveCount.setValue(count);
     }
 
-    /**
-     * Add squares moved to the counter
-     *
-     * @param squares Number of squares moved
-     */
-    public void addSquaresMoved(int squares) {
-        Integer current = squaresMoved.getValue();
-        if (current != null) {
-            squaresMoved.setValue(current + squares);
-        }
-    }
 
     /**
      * Reset squares moved counter
@@ -3108,16 +3080,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         });
     }
 
-    /**
-     * Cancel and clean up the live solver.
-     */
-    public void cancelLiveSolver() {
-        if (liveSolverManager != null) {
-            liveSolverManager.cancel();
-        }
-        liveMoveCounterText.setValue("");
-        liveSolverCalculating.setValue(false);
-    }
 
     @Override
     protected void onCleared() {

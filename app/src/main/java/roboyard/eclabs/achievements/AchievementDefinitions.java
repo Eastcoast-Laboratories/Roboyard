@@ -5,8 +5,8 @@ import java.util.Map;
 
 /**
  * Defines all achievements in the game.
- * Each achievement uses individual drawable resources from achievements_icons_cropped folder.
- * Icons are named: {number}_{icon_name}.png (e.g., 1_lightning.png, 46_flame.png)
+ * Each achievement uses individual drawable resources named icon_{number}_{name}.png
+ * (e.g., icon_1_lightning.png, icon_46_flame.png) in res/drawable/.
  * 
  * This is the central configuration for all achievement-related data:
  * - Achievement definitions (ID, name, description, category, icon)
@@ -114,7 +114,6 @@ public class AchievementDefinitions {
     private static final String ICON_NETWORK = "icon_52_network";             // Network - share
     private static final String ICON_HEART_GEAR = "icon_2_heart";             // Heart gear - first game
     private static final String ICON_INFINITY = "icon_32_infinity";           // Infinity - streak
-    private static final String ICON_ROBOT = "icon_3_robot";                  // Robot - robot related
     private static final String ICON_ROBOT_YELLOW = "icon_49_armor";          // Yellow robot - 5 robots
     private static final String ICON_TARGET = "icon_8_target";                // Target - targets
     private static final String ICON_TARGET_BLUE = "icon_33_target_blue";     // Blue target - multi targets

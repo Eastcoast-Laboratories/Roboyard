@@ -104,9 +104,6 @@ public class SettingsFragment extends Fragment {
     private Button logoutButton;
     
     // Cached registration form data (persists between dialog opens)
-    private String cachedRegisterName = "";
-    private String cachedRegisterEmail = "";
-    private String cachedRegisterPassword = "";
     
     // Data export/import section
     private Button exportDataButton;
@@ -116,13 +113,11 @@ public class SettingsFragment extends Fragment {
     private List<int[]> validBoardSizes;
     
     // Add a flag to track if this is the first selection event
-    private boolean isInitialBoardSizeSelection = true;
     
     // Flag to prevent recursive updates
     private boolean isUpdatingUI = false;
     
     // Debug view
-    private long lastTitleClickTime = 0;
     private android.view.GestureDetector debugGestureDetector;
     private android.os.Handler longPressHandler;
     private Runnable longPressRunnable;

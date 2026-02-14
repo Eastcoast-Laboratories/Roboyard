@@ -54,7 +54,6 @@ public class RoboyardApplication extends Application implements Application.Acti
     
     private static Context appContext;
     private int startedActivityCount = 0;
-    private static boolean streakPopupPending = true;
     
     /**
      * Get the application context
@@ -64,13 +63,6 @@ public class RoboyardApplication extends Application implements Application.Acti
         return appContext;
     }
 
-    public static boolean shouldShowStreakPopup() {
-        return streakPopupPending;
-    }
-
-    public static void markStreakPopupShown() {
-        streakPopupPending = false;
-    }
     
     /**
      * Updates the app context with the current locale from preferences
@@ -104,7 +96,6 @@ public class RoboyardApplication extends Application implements Application.Acti
         appContext = getApplicationContext();
 
         registerActivityLifecycleCallbacks(this);
-        streakPopupPending = true;
         
         // Initialize Timber for logging - always enable it for debugging
         Timber.plant(new FilteredDebugTree());
@@ -133,8 +124,7 @@ public class RoboyardApplication extends Application implements Application.Acti
     @Override
     public void onActivityStarted(Activity activity) {
         if (startedActivityCount == 0) {
-            streakPopupPending = true;
-            Timber.d("[STREAK_POPUP] App entered foreground - popup flag reset");
+            Timber.d("[STREAK_POPUP] App entered foreground");
         }
         startedActivityCount++;
     }

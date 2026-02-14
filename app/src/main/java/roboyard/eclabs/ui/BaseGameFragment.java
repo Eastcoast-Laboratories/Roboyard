@@ -4,15 +4,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.widget.Toast;
-
-import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-
 import java.util.Locale;
 
 import roboyard.eclabs.R;
@@ -48,23 +42,6 @@ public abstract class BaseGameFragment extends Fragment {
         // Apply fixed font scaling to ensure consistent UI
         Context fixedContext = FontScaleUtil.createFixedFontScaleContext(context);
         super.onAttach(fixedContext);
-    }
-    
-    /**
-     * Navigate to another screen using NavDirections
-     * @param directions NavDirections object containing navigation information
-     */
-    protected void navigateTo(NavDirections directions) {
-        Navigation.findNavController(requireView()).navigate(directions);
-    }
-    
-    /**
-     * Navigate to another screen using a navigation action resource ID
-     * This provides an alternative to NavDirections for simpler navigation needs
-     * @param actionId Resource ID of the navigation action
-     */
-    protected void navigateTo(@IdRes int actionId) {
-        Navigation.findNavController(requireView()).navigate(actionId);
     }
     
     /**
@@ -105,14 +82,6 @@ public abstract class BaseGameFragment extends Fragment {
      */
     protected void navigateToDirect(Fragment fragment) {
         navigateToDirect(fragment, true, null);
-    }
-    
-    /**
-     * Shows a toast message
-     * @param message Message to display
-     */
-    protected void showToast(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
     }
     
     /**

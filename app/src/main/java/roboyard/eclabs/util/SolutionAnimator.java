@@ -154,21 +154,6 @@ public class SolutionAnimator {
     }
     
     /**
-     * Stops the current animation
-     */
-    public void stopAnimation() {
-        if (isAnimating) {
-            Timber.d("SolutionAnimator: Stopping animation");
-            isAnimating = false;
-            handler.removeCallbacksAndMessages(null);
-            
-            if (listener != null) {
-                listener.onAnimationStopped();
-            }
-        }
-    }
-    
-    /**
      * @return Whether the animator is currently animating a solution
      */
     public boolean isAnimating() {
@@ -237,7 +222,7 @@ public class SolutionAnimator {
      * @param iaDirection The direction from the solver
      * @return The direction for the game (0-3)
      */
-    public static int translateIADirectionToGameDirection(int iaDirection) {
+    private static int translateIADirectionToGameDirection(int iaDirection) {
         switch (iaDirection) {
             case 1: // Left
                 return 0;

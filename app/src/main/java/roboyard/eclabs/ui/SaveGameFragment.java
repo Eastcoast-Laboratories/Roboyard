@@ -59,9 +59,6 @@ import timber.log.Timber;
 public class SaveGameFragment extends BaseGameFragment {
     
     // Constants
-    private static final int TAB_SAVE = 0;
-    private static final int TAB_LOAD = 1;
-    private static final int TAB_HISTORY = 2;
     
     // UI components
     private TextView titleText;

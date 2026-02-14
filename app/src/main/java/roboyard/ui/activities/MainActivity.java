@@ -25,7 +25,6 @@ import timber.log.Timber;
 
 public class MainActivity extends FragmentActivity
         implements TextureView.SurfaceTextureListener {
-    private static final boolean DEBUG = true;  // Set this to false for release builds
     private TextureView mTextureView;
     private MainActivity.RenderingThread mThread;
     private int sWidth, sHeight;
@@ -48,8 +47,6 @@ public class MainActivity extends FragmentActivity
     public static int boardSizeY = DEFAULT_BOARD_SIZE_Y;
     public static int numRobots = Constants.NUM_ROBOTS;
 
-    private static final int HIGH_FPS_SLEEP = 15;  // ~15 FPS
-    private static final int LOW_FPS_SLEEP = 45;  // ~5 FPS
     private boolean touchActive = false;
 
     @Override
@@ -204,18 +201,6 @@ public class MainActivity extends FragmentActivity
     public void draw(Canvas pCanvas) {
         synchronized (this.renderManager) {
             this.renderManager.setMainTarget(pCanvas);
-        }
-    }
-
-    public void tick(Canvas pCanvas) {
-        try {
-            this.draw(pCanvas); //draw all items
-            synchronized(this.inputManager) {
-                this.inputManager.resetEvents(); //reset events
-            }
-        }catch(Exception e){
-            //error
-            e.getMessage();
         }
     }
 

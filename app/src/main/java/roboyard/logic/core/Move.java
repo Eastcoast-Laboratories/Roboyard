@@ -16,13 +16,6 @@ public class Move {
         _y = y;
     }
 
-    public void goBack(){
-        _p.setX(_x);
-        _p.setY(_y);
-        _p.setxObjective(_x);
-        _p.setyObjective(_y);
-    }
-
     public int getSquaresMoved(){
         return this.squaresMoved;
     }

@@ -25,7 +25,6 @@ public class HelpFragment extends BaseGameFragment {
     
     // Colors matching Laravel style
     private static final int COLOR_TEXT = Color.parseColor("#212529");
-    private static final int COLOR_MUTED = Color.parseColor("#6c757d");
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
