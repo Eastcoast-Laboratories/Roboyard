@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
@@ -2975,8 +2976,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 int skipped = 0;
                 for (GameElement robot : robots) {
                     for (int d = 0; d < 4; d++) {
-                        // Check cancellation before each solve
-                        if (preComputeCancelled) {
+                        // Check cancellation / thread interruption before each solve
+                        if (preComputeCancelled || Thread.currentThread().isInterrupted()) {
                             Timber.d("[PRECOMP] Cancelled after %d computed, %d skipped", computed, skipped);
                             return;
                         }
@@ -3059,22 +3060,44 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             if (ge != null) gridElements.add(ge);
                         }
 
-                        Timber.d("[PRECOMP] Solving: robot %d %s → (%d,%d)...",
+                        Timber.d("[PRECOMP] [%d/%d] Solving: robot %d %s → (%d,%d)...",
+                                computed + skipped + 1, robots.size() * 4,
                                 robot.getColor(), dirNames[d], newX, newY);
+                        long solveStart = System.currentTimeMillis();
 
-                        // Solve synchronously on this single background thread
+                        // Solve with 60s timeout using a sub-executor
                         roboyard.logic.solver.SolverDD solver = new roboyard.logic.solver.SolverDD();
                         solver.init(gridElements);
-                        solver.run();
+                        ExecutorService solverThread = Executors.newSingleThreadExecutor();
+                        java.util.concurrent.Future<?> solverFuture = solverThread.submit(() -> solver.run());
+                        boolean solverCompleted = false;
+                        try {
+                            solverFuture.get(60, TimeUnit.SECONDS);
+                            solverCompleted = true;
+                        } catch (java.util.concurrent.TimeoutException te) {
+                            solverFuture.cancel(true);
+                            long elapsed = System.currentTimeMillis() - solveStart;
+                            Timber.w("[PRECOMP] [%d/%d] TIMEOUT after %dms: robot %d %s → (%d,%d)",
+                                    computed + skipped + 1, robots.size() * 4,
+                                    elapsed, robot.getColor(), dirNames[d], newX, newY);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        } catch (java.util.concurrent.ExecutionException ee) {
+                            Timber.e(ee, "[PRECOMP] Solver execution error");
+                        } finally {
+                            solverThread.shutdownNow();
+                        }
 
-                        // Check cancellation after solve completes
-                        if (preComputeCancelled) {
-                            Timber.d("[PRECOMP] Cancelled after solve (robot %d %s), %d computed so far",
-                                    robot.getColor(), dirNames[d], computed);
+                        long solveElapsed = System.currentTimeMillis() - solveStart;
+
+                        // Check cancellation / thread interruption after solve completes
+                        if (preComputeCancelled || Thread.currentThread().isInterrupted()) {
+                            Timber.d("[PRECOMP] Cancelled after solve (robot %d %s, %dms), %d computed so far",
+                                    robot.getColor(), dirNames[d], solveElapsed, computed);
                             return;
                         }
 
-                        if (solver.getSolverStatus().isFinished()) {
+                        if (solverCompleted && solver.getSolverStatus().isFinished()) {
                             int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
                             if (numSolutions > 0) {
                                 roboyard.logic.core.GameSolution solution = solver.getSolution(0);
@@ -3082,9 +3105,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 if (solver.isSolution01()) moves = 1;
                                 nextMovesCache.put(hypotheticalHash, moves);
                                 computed++;
-                                Timber.d("[PRECOMP] Solved: robot %d %s → (%d,%d) = %d moves",
-                                        robot.getColor(), dirNames[d], newX, newY, moves);
+                                Timber.d("[PRECOMP] [%d/%d] Solved in %dms: robot %d %s → (%d,%d) = %d moves",
+                                        computed + skipped, robots.size() * 4,
+                                        solveElapsed, robot.getColor(), dirNames[d], newX, newY, moves);
+                            } else {
+                                Timber.d("[PRECOMP] [%d/%d] No solution in %dms: robot %d %s → (%d,%d)",
+                                        computed + skipped + 1, robots.size() * 4,
+                                        solveElapsed, robot.getColor(), dirNames[d], newX, newY);
                             }
+                        } else if (solverCompleted) {
+                            Timber.d("[PRECOMP] [%d/%d] Solver not finished in %dms: robot %d %s → (%d,%d)",
+                                    computed + skipped + 1, robots.size() * 4,
+                                    solveElapsed, robot.getColor(), dirNames[d], newX, newY);
                         }
                     }
                 }
@@ -3104,7 +3136,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private void cancelPreComputation() {
         if (preComputeRunning) {
             preComputeCancelled = true;
-            Timber.d("[PRECOMP] Cancellation requested (preComputeRunning=%b)", preComputeRunning);
+            Timber.d("[PRECOMP] Cancellation requested — shutting down executor");
+            if (preComputeExecutor != null) {
+                preComputeExecutor.shutdownNow();
+                preComputeExecutor = null;
+            }
+            preComputeRunning = false;
         }
     }
 
