@@ -2913,14 +2913,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
+     * Short color letter for log/hash: r=red/pink, g=green, b=blue, y=yellow, s=silver.
+     */
+    private static String robotColorShort(int colorId) {
+        switch (colorId) {
+            case Constants.COLOR_PINK:   return "r";
+            case Constants.COLOR_GREEN:  return "g";
+            case Constants.COLOR_BLUE:   return "b";
+            case Constants.COLOR_YELLOW: return "y";
+            default: return String.valueOf(colorId);
+        }
+    }
+
+    /**
      * Compute a hash string from robot positions in the given state.
      * Used as cache key for pre-computation.
+     * Format: r:4,5;g:3,2;b:12,17;y:10,1;
      */
     private String computeStateHash(GameState state) {
         StringBuilder sb = new StringBuilder();
         for (GameElement element : state.getGameElements()) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
-                sb.append(element.getColor()).append(':')
+                sb.append(robotColorShort(element.getColor())).append(':')
                   .append(element.getX()).append(',')
                   .append(element.getY()).append(';');
             }
@@ -3018,7 +3032,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         // Compute hash for the hypothetical state
                         StringBuilder sb = new StringBuilder();
                         for (GameElement r : robots) {
-                            sb.append(r.getColor()).append(':');
+                            sb.append(robotColorShort(r.getColor())).append(':');
                             if (r == robot) {
                                 sb.append(newX).append(',').append(newY);
                             } else {
@@ -3060,9 +3074,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             if (ge != null) gridElements.add(ge);
                         }
 
-                        Timber.d("[PRECOMP] [%d/%d] Solving: robot %d %s → (%d,%d)...",
+                        String colorLetter = robotColorShort(robot.getColor());
+                        Timber.d("[PRECOMP] [%d/%d] Solving: %s%s (%d,%d)→(%d,%d)...",
                                 computed + skipped + 1, robots.size() * 4,
-                                robot.getColor(), dirNames[d], newX, newY);
+                                colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         long solveStart = System.currentTimeMillis();
 
                         // Solve with 60s timeout using a sub-executor
@@ -3077,9 +3092,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         } catch (java.util.concurrent.TimeoutException te) {
                             solverFuture.cancel(true);
                             long elapsed = System.currentTimeMillis() - solveStart;
-                            Timber.w("[PRECOMP] [%d/%d] TIMEOUT after %dms: robot %d %s → (%d,%d)",
+                            Timber.w("[PRECOMP] [%d/%d] TIMEOUT after %dms: %s%s (%d,%d)→(%d,%d)",
                                     computed + skipped + 1, robots.size() * 4,
-                                    elapsed, robot.getColor(), dirNames[d], newX, newY);
+                                    elapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
                         } catch (java.util.concurrent.ExecutionException ee) {
@@ -3092,8 +3107,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
                         // Check cancellation / thread interruption after solve completes
                         if (preComputeCancelled || Thread.currentThread().isInterrupted()) {
-                            Timber.d("[PRECOMP] Cancelled after solve (robot %d %s, %dms), %d computed so far",
-                                    robot.getColor(), dirNames[d], solveElapsed, computed);
+                            Timber.d("[PRECOMP] Cancelled after solve (%s%s, %dms), %d computed so far",
+                                    colorLetter, dirNames[d], solveElapsed, computed);
                             return;
                         }
 
@@ -3105,18 +3120,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 if (solver.isSolution01()) moves = 1;
                                 nextMovesCache.put(hypotheticalHash, moves);
                                 computed++;
-                                Timber.d("[PRECOMP] [%d/%d] Solved in %dms: robot %d %s → (%d,%d) = %d moves",
+                                Timber.d("[PRECOMP] [%d/%d] Solved in %dms: %s%s (%d,%d)→(%d,%d) = %d moves",
                                         computed + skipped, robots.size() * 4,
-                                        solveElapsed, robot.getColor(), dirNames[d], newX, newY, moves);
+                                        solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY, moves);
                             } else {
-                                Timber.d("[PRECOMP] [%d/%d] No solution in %dms: robot %d %s → (%d,%d)",
+                                Timber.d("[PRECOMP] [%d/%d] No solution in %dms: %s%s (%d,%d)→(%d,%d)",
                                         computed + skipped + 1, robots.size() * 4,
-                                        solveElapsed, robot.getColor(), dirNames[d], newX, newY);
+                                        solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                             }
                         } else if (solverCompleted) {
-                            Timber.d("[PRECOMP] [%d/%d] Solver not finished in %dms: robot %d %s → (%d,%d)",
+                            Timber.d("[PRECOMP] [%d/%d] Solver not finished in %dms: %s%s (%d,%d)→(%d,%d)",
                                     computed + skipped + 1, robots.size() * 4,
-                                    solveElapsed, robot.getColor(), dirNames[d], newX, newY);
+                                    solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         }
                     }
                 }
