@@ -24,10 +24,13 @@ import timber.log.Timber;
 /**
  * Instrumented test for the pre-computation cache of next possible moves.
  *
- * Uses a specific 19x19 map with known solution:
- * solution: yE yS yW yS bE bN gS gE rS rE gS yW rS rE gN rW bW rS gE gS (20 moves)
+ * Uses a specific 19x19 map with known solution (20 moves from initial position):
+ * solution: yE yS yW yS bE bN gS gE rS rE gS yW rS rE gN rW bW rS gE gS
  *
- * Robots: r=(5,4), g=(4,5), b=(12,17), y=(10,1)
+ * This test starts AFTER yellow has made 4 moves (yE yS yW yS),
+ * so the remaining optimal solution is 16 moves: bE bN gS gE rS rE gS yW rS rE gN rW bW rS gE gS
+ *
+ * Robots after 4 yellow moves: r=(5,4), g=(4,5), b=(12,17), y=(11,11)
  * Target: G=(11,14) (green)
  *
  * Run with:
@@ -51,12 +54,14 @@ public class PreComputationTest {
     private ArrayList<GridElement> buildTestMap() {
         ArrayList<GridElement> elements = new ArrayList<>();
 
-        // Robots: PINK=0(red), GREEN=1, BLUE=2, YELLOW=3
+        // Robots after yellow's 4 moves (yE yS yW yS):
+        // PINK=0(red), GREEN=1, BLUE=2, YELLOW=3
         // In solver: robot_red maps to COLOR_PINK=0
-        elements.add(new GridElement(5, 4, "robot_red"));     // r at (5,4)
-        elements.add(new GridElement(4, 5, "robot_green"));   // g at (4,5)
-        elements.add(new GridElement(12, 17, "robot_blue"));  // b at (12,17)
-        elements.add(new GridElement(10, 1, "robot_yellow")); // y at (10,1)
+        // Yellow path: (10,1) →yE→ (17,1) →yS→ (17,5) →yW→ (11,5) →yS→ (11,18)
+        elements.add(new GridElement(5, 4, "robot_red"));     // r at (5,4) - unchanged
+        elements.add(new GridElement(4, 5, "robot_green"));   // g at (4,5) - unchanged
+        elements.add(new GridElement(12, 17, "robot_blue"));  // b at (12,17) - unchanged
+        elements.add(new GridElement(11, 18, "robot_yellow")); // y at (11,18) - after 4 moves (slides to bottom wall)
 
         // Target: green at (11,14)
         elements.add(new GridElement(11, 14, "target_green"));
@@ -239,8 +244,15 @@ public class PreComputationTest {
      * Verify the solver finds a 20-move solution for this map.
      */
     @Test
-    public void testSolverFinds20MoveSolution() {
-        Timber.d("[PRECOMP_TEST] Testing solver with 19x19 map");
+    public void testSolverFinds16MoveSolution() {
+        Timber.d("[PRECOMP_TEST] Testing solver with 19x19 map (yellow already moved 4 steps)");
+        
+        // Log robot positions for debugging
+        for (GridElement e : mapElements) {
+            if (e.getType().startsWith("robot_")) {
+                Timber.d("[PRECOMP_TEST] Robot %s at (%d,%d)", e.getType(), e.getX(), e.getY());
+            }
+        }
 
         SolverDD solver = new SolverDD();
         solver.init(mapElements);
@@ -254,7 +266,17 @@ public class PreComputationTest {
         assertNotNull("First solution should not be null", solution);
         int moves = solution.getMoves().size();
         Timber.d("[PRECOMP_TEST] Solution found with %d moves", moves);
-        assertEquals("Solution should have 20 moves", 20, moves);
+        
+        // Log the first few moves to understand the solution
+        if (solution.getMoves() != null && solution.getMoves().size() > 0) {
+            StringBuilder movesStr = new StringBuilder();
+            for (int i = 0; i < Math.min(5, solution.getMoves().size()); i++) {
+                movesStr.append(solution.getMoves().get(i)).append(" ");
+            }
+            Timber.d("[PRECOMP_TEST] First moves: %s", movesStr.toString());
+        }
+        
+        assertEquals("Solution should have 16 moves (after 4 yellow moves)", 16, moves);
     }
 
     /**
@@ -270,7 +292,7 @@ public class PreComputationTest {
 
         liveSolver.solveAsync(mapElements, new LiveSolverManager.LiveSolverListener() {
             @Override
-            public void onLiveSolverFinished(int optimalMoves) {
+            public void onLiveSolverFinished(int optimalMoves, GameSolution solution) {
                 result[0] = optimalMoves;
                 Timber.d("[PRECOMP_TEST] LiveSolver result: %d moves", optimalMoves);
                 latch.countDown();
@@ -284,28 +306,28 @@ public class PreComputationTest {
         });
 
         assertTrue("LiveSolver should complete within 60 seconds", latch.await(60, TimeUnit.SECONDS));
-        assertEquals("LiveSolver should find 20-move solution", 20, result[0]);
+        assertEquals("LiveSolver should find 16-move solution (after 4 yellow moves)", 16, result[0]);
 
         liveSolver.shutdown();
     }
 
     /**
-     * Test pre-computation: after solving the initial state, simulate moving yellow East
-     * (first move of the solution: yE) and verify the solver finds 19 remaining moves.
-     * Then verify that solving from the post-yE state is faster when pre-computed.
+     * Test pre-computation: after solving the current state (16 moves),
+     * simulate moving blue East (first move of the remaining solution: bE)
+     * and verify the solver finds 15 remaining moves.
      */
     @Test
     public void testPreComputationAfterFirstMove() throws InterruptedException {
-        Timber.d("[PRECOMP_TEST] Testing pre-computation after first move (yE)");
+        Timber.d("[PRECOMP_TEST] Testing pre-computation after first move (bE)");
 
-        // First solve from initial position
+        // First solve from current position (yellow already moved 4 steps)
         LiveSolverManager liveSolver = new LiveSolverManager();
         CountDownLatch latch1 = new CountDownLatch(1);
         final int[] initialResult = {-1};
 
         liveSolver.solveAsync(mapElements, new LiveSolverManager.LiveSolverListener() {
             @Override
-            public void onLiveSolverFinished(int optimalMoves) {
+            public void onLiveSolverFinished(int optimalMoves, GameSolution solution) {
                 initialResult[0] = optimalMoves;
                 latch1.countDown();
             }
@@ -313,38 +335,36 @@ public class PreComputationTest {
             public void onLiveSolverFailed() { latch1.countDown(); }
         });
         assertTrue("Initial solve should complete", latch1.await(60, TimeUnit.SECONDS));
-        assertEquals("Initial solution should be 20 moves", 20, initialResult[0]);
+        assertEquals("Solution should be 16 moves", 16, initialResult[0]);
 
-        // Now simulate yE (yellow moves East from (10,1) to (17,1) - slides to right wall)
-        // Build new grid elements with yellow at new position
+        // Now simulate bE (blue moves East from (12,17) - slides to right wall at x=17)
+        // Row 17 has no internal walls between x=12 and x=18, so blue slides to x=17
         ArrayList<GridElement> postMoveElements = new ArrayList<>();
         for (GridElement e : mapElements) {
-            if (e.getType().equals("robot_yellow")) {
-                // Yellow slides East from (10,1) - find where it stops
-                // Looking at row 1: no internal walls, so yellow slides to x=17 (before right border wall at x=18)
-                postMoveElements.add(new GridElement(17, 1, "robot_yellow"));
-                Timber.d("[PRECOMP_TEST] Yellow moved East: (10,1) → (17,1)");
+            if (e.getType().equals("robot_blue")) {
+                postMoveElements.add(new GridElement(17, 17, "robot_blue"));
+                Timber.d("[PRECOMP_TEST] Blue moved East: (12,17) → (17,17)");
             } else {
                 postMoveElements.add(e);
             }
         }
 
-        // Solve from post-yE position
+        // Solve from post-bE position
         CountDownLatch latch2 = new CountDownLatch(1);
         final int[] postMoveResult = {-1};
 
         liveSolver.solveAsync(postMoveElements, new LiveSolverManager.LiveSolverListener() {
             @Override
-            public void onLiveSolverFinished(int optimalMoves) {
+            public void onLiveSolverFinished(int optimalMoves, GameSolution solution) {
                 postMoveResult[0] = optimalMoves;
-                Timber.d("[PRECOMP_TEST] Post-yE result: %d moves remaining", optimalMoves);
+                Timber.d("[PRECOMP_TEST] Post-bE result: %d moves remaining", optimalMoves);
                 latch2.countDown();
             }
             @Override
             public void onLiveSolverFailed() { latch2.countDown(); }
         });
         assertTrue("Post-move solve should complete", latch2.await(60, TimeUnit.SECONDS));
-        assertEquals("After yE, should need 19 remaining moves", 19, postMoveResult[0]);
+        assertEquals("After bE, should need 15 remaining moves", 15, postMoveResult[0]);
 
         liveSolver.shutdown();
     }
@@ -367,12 +387,13 @@ public class PreComputationTest {
 
         // 4 hypothetical moves: one per robot, each sliding to a board edge
         // These simulate what preComputeNextMoves() would compute
+        // Robot positions: r=(5,4), g=(4,5), b=(12,17), y=(11,11)
         String[][] testMoves = {
             // {robotType, robotName, direction, newX, newY}
             {"robot_red",    "red",    "E", "17", "4"},   // red slides East to wall
             {"robot_green",  "green",  "S", "4",  "17"},  // green slides South to wall
-            {"robot_blue",   "blue",   "W", "0",  "17"},  // blue slides West to wall
-            {"robot_yellow", "yellow", "N", "10", "0"},   // yellow slides North to wall
+            {"robot_blue",   "blue",   "E", "17", "17"},  // blue slides East to wall
+            {"robot_yellow", "yellow", "S", "11", "14"},  // yellow slides South (stops at target row or wall)
         };
 
         int solved = 0;

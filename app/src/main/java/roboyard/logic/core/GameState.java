@@ -1695,14 +1695,28 @@ public class GameState implements Serializable {
      * @return A new GameState populated with the given elements
      */
     public static GameState createFromGridElements(ArrayList<GridElement> gridElements) {
-        // Determine board dimensions from elements
-        int maxX = 0, maxY = 0;
+        // Determine board dimensions from elements.
+        // Walls (mh/mv) can have coordinates equal to the board size (border walls),
+        // so we use non-wall elements (robots, targets) to determine the playable area,
+        // and wall coordinates only as fallback.
+        int maxCellX = -1, maxCellY = -1;
+        int maxWallX = 0, maxWallY = 0;
         for (GridElement element : gridElements) {
-            maxX = Math.max(maxX, element.getX());
-            maxY = Math.max(maxY, element.getY());
+            String type = element.getType();
+            if (type.equals("mh") || type.equals("mv")) {
+                maxWallX = Math.max(maxWallX, element.getX());
+                maxWallY = Math.max(maxWallY, element.getY());
+            } else {
+                maxCellX = Math.max(maxCellX, element.getX());
+                maxCellY = Math.max(maxCellY, element.getY());
+            }
         }
-        int width = maxX + 1;
-        int height = maxY + 1;
+        // Border walls sit at coordinate = boardSize (e.g. right wall at x=18 for 18-wide board).
+        // So boardSize = max wall coordinate. Cell elements are 0-indexed within the board.
+        int width = Math.max(maxWallX, (maxCellX >= 0) ? maxCellX + 1 : 0);
+        int height = Math.max(maxWallY, (maxCellY >= 0) ? maxCellY + 1 : 0);
+        Timber.d("[ASCII_IMPORT] Board size from elements: %dx%d (maxCell=%d,%d maxWall=%d,%d)",
+                width, height, maxCellX, maxCellY, maxWallX, maxWallY);
 
         GameState state = new GameState(width, height);
 
