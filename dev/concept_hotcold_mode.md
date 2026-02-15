@@ -61,17 +61,17 @@ After each player move, solve all possible next states in background:
 - **Cancel on move:** When the player moves a robot, all pending pre-computations are cancelled immediately via `preComputeCancelled` flag
 - **Cache lookup first:** On each move, check if the result was already pre-computed; if yes, use it instantly; if not, run the live solver normally
 - **Pre-compute after solve:** Only after the current position is solved (either from cache or live solver), start pre-computing the next possible positions
-- **Logging:** All pre-computation events use the `[PRECOMP]` tag:
-  - `[PRECOMP] Starting sequential pre-computation for N robots × 4 directions`
-  - `[PRECOMP] Solving: robot X dir → (x,y)...`
-  - `[PRECOMP] Solved: robot X dir → (x,y) = N moves`
-  - `[PRECOMP] Finished: N computed, N skipped, cache size: N`
-  - `[PRECOMP] Cache HIT for state ...`
-  - `[PRECOMP] Cache MISS — no pre-computation available for state ...`
-  - `[PRECOMP] Used pre-computed result: ...`
-  - `[PRECOMP] Cancelled after N computed, N skipped`
-  - `[PRECOMP] Cancellation requested`
-  - `[PRECOMP] Cache cleared`
+- **Logging:** All pre-computation events use the `[PRECOMP_SOLUTION]` tag:
+  - `[PRECOMP_SOLUTION] Starting sequential pre-computation for N robots × 4 directions`
+  - `[PRECOMP_SOLUTION] Solving: robot X dir → (x,y)...`
+  - `[PRECOMP_SOLUTION] Solved: robot X dir → (x,y) = N moves`
+  - `[PRECOMP_SOLUTION] Finished: N computed, N skipped, cache size: N`
+  - `[PRECOMP_SOLUTION] Cache HIT for state ...`
+  - `[PRECOMP_SOLUTION] Cache MISS — no pre-computation available for state ...`
+  - `[PRECOMP_SOLUTION] Used pre-computed result: ...`
+  - `[PRECOMP_SOLUTION] Cancelled after N computed, N skipped`
+  - `[PRECOMP_SOLUTION] Cancellation requested`
+  - `[PRECOMP_SOLUTION] Cache cleared`
 
 ## Relationship to Hint Mode
 

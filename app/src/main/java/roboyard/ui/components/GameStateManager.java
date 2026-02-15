@@ -2831,7 +2831,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         String stateHash = computeStateHash(state);
         Integer cachedResult = nextMovesCache.get(stateHash);
         if (cachedResult != null) {
-            Timber.d("[PRECOMP] Cache HIT for state %s → %d moves", stateHash, cachedResult);
+            Timber.d("[PRECOMP_SOLUTION] Cache HIT for state %s → %d moves", stateHash, cachedResult);
             int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
             int optimal = lastSolutionMinMoves;
             int deviation = (optimal > 0) ? (currentMoves + cachedResult) - optimal : 0;
@@ -2840,12 +2840,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             liveMoveCounterText.setValue(text);
             liveMoveCounterDeviation.setValue(deviation);
             liveSolverCalculating.setValue(false);
-            Timber.d("[PRECOMP] Used pre-computed result: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
+            Timber.d("[PRECOMP_SOLUTION] Used pre-computed result: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
             // Pre-compute next moves from this new position
-            preComputeNextMoves(state);
+            preComputeNextMoves(state, null);
             return;
         }
-        Timber.d("[PRECOMP] Cache MISS — no pre-computation available for state %s (cache size: %d)", stateHash, nextMovesCache.size());
+        Timber.d("[PRECOMP_SOLUTION] Cache MISS — no pre-computation available for state %s (cache size: %d)", stateHash, nextMovesCache.size());
 
         ArrayList<GridElement> gridElements = buildGridElements(state);
 
@@ -2853,7 +2853,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         liveSolverManager.solveAsync(gridElements, new LiveSolverManager.LiveSolverListener() {
             @Override
-            public void onLiveSolverFinished(int remainingMoves) {
+            public void onLiveSolverFinished(int remainingMoves, GameSolution liveSolution) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     liveSolverCalculating.setValue(false);
                     int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
@@ -2866,7 +2866,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.d("[LIVE_SOLVER] Result: %d remaining, %d current, %d optimal, Δ%+d", remainingMoves, currentMoves, optimal, deviation);
                     // Cache this result and pre-compute next moves
                     nextMovesCache.put(stateHash, remainingMoves);
-                    preComputeNextMoves(state);
+                    preComputeNextMoves(state, liveSolution);
                 });
             }
 
@@ -2947,11 +2947,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Returns colors of robots from remaining solution moves (unique, in order of appearance).
      * The first robot in the returned list is the one the solver expects the player to move next.
      */
-    private List<Integer> getSolutionRobotOrder() {
+    private List<Integer> getSolutionRobotOrder(GameSolution solution) {
         List<Integer> order = new ArrayList<>();
-        if (currentSolution != null && currentSolution.getMoves() != null) {
-            List<IGameMove> moves = currentSolution.getMoves();
-            for (int i = currentSolutionStep; i < moves.size(); i++) {
+        if (solution != null && solution.getMoves() != null) {
+            List<IGameMove> moves = solution.getMoves();
+            int startStep = (solution == currentSolution) ? currentSolutionStep : 0;
+            for (int i = startStep; i < moves.size(); i++) {
                 IGameMove move = moves.get(i);
                 if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
                     int color = ((roboyard.pm.ia.ricochet.RRGameMove) move).getColor();
@@ -2970,10 +2971,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * Checks preComputeCancelled before each solve so a robot move can abort the batch.
      * Results are cached in nextMovesCache for instant lookup.
      */
-    private void preComputeNextMoves(GameState state) {
+    private void preComputeNextMoves(GameState state, GameSolution liveSolution) {
         if (!liveMoveCounterEnabled) return;
         if (preComputeRunning) {
-            Timber.d("[PRECOMP] Skipping — previous pre-computation still running");
+            Timber.d("[PRECOMP_SOLUTION] Skipping — previous pre-computation still running");
             return;
         }
 
@@ -2998,7 +2999,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         // Sort robots: solution-next robots first, then rest
-        List<Integer> priorityColors = getSolutionRobotOrder();
+        // Use currentSolution if available, otherwise fall back to liveSolution from live-solver
+        GameSolution solutionForOrder = currentSolution != null ? currentSolution : liveSolution;
+        List<Integer> priorityColors = getSolutionRobotOrder(solutionForOrder);
         if (!priorityColors.isEmpty()) {
             robots.sort((a, b) -> {
                 int idxA = priorityColors.indexOf(a.getColor());
@@ -3013,7 +3016,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             for (GameElement r : robots) {
                 orderLog.append(robotColorShort(r.getColor()));
             }
-            Timber.d("[PRECOMP] Robot order (solution-prioritized): %s", orderLog);
+            Timber.d("[PRECOMP_SOLUTION] Robot order (solution-prioritized): %s", orderLog);
         }
 
         int width = state.getWidth();
@@ -3023,7 +3026,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         preComputeRunning = true;
         preComputeCancelled = false;
-        Timber.d("[PRECOMP] Starting sequential pre-computation for %d robots × 4 directions", robots.size());
+        Timber.d("[PRECOMP_SOLUTION] Starting sequential pre-computation for %d robots × 4 directions", robots.size());
 
         preComputeExecutor.submit(() -> {
             try {
@@ -3033,7 +3036,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     for (int d = 0; d < 4; d++) {
                         // Check cancellation / thread interruption before each solve
                         if (preComputeCancelled || Thread.currentThread().isInterrupted()) {
-                            Timber.d("[PRECOMP] Cancelled after %d computed, %d skipped", computed, skipped);
+                            Timber.d("[PRECOMP_SOLUTION] Cancelled after %d computed, %d skipped", computed, skipped);
                             return;
                         }
 
@@ -3116,7 +3119,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         }
 
                         String colorLetter = robotColorShort(robot.getColor());
-                        Timber.d("[PRECOMP] [%d/%d] Solving: %s%s (%d,%d)→(%d,%d)...",
+                        Timber.d("[PRECOMP_SOLUTION] [%d/%d] Solving: %s%s (%d,%d)→(%d,%d)...",
                                 computed + skipped + 1, robots.size() * 4,
                                 colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         long solveStart = System.currentTimeMillis();
@@ -3133,13 +3136,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         } catch (java.util.concurrent.TimeoutException te) {
                             solverFuture.cancel(true);
                             long elapsed = System.currentTimeMillis() - solveStart;
-                            Timber.w("[PRECOMP] [%d/%d] TIMEOUT after %dms: %s%s (%d,%d)→(%d,%d)",
+                            Timber.w("[PRECOMP_SOLUTION] [%d/%d] TIMEOUT after %dms: %s%s (%d,%d)→(%d,%d)",
                                     computed + skipped + 1, robots.size() * 4,
                                     elapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
                         } catch (java.util.concurrent.ExecutionException ee) {
-                            Timber.e(ee, "[PRECOMP] Solver execution error");
+                            Timber.e(ee, "[PRECOMP_SOLUTION] Solver execution error");
                         } finally {
                             solverThread.shutdownNow();
                         }
@@ -3148,7 +3151,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
                         // Check cancellation / thread interruption after solve completes
                         if (preComputeCancelled || Thread.currentThread().isInterrupted()) {
-                            Timber.d("[PRECOMP] Cancelled after solve (%s%s, %dms), %d computed so far",
+                            Timber.d("[PRECOMP_SOLUTION] Cancelled after solve (%s%s, %dms), %d computed so far",
                                     colorLetter, dirNames[d], solveElapsed, computed);
                             return;
                         }
@@ -3161,24 +3164,24 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 if (solver.isSolution01()) moves = 1;
                                 nextMovesCache.put(hypotheticalHash, moves);
                                 computed++;
-                                Timber.d("[PRECOMP] [%d/%d] Solved in %dms: %s%s (%d,%d)→(%d,%d) = %d moves",
+                                Timber.d("[PRECOMP_SOLUTION] [%d/%d] Solved in %dms: %s%s (%d,%d)→(%d,%d) = %d moves",
                                         computed + skipped, robots.size() * 4,
                                         solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY, moves);
                             } else {
-                                Timber.d("[PRECOMP] [%d/%d] No solution in %dms: %s%s (%d,%d)→(%d,%d)",
+                                Timber.d("[PRECOMP_SOLUTION] [%d/%d] No solution in %dms: %s%s (%d,%d)→(%d,%d)",
                                         computed + skipped + 1, robots.size() * 4,
                                         solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                             }
                         } else if (solverCompleted) {
-                            Timber.d("[PRECOMP] [%d/%d] Solver not finished in %dms: %s%s (%d,%d)→(%d,%d)",
+                            Timber.d("[PRECOMP_SOLUTION] [%d/%d] Solver not finished in %dms: %s%s (%d,%d)→(%d,%d)",
                                     computed + skipped + 1, robots.size() * 4,
                                     solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         }
                     }
                 }
-                Timber.d("[PRECOMP] Finished: %d computed, %d skipped, cache size: %d", computed, skipped, nextMovesCache.size());
+                Timber.d("[PRECOMP_SOLUTION] Finished: %d computed, %d skipped, cache size: %d", computed, skipped, nextMovesCache.size());
             } catch (Exception e) {
-                Timber.e(e, "[PRECOMP] Error during pre-computation");
+                Timber.e(e, "[PRECOMP_SOLUTION] Error during pre-computation");
             } finally {
                 preComputeRunning = false;
             }
@@ -3192,7 +3195,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private void cancelPreComputation() {
         if (preComputeRunning) {
             preComputeCancelled = true;
-            Timber.d("[PRECOMP] Cancellation requested — shutting down executor");
+            Timber.d("[PRECOMP_SOLUTION] Cancellation requested — shutting down executor");
             if (preComputeExecutor != null) {
                 preComputeExecutor.shutdownNow();
                 preComputeExecutor = null;
@@ -3207,7 +3210,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void clearNextMovesCache() {
         cancelPreComputation();
         nextMovesCache.clear();
-        Timber.d("[PRECOMP] Cache cleared");
+        Timber.d("[PRECOMP_SOLUTION] Cache cleared");
     }
 
     @Override
