@@ -371,6 +371,20 @@ public class LevelDesignEditorFragment extends Fragment {
                 return false;
             }
             
+            // Diagnostic logging for autosave load
+            int robots = 0, walls = 0, targets = 0;
+            for (GameElement el : state.getGameElements()) {
+                switch (el.getType()) {
+                    case GameElement.TYPE_ROBOT: robots++; break;
+                    case GameElement.TYPE_HORIZONTAL_WALL: // fall through
+                    case GameElement.TYPE_VERTICAL_WALL: walls++; break;
+                    case GameElement.TYPE_TARGET: targets++; break;
+                }
+            }
+            Timber.d("[EDITOR] Parsed autosave: %dx%d, %d elements (robots=%d, walls=%d, targets=%d)",
+                    state.getWidth(), state.getHeight(), state.getGameElements().size(),
+                    robots, walls, targets);
+            
             // Successfully loaded - set as current state
             currentState = state;
             currentLevelId = -1; // Mark as non-level (random/web map)

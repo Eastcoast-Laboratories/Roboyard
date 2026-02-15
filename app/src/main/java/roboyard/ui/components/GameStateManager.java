@@ -2943,6 +2943,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
+     * Get robot colors ordered by solution priority.
+     * Returns colors of robots from remaining solution moves (unique, in order of appearance).
+     * The first robot in the returned list is the one the solver expects the player to move next.
+     */
+    private List<Integer> getSolutionRobotOrder() {
+        List<Integer> order = new ArrayList<>();
+        if (currentSolution != null && currentSolution.getMoves() != null) {
+            List<IGameMove> moves = currentSolution.getMoves();
+            for (int i = currentSolutionStep; i < moves.size(); i++) {
+                IGameMove move = moves.get(i);
+                if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
+                    int color = ((roboyard.pm.ia.ricochet.RRGameMove) move).getColor();
+                    if (!order.contains(color)) {
+                        order.add(color);
+                    }
+                }
+            }
+        }
+        return order;
+    }
+
+    /**
      * Pre-compute optimal moves for all possible next states (4 robots × 4 directions).
      * Runs SEQUENTIALLY — one solver at a time on a single background thread.
      * Checks preComputeCancelled before each solve so a robot move can abort the batch.
@@ -2973,6 +2995,25 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             } else {
                 nonRobots.add(element);
             }
+        }
+
+        // Sort robots: solution-next robots first, then rest
+        List<Integer> priorityColors = getSolutionRobotOrder();
+        if (!priorityColors.isEmpty()) {
+            robots.sort((a, b) -> {
+                int idxA = priorityColors.indexOf(a.getColor());
+                int idxB = priorityColors.indexOf(b.getColor());
+                // Robots in priority list come first, in their solution order
+                if (idxA >= 0 && idxB >= 0) return idxA - idxB;
+                if (idxA >= 0) return -1;
+                if (idxB >= 0) return 1;
+                return 0;
+            });
+            StringBuilder orderLog = new StringBuilder();
+            for (GameElement r : robots) {
+                orderLog.append(robotColorShort(r.getColor()));
+            }
+            Timber.d("[PRECOMP] Robot order (solution-prioritized): %s", orderLog);
         }
 
         int width = state.getWidth();
@@ -3080,14 +3121,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
                         long solveStart = System.currentTimeMillis();
 
-                        // Solve with 60s timeout using a sub-executor
+                        // Solve with some minutes timeout using a sub-executor
                         roboyard.logic.solver.SolverDD solver = new roboyard.logic.solver.SolverDD();
                         solver.init(gridElements);
                         ExecutorService solverThread = Executors.newSingleThreadExecutor();
                         java.util.concurrent.Future<?> solverFuture = solverThread.submit(() -> solver.run());
                         boolean solverCompleted = false;
                         try {
-                            solverFuture.get(60, TimeUnit.SECONDS);
+                            solverFuture.get(Constants.PRECOMP_SOLVER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                             solverCompleted = true;
                         } catch (java.util.concurrent.TimeoutException te) {
                             solverFuture.cancel(true);
