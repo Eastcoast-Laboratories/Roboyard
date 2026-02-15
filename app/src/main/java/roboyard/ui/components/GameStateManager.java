@@ -100,6 +100,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private GameSolution currentSolution = null;
     private int currentSolutionStep = 0;
 
+    // Pre-computation: remembered robot order from last known solution.
+    // Survives solver restarts so preComputeNextMoves can prioritize correctly.
+    private List<Integer> preCompRobotOrder = new ArrayList<>();
+
     // Track hint usage for level completion statistics
     private int hintsShown = 0;
     // Track unique robots used for level completion statistics
@@ -221,6 +225,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
+        preCompRobotOrder.clear();
         resetSolverRestartCount();
         resetLastSolutionMinMoves();
 
@@ -262,6 +267,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
+        preCompRobotOrder.clear();
 
         // Load level from assets
         GameState state = GameState.loadLevel(getApplication(), levelId);
@@ -489,6 +495,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         clearNextMovesCache();
         currentSolution = null;
         currentSolutionStep = 0;
+        preCompRobotOrder.clear();
         getSolverManager().resetInitialization();
         Timber.d("[GAME_LOAD] Cleared old game data and reset solver for new map");
 
@@ -1016,6 +1023,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         GameElement robot = state.getSelectedRobot();
+
+        // Advance preCompRobotOrder: if the moved robot matches the first expected color, remove it
+        if (!preCompRobotOrder.isEmpty() && preCompRobotOrder.get(0) == robot.getColor()) {
+            preCompRobotOrder.remove(0);
+            Timber.d("[PRECOMP_SOLUTION] Advanced preCompRobotOrder after %s move, remaining first: %s",
+                    robotColorShort(robot.getColor()),
+                    preCompRobotOrder.isEmpty() ? "none" : robotColorShort(preCompRobotOrder.get(0)));
+        }
         int startX = robot.getX();
         int startY = robot.getY();
 
@@ -2154,6 +2169,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Store the solution for later use with getHint()
         currentSolution = solution;
         currentSolutionStep = 0;
+        updatePreCompRobotOrder(solution);
 
         // Update solver status
         isSolverRunning.setValue(false);
@@ -2449,6 +2465,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Store the solution
                 currentSolution = solution;
                 currentSolutionStep = 0;
+                updatePreCompRobotOrder(solution);
                 isSolverRunning.setValue(false);
                 // Signal to UI that solution was accepted and hint container should be hidden
                 Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] Solution accepted, notifying UI to hide hint container");
@@ -2966,6 +2983,27 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
+     * Update preCompRobotOrder from a solution's move list.
+     * Extracts unique robot colors in order of first appearance.
+     */
+    private void updatePreCompRobotOrder(GameSolution solution) {
+        preCompRobotOrder.clear();
+        if (solution != null && solution.getMoves() != null) {
+            for (IGameMove move : solution.getMoves()) {
+                if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
+                    int color = ((roboyard.pm.ia.ricochet.RRGameMove) move).getColor();
+                    if (!preCompRobotOrder.contains(color)) {
+                        preCompRobotOrder.add(color);
+                    }
+                }
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int c : preCompRobotOrder) sb.append(robotColorShort(c));
+        Timber.d("[PRECOMP_SOLUTION] Updated preCompRobotOrder: %s", sb);
+    }
+
+    /**
      * Pre-compute optimal moves for all possible next states (4 robots × 4 directions).
      * Runs SEQUENTIALLY — one solver at a time on a single background thread.
      * Checks preComputeCancelled before each solve so a robot move can abort the batch.
@@ -2999,9 +3037,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         // Sort robots: solution-next robots first, then rest
-        // Use currentSolution if available, otherwise fall back to liveSolution from live-solver
-        GameSolution solutionForOrder = currentSolution != null ? currentSolution : liveSolution;
-        List<Integer> priorityColors = getSolutionRobotOrder(solutionForOrder);
+        // Primary: preCompRobotOrder (survives solver restarts, advanced on each user move)
+        // Fallback: liveSolution from live-solver (fresh solve for current position)
+        List<Integer> priorityColors;
+        if (!preCompRobotOrder.isEmpty()) {
+            priorityColors = new ArrayList<>(preCompRobotOrder);
+            Timber.d("[PRECOMP_SOLUTION] Using preCompRobotOrder for sorting");
+        } else if (liveSolution != null) {
+            priorityColors = getSolutionRobotOrder(liveSolution);
+            Timber.d("[PRECOMP_SOLUTION] Using liveSolution for sorting (preCompRobotOrder empty)");
+        } else {
+            priorityColors = new ArrayList<>();
+        }
         if (!priorityColors.isEmpty()) {
             robots.sort((a, b) -> {
                 int idxA = priorityColors.indexOf(a.getColor());
