@@ -64,7 +64,7 @@ public class LevelEditorDebugTest {
         // Step 3: Verify Debug Settings is displayed with Level Editor section
         Timber.d("[TEST_LEVEL_EDITOR] Step 3: Verifying Debug Settings with Level Editor section");
         onView(withText("DEBUG SETTINGS")).check(matches(isDisplayed()));
-        onView(withText("LEVEL EDITOR")).check(matches(isDisplayed()));
+        onView(withText("LEVELS")).check(matches(isDisplayed()));
         onView(withText("Open Level Editor")).check(matches(isDisplayed()));
         Timber.d("[TEST_LEVEL_EDITOR] Level Editor section found in Debug Settings");
 
@@ -114,12 +114,12 @@ public class LevelEditorDebugTest {
         Timber.d("[TEST_LEVEL_EDITOR] Step 4: Verifying level loaded in editor");
         onView(withId(R.id.board_preview_container)).check(matches(isDisplayed()));
 
-        // Verify the board width/height fields show the correct values for level 1 (12x14)
+        // Verify the board width/height fields show the correct values for level 1 (10x10)
         onView(withId(R.id.board_width_edit_text)).check(matches(isDisplayed()));
         onView(withId(R.id.board_height_edit_text)).check(matches(isDisplayed()));
-        onView(withId(R.id.board_width_edit_text)).check(matches(withText("12")));
-        onView(withId(R.id.board_height_edit_text)).check(matches(withText("14")));
-        Timber.d("[TEST_LEVEL_EDITOR] Level 1 loaded correctly with board size 12x14");
+        onView(withId(R.id.board_width_edit_text)).check(matches(withText("10")));
+        onView(withId(R.id.board_height_edit_text)).check(matches(withText("10")));
+        Timber.d("[TEST_LEVEL_EDITOR] Level 1 loaded correctly with board size 10x10");
 
         // Step 5: Press back
         pressBack();
@@ -147,7 +147,7 @@ public class LevelEditorDebugTest {
 
         // Step 3: Long press on the title - should NOT open Level Editor
         Timber.d("[TEST_LEVEL_EDITOR] Step 3: Long pressing title (should do nothing)");
-        onView(withId(R.id.title_text)).perform(longPressFor(2000));
+        onView(withId(R.id.level_selection_title)).perform(longPressFor(2000));
         Thread.sleep(1000);
 
         // Step 4: Verify we're still on Level Selection (not Level Editor)
