@@ -350,96 +350,101 @@ public class PreComputationTest {
     }
 
     /**
-     * Test that pre-computation correctly caches results for all possible next moves.
-     * Simulates what GameStateManager.preComputeNextMoves() does:
-     * For each robot × 4 directions, solve the resulting state and cache it.
+     * Test that pre-computation sequentially solves multiple robots in multiple directions.
+     * Mirrors the real GameStateManager.preComputeNextMoves() logic:
+     * - Sequential execution (one solver at a time)
+     * - 60s timeout per solver
+     * - Detailed [PRECOMP] logging for each robot+direction
+     *
+     * Tests 4 specific hypothetical moves (one per robot) to verify that
+     * the solver runs for each robot, not just the first one.
+     * Each solve can take 25s+, so total test time can be ~2-4 minutes.
      */
     @Test
-    public void testPreComputationCachesAllNextMoves() throws InterruptedException {
-        Timber.d("[PRECOMP_TEST] Testing pre-computation of all next moves");
+    public void testSequentialPreComputationMultipleRobots() {
+        Timber.d("[PRECOMP_TEST] === Starting sequential pre-computation test ===");
+        Timber.d("[PRECOMP_TEST] Testing that solver runs for MULTIPLE robots sequentially");
 
-        // Collect robot positions
-        int[][] robotPositions = {
-            {5, 4},   // red (index 0 in solver = PINK)
-            {4, 5},   // green
-            {12, 17}, // blue
-            {10, 1}   // yellow
+        // 4 hypothetical moves: one per robot, each sliding to a board edge
+        // These simulate what preComputeNextMoves() would compute
+        String[][] testMoves = {
+            // {robotType, robotName, direction, newX, newY}
+            {"robot_red",    "red",    "E", "17", "4"},   // red slides East to wall
+            {"robot_green",  "green",  "S", "4",  "17"},  // green slides South to wall
+            {"robot_blue",   "blue",   "W", "0",  "17"},  // blue slides West to wall
+            {"robot_yellow", "yellow", "N", "10", "0"},   // yellow slides North to wall
         };
-        String[] robotTypes = {"robot_red", "robot_green", "robot_blue", "robot_yellow"};
-        String[] robotNames = {"red", "green", "blue", "yellow"};
 
-        // Directions: E, W, S, N
-        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        String[] dirNames = {"E", "W", "S", "N"};
+        int solved = 0;
+        int timeout = 0;
+        long totalStart = System.currentTimeMillis();
 
-        int cachedCount = 0;
-        int skippedCount = 0;
+        for (int i = 0; i < testMoves.length; i++) {
+            String robotType = testMoves[i][0];
+            String robotName = testMoves[i][1];
+            String direction = testMoves[i][2];
+            int newX = Integer.parseInt(testMoves[i][3]);
+            int newY = Integer.parseInt(testMoves[i][4]);
 
-        for (int r = 0; r < 4; r++) {
-            for (int d = 0; d < 4; d++) {
-                int dx = directions[d][0];
-                int dy = directions[d][1];
-                int startX = robotPositions[r][0];
-                int startY = robotPositions[r][1];
+            Timber.d("[PRECOMP_TEST] [%d/%d] Solving: %s %s → (%d,%d)...",
+                    i + 1, testMoves.length, robotName, direction, newX, newY);
+            long solveStart = System.currentTimeMillis();
 
-                // Simulate slide (simplified - doesn't account for walls properly,
-                // but demonstrates the pre-computation pattern)
-                // For a proper test we'd need the full wall model
-                int newX = startX;
-                int newY = startY;
-
-                // Simple slide: move until board edge (walls not checked here for simplicity)
-                if (dx != 0) {
-                    newX = dx > 0 ? 17 : 0; // simplified: slide to edge
-                }
-                if (dy != 0) {
-                    newY = dy > 0 ? 17 : 0; // simplified: slide to edge
-                }
-
-                if (newX == startX && newY == startY) {
-                    skippedCount++;
-                    continue;
-                }
-
-                // Build hypothetical state
-                ArrayList<GridElement> hypothetical = new ArrayList<>();
-                for (GridElement e : mapElements) {
-                    if (e.getType().equals(robotTypes[r])) {
-                        hypothetical.add(new GridElement(newX, newY, robotTypes[r]));
-                    } else {
-                        hypothetical.add(e);
-                    }
-                }
-
-                // Solve
-                CountDownLatch latch = new CountDownLatch(1);
-                final int[] result = {-1};
-                LiveSolverManager solver = new LiveSolverManager();
-
-                solver.solveAsync(hypothetical, new LiveSolverManager.LiveSolverListener() {
-                    @Override
-                    public void onLiveSolverFinished(int optimalMoves) {
-                        result[0] = optimalMoves;
-                        latch.countDown();
-                    }
-                    @Override
-                    public void onLiveSolverFailed() { latch.countDown(); }
-                });
-
-                boolean completed = latch.await(30, TimeUnit.SECONDS);
-                solver.shutdown();
-
-                if (completed && result[0] >= 0) {
-                    cachedCount++;
-                    Timber.d("[PRECOMP_TEST] %s %s: (%d,%d)→(%d,%d) = %d moves",
-                            robotNames[r], dirNames[d], startX, startY, newX, newY, result[0]);
+            // Build hypothetical state with this robot moved
+            ArrayList<GridElement> hypothetical = new ArrayList<>();
+            for (GridElement e : mapElements) {
+                if (e.getType().equals(robotType)) {
+                    hypothetical.add(new GridElement(newX, newY, robotType));
                 } else {
-                    Timber.w("[PRECOMP_TEST] %s %s: timeout or no solution", robotNames[r], dirNames[d]);
+                    hypothetical.add(e);
+                }
+            }
+
+            // Solve with 60s timeout (same as real pre-computation)
+            SolverDD solver = new SolverDD();
+            solver.init(hypothetical);
+
+            java.util.concurrent.ExecutorService solverExec = java.util.concurrent.Executors.newSingleThreadExecutor();
+            java.util.concurrent.Future<?> future = solverExec.submit(() -> solver.run());
+            boolean completed = false;
+            try {
+                future.get(60, TimeUnit.SECONDS);
+                completed = true;
+            } catch (java.util.concurrent.TimeoutException te) {
+                future.cancel(true);
+                long elapsed = System.currentTimeMillis() - solveStart;
+                Timber.w("[PRECOMP_TEST] [%d/%d] TIMEOUT after %dms: %s %s → (%d,%d)",
+                        i + 1, testMoves.length, elapsed, robotName, direction, newX, newY);
+                timeout++;
+            } catch (Exception ex) {
+                Timber.e(ex, "[PRECOMP_TEST] Solver error");
+            } finally {
+                solverExec.shutdownNow();
+            }
+
+            long solveElapsed = System.currentTimeMillis() - solveStart;
+
+            if (completed && solver.getSolverStatus().isFinished()) {
+                int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
+                if (numSolutions > 0) {
+                    GameSolution solution = solver.getSolution(0);
+                    int moves = (solution != null && solution.getMoves() != null) ? solution.getMoves().size() : 0;
+                    if (solver.isSolution01()) moves = 1;
+                    solved++;
+                    Timber.d("[PRECOMP_TEST] [%d/%d] Solved in %dms: %s %s → (%d,%d) = %d moves",
+                            i + 1, testMoves.length, solveElapsed, robotName, direction, newX, newY, moves);
+                } else {
+                    Timber.d("[PRECOMP_TEST] [%d/%d] No solution in %dms: %s %s → (%d,%d)",
+                            i + 1, testMoves.length, solveElapsed, robotName, direction, newX, newY);
                 }
             }
         }
 
-        Timber.d("[PRECOMP_TEST] Pre-computation complete: %d cached, %d skipped", cachedCount, skippedCount);
-        assertTrue("Should have cached at least some results", cachedCount > 0);
+        long totalElapsed = System.currentTimeMillis() - totalStart;
+        Timber.d("[PRECOMP_TEST] === Finished: %d solved, %d timeout, total %dms ===",
+                solved, timeout, totalElapsed);
+
+        // Verify that at least 2 different robots were solved (not just the first one)
+        assertTrue("Should have solved at least 2 robots (got " + solved + ")", solved >= 2);
     }
 }
