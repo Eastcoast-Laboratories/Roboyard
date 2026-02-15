@@ -156,10 +156,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private final MutableLiveData<Boolean> liveSolverCalculating = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> liveMoveCounterDeviation = new MutableLiveData<>(0);
 
-    // Pre-computation cache for next possible moves
+    // Pre-computation cache for next possible moves (sequential, one solver at a time)
     private final ConcurrentHashMap<String, Integer> nextMovesCache = new ConcurrentHashMap<>();
     private ExecutorService preComputeExecutor;
     private volatile boolean preComputeRunning = false;
+    private volatile boolean preComputeCancelled = false;
 
     public GameStateManager(Application application) {
         super(application);
@@ -1000,6 +1001,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return True if the robot moved, false otherwise
      */
     public boolean moveRobotInDirection(int dx, int dy) {
+        // Cancel any running pre-computation immediately on robot move
+        cancelPreComputation();
+
         GameState state = getCurrentState().getValue();
         if (state == null || state.getSelectedRobot() == null) {
             return false;
@@ -2826,7 +2830,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         String stateHash = computeStateHash(state);
         Integer cachedResult = nextMovesCache.get(stateHash);
         if (cachedResult != null) {
-            Timber.d("[LIVE_SOLVER][PRECOMP] Cache HIT for state %s → %d moves", stateHash, cachedResult);
+            Timber.d("[PRECOMP] Cache HIT for state %s → %d moves", stateHash, cachedResult);
             int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
             int optimal = lastSolutionMinMoves;
             int deviation = (optimal > 0) ? (currentMoves + cachedResult) - optimal : 0;
@@ -2835,12 +2839,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             liveMoveCounterText.setValue(text);
             liveMoveCounterDeviation.setValue(deviation);
             liveSolverCalculating.setValue(false);
-            Timber.d("[LIVE_SOLVER][PRECOMP] Result from cache: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
+            Timber.d("[PRECOMP] Used pre-computed result: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
             // Pre-compute next moves from this new position
             preComputeNextMoves(state);
             return;
         }
-        Timber.d("[LIVE_SOLVER][PRECOMP] Cache MISS for state %s (cache size: %d)", stateHash, nextMovesCache.size());
+        Timber.d("[PRECOMP] Cache MISS — no pre-computation available for state %s (cache size: %d)", stateHash, nextMovesCache.size());
 
         ArrayList<GridElement> gridElements = buildGridElements(state);
 
@@ -2925,13 +2929,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Pre-compute optimal moves for all possible next states (4 robots × 4 directions).
+     * Runs SEQUENTIALLY — one solver at a time on a single background thread.
+     * Checks preComputeCancelled before each solve so a robot move can abort the batch.
      * Results are cached in nextMovesCache for instant lookup.
      */
     private void preComputeNextMoves(GameState state) {
-        if (!liveMoveCounterEnabled || preComputeRunning) return;
+        if (!liveMoveCounterEnabled) return;
+        if (preComputeRunning) {
+            Timber.d("[PRECOMP] Skipping — previous pre-computation still running");
+            return;
+        }
 
         if (preComputeExecutor == null || preComputeExecutor.isShutdown()) {
-            preComputeExecutor = Executors.newFixedThreadPool(2, r -> {
+            preComputeExecutor = Executors.newSingleThreadExecutor(r -> {
                 Thread t = new Thread(r, "precompute-solver");
                 t.setDaemon(true);
                 t.setPriority(Thread.MIN_PRIORITY);
@@ -2956,7 +2966,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         String[] dirNames = {"E", "W", "S", "N"};
 
         preComputeRunning = true;
-        Timber.d("[LIVE_SOLVER][PRECOMP] Starting pre-computation for %d robots × 4 directions", robots.size());
+        preComputeCancelled = false;
+        Timber.d("[PRECOMP] Starting sequential pre-computation for %d robots × 4 directions", robots.size());
 
         preComputeExecutor.submit(() -> {
             try {
@@ -2964,6 +2975,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 int skipped = 0;
                 for (GameElement robot : robots) {
                     for (int d = 0; d < 4; d++) {
+                        // Check cancellation before each solve
+                        if (preComputeCancelled) {
+                            Timber.d("[PRECOMP] Cancelled after %d computed, %d skipped", computed, skipped);
+                            return;
+                        }
+
                         int dx = directions[d][0];
                         int dy = directions[d][1];
 
@@ -2997,7 +3014,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             continue;
                         }
 
-                        // Build a hypothetical state with this robot at the new position
                         // Compute hash for the hypothetical state
                         StringBuilder sb = new StringBuilder();
                         for (GameElement r : robots) {
@@ -3043,10 +3059,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             if (ge != null) gridElements.add(ge);
                         }
 
-                        // Solve synchronously on this background thread
+                        Timber.d("[PRECOMP] Solving: robot %d %s → (%d,%d)...",
+                                robot.getColor(), dirNames[d], newX, newY);
+
+                        // Solve synchronously on this single background thread
                         roboyard.logic.solver.SolverDD solver = new roboyard.logic.solver.SolverDD();
                         solver.init(gridElements);
                         solver.run();
+
+                        // Check cancellation after solve completes
+                        if (preComputeCancelled) {
+                            Timber.d("[PRECOMP] Cancelled after solve (robot %d %s), %d computed so far",
+                                    robot.getColor(), dirNames[d], computed);
+                            return;
+                        }
 
                         if (solver.getSolverStatus().isFinished()) {
                             int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
@@ -3056,15 +3082,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 if (solver.isSolution01()) moves = 1;
                                 nextMovesCache.put(hypotheticalHash, moves);
                                 computed++;
-                                Timber.d("[LIVE_SOLVER][PRECOMP] Cached: robot %d %s → (%d,%d) = %d moves",
+                                Timber.d("[PRECOMP] Solved: robot %d %s → (%d,%d) = %d moves",
                                         robot.getColor(), dirNames[d], newX, newY, moves);
                             }
                         }
                     }
                 }
-                Timber.d("[LIVE_SOLVER][PRECOMP] Done: %d computed, %d skipped, cache size: %d", computed, skipped, nextMovesCache.size());
+                Timber.d("[PRECOMP] Finished: %d computed, %d skipped, cache size: %d", computed, skipped, nextMovesCache.size());
             } catch (Exception e) {
-                Timber.e(e, "[LIVE_SOLVER][PRECOMP] Error during pre-computation");
+                Timber.e(e, "[PRECOMP] Error during pre-computation");
             } finally {
                 preComputeRunning = false;
             }
@@ -3072,11 +3098,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
+     * Cancel any running pre-computation. Called when a robot move starts
+     * so the solver is not running in parallel with the live solver.
+     */
+    private void cancelPreComputation() {
+        if (preComputeRunning) {
+            preComputeCancelled = true;
+            Timber.d("[PRECOMP] Cancellation requested (preComputeRunning=%b)", preComputeRunning);
+        }
+    }
+
+    /**
      * Clear the pre-computation cache. Call on new game / reset.
      */
     public void clearNextMovesCache() {
+        cancelPreComputation();
         nextMovesCache.clear();
-        Timber.d("[LIVE_SOLVER][PRECOMP] Cache cleared");
+        Timber.d("[PRECOMP] Cache cleared");
     }
 
     @Override
@@ -3086,6 +3124,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             liveSolverManager.shutdown();
         }
         if (preComputeExecutor != null) {
+            preComputeCancelled = true;
             preComputeExecutor.shutdownNow();
         }
     }

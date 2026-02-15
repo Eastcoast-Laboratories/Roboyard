@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 import roboyard.eclabs.R;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;

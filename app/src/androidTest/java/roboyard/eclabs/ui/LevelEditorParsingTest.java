@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
 import timber.log.Timber;
 

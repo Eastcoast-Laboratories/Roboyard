@@ -1,5 +1,8 @@
 package roboyard.eclabs;
 
+import roboyard.ui.components.GameHistoryManager;
+import roboyard.ui.components.FileReadWrite;
+
 import static org.junit.Assert.*;
 
 import android.app.Activity;

@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.SoundService;
 import roboyard.eclabs.R;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.logic.core.Preferences;
 import timber.log.Timber;
 
