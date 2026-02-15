@@ -1416,7 +1416,13 @@ public class LevelDesignEditorFragment extends Fragment {
             case Constants.COLOR_BLUE: return "blue";
             case Constants.COLOR_YELLOW: return "yellow";
             case Constants.COLOR_SILVER: return "silver";
-            default: return "unknown";
+            case Constants.COLOR_RED: return "red";
+            case Constants.COLOR_BROWN: return "brown";
+            case Constants.COLOR_ORANGE: return "orange";
+            case Constants.COLOR_WHITE: return "white";
+            default:
+                Timber.w("[EDITOR] Unknown color index in getColorNameLower: %d", colorIndex);
+                return "unknown";
         }
     }
     
