@@ -1688,6 +1688,71 @@ public class GameState implements Serializable {
     }
     
     /**
+     * Create a GameState from a list of GridElements (e.g. from ASCII map parsing).
+     * Determines board dimensions from the elements automatically.
+     *
+     * @param gridElements The grid elements to create the state from
+     * @return A new GameState populated with the given elements
+     */
+    public static GameState createFromGridElements(ArrayList<GridElement> gridElements) {
+        // Determine board dimensions from elements
+        int maxX = 0, maxY = 0;
+        for (GridElement element : gridElements) {
+            maxX = Math.max(maxX, element.getX());
+            maxY = Math.max(maxY, element.getY());
+        }
+        int width = maxX + 1;
+        int height = maxY + 1;
+
+        GameState state = new GameState(width, height);
+
+        for (GridElement element : gridElements) {
+            String type = element.getType();
+            int x = element.getX();
+            int y = element.getY();
+
+            if (type.equals("mh")) {
+                state.addHorizontalWall(x, y);
+            } else if (type.equals("mv")) {
+                state.addVerticalWall(x, y);
+            } else if (type.equals("target_red")) {
+                state.addTarget(x, y, Constants.COLOR_PINK);
+            } else if (type.equals("target_green")) {
+                state.addTarget(x, y, Constants.COLOR_GREEN);
+            } else if (type.equals("target_blue")) {
+                state.addTarget(x, y, Constants.COLOR_BLUE);
+            } else if (type.equals("target_yellow")) {
+                state.addTarget(x, y, Constants.COLOR_YELLOW);
+            } else if (type.equals("target_silver")) {
+                state.addTarget(x, y, Constants.COLOR_SILVER);
+            } else if (type.equals("target_multi")) {
+                state.addTarget(x, y, Constants.COLOR_MULTI);
+            } else if (type.equals("robot_red") || type.equals("robot_pink")) {
+                state.addRobot(x, y, Constants.COLOR_PINK);
+            } else if (type.equals("robot_green")) {
+                state.addRobot(x, y, Constants.COLOR_GREEN);
+            } else if (type.equals("robot_blue")) {
+                state.addRobot(x, y, Constants.COLOR_BLUE);
+            } else if (type.equals("robot_yellow")) {
+                state.addRobot(x, y, Constants.COLOR_YELLOW);
+            } else if (type.equals("robot_silver")) {
+                state.addRobot(x, y, Constants.COLOR_SILVER);
+            }
+        }
+
+        state.setLevelName("Imported Map");
+        state.storeInitialRobotPositions();
+
+        ArrayList<GridElement> stateGridElements = state.getGridElements();
+        String uniqueId = MapIdGenerator.generateUniqueId(stateGridElements);
+        state.setUniqueMapId(uniqueId);
+
+        Timber.d("[ASCII_IMPORT] Created GameState %dx%d with %d elements, ID: %s",
+                width, height, stateGridElements.size(), uniqueId);
+        return state;
+    }
+
+    /**
      * Get the number of hints used in this game
      * @return The hint count
      */

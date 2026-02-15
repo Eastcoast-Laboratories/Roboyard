@@ -346,23 +346,28 @@ public class LevelDesignEditorFragment extends Fragment {
     private boolean loadLastRandomMap() {
         try {
             String autosavePath = FileReadWrite.getSaveGamePath(requireActivity(), 0);
+            Timber.d("[EDITOR] Autosave path: %s", autosavePath);
             java.io.File autosaveFile = new java.io.File(autosavePath);
             
             if (!autosaveFile.exists()) {
-                Timber.d("[EDITOR] No autosave file found");
+                Timber.d("[EDITOR] No autosave file found at: %s", autosavePath);
                 return false;
             }
             
+            Timber.d("[EDITOR] Autosave file exists, size: %d bytes", autosaveFile.length());
             String saveData = FileReadWrite.loadAbsoluteData(autosavePath);
             if (saveData == null || saveData.isEmpty()) {
-                Timber.d("[EDITOR] Autosave file is empty");
+                Timber.d("[EDITOR] Autosave file is empty or could not be read");
                 return false;
             }
+            
+            Timber.d("[EDITOR] Autosave data loaded, length: %d chars, first 200: %s", 
+                    saveData.length(), saveData.substring(0, Math.min(200, saveData.length())));
             
             // Parse the save data into a GameState
             GameState state = GameState.parseFromSaveData(saveData, requireContext());
             if (state == null) {
-                Timber.d("[EDITOR] Failed to parse autosave data");
+                Timber.e("[EDITOR] Failed to parse autosave data");
                 return false;
             }
             
@@ -473,6 +478,10 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Export button
         exportButton.setOnClickListener(v -> showLevelText());
+        
+        // Import ASCII Map button
+        Button importAsciiMapButton = requireView().findViewById(R.id.import_ascii_map_button);
+        importAsciiMapButton.setOnClickListener(v -> showImportAsciiMapDialog());
         
         // Shift buttons
         requireView().findViewById(R.id.shift_up_button).setOnClickListener(v -> shiftContent(0, -1));
@@ -1436,6 +1445,93 @@ public class LevelDesignEditorFragment extends Fragment {
         return GameState.parseLevel(requireContext(), content, currentLevelId);
     }
     
+    /**
+     * Show a dialog with a text input field where the user can paste an ASCII map.
+     * Parses the map and loads it into the editor.
+     */
+    private void showImportAsciiMapDialog() {
+        EditText input = new EditText(requireContext());
+        input.setHint(R.string.editor_import_ascii_map_hint);
+        input.setMinLines(10);
+        input.setMaxLines(20);
+        input.setGravity(android.view.Gravity.TOP);
+        input.setHorizontallyScrolling(true);
+        input.setTypeface(android.graphics.Typeface.MONOSPACE);
+        input.setTextSize(10);
+
+        // Try to pre-fill from clipboard
+        ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null && clipboard.hasPrimaryClip()) {
+            ClipData clip = clipboard.getPrimaryClip();
+            if (clip != null && clip.getItemCount() > 0) {
+                CharSequence clipText = clip.getItemAt(0).getText();
+                if (clipText != null && clipText.toString().contains("|")) {
+                    input.setText(clipText);
+                    Timber.d("[EDITOR] Pre-filled import dialog from clipboard (%d chars)", clipText.length());
+                }
+            }
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.editor_import_ascii_map_title)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String asciiText = input.getText().toString().trim();
+                    if (asciiText.isEmpty()) {
+                        Toast.makeText(requireContext(), "No input provided", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    importAsciiMap(asciiText);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * Parse an ASCII map string and load it into the editor as a new level.
+     */
+    private void importAsciiMap(String asciiText) {
+        try {
+            ArrayList<roboyard.logic.core.GridElement> gridElements =
+                    roboyard.pm.ia.ricochet.RRGetMap.parseAsciiMap(asciiText);
+
+            if (gridElements == null || gridElements.isEmpty()) {
+                Toast.makeText(requireContext(), "Could not parse ASCII map", Toast.LENGTH_SHORT).show();
+                Timber.e("[EDITOR] parseAsciiMap returned null or empty");
+                return;
+            }
+
+            GameState state = GameState.createFromGridElements(gridElements);
+            if (state == null) {
+                Toast.makeText(requireContext(), "Could not create game state from map", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            currentState = state;
+            currentLevelId = -1;
+
+            EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
+            EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
+            widthEdit.setText(String.valueOf(currentState.getWidth()));
+            heightEdit.setText(String.valueOf(currentState.getHeight()));
+
+            editLevelSpinner.setSelection(0);
+            levelIdTextView.setText(state.getLevelName());
+
+            updateUI();
+
+            Timber.d("[EDITOR] Imported ASCII map: %dx%d, %d elements",
+                    state.getWidth(), state.getHeight(), state.getGameElements().size());
+            Toast.makeText(requireContext(),
+                    "Imported " + state.getWidth() + "x" + state.getHeight() + " map with " +
+                    state.getGameElements().size() + " elements", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Timber.e(e, "[EDITOR] Error importing ASCII map");
+            Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
     /**
      * Custom view to display the game board for editing
      */

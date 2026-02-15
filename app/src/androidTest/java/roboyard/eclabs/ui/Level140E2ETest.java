@@ -33,6 +33,7 @@ import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.pm.ia.ricochet.ERRGameMove;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.ui.components.GameStateManager;
 
 import timber.log.Timber;

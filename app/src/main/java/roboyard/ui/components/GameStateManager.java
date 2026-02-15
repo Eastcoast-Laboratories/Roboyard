@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -153,6 +154,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private boolean liveMoveCounterEnabled = false;
     private final MutableLiveData<String> liveMoveCounterText = new MutableLiveData<>("");
     private final MutableLiveData<Boolean> liveSolverCalculating = new MutableLiveData<>(false);
+    private final MutableLiveData<Integer> liveMoveCounterDeviation = new MutableLiveData<>(0);
+
+    // Pre-computation cache for next possible moves
+    private final ConcurrentHashMap<String, Integer> nextMovesCache = new ConcurrentHashMap<>();
+    private ExecutorService preComputeExecutor;
+    private volatile boolean preComputeRunning = false;
 
     public GameStateManager(Application application) {
         super(application);
@@ -275,6 +282,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
+        clearNextMovesCache();
 
         // Initialize the solver with the grid elements from the loaded level
         ArrayList<GridElement> gridElements = state.getGridElements();
@@ -476,6 +484,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear old game data and force solver re-initialization with new map
         stateHistory.clear();
         squaresMovedHistory.clear();
+        clearNextMovesCache();
         currentSolution = null;
         currentSolutionStep = 0;
         getSolverManager().resetInitialization();
@@ -2358,6 +2367,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear the state history
         stateHistory.clear();
         squaresMovedHistory.clear();
+        clearNextMovesCache();
 
         // Initialize the solver with grid elements from the new state
         ArrayList<GridElement> gridElements = newState.getGridElements();
@@ -2615,6 +2625,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         setGameComplete(false);
         stateHistory.clear();
         squaresMovedHistory.clear();
+        clearNextMovesCache();
     }
 
     /**
@@ -2766,6 +2777,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return liveSolverCalculating;
     }
 
+    public LiveData<Integer> getLiveMoveCounterDeviation() {
+        return liveMoveCounterDeviation;
+    }
+
     public boolean isLiveMoveCounterEnabled() {
         return liveMoveCounterEnabled;
     }
@@ -2807,7 +2822,65 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         liveSolverCalculating.setValue(true);
 
-        // Build grid elements from current state (current robot positions)
+        // Check pre-computation cache first
+        String stateHash = computeStateHash(state);
+        Integer cachedResult = nextMovesCache.get(stateHash);
+        if (cachedResult != null) {
+            Timber.d("[LIVE_SOLVER][PRECOMP] Cache HIT for state %s → %d moves", stateHash, cachedResult);
+            int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
+            int optimal = lastSolutionMinMoves;
+            int deviation = (optimal > 0) ? (currentMoves + cachedResult) - optimal : 0;
+            String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
+            String text = context.getString(R.string.live_move_counter_optimal, cachedResult) + deviationStr;
+            liveMoveCounterText.setValue(text);
+            liveMoveCounterDeviation.setValue(deviation);
+            liveSolverCalculating.setValue(false);
+            Timber.d("[LIVE_SOLVER][PRECOMP] Result from cache: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
+            // Pre-compute next moves from this new position
+            preComputeNextMoves(state);
+            return;
+        }
+        Timber.d("[LIVE_SOLVER][PRECOMP] Cache MISS for state %s (cache size: %d)", stateHash, nextMovesCache.size());
+
+        ArrayList<GridElement> gridElements = buildGridElements(state);
+
+        Timber.d("[LIVE_SOLVER] Triggering live solve with %d elements", gridElements.size());
+
+        liveSolverManager.solveAsync(gridElements, new LiveSolverManager.LiveSolverListener() {
+            @Override
+            public void onLiveSolverFinished(int remainingMoves) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    liveSolverCalculating.setValue(false);
+                    int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
+                    int optimal = lastSolutionMinMoves;
+                    int deviation = (optimal > 0) ? (currentMoves + remainingMoves) - optimal : 0;
+                    String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
+                    String text = context.getString(R.string.live_move_counter_optimal, remainingMoves) + deviationStr;
+                    liveMoveCounterText.setValue(text);
+                    liveMoveCounterDeviation.setValue(deviation);
+                    Timber.d("[LIVE_SOLVER] Result: %d remaining, %d current, %d optimal, Δ%+d", remainingMoves, currentMoves, optimal, deviation);
+                    // Cache this result and pre-compute next moves
+                    nextMovesCache.put(stateHash, remainingMoves);
+                    preComputeNextMoves(state);
+                });
+            }
+
+            @Override
+            public void onLiveSolverFailed() {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    liveSolverCalculating.setValue(false);
+                    liveMoveCounterText.setValue("?");
+                    Timber.d("[LIVE_SOLVER] No solution found from current position");
+                });
+            }
+        });
+    }
+
+
+    /**
+     * Build GridElement list from a GameState for the solver.
+     */
+    private ArrayList<GridElement> buildGridElements(GameState state) {
         ArrayList<GridElement> gridElements = new ArrayList<>();
         for (GameElement element : state.getGameElements()) {
             GridElement gridElement = null;
@@ -2831,41 +2904,189 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 gridElements.add(gridElement);
             }
         }
+        return gridElements;
+    }
 
-        Timber.d("[LIVE_SOLVER] Triggering live solve with %d elements", gridElements.size());
-
-        liveSolverManager.solveAsync(gridElements, new LiveSolverManager.LiveSolverListener() {
-            @Override
-            public void onLiveSolverFinished(int remainingMoves) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    liveSolverCalculating.setValue(false);
-                    int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
-                    int optimal = lastSolutionMinMoves;
-                    int deviation = (optimal > 0) ? (currentMoves + remainingMoves) - optimal : 0;
-                    String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
-                    String text = context.getString(R.string.live_move_counter_optimal, remainingMoves) + deviationStr;
-                    liveMoveCounterText.setValue(text);
-                    Timber.d("[LIVE_SOLVER] Result: %d remaining, %d current, %d optimal, Δ%+d", remainingMoves, currentMoves, optimal, deviation);
-                });
+    /**
+     * Compute a hash string from robot positions in the given state.
+     * Used as cache key for pre-computation.
+     */
+    private String computeStateHash(GameState state) {
+        StringBuilder sb = new StringBuilder();
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                sb.append(element.getColor()).append(':')
+                  .append(element.getX()).append(',')
+                  .append(element.getY()).append(';');
             }
+        }
+        return sb.toString();
+    }
 
-            @Override
-            public void onLiveSolverFailed() {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    liveSolverCalculating.setValue(false);
-                    liveMoveCounterText.setValue("?");
-                    Timber.d("[LIVE_SOLVER] No solution found from current position");
-                });
+    /**
+     * Pre-compute optimal moves for all possible next states (4 robots × 4 directions).
+     * Results are cached in nextMovesCache for instant lookup.
+     */
+    private void preComputeNextMoves(GameState state) {
+        if (!liveMoveCounterEnabled || preComputeRunning) return;
+
+        if (preComputeExecutor == null || preComputeExecutor.isShutdown()) {
+            preComputeExecutor = Executors.newFixedThreadPool(2, r -> {
+                Thread t = new Thread(r, "precompute-solver");
+                t.setDaemon(true);
+                t.setPriority(Thread.MIN_PRIORITY);
+                return t;
+            });
+        }
+
+        // Collect robots and non-robot elements (walls, targets) from current state
+        List<GameElement> robots = new ArrayList<>();
+        List<GameElement> nonRobots = new ArrayList<>();
+        for (GameElement element : state.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT) {
+                robots.add(element);
+            } else {
+                nonRobots.add(element);
+            }
+        }
+
+        int width = state.getWidth();
+        int height = state.getHeight();
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        String[] dirNames = {"E", "W", "S", "N"};
+
+        preComputeRunning = true;
+        Timber.d("[LIVE_SOLVER][PRECOMP] Starting pre-computation for %d robots × 4 directions", robots.size());
+
+        preComputeExecutor.submit(() -> {
+            try {
+                int computed = 0;
+                int skipped = 0;
+                for (GameElement robot : robots) {
+                    for (int d = 0; d < 4; d++) {
+                        int dx = directions[d][0];
+                        int dy = directions[d][1];
+
+                        // Simulate the slide: move robot until it hits wall/robot/boundary
+                        int newX = robot.getX();
+                        int newY = robot.getY();
+                        if (dx != 0) {
+                            int step = dx > 0 ? 1 : -1;
+                            for (int i = newX + step; i >= 0 && i < width; i += step) {
+                                if (state.canRobotMoveTo(robot, i, newY)) {
+                                    newX = i;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        if (dy != 0) {
+                            int step = dy > 0 ? 1 : -1;
+                            for (int i = newY + step; i >= 0 && i < height; i += step) {
+                                if (state.canRobotMoveTo(robot, newX, i)) {
+                                    newY = i;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Skip if robot didn't move
+                        if (newX == robot.getX() && newY == robot.getY()) {
+                            skipped++;
+                            continue;
+                        }
+
+                        // Build a hypothetical state with this robot at the new position
+                        // Compute hash for the hypothetical state
+                        StringBuilder sb = new StringBuilder();
+                        for (GameElement r : robots) {
+                            sb.append(r.getColor()).append(':');
+                            if (r == robot) {
+                                sb.append(newX).append(',').append(newY);
+                            } else {
+                                sb.append(r.getX()).append(',').append(r.getY());
+                            }
+                            sb.append(';');
+                        }
+                        String hypotheticalHash = sb.toString();
+
+                        // Skip if already cached
+                        if (nextMovesCache.containsKey(hypotheticalHash)) {
+                            skipped++;
+                            continue;
+                        }
+
+                        // Build grid elements for the hypothetical state
+                        ArrayList<GridElement> gridElements = new ArrayList<>();
+                        for (GameElement r : robots) {
+                            String rType = "robot_" + GameLogic.getColorName(r.getColor(), false);
+                            if (r == robot) {
+                                gridElements.add(new GridElement(newX, newY, rType));
+                            } else {
+                                gridElements.add(new GridElement(r.getX(), r.getY(), rType));
+                            }
+                        }
+                        for (GameElement nr : nonRobots) {
+                            GridElement ge = null;
+                            switch (nr.getType()) {
+                                case GameElement.TYPE_TARGET:
+                                    ge = new GridElement(nr.getX(), nr.getY(), "target_" + GameLogic.getColorName(nr.getColor(), false));
+                                    break;
+                                case GameElement.TYPE_HORIZONTAL_WALL:
+                                    ge = new GridElement(nr.getX(), nr.getY(), "mh");
+                                    break;
+                                case GameElement.TYPE_VERTICAL_WALL:
+                                    ge = new GridElement(nr.getX(), nr.getY(), "mv");
+                                    break;
+                            }
+                            if (ge != null) gridElements.add(ge);
+                        }
+
+                        // Solve synchronously on this background thread
+                        roboyard.logic.solver.SolverDD solver = new roboyard.logic.solver.SolverDD();
+                        solver.init(gridElements);
+                        solver.run();
+
+                        if (solver.getSolverStatus().isFinished()) {
+                            int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
+                            if (numSolutions > 0) {
+                                roboyard.logic.core.GameSolution solution = solver.getSolution(0);
+                                int moves = (solution != null && solution.getMoves() != null) ? solution.getMoves().size() : 0;
+                                if (solver.isSolution01()) moves = 1;
+                                nextMovesCache.put(hypotheticalHash, moves);
+                                computed++;
+                                Timber.d("[LIVE_SOLVER][PRECOMP] Cached: robot %d %s → (%d,%d) = %d moves",
+                                        robot.getColor(), dirNames[d], newX, newY, moves);
+                            }
+                        }
+                    }
+                }
+                Timber.d("[LIVE_SOLVER][PRECOMP] Done: %d computed, %d skipped, cache size: %d", computed, skipped, nextMovesCache.size());
+            } catch (Exception e) {
+                Timber.e(e, "[LIVE_SOLVER][PRECOMP] Error during pre-computation");
+            } finally {
+                preComputeRunning = false;
             }
         });
     }
 
+    /**
+     * Clear the pre-computation cache. Call on new game / reset.
+     */
+    public void clearNextMovesCache() {
+        nextMovesCache.clear();
+        Timber.d("[LIVE_SOLVER][PRECOMP] Cache cleared");
+    }
 
     @Override
     protected void onCleared() {
         super.onCleared();
         if (liveSolverManager != null) {
             liveSolverManager.shutdown();
+        }
+        if (preComputeExecutor != null) {
+            preComputeExecutor.shutdownNow();
         }
     }
 }
