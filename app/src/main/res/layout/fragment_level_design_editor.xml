@@ -309,6 +309,13 @@
             android:text="Export Level Text"
             android:layout_marginBottom="8dp" />
 
+        <Button
+            android:id="@+id/import_ascii_map_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/editor_import_ascii_map"
+            android:layout_marginBottom="8dp" />
+
         <TextView
             android:id="@+id/level_text_view"
             android:layout_width="match_parent"

@@ -749,6 +749,11 @@
     <string name="streak_popup_day_30_headline">Almost a month!</string>
     <string name="streak_popup_day_31_headline">Legend status!</string>
     
+    <!-- Level Editor Strings -->
+    <string name="editor_import_ascii_map">Import ASCII Map</string>
+    <string name="editor_import_ascii_map_title">Paste ASCII Map</string>
+    <string name="editor_import_ascii_map_hint">Paste the ASCII map here…</string>
+
     <!-- Login and Account Strings -->
     <string name="profile_a11y">User profile</string>
 </resources>

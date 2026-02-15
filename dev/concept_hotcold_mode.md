@@ -18,14 +18,18 @@ Independent of the solver/hint system. Persists across games and app restarts.
 - **String:** `live_move_counter_optimal` = `"%1$d moves from here"`
 - **Optimal moves** are already shown in the big ***Optimal moves button***
 
-### What's NOT Yet Implemented
-- Toggle state is **not persisted** (resets on Back / new game)
-- Only shows remaining moves (R), not deviation (Δ)
-- No background pre-computation of next possible moves
+## Display Format - fixed [x]
 
-## Problems to Fix
-1. Toggle resets when navigating away — needs SharedPreferences persistence
-2. Display text (`"X moves from here"`) — needs to add the delta Y like: `X moves from here (Δ+Y)`, so player can see if they're on track
+keep it like it is
+### Toggle State
+- Save to SharedPreferences: `live_move_counter_enabled` (boolean)
+- Restore in `ModernGameFragment.onViewCreated()` from SharedPreferences
+- Update SharedPreferences in `setLiveMoveCounterEnabled()`
+- Survives: Back button, new game, app restart, fragment recreation
+
+### What's NOT Yet Implemented
+- No background pre-computation of next possible moves
+- color coding
 
 ## The 4 Key Values
 
@@ -36,43 +40,15 @@ Independent of the solver/hint system. Persists across games and app restarts.
 | **Remaining** | Optimal moves from current position | `LiveSolverManager` (already computed) |
 | **Deviation (Δ)** | How far off optimal: (Moves + Remaining) - Optimal | Calculated |
 
-## Display Format
 
-Short, word-based, but compact. Three lines or one line depending on space:
-
-**One-line format (in statusTextView):**
-```
-Optimal: 6 · Moves: 3 · Remaining: 5 · +2
-```
-
-**Compact alternative:**
-```
-Optimal 6 | Moves 3 | Left 5 | +2 over
-```
-
-**Minimal (if space is tight):**
-```
-Opt 6 | You 3 | Left 5 | +2
-```
+## Color Coding
 
 The **deviation** (+2) should be color-coded:
 - **Green (+0):** On an optimal path
 - **Yellow (+1 to +2):** Slightly off
 - **Red (+3+):** Significantly off
 
-While solver is calculating remaining:
-- Show the solver's search depth counting up in matte/blinking style
-- e.g. `Left ⏳4...` → `Left ⏳5...` → `Left 6` (solid when done)
-
-## Persistence
-
-### Toggle State
-- Save to SharedPreferences: `live_move_counter_enabled` (boolean)
-- Restore in `ModernGameFragment.onViewCreated()` from SharedPreferences
-- Update SharedPreferences in `setLiveMoveCounterEnabled()`
-- Survives: Back button, new game, app restart, fragment recreation
-
-## Background Pre-computation (Future Enhancement)
+## Background Pre-computation
 
 After each player move, solve all possible next states in background:
 - 4 robots × 4 directions = max 16 possible next states

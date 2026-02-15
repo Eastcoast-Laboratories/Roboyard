@@ -766,10 +766,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Observe live move counter text
         gameStateManager.getLiveMoveCounterText().observe(getViewLifecycleOwner(), text -> {
             if (text != null && !text.isEmpty() && gameStateManager.isLiveMoveCounterEnabled()) {
-                // Show live counter text in dark green instead of current hint
                 if (statusTextView != null) {
                     statusTextView.setText(text);
-                    statusTextView.setTextColor(android.graphics.Color.parseColor("#006400"));
+                    statusTextView.setTextColor(getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue()));
                 }
             }
         });
@@ -3447,6 +3446,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         button.startAnimation(animationSet);
     }
     
+    /**
+     * Get color for deviation value: Green (+0), Yellow (+1 to +2), Red (+3+)
+     */
+    private int getDeviationColor(Integer deviation) {
+        if (deviation == null) return android.graphics.Color.parseColor("#006400");
+        if (deviation <= 0) return android.graphics.Color.parseColor("#006400"); // Green - on optimal path
+        if (deviation <= 2) return android.graphics.Color.parseColor("#B8860B"); // Dark yellow - slightly off
+        return android.graphics.Color.parseColor("#CC0000"); // Red - significantly off
+    }
+
     /**
      * Start blinking animation on the eye toggle while the live solver is calculating
      */
