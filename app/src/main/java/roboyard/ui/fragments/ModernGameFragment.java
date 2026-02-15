@@ -3212,8 +3212,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             numPreHints = randomHintCount;
         }
         
-        // Clear any previous hint or status text
+        // Clear any previous hint or status text and hide hint UI
         updateStatusText("", false);
+        if (hintContainer != null) {
+            hintContainer.setVisibility(View.GONE);
+        }
+        if (hintButton != null && hintButton.isChecked()) {
+            hintButton.setChecked(false);
+        }
+        currentHintStep = 0;
+        showingPreHints = true;
 
         // Resume timer from ViewModel if it was running AND no new game was loaded
         // If a new game was loaded (from SaveGame/History/Level), reset the timer to 0

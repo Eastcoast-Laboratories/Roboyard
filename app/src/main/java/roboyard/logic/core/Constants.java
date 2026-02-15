@@ -79,6 +79,9 @@ public class Constants {
     // Debug settings
     public static final long DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS = 3000; // milliseconds to open debug screen
 
+    // Pre-computation solver timeout per solve (seconds)
+    public static final int PRECOMP_SOLVER_TIMEOUT_SECONDS = 120;
+
     // RGB color values for robots (used in solver)
     public static final int[] colors_rgb = {
         Color.MAGENTA,  // Pink (COLOR_PINK)
