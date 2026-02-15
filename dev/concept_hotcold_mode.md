@@ -28,8 +28,8 @@ keep it like it is
 - Survives: Back button, new game, app restart, fragment recreation
 
 ### What's NOT Yet Implemented
-- No background pre-computation of next possible moves
-- color coding
+- ~~No background pre-computation of next possible moves~~ → **done**
+- ~~color coding~~ → **done**
 
 ## The 4 Key Values
 
@@ -48,13 +48,30 @@ The **deviation** (+2) should be color-coded:
 - **Yellow (+1 to +2):** Slightly off
 - **Red (+3+):** Significantly off
 
-## Background Pre-computation
+## Background Pre-computation [implemented]
 
 After each player move, solve all possible next states in background:
 - 4 robots × 4 directions = max 16 possible next states
-- Cache results in `HashMap<String, Integer>` (state hash → optimal moves)
+- Cache results in `ConcurrentHashMap<String, Integer>` (state hash → optimal moves)
 - When player makes their next move, look up cached result → instant display
 - Clear cache on new game / reset
+
+### Execution Rules
+- **Sequential only:** All pre-computations run on a `SingleThreadExecutor` — never two solvers in parallel
+- **Cancel on move:** When the player moves a robot, all pending pre-computations are cancelled immediately via `preComputeCancelled` flag
+- **Cache lookup first:** On each move, check if the result was already pre-computed; if yes, use it instantly; if not, run the live solver normally
+- **Pre-compute after solve:** Only after the current position is solved (either from cache or live solver), start pre-computing the next possible positions
+- **Logging:** All pre-computation events use the `[PRECOMP]` tag:
+  - `[PRECOMP] Starting sequential pre-computation for N robots × 4 directions`
+  - `[PRECOMP] Solving: robot X dir → (x,y)...`
+  - `[PRECOMP] Solved: robot X dir → (x,y) = N moves`
+  - `[PRECOMP] Finished: N computed, N skipped, cache size: N`
+  - `[PRECOMP] Cache HIT for state ...`
+  - `[PRECOMP] Cache MISS — no pre-computation available for state ...`
+  - `[PRECOMP] Used pre-computed result: ...`
+  - `[PRECOMP] Cancelled after N computed, N skipped`
+  - `[PRECOMP] Cancellation requested`
+  - `[PRECOMP] Cache cleared`
 
 ## Relationship to Hint Mode
 
@@ -86,10 +103,11 @@ In a way, Hot/Cold could make hints less necessary — but not fully replace the
 - Calculate Deviation = (Moves + Remaining) - Optimal
 - Color-code the deviation value
 
-### Phase 3: Background Pre-computation
-- After each move, solve all 16 possible next positions
+### Phase 3: Background Pre-computation [implemented]
+- After each move, solve all 16 possible next positions sequentially (one at a time)
 - Cache results for instant Remaining display
-- Use thread pool for parallel solving
+- Cancel all pending pre-computations when player moves a robot
+- See "Execution Rules" above for details
 
 ### Phase 4: Hot/Cold Pulse Animation
 - Track previous Δ value

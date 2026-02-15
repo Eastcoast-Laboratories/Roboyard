@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;

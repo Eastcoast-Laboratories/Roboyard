@@ -1,5 +1,7 @@
 package roboyard.eclabs.achievements;
 
+import roboyard.ui.achievements.AchievementManager;
+
 import static org.junit.Assert.*;
 
 import android.content.Context;

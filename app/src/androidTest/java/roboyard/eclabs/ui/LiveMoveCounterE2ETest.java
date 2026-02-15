@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
+import roboyard.logic.core.GameElement;
+import roboyard.ui.activities.MainFragmentActivity;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;

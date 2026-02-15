@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
+import roboyard.ui.fragments.AchievementsFragment;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.eclabs.ui.mock.MockMainActivity;
 
