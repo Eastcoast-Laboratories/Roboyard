@@ -17,7 +17,7 @@ import timber.log.Timber;
 public class LiveSolverManager {
 
     public interface LiveSolverListener {
-        void onLiveSolverFinished(int optimalMoves);
+        void onLiveSolverFinished(int optimalMoves, GameSolution solution);
         void onLiveSolverFailed();
     }
 
@@ -65,7 +65,7 @@ public class LiveSolverManager {
                         }
                         Timber.d("[LIVE_SOLVER] Found solution with %d moves", moves);
                         if (!cancelled && listener != null) {
-                            listener.onLiveSolverFinished(moves);
+                            listener.onLiveSolverFinished(moves, solution);
                         }
                     } else {
                         Timber.d("[LIVE_SOLVER] No solution found");
