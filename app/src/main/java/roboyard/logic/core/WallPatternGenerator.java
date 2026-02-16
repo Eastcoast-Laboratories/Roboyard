@@ -345,43 +345,51 @@ public class WallPatternGenerator {
     // ── Pattern 3: Maze ─────────────────────────────────────────────────
 
     private void generateMaze() {
-        // Grid-based maze using recursive backtracker
-        // Cells are at odd coordinates, walls between them
-        // This covers the FULL board from (0,0) to (width-1, height-1)
-        int cellsX = (width - 1) / 2;
-        int cellsY = (height - 1) / 2;
-        if (cellsX < 2) cellsX = 2;
-        if (cellsY < 2) cellsY = 2;
+        // Recursive backtracker maze where every board cell is a maze node.
+        // Wall between cell (x,y) and (x+1,y) = vWalls[x+1][y]
+        // Wall between cell (x,y) and (x,y+1) = hWalls[x][y+1]
+        // After carving, every cell is reachable from every other cell.
 
-        boolean[][] visited = new boolean[cellsX][cellsY];
-        ArrayList<int[]> stack = new ArrayList<>();
+        int cx2 = width / 2 - 1;
+        int cy2 = height / 2 - 1;
 
-        // Fill entire interior with walls first, then carve passages
+        // Place ALL interior walls (border walls are already set by addBorderWalls)
         for (int x = 1; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                vWalls[x][y] = 1; // vertical wall between (x-1,y) and (x,y)
+            }
+        }
+        for (int x = 0; x < width; x++) {
             for (int y = 1; y < height; y++) {
-                if (!inCarree(x, y)) {
-                    placeH(x, y);
-                    placeV(x, y);
-                }
+                hWalls[x][y] = 1; // horizontal wall between (x,y-1) and (x,y)
             }
         }
 
-        // Start from random cell
-        int sx = rand.nextInt(cellsX);
-        int sy = rand.nextInt(cellsY);
-        visited[sx][sy] = true;
-        stack.add(new int[]{sx, sy});
+        // Recursive backtracker: visit every cell exactly once, removing walls
+        boolean[][] visited = new boolean[width][height];
+        // Mark center carree cells as visited so maze carves around them
+        for (int x = cx2; x <= cx2 + 1 && x < width; x++) {
+            for (int y = cy2; y <= cy2 + 1 && y < height; y++) {
+                visited[x][y] = true;
+            }
+        }
+
+        ArrayList<int[]> stack = new ArrayList<>();
+        // Start from (0,0)
+        visited[0][0] = true;
+        stack.add(new int[]{0, 0});
 
         int[][] dirs = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 
         while (!stack.isEmpty()) {
-            int[] current = stack.get(stack.size() - 1);
-            int cx = current[0], cy = current[1];
+            int[] cur = stack.get(stack.size() - 1);
+            int cx = cur[0], cy = cur[1];
 
+            // Collect unvisited neighbors
             ArrayList<int[]> neighbors = new ArrayList<>();
             for (int[] d : dirs) {
                 int nx = cx + d[0], ny = cy + d[1];
-                if (nx >= 0 && nx < cellsX && ny >= 0 && ny < cellsY && !visited[nx][ny]) {
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && !visited[nx][ny]) {
                     neighbors.add(new int[]{nx, ny, d[0], d[1]});
                 }
             }
@@ -393,36 +401,41 @@ public class WallPatternGenerator {
                 int nx = chosen[0], ny = chosen[1], dx = chosen[2], dy = chosen[3];
                 visited[nx][ny] = true;
 
-                // Remove wall between current cell and chosen neighbor
-                // Cell (cx,cy) maps to board position (cx*2+1, cy*2+1)
-                int wallX = cx * 2 + 1 + dx;
-                int wallY = cy * 2 + 1 + dy;
-                // Remove the wall segment between the two cells
-                if (dx != 0) {
-                    // Horizontal movement → remove vertical wall
-                    if (wallX >= 0 && wallX <= width && wallY >= 0 && wallY < height) {
-                        vWalls[wallX][wallY] = 0;
-                    }
-                } else {
-                    // Vertical movement → remove horizontal wall
-                    if (wallX >= 0 && wallX < width && wallY >= 0 && wallY <= height) {
-                        hWalls[wallX][wallY] = 0;
-                    }
+                // Remove wall between (cx,cy) and (nx,ny)
+                if (dx == 1) {
+                    // Moving right → remove vWalls[cx+1][cy]
+                    vWalls[cx + 1][cy] = 0;
+                } else if (dx == -1) {
+                    // Moving left → remove vWalls[cx][cy]
+                    vWalls[cx][cy] = 0;
+                } else if (dy == 1) {
+                    // Moving down → remove hWalls[cx][cy+1]
+                    hWalls[cx][cy + 1] = 0;
+                } else if (dy == -1) {
+                    // Moving up → remove hWalls[cx][cy]
+                    hWalls[cx][cy] = 0;
                 }
 
                 stack.add(new int[]{nx, ny});
             }
         }
 
-        // Remove some extra walls randomly to create wider passages and reduce density
-        for (int i = 0; i < (width + height); i++) {
+        // Open a few extra walls to create loops (makes it less of a perfect maze,
+        // more interesting for Roboyard where robots slide until hitting a wall)
+        int extraOpenings = (width + height) / 2;
+        for (int i = 0; i < extraOpenings; i++) {
             int x = rng(1, width - 1);
             int y = rng(1, height - 1);
             if (!inCarree(x, y)) {
-                if (rand.nextBoolean()) hWalls[x][y] = 0;
-                else vWalls[x][y] = 0;
+                if (rand.nextBoolean() && hWalls[x][y] == 1) {
+                    hWalls[x][y] = 0;
+                } else if (vWalls[x][y] == 1) {
+                    vWalls[x][y] = 0;
+                }
             }
         }
+
+        Timber.d("[WALL_PATTERN] Maze generated: %dx%d cells, %d extra openings", width, height, extraOpenings);
     }
 
     // ── Pattern 4: Diagonal ─────────────────────────────────────────────
