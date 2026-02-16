@@ -255,6 +255,57 @@ public class WallStorage {
     }
     
     /**
+     * Store wall elements for a specific board size (not necessarily the current one).
+     * Used when loading a savegame with a different board size.
+     * @param elements List of grid elements containing walls and other elements
+     * @param boardWidth Board width of the savegame
+     * @param boardHeight Board height of the savegame
+     */
+    public void storeWallsForBoardSize(List<GridElement> elements, int boardWidth, int boardHeight) {
+        if (elements == null || elements.isEmpty()) {
+            Timber.tag(TAG).d("[WALL STORAGE] No elements to store for %dx%d", boardWidth, boardHeight);
+            return;
+        }
+
+        // If this matches the current board size, use the normal storeWalls path
+        if (boardWidth == currentBoardWidth && boardHeight == currentBoardHeight) {
+            storeWalls(elements);
+            return;
+        }
+
+        // Extract only wall elements
+        ArrayList<GridElement> walls = new ArrayList<>();
+        for (GridElement element : elements) {
+            String type = element.getType();
+            if ("mh".equals(type) || "mv".equals(type)) {
+                walls.add(element);
+            }
+        }
+
+        // Save directly to disk for this board size
+        Context context = Preferences.getContext();
+        if (context == null) {
+            Timber.tag(TAG).e("[WALL STORAGE] Cannot save walls: context is null");
+            return;
+        }
+
+        String key = getWallsKey(boardWidth, boardHeight);
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (GridElement wall : walls) {
+            if (count > 0) sb.append(";");
+            sb.append(wall.getType()).append(",").append(wall.getX()).append(",").append(wall.getY());
+            count++;
+        }
+
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(key, sb.toString()).apply();
+
+        Timber.tag(TAG).d("[WALL STORAGE] Stored %d walls to disk for board size %dx%d (different from current %dx%d)",
+                count, boardWidth, boardHeight, currentBoardWidth, currentBoardHeight);
+    }
+
+    /**
      * Check if there are stored walls available
      * @return true if walls are stored, false otherwise
      */

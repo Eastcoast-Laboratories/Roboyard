@@ -3,6 +3,7 @@ package roboyard.ui.components;
 import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -489,6 +490,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         moveCount.setValue(newState.getMoveCount());
         isGameComplete.setValue(newState.isComplete());
 
+        // Store walls from loaded game in WallStorage if generateNewMapEachTime is off
+        if (!Preferences.generateNewMapEachTime) {
+            ArrayList<GridElement> gridElements = buildGridElements(newState);
+            WallStorage.getInstance().storeWallsForBoardSize(
+                    gridElements, newState.getWidth(), newState.getHeight());
+            Timber.d("[GAME_LOAD] Stored walls from loaded savegame for board size %dx%d",
+                    newState.getWidth(), newState.getHeight());
+        }
+
         // Clear old game data and force solver re-initialization with new map
         stateHistory.clear();
         squaresMovedHistory.clear();
@@ -744,6 +754,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     enhancedSaveData.insert(insertPos, solvedTag);
                     Timber.d("[SAVEDATA] Added solved tag: %s", solvedTag);
                 }
+            }
+
+            // If this is an autosave (slot 0), store settings metadata for quick comparison
+            if (saveId == 0) {
+                saveAutosaveMetadata(gameState);
             }
 
             // Write the save data to the file
@@ -3264,6 +3279,66 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         cancelPreComputation();
         nextMovesCache.clear();
         Timber.d("[PRECOMP_SOLUTION] Cache cleared");
+    }
+
+    // ── Autosave metadata for settings comparison ─────────────────────
+
+    private static final String AUTOSAVE_META_PREFS = "AutosaveMetadata";
+    private static final String AUTOSAVE_META_BOARD_W = "autosave_board_w";
+    private static final String AUTOSAVE_META_BOARD_H = "autosave_board_h";
+    private static final String AUTOSAVE_META_TARGET_COUNT = "autosave_target_count";
+
+    /**
+     * Save metadata about the autosave so the Play button can quickly check
+     * if current settings still match the autosaved game.
+     */
+    private void saveAutosaveMetadata(GameState state) {
+        SharedPreferences prefs = getApplication().getSharedPreferences(AUTOSAVE_META_PREFS, Context.MODE_PRIVATE);
+        // Count targets in the state
+        int targets = 0;
+        for (GameElement el : state.getGameElements()) {
+            if (el.getType() == GameElement.TYPE_TARGET) targets++;
+        }
+        prefs.edit()
+                .putInt(AUTOSAVE_META_BOARD_W, state.getWidth())
+                .putInt(AUTOSAVE_META_BOARD_H, state.getHeight())
+                .putInt(AUTOSAVE_META_TARGET_COUNT, targets)
+                .apply();
+        Timber.d("[AUTOSAVE_META] Saved metadata: %dx%d, %d targets", state.getWidth(), state.getHeight(), targets);
+    }
+
+    /**
+     * Check if current settings match the autosave metadata.
+     * @return true if settings match (autosave can be resumed), false if settings changed
+     */
+    public boolean autosaveSettingsMatch() {
+        SharedPreferences prefs = getApplication().getSharedPreferences(AUTOSAVE_META_PREFS, Context.MODE_PRIVATE);
+        int savedW = prefs.getInt(AUTOSAVE_META_BOARD_W, -1);
+        int savedH = prefs.getInt(AUTOSAVE_META_BOARD_H, -1);
+        int savedTargets = prefs.getInt(AUTOSAVE_META_TARGET_COUNT, -1);
+
+        if (savedW == -1) {
+            Timber.d("[AUTOSAVE_META] No metadata found, settings don't match");
+            return false;
+        }
+
+        boolean match = savedW == Preferences.boardSizeWidth
+                && savedH == Preferences.boardSizeHeight
+                && savedTargets == Preferences.targetColors;
+
+        Timber.d("[AUTOSAVE_META] Settings match: %s (saved: %dx%d/%d targets, current: %dx%d/%d targets)",
+                match, savedW, savedH, savedTargets,
+                Preferences.boardSizeWidth, Preferences.boardSizeHeight, Preferences.targetColors);
+        return match;
+    }
+
+    /**
+     * Clear autosave metadata (called when autosave is deleted).
+     */
+    public void clearAutosaveMetadata() {
+        getApplication().getSharedPreferences(AUTOSAVE_META_PREFS, Context.MODE_PRIVATE)
+                .edit().clear().apply();
+        Timber.d("[AUTOSAVE_META] Metadata cleared");
     }
 
     @Override

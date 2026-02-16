@@ -238,16 +238,24 @@ public class MainMenuFragment extends BaseGameFragment {
             String autosavePath = roboyard.ui.components.FileReadWrite.getSaveGamePath(requireActivity(), 0);
             java.io.File autosaveFile = new java.io.File(autosavePath);
             if (autosaveFile.exists()) {
-                Timber.d("[PLAY] Auto-save found, loading from slot 0");
-                gameStateManager.loadGame(0);
-                if (gameStateManager.getCurrentState().getValue() != null) {
-                    Timber.d("[PLAY] Auto-save loaded successfully, resuming game");
-                    UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
-                    ModernGameFragment gameFragment = new ModernGameFragment();
-                    navigateToDirect(gameFragment);
-                    return;
+                // Check if settings changed since autosave was created
+                if (gameStateManager.autosaveSettingsMatch()) {
+                    Timber.d("[PLAY] Auto-save found and settings match, loading from slot 0");
+                    gameStateManager.loadGame(0);
+                    if (gameStateManager.getCurrentState().getValue() != null) {
+                        Timber.d("[PLAY] Auto-save loaded successfully, resuming game");
+                        UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
+                        ModernGameFragment gameFragment = new ModernGameFragment();
+                        navigateToDirect(gameFragment);
+                        return;
+                    }
+                    Timber.w("[PLAY] Auto-save load failed, starting new game instead");
+                } else {
+                    Timber.d("[PLAY] Auto-save found but settings changed (board size or target count), starting new game");
+                    // don't delete stale autosave
+                    // autosaveFile.delete();
+                    // gameStateManager.clearAutosaveMetadata();
                 }
-                Timber.w("[PLAY] Auto-save load failed, starting new game instead");
             } else {
                 Timber.d("[PLAY] No auto-save found, starting new game");
             }
