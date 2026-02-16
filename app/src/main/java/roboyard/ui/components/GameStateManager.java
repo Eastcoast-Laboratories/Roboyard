@@ -662,10 +662,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return true if the game was saved successfully, false otherwise
      */
     public boolean saveGame(int saveId, boolean isAutoSave) {
-        // Slot 0 is reserved for auto-save only - prevent manual saves but allow autosaves
+        // Slot 0 is reserved for auto-save only - prevent manual saves unless no autosave exists yet
         if (saveId == 0 && !isAutoSave) {
-            Timber.e("[SAVE_PROTECTION] Attempted manual save to slot 0 (auto-save slot) - blocked");
-            return false;
+            File autoSaveDir = new File(getContext().getFilesDir(), Constants.SAVE_DIRECTORY);
+            String autoSaveFileName = Constants.SAVE_FILENAME_PREFIX + 0 + Constants.SAVE_FILENAME_EXTENSION;
+            File autoSaveFile = new File(autoSaveDir, autoSaveFileName);
+            if (autoSaveFile.exists()) {
+                Timber.e("[SAVE_PROTECTION] Attempted manual save to slot 0 (auto-save slot) - blocked (autosave already exists)");
+                return false;
+            }
+            Timber.d("[SAVE_PROTECTION] Allowing manual save to slot 0 - no autosave exists yet");
         }
         
         Timber.d("Saving game to slot %d (autosave: %b)", saveId, isAutoSave);

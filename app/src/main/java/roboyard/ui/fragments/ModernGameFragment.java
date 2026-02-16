@@ -810,9 +810,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // This ensures the toggle appears immediately when the first move is made
         if (showingPreHints && currentHintStep == numPreHints && liveMoveCounterToggle != null) {
             int moveCount = state.getMoveCount();
-            liveMoveCounterToggle.setVisibility(moveCount >= 1 ? View.VISIBLE : View.GONE);
-            Timber.d("[HINT_SYSTEM] Updated eye toggle visibility: moveCount=%d, visible=%b", 
-                moveCount, moveCount >= 1);
+            // Keep toggle visible if live move counter is enabled
+            boolean visible = moveCount >= 1 || gameStateManager.isLiveMoveCounterEnabled();
+            liveMoveCounterToggle.setVisibility(visible ? View.VISIBLE : View.GONE);
+            Timber.d("[HINT_SYSTEM] Updated eye toggle visibility: moveCount=%d, liveMoveEnabled=%b, visible=%b", 
+                moveCount, gameStateManager.isLiveMoveCounterEnabled(), visible);
         }
         
         // Check if a hint is being shown
@@ -2065,6 +2067,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     public void onResume() {
         super.onResume();
         
+        // Re-measure the game grid to fix scaling after app loses/regains focus
+        if (gameGridView != null) {
+            gameGridView.requestLayout();
+            gameGridView.invalidate();
+            Timber.d("[GRID_LAYOUT] onResume: requested layout recalculation for game grid");
+        }
+        
         // Refresh activity reference in GameStateManager during resume
         if (gameStateManager != null) {
             gameStateManager.setActivity(requireActivity());
@@ -2650,8 +2659,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 currentHintStep + 1, numPreHints, NUM_FIXED_PRE_HINTS);
         
         // Hide the eye toggle by default; only the exact solution pre-hint shows it
+        // But keep it visible if live move counter is enabled
         if (liveMoveCounterToggle != null && currentHintStep != numPreHints) {
-            liveMoveCounterToggle.setVisibility(View.GONE);
+            liveMoveCounterToggle.setVisibility(
+                    gameStateManager.isLiveMoveCounterEnabled() ? View.VISIBLE : View.GONE);
         }
         
         // Calculate total number of pre-hints (regular + fixed)
@@ -2678,11 +2689,12 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);
             
-            // Show the live move counter eye toggle only if at least 1 move has been made
+            // Show the live move counter eye toggle if at least 1 move has been made or if enabled
             if (liveMoveCounterToggle != null) {
                 GameState currentState = gameStateManager.getCurrentState().getValue();
                 int moveCount = (currentState != null) ? currentState.getMoveCount() : 0;
-                liveMoveCounterToggle.setVisibility(moveCount >= 1 ? View.VISIBLE : View.GONE);
+                boolean visible = moveCount >= 1 || gameStateManager.isLiveMoveCounterEnabled();
+                liveMoveCounterToggle.setVisibility(visible ? View.VISIBLE : View.GONE);
             }
         }
         // Second fixed pre-hint: Show involved robot colors
@@ -2773,8 +2785,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
         Timber.d("[HINT_SYSTEM] showNormalHint called with hintIndex: %d", hintIndex);
         
-        // Hide the eye toggle during normal hints
-        if (liveMoveCounterToggle != null) {
+        // Hide the eye toggle during normal hints, unless live move counter is active
+        if (liveMoveCounterToggle != null && !gameStateManager.isLiveMoveCounterEnabled()) {
             liveMoveCounterToggle.setVisibility(View.GONE);
         }
         
@@ -3510,13 +3522,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
     
     /**
-     * Get color for deviation value: Green (+0), Yellow (+1 to +2), Red (+3+)
+     * Get color for deviation value:
+     * 0=green, 1=green-yellow, 2=dark yellow, 3=orange, 4=red, 5+=dark-red
      */
     private int getDeviationColor(Integer deviation) {
-        if (deviation == null) return android.graphics.Color.parseColor("#006400");
-        if (deviation <= 0) return android.graphics.Color.parseColor("#006400"); // Green - on optimal path
-        if (deviation <= 2) return android.graphics.Color.parseColor("#B8860B"); // Dark yellow - slightly off
-        return android.graphics.Color.parseColor("#CC0000"); // Red - significantly off
+        if (deviation == null || deviation <= 0) return Color.parseColor("#006400"); // Green
+        switch (deviation) {
+            case 1: return Color.parseColor("#7CB342"); // Green-yellow
+            case 2: return Color.parseColor("#C6A700"); // Dark yellow
+            case 3: return Color.parseColor("#E65100"); // Orange
+            case 4: return Color.parseColor("#D50000"); // Red
+            default: return Color.parseColor("#8B0000"); // Dark red (5+)
+        }
     }
 
     /**
