@@ -753,6 +753,18 @@
     <string name="editor_import_ascii_map">Import ASCII Map</string>
     <string name="editor_import_ascii_map_title">Paste ASCII Map</string>
     <string name="editor_import_ascii_map_hint">Paste the ASCII map here…</string>
+    <string name="editor_generate_walls">Generate Walls</string>
+    <string name="editor_pattern_label">Pattern:</string>
+    <string name="editor_pattern_classic">Classic (L-shapes)</string>
+    <string name="editor_pattern_spiral">Spiral</string>
+    <string name="editor_pattern_rooms">Rooms</string>
+    <string name="editor_pattern_maze">Maze</string>
+    <string name="editor_pattern_diagonal">Diagonal</string>
+    <string name="editor_pattern_symmetric">Symmetric</string>
+    <string name="editor_pattern_corridors">Corridors</string>
+    <string name="editor_pattern_islands">Islands</string>
+    <string name="editor_pattern_border_heavy">Border Heavy</string>
+    <string name="editor_pattern_scatter">Scatter</string>
 
     <!-- Login and Account Strings -->
     <string name="profile_a11y">User profile</string>

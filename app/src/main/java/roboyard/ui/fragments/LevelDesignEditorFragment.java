@@ -45,6 +45,7 @@ import java.util.Scanner;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.RoboyardApiClient;
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.WallPatternGenerator;
 import roboyard.eclabs.R;
 
 import roboyard.logic.core.GameState;
@@ -77,6 +78,8 @@ public class LevelDesignEditorFragment extends Fragment {
     private Button applyBoardSizeButton;
     private RadioGroup robotColorRadioGroup;
     private RadioGroup targetColorRadioGroup;
+    private Spinner wallPatternSpinner;
+    private Button generateWallsButton;
     
     // Edit modes
     private static final int EDIT_MODE_ROBOT = 0;
@@ -137,6 +140,11 @@ public class LevelDesignEditorFragment extends Fragment {
         applyBoardSizeButton = view.findViewById(R.id.apply_board_size_button);
         robotColorRadioGroup = view.findViewById(R.id.robot_color_radio_group);
         targetColorRadioGroup = view.findViewById(R.id.target_color_radio_group);
+        wallPatternSpinner = view.findViewById(R.id.wall_pattern_spinner);
+        generateWallsButton = view.findViewById(R.id.generate_walls_button);
+        
+        // Set up wall pattern spinner
+        setupWallPatternSpinner();
         
         // Set up robot color radio buttons for selection
         setupColorRadioButtons();
@@ -502,6 +510,73 @@ public class LevelDesignEditorFragment extends Fragment {
         requireView().findViewById(R.id.shift_down_button).setOnClickListener(v -> shiftContent(0, 1));
         requireView().findViewById(R.id.shift_left_button).setOnClickListener(v -> shiftContent(-1, 0));
         requireView().findViewById(R.id.shift_right_button).setOnClickListener(v -> shiftContent(1, 0));
+        
+        // Generate walls button
+        if (generateWallsButton != null) {
+            generateWallsButton.setOnClickListener(v -> generateWallsFromPattern());
+        }
+    }
+    
+    private void setupWallPatternSpinner() {
+        if (wallPatternSpinner == null) return;
+        
+        String[] patternNames = {
+            getString(R.string.editor_pattern_classic),
+            getString(R.string.editor_pattern_spiral),
+            getString(R.string.editor_pattern_rooms),
+            getString(R.string.editor_pattern_maze),
+            getString(R.string.editor_pattern_diagonal),
+            getString(R.string.editor_pattern_symmetric),
+            getString(R.string.editor_pattern_corridors),
+            getString(R.string.editor_pattern_islands),
+            getString(R.string.editor_pattern_border_heavy),
+            getString(R.string.editor_pattern_scatter)
+        };
+        
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(), android.R.layout.simple_spinner_item, patternNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        wallPatternSpinner.setAdapter(adapter);
+    }
+    
+    private void generateWallsFromPattern() {
+        if (currentState == null) {
+            Toast.makeText(requireContext(), "No level loaded", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        int pattern = wallPatternSpinner != null ? wallPatternSpinner.getSelectedItemPosition() : 0;
+        int w = currentState.getWidth();
+        int h = currentState.getHeight();
+        
+        Timber.d("[LEVEL_EDITOR] Generating walls: pattern=%d, board=%dx%d", pattern, w, h);
+        
+        // Preserve existing robots and targets
+        List<GameElement> robotsAndTargets = new ArrayList<>();
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
+                robotsAndTargets.add(element);
+            }
+        }
+        
+        // Generate new wall pattern
+        WallPatternGenerator generator = new WallPatternGenerator(w, h);
+        GameState newState = generator.generate(pattern);
+        
+        // Copy level metadata
+        newState.setLevelId(currentState.getLevelId());
+        newState.setLevelName(currentState.getLevelName());
+        
+        // Re-add robots and targets
+        for (GameElement element : robotsAndTargets) {
+            newState.getGameElements().add(element);
+        }
+        
+        currentState = newState;
+        updateUI();
+        
+        Timber.d("[LEVEL_EDITOR] Generated %d elements with pattern %d", 
+                currentState.getGameElements().size(), pattern);
     }
     
     private void showLevelText() {
