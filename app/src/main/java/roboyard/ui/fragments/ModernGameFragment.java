@@ -1255,6 +1255,25 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // "New Game" Button
         newMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
+
+            // If generateNewMapEachTime is off, check if current map ratio matches settings
+            if (!Preferences.generateNewMapEachTime) {
+                GameState curState = gameStateManager.getCurrentState().getValue();
+                if (curState != null) {
+                    int mapW = curState.getWidth();
+                    int mapH = curState.getHeight();
+                    int settW = Preferences.boardSizeWidth;
+                    int settH = Preferences.boardSizeHeight;
+                    if (mapW != settW || mapH != settH) {
+                        Toast.makeText(requireContext(),
+                                "Map dimensions " + mapW + "x" + mapH + " does not fit settings " + settW + "x" + settH + " - generating new walls",
+                                Toast.LENGTH_LONG).show();
+                        Timber.d("[NEW_GAME] Map ratio mismatch: map=%dx%d, settings=%dx%d — forcing new walls",
+                                mapW, mapH, settW, settH);
+                    }
+                }
+            }
+
             // Clear robot paths BEFORE starting a new game
             if (gameGridView != null) {
                 gameGridView.clearRobotPaths();
