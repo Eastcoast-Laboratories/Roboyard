@@ -521,7 +521,7 @@ public class LevelDesignEditorFragment extends Fragment {
         if (borderStubsButton != null) {
             borderStubsButton.setOnClickListener(v -> {
                 if (currentState == null) {
-                    Toast.makeText(requireContext(), "No level loaded", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.editor_no_level_loaded, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 WallPatternGenerator.generateBorderStubs(currentState);
