@@ -232,4 +232,5 @@
     <string name="share_via_url">URL로 공유</string>
     <string name="share_success">지도가 성공적으로 공유되었습니다!</string>
     <string name="share_failed">공유 실패: %1$s</string>
+    <string name="map_dimensions_mismatch">맵 크기 %1$dx%2$d이(가) 설정 %3$dx%4$d과(와) 맞지 않습니다 - 새 벽을 생성합니다</string>
 </resources>

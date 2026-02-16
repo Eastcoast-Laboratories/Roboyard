@@ -337,12 +337,27 @@
                 android:text="Load Autosave" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/export_level_button"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Export Level Text"
-            android:layout_marginBottom="8dp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/export_level_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Export Level Text" />
+
+            <Button
+                android:id="@+id/play_map_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_play_map"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/import_ascii_map_button"

@@ -424,4 +424,5 @@
     <string name="share_success">¡Mapa compartido exitosamente!</string>
     <string name="share_failed">Error al compartir: %1$s</string>
 
+    <string name="map_dimensions_mismatch">Dimensiones del mapa %1$dx%2$d no coinciden con ajustes %3$dx%4$d - generando nuevas paredes</string>
 </resources>

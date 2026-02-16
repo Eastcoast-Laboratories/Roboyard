@@ -1266,7 +1266,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     int settH = Preferences.boardSizeHeight;
                     if (mapW != settW || mapH != settH) {
                         Toast.makeText(requireContext(),
-                                "Map dimensions " + mapW + "x" + mapH + " does not fit settings " + settW + "x" + settH + " - generating new walls",
+                                getString(R.string.map_dimensions_mismatch, mapW, mapH, settW, settH),
                                 Toast.LENGTH_LONG).show();
                         Timber.d("[NEW_GAME] Map ratio mismatch: map=%dx%d, settings=%dx%d — forcing new walls",
                                 mapW, mapH, settW, settH);

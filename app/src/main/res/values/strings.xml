@@ -766,6 +766,8 @@
     <string name="editor_pattern_border_heavy">Border Heavy</string>
     <string name="editor_pattern_scatter">Scatter</string>
     <string name="editor_generate_border_stubs">Border Stubs</string>
+    <string name="editor_play_map">▶ Play Map</string>
+    <string name="map_dimensions_mismatch">Map dimensions %1$dx%2$d does not fit settings %3$dx%4$d - generating new walls</string>
     <string name="editor_no_level_loaded">No level loaded</string>
 
     <!-- Login and Account Strings -->

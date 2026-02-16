@@ -691,4 +691,5 @@
     <string name="streak_popup_day_29_headline">Noch ein Tag!</string>
     <string name="streak_popup_day_30_headline">Fast ein Monat!</string>
     <string name="streak_popup_day_31_headline">Legendenstatus!</string>
+    <string name="map_dimensions_mismatch">Kartengröße %1$dx%2$d passt nicht zu Einstellungen %3$dx%4$d - neue Wände werden generiert</string>
 </resources>

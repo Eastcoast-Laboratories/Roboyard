@@ -286,4 +286,5 @@
     <string name="share_via_url">Partager via URL</string>
     <string name="share_success">Carte partagée avec succès!</string>
     <string name="share_failed">Erreur lors du partage: %1$s</string>
+    <string name="map_dimensions_mismatch">Dimensions de la carte %1$dx%2$d ne correspondent pas aux paramètres %3$dx%4$d - génération de nouveaux murs</string>
 </resources>

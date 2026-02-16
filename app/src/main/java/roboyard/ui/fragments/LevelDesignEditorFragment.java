@@ -529,6 +529,12 @@ public class LevelDesignEditorFragment extends Fragment {
                 Timber.d("[LEVEL_EDITOR] Border stubs regenerated");
             });
         }
+
+        // Play map button — launches the current editor map via deep link
+        Button playMapButton = requireView().findViewById(R.id.play_map_button);
+        if (playMapButton != null) {
+            playMapButton.setOnClickListener(v -> playCurrentMap());
+        }
     }
     
     private void setupWallPatternSpinner() {
@@ -593,6 +599,50 @@ public class LevelDesignEditorFragment extends Fragment {
                 currentState.getGameElements().size(), pattern);
     }
     
+    /**
+     * Launch the current editor map as a playable game via deep link intent.
+     * Generates the web-format level text and opens it through the app's deep link handler.
+     */
+    private void playCurrentMap() {
+        if (currentState == null) {
+            Toast.makeText(requireContext(), R.string.editor_no_level_loaded, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check that there is at least one robot and one target
+        boolean hasRobot = false, hasTarget = false;
+        for (GameElement el : currentState.getGameElements()) {
+            if (el.getType() == GameElement.TYPE_ROBOT) hasRobot = true;
+            if (el.getType() == GameElement.TYPE_TARGET) hasTarget = true;
+        }
+        if (!hasRobot || !hasTarget) {
+            Toast.makeText(requireContext(),
+                    "Map needs at least one robot and one target to play",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        try {
+            String levelText = generateLevelText();
+            String encoded = URLEncoder.encode(levelText, "UTF-8");
+            // Use /open path which matches the intent-filter in AndroidManifest.xml
+            String deepLinkUrl = "https://roboyard.z11.de/open?data=" + encoded;
+            Timber.d("[EDITOR_PLAY] Launching map via deep link: %s",
+                    deepLinkUrl.substring(0, Math.min(120, deepLinkUrl.length())));
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(deepLinkUrl));
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            startActivity(intent);
+        } catch (UnsupportedEncodingException e) {
+            Timber.e(e, "[EDITOR_PLAY] Failed to encode level text");
+            Toast.makeText(requireContext(), "Error encoding map data", Toast.LENGTH_SHORT).show();
+        } catch (ActivityNotFoundException e) {
+            Timber.e(e, "[EDITOR_PLAY] No activity found for deep link");
+            Toast.makeText(requireContext(), "Cannot open game from editor", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void showLevelText() {
         Timber.d("[EDITOR_EXPORT] showLevelText() called - opening export dialog");
         String levelText = generateLevelText();
