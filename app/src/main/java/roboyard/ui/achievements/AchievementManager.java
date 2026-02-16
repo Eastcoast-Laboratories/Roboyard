@@ -310,10 +310,15 @@ public class AchievementManager {
         }
         
         // Solution length achievements (18-29 moves individually, 30+ as one)
-        if (optimalMoves >= 18 && optimalMoves <= 29) {
-            unlock("solution_" + optimalMoves + "_moves");
-        } else if (optimalMoves >= 30) {
-            unlock("solution_30_plus_moves");
+        // Only unlock without hint usage
+        if (hintsUsed == 0) {
+            if (optimalMoves >= 18 && optimalMoves <= 29) {
+                unlock("solution_" + optimalMoves + "_moves");
+            } else if (optimalMoves >= 30) {
+                unlock("solution_30_plus_moves");
+            }
+        } else {
+            Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - hints were used (%d)", hintsUsed);
         }
         
         // Multiple targets

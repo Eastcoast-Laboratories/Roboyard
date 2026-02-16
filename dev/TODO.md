@@ -73,12 +73,11 @@ check if this all works:
 
 - sidekick_concept.md
 
+1. testen: die achievements Solution length  müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
 
 # last prompt:
-1. die achievements Solution length  müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
 
-2.
-Wenn man Reset drückt, dann muss auch der Hint counter wieder auf Null gesetzt werden und auch kein moves from here angezeigt werden
+1. die farbe des deltas aendert sich immer erst einen click zu spät, also wenn man auf delta 0 ist und dann einen falschen mve macht, dann erhöht sich das delta auf +1 aber die farbe bleibt noch grün, erst, wenn man den nächsten move macht korrigiert sich die farbe zu gelb-grün. das soll besser gleich passieren 
 
 3.
 Erstelle einen Level Generator. Der lustige Levels erzeugt, mit irgendwelchen Spiralen oder getrennten Bereichen, wo die Roboter teilweise schwierig, rüberkommen oder mit lustigen Mustern aus den Wänden. Der Generator soll zehn verschiedene Modi haben und im level Editor soll man diese auswählen können um neue Level zu erzeugen

@@ -59,8 +59,8 @@ public class AchievementManagerTest {
     public void testAllAchievementsLoaded() {
         List<Achievement> all = achievementManager.getAllAchievements();
         assertNotNull("Achievement list should not be null", all);
-        // 64 achievements (54 + 3 perfect_streak + 2 no_hints cumulative + 5 other)
-        assertEquals("Should have 64 achievements", 64, all.size());
+        // 68 achievements
+        assertEquals("Should have 68 achievements", 68, all.size());
     }
 
     /**
@@ -262,6 +262,34 @@ public class AchievementManagerTest {
         achievementManager.onNewGameStarted();
         achievementManager.onRandomGameCompleted(35, 35, 0, 120000, false, 4, 1, 1);
         assertTrue("solution_30_plus_moves should be unlocked", achievementManager.isUnlocked("solution_30_plus_moves"));
+    }
+
+    /**
+     * Test solution length achievements are NOT unlocked when hints are used
+     */
+    @Test
+    public void testSolutionLengthAchievementsBlockedByHints() {
+        achievementManager.resetAll();
+        
+        // Complete a 20-move game WITH hints — should NOT unlock
+        achievementManager.onNewGameStarted();
+        achievementManager.onHintUsed();
+        achievementManager.onRandomGameCompleted(20, 20, 1, 60000, false, 4, 1, 1);
+        assertFalse("solution_20_moves should NOT be unlocked when hints used",
+                achievementManager.isUnlocked("solution_20_moves"));
+        
+        // Complete a 30+ move game WITH hints — should NOT unlock
+        achievementManager.onNewGameStarted();
+        achievementManager.onHintUsed();
+        achievementManager.onRandomGameCompleted(35, 35, 1, 120000, false, 4, 1, 1);
+        assertFalse("solution_30_plus_moves should NOT be unlocked when hints used",
+                achievementManager.isUnlocked("solution_30_plus_moves"));
+        
+        // Now complete without hints — SHOULD unlock
+        achievementManager.onNewGameStarted();
+        achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 1, 1);
+        assertTrue("solution_20_moves SHOULD be unlocked without hints",
+                achievementManager.isUnlocked("solution_20_moves"));
     }
 
     /**
