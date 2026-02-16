@@ -765,6 +765,7 @@
     <string name="editor_pattern_islands">Islands</string>
     <string name="editor_pattern_border_heavy">Border Heavy</string>
     <string name="editor_pattern_scatter">Scatter</string>
+    <string name="editor_generate_border_stubs">Border Stubs</string>
 
     <!-- Login and Account Strings -->
     <string name="profile_a11y">User profile</string>

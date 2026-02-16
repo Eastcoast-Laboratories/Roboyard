@@ -242,6 +242,13 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
+        <Button
+            android:id="@+id/generate_border_stubs_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/editor_generate_border_stubs"
+            android:layout_marginBottom="8dp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

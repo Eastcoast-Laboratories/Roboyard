@@ -515,6 +515,20 @@ public class LevelDesignEditorFragment extends Fragment {
         if (generateWallsButton != null) {
             generateWallsButton.setOnClickListener(v -> generateWallsFromPattern());
         }
+        
+        // Generate border stubs button
+        Button borderStubsButton = requireView().findViewById(R.id.generate_border_stubs_button);
+        if (borderStubsButton != null) {
+            borderStubsButton.setOnClickListener(v -> {
+                if (currentState == null) {
+                    Toast.makeText(requireContext(), "No level loaded", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                WallPatternGenerator.generateBorderStubs(currentState);
+                updateUI();
+                Timber.d("[LEVEL_EDITOR] Border stubs regenerated");
+            });
+        }
     }
     
     private void setupWallPatternSpinner() {

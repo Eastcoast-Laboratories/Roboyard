@@ -2860,8 +2860,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int deviation = (optimal > 0) ? (currentMoves + cachedResult) - optimal : 0;
             String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
             String text = context.getString(R.string.live_move_counter_optimal, cachedResult) + deviationStr;
-            liveMoveCounterText.setValue(text);
             liveMoveCounterDeviation.setValue(deviation);
+            liveMoveCounterText.setValue(text);
             liveSolverCalculating.setValue(false);
             Timber.d("[PRECOMP_SOLUTION] Used pre-computed result: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
             // Pre-compute next moves from this new position
@@ -2884,8 +2884,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     int deviation = (optimal > 0) ? (currentMoves + remainingMoves) - optimal : 0;
                     String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
                     String text = context.getString(R.string.live_move_counter_optimal, remainingMoves) + deviationStr;
-                    liveMoveCounterText.setValue(text);
                     liveMoveCounterDeviation.setValue(deviation);
+                    liveMoveCounterText.setValue(text);
                     Timber.d("[LIVE_SOLVER] Result: %d remaining, %d current, %d optimal, Δ%+d", remainingMoves, currentMoves, optimal, deviation);
                     // Cache this result and pre-compute next moves
                     nextMovesCache.put(stateHash, remainingMoves);

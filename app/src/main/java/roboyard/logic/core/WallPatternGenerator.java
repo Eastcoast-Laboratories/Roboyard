@@ -1,6 +1,7 @@
 package roboyard.logic.core;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import timber.log.Timber;
@@ -129,6 +130,101 @@ public class WallPatternGenerator {
             }
         }
         return state;
+    }
+
+    // ── Border Stubs (perpendicular walls on outer edges) ─────────────
+
+    /**
+     * Remove existing border stubs and generate new ones on a GameState.
+     * Places 2-3 perpendicular walls per side, not too close to corners (min 2 cells away).
+     * Top/bottom borders get vertical stubs, left/right borders get horizontal stubs.
+     */
+    public static void generateBorderStubs(GameState state) {
+        int w = state.getWidth();
+        int h = state.getHeight();
+        Random r = new Random();
+        int minCornerDist = 2;
+
+        // Remove existing border stubs (perpendicular walls touching the border)
+        List<GameElement> toRemove = new ArrayList<>();
+        for (GameElement el : state.getGameElements()) {
+            if (el.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                // Vertical wall on top border (y=0) or bottom border (y=h-1)
+                if (el.getY() == 0 || el.getY() == h - 1) {
+                    // Don't remove corner border walls (x=0 or x=w)
+                    if (el.getX() > 0 && el.getX() < w) {
+                        toRemove.add(el);
+                    }
+                }
+            } else if (el.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                // Horizontal wall on left border (x=0) or right border (x=w-1)
+                if (el.getX() == 0 || el.getX() == w - 1) {
+                    // Don't remove corner border walls (y=0 or y=h)
+                    if (el.getY() > 0 && el.getY() < h) {
+                        toRemove.add(el);
+                    }
+                }
+            }
+        }
+        // Clean up board[][] for removed stubs
+        for (GameElement el : toRemove) {
+            state.setCellType(el.getX(), el.getY(), 0);
+        }
+        state.getGameElements().removeAll(toRemove);
+
+        Timber.d("[BORDER_STUBS] Removed %d old border stubs from %dx%d board", toRemove.size(), w, h);
+
+        // Generate new stubs per side
+        generateStubsForSide(state, r, w, h, minCornerDist);
+    }
+
+    private static void generateStubsForSide(GameState state, Random r, int w, int h, int minDist) {
+        // Top border: vertical walls at y=0, x varies
+        placeStubsOnEdge(state, r, minDist, w - 1 - minDist, true, 0, w, h);
+        // Bottom border: vertical walls at y=h, x varies
+        placeStubsOnEdge(state, r, minDist, w - 1 - minDist, true, h, w, h);
+        // Left border: horizontal walls at x=0, y varies
+        placeStubsOnEdge(state, r, minDist, h - 1 - minDist, false, 0, w, h);
+        // Right border: horizontal walls at x=w, y varies
+        placeStubsOnEdge(state, r, minDist, h - 1 - minDist, false, w, w, h);
+    }
+
+    private static void placeStubsOnEdge(GameState state, Random r, int rangeMin, int rangeMax,
+                                           boolean isHorizontalEdge, int fixedCoord, int boardW, int boardH) {
+        if (rangeMin >= rangeMax) return;
+        int count = 2 + r.nextInt(2); // 2 or 3 stubs
+        int minSpacing = 2;
+        ArrayList<Integer> positions = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            for (int attempt = 0; attempt < 30; attempt++) {
+                int pos = rangeMin + r.nextInt(rangeMax - rangeMin + 1);
+                boolean tooClose = false;
+                for (int existing : positions) {
+                    if (Math.abs(pos - existing) < minSpacing) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (!tooClose) {
+                    positions.add(pos);
+                    break;
+                }
+            }
+        }
+
+        for (int pos : positions) {
+            if (isHorizontalEdge) {
+                // Horizontal edge (top/bottom) → place vertical wall stub
+                state.addVerticalWall(pos, fixedCoord == 0 ? 0 : boardH - 1);
+            } else {
+                // Vertical edge (left/right) → place horizontal wall stub
+                state.addHorizontalWall(fixedCoord == 0 ? 0 : boardW - 1, pos);
+            }
+        }
+
+        Timber.d("[BORDER_STUBS] Placed %d stubs on %s edge at %d",
+                positions.size(), isHorizontalEdge ? "horizontal" : "vertical", fixedCoord);
     }
 
     // ── Pattern 0: Classic (L-shaped wall pairs in quadrants) ───────────
