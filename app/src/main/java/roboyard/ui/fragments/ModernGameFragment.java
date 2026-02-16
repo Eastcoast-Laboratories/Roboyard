@@ -2422,26 +2422,6 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         }
     }
 
-    /**
-     * Get the direction name from a move direction
-     * @param direction Direction constant from ERRGameMove
-     * @return Human-readable direction name
-     */
-    private String getLocalizedDirectionName(int direction) {
-        
-        switch (direction) {
-            case 1: // ERRGameMove.UP.getDirection()
-                return getString(R.string.hint_direction_up);
-            case 4: // ERRGameMove.DOWN.getDirection()
-                return getString(R.string.hint_direction_down);
-            case 2: // ERRGameMove.RIGHT.getDirection()
-                return getString(R.string.hint_direction_right);
-            case 8: // ERRGameMove.LEFT.getDirection()
-                return getString(R.string.hint_direction_left);
-            default:
-                return "unknown direction";
-        }
-    }
 
 
     /**
@@ -2471,18 +2451,60 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * @return Human-readable direction name
      */
     private String getDirectionArrow(int direction) {
+        // Return a placeholder character that will be replaced with SVG drawable
         switch (direction) {
-            case 1: // ERRGameMove.UP.getDirection()
-                return getString(R.string.hint_direction_up); // ▲
-            case 2: // ERRGameMove.RIGHT.getDirection()
-                return getString(R.string.hint_direction_right); // ▶
-            case 4: // ERRGameMove.DOWN.getDirection()
-                return getString(R.string.hint_direction_down); // ▼
-            case 8: // ERRGameMove.LEFT.getDirection()
-                return getString(R.string.hint_direction_left); // ◀
+            case 1: // UP
+                return "↑";
+            case 2: // RIGHT
+                return "→";
+            case 4: // DOWN
+                return "↓";
+            case 8: // LEFT
+                return "←";
             default:
-                return "unknown direction";
+                return "?";
         }
+    }
+
+    /**
+     * Replace arrow characters in hint text with SVG triangle drawables
+     * Arrows maintain consistent size regardless of text context (history vs current move)
+     */
+    private CharSequence formatHintWithSVGArrows(String hintText) {
+        android.text.SpannableString spannable = new android.text.SpannableString(hintText);
+        int textColor = android.graphics.Color.BLACK;
+        try {
+            // Try to get the text color from the status text view if available
+            if (statusTextView != null) {
+                textColor = statusTextView.getCurrentTextColor();
+            }
+        } catch (Exception e) {
+            Timber.d("[HINT_ARROWS] Could not get text color, using black");
+        }
+
+        int arrowSize = 88; // Fixed pixel size for all arrows
+        String[] arrows = {"↑", "→", "↓", "←"};
+        int[] directions = {1, 2, 4, 8};
+
+        for (int i = 0; i < arrows.length; i++) {
+            String arrow = arrows[i];
+            int direction = directions[i];
+            int index = hintText.indexOf(arrow);
+            
+            while (index >= 0) {
+                roboyard.ui.utils.DirectionArrowDrawable drawable = 
+                    new roboyard.ui.utils.DirectionArrowDrawable(direction, textColor, arrowSize);
+                
+                // Use FixedSizeImageSpan to prevent scaling relative to text size
+                roboyard.ui.utils.FixedSizeImageSpan imageSpan = 
+                    new roboyard.ui.utils.FixedSizeImageSpan(drawable, arrowSize, arrowSize);
+                spannable.setSpan(imageSpan, index, index + 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                
+                index = hintText.indexOf(arrow, index + 1);
+            }
+        }
+        
+        return spannable;
     }
 
     /**
@@ -2831,8 +2853,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 // Get the robot's color name - use the color from the move
                 String robotColorName = getLocalizedRobotColorName(rrMove.getColor());
                 
-                // Get the direction name
-                String directionName = getLocalizedDirectionName(rrMove.getDirection());
+                // Get the direction arrow (UTF-8 arrow that will be replaced by SVG)
+                String directionArrow = getDirectionArrow(rrMove.getDirection());
                 
                 // Calculate the hint number to display (1-based)
                 int displayHintNumber = hintIndex + 1;
@@ -2857,7 +2879,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 
                 // For the first hint, just show which robot to move
                 if (hintIndex == 0) {
-                    hintMessage.append(robotColorName).append(" ").append(directionName);
+                    hintMessage.append(robotColorName).append(" ").append(directionArrow);
                     Timber.d("[HINT_SYSTEM] First hint format: %s", hintMessage.toString());
                 } else {
                     // For subsequent hints, first show abbreviated previous moves
@@ -2894,7 +2916,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     
                     // Add current move
                     // String colorAbbreviation = getColorAbbreviation(robotColorName);
-                    hintMessage.append(", ").append(robotColorName + " ").append(directionName);
+                    hintMessage.append(", ").append(robotColorName + " ").append(directionArrow);
                     Timber.d("[HINT_SYSTEM] Subsequent hint format: %s", hintMessage.toString());
                 }
                 
@@ -3062,7 +3084,9 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void updateStatusText(String message, boolean isVisible) {
         Timber.d("[STATUS_TEXT] Updating status text: '%s', visible: %b", message, isVisible);
         if (statusTextView != null) {
-            statusTextView.setText(message);
+            // Format hint text with SVG arrows instead of UTF-8 characters
+            CharSequence formattedText = formatHintWithSVGArrows(message);
+            statusTextView.setText(formattedText);
             // Reset text color to default black (live counter sets it to green)
             statusTextView.setTextColor(android.graphics.Color.parseColor("#1A1A1A"));
             statusTextView.setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE); // Use INVISIBLE instead of GONE to reserve space

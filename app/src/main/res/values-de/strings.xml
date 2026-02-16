@@ -379,12 +379,6 @@
     <string name="direction_right">rechts</string>
     <string name="direction_left">links</string>
 
-    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
-    <string name="hint_direction_up">\u25B2</string>
-    <string name="hint_direction_down">\u25BC</string>
-    <string name="hint_direction_right">\u25B6</string>
-    <string name="hint_direction_left">\u25C0</string>
-    
     <!-- Additional hint strings -->
     <string name="hint_move_robot_first">Bewege den %1$s Roboter zuerst</string>
 

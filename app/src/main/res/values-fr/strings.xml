@@ -115,12 +115,6 @@
     <string name="direction_down">vers le bas</string>
     <string name="direction_right">vers la droite</string>
     <string name="direction_left">vers la gauche</string>
-    
-    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
-    <string name="hint_direction_up">\u25B2</string>
-    <string name="hint_direction_down">\u25BC</string>
-    <string name="hint_direction_right">\u25B6</string>
-    <string name="hint_direction_left">\u25C0</string>
 
     <!-- Game status messages -->
     <string name="target_reached">Cible atteinte! Partie terminée en %1$d coups et %2$d cases déplacées</string>

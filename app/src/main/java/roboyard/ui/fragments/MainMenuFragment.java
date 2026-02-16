@@ -118,6 +118,18 @@ public class MainMenuFragment extends BaseGameFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        // Stop any running solver when returning to main menu (via back button or navigation)
+        roboyard.ui.util.SolverManager solverManager = roboyard.ui.util.SolverManager.getInstance();
+        solverManager.cancelSolver();
+        solverManager.resetInitialization();
+        
+        // Also cancel solver via GameStateManager to stop background threads
+        if (gameStateManager != null) {
+            gameStateManager.cancelSolver();
+        }
+        
+        Timber.d("[SOLVER] Cancelled and reset all solvers when entering main menu");
     }
 
     @Override

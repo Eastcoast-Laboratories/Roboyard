@@ -96,11 +96,6 @@
     <string name="direction_right">오른쪽</string>
     <string name="direction_left">왼쪽</string>
     
-    <!-- Hint Direction Symbols - Using Unicode escape sequences for consistent rendering across devices -->
-    <string name="hint_direction_left">\u25C0</string>
-    <string name="hint_direction_right">\u25B6</string>
-    <string name="hint_direction_up">\u25B2</string>
-    <string name="hint_direction_down">\u25BC</string>
     
     <!-- Settings strings -->
     <string name="settings_game_mode">게임 모드:</string>

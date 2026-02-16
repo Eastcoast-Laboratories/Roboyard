@@ -253,13 +253,7 @@
     <string name="direction_down">向下</string>
     <string name="direction_right">向右</string>
     <string name="direction_left">向左</string>
-    
-    <!-- Direction symbols - Using Unicode escape sequences for consistent rendering across devices -->
-    <string name="hint_direction_up">\u25B2</string>
-    <string name="hint_direction_down">\u25BC</string>
-    <string name="hint_direction_right">\u25B6</string>
-    <string name="hint_direction_left">\u25C0</string>
-    
+
     <!-- Accessibility Controls -->
     <string name="next_robot_button">下一个机器人</string>
     <string name="announce_hint">提示</string>
