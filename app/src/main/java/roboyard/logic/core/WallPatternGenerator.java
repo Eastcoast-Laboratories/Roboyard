@@ -345,26 +345,43 @@ public class WallPatternGenerator {
     // ── Pattern 3: Maze ─────────────────────────────────────────────────
 
     private void generateMaze() {
-        // Simple recursive-backtracker-inspired maze with wider passages
-        int step = 2;
-        boolean[][] visited = new boolean[width][height];
+        // Grid-based maze using recursive backtracker
+        // Cells are at odd coordinates, walls between them
+        // This covers the FULL board from (0,0) to (width-1, height-1)
+        int cellsX = (width - 1) / 2;
+        int cellsY = (height - 1) / 2;
+        if (cellsX < 2) cellsX = 2;
+        if (cellsY < 2) cellsY = 2;
+
+        boolean[][] visited = new boolean[cellsX][cellsY];
         ArrayList<int[]> stack = new ArrayList<>();
 
-        int startX = 1, startY = 1;
-        visited[startX][startY] = true;
-        stack.add(new int[]{startX, startY});
+        // Fill entire interior with walls first, then carve passages
+        for (int x = 1; x < width; x++) {
+            for (int y = 1; y < height; y++) {
+                if (!inCarree(x, y)) {
+                    placeH(x, y);
+                    placeV(x, y);
+                }
+            }
+        }
 
-        int[][] dirs = {{0, -step}, {step, 0}, {0, step}, {-step, 0}};
+        // Start from random cell
+        int sx = rand.nextInt(cellsX);
+        int sy = rand.nextInt(cellsY);
+        visited[sx][sy] = true;
+        stack.add(new int[]{sx, sy});
+
+        int[][] dirs = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 
         while (!stack.isEmpty()) {
             int[] current = stack.get(stack.size() - 1);
             int cx = current[0], cy = current[1];
 
-            // Find unvisited neighbors
             ArrayList<int[]> neighbors = new ArrayList<>();
             for (int[] d : dirs) {
                 int nx = cx + d[0], ny = cy + d[1];
-                if (nx >= 1 && nx < width - 1 && ny >= 1 && ny < height - 1 && !visited[nx][ny]) {
+                if (nx >= 0 && nx < cellsX && ny >= 0 && ny < cellsY && !visited[nx][ny]) {
                     neighbors.add(new int[]{nx, ny, d[0], d[1]});
                 }
             }
@@ -376,29 +393,34 @@ public class WallPatternGenerator {
                 int nx = chosen[0], ny = chosen[1], dx = chosen[2], dy = chosen[3];
                 visited[nx][ny] = true;
 
-                // Place wall segments on the sides of the passage (not blocking it)
+                // Remove wall between current cell and chosen neighbor
+                // Cell (cx,cy) maps to board position (cx*2+1, cy*2+1)
+                int wallX = cx * 2 + 1 + dx;
+                int wallY = cy * 2 + 1 + dy;
+                // Remove the wall segment between the two cells
                 if (dx != 0) {
-                    // Moving horizontally — place vertical walls above/below passage
-                    int midX = cx + dx / 2;
-                    // Randomly place a wall segment perpendicular to movement
-                    if (rand.nextBoolean()) placeH(midX, cy);
+                    // Horizontal movement → remove vertical wall
+                    if (wallX >= 0 && wallX <= width && wallY >= 0 && wallY < height) {
+                        vWalls[wallX][wallY] = 0;
+                    }
                 } else {
-                    // Moving vertically — place horizontal walls left/right of passage
-                    int midY = cy + dy / 2;
-                    if (rand.nextBoolean()) placeV(cx, midY);
+                    // Vertical movement → remove horizontal wall
+                    if (wallX >= 0 && wallX < width && wallY >= 0 && wallY <= height) {
+                        hWalls[wallX][wallY] = 0;
+                    }
                 }
 
                 stack.add(new int[]{nx, ny});
             }
         }
 
-        // Add extra L-walls for complexity
-        for (int i = 0; i < width / 3; i++) {
-            int x = rng(2, width - 3);
-            int y = rng(2, height - 3);
+        // Remove some extra walls randomly to create wider passages and reduce density
+        for (int i = 0; i < (width + height); i++) {
+            int x = rng(1, width - 1);
+            int y = rng(1, height - 1);
             if (!inCarree(x, y)) {
-                placeH(x, y);
-                placeV(x + rng(0, 1), y - rng(0, 1));
+                if (rand.nextBoolean()) hWalls[x][y] = 0;
+                else vWalls[x][y] = 0;
             }
         }
     }
@@ -512,23 +534,37 @@ public class WallPatternGenerator {
     // ── Pattern 7: Islands ──────────────────────────────────────────────
 
     private void generateIslands() {
-        // Small isolated wall clusters scattered across the board
-        int numIslands = rng(4, 8);
+        // Many small wall clusters spread evenly across the board
+        // Use a grid-based approach to ensure good coverage
+        int gridStep = 3;
+        int numIslands = rng(width * height / 12, width * height / 8);
 
         for (int i = 0; i < numIslands; i++) {
-            int cx = rng(2, width - 3);
-            int cy = rng(2, height - 3);
+            int cx = rng(1, width - 2);
+            int cy = rng(1, height - 2);
             if (inCarree(cx, cy)) continue;
 
-            int size = rng(1, 3);
-            // Create a small cluster of walls around (cx, cy)
-            for (int dx = 0; dx < size; dx++) {
-                for (int dy = 0; dy < size; dy++) {
+            int size = rng(1, 2);
+            // Create a small L-shaped or T-shaped cluster
+            for (int dx = 0; dx <= size; dx++) {
+                for (int dy = 0; dy <= size; dy++) {
                     int wx = cx + dx;
                     int wy = cy + dy;
-                    if (wx < width - 1 && wy < height - 1 && !inCarree(wx, wy)) {
-                        if (rand.nextBoolean()) placeH(wx, wy);
-                        if (rand.nextBoolean()) placeV(wx, wy);
+                    if (wx >= 0 && wx < width && wy >= 0 && wy < height && !inCarree(wx, wy)) {
+                        if (rand.nextInt(3) > 0) placeH(wx, wy);
+                        if (rand.nextInt(3) > 0) placeV(wx, wy);
+                    }
+                }
+            }
+        }
+
+        // Fill sparse areas with extra single walls
+        for (int x = 1; x < width - 1; x += 3) {
+            for (int y = 1; y < height - 1; y += 3) {
+                if (!inCarree(x, y) && hWalls[x][y] == 0 && vWalls[x][y] == 0) {
+                    if (rand.nextInt(3) == 0) {
+                        if (rand.nextBoolean()) placeH(x, y);
+                        else placeV(x, y);
                     }
                 }
             }
@@ -539,22 +575,24 @@ public class WallPatternGenerator {
 
     private void generateBorderHeavy() {
         // Many walls near the edges, fewer in the center
-        int margin = Math.max(2, width / 4);
+        // Extended range: 0 to width/height (includes edge positions)
+        int margin = Math.max(3, width / 3);
+        int wallCount = (width + height) * 2;
 
-        for (int i = 0; i < width * 2; i++) {
+        for (int i = 0; i < wallCount; i++) {
             int x, y;
             // 70% chance near border, 30% chance anywhere
             if (rand.nextInt(10) < 7) {
-                // Near a border
+                // Near a border — range includes edge cells (0 and max)
                 switch (rand.nextInt(4)) {
-                    case 0: x = rng(1, margin); y = rng(1, height - 2); break;
-                    case 1: x = rng(width - margin - 1, width - 2); y = rng(1, height - 2); break;
-                    case 2: x = rng(1, width - 2); y = rng(1, margin); break;
-                    default: x = rng(1, width - 2); y = rng(height - margin - 1, height - 2); break;
+                    case 0: x = rng(0, margin); y = rng(0, height - 1); break;
+                    case 1: x = rng(width - 1 - margin, width - 1); y = rng(0, height - 1); break;
+                    case 2: x = rng(0, width - 1); y = rng(0, margin); break;
+                    default: x = rng(0, width - 1); y = rng(height - 1 - margin, height - 1); break;
                 }
             } else {
-                x = rng(1, width - 2);
-                y = rng(1, height - 2);
+                x = rng(0, width - 1);
+                y = rng(0, height - 1);
             }
 
             if (!inCarree(x, y)) {
@@ -567,11 +605,12 @@ public class WallPatternGenerator {
     // ── Pattern 9: Scatter (random walls everywhere) ────────────────────
 
     private void generateScatter() {
-        int wallCount = rng(width, width * 2);
+        // Random walls everywhere, including edge positions
+        int wallCount = rng(width + height, (width + height) * 2);
 
         for (int i = 0; i < wallCount; i++) {
-            int x = rng(1, width - 2);
-            int y = rng(1, height - 2);
+            int x = rng(0, width - 1);
+            int y = rng(0, height - 1);
             if (!inCarree(x, y)) {
                 if (rand.nextBoolean()) placeH(x, y);
                 else placeV(x, y);

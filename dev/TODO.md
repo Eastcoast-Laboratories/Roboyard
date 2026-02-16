@@ -79,8 +79,16 @@ check if this all works:
 
 1. die farbe des deltas aendert sich immer erst einen click zu spät, also wenn man auf delta 0 ist und dann einen falschen mve macht, dann erhöht sich das delta auf +1 aber die farbe bleibt noch grün, erst, wenn man den nächsten move macht korrigiert sich die farbe zu gelb-grün. das soll besser gleich passieren 
 
-3.
-Erstelle einen Level Generator. Der lustige Levels erzeugt, mit irgendwelchen Spiralen oder getrennten Bereichen, wo die Roboter teilweise schwierig, rüberkommen oder mit lustigen Mustern aus den Wänden. Der Generator soll zehn verschiedene Modi haben und im level Editor soll man diese auswählen können um neue Level zu erzeugen
+
+
+1. beim level editor: der maze generator hat zu wenig walls und ausserdem reicht er nicht bis zum rechten und unteren rand , der muss den gesamten bereich der karte ausfüllen
+
+2.islands hat zu grosse flächen ohne walls, 
+
+3. border heavy und scattered müssen beide einen grösseren bereich abdecken, diese beiden müssen auch walls die direkt am rand liegen abbilden, also in alle richtungen ein feld grösser generieren
+
+4.
+erstell eein konzept, was genau wann passieren soll mit der karten geneirierung, im moment ist es ja so, dass beim start die letzte autosave gladen wird, aber das ist nich ti immer gut, vor allem, wenn man "generate new map each time" ausgeschaltet hat, will man eigentlich, dass smoglichst immer die selbe map bleibt, nur neue positionen. ausser, wenn man die ratio ändert. oder wenn man eine karte lädt. Da muss man noch mal irgendwie in genaues Konzept machen. Was passiert wenn man das Spiel das erste mal startet, was passiert wenn man auf Karte behalten eingestellt ist? Was passiert wenn man die Auflösung ändert, was passiert wenn man einen Safe Game lädt das eine andere auf Lösung mit hat? was passeirt, wenn man eine difficulty einstellt, was, wenn man robotCount oder targetCount ändert, 
 
 
 
