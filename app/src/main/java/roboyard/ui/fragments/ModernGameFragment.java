@@ -417,6 +417,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.setActivity(requireActivity());
         Timber.d("[HISTORY] Setting activity reference in GameStateManager during onViewCreated");
         
+        // Resume map regeneration when entering game screen
+        gameStateManager.resumeRegeneration();
+        Timber.d("[SOLVER] Resumed map regeneration when entering game screen");
+        
         // Initialize UI components
         gameGridView = view.findViewById(R.id.game_grid_view);
         moveCountTextView = view.findViewById(R.id.move_count_text);
@@ -750,7 +754,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
         
-        // Observe solver running state to update hint button text
+        // Observe solver running state to update hint button text and save map button state
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
                 // Change hint button text to "Cancel" while calculating
@@ -758,11 +762,23 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 hintButton.setTextOff(getString(R.string.hint_button));
                 hintButton.setChecked(true);
                 showSolverCalculatingMessage();
+                
+                // Disable save map button while solver is running (no solution yet)
+                if (saveMapButton != null) {
+                    saveMapButton.setEnabled(false);
+                    saveMapButton.setAlpha(0.5f);
+                }
             } else {
                 // Reset hint button text
                 hintButton.setChecked(false);
                 // Don't update the status text here - let callbacks handle it appropriately
                 // This prevents text flashing/flickering between states
+                
+                // Enable save map button when solver finishes (solution found or cancelled)
+                if (saveMapButton != null && gameStateManager.getCurrentSolution() != null) {
+                    saveMapButton.setEnabled(true);
+                    saveMapButton.setAlpha(1.0f);
+                }
             }
         });
 

@@ -73,6 +73,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private boolean validateDifficulty = true;
     private int regenerationCount = 0;
     private static final int MAX_AUTO_REGENERATIONS = 999;
+    private boolean allowRegeneration = true; // Flag to stop regeneration when leaving game
 
     // Game state
     private final MutableLiveData<GameState> currentState = new MutableLiveData<>();
@@ -2141,7 +2142,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
             // BEGINNER MODE: Check if solution is too easy (below minimum) or too hard (above maximum)
             // Skip validation for loaded savegames - they should be playable regardless of current difficulty settings
-            if (!isLevelMode && !isLoadedFromSave && regenerationCount < MAX_AUTO_REGENERATIONS) {
+            // Also skip if regeneration is disabled (e.g., when user left the game screen)
+            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
                 boolean isTooEasy = moveCount < minRequiredMoves;
                 boolean isTooHard = moveCount > maxRequiredMoves;
 
@@ -2182,6 +2184,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
                 Timber.d("[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.", MAX_AUTO_REGENERATIONS);
                 regenerationCount = 0; // Reset for next time
+            } else if (!allowRegeneration) {
+                Timber.d("[SOLUTION_SOLVER][MOVES] Regeneration disabled (user left game screen), accepting current solution");
             }
         } else {
             Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
@@ -2243,6 +2247,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             getSolverManager().cancelSolver();
             // The solver will call onSolverCancelled() via the listener
         }
+    }
+    
+    /**
+     * Stop all map regeneration (e.g., when user leaves game screen)
+     */
+    public void stopRegeneration() {
+        allowRegeneration = false;
+        Timber.d("[SOLUTION_SOLVER] Map regeneration disabled");
+    }
+    
+    /**
+     * Resume map regeneration (e.g., when user enters game screen)
+     */
+    public void resumeRegeneration() {
+        allowRegeneration = true;
+        Timber.d("[SOLUTION_SOLVER] Map regeneration enabled");
     }
 
     /**

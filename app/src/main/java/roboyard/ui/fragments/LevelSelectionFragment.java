@@ -155,6 +155,17 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         return view;
     }
+    
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        // Stop map regeneration when in level selection screen
+        if (gameStateManager != null) {
+            gameStateManager.stopRegeneration();
+            Timber.d("[SOLVER] Stopped regeneration in level selection screen");
+        }
+    }
 
     /**
      * Scroll to the last played level automatically, positioning it in the middle of the screen

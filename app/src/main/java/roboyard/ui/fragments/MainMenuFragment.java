@@ -125,11 +125,13 @@ public class MainMenuFragment extends BaseGameFragment {
         solverManager.resetInitialization();
         
         // Also cancel solver via GameStateManager to stop background threads
+        // AND stop map regeneration to prevent infinite solver restarts
         if (gameStateManager != null) {
             gameStateManager.cancelSolver();
+            gameStateManager.stopRegeneration();
         }
         
-        Timber.d("[SOLVER] Cancelled and reset all solvers when entering main menu");
+        Timber.d("[SOLVER] Cancelled all solvers and stopped regeneration when entering main menu");
     }
 
     @Override
