@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 
 import androidx.core.content.ContextCompat;
 
@@ -767,8 +770,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         gameStateManager.getLiveMoveCounterText().observe(getViewLifecycleOwner(), text -> {
             if (text != null && !text.isEmpty() && gameStateManager.isLiveMoveCounterEnabled()) {
                 if (statusTextView != null) {
-                    statusTextView.setText(text);
-                    statusTextView.setTextColor(getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue()));
+                    // Main text always dark green, only the delta in parentheses changes color
+                    int darkGreen = Color.parseColor("#006400");
+                    int deltaIdx = text.indexOf("(");
+                    if (deltaIdx >= 0) {
+                        SpannableString spannable = new SpannableString(text);
+                        spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
+                        spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        statusTextView.setText(spannable);
+                    } else {
+                        statusTextView.setText(text);
+                        statusTextView.setTextColor(darkGreen);
+                    }
+                    // Always use standard light-green background for live move counter
+                    statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.hint_text_fancy_background));
                 }
             }
         });
@@ -957,6 +973,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[ROBOTS] ModernGameFragment: Reset robots button clicked");
             // Use resetGame() which provides a more complete soft reset
             gameStateManager.resetGame();
+            
+            // Hide hint container and reset hint state
+            if (hintButton != null && hintButton.isChecked()) {
+                hintButton.setChecked(false); // triggers onCheckedChanged → slideUpHintContainer
+                Timber.d("[HINT_SYSTEM] Reset: unchecked hint button");
+            }
+            currentHintStep = 0;
+            showingPreHints = true;
+            gameStateManager.resetSolutionStep();
+            Timber.d("[HINT_SYSTEM] Reset: cleared hint state");
             
             // change the "Reset" Button back to "Reset"
             resetRobotsButton.setText(R.string.reset_button);
@@ -1148,14 +1174,32 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             liveMoveCounterToggle.setChecked(savedEnabled);
             if (savedEnabled) {
                 gameStateManager.setLiveMoveCounterEnabled(true);
+                // Show hint container with just status text + eye toggle
+                if (hintContainer != null) {
+                    hintContainer.setVisibility(View.VISIBLE);
+                    prevHintButton.setVisibility(View.GONE);
+                    nextHintButton.setVisibility(View.GONE);
+                }
+                liveMoveCounterToggle.setVisibility(View.VISIBLE);
                 gameStateManager.triggerLiveSolver();
             }
             liveMoveCounterToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 Timber.d("[LIVE_SOLVER] Eye toggle changed: %s", isChecked ? "ON" : "OFF");
                 gameStateManager.setLiveMoveCounterEnabled(isChecked);
                 if (isChecked) {
+                    // Show hint container with status text + eye toggle (no hint arrows)
+                    if (hintContainer != null && hintContainer.getVisibility() != View.VISIBLE) {
+                        hintContainer.setVisibility(View.VISIBLE);
+                        prevHintButton.setVisibility(View.GONE);
+                        nextHintButton.setVisibility(View.GONE);
+                    }
                     // Trigger an immediate solve for the current position
                     gameStateManager.triggerLiveSolver();
+                } else {
+                    // If hint button is not checked, hide the container
+                    if (hintButton != null && !hintButton.isChecked() && hintContainer != null) {
+                        hintContainer.setVisibility(View.GONE);
+                    }
                 }
             });
         }
@@ -3163,11 +3207,22 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 @Override
                 public void onAnimationEnd(android.animation.Animator animation) {
                     // Reset all properties for next animation
-                    hintContainer.setVisibility(View.GONE);
                     hintContainer.setTranslationY(0f);
                     hintContainer.setAlpha(1f);
                     hintContainer.clearAnimation();
-                    Timber.d("[HINT_SYSTEM] Animation UP completed, container reset");
+                    // If live move counter is active, keep container visible with just status + eye toggle
+                    if (gameStateManager.isLiveMoveCounterEnabled()) {
+                        hintContainer.setVisibility(View.VISIBLE);
+                        prevHintButton.setVisibility(View.GONE);
+                        nextHintButton.setVisibility(View.GONE);
+                        if (liveMoveCounterToggle != null) {
+                            liveMoveCounterToggle.setVisibility(View.VISIBLE);
+                        }
+                        Timber.d("[HINT_SYSTEM] Animation UP completed, keeping container for live move counter");
+                    } else {
+                        hintContainer.setVisibility(View.GONE);
+                        Timber.d("[HINT_SYSTEM] Animation UP completed, container hidden");
+                    }
                 }
             })
             .start();

@@ -75,25 +75,14 @@ check if this all works:
 
 
 # last prompt:
-
-- merke: du sollst immer eine englische commit message vorschlagen, wenn du fertig bist.
-
-schlage eine vor jetzt.
+1. die achievements Solution length  müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
 
 2.
-warum wurden in Commit a68af9cc  updateMoveCount() und updateSquaresMoved() in ModernGameFragment.java geändert — getString(R.string.moves_count, count) wurde durch String.valueOf(count) ersetzt, wodurch die Wörter "Moves:" und "Squares:" verloren gingen? analysieree ob noch mehr solche falschen ersetzungen in dem commit vorgenommen wurden. falls ja, reverte diese auch und committe das
+Wenn man Reset drückt, dann muss auch der Hint counter wieder auf Null gesetzt werden und auch kein moves from here angezeigt werden
 
 3.
-der backround sound erklingt nicht:
-@SoundService.java#L18-26 
-dieser soll aber immer klingen und in den settings soll ein schieberegler dafür sein, wie laut "Background sound" in allen sprachen.
-baue dazu einen espresso test .
-und committe das wenn fertig
+Erstelle einen Level Generator. Der lustige Levels erzeugt, mit irgendwelchen Spiralen oder getrennten Bereichen, wo die Roboter teilweise schwierig, rüberkommen oder mit lustigen Mustern aus den Wänden. Der Generator soll zehn verschiedene Modi haben und im level Editor soll man diese auswählen können um neue Level zu erzeugen
 
-4. @concept_hotcold_mode.md#L26-29 Problems to Fix
-Toggle resets when navigating away — needs SharedPreferences persistence
-Display text ("X moves from here") — needs to add the delta Y like: X moves from here (Δ+Y), so player can see if they're on track
-schlage ab hier wieder  nur die englische  message vor, nicht committen
 
 
 
