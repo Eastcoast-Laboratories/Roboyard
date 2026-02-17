@@ -84,6 +84,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Move history for undo functionality
     private final ArrayList<GameState> stateHistory = new ArrayList<>();
     private final ArrayList<Integer> squaresMovedHistory = new ArrayList<>();
+    
+    // Path history for visual robot paths: each entry stores [robotColor, fromX, fromY, toX, toY]
+    private final ArrayList<int[]> pathHistory = new ArrayList<>();
 
     // Game settings
     private final MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
@@ -1392,6 +1395,36 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     public LiveData<Boolean> isSolverRunning() {
         return isSolverRunning;
+    }
+    
+    /**
+     * Get the path history for robot movements
+     * @return ArrayList of path entries [robotColor, fromX, fromY, toX, toY]
+     */
+    public ArrayList<int[]> getPathHistory() {
+        return pathHistory;
+    }
+    
+    /**
+     * Add a path entry to the history
+     */
+    public void addPathToHistory(int color, int fromX, int fromY, int toX, int toY) {
+        pathHistory.add(new int[]{color, fromX, fromY, toX, toY});
+    }
+    
+    /**
+     * Remove the last path entry (for undo)
+     */
+    public int[] removeLastPathFromHistory() {
+        if (pathHistory.isEmpty()) return null;
+        return pathHistory.remove(pathHistory.size() - 1);
+    }
+    
+    /**
+     * Clear path history
+     */
+    public void clearPathHistory() {
+        pathHistory.clear();
     }
 
     /**

@@ -3420,8 +3420,8 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             Timber.d("[GAME_INIT] Reset move counts and game history");
         } else {
             // For games already in progress, reconstruct the robot paths from history
+            // DO NOT clear paths - just reconstruct them from the stored history
             if (gameGridView != null) {
-                gameGridView.clearRobotPaths();
                 gameGridView.reconstructPathsFromHistory();
                 Timber.d("[ROBOT_PATHS] Reconstructed robot paths from history (moveCount=%d)", moveCount);
             }

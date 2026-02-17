@@ -75,8 +75,7 @@ public class GameGridView extends View {
     private final HashMap<Integer, float[]> robotBaseOffsets = new HashMap<>(); // Base offset for each robot
     private final HashMap<Integer, HashMap<String, Integer>> segmentCounts = new HashMap<>(); // Track segment traversal count
     
-    // Path history for undo support: each entry stores [robotColor, fromX, fromY, toX, toY]
-    private final ArrayList<int[]> pathHistory = new ArrayList<>();
+    // NOTE: pathHistory is now stored in GameStateManager to persist across fragment recreation
     
     // Track visited squares for achievements (per robot and combined)
     private final HashMap<Integer, java.util.HashSet<String>> visitedSquaresPerRobot = new HashMap<>();
@@ -1630,8 +1629,10 @@ public class GameGridView extends View {
         // Add the new position to the path
         robotPaths.get(color).add(new int[]{toX, toY});
         
-        // Save to path history for undo support
-        pathHistory.add(new int[]{color, fromX, fromY, toX, toY});
+        // Save to path history for undo support (stored in GameStateManager to persist across fragment recreation)
+        if (gameStateManager != null) {
+            gameStateManager.addPathToHistory(color, fromX, fromY, toX, toY);
+        }
         
         // Track all squares visited along the path (not just endpoints)
         int dx = Integer.compare(toX, fromX);
@@ -1794,13 +1795,15 @@ public class GameGridView extends View {
     
     /**
      * Clear all robot paths
-     * NOTE: pathHistory is NOT cleared - it's needed to reconstruct paths when game is re-rendered
      */
     public void clearRobotPaths() {
         robotPaths.clear();
         robotBaseOffsets.clear();
         segmentCounts.clear();
-        // DO NOT clear pathHistory - it's needed to reconstruct paths
+        // Also clear pathHistory in GameStateManager
+        if (gameStateManager != null) {
+            gameStateManager.clearPathHistory();
+        }
         visitedSquaresPerRobot.clear();
         visitedSquaresAllRobots.clear();
         allSquaresOneRobotUnlocked = false;
@@ -1816,6 +1819,9 @@ public class GameGridView extends View {
      * This is called when the game is re-rendered after being paused/resumed
      */
     public void reconstructPathsFromHistory() {
+        if (gameStateManager == null) return;
+        
+        ArrayList<int[]> pathHistory = gameStateManager.getPathHistory();
         if (pathHistory.isEmpty()) return;
         
         // Clear current paths but keep the history
@@ -1881,10 +1887,11 @@ public class GameGridView extends View {
      * Removes the last point from the robot's path and decrements the segment count.
      */
     public void undoLastPathSegment() {
-        if (pathHistory.isEmpty()) return;
+        if (gameStateManager == null) return;
         
-        // Pop the last path entry
-        int[] last = pathHistory.remove(pathHistory.size() - 1);
+        // Pop the last path entry from GameStateManager
+        int[] last = gameStateManager.removeLastPathFromHistory();
+        if (last == null) return;
         int color = last[0];
         int fromX = last[1];
         int fromY = last[2];
