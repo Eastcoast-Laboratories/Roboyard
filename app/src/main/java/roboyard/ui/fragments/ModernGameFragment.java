@@ -2104,6 +2104,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Re-measure the game grid to fix scaling after app loses/regains focus
         if (gameGridView != null) {
+            // Get current state and update game grid (same as reset button)
+            GameState currentState = gameStateManager != null ? gameStateManager.getCurrentState().getValue() : null;
+            if (currentState != null) {
+                updateGameState(currentState); // This fixes the scaling problem when the app is losing focus and resuming game
+                Timber.d("[GRID_LAYOUT] onResume: called updateGameState to fix scaling");
+            }
+            
             gameGridView.requestLayout();
             gameGridView.invalidate();
             Timber.d("[GRID_LAYOUT] onResume: requested layout recalculation for game grid");
