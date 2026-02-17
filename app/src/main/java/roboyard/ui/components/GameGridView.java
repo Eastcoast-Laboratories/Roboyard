@@ -1794,12 +1794,13 @@ public class GameGridView extends View {
     
     /**
      * Clear all robot paths
+     * NOTE: pathHistory is NOT cleared - it's needed to reconstruct paths when game is re-rendered
      */
     public void clearRobotPaths() {
         robotPaths.clear();
         robotBaseOffsets.clear();
         segmentCounts.clear();
-        pathHistory.clear();
+        // DO NOT clear pathHistory - it's needed to reconstruct paths
         visitedSquaresPerRobot.clear();
         visitedSquaresAllRobots.clear();
         allSquaresOneRobotUnlocked = false;
@@ -1807,6 +1808,71 @@ public class GameGridView extends View {
         allSquaresAllRobotsUnlocked = false;
         allSquaresAllRobotsGoalUnlocked = false;
         goalReached = false;
+        invalidate();
+    }
+    
+    /**
+     * Reconstruct robot paths from pathHistory
+     * This is called when the game is re-rendered after being paused/resumed
+     */
+    public void reconstructPathsFromHistory() {
+        if (pathHistory.isEmpty()) return;
+        
+        // Clear current paths but keep the history
+        robotPaths.clear();
+        robotBaseOffsets.clear();
+        segmentCounts.clear();
+        visitedSquaresPerRobot.clear();
+        visitedSquaresAllRobots.clear();
+        
+        // Reconstruct paths from history
+        for (int[] entry : pathHistory) {
+            int color = entry[0];
+            int fromX = entry[1];
+            int fromY = entry[2];
+            int toX = entry[3];
+            int toY = entry[4];
+            
+            // Initialize data structures if they don't exist
+            if (!robotPaths.containsKey(color)) {
+                // Generate a consistent base offset for this robot
+                float offsetX = (float) (Math.random() * 2 * baseRobotOffsetRange - baseRobotOffsetRange);
+                float offsetY = (float) (Math.random() * 2 * baseRobotOffsetRange - baseRobotOffsetRange);
+                robotBaseOffsets.put(color, new float[]{offsetX, offsetY});
+                
+                // Initialize path and segment count
+                robotPaths.put(color, new ArrayList<>());
+                segmentCounts.put(color, new HashMap<>());
+                
+                // Add the starting position
+                robotPaths.get(color).add(new int[]{fromX, fromY});
+                
+                // Initialize visited squares for this robot
+                visitedSquaresPerRobot.put(color, new java.util.HashSet<>());
+            }
+            
+            // Add segment to segment count
+            HashMap<String, Integer> robotSegments = segmentCounts.get(color);
+            String segmentKey = fromX + "," + fromY + ":" + toX + "," + toY;
+            int count = robotSegments.getOrDefault(segmentKey, 0) + 1;
+            robotSegments.put(segmentKey, count);
+            
+            // Add the new position to the path
+            robotPaths.get(color).add(new int[]{toX, toY});
+            
+            // Track visited squares
+            int dx = Integer.compare(toX, fromX);
+            int dy = Integer.compare(toY, fromY);
+            int x = fromX;
+            int y = fromY;
+            while (x != toX || y != toY) {
+                if (x != toX) x += dx;
+                if (y != toY) y += dy;
+                visitedSquaresPerRobot.get(color).add(x + "," + y);
+                visitedSquaresAllRobots.add(x + "," + y);
+            }
+        }
+        
         invalidate();
     }
     
