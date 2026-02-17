@@ -132,6 +132,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long uiTimerElapsedMs = 0;
     private boolean uiTimerWasRunning = false;
     private boolean isNewGameLoaded = false; // Flag to indicate if a new game was just loaded (timer should reset)
+    private boolean shouldResetTimerAfterRegeneration = false; // Flag to signal Fragment to reset timer after regeneration
 
     // Game history tracking variables
     private long gameStartTime;
@@ -1683,6 +1684,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         this.isNewGameLoaded = false;
         Timber.d("[TIMER] Cleared new game loaded flag");
     }
+    
+    /**
+     * Check if timer should be reset after regeneration
+     * @return true if timer should be reset
+     */
+    public boolean shouldResetTimerAfterRegeneration() {
+        return shouldResetTimerAfterRegeneration;
+    }
+    
+    /**
+     * Clear the timer reset flag (called after timer is reset in Fragment)
+     */
+    public void clearTimerResetFlag() {
+        this.shouldResetTimerAfterRegeneration = false;
+        Timber.d("[TIMER] Cleared timer reset flag");
+    }
 
     /**
      * Check if the current game is a level game (not a random game)
@@ -2198,6 +2215,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Update solver status
         isSolverRunning.setValue(false);
+        
+        // Set flag to signal Fragment to reset timer after regeneration
+        if (regenerationCount > 0) {
+            shouldResetTimerAfterRegeneration = true;
+            Timber.d("[SOLUTION_SOLVER][TIMER] New map accepted after %d regenerations, signaling Fragment to reset timer", regenerationCount);
+        }
+        
+        // Reset regeneration count when map is accepted
+        regenerationCount = 0;
 
         // Notify the callback if provided
         if (solutionCallback != null) {
@@ -2723,6 +2749,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         return lastSolutionMinMoves;
     }
 
+    /** reset the game timer but not the UI Timer, then you need to call resetUITimer() to reset the UI Timer */
     private void resetGameTimer() {
         gameStartTime = System.currentTimeMillis();
         totalPlayTime = 0;

@@ -781,6 +781,13 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     saveMapButton.setAlpha(0.5f);
                 }
             } else {
+                // Check if timer should be reset after regeneration
+                if (gameStateManager != null && gameStateManager.shouldResetTimerAfterRegeneration()) {
+                    Timber.d("[TIMER] Solver stopped after regeneration - resetting timer to 0:00");
+                    resetAndStartTimer();
+                    gameStateManager.clearTimerResetFlag();
+                }
+                
                 // Re-enable hint button after regeneration
                 hintButton.setEnabled(true);
                 hintButton.setAlpha(1.0f);
