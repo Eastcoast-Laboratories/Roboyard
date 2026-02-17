@@ -3404,16 +3404,21 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         }
         
-        // Clear robot paths
-        if (gameGridView != null) {
-            gameGridView.clearRobotPaths();
-            gameGridView.invalidate();
-            Timber.d("[ROBOT_PATHS] Cleared robot paths during game initialization");
-        }
+        // Only clear robot paths and reset move counts if no moves have been made yet
+        // If moveCount > 0, it means the game is already in progress and should be preserved
+        int moveCount = gameStateManager != null ? gameStateManager.getMoveCount().getValue() : 0;
+        if (moveCount == 0) {
+            // Clear robot paths only for new games
+            if (gameGridView != null) {
+                gameGridView.clearRobotPaths();
+                gameGridView.invalidate();
+                Timber.d("[ROBOT_PATHS] Cleared robot paths during game initialization");
+            }
 
-        // Reset move counts and history explicitly to ensure all counters are zeroed
-        gameStateManager.resetMoveCountsAndHistory();
-        Timber.d("[GAME_INIT] Reset move counts and game history");
+            // Reset move counts and history only for new games
+            gameStateManager.resetMoveCountsAndHistory();
+            Timber.d("[GAME_INIT] Reset move counts and game history");
+        }
 
         // Auto-select robot that matches the target color
         selectRobotWithTargetColor();
