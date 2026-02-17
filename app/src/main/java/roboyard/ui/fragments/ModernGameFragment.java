@@ -757,6 +757,18 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Observe solver running state to update hint button text and save map button state
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
+                // Keep hint container visible during regeneration but hide toggle
+                if (hintContainer != null) {
+                    hintContainer.setVisibility(View.GONE);
+                }
+                if (liveMoveCounterToggle != null) {
+                    liveMoveCounterToggle.setVisibility(View.GONE);
+                }
+                
+                // Disable hint button during regeneration to prevent pressing
+                hintButton.setEnabled(false);
+                hintButton.setAlpha(0.5f);
+                
                 // Change hint button text to "Cancel" while calculating
                 hintButton.setTextOn(getString(R.string.hint_cancel_button));
                 hintButton.setTextOff(getString(R.string.hint_button));
@@ -769,6 +781,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     saveMapButton.setAlpha(0.5f);
                 }
             } else {
+                // Re-enable hint button after regeneration
+                hintButton.setEnabled(true);
+                hintButton.setAlpha(1.0f);
+                
                 // Reset hint button text
                 hintButton.setChecked(false);
                 // Don't update the status text here - let callbacks handle it appropriately
@@ -2496,16 +2512,22 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private CharSequence formatHintWithSVGArrows(String hintText) {
         android.text.SpannableString spannable = new android.text.SpannableString(hintText);
         int textColor = android.graphics.Color.BLACK;
+        float textSize = 48f; // Default text size in pixels
+        
         try {
-            // Try to get the text color from the status text view if available
+            // Try to get the text color and size from the status text view if available
             if (statusTextView != null) {
                 textColor = statusTextView.getCurrentTextColor();
+                textSize = statusTextView.getTextSize(); // Get current text size in pixels
             }
         } catch (Exception e) {
-            Timber.d("[HINT_ARROWS] Could not get text color, using black");
+            Timber.d("[HINT_ARROWS] Could not get text properties, using defaults");
         }
 
-        int arrowSize = 88; // Fixed pixel size for all arrows
+        // Scale arrow size to text size (slightly larger than text for visibility)
+        int arrowSize = (int) (textSize * 1.2f);
+        Timber.d("[HINT_ARROWS] Text size: %.1f px, Arrow size: %d px", textSize, arrowSize);
+        
         String[] arrows = {"↑", "→", "↓", "←"};
         int[] directions = {1, 2, 4, 8};
 
@@ -2753,12 +2775,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);
             
-            // Show the live move counter eye toggle if at least 1 move has been made or if enabled
+            // Show the live move counter eye toggle from this hint onwards (always visible from here)
             if (liveMoveCounterToggle != null) {
-                GameState currentState = gameStateManager.getCurrentState().getValue();
-                int moveCount = (currentState != null) ? currentState.getMoveCount() : 0;
-                boolean visible = moveCount >= 1 || gameStateManager.isLiveMoveCounterEnabled();
-                liveMoveCounterToggle.setVisibility(visible ? View.VISIBLE : View.GONE);
+                liveMoveCounterToggle.setVisibility(View.VISIBLE);
+                Timber.d("[HINT_SYSTEM] Toggle button now visible from exact solution hint onwards");
             }
         }
         // Second fixed pre-hint: Show involved robot colors
@@ -3349,6 +3369,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         updateStatusText("", false);
         if (hintContainer != null) {
             hintContainer.setVisibility(View.GONE);
+        }
+        // Hide live move counter toggle when new map is accepted
+        if (liveMoveCounterToggle != null) {
+            liveMoveCounterToggle.setVisibility(View.GONE);
         }
         if (hintButton != null && hintButton.isChecked()) {
             hintButton.setChecked(false);

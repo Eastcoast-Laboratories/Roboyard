@@ -231,25 +231,6 @@
             android:textStyle="bold"
             android:elevation="4dp" />
         
-        <!-- Next hint button -->
-        <TextView
-            android:id="@+id/next_hint_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="▸"
-            android:textSize="@dimen/status_text_size"
-            android:gravity="center"
-            android:contentDescription="Next hint"
-            android:textColor="#1A1A1A"
-            android:background="@drawable/hint_button_fancy"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginStart="2dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:textStyle="bold"
-            android:elevation="4dp" />
-
         <!-- Live move counter eye toggle -->
         <ToggleButton
             android:id="@+id/live_move_counter_toggle"
@@ -267,6 +248,25 @@
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:visibility="gone"
+            android:elevation="4dp" />
+
+        <!-- Next hint button -->
+        <TextView
+            android:id="@+id/next_hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="▸"
+            android:textSize="@dimen/status_text_size"
+            android:gravity="center"
+            android:contentDescription="Next hint"
+            android:textColor="#1A1A1A"
+            android:background="@drawable/hint_button_fancy"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="2dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:textStyle="bold"
             android:elevation="4dp" />
     </LinearLayout>
 
