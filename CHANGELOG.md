@@ -2,9 +2,12 @@
 =========
 
 
-## Version 38 (2026-02-13)
+## Version 38 (2026-02-18)
 - Live move counter button, that shows the remaining optimal moves from the current position
-
+- New optional ambient background sound
+- Sound-effects volume slider in settings
+- Always open last Auto-Save when entering random game
+- Performance improvements
 
 ## Version 37 (2026-02-13)
 - Dynamic robot collision sounds - the pitch changes based on the involved robots

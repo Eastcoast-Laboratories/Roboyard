@@ -2,9 +2,12 @@ Changelog Deutsch
 =================
 
 
-## Version 38 (2026-02-13)
+## Version 38 (2026-02-18)
 - Live Move Counter Button, der die optimale Anzahl der Züge von der aktuellen Position zeigt
-
+- Neuer optionaler Ambient Hintergrundsound
+- Sound Effects Lautstärke einstellbar in Settings
+- Es wird immer das letzte Auto-Save geöffnet, wenn man das zufällige Spiel startet
+- Performance-Optimierungen
 
 ## Version 37 (2026-02-13)
 - Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter

@@ -70,6 +70,7 @@ DE_CHANGES=$(cat << EOF
 - Neuer optionaler Ambient Hintergrundsound
 - Sound Effects Lautstärke einstellbar in Settings
 - Es wird immer das letzte Auto-Save geöffnet, wenn man das zufällige Spiel startet
+- Performance-Optimierungen
 EOF
 )
 
@@ -79,6 +80,7 @@ EN_CHANGES=$(cat << EOF
 - New optional ambient background sound
 - Sound-effects volume slider in settings
 - Always open last Auto-Save when entering random game
+- Performance improvements
 EOF
 )
 
