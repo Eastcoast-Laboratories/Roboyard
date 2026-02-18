@@ -2520,6 +2520,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         getSolverManager().resetInitialization();
         getSolverManager().initialize(gridElements);
 
+        // Quick check for trivial puzzles (1 move or already solved) before starting expensive solver
+        if (validateDifficulty && isTrivialPuzzle(newState)) {
+            Timber.d("[TRIVIAL_CHECK] Detected trivial puzzle, regenerating without running solver");
+            createValidGame(width, height);
+            return;
+        }
+
         startTime = System.currentTimeMillis();
 
         // Start calculating the solution, but use our internal validation callback
@@ -2536,6 +2543,76 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             validateDifficulty = true; // Reset for next time
             calculateSolutionAsync(null);
         }
+    }
+
+    /**
+     * Quick check if puzzle is trivial (already solved or only 1 move needed)
+     * This prevents occasionally OutOfMemoryError in solver for very simple puzzles
+     * this is a duplicate of isSolution01() but that function did not always work
+     */
+    private boolean isTrivialPuzzle(GameState state) {
+        // Check if puzzle is already solved
+        if (state.isComplete()) {
+            Timber.d("[TRIVIAL_CHECK] Puzzle is already solved");
+            return true;
+        }
+        
+        // Check if any robot can reach its target in one move
+        // This is a quick heuristic check - not perfect but catches most trivial cases
+        for (GameElement robot : state.getGameElements()) {
+            if (robot.getType() != GameElement.TYPE_ROBOT) continue;
+            
+            int robotX = robot.getX();
+            int robotY = robot.getY();
+            int robotColor = robot.getColor();
+            
+            // Find matching target
+            for (GameElement target : state.getGameElements()) {
+                if (target.getType() != GameElement.TYPE_TARGET) continue;
+                if (target.getColor() != robotColor) continue;
+                
+                int targetX = target.getX();
+                int targetY = target.getY();
+                
+                // Check if robot can reach target in one move (same row or column)
+                if (robotX == targetX || robotY == targetY) {
+                    // Check if path is clear (no walls blocking)
+                    boolean pathClear = true;
+                    
+                    if (robotX == targetX) {
+                        // Vertical movement
+                        int startY = Math.min(robotY, targetY);
+                        int endY = Math.max(robotY, targetY);
+                        for (int y = startY; y <= endY; y++) {
+                            // Check for horizontal walls blocking vertical movement
+                            if (y > startY && state.getCellType(robotX, y) == Constants.TYPE_HORIZONTAL_WALL) {
+                                pathClear = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Horizontal movement
+                        int startX = Math.min(robotX, targetX);
+                        int endX = Math.max(robotX, targetX);
+                        for (int x = startX; x <= endX; x++) {
+                            // Check for vertical walls blocking horizontal movement
+                            if (x > startX && state.getCellType(x, robotY) == Constants.TYPE_VERTICAL_WALL) {
+                                pathClear = false;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (pathClear) {
+                        Timber.d("[TRIVIAL_CHECK] Robot color %d can reach target in 1 move from (%d,%d) to (%d,%d)",
+                                robotColor, robotX, robotY, targetX, targetY);
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 
     /**
