@@ -81,9 +81,4 @@ check if this all works:
 -Der hint container soll  immer sichtbar sein unabhängig von dem live move couter setting. 
 -der hint button soll auch nciht gedrückt werden, wenn eine neue map berrechnet wird. der container soll sich erst  ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
 - der live move counter toggle button soll immer ausgeblendet sein während dieser recreation phase. 
--Wenn eine map angenommen wird, dann muss der zeit timer wieder auf 0:00 gesetzt werden und der hint container (incldem unsichtbaren toggle button) sich verstecken
 
-
-- Wenn man ein paar moves macht und dann das game saved, und zurück geht, sind die roboter zwar noch an den letzten positionen aber der pfad ist verschwiunden und auch die moves und squares sind auf 0 gesetzt. Auch bei den level games geht das indem man ins menu geht und back drülck, (so kann man eien level in weniger zügen schaffen als optimal moves)
- - es muessen die moves und squares sixh gemerkt werden
-fixe das und dann mache einen unittest, der verrifiziert, dsas die schon gelaufenen moves errhalten bleiben und dass der farbige bewegungs path nach dem zurückkehren auch weeiterhin angeziegt wird

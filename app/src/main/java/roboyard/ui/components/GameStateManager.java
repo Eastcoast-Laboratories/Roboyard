@@ -87,6 +87,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     
     // Path history for visual robot paths: each entry stores [robotColor, fromX, fromY, toX, toY]
     private final ArrayList<int[]> pathHistory = new ArrayList<>();
+    
+    // Robot starting positions: Map robot color to starting position [x,y]
+    private final HashMap<Integer, int[]> robotStartingPositions = new HashMap<>();
 
     // Game settings
     private final MutableLiveData<Boolean> soundEnabled = new MutableLiveData<>(true);
@@ -1425,6 +1428,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void clearPathHistory() {
         pathHistory.clear();
+    }
+    
+    /**
+     * Get robot starting positions
+     * @return HashMap of robot color to starting position [x,y]
+     */
+    public HashMap<Integer, int[]> getRobotStartingPositions() {
+        return robotStartingPositions;
+    }
+    
+    /**
+     * Store a robot's starting position
+     */
+    public void setRobotStartingPosition(int color, int x, int y) {
+        robotStartingPositions.put(color, new int[]{x, y});
+    }
+    
+    /**
+     * Clear all robot starting positions
+     */
+    public void clearRobotStartingPositions() {
+        robotStartingPositions.clear();
     }
 
     /**

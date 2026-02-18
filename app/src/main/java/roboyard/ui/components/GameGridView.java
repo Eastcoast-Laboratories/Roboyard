@@ -118,8 +118,7 @@ public class GameGridView extends View {
     private final android.os.Handler animationHandler = new android.os.Handler(android.os.Looper.getMainLooper()); // Animation handler
     private final long animationDuration = 300; // Animation duration in milliseconds
     
-    // Store starting positions of robots
-    private final HashMap<Integer, int[]> robotStartingPositions = new HashMap<>(); // Map robot color to starting position [x,y]
+    // NOTE: robotStartingPositions is now stored in GameStateManager to persist across fragment recreation
     
     // Grid background
     private Drawable gridTileDrawable; 
@@ -396,7 +395,9 @@ public class GameGridView extends View {
      * @param state Current game state
      */
     private void storeRobotStartingPositions(GameState state) {
-        if (state == null) return;
+        if (state == null || gameStateManager == null) return;
+        
+        HashMap<Integer, int[]> robotStartingPositions = gameStateManager.getRobotStartingPositions();
         
         // Check if this is a new game by comparing robot positions with stored positions
         boolean isNewGame = false;
@@ -444,12 +445,12 @@ public class GameGridView extends View {
         // Only clear and update if this is a new game
         if (isNewGame) {
             // Clear existing positions
-            robotStartingPositions.clear();
+            gameStateManager.clearRobotStartingPositions();
             
             // Store positions of all robots
             for (GameElement element : state.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_ROBOT) {
-                    robotStartingPositions.put(element.getColor(), new int[] {element.getX(), element.getY()});
+                    gameStateManager.setRobotStartingPosition(element.getColor(), element.getX(), element.getY());
                     Timber.d("Stored starting position for robot color %d at (%d,%d)", 
                             element.getColor(), element.getX(), element.getY());
                 }
@@ -829,8 +830,10 @@ public class GameGridView extends View {
         renderer.drawWalls(canvas, offsetX, offsetY);
         
         // Draw starting positions of robots
-        for (int color : robotStartingPositions.keySet()) {
-            int[] position = robotStartingPositions.get(color);
+        if (gameStateManager != null) {
+            HashMap<Integer, int[]> robotStartingPositions = gameStateManager.getRobotStartingPositions();
+            for (int color : robotStartingPositions.keySet()) {
+                int[] position = robotStartingPositions.get(color);
             int x = position[0];
             int y = position[1];
             
@@ -867,6 +870,7 @@ public class GameGridView extends View {
                 markerDrawable.setBounds((int)left, (int)top, (int)right, (int)bottom);
                 markerDrawable.setAlpha(55); // Set alpha to 20% transparency for the semi-transparent robot markers for starting positions
                 markerDrawable.draw(canvas);
+            }
             }
         }
         
