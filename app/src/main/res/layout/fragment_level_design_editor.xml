@@ -9,9 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="0dp"
         tools:context=".ui.LevelDesignEditorFragment">
 
+        <!-- Header: Title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,6 +22,7 @@
             android:gravity="center"
             android:layout_marginBottom="16dp" />
 
+        <!-- Level ID Display -->
         <TextView
             android:id="@+id/level_id_text"
             android:layout_width="match_parent"
@@ -29,6 +31,7 @@
             android:textSize="18sp"
             android:layout_marginBottom="8dp" />
 
+        <!-- Level Selection Spinner -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -49,6 +52,7 @@
                 android:layout_weight="1" />
         </LinearLayout>
 
+        <!-- Board Size Configuration -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -69,7 +73,8 @@
                 android:inputType="number"
                 android:text="12"
                 android:textColor="#666666"
-                android:gravity="center" />
+                android:gravity="center"
+                android:selectAllOnFocus="true" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -85,7 +90,8 @@
                 android:inputType="number"
                 android:text="14"
                 android:textColor="#666666"
-                android:gravity="center" />
+                android:gravity="center"
+                android:selectAllOnFocus="true" />
 
             <Button
                 android:id="@+id/apply_board_size_button"
@@ -95,125 +101,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Edit Mode:"
-            android:textSize="16sp"
-            android:layout_marginBottom="4dp" />
-
-        <RadioGroup
-            android:id="@+id/edit_mode_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <RadioButton
-                android:id="@+id/mode_robot_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Robot"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/mode_target_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Target" />
-                
-            <RadioButton
-                android:id="@+id/mode_wall_h_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Wall H" />
-                
-            <RadioButton
-                android:id="@+id/mode_wall_v_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Wall V" />
-
-            <RadioButton
-                android:id="@+id/mode_erase_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Erase" />
-        </RadioGroup>
-
-        <RadioGroup
-            android:id="@+id/robot_color_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <RadioButton
-                android:id="@+id/robot_red_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Red"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/robot_green_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Green" />
-
-            <RadioButton
-                android:id="@+id/robot_blue_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Blue" />
-
-            <RadioButton
-                android:id="@+id/robot_yellow_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yellow" />
-
-            <RadioButton
-                android:id="@+id/robot_silver_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Silver" />
-        </RadioGroup>
-
-        <RadioGroup
-            android:id="@+id/target_color_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp"
-            android:visibility="gone">
-
-            <RadioButton
-                android:id="@+id/target_red_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Red"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/target_green_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Green" />
-
-            <RadioButton
-                android:id="@+id/target_blue_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Blue" />
-
-            <RadioButton
-                android:id="@+id/target_yellow_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yellow" />
-        </RadioGroup>
-
+        <!-- Wall Pattern Generator -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -242,6 +130,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
+        <!-- Generate Border Stubs Button -->
         <Button
             android:id="@+id/generate_border_stubs_button"
             android:layout_width="match_parent"
@@ -249,6 +138,15 @@
             android:text="@string/editor_generate_border_stubs"
             android:layout_marginBottom="8dp" />
 
+        <!-- Random Placement Button -->
+        <Button
+            android:id="@+id/random_placement_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Random Robots &amp; Targets"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Board Preview Section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -259,7 +157,7 @@
         <FrameLayout
             android:id="@+id/board_preview_container"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="400dp"
             android:layout_marginBottom="16dp"
             android:background="#E0E0E0">
             
@@ -271,6 +169,150 @@
                 android:textSize="16sp" />
         </FrameLayout>
 
+        <!-- Edit Mode Selection (Robot/Target/Wall/Erase) -->
+        <RadioGroup
+            android:id="@+id/edit_mode_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/mode_robot_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Robot"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/mode_target_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Target"
+                android:textSize="12sp" />
+                
+            <RadioButton
+                android:id="@+id/mode_wall_h_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="– Wall"
+                android:textSize="12sp" />
+                
+            <RadioButton
+                android:id="@+id/mode_wall_v_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="| Wall"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/mode_erase_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Erase"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <!-- Robot Color Selection (visible when Robot mode is selected) -->
+        <RadioGroup
+            android:id="@+id/robot_color_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/robot_red_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Pink"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/robot_green_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Green"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/robot_blue_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Blue"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/robot_yellow_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Yellow"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/robot_silver_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Silver"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <!-- Target Color Selection (visible when Target mode is selected) -->
+        <RadioGroup
+            android:id="@+id/target_color_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/target_red_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Pink"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/target_green_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Green"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/target_blue_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Blue"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/target_yellow_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Yellow"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <!-- Board Shift Controls (Arrow Buttons) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -317,6 +359,7 @@
                 android:padding="0dp" />
         </LinearLayout>
 
+        <!-- Action Buttons: Cancel and Load Autosave -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -337,6 +380,7 @@
                 android:text="Load Autosave" />
         </LinearLayout>
 
+        <!-- Action Buttons: Export and Play Map -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -359,6 +403,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
+        <!-- Import ASCII Map Button -->
         <Button
             android:id="@+id/import_ascii_map_button"
             android:layout_width="match_parent"
@@ -366,6 +411,7 @@
             android:text="@string/editor_import_ascii_map"
             android:layout_marginBottom="8dp" />
 
+        <!-- Level Text Output (hidden by default) -->
         <TextView
             android:id="@+id/level_text_view"
             android:layout_width="match_parent"

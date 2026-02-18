@@ -530,6 +530,20 @@ public class LevelDesignEditorFragment extends Fragment {
             });
         }
 
+        // Random placement button
+        Button randomPlacementButton = requireView().findViewById(R.id.random_placement_button);
+        if (randomPlacementButton != null) {
+            randomPlacementButton.setOnClickListener(v -> {
+                if (currentState == null) {
+                    Toast.makeText(requireContext(), R.string.editor_no_level_loaded, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                randomlyPlaceRobotsAndTargets();
+                updateUI();
+                Timber.d("[LEVEL_EDITOR] Robots and targets randomly placed");
+            });
+        }
+
         // Play map button — launches the current editor map via deep link
         Button playMapButton = requireView().findViewById(R.id.play_map_button);
         if (playMapButton != null) {
@@ -1563,6 +1577,87 @@ public class LevelDesignEditorFragment extends Fragment {
                 Timber.w("[EDITOR] Unknown color index in getColorNameLower: %d", colorIndex);
                 return "unknown";
         }
+    }
+    
+    /**
+     * Remove all robots and targets, then randomly place new ones on the board
+     */
+    private void randomlyPlaceRobotsAndTargets() {
+        if (currentState == null) return;
+        
+        int width = currentState.getWidth();
+        int height = currentState.getHeight();
+        
+        // Remove all existing robots and targets
+        List<GameElement> elementsToRemove = new ArrayList<>();
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
+                elementsToRemove.add(element);
+            }
+        }
+        for (GameElement element : elementsToRemove) {
+            currentState.getGameElements().remove(element);
+        }
+        
+        // Determine how many robots to place (2-4 robots)
+        java.util.Random random = new java.util.Random();
+        int numRobots = 4;
+        
+        // Available colors
+        int[] colors = {Constants.COLOR_PINK, Constants.COLOR_GREEN, Constants.COLOR_BLUE, Constants.COLOR_YELLOW};
+        
+        // Randomly place robots
+        List<Integer> usedColors = new ArrayList<>();
+        for (int i = 0; i < numRobots && i < colors.length; i++) {
+            int x, y;
+            int attempts = 0;
+            do {
+                x = random.nextInt(width);
+                y = random.nextInt(height);
+                attempts++;
+            } while (hasElementAt(x, y) && attempts < 100);
+            
+            if (attempts < 100) {
+                currentState.addRobot(x, y, colors[i]);
+                usedColors.add(colors[i]);
+                Timber.d("[LEVEL_EDITOR] Placed %s robot at (%d,%d)", getColorName(colors[i]), x, y);
+            }
+        }
+        
+        // Place only ONE random target from the used colors
+        if (!usedColors.isEmpty()) {
+            int randomColorIndex = random.nextInt(usedColors.size());
+            int targetColor = usedColors.get(randomColorIndex);
+            
+            int x, y;
+            int attempts = 0;
+            do {
+                x = random.nextInt(width);
+                y = random.nextInt(height);
+                attempts++;
+            } while (hasElementAt(x, y) && attempts < 100);
+            
+            if (attempts < 100) {
+                currentState.addTarget(x, y, targetColor);
+                Timber.d("[LEVEL_EDITOR] Placed %s target at (%d,%d)", getColorName(targetColor), x, y);
+            }
+        }
+        
+        Toast.makeText(requireContext(), 
+            String.format("Placed %d robots and 1 target randomly", numRobots), 
+            Toast.LENGTH_SHORT).show();
+    }
+    
+    /**
+     * Check if there's any element (robot, target, or wall) at the given position
+     */
+    private boolean hasElementAt(int x, int y) {
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getX() == x && element.getY() == y) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private void handleBoardClick(int x, int y) {
