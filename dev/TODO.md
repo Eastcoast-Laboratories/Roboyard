@@ -75,10 +75,26 @@ check if this all works:
 
 1. testen: die achievements Solution length  müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
 
+2. der container soll sich erst  ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
+
 # last prompt:
 
-1. 
--Der hint container soll  immer sichtbar sein unabhängig von dem live move couter setting. 
--der hint button soll auch nciht gedrückt werden, wenn eine neue map berrechnet wird. der container soll sich erst  ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
-- der live move counter toggle button soll immer ausgeblendet sein während dieser recreation phase. 
+
+in der debug Seite, Ändere den Button zum freischalten Aller levels: der soll nur einen Stern Bei jedem Level geben und er soll den Level 139 nicht freischalten .
+
+Wenn man alle 140 Level freigeschaltet hat, dann soll im Level screen ganz unten ein neuer Button erscheinen der zum Level Editor leitet.
+
+Der Hintergrund im Level Editor muss schwarz. 
+
+In der preview map im Level Editor ist ja ein weißer Rand, wenn die Karte sich nicht ganz richtig skalieren lässt, der soll schwarz sein.
+
+Der cancel button im Level Editor soll ganz unten stehen und über die gesamte Breite gehen. 
+
+Den gesamten Level Editor auch komplett auf alle Sprachen lokalisieren 
+
+Das readme auf GitHub soll einen Hinweis auf den Editor erhalten, dass man, wenn man alle Level freigeschaltet hat, den benutzen kann. 
+
+Auch im Hilfe Fragment soll so ein Hinweis
+
+Wenn man auf dem next level oder new Game drückt soll ein eventuell offenes achievement pop up verschwinden
 
