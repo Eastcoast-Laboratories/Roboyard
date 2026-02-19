@@ -651,10 +651,16 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         // Only call onLevelCompleted if this is a different level or enough time has passed
                         if (currentLevelId != lastCompletedLevelId || (currentTime - lastCompletedTime) > 1000) {
                             Timber.d("[ACHIEVEMENT_GUARD] Calling onLevelCompleted for levelId=%d (last was %d)", currentLevelId, lastCompletedLevelId);
+                            int starsBefore = roboyard.ui.components.LevelCompletionManager.getInstance(requireContext()).getTotalStars();
                             AchievementManager.getInstance(requireContext())
                                 .onLevelCompleted(currentLevelId, playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
                             lastCompletedLevelId = currentLevelId;
                             lastCompletedTime = currentTime;
+                            int starsAfter = roboyard.ui.components.LevelCompletionManager.getInstance(requireContext()).getTotalStars();
+                            if (starsBefore < 140 && starsAfter >= 140) {
+                                Toast.makeText(requireContext(), R.string.level_editor_unlocked, Toast.LENGTH_LONG).show();
+                                Timber.d("[LEVEL_EDITOR] Level Editor unlocked! Stars: %d", starsAfter);
+                            }
                         } else {
                             Timber.d("[ACHIEVEMENT_GUARD] Skipping duplicate onLevelCompleted call for levelId=%d", currentLevelId);
                         }

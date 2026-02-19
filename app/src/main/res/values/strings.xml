@@ -175,6 +175,7 @@
     <string name="level_selection_title">Level Selection</string>
     <string name="level_editor_button">Level Editor</string>
     <string name="level_editor_button_short">Editor</string>
+    <string name="level_editor_unlocked">Level Editor unlocked!</string>
     <string name="level_editor_hint">You have unlocked the Level Editor! Create your own levels.</string>
     <string name="level_category_beginner">Beginner</string>
     <string name="level_category_intermediate">Intermediate</string>

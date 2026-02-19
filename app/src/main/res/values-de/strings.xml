@@ -223,7 +223,7 @@
     <string name="editor_mode_robot">Robot</string>
     <string name="editor_mode_target">Ziel</string>
     <string name="editor_mode_wall_h">–</string>
-    <string name="editor_mode_wall_v">&nbsp;&nbsp;|</string>
+    <string name="editor_mode_wall_v">  |</string>
     <string name="editor_mode_erase">Del</string>
     <string name="editor_color_pink">Pink</string>
     <string name="editor_color_green">Grün</string>
@@ -235,6 +235,9 @@
     <string name="editor_random_robots_targets">Zufällige Roboter</string>
     <string name="editor_export_level">Level-Text exportieren</string>
     <string name="editor_generate_walls">Wände generieren</string>
+    <string name="editor_generate">Generieren</string>
+    <string name="editor_load_savegame">Spielstand: </string>
+    <string name="editor_level_editor_unlocked">Level Editor freigeschaltet!</string>
     <string name="editor_generate_border_stubs">Randwände generieren</string>
     <string name="editor_play_map">▶ Karte spielen</string>
     <string name="editor_import_ascii_map">ASCII-Karte importieren</string>
