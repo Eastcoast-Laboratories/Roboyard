@@ -77,24 +77,18 @@ check if this all works:
 
 2. der container soll sich erst  ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
 
+3. hier ist ein alternatives design: /var/www/Roboyard/dev/images/alternative_layout/design.jpg
+   1. zerschneide das design in seine elemente und benutze die icons für das neue design
+   2. im debug screen soll es eine preferences einstellung geben, die das alternative design aktiviert/deaktiviert anstatt des default designs
+   3. das neue design soll die gleiche funktion haben wie das alte design, aber nur mit icons statt text buttons im neuen design
+   4. die icons sollen aus dem design übernommen werden
+   5. das gamegrid soll im neuen design die gleiche größe haben wie im alten design und soll nicht neu definiert werden, sondern nach dem DRY prinzip wiederverwendet werden
+   6. im unteren bereich des designs ist nur ein timer angezeigt, aber dies ist der gesamte textbereich unterhalb des aktuellen default designs, das soll auch alles nach dem DRY das selbe sein
+
 # last prompt:
 
 
-in der debug Seite, Ändere den Button zum freischalten Aller levels: der soll nur einen Stern Bei jedem Level geben und er soll den Level 139 nicht freischalten .
-
-Wenn man alle 140 Level freigeschaltet hat, dann soll im Level screen ganz unten ein neuer Button erscheinen der zum Level Editor leitet.
-
-Der Hintergrund im Level Editor muss schwarz. 
-
-In der preview map im Level Editor ist ja ein weißer Rand, wenn die Karte sich nicht ganz richtig skalieren lässt, der soll schwarz sein.
-
-Der cancel button im Level Editor soll ganz unten stehen und über die gesamte Breite gehen. 
-
 Den gesamten Level Editor auch komplett auf alle Sprachen lokalisieren 
-
-Das readme auf GitHub soll einen Hinweis auf den Editor erhalten, dass man, wenn man alle Level freigeschaltet hat, den benutzen kann. 
-
-Auch im Hilfe Fragment soll so ein Hinweis
 
 Wenn man auf dem next level oder new Game drückt soll ein eventuell offenes achievement pop up verschwinden
 

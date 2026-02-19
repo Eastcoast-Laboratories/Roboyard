@@ -58,6 +58,16 @@ The game is fully playable for blind players and supports all accessibility feat
   - five lines allowed in the same row/column
 
 
+# Level Editor
+
+Once you have completed all 140 built-in levels, a **Level Editor** will be available:
+
+- Create your own custom levels
+- Place robots, targets, and walls freely on the board
+- Generate random maps with 10 different level generators
+- Export and share your levels online on https://roboyard.z11.de
+
+
 # Build in Android Studio
 - ensure you have at least 2GB of free space in your home partition
 - Install Android Studio (easy with `sudo snap install --classic android-studio`)

@@ -153,6 +153,21 @@ public class LevelSelectionFragment extends BaseGameFragment {
             navigateToDirect(menuFragment);
         });
 
+        // Show Level Editor button if all 140 levels (except 139) are unlocked
+        Button levelEditorButton = view.findViewById(R.id.level_editor_button);
+        if (levelEditorButton != null) {
+            updateLevelEditorButtonVisibility(levelEditorButton);
+            levelEditorButton.setOnClickListener(v -> {
+                Timber.d("[LEVEL_SELECTION] Opening Level Design Editor");
+                LevelDesignEditorFragment editorFragment = LevelDesignEditorFragment.newInstance(0);
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.nav_host_fragment, editorFragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
+
         return view;
     }
     
@@ -236,6 +251,24 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Auto-scroll to the last played level
         scrollToLastPlayedLevel();
+
+        // Update Level Editor button visibility
+        if (getView() != null) {
+            Button levelEditorButton = getView().findViewById(R.id.level_editor_button);
+            if (levelEditorButton != null) {
+                updateLevelEditorButtonVisibility(levelEditorButton);
+            }
+        }
+    }
+
+    /**
+     * Shows the Level Editor button if the player has earned at least 140 stars total.
+     */
+    private void updateLevelEditorButtonVisibility(Button button) {
+        int totalStars = completionManager.getTotalStars();
+        boolean visible = totalStars >= 140;
+        button.setVisibility(visible ? View.VISIBLE : View.GONE);
+        Timber.d("[LEVEL_SELECTION] Total stars: %d, Level Editor button visible: %b", totalStars, visible);
     }
 
     /**

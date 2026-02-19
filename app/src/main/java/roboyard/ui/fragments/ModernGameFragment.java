@@ -1294,6 +1294,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // "New Game" Button
         newMapButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
+            
+            // Dismiss achievement popup if visible
+            if (achievementPopup != null) {
+                achievementPopup.dismiss();
+            }
 
             // If generateNewMapEachTime is off, check if current map ratio matches settings
             if (!Preferences.generateNewMapEachTime) {
@@ -1411,6 +1416,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         nextLevelButton = view.findViewById(R.id.next_level_button);
         nextLevelButton.setOnClickListener(v -> {
             Timber.d("ModernGameFragment: Next Level button clicked");
+            
+            // Dismiss achievement popup if visible
+            if (achievementPopup != null) {
+                achievementPopup.dismiss();
+            }
             
             // Reset achievement game session flags for new game
             AchievementManager.getInstance(requireContext()).onNewGameStarted();

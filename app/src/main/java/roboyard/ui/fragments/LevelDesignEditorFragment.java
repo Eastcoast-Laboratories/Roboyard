@@ -5,9 +5,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -152,6 +155,9 @@ public class LevelDesignEditorFragment extends Fragment {
         // Setup level spinner
         setupLevelSpinner();
         
+        // Setup savegame spinner (replaces load autosave button)
+        setupSavegameSpinner();
+        
         // Set up map touch events
         setupMapTouchEvents();
         
@@ -262,7 +268,7 @@ public class LevelDesignEditorFragment extends Fragment {
     private void setupLevelSpinner() {
         // Populate spinner with all available levels, sorted numerically
         List<String> levelOptions = new ArrayList<>();
-        levelOptions.add("New Level");
+        levelOptions.add(getString(R.string.editor_new_map));
         
         // Collect level IDs for numeric sorting
         List<Integer> builtInIds = new ArrayList<>();
@@ -336,6 +342,88 @@ public class LevelDesignEditorFragment extends Fragment {
         });
     }
     
+    private void setupSavegameSpinner() {
+        Spinner savegameSpinner = requireView().findViewById(R.id.savegame_spinner);
+        if (savegameSpinner == null) return;
+
+        List<String> saveOptions = new ArrayList<>();
+        List<Integer> saveSlots = new ArrayList<>();
+        saveOptions.add("—");
+        saveSlots.add(-1);
+
+        File saveDir = new File(requireActivity().getFilesDir(), Constants.SAVE_DIRECTORY);
+        if (saveDir.exists()) {
+            File[] files = saveDir.listFiles();
+            if (files != null) {
+                java.util.Arrays.sort(files, (a, b) -> a.getName().compareTo(b.getName()));
+                for (File f : files) {
+                    String name = f.getName();
+                    if (name.startsWith(Constants.SAVE_FILENAME_PREFIX) && name.endsWith(Constants.SAVE_FILENAME_EXTENSION)) {
+                        String slotStr = name.substring(Constants.SAVE_FILENAME_PREFIX.length(),
+                                name.length() - Constants.SAVE_FILENAME_EXTENSION.length());
+                        try {
+                            int slot = Integer.parseInt(slotStr);
+                            String saveData = FileReadWrite.loadAbsoluteData(f.getAbsolutePath());
+                            String mapName = null;
+                            if (saveData != null) {
+                                for (String line : saveData.split("\n")) {
+                                    if (line.startsWith("#MAPNAME:")) {
+                                        mapName = line.substring(9).split(";")[0].trim();
+                                        break;
+                                    }
+                                }
+                            }
+                            String label = slot + ": " + (mapName != null && !mapName.isEmpty() ? mapName : "Save " + slot);
+                            saveOptions.add(label);
+                            saveSlots.add(slot);
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+            }
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, saveOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        savegameSpinner.setAdapter(adapter);
+
+        savegameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) return;
+                int slot = saveSlots.get(position);
+                String path = FileReadWrite.getSaveGamePath(requireActivity(), slot);
+                String saveData = FileReadWrite.loadAbsoluteData(path);
+                if (saveData == null || saveData.isEmpty()) {
+                    Toast.makeText(requireContext(), "Save slot empty", Toast.LENGTH_SHORT).show();
+                    savegameSpinner.setSelection(0);
+                    return;
+                }
+                GameState state = GameState.parseFromSaveData(saveData, requireContext());
+                if (state == null) {
+                    Toast.makeText(requireContext(), "Could not load save", Toast.LENGTH_SHORT).show();
+                    savegameSpinner.setSelection(0);
+                    return;
+                }
+                currentLevelId = 0;
+                currentState = state;
+                EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
+                EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
+                widthEdit.setText(String.valueOf(currentState.getWidth()));
+                heightEdit.setText(String.valueOf(currentState.getHeight()));
+                editLevelSpinner.setSelection(0);
+                String mapName = state.getLevelName() != null ? state.getLevelName() : "Save " + slot;
+                levelIdTextView.setText(mapName);
+                updateUI();
+                savegameSpinner.setSelection(0);
+                Timber.d("[EDITOR] Loaded savegame slot %d: %s", slot, mapName);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
     private boolean levelExistsInSpinner(int levelId) {
         if (editLevelSpinner == null || editLevelSpinner.getAdapter() == null) return false;
         String target = "Level " + levelId;
@@ -488,14 +576,6 @@ public class LevelDesignEditorFragment extends Fragment {
         cancelButton.setOnClickListener(v -> {
             // Navigate back to level selection
             requireActivity().getSupportFragmentManager().popBackStack();
-        });
-        
-        // Load Autosave button
-        Button loadAutosaveButton = requireView().findViewById(R.id.load_autosave_button);
-        loadAutosaveButton.setOnClickListener(v -> {
-            if (!loadLastRandomMap()) {
-                Toast.makeText(requireContext(), "No autosave found", Toast.LENGTH_SHORT).show();
-            }
         });
         
         // Export button
@@ -1007,7 +1087,7 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void createNewLevel(int width, int height) {
         currentLevelId = 0;
-        levelIdTextView.setText("New Level");
+        levelIdTextView.setText(getString(R.string.editor_new_map));
         
         // Create a new state with specified dimensions
         currentState = new GameState(width, height);
@@ -1334,9 +1414,9 @@ public class LevelDesignEditorFragment extends Fragment {
         // Update level ID text
         TextView levelIdText = requireView().findViewById(R.id.level_id_text);
         if (currentLevelId > 0) {
-            levelIdText.setText("Editing Level: " + currentLevelId);
+            levelIdText.setText(getString(R.string.editor_level_map, currentLevelId));
         } else {
-            levelIdText.setText("New Level");
+            levelIdText.setText(getString(R.string.editor_new_map));
         }
         
         Timber.d("Updated UI with current state: %d elements, board size: %dx%d", 
@@ -1790,14 +1870,11 @@ public class LevelDesignEditorFragment extends Fragment {
      * Custom view to display the game board for editing
      */
     private class GameBoardView extends View {
-        private final Paint robotPaint = new Paint();
-        private final Paint targetPaint = new Paint();
         private final Paint wallPaint = new Paint();
         private final Paint gridPaint = new Paint();
-        private final Paint textPaint = new Paint();
-        private final Paint targetTextPaint = new Paint();
         private int cellSize = 0;
-        
+        private Bitmap gridTileBitmap;
+
         public GameBoardView(Context context) {
             super(context);
             
@@ -1806,22 +1883,19 @@ public class LevelDesignEditorFragment extends Fragment {
             setFocusable(true);
             
             // Initialize paints
-            robotPaint.setStyle(Paint.Style.FILL);
-            targetPaint.setStyle(Paint.Style.FILL);
             wallPaint.setStyle(Paint.Style.FILL);
             wallPaint.setColor(Color.BLACK);
             
             gridPaint.setStyle(Paint.Style.STROKE);
-            gridPaint.setColor(Color.LTGRAY);
+            gridPaint.setColor(Color.DKGRAY);
             gridPaint.setStrokeWidth(1);
-            
-            textPaint.setColor(Color.WHITE);
-            textPaint.setTextSize(20);
-            textPaint.setTextAlign(Paint.Align.CENTER);
-            
-            targetTextPaint.setColor(Color.BLACK);
-            targetTextPaint.setTextSize(20);
-            targetTextPaint.setTextAlign(Paint.Align.CENTER);
+
+            // Load grid tile bitmap
+            try {
+                gridTileBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.grid_tiles);
+            } catch (Exception e) {
+                Timber.e(e, "[EDITOR] Could not load grid_tiles bitmap");
+            }
         }
         
         @Override
@@ -1842,62 +1916,90 @@ public class LevelDesignEditorFragment extends Fragment {
             int offsetX = (width - (cellSize * boardWidth)) / 2;
             int offsetY = (height - (cellSize * boardHeight)) / 2;
             
-            // Draw background
-            canvas.drawColor(Color.WHITE);
+            // Draw black background outside board
+            canvas.drawColor(Color.BLACK);
             
-            // Draw grid
+            // Draw grid cells with grid_tiles texture
+            for (int y = 0; y < boardHeight; y++) {
+                for (int x = 0; x < boardWidth; x++) {
+                    int left = offsetX + x * cellSize;
+                    int top = offsetY + y * cellSize;
+                    Rect dst = new Rect(left, top, left + cellSize, top + cellSize);
+                    if (gridTileBitmap != null) {
+                        canvas.drawBitmap(gridTileBitmap, null, dst, null);
+                    } else {
+                        Paint cellPaint = new Paint();
+                        cellPaint.setColor(Color.DKGRAY);
+                        canvas.drawRect(dst, cellPaint);
+                    }
+                }
+            }
+
+            // Draw grid lines
             for (int x = 0; x <= boardWidth; x++) {
                 canvas.drawLine(offsetX + x * cellSize, offsetY, 
                                offsetX + x * cellSize, offsetY + boardHeight * cellSize, gridPaint);
             }
-            
             for (int y = 0; y <= boardHeight; y++) {
                 canvas.drawLine(offsetX, offsetY + y * cellSize, 
                                offsetX + boardWidth * cellSize, offsetY + y * cellSize, gridPaint);
             }
             
-            // Draw walls from GameElements directly to include boundary walls
-            // (outer walls at x=boardWidth and y=boardHeight are outside the grid array)
+            // Draw walls
             for (GameElement element : currentState.getGameElements()) {
                 int ex = element.getX();
                 int ey = element.getY();
                 if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                    // Horizontal wall drawn as a bar along the top edge of cell (ex, ey)
                     canvas.drawRect(offsetX + ex * cellSize, offsetY + ey * cellSize - cellSize/8,
                                   offsetX + (ex+1) * cellSize, offsetY + ey * cellSize + cellSize/8, wallPaint);
                 } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                    // Vertical wall drawn as a bar along the left edge of cell (ex, ey)
                     canvas.drawRect(offsetX + ex * cellSize - cellSize/8, offsetY + ey * cellSize,
                                   offsetX + ex * cellSize + cellSize/8, offsetY + (ey+1) * cellSize, wallPaint);
                 }
             }
             
-            // Draw game elements (robots and targets)
+            // Draw robots and targets using real images
             for (GameElement element : currentState.getGameElements()) {
                 int x = element.getX();
                 int y = element.getY();
-                int centerX = offsetX + (x * cellSize) + (cellSize / 2);
-                int centerY = offsetY + (y * cellSize) + (cellSize / 2);
-                int radius = cellSize / 3;
-                
-                // Get color based on the element's color index
-                int colorValue = getColorForIndex(element.getColor());
+                int left = offsetX + x * cellSize;
+                int top = offsetY + y * cellSize;
+                Rect dst = new Rect(left, top, left + cellSize, top + cellSize);
                 
                 if (element.getType() == GameElement.TYPE_ROBOT) {
-                    robotPaint.setColor(colorValue);
-                    canvas.drawCircle(centerX, centerY, radius, robotPaint);
-                    // Draw "R" label
-                    canvas.drawText("R", centerX, centerY + radius/2, textPaint);
+                    int resId = getRobotDrawableId(element.getColor());
+                    Bitmap bmp = BitmapFactory.decodeResource(getContext().getResources(), resId);
+                    if (bmp != null) canvas.drawBitmap(bmp, null, dst, null);
                 } else if (element.getType() == GameElement.TYPE_TARGET) {
-                    targetPaint.setColor(colorValue);
-                    canvas.drawRect(centerX - radius, centerY - radius, 
-                                 centerX + radius, centerY + radius, targetPaint);
-                    // Draw "T" label with black text
-                    canvas.drawText("T", centerX, centerY + radius/2, targetTextPaint);
+                    int resId = getTargetDrawableId(element.getColor());
+                    Bitmap bmp = BitmapFactory.decodeResource(getContext().getResources(), resId);
+                    if (bmp != null) canvas.drawBitmap(bmp, null, dst, null);
                 }
             }
         }
-        
+
+        private int getRobotDrawableId(int colorIndex) {
+            switch (colorIndex) {
+                case Constants.COLOR_PINK:   return R.drawable.robot_pink_right;
+                case Constants.COLOR_GREEN:  return R.drawable.robot_green_right;
+                case Constants.COLOR_BLUE:   return R.drawable.robot_blue_right;
+                case Constants.COLOR_YELLOW: return R.drawable.robot_yellow_right;
+                case Constants.COLOR_SILVER: return R.drawable.robot_silver_right;
+                default:                     return R.drawable.robot_pink_right;
+            }
+        }
+
+        private int getTargetDrawableId(int colorIndex) {
+            switch (colorIndex) {
+                case Constants.COLOR_PINK:   return R.drawable.target_pink;
+                case Constants.COLOR_GREEN:  return R.drawable.target_green;
+                case Constants.COLOR_BLUE:   return R.drawable.target_blue;
+                case Constants.COLOR_YELLOW: return R.drawable.target_yellow;
+                case Constants.COLOR_SILVER: return R.drawable.target_silver;
+                default:                     return R.drawable.target_pink;
+            }
+        }
+
         private int getColorForIndex(int colorIndex) {
             switch (colorIndex) {
                 case Constants.COLOR_PINK: return Color.RED;

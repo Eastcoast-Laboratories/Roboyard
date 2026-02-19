@@ -209,6 +209,38 @@
     <string name="help_star_system_1_star">⭐ - Gute Lösung: Du hast die optimale Lösung mit zwei Hinweisen gefunden, ODER du hast zwei Züge mehr als optimal verwendet ohne Hinweise.</string>
     <string name="help_star_system_0_stars">Keine Sterne: Alle anderen Fälle. Übe weiter, um deine Leistung zu verbessern!</string>
     <string name="help_star_system_hint_penalty">Hinweis: Die Verwendung von Hinweisen reduziert deine Sterne-Bewertung und ermutigt dich, Rätsel selbstständig zu lösen.</string>
+    <string name="help_level_editor_section_title">Level-Editor</string>
+    <string name="help_level_editor_description">Sobald du alle 140 Level freigeschaltet hast, erscheint unten im Level-Auswahlbildschirm ein Level-Editor-Button. Erstelle damit eigene Level und teile sie mit anderen!</string>
+    
+    <!-- Level Editor Strings -->
+    <string name="editor_title">Level-Design-Editor</string>
+    <string name="editor_new_map">Neue Karte</string>
+    <string name="editor_level_map">Level %1$d Karte</string>
+    <string name="editor_select_level">Level auswählen: </string>
+    <string name="editor_board_size">Feldgröße: </string>
+    <string name="editor_apply">Anwenden</string>
+    <string name="editor_board_preview_hint">Vorschau (Tippen zum Bearbeiten)</string>
+    <string name="editor_mode_robot">Robot</string>
+    <string name="editor_mode_target">Ziel</string>
+    <string name="editor_mode_wall_h">–</string>
+    <string name="editor_mode_wall_v">&nbsp;&nbsp;|</string>
+    <string name="editor_mode_erase">Del</string>
+    <string name="editor_color_pink">Pink</string>
+    <string name="editor_color_green">Grün</string>
+    <string name="editor_color_blue">Blau</string>
+    <string name="editor_color_yellow">Gelb</string>
+    <string name="editor_color_silver">Silber</string>
+    <string name="editor_load_autosave">Autosave laden</string>
+    <string name="editor_cancel">Abbrechen</string>
+    <string name="editor_random_robots_targets">Zufällige Roboter</string>
+    <string name="editor_export_level">Level-Text exportieren</string>
+    <string name="editor_generate_walls">Wände generieren</string>
+    <string name="editor_generate_border_stubs">Randwände generieren</string>
+    <string name="editor_play_map">▶ Karte spielen</string>
+    <string name="editor_import_ascii_map">ASCII-Karte importieren</string>
+    <string name="editor_pattern_label">Muster:</string>
+    <string name="level_editor_button">Level-Editor</string>
+    <string name="level_editor_hint">Du hast den Level-Editor freigeschaltet! Erstelle eigene Level.</string>
     
     <!-- Game Buttons -->
     <string name="button_reset">Reset</string>

@@ -342,8 +342,8 @@ public class DebugSettingsFragment extends Fragment {
         unlockStarsBtn.setOnClickListener(v -> {
             LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
             completionManager.unlockAllStars();
-            Toast.makeText(requireContext(), "All 420 stars unlocked", Toast.LENGTH_SHORT).show();
-            Timber.d("[DEBUG] Unlocked all 420 stars via debug button");
+            Toast.makeText(requireContext(), "139 stars unlocked", Toast.LENGTH_SHORT).show();
+            Timber.d("[DEBUG] Unlocked 139 stars via debug button");
         });
         buttonLayout.addView(unlockStarsBtn);
         

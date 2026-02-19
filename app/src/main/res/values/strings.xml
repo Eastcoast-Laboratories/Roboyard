@@ -173,6 +173,9 @@
     
     <!-- Level Selection screen -->
     <string name="level_selection_title">Level Selection</string>
+    <string name="level_editor_button">Level Editor</string>
+    <string name="level_editor_button_short">Editor</string>
+    <string name="level_editor_hint">You have unlocked the Level Editor! Create your own levels.</string>
     <string name="level_category_beginner">Beginner</string>
     <string name="level_category_intermediate">Intermediate</string>
     <string name="level_category_advanced">Advanced</string>
@@ -226,6 +229,8 @@
     <string name="help_star_system_1_star">⭐ - Good solution: You found the optimal solution with two hints, OR you used two moves more than optimal without hints.</string>
     <string name="help_star_system_0_stars">No stars: All other cases. Keep practicing to improve your performance!</string>
     <string name="help_star_system_hint_penalty">Note: Using hints will reduce your star rating, encouraging you to solve puzzles independently.</string>
+    <string name="help_level_editor_section_title">Level Editor</string>
+    <string name="help_level_editor_description">Once you have unlocked all 140 levels, a Level Editor button will appear at the bottom of the level selection screen. Use it to create your own custom levels and share them with others!</string>
     
     <!-- Game Buttons -->
     <string name="hint_button">💡Hint</string>
@@ -745,10 +750,34 @@
     <string name="streak_popup_day_31_headline">Legend status!</string>
     
     <!-- Level Editor Strings -->
+    <string name="editor_title">Level Design Editor</string>
+    <string name="editor_new_map">New Map</string>
+    <string name="editor_level_map">Level %1$d Map</string>
+    <string name="editor_select_level">Select Level: </string>
+    <string name="editor_board_size">Board Size: </string>
+    <string name="editor_apply">Apply</string>
+    <string name="editor_board_preview">Board Preview</string>
+    <string name="editor_board_preview_hint">Board Preview (Tap to edit)</string>
+    <string name="editor_mode_robot">Robot</string>
+    <string name="editor_mode_target">Target</string>
+    <string name="editor_mode_wall_h">– Wall</string>
+    <string name="editor_mode_wall_v">| Wall</string>
+    <string name="editor_mode_erase">Erase</string>
+    <string name="editor_color_pink">Pink</string>
+    <string name="editor_color_green">Green</string>
+    <string name="editor_color_blue">Blue</string>
+    <string name="editor_color_yellow">Yellow</string>
+    <string name="editor_color_silver">Silver</string>
+    <string name="editor_load_autosave">Load Autosave</string>
+    <string name="editor_cancel">Cancel</string>
+    <string name="editor_random_robots_targets">Random Robots &amp; Targets</string>
+    <string name="editor_export_level">Export Level Text</string>
     <string name="editor_import_ascii_map">Import ASCII Map</string>
     <string name="editor_import_ascii_map_title">Paste ASCII Map</string>
     <string name="editor_import_ascii_map_hint">Paste the ASCII map here…</string>
     <string name="editor_generate_walls">Generate Walls</string>
+    <string name="editor_generate">Generate</string>
+    <string name="editor_load_savegame">Load Save: </string>
     <string name="editor_pattern_label">Pattern:</string>
     <string name="editor_pattern_classic">Classic (L-shapes)</string>
     <string name="editor_pattern_spiral">Spiral</string>

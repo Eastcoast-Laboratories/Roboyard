@@ -3,23 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="#000000">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="0dp"
+        android:background="#000000"
         tools:context=".ui.LevelDesignEditorFragment">
 
         <!-- Header: Title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Level Design Editor"
+            android:text="@string/editor_title"
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
+            android:textColor="#FFFFFF"
             android:layout_marginBottom="16dp" />
 
         <!-- Level ID Display -->
@@ -27,290 +30,11 @@
             android:id="@+id/level_id_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="New Level"
+            android:text="@string/editor_new_map"
             android:textSize="18sp"
+            android:textColor="#CCCCCC"
             android:layout_marginBottom="8dp" />
 
-        <!-- Level Selection Spinner -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Select Level: "
-                android:textSize="16sp"
-                android:layout_gravity="center_vertical" />
-
-            <Spinner
-                android:id="@+id/edit_level_spinner"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <!-- Board Size Configuration -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Board Size: "
-                android:textSize="16sp"
-                android:layout_gravity="center_vertical" />
-
-            <EditText
-                android:id="@+id/board_width_edit_text"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="12"
-                android:textColor="#666666"
-                android:gravity="center"
-                android:selectAllOnFocus="true" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" x "
-                android:textSize="16sp"
-                android:layout_gravity="center_vertical" />
-
-            <EditText
-                android:id="@+id/board_height_edit_text"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="14"
-                android:textColor="#666666"
-                android:gravity="center"
-                android:selectAllOnFocus="true" />
-
-            <Button
-                android:id="@+id/apply_board_size_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Apply"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
-
-        <!-- Wall Pattern Generator -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/editor_pattern_label"
-                android:textSize="16sp" />
-
-            <Spinner
-                android:id="@+id/wall_pattern_spinner"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp" />
-
-            <Button
-                android:id="@+id/generate_walls_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/editor_generate_walls"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
-
-        <!-- Generate Border Stubs Button -->
-        <Button
-            android:id="@+id/generate_border_stubs_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/editor_generate_border_stubs"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Random Placement Button -->
-        <Button
-            android:id="@+id/random_placement_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Random Robots &amp; Targets"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Board Preview Section -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Board Preview"
-            android:textSize="16sp"
-            android:layout_marginBottom="4dp" />
-
-        <FrameLayout
-            android:id="@+id/board_preview_container"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_marginBottom="16dp"
-            android:background="#E0E0E0">
-            
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Board Preview (Tap to edit)"
-                android:textSize="16sp" />
-        </FrameLayout>
-
-        <!-- Edit Mode Selection (Robot/Target/Wall/Erase) -->
-        <RadioGroup
-            android:id="@+id/edit_mode_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <RadioButton
-                android:id="@+id/mode_robot_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Robot"
-                android:textSize="12sp"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/mode_target_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Target"
-                android:textSize="12sp" />
-                
-            <RadioButton
-                android:id="@+id/mode_wall_h_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="– Wall"
-                android:textSize="12sp" />
-                
-            <RadioButton
-                android:id="@+id/mode_wall_v_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="| Wall"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/mode_erase_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Erase"
-                android:textSize="12sp" />
-        </RadioGroup>
-
-        <!-- Robot Color Selection (visible when Robot mode is selected) -->
-        <RadioGroup
-            android:id="@+id/robot_color_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <RadioButton
-                android:id="@+id/robot_red_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Pink"
-                android:textSize="12sp"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/robot_green_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Green"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/robot_blue_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Blue"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/robot_yellow_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Yellow"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/robot_silver_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Silver"
-                android:textSize="12sp" />
-        </RadioGroup>
-
-        <!-- Target Color Selection (visible when Target mode is selected) -->
-        <RadioGroup
-            android:id="@+id/target_color_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp"
-            android:visibility="gone">
-
-            <RadioButton
-                android:id="@+id/target_red_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Pink"
-                android:textSize="12sp"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/target_green_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Green"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/target_blue_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Blue"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/target_yellow_radio"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Yellow"
-                android:textSize="12sp" />
-        </RadioGroup>
 
         <!-- Board Shift Controls (Arrow Buttons) -->
         <LinearLayout
@@ -358,8 +82,42 @@
                 android:textSize="16sp"
                 android:padding="0dp" />
         </LinearLayout>
+        
+        <!-- Wall Pattern Generator -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical">
 
-        <!-- Action Buttons: Cancel and Load Autosave -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_pattern_label"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/wall_pattern_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="#1a1a1a"
+                android:popupBackground="#1a1a1a" />
+
+            <Button
+                android:id="@+id/generate_walls_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_generate"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_green_outline"
+                android:padding="6dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Random Placement + Border Stubs side by side -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -367,17 +125,310 @@
             android:layout_marginBottom="8dp">
 
             <Button
-                android:id="@+id/cancel_button"
-                android:layout_width="wrap_content"
+                android:id="@+id/random_placement_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Cancel" />
+                android:text="@string/editor_random_robots_targets"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_purple"
+                android:padding="6dp" />
 
             <Button
-                android:id="@+id/load_autosave_button"
+                android:id="@+id/generate_border_stubs_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_generate_border_stubs"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_green_outline"
+                android:padding="6dp"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+        
+        <!-- Edit Mode Selection (Robot/Target/Wall/Erase) -->
+        <RadioGroup
+            android:id="@+id/edit_mode_radio_group"
+            android:background="#111111"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/mode_robot_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_mode_robot"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/mode_target_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_mode_target"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+                
+            <RadioButton
+                android:id="@+id/mode_wall_h_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_mode_wall_h"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+                
+            <RadioButton
+                android:id="@+id/mode_wall_v_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_mode_wall_v"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/mode_erase_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_mode_erase"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <!-- Robot Color Selection (visible when Robot mode is selected) -->
+        <RadioGroup
+            android:id="@+id/robot_color_radio_group"
+            android:background="#111111"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/robot_red_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_pink"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/robot_green_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_green"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/robot_blue_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_blue"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/robot_yellow_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_yellow"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/robot_silver_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_silver"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <!-- Target Color Selection (visible when Target mode is selected) -->
+        <RadioGroup
+            android:id="@+id/target_color_radio_group"
+            android:background="#111111"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/target_red_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_pink"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/target_green_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_green"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/target_blue_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_blue"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/target_yellow_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_color_yellow"
+                android:textColor="#CCCCCC"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <!-- Board Preview Section -->
+        <FrameLayout
+            android:id="@+id/board_preview_container"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_marginBottom="16dp"
+            android:background="#000000">
+            
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Load Autosave" />
+                android:layout_gravity="center"
+                android:text="@string/editor_board_preview_hint"
+                android:textColor="#888888"
+                android:textSize="16sp" />
+        </FrameLayout>
+
+
+        
+        <!-- Level Selection Spinner -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_select_level"
+                android:textSize="16sp"
+                android:textColor="#CCCCCC"
+                android:layout_gravity="center_vertical" />
+
+            <Spinner
+                android:id="@+id/edit_level_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#1a1a1a"
+                android:popupBackground="#1a1a1a" />
+        </LinearLayout>
+
+        <!-- Board Size Configuration -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_board_size"
+                android:textSize="16sp"
+                android:textColor="#CCCCCC"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:id="@+id/board_width_edit_text"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="12"
+                android:textColor="#FFFFFF"
+                android:background="#1a1a1a"
+                android:gravity="center"
+                android:selectAllOnFocus="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" x "
+                android:textSize="16sp"
+                android:textColor="#CCCCCC"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:id="@+id/board_height_edit_text"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="14"
+                android:textColor="#FFFFFF"
+                android:background="#1a1a1a"
+                android:gravity="center"
+                android:selectAllOnFocus="true" />
+
+            <Button
+                android:id="@+id/apply_board_size_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_apply"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_blue_outline"
+                android:padding="6dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Savegame Spinner (load saved game) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/editor_load_savegame"
+                android:textSize="16sp"
+                android:textColor="#CCCCCC"
+                android:layout_gravity="center_vertical" />
+
+            <Spinner
+                android:id="@+id/savegame_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#1a1a1a"
+                android:popupBackground="#1a1a1a" />
+
         </LinearLayout>
 
         <!-- Action Buttons: Export and Play Map -->
@@ -392,7 +443,10 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Export Level Text" />
+                android:text="@string/editor_export_level"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_gray_outline"
+                android:padding="6dp" />
 
             <Button
                 android:id="@+id/play_map_button"
@@ -400,6 +454,9 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/editor_play_map"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_rounded_green_outline"
+                android:padding="6dp"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
@@ -409,6 +466,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/editor_import_ascii_map"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_rounded_blue_outline"
+            android:padding="6dp"
             android:layout_marginBottom="8dp" />
 
         <!-- Level Text Output (hidden by default) -->
@@ -417,11 +477,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:background="#f0f0f0"
-            android:textColor="#666666"
+            android:background="#1a1a1a"
+            android:textColor="#CCCCCC"
             android:textIsSelectable="true"
             android:layout_marginTop="8dp"
             android:visibility="gone" />
+
+        <!-- Cancel Button at the very bottom, full width -->
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/editor_cancel"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_rounded_gray_outline"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
 
     </LinearLayout>
 </ScrollView>

@@ -60,26 +60,46 @@
         android:importantForAccessibility="no"
         />
 
-    <!-- Back button at the bottom of the screen with reduced height and no bottom margin -->
-    <Button
-        android:id="@+id/back_button"
+    <!-- Bottom button row: Back + optional Editor button -->
+    <LinearLayout
+        android:id="@+id/bottom_button_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/back"
-        android:contentDescription="@string/back_description"
-        android:padding="6dp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="16dp"
-        android:background="@drawable/button_rounded_gray_outline"
-        app:layout_constraintEnd_toStartOf="@id/right_wall"
-        app:layout_constraintStart_toEndOf="@id/left_wall"
-        app:layout_constraintBottom_toTopOf="@id/bottom_wall"
-        app:layout_constraintWidth_max="240dp"
-        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="4dp"
+        app:layout_constraintEnd_toStartOf="@id/right_wall"
+        app:layout_constraintStart_toEndOf="@id/left_wall"
+        app:layout_constraintBottom_toTopOf="@id/bottom_wall">
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/back"
+            android:contentDescription="@string/back_description"
+            android:padding="6dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16dp"
+            android:background="@drawable/button_rounded_gray_outline" />
+
+        <Button
+            android:id="@+id/level_editor_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/level_editor_button_short"
+            android:padding="6dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/button_rounded_blue_outline"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <!-- Scrollable content area with padding -->
     <ScrollView
@@ -87,7 +107,7 @@
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/top_wall"
-        app:layout_constraintBottom_toTopOf="@id/back_button"
+        app:layout_constraintBottom_toTopOf="@id/bottom_button_row"
         app:layout_constraintStart_toEndOf="@id/left_wall"
         app:layout_constraintEnd_toStartOf="@id/right_wall">
         

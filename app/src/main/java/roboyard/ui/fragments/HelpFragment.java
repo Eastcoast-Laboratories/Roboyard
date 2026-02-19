@@ -89,6 +89,10 @@ public class HelpFragment extends BaseGameFragment {
                      getString(R.string.help_star_system_1_star) + "\n" +
                      getString(R.string.help_star_system_0_stars));
         addParagraph(getString(R.string.help_star_system_hint_penalty));
+        
+        // Level Editor section
+        addSectionHeading(getString(R.string.help_level_editor_section_title));
+        addParagraph(getString(R.string.help_level_editor_description));
     }
     
     /**

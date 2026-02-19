@@ -379,6 +379,13 @@ public class AchievementPopup {
         return list;
     }
     
+    /**
+     * Dismiss the popup immediately (e.g. when starting a new game or next level).
+     */
+    public void dismiss() {
+        hidePopup();
+    }
+
     private void hidePopup() {
         if (popupContainer == null) {
             isShowing = false;
