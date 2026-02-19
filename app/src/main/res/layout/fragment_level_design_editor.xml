@@ -192,7 +192,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/editor_mode_wall_v"
                 android:textColor="#CCCCCC"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:paddingStart="8dp" />
 
             <RadioButton
                 android:id="@+id/mode_erase_radio"

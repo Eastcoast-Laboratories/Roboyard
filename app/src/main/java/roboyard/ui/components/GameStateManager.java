@@ -1556,20 +1556,24 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Save level completion data if this is a level game
             if (complete && state.getLevelId() > 0) {
                 Timber.d("[SAVE] [STARS] Game completed, saving level completion data for level %d", state.getLevelId());
+                LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
+                int starsBefore = manager.getTotalStars();
                 LevelCompletionData data = saveLevelCompletionData(state);
 
                 // Now save the prepared data
                 if (data != null) {
-                    LevelCompletionManager manager = LevelCompletionManager.getInstance(context);
                     manager.saveLevelCompletionData(data);
                     Timber.d("Saved level completion data: %s", data);
                 }
 
-                // Show a toast to indicate the level was completed
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    // Toast.makeText(context, "Level " + state.getLevelId() + " completed!", Toast.LENGTH_SHORT).show();
-                    Timber.d("Level " + state.getLevelId() + " completed!");
-                });
+                int starsAfter = manager.getTotalStars();
+                Timber.d("[LEVEL_EDITOR] Stars before=%d, after=%d", starsBefore, starsAfter);
+                if (starsBefore < 140 && starsAfter >= 140) {
+                    new Handler(Looper.getMainLooper()).post(() ->
+                        android.widget.Toast.makeText(context, roboyard.eclabs.R.string.level_editor_unlocked, android.widget.Toast.LENGTH_LONG).show()
+                    );
+                    Timber.d("[LEVEL_EDITOR] Level Editor unlocked at %d stars!", starsAfter);
+                }
             }
         }
     }
