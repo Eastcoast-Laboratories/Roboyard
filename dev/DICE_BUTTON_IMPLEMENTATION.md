@@ -48,14 +48,14 @@ When `generateNewMapEachTime == "no"`, add a dice button in the random game scre
 3. Call from dice button:
    ```java
    MapGenerator.forceGenerateNewMapOnce = true;
-   gameStateManager.startModernGame();
+   gameStateManager.startGame();
    ```
 
 
 ### UI Implementation
 
 #### Where to Add Button
-- **ModernGameFragment** - Game screen
+- **GameFragment** - Game screen
 - Position: Next to map name (top of game screen)
 - Only visible when `Preferences.generateNewMapEachTime == false`
 
@@ -67,7 +67,7 @@ When `generateNewMapEachTime == "no"`, add a dice button in the random game scre
 
 #### Implementation Steps
 
-1. **Find ModernGameFragment layout**
+1. **Find GameFragment layout**
    - Locate the map name TextView
    - Add dice button next to it
 
@@ -82,7 +82,7 @@ When `generateNewMapEachTime == "no"`, add a dice button in the random game scre
    ```java
    diceButton.setOnClickListener(v -> {
        MapGenerator.forceGenerateNewMapOnce = true;
-       gameStateManager.startModernGame();
+       gameStateManager.startGame();
        Timber.d("[DICE_BUTTON] New map generated with dice button");
    });
    ```
@@ -100,6 +100,6 @@ When `generateNewMapEachTime == "no"`, add a dice button in the random game scre
 
 ### Files to Modify
 1. `MapGenerator.java` - Add override flag
-2. `ModernGameFragment.java` - Add button and logic
-3. `fragment_modern_game.xml` (or equivalent) - Add button UI
+2. `GameFragment.java` - Add button and logic
+3. `fragment_game_portrait.xml` (or equivalent) - Add button UI
 4. `strings.xml` - Add button label for accessibility in all languages

@@ -29,8 +29,8 @@
                 android:defaultValue="false" />
         </action>
         <action
-            android:id="@+id/actionMainMenuToModernGame"
-            app:destination="@id/modernGameFragment" />
+            android:id="@+id/actionMainMenuToGame"
+            app:destination="@id/gameFragment" />
     </fragment>
 
     <!-- Game Canvas Fragment (using old game logic) -->
@@ -87,14 +87,14 @@
             android:defaultValue="true" />
     </fragment>
 
-    <!-- Modern Game Fragment -->
+    <!-- Game Fragment -->
     <fragment
-        android:id="@+id/modernGameFragment"
-        android:name="roboyard.ui.fragments.ModernGameFragment"
-        android:label="Modern Game"
-        tools:layout="@layout/fragment_modern_game">
+        android:id="@+id/gameFragment"
+        android:name="roboyard.ui.fragments.GameFragment"
+        android:label="Game"
+        tools:layout="@layout/fragment_game_portrait">
         <action
-            android:id="@+id/actionModernGameToMainMenu"
+            android:id="@+id/actionGameToMainMenu"
             app:destination="@id/mainMenuFragment" />
     </fragment>
 

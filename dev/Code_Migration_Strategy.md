@@ -38,7 +38,7 @@ All imports referencing the old package must be updated across the entire codeba
 | `LevelDesignEditorFragment.java` | `roboyard.ui.fragments` |
 | `LevelSelectionFragment.java` | `roboyard.ui.fragments` |
 | `MainMenuFragment.java` | `roboyard.ui.fragments` |
-| `ModernGameFragment.java` | `roboyard.ui.fragments` |
+| `GameFragment.java` | `roboyard.ui.fragments` |
 | `SaveGameFragment.java` | `roboyard.ui.fragments` |
 | `SettingsFragment.java` | `roboyard.ui.fragments` |
 
@@ -119,7 +119,7 @@ app/src/main/java/roboyard/
 │   ├── animation/     # RobotAnimationManager
 │   ├── components/    # GameGridView, GameStateManager, RenderManager, GameManager,
 │   │                  # FileReadWrite, MinimapGenerator, etc.
-│   ├── fragments/     # ModernGameFragment, SettingsFragment, all *Fragment.java
+│   ├── fragments/     # GameFragment, SettingsFragment, all *Fragment.java
 │   └── util/          # SolverManager, SoundManager, SolutionAnimator, FontScaleUtil, etc.
 └── (eclabs/ — EMPTY after migration, to be deleted)
 ```

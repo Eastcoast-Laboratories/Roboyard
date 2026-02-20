@@ -211,14 +211,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void startNewGame() {
         Timber.d("GameStateManager: startNewGame() called");
 
-        startModernGame();
+        startGame();
     }
 
     /**
-     * Start a new modern game
+     * Start a new game
      */
-    public void startModernGame() {
-        Timber.d("GameStateManager: startModernGame() called");
+    public void startGame() {
+        Timber.d("GameStateManager: startGame() called");
 
         // Reset loaded game flags - new games should use current difficulty settings
         isLoadedFromSave = false;
@@ -250,11 +250,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Record start time
         startTime = System.currentTimeMillis();
 
-        Timber.d("GameStateManager: startModernGame() complete");
+        Timber.d("GameStateManager: startGame() complete");
     }
 
     /**
-     * Start a level game with the modern UI
+     * Start a level game
      *
      * @param levelId Level ID to load
      */

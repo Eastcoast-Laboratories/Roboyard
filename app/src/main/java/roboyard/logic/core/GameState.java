@@ -1593,7 +1593,7 @@ public class GameState implements Serializable {
         state.setDifficulty(Preferences.difficulty);
         Timber.tag(TAG).d("[DIFFICULTY] Set game difficulty to %d", Preferences.difficulty);
 
-        // Use MapGenerator instead of directly using GameLogic to match the old canvas-based game
+        // Use MapGenerator instead of directly using GameLogic
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
                 boardSizeX + "x" + boardSizeY);
 
@@ -1611,7 +1611,7 @@ public class GameState implements Serializable {
         Timber.tag(TAG).d("[PREFERENCES] Using robotCount=%d, targetColors=%d from static Preferences",
                 state.robotCount, state.targetColorsCount);
         
-        // Generate a new game map using the same method as the old canvas-based game
+        // Generate a new game map
         ArrayList<GridElement> gridElements = mapGenerator.getGeneratedGameMap();
 
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size() + " grid elements");

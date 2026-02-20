@@ -1,36 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Landscape layout with game grid on the left side (alternative) -->
+<!-- Landscape layout with game grid on the right side (default) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Game grid view - left side, height=full screen, width=height (square) -->
-    <roboyard.ui.components.GameGridView
-        android:id="@+id/game_grid_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="H,1:1" />
-
-    <!-- Right panel containing all other elements - takes remaining space -->
+    <!-- Left panel containing all other elements - takes remaining space -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/right_panel"
+        android:id="@+id/left_panel"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="0dp"
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
-        app:layout_constraintStart_toEndOf="@id/game_grid_view"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/game_grid_view"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Hint container - top of right panel -->
+        <!-- Hint container - top of left panel -->
         <LinearLayout
             android:id="@+id/hint_container"
             android:layout_width="match_parent"
@@ -79,7 +69,7 @@
                 android:textStyle="bold"
                 android:elevation="4dp" />
             
-            <!-- Live move counter eye toggle -->
+            <!-- Live move counter live-move-toggle -->
             <ToggleButton
                 android:id="@+id/live_move_counter_toggle"
                 android:layout_width="wrap_content"
@@ -201,21 +191,21 @@
                 android:layout_marginTop="7dp"
                 android:layout_marginStart="8dp" />
 
-            <!-- Layout toggle button positioned at the left edge (near game grid) -->
+            <!-- Layout toggle button positioned at the right edge (near game grid) -->
             <Button
                 android:id="@+id/layout_toggle_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/button_fancy_gray"
+                android:background="@drawable/button_rounded_gray_outline"
                 android:padding="4dp"
-                android:text="⇆"
+                android:text="⇄"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:minWidth="32dp"
                 android:contentDescription="Toggle layout direction"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
 
             <!-- Optimal Moves Button centered -->
@@ -224,7 +214,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/button_fancy_green"
+                android:background="@drawable/button_rounded_green_outline"
                 android:padding="0dp"
                 android:text="Show Optimal"
                 android:textColor="#FFFFFF"
@@ -236,8 +226,8 @@
                 app:autoSizeMaxTextSize="36sp"
                 app:autoSizeStepGranularity="1sp"
                 android:visibility="gone"
-                app:layout_constraintStart_toEndOf="@id/layout_toggle_button"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/layout_toggle_button"
                 app:layout_constraintTop_toBottomOf="@id/difficulty_text" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -270,7 +260,7 @@
             app:layout_constraintBottom_toTopOf="@id/button_container"
             app:layout_constraintVertical_weight="1" />
 
-        <!-- Buttons at the bottom of right panel -->
+        <!-- Buttons at the bottom of left panel -->
         <LinearLayout
             android:id="@+id/button_container"
             android:layout_width="match_parent"
@@ -302,7 +292,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/game_button_text_size"
                     android:textStyle="bold"
-                android:elevation="6dp" />
+                    android:elevation="6dp" />
 
                 <Button
                     android:id="@+id/save_map_button"
@@ -316,7 +306,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/game_button_text_size"
                     android:textStyle="bold"
-                android:elevation="6dp" />
+                    android:elevation="6dp" />
 
                 <Button
                     android:id="@+id/reset_robots_button"
@@ -329,7 +319,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/game_button_text_size"
                     android:textStyle="bold"
-                android:elevation="6dp" />
+                    android:elevation="6dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -350,7 +340,7 @@
                     android:textOff="@string/hint_button"
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/game_button_text_size"
-                android:elevation="6dp" />
+                    android:elevation="6dp" />
 
                 <Button
                     android:id="@+id/new_map_button"
@@ -364,7 +354,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/game_button_text_size"
                     android:textStyle="bold"
-                android:elevation="6dp" />
+                    android:elevation="6dp" />
 
                 <Button
                     android:id="@+id/menu_button"
@@ -377,7 +367,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/game_button_text_size"
                     android:textStyle="bold"
-                android:elevation="6dp" />
+                    android:elevation="6dp" />
             </LinearLayout>
             
             <!-- Next Level button (initially invisible) -->
@@ -394,7 +384,17 @@
                 android:textSize="@dimen/game_button_text_size"
                 android:textStyle="bold"
                 android:visibility="gone"
-            android:elevation="6dp" />
+                android:elevation="6dp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Game grid view - right side, height=full screen, width=height (square) -->
+    <roboyard.ui.components.GameGridView
+        android:id="@+id/game_grid_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="H,1:1" />
 </androidx.constraintlayout.widget.ConstraintLayout>

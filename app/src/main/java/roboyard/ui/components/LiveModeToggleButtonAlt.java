@@ -6,20 +6,20 @@ import android.widget.ToggleButton;
 
 /**
  * A ToggleButton that ignores setVisibility(GONE) calls.
- * Used in the alternative layout so the eye-toggle stays visible
+ * Used in the alternative layout so the live-move-toggle stays visible
  * even when the fragment tries to hide it.
  */
-public class LiiveModeToggleButtonAlt extends ToggleButton {
+public class LiveModeToggleButtonAlt extends ToggleButton {
 
-    public LiiveModeToggleButtonAlt(Context context) {
+    public LiveModeToggleButtonAlt(Context context) {
         super(context);
     }
 
-    public LiiveModeToggleButtonAlt(Context context, AttributeSet attrs) {
+    public LiveModeToggleButtonAlt(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public LiiveModeToggleButtonAlt(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LiveModeToggleButtonAlt(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

@@ -20,7 +20,7 @@ private final List<GameElement> gameElements;  // Line 44
 - `GameState.java` - Primary storage, addRobot(), addTarget(), addWall(), getRobotAt(), getTargets(), getRobots()
 - `GameGridView.java` - Rendering all elements
 - `GameStateManager.java` - Game logic, movement, undo
-- `ModernGameFragment.java` - UI updates, robot selection
+- `GameFragment.java` - UI updates, robot selection
 - `LevelDesignEditorFragment.java` - Level editor
 - `MinimapGenerator.java` - Minimap creation
 - `RobotAnimationManager.java` - Animations
@@ -83,7 +83,7 @@ public class GridElement {
 | `GameStateManager.java` | Game logic, 12 references |
 | `GameLogic.java` | Map generation, 11 references |
 | `LevelDesignEditorFragment.java` | Editor, 10 references |
-| `ModernGameFragment.java` | UI, 9 references |
+| `GameFragment.java` | UI, 9 references |
 | `MapGenerator.java` | Generation, 4 references |
 | `MainFragmentActivity.java` | Navigation, 2 references |
 | `MinimapGenerator.java` | Minimap, 1 reference |

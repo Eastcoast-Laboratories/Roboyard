@@ -231,7 +231,7 @@
             android:textStyle="bold"
             android:elevation="4dp" />
         
-        <!-- Live move counter eye toggle -->
+        <!-- Live move counter live-move-toggle -->
         <ToggleButton
             android:id="@+id/live_move_counter_toggle"
             android:layout_width="wrap_content"

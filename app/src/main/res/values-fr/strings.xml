@@ -94,7 +94,7 @@
     <string name="robot_movement_canceled">Mouvement du robot annulé</string>
     <string name="no_game_to_save">Aucune partie disponible à sauvegarder</string>
     
-    <!-- Game UI text for ModernGameFragment -->
+    <!-- Game UI text for GameFragment -->
     <string name="no_robot_selected">Aucun robot sélectionné</string>
     <string name="robot_selected">Sélectionné: robot %1$s à (%2$d, %3$d)</string>
     <string name="robot_selected_info">Sélectionné: robot %1$s à (%2$d, %3$d)</string>

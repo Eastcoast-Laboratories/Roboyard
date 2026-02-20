@@ -5,7 +5,7 @@
 - Logging for target conversion in GameStateManager and SolverDD was marked as possibly unreachable, confirming alternate code paths.
 - User reported accessibility mode issues: missing coordinates in target announcements, unwanted solution computation message, and hint announcements should only include the last step, not history.
 - Confirmed `target_a11y` string exists and is used for target announcements; bug may be in usage (possible double-appending or formatting error).
-- Located code for "KI berechnet Lösung ..." announcement and hint accessibility announcement logic in ModernGameFragment.java for targeted fixes.
+- Located code for "KI berechnet Lösung ..." announcement and hint accessibility announcement logic in GameFragment.java for targeted fixes.
 - User requested: Accessibility hint message should use translated direction words from strings.xml instead of arrows.
 - New feature request: Add a second pre-hint that lists the involved robot colors in the solution (before the first-move pre-hint).
 - Fixed robot color list formatting in pre-hint: no comma before "and"; update propagated to all languages.

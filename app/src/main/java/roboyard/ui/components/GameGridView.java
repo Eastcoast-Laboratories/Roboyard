@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
-import roboyard.ui.fragments.ModernGameFragment;
+import roboyard.ui.fragments.GameFragment;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameLogic;
@@ -1527,8 +1527,8 @@ public class GameGridView extends View {
         
         if (!moved) {
             // Play wall hit sound for blocked movement (no animation callback in this case)
-            if (fragment instanceof ModernGameFragment) {
-                ((ModernGameFragment) fragment).playSound("hit_wall");
+            if (fragment instanceof GameFragment) {
+                ((GameFragment) fragment).playSound("hit_wall");
             }
         }
         
@@ -1555,13 +1555,13 @@ public class GameGridView extends View {
         GameElement hitRobotElement = gameStateManager.getLastMoveHitRobotElement();
         
         // Play the appropriate sound effect based on what happened
-        if (fragment instanceof ModernGameFragment) {
-            ModernGameFragment modernFragment = (ModernGameFragment) fragment;
+        if (fragment instanceof GameFragment) {
+            GameFragment gameFragment = (GameFragment) fragment;
             // Use shared method to handle sounds and achievements
-            modernFragment.handleRobotMovementSounds(state, selectedRobot, hitRobotElement, hitWall, "GameGridView");
+            gameFragment.handleRobotMovementSounds(state, selectedRobot, hitRobotElement, hitWall, "GameGridView");
             
             // Also announce possible moves after movement
-            modernFragment.announcePossibleMoves(selectedRobot);
+            gameFragment.announcePossibleMoves(selectedRobot);
         }
         
         if (state.checkCompletion()) {
@@ -2122,7 +2122,7 @@ public class GameGridView extends View {
     
     /**
      * Set grid elements directly from an ArrayList of GridElements
-     * This is used by ModernGameFragment to update the grid view
+     * This is used by GameFragment to update the grid view
      * @param gridElements List of grid elements to display
      */
     public void setGridElements(ArrayList<GridElement> gridElements) {

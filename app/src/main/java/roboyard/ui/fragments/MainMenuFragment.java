@@ -24,10 +24,9 @@ import android.content.res.Configuration;
 import android.content.Intent;
 import android.net.Uri;
 import roboyard.ui.components.LoginDialogHelper;
-import roboyard.ui.components.UIModeManager;
 
 /**
- * Main menu screen implemented as a Fragment with modern Android UI components.
+ * Main menu screen
  */
 public class MainMenuFragment extends BaseGameFragment {
     
@@ -55,7 +54,7 @@ public class MainMenuFragment extends BaseGameFragment {
         applyLanguageSettings();
         
         // Set up UI elements - only use buttons
-        newGameButton = view.findViewById(R.id.modern_ui_button);
+        newGameButton = view.findViewById(R.id.ui_button);
         
         levelGameButton = view.findViewById(R.id.level_game_button);
         loadGameButton = view.findViewById(R.id.load_game_button);
@@ -258,8 +257,7 @@ public class MainMenuFragment extends BaseGameFragment {
                     gameStateManager.loadGame(0);
                     if (gameStateManager.getCurrentState().getValue() != null) {
                         Timber.d("[PLAY] Auto-save loaded successfully, resuming game");
-                        UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
-                        ModernGameFragment gameFragment = new ModernGameFragment();
+                        GameFragment gameFragment = new GameFragment();
                         navigateToDirect(gameFragment);
                         return;
                     }
@@ -275,11 +273,11 @@ public class MainMenuFragment extends BaseGameFragment {
             }
             
             // Start a new game
-            Timber.d("MainMenuFragment: Calling gameStateManager.startModernGame()");
-            gameStateManager.startModernGame();
+            Timber.d("MainMenuFragment: Calling gameStateManager.startGame()");
+            gameStateManager.startGame();
             
-            // Create a new ModernGameFragment instance
-            ModernGameFragment gameFragment = new ModernGameFragment();
+            // Create a new GameFragment instance
+            GameFragment gameFragment = new GameFragment();
             navigateToDirect(gameFragment);
         });
         

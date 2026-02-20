@@ -52,8 +52,8 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Eye toggle for hot/cold mode - top right; LiiveModeToggleButtonAlt ignores setVisibility(GONE) -->
-        <roboyard.ui.components.LiiveModeToggleButtonAlt
+        <!-- live-move-toggle for hot/cold mode - top right; LiveModeToggleButtonAlt ignores setVisibility(GONE) -->
+        <roboyard.ui.components.LiveModeToggleButtonAlt
             android:id="@+id/live_move_counter_toggle"
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -255,7 +255,7 @@
         app:layout_constraintBottom_toTopOf="@id/alt_bottom_bar"
         app:layout_constraintVertical_weight="1" />
 
-    <!-- Hidden views needed by ModernGameFragment -->
+    <!-- Hidden views needed by GameFragment -->
     <TextView
         android:id="@+id/difficulty_text"
         android:layout_width="0dp"
@@ -387,7 +387,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- game_info_container stub (needed by ModernGameFragment references) -->
+    <!-- game_info_container stub (needed by GameFragment references) -->
     <View
         android:id="@+id/game_info_container"
         android:layout_width="0dp"

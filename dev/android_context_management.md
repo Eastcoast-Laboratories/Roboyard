@@ -26,7 +26,7 @@ GameHistoryManager.initialize(context);
 
 1. `GameStateManager` extends `AndroidViewModel` which has access to application context
 2. `GameHistoryManager` requires Activity context for file operations
-3. `ModernGameFragment` holds a reference to `GameStateManager`
+3. `GameFragment` holds a reference to `GameStateManager`
 
 ## Solutions
 
@@ -34,7 +34,7 @@ GameHistoryManager.initialize(context);
 
 1. Use WeakReference<Activity> to store Activity reference
 2. Add `setActivity()` method to update the reference when Fragment is created/resumed
-3. Call `setActivity()` from ModernGameFragment during appropriate lifecycle events
+3. Call `setActivity()` from GameFragment during appropriate lifecycle events
 4. Check for null/stale reference before using
 
 ### Long-term Solutions
@@ -55,7 +55,7 @@ GameHistoryManager.initialize(context);
 ## Implementation Plan
 
 1. Implement WeakReference solution in GameStateManager
-2. Update ModernGameFragment to properly set the Activity reference
+2. Update GameFragment to properly set the Activity reference
 3. Add defensive checks for null references
 4. Document pattern for future use
 
