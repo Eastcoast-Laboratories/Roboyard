@@ -395,13 +395,13 @@ public class LevelDesignEditorFragment extends Fragment {
                 String path = FileReadWrite.getSaveGamePath(requireActivity(), slot);
                 String saveData = FileReadWrite.loadAbsoluteData(path);
                 if (saveData == null || saveData.isEmpty()) {
-                    Toast.makeText(requireContext(), "Save slot empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.editor_save_slot_empty), Toast.LENGTH_SHORT).show();
                     savegameSpinner.setSelection(0);
                     return;
                 }
                 GameState state = GameState.parseFromSaveData(saveData, requireContext());
                 if (state == null) {
-                    Toast.makeText(requireContext(), "Could not load save", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.editor_could_not_load_save), Toast.LENGTH_SHORT).show();
                     savegameSpinner.setSelection(0);
                     return;
                 }
@@ -501,7 +501,7 @@ public class LevelDesignEditorFragment extends Fragment {
             
             Timber.d("[EDITOR] Loaded last random/web map: %s (%dx%d, %d elements)", 
                     mapName, state.getWidth(), state.getHeight(), state.getGameElements().size());
-            Toast.makeText(requireContext(), "Loaded last played map: " + mapName, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_loaded_map, mapName), Toast.LENGTH_SHORT).show();
             return true;
             
         } catch (Exception e) {
@@ -553,7 +553,7 @@ public class LevelDesignEditorFragment extends Fragment {
                 
                 // Validate board size (minimum 4x4, maximum 24x24)
                 if (width < 4 || width > 24 || height < 4 || height > 24) {
-                    Toast.makeText(requireContext(), "Board size must be between 4x4 and 24x24", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.editor_board_size_invalid), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 
@@ -568,7 +568,7 @@ public class LevelDesignEditorFragment extends Fragment {
                 }
                 
             } catch (NumberFormatException e) {
-                Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.editor_invalid_numbers), Toast.LENGTH_SHORT).show();
             }
         });
         
@@ -655,7 +655,7 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void generateWallsFromPattern() {
         if (currentState == null) {
-            Toast.makeText(requireContext(), "No level loaded", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_no_level_loaded), Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -730,10 +730,10 @@ public class LevelDesignEditorFragment extends Fragment {
             startActivity(intent);
         } catch (UnsupportedEncodingException e) {
             Timber.e(e, "[EDITOR_PLAY] Failed to encode level text");
-            Toast.makeText(requireContext(), "Error encoding map data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_error_encoding_map), Toast.LENGTH_SHORT).show();
         } catch (ActivityNotFoundException e) {
             Timber.e(e, "[EDITOR_PLAY] No activity found for deep link");
-            Toast.makeText(requireContext(), "Cannot open game from editor", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_cannot_open_game), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -776,7 +776,7 @@ public class LevelDesignEditorFragment extends Fragment {
                     requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Level Data", levelText);
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(requireContext(), "Level data copied to clipboard", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_copied_to_clipboard), Toast.LENGTH_SHORT).show();
         });
         
         LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
@@ -859,13 +859,13 @@ public class LevelDesignEditorFragment extends Fragment {
         
         if (apiClient.isLoggedIn()) {
             // Logged in: post directly via API
-            Toast.makeText(requireContext(), "Sharing to account...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_sharing_to_account), Toast.LENGTH_SHORT).show();
             
             apiClient.shareMap(levelText, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
                 @Override
                 public void onSuccess(RoboyardApiClient.ShareResult result) {
                     if (result.isDuplicate) {
-                        Toast.makeText(requireContext(), "Map already exists", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getString(R.string.editor_map_already_exists), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(requireContext(), R.string.share_success, Toast.LENGTH_SHORT).show();
                     }
@@ -900,15 +900,15 @@ public class LevelDesignEditorFragment extends Fragment {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
                 startActivity(intent);
                 
-                Toast.makeText(requireContext(), "Opening share URL in browser", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.editor_opening_share_url), Toast.LENGTH_SHORT).show();
                 Timber.d("[SHARE] Sharing level with URL: %s", shareUrl);
                 
             } catch (UnsupportedEncodingException e) {
                 Timber.e(e, "[SHARE] Error encoding level text");
-                Toast.makeText(requireContext(), "Error creating share URL", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.editor_error_creating_share_url), Toast.LENGTH_SHORT).show();
             } catch (ActivityNotFoundException e) {
                 Timber.e(e, "[SHARE] No browser available to open URL");
-                Toast.makeText(requireContext(), "No browser available to open URL", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.editor_no_browser_available), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -1483,11 +1483,34 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void addRobotAt(int x, int y) {
         Timber.d("Adding robot at (%d, %d) with color %d", x, y, currentRobotColor);
-        // Remove only robots and targets at this position, NOT walls
-        removeRobotsAndTargetsAt(x, y);
-        // Add a new robot
+        
+        // Check if position is in carree (2x2 center square)
+        int w = currentState.getWidth();
+        int h = currentState.getHeight();
+        int cx = w / 2 - 1;
+        int cy = h / 2 - 1;
+        if (x >= cx && x <= cx + 1 && y >= cy && y <= cy + 1) {
+            Toast.makeText(requireContext(), getString(R.string.editor_cannot_place_in_carree), 
+                Toast.LENGTH_SHORT).show();
+            Timber.d("[EDITOR] Cannot place robot in carree at (%d,%d)", x, y);
+            return;
+        }
+        
+        // Remove all robots of the same color (anywhere on the board)
+        List<GameElement> robotsToRemove = new ArrayList<>();
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == currentRobotColor) {
+                robotsToRemove.add(element);
+            }
+        }
+        for (GameElement robot : robotsToRemove) {
+            currentState.getGameElements().remove(robot);
+            Timber.d("[EDITOR] Removed %s robot at (%d,%d)", getColorName(currentRobotColor), robot.getX(), robot.getY());
+        }
+        
+        // Add the new robot
         currentState.addRobot(x, y, currentRobotColor);
-        Toast.makeText(requireContext(), String.format("Added %s robot at (%d, %d)", 
+        Toast.makeText(requireContext(), getString(R.string.editor_added_robot, 
             getColorName(currentRobotColor), x, y), Toast.LENGTH_SHORT).show();
             
         // Immediately update UI
@@ -1496,11 +1519,34 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private void addTargetAt(int x, int y) {
         Timber.d("Adding target at (%d, %d) with color %d", x, y, currentTargetColor);
-        // Remove only robots and targets at this position, NOT walls
-        removeRobotsAndTargetsAt(x, y);
-        // Add a new target
+        
+        // Check if position is in carree (2x2 center square)
+        int w = currentState.getWidth();
+        int h = currentState.getHeight();
+        int cx = w / 2 - 1;
+        int cy = h / 2 - 1;
+        if (x >= cx && x <= cx + 1 && y >= cy && y <= cy + 1) {
+            Toast.makeText(requireContext(), getString(R.string.editor_cannot_place_in_carree), 
+                Toast.LENGTH_SHORT).show();
+            Timber.d("[EDITOR] Cannot place target in carree at (%d,%d)", x, y);
+            return;
+        }
+        
+        // Remove all targets of the same color (anywhere on the board)
+        List<GameElement> targetsToRemove = new ArrayList<>();
+        for (GameElement element : currentState.getGameElements()) {
+            if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == currentTargetColor) {
+                targetsToRemove.add(element);
+            }
+        }
+        for (GameElement target : targetsToRemove) {
+            currentState.getGameElements().remove(target);
+            Timber.d("[EDITOR] Removed %s target at (%d,%d)", getColorName(currentTargetColor), target.getX(), target.getY());
+        }
+        
+        // Add the new target
         currentState.addTarget(x, y, currentTargetColor);
-        Toast.makeText(requireContext(), String.format("Added %s target at (%d, %d)", 
+        Toast.makeText(requireContext(), getString(R.string.editor_added_target, 
             getColorName(currentTargetColor), x, y), Toast.LENGTH_SHORT).show();
             
         // Immediately update UI
@@ -1513,13 +1559,11 @@ public class LevelDesignEditorFragment extends Fragment {
         if (hasWallOfType(x, y, GameElement.TYPE_HORIZONTAL_WALL)) {
             // Remove only the horizontal wall (toggle behavior)
             removeWallByTypeAt(x, y, GameElement.TYPE_HORIZONTAL_WALL);
-            Toast.makeText(requireContext(), String.format("Removed horizontal wall at (%d, %d)", 
-                x, y), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_removed_horizontal_wall, x, y), Toast.LENGTH_SHORT).show();
         } else {
             // Add a new horizontal wall - don't remove other elements
             currentState.addHorizontalWall(x, y);
-            Toast.makeText(requireContext(), String.format("Added horizontal wall at (%d, %d)", 
-                x, y), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_added_horizontal_wall, x, y), Toast.LENGTH_SHORT).show();
         }
         
         // Redraw outer walls and carree
@@ -1536,13 +1580,11 @@ public class LevelDesignEditorFragment extends Fragment {
         if (hasWallOfType(x, y, GameElement.TYPE_VERTICAL_WALL)) {
             // Remove only the vertical wall (toggle behavior)
             removeWallByTypeAt(x, y, GameElement.TYPE_VERTICAL_WALL);
-            Toast.makeText(requireContext(), String.format("Removed vertical wall at (%d, %d)", 
-                x, y), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_removed_vertical_wall, x, y), Toast.LENGTH_SHORT).show();
         } else {
             // Add a new vertical wall - don't remove other elements
             currentState.addVerticalWall(x, y);
-            Toast.makeText(requireContext(), String.format("Added vertical wall at (%d, %d)", 
-                x, y), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_added_vertical_wall, x, y), Toast.LENGTH_SHORT).show();
         }
         
         // Redraw outer walls and carree
@@ -1556,11 +1598,8 @@ public class LevelDesignEditorFragment extends Fragment {
     private void eraseAt(int x, int y) {
         Timber.d("Erasing at (%d, %d)", x, y);
         if (removeElementsAt(x, y)) {
-            Toast.makeText(requireContext(), String.format("Erased element at (%d, %d)", 
-                x, y), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(requireContext(), String.format("Nothing to erase at (%d, %d)", 
-                x, y), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.editor_nothing_to_erase, x, y), Toast.LENGTH_SHORT).show();
         }
         
         // Redraw outer walls and carree

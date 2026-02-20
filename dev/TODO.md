@@ -73,22 +73,10 @@ check if this all works:
 
 - sidekick_concept.md
 
-1. testen: die achievements Solution length  müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
+1. testen: die achievements "Solution length" müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
 
 2. der container soll sich erst  ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
 
-3. hier ist ein alternatives design: /var/www/Roboyard/dev/images/alternative_layout/design.jpg
-   1. zerschneide das design in seine elemente und benutze die icons für das neue design
-   2. im debug screen soll es eine preferences einstellung geben, die das alternative design aktiviert/deaktiviert anstatt des default designs
-   3. das neue design soll die gleiche funktion haben wie das alte design, aber nur mit icons statt text buttons im neuen design
-   4. die icons sollen aus dem design übernommen werden
-   5. das gamegrid soll im neuen design die gleiche größe haben wie im alten design und soll nicht neu definiert werden, sondern nach dem DRY prinzip wiederverwendet werden
-   6. im unteren bereich des designs ist nur ein timer angezeigt, aber dies ist der gesamte textbereich unterhalb des aktuellen default designs, das soll auch alles nach dem DRY das selbe sein
-
 # last prompt:
 
-
-Den gesamten Level Editor auch komplett auf alle Sprachen lokalisieren 
-
-Wenn man auf dem next level oder new Game drückt soll ein eventuell offenes achievement pop up verschwinden
-
+- If you move back and forth the same way it should count the number of moves back

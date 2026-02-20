@@ -794,6 +794,32 @@
     <string name="editor_play_map">▶ Play Map</string>
     <string name="map_dimensions_mismatch">Map dimensions %1$dx%2$d does not fit settings %3$dx%4$d - generating new walls</string>
     <string name="editor_no_level_loaded">No level loaded</string>
+    <string name="editor_save_slot_empty">Save slot empty</string>
+    <string name="editor_could_not_load_save">Could not load save</string>
+    <string name="editor_loaded_map">Loaded last played map: %1$s</string>
+    <string name="editor_board_size_invalid">Board size must be between 4x4 and 24x24</string>
+    <string name="editor_invalid_numbers">Please enter valid numbers</string>
+    <string name="editor_map_needs_robot_target">Map needs at least one robot and one target to play</string>
+    <string name="editor_error_encoding_map">Error encoding map data</string>
+    <string name="editor_cannot_open_game">Cannot open game from editor</string>
+    <string name="editor_copied_to_clipboard">Level data copied to clipboard</string>
+    <string name="editor_sharing_to_account">Sharing to account…</string>
+    <string name="editor_map_already_exists">Map already exists</string>
+    <string name="editor_opening_share_url">Opening share URL in browser</string>
+    <string name="editor_error_creating_share_url">Error creating share URL</string>
+    <string name="editor_no_browser_available">No browser available to open URL</string>
+    <string name="editor_saved_to_sourcecode">Level %1$d saved to sourcecode!</string>
+    <string name="editor_added_robot">Added %1$s robot at (%2$d, %3$d)</string>
+    <string name="editor_removed_robot">Removed robot at (%1$d, %2$d)</string>
+    <string name="editor_added_target">Added %1$s target at (%2$d, %3$d)</string>
+    <string name="editor_removed_target">Removed target at (%1$d, %2$d)</string>
+    <string name="editor_added_horizontal_wall">Added horizontal wall at (%1$d, %2$d)</string>
+    <string name="editor_removed_horizontal_wall">Removed horizontal wall at (%1$d, %2$d)</string>
+    <string name="editor_added_vertical_wall">Added vertical wall at (%1$d, %2$d)</string>
+    <string name="editor_removed_vertical_wall">Removed vertical wall at (%1$d, %2$d)</string>
+    <string name="editor_erased_element">Erased element at (%1$d, %2$d)</string>
+    <string name="editor_nothing_to_erase">Nothing to erase at (%1$d, %2$d)</string>
+    <string name="editor_cannot_place_in_carree">Cannot place robot or target in the center carree</string>
 
     <!-- Login and Account Strings -->
     <string name="profile_a11y">User profile</string>
