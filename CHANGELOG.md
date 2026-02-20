@@ -2,6 +2,12 @@
 =========
 
 
+## Version 39 (2026-02-20)
+- New Level editor after all levels are unlocked:
+ - 10 different map generators
+ - play and share custom levels online
+
+
 ## Version 38 (2026-02-18)
 - Live move counter button, that shows the remaining optimal moves from the current position
 - New optional ambient background sound

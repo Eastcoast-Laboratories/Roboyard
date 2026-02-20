@@ -2,6 +2,12 @@ Changelog Deutsch
 =================
 
 
+## Version 39 (2026-02-20)
+- Neu: Level Editor, wenn man alle level freigeschaltet hat
+ - 10 verschiedene Kartengeneratoren
+ - spiele und teile custom Levels online
+
+
 ## Version 38 (2026-02-18)
 - Live Move Counter Button, der die optimale Anzahl der Züge von der aktuellen Position zeigt
 - Neuer optionaler Ambient Hintergrundsound

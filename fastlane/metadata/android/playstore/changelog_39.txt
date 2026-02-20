@@ -1,0 +1,14 @@
+# Play Store Changelogs für Version 39
+
+<en-GB>
+- New Level editor after all levels are unlocked:
+ - 10 different map generators
+ - play and share custom levels online
+- full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Neu: Level Editor, wenn man alle level freigeschaltet hat
+ - 10 verschiedene Kartengeneratoren
+ - spiele und teile custom Levels online
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>
