@@ -56,6 +56,8 @@ public class GameGridView extends View {
     private Paint gridPaint;
     private Paint[] pathPaints; // Paints for robot movement paths
     private float cellSize;
+    private int hintRobotColor = -1;  // -1 = no hint arrow
+    private int hintDirection = -1;   // direction constants: 1=UP, 2=RIGHT, 4=DOWN, 8=LEFT
     
     // Calculated path rendering values based on cellSize
     private float pathStrokeWidth = 6.0f;
@@ -944,6 +946,16 @@ public class GameGridView extends View {
             if (element.getType() == GameElement.TYPE_ROBOT) {
                 // Draw the robot using the drawable
                 drawRobotWithGraphics(canvas, element, state);
+            }
+        }
+
+        // Draw hint direction arrow next to the hinted robot
+        if (hintRobotColor >= 0 && hintDirection >= 0) {
+            for (GameElement element : state.getGameElements()) {
+                if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == hintRobotColor) {
+                    drawHintArrow(canvas, element, offsetX, offsetY);
+                    break;
+                }
             }
         }
     }
@@ -2211,6 +2223,62 @@ public class GameGridView extends View {
         return isActive;
     }
     
+    /**
+     * Set the hint arrow to display next to a robot on the game grid.
+     * @param robotColor Robot color constant, or -1 to clear the arrow
+     * @param direction  Direction constant (1=UP, 2=RIGHT, 4=DOWN, 8=LEFT), or -1 to clear
+     */
+    public void setHintArrow(int robotColor, int direction) {
+        hintRobotColor = robotColor;
+        hintDirection = direction;
+        invalidate();
+    }
+
+    /** Draw a filled triangle pointing in hintDirection next to the robot. */
+    private void drawHintArrow(Canvas canvas, GameElement robot, float offsetX, float offsetY) {
+        float cx = offsetX + robot.getX() * cellSize + cellSize / 2f;
+        float cy = offsetY + robot.getY() * cellSize + cellSize / 2f;
+        float r = cellSize * 0.28f;   // triangle size
+        float gap = cellSize * 0.9f; // distance from robot center to triangle center
+
+        Paint arrowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        arrowPaint.setStyle(Paint.Style.FILL);
+        if (hintRobotColor >= 0 && hintRobotColor < pathPaints.length && pathPaints[hintRobotColor] != null) {
+            arrowPaint.setColor(pathPaints[hintRobotColor].getColor());
+        } else {
+            arrowPaint.setColor(android.graphics.Color.WHITE);
+        }
+        arrowPaint.setAlpha(220);
+
+        android.graphics.Path tri = new android.graphics.Path();
+        switch (hintDirection) {
+            case 2: // RIGHT
+                tri.moveTo(cx + gap + r, cy);
+                tri.lineTo(cx + gap - r, cy - r);
+                tri.lineTo(cx + gap - r, cy + r);
+                break;
+            case 8: // LEFT
+                tri.moveTo(cx - gap - r, cy);
+                tri.lineTo(cx - gap + r, cy - r);
+                tri.lineTo(cx - gap + r, cy + r);
+                break;
+            case 1: // UP
+                tri.moveTo(cx, cy - gap - r);
+                tri.lineTo(cx - r, cy - gap + r);
+                tri.lineTo(cx + r, cy - gap + r);
+                break;
+            case 4: // DOWN
+                tri.moveTo(cx, cy + gap + r);
+                tri.lineTo(cx - r, cy + gap - r);
+                tri.lineTo(cx + r, cy + gap - r);
+                break;
+            default:
+                return;
+        }
+        tri.close();
+        canvas.drawPath(tri, arrowPaint);
+    }
+
     /**
      * Select a robot with the full visual treatment: setSelectedRobot + shrink others + grow animation.
      * Use this everywhere a robot should become selected (DRY).

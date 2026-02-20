@@ -1163,6 +1163,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 slideUpHintContainer();
                 prevHintButton.setVisibility(View.GONE);
                 nextHintButton.setVisibility(View.GONE);
+                // Clear the hint arrow from the game grid
+                if (gameGridView != null) {
+                    gameGridView.setHintArrow(-1, -1);
+                }
                 
                 // Keep consistent padding (no vertical padding needed)
                 if (statusTextView != null) {
@@ -2899,11 +2903,19 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         Timber.d("[HINT_SYSTEM] Displayed pre-hint: %s", preHintText);
         // Announce hint
         announceAccessibility(preHintText);
-        // Return the robot color for the last fixed pre-hint ("move X first"), else -1
+        // For the last fixed pre-hint ("move X first"), show direction arrow on the grid
         if (currentHintStep == numPreHints + 2
                 && !solution.getMoves().isEmpty()
                 && solution.getMoves().get(0) instanceof RRGameMove) {
-            return ((RRGameMove) solution.getMoves().get(0)).getColor();
+            RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
+            if (gameGridView != null) {
+                gameGridView.setHintArrow(firstMove.getColor(), firstMove.getDirection());
+            }
+            return firstMove.getColor();
+        }
+        // All other pre-hints: clear any existing arrow
+        if (gameGridView != null) {
+            gameGridView.setHintArrow(-1, -1);
         }
         return -1;
     }
@@ -3021,6 +3033,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         		
                 if (hintIndex == 0) {
                     Timber.d("[HINT_SYSTEM] First normal hint shown");
+                }
+                // Show direction arrow on the game grid next to the hinted robot
+                if (gameGridView != null) {
+                    gameGridView.setHintArrow(rrMove.getColor(), rrMove.getDirection());
                 }
                 return rrMove.getColor();
             } else {
