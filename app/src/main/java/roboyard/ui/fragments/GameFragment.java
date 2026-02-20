@@ -57,7 +57,6 @@ import android.graphics.drawable.GradientDrawable;
 
 import roboyard.logic.core.Preferences;
 import roboyard.logic.core.GameElement;
-import roboyard.ui.components.UIModeManager;
 
 /**
  * Modern UI implementation of the game screen.
@@ -499,11 +498,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         gameStateManager.setGameGridView(gameGridView);
         Timber.d("[ANIM] Connected GameGridView to animation system. Animations enabled: %s", 
                 gameStateManager.areAnimationsEnabled());
-        
-        // Set up the UI mode manager
-        UIModeManager uiModeManager = UIModeManager.getInstance(requireContext());
-        uiModeManager.setUIMode(UIModeManager.MODE_MODERN);
-        
+
         // Update difficulty and board size text
         updateDifficulty();
         

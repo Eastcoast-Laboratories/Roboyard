@@ -24,7 +24,6 @@ import android.content.res.Configuration;
 import android.content.Intent;
 import android.net.Uri;
 import roboyard.ui.components.LoginDialogHelper;
-import roboyard.ui.components.UIModeManager;
 
 /**
  * Main menu screen implemented as a Fragment with modern Android UI components.
@@ -258,7 +257,6 @@ public class MainMenuFragment extends BaseGameFragment {
                     gameStateManager.loadGame(0);
                     if (gameStateManager.getCurrentState().getValue() != null) {
                         Timber.d("[PLAY] Auto-save loaded successfully, resuming game");
-                        UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
                         GameFragment gameFragment = new GameFragment();
                         navigateToDirect(gameFragment);
                         return;

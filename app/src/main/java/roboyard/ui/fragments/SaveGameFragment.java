@@ -49,7 +49,6 @@ import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.RoboyardApiClient;
 import timber.log.Timber;
 import roboyard.ui.components.MinimapGenerator;
-import roboyard.ui.components.UIModeManager;
 
 /**
  * SaveGameFragment handles saving, loading, and viewing history of games.
@@ -1638,9 +1637,6 @@ public class SaveGameFragment extends BaseGameFragment {
                         
                         // Verify that the game state was loaded successfully
                         if (gameStateManager.getCurrentState().getValue() != null) {
-                            // Set UI mode to modern
-                            UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
-                            
                             // Navigate to the game fragment
                             GameFragment gameFragment = new GameFragment();
                             navigateToDirect(gameFragment);
@@ -1764,9 +1760,6 @@ public class SaveGameFragment extends BaseGameFragment {
                     
                     // Verify that the game state was loaded successfully
                     if (gameStateManager.getCurrentState().getValue() != null) {
-                        // Set UI mode to modern
-                        UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
-                        
                         // Navigate to the game fragment
                         GameFragment gameFragment = new GameFragment();
                         navigateToDirect(gameFragment);
