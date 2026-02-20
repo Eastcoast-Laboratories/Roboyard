@@ -1522,6 +1522,10 @@ public class LevelDesignEditorFragment extends Fragment {
                 x, y), Toast.LENGTH_SHORT).show();
         }
         
+        // Redraw outer walls and carree
+        createBorderWalls(currentState.getWidth(), currentState.getHeight());
+        createCenterCarree(currentState.getWidth(), currentState.getHeight());
+        
         // Immediately update UI
         updateUI();
     }
@@ -1541,6 +1545,10 @@ public class LevelDesignEditorFragment extends Fragment {
                 x, y), Toast.LENGTH_SHORT).show();
         }
         
+        // Redraw outer walls and carree
+        createBorderWalls(currentState.getWidth(), currentState.getHeight());
+        createCenterCarree(currentState.getWidth(), currentState.getHeight());
+        
         // Immediately update UI
         updateUI();
     }
@@ -1554,6 +1562,10 @@ public class LevelDesignEditorFragment extends Fragment {
             Toast.makeText(requireContext(), String.format("Nothing to erase at (%d, %d)", 
                 x, y), Toast.LENGTH_SHORT).show();
         }
+        
+        // Redraw outer walls and carree
+        createBorderWalls(currentState.getWidth(), currentState.getHeight());
+        createCenterCarree(currentState.getWidth(), currentState.getHeight());
         
         // Immediately update UI
         updateUI();

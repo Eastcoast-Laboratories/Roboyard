@@ -67,13 +67,18 @@ check_length() {
 # German Changelog
 DE_CHANGES=$(cat << EOF
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
-
+- Neu: Level Editor, wenn man alle level freigeschaltet hat
+ - 10 verschiedene Kartengeneratoren
+ - spiele und teile custom Levels online
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
 - full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+- New Level editor after all levels are unlocked:
+ - 10 different map generators
+ - play and share custom levels online
 EOF
 )
 
