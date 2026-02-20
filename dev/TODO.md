@@ -79,4 +79,15 @@ check if this all works:
 
 # last prompt:
 
-- If you move back and forth the same way it should count the number of moves back
+1. - If you move back the same way where  the last positin of the robot was in the history path,  it should count the number of moves back like the back-button. reuse the already existing path functin for this. also delete the last element in the path and redraw it, so the visible path is gone too
+
+
+
+
+
+2.
+wenn eine karte eine ungerade anzahl squares gross ist, dann muss das center carree image entsprechend gesetzt werden: 
+- wenn es ungerade in x-richtung ist, dann muss es ein halbes square nach links
+- wenn es ungerade in y-richtung ist, dann muss es ein halbes square nach oben
+  
+3. 

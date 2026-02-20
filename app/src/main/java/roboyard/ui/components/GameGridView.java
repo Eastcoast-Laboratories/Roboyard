@@ -753,19 +753,20 @@ public class GameGridView extends View {
         // Draw the Roboyard logo in the center of the board AFTER the background tiles
         // but BEFORE the walls and other game elements
         if (backgroundLogo != null) {
-            // Calculate the center of the board
-            float centerX = offsetX + (gridWidth * cellSize) / 2;
-            float centerY = offsetY + (gridHeight * cellSize) / 2;
+            // Calculate the top-left corner of the 2x2 carree (same formula as game logic)
+            int carreeCellX = (gridWidth / 2) - 1;
+            int carreeCellY = (gridHeight / 2) - 1;
+            // For odd dimensions, integer division already shifts left/up by half a cell
+            // compared to the geometric center, which is the correct behavior
+            float logoLeft = offsetX + carreeCellX * cellSize;
+            float logoTop  = offsetY + carreeCellY * cellSize;
+            float logoSize = cellSize * 2;
             
-            // Make the logo exactly 2x2 squares in size
-            float logoSize = cellSize * 2; // Exactly 2 cells wide and high
-            
-            // Set bounds for the logo centered on the board - the center of the logo should be at the center of the board
             backgroundLogo.setBounds(
-                (int)(centerX - logoSize/2),
-                (int)(centerY - logoSize/2),
-                (int)(centerX + logoSize/2),
-                (int)(centerY + logoSize/2)
+                (int) logoLeft,
+                (int) logoTop,
+                (int)(logoLeft + logoSize),
+                (int)(logoTop  + logoSize)
             );
             
             // Draw the logo with full opacity
