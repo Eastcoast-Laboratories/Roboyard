@@ -832,7 +832,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             }
         });
 
-        // Observe live solver calculating state for eye blink animation
+        // Observe live solver calculating state for live-move-toggle blink animation
         gameStateManager.isLiveSolverCalculating().observe(getViewLifecycleOwner(), isCalculating -> {
             if (liveMoveCounterToggle != null && liveMoveCounterToggle.isChecked()) {
                 if (isCalculating) {
@@ -856,7 +856,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Keep toggle visible if live move counter is enabled
             boolean visible = moveCount >= 1 || gameStateManager.isLiveMoveCounterEnabled();
             liveMoveCounterToggle.setVisibility(visible ? View.VISIBLE : View.GONE);
-            Timber.d("[HINT_SYSTEM] Updated eye toggle visibility: moveCount=%d, liveMoveEnabled=%b, visible=%b", 
+            Timber.d("[HINT_SYSTEM] Updated live-move-toggle visibility: moveCount=%d, liveMoveEnabled=%b, visible=%b", 
                 moveCount, gameStateManager.isLiveMoveCounterEnabled(), visible);
         }
         
@@ -1212,14 +1212,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             showNextHint("next hint button");
         });
         
-        // Set up live move counter eye toggle — restore persisted state first
+        // Set up live move counter live-move-toggle — restore persisted state first
         if (liveMoveCounterToggle != null) {
             boolean savedEnabled = Preferences.liveMoveCounterEnabled;
             liveMoveCounterToggle.setOnCheckedChangeListener(null);
             liveMoveCounterToggle.setChecked(savedEnabled);
             if (savedEnabled) {
                 gameStateManager.setLiveMoveCounterEnabled(true);
-                // Show hint container with just status text + eye toggle
+                // Show hint container with just status text + live-move-toggle
                 if (hintContainer != null) {
                     hintContainer.setVisibility(View.VISIBLE);
                     prevHintButton.setVisibility(View.GONE);
@@ -1229,10 +1229,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 gameStateManager.triggerLiveSolver();
             }
             liveMoveCounterToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                Timber.d("[LIVE_SOLVER] Eye toggle changed: %s", isChecked ? "ON" : "OFF");
+                Timber.d("[LIVE_SOLVER] live-move-toggle changed: %s", isChecked ? "ON" : "OFF");
                 gameStateManager.setLiveMoveCounterEnabled(isChecked);
                 if (isChecked) {
-                    // Show hint container with status text + eye toggle (no hint arrows)
+                    // Show hint container with status text + live-move-toggle (no hint arrows)
                     if (hintContainer != null && hintContainer.getVisibility() != View.VISIBLE) {
                         hintContainer.setVisibility(View.VISIBLE);
                         prevHintButton.setVisibility(View.GONE);
@@ -2765,7 +2765,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         Timber.d("[HINT_SYSTEM] Showing pre-hint #%d (total pre-hints: %d + %d fixed)", 
                 currentHintStep + 1, numPreHints, NUM_FIXED_PRE_HINTS);
         
-        // Hide the eye toggle by default; only the exact solution pre-hint shows it
+        // Hide the live-move-toggle by default; only the exact solution pre-hint shows it
         // But keep it visible if live move counter is enabled
         if (liveMoveCounterToggle != null && currentHintStep != numPreHints) {
             liveMoveCounterToggle.setVisibility(
@@ -2796,7 +2796,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Show the optimal moves button when the optimal moves are available
             updateOptimalMovesButton(totalMoves, true);
             
-            // Show the live move counter eye toggle from this hint onwards (always visible from here)
+            // Show the live move counter live-move-toggle from this hint onwards (always visible from here)
             if (liveMoveCounterToggle != null) {
                 liveMoveCounterToggle.setVisibility(View.VISIBLE);
                 Timber.d("[HINT_SYSTEM] Toggle button now visible from exact solution hint onwards");
@@ -2890,7 +2890,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
         Timber.d("[HINT_SYSTEM] showNormalHint called with hintIndex: %d", hintIndex);
         
-        // Hide the eye toggle during normal hints, unless live move counter is active
+        // Hide the live-move-toggle during normal hints, unless live move counter is active
         if (liveMoveCounterToggle != null && !gameStateManager.isLiveMoveCounterEnabled()) {
             liveMoveCounterToggle.setVisibility(View.GONE);
         }
@@ -3329,7 +3329,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     hintContainer.setTranslationY(0f);
                     hintContainer.setAlpha(1f);
                     hintContainer.clearAnimation();
-                    // If live move counter is active, keep container visible with just status + eye toggle
+                    // If live move counter is active, keep container visible with just status + live-move-toggle
                     if (gameStateManager.isLiveMoveCounterEnabled()) {
                         hintContainer.setVisibility(View.VISIBLE);
                         prevHintButton.setVisibility(View.GONE);
@@ -3660,7 +3660,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
 
     /**
-     * Start blinking animation on the eye toggle while the live solver is calculating
+     * Start blinking animation on the live-move-toggle while the live solver is calculating
      */
     private void startEyeBlinkAnimation() {
         if (liveMoveCounterToggle == null) return;
@@ -3673,7 +3673,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
     }
 
     /**
-     * Stop blinking animation on the eye toggle
+     * Stop blinking animation on the live-move-toggle
      */
     private void stopEyeBlinkAnimation() {
         if (eyeBlinkAnimator != null) {

@@ -52,8 +52,8 @@
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Eye toggle for hot/cold mode - top right; LiiveModeToggleButtonAlt ignores setVisibility(GONE) -->
-        <roboyard.ui.components.LiiveModeToggleButtonAlt
+        <!-- live-move-toggle for hot/cold mode - top right; LiveModeToggleButtonAlt ignores setVisibility(GONE) -->
+        <roboyard.ui.components.LiveModeToggleButtonAlt
             android:id="@+id/live_move_counter_toggle"
             android:layout_width="48dp"
             android:layout_height="48dp"

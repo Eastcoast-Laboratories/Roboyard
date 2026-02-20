@@ -12,7 +12,7 @@ Independent of the solver/hint system. Persists across games and app restarts.
 - **State:** `liveMoveCounterEnabled` boolean in `GameStateManager`
 - **Solver:** `LiveSolverManager` runs a separate solver instance for current position
 - **Display:** Shows `"%d moves from here"` in `statusTextView` (dark green)
-- **Blink animation:** Eye icon blinks while solver calculates
+- **Blink animation:** live-move-toggle icon blinks while solver calculates
 - **LiveData:** `liveMoveCounterText` and `liveSolverCalculating` observables
 - **Trigger:** `triggerLiveSolver()` called after each move when enabled
 - **String:** `live_move_counter_optimal` = `"%1$d moves from here"`
