@@ -394,14 +394,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             boolean isGridRight = prefs.getBoolean("landscape_grid_right", true);
             
             if (isGridRight) {
-                layoutId = R.layout.fragment_game_portrait;
+                layoutId = R.layout.fragment_game_landscape_right;
             } else {
                 layoutId = R.layout.fragment_game_landscape;
             }
             Timber.d("[LAYOUT_SELECTION] Landscape mode: using %s layout (grid_right=%s)", 
-                    isGridRight ? "standard" : "alternative", isGridRight);
+                    isGridRight ? "landscape_right" : "landscape", isGridRight);
         } else if (useAltLayout) {
-            layoutId = R.layout.fragment_game_landscape;
+            layoutId = R.layout.fragment_game_alt;
             Timber.d("[LAYOUT_SELECTION] Portrait mode: using alternative icon layout");
         }
         
