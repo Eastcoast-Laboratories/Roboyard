@@ -1,5 +1,7 @@
 package roboyard.ui.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -81,6 +83,10 @@ public class DebugSettingsFragment extends Fragment {
         addLevelButtons(contentLayout);
         addLevelEditorButton(contentLayout);
         
+        // UI Design Section
+        addSectionTitle(contentLayout, "UI DESIGN");
+        addAlternativeLayoutToggle(contentLayout);
+        
         // App Control Section
         addSectionTitle(contentLayout, "APP CONTROL");
         addAppControlButtons(contentLayout);
@@ -107,6 +113,29 @@ public class DebugSettingsFragment extends Fragment {
         parent.addView(sectionTitle);
     }
     
+    private static final String PREFS_NAME = "roboyard_prefs";
+    private static final String KEY_ALT_LAYOUT = "use_alternative_layout";
+
+    private void addAlternativeLayoutToggle(LinearLayout parent) {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean current = prefs.getBoolean(KEY_ALT_LAYOUT, false);
+
+        Button btn = new Button(requireContext());
+        btn.setText("ALT LAYOUT: " + (current ? "ON" : "OFF"));
+        btn.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        btn.setOnClickListener(v -> {
+            boolean newVal = !prefs.getBoolean(KEY_ALT_LAYOUT, false);
+            prefs.edit().putBoolean(KEY_ALT_LAYOUT, newVal).apply();
+            btn.setText("ALT LAYOUT: " + (newVal ? "ON" : "OFF"));
+            Toast.makeText(requireContext(),
+                    "Alternative layout " + (newVal ? "ENABLED" : "DISABLED") + " (restart game screen)",
+                    Toast.LENGTH_SHORT).show();
+        });
+        parent.addView(btn);
+    }
+
     private void addStreakTestModeToggle(LinearLayout parent) {
         LinearLayout toggleLayout = new LinearLayout(requireContext());
         toggleLayout.setOrientation(LinearLayout.HORIZONTAL);

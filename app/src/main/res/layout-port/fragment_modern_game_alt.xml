@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Alternative portrait layout with icon-based controls -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Top bar: menu, save, move counter, toggle, profile -->
+    <LinearLayout
+        android:id="@+id/alt_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#222222"
+        android:padding="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/alt_menu_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_alt_menu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/menu_button_a11y" />
+
+        <ImageButton
+            android:id="@+id/alt_save_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_alt_save"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/save_map_button_a11y" />
+
+        <!-- Move counter (green box) -->
+        <TextView
+            android:id="@+id/move_count_text"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:background="#2E7D32"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" />
+
+        <!-- Eye toggle for hot/cold mode - top right; LiiveModeToggleButtonAlt ignores setVisibility(GONE) -->
+        <roboyard.ui.components.LiiveModeToggleButtonAlt
+            android:id="@+id/live_move_counter_toggle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:textOn="👁"
+            android:textOff="👁‍🗨"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:contentDescription="@string/live_move_counter_label_a11y"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/alt_profile_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:drawableTop="@drawable/ic_alt_profile"
+            android:drawablePadding="0dp"
+            android:text=""
+            android:textSize="0sp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Profile" />
+
+    </LinearLayout>
+
+    <!-- Game grid view - same as default layout (DRY) -->
+    <roboyard.ui.components.GameGridView
+        android:id="@+id/game_grid_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/alt_top_bar" />
+
+    <!-- Hint container -->
+    <LinearLayout
+        android:id="@+id/hint_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:background="#DD000000"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/game_grid_view"
+        app:layout_constraintBottom_toTopOf="@id/alt_info_bar">
+
+        <TextView
+            android:id="@+id/prev_hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="◂"
+            android:textSize="@dimen/status_text_size"
+            android:gravity="center"
+            android:contentDescription="Previous hint"
+            android:textColor="#1A1A1A"
+            android:background="@drawable/hint_button_fancy"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="2dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:textStyle="bold"
+            android:elevation="4dp" />
+
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/hint_text_fancy_background"
+            android:gravity="center"
+            android:padding="@dimen/status_text_padding"
+            android:text="@string/empty_text"
+            android:textColor="#1A1A1A"
+            android:textSize="@dimen/status_text_size"
+            android:textStyle="bold"
+            android:elevation="4dp" />
+
+        <TextView
+            android:id="@+id/next_hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="▸"
+            android:textSize="@dimen/status_text_size"
+            android:gravity="center"
+            android:contentDescription="Next hint"
+            android:textColor="#1A1A1A"
+            android:background="@drawable/hint_button_fancy"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="2dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:textStyle="bold"
+            android:elevation="4dp" />
+    </LinearLayout>
+
+    <!-- Info bar: moves + optimal + timer -->
+    <LinearLayout
+        android:id="@+id/alt_info_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#111111"
+        android:padding="4dp"
+        app:layout_constraintTop_toBottomOf="@id/game_grid_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Moves made -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/squares_moved_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5"
+                android:textColor="#EEEEEE"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Züge"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Optimal moves button -->
+        <Button
+            android:id="@+id/optimal_moves_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_fancy_green"
+            android:padding="4dp"
+            android:text="Show Optimal"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeMaxTextSize="28sp"
+            app:autoSizeStepGranularity="1sp"
+            android:visibility="gone"
+            android:elevation="6dp" />
+
+        <!-- Timer -->
+        <TextView
+            android:id="@+id/game_timer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end|center_vertical"
+            android:text="00:00"
+            android:textColor="#EEEEEE"
+            android:textSize="@dimen/game_info_primary_text_size"
+            android:paddingEnd="8dp" />
+
+    </LinearLayout>
+
+    <!-- Accessibility controls -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/accessibility_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/alt_info_bar"
+        app:layout_constraintBottom_toTopOf="@id/spacer"
+        android:elevation="10dp">
+
+        <include
+            android:id="@+id/accessibility_container"
+            layout="@layout/accessibility_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Flexible spacer -->
+    <Space
+        android:id="@+id/spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/accessibility_section"
+        app:layout_constraintBottom_toTopOf="@id/alt_bottom_bar"
+        app:layout_constraintVertical_weight="1" />
+
+    <!-- Hidden views needed by ModernGameFragment -->
+    <TextView
+        android:id="@+id/difficulty_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/unique_map_id_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/dice_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/game_info_close_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Bottom icon bar -->
+    <LinearLayout
+        android:id="@+id/alt_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#000000"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- hint_button must be ToggleButton (fragment casts to ToggleButton) -->
+        <!-- textSize=0sp hides the text label; drawableTop shows the icon -->
+        <ToggleButton
+            android:id="@+id/hint_button"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/ic_alt_hint"
+            android:drawablePadding="0dp"
+            android:textOn=""
+            android:textOff=""
+            android:textSize="0sp"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:contentDescription="@string/hint_button_a11y" />
+
+        <!-- back_button must be Button (fragment casts to Button) -->
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/ic_alt_back"
+            android:drawablePadding="0dp"
+            android:text=""
+            android:textSize="0sp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back_description" />
+
+        <!-- new_map_button center = New Game -->
+        <Button
+            android:id="@+id/new_map_button"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/ic_alt_forward"
+            android:drawablePadding="0dp"
+            android:text=""
+            android:textSize="0sp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/button_new_game" />
+
+        <!-- save_map_button must be Button -->
+        <Button
+            android:id="@+id/save_map_button"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/ic_alt_save_add"
+            android:drawablePadding="0dp"
+            android:text=""
+            android:textSize="0sp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/save_map_button_a11y" />
+
+        <!-- reset_robots_button must be Button -->
+        <Button
+            android:id="@+id/reset_robots_button"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/ic_alt_replay"
+            android:drawablePadding="0dp"
+            android:text=""
+            android:textSize="0sp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/restart_button_a11y" />
+
+    </LinearLayout>
+
+    <!-- Next Level button (initially invisible) -->
+    <Button
+        android:id="@+id/next_level_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/game_button_height"
+        android:background="@drawable/button_fancy_green"
+        android:padding="@dimen/game_button_padding"
+        android:text="@string/next_level"
+        android:contentDescription="@string/next_level_description"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:elevation="6dp"
+        app:layout_constraintBottom_toTopOf="@id/alt_bottom_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- game_info_container stub (needed by ModernGameFragment references) -->
+    <View
+        android:id="@+id/game_info_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/flexible_spacer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/button_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/left_info_block"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/right_info_block"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- menu_button stub: must be Button (fragment casts to Button) -->
+    <Button
+        android:id="@+id/menu_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:text=""
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- layout_toggle_button stub: must be Button (fragment casts to Button) -->
+    <Button
+        android:id="@+id/layout_toggle_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:text=""
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

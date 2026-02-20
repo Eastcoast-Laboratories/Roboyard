@@ -384,21 +384,25 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         
         // Choose layout based on orientation and preference
         int layoutId = R.layout.fragment_modern_game; // Default layout
-        
+
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE);
+        boolean useAltLayout = prefs.getBoolean("use_alternative_layout", false);
+
         Configuration config = getResources().getConfiguration();
         if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape mode, check preference for layout direction
-            boolean isGridRight = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
-                    .getBoolean("landscape_grid_right", true); // Default: grid on right
+            boolean isGridRight = prefs.getBoolean("landscape_grid_right", true);
             
             if (isGridRight) {
-                layoutId = R.layout.fragment_modern_game; // Current layout (grid right)
+                layoutId = R.layout.fragment_modern_game;
             } else {
-                layoutId = R.layout.fragment_modern_game_alt; // Alternative layout (grid left)
+                layoutId = R.layout.fragment_modern_game_alt;
             }
-            
             Timber.d("[LAYOUT_SELECTION] Landscape mode: using %s layout (grid_right=%s)", 
                     isGridRight ? "standard" : "alternative", isGridRight);
+        } else if (useAltLayout) {
+            layoutId = R.layout.fragment_modern_game_alt;
+            Timber.d("[LAYOUT_SELECTION] Portrait mode: using alternative icon layout");
         }
         
         // Inflate the chosen layout
@@ -651,16 +655,10 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                         // Only call onLevelCompleted if this is a different level or enough time has passed
                         if (currentLevelId != lastCompletedLevelId || (currentTime - lastCompletedTime) > 1000) {
                             Timber.d("[ACHIEVEMENT_GUARD] Calling onLevelCompleted for levelId=%d (last was %d)", currentLevelId, lastCompletedLevelId);
-                            int starsBefore = roboyard.ui.components.LevelCompletionManager.getInstance(requireContext()).getTotalStars();
                             AchievementManager.getInstance(requireContext())
                                 .onLevelCompleted(currentLevelId, playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
                             lastCompletedLevelId = currentLevelId;
                             lastCompletedTime = currentTime;
-                            int starsAfter = roboyard.ui.components.LevelCompletionManager.getInstance(requireContext()).getTotalStars();
-                            if (starsBefore < 140 && starsAfter >= 140) {
-                                Toast.makeText(requireContext(), R.string.level_editor_unlocked, Toast.LENGTH_LONG).show();
-                                Timber.d("[LEVEL_EDITOR] Level Editor unlocked! Stars: %d", starsAfter);
-                            }
                         } else {
                             Timber.d("[ACHIEVEMENT_GUARD] Skipping duplicate onLevelCompleted call for levelId=%d", currentLevelId);
                         }
