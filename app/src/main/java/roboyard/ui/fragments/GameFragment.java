@@ -986,12 +986,23 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
             
             // Standard undo functionality (original code)
+            // Remember which robot was last moved before undoing (pathHistory still contains it)
+            int lastMovedRobotColor = -1;
+            java.util.ArrayList<int[]> pathHistory = gameStateManager.getPathHistory();
+            if (!pathHistory.isEmpty()) {
+                lastMovedRobotColor = pathHistory.get(pathHistory.size() - 1)[0];
+            }
             // Undo the last move
             if (gameStateManager.undoLastMove()) {
                 // Force grid view update after undo
                 if (gameGridView != null) {
                     // Remove only the last path segment instead of clearing all paths
                     gameGridView.undoLastPathSegment();
+                    // Re-select the robot that was undone with full visual treatment
+                    if (lastMovedRobotColor >= 0) {
+                        gameGridView.selectRobotByColor(lastMovedRobotColor);
+                        Timber.d("[ROBOTS][UNDO] Back-button: re-selected robot %d after undo", lastMovedRobotColor);
+                    }
                     // Force the grid view to redraw completely
                     gameGridView.invalidate();
                     

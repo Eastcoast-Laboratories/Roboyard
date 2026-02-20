@@ -1458,6 +1458,8 @@ public class GameGridView extends View {
                                 robotAnimationInProgress = true;  // Track animation state
                                 Timber.d("[ANIM] Setting robotAnimationInProgress=true for tap movement");
                                 boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
+                                Timber.d("[ROBOTS][UNDO] After moveRobotInDirection: moved=%b, robotMoveInitiated=%b, robotAnimationInProgress=%b",
+                                        moved, robotMoveInitiated, robotAnimationInProgress);
                                 return true;
                             } else {
                                 // Diagonal movement - determine which direction to prioritize
@@ -1896,6 +1898,18 @@ public class GameGridView extends View {
         
         // Pop the last path entry from GameStateManager
         int[] last = gameStateManager.removeLastPathFromHistory();
+        applyPathSegmentUndoVisual(last);
+    }
+
+    /**
+     * Apply the visual undo of a path segment without touching pathHistory.
+     * Use this when the history entry has already been removed externally.
+     * @param last The already-removed history entry [color, fromX, fromY, toX, toY], or null to no-op.
+     */
+    public void applyPathSegmentUndoVisual(int[] last) {
+        Timber.d("[ROBOTS][UNDO] applyPathSegmentUndoVisual called, last=%s, robotMoveInitiated=%b, robotAnimationInProgress=%b",
+                last == null ? "null" : "[" + last[0] + "," + last[1] + "," + last[2] + "," + last[3] + "," + last[4] + "]",
+                robotMoveInitiated, robotAnimationInProgress);
         if (last == null) return;
         int color = last[0];
         int fromX = last[1];
@@ -1920,6 +1934,12 @@ public class GameGridView extends View {
                 robotSegments.put(segmentKey, count);
             }
         }
+        
+        // Reset move flags so touch events are not permanently blocked after undo
+        robotMoveInitiated = false;
+        robotAnimationInProgress = false;
+        Timber.d("[ROBOTS][UNDO] applyPathSegmentUndoVisual: reset flags, robotMoveInitiated=%b, robotAnimationInProgress=%b",
+                robotMoveInitiated, robotAnimationInProgress);
         
         invalidate();
     }
@@ -2191,6 +2211,37 @@ public class GameGridView extends View {
         return isActive;
     }
     
+    /**
+     * Select a robot with the full visual treatment: setSelectedRobot + shrink others + grow animation.
+     * Use this everywhere a robot should become selected (DRY).
+     * @param robot The robot to select, or null to deselect all
+     */
+    public void selectRobot(GameElement robot) {
+        GameState state = gameStateManager != null ? gameStateManager.getCurrentState().getValue() : null;
+        if (state == null) return;
+        state.setSelectedRobot(robot);
+        shrinkNonSelectedRobots(robot);
+        if (robot != null) {
+            animateRobotScale(robot, DEFAULT_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
+        }
+    }
+
+    /**
+     * Select a robot by color with the full visual treatment.
+     * Looks up the robot in the current state by color, then calls selectRobot(GameElement).
+     * @param color Robot color constant
+     */
+    public void selectRobotByColor(int color) {
+        GameState state = gameStateManager != null ? gameStateManager.getCurrentState().getValue() : null;
+        if (state == null) return;
+        for (GameElement el : state.getGameElements()) {
+            if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == color) {
+                selectRobot(el);
+                return;
+            }
+        }
+    }
+
     /**
      * Shrink all robots except the currently selected one back to default size
      * @param selectedRobot The robot to keep at its current scale (can be null to shrink all robots)

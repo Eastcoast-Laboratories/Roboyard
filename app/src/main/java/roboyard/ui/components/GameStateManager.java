@@ -1053,6 +1053,65 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         GameElement robot = state.getSelectedRobot();
 
+        // Check if the robot is moving back to its last position in the path history (reverse move = undo)
+        Timber.d("[ROBOTS][UNDO] moveRobotInDirection: robot=%d at (%d,%d), dx=%d dy=%d, pathHistory.size=%d",
+                robot.getColor(), robot.getX(), robot.getY(), dx, dy, pathHistory.size());
+        if (!pathHistory.isEmpty()) {
+            int[] lastPath = pathHistory.get(pathHistory.size() - 1);
+            int lastColor = lastPath[0];
+            int lastFromX = lastPath[1];
+            int lastFromY = lastPath[2];
+            int lastToX   = lastPath[3];
+            int lastToY   = lastPath[4];
+            Timber.d("[ROBOTS][UNDO] lastPath: color=%d from=(%d,%d) to=(%d,%d)",
+                    lastColor, lastFromX, lastFromY, lastToX, lastToY);
+            // Only applies to the same robot
+            if (lastColor == robot.getColor()
+                    && robot.getX() == lastToX && robot.getY() == lastToY) {
+                // Determine which direction the robot would slide to
+                int startX2 = robot.getX();
+                int startY2 = robot.getY();
+                int endX2 = startX2;
+                int endY2 = startY2;
+                if (dx != 0) {
+                    int step = dx > 0 ? 1 : -1;
+                    for (int i = startX2 + step; i >= 0 && i < state.getWidth(); i += step) {
+                        if (state.canRobotMoveTo(robot, i, startY2)) { endX2 = i; } else { break; }
+                    }
+                }
+                if (dy != 0) {
+                    int step = dy > 0 ? 1 : -1;
+                    for (int i = startY2 + step; i >= 0 && i < state.getHeight(); i += step) {
+                        if (state.canRobotMoveTo(robot, startX2, i)) { endY2 = i; } else { break; }
+                    }
+                }
+                Timber.d("[ROBOTS][UNDO] Would slide to (%d,%d), lastFrom=(%d,%d), match=%b",
+                        endX2, endY2, lastFromX, lastFromY, (endX2 == lastFromX && endY2 == lastFromY));
+                // If the robot would land exactly on its previous position, treat as undo
+                if (endX2 == lastFromX && endY2 == lastFromY) {
+                    Timber.d("[ROBOTS][UNDO] Reverse move detected for robot %d: (%d,%d)->(%d,%d), triggering undo",
+                            robot.getColor(), lastToX, lastToY, lastFromX, lastFromY);
+                    final int undoneRobotColor = robot.getColor();
+                    // Remove the path history entry first, then undo the game state
+                    int[] removedPath = removeLastPathFromHistory();
+                    boolean undone = undoLastMove();
+                    Timber.d("[ROBOTS][UNDO] undoLastMove returned: %b, gameGridView=%s",
+                            undone, gameGridView != null ? "non-null" : "null");
+                    if (undone) {
+                        if (gameGridView != null) {
+                            // Apply visual undo without touching pathHistory again (already removed above)
+                            gameGridView.applyPathSegmentUndoVisual(removedPath);
+                            // Re-select the robot with full visual treatment (grow animation etc.)
+                            gameGridView.selectRobotByColor(undoneRobotColor);
+                            Timber.d("[ROBOTS][UNDO] Re-selected robot %d after reverse-move undo", undoneRobotColor);
+                            gameGridView.invalidate();
+                        }
+                    }
+                    return undone;
+                }
+            }
+        }
+
         // Advance preCompRobotOrder: if the moved robot matches the first expected color, remove it
         if (!preCompRobotOrder.isEmpty() && preCompRobotOrder.get(0) == robot.getColor()) {
             preCompRobotOrder.remove(0);

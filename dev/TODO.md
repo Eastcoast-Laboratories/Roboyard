@@ -75,19 +75,8 @@ check if this all works:
 
 1. testen: die achievements "Solution length" müssen alle ohne benutzung  hint gelöst werden um freigeschaltet zu werden
 
-2. der container soll sich erst  ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
+2. der hint container soll sich ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
 
 # last prompt:
 
-1. - If you move back the same way where  the last positin of the robot was in the history path,  it should count the number of moves back like the back-button. reuse the already existing path functin for this. also delete the last element in the path and redraw it, so the visible path is gone too
-
-
-
-
-
-2.
-wenn eine karte eine ungerade anzahl squares gross ist, dann muss das center carree image entsprechend gesetzt werden: 
-- wenn es ungerade in x-richtung ist, dann muss es ein halbes square nach links
-- wenn es ungerade in y-richtung ist, dann muss es ein halbes square nach oben
-  
-3. 
+1. der hint container soll sich auch wenn der live-move-toggle an ist ausblenden, sobald der solver was gefunden hat und die map angenommen wurde. Im moment blendet der nur aus, wenn der live-move-toggle aus ist
