@@ -45,7 +45,7 @@
                 app:layout_constraintWidth_max="240dp"
                 android:minHeight="0dp">
 
-                <!-- Modern UI Game button - green with round corners and black outline -->
+                <!--  Game button - green with round corners and black outline -->
                 <Button
                     android:id="@+id/modern_ui_button"
                     android:layout_width="match_parent"

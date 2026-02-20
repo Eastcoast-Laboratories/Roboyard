@@ -1556,12 +1556,12 @@ public class GameGridView extends View {
         
         // Play the appropriate sound effect based on what happened
         if (fragment instanceof GameFragment) {
-            GameFragment modernFragment = (GameFragment) fragment;
+            GameFragment gameFragment = (GameFragment) fragment;
             // Use shared method to handle sounds and achievements
-            modernFragment.handleRobotMovementSounds(state, selectedRobot, hitRobotElement, hitWall, "GameGridView");
+            gameFragment.handleRobotMovementSounds(state, selectedRobot, hitRobotElement, hitWall, "GameGridView");
             
             // Also announce possible moves after movement
-            modernFragment.announcePossibleMoves(selectedRobot);
+            gameFragment.announcePossibleMoves(selectedRobot);
         }
         
         if (state.checkCompletion()) {

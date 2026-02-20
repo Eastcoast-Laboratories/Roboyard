@@ -372,7 +372,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Start a new game with the selected level
         gameStateManager.startLevelGame(levelId);
 
-        // For modern UI, use GameFragment
+        // For UI, use GameFragment
         GameFragment gameFragment = new GameFragment();
         navigateToDirect(gameFragment);
     }

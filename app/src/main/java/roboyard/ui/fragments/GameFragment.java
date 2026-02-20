@@ -59,8 +59,7 @@ import roboyard.logic.core.Preferences;
 import roboyard.logic.core.GameElement;
 
 /**
- * Modern UI implementation of the game screen.
- * all Android-native UI
+ * UI implementation of the game screen.
  * the layout is defined in the xml file app/src/main/res/layout/fragment_game_portrait.xml
  */
 public class GameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {

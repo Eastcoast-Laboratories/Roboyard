@@ -26,7 +26,7 @@ import android.net.Uri;
 import roboyard.ui.components.LoginDialogHelper;
 
 /**
- * Main menu screen implemented as a Fragment with modern Android UI components.
+ * Main menu screen
  */
 public class MainMenuFragment extends BaseGameFragment {
     

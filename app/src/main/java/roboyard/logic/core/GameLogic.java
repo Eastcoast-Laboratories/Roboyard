@@ -14,7 +14,6 @@ import roboyard.logic.core.WallStorage;
 
 /**
  * A UI-agnostic class that contains the core game logic for map generation.
- * This class is designed to be used by both the classic UI and the modern UI.
  */
 public class GameLogic {
 

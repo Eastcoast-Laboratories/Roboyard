@@ -22,7 +22,7 @@ import roboyard.eclabs.R;
 import timber.log.Timber;
 
 /**
- * Credits screen implemented as a Fragment with modern Android UI components.
+ * Credits screen
  */
 public class CreditsFragment extends BaseGameFragment {
 

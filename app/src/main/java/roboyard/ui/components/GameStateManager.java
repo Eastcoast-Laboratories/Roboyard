@@ -254,7 +254,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
-     * Start a level game with the modern UI
+     * Start a level game
      *
      * @param levelId Level ID to load
      */
