@@ -342,7 +342,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
      * Handles the selection of a level from the grid.
      * When a level is selected, this method:
      * 1. Starts a new level game with the selected level ID
-     * 2. Navigates to the ModernGameFragment to display the game
+     * 2. Navigates to the GameFragment to display the game
      * 
      * After completing the level, the user will return to this screen,
      * and the onResume method will refresh the adapter to show completion stars.
@@ -372,8 +372,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Start a new game with the selected level
         gameStateManager.startLevelGame(levelId);
 
-        // For modern UI, use ModernGameFragment
-        ModernGameFragment gameFragment = new ModernGameFragment();
+        // For modern UI, use GameFragment
+        GameFragment gameFragment = new GameFragment();
         navigateToDirect(gameFragment);
     }
 

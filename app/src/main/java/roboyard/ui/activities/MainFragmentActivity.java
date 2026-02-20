@@ -626,17 +626,17 @@ public class MainFragmentActivity extends AppCompatActivity {
                 // Check which fragment is currently displayed
                 if (navController != null && navController.getCurrentDestination() != null) {
                     int currentDestId = navController.getCurrentDestination().getId();
-                    Timber.d("[DEEPLINK_NAV] Current destination ID: %d, modernGameFragment ID: %d", 
-                            currentDestId, R.id.modernGameFragment);
+                    Timber.d("[DEEPLINK_NAV] Current destination ID: %d, gameFragment ID: %d", 
+                            currentDestId, R.id.gameFragment);
                 }
                 
                 // Navigate to the game fragment if we're not already there
                 if (navController != null && navController.getCurrentDestination() != null && 
-                    navController.getCurrentDestination().getId() != R.id.modernGameFragment) {
-                    Timber.d("[DEEPLINK_NAV] Navigating to modern game fragment");
-                    navController.navigate(R.id.modernGameFragment);
+                    navController.getCurrentDestination().getId() != R.id.gameFragment) {
+                    Timber.d("[DEEPLINK_NAV] Navigating to game fragment");
+                    navController.navigate(R.id.gameFragment);
                 } else {
-                    Timber.d("[DEEPLINK_NAV] Already in modern game fragment or navigation failed");
+                    Timber.d("[DEEPLINK_NAV] Already in game fragment or navigation failed");
                 }
                 
                 // Set the game state in the GameStateManager

@@ -1641,8 +1641,8 @@ public class SaveGameFragment extends BaseGameFragment {
                             // Set UI mode to modern
                             UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
                             
-                            // Navigate to the modern game fragment
-                            ModernGameFragment gameFragment = new ModernGameFragment();
+                            // Navigate to the game fragment
+                            GameFragment gameFragment = new GameFragment();
                             navigateToDirect(gameFragment);
                         } else {
                             // Show error if game state couldn't be loaded
@@ -1767,8 +1767,8 @@ public class SaveGameFragment extends BaseGameFragment {
                         // Set UI mode to modern
                         UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
                         
-                        // Navigate to the modern game fragment
-                        ModernGameFragment gameFragment = new ModernGameFragment();
+                        // Navigate to the game fragment
+                        GameFragment gameFragment = new GameFragment();
                         navigateToDirect(gameFragment);
                     } else {
                         // Show error if game state couldn't be loaded

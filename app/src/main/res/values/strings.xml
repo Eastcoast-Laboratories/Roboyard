@@ -235,7 +235,7 @@
     
     <!-- Game Buttons -->
     <string name="hint_button">💡Hint</string>
-    <string name="hint_cancel_button" comment="Generic cancel button text [ModernGameFragment]">❌ Hint</string>
+    <string name="hint_cancel_button" comment="Generic cancel button text [GameFragment]">❌ Hint</string>
     <string name="hint_button_a11y">Hint</string>
     <string name="button_back_game">Back</string>
     <string name="button_reset">Reset</string>
@@ -252,7 +252,7 @@
     <string name="history_screen_title">Game History</string>
     <string name="save_slot_empty">Empty</string>
     <string name="save_slot_autosave">Autosave</string>
-    <string name="ai_calculating" comment="Message shown when AI is calculating a solution [ModernGameFragment]">A.I. calculating solution...</string>
+    <string name="ai_calculating" comment="Message shown when AI is calculating a solution [GameFragment]">A.I. calculating solution...</string>
 
     <!-- Game control buttons -->
     <string name="back_button">Back</string>
@@ -321,28 +321,28 @@
     <string name="color_pink_target">Pink</string>
     <string name="color_silver_target">Silver</string>
 
-    <!-- Game UI text for ModernGameFragment -->
-    <string name="no_robot_selected" comment="Status message when no robot is currently selected [ModernGameFragment]">No robot selected</string>
+    <!-- Game UI text for GameFragment -->
+    <string name="no_robot_selected" comment="Status message when no robot is currently selected [GameFragment]">No robot selected</string>
     <string name="robot_selected" comment="Status message showing which robot is selected">Selected: %1$s robot at (%2$d, %3$d)</string>
-    <string name="robot_selected_info" comment="More detailed information about selected robot [ModernGameFragment]">Selected: %1$s robot at position (%2$d, %3$d)</string>
-    <string name="robot_target_info" comment="Information about a target on the board [ModernGameFragment]">%1$s target: (%2$d, %3$d)</string>
-    <string name="no_target_for_robot" comment="Message when a robot has no matching target [ModernGameFragment]">No target for this robot</string>
+    <string name="robot_selected_info" comment="More detailed information about selected robot [GameFragment]">Selected: %1$s robot at position (%2$d, %3$d)</string>
+    <string name="robot_target_info" comment="Information about a target on the board [GameFragment]">%1$s target: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot" comment="Message when a robot has no matching target [GameFragment]">No target for this robot</string>
     <string name="move_count_text" comment="Text showing number of moves made">Moves: %1$d</string>
-    <string name="moves_count" comment="Alternative text for move counter [ModernGameFragment]">Moves: %1$d</string>
-    <string name="squares_moved" comment="Text showing number of squares robots have moved [ModernGameFragment]">Squares: %1$d</string>
-    <string name="board_size" comment="Text showing board dimensions [ModernGameFragment]">Board: %1$dx%2$d</string>
-    <string name="solution_error" comment="Error message when no solution can be found [ModernGameFragment]">Could not find a solution: %1$s</string>
-    <string name="direction_up" comment="Direction name for movement hints [ModernGameFragment]">up</string>
-    <string name="direction_down" comment="Direction name for movement hints [ModernGameFragment]">down</string>
-    <string name="direction_right" comment="Direction name for movement hints [ModernGameFragment]">right</string>
-    <string name="direction_left" comment="Direction name for movement hints [ModernGameFragment]">left</string>
+    <string name="moves_count" comment="Alternative text for move counter [GameFragment]">Moves: %1$d</string>
+    <string name="squares_moved" comment="Text showing number of squares robots have moved [GameFragment]">Squares: %1$d</string>
+    <string name="board_size" comment="Text showing board dimensions [GameFragment]">Board: %1$dx%2$d</string>
+    <string name="solution_error" comment="Error message when no solution can be found [GameFragment]">Could not find a solution: %1$s</string>
+    <string name="direction_up" comment="Direction name for movement hints [GameFragment]">up</string>
+    <string name="direction_down" comment="Direction name for movement hints [GameFragment]">down</string>
+    <string name="direction_right" comment="Direction name for movement hints [GameFragment]">right</string>
+    <string name="direction_left" comment="Direction name for movement hints [GameFragment]">left</string>
 
     <!-- Game UI Buttons and Messages -->
-    <string name="cancel_button" comment="Generic cancel button text [ModernGameFragment]">Cancel</string>
-    <string name="reset_button" comment="Button to reset the current game/level [ModernGameFragment]">Reset</string>
-    <string name="unique_map_id" comment="Unique identifier for a game map [ModernGameFragment]">%1$s</string>
+    <string name="cancel_button" comment="Generic cancel button text [GameFragment]">Cancel</string>
+    <string name="reset_button" comment="Button to reset the current game/level [GameFragment]">Reset</string>
+    <string name="unique_map_id" comment="Unique identifier for a game map [GameFragment]">%1$s</string>
     <string name="empty_text" comment="Empty placeholder text"></string>
-    <string name="level_id_text" comment="Text showing the current level number [ModernGameFragment]">Level %1$d</string>
+    <string name="level_id_text" comment="Text showing the current level number [GameFragment]">Level %1$d</string>
     <string name="stars_earned" comment="Message showing stars earned for level completion">You earned %1$d stars</string>
     <string name="completed_in_moves" comment="Short text showing moves used to complete level">Completed in %1$d moves</string>
     <string name="starting_level" comment="Message shown when starting a level">Starting level %1$d</string>
@@ -391,7 +391,7 @@
     
     <!-- Toast messages -->
     <string name="error_email_app" comment="Error message when email app cannot be opened [SettingsFragment]">Could not open email app</string>
-    <string name="robot_movement_canceled" comment="Message when robot movement is canceled [ModernGameFragment]">Robot movement canceled</string>
+    <string name="robot_movement_canceled" comment="Message when robot movement is canceled [GameFragment]">Robot movement canceled</string>
     <string name="no_game_to_save" comment="Message when there is no game available to save">No game available to save</string>
 
     <!-- Settings Screen -->

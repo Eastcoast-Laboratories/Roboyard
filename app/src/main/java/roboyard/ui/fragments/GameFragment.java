@@ -62,9 +62,9 @@ import roboyard.ui.components.UIModeManager;
 /**
  * Modern UI implementation of the game screen.
  * all Android-native UI
- * the layout is defined in the xml file app/src/main/res/layout/fragment_modern_game.xml
+ * the layout is defined in the xml file app/src/main/res/layout/fragment_game_portrait.xml
  */
-public class ModernGameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
+public class GameFragment extends BaseGameFragment implements GameStateManager.SolutionCallback {
 
     private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10 (increase this for debugging)
     private static final int LEVEL_10_THRESHHOLD = 10; // this should be set to 10, increase only for debugging
@@ -383,7 +383,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         applyLanguageSettings();
         
         // Choose layout based on orientation and preference
-        int layoutId = R.layout.fragment_modern_game; // Default layout
+        int layoutId = R.layout.fragment_game_portrait; // Default layout
 
         android.content.SharedPreferences prefs = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE);
         boolean useAltLayout = prefs.getBoolean("use_alternative_layout", false);
@@ -394,14 +394,14 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             boolean isGridRight = prefs.getBoolean("landscape_grid_right", true);
             
             if (isGridRight) {
-                layoutId = R.layout.fragment_modern_game;
+                layoutId = R.layout.fragment_game_portrait;
             } else {
-                layoutId = R.layout.fragment_modern_game_alt;
+                layoutId = R.layout.fragment_game_landscape;
             }
             Timber.d("[LAYOUT_SELECTION] Landscape mode: using %s layout (grid_right=%s)", 
                     isGridRight ? "standard" : "alternative", isGridRight);
         } else if (useAltLayout) {
-            layoutId = R.layout.fragment_modern_game_alt;
+            layoutId = R.layout.fragment_game_landscape;
             Timber.d("[LAYOUT_SELECTION] Portrait mode: using alternative icon layout");
         }
         
@@ -962,7 +962,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Back button - undo the last robot movement
         backButton = view.findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Back button clicked");
+            Timber.d("GameFragment: Back button clicked");
             
             // Check if hint container is visible (hints are being shown)
             if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE && currentHintStep > 0) {
@@ -1015,7 +1015,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Reset robots button - reset robots to starting positions without changing the map
         resetRobotsButton = view.findViewById(R.id.reset_robots_button);
         resetRobotsButton.setOnClickListener(v -> {
-            Timber.d("[ROBOTS] ModernGameFragment: Reset robots button clicked");
+            Timber.d("[ROBOTS] GameFragment: Reset robots button clicked");
             // Use resetGame() which provides a more complete soft reset
             gameStateManager.resetGame();
             
@@ -1253,7 +1253,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Save map button - navigate to save screen
         saveMapButton = view.findViewById(R.id.save_map_button);
         saveMapButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Save map button clicked");
+            Timber.d("GameFragment: Save map button clicked");
             try {
                 // Create a new SaveGameFragment instance
                 SaveGameFragment saveFragment = new SaveGameFragment();
@@ -1264,7 +1264,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                 args.putString("mode", "save");  // Also set the string mode parameter
                 saveFragment.setArguments(args);
                 
-                Timber.d("ModernGameFragment: Navigating to SaveGameFragment in SAVE mode");
+                Timber.d("GameFragment: Navigating to SaveGameFragment in SAVE mode");
                 
                 // Perform the fragment transaction
                 requireActivity().getSupportFragmentManager()
@@ -1297,7 +1297,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
         // "New Game" Button
         newMapButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Restart button clicked. calling startModernGame()");
+            Timber.d("GameFragment: Restart button clicked. calling startGame()");
             
             // Dismiss achievement popup if visible
             if (achievementPopup != null) {
@@ -1333,7 +1333,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 	        Timber.d("[NEW_GAME] Reset move counts and game history");
 
             // Start a new game
-            gameStateManager.startModernGame();
+            gameStateManager.startGame();
             // Reset timer to 0 for the new game
             resetAndStartTimer();
             
@@ -1383,7 +1383,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Menu button - go back to level selection
         menuButton = view.findViewById(R.id.menu_button);
         menuButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Menu button clicked - returning to level selection");
+            Timber.d("GameFragment: Menu button clicked - returning to level selection");
             
             // if playing a level game
             if(isLevelGame) {
@@ -1400,7 +1400,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // Layout toggle button - only available in landscape mode
         if (layoutToggleButton != null) {
             layoutToggleButton.setOnClickListener(v -> {
-                Timber.d("ModernGameFragment: Layout toggle button clicked");
+                Timber.d("GameFragment: Layout toggle button clicked");
                 // Add fancy button animation
                 addButtonClickAnimation(v);
                 toggleLayoutDirection();
@@ -1419,7 +1419,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         // big "new Game" button - in random game mode
         nextLevelButton = view.findViewById(R.id.next_level_button);
         nextLevelButton.setOnClickListener(v -> {
-            Timber.d("ModernGameFragment: Next Level button clicked");
+            Timber.d("GameFragment: Next Level button clicked");
             
             // Dismiss achievement popup if visible
             if (achievementPopup != null) {
@@ -1436,7 +1436,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     // Level game - go to next level
                     int currentLevelId = gameState.getLevelId();
                     int nextLevelId = currentLevelId + 1;
-                    Timber.d("ModernGameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
+                    Timber.d("GameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
                     
                     // Start the next level
                     gameStateManager.startLevelGame(nextLevelId);
@@ -1483,7 +1483,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
                     newMapButton.setVisibility(View.GONE);
                 } else {
                     // Random game - start a new random game
-                    gameStateManager.startModernGame();
+                    gameStateManager.startGame();
                     
                     // Update difficulty display to reflect current settings (not savegame)
                     updateDifficulty();
@@ -2226,11 +2226,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
         if (currentState != null) {
             int boardWidth = currentState.getWidth();
             int boardHeight = currentState.getHeight();
-            Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
+            Timber.d("[BOARD_SIZE_DEBUG] GameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
             //boardSizeTextView.setText(getString(R.string.board_size, boardWidth, boardHeight));
         } else {
             // If no game state yet, get it
-            Timber.d("[BOARD_SIZE_DEBUG] ModernGameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+            Timber.d("[BOARD_SIZE_DEBUG] GameFragment.updateBoardSizeText() from BoardSizeManager: %dx%d", Preferences.boardSizeWidth, Preferences.boardSizeHeight);
             //boardSizeTextView.setText(getString(R.string.board_size, Preferences.boardSizeWidth, Preferences.boardSizeHeight));
         }
     }
@@ -2271,7 +2271,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             gameStateManager.resetMoveCountsAndHistory();
             
             // Start a new game (this will use the forceGenerateNewMapOnce flag)
-            gameStateManager.startModernGame();
+            gameStateManager.startGame();
             
             // Reset timer
             stopTimer();
@@ -2384,7 +2384,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      */
     @Override
     public String getScreenTitle() {
-        return "Modern Game";
+        return "Game";
     }
     
     /**
@@ -3371,7 +3371,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
      * Initialize a new game
      */
     private void initializeGame() {
-        Timber.d("ModernGameFragment: initializeGame() called");
+        Timber.d("GameFragment: initializeGame() called");
         
         // Get current game state (robotCount and targetColors are already set
         // correctly during game creation - by Preferences for random games,
@@ -3447,7 +3447,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     @Override
     public void onSolutionCalculationStarted() {
-        Timber.d("ModernGameFragment: Solution calculation started");
+        Timber.d("GameFragment: Solution calculation started");
         requireActivity().runOnUiThread(() -> {
             // Update hint button text to "Cancel"
             hintButton.setTextOn(getString(R.string.cancel_button));
@@ -3526,11 +3526,11 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
 
     @Override
     public void onSolutionCalculationFailed(String errorMessage) {
-        Timber.d("ModernGameFragment: Solution calculation failed - %s", errorMessage);
+        Timber.d("GameFragment: Solution calculation failed - %s", errorMessage);
         
         // Check if the fragment is still attached to an activity before proceeding
         if (!isAdded()) {
-            Timber.w("ModernGameFragment: Fragment not attached to activity, skipping UI update");
+            Timber.w("GameFragment: Fragment not attached to activity, skipping UI update");
             return;
         }
         
@@ -3538,7 +3538,7 @@ public class ModernGameFragment extends BaseGameFragment implements GameStateMan
             // Reset hint button text back to "Hint"
             hintButton.setChecked(false);
             updateStatusText(getString(R.string.solution_error, errorMessage), true);
-            Timber.d("ModernGameFragment: UI updated to show error");
+            Timber.d("GameFragment: UI updated to show error");
         });
     }
     

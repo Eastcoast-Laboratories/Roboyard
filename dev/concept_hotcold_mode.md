@@ -8,7 +8,7 @@ Independent of the solver/hint system. Persists across games and app restarts.
 ## What Already Exists
 
 ### Live Move Counter (implemented)
-- **Toggle button:** `ToggleButton liveMoveCounterToggle` (eye icon) in `ModernGameFragment`
+- **Toggle button:** `ToggleButton liveMoveCounterToggle` (eye icon) in `GameFragment`
 - **State:** `liveMoveCounterEnabled` boolean in `GameStateManager`
 - **Solver:** `LiveSolverManager` runs a separate solver instance for current position
 - **Display:** Shows `"%d moves from here"` in `statusTextView` (dark green)
@@ -23,7 +23,7 @@ Independent of the solver/hint system. Persists across games and app restarts.
 keep it like it is
 ### Toggle State
 - Save to SharedPreferences: `live_move_counter_enabled` (boolean)
-- Restore in `ModernGameFragment.onViewCreated()` from SharedPreferences
+- Restore in `GameFragment.onViewCreated()` from SharedPreferences
 - Update SharedPreferences in `setLiveMoveCounterEnabled()`
 - Survives: Back button, new game, app restart, fragment recreation
 

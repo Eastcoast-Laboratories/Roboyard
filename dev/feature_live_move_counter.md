@@ -59,7 +59,7 @@ Player makes a move
   - Player disables the feature
   - Player leaves the game
 
-#### 3. ModernGameFragment UI Changes
+#### 3. GameFragment UI Changes
 - Add a `ToggleButton` in the hint container area as an eye with the accessibility text: "Show remaining moves"
 - Observe `liveMoveCounterText` LiveData
 - When text is non-empty and feature is enabled, display it instead of the current hint text
@@ -89,7 +89,7 @@ Add to `strings.xml`:
 ### Files to Modify
 1. **`GameStateManager.java`** — Add liveSolution field, LiveData, enable/disable, trigger after moves
 2. **`SolverManager.java`** — Either make non-singleton or create a LiveSolverManager
-3. **`ModernGameFragment.java`** — Add UI toggle, observe LiveData, display counter
-4. **`fragment_modern_game.xml`** — Add toggle button in hint area
+3. **`GameFragment.java`** — Add UI toggle, observe LiveData, display counter
+4. **`fragment_game_portrait.xml`** — Add toggle button in hint area
 5. **`strings.xml`** — Add new string resources
 6. **`SharedPreferences`** — Persist toggle state

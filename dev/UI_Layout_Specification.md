@@ -1,7 +1,7 @@
-# UI Layout Specification - ModernGameFragment
+# UI Layout Specification - GameFragment
 
 ## Overview
-This document describes the optimal layout hierarchy for the ModernGameFragment to ensure proper space utilization and responsive behavior across different screen sizes.
+This document describes the optimal layout hierarchy for the GameFragment to ensure proper space utilization and responsive behavior across different screen sizes.
 
 ## Layout Hierarchy (Top to Bottom)
 

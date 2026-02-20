@@ -259,7 +259,7 @@ public class MainMenuFragment extends BaseGameFragment {
                     if (gameStateManager.getCurrentState().getValue() != null) {
                         Timber.d("[PLAY] Auto-save loaded successfully, resuming game");
                         UIModeManager.getInstance(requireContext()).setUIMode(UIModeManager.MODE_MODERN);
-                        ModernGameFragment gameFragment = new ModernGameFragment();
+                        GameFragment gameFragment = new GameFragment();
                         navigateToDirect(gameFragment);
                         return;
                     }
@@ -275,11 +275,11 @@ public class MainMenuFragment extends BaseGameFragment {
             }
             
             // Start a new game
-            Timber.d("MainMenuFragment: Calling gameStateManager.startModernGame()");
-            gameStateManager.startModernGame();
+            Timber.d("MainMenuFragment: Calling gameStateManager.startGame()");
+            gameStateManager.startGame();
             
-            // Create a new ModernGameFragment instance
-            ModernGameFragment gameFragment = new ModernGameFragment();
+            // Create a new GameFragment instance
+            GameFragment gameFragment = new GameFragment();
             navigateToDirect(gameFragment);
         });
         

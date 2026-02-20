@@ -7,7 +7,7 @@ import timber.log.Timber;
 import roboyard.eclabs.R;
 
 /**
- * Manages sound effects for the Modern Game
+ * Manages sound effects for the Game
  */
 public class SoundManager {
     private static SoundManager instance;

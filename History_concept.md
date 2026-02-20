@@ -398,7 +398,7 @@ The game history feature has been successfully implemented with the following op
 
 ### Key Architecture Changes
 
-1. **ModernGameFragment.java**:
+1. **GameFragment.java**:
    - Updated `startTimer()` to initialize history tracking variables
    - Modified `timerRunnable` to handle history checks based on elapsed time
    - Simplified `stopTimer()` to clean up all timer-related resources
