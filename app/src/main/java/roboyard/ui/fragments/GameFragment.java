@@ -976,11 +976,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     GameState state = gameStateManager.getCurrentState().getValue();
                     
                     // Show the appropriate hint based on the currentHintStep
+                    int backHintRobotColor;
                     if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                        showPreHint(solution, totalMoves, currentHintStep);
+                        backHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
                     } else {
                         int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                        showNormalHint(solution, state, totalMoves, normalHintIndex);
+                        backHintRobotColor = showNormalHint(solution, state, totalMoves, normalHintIndex);
+                    }
+                    if (backHintRobotColor >= 0 && gameGridView != null) {
+                        gameGridView.selectRobotByColor(backHintRobotColor);
                     }
                 }
             }
@@ -1130,11 +1134,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 Timber.d("[HINT_SYSTEM] Showing current hint: step=%d, totalMoves=%d", currentStep, totalMoves);
                 
                 // Check if we're showing pre-hints or normal hints
+                int hintRobotColor;
                 if (showingPreHints && currentStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                    showPreHint(solution, totalMoves, currentStep);
+                    hintRobotColor = showPreHint(solution, totalMoves, currentStep);
                 } else {
                     int normalHintIndex = showingPreHints ? currentStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentStep;
-                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                    hintRobotColor = showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                }
+                if (hintRobotColor >= 0 && gameGridView != null) {
+                    gameGridView.selectRobotByColor(hintRobotColor);
                 }
                 
                 // WICHTIG: Info Box Padding NACH showPreHint/showNormalHint setzen (kompakt)
@@ -2765,7 +2773,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      * @param totalMoves Total number of moves in the solution
      * @param currentHintStep Current hint step (0-based index)
      */
-    private void showPreHint(GameSolution solution, int totalMoves, int currentHintStep) {
+    private int showPreHint(GameSolution solution, int totalMoves, int currentHintStep) {
         String preHintText;
         Timber.d("[HINT_SYSTEM] Showing pre-hint #%d (total pre-hints: %d + %d fixed)", 
                 currentHintStep + 1, numPreHints, NUM_FIXED_PRE_HINTS);
@@ -2883,6 +2891,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         Timber.d("[HINT_SYSTEM] Displayed pre-hint: %s", preHintText);
         // Announce hint
         announceAccessibility(preHintText);
+        // Return the robot color for the last fixed pre-hint ("move X first"), else -1
+        if (currentHintStep == numPreHints + 2
+                && !solution.getMoves().isEmpty()
+                && solution.getMoves().get(0) instanceof RRGameMove) {
+            return ((RRGameMove) solution.getMoves().get(0)).getColor();
+        }
+        return -1;
     }
     
     /**
@@ -2892,7 +2907,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      * @param totalMoves Total number of moves in the solution
      * @param hintIndex Index of the hint to show (0-based)
      */
-    private void showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
+    private int showNormalHint(GameSolution solution, GameState currentState, int totalMoves, int hintIndex) {
         Timber.d("[HINT_SYSTEM] showNormalHint called with hintIndex: %d", hintIndex);
         
         // Hide the live-move-toggle during normal hints, unless live move counter is active
@@ -2904,7 +2919,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (hintIndex < 0 || hintIndex >= totalMoves) {
             Timber.e("[HINT_SYSTEM] Invalid hint index: %d (total moves: %d)", hintIndex, totalMoves);
             updateStatusText(getString(R.string.all_hints_shown), true);
-            return;
+            return -1;
         }
         
         // Track hint usage for achievements - only count real hints (not pre-hints)
@@ -2999,6 +3014,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 if (hintIndex == 0) {
                     Timber.d("[HINT_SYSTEM] First normal hint shown");
                 }
+                return rrMove.getColor();
             } else {
                 // Error in hint system
                 Timber.e("[HINT_SYSTEM] Failed to get a valid hint move");
@@ -3008,6 +3024,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             Timber.e(e, "[HINT_SYSTEM] Error displaying normal hint #%d", hintIndex + 1);
             updateStatusText(getString(R.string.error_displaying_hint), true);
         }
+        return -1;
     }
 
     private String getColorAbbreviation(String colorName) {
@@ -3124,11 +3141,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             GameState currentGameState = gameStateManager.getCurrentState().getValue();
             
             // Show the appropriate hint
+            int nextHintRobotColor;
             if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                showPreHint(solution, totalMoves, currentHintStep);
+                nextHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
             } else {
                 int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                nextHintRobotColor = showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+            }
+            if (nextHintRobotColor >= 0 && gameGridView != null) {
+                gameGridView.selectRobotByColor(nextHintRobotColor);
             }
             
             // Update the game state manager's current solution step
