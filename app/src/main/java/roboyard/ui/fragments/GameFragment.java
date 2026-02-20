@@ -909,12 +909,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                     // Show the appropriate hint after a short delay
                                     new Handler().postDelayed(() -> {
                                         // Show the appropriate hint
+                                        int autoHintRobotColor;
                                         if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                                            showPreHint(solution, totalMoves, currentHintStep);
+                                            autoHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
                                         } else {
                                             int nextNormalHintIndex = showingPreHints ? 
                                                     currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                                            showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
+                                            autoHintRobotColor = showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
+                                        }
+                                        if (autoHintRobotColor >= 0 && gameGridView != null) {
+                                            gameGridView.selectRobotByColor(autoHintRobotColor);
                                         }
                                         
                                         // Update the current solution step
