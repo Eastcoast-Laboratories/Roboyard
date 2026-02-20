@@ -1202,11 +1202,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 int totalMoves = solution.getMoves().size();
                 
                 // Show the appropriate hint
+                int prevHintRobotColor;
                 if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                    showPreHint(solution, totalMoves, currentHintStep);
+                    prevHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
                 } else {
                     int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                    showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                    prevHintRobotColor = showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
+                }
+                if (prevHintRobotColor >= 0 && gameGridView != null) {
+                    gameGridView.selectRobotByColor(prevHintRobotColor);
                 }
                 
                 // Update the game state manager's current solution step
