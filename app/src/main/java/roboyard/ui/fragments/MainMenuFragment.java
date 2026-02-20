@@ -54,7 +54,7 @@ public class MainMenuFragment extends BaseGameFragment {
         applyLanguageSettings();
         
         // Set up UI elements - only use buttons
-        newGameButton = view.findViewById(R.id.modern_ui_button);
+        newGameButton = view.findViewById(R.id.ui_button);
         
         levelGameButton = view.findViewById(R.id.level_game_button);
         loadGameButton = view.findViewById(R.id.load_game_button);

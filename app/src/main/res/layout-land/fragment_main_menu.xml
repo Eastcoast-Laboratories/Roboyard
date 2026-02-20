@@ -48,7 +48,7 @@
 
                 <!-- Game button - green with round corners and black outline -->
                 <Button
-                    android:id="@+id/modern_ui_button"
+                    android:id="@+id/ui_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/new_random_game"
