@@ -910,15 +910,25 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                     new Handler().postDelayed(() -> {
                                         // Show the appropriate hint
                                         int autoHintRobotColor;
+                                        int autoHintDirection = -1;
                                         if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
                                             autoHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
                                         } else {
                                             int nextNormalHintIndex = showingPreHints ? 
                                                     currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
                                             autoHintRobotColor = showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
+                                            // Get direction of the next hint move for the arrow
+                                            if (nextNormalHintIndex >= 0 && nextNormalHintIndex < solution.getMoves().size()) {
+                                                IGameMove nextMove = solution.getMoves().get(nextNormalHintIndex);
+                                                if (nextMove instanceof roboyard.pm.ia.ricochet.RRGameMove) {
+                                                    autoHintDirection = ((roboyard.pm.ia.ricochet.RRGameMove) nextMove).getDirection();
+                                                }
+                                            }
                                         }
                                         if (autoHintRobotColor >= 0 && gameGridView != null) {
                                             gameGridView.selectRobotByColor(autoHintRobotColor);
+                                            // Show direction arrow only after correct auto-advance
+                                            gameGridView.setHintArrow(autoHintRobotColor, autoHintDirection);
                                         }
                                         
                                         // Update the current solution step
@@ -979,6 +989,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     int totalMoves = solution.getMoves().size();
                     GameState state = gameStateManager.getCurrentState().getValue();
                     
+                    // Clear hint arrow on manual navigation
+                    if (gameGridView != null) {
+                        gameGridView.setHintArrow(-1, -1);
+                    }
                     // Show the appropriate hint based on the currentHintStep
                     int backHintRobotColor;
                     if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
@@ -1137,6 +1151,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 int currentStep = gameStateManager.getCurrentSolutionStep();
                 Timber.d("[HINT_SYSTEM] Showing current hint: step=%d, totalMoves=%d", currentStep, totalMoves);
                 
+                // Clear hint arrow when manually opening hints
+                if (gameGridView != null) {
+                    gameGridView.setHintArrow(-1, -1);
+                }
                 // Check if we're showing pre-hints or normal hints
                 int hintRobotColor;
                 if (showingPreHints && currentStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
@@ -1205,6 +1223,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 GameState currentGameState = gameStateManager.getCurrentState().getValue();
                 int totalMoves = solution.getMoves().size();
                 
+                // Clear hint arrow on manual navigation
+                if (gameGridView != null) {
+                    gameGridView.setHintArrow(-1, -1);
+                }
                 // Show the appropriate hint
                 int prevHintRobotColor;
                 if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
@@ -2903,19 +2925,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         Timber.d("[HINT_SYSTEM] Displayed pre-hint: %s", preHintText);
         // Announce hint
         announceAccessibility(preHintText);
-        // For the last fixed pre-hint ("move X first"), show direction arrow on the grid
+        // Return the robot color for the last fixed pre-hint ("move X first"), else -1
         if (currentHintStep == numPreHints + 2
                 && !solution.getMoves().isEmpty()
                 && solution.getMoves().get(0) instanceof RRGameMove) {
-            RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
-            if (gameGridView != null) {
-                gameGridView.setHintArrow(firstMove.getColor(), firstMove.getDirection());
-            }
-            return firstMove.getColor();
-        }
-        // All other pre-hints: clear any existing arrow
-        if (gameGridView != null) {
-            gameGridView.setHintArrow(-1, -1);
+            return ((RRGameMove) solution.getMoves().get(0)).getColor();
         }
         return -1;
     }
@@ -3033,10 +3047,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         		
                 if (hintIndex == 0) {
                     Timber.d("[HINT_SYSTEM] First normal hint shown");
-                }
-                // Show direction arrow on the game grid next to the hinted robot
-                if (gameGridView != null) {
-                    gameGridView.setHintArrow(rrMove.getColor(), rrMove.getDirection());
                 }
                 return rrMove.getColor();
             } else {
@@ -3164,6 +3174,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             Timber.d("[HINT_SYSTEM] Moving to next hint: step=%d of %d (from %s)", currentHintStep, totalPossibleHints - 1, source);
             GameState currentGameState = gameStateManager.getCurrentState().getValue();
             
+            // Clear hint arrow on manual navigation
+            if (gameGridView != null) {
+                gameGridView.setHintArrow(-1, -1);
+            }
             // Show the appropriate hint
             int nextHintRobotColor;
             if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
