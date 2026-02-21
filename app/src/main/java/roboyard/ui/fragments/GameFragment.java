@@ -897,6 +897,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             // Only advance to the next hint if both robot and direction match
                             if (robotMatches && directionMatches) {
                                 Timber.d("[HINT_SYSTEM] Move matches hint! Advancing to next hint");
+                                // Clear the arrow immediately — new one will appear after the delay
+                                if (gameGridView != null) {
+                                    gameGridView.setHintArrow(-1, -1);
+                                }
                                 // Advance to the next hint
                                 int totalMoves = solution.getMoves().size();
                                 totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
