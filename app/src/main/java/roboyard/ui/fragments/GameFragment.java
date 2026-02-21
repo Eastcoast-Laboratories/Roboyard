@@ -3051,6 +3051,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         		
                 if (hintIndex == 0) {
                     Timber.d("[HINT_SYSTEM] First normal hint shown");
+                    // Show arrow immediately for the very first hint
+                    if (gameGridView != null) {
+                        gameGridView.setHintArrow(rrMove.getColor(), rrMove.getDirection());
+                    }
                 }
                 return rrMove.getColor();
             } else {
