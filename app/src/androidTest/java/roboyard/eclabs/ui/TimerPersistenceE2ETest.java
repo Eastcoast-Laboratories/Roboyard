@@ -51,7 +51,7 @@ public class TimerPersistenceE2ETest {
         Thread.sleep(2000);
         // Click New Game button programmatically (streak popup may keep it INVISIBLE)
         activityRule.getScenario().onActivity(activity -> {
-            android.widget.Button btn = activity.findViewById(R.id.modern_ui_button);
+            android.widget.Button btn = activity.findViewById(R.id.ui_button);
             if (btn != null) {
                 btn.setVisibility(android.view.View.VISIBLE);
                 btn.performClick();

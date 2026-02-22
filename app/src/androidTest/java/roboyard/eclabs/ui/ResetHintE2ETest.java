@@ -86,7 +86,7 @@ public class ResetHintE2ETest {
                     .findFragmentById(R.id.nav_host_fragment);
             if (navHostFragment != null) {
                 NavController navController = navHostFragment.getNavController();
-                navController.navigate(R.id.modernGameFragment);
+                navController.navigate(R.id.gameFragment);
                 Timber.d("[RESET_HINT_TEST] Navigated to ModernGameFragment");
             }
         });

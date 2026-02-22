@@ -76,8 +76,8 @@ public class RandomGame11E2ETest {
         Timber.d("[E2E_RANDOM11] Starting 11 random games test (hint on game 10)");
         Thread.sleep(200);
         
-        // Navigate to New Game (Random Game) - button is called modern_ui_button
-        onView(withId(R.id.modern_ui_button)).check(matches(isDisplayed())).perform(click());
+        // Navigate to New Game (Random Game) - button is called ui_button
+        onView(withId(R.id.ui_button)).check(matches(isDisplayed())).perform(click());
         Thread.sleep(500);
         
         activityRule.getScenario().onActivity(activity -> {

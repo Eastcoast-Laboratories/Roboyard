@@ -82,7 +82,7 @@ public class LoadGameDifficultyTest {
         Timber.d("[LOAD_GAME_TEST] Step 1: Starting new random game in Beginner mode");
         Thread.sleep(500);
         
-        onView(withId(R.id.modern_ui_button)).check(matches(isDisplayed())).perform(click());
+        onView(withId(R.id.ui_button)).check(matches(isDisplayed())).perform(click());
         Thread.sleep(3000); // Wait for game to generate and solver to find solution
         
         // Get GameStateManager reference
@@ -217,7 +217,7 @@ public class LoadGameDifficultyTest {
         // First, simulate loading a game
         Preferences.difficulty = Constants.DIFFICULTY_BEGINNER;
         
-        onView(withId(R.id.modern_ui_button)).check(matches(isDisplayed())).perform(click());
+        onView(withId(R.id.ui_button)).check(matches(isDisplayed())).perform(click());
         Thread.sleep(3000);
         
         activityRule.getScenario().onActivity(activity -> {

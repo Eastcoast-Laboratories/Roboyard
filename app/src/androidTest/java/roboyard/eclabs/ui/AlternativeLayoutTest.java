@@ -98,7 +98,7 @@ public class AlternativeLayoutTest {
         Thread.sleep(500);
 
         // Step 6: Start a Random Game
-        onView(withId(R.id.modern_ui_button)).perform(click());
+        onView(withId(R.id.ui_button)).perform(click());
         Thread.sleep(2000);
 
         // Step 7: Verify game screen with game_grid_view
