@@ -42,7 +42,8 @@ public class GameHistoryEntry {
     // The critical hint is when robot colors are revealed (which robots to use)
     // -1 = no hints used, 0+ = max hint index viewed (0 = pre-hint with colors)
     private int maxHintUsed = -1;             // Highest hint index ever viewed for this map
-    private boolean solvedWithoutHints;       // True if map was ever solved without using hints
+    private boolean solvedWithoutHints;       // True if map was FIRST solved without using hints
+    private boolean everUsedHints = false;    // True if hints were EVER used in ANY attempt (including later ones)
 
     /**
      * Constructor for a new history entry
@@ -275,6 +276,8 @@ public class GameHistoryEntry {
         if (hintIndex > maxHintUsed) {
             maxHintUsed = hintIndex;
         }
+        // Permanently mark that hints were ever used in any attempt
+        everUsedHints = true;
     }
     
     /**
@@ -287,12 +290,28 @@ public class GameHistoryEntry {
     
     /**
      * Check if this map qualifies for "no hints" achievements.
-     * A map only qualifies if it was FIRST solved without hints.
-     * Even if solved without hints later, it doesn't count if hints were used before.
+     * A map only qualifies if it was FIRST solved without hints AND hints were NEVER used
+     * in any subsequent attempt either.
      * @return true if map qualifies for no-hints achievements
      */
     public boolean qualifiesForNoHintsAchievement() {
-        return solvedWithoutHints && maxHintUsed < 0;
+        return solvedWithoutHints && !everUsedHints;
+    }
+
+    public boolean isEverUsedHints() {
+        return everUsedHints;
+    }
+
+    public void setEverUsedHints(boolean everUsedHints) {
+        this.everUsedHints = everUsedHints;
+    }
+
+    /**
+     * Mark that hints were used in any attempt of this map.
+     * Once set to true, this is permanent - it tracks lifetime hint usage.
+     */
+    public void markEverUsedHints() {
+        this.everUsedHints = true;
     }
 
     /**

@@ -2206,17 +2206,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Preview image path (flat filename, no directory separator)
             String previewImagePath = historyFileName + "_preview.txt";
 
+            // Get optimal moves from current solution if available
+            int optimalMovesCount = 0;
+            GameSolution currentSolution = getCurrentSolution();
+            if (currentSolution != null && currentSolution.getMoves() != null) {
+                optimalMovesCount = currentSolution.getMoves().size();
+            }
+
             // Create history entry with available information
+            // Use gameState.getMoveCount() as source of truth, not moveCount.getValue()
+            int actualMoveCount = gameState.getMoveCount();
             GameHistoryEntry entry = new GameHistoryEntry(
                     historyPath,
                     mapName,
                     System.currentTimeMillis(),
                     totalPlayTime,
-                    moveCount.getValue(),
-                    0, // We don't have solution move count
+                    actualMoveCount,
+                    optimalMovesCount,
                     boardSize,
                     previewImagePath
             );
+            Timber.d("[HISTORY] Saving to history: moveCount=%d (from GameState), optimalMoves=%d",
+                    actualMoveCount, optimalMovesCount);
             
             // Set map signatures for unique map tracking
             entry.setWallSignature(gameState.generateWallSignature());

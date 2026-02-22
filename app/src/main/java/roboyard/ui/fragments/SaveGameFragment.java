@@ -2010,13 +2010,23 @@ public class SaveGameFragment extends BaseGameFragment {
         int bestMoves = entry.getBestMoves();
         sb.append(bestMoves > 0 ? bestMoves : "—").append("\n");
         
-        // Optimal moves (if available)
-        if (entry.getOptimalMoves() > 0) {
-            sb.append("Optimal moves: ").append(entry.getOptimalMoves()).append("\n");
+        // Optimal moves - always show
+        sb.append("Optimal moves: ");
+        int optimalMoves = entry.getOptimalMoves();
+        if (optimalMoves > 0) {
+            sb.append(optimalMoves);
+            if (bestMoves > 0 && bestMoves == optimalMoves) {
+                sb.append(" ✓ (perfect!)");
+            } else if (bestMoves > 0) {
+                sb.append(" (+").append(bestMoves - optimalMoves).append(" extra)");
+            }
+        } else {
+            sb.append("—");
         }
+        sb.append("\n");
         
         // Hint usage
-        sb.append("\nHint usage: ");
+        sb.append("\nHint usage (this session): ");
         int maxHint = entry.getMaxHintUsed();
         if (maxHint < 0) {
             sb.append("No hints used");
@@ -2027,7 +2037,11 @@ public class SaveGameFragment extends BaseGameFragment {
         }
         sb.append("\n");
         
-        // Solved without hints
+        // Hints ever used across all attempts
+        sb.append("Hints ever used (all attempts): ")
+          .append(entry.isEverUsedHints() ? "Yes" : "No").append("\n");
+        
+        // Qualifies for no-hints achievement
         sb.append("Qualifies for no-hints achievement: ")
           .append(entry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
         

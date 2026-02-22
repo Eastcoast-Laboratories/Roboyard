@@ -70,11 +70,29 @@ public class GameHistoryManager {
                         if (entry.getMaxHintUsed() > existing.getMaxHintUsed()) {
                             existing.setMaxHintUsed(entry.getMaxHintUsed());
                         }
+                        // everUsedHints is cumulative: true if hints used in ANY attempt
+                        if (entry.getMaxHintUsed() >= 0 || entry.isEverUsedHints()) {
+                            existing.markEverUsedHints();
+                        }
                         // solvedWithoutHints stays true only if FIRST completion was without hints
                         // Don't update it on subsequent completions
+                        
+                        // Log optimal solution achievement with full hint history
+                        int optMoves = existing.getOptimalMoves() > 0 ? existing.getOptimalMoves() : entry.getOptimalMoves();
+                        boolean isOptimal = optMoves > 0 && entry.getMovesMade() == optMoves;
+                        if (isOptimal) {
+                            boolean neverHints = !existing.isEverUsedHints();
+                            Timber.d("[HISTORY] OPTIMAL SOLUTION on completion #%d: map=%s, moves=%d, " +
+                                    "everUsedHints=%b, solvedWithoutHints=%b, qualifiesNoHints=%b",
+                                    existing.getCompletionCount(), existing.getMapPath(),
+                                    entry.getMovesMade(), existing.isEverUsedHints(),
+                                    existing.isSolvedWithoutHints(), neverHints);
+                        }
+                        
                         updated = true;
-                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s, maxHintUsed=%d", 
-                                existing.getCompletionCount(), existing.getMapPath(), existing.getMaxHintUsed());
+                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s, maxHintUsed=%d, everUsedHints=%b", 
+                                existing.getCompletionCount(), existing.getMapPath(),
+                                existing.getMaxHintUsed(), existing.isEverUsedHints());
                         break;
                     }
                 }
@@ -172,6 +190,9 @@ public class GameHistoryManager {
                     // Load hint tracking fields
                     entry.setMaxHintUsed(entryJson.optInt("maxHintUsed", -1));
                     entry.setSolvedWithoutHints(entryJson.optBoolean("solvedWithoutHints", false));
+                    // everUsedHints: fallback to maxHintUsed>=0 for legacy entries
+                    boolean legacyEverUsedHints = entry.getMaxHintUsed() >= 0;
+                    entry.setEverUsedHints(entryJson.optBoolean("everUsedHints", legacyEverUsedHints));
                     
                     entries.add(entry);
                 }
@@ -279,6 +300,7 @@ public class GameHistoryManager {
                 // Save hint tracking fields
                 entryJson.put("maxHintUsed", entry.getMaxHintUsed());
                 entryJson.put("solvedWithoutHints", entry.isSolvedWithoutHints());
+                entryJson.put("everUsedHints", entry.isEverUsedHints());
                 
                 entriesArray.put(entryJson);
             }
