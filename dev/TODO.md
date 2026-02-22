@@ -77,6 +77,25 @@ check if this all works:
 
 2. der hint container soll sich ausblenden, wenn der solver was gefunden hat und das angenommen wurde, nicht mehr zwischendurch ein-und ausblenden.
 
+3. der hint container soll sich auch wenn der live-move-toggle an ist ausblenden, sobald der solver was gefunden hat und die map angenommen wurde. Im moment blendet der nur aus, wenn der live-move-toggle aus ist
+4. add achievements tracking same walls, different positions
+  
 # last prompt:
 
-1. der hint container soll sich auch wenn der live-move-toggle an ist ausblenden, sobald der solver was gefunden hat und die map angenommen wurde. Im moment blendet der nur aus, wenn der live-move-toggle aus ist
+ergänze das achievement konzept, wie man sicherstellen kannn, dass man für die achievements wirklich unterschiedliche maps macht umdie achievements zu erreichen, also es muss irgendwie jede map gespeicherrt werden für immer in der geschafft-liste damit man diese nicht doppelt zählt , bei jedemeintrag muss noch gespeichert werden, wie oft und wann man die geschafft hat, damit man hinterher auswerten kann, was fr maps man wann geschafft hat,. man braucht keine hashes, da die maps schon sehr wenig daten haben kann man die gesamten maps in dieser neen history speichern. dadurch wird verhindert, dass man z.b. immer wieder ein savegame lädt und das immer wieder löst. auch wird dann verhindert, dass man die slebe map imer rwieder löst. die achievements sollen nur wirklich verrschiedene maps zählen für achievements, die auf die anzahl maps hinauss sind. auch die speed achievements dürfen nur triggern, wenn man eine map das erste mal schafft, denn danach ist es ja kein kunststck mehr. gehe alle achievements durch auf diese aspekte und ergänze solche bedingungen, die für das erreichen notwendig sind.
+
+DRY! 
+@achievements.md#L185-190 
+Benutze die bestehende history.
+baue die bestehende history so um,
+- eine einträge mehr löschen kann
+- die history nur noch einen eintrag pro verschiedene maps speichert
+- bei jedem eintrag speicherrt wann die alles gelöst wurde,  
+- sortierung in der histroy ansicht dann danach, wann jeweisl zuletzt gelöst.
+- es sollen alle zeitpunkte, wann sie gelöst wurde gespeichert werden, damit man hinterher verschiedene auswertungen darüber rmachen kann, auch für streaks und so
+- die walls sollen getrennt von den position s gespeichert werden für neue achievements, die sich auf die selben wall-storage einträge beziehen mit verschiedenen robot positions aber gleichen walls.
+- beue unittests, die die eaenderte history testen und ältere einträge daraus aufrufen und testen ob man die noch spielen kann.
+- wenn die history funktionierrt, dann die achievements logik bearbeiten um die neuen bedingungen in den achievements zu testen mit unittests und espresso tests, die die achievements testen und baue neue espresso tests, wenn es noch keinen gibt, der die einzelnen neuen aspekte  wirklich testst
+
+- entferne den delete button bei den history einträgen (die logik dahinter kann ergalten bleiben)
+- 

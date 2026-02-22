@@ -498,32 +498,6 @@ All purchases are purely visual and do not provide any gameplay advantage:
 - Monthly active users (MAU)
 - Retention rates
 
-### Success Criteria
-- 40%+ of players unlock first achievement
-- Average 7-day streak for engaged players
-- 60%+ quest completion rate
-- 20%+ increase in DAU after Sidekick launch
-
-## Testing Strategy
-
-### Internal Testing
-- Test all achievement unlock conditions
-- Verify streak tracking accuracy
-- Test offline mode behavior
-- Validate Play Points integration
-
-### Closed Testing
-- Gather feedback from testers
-- Monitor achievement unlock rates
-- Identify balance issues
-- Refine quest difficulty
-
-### Open Testing
-- Wider audience feedback
-- Performance monitoring
-- Bug identification
-- User engagement metrics
-
 ## Play Store Submission
 
 ### Requirements

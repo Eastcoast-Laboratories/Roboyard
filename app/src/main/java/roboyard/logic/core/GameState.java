@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1957,5 +1958,79 @@ public class GameState implements Serializable {
         
         Timber.d("[TARGET SYNC] Synchronized %d targets", syncedTargets);
         return syncedTargets;
+    }
+    
+    // ========== Map Signature Generation for Unique Map Tracking ==========
+    
+    /**
+     * Generate a unique signature for the wall layout only.
+     * Used for achievements that track same walls with different robot positions.
+     * @return A string signature representing the wall layout
+     */
+    public String generateWallSignature() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(width).append("x").append(height).append("|");
+        
+        // Collect all walls in sorted order
+        List<String> walls = new ArrayList<>();
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                walls.add("H" + element.getX() + "," + element.getY());
+            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                walls.add("V" + element.getX() + "," + element.getY());
+            }
+        }
+        Collections.sort(walls);
+        for (String wall : walls) {
+            sb.append(wall).append(";");
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Generate a unique signature for robot and target positions only.
+     * @return A string signature representing positions
+     */
+    public String generatePositionSignature() {
+        StringBuilder sb = new StringBuilder();
+        
+        // Collect initial robot positions in sorted order
+        List<String> robots = new ArrayList<>();
+        if (initialRobotPositions != null) {
+            for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
+                int[] pos = entry.getValue();
+                robots.add("R" + entry.getKey() + "@" + pos[0] + "," + pos[1]);
+            }
+        }
+        Collections.sort(robots);
+        for (String robot : robots) {
+            sb.append(robot).append(";");
+        }
+        
+        sb.append("|");
+        
+        // Collect target positions in sorted order
+        List<String> targets = new ArrayList<>();
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET) {
+                targets.add("T" + element.getColor() + "@" + element.getX() + "," + element.getY());
+            }
+        }
+        Collections.sort(targets);
+        for (String target : targets) {
+            sb.append(target).append(";");
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Generate a complete unique signature for the entire map.
+     * Combines wall signature and position signature.
+     * Two maps with identical signatures are considered the same map.
+     * @return A string signature representing the complete map
+     */
+    public String generateMapSignature() {
+        return generateWallSignature() + "||" + generatePositionSignature();
     }
 }

@@ -21,7 +21,7 @@ import timber.log.Timber;
 public class GameHistoryManager {
     private static final String HISTORY_DIR = "history";
     private static final String HISTORY_INDEX_FILE = "history_index.json";
-    private static final int MAX_HISTORY_ENTRIES = 11;
+    // Maps are never deleted - kept forever for unique map tracking
 
     /**
      * Initialize the history directory if it doesn't exist
@@ -41,23 +41,47 @@ public class GameHistoryManager {
     }
 
     /**
-     * Add a new history entry
+     * Add a new history entry or update existing one if map already exists.
+     * Maps are identified by their mapSignature (unique combination of walls + positions).
+     * Entries are never deleted - only updated with new completion data.
      *
-     * @return
+     * @return true if entry was added/updated successfully
      */
     public static Boolean addHistoryEntry(Activity activity, GameHistoryEntry entry) {
         try {
             // Load existing entries
             List<GameHistoryEntry> entries = getHistoryEntries(activity);
             
-            // Check if we already have an entry with the same mapName
+            // Check if we already have an entry with the same mapSignature
             boolean updated = false;
-            for (int i = 0; i < entries.size(); i++) {
-                if (entries.get(i).getMapName().equals(entry.getMapName())) {
-                    // Update existing entry
-                    entries.set(i, entry);
-                    updated = true;
-                    break;
+            String newMapSignature = entry.getMapSignature();
+            
+            if (newMapSignature != null && !newMapSignature.isEmpty()) {
+                for (int i = 0; i < entries.size(); i++) {
+                    GameHistoryEntry existing = entries.get(i);
+                    if (newMapSignature.equals(existing.getMapSignature())) {
+                        // Same map found - record new completion
+                        existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                        if (entry.getOptimalMoves() > 0) {
+                            existing.setOptimalMoves(entry.getOptimalMoves());
+                        }
+                        updated = true;
+                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s", 
+                                existing.getCompletionCount(), existing.getMapPath());
+                        break;
+                    }
+                }
+            }
+            
+            // Fallback: check by mapName (legacy entries)
+            if (!updated) {
+                for (int i = 0; i < entries.size(); i++) {
+                    if (entries.get(i).getMapName().equals(entry.getMapName())) {
+                        GameHistoryEntry existing = entries.get(i);
+                        existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                        updated = true;
+                        break;
+                    }
                 }
             }
             
@@ -66,28 +90,17 @@ public class GameHistoryManager {
                 entries.add(entry);
             }
             
-            // Sort by timestamp (newest first)
+            // Sort by lastCompletionTimestamp (most recently played first)
             Collections.sort(entries, new Comparator<GameHistoryEntry>() {
                 @Override
                 public int compare(GameHistoryEntry o1, GameHistoryEntry o2) {
-                    return Long.compare(o2.getTimestamp(), o1.getTimestamp());
+                    long t1 = o1.getLastCompletionTimestamp() > 0 ? o1.getLastCompletionTimestamp() : o1.getTimestamp();
+                    long t2 = o2.getLastCompletionTimestamp() > 0 ? o2.getLastCompletionTimestamp() : o2.getTimestamp();
+                    return Long.compare(t2, t1);
                 }
             });
             
-            // Trim to max entries
-            if (entries.size() > MAX_HISTORY_ENTRIES) {
-                // Get entries to remove
-                List<GameHistoryEntry> entriesToRemove = 
-                    entries.subList(MAX_HISTORY_ENTRIES, entries.size());
-                
-                // Delete files for removed entries
-                for (GameHistoryEntry entryToRemove : entriesToRemove) {
-                    deleteHistoryFiles(activity, entryToRemove);
-                }
-                
-                // Trim the list
-                entries = entries.subList(0, MAX_HISTORY_ENTRIES);
-            }
+            // No trimming - maps are kept forever for unique map tracking
             
             // Save updated index
             Boolean isSaved = saveHistoryIndex(activity, entries);
@@ -124,6 +137,30 @@ public class GameHistoryManager {
                     entry.setOptimalMoves(entryJson.optInt("optimalMoves", 0));
                     entry.setBoardSize(entryJson.getString("boardSize"));
                     entry.setPreviewImagePath(entryJson.getString("previewImagePath"));
+                    
+                    // Load new fields for unique map tracking
+                    entry.setCompletionCount(entryJson.optInt("completionCount", 1));
+                    entry.setLastCompletionTimestamp(entryJson.optLong("lastCompletionTimestamp", entry.getTimestamp()));
+                    entry.setBestTime(entryJson.optInt("bestTime", entry.getPlayDuration()));
+                    entry.setBestMoves(entryJson.optInt("bestMoves", entry.getMovesMade()));
+                    entry.setWallSignature(entryJson.optString("wallSignature", null));
+                    entry.setPositionSignature(entryJson.optString("positionSignature", null));
+                    entry.setMapSignature(entryJson.optString("mapSignature", null));
+                    
+                    // Load completion timestamps array
+                    if (entryJson.has("completionTimestamps")) {
+                        JSONArray timestamps = entryJson.getJSONArray("completionTimestamps");
+                        List<Long> completionTimestamps = new ArrayList<>();
+                        for (int j = 0; j < timestamps.length(); j++) {
+                            completionTimestamps.add(timestamps.getLong(j));
+                        }
+                        entry.setCompletionTimestamps(completionTimestamps);
+                    } else {
+                        // Legacy entry - create list with single timestamp
+                        List<Long> completionTimestamps = new ArrayList<>();
+                        completionTimestamps.add(entry.getTimestamp());
+                        entry.setCompletionTimestamps(completionTimestamps);
+                    }
                     
                     entries.add(entry);
                 }
@@ -203,6 +240,30 @@ public class GameHistoryManager {
                 entryJson.put("optimalMoves", entry.getOptimalMoves());
                 entryJson.put("boardSize", entry.getBoardSize());
                 entryJson.put("previewImagePath", entry.getPreviewImagePath());
+                
+                // Save new fields for unique map tracking
+                entryJson.put("completionCount", entry.getCompletionCount());
+                entryJson.put("lastCompletionTimestamp", entry.getLastCompletionTimestamp());
+                entryJson.put("bestTime", entry.getBestTime());
+                entryJson.put("bestMoves", entry.getBestMoves());
+                if (entry.getWallSignature() != null) {
+                    entryJson.put("wallSignature", entry.getWallSignature());
+                }
+                if (entry.getPositionSignature() != null) {
+                    entryJson.put("positionSignature", entry.getPositionSignature());
+                }
+                if (entry.getMapSignature() != null) {
+                    entryJson.put("mapSignature", entry.getMapSignature());
+                }
+                
+                // Save completion timestamps array
+                JSONArray timestamps = new JSONArray();
+                if (entry.getCompletionTimestamps() != null) {
+                    for (Long ts : entry.getCompletionTimestamps()) {
+                        timestamps.put(ts);
+                    }
+                }
+                entryJson.put("completionTimestamps", timestamps);
                 
                 entriesArray.put(entryJson);
             }
@@ -376,5 +437,80 @@ public class GameHistoryManager {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    // ========== Unique Map Tracking Methods ==========
+    
+    /**
+     * Check if a map with the given signature is being completed for the first time.
+     * @param activity The activity context
+     * @param mapSignature The unique map signature to check
+     * @return true if this map has never been completed before
+     */
+    public static boolean isFirstCompletion(Activity activity, String mapSignature) {
+        if (mapSignature == null || mapSignature.isEmpty()) {
+            return true; // No signature = treat as new
+        }
+        GameHistoryEntry existing = findByMapSignature(activity, mapSignature);
+        return existing == null;
+    }
+    
+    /**
+     * Find a history entry by its map signature.
+     * @param activity The activity context
+     * @param mapSignature The unique map signature to find
+     * @return The matching entry, or null if not found
+     */
+    public static GameHistoryEntry findByMapSignature(Activity activity, String mapSignature) {
+        if (mapSignature == null || mapSignature.isEmpty()) {
+            return null;
+        }
+        List<GameHistoryEntry> entries = getHistoryEntries(activity);
+        for (GameHistoryEntry entry : entries) {
+            if (mapSignature.equals(entry.getMapSignature())) {
+                return entry;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Find all history entries with the same wall signature (same walls, different positions).
+     * @param activity The activity context
+     * @param wallSignature The wall signature to match
+     * @return List of entries with matching wall layout
+     */
+    public static List<GameHistoryEntry> findByWallSignature(Activity activity, String wallSignature) {
+        List<GameHistoryEntry> result = new ArrayList<>();
+        if (wallSignature == null || wallSignature.isEmpty()) {
+            return result;
+        }
+        List<GameHistoryEntry> entries = getHistoryEntries(activity);
+        for (GameHistoryEntry entry : entries) {
+            if (wallSignature.equals(entry.getWallSignature())) {
+                result.add(entry);
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Get the total count of unique maps completed.
+     * @param activity The activity context
+     * @return Number of unique maps in history
+     */
+    public static int getUniqueMapCount(Activity activity) {
+        return getHistoryEntries(activity).size();
+    }
+    
+    /**
+     * Get the completion count for a specific map.
+     * @param activity The activity context
+     * @param mapSignature The map signature to check
+     * @return Number of times this map was completed, or 0 if never
+     */
+    public static int getCompletionCount(Activity activity, String mapSignature) {
+        GameHistoryEntry entry = findByMapSignature(activity, mapSignature);
+        return entry != null ? entry.getCompletionCount() : 0;
     }
 }

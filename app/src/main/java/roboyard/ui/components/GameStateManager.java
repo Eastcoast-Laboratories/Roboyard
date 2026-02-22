@@ -2143,6 +2143,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     boardSize,
                     previewImagePath
             );
+            
+            // Set map signatures for unique map tracking
+            entry.setWallSignature(gameState.generateWallSignature());
+            entry.setPositionSignature(gameState.generatePositionSignature());
+            entry.setMapSignature(gameState.generateMapSignature());
 
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(activity, entry);

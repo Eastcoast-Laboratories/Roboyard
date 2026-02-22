@@ -185,12 +185,154 @@ Note: The solution length achievements include 20-29 (10 achievements) plus 30+ 
 
 ---
 
+## Unique Map Tracking (Anti-Cheat System)
+
+To prevent achievement farming by repeatedly solving the same map (e.g., loading a savegame), the existing **Game History** (`GameHistoryManager`) has been enhanced to track unique maps permanently.
+
+### Enhanced History Storage
+
+The existing `GameHistoryEntry` class has been extended with:
+- **mapSignature**: Unique signature combining walls + positions (for exact map matching)
+- **wallSignature**: Signature of wall layout only (for achievements tracking same walls, different positions)
+- **positionSignature**: Signature of robot + target positions only
+- **completionTimestamps**: List of ALL timestamps when this map was completed
+- **completionCount**: How many times this exact map was solved
+- **lastCompletionTimestamp**: When the map was most recently solved
+- **bestTime**: Fastest completion time for this map
+- **bestMoves**: Fewest moves used to solve this map
+
+**Key changes to GameHistoryManager:**
+- Entries are **never deleted** (no MAX_HISTORY_ENTRIES limit)
+- Maps are matched by `mapSignature` instead of `mapName`
+- Duplicate completions update existing entry via `recordCompletion()` instead of replacing
+- Sorted by `lastCompletionTimestamp` (most recently played first)
+
+Storage location: `history_index.json` (existing file, extended format)
+
+### Achievement Conditions by Type
+
+#### Achievements requiring UNIQUE maps (first-time completion only):
+
+| Achievement Type | Condition |
+|------------------|-----------|
+| **Count-based** (e.g., "Complete 5 games in Impossible mode") | Only counts if map is NEW (not in history) |
+| **Speed achievements** (e.g., "Complete in under 10 seconds") | Only triggers on FIRST completion of a map |
+| **Solution Length** (e.g., "18 Move Master") | Only triggers on FIRST completion of a map |
+| **Perfect solutions** (optimal moves) | Only counts if map is NEW |
+| **Streak achievements** | Each map in the streak must be UNIQUE |
+| **Resolution Explorer** | Each resolution needs a UNIQUE map |
+| **Multiple Targets** | Only triggers on FIRST completion of a map |
+
+#### Achievements NOT requiring unique maps:
+
+| Achievement Type | Reason |
+|------------------|--------|
+| **Login Streak** | Not map-based |
+| **Level progression** (Level 1-140) | Levels are fixed, tracked by level ID |
+| **Star collection** | Stars are per-level, tracked by level ID |
+| **Square Coverage** | Challenge achievements, can be repeated |
+| **Fun Challenges** (Gimme Five, etc.) | Challenge achievements, can be repeated |
+
+### Detailed Achievement Analysis
+
+#### Random Game Achievements - Updated Conditions
+
+**Difficulty (4)** - All require UNIQUE maps:
+- `impossible_mode_1`: Map must be NEW
+- `impossible_mode_5`: Each of the 5 maps must be UNIQUE
+- `impossible_mode_streak_5`: Each of the 5 consecutive maps must be UNIQUE
+- `impossible_mode_streak_10`: Each of the 10 consecutive maps must be UNIQUE
+
+**Solution Length (13)** - All require FIRST completion:
+- `solution_18_moves` through `solution_30_plus_moves`: Only triggers if this exact map has never been solved before
+
+**Screen Resolutions (3)** - Each resolution needs UNIQUE maps:
+- `play_10_move_games_all_resolutions`: For each resolution, the map must be NEW
+- `play_12_move_games_all_resolutions`: For each resolution, the map must be NEW
+- `play_15_move_games_all_resolutions`: For each resolution, the map must be NEW
+
+**Multiple Targets (9)** - All require FIRST completion:
+- `game_2_targets` through `game_4_of_4_targets`: Only triggers if map is NEW
+
+**Streaks & Challenges (11)** - Count-based require UNIQUE maps:
+- `perfect_random_games_5/10/20`: Each counted game must be a UNIQUE map
+- `perfect_random_games_streak_5/10/20`: Each game in streak must be UNIQUE
+- `no_hints_random_10/50`: Each counted game must be a UNIQUE map
+- `no_hints_streak_random_10/50`: Each game in streak must be UNIQUE
+
+**Speed (3)** - All require FIRST completion:
+- `speedrun_random_under_20s`: Only triggers on FIRST completion of this map
+- `speedrun_random_under_10s`: Only triggers on FIRST completion of this map
+- `speedrun_random_5_games_under_30s`: Each of the 5 games must be a UNIQUE map
+
+#### Performance Achievements - Updated Conditions
+
+- `perfect_solutions_5/10/50`: Each counted solution must be a UNIQUE map (for random games) or unique level (for levels)
+- `speedrun_under_30s`: Only triggers on FIRST completion of this map/level
+- `speedrun_under_10s`: Only triggers on FIRST completion of this map/level
+
+### Implementation
+
+```java
+// GameHistoryManager.java (enhanced existing class)
+public class GameHistoryManager {
+    // Check if this is first completion of a map
+    public static boolean isFirstCompletion(Activity activity, String mapSignature);
+    
+    // Find entry by map signature
+    public static GameHistoryEntry findByMapSignature(Activity activity, String mapSignature);
+    
+    // Find entries with same wall layout (different positions)
+    public static List<GameHistoryEntry> findByWallSignature(Activity activity, String wallSignature);
+    
+    // Get total unique maps count
+    public static int getUniqueMapCount(Activity activity);
+    
+    // Get completion count for a specific map
+    public static int getCompletionCount(Activity activity, String mapSignature);
+}
+
+// GameState.java (new methods)
+public class GameState {
+    // Generate wall-only signature
+    public String generateWallSignature();
+    
+    // Generate position-only signature (robots + targets)
+    public String generatePositionSignature();
+    
+    // Generate full map signature (walls + positions)
+    public String generateMapSignature();
+}
+
+// GameHistoryEntry.java (enhanced existing class)
+public class GameHistoryEntry {
+    // Record a new completion of this map
+    public boolean recordCompletion(int completionTime, int moves);
+    
+    // Check if this is first completion
+    public boolean isFirstCompletion();
+}
+```
+
+### Map Comparison
+
+Two maps are considered IDENTICAL if:
+1. Same grid dimensions (width × height)
+2. Same robot positions (all robots at same coordinates)
+3. Same target positions (all targets at same coordinates with same colors)
+4. Same wall positions (all walls at same coordinates)
+
+Note: The order of elements in the comparison does not matter - positions are sorted before comparison.
+
+---
+
 ## Technical Notes
 
 ### Storage
 - Achievements are stored in SharedPreferences (`roboyard_achievements`)
 - Each achievement has: `unlocked_<id>` (boolean) and `timestamp_<id>` (long)
 - Counters for progressive achievements: `counter_<name>` (int)
+- **Map History**: Stored in `map_history.json` (internal storage, not SharedPreferences due to size)
 
 ### Triggers
 - Level completion: `AchievementManager.onLevelCompleted()`
@@ -198,8 +340,14 @@ Note: The solution length achievements include 20-29 (10 achievements) plus 30+ 
 - Custom level events: `onCustomLevelCreated()`, `onCustomLevelSolved()`, `onCustomLevelShared()`
 - Daily login: `onDailyLogin()`
 - Comeback: `onComebackPlayer()`
+- **Map history check**: `MapHistoryManager.isFirstCompletion()` called before achievement triggers
 
 ### UI
 - `AchievementsFragment`: Main achievements screen
 - `AchievementPopup`: Unlock notification popup
 - Icons: `ic_achievement_*.xml` drawables
+
+### Data Migration
+- On first launch after update: No migration needed (history starts empty)
+- Existing achievements remain unlocked (grandfather clause)
+- New achievements going forward require unique maps
