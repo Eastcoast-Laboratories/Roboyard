@@ -1083,9 +1083,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         GameElement robot = state.getSelectedRobot();
 
         // Check if the robot is moving back to its last position in the path history (reverse move = undo)
-        Timber.d("[ROBOTS][UNDO] moveRobotInDirection: robot=%d at (%d,%d), dx=%d dy=%d, pathHistory.size=%d",
-                robot.getColor(), robot.getX(), robot.getY(), dx, dy, pathHistory.size());
-        if (!pathHistory.isEmpty()) {
+        // But only if game is not already complete - after goal, reverse moves are treated as normal forward moves
+        Timber.d("[ROBOTS][UNDO] moveRobotInDirection: robot=%d at (%d,%d), dx=%d dy=%d, pathHistory.size=%d, gameComplete=%b",
+                robot.getColor(), robot.getX(), robot.getY(), dx, dy, pathHistory.size(), isGameComplete.getValue());
+        if (!isGameComplete.getValue() && !pathHistory.isEmpty()) {
             int[] lastPath = pathHistory.get(pathHistory.size() - 1);
             int lastColor = lastPath[0];
             int lastFromX = lastPath[1];
@@ -1305,15 +1306,21 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[ROBOT][HINT_SYSTEM] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)",
                     robot.getColor(), originalX, originalY, targetX, targetY);
 
-            setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
+            // Only increment counters if game is not already complete
+            // Once goal is reached, stop counting moves and squares
+            if (!isGameComplete.getValue()) {
+                setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
 
-            // Increment move count
-            // The value in this GameStateManager (UI)
-            setMoveCount(getMoveCount().getValue() + 1);
+                // Increment move count
+                // The value in this GameStateManager (UI)
+                setMoveCount(getMoveCount().getValue() + 1);
 
-            // Also update the move count in the GameState object itself (logic)
-            // This ensures state.getMoveCount() returns the correct value
-            state.setMoveCount(getMoveCount().getValue());
+                // Also update the move count in the GameState object itself (logic)
+                // This ensures state.getMoveCount() returns the correct value
+                state.setMoveCount(getMoveCount().getValue());
+            } else {
+                Timber.d("[GAME_COMPLETE] Game already completed, not incrementing move/squares counters");
+            }
 
             // Track the robot and direction for hint verification
             int directionConstant = 0;
@@ -1335,8 +1342,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 robot.setX(targetX);
                 robot.setY(targetY);
 
-                // Check for game completion after animation
-                if (state.areAllRobotsAtTargets()) {
+                // Check for game completion after animation - but only if not already complete
+                // This prevents triggering goal event twice
+                if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
                 }
 
@@ -1389,8 +1397,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 robot.setX(targetX);
                 robot.setY(targetY);
 
-                // Check for game completion - use areAllRobotsAtTargets to properly check win conditions
-                if (state.areAllRobotsAtTargets()) {
+                // Check for game completion - but only if not already complete
+                // This prevents triggering goal event twice
+                if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
                 }
 

@@ -1000,6 +1000,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         backButton.setOnClickListener(v -> {
             Timber.d("GameFragment: Back button clicked");
             
+            // Disable back button after goal is reached
+            if (gameStateManager.isGameComplete().getValue()) {
+                Timber.d("GameFragment: Game already complete, back button disabled");
+                Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
             // Check if hint container is visible (hints are being shown)
             if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE && currentHintStep > 0) {
                 // Go back one step in hints
@@ -3087,9 +3094,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         		
                 if (hintIndex == 0) {
                     Timber.d("[HINT_SYSTEM] First normal hint shown");
-                    // Show arrow immediately for the very first hint
-                    if (gameGridView != null) {
+                    // Show arrow immediately for the very first hint - but only if game is not complete
+                    if (gameGridView != null && !gameStateManager.isGameComplete().getValue()) {
                         gameGridView.setHintArrow(rrMove.getColor(), rrMove.getDirection());
+                    } else if (gameStateManager.isGameComplete().getValue()) {
+                        Timber.d("[HINT_SYSTEM] Game already complete, not showing direction arrow");
                     }
                 }
                 return rrMove.getColor();
