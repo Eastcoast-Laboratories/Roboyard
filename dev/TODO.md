@@ -98,4 +98,5 @@ baue die bestehende history so um,
 - wenn die history funktionierrt, dann die achievements logik bearbeiten um die neuen bedingungen in den achievements zu testen mit unittests und espresso tests, die die achievements testen und baue neue espresso tests, wenn es noch keinen gibt, der die einzelnen neuen aspekte  wirklich testst
 
 - entferne den delete button bei den history einträgen (die logik dahinter kann ergalten bleiben)
-- 
+- für die 2. phase fehlen noch, dass die hint nutzung richtig gespeichert wurde in der history. beim ersten mal spielen der map muss schon sofort immer mit gespeichtert werden, bus zu welchem hint die hints benutzt wurden. für die achievements ist der entscheindende hint der wo gesagt wird, welche farben der robots benutzt werden müssen, ab dann gild die map nicht merh als ohne hints gelöst. das muss dauerhaft iin dem history eintrag der map gespeihert werden, auch wenn man die selbe map später noch mal ohne hints löst, gilt diese trothzdem nur als mit hints gelöst
+- wenn der live move aktiv ist, gilt eine map immer sofort, wenn ein live move angezeigt wird als nicht ohne hint gelöst, das muss sofort in der history gespeichert werden

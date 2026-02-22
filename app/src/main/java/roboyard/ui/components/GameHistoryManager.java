@@ -65,9 +65,16 @@ public class GameHistoryManager {
                         if (entry.getOptimalMoves() > 0) {
                             existing.setOptimalMoves(entry.getOptimalMoves());
                         }
+                        // Merge hint tracking - once hints used, permanently marked
+                        // Update maxHintUsed to the higher value (more hints = worse)
+                        if (entry.getMaxHintUsed() > existing.getMaxHintUsed()) {
+                            existing.setMaxHintUsed(entry.getMaxHintUsed());
+                        }
+                        // solvedWithoutHints stays true only if FIRST completion was without hints
+                        // Don't update it on subsequent completions
                         updated = true;
-                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s", 
-                                existing.getCompletionCount(), existing.getMapPath());
+                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s, maxHintUsed=%d", 
+                                existing.getCompletionCount(), existing.getMapPath(), existing.getMaxHintUsed());
                         break;
                     }
                 }
@@ -161,6 +168,10 @@ public class GameHistoryManager {
                         completionTimestamps.add(entry.getTimestamp());
                         entry.setCompletionTimestamps(completionTimestamps);
                     }
+                    
+                    // Load hint tracking fields
+                    entry.setMaxHintUsed(entryJson.optInt("maxHintUsed", -1));
+                    entry.setSolvedWithoutHints(entryJson.optBoolean("solvedWithoutHints", false));
                     
                     entries.add(entry);
                 }
@@ -264,6 +275,10 @@ public class GameHistoryManager {
                     }
                 }
                 entryJson.put("completionTimestamps", timestamps);
+                
+                // Save hint tracking fields
+                entryJson.put("maxHintUsed", entry.getMaxHintUsed());
+                entryJson.put("solvedWithoutHints", entry.isSolvedWithoutHints());
                 
                 entriesArray.put(entryJson);
             }

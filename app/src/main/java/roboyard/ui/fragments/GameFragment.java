@@ -2963,8 +2963,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Track hint usage for achievements - only count real hints (not pre-hints)
         if (currentState != null) {
             currentState.incrementHintCount();
+            // Record max hint index for permanent history tracking (anti-cheat)
+            currentState.recordHintUsed(hintIndex);
             AchievementManager.getInstance(requireContext()).onHintUsed();
-            Timber.d("[HINT_SYSTEM] Hint counted for achievements: hintCount=%d", currentState.getHintCount());
+            Timber.d("[HINT_SYSTEM] Hint counted for achievements: hintCount=%d, maxHintUsed=%d", 
+                    currentState.getHintCount(), currentState.getMaxHintUsedThisSession());
         }
         
         try {

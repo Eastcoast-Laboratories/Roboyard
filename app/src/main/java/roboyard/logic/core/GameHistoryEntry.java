@@ -37,6 +37,12 @@ public class GameHistoryEntry {
     private String wallSignature;             // Unique signature of wall layout only
     private String positionSignature;         // Unique signature of robot+target positions
     private String mapSignature;              // Full map signature (walls + positions) for exact match
+    
+    // Hint tracking for achievements - once hints are used, map is permanently marked
+    // The critical hint is when robot colors are revealed (which robots to use)
+    // -1 = no hints used, 0+ = max hint index viewed (0 = pre-hint with colors)
+    private int maxHintUsed = -1;             // Highest hint index ever viewed for this map
+    private boolean solvedWithoutHints;       // True if map was ever solved without using hints
 
     /**
      * Constructor for a new history entry
@@ -239,6 +245,54 @@ public class GameHistoryEntry {
     
     public void setMapSignature(String mapSignature) {
         this.mapSignature = mapSignature;
+    }
+    
+    // Hint tracking getters and setters
+    
+    public int getMaxHintUsed() {
+        return maxHintUsed;
+    }
+    
+    public void setMaxHintUsed(int maxHintUsed) {
+        this.maxHintUsed = maxHintUsed;
+    }
+    
+    public boolean isSolvedWithoutHints() {
+        return solvedWithoutHints;
+    }
+    
+    public void setSolvedWithoutHints(boolean solvedWithoutHints) {
+        this.solvedWithoutHints = solvedWithoutHints;
+    }
+    
+    /**
+     * Record that a hint was viewed during this game session.
+     * Once a hint is used, the map is permanently marked.
+     * The critical hint (index 0) reveals which robot colors to use.
+     * @param hintIndex The hint index that was viewed (0 = pre-hint with colors)
+     */
+    public void recordHintUsed(int hintIndex) {
+        if (hintIndex > maxHintUsed) {
+            maxHintUsed = hintIndex;
+        }
+    }
+    
+    /**
+     * Check if hints were ever used on this map.
+     * @return true if any hint was ever viewed
+     */
+    public boolean hasUsedHints() {
+        return maxHintUsed >= 0;
+    }
+    
+    /**
+     * Check if this map qualifies for "no hints" achievements.
+     * A map only qualifies if it was FIRST solved without hints.
+     * Even if solved without hints later, it doesn't count if hints were used before.
+     * @return true if map qualifies for no-hints achievements
+     */
+    public boolean qualifiesForNoHintsAchievement() {
+        return solvedWithoutHints && maxHintUsed < 0;
     }
 
     /**

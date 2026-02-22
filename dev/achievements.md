@@ -200,6 +200,24 @@ The existing `GameHistoryEntry` class has been extended with:
 - **lastCompletionTimestamp**: When the map was most recently solved
 - **bestTime**: Fastest completion time for this map
 - **bestMoves**: Fewest moves used to solve this map
+- **maxHintUsed**: Highest hint index ever viewed for this map (-1 = no hints)
+- **solvedWithoutHints**: True only if FIRST completion was without any hints
+
+### Hint Tracking for Achievements
+
+The hint system tracks hint usage permanently per map:
+- **Critical hint**: The first normal hint (index 0) reveals which robot colors to use
+- Once ANY hint is viewed, the map is **permanently marked** as "solved with hints"
+- Even if the same map is later solved without hints, it does NOT qualify for "no hints" achievements
+- The `maxHintUsed` field tracks the highest hint index ever viewed
+- The `solvedWithoutHints` field is only true if the FIRST completion used no hints
+
+**Methods for hint tracking:**
+- `GameHistoryEntry.recordHintUsed(int hintIndex)` - Records hint usage (updates max)
+- `GameHistoryEntry.hasUsedHints()` - Returns true if any hint was ever used
+- `GameHistoryEntry.qualifiesForNoHintsAchievement()` - Returns true only if first solve was hint-free
+- `GameState.recordHintUsed(int hintIndex)` - Tracks hints during current session
+- `GameState.getMaxHintUsedThisSession()` - Gets max hint used in current session
 
 **Key changes to GameHistoryManager:**
 - Entries are **never deleted** (no MAX_HISTORY_ENTRIES limit)

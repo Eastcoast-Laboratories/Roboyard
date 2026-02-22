@@ -49,6 +49,10 @@ public class GameState implements Serializable {
     private int robotCount = 1; // Default to 1 robot per color
     private int targetColorsCount = Constants.NUM_ROBOTS; // Default to 4 different target colors
     private boolean completed = false;
+    
+    // Hint tracking - tracks max hint used during this game session
+    // -1 = no hints, 0+ = hint index (0 = first hint revealing robot colors)
+    private int maxHintUsedThisSession = -1;
     private int hintCount = 0; // Track the number of hints used in this game
     private String uniqueMapId = ""; // 5-letter unique ID for map identification
     
@@ -407,6 +411,42 @@ public class GameState implements Serializable {
      */
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+    
+    /**
+     * Get the maximum hint index used during this game session.
+     * @return -1 if no hints used, 0+ for hint index
+     */
+    public int getMaxHintUsedThisSession() {
+        return maxHintUsedThisSession;
+    }
+    
+    /**
+     * Set the maximum hint index used during this game session.
+     * @param maxHintUsed The max hint index
+     */
+    public void setMaxHintUsedThisSession(int maxHintUsed) {
+        this.maxHintUsedThisSession = maxHintUsed;
+    }
+    
+    /**
+     * Record that a hint was viewed during this game session.
+     * Only updates if the new hint index is higher than the current max.
+     * @param hintIndex The hint index that was viewed (0 = first hint with robot colors)
+     */
+    public void recordHintUsed(int hintIndex) {
+        if (hintIndex > maxHintUsedThisSession) {
+            maxHintUsedThisSession = hintIndex;
+            Timber.d("[HINT_TRACKING] Recorded hint usage: maxHintUsed=%d", maxHintUsedThisSession);
+        }
+    }
+    
+    /**
+     * Check if any hints were used during this game session.
+     * @return true if hints were used
+     */
+    public boolean hasUsedHintsThisSession() {
+        return maxHintUsedThisSession >= 0;
     }
     
     

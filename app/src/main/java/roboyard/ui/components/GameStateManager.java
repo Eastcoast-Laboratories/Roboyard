@@ -2148,6 +2148,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             entry.setWallSignature(gameState.generateWallSignature());
             entry.setPositionSignature(gameState.generatePositionSignature());
             entry.setMapSignature(gameState.generateMapSignature());
+            
+            // Set hint tracking - record if hints were used during this session
+            int maxHintUsed = gameState.getMaxHintUsedThisSession();
+            entry.setMaxHintUsed(maxHintUsed);
+            // Mark as solved without hints only if no hints were used
+            entry.setSolvedWithoutHints(maxHintUsed < 0);
+            Timber.d("[HISTORY] Hint tracking: maxHintUsed=%d, solvedWithoutHints=%b", 
+                    maxHintUsed, entry.isSolvedWithoutHints());
 
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(activity, entry);

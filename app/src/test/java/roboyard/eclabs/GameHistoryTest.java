@@ -159,4 +159,79 @@ public class GameHistoryTest {
         
         assertTrue(entry.getLastCompletionTimestamp() > initialTimestamp);
     }
+    
+    // ========== Hint Tracking Tests ==========
+    
+    @Test
+    public void testNewEntryHasNoHintsUsed() {
+        assertEquals(-1, entry.getMaxHintUsed());
+        assertFalse(entry.hasUsedHints());
+    }
+    
+    @Test
+    public void testRecordHintUsed() {
+        entry.recordHintUsed(0);
+        assertEquals(0, entry.getMaxHintUsed());
+        assertTrue(entry.hasUsedHints());
+    }
+    
+    @Test
+    public void testRecordHintUsedTracksMaximum() {
+        entry.recordHintUsed(2);
+        entry.recordHintUsed(1);  // Lower hint, should not update
+        entry.recordHintUsed(5);  // Higher hint, should update
+        entry.recordHintUsed(3);  // Lower hint, should not update
+        
+        assertEquals(5, entry.getMaxHintUsed());
+    }
+    
+    @Test
+    public void testSolvedWithoutHintsDefault() {
+        assertFalse(entry.isSolvedWithoutHints());
+    }
+    
+    @Test
+    public void testSolvedWithoutHintsSetter() {
+        entry.setSolvedWithoutHints(true);
+        assertTrue(entry.isSolvedWithoutHints());
+    }
+    
+    @Test
+    public void testQualifiesForNoHintsAchievementWhenNoHintsUsed() {
+        entry.setSolvedWithoutHints(true);
+        // maxHintUsed is -1 by default
+        assertTrue(entry.qualifiesForNoHintsAchievement());
+    }
+    
+    @Test
+    public void testDoesNotQualifyForNoHintsAchievementWhenHintsUsed() {
+        entry.setSolvedWithoutHints(true);
+        entry.recordHintUsed(0);
+        assertFalse(entry.qualifiesForNoHintsAchievement());
+    }
+    
+    @Test
+    public void testDoesNotQualifyForNoHintsAchievementWhenNotSolvedWithoutHints() {
+        // solvedWithoutHints is false by default
+        assertFalse(entry.qualifiesForNoHintsAchievement());
+    }
+    
+    @Test
+    public void testHintTrackingPersistsThroughMultipleCompletions() {
+        // First completion without hints
+        entry.setSolvedWithoutHints(true);
+        assertTrue(entry.qualifiesForNoHintsAchievement());
+        
+        // Second completion - record completion doesn't change hint status
+        entry.recordCompletion(100, 12);
+        assertTrue(entry.qualifiesForNoHintsAchievement());
+        
+        // If hints are used later, map is permanently marked
+        entry.recordHintUsed(0);
+        assertFalse(entry.qualifiesForNoHintsAchievement());
+        
+        // Even more completions don't fix it
+        entry.recordCompletion(80, 10);
+        assertFalse(entry.qualifiesForNoHintsAchievement());
+    }
 }
