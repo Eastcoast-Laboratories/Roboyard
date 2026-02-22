@@ -273,10 +273,13 @@ public class AchievementManager {
     
     /**
      * Called when a random game is completed
+     * @param isFirstCompletion true if this is the first time this exact map is completed (unique map)
+     * @param qualifiesForNoHints true if map qualifies for no-hints achievements (first solve was hint-free)
      */
     public void onRandomGameCompleted(int playerMoves, int optimalMoves, int hintsUsed, 
                                        long timeMs, boolean isImpossibleMode, int robotCount,
-                                       int targetCount, int targetsNeeded) {
+                                       int targetCount, int targetsNeeded,
+                                       boolean isFirstCompletion, boolean qualifiesForNoHints) {
         
         // Check if hint was used during this game session
         if (hintUsedInCurrentGame) {
@@ -284,11 +287,14 @@ public class AchievementManager {
             Timber.d("[ACHIEVEMENTS] Hint was used during this game session");
         }
         
+        Timber.d("[ACHIEVEMENTS] onRandomGameCompleted: isFirstCompletion=%b, qualifiesForNoHints=%b, hintsUsed=%d",
+                isFirstCompletion, qualifiesForNoHints, hintsUsed);
+        
         // First game
         onFirstGame();
         
-        // Impossible mode - only count if optimal moves >= 17 (to prevent easy games via settings)
-        if (isImpossibleMode && optimalMoves >= 17) {
+        // Impossible mode - only count if optimal moves >= 17 AND first completion (unique map)
+        if (isImpossibleMode && optimalMoves >= 17 && isFirstCompletion) {
             impossibleModeGames++;
             saveCounter("impossible_mode_games", impossibleModeGames);
             unlock("impossible_mode_1");
@@ -304,19 +310,23 @@ public class AchievementManager {
                 impossibleModeStreak = 0;
                 saveCounter("impossible_mode_streak", 0);
             }
-            Timber.d("[ACHIEVEMENTS] Impossible mode game counted (optimalMoves=%d >= 17)", optimalMoves);
+            Timber.d("[ACHIEVEMENTS] Impossible mode game counted (optimalMoves=%d >= 17, isFirstCompletion=true)", optimalMoves);
+        } else if (isImpossibleMode && optimalMoves >= 17 && !isFirstCompletion) {
+            Timber.d("[ACHIEVEMENTS] Impossible mode game NOT counted - map already completed before");
         } else {
             Timber.d("[ACHIEVEMENTS] Impossible mode game NOT counted (optimalMoves=%d < 17), isImpossibleMode=%b", optimalMoves, isImpossibleMode);
         }
         
         // Solution length achievements (18-29 moves individually, 30+ as one)
-        // Only unlock without hint usage
-        if (hintsUsed == 0) {
+        // Only unlock on FIRST completion AND without hint usage
+        if (isFirstCompletion && hintsUsed == 0) {
             if (optimalMoves >= 18 && optimalMoves <= 29) {
                 unlock("solution_" + optimalMoves + "_moves");
             } else if (optimalMoves >= 30) {
                 unlock("solution_30_plus_moves");
             }
+        } else if (!isFirstCompletion) {
+            Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - map already completed before");
         } else {
             Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - hints were used (%d)", hintsUsed);
         }
@@ -337,8 +347,8 @@ public class AchievementManager {
         // Fun Challenges
         if (robotCount >= 5) unlock("game_5_robots");
         
-        // Perfect random games (cumulative - no reset)
-        if (playerMoves == optimalMoves) {
+        // Perfect random games - only count UNIQUE maps (first completion)
+        if (playerMoves == optimalMoves && isFirstCompletion) {
             perfectRandomGames++;
             saveCounter("perfect_random_games", perfectRandomGames);
             if (perfectRandomGames >= 5) unlock("perfect_random_games_5");
@@ -351,7 +361,9 @@ public class AchievementManager {
             if (perfectRandomGamesStreak >= 5) unlock("perfect_random_games_streak_5");
             if (perfectRandomGamesStreak >= 10) unlock("perfect_random_games_streak_10");
             if (perfectRandomGamesStreak >= 20) unlock("perfect_random_games_streak_20");
-            Timber.d("[ACHIEVEMENTS] Perfect game - total: %d, streak: %d", perfectRandomGames, perfectRandomGamesStreak);
+            Timber.d("[ACHIEVEMENTS] Perfect game on unique map - total: %d, streak: %d", perfectRandomGames, perfectRandomGamesStreak);
+        } else if (playerMoves == optimalMoves && !isFirstCompletion) {
+            Timber.d("[ACHIEVEMENTS] Perfect game NOT counted - map already completed before");
         } else {
             // Reset streak when non-optimal
             perfectRandomGamesStreak = 0;
@@ -359,14 +371,14 @@ public class AchievementManager {
             Timber.d("[ACHIEVEMENTS] Non-optimal game - perfect streak reset to 0");
         }
         
-        // Perfect solution with no hints (10+ moves optimal)
-        if (playerMoves == optimalMoves && hintsUsed == 0 && optimalMoves >= 10) {
+        // Perfect solution with no hints (10+ moves optimal) - only on FIRST completion
+        if (playerMoves == optimalMoves && qualifiesForNoHints && optimalMoves >= 10 && isFirstCompletion) {
             unlock("perfect_no_hints_random_1");
-            Timber.d("[ACHIEVEMENTS] Perfect no hints achievement unlocked - optimal: %d moves, no hints used", optimalMoves);
+            Timber.d("[ACHIEVEMENTS] Perfect no hints achievement unlocked - optimal: %d moves, qualifiesForNoHints=true", optimalMoves);
         }
         
-        // No hints random games - both cumulative and streak
-        if (hintsUsed == 0) {
+        // No hints random games - only count UNIQUE maps with qualifiesForNoHints
+        if (qualifiesForNoHints && isFirstCompletion) {
             // Cumulative counter (never resets)
             noHintRandomGamesTotal++;
             saveCounter("no_hint_random_games_total", noHintRandomGamesTotal);
@@ -378,12 +390,14 @@ public class AchievementManager {
             saveCounter("no_hint_random_games", noHintRandomGames);
             if (noHintRandomGames >= 10) unlock("no_hints_streak_random_10");
             if (noHintRandomGames >= 50) unlock("no_hints_streak_random_50");
-            Timber.d("[ACHIEVEMENTS] No hints used - total: %d, streak: %d", noHintRandomGamesTotal, noHintRandomGames);
-        } else {
-            // Reset streak counter when hint is used
+            Timber.d("[ACHIEVEMENTS] No hints on unique map - total: %d, streak: %d", noHintRandomGamesTotal, noHintRandomGames);
+        } else if (!qualifiesForNoHints) {
+            // Reset streak counter when hints were used (on this or previous completion)
             noHintRandomGames = 0;
             saveCounter("no_hint_random_games", noHintRandomGames);
-            Timber.d("[ACHIEVEMENTS] Hint used - no_hint streak reset to 0 (total stays: %d)", noHintRandomGamesTotal);
+            Timber.d("[ACHIEVEMENTS] Hints used - no_hint streak reset to 0 (total stays: %d)", noHintRandomGamesTotal);
+        } else if (!isFirstCompletion) {
+            Timber.d("[ACHIEVEMENTS] No hints NOT counted - map already completed before");
         }
         
         // Speed achievements

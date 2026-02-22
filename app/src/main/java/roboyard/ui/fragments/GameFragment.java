@@ -44,7 +44,9 @@ import roboyard.ui.util.SoundManager;
 import roboyard.logic.core.GameSolution;
 
 import roboyard.ui.components.GameGridView;
+import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
+import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.achievements.Achievement;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.ui.achievements.AchievementPopup;
@@ -731,9 +733,28 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         int targetCount = 1;
                         int targetsNeeded = 1;
                         
+                        // Check if this is a unique map (first completion) for anti-cheat
+                        String mapSignature = state.generateMapSignature();
+                        boolean isFirstCompletion = GameHistoryManager.isFirstCompletion(
+                                requireActivity(), mapSignature);
+                        // Check if map qualifies for no-hints achievements
+                        // For first completion: based on current session hint usage
+                        // For repeat completion: check history entry
+                        boolean qualifiesForNoHints = !state.hasUsedHintsThisSession();
+                        if (!isFirstCompletion) {
+                            GameHistoryEntry existingEntry = GameHistoryManager.findByMapSignature(
+                                    requireActivity(), mapSignature);
+                            if (existingEntry != null) {
+                                qualifiesForNoHints = existingEntry.qualifiesForNoHintsAchievement();
+                            }
+                        }
+                        Timber.d("[ACHIEVEMENTS] Unique map check: isFirstCompletion=%b, qualifiesForNoHints=%b, mapSignature=%s",
+                                isFirstCompletion, qualifiesForNoHints, mapSignature);
+                        
                         AchievementManager.getInstance(requireContext())
                             .onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
-                                isImpossibleMode, robotCount, targetCount, targetsNeeded);
+                                isImpossibleMode, robotCount, targetCount, targetsNeeded,
+                                isFirstCompletion, qualifiesForNoHints);
                     }
 
                     // change the "Reset" Button to "Retry"
