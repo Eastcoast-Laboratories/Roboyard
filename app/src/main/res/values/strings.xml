@@ -110,6 +110,7 @@
     <string name="save_success">Game saved successfully</string>
     <string name="load_success">Game loaded successfully</string>
     <string name="share_button_a11y">Share this saved game</string>
+    <string name="info_button_a11y">Show map details</string>
     <string name="level_difficulty">Difficulty</string>
     <string name="saved_on">saved on</string>
     <string name="share_a11y">Share</string>

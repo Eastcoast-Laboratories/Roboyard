@@ -713,6 +713,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         announceAccessibility(completionMessage_a11y);
                         updateStatusText(completionMessage, true);
                         
+                        // Save to history immediately on completion (bypasses time threshold)
+                        gameStateManager.saveToHistoryNow("completed");
+                        
                         // Trigger achievements for random game completion
                         int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
                                 gameStateManager.getMoveCount().getValue() : 0;
@@ -1304,6 +1307,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 Timber.d("[LIVE_SOLVER] live-move-toggle changed: %s", isChecked ? "ON" : "OFF");
                 gameStateManager.setLiveMoveCounterEnabled(isChecked);
                 if (isChecked) {
+                    // Live move counter is a hint - mark map as hint-used and save to history immediately
+                    GameState liveState = gameStateManager.getCurrentState().getValue();
+                    if (liveState != null) {
+                        liveState.recordHintUsed(0);
+                        Timber.d("[HINT_TRACKING] Live move counter activated - map marked as hint-used");
+                    }
+                    gameStateManager.saveToHistoryNow("live_move");
                     // Show hint container with status text + live-move-toggle (no hint arrows)
                     if (hintContainer != null && hintContainer.getVisibility() != View.VISIBLE) {
                         hintContainer.setVisibility(View.VISIBLE);
@@ -2990,6 +3000,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             Timber.d("[HINT_SYSTEM] Hint counted for achievements: hintCount=%d, maxHintUsed=%d", 
                     currentState.getHintCount(), currentState.getMaxHintUsedThisSession());
         }
+        // Save to history immediately when a hint is shown (bypasses time threshold)
+        gameStateManager.saveToHistoryNow("hint_shown_" + hintIndex);
         
         try {
             // Get the specific move for this hint

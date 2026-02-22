@@ -35,6 +35,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Info button (i) - shows map details popup -->
+        <ImageButton
+            android:id="@+id/info_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/info_button_a11y"
+            android:src="@android:drawable/ic_menu_info_details"
+            app:layout_constraintTop_toBottomOf="@+id/share_button"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <!-- Save name -->
         <TextView
             android:id="@+id/name_text"

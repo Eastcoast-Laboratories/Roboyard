@@ -764,6 +764,35 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
             }
 
+            // Add hint tracking metadata (DRY with history)
+            if (!enhancedSaveData.toString().contains("MAX_HINT_USED:")) {
+                int maxHintUsed = gameState.getMaxHintUsedThisSession();
+                String hintTag = "MAX_HINT_USED:" + maxHintUsed + ";";
+                int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
+                enhancedSaveData.insert(insertPos, hintTag);
+                Timber.d("[SAVEDATA] Added hint tag: %s", hintTag);
+            }
+            
+            // Add move count if not already present
+            if (!enhancedSaveData.toString().contains("MOVES:")) {
+                int moves = gameState.getMoveCount();
+                String movesTag = "MOVES:" + moves + ";";
+                int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
+                enhancedSaveData.insert(insertPos, movesTag);
+                Timber.d("[SAVEDATA] Added moves tag: %s", movesTag);
+            }
+            
+            // Add map signature for history lookup (DRY with history)
+            if (!enhancedSaveData.toString().contains("MAP_SIG:")) {
+                String mapSig = gameState.generateMapSignature();
+                if (mapSig != null && !mapSig.isEmpty()) {
+                    String sigTag = "MAP_SIG:" + mapSig + ";";
+                    int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
+                    enhancedSaveData.insert(insertPos, sigTag);
+                    Timber.d("[SAVEDATA] Added map signature tag");
+                }
+            }
+
             // If this is an autosave (slot 0), store settings metadata for quick comparison
             if (saveId == 0) {
                 saveAutosaveMetadata(gameState);
@@ -2065,6 +2094,51 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 saveToHistory();
                 isHistorySaved = true;
             }
+        }
+    }
+
+    /**
+     * Save to history immediately, bypassing the time threshold.
+     * Called when a hint is shown, live move counter is activated, or map is completed.
+     * @param reason Short description for logging (e.g. "hint_shown", "live_move", "completed")
+     */
+    public void saveToHistoryNow(String reason) {
+        if (!isHistorySaved) {
+            Timber.d("[HISTORY] Immediate save triggered by: %s", reason);
+            saveToHistory();
+            isHistorySaved = true;
+        } else {
+            // Already saved - just update hint tracking in existing entry
+            Timber.d("[HISTORY] Already saved, updating hint tracking for: %s", reason);
+            updateHintTrackingInHistory();
+        }
+    }
+
+    /**
+     * Update hint tracking in the existing history entry for the current map.
+     * Called when hint status changes after the initial history save.
+     */
+    private void updateHintTrackingInHistory() {
+        try {
+            Activity activity = getActivity();
+            GameState gameState = currentState.getValue();
+            if (activity == null || gameState == null) return;
+
+            String mapSig = gameState.generateMapSignature();
+            if (mapSig == null || mapSig.isEmpty()) return;
+
+            GameHistoryEntry existing = GameHistoryManager.findByMapSignature(activity, mapSig);
+            if (existing != null && !existing.hasUsedHints()) {
+                int maxHint = gameState.getMaxHintUsedThisSession();
+                if (maxHint >= 0) {
+                    existing.recordHintUsed(maxHint);
+                    GameHistoryManager.saveHistoryIndex(activity,
+                            GameHistoryManager.getHistoryEntries(activity));
+                    Timber.d("[HISTORY] Updated hint tracking in existing entry: maxHintUsed=%d", maxHint);
+                }
+            }
+        } catch (Exception e) {
+            Timber.e("[HISTORY] Error updating hint tracking: %s", e.getMessage());
         }
     }
 

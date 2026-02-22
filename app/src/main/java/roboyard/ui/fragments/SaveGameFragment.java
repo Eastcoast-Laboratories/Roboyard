@@ -535,7 +535,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
-                            meta.boardSize, mapPath, meta.minimap, meta.difficulty, meta.completionStatus);
+                            meta.boardSize, mapPath, meta.minimap, meta.difficulty, meta.completionStatus, entry);
                     entries.add(historyEntry);
                 }
                 
@@ -1651,6 +1651,14 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
             });
             
+            // Set up info button - shows map details popup
+            if (holder.infoButton != null && slot.getDate() != null) {
+                holder.infoButton.setOnClickListener(v -> showSaveSlotInfoPopup(slot));
+                holder.infoButton.setVisibility(View.VISIBLE);
+            } else if (holder.infoButton != null) {
+                holder.infoButton.setVisibility(View.GONE);
+            }
+            
             // Set up share button
             holder.shareButton.setOnClickListener(v -> {
                 // Share the save slot via URL
@@ -1774,6 +1782,13 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
             });
             
+            // Set info button click listener - shows map details popup
+            if (holder.infoButton != null) {
+                holder.infoButton.setOnClickListener(v -> {
+                    showMapInfoPopup(entry.getHistoryEntry());
+                });
+            }
+            
             // Set delete button click listener
             holder.deleteButton.setOnClickListener(v -> {
                 // Delete this history entry
@@ -1830,6 +1845,7 @@ public class SaveGameFragment extends BaseGameFragment {
         TextView completionStatus;
         ImageView minimapView;
         ImageButton shareButton;
+        ImageButton infoButton;
         
         public SaveSlotViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -1841,6 +1857,7 @@ public class SaveGameFragment extends BaseGameFragment {
             completionStatus = itemView.findViewById(R.id.completion_status);
             minimapView = itemView.findViewById(R.id.minimap_view);
             shareButton = itemView.findViewById(R.id.share_button);
+            infoButton = itemView.findViewById(R.id.info_button);
         }
     }
     
@@ -1856,6 +1873,7 @@ public class SaveGameFragment extends BaseGameFragment {
         TextView completionStatus;
         ImageView minimapView;
         ImageButton deleteButton;
+        ImageButton infoButton;
         
         public HistoryViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -1867,6 +1885,7 @@ public class SaveGameFragment extends BaseGameFragment {
             completionStatus = itemView.findViewById(R.id.completion_status);
             minimapView = itemView.findViewById(R.id.minimap_view);
             deleteButton = itemView.findViewById(R.id.delete_button);
+            infoButton = itemView.findViewById(R.id.info_button);
         }
     }
     
@@ -1919,9 +1938,10 @@ public class SaveGameFragment extends BaseGameFragment {
         private final Bitmap minimap;
         private final String difficulty;
         private final String completionStatus;
+        private final GameHistoryEntry historyEntry; // full entry for info popup
         
         public HistoryEntry(String name, Date date, int moves, String boardSize, String mapPath, Bitmap minimap,
-                String difficulty, String completionStatus) {
+                String difficulty, String completionStatus, GameHistoryEntry historyEntry) {
             this.name = name;
             this.date = date;
             this.moves = moves;
@@ -1930,6 +1950,7 @@ public class SaveGameFragment extends BaseGameFragment {
             this.minimap = minimap;
             this.difficulty = difficulty;
             this.completionStatus = completionStatus;
+            this.historyEntry = historyEntry;
         }
         
         public String getName() { return name; }
@@ -1940,6 +1961,169 @@ public class SaveGameFragment extends BaseGameFragment {
         public Bitmap getMinimap() { return minimap; }
         public String getDifficulty() { return difficulty; }
         public String getCompletionStatus() { return completionStatus; }
+        public GameHistoryEntry getHistoryEntry() { return historyEntry; }
+    }
+
+    /**
+     * Show a popup dialog with all map details for a history entry.
+     * Displays: completion count, timestamps, best time, best moves, hint usage, etc.
+     */
+    private void showMapInfoPopup(GameHistoryEntry entry) {
+        if (entry == null || getContext() == null) return;
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
+        StringBuilder sb = new StringBuilder();
+        
+        // Completion count
+        sb.append("Completions: ").append(entry.getCompletionCount()).append("\n");
+        
+        // First played
+        sb.append("First played: ").append(sdf.format(new Date(entry.getTimestamp()))).append("\n");
+        
+        // Last played
+        if (entry.getLastCompletionTimestamp() > 0) {
+            sb.append("Last played: ").append(sdf.format(new Date(entry.getLastCompletionTimestamp()))).append("\n");
+        }
+        
+        // All completion timestamps
+        List<Long> timestamps = entry.getCompletionTimestamps();
+        if (timestamps != null && timestamps.size() > 1) {
+            sb.append("\nAll completions:\n");
+            for (int i = 0; i < timestamps.size(); i++) {
+                sb.append("  ").append(i + 1).append(". ")
+                  .append(sdf.format(new Date(timestamps.get(i)))).append("\n");
+            }
+        }
+        
+        // Best time
+        sb.append("\nBest time: ");
+        int bestTime = entry.getBestTime();
+        if (bestTime > 0) {
+            sb.append(bestTime / 60).append("m ").append(bestTime % 60).append("s");
+        } else {
+            sb.append("—");
+        }
+        sb.append("\n");
+        
+        // Best moves
+        sb.append("Best moves: ");
+        int bestMoves = entry.getBestMoves();
+        sb.append(bestMoves > 0 ? bestMoves : "—").append("\n");
+        
+        // Optimal moves (if available)
+        if (entry.getOptimalMoves() > 0) {
+            sb.append("Optimal moves: ").append(entry.getOptimalMoves()).append("\n");
+        }
+        
+        // Hint usage
+        sb.append("\nHint usage: ");
+        int maxHint = entry.getMaxHintUsed();
+        if (maxHint < 0) {
+            sb.append("No hints used");
+        } else if (maxHint == 0) {
+            sb.append("Pre-hint viewed (robot colors revealed)");
+        } else {
+            sb.append("Up to hint #").append(maxHint + 1).append(" viewed");
+        }
+        sb.append("\n");
+        
+        // Solved without hints
+        sb.append("Qualifies for no-hints achievement: ")
+          .append(entry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
+        
+        // Board size
+        if (entry.getBoardSize() != null && !entry.getBoardSize().isEmpty()) {
+            sb.append("\nBoard: ").append(entry.getBoardSize()).append("\n");
+        }
+        
+        // Map name
+        sb.append("Map: ").append(entry.getMapName()).append("\n");
+        
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(entry.getMapName())
+            .setMessage(sb.toString())
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
+    }
+    
+    /**
+     * Show a popup dialog with map details from savegame metadata (for save slots).
+     * Reads MAX_HINT_USED, MOVES, MAP_SIG from the save file header and looks up history.
+     */
+    private void showSaveSlotInfoPopup(SaveSlotInfo slot) {
+        if (slot == null || getContext() == null) return;
+        
+        String saveData = slot.getSaveData();
+        StringBuilder sb = new StringBuilder();
+        
+        // Parse metadata from save file header
+        int maxHintUsed = -1;
+        int moves = -1;
+        String mapSig = null;
+        boolean solved = false;
+        
+        if (saveData != null && saveData.startsWith("#")) {
+            String header = saveData.substring(1, saveData.indexOf('\n') > 0 ? saveData.indexOf('\n') : saveData.length());
+            for (String part : header.split(";")) {
+                if (part.startsWith("MAX_HINT_USED:")) {
+                    try { maxHintUsed = Integer.parseInt(part.substring("MAX_HINT_USED:".length())); } catch (Exception ignored) {}
+                } else if (part.startsWith("MOVES:")) {
+                    try { moves = Integer.parseInt(part.substring("MOVES:".length())); } catch (Exception ignored) {}
+                } else if (part.startsWith("MAP_SIG:")) {
+                    mapSig = part.substring("MAP_SIG:".length());
+                } else if (part.startsWith("SOLVED:")) {
+                    solved = "true".equals(part.substring("SOLVED:".length()));
+                }
+            }
+        }
+        
+        // Basic save info
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
+        if (slot.getDate() != null) {
+            sb.append("Saved: ").append(sdf.format(slot.getDate())).append("\n");
+        }
+        sb.append("Status: ").append(solved ? "Solved" : "In progress").append("\n");
+        if (moves >= 0) sb.append("Moves at save: ").append(moves).append("\n");
+        if (slot.getBoardSize() != null) sb.append("Board: ").append(slot.getBoardSize()).append("\n");
+        if (slot.getDifficulty() != null) sb.append("Difficulty: ").append(slot.getDifficulty()).append("\n");
+        
+        // Hint info from save
+        sb.append("\nHint usage at save: ");
+        if (maxHintUsed < 0) {
+            sb.append("No hints used");
+        } else if (maxHintUsed == 0) {
+            sb.append("Pre-hint viewed (robot colors revealed)");
+        } else {
+            sb.append("Up to hint #").append(maxHintUsed + 1).append(" viewed");
+        }
+        sb.append("\n");
+        
+        // Look up full history entry if map signature available
+        if (mapSig != null && !mapSig.isEmpty()) {
+            GameHistoryEntry histEntry = GameHistoryManager.findByMapSignature(requireActivity(), mapSig);
+            if (histEntry != null) {
+                sb.append("\n--- History for this map ---\n");
+                sb.append("Total completions: ").append(histEntry.getCompletionCount()).append("\n");
+                if (histEntry.getBestTime() > 0) {
+                    int bt = histEntry.getBestTime();
+                    sb.append("Best time: ").append(bt / 60).append("m ").append(bt % 60).append("s\n");
+                }
+                if (histEntry.getBestMoves() > 0) {
+                    sb.append("Best moves: ").append(histEntry.getBestMoves()).append("\n");
+                }
+                if (histEntry.getOptimalMoves() > 0) {
+                    sb.append("Optimal moves: ").append(histEntry.getOptimalMoves()).append("\n");
+                }
+                sb.append("No-hints achievement: ")
+                  .append(histEntry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
+            }
+        }
+        
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(slot.getName())
+            .setMessage(sb.toString())
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
     }
 
     private boolean hasTargets(String saveData) {

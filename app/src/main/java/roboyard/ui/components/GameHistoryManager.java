@@ -236,7 +236,7 @@ public class GameHistoryManager {
      *
      * @return
      */
-    private static Boolean saveHistoryIndex(Activity activity, List<GameHistoryEntry> entries) {
+    public static Boolean saveHistoryIndex(Activity activity, List<GameHistoryEntry> entries) {
         try {
             JSONObject root = new JSONObject();
             JSONArray entriesArray = new JSONArray();

@@ -103,6 +103,18 @@
             app:layout_constraintTop_toBottomOf="@+id/board_size_text"
             tools:text="Completed" />
 
+        <!-- Info button (i) - shows map details popup -->
+        <ImageButton
+            android:id="@+id/info_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/info_button_a11y"
+            android:src="@android:drawable/ic_menu_info_details"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <!-- Delete button - hidden but logic preserved for potential future use -->
         <ImageButton
             android:id="@+id/delete_button"
@@ -114,7 +126,7 @@
             android:src="@android:drawable/ic_menu_delete"
             android:tint="#F44336"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/info_button"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
