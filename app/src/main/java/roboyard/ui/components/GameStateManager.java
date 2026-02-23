@@ -2126,6 +2126,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     /**
      * Update hint tracking in the existing history entry for the current map.
      * Called when hint status changes after the initial history save.
+     * Also updates move count if game is completed after hints were shown.
      */
     private void updateHintTrackingInHistory() {
         try {
@@ -2137,14 +2138,32 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (mapSig == null || mapSig.isEmpty()) return;
 
             GameHistoryEntry existing = GameHistoryManager.findByMapSignature(activity, mapSig);
-            if (existing != null && !existing.hasUsedHints()) {
+            if (existing != null) {
                 int maxHint = gameState.getMaxHintUsedThisSession();
-                if (maxHint >= 0) {
+                
+                // Update hint tracking if hints were used
+                if (!existing.hasUsedHints() && maxHint >= 0) {
                     existing.recordHintUsed(maxHint);
-                    GameHistoryManager.saveHistoryIndex(activity,
-                            GameHistoryManager.getHistoryEntries(activity));
                     Timber.d("[HISTORY] Updated hint tracking in existing entry: maxHintUsed=%d", maxHint);
                 }
+                
+                // Update move count if game is completed (important when hints were shown before completion)
+                if (isGameComplete.getValue()) {
+                    int actualMoveCount = gameState.getMoveCount();
+                    // Record completion with the actual move count
+                    existing.recordCompletion((int)((System.currentTimeMillis() - gameStartTime) / 1000), actualMoveCount);
+                    Timber.d("[HISTORY] Updated move count in existing entry after completion: moveCount=%d", actualMoveCount);
+                }
+                
+                // Mark everUsedHints if hints were used
+                if (maxHint >= 0) {
+                    existing.markEverUsedHints();
+                }
+                
+                GameHistoryManager.saveHistoryIndex(activity,
+                        GameHistoryManager.getHistoryEntries(activity));
+                Timber.d("[HISTORY] Saved updated history entry: maxHintUsed=%d, everUsedHints=%b", 
+                        maxHint, existing.isEverUsedHints());
             }
         } catch (Exception e) {
             Timber.e("[HISTORY] Error updating hint tracking: %s", e.getMessage());
@@ -2248,8 +2267,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             entry.setMaxHintUsed(maxHintUsed);
             // Mark as solved without hints only if no hints were used
             entry.setSolvedWithoutHints(maxHintUsed < 0);
-            Timber.d("[HISTORY] Hint tracking: maxHintUsed=%d, solvedWithoutHints=%b", 
-                    maxHintUsed, entry.isSolvedWithoutHints());
+            // Mark everUsedHints if hints were used in this session
+            if (maxHintUsed >= 0) {
+                entry.markEverUsedHints();
+            }
+            Timber.d("[HISTORY] Hint tracking: maxHintUsed=%d, solvedWithoutHints=%b, everUsedHints=%b", 
+                    maxHintUsed, entry.isSolvedWithoutHints(), entry.isEverUsedHints());
 
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(activity, entry);
