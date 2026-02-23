@@ -50,7 +50,8 @@ public class MoveCountSyncTest {
 
         assertEquals("movesMade should be 5", 5, entry.getMovesMade());
         assertEquals("optimalMoves should be 3", 3, entry.getOptimalMoves());
-        assertEquals("bestMoves should be 5", 5, entry.getBestMoves());
+        // bestMoves is 0 until recordCompletion() is called
+        assertEquals("bestMoves should be 0 before completion", 0, entry.getBestMoves());
     }
 
     @Test
@@ -74,7 +75,8 @@ public class MoveCountSyncTest {
         assertEquals("Player should have made 8 moves", 8, entry.getMovesMade());
         assertEquals("Optimal should be 3 moves", 3, entry.getOptimalMoves());
         assertEquals("Extra moves should be 5", 5, extraMoves);
-        assertEquals("Best moves should equal player moves (first completion)", 8, entry.getBestMoves());
+        // bestMoves is 0 until recordCompletion() is called
+        assertEquals("bestMoves should be 0 before completion", 0, entry.getBestMoves());
     }
 
     @Test

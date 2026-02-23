@@ -34,24 +34,35 @@ public class GameHistoryTest {
 
     @Test
     public void testNewEntryHasCorrectInitialValues() {
-        assertEquals(1, entry.getCompletionCount());
-        assertEquals(1000000L, entry.getLastCompletionTimestamp());
-        assertEquals(120, entry.getBestTime());
-        assertEquals(15, entry.getBestMoves());
+        // completionCount starts at 0 - not completed until recordCompletion() is called
+        assertEquals(0, entry.getCompletionCount());
+        assertEquals(0L, entry.getLastCompletionTimestamp());
+        assertEquals(0, entry.getBestTime());
+        assertEquals(0, entry.getBestMoves());
         assertNotNull(entry.getCompletionTimestamps());
-        assertEquals(1, entry.getCompletionTimestamps().size());
-        assertEquals(Long.valueOf(1000000L), entry.getCompletionTimestamps().get(0));
+        assertEquals(0, entry.getCompletionTimestamps().size());
     }
 
     @Test
     public void testIsFirstCompletionForNewEntry() {
+        // New entry is NOT a first completion yet - it hasn't been completed
+        assertFalse(entry.isFirstCompletion());
+    }
+
+    @Test
+    public void testIsFirstCompletionAfterOneCompletion() {
+        entry.recordCompletion(120, 15);
         assertTrue(entry.isFirstCompletion());
     }
 
     @Test
     public void testRecordCompletionIncrementsCount() {
         entry.recordCompletion(100, 12);
-        
+        assertEquals(1, entry.getCompletionCount());
+        assertTrue(entry.isFirstCompletion());
+        assertEquals(1, entry.getCompletionTimestamps().size());
+
+        entry.recordCompletion(90, 11);
         assertEquals(2, entry.getCompletionCount());
         assertFalse(entry.isFirstCompletion());
         assertEquals(2, entry.getCompletionTimestamps().size());
@@ -59,35 +70,37 @@ public class GameHistoryTest {
 
     @Test
     public void testRecordCompletionUpdatesBestTime() {
-        // Initial best time is 120
+        // First completion sets best time
+        entry.recordCompletion(120, 15);
         assertEquals(120, entry.getBestTime());
-        
+
         // Record faster completion
         boolean newBest = entry.recordCompletion(80, 20);
-        
         assertTrue(newBest);
         assertEquals(80, entry.getBestTime());
-        // Best moves should still be 15 (original)
+        // Best moves should still be 15 (first completion)
         assertEquals(15, entry.getBestMoves());
     }
 
     @Test
     public void testRecordCompletionUpdatesBestMoves() {
-        // Initial best moves is 15
+        // First completion
+        entry.recordCompletion(200, 15);
         assertEquals(15, entry.getBestMoves());
-        
+
         // Record completion with fewer moves
         boolean newBest = entry.recordCompletion(200, 10);
-        
         assertTrue(newBest);
         assertEquals(10, entry.getBestMoves());
     }
 
     @Test
     public void testRecordCompletionNoNewBest() {
+        // First completion
+        entry.recordCompletion(120, 15);
+
         // Record worse completion
         boolean newBest = entry.recordCompletion(200, 20);
-        
         assertFalse(newBest);
         assertEquals(120, entry.getBestTime());
         assertEquals(15, entry.getBestMoves());
@@ -98,9 +111,9 @@ public class GameHistoryTest {
         entry.recordCompletion(100, 12);
         entry.recordCompletion(90, 11);
         entry.recordCompletion(85, 10);
-        
-        assertEquals(4, entry.getCompletionCount());
-        assertEquals(4, entry.getCompletionTimestamps().size());
+
+        assertEquals(3, entry.getCompletionCount());
+        assertEquals(3, entry.getCompletionTimestamps().size());
         assertEquals(85, entry.getBestTime());
         assertEquals(10, entry.getBestMoves());
     }
@@ -150,14 +163,41 @@ public class GameHistoryTest {
 
     @Test
     public void testLastCompletionTimestampUpdatedOnRecordCompletion() {
-        long initialTimestamp = entry.getLastCompletionTimestamp();
-        
-        // Wait a tiny bit to ensure different timestamp
-        try { Thread.sleep(10); } catch (InterruptedException e) { }
-        
+        // Initially 0 (not completed)
+        assertEquals(0L, entry.getLastCompletionTimestamp());
+
         entry.recordCompletion(100, 12);
-        
-        assertTrue(entry.getLastCompletionTimestamp() > initialTimestamp);
+        assertTrue(entry.getLastCompletionTimestamp() > 0);
+
+        long afterFirst = entry.getLastCompletionTimestamp();
+        try { Thread.sleep(10); } catch (InterruptedException e) { }
+        entry.recordCompletion(90, 11);
+        assertTrue(entry.getLastCompletionTimestamp() > afterFirst);
+    }
+
+    @Test
+    public void testDifficultyField() {
+        // Default is empty
+        assertEquals("", entry.getDifficulty());
+
+        entry.setDifficulty("Expert");
+        assertEquals("Expert", entry.getDifficulty());
+
+        // Null should be treated as empty
+        entry.setDifficulty(null);
+        assertEquals("", entry.getDifficulty());
+    }
+
+    @Test
+    public void testCompletedStatusNotSetOnCreation() {
+        // A new entry should NOT be marked as completed
+        assertEquals(0, entry.getCompletionCount());
+        assertFalse(entry.isFirstCompletion());
+
+        // After first completion it should be marked
+        entry.recordCompletion(120, 15);
+        assertEquals(1, entry.getCompletionCount());
+        assertTrue(entry.isFirstCompletion());
     }
     
     // ========== Hint Tracking Tests ==========

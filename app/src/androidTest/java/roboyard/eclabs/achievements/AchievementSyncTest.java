@@ -123,7 +123,7 @@ public class AchievementSyncTest {
     public void testStatsDataStructure() throws Exception {
         // Simulate some game completions
         achievementManager.onLevelCompleted(1, 5, 5, 0, 3, 15000);
-        achievementManager.onRandomGameCompleted(8, 8, 0, 25000, false, 4, 1, 1);
+        achievementManager.onRandomGameCompleted(8, 8, 0, 25000, false, 4, 1, 1, true, false);
         
         // Build stats object like syncToServer does
         JSONObject stats = new JSONObject();
