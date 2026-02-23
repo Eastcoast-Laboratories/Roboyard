@@ -60,8 +60,11 @@ public class GameHistoryManager {
                 for (int i = 0; i < entries.size(); i++) {
                     GameHistoryEntry existing = entries.get(i);
                     if (newMapSignature.equals(existing.getMapSignature())) {
-                        // Same map found - record new completion
-                        existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                        // Same map found - only record completion if moves > 0 (game was actually played)
+                        // Don't record completion for intermediate saves (e.g., when hints are shown)
+                        if (entry.getMovesMade() > 0) {
+                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                        }
                         if (entry.getOptimalMoves() > 0) {
                             existing.setOptimalMoves(entry.getOptimalMoves());
                         }
@@ -103,7 +106,10 @@ public class GameHistoryManager {
                 for (int i = 0; i < entries.size(); i++) {
                     if (entries.get(i).getMapName().equals(entry.getMapName())) {
                         GameHistoryEntry existing = entries.get(i);
-                        existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                        // Only record completion if moves > 0 (game was actually played)
+                        if (entry.getMovesMade() > 0) {
+                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                        }
                         updated = true;
                         break;
                     }
@@ -112,6 +118,10 @@ public class GameHistoryManager {
             
             // Add new entry if not updated
             if (!updated) {
+                // If game was completed (movesMade > 0), record the completion on the new entry
+                if (entry.getMovesMade() > 0) {
+                    entry.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                }
                 entries.add(entry);
             }
             
@@ -163,8 +173,11 @@ public class GameHistoryManager {
                     entry.setBoardSize(entryJson.getString("boardSize"));
                     entry.setPreviewImagePath(entryJson.getString("previewImagePath"));
                     
+                    // Load difficulty
+                    entry.setDifficulty(entryJson.optString("difficulty", ""));
+                    
                     // Load new fields for unique map tracking
-                    entry.setCompletionCount(entryJson.optInt("completionCount", 1));
+                    entry.setCompletionCount(entryJson.optInt("completionCount", 0));
                     entry.setLastCompletionTimestamp(entryJson.optLong("lastCompletionTimestamp", entry.getTimestamp()));
                     entry.setBestTime(entryJson.optInt("bestTime", entry.getPlayDuration()));
                     entry.setBestMoves(entryJson.optInt("bestMoves", entry.getMovesMade()));
@@ -301,6 +314,7 @@ public class GameHistoryManager {
                 entryJson.put("maxHintUsed", entry.getMaxHintUsed());
                 entryJson.put("solvedWithoutHints", entry.isSolvedWithoutHints());
                 entryJson.put("everUsedHints", entry.isEverUsedHints());
+                entryJson.put("difficulty", entry.getDifficulty());
                 
                 entriesArray.put(entryJson);
             }

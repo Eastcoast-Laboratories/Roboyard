@@ -244,6 +244,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Reset UI timer for the new game
         resetUiTimer();
 
+        // Reset history tracking so a new history entry is created for this game
+        resetGameTimer();
+        startGameTimer();
+
         // Create a new valid game (will regenerate if solution is too simple)
         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
 
@@ -346,6 +350,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         currentState.setValue(newState);
         moveCount.setValue(0);
         isGameComplete.setValue(false);
+
+        // Reset history tracking so a new history entry is created for this game
+        resetGameTimer();
+        startGameTimer();
 
         // Initialize the solver with grid elements
         ArrayList<GridElement> gridElements = newState.getGridElements();
@@ -1308,6 +1316,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
             // Only increment counters if game is not already complete
             // Once goal is reached, stop counting moves and squares
+            boolean wasFirstMove = pathHistory.isEmpty();
             if (!isGameComplete.getValue()) {
                 setSquaresMoved(getSquaresMoved().getValue() + distanceMoved);
 
@@ -1318,6 +1327,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Also update the move count in the GameState object itself (logic)
                 // This ensures state.getMoveCount() returns the correct value
                 state.setMoveCount(getMoveCount().getValue());
+
+                // Save history immediately on first move (before threshold)
+                // Move count is 0 here since game is not complete yet
+                if (wasFirstMove && !isHistorySaved) {
+                    Timber.d("[HISTORY] First move detected, saving history immediately");
+                    saveToHistory();
+                    isHistorySaved = true;
+                }
             } else {
                 Timber.d("[GAME_COMPLETE] Game already completed, not incrementing move/squares counters");
             }
@@ -2135,35 +2152,48 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (activity == null || gameState == null) return;
 
             String mapSig = gameState.generateMapSignature();
+            Timber.d("[HISTORY] updateHintTrackingInHistory: mapSig=%s, isComplete=%b",
+                    mapSig, isGameComplete.getValue());
+
             if (mapSig == null || mapSig.isEmpty()) return;
 
-            GameHistoryEntry existing = GameHistoryManager.findByMapSignature(activity, mapSig);
+            // Load the full list once - we will modify it in-place and save it back
+            java.util.List<GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
+            GameHistoryEntry existing = null;
+            for (GameHistoryEntry e : allEntries) {
+                if (mapSig.equals(e.getMapSignature())) {
+                    existing = e;
+                    break;
+                }
+            }
+            Timber.d("[HISTORY] findByMapSignature result: %s", existing != null ? existing.getMapName() : "null - NOT FOUND");
+
             if (existing != null) {
                 int maxHint = gameState.getMaxHintUsedThisSession();
-                
+
                 // Update hint tracking if hints were used
                 if (!existing.hasUsedHints() && maxHint >= 0) {
                     existing.recordHintUsed(maxHint);
                     Timber.d("[HISTORY] Updated hint tracking in existing entry: maxHintUsed=%d", maxHint);
                 }
-                
+
                 // Update move count if game is completed (important when hints were shown before completion)
-                if (isGameComplete.getValue()) {
+                if (Boolean.TRUE.equals(isGameComplete.getValue())) {
                     int actualMoveCount = gameState.getMoveCount();
-                    // Record completion with the actual move count
                     existing.recordCompletion((int)((System.currentTimeMillis() - gameStartTime) / 1000), actualMoveCount);
-                    Timber.d("[HISTORY] Updated move count in existing entry after completion: moveCount=%d", actualMoveCount);
+                    Timber.d("[HISTORY] Recorded completion in existing entry: moveCount=%d, completionCount now=%d",
+                            actualMoveCount, existing.getCompletionCount());
                 }
-                
+
                 // Mark everUsedHints if hints were used
                 if (maxHint >= 0) {
                     existing.markEverUsedHints();
                 }
-                
-                GameHistoryManager.saveHistoryIndex(activity,
-                        GameHistoryManager.getHistoryEntries(activity));
-                Timber.d("[HISTORY] Saved updated history entry: maxHintUsed=%d, everUsedHints=%b", 
-                        maxHint, existing.isEverUsedHints());
+
+                // Save the same list we modified (not a freshly-read copy from disk)
+                GameHistoryManager.saveHistoryIndex(activity, allEntries);
+                Timber.d("[HISTORY] Saved updated history entry: completionCount=%d, maxHintUsed=%d, everUsedHints=%b",
+                        existing.getCompletionCount(), maxHint, existing.isEverUsedHints());
             }
         } catch (Exception e) {
             Timber.e("[HISTORY] Error updating hint tracking: %s", e.getMessage());
@@ -2242,8 +2272,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
 
             // Create history entry with available information
-            // Use gameState.getMoveCount() as source of truth, not moveCount.getValue()
-            int actualMoveCount = gameState.getMoveCount();
+            // Only save actual move count if game is completed
+            // For intermediate saves (hints, live move counter), use 0
+            int actualMoveCount = isGameComplete.getValue() ? gameState.getMoveCount() : 0;
             GameHistoryEntry entry = new GameHistoryEntry(
                     historyPath,
                     mapName,
@@ -2254,9 +2285,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     boardSize,
                     previewImagePath
             );
-            Timber.d("[HISTORY] Saving to history: moveCount=%d (from GameState), optimalMoves=%d",
-                    actualMoveCount, optimalMovesCount);
+            Timber.d("[HISTORY] Saving to history: moveCount=%d (gameComplete=%b), optimalMoves=%d",
+                    actualMoveCount, isGameComplete.getValue(), optimalMovesCount);
             
+            // Set difficulty
+            entry.setDifficulty(getLocalizedDifficultyString());
+
             // Set map signatures for unique map tracking
             entry.setWallSignature(gameState.generateWallSignature());
             entry.setPositionSignature(gameState.generatePositionSignature());

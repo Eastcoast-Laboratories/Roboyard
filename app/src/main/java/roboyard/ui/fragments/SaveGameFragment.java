@@ -533,9 +533,22 @@ public class SaveGameFragment extends BaseGameFragment {
                     if ((name == null || name.isEmpty()) && meta.mapName != null) {
                         name = meta.mapName;
                     }
-                    
+
+                    // Completion status from GameHistoryEntry (authoritative), not from savegame SOLVED flag
+                    String completionStatus;
+                    if (entry.getCompletionCount() > 0) {
+                        completionStatus = entry.getCompletionCount() == 1
+                                ? getString(R.string.history_completed_once)
+                                : getString(R.string.history_completed_times, entry.getCompletionCount());
+                    } else {
+                        completionStatus = getString(R.string.history_not_completed);
+                    }
+
+                    // Difficulty from GameHistoryEntry (saved at game start), fallback to savegame metadata
+                    String difficulty = !entry.getDifficulty().isEmpty() ? entry.getDifficulty() : meta.difficulty;
+
                     HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
-                            meta.boardSize, mapPath, meta.minimap, meta.difficulty, meta.completionStatus, entry);
+                            meta.boardSize, mapPath, meta.minimap, difficulty, completionStatus, entry);
                     entries.add(historyEntry);
                 }
                 

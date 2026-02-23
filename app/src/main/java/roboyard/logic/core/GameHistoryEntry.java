@@ -45,6 +45,8 @@ public class GameHistoryEntry {
     private boolean solvedWithoutHints;       // True if map was FIRST solved without using hints
     private boolean everUsedHints = false;    // True if hints were EVER used in ANY attempt (including later ones)
 
+    private String difficulty = "";           // Difficulty level when the game was created
+
     /**
      * Constructor for a new history entry
      */
@@ -69,12 +71,12 @@ public class GameHistoryEntry {
         this.originalMapPath = originalMapPath;
         
         // Initialize new fields
+        // completionCount starts at 0 - only incremented by recordCompletion() when goal is reached
         this.completionTimestamps = new ArrayList<>();
-        this.completionTimestamps.add(timestamp);
-        this.completionCount = 1;
-        this.lastCompletionTimestamp = timestamp;
-        this.bestTime = playDuration;
-        this.bestMoves = movesMade;
+        this.completionCount = 0;
+        this.lastCompletionTimestamp = 0;
+        this.bestTime = 0;
+        this.bestMoves = 0;
     }
 
     /**
@@ -114,7 +116,7 @@ public class GameHistoryEntry {
      * @return true if this map has only been completed once
      */
     public boolean isFirstCompletion() {
-        return completionCount <= 1;
+        return completionCount == 1;
     }
 
     // Getters and setters
@@ -318,6 +320,9 @@ public class GameHistoryEntry {
      * Get the history index from the map path
      * @return The history index
      */
+    public String getDifficulty() { return difficulty != null ? difficulty : ""; }
+    public void setDifficulty(String difficulty) { this.difficulty = difficulty != null ? difficulty : ""; }
+
     public int getHistoryIndex() {
         // e.g. getMapPath() = history_1.txt
         // extract the number
