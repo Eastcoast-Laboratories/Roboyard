@@ -755,26 +755,46 @@ public class GameState implements Serializable {
                     String data = entry.data;
                     
                     try {
-                        if (type.equals("t")) {
-                            // Target: tcolorX,Y; (e.g., tb8,7;)
-                            if (data.length() >= 2) {
-                                int colorId = parseColorChar(data.charAt(0));
-                                String coords = data.substring(1);
+                        if (type.startsWith("t")) {
+                            // Target: tcolorX,Y; (e.g., tb8,7; parsed as type=tb, data=8,7)
+                            int colorId = -1;
+                            String coords = data;
+                            
+                            if (type.length() == 2 && type.charAt(0) == 't') {
+                                // Color is second char of type
+                                colorId = parseColorChar(type.charAt(1));
+                            } else if (type.length() == 1 && data.length() >= 2) {
+                                // Color is first char of data
+                                colorId = parseColorChar(data.charAt(0));
+                                coords = data.substring(1);
+                            }
+                            
+                            if (colorId >= 0) {
                                 String[] parts = coords.split(",");
-                                if (parts.length == 2 && colorId >= 0) {
+                                if (parts.length == 2) {
                                     int x = Integer.parseInt(parts[0]);
                                     int y = Integer.parseInt(parts[1]);
                                     state.addTarget(x, y, colorId);
                                     targetsAdded++;
                                 }
                             }
-                        } else if (type.equals("r")) {
-                            // Robot: rcolorX,Y; (e.g., rr1,5;)
-                            if (data.length() >= 2) {
-                                int colorId = parseColorChar(data.charAt(0));
-                                String coords = data.substring(1);
+                        } else if (type.startsWith("r")) {
+                            // Robot: rcolorX,Y; (e.g., rr1,5; parsed as type=rr, data=1,5)
+                            int colorId = -1;
+                            String coords = data;
+                            
+                            if (type.length() == 2 && type.charAt(0) == 'r') {
+                                // Color is second char of type
+                                colorId = parseColorChar(type.charAt(1));
+                            } else if (type.length() == 1 && data.length() >= 2) {
+                                // Color is first char of data
+                                colorId = parseColorChar(data.charAt(0));
+                                coords = data.substring(1);
+                            }
+                            
+                            if (colorId >= 0) {
                                 String[] parts = coords.split(",");
-                                if (parts.length == 2 && colorId >= 0) {
+                                if (parts.length == 2) {
                                     int x = Integer.parseInt(parts[0]);
                                     int y = Integer.parseInt(parts[1]);
                                     state.addRobot(x, y, colorId);
@@ -1198,8 +1218,12 @@ public class GameState implements Serializable {
                     int colorId = -1;
                     String coords = data;
                     
-                    if (type.length() == 1) {
-                        // Compact format: tcolorX,Y; (e.g., tb8,7;)
+                    if (type.length() == 2 && type.charAt(0) == 't') {
+                        // Compact format: tcolorX,Y; (e.g., tb8,7; parsed as type=tb, data=8,7)
+                        // Color is second char of type
+                        colorId = parseColorChar(type.charAt(1));
+                    } else if (type.length() == 1) {
+                        // Compact format: tcolorX,Y; (e.g., t b8,7;)
                         // First char of data is color, rest is coordinates
                         if (data.length() >= 2) {
                             colorId = parseColorChar(data.charAt(0));
@@ -1228,8 +1252,12 @@ public class GameState implements Serializable {
                     int colorId = -1;
                     String coords = data;
                     
-                    if (type.length() == 1) {
-                        // Compact format: rcolorX,Y; (e.g., rr1,5;)
+                    if (type.length() == 2 && type.charAt(0) == 'r') {
+                        // Compact format: rcolorX,Y; (e.g., rr1,5; parsed as type=rr, data=1,5)
+                        // Color is second char of type
+                        colorId = parseColorChar(type.charAt(1));
+                    } else if (type.length() == 1) {
+                        // Compact format: rcolorX,Y; (e.g., r r1,5;)
                         // First char of data is color, rest is coordinates
                         if (data.length() >= 2) {
                             colorId = parseColorChar(data.charAt(0));
