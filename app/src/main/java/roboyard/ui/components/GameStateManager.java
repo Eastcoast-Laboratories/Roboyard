@@ -2291,10 +2291,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             String saveData = gameState.serialize();
             FileReadWrite.writePrivateData(activity, historyPath, saveData);
 
-            // Use static values for missing board dimensions
-            int boardWidth = 16; // Default value
-            int boardHeight = 16; // Default value
-            String boardSize = boardWidth + "x" + boardHeight;
+            // Get actual board dimensions from game state
+            int boardWidth = gameState.getWidth();
+            int boardHeight = gameState.getHeight();
+            String boardSize = (boardWidth > 0 && boardHeight > 0) ? boardWidth + "x" + boardHeight : "";
 
             // Preview image path (flat filename, no directory separator)
             String previewImagePath = historyFileName + "_preview.txt";

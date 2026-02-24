@@ -179,8 +179,8 @@ public class GameHistoryManager {
                     entry.setPlayDuration(entryJson.getInt("playDuration"));
                     entry.setMovesMade(entryJson.getInt("movesMade"));
                     entry.setOptimalMoves(entryJson.optInt("optimalMoves", 0));
-                    entry.setBoardSize(entryJson.getString("boardSize"));
-                    entry.setPreviewImagePath(entryJson.getString("previewImagePath"));
+                    entry.setBoardSize(entryJson.optString("boardSize", ""));
+                    entry.setPreviewImagePath(entryJson.optString("previewImagePath", ""));
                     
                     // Load difficulty
                     entry.setDifficulty(entryJson.optString("difficulty", ""));

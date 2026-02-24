@@ -1,10 +1,12 @@
 package roboyard.ui.fragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,11 +20,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import roboyard.logic.core.Constants;
+import roboyard.logic.core.GameHistoryEntry;
 import roboyard.eclabs.R;
 import roboyard.ui.achievements.AchievementManager;
+import roboyard.ui.components.GameHistoryManager;
 import timber.log.Timber;
 import roboyard.logic.core.LevelCompletionData;
 import roboyard.ui.components.LevelCompletionManager;
@@ -40,6 +46,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private final List<Integer> availableLevels = new ArrayList<>();
     private LevelCompletionManager completionManager;
     private int totalStars = 0;
+    /** Maps level file map name (e.g. "level_1") to history entry, for minimap + info-box reuse */
+    private final Map<String, GameHistoryEntry> historyByMapName = new HashMap<>();
 
     // Constants for custom level support
     private static final int CUSTOM_LEVEL_START_ID = 141;
@@ -133,13 +141,16 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Load available levels
         loadAvailableLevels();
 
+        // Load history entries mapped by level map name
+        loadHistoryByMapName();
+
         // Display total stars with format X/420
         if (starsTextView != null) {
             starsTextView.setText(String.format("%d/%d", totalStars, 420));
         }
 
         // Set up adapter
-        levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars);
+        levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars, historyByMapName);
         levelRecyclerView.setAdapter(levelAdapter);
 
         // Auto-scroll to the last played level
@@ -243,6 +254,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
             starsTextView.setText(String.format("%d/%d", totalStars, 420));
         }
 
+        // Reload history entries (may have new entries after playing)
+        loadHistoryByMapName();
+
         // Refresh the adapter to update completion stars when returning to this screen
         if (levelAdapter != null) {
             levelAdapter.updateTotalStars(totalStars);
@@ -269,6 +283,61 @@ public class LevelSelectionFragment extends BaseGameFragment {
         boolean visible = totalStars >= 140;
         button.setVisibility(visible ? View.VISIBLE : View.GONE);
         Timber.d("[LEVEL_SELECTION] Total stars: %d, Level Editor button visible: %b", totalStars, visible);
+    }
+
+    /**
+     * Loads history entries and maps them by normalized level key (e.g. "level_1" for levelId=1).
+     * History stores mapName as "Level 1" (set in GameStateManager.startLevelGame), so we
+     * extract the number and map it to the key used by onBindViewHolder.
+     */
+    private void loadHistoryByMapName() {
+        historyByMapName.clear();
+        try {
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(requireActivity());
+            if (entries != null) {
+                for (GameHistoryEntry entry : entries) {
+                    String key = extractLevelKey(entry);
+                    if (key == null) continue;
+                    // Keep the entry with the most completions if there are duplicates
+                    GameHistoryEntry existing = historyByMapName.get(key);
+                    if (existing == null || entry.getCompletionCount() >= existing.getCompletionCount()) {
+                        historyByMapName.put(key, entry);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[LEVEL_SELECTION] Error loading history entries for minimap display");
+        }
+        Timber.d("[LEVEL_SELECTION] Loaded %d history entries into map", historyByMapName.size());
+    }
+
+    /**
+     * Extracts a normalized level key (e.g. "level_1") from a history entry.
+     * History mapName is "Level 1" (set via GameStateManager.startLevelGame).
+     * Also falls back to parsing the mapPath basename (e.g. "level_1.txt").
+     *
+     * @return normalized key like "level_1" or "custom_level_141", or null if not a level entry
+     */
+    private static String extractLevelKey(GameHistoryEntry entry) {
+        // Try mapName "Level N" -> "level_N"
+        String mapName = entry.getMapName();
+        if (mapName != null) {
+            if (mapName.matches("(?i)Level \\d+")) {
+                int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
+                return id >= 141 ? "custom_level_" + id : "level_" + id;
+            }
+        }
+        // Fallback: parse mapPath basename, e.g. "level_1.txt" or "level_1"
+        String mapPath = entry.getMapPath();
+        if (mapPath != null) {
+            String base = mapPath.contains("/")
+                    ? mapPath.substring(mapPath.lastIndexOf('/') + 1)
+                    : mapPath;
+            if (base.startsWith("level_") || base.startsWith("custom_level_")) {
+                return base.endsWith(".txt") ? base.substring(0, base.length() - 4) : base;
+            }
+        }
+        return null;
     }
 
     /**
@@ -321,7 +390,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         calculateTotalStars();
 
         // Create and set the adapter
-        levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars);
+        levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars, historyByMapName);
         levelRecyclerView.setAdapter(levelAdapter);
     }
 
@@ -400,14 +469,17 @@ public class LevelSelectionFragment extends BaseGameFragment {
         private final List<Integer> levels;
         private final LevelSelectionFragment fragment;
         private final LevelCompletionManager completionManager;
+        private final Map<String, GameHistoryEntry> historyByMapName;
         private int totalStars;
 
-        public LevelAdapter(List<Integer> levels, LevelSelectionFragment fragment, 
-                          LevelCompletionManager completionManager, int totalStars) {
+        public LevelAdapter(List<Integer> levels, LevelSelectionFragment fragment,
+                          LevelCompletionManager completionManager, int totalStars,
+                          Map<String, GameHistoryEntry> historyByMapName) {
             this.levels = levels;
             this.fragment = fragment;
             this.completionManager = completionManager;
             this.totalStars = totalStars;
+            this.historyByMapName = historyByMapName;
         }
 
         @Override
@@ -515,8 +587,14 @@ public class LevelSelectionFragment extends BaseGameFragment {
                             // Regular levels unlock based on total stars
                             (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
 
+                    // Look up history entry for this level (e.g. "level_1" for levelId=1)
+                    String mapKey = levelId < CUSTOM_LEVEL_START_ID
+                            ? "level_" + levelId
+                            : "custom_level_" + levelId;
+                    GameHistoryEntry historyEntry = historyByMapName.get(mapKey);
+
                     // Bind the level data
-                    levelHolder.bind(levelId, fragment, isCompleted, starsEarned, isUnlocked);
+                    levelHolder.bind(levelId, fragment, isCompleted, starsEarned, isUnlocked, historyEntry);
                 }
             }
         }
@@ -574,7 +652,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
     /**
      * ViewHolder for level items in the RecyclerView.
-     * Contains a button for the level and an ImageView for the completion star.
+     * Contains a button for the level, completion stars, and optionally a minimap + info button
+     * when a history entry exists for the level.
      */
     private static class LevelViewHolder extends RecyclerView.ViewHolder {
         private final Button levelButton;
@@ -586,10 +665,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
         private final TextView levelNameText;
         private final TextView movesText;
         private final TextView timeText;
+        private final ImageView minimapView;
+        private final ImageButton infoButton;
 
         /**
          * Constructor for the LevelViewHolder.
-         * Finds and stores references to the level button and completion star views.
+         * Finds and stores references to the level button, completion star views, minimap, and info button.
          * 
          * @param itemView The root view of the level item
          */
@@ -604,6 +685,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
             levelNameText = itemView.findViewById(R.id.level_name_text);
             movesText = itemView.findViewById(R.id.level_moves_text);
             timeText = itemView.findViewById(R.id.level_time_text);
+            minimapView = itemView.findViewById(R.id.level_minimap_view);
+            infoButton = itemView.findViewById(R.id.level_info_button);
         }
 
         /**
@@ -622,8 +705,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
          * @param starsEarned Number of stars earned for this level (0-3)
          * @param isUnlocked Whether the level is unlocked
          */
-        public void bind(int levelId, LevelSelectionFragment fragment, boolean isCompleted, 
-                        int starsEarned, boolean isUnlocked) {
+        public void bind(int levelId, LevelSelectionFragment fragment, boolean isCompleted,
+                        int starsEarned, boolean isUnlocked, GameHistoryEntry historyEntry) {
             // Set level number (only visible for non-completed levels)
             levelButton.setText(String.valueOf(levelId));
             levelButton.setContentDescription("Level " + levelId);
@@ -689,6 +772,26 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 levelNameText.setVisibility(View.GONE);
                 movesText.setVisibility(View.GONE);
                 timeText.setVisibility(View.GONE);
+            }
+
+            // Show minimap and info button when a history entry exists for this level
+            if (historyEntry != null && minimapView != null && infoButton != null) {
+                String mapPath = historyEntry.getMapPath();
+                String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
+                        ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
+                        : mapPath;
+                if (absolutePath != null) {
+                    Bitmap minimap = fragment.createMinimapFromPath(itemView.getContext(), absolutePath, 100, 100);
+                    minimapView.setImageBitmap(minimap);
+                    minimapView.setVisibility(View.VISIBLE);
+                } else {
+                    minimapView.setVisibility(View.GONE);
+                }
+                infoButton.setVisibility(View.VISIBLE);
+                infoButton.setOnClickListener(v -> fragment.showMapInfoPopup(historyEntry));
+            } else {
+                if (minimapView != null) minimapView.setVisibility(View.GONE);
+                if (infoButton != null) infoButton.setVisibility(View.GONE);
             }
 
             // Set click listener on the entire item view AND the button

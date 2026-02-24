@@ -643,6 +643,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         
                         announceAccessibility(completionMessage);
                         
+                        // Save to history immediately on completion (bypasses time threshold)
+                        gameStateManager.saveToHistoryNow("completed");
+
                         // Trigger achievements for level completion (guard against multiple calls)
                         long elapsedTime = SystemClock.elapsedRealtime() - startTime;
                         int currentLevelId = state.getLevelId();

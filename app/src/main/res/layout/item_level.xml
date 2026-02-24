@@ -80,6 +80,36 @@
         </LinearLayout>
     </RelativeLayout>
 
+    <!-- Minimap thumbnail (shown when level has a history entry) -->
+    <!-- Margin keeps the blue button border visible around the minimap -->
+    <ImageView
+        android:id="@+id/level_minimap_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="0dp"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/level_button_container"
+        app:layout_constraintStart_toStartOf="@id/level_button_container"
+        app:layout_constraintEnd_toEndOf="@id/level_button_container"
+        app:layout_constraintBottom_toBottomOf="@id/level_button_container" />
+
+    <!-- Info button (shown when level has a history entry) -->
+    <ImageButton
+        android:id="@+id/level_info_button"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_info_details"
+        android:contentDescription="@string/info_button_a11y"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/level_button_container"
+        app:layout_constraintTop_toTopOf="@id/level_button_container" />
+
     <!-- Horizontal stars strip with 4 stars -->
     <LinearLayout
         android:id="@+id/stars_container"
