@@ -1278,7 +1278,7 @@ public class GameState implements Serializable {
         sb.append("WIDTH:").append(width).append(";\n");
         sb.append("HEIGHT:").append(height).append(";\n");
         
-        // Generate the board representation
+        // Generate the board representation (walls excluded - they go in WALLS section)
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (x > 0) {
@@ -1287,7 +1287,10 @@ public class GameState implements Serializable {
                 
                 int cellType = board[y][x];
                 
-                if (cellType == Constants.TYPE_TARGET) {
+                // Skip walls - they are saved in WALLS section to reduce file size
+                if (cellType == Constants.TYPE_HORIZONTAL_WALL || cellType == Constants.TYPE_VERTICAL_WALL) {
+                    sb.append(Constants.TYPE_EMPTY);
+                } else if (cellType == Constants.TYPE_TARGET) {
                     // Targets include their color information
                     sb.append(cellType).append(":").append(targetColors[y][x]);
                 } else {
@@ -1319,8 +1322,11 @@ public class GameState implements Serializable {
             throw new IllegalStateException("[SAVE_DATA] Cannot save game: no targets found in game state");
         }
         
-        // Add dedicated WALLS section to ensure all walls are properly serialized
-        // IMPORTANT: loops go to <= width/height to include outer boundary walls at grid+1
+        // Add WALLS section for achievements feature (find maps with same walls but different robots)
+        // NOTE: Walls are already in the board array above, but we save them separately here
+        // so that the wall signature can be extracted for achievement matching.
+        // During parsing, the WALLS section will be the authoritative source and board array
+        // walls will be removed to avoid duplicates.
         sb.append("WALLS:\n");
         // Save horizontal walls (y goes to height to include bottom boundary)
         for (int y = 0; y <= height; y++) {
