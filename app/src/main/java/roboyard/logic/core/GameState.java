@@ -741,10 +741,10 @@ public class GameState implements Serializable {
             // Supports both old format (mh, mv, tb, rb, ry, rg, rs) and new format (h, v, t, r)
             boolean isCompactFormat = false;
             for (String line : lines) {
-                // Check for new format: h0,0; v0,0; tb8,7; rr1,5;
-                // Check for old format: mh0,0; mv0,0; target_blue8,7; robot_red1,5;
-                if ((line.contains("h") || line.contains("v") || line.contains("t") || line.contains("r")) 
-                    && line.contains(",") && line.contains(";")) {
+                // Check for new format patterns: h0,0; v0,0; tb8,7; rr1,5;
+                // Check for old format patterns: mh0,0; mv0,0; target_blue8,7; robot_red1,5;
+                if (line.matches("^[hmvtr].*\\d+,\\d+;.*") || 
+                    line.matches(".*[mh|mv|tb|tg|tr|ty|ts|rb|rg|rr|ry|rs|target_|robot_].*\\d+,\\d+;.*")) {
                     isCompactFormat = true;
                     break;
                 }

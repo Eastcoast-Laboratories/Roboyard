@@ -31,8 +31,16 @@ public class LevelFormatParser {
         // Remove comments (everything after # until end of line)
         String cleaned = removeComments(content);
         
-        // Normalize whitespace and line breaks
-        cleaned = cleaned.replaceAll("\\s+", "");
+        // Filter out lines that don't contain semicolons (board data lines like "0,0,0,0")
+        // and lines that are metadata (WIDTH:, HEIGHT:)
+        StringBuilder filteredContent = new StringBuilder();
+        for (String line : cleaned.split("\n")) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty()) continue;
+            if (!trimmed.contains(";")) continue; // Skip board data lines
+            filteredContent.append(trimmed);
+        }
+        cleaned = filteredContent.toString();
         
         // Parse entries: each entry is type + data + semicolon
         // Examples: h0,0; v1,2; tb8,7; rr1,5; mh0,0; mv1,2; target_blue8,7; robot_red1,5;
