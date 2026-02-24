@@ -30,6 +30,8 @@ import timber.log.Timber;
 
 /**
  * E2E test: Complete Level 1 fast (<10s) - both speedrun achievements
+ *
+ * Tags: e2e, level-game, achievement, solver, fast, speedrun, timer
  */
 @RunWith(AndroidJUnit4.class)
 public class Level1FastE2ETest {

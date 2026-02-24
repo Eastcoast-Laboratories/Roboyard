@@ -18,7 +18,10 @@ import org.junit.runner.RunWith;
 import timber.log.Timber;
 
 /**
- * Debug test to reproduce the issue from the logs where achievements unlock after Level 5
+ * Debug test to reproduce the issue from the logs where achievements unlock after Level 5.
+ * Simulates the exact sequence of events that caused unexpected early unlocking.
+ *
+ * Tags: debug, achievements, unlock-timing, level-5, regression
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementDebugTest {

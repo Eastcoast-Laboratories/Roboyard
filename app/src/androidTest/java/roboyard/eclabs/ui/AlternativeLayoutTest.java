@@ -42,6 +42,8 @@ import timber.log.Timber;
  * 3. Back -> Main Menu -> Start Random Game
  * 4. Verify game screen with alt layout buttons visible
  * 5. Cleanup: disable alt layout after test
+ *
+ * Tags: ui, settings, debug-settings, alternative-layout, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class AlternativeLayoutTest {

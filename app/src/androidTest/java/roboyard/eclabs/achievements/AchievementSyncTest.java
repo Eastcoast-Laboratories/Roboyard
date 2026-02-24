@@ -30,6 +30,8 @@ import timber.log.Timber;
  * 1. Achievement sync API call structure
  * 2. Sync after achievement unlock
  * 3. Sync only when logged in
+ *
+ * Tags: achievements, sync, api, network, login
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementSyncTest {

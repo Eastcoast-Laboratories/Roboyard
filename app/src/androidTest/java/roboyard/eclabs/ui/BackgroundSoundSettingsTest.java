@@ -35,6 +35,8 @@ import timber.log.Timber;
  * - Verify SeekBar is displayed in Settings
  * - Verify SeekBar changes persist to Preferences
  * - Verify SoundService starts when volume > 0
+ *
+ * Tags: ui, settings, sound, seekbar, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class BackgroundSoundSettingsTest {

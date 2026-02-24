@@ -39,6 +39,8 @@ import timber.log.Timber;
  * 
  * This test ensures that loaded savegames bypass the min/max moves validation
  * and display the correct difficulty from the savegame.
+ *
+ * Tags: e2e, save-load, difficulty, random-game, settings
  */
 @RunWith(AndroidJUnit4.class)
 public class LoadGameDifficultyTest {

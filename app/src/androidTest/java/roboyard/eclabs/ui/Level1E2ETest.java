@@ -42,6 +42,7 @@ import timber.log.Timber;
  * 5. Verifies achievements are unlocked
  * 6. Verifies the achievement popup appears
  * 
+ * Tags: e2e, level-game, achievement, solver
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.Level1E2ETest
  */
 @RunWith(AndroidJUnit4.class)

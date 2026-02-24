@@ -11,6 +11,9 @@ import timber.log.Timber;
 
 /**
  * Shared test utilities for Espresso UI tests.
+ * Provides helpers for closing achievement and streak popups.
+ *
+ * Tags: test-helper, espresso, achievement-popup, streak-popup
  */
 public class TestHelper {
 

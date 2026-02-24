@@ -29,6 +29,8 @@ import timber.log.Timber;
 /**
  * Espresso UI test for Debug Settings navigation flow:
  * Main Menu -> Settings -> 3s longpress -> Debug Settings -> Back gesture -> Settings
+ *
+ * Tags: ui, navigation, debug-settings, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class DebugSettingsNavigationTest {

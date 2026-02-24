@@ -26,6 +26,8 @@ import timber.log.Timber;
  * saved and loaded, especially the right and bottom edges.
  *
  * Run with: ./gradlew connectedAndroidTest --tests "roboyard.eclabs.WallSerializationTest"
+ *
+ * Tags: walls, serialization, deserialization, boundary, instrumented
  */
 @RunWith(AndroidJUnit4.class)
 public class WallSerializationTest {

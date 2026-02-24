@@ -18,7 +18,10 @@ import org.junit.runner.RunWith;
 import timber.log.Timber;
 
 /**
- * Test to verify that achievement counters are properly reset and don't carry over between tests
+ * Test to verify that achievement counters are properly reset and don't carry over between tests.
+ * Ensures clean state between test runs so achievements don't bleed over.
+ *
+ * Tags: achievements, reset, counters, test-isolation
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementResetTest {

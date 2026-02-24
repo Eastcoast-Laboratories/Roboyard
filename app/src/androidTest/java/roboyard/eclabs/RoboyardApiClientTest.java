@@ -30,6 +30,7 @@ import timber.log.Timber;
  * NOTE: These tests require network access to roboyard.z11.de.
  * They may fail on emulators without proper network configuration.
  * 
+ * Tags: api, network, registration, sync, integration-test
  * Run with: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.ui.components.RoboyardApiClientTest
  */
 @RunWith(AndroidJUnit4.class)

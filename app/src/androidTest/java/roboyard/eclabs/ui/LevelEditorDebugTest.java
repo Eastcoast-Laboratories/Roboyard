@@ -32,6 +32,8 @@ import timber.log.Timber;
  * Main Menu -> Settings -> 3s longpress -> Debug Settings -> Open Level Editor
  * 
  * Also verifies that level files load correctly (level_%d.txt format with underscore).
+ *
+ * Tags: ui, level-editor, debug-settings, navigation, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class LevelEditorDebugTest {

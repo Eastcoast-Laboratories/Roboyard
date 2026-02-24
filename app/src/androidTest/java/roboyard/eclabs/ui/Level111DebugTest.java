@@ -41,6 +41,8 @@ import timber.log.Timber;
  * Debug test for Level 111 to investigate why the solver solution doesn't work.
  * The solution ends with the green robot not at the target.
  * Suspected issue: board dimension not passed correctly to solver, bottom row ignored.
+ *
+ * Tags: debug, level-game, solver, board-dimensions
  */
 @RunWith(AndroidJUnit4.class)
 public class Level111DebugTest {

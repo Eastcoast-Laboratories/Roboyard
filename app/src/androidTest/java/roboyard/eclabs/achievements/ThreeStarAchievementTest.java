@@ -29,6 +29,8 @@ import roboyard.eclabs.data.LevelSolutionData;
  * 4. Verifies the 3_star_hard_level achievement is unlocked correctly
  * 
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.achievements.ThreeStarAchievementTest
+ *
+ * Tags: achievements, 3-star, hard-level, solver, level-data
  */
 @RunWith(AndroidJUnit4.class)
 public class ThreeStarAchievementTest {

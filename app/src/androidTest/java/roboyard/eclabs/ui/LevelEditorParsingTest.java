@@ -27,6 +27,8 @@ import timber.log.Timber;
  * - Level files in board:W,H; mhX,Y; mvX,Y; format are parsed correctly
  * - Outer walls are at correct boundary positions (x=width for right, y=height for bottom)
  * - Level 1 loads with correct dimensions and element count
+ *
+ * Tags: level-editor, parsing, walls, board-dimensions, instrumented
  */
 @RunWith(AndroidJUnit4.class)
 public class LevelEditorParsingTest {

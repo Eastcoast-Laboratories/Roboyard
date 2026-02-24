@@ -45,6 +45,8 @@ import timber.log.Timber;
  * 6. Press back button
  * 7. Verify: "Next Level" button is VISIBLE (level completion state preserved)
  * 8. Verify: No auto-regeneration (not in random game mode)
+ *
+ * Tags: e2e, game-mode, level-game, achievements, navigation, next-level
  * 
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.GameModeMemoryE2ETest
  */

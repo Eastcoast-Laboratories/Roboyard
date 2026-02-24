@@ -30,6 +30,8 @@ import timber.log.Timber;
 
 /**
  * E2E test: Wrong moves - verify level is NOT completed (test should PASS)
+ *
+ * Tags: e2e, level-game, negative-test, wrong-moves
  */
 @RunWith(AndroidJUnit4.class)
 public class Level1WrongE2ETest {

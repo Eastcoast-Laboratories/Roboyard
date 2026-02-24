@@ -23,6 +23,8 @@ import java.util.List;
  * Tests achievement unlocking, storage, and event handlers.
  * 
  * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.achievements.AchievementManagerTest"
+ *
+ * Tags: achievements, achievement-manager, unlock, storage, events
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementManagerTest {

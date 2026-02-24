@@ -30,6 +30,8 @@ import timber.log.Timber;
 
 /**
  * E2E test: Complete Level 1 slowly (>30s) - only level_1_complete achievement
+ *
+ * Tags: e2e, level-game, achievement, slow, timer
  */
 @RunWith(AndroidJUnit4.class)
 public class Level1SlowE2ETest {

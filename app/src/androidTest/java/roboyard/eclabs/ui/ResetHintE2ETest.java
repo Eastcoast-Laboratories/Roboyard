@@ -47,6 +47,7 @@ import timber.log.Timber;
  * 5. Press Reset
  * 6. Assert: hint_container is GONE, hintButton is unchecked
  *
+ * Tags: e2e, hint-system, reset, live-move-counter, level-game
  * Run with:
  * ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.ResetHintE2ETest
  */

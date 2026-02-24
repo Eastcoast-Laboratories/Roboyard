@@ -41,6 +41,8 @@ import timber.log.Timber;
 /**
  * E2E test: Complete all 140 levels to unlock 3_star_10_levels, 3_star_50_levels, and 3_star_all_levels achievements
  * Uses the solver solution to execute moves automatically
+ *
+ * Tags: e2e, level-game, achievement, 3-star, solver, all-levels
  */
 @RunWith(AndroidJUnit4.class)
 public class Level140E2ETest {

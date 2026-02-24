@@ -38,6 +38,8 @@ import timber.log.Timber;
  * Analyzes history entries to verify move counts are saved correctly.
  *
  * Run with: ./gradlew connectedAndroidTest --tests "roboyard.eclabs.MoveCountDebugTest"
+ *
+ * Tags: debug, move-count, history, solver, random-game
  */
 @RunWith(AndroidJUnit4.class)
 public class MoveCountDebugTest {

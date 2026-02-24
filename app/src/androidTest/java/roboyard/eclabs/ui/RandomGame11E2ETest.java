@@ -44,6 +44,8 @@ import timber.log.Timber;
  * - perfect_random_games_10 should be unlocked after game 10 (10 perfect games)
  * - no_hints_streak_random_10 should NOT be unlocked (hint was used in game 10)
  * - no_hints_streak_random_10 should be unlocked after game 11 (10 perfect games without hints)
+ *
+ * Tags: e2e, random-game, achievement, hint-system, streak
  */
 @RunWith(AndroidJUnit4.class)
 public class RandomGame11E2ETest {

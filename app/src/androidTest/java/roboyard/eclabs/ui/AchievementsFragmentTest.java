@@ -28,8 +28,11 @@ import roboyard.eclabs.ui.mock.MockMainActivity;
 /**
  * UI tests for the AchievementsFragment.
  * Tests that the achievements screen displays correctly and responds to user interaction.
- * 
+ * Covers: navigation to achievements screen, list display, back button, filter/tab switching.
+ *
  * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.fragments.AchievementsFragmentTest"
+ *
+ * Tags: achievements, ui, fragment, navigation, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementsFragmentTest {

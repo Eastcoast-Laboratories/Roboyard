@@ -39,6 +39,8 @@ import timber.log.Timber;
 /**
  * E2E test: Complete 11 levels where Level 1 gets only 2 stars (not 3)
  * Verifies that 3_star_10_levels is NOT unlocked after level 10 (since not all levels have 3 stars)
+ *
+ * Tags: e2e, level-game, achievement, 3-star, negative-test
  */
 @RunWith(AndroidJUnit4.class)
 public class Level11With2StarsE2ETest {

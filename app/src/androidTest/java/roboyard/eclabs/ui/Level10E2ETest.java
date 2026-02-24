@@ -39,6 +39,8 @@ import timber.log.Timber;
 /**
  * E2E test: Complete levels 1-10 to unlock 3_star_10_levels achievement
  * Uses the solver solution to execute moves automatically
+ *
+ * Tags: e2e, level-game, achievement, 3-star, solver
  */
 @RunWith(AndroidJUnit4.class)
 public class Level10E2ETest {

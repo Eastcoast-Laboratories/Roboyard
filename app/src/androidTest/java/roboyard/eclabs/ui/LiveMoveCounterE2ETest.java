@@ -47,6 +47,8 @@ import timber.log.Timber;
  * 3. Eye toggle activates live counter and shows result after a move
  *
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.LiveMoveCounterE2ETest
+ *
+ * Tags: e2e, hint-system, live-move-counter, level-game, regression
  */
 @RunWith(AndroidJUnit4.class)
 public class LiveMoveCounterE2ETest {

@@ -18,7 +18,10 @@ import org.junit.runner.RunWith;
 import timber.log.Timber;
 
 /**
- * Test to check if onLevelCompleted is called multiple times or if achievements are unlocked incorrectly
+ * Test to check if onLevelCompleted is called multiple times or if achievements are unlocked incorrectly.
+ * Verifies that achievements are not double-counted when the level completion callback fires.
+ *
+ * Tags: achievements, level-completion, call-count, regression
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementCallCountTest {

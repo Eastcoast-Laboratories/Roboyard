@@ -40,6 +40,7 @@ import timber.log.Timber;
  * 4. Move DOWN (reverse of UP -> triggers undo)
  * 5. Verify: move count decremented, robot can still be moved (move RIGHT works)
  *
+ * Tags: regression, undo, reverse-move, level-game, bug-fix
  * Run with:
  * ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.ReverseMoveUndoBugTest
  */

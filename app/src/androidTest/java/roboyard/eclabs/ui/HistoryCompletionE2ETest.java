@@ -49,6 +49,7 @@ import timber.log.Timber;
  * 5. Click info button on first history entry
  * 6. Verify popup shows "Completions: 1"
  *
+ * Tags: e2e, history, random-game, completion-tracking, espresso
  * Run with:
  * ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.HistoryCompletionE2ETest
  */

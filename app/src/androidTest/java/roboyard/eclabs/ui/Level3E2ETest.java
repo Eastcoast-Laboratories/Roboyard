@@ -39,6 +39,8 @@ import timber.log.Timber;
 /**
  * E2E test: Complete levels 1-3 to test level completion and achievements
  * Uses the solver solution to execute moves automatically
+ *
+ * Tags: e2e, level-game, achievement, solver
  */
 @RunWith(AndroidJUnit4.class)
 public class Level3E2ETest {

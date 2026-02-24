@@ -36,6 +36,8 @@ import timber.log.Timber;
  *   Main Menu -> Settings -> 3.5s longpress -> Debug Settings -> Open Level Editor
  *   -> Export Level Text -> verify "Save to Sourcecode" button appears
  *   -> click Save to Sourcecode -> verify success toast
+ *
+ * Tags: ui, level-editor, export, sourcecode, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class LevelEditorExportTest {

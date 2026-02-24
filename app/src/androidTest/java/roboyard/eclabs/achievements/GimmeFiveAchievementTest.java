@@ -35,6 +35,8 @@ import java.util.List;
  * Example: For 3 robots (0, 1, 2), we need 3 pairs: 0-1, 0-2, 1-2
  * 
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.achievements.GimmeFiveAchievementTest
+ *
+ * Tags: achievements, gimme-five, robot-collision, game-logic
  */
 @RunWith(AndroidJUnit4.class)
 public class GimmeFiveAchievementTest {

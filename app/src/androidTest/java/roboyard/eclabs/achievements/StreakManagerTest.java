@@ -16,7 +16,10 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 /**
- * Tests for StreakManager daily login tracking
+ * Tests for StreakManager daily login tracking.
+ * Verifies streak increments, resets, and achievement integration for consecutive daily logins.
+ *
+ * Tags: streak, daily-login, achievement-manager, instrumented
  */
 @RunWith(AndroidJUnit4.class)
 public class StreakManagerTest {

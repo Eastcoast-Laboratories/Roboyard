@@ -34,6 +34,8 @@ import timber.log.Timber;
  * 3. Click "Menu" button to navigate away
  * 4. Press back (back gesture) to return to the game
  * 5. Verify timer continues from ~5s (not reset to 00:00)
+ *
+ * Tags: e2e, timer, navigation, persistence, random-game
  */
 @RunWith(AndroidJUnit4.class)
 public class TimerPersistenceE2ETest {

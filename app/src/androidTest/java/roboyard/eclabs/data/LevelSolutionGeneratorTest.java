@@ -37,6 +37,9 @@ import roboyard.logic.core.IGameMove;
  * Run with: ./gradlew connectedAndroidTest --tests "roboyard.eclabs.data.LevelSolutionGeneratorTest"
  * 
  * The output will be in logcat with tag "LEVEL_SOLUTION_DATA"
+ *
+ * Tags: solver, level-data, solution-generation, all-levels, data-generation
+ * NOTE: Run only manually to regenerate LevelSolutionData.java stub.
  */
 @RunWith(AndroidJUnit4.class)
 public class LevelSolutionGeneratorTest {

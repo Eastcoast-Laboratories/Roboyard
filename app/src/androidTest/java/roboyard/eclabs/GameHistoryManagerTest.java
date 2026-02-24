@@ -28,6 +28,8 @@ import timber.log.Timber;
  * Tests history entry creation, retrieval, deletion, and path handling.
  *
  * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.components.GameHistoryManagerTest"
+ *
+ * Tags: game-history, history-manager, history-entry, instrumented
  */
 @RunWith(AndroidJUnit4.class)
 public class GameHistoryManagerTest {

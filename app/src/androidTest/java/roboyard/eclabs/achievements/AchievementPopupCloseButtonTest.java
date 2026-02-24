@@ -33,6 +33,8 @@ import timber.log.Timber;
  * Tests that the X close button appears when tapping the popup and can be clicked.
  * 
  * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.ui.achievements.AchievementPopupCloseButtonTest
+ *
+ * Tags: ui, achievements, achievement-popup, close-button, espresso
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementPopupCloseButtonTest {

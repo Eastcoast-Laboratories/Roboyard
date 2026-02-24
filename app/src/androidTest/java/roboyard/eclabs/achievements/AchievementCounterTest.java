@@ -18,7 +18,10 @@ import org.junit.runner.RunWith;
 import timber.log.Timber;
 
 /**
- * Test to verify achievement counters are correct and achievements unlock at the right time
+ * Test to verify achievement counters are correct and achievements unlock at the right time.
+ * Tests threshold-based unlocking logic and counter increments.
+ *
+ * Tags: achievements, counters, unlock-logic, level-completion
  */
 @RunWith(AndroidJUnit4.class)
 public class AchievementCounterTest {

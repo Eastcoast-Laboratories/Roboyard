@@ -34,6 +34,8 @@ import timber.log.Timber;
  *
  * Run with:
  * ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.PreComputationTest
+ *
+ * Tags: solver, pre-computation, moves-cache, instrumented
  */
 @RunWith(AndroidJUnit4.class)
 public class PreComputationTest {
