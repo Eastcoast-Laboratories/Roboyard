@@ -737,10 +737,14 @@ public class GameState implements Serializable {
             int wallsAdded = 0;
             int targetsAdded = 0;
             
-            // Check if this is new compact format (no WIDTH/HEIGHT lines, targets/robots/walls on single lines)
+            // Check if this is compact format (no WIDTH/HEIGHT lines, targets/robots/walls on single lines)
+            // Supports both old format (mh, mv, tb, rb, ry, rg, rs) and new format (h, v, t, r)
             boolean isCompactFormat = false;
             for (String line : lines) {
-                if (line.startsWith("t") && line.contains(",") && line.contains(";")) {
+                // Check for new format: h0,0; v0,0; tb8,7; rr1,5;
+                // Check for old format: mh0,0; mv0,0; target_blue8,7; robot_red1,5;
+                if ((line.contains("h") || line.contains("v") || line.contains("t") || line.contains("r")) 
+                    && line.contains(",") && line.contains(";")) {
                     isCompactFormat = true;
                     break;
                 }
@@ -757,14 +761,19 @@ public class GameState implements Serializable {
                     try {
                         if (type.startsWith("t")) {
                             // Target: tcolorX,Y; (e.g., tb8,7; parsed as type=tb, data=8,7)
+                            // or legacy: target_colorX,Y; (e.g., target_blue8,7; parsed as type=target_blue, data=8,7)
                             int colorId = -1;
                             String coords = data;
                             
                             if (type.length() == 2 && type.charAt(0) == 't') {
-                                // Color is second char of type
+                                // New format: Color is second char of type
                                 colorId = parseColorChar(type.charAt(1));
+                            } else if (type.startsWith("target_")) {
+                                // Legacy format: target_colorname
+                                String colorName = type.substring(7);
+                                colorId = parseColorName(colorName);
                             } else if (type.length() == 1 && data.length() >= 2) {
-                                // Color is first char of data
+                                // Compact format: tcolorX,Y; (color is first char of data)
                                 colorId = parseColorChar(data.charAt(0));
                                 coords = data.substring(1);
                             }
@@ -780,14 +789,19 @@ public class GameState implements Serializable {
                             }
                         } else if (type.startsWith("r")) {
                             // Robot: rcolorX,Y; (e.g., rr1,5; parsed as type=rr, data=1,5)
+                            // or legacy: robot_colorX,Y; (e.g., robot_red1,5; parsed as type=robot_red, data=1,5)
                             int colorId = -1;
                             String coords = data;
                             
                             if (type.length() == 2 && type.charAt(0) == 'r') {
-                                // Color is second char of type
+                                // New format: Color is second char of type
                                 colorId = parseColorChar(type.charAt(1));
+                            } else if (type.startsWith("robot_")) {
+                                // Legacy format: robot_colorname
+                                String colorName = type.substring(6);
+                                colorId = parseColorName(colorName);
                             } else if (type.length() == 1 && data.length() >= 2) {
-                                // Color is first char of data
+                                // Compact format: rcolorX,Y; (color is first char of data)
                                 colorId = parseColorChar(data.charAt(0));
                                 coords = data.substring(1);
                             }
