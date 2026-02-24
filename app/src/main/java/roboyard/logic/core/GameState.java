@@ -1346,19 +1346,14 @@ public class GameState implements Serializable {
         }
         
         // Determine which positions to serialize as initial robot positions.
-        // IMPORTANT: never call storeInitialRobotPositions() here - that would overwrite
-        // initialRobotPositions with current (possibly moved) positions, corrupting mapSignature.
-        Map<Integer, int[]> positionsToSerialize = initialRobotPositions;
-        if (positionsToSerialize == null || positionsToSerialize.isEmpty()) {
-            // initialRobotPositions not set - this is a bug, log it clearly
-            Timber.e("[MAPSIG] serialize(): initialRobotPositions is null/empty! Using current gameElement positions as fallback. mapSignature will be unreliable.");
-            positionsToSerialize = new HashMap<>();
-            for (GameElement element : gameElements) {
-                if (element.getType() == GameElement.TYPE_ROBOT) {
-                    positionsToSerialize.put(element.getColor(), new int[]{element.getX(), element.getY()});
-                }
-            }
+        // IMPORTANT: initialRobotPositions MUST be set before serializing.
+        // This is set by storeInitialRobotPositions() when the game is created.
+        if (initialRobotPositions == null || initialRobotPositions.isEmpty()) {
+            Throwable t = new Throwable();
+            Timber.e(t, "[SAVE_DATA] FATAL ERROR: initialRobotPositions not set! Game must call storeInitialRobotPositions() after creation.");
+            throw new IllegalStateException("[SAVE_DATA] Cannot save game: initialRobotPositions not set");
         }
+        Map<Integer, int[]> positionsToSerialize = initialRobotPositions;
 
         // Add dedicated ROBOTS section
         sb.append("ROBOTS:\n");
@@ -2030,19 +2025,20 @@ public class GameState implements Serializable {
     /**
      * Generate a unique signature for the wall layout only.
      * Used for achievements that track same walls with different robot positions.
+     * Format matches level file format: 12x14;mh1,0;mh1,3;...mv9,6;
      * @return A string signature representing the wall layout
      */
     public String generateWallSignature() {
         StringBuilder sb = new StringBuilder();
-        sb.append(width).append("x").append(height).append("|");
+        sb.append(width).append("x").append(height).append(";");
         
         // Collect all walls in sorted order
         List<String> walls = new ArrayList<>();
         for (GameElement element : gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                walls.add("H" + element.getX() + "," + element.getY());
+                walls.add("mh" + element.getX() + "," + element.getY());
             } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                walls.add("V" + element.getX() + "," + element.getY());
+                walls.add("mv" + element.getX() + "," + element.getY());
             }
         }
         Collections.sort(walls);

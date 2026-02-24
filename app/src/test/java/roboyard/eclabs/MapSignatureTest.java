@@ -24,13 +24,13 @@ public class MapSignatureTest {
     @Test
     public void testWallSignatureIncludesDimensions() {
         String signature = gameState.generateWallSignature();
-        assertTrue(signature.startsWith("16x16|"));
+        assertTrue(signature.startsWith("16x16;"));
     }
 
     @Test
     public void testWallSignatureWithNoWalls() {
         String signature = gameState.generateWallSignature();
-        assertEquals("16x16|", signature);
+        assertEquals("16x16;", signature);
     }
 
     @Test
@@ -40,8 +40,8 @@ public class MapSignatureTest {
         
         String signature = gameState.generateWallSignature();
         
-        assertTrue(signature.contains("H5,3;"));
-        assertTrue(signature.contains("V7,8;"));
+        assertTrue(signature.contains("mh5,3;"));
+        assertTrue(signature.contains("mv7,8;"));
     }
 
     @Test
@@ -53,13 +53,13 @@ public class MapSignatureTest {
         
         String signature = gameState.generateWallSignature();
         
-        // Should be sorted: H2,1 < V10,5 < V3,2 (alphabetically)
-        int h21 = signature.indexOf("H2,1;");
-        int v105 = signature.indexOf("V10,5;");
-        int v32 = signature.indexOf("V3,2;");
+        // Should be sorted: mh2,1 < mv10,5 < mv3,2 (alphabetically)
+        int mh21 = signature.indexOf("mh2,1;");
+        int mv105 = signature.indexOf("mv10,5;");
+        int mv32 = signature.indexOf("mv3,2;");
         
-        assertTrue(h21 < v105);
-        assertTrue(v105 < v32);
+        assertTrue(mh21 < mv105);
+        assertTrue(mv105 < mv32);
     }
 
     @Test
