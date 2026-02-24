@@ -60,7 +60,11 @@ public class Level1FastE2ETest {
     @Test
     public void testLevel1FastCompletion_BothSpeedrunAchievements() throws InterruptedException {
         Timber.d("[E2E_FAST] Starting fast completion test (<10s)");
-        Thread.sleep(200);
+        
+        // Wait for achievement popup to auto-close (7-15 seconds depending on number of achievements)
+        // Single achievement: 7 seconds, Multiple: 15 seconds
+        // Add 1 second buffer for animation
+        Thread.sleep(8000);
         
         // Navigate to Level 1
         onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());
