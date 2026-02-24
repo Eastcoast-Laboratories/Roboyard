@@ -81,7 +81,7 @@
     </RelativeLayout>
 
     <!-- Minimap thumbnail (shown when level has a history entry) -->
-    <!-- Margin keeps the blue button border visible around the minimap -->
+    <!-- 50% transparent, behind text; margins keep blue button border visible -->
     <ImageView
         android:id="@+id/level_minimap_view"
         android:layout_width="0dp"
@@ -90,6 +90,7 @@
         android:layout_marginEnd="24dp"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="0dp"
+        android:alpha="0.5"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         android:visibility="gone"
@@ -110,45 +111,45 @@
         app:layout_constraintEnd_toEndOf="@id/level_button_container"
         app:layout_constraintTop_toTopOf="@id/level_button_container" />
 
-    <!-- Horizontal stars strip with 4 stars -->
+    <!-- Horizontal stars strip with 4 stars (smaller, higher, more left) -->
     <LinearLayout
         android:id="@+id/stars_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@id/level_button_container"
         app:layout_constraintTop_toTopOf="@id/level_button_container">
 
         <ImageView
             android:id="@+id/level_star_1"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="4dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="2dp"
             android:src="@drawable/star"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/level_star_2"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="4dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="2dp"
             android:src="@drawable/star"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/level_star_3"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="4dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="2dp"
             android:src="@drawable/star"
             android:visibility="gone" />
             
         <ImageView
             android:id="@+id/level_star_4"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:src="@drawable/star"
             android:visibility="gone" />
 
