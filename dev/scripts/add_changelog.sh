@@ -75,7 +75,7 @@ EOF
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- 
+- Le
 - full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )
