@@ -868,16 +868,31 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private boolean validateSaveContainsTargets(String saveData, File saveFile) {
         Timber.d("[SAVE_VERIFICATION] Validating save file: %s", saveFile.getName());
 
-        // Check for dedicated TARGET_SECTION section
+        // Check for dedicated TARGET_SECTION section (legacy format)
         if (saveData.contains("TARGET_SECTION:")) {
-            // Look for TARGET_SECTION: entries which must be present
-            if (saveData.contains("TARGET_SECTION:")) {
-                Timber.d("[SAVE_VERIFICATION] Save file contains TARGET_SECTION section and TARGET_SECTION: entries");
-                return true;
-            }
+            Timber.d("[SAVE_VERIFICATION] Save file contains TARGET_SECTION entries");
+            return true;
         }
 
-        // Check for target cell types in board data
+        // First-line format: |T<color>@<x>,<y>; (e.g. |T3@4,13;)
+        if (saveData.matches("(?s).*\\|T\\d+@\\d+,\\d+;.*")) {
+            Timber.d("[SAVE_VERIFICATION] Save file contains targets (T@x,y format)");
+            return true;
+        }
+
+        // Compact format: t<color_letter><x>,<y>; (e.g. ty4,13; tb2,11;)
+        if (saveData.matches("(?s).*(?:^|\\n|;)t[rgby]\\d+,\\d+;.*")) {
+            Timber.d("[SAVE_VERIFICATION] Save file contains targets (compact t<color> format)");
+            return true;
+        }
+
+        // Legacy format: target_<color><x>,<y>;
+        if (saveData.matches("(?s).*target_(red|green|blue|yellow)\\d+,\\d+;.*")) {
+            Timber.d("[SAVE_VERIFICATION] Save file contains targets (legacy target_color format)");
+            return true;
+        }
+
+        // Check for target cell types in board data (cell type 2)
         String[] lines = saveData.split("\n");
         for (String line : lines) {
             if (line.contains(Constants.TYPE_TARGET + ":")) {

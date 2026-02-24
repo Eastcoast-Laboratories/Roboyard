@@ -1396,10 +1396,26 @@ public class GameState implements Serializable {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (board[y][x] == Constants.TYPE_TARGET) {
-                    sb.append("t").append(getColorChar(targetColors[y][x]))
+                    int color = targetColors[y][x];
+                    if (color < 0 || color > 4) {
+                        // Target color is invalid - try to recover from gameElements
+                        Timber.e("[SAVE_DATA] Target at (%d,%d) has invalid color %d in targetColors array, recovering from gameElements", x, y, color);
+                        for (GameElement element : gameElements) {
+                            if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
+                                color = element.getColor();
+                                Timber.d("[SAVE_DATA] Recovered target color %d from gameElement at (%d,%d)", color, x, y);
+                                targetColors[y][x] = color;
+                                break;
+                            }
+                        }
+                        if (color < 0 || color > 4) {
+                            Timber.e("[SAVE_DATA] FATAL: Could not recover target color at (%d,%d), gameElements has no matching target", x, y);
+                        }
+                    }
+                    sb.append("t").append(getColorChar(color))
                       .append(x).append(",").append(y).append(";");
                     targetCount++;
-                    Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, targetColors[y][x]);
+                    Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, color);
                 }
             }
         }
@@ -2107,6 +2123,11 @@ public class GameState implements Serializable {
                 int x = element.getX();
                 int y = element.getY();
                 int color = element.getColor();
+                
+                Timber.d("[TARGET SYNC] GameElement target at (%d,%d) with color %d, board=%d, targetColors=%d",
+                        x, y, color, 
+                        (x >= 0 && y >= 0 && x < width && y < height) ? board[y][x] : -999,
+                        (x >= 0 && y >= 0 && x < width && y < height) ? targetColors[y][x] : -999);
                 
                 // Skip invalid coordinates
                 if (x < 0 || y < 0 || x >= width || y >= height) {

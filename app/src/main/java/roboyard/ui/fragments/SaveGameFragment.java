@@ -2158,16 +2158,40 @@ public class SaveGameFragment extends BaseGameFragment {
             return false;
         }
         
-        // Check if the save contains any targets
-        boolean hasTargets = false;
+        // Check if the save contains any targets in any format
         
-        // Method 1: Look for TARGET_SECTION: entries
+        // Legacy format: TARGET_SECTION: entries
         if (saveData.contains("TARGET_SECTION:")) {
-            hasTargets = true;
+            Timber.d("[TARGET_CHECK] Save data has targets (TARGET_SECTION format)");
+            return true;
         }
         
-        Timber.d("[TARGET_CHECK] Save data has targets: %s", hasTargets);
-        return hasTargets;
+        // First-line format: |T<color>@<x>,<y>; (e.g. |T3@4,13;)
+        if (saveData.matches("(?s).*\\|T\\d+@\\d+,\\d+;.*")) {
+            Timber.d("[TARGET_CHECK] Save data has targets (T@x,y format)");
+            return true;
+        }
+        
+        // Compact format: t<color_letter><x>,<y>; on separate lines (e.g. ty4,13; tb2,11;)
+        if (saveData.matches("(?s).*(?:^|\\n|;)t[rgby]\\d+,\\d+;.*")) {
+            Timber.d("[TARGET_CHECK] Save data has targets (compact t<color> format)");
+            return true;
+        }
+        
+        // Legacy format: target_<color><x>,<y>; (e.g. target_red4,13;)
+        if (saveData.matches("(?s).*target_(red|green|blue|yellow)\\d+,\\d+;.*")) {
+            Timber.d("[TARGET_CHECK] Save data has targets (legacy target_color format)");
+            return true;
+        }
+        
+        // Board data format: cell type 2 with color (e.g. 2:3 in comma-separated board rows)
+        if (saveData.matches("(?s).*(?:^|,)2:\\d+(?:,|$).*")) {
+            Timber.d("[TARGET_CHECK] Save data has targets (board cell type 2:color format)");
+            return true;
+        }
+        
+        Timber.d("[TARGET_CHECK] Save data has NO targets in any known format");
+        return false;
     }
     
     /**
