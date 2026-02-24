@@ -2149,6 +2149,14 @@ public class GameState implements Serializable {
                     targetColors[y][x] = color;
                     syncedTargets++;
                 }
+                
+                // Detect invalid color on either side and log for root cause analysis
+                if (color < 0 || color > 4) {
+                    Timber.e("[TARGET SYNC] GameElement at (%d,%d) has invalid color %d", x, y, color);
+                }
+                if (targetColors[y][x] < 0 || targetColors[y][x] > 4) {
+                    Timber.e("[TARGET SYNC] targetColors[%d][%d] has invalid value %d after sync", y, x, targetColors[y][x]);
+                }
             }
         }
         

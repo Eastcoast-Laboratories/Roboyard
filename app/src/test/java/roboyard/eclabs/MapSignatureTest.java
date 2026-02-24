@@ -10,7 +10,11 @@ import roboyard.logic.core.GameElement;
 
 /**
  * Unit tests for GameState map signature generation.
- * Tests wall, position, and full map signatures for unique map tracking.
+ *
+ * Verifies wall signatures, position signatures, and full map signatures
+ * used for unique map tracking and achievement progress.
+ *
+ * Tags: map-signature, walls, positions, unique-map-tracking, achievements
  */
 public class MapSignatureTest {
 

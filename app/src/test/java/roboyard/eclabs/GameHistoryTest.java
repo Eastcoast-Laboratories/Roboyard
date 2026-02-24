@@ -13,6 +13,8 @@ import roboyard.logic.core.GameHistoryEntry;
 /**
  * Unit tests for GameHistoryEntry unique map tracking functionality.
  * Tests the new fields and methods for tracking map completions.
+ *
+ * Tags: game-history, unique-map-tracking, map-completions, history-entry
  */
 public class GameHistoryTest {
 

@@ -8,8 +8,17 @@ import java.util.List;
 import roboyard.logic.core.LevelFormatParser;
 
 /**
- * Unit tests for LevelFormatParser
- * Tests parsing of level format with comments and optional line breaks
+ * Unit tests for LevelFormatParser.
+ *
+ * Verifies parsing and serialization of level format entries including:
+ * - Basic entries (board, walls, targets, robots)
+ * - Comments (lines starting with #)
+ * - Optional line breaks between entries
+ * - Legacy format (mh, mv, target_color, robot_color)
+ * - Compact format (h, v, t<color>, r<color>)
+ * - Empty content and edge cases
+ *
+ * Tags: level-format, parsing, serialization, comments, legacy-format, compact-format
  */
 public class LevelFormatParserTest {
 

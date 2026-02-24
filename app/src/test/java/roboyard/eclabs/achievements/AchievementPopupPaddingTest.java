@@ -4,7 +4,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit test for responsive padding calculation in AchievementPopup
+ * Unit test for responsive padding calculation in AchievementPopup.
+ *
+ * Verifies that horizontal padding scales correctly via linear interpolation
+ * across different screen widths, with proper min/max clamping.
+ *
+ * Tags: achievement-popup, ui-layout, responsive-design, padding, interpolation
  */
 public class AchievementPopupPaddingTest {
 

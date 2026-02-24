@@ -4,7 +4,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit test for topMargin interpolation calculation in AchievementPopup
+ * Unit test for topMargin interpolation calculation in AchievementPopup.
+ *
+ * Verifies that the linear interpolation for topMargin positioning works
+ * correctly across different screen sizes and orientations.
+ *
+ * Tags: achievement-popup, ui-layout, responsive-design, interpolation
  */
 public class AchievementPopupMarginTest {
 

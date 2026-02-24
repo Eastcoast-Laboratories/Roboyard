@@ -8,6 +8,8 @@ import static org.junit.Assert.*;
  * Tests parsing, data extraction, and sync logic without requiring Android context.
  * Note: org.json is not available in local JUnit tests (Android stub), so JSON tests
  * are in androidTest instead.
+ *
+ * Tags: sync, parsing, save-data, streak, timestamp, url-construction
  */
 public class SyncManagerTest {
 

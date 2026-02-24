@@ -11,6 +11,8 @@ import roboyard.logic.core.GameHistoryEntry;
 /**
  * Unit test to verify moveCount synchronization between GameState and history entries.
  * Tests that when a game is saved to history, the moveCount is recorded correctly.
+ *
+ * Tags: move-count, game-state, history, synchronization
  */
 public class MoveCountSyncTest {
 

@@ -24,6 +24,9 @@ import roboyard.logic.core.MapObjects;
  * - Fast execution (no I/O, no Android context)
  * - Broad coverage of game logic
  * - Catches regressions in core data structures
+ *
+ * Tags: smoke-test, game-logic, data-classes, game-element, game-move, grid-element,
+ *       map-objects, achievements, constants, save-data, streak, sync, timestamp
  */
 public class RoboyardSmokeTest {
 
