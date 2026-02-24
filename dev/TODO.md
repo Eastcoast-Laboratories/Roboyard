@@ -1,27 +1,5 @@
 # TODO
 
-
-
-# image creation:
-
-Bild 1 (erste Szene mit Hecke, noch ohne spezielle Blumen oder Wurzeln):
-A traditional cel-shaded anime-style painting depicting a lush green hedge maze with a warm, soft lighting atmosphere. The perspective is slightly elevated, showcasing the winding paths and intersections of the maze. The environment feels magical and inviting, with intricate details in the leaves and hedges, giving it a hand-painted Studio Ghibli-inspired look.
-
-Bild 2 (erste schräg oben Perspektive):
-A traditional-style anime painting portrays a small, glowing blue robot speeding through a winding hedge maze. The hedges are lush and detailed, featuring intertwined blue roots and bright yellow flowers. The perspective is from a slightly elevated angle, showing the depth of the maze. At the end of one of the paths, a mysterious swirling wormhole-like portal glows softly, inviting curiosity. The scene is inspired by Studio Ghibli’s hand-painted style, with a dreamlike atmosphere and a warm color palette.
-
-Bild 3 (zweite schräg oben Perspektive mit blauen Wurzeln und gelben Blumen):
-A hand-drawn and painted illustration in a Studio Ghibli-style shows a small blue robot racing through a hedge maze. The hedges are richly detailed, with bright yellow flowers and strange blue roots woven into the foliage. The perspective is from above at an angle, revealing the complexity of the maze’s pathways. The glowing wormhole at the end of the maze shimmers with an inviting, mysterious energy. The scene is vibrant, with soft shadows and an animated film-like texture.
-
-Bild 4 (dritte schräg oben Perspektive, mit mehr Ghibli-Detail):
-A hand-painted animation still in the Studio Ghibli style, depicting a small glowing blue robot zipping through a beautifully overgrown hedge maze. The hedges are thick and full of life, with twisted blue roots and patches of yellow flowers scattered throughout. The view is from an overhead diagonal perspective, emphasizing the intricate maze structure. At the end of the winding path, a surreal glowing wormhole pulses with soft energy. The color palette is warm and earthy, with a painterly touch adding depth and charm to the scene.
-
-Bild 5 (dritte schräg oben Perspektive, mit 4 robotern):
-A traditional animation, hand-painted in a Studio Ghibli-style, depicting a lush hedge maze with visible paths, intersections, and vibrant greenery. The hedges have intertwined blue roots, bright yellow flowers, and some red flowers for added contrast. Three small, cute robots with a glowing faceplate navigate the maze. The main character is a blue robot leading the way, followed by a green and a yellow robot exploring different paths. The scene is immersive, with soft lighting, a fantasy atmosphere, and detailed, textured foliage.
-
-neu fuer openai:
-A traditional cel-shaded anime-style painting depicting a lush green hedge maze with a warm, soft lighting atmosphere. portrays a small, glowing blue robot speeding through a winding hedge maze in the background three glowing pink, green and yellow robots. The hedges are thick and full of life, with twisted blue roots and patches of yellow and also a few red flowers scattered throughout. The perspective is from a slightly elevated angle, showing the depth of the maze and showcasing the winding paths and intersections of the maze. At the end of one of the paths, a mysterious swirling wormhole-like portal glows softly, inviting curiosity. The main character is a blue robot, the other three are the pink, green and yellow robots. use the last four robot images, i uploaded. The environment feels magical and inviting, with intricate details in the leaves and hedges, giving it a hand-painted Studio Ghibli-inspired look.
-
 # Difficulty
 check if this all works:
 - Beginner
@@ -82,20 +60,11 @@ check if this all works:
   
 # last prompt:
 
-ergänze das achievement konzept, wie man sicherstellen kannn, dass man für die achievements wirklich unterschiedliche maps macht umdie achievements zu erreichen, also es muss irgendwie jede map gespeicherrt werden für immer in der geschafft-liste damit man diese nicht doppelt zählt , bei jedemeintrag muss noch gespeichert werden, wie oft und wann man die geschafft hat, damit man hinterher auswerten kann, was fr maps man wann geschafft hat,. man braucht keine hashes, da die maps schon sehr wenig daten haben kann man die gesamten maps in dieser neen history speichern. dadurch wird verhindert, dass man z.b. immer wieder ein savegame lädt und das immer wieder löst. auch wird dann verhindert, dass man die slebe map imer rwieder löst. die achievements sollen nur wirklich verrschiedene maps zählen für achievements, die auf die anzahl maps hinauss sind. auch die speed achievements dürfen nur triggern, wenn man eine map das erste mal schafft, denn danach ist es ja kein kunststck mehr. gehe alle achievements durch auf diese aspekte und ergänze solche bedingungen, die für das erreichen notwendig sind.
-
-DRY! 
-@achievements.md#L185-190 
-Benutze die bestehende history.
 baue die bestehende history so um,
-- eine einträge mehr löschen kann
-- die history nur noch einen eintrag pro verschiedene maps speichert
-- bei jedem eintrag speicherrt wann die alles gelöst wurde,  
+- bei jedem eintrag speichert wann die alles gelöst wurde,  
 - sortierung in der histroy ansicht dann danach, wann jeweisl zuletzt gelöst.
 - es sollen alle zeitpunkte, wann sie gelöst wurde gespeichert werden, damit man hinterher verschiedene auswertungen darüber rmachen kann, auch für streaks und so
-- die walls sollen getrennt von den position s gespeichert werden für neue achievements, die sich auf die selben wall-storage einträge beziehen mit verschiedenen robot positions aber gleichen walls.
-- beue unittests, die die eaenderte history testen und ältere einträge daraus aufrufen und testen ob man die noch spielen kann.
-- wenn die history funktionierrt, dann die achievements logik bearbeiten um die neuen bedingungen in den achievements zu testen mit unittests und espresso tests, die die achievements testen und baue neue espresso tests, wenn es noch keinen gibt, der die einzelnen neuen aspekte  wirklich testst
+- die walls sollen getrennt von den positions gespeichert werden für neue achievements, die sich auf die selben wall-storage einträge beziehen mit verschiedenen robot positions aber gleichen walls.
 
 - für die 2. phase fehlen noch, dass die hint nutzung richtig gespeichert wurde in der history. beim ersten mal spielen der map muss schon sofort immer mit gespeichtert werden, bus zu welchem hint die hints benutzt wurden. für die achievements ist der entscheindende hint der wo gesagt wird, welche farben der robots benutzt werden müssen, ab dann gild die map nicht merh als ohne hints gelöst. das muss dauerhaft iin dem history eintrag der map gespeihert werden, auch wenn man die selbe map später noch mal ohne hints löst, gilt diese trothzdem nur als mit hints gelöst
 
@@ -109,4 +78,4 @@ baue die bestehende history so um,
 
 verbessere den test, so dass du die logs sehen kannst und berprüfe, dass er wirklich die selbe map daten akualisiert
 
-2. first played ist noch falsch, das ist anscheinend der erste move, den man gemacht hat, wo die map das erste mal gespeichert wurde, aber innerhalb des selben spiels wird dann last played gespeihert, das interressiert in der info box nicht. es interressiert nur, wann ein spiel gelöst wurde, Ich weis nicht ob dieser wert der im moment bei "first played" angezeigt wird überhaupt gespeichert werden muss, es scheint, dass er innerhalb des selben spiels schon 2 einträge erzeugt in der liste in einem history eintrag, enaml beim ersten move und dann immer bei den weiteren mves . er sollte aber in einem history eintrag nur den selben eintrag aktualisieren anstatt einen neuen anzulegen innerhalb des history savegames
+1. first played ist noch falsch, das ist anscheinend der erste move, den man gemacht hat, wo die map das erste mal gespeichert wurde, aber innerhalb des selben spiels wird dann last played gespeihert, das interressiert in der info box nicht. es interressiert nur, wann ein spiel gelöst wurde, Ich weis nicht ob dieser wert der im moment bei "first played" angezeigt wird überhaupt gespeichert werden muss, es scheint, dass er innerhalb des selben spiels schon 2 einträge erzeugt in der liste in einem history eintrag, enaml beim ersten move und dann immer bei den weiteren mves . er sollte aber in einem history eintrag nur den selben eintrag aktualisieren anstatt einen neuen anzulegen innerhalb des history savegames

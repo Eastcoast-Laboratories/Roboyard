@@ -1,7 +1,7 @@
 # Level design
 
 Level 1: 
-- simple solution in  moves
+- simple solution in 2 moves
 - board size: 10x10
 
 Level 2:
@@ -15,7 +15,8 @@ Level 3:
 - board size: 12x12
 
 Level 4:
-- teaches, that robots are on the path to the target, and that you have to move it away first and that you have more ways to solve it
+- teaches, that robots are on the path to the target, and that you have to move it away first
+- teaches, that you have more ways to solve it
 - solution in 3 moves
 - board size: 12x12
   

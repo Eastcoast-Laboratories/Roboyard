@@ -1426,8 +1426,8 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private String generateLevelText() {
-        // Generate the level format text matching the standard level file format:
-        // board:W,H; then mhX,Y; then mvX,Y; then target_colorX,Y; then robot_colorX,Y;
+        // Generate the level format text in new compact format:
+        // board:W,H; then hX,Y; then vX,Y; then tcolorX,Y; then rcolorX,Y;
         // Sorted numerically (by X first, then Y) within each section
         StringBuilder sb = new StringBuilder();
         
@@ -1462,22 +1462,40 @@ public class LevelDesignEditorFragment extends Fragment {
         java.util.Collections.sort(targets, numericSort);
         java.util.Collections.sort(robots, numericSort);
         
+        // Write horizontal walls in compact format (hX,Y;)
         for (GameElement e : horizontalWalls) {
-            sb.append("mh").append(e.getX()).append(",").append(e.getY()).append(";\n");
+            sb.append("h").append(e.getX()).append(",").append(e.getY()).append(";\n");
         }
+        // Write vertical walls in compact format (vX,Y;)
         for (GameElement e : verticalWalls) {
-            sb.append("mv").append(e.getX()).append(",").append(e.getY()).append(";\n");
+            sb.append("v").append(e.getX()).append(",").append(e.getY()).append(";\n");
         }
+        // Write targets in compact format (tcolorX,Y;)
         for (GameElement e : targets) {
-            sb.append("target_").append(getColorNameLower(e.getColor()))
+            sb.append("t").append(getColorChar(e.getColor()))
               .append(e.getX()).append(",").append(e.getY()).append(";\n");
         }
+        // Write robots in compact format (rcolorX,Y;)
         for (GameElement e : robots) {
-            sb.append("robot_").append(getColorNameLower(e.getColor()))
+            sb.append("r").append(getColorChar(e.getColor()))
               .append(e.getX()).append(",").append(e.getY()).append(";\n");
         }
         
         return sb.toString();
+    }
+    
+    /**
+     * Helper method to convert color ID to single character for compact format
+     */
+    private char getColorChar(int colorId) {
+        switch (colorId) {
+            case 0: return 'r'; // red
+            case 1: return 'g'; // green
+            case 2: return 'b'; // blue
+            case 3: return 'y'; // yellow
+            case 4: return 's'; // silver
+            default: return '?';
+        }
     }
     
     

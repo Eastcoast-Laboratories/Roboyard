@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import roboyard.logic.core.GameElement;
+import roboyard.logic.core.LevelFormatParser;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -736,6 +737,80 @@ public class GameState implements Serializable {
             int wallsAdded = 0;
             int targetsAdded = 0;
             
+            // Check if this is new compact format (no WIDTH/HEIGHT lines, targets/robots/walls on single lines)
+            boolean isCompactFormat = false;
+            for (String line : lines) {
+                if (line.startsWith("t") && line.contains(",") && line.contains(";")) {
+                    isCompactFormat = true;
+                    break;
+                }
+            }
+            
+            if (isCompactFormat) {
+                // Parse new compact format using central parser (handles comments and line breaks)
+                java.util.List<LevelFormatParser.LevelEntry> entries = LevelFormatParser.parseEntries(saveData);
+                
+                for (LevelFormatParser.LevelEntry entry : entries) {
+                    String type = entry.type;
+                    String data = entry.data;
+                    
+                    try {
+                        if (type.equals("t")) {
+                            // Target: tcolorX,Y; (e.g., tb8,7;)
+                            if (data.length() >= 2) {
+                                int colorId = parseColorChar(data.charAt(0));
+                                String coords = data.substring(1);
+                                String[] parts = coords.split(",");
+                                if (parts.length == 2 && colorId >= 0) {
+                                    int x = Integer.parseInt(parts[0]);
+                                    int y = Integer.parseInt(parts[1]);
+                                    state.addTarget(x, y, colorId);
+                                    targetsAdded++;
+                                }
+                            }
+                        } else if (type.equals("r")) {
+                            // Robot: rcolorX,Y; (e.g., rr1,5;)
+                            if (data.length() >= 2) {
+                                int colorId = parseColorChar(data.charAt(0));
+                                String coords = data.substring(1);
+                                String[] parts = coords.split(",");
+                                if (parts.length == 2 && colorId >= 0) {
+                                    int x = Integer.parseInt(parts[0]);
+                                    int y = Integer.parseInt(parts[1]);
+                                    state.addRobot(x, y, colorId);
+                                }
+                            }
+                        } else if (type.equals("h")) {
+                            // Horizontal wall: hX,Y; (e.g., h0,0;)
+                            String[] parts = data.split(",");
+                            if (parts.length == 2) {
+                                int x = Integer.parseInt(parts[0]);
+                                int y = Integer.parseInt(parts[1]);
+                                state.addHorizontalWall(x, y);
+                                wallsAdded++;
+                            }
+                        } else if (type.equals("v")) {
+                            // Vertical wall: vX,Y; (e.g., v0,0;)
+                            String[] parts = data.split(",");
+                            if (parts.length == 2) {
+                                int x = Integer.parseInt(parts[0]);
+                                int y = Integer.parseInt(parts[1]);
+                                state.addVerticalWall(x, y);
+                                wallsAdded++;
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        Timber.e("Error parsing compact format entry '%s:%s': %s", type, data, e.getMessage());
+                    }
+                }
+                
+                // Store initial robot positions
+                state.storeInitialRobotPositions();
+                Timber.d("[SAVE_LOAD] Successfully parsed compact format save data: %d targets, %d walls", targetsAdded, wallsAdded);
+                return state;
+            }
+            
+            // Legacy format parsing (old saves with WIDTH/HEIGHT, ROBOTS, INITIAL_POSITIONS, WALLS, TARGET_SECTION)
             // Skip metadata and dimension lines
             for (int i = 1; i < lines.length; i++) {
                 String line = lines[i];
@@ -1060,6 +1135,8 @@ public class GameState implements Serializable {
     
     /**
      * Parse level content from a level file
+     * Uses central LevelFormatParser for DRY principle
+     * Supports comments (#) and optional line breaks
      */
     public static GameState parseLevel(Context context, String levelContent, int levelId) {
         // Default board size
@@ -1072,157 +1149,129 @@ public class GameState implements Serializable {
         // Track if we have at least one target
         boolean hasTarget = false;
         
-        // Parse the level content line by line
-        String[] lines = levelContent.split("\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+        // Parse entries using central parser (handles comments and line breaks)
+        java.util.List<LevelFormatParser.LevelEntry> entries = LevelFormatParser.parseEntries(levelContent);
+        
+        for (LevelFormatParser.LevelEntry entry : entries) {
+            String type = entry.type;
+            String data = entry.data;
             
-            // Parse board dimensions
-            if (line.startsWith("board:")) {
-                String[] parts = line.substring(6, line.length() - 1).split(",");
-                if (parts.length == 2) {
-                    width = Integer.parseInt(parts[0]);
-                    height = Integer.parseInt(parts[1]);
-                    state = new GameState(width, height);
-                    Timber.d("[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d", levelId, width, height);
-                }
-                continue;
-            }
-            
-            // Parse horizontal walls (mh)
-            if (line.startsWith("mh")) {
-                String[] parts = line.substring(2, line.length() - 1).split(",");
-                if (parts.length == 2) {
-                    int x = Integer.parseInt(parts[0]);
-                    int y = Integer.parseInt(parts[1]);
-                    state.addHorizontalWall(x, y);
-                }
-                continue;
-            }
-            
-            // Parse vertical walls (mv)
-            if (line.startsWith("mv")) {
-                String[] parts = line.substring(2, line.length() - 1).split(",");
-                if (parts.length == 2) {
-                    int x = Integer.parseInt(parts[0]);
-                    int y = Integer.parseInt(parts[1]);
-                    state.addVerticalWall(x, y);
-                }
-                continue;
-            }
-            
-            // Parse targets
-            if (line.startsWith("target_")) {
-                // Format: target_color8,11;
-                // Extract color name (e.g., "yellow" from "target_yellow8,11;")
-                String colorPart = line.substring(7, line.indexOf(";"));
-                
-                // Find the first digit to separate color from coordinates
-                int digitPos = -1;
-                for (int i = 0; i < colorPart.length(); i++) {
-                    if (Character.isDigit(colorPart.charAt(i))) {
-                        digitPos = i;
-                        break;
+            try {
+                // Parse board dimensions
+                if (type.equals("board")) {
+                    // Remove leading colon if present (board:10,10 -> data=:10,10)
+                    String cleanData = data.startsWith(":") ? data.substring(1) : data;
+                    String[] parts = cleanData.split(",");
+                    if (parts.length == 2) {
+                        width = Integer.parseInt(parts[0]);
+                        height = Integer.parseInt(parts[1]);
+                        state = new GameState(width, height);
+                        Timber.d("[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d", levelId, width, height);
                     }
+                    continue;
                 }
                 
-                if (digitPos != -1) {
-                    String color = colorPart.substring(0, digitPos);
-                    String coordsStr = colorPart.substring(digitPos);
-                    String[] coords = coordsStr.split(",");
+                // Parse horizontal walls - new compact format (h) or legacy format (mh)
+                if (type.equals("h") || type.equals("mh")) {
+                    String[] parts = data.split(",");
+                    if (parts.length == 2) {
+                        int x = Integer.parseInt(parts[0]);
+                        int y = Integer.parseInt(parts[1]);
+                        state.addHorizontalWall(x, y);
+                    }
+                    continue;
+                }
+                
+                // Parse vertical walls - new compact format (v) or legacy format (mv)
+                if (type.equals("v") || type.equals("mv")) {
+                    String[] parts = data.split(",");
+                    if (parts.length == 2) {
+                        int x = Integer.parseInt(parts[0]);
+                        int y = Integer.parseInt(parts[1]);
+                        state.addVerticalWall(x, y);
+                    }
+                    continue;
+                }
+                
+                // Parse targets - new compact format (t) or legacy format (target_color)
+                if (type.startsWith("t")) {
+                    int colorId = -1;
+                    String coords = data;
                     
-                    if (coords.length == 2) {
-                        try {
-                            int x = Integer.parseInt(coords[0]);
-                            int y = Integer.parseInt(coords[1]);
-                            int colorId = -1;
-                            
-                            if (color.equals("red")) colorId = 0;
-                            else if (color.equals("green")) colorId = 1;
-                            else if (color.equals("blue")) colorId = 2;
-                            else if (color.equals("yellow")) colorId = 3;
-                            else if (color.equals("silver")) colorId = 4;
-                            
-                            if (colorId >= 0) {
-                                state.addTarget(x, y, colorId);
-                                hasTarget = true;
-                                Timber.d("[LEVEL LOADING] Adding %s target at (%d,%d)", color, x, y);
-                            }
-                        } catch (NumberFormatException e) {
-                            Timber.e(e, "[LEVEL LOADING] Error parsing target coordinates: %s", line);
+                    if (type.length() == 1) {
+                        // Compact format: tcolorX,Y; (e.g., tb8,7;)
+                        // First char of data is color, rest is coordinates
+                        if (data.length() >= 2) {
+                            colorId = parseColorChar(data.charAt(0));
+                            coords = data.substring(1);
+                        }
+                    } else if (type.startsWith("target_")) {
+                        // Legacy format: target_color (e.g., target_blue)
+                        String colorName = type.substring(7);
+                        colorId = parseColorName(colorName);
+                    }
+                    
+                    if (colorId >= 0) {
+                        String[] parts = coords.split(",");
+                        if (parts.length == 2) {
+                            int x = Integer.parseInt(parts[0]);
+                            int y = Integer.parseInt(parts[1]);
+                            state.addTarget(x, y, colorId);
+                            hasTarget = true;
                         }
                     }
-                } else {
-                    Timber.e("[LEVEL LOADING] Error parsing target line, no digits found: %s", line);
-                }
-                continue;
-            }
-            
-            // Parse robots
-            if (line.startsWith("robot_")) {
-                // Format: robot_color6,1;
-                // Extract color name (e.g., "red" from "robot_red6,1;")
-                String colorPart = line.substring(6, line.indexOf(";"));
-                
-                // Find the first digit to separate color from coordinates
-                int digitPos = -1;
-                for (int i = 0; i < colorPart.length(); i++) {
-                    if (Character.isDigit(colorPart.charAt(i))) {
-                        digitPos = i;
-                        break;
-                    }
+                    continue;
                 }
                 
-                if (digitPos != -1) {
-                    String color = colorPart.substring(0, digitPos);
-                    String coordsStr = colorPart.substring(digitPos);
-                    String[] coords = coordsStr.split(",");
+                // Parse robots - new compact format (r) or legacy format (robot_color)
+                if (type.startsWith("r")) {
+                    int colorId = -1;
+                    String coords = data;
                     
-                    if (coords.length == 2) {
-                        try {
-                            int x = Integer.parseInt(coords[0]);
-                            int y = Integer.parseInt(coords[1]);
-                            int colorId = -1;
-                            
-                            if (color.equals("red")) colorId = 0;
-                            else if (color.equals("green")) colorId = 1;
-                            else if (color.equals("blue")) colorId = 2;
-                            else if (color.equals("yellow")) colorId = 3;
-                            else if (color.equals("silver")) colorId = 4;
-                            
-                            if (colorId >= 0) {
-                                state.addRobot(x, y, colorId);
-                                Timber.d("[LEVEL LOADING] Adding %s robot at (%d,%d)", color, x, y);
-                            }
-                        } catch (NumberFormatException e) {
-                            Timber.e(e, "[LEVEL LOADING] Error parsing robot coordinates: %s", line);
+                    if (type.length() == 1) {
+                        // Compact format: rcolorX,Y; (e.g., rr1,5;)
+                        // First char of data is color, rest is coordinates
+                        if (data.length() >= 2) {
+                            colorId = parseColorChar(data.charAt(0));
+                            coords = data.substring(1);
+                        }
+                    } else if (type.startsWith("robot_")) {
+                        // Legacy format: robot_color (e.g., robot_red)
+                        String colorName = type.substring(6);
+                        colorId = parseColorName(colorName);
+                    }
+                    
+                    if (colorId >= 0) {
+                        String[] parts = coords.split(",");
+                        if (parts.length == 2) {
+                            int x = Integer.parseInt(parts[0]);
+                            int y = Integer.parseInt(parts[1]);
+                            state.addRobot(x, y, colorId);
                         }
                     }
-                } else {
-                    Timber.e("[LEVEL LOADING] Error parsing robot line, no digits found: %s", line);
+                    continue;
                 }
-                continue;
-            }
-            
-            // Parse predefined solution
-            if (line.startsWith("solution:")) {
-                String solutionStr = line.substring(9).trim();
-                state.setPredefinedSolution(solutionStr);
-                Timber.d("[LEVEL LOADING] Found predefined solution: %s", solutionStr);
-                continue;
-            }
-            
-            // Parse predefined number of moves
-            if (line.startsWith("num_moves:")) {
-                try {
-                    int numMoves = Integer.parseInt(line.substring(10).trim());
-                    state.setPredefinedNumMoves(numMoves);
-                    Timber.d("[LEVEL LOADING] Found predefined num_moves: %d", numMoves);
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "[LEVEL LOADING] Error parsing num_moves: %s", line);
+                
+                // Parse predefined solution
+                if (type.equals("solution")) {
+                    state.setPredefinedSolution(data);
+                    Timber.d("[LEVEL LOADING] Found predefined solution: %s", data);
+                    continue;
                 }
-                continue;
+                
+                // Parse predefined number of moves
+                if (type.equals("num_moves")) {
+                    try {
+                        int numMoves = Integer.parseInt(data);
+                        state.setPredefinedNumMoves(numMoves);
+                        Timber.d("[LEVEL LOADING] Found predefined num_moves: %d", numMoves);
+                    } catch (NumberFormatException e) {
+                        Timber.e(e, "[LEVEL LOADING] Error parsing num_moves: %s", data);
+                    }
+                    continue;
+                }
+            } catch (NumberFormatException e) {
+                Timber.e(e, "[LEVEL LOADING] Error parsing entry %s:%s", type, data);
             }
         }
         
@@ -1300,15 +1349,13 @@ public class GameState implements Serializable {
             sb.append("\n");
         }
         
-        // Add dedicated TARGET_SECTION section to make them explicit and easier to detect
-        sb.append("TARGET_SECTION:\n");
+        // Save targets in compact format: tcolorX,Y; (e.g., tb8,7;)
         int targetCount = 0;
-        // Save targets (position and color)
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (board[y][x] == Constants.TYPE_TARGET) {
-                    sb.append("TARGET_SECTION:").append(x).append(",").append(y)
-                           .append(",").append(targetColors[y][x]).append("\n");
+                    sb.append("t").append(getColorChar(targetColors[y][x]))
+                      .append(x).append(",").append(y).append(";");
                     targetCount++;
                     Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, targetColors[y][x]);
                 }
@@ -1322,28 +1369,27 @@ public class GameState implements Serializable {
             throw new IllegalStateException("[SAVE_DATA] Cannot save game: no targets found in game state");
         }
         
-        // Add WALLS section for achievements feature (find maps with same walls but different robots)
-        // NOTE: Walls are already in the board array above, but we save them separately here
-        // so that the wall signature can be extracted for achievement matching.
-        // During parsing, the WALLS section will be the authoritative source and board array
-        // walls will be removed to avoid duplicates.
-        sb.append("WALLS:\n");
-        // Save horizontal walls (y goes to height to include bottom boundary)
+        sb.append("\n");
+        
+        // Save walls in compact format: hX,Y; and vX,Y;
+        // Horizontal walls (y goes to height to include bottom boundary)
         for (int y = 0; y <= height; y++) {
             for (int x = 0; x < width; x++) {
                 if (hasHorizontalWall(x, y)) {
-                    sb.append("H,").append(x).append(",").append(y).append("\n");
+                    sb.append("h").append(x).append(",").append(y).append(";");
                 }
             }
         }
-        // Save vertical walls (x goes to width to include right boundary)
+        // Vertical walls (x goes to width to include right boundary)
         for (int y = 0; y < height; y++) {
             for (int x = 0; x <= width; x++) {
                 if (hasVerticalWall(x, y)) {
-                    sb.append("V,").append(x).append(",").append(y).append("\n");
+                    sb.append("v").append(x).append(",").append(y).append(";");
                 }
             }
         }
+        
+        sb.append("\n");
         
         // Determine which positions to serialize as initial robot positions.
         // IMPORTANT: initialRobotPositions MUST be set before serializing.
@@ -1355,28 +1401,55 @@ public class GameState implements Serializable {
         }
         Map<Integer, int[]> positionsToSerialize = initialRobotPositions;
 
-        // Add dedicated ROBOTS section
-        sb.append("ROBOTS:\n");
+        // Save robots in compact format: rcolorX,Y; (e.g., rr1,5;)
         for (Map.Entry<Integer, int[]> entry : positionsToSerialize.entrySet()) {
             int robotColor = entry.getKey();
             int[] position = entry.getValue();
-            sb.append(position[0]).append(",")
-                   .append(position[1]).append(",")
-                   .append(robotColor).append("\n");
-        }
-
-        // Add current robot positions as INITIAL_POSITIONS section for reference
-        // This maintains compatibility with the existing code
-        sb.append("INITIAL_POSITIONS:\n");
-        for (Map.Entry<Integer, int[]> entry : positionsToSerialize.entrySet()) {
-            int robotColor = entry.getKey();
-            int[] position = entry.getValue();
-            sb.append(position[0]).append(",")
-                   .append(position[1]).append(",")
-                   .append(robotColor).append("\n");
+            sb.append("r").append(getColorChar(robotColor))
+              .append(position[0]).append(",").append(position[1]).append(";");
         }
         
         return sb.toString();
+    }
+    
+    /**
+     * Helper method to convert color ID to single character for compact format
+     */
+    private static char getColorChar(int colorId) {
+        switch (colorId) {
+            case 0: return 'r'; // red
+            case 1: return 'g'; // green
+            case 2: return 'b'; // blue
+            case 3: return 'y'; // yellow
+            case 4: return 's'; // silver
+            default: return '?';
+        }
+    }
+    
+    /**
+     * Helper method to convert single character back to color ID
+     */
+    private static int parseColorChar(char colorChar) {
+        switch (colorChar) {
+            case 'r': return 0; // red
+            case 'g': return 1; // green
+            case 'b': return 2; // blue
+            case 'y': return 3; // yellow
+            case 's': return 4; // silver
+            default: return -1;
+        }
+    }
+    
+    /**
+     * Helper method to convert color name string to color ID (legacy format support)
+     */
+    private static int parseColorName(String color) {
+        if (color.equals("red")) return 0;
+        else if (color.equals("green")) return 1;
+        else if (color.equals("blue")) return 2;
+        else if (color.equals("yellow")) return 3;
+        else if (color.equals("silver")) return 4;
+        return -1;
     }
     
     /**
