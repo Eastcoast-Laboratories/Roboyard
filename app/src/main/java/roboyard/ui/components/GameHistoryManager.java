@@ -62,8 +62,13 @@ public class GameHistoryManager {
                     if (newMapSignature.equals(existing.getMapSignature())) {
                         // Same map found - only record completion if moves > 0 (game was actually played)
                         // Don't record completion for intermediate saves (e.g., when hints are shown)
+                        int countBefore = existing.getCompletionCount();
                         if (entry.getMovesMade() > 0) {
                             existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                            Timber.d("[HISTORY_FLOW] addHistoryEntry(existing): recordCompletion called, movesMade=%d, countBefore=%d, countAfter=%d",
+                                    entry.getMovesMade(), countBefore, existing.getCompletionCount());
+                        } else {
+                            Timber.d("[HISTORY_FLOW] addHistoryEntry(existing): movesMade=0, skipping recordCompletion, count stays %d", countBefore);
                         }
                         if (entry.getOptimalMoves() > 0) {
                             existing.setOptimalMoves(entry.getOptimalMoves());
@@ -121,6 +126,10 @@ public class GameHistoryManager {
                 // If game was completed (movesMade > 0), record the completion on the new entry
                 if (entry.getMovesMade() > 0) {
                     entry.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                    Timber.d("[HISTORY_FLOW] addHistoryEntry(new): recordCompletion called on new entry, movesMade=%d, countAfter=%d",
+                            entry.getMovesMade(), entry.getCompletionCount());
+                } else {
+                    Timber.d("[HISTORY_FLOW] addHistoryEntry(new): movesMade=0, new entry added with completionCount=0");
                 }
                 entries.add(entry);
             }

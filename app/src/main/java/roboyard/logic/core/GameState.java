@@ -756,11 +756,23 @@ public class GameState implements Serializable {
                     boardDataStarted = false; // Exit board data mode
                     continue;
                 } else if (line.equals("WALLS:")) {
-                    // New section for wall data
+                    // New section for wall data - authoritative source for walls
                     inRobotsSection = false;
                     inInitialPositionsSection = false;
                     boardDataStarted = false; // Exit board data mode
-                    Timber.d("Entering WALLS section");
+                    // Remove wall GameElements already added from board data to avoid duplicates
+                    // WALLS section is the authoritative source, same pattern as TARGET_SECTION
+                    int removedWalls = 0;
+                    Iterator<GameElement> wallIt = state.gameElements.iterator();
+                    while (wallIt.hasNext()) {
+                        int t = wallIt.next().getType();
+                        if (t == GameElement.TYPE_HORIZONTAL_WALL || t == GameElement.TYPE_VERTICAL_WALL) {
+                            wallIt.remove();
+                            removedWalls++;
+                        }
+                    }
+                    wallsAdded -= removedWalls;
+                    Timber.d("[MAPSIG] Entering WALLS section, removed %d duplicate wall GameElements from board data", removedWalls);
                     continue;
                 } else if (line.equals("TARGET_SECTION:")) {
                     // Entering targets section, exit other modes
@@ -1327,33 +1339,40 @@ public class GameState implements Serializable {
             }
         }
         
-        // Make sure initial robot positions are stored
-        if (initialRobotPositions == null || initialRobotPositions.isEmpty()) {
-            storeInitialRobotPositions();
-            Timber.d("Initial robot positions were not stored, storing them now");
+        // Determine which positions to serialize as initial robot positions.
+        // IMPORTANT: never call storeInitialRobotPositions() here - that would overwrite
+        // initialRobotPositions with current (possibly moved) positions, corrupting mapSignature.
+        Map<Integer, int[]> positionsToSerialize = initialRobotPositions;
+        if (positionsToSerialize == null || positionsToSerialize.isEmpty()) {
+            // initialRobotPositions not set - this is a bug, log it clearly
+            Timber.e("[MAPSIG] serialize(): initialRobotPositions is null/empty! Using current gameElement positions as fallback. mapSignature will be unreliable.");
+            positionsToSerialize = new HashMap<>();
+            for (GameElement element : gameElements) {
+                if (element.getType() == GameElement.TYPE_ROBOT) {
+                    positionsToSerialize.put(element.getColor(), new int[]{element.getX(), element.getY()});
+                }
+            }
         }
-        
+
         // Add dedicated ROBOTS section
         sb.append("ROBOTS:\n");
-        for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
+        for (Map.Entry<Integer, int[]> entry : positionsToSerialize.entrySet()) {
             int robotColor = entry.getKey();
             int[] position = entry.getValue();
             sb.append(position[0]).append(",")
                    .append(position[1]).append(",")
                    .append(robotColor).append("\n");
-            // Timber.d("Serializing initial position for robot color %d at (%d, %d)", robotColor, position[0], position[1]);
         }
-        
+
         // Add current robot positions as INITIAL_POSITIONS section for reference
         // This maintains compatibility with the existing code
         sb.append("INITIAL_POSITIONS:\n");
-        for (Map.Entry<Integer, int[]> entry : initialRobotPositions.entrySet()) {
+        for (Map.Entry<Integer, int[]> entry : positionsToSerialize.entrySet()) {
             int robotColor = entry.getKey();
             int[] position = entry.getValue();
             sb.append(position[0]).append(",")
                    .append(position[1]).append(",")
                    .append(robotColor).append("\n");
-            // Timber.d("Serializing initial position for robot color %d at (%d, %d)", robotColor, position[0], position[1]);
         }
         
         return sb.toString();

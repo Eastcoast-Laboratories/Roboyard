@@ -217,6 +217,117 @@ public class HistoryCompletionE2ETest {
         step("PASS", "testIntermediateSaveDoesNotMarkCompleted PASSED");
     }
 
+    // ==================== TEST 4 ====================
+
+    /**
+     * Full flow:
+     * 1. Start random game, make extra moves with a non-solution robot, then solve optimally
+     * 2. Open history, verify bestMoves and optimalMoves in info popup
+     * 3. Click the history entry to replay the same map
+     * 4. Click hint button, then solve optimally
+     * 5. Open history, verify everUsedHints=Yes and bestMoves improved
+     */
+    @Test
+    public void testBestMovesAndHintsTrackedCorrectly() throws InterruptedException {
+        step("SETUP", "Starting random game via UI button");
+        onView(withId(R.id.ui_button)).perform(click());
+        Thread.sleep(4000);
+
+        step("SOL", "Waiting for AI solution");
+        GameSolution solution = waitForSolution(20);
+        assertNotNull(TAG + " Solution must be available", solution);
+        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
+        int optimalMoveCount = solution.getMoves().size();
+        step("SOL", "Optimal solution: " + optimalMoveCount + " moves");
+
+        step("EXTRA", "Making extra moves with a non-solution robot");
+        int extraMoves = makeExtraMovesWithNonSolutionRobot(solution);
+        step("EXTRA", "Made " + extraMoves + " extra moves");
+        Thread.sleep(500);
+
+        step("PLAY1", "Playing optimal solution");
+        playAllMoves(solution);
+        Thread.sleep(3000);
+
+        assertTrue(TAG + " Game must be complete after solution",
+                Boolean.TRUE.equals(gameStateManager.isGameComplete().getValue()));
+
+        // totalMoves1 = actual move count reported by gameStateManager after completion
+        int totalMoves1 = gameStateManager.getMoveCount().getValue() != null
+                ? gameStateManager.getMoveCount().getValue() : (extraMoves + optimalMoveCount);
+        step("PLAY1", "Total moves in play 1: " + totalMoves1 + " (extraMoves=" + extraMoves + ", optimal=" + optimalMoveCount + ")");
+
+        step("HIST1", "Navigating to history tab");
+        navigateToHistoryTab();
+        Thread.sleep(2000);
+
+        step("HIST1", "Clicking info button on first history entry");
+        onView(withId(R.id.save_slot_recycler_view))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,
+                        new ClickChildViewWithId(R.id.info_button)));
+        Thread.sleep(1000);
+
+        // Verify bestMoves and optimalMoves are shown
+        onView(withText(containsString("Optimal moves: " + optimalMoveCount))).check(matches(isDisplayed()));
+        onView(withText(containsString("Best moves: " + totalMoves1))).check(matches(isDisplayed()));
+        step("HIST1", "PASS: bestMoves=" + totalMoves1 + ", optimalMoves=" + optimalMoveCount + " shown correctly");
+
+        // Dismiss popup by pressing back
+        androidx.test.espresso.Espresso.pressBack();
+        Thread.sleep(500);
+
+        step("REPLAY", "Clicking history entry to replay same map");
+        onView(withId(R.id.save_slot_recycler_view))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        Thread.sleep(4000);
+
+        step("REPLAY", "Waiting for solution on replayed map");
+        GameSolution solution2 = waitForSolution(20);
+        assertNotNull(TAG + " Solution must be available for replay", solution2);
+        int optimalMoveCount2 = solution2.getMoves().size();
+        step("REPLAY", "Replay solution: " + optimalMoveCount2 + " moves");
+
+        step("HINT", "Clicking hint button");
+        onView(withId(R.id.hint_button)).perform(click());
+        Thread.sleep(2000);
+
+        step("PLAY2", "Playing optimal solution on replayed map");
+        playAllMoves(solution2);
+        Thread.sleep(3000);
+
+        assertTrue(TAG + " Game must be complete after replay solution",
+                Boolean.TRUE.equals(gameStateManager.isGameComplete().getValue()));
+
+        step("HIST2", "Navigating to history tab after replay");
+        navigateToHistoryTab();
+        Thread.sleep(2000);
+
+        step("HIST2", "Clicking info button on first history entry");
+        onView(withId(R.id.save_slot_recycler_view))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0,
+                        new ClickChildViewWithId(R.id.info_button)));
+        Thread.sleep(1000);
+
+        // Verify everUsedHints=Yes
+        onView(withText(containsString("Hints ever used (all attempts): Yes"))).check(matches(isDisplayed()));
+        step("HIST2", "PASS: everUsedHints=Yes shown correctly");
+
+        // Verify bestMoves improved (replay was optimal, play1 had extra moves)
+        // Only check if extraMoves > 0 (otherwise play1 was already optimal, no improvement possible)
+        if (extraMoves > 0) {
+            onView(withText(containsString("Best moves: " + optimalMoveCount2))).check(matches(isDisplayed()));
+            step("HIST2", "PASS: bestMoves improved to " + optimalMoveCount2);
+        } else {
+            step("HIST2", "SKIP: no extra moves were possible (all directions blocked), bestMoves check skipped");
+        }
+
+        // Verify completions = 2
+        onView(withText(containsString("Completions: 2"))).check(matches(isDisplayed()));
+        step("HIST2", "PASS: Completions=2 shown correctly");
+
+        step("PASS", "testBestMovesAndHintsTrackedCorrectly PASSED");
+    }
+
     // ==================== HELPERS ====================
 
     private void step(String step, String msg) {
@@ -304,6 +415,68 @@ public class HistoryCompletionE2ETest {
             }
             gameStateManager.moveRobotInDirection(dx, dy);
         });
+    }
+
+    /**
+     * Finds a robot NOT involved in the solution and moves it in all 4 directions.
+     * Returns the number of actual moves made (walls may block some).
+     */
+    private int makeExtraMovesWithNonSolutionRobot(GameSolution solution) throws InterruptedException {
+        AtomicReference<Integer> movesRef = new AtomicReference<>(0);
+
+        // Collect colors used in the solution
+        java.util.Set<Integer> solutionColors = new java.util.HashSet<>();
+        for (IGameMove m : solution.getMoves()) {
+            if (m instanceof RRGameMove) {
+                solutionColors.add(((RRGameMove) m).getColor());
+            }
+        }
+
+        // Find a robot not in the solution
+        AtomicReference<GameElement> nonSolutionRobot = new AtomicReference<>(null);
+        activityRule.getScenario().onActivity(a -> {
+            GameState state = gameStateManager.getCurrentState().getValue();
+            if (state == null) return;
+            for (GameElement el : state.getGameElements()) {
+                if (el.getType() == Constants.TYPE_ROBOT && !solutionColors.contains(el.getColor())) {
+                    nonSolutionRobot.set(el);
+                    break;
+                }
+            }
+        });
+
+        if (nonSolutionRobot.get() == null) {
+            step("EXTRA", "No non-solution robot found, skipping extra moves");
+            return 0;
+        }
+
+        step("EXTRA", "Moving non-solution robot (color=" + nonSolutionRobot.get().getColor() + ") in all 4 directions");
+
+        int startMoveCount = gameStateManager.getMoveCount().getValue() != null
+                ? gameStateManager.getMoveCount().getValue() : 0;
+
+        // Move in all 4 directions: up, right, down, left
+        int[][] directions = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+        for (int[] dir : directions) {
+            activityRule.getScenario().onActivity(a -> {
+                GameState state = gameStateManager.getCurrentState().getValue();
+                if (state == null) return;
+                // Re-select the non-solution robot by color each time (position may have changed)
+                for (GameElement el : state.getGameElements()) {
+                    if (el.getType() == Constants.TYPE_ROBOT
+                            && el.getColor() == nonSolutionRobot.get().getColor()) {
+                        state.setSelectedRobot(el);
+                        break;
+                    }
+                }
+                gameStateManager.moveRobotInDirection(dir[0], dir[1]);
+            });
+            Thread.sleep(600);
+        }
+
+        int endMoveCount = gameStateManager.getMoveCount().getValue() != null
+                ? gameStateManager.getMoveCount().getValue() : 0;
+        return endMoveCount - startMoveCount; // return only the extra moves delta
     }
 
     private List<GameHistoryEntry> getHistoryEntries() {

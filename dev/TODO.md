@@ -104,3 +104,9 @@ baue die bestehende history so um,
 - in den savegames soll auch gespeichert werden, wenn noch nciht vorhanden, wieviel züge man gebraucht hat, ob die karte beim ersten mal ohne hints gelöst wurde und wie gut dabei beim ersten mal ohne hints. wenn sie später noch mal besser gelöst wurde auch wieder ob ohne hints. und alle nötigen deatils, die man  für acheivements benötigen könnte (DRY mit der history)
 
 - im savescreen ergänze bei jedem eintrag der savegames und der history (DRY) einen info button (i  im kreis) wenn man darauf tippt ein popup, das  alle details zu der map bzgl. hint benutzung, wie oft und wann gelöst, wei schnell, mit wieviel zuegen undn was die optimalen züge gewesen wären, und ob der movecount aktiv war auflistet gut lesbar aufbereitet und  prasentiert mit allen details bis zu sekunden und welchen hint genau und so weiter. 
+
+-  ergänze logs, die zeigen, wenn er die map aktualisiert mit den daten vorher und nachher, es msste der best mve ja verrbessert werden bei dem speichervorgang. 
+
+verbessere den test, so dass du die logs sehen kannst und berprüfe, dass er wirklich die selbe map daten akualisiert
+
+2. first played ist noch falsch, das ist anscheinend der erste move, den man gemacht hat, wo die map das erste mal gespeichert wurde, aber innerhalb des selben spiels wird dann last played gespeihert, das interressiert in der info box nicht. es interressiert nur, wann ein spiel gelöst wurde, Ich weis nicht ob dieser wert der im moment bei "first played" angezeigt wird überhaupt gespeichert werden muss, es scheint, dass er innerhalb des selben spiels schon 2 einträge erzeugt in der liste in einem history eintrag, enaml beim ersten move und dann immer bei den weiteren mves . er sollte aber in einem history eintrag nur den selben eintrag aktualisieren anstatt einen neuen anzulegen innerhalb des history savegames
