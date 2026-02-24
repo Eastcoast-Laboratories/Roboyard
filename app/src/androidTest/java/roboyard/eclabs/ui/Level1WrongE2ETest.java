@@ -60,7 +60,9 @@ public class Level1WrongE2ETest {
     @Test
     public void testLevel1WrongMoves_LevelNotCompleted() throws InterruptedException {
         Timber.d("[E2E_WRONG] Starting wrong moves test");
-        Thread.sleep(200);
+        
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Navigate to Level 1
         onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());

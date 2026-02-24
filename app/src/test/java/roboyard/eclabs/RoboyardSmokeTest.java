@@ -779,4 +779,81 @@ public class RoboyardSmokeTest {
             return System.currentTimeMillis();
         }
     }
+
+    // ========================================================================
+    // LevelFormatParser Tests
+    // ========================================================================
+
+    @Test
+    public void testLevelFormatParser_newCompactFormat() {
+        String content = "tb9,0;h0,0;h1,0;v0,0;rr1,3;rg4,1;rb8,5;ry6,13;";
+        java.util.List<roboyard.logic.core.LevelFormatParser.LevelEntry> entries =
+            roboyard.logic.core.LevelFormatParser.parseEntries(content);
+
+        // Find target entries
+        int targetCount = 0;
+        int robotCount = 0;
+        int wallCount = 0;
+        for (roboyard.logic.core.LevelFormatParser.LevelEntry e : entries) {
+            if (e.type.startsWith("t") && e.type.length() == 2) targetCount++;
+            else if (e.type.startsWith("r") && e.type.length() == 2) robotCount++;
+            else if (e.type.equals("h") || e.type.equals("v")) wallCount++;
+        }
+        assertEquals("Should find 1 target", 1, targetCount);
+        assertEquals("Should find 4 robots", 4, robotCount);
+        assertEquals("Should find 3 walls", 3, wallCount);
+    }
+
+    @Test
+    public void testLevelFormatParser_saveDataWithBoardAndComments() {
+        // Simulate actual save data format
+        String saveData = "#MAPNAME:NETAQ;TIME:2633;MOVES:0\n" +
+            "WIDTH:12;\n" +
+            "HEIGHT:14;\n" +
+            "0,0,0,0,0,0,0,0,0,2:2,0,0\n" +
+            "0,0,0,0,0,0,0,0,0,0,0,0\n" +
+            "tb9,0;\n" +
+            "h0,0;h1,0;v0,0;v12,0;\n" +
+            "rr1,3;rg4,1;rb8,5;ry6,13;";
+
+        java.util.List<roboyard.logic.core.LevelFormatParser.LevelEntry> entries =
+            roboyard.logic.core.LevelFormatParser.parseEntries(saveData);
+
+        // Count entries by type
+        int targetCount = 0;
+        int robotCount = 0;
+        int hWallCount = 0;
+        int vWallCount = 0;
+        for (roboyard.logic.core.LevelFormatParser.LevelEntry e : entries) {
+            if (e.type.equals("tb")) targetCount++;
+            else if (e.type.equals("rr") || e.type.equals("rg") || e.type.equals("rb") || e.type.equals("ry")) robotCount++;
+            else if (e.type.equals("h")) hWallCount++;
+            else if (e.type.equals("v")) vWallCount++;
+        }
+        assertEquals("Should find 1 target (tb9,0)", 1, targetCount);
+        assertEquals("Should find 4 robots", 4, robotCount);
+        assertEquals("Should find 2 h-walls", 2, hWallCount);
+        assertEquals("Should find 2 v-walls", 2, vWallCount);
+    }
+
+    @Test
+    public void testLevelFormatParser_commentRemoval() {
+        // First line starting with # should be removed
+        String content = "#MAPNAME:TEST;mh0,0;mh1,0;\ntb9,0;\nh0,0;";
+        java.util.List<roboyard.logic.core.LevelFormatParser.LevelEntry> entries =
+            roboyard.logic.core.LevelFormatParser.parseEntries(content);
+
+        // The #-line should be removed, so mh entries should NOT appear
+        boolean hasMh = false;
+        boolean hasTb = false;
+        boolean hasH = false;
+        for (roboyard.logic.core.LevelFormatParser.LevelEntry e : entries) {
+            if (e.type.equals("mh")) hasMh = true;
+            if (e.type.equals("tb")) hasTb = true;
+            if (e.type.equals("h")) hasH = true;
+        }
+        assertFalse("mh entries from comment line should be removed", hasMh);
+        assertTrue("tb entry should be found", hasTb);
+        assertTrue("h entry should be found", hasH);
+    }
 }

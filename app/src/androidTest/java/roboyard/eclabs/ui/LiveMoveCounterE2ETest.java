@@ -70,8 +70,8 @@ public class LiveMoveCounterE2ETest {
     }
 
     private void navigateToLevel1() throws InterruptedException {
-        // Wait for main menu to fully load and buttons to become visible
-        Thread.sleep(2000);
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Click "Level Game" button on main menu (use programmatic click to avoid visibility issues)
         activityRule.getScenario().onActivity(activity -> {

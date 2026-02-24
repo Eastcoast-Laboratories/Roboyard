@@ -69,7 +69,9 @@ public class Level10E2ETest {
     @Test
     public void testComplete10Levels_Unlocks3Star10LevelsAchievement() throws InterruptedException {
         Timber.d("[E2E_10LEVELS] Starting 10 levels completion test");
-        Thread.sleep(200);
+        
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Navigate to Level 1
         onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());

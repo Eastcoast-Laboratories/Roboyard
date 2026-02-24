@@ -71,7 +71,9 @@ public class Level111DebugTest {
     @Test
     public void testLevel111_DebugSolverSolution() throws InterruptedException {
         Timber.d("[LEVEL111_DEBUG] Starting Level 111 debug test");
-        Thread.sleep(1000);
+        
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Navigate to Level Selection
         try {

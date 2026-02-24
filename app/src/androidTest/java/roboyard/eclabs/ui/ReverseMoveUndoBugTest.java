@@ -54,7 +54,8 @@ public class ReverseMoveUndoBugTest {
 
     @Before
     public void setUp() throws InterruptedException {
-        Thread.sleep(200);
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
 
         // Navigate to Level 1
         onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());

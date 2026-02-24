@@ -136,6 +136,9 @@ public class LevelEditorDebugTest {
     public void testLongPressOnLevelSelectionTitleDoesNothing() throws InterruptedException {
         Timber.d("[TEST_LEVEL_EDITOR] Starting longpress removal test");
 
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
+
         // Step 1: Navigate to Level Selection (click Level Game button)
         Timber.d("[TEST_LEVEL_EDITOR] Step 1: Clicking Level Game button");
         onView(withId(R.id.level_game_button)).perform(click());

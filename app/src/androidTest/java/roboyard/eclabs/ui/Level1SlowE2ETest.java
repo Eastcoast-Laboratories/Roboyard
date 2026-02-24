@@ -60,7 +60,9 @@ public class Level1SlowE2ETest {
     @Test
     public void testLevel1SlowCompletion_OnlyLevelAchievement() throws InterruptedException {
         Timber.d("[E2E_SLOW] Starting slow completion test (>30s)");
-        Thread.sleep(200);
+        
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Navigate to Level 1
         onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());

@@ -69,7 +69,9 @@ public class Level11With2StarsE2ETest {
     @Test
     public void testLevel11With2StarsInLevel1_3StarAchievementNotUnlocked() throws InterruptedException {
         Timber.d("[E2E_2STARS] Starting test: 11 levels with only 2 stars in level 1");
-        Thread.sleep(1000);
+        
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Navigate to Level 1 - click level game button
         try {

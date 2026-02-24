@@ -96,7 +96,9 @@ public class GameModeMemoryE2ETest {
         
         // Step 1: Close streak popup if shown
         closeStreakPopupIfPresent();
-        Thread.sleep(1000);
+        
+        // Close achievement popup if present
+        TestHelper.closeAchievementPopupIfPresent();
         
         // Step 2: Click on "Level Game" button to go to level selection
         Timber.d("[GAME_MODE_E2E] Step 2: Clicking Level Game button");
