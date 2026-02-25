@@ -143,7 +143,7 @@ public class MainFragmentActivity extends AppCompatActivity {
     }
     
     @Override
-    protected void onNewIntent(Intent intent) {
+    public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         // Handle the new intent, e.g., if the app was already running and a new deep link is clicked
         handleIntent(intent);

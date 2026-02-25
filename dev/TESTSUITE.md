@@ -53,8 +53,9 @@ These tests run on the JVM without an Android device or emulator.
 | `AchievementPopupMarginTest`  | ✅ Passing | 4     | Linear interpolation for AchievementPopup topMargin across screen sizes and orientations.                                                                                                                          | achievement-popup, ui-layout, responsive-design, interpolation                |
 | `AchievementPopupPaddingTest` | ✅ Passing | 5     | Horizontal padding scaling via linear interpolation across screen widths with min/max clamping.                                                                                                                    | achievement-popup, ui-layout, responsive-design, padding, interpolation       |
 | `SpecialTargetSaveLoadTest`   | ✅ Passing | 5     | Silver robot+target, multi-color target (COLOR_MULTI=-1) serialize as 'ts'/'tm', 2 targets with 1 robot, board targetColors array, synchronizeTargets preserves silver color.                                      | save, load, serialization, silver, multi-color, target, robot, edge-cases     |
+| `DeepLinkBoardParsingTest`    | ✅ Passing | 10    | Deep-link compact format parsing: board:W,H; entry extraction, 12x12 board parsing (not 8x8), robot/target/wall counts, small/large board sizes, compact format detection.                                         | deep-link, board-size, compact-format, parsing, unit-test                     |
 
-**Total unit tests: ~116 in 10 files, all passing.**
+**Total unit tests: ~126 in 11 files, all passing.**
 
 ---
 
@@ -86,6 +87,7 @@ These tests require a connected Android device or emulator.
 | `RandomGame11E2ETest`         | ✅ Passing                | 1     | 11 random games testing `perfect_random_games_10` and `no_hints_streak_random_10` achievements. Long-running.      | e2e, random-game, achievement, hint-system, streak                    |
 | `TimerPersistenceE2ETest`     | ✅ Passing                | 1     | Timer persists when navigating to menu and back.                                                                   | e2e, timer, navigation, persistence, random-game                      |
 | `LoadGameDifficultyTest`      | ✅ Passing                | 2     | Loading a saved game bypasses min/max move validation and shows the saved difficulty.                              | e2e, save-load, difficulty, random-game, settings                     |
+| `DeepLinkBoardSizeE2ETest`    | ✅ Passing                | 5     | Deep-link with board:12,12; loads correctly as 12x12 (not 8x8). Verifies board dimensions, robot movement beyond 8x8, target accessibility, element loading. | e2e, deep-link, board-size, compact-format, ui-movement, espresso     |
 | `AchievementsFragmentTest`    | ✅ Passing                | 7     | Achievements screen navigation, list display, back button, filter/tab switching.                                   | achievements, ui, fragment, navigation, espresso                      |
 | `AlternativeLayoutTest`       | ✅ Passing                | 1     | Enable alt layout in debug settings, verify correct widget types in game screen.                                   | ui, settings, debug-settings, alternative-layout, espresso            |
 | `BackgroundSoundSettingsTest` | ✅ Passing                | 2     | Sound settings SeekBar display and persistence to Preferences.                                                     | ui, settings, sound, seekbar, espresso                                |
