@@ -221,13 +221,17 @@ public class LevelDesignEditorFragment extends Fragment {
         
         targetColorRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.target_red_radio) {
-                currentTargetColor = 0;
+                currentTargetColor = Constants.COLOR_PINK;
             } else if (checkedId == R.id.target_green_radio) {
-                currentTargetColor = 1;
+                currentTargetColor = Constants.COLOR_GREEN;
             } else if (checkedId == R.id.target_blue_radio) {
-                currentTargetColor = 2;
+                currentTargetColor = Constants.COLOR_BLUE;
             } else if (checkedId == R.id.target_yellow_radio) {
-                currentTargetColor = 3;
+                currentTargetColor = Constants.COLOR_YELLOW;
+            } else if (checkedId == R.id.target_silver_radio) {
+                currentTargetColor = Constants.COLOR_SILVER;
+            } else if (checkedId == R.id.target_multi_radio) {
+                currentTargetColor = Constants.COLOR_MULTI;
             }
         });
     }
@@ -1489,6 +1493,7 @@ public class LevelDesignEditorFragment extends Fragment {
      */
     private char getColorChar(int colorId) {
         switch (colorId) {
+            case -1: return 'm'; // multi (COLOR_MULTI)
             case 0: return 'r'; // red
             case 1: return 'g'; // green
             case 2: return 'b'; // blue
@@ -1702,6 +1707,7 @@ public class LevelDesignEditorFragment extends Fragment {
     
     private String getColorName(int colorIndex) {
         switch (colorIndex) {
+            case Constants.COLOR_MULTI: return "Multi";
             case Constants.COLOR_PINK: return "Red";
             case Constants.COLOR_GREEN: return "Green";
             case Constants.COLOR_BLUE: return "Blue";

@@ -773,6 +773,7 @@
     <string name="editor_color_blue">Blue</string>
     <string name="editor_color_yellow">Yellow</string>
     <string name="editor_color_silver">Silver</string>
+    <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Load Autosave</string>
     <string name="editor_cancel">Cancel</string>
     <string name="editor_random_robots_targets">Random Robots &amp; Targets</string>

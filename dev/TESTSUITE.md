@@ -52,8 +52,9 @@ These tests run on the JVM without an Android device or emulator.
 | `SyncManagerTest`             | ✅ Passing | ~8    | Save data parsing, map name extraction, streak/sync logic without Android context. Note: JSON tests are in androidTest (org.json not available in JVM).                                                            | sync, parsing, save-data, streak, timestamp, url-construction                 |
 | `AchievementPopupMarginTest`  | ✅ Passing | 4     | Linear interpolation for AchievementPopup topMargin across screen sizes and orientations.                                                                                                                          | achievement-popup, ui-layout, responsive-design, interpolation                |
 | `AchievementPopupPaddingTest` | ✅ Passing | 5     | Horizontal padding scaling via linear interpolation across screen widths with min/max clamping.                                                                                                                    | achievement-popup, ui-layout, responsive-design, padding, interpolation       |
+| `SpecialTargetSaveLoadTest`   | ✅ Passing | 5     | Silver robot+target, multi-color target (COLOR_MULTI=-1) serialize as 'ts'/'tm', 2 targets with 1 robot, board targetColors array, synchronizeTargets preserves silver color.                                      | save, load, serialization, silver, multi-color, target, robot, edge-cases     |
 
-**Total unit tests: ~111 in 9 files, all passing.**
+**Total unit tests: ~116 in 10 files, all passing.**
 
 ---
 

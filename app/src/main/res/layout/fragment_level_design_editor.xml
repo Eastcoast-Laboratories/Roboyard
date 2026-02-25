@@ -276,9 +276,9 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/editor_color_pink"
-                android:textColor="#CCCCCC"
-                android:textSize="12sp"
+                android:text="P"
+                android:textColor="#FF69B4"
+                android:textSize="10sp"
                 android:checked="true" />
 
             <RadioButton
@@ -286,27 +286,45 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/editor_color_green"
-                android:textColor="#CCCCCC"
-                android:textSize="12sp" />
+                android:text="G"
+                android:textColor="#00FF00"
+                android:textSize="10sp" />
 
             <RadioButton
                 android:id="@+id/target_blue_radio"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/editor_color_blue"
-                android:textColor="#CCCCCC"
-                android:textSize="12sp" />
+                android:text="B"
+                android:textColor="#4488FF"
+                android:textSize="10sp" />
 
             <RadioButton
                 android:id="@+id/target_yellow_radio"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/editor_color_yellow"
-                android:textColor="#CCCCCC"
-                android:textSize="12sp" />
+                android:text="Y"
+                android:textColor="#FFFF00"
+                android:textSize="10sp" />
+
+            <RadioButton
+                android:id="@+id/target_silver_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="S"
+                android:textColor="#C0C0C0"
+                android:textSize="10sp" />
+
+            <RadioButton
+                android:id="@+id/target_multi_radio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="M"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
         </RadioGroup>
 
         <!-- Board Preview Section -->
