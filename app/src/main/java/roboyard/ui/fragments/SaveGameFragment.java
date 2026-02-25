@@ -11,9 +11,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +67,13 @@ public class SaveGameFragment extends BaseGameFragment {
     private TabLayout tabLayout;
     private RecyclerView saveSlotRecyclerView;
     private Button backButton;
+    private LinearLayout historyFilterHeader;
+    private Spinner sortSpinner;
+    private Spinner filterSpinner;
+    private LinearLayout paginationControls;
+    private Button prevPageButton;
+    private Button nextPageButton;
+    private TextView pageInfoText;
     
     // Adapters
     private SaveSlotAdapter saveSlotAdapter;
@@ -73,6 +84,46 @@ public class SaveGameFragment extends BaseGameFragment {
     
     private GameStateManager gameStateManager;
     private final List<SaveSlotInfo> saveSlots = new ArrayList<>();
+    
+    // Pagination and filtering state
+    private static final int ITEMS_PER_PAGE = 10;
+    private int currentPage = 0;
+    private int totalPages = 0;
+    private List<GameHistoryEntry> allHistoryEntries = new ArrayList<>();
+    private List<GameHistoryEntry> filteredHistoryEntries = new ArrayList<>();
+    
+    // Sort/Filter options
+    private enum SortOption {
+        LAST_SOLVED("Last Solved"),
+        LONGEST_FIRST_ATTEMPT("Longest First Attempt"),
+        OPTIMAL_NOT_FOUND("Optimal Not Found"),
+        UNSOLVED("Unsolved");
+        
+        private final String label;
+        SortOption(String label) {
+            this.label = label;
+        }
+        public String getLabel() {
+            return label;
+        }
+    }
+    
+    private enum FilterOption {
+        ALL("All"),
+        OPTIMAL_NOT_FOUND("Optimal Not Found"),
+        UNSOLVED("Unsolved");
+        
+        private final String label;
+        FilterOption(String label) {
+            this.label = label;
+        }
+        public String getLabel() {
+            return label;
+        }
+    }
+    
+    private SortOption currentSort = SortOption.LAST_SOLVED;
+    private FilterOption currentFilter = FilterOption.ALL;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -119,12 +170,22 @@ public class SaveGameFragment extends BaseGameFragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         saveSlotRecyclerView = view.findViewById(R.id.save_slot_recycler_view);
         backButton = view.findViewById(R.id.back_button);
+        historyFilterHeader = view.findViewById(R.id.history_filter_header);
+        sortSpinner = view.findViewById(R.id.sort_spinner);
+        filterSpinner = view.findViewById(R.id.filter_spinner);
+        paginationControls = view.findViewById(R.id.pagination_controls);
+        prevPageButton = view.findViewById(R.id.prev_page_button);
+        nextPageButton = view.findViewById(R.id.next_page_button);
+        pageInfoText = view.findViewById(R.id.page_info_text);
         
         // Set up tabs
         setupTabs();
         
         // Set up RecyclerView
         setupRecyclerView();
+        
+        // Set up sort/filter spinners
+        setupSortFilterSpinners();
         
         // Set up back button
         backButton.setOnClickListener(v -> {
@@ -261,6 +322,12 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private void updateTabContent(int tabPosition) {
         Timber.d("[SaveGameFragment] Updating tab content for position: %d", tabPosition);
+        boolean isHistoryTab = (tabPosition == 1);
+        
+        // Show/hide sort/filter header and pagination controls
+        historyFilterHeader.setVisibility(isHistoryTab ? View.VISIBLE : View.GONE);
+        paginationControls.setVisibility(isHistoryTab ? View.VISIBLE : View.GONE);
+        
         if (saveMode) {
             // Save mode tabs: Save (0) or History (1)
             if (tabPosition == 0) {
@@ -511,60 +578,188 @@ public class SaveGameFragment extends BaseGameFragment {
             // Load history entries
             List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(requireActivity());
             
-            // If we have history entries, add them to the adapter
-            if (historyEntries != null && !historyEntries.isEmpty()) {
-                List<HistoryEntry> entries = new ArrayList<>();
-                for (GameHistoryEntry entry : historyEntries) {
-                    String name = entry.getMapName();
-                    int moves = entry.getMovesMade();
-                    String mapPath = entry.getMapPath();
-                    
-                    // Resolve to absolute path for loadAbsoluteData
-                    String absolutePath = mapPath;
-                    if (mapPath != null && !mapPath.startsWith("/")) {
-                        absolutePath = requireContext().getFileStreamPath(mapPath).getAbsolutePath();
-                    }
-                    
-                    // Extract metadata using shared method (DRY - same as save slots)
-                    String saveData = FileReadWrite.loadAbsoluteData(absolutePath);
-                    SaveDataMetadata meta = extractSaveMetadata(saveData, absolutePath);
-                    
-                    // Use map name from metadata if entry name is missing
-                    if ((name == null || name.isEmpty()) && meta.mapName != null) {
-                        name = meta.mapName;
-                    }
-
-                    // Completion status from GameHistoryEntry (authoritative), not from savegame SOLVED flag
-                    String completionStatus;
-                    if (entry.getCompletionCount() > 0) {
-                        completionStatus = entry.getCompletionCount() == 1
-                                ? getString(R.string.history_completed_once)
-                                : getString(R.string.history_completed_times, entry.getCompletionCount());
-                    } else {
-                        completionStatus = getString(R.string.history_not_completed);
-                    }
-
-                    // Difficulty from GameHistoryEntry (saved at game start), fallback to savegame metadata
-                    String difficulty = !entry.getDifficulty().isEmpty() ? entry.getDifficulty() : meta.difficulty;
-
-                    HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
-                            meta.boardSize, mapPath, meta.minimap, difficulty, completionStatus, entry);
-                    entries.add(historyEntry);
-                }
-                
-                // Update the adapter
-                historyAdapter.updateHistoryEntries(entries);
-                historyAdapter.notifyDataSetChanged();
-            } else {
-                // No history entries - clear the adapter
-                historyAdapter.updateHistoryEntries(new ArrayList<>());
-            }
+            // Store all entries for filtering/sorting
+            allHistoryEntries = historyEntries != null ? historyEntries : new ArrayList<>();
+            
+            // Apply filter and sort (which will also update pagination UI)
+            applyFilterAndSort();
         } catch (Exception e) {
             Timber.e(e, "Error loading history entries");
         }
     }
     
     // createMinimapFromPath is inherited from BaseGameFragment (DRY)
+    
+    /**
+     * Set up sort and filter spinners for history tab
+     */
+    private void setupSortFilterSpinners() {
+        // Sort spinner
+        ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item,
+                new String[]{"Last Solved", "Longest First Attempt", "Optimal Not Found", "Unsolved"});
+        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(sortAdapter);
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentSort = SortOption.values()[position];
+                currentPage = 0;
+                applyFilterAndSort();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        
+        // Filter spinner
+        ArrayAdapter<String> filterAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item,
+                new String[]{"All", "Optimal Not Found", "Unsolved"});
+        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterSpinner.setAdapter(filterAdapter);
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentFilter = FilterOption.values()[position];
+                currentPage = 0;
+                applyFilterAndSort();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        
+        // Pagination buttons
+        prevPageButton.setOnClickListener(v -> {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePaginationUI();
+            }
+        });
+        
+        nextPageButton.setOnClickListener(v -> {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                updatePaginationUI();
+            }
+        });
+    }
+    
+    /**
+     * Apply sort and filter to history entries, then update pagination
+     */
+    private void applyFilterAndSort() {
+        // Filter out level saves (entries with mapName starting with "Level")
+        List<GameHistoryEntry> nonLevelEntries = new ArrayList<>();
+        for (GameHistoryEntry entry : allHistoryEntries) {
+            String mapName = entry.getMapName();
+            if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
+                nonLevelEntries.add(entry);
+            }
+        }
+        
+        // Apply additional filter based on currentFilter
+        filteredHistoryEntries = new ArrayList<>();
+        for (GameHistoryEntry entry : nonLevelEntries) {
+            switch (currentFilter) {
+                case ALL:
+                    filteredHistoryEntries.add(entry);
+                    break;
+                case OPTIMAL_NOT_FOUND:
+                    // Optimal not found = no optimal moves recorded (0 means unknown/not found)
+                    if (entry.getOptimalMoves() == 0) {
+                        filteredHistoryEntries.add(entry);
+                    }
+                    break;
+                case UNSOLVED:
+                    if (entry.getCompletionCount() == 0) {
+                        filteredHistoryEntries.add(entry);
+                    }
+                    break;
+            }
+        }
+        
+        // Apply sort
+        switch (currentSort) {
+            case LAST_SOLVED:
+                filteredHistoryEntries.sort((a, b) -> Long.compare(b.getLastCompletionTimestamp(), a.getLastCompletionTimestamp()));
+                break;
+            case LONGEST_FIRST_ATTEMPT:
+                filteredHistoryEntries.sort((a, b) -> Integer.compare(b.getBestTime(), a.getBestTime()));
+                break;
+            case OPTIMAL_NOT_FOUND:
+                // Sort by optimal moves (0 = not found, higher = found)
+                filteredHistoryEntries.sort((a, b) -> Integer.compare(a.getOptimalMoves(), b.getOptimalMoves()));
+                break;
+            case UNSOLVED:
+                filteredHistoryEntries.sort((a, b) -> Integer.compare(a.getCompletionCount(), b.getCompletionCount()));
+                break;
+        }
+        
+        // Calculate pagination
+        totalPages = (filteredHistoryEntries.size() + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+        if (totalPages == 0) totalPages = 1;
+        currentPage = 0;
+        
+        updatePaginationUI();
+    }
+    
+    /**
+     * Update pagination UI and display current page of history entries
+     */
+    private void updatePaginationUI() {
+        // Calculate start and end indices for current page
+        int startIndex = currentPage * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredHistoryEntries.size());
+        
+        // Get entries for current page
+        List<GameHistoryEntry> pageEntries = filteredHistoryEntries.subList(startIndex, endIndex);
+        
+        // Convert to HistoryEntry objects for adapter
+        List<HistoryEntry> entries = new ArrayList<>();
+        for (GameHistoryEntry entry : pageEntries) {
+            String name = entry.getMapName();
+            int moves = entry.getMovesMade();
+            String mapPath = entry.getMapPath();
+            
+            // Resolve to absolute path
+            String absolutePath = mapPath;
+            if (mapPath != null && !mapPath.startsWith("/")) {
+                absolutePath = requireContext().getFileStreamPath(mapPath).getAbsolutePath();
+            }
+            
+            // Extract metadata
+            String saveData = FileReadWrite.loadAbsoluteData(absolutePath);
+            SaveDataMetadata meta = extractSaveMetadata(saveData, absolutePath);
+            
+            if ((name == null || name.isEmpty()) && meta.mapName != null) {
+                name = meta.mapName;
+            }
+            
+            // Completion status
+            String completionStatus;
+            if (entry.getCompletionCount() > 0) {
+                completionStatus = entry.getCompletionCount() == 1
+                        ? getString(R.string.history_completed_once)
+                        : getString(R.string.history_completed_times, entry.getCompletionCount());
+            } else {
+                completionStatus = getString(R.string.history_not_completed);
+            }
+            
+            String difficulty = !entry.getDifficulty().isEmpty() ? entry.getDifficulty() : meta.difficulty;
+            
+            HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
+                    meta.boardSize, mapPath, meta.minimap, difficulty, completionStatus, entry);
+            entries.add(historyEntry);
+        }
+        
+        // Update adapter
+        historyAdapter.updateHistoryEntries(entries);
+        
+        // Update pagination info
+        pageInfoText.setText(String.format("Page %d of %d", currentPage + 1, totalPages));
+        prevPageButton.setEnabled(currentPage > 0);
+        nextPageButton.setEnabled(currentPage < totalPages - 1);
+    }
     
     /**
      * Refresh a specific save slot (called after saving a game)

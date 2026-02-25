@@ -68,15 +68,19 @@ check_length() {
 DE_CHANGES=$(cat << EOF
 - Level Editor in allen Sprachen: Deutsch, Französisch, Spanisch, Koreanisch, Chinesisch
 - Es werden auch Karten mit ungeraden Dimensionen akzeptiert
-- Man kann mit Hinweisen immer den Roboter angezeigt bekommen, welcher bewegt werden muss
+- Optinale Hinweispfeile auf dem Spielbrett neben dem Roboter welcher bewegt werden muss
+- Unendliche History gespeichert
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Le
-- full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+- Level Editor in all languages: German, French, Spanish, Korean, Chinese
+- Maps with odd dimensions are also accepted
+- Optional arrow indicators on the game board next to the robot that needs to be moved
+- Infinite history saved
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )
 
