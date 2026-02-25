@@ -2217,14 +2217,14 @@ public class SaveGameFragment extends BaseGameFragment {
             return true;
         }
         
-        // First-line format: |T<color>@<x>,<y>; (e.g. |T3@4,13;)
-        if (saveData.matches("(?s).*\\|T\\d+@\\d+,\\d+;.*")) {
+        // First-line format: |T<color>@<x>,<y>; (e.g. |T3@4,13; or |T-1@4,13; for multi)
+        if (saveData.matches("(?s).*\\|T-?\\d+@\\d+,\\d+;.*")) {
             Timber.d("[TARGET_CHECK] Save data has targets (T@x,y format)");
             return true;
         }
         
-        // Compact format: t<color_letter><x>,<y>; on separate lines (e.g. ty4,13; tb2,11;)
-        if (saveData.matches("(?s).*(?:^|\\n|;)t[rgby]\\d+,\\d+;.*")) {
+        // Compact format: t<color_letter><x>,<y>; on separate lines (e.g. ty4,13; tb2,11; tm3,4; for multi)
+        if (saveData.matches("(?s).*(?:^|\\n|;)t[rgbyms]\\d+,\\d+;.*")) {
             Timber.d("[TARGET_CHECK] Save data has targets (compact t<color> format)");
             return true;
         }

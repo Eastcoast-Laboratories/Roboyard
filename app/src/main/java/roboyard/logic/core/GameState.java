@@ -778,7 +778,7 @@ public class GameState implements Serializable {
                                 coords = data.substring(1);
                             }
                             
-                            if (colorId >= 0) {
+                            if (colorId >= -1) { // -1 = COLOR_MULTI, 0-4 = normal colors
                                 String[] parts = coords.split(",");
                                 if (parts.length == 2) {
                                     int x = Integer.parseInt(parts[0]);
@@ -1397,8 +1397,8 @@ public class GameState implements Serializable {
             for (int x = 0; x < width; x++) {
                 if (board[y][x] == Constants.TYPE_TARGET) {
                     int color = targetColors[y][x];
-                    if (color < 0 || color > 4) {
-                        // Target color is invalid - try to recover from gameElements
+                    if ((color < -1 || color > 4)) {
+                        // Target color is invalid (not COLOR_MULTI and not 0-4) - try to recover from gameElements
                         Timber.e("[SAVE_DATA] Target at (%d,%d) has invalid color %d in targetColors array, recovering from gameElements", x, y, color);
                         for (GameElement element : gameElements) {
                             if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
@@ -1408,7 +1408,7 @@ public class GameState implements Serializable {
                                 break;
                             }
                         }
-                        if (color < 0 || color > 4) {
+                        if (color < -1 || color > 4) {
                             Timber.e("[SAVE_DATA] FATAL: Could not recover target color at (%d,%d), gameElements has no matching target", x, y);
                         }
                     }
@@ -1475,6 +1475,7 @@ public class GameState implements Serializable {
      */
     private static char getColorChar(int colorId) {
         switch (colorId) {
+            case -1: return 'm'; // multi (COLOR_MULTI)
             case 0: return 'r'; // red
             case 1: return 'g'; // green
             case 2: return 'b'; // blue
@@ -1489,12 +1490,13 @@ public class GameState implements Serializable {
      */
     private static int parseColorChar(char colorChar) {
         switch (colorChar) {
+            case 'm': return -1; // multi (COLOR_MULTI)
             case 'r': return 0; // red
             case 'g': return 1; // green
             case 'b': return 2; // blue
             case 'y': return 3; // yellow
             case 's': return 4; // silver
-            default: return -1;
+            default: return -2; // unknown color (not COLOR_MULTI)
         }
     }
     
@@ -2151,10 +2153,11 @@ public class GameState implements Serializable {
                 }
                 
                 // Detect invalid color on either side and log for root cause analysis
-                if (color < 0 || color > 4) {
+                // COLOR_MULTI (-1) is valid, so only flag colors < -1
+                if (color < -1 || color > 4) {
                     Timber.e("[TARGET SYNC] GameElement at (%d,%d) has invalid color %d", x, y, color);
                 }
-                if (targetColors[y][x] < 0 || targetColors[y][x] > 4) {
+                if (targetColors[y][x] < -1 || targetColors[y][x] > 4) {
                     Timber.e("[TARGET SYNC] targetColors[%d][%d] has invalid value %d after sync", y, x, targetColors[y][x]);
                 }
             }
