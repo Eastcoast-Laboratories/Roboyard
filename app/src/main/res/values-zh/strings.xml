@@ -393,6 +393,7 @@
     <string name="editor_color_blue">蓝色</string>
     <string name="editor_color_yellow">黄色</string>
     <string name="editor_color_silver">银色</string>
+    <string name="editor_color_multi">多色</string>
     <string name="editor_load_autosave">加载自动保存</string>
     <string name="editor_cancel">取消</string>
     <string name="editor_random_robots_targets">随机机器人和目标</string>

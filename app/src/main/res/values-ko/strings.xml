@@ -248,6 +248,7 @@
     <string name="editor_color_blue">파란색</string>
     <string name="editor_color_yellow">노란색</string>
     <string name="editor_color_silver">은색</string>
+    <string name="editor_color_multi">멀티</string>
     <string name="editor_load_autosave">자동 저장 로드</string>
     <string name="editor_cancel">취소</string>
     <string name="editor_random_robots_targets">무작위 로봇 및 목표</string>

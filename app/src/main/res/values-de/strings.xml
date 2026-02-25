@@ -230,6 +230,7 @@
     <string name="editor_color_blue">Blau</string>
     <string name="editor_color_yellow">Gelb</string>
     <string name="editor_color_silver">Silber</string>
+    <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Autosave laden</string>
     <string name="editor_cancel">Abbrechen</string>
     <string name="editor_random_robots_targets">Zufällige Roboter</string>

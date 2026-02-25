@@ -754,11 +754,37 @@ public class GameState implements Serializable {
                 // Parse new compact format using central parser (handles comments and line breaks)
                 java.util.List<LevelFormatParser.LevelEntry> entries = LevelFormatParser.parseEntries(saveData);
                 
+                // First pass: extract board dimensions
+                for (LevelFormatParser.LevelEntry entry : entries) {
+                    if (entry.type.equals("board")) {
+                        String cleanData = entry.data.startsWith(":") ? entry.data.substring(1) : entry.data;
+                        String[] parts = cleanData.split(",");
+                        if (parts.length == 2) {
+                            try {
+                                width = Integer.parseInt(parts[0]);
+                                height = Integer.parseInt(parts[1]);
+                                state = new GameState(width, height);
+                                state.setLevelName(mapName);
+                                state.setMoveCount(moveCount);
+                                state.startTime = System.currentTimeMillis() - timePlayed;
+                                Timber.d("[BOARD_SIZE_DEBUG] parseFromSaveData compact format board size: %dx%d", width, height);
+                            } catch (NumberFormatException e) {
+                                Timber.e(e, "[BOARD_SIZE_DEBUG] Error parsing board dimensions from compact format");
+                            }
+                        }
+                        break;
+                    }
+                }
+                
+                // Second pass: parse all other entries
                 for (LevelFormatParser.LevelEntry entry : entries) {
                     String type = entry.type;
                     String data = entry.data;
                     
                     try {
+                        // Skip board entry (already handled)
+                        if (type.equals("board")) continue;
+                        
                         if (type.startsWith("t")) {
                             // Target: tcolorX,Y; (e.g., tb8,7; parsed as type=tb, data=8,7)
                             // or legacy: target_colorX,Y; (e.g., target_blue8,7; parsed as type=target_blue, data=8,7)
@@ -1249,7 +1275,7 @@ public class GameState implements Serializable {
                         colorId = parseColorName(colorName);
                     }
                     
-                    if (colorId >= 0) {
+                    if (colorId >= -1) { // -1 = COLOR_MULTI, 0-4 = normal colors
                         String[] parts = coords.split(",");
                         if (parts.length == 2) {
                             int x = Integer.parseInt(parts[0]);

@@ -440,6 +440,7 @@
     <string name="editor_color_blue">Azul</string>
     <string name="editor_color_yellow">Amarillo</string>
     <string name="editor_color_silver">Plata</string>
+    <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Cargar Guardado Automático</string>
     <string name="editor_cancel">Cancelar</string>
     <string name="editor_random_robots_targets">Robots y Objetivos Aleatorios</string>
