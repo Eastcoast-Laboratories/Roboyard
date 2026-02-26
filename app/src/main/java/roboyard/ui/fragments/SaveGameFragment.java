@@ -724,25 +724,12 @@ public class SaveGameFragment extends BaseGameFragment {
         List<GameHistoryEntry> pageEntries = filteredHistoryEntries.subList(startIndex, endIndex);
         
         // Convert to HistoryEntry objects for adapter
+        // NOTE: Minimaps are NOT loaded here to save memory - they are loaded on-demand in the adapter
         List<HistoryEntry> entries = new ArrayList<>();
         for (GameHistoryEntry entry : pageEntries) {
             String name = entry.getMapName();
             int moves = entry.getMovesMade();
             String mapPath = entry.getMapPath();
-            
-            // Resolve to absolute path
-            String absolutePath = mapPath;
-            if (mapPath != null && !mapPath.startsWith("/")) {
-                absolutePath = requireContext().getFileStreamPath(mapPath).getAbsolutePath();
-            }
-            
-            // Extract metadata
-            String saveData = FileReadWrite.loadAbsoluteData(absolutePath);
-            SaveDataMetadata meta = extractSaveMetadata(saveData, absolutePath);
-            
-            if ((name == null || name.isEmpty()) && meta.mapName != null) {
-                name = meta.mapName;
-            }
             
             // Completion status
             String completionStatus;
@@ -754,10 +741,12 @@ public class SaveGameFragment extends BaseGameFragment {
                 completionStatus = getString(R.string.history_not_completed);
             }
             
-            String difficulty = !entry.getDifficulty().isEmpty() ? entry.getDifficulty() : meta.difficulty;
+            String difficulty = entry.getDifficulty();
+            String boardSize = entry.getBoardSize();
             
+            // Create entry without minimap - will be loaded on-demand in adapter
             HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
-                    meta.boardSize, mapPath, meta.minimap, difficulty, completionStatus, entry);
+                    boardSize, mapPath, null, difficulty, completionStatus, entry);
             entries.add(historyEntry);
         }
         
@@ -1915,10 +1904,38 @@ public class SaveGameFragment extends BaseGameFragment {
                 holder.completionStatus.setVisibility(View.GONE);
             }
             
-            // Set minimap if available
-            if (entry.getMinimap() != null) {
-                holder.minimapView.setImageBitmap(entry.getMinimap());
-                holder.minimapView.setVisibility(View.VISIBLE);
+            // Load minimap asynchronously to prevent main thread blocking
+            if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
+                if (entry.getMinimap() != null) {
+                    // Already cached
+                    holder.minimapView.setImageBitmap(entry.getMinimap());
+                    holder.minimapView.setVisibility(View.VISIBLE);
+                } else {
+                    // Show placeholder while loading
+                    holder.minimapView.setVisibility(View.GONE);
+                    
+                    // Load asynchronously
+                    new android.os.AsyncTask<Void, Void, Bitmap>() {
+                        @Override
+                        protected Bitmap doInBackground(Void... voids) {
+                            try {
+                                return createMinimapFromPath(requireContext(), entry.getMapPath(), 200, 200);
+                            } catch (Exception e) {
+                                Timber.e(e, "Error loading minimap for history entry");
+                                return null;
+                            }
+                        }
+                        
+                        @Override
+                        protected void onPostExecute(Bitmap minimap) {
+                            if (minimap != null && holder.minimapView != null) {
+                                entry.setMinimap(minimap);
+                                holder.minimapView.setImageBitmap(minimap);
+                                holder.minimapView.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }.execute();
+                }
             } else {
                 holder.minimapView.setVisibility(View.GONE);
             }
@@ -2104,7 +2121,7 @@ public class SaveGameFragment extends BaseGameFragment {
         private final int moves;
         private final String boardSize;
         private final String mapPath;
-        private final Bitmap minimap;
+        private Bitmap minimap; // Non-final to allow lazy loading
         private final String difficulty;
         private final String completionStatus;
         private final GameHistoryEntry historyEntry; // full entry for info popup
@@ -2128,6 +2145,7 @@ public class SaveGameFragment extends BaseGameFragment {
         public String getBoardSize() { return boardSize; }
         public String getMapPath() { return mapPath; }
         public Bitmap getMinimap() { return minimap; }
+        public void setMinimap(Bitmap minimap) { this.minimap = minimap; }
         public String getDifficulty() { return difficulty; }
         public String getCompletionStatus() { return completionStatus; }
         public GameHistoryEntry getHistoryEntry() { return historyEntry; }
