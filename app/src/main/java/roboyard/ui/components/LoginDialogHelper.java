@@ -110,6 +110,12 @@ public class LoginDialogHelper {
         
         RoboyardApiClient.getInstance(context).login(email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
             @Override
+            public void onNeedsUpdate() {
+                Toast.makeText(context, R.string.needs_update_toast, Toast.LENGTH_LONG).show();
+                if (callback != null) callback.onLoginError("needs_update");
+            }
+
+            @Override
             public void onSuccess(RoboyardApiClient.LoginResult result) {
                 Toast.makeText(context, R.string.settings_login_success, Toast.LENGTH_SHORT).show();
                 

@@ -441,6 +441,7 @@
     <string name="settings_register_success">Registration successful</string>
     <string name="settings_register_failed">Registration failed: %1$s</string>
     <string name="settings_logout_success">Logged out</string>
+    <string name="needs_update_toast">Your app needs an update to use this feature.</string>
     <string name="login_dialog_title">Login to Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_password">Password</string>
@@ -663,6 +664,14 @@
     <string name="achievement_5_robots_desc">Complete a game with 5 robots</string>
     <string name="achievement_gimme_five">Gimme Five</string>
     <string name="achievement_gimme_five_desc">All robots must touch each other</string>
+
+    <!-- Same-walls achievements -->
+    <string name="achievement_same_walls_2">Déjà Vu</string>
+    <string name="achievement_same_walls_2_desc">Solve the same wall layout with 2 different robot positions</string>
+    <string name="achievement_same_walls_5">Wall Expert</string>
+    <string name="achievement_same_walls_5_desc">Solve the same wall layout with 5 different robot positions</string>
+    <string name="achievement_same_walls_10">Wall Master</string>
+    <string name="achievement_same_walls_10_desc">Solve the same wall layout with 10 different robot positions</string>
     
     <!-- Random Game - Square Coverage -->
     <string name="achievement_traverse_1_robot">Solo Explorer</string>

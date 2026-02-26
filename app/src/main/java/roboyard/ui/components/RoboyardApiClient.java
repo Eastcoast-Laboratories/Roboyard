@@ -29,6 +29,8 @@ public class RoboyardApiClient {
     private static final String TAG = "RoboyardApi";
     private static final String BASE_URL = "https://roboyard.z11.de";
     private static final String PREFS_NAME = "roboyard_api";
+    /** Current API protocol version sent with every request. Increment on breaking changes. */
+    public static final int API_VERSION = 1;
     private static final String KEY_AUTH_TOKEN = "auth_token";
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_USER_NAME = "user_name";
@@ -43,6 +45,8 @@ public class RoboyardApiClient {
     public interface ApiCallback<T> {
         void onSuccess(T result);
         void onError(String error);
+        /** Called when the server requires a newer app version (needs_update response). Default: treat as error. */
+        default void onNeedsUpdate() { onError("needs_update"); }
     }
     
     public static class LoginResult {
@@ -156,10 +160,15 @@ public class RoboyardApiClient {
                 JSONObject requestBody = new JSONObject();
                 requestBody.put("email", email);
                 requestBody.put("password", password);
+                requestBody.put("ver", API_VERSION);
                 
                 String response = makePostRequest("/api/mobile/login", requestBody.toString());
                 JSONObject json = new JSONObject(response);
                 
+                if (json.optBoolean("needs_update", false)) {
+                    mainHandler.post(() -> callback.onNeedsUpdate());
+                    return;
+                }
                 if (json.has("error")) {
                     postError(callback, json.getString("error"));
                     return;
@@ -203,10 +212,15 @@ public class RoboyardApiClient {
                 requestBody.put("email", email);
                 requestBody.put("password", password);
                 requestBody.put("password_confirmation", password);
+                requestBody.put("ver", API_VERSION);
                 
                 String response = makePostRequest("/api/mobile/register", requestBody.toString());
                 JSONObject json = new JSONObject(response);
                 
+                if (json.optBoolean("needs_update", false)) {
+                    mainHandler.post(() -> callback.onNeedsUpdate());
+                    return;
+                }
                 if (json.has("error")) {
                     postError(callback, json.getString("error"));
                     return;
@@ -265,6 +279,7 @@ public class RoboyardApiClient {
             try {
                 JSONObject requestBody = new JSONObject();
                 requestBody.put("map_data", mapData);
+                requestBody.put("ver", API_VERSION);
                 if (mapName != null && !mapName.isEmpty()) {
                     requestBody.put("name", mapName);
                 }
@@ -272,6 +287,10 @@ public class RoboyardApiClient {
                 String response = makeAuthenticatedPostRequest("/api/mobile/maps", requestBody.toString());
                 JSONObject json = new JSONObject(response);
                 
+                if (json.optBoolean("needs_update", false)) {
+                    mainHandler.post(() -> callback.onNeedsUpdate());
+                    return;
+                }
                 if (json.has("error")) {
                     postError(callback, json.getString("error"));
                     return;
@@ -311,6 +330,7 @@ public class RoboyardApiClient {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("X-App-Version", String.valueOf(API_VERSION));
             conn.setDoOutput(true);
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);

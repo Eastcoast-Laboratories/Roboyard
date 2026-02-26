@@ -50,6 +50,8 @@ public class AchievementManager {
     private int noHintRandomGamesTotal;
     private int dailyLoginStreak;
     private int speedrunRandomGamesUnder30s;
+    // max unique robot-positions solved on any single wall layout
+    private int sameWallsMaxPositions;
     
     // Game session tracking
     private boolean hintUsedInCurrentGame = false;
@@ -104,6 +106,7 @@ public class AchievementManager {
         noHintRandomGamesTotal = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games_total", 0);
         dailyLoginStreak = prefs.getInt(KEY_COUNTER_PREFIX + "daily_login_streak", 0);
         speedrunRandomGamesUnder30s = prefs.getInt(KEY_COUNTER_PREFIX + "speedrun_random_30s", 0);
+        sameWallsMaxPositions = prefs.getInt(KEY_COUNTER_PREFIX + "same_walls_max_positions", 0);
         
         Timber.d("[ACHIEVEMENTS] Loaded state: %d achievements, %d unlocked", 
             achievements.size(), getUnlockedCount());
@@ -275,11 +278,13 @@ public class AchievementManager {
      * Called when a random game is completed
      * @param isFirstCompletion true if this is the first time this exact map is completed (unique map)
      * @param qualifiesForNoHints true if map qualifies for no-hints achievements (first solve was hint-free)
+     * @param wallSignature wall-layout signature for same-walls tracking (may be null)
      */
     public void onRandomGameCompleted(int playerMoves, int optimalMoves, int hintsUsed, 
                                        long timeMs, boolean isImpossibleMode, int robotCount,
                                        int targetCount, int targetsNeeded,
-                                       boolean isFirstCompletion, boolean qualifiesForNoHints) {
+                                       boolean isFirstCompletion, boolean qualifiesForNoHints,
+                                       String wallSignature) {
         
         // Check if hint was used during this game session
         if (hintUsedInCurrentGame) {
@@ -400,6 +405,25 @@ public class AchievementManager {
             Timber.d("[ACHIEVEMENTS] No hints NOT counted - map already completed before");
         }
         
+        // Same-walls achievements: count unique position-signatures sharing the same wall layout
+        if (wallSignature != null && !wallSignature.isEmpty() && currentActivity != null) {
+            Activity act = currentActivity.get();
+            if (act != null) {
+                List<roboyard.logic.core.GameHistoryEntry> sameWallEntries =
+                        roboyard.ui.components.GameHistoryManager.findByWallSignature(act, wallSignature);
+                int uniquePositions = sameWallEntries.size(); // each entry = distinct positionSignature
+                Timber.d("[ACHIEVEMENTS] same_walls: wallSig=%s uniquePositions=%d",
+                        wallSignature.substring(0, Math.min(30, wallSignature.length())), uniquePositions);
+                if (uniquePositions > sameWallsMaxPositions) {
+                    sameWallsMaxPositions = uniquePositions;
+                    saveCounter("same_walls_max_positions", sameWallsMaxPositions);
+                }
+                if (sameWallsMaxPositions >= 2)  unlock("same_walls_2");
+                if (sameWallsMaxPositions >= 5)  unlock("same_walls_5");
+                if (sameWallsMaxPositions >= 10) unlock("same_walls_10");
+            }
+        }
+
         // Speed achievements
         if (timeMs < 20000) unlock("speedrun_random_under_20s");
         if (timeMs < 10000) unlock("speedrun_random_under_10s");

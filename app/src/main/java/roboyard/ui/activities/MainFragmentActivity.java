@@ -153,6 +153,9 @@ public class MainFragmentActivity extends AppCompatActivity {
      * Handle incoming intents, including deep links
      * @param intent The intent to handle
      */
+    /** Current supported deep-link protocol version. Increment when breaking changes are introduced. */
+    private static final int DEEPLINK_API_VERSION = 1;
+
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         Uri data = intent.getData();
@@ -160,7 +163,23 @@ public class MainFragmentActivity extends AppCompatActivity {
         if (Intent.ACTION_VIEW.equals(action) && data != null) {
             // This is a deep link
             Timber.d("[DEEPLINK] Received deep link: %s", data.toString());
-            
+
+            // Version check: if server sends a higher version than we support, redirect to menu
+            String verStr = data.getQueryParameter("ver");
+            if (verStr != null && !verStr.isEmpty()) {
+                try {
+                    int ver = Integer.parseInt(verStr);
+                    if (ver > DEEPLINK_API_VERSION) {
+                        Timber.w("[DEEPLINK] Unsupported deep-link version %d (max %d), redirecting to menu", ver, DEEPLINK_API_VERSION);
+                        android.widget.Toast.makeText(this, "Your app needs an update to open this map.", android.widget.Toast.LENGTH_LONG).show();
+                        if (navController != null) navController.navigate(R.id.mainMenuFragment);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    Timber.e("[DEEPLINK] Invalid ver parameter: %s", verStr);
+                }
+            }
+
             // Extract parameters - name & difficulty may be separate query params or embedded in data
             String mapData = data.getQueryParameter("data");
             String mapName = data.getQueryParameter("name");

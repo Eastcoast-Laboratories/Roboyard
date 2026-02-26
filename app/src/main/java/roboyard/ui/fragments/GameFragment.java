@@ -754,13 +754,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                 qualifiesForNoHints = existingEntry.qualifiesForNoHintsAchievement();
                             }
                         }
+                        String wallSignature = state.generateWallSignature();
                         Timber.d("[ACHIEVEMENTS] Unique map check: isFirstCompletion=%b, qualifiesForNoHints=%b, mapSignature=%s",
                                 isFirstCompletion, qualifiesForNoHints, mapSignature);
                         
                         AchievementManager.getInstance(requireContext())
                             .onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
                                 isImpossibleMode, robotCount, targetCount, targetsNeeded,
-                                isFirstCompletion, qualifiesForNoHints);
+                                isFirstCompletion, qualifiesForNoHints, wallSignature);
                     }
 
                     // change the "Reset" Button to "Retry"

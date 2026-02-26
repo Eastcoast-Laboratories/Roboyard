@@ -63,12 +63,8 @@ check if this all works:
 
 # last prompt:
 
-baue die bestehende history so um,
-- bei jedem eintrag speichert wann die alles gelöst wurde,  
-- sortierung in der histroy ansicht dann danach, wann jeweisl zuletzt gelöst.
-- es sollen alle zeitpunkte, wann sie gelöst wurde gespeichert werden, damit man hinterher verschiedene auswertungen darüber rmachen kann, auch für streaks und so
-- die walls sollen getrennt von den positions gespeichert werden für neue achievements, die sich auf die selben wall-storage einträge beziehen mit verschiedenen robot positions aber gleichen walls.
+deine difficulty string aenderung hab ich rückgängig gemacht, ich heinte es so:
+Im Save Games screen eintrag: den dificulty string in eine neue zeile
 
-
-1. first played ist noch falsch, das ist anscheinend der erste move, den man gemacht hat, wo die map das erste mal gespeichert wurde, aber innerhalb des selben spiels wird dann last played gespeihert, das interressiert in der info box nicht. es interressiert nur, wann ein spiel gelöst wurde, Ich weis nicht ob dieser wert der im moment bei "first played" angezeigt wird überhaupt gespeichert werden muss, es scheint, dass er innerhalb des selben spiels schon 2 einträge erzeugt in der liste in einem history eintrag, enaml beim ersten move und dann immer bei den weiteren mves . er sollte aber in einem history eintrag nur den selben eintrag aktualisieren anstatt einen neuen anzulegen innerhalb des history savegames
+2. Baue in alle Kommunikation eine Version ein (ver=1) die wird erwartet. Z.b. Beim deep Link der map erwartet der Ver 1 aber wenn die höher ist, dann macht er statt die map mit unerwarteten Daten zu starten einen Toast "your app needs an update" und lenkt zum Menü; Auch die Login communication und die Synchronisation entsprechend. So kann ich in Zukunft breaking changes in Laravel ausrollen ohne dass die alten Apps abgestürzen
 

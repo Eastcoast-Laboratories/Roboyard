@@ -121,12 +121,15 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `game_3_of_4_targets` | 3 of 4 | Complete a game where you need 3 out of 4 targets | ✅ Implemented |
 | `game_4_of_4_targets` | 4 of 4 | Complete a game where you need all 4 targets | ✅ Implemented |
 
-### Fun Challenges (2)
+### Fun Challenges (5)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
 | `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented | ✅ |
 | `gimme_five` | Gimme Five | All Robots must touch each other | ✅ Implemented |
+| `same_walls_2` | Déjà Vu | Solve the same wall layout with 2 different robot positions | ✅ Implemented |
+| `same_walls_5` | Wall Expert | Solve the same wall layout with 5 different robot positions | ✅ Implemented |
+| `same_walls_10` | Wall Master | Solve the same wall layout with 10 different robot positions | ✅ Implemented |
 
 ### Square Coverage (4)
 
@@ -163,7 +166,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ---
 
-## Total: 60 Achievements
+## Total: 63 Achievements
 
 | Category | Count |
 |----------|-------|
@@ -177,9 +180,10 @@ This document defines all achievements in the game. Keep this file synchronized 
 | Random - Solution Length | 11 |
 | Random - Screen Resolutions | 3 |
 | Random - Multiple Targets | 8 |
-| Random - Fun Challenges | 2 |
+| Random - Fun Challenges | 5 |
 | Random - Square Coverage | 4 |
 | Random - Streaks | 5 |
+| Random - Same Walls | 3 |
 
 Note: The solution length achievements include 20-29 (10 achievements) plus 30+ (1 achievement) = 11 total.
 

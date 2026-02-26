@@ -141,6 +141,12 @@ public class RegisterDialogHelper {
         
         RoboyardApiClient.getInstance(context).register(name, email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
             @Override
+            public void onNeedsUpdate() {
+                Toast.makeText(context, R.string.needs_update_toast, Toast.LENGTH_LONG).show();
+                if (callback != null) callback.onRegisterError("needs_update");
+            }
+
+            @Override
             public void onSuccess(RoboyardApiClient.LoginResult result) {
                 // Clear cached data on success
                 cachedRegisterName = "";
