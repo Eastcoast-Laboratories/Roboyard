@@ -669,10 +669,10 @@
     <!-- Same-walls achievements -->
     <string name="achievement_same_walls_2">Déjà Vu</string>
     <string name="achievement_same_walls_2_desc">Solve the same wall layout with 2 different robot positions</string>
-    <string name="achievement_same_walls_5">Wall Expert</string>
-    <string name="achievement_same_walls_5_desc">Solve the same wall layout with 5 different robot positions</string>
-    <string name="achievement_same_walls_10">Wall Master</string>
-    <string name="achievement_same_walls_10_desc">Solve the same wall layout with 10 different robot positions</string>
+    <string name="achievement_same_walls_10">Wall Expert</string>
+    <string name="achievement_same_walls_10_desc">Solve the same wall layout with 5 different robot positions</string>
+    <string name="achievement_same_walls_100">Wall Master</string>
+    <string name="achievement_same_walls_100_desc">Solve the same wall layout with 10 different robot positions</string>
     
     <!-- Random Game - Square Coverage -->
     <string name="achievement_traverse_1_robot">Solo Explorer</string>

@@ -83,6 +83,10 @@ public class AchievementManager {
         this.unlockListener = listener;
     }
 
+    public void setCurrentActivity(Activity activity) {
+        this.currentActivity = new WeakReference<>(activity);
+    }
+
     /**
      * Progress snapshot for a counter-based achievement.
      * current == required means the achievement can be / is unlocked.
@@ -143,8 +147,8 @@ public class AchievementManager {
             case "speedrun_random_5_games_under_30s": return new AchievementProgress(speedrunRandomGamesUnder30s, 5);
             // Same-walls
             case "same_walls_2":  return new AchievementProgress(sameWallsMaxPositions, 2);
-            case "same_walls_5":  return new AchievementProgress(sameWallsMaxPositions, 5);
-            case "same_walls_10": return new AchievementProgress(sameWallsMaxPositions, 10);
+            case "same_walls_10":  return new AchievementProgress(sameWallsMaxPositions, 5);
+            case "same_walls_100": return new AchievementProgress(sameWallsMaxPositions, 10);
             // Binary achievements (no progress tracking)
             default: return null;
         }
@@ -508,8 +512,8 @@ public class AchievementManager {
                     saveCounter("same_walls_max_positions", sameWallsMaxPositions);
                 }
                 unlockIfComplete("same_walls_2");
-                unlockIfComplete("same_walls_5");
                 unlockIfComplete("same_walls_10");
+                unlockIfComplete("same_walls_100");
             }
         }
 

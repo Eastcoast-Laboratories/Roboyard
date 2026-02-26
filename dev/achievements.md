@@ -128,8 +128,8 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `game_5_robots` | Full Team | Complete a game with 5 robots | ✅ Implemented | ✅ |
 | `gimme_five` | Gimme Five | All Robots must touch each other | ✅ Implemented |
 | `same_walls_2` | Déjà Vu | Solve the same wall layout with 2 different robot positions | ✅ Implemented |
-| `same_walls_5` | Wall Expert | Solve the same wall layout with 5 different robot positions | ✅ Implemented |
-| `same_walls_10` | Wall Master | Solve the same wall layout with 10 different robot positions | ✅ Implemented |
+| `same_walls_10` | Wall Expert | Solve the same wall layout with 10 different robot positions | ✅ Implemented |
+| `same_walls_100` | Wall Master | Solve the same wall layout with 100 different robot positions | ✅ Implemented |
 
 ### Square Coverage (4)
 

@@ -171,7 +171,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                     int ver = Integer.parseInt(verStr);
                     if (ver > DEEPLINK_API_VERSION) {
                         Timber.w("[DEEPLINK] Unsupported deep-link version %d (max %d), redirecting to menu", ver, DEEPLINK_API_VERSION);
-                        android.widget.Toast.makeText(this, "Your app needs an update to open this map.", android.widget.Toast.LENGTH_LONG).show();
+                        android.widget.Toast.makeText(this, R.string.needs_update_toast, android.widget.Toast.LENGTH_LONG).show();
                         if (navController != null) navController.navigate(R.id.mainMenuFragment);
                         return;
                     }

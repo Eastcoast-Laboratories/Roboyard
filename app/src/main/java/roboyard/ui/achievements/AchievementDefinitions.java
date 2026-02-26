@@ -353,11 +353,11 @@ public class AchievementDefinitions {
         add(new Achievement("same_walls_2",
             "achievement_same_walls_2", "achievement_same_walls_2_desc",
             AchievementCategory.RANDOM_ROBOTS, ICON_MAP));
-        add(new Achievement("same_walls_5",
-            "achievement_same_walls_5", "achievement_same_walls_5_desc",
-            AchievementCategory.RANDOM_ROBOTS, ICON_SATELLITE));
         add(new Achievement("same_walls_10",
             "achievement_same_walls_10", "achievement_same_walls_10_desc",
+            AchievementCategory.RANDOM_ROBOTS, ICON_SATELLITE));
+        add(new Achievement("same_walls_100",
+            "achievement_same_walls_100", "achievement_same_walls_100_desc",
             AchievementCategory.RANDOM_ROBOTS, ICON_CROWN));
             
         // ========== RANDOM GAME - SQUARE COVERAGE ==========

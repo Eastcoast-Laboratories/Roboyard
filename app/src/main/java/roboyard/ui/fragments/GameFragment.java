@@ -768,8 +768,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         Timber.d("[ACHIEVEMENTS] Unique map check: isFirstCompletion=%b, qualifiesForNoHints=%b, mapSignature=%s",
                                 isFirstCompletion, qualifiesForNoHints, mapSignature);
                         
-                        AchievementManager.getInstance(requireContext())
-                            .onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
+                        AchievementManager am = AchievementManager.getInstance(requireContext());
+                        am.setCurrentActivity(requireActivity());
+                        am.onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
                                 isImpossibleMode, robotCount, targetCount, targetsNeeded,
                                 isFirstCompletion, qualifiesForNoHints, wallSignature);
                     }
