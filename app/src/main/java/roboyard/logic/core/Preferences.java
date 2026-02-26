@@ -36,6 +36,7 @@ public class Preferences {
     private static final String KEY_HIGH_CONTRAST_MODE = "high_contrast_mode";
     private static final String KEY_BACKGROUND_SOUND_VOLUME = "background_sound_volume";
     private static final String KEY_LIVE_MOVE_COUNTER_ENABLED = "live_move_counter_enabled";
+    private static final String KEY_HINT_AUTO_MOVE_ENABLED = "hint_auto_move_enabled";
     private static final String KEY_SOUND_EFFECTS_VOLUME = "sound_effects_volume";
     
     // Default values
@@ -57,6 +58,7 @@ public class Preferences {
     public static final boolean DEFAULT_HIGH_CONTRAST_MODE = false;
     public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 15;
     public static final boolean DEFAULT_LIVE_MOVE_COUNTER_ENABLED = false;
+    public static final boolean DEFAULT_HINT_AUTO_MOVE_ENABLED = false;
     public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 80;
     
     // Cached values - accessible as static fields
@@ -78,6 +80,7 @@ public class Preferences {
     public static boolean highContrastMode;
     public static int backgroundSoundVolume;
     public static boolean liveMoveCounterEnabled;
+    public static boolean hintAutoMoveEnabled;
     public static int soundEffectsVolume;
     
     // For compatibility with existing code
@@ -350,6 +353,14 @@ public class Preferences {
             }
             
             try {
+                hintAutoMoveEnabled = prefs.getBoolean(KEY_HINT_AUTO_MOVE_ENABLED, DEFAULT_HINT_AUTO_MOVE_ENABLED);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading hint auto move enabled: %s", e.getMessage());
+                prefs.edit().remove(KEY_HINT_AUTO_MOVE_ENABLED).apply();
+                hintAutoMoveEnabled = DEFAULT_HINT_AUTO_MOVE_ENABLED;
+            }
+            
+            try {
                 soundEffectsVolume = prefs.getInt(KEY_SOUND_EFFECTS_VOLUME, DEFAULT_SOUND_EFFECTS_VOLUME);
             } catch (ClassCastException e) {
                 Timber.e("[PREFERENCES] Error loading sound effects volume: %s", e.getMessage());
@@ -563,6 +574,32 @@ public class Preferences {
         liveMoveCounterEnabled = enabled;
         
         Timber.d("[PREFERENCES] Live move counter enabled set to %s", enabled);
+    }
+    
+    /**
+     * Set the hint auto-move enabled state and save to preferences
+     * @param enabled True to enable auto-move when selecting hints, false to disable
+     */
+    public static void setHintAutoMoveEnabled(boolean enabled) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveEnabled, attempting to initialize");
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                hintAutoMoveEnabled = enabled;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_HINT_AUTO_MOVE_ENABLED, enabled);
+        editor.apply();
+        
+        hintAutoMoveEnabled = enabled;
+        
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Hint auto-move enabled set to %s", enabled);
     }
     
     /**

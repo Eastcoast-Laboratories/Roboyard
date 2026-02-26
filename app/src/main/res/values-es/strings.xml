@@ -487,4 +487,39 @@
     <string name="editor_erased_element">Elemento borrado en (%1$d, %2$d)</string>
     <string name="editor_nothing_to_erase">Nada que borrar en (%1$d, %2$d)</string>
     <string name="editor_cannot_place_in_carree">No se puede colocar robot u objetivo en el carree central</string>
+    
+    <!-- Game History Details Popup -->
+    <string name="history_detail_completions">Completados:</string>
+    <string name="history_detail_first_started">Primera vez iniciado:</string>
+    <string name="history_detail_last_played">Última vez jugado:</string>
+    <string name="history_detail_all_completions">Todos los completados:</string>
+    <string name="history_detail_best_time">Mejor tiempo:</string>
+    <string name="history_detail_best_moves">Mejores movimientos:</string>
+    <string name="history_detail_optimal_moves">Movimientos óptimos:</string>
+    <string name="history_detail_perfect">¡perfecto!</string>
+    <string name="history_detail_extra_moves">+%1$d extra</string>
+    <string name="history_detail_hint_usage_last">Uso de pistas (última sesión):</string>
+    <string name="history_detail_no_hints_used">No se usaron pistas</string>
+    <string name="history_detail_pre_hint_viewed">Pre-pista vista (colores de robots revelados)</string>
+    <string name="history_detail_up_to_hint">Hasta pista #%1$d vista</string>
+    <string name="history_detail_hints_ever_used">Pistas usadas alguna vez (todos los intentos):</string>
+    <string name="history_detail_qualifies_no_hints">Califica para logro sin pistas:</string>
+    <string name="history_detail_last_solved_no_hints">Última vez resuelto sin pistas:</string>
+    <string name="history_detail_last_perfect_no_hints">Última vez resuelto perfectamente sin pistas:</string>
+    <string name="history_detail_board">Tablero:</string>
+    <string name="history_detail_map">Mapa:</string>
+    <string name="history_detail_yes">Sí</string>
+    <string name="history_detail_no">No</string>
+    
+    <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_last_solved">Último resuelto</string>
+    <string name="sort_longest_first_attempt">Primer intento más largo</string>
+    <string name="sort_optimal_not_found">Óptimo no encontrado</string>
+    <string name="sort_unsolved">Sin resolver</string>
+    <string name="filter_optimal_not_found">Óptimo no encontrado</string>
+    
+    <!-- Hint Auto-Move Settings -->
+    <string name="settings_hint_auto_move">Movimiento automático de pistas:</string>
+    <string name="settings_hint_auto_move_on_a11y">Activar movimiento automático del robot al seleccionar pistas</string>
+    <string name="settings_hint_auto_move_off_a11y">Desactivar movimiento automático del robot al seleccionar pistas</string>
 </resources>

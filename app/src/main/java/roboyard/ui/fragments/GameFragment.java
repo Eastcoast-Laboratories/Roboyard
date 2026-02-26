@@ -3123,6 +3123,52 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         Timber.d("[HINT_SYSTEM] Game already complete, not showing direction arrow");
                     }
                 }
+                
+                // Auto-move robot if hint auto-move is enabled (DRY: use existing moveRobotInDirection)
+                if (Preferences.hintAutoMoveEnabled && !gameStateManager.isGameComplete().getValue()) {
+                    final int robotColor = rrMove.getColor();
+                    final int direction = rrMove.getDirection();
+                    Timber.d("[HINT_AUTO_MOVE] Auto-move enabled, scheduling move for robot color %d in direction %d", 
+                            robotColor, direction);
+                    
+                    // Execute auto-move asynchronously to avoid ANR when clicking hints rapidly
+                    if (getView() != null) {
+                        getView().postDelayed(() -> {
+                            // Check if game is still active before executing move
+                            if (gameStateManager.isGameComplete().getValue()) {
+                                Timber.d("[HINT_AUTO_MOVE] Game complete, skipping auto-move");
+                                return;
+                            }
+                            
+                            // Convert direction to dx, dy for moveRobotInDirection
+                            int dx = 0, dy = 0;
+                            switch (direction) {
+                                case 1: // UP
+                                    dy = -1;
+                                    break;
+                                case 4: // DOWN
+                                    dy = 1;
+                                    break;
+                                case 2: // RIGHT
+                                    dx = 1;
+                                    break;
+                                case 8: // LEFT
+                                    dx = -1;
+                                    break;
+                            }
+                            
+                            // Select the robot by color first, then move it
+                            if (gameGridView != null) {
+                                gameGridView.selectRobotByColor(robotColor);
+                            }
+                            // Execute the move using the existing method (DRY principle)
+                            gameStateManager.moveRobotInDirection(dx, dy);
+                            Timber.d("[HINT_AUTO_MOVE] Auto-move executed for robot %d: dx=%d, dy=%d", 
+                                    robotColor, dx, dy);
+                        }, 100); // Small delay to prevent ANR on rapid clicks
+                    }
+                }
+                
                 return rrMove.getColor();
             } else {
                 // Error in hint system

@@ -13,6 +13,11 @@ android {
         versionName "39"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Support all ABIs (including x86_64 for emulator)
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
     }
     buildTypes {
         debug {

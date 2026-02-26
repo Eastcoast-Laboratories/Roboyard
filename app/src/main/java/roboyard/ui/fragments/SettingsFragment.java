@@ -97,6 +97,10 @@ public class SettingsFragment extends Fragment {
     private RadioButton highContrastModeYes;
     private RadioButton highContrastModeNo;
     
+    private RadioGroup hintAutoMoveRadioGroup;
+    private RadioButton hintAutoMoveOn;
+    private RadioButton hintAutoMoveOff;
+    
     private android.widget.SeekBar backgroundSoundSeekbar;
     private android.widget.SeekBar soundEffectsVolumeSeekbar;
     private android.media.MediaPlayer sfxPreviewPlayer;
@@ -208,6 +212,9 @@ public class SettingsFragment extends Fragment {
             fullscreenRadioGroup = view.findViewById(R.id.fullscreen_radio_group);
             fullscreenOn = view.findViewById(R.id.fullscreen_on);
             fullscreenOff = view.findViewById(R.id.fullscreen_off);
+            hintAutoMoveRadioGroup = view.findViewById(R.id.hint_auto_move_radio_group);
+            hintAutoMoveOn = view.findViewById(R.id.hint_auto_move_on);
+            hintAutoMoveOff = view.findViewById(R.id.hint_auto_move_off);
             // Game mode radio buttons
             gameModeRadioGroup = view.findViewById(R.id.game_mode_radio_group);
             standardGameModeButton = view.findViewById(R.id.standard_game_mode);
@@ -659,6 +666,17 @@ public class SettingsFragment extends Fragment {
                 }
             } else {
                 Timber.e("fullscreenRadioGroup is null");
+            }
+            
+            // Set hint auto-move radio buttons
+            if (hintAutoMoveRadioGroup != null) {
+                if (Preferences.hintAutoMoveEnabled) {
+                    if (hintAutoMoveOn != null) hintAutoMoveOn.setChecked(true);
+                } else {
+                    if (hintAutoMoveOff != null) hintAutoMoveOff.setChecked(true);
+                }
+            } else {
+                Timber.e("hintAutoMoveRadioGroup is null");
             }
             
             isUpdatingUI = false;
@@ -1589,6 +1607,25 @@ public class SettingsFragment extends Fragment {
                 });
             } else {
                 Timber.e("accessibilityRadioGroup is null");
+            }
+            
+            // Hint auto-move radio group
+            if (hintAutoMoveRadioGroup != null) {
+                hintAutoMoveRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                    try {
+                        if (isUpdatingUI) return;
+                        
+                        boolean hintAutoMoveEnabled = checkedId == R.id.hint_auto_move_on;
+                        
+                        Preferences.setHintAutoMoveEnabled(hintAutoMoveEnabled);
+                        
+                        Timber.d("[PREFERENCES] Hint auto-move set to %b", hintAutoMoveEnabled);
+                    } catch (Exception e) {
+                        Timber.e(e, "Error processing hint auto-move selection");
+                    }
+                });
+            } else {
+                Timber.e("hintAutoMoveRadioGroup is null");
             }
             
             // Fullscreen radio group

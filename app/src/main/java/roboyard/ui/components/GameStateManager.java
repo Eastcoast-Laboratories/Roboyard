@@ -306,6 +306,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         stateHistory.clear();
         squaresMovedHistory.clear();
         clearNextMovesCache();
+        
+        // Disable live-move-mode for level games (only available in random games)
+        setLiveMoveCounterEnabled(false);
 
         // Initialize the solver with the grid elements from the loaded level
         ArrayList<GridElement> gridElements = state.getGridElements();

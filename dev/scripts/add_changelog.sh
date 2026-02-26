@@ -68,8 +68,10 @@ check_length() {
 DE_CHANGES=$(cat << EOF
 - Level Editor in allen Sprachen: Deutsch, Französisch, Spanisch, Koreanisch, Chinesisch
 - Es werden auch Karten mit ungeraden Dimensionen akzeptiert
-- Optinale Hinweispfeile auf dem Spielbrett neben dem Roboter welcher bewegt werden muss
-- Unendliche History gespeichert
+- Unendliche History gespeichert. Jetzt mit Sortierung und Filterung
+- Neue Achievements, verschiedene Karten mit den selben Wänden zu lösen
+- Roboter Hinweispfeile direkt auf der Karte
+- Neue Option: Roboter bewegen sich in den Hinweisen automatisch ins Ziel
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
@@ -78,8 +80,10 @@ EOF
 EN_CHANGES=$(cat << EOF
 - Level Editor in all languages: German, French, Spanish, Korean, Chinese
 - Maps with odd dimensions are also accepted
-- Optional arrow indicators on the game board next to the robot that needs to be moved
-- Infinite history saved
+- Infinite history saved. With sorting and filtering
+- New achievements for solving different maps with the same walls
+- robot hint direction arrows directly on the map
+- New option: robots move automatically to the goal in the hints
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )

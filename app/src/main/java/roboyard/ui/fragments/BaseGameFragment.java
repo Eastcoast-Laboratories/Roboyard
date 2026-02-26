@@ -140,60 +140,69 @@ public abstract class BaseGameFragment extends Fragment {
         if (entry == null || getContext() == null) return;
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
         StringBuilder sb = new StringBuilder();
-        sb.append("Completions: ").append(entry.getCompletionCount()).append("\n");
-        sb.append("First played: ").append(sdf.format(new Date(entry.getTimestamp()))).append("\n");
+        sb.append(getString(R.string.history_detail_completions)).append(" ").append(entry.getCompletionCount()).append("\n");
+        sb.append(getString(R.string.history_detail_first_started)).append(" ").append(sdf.format(new Date(entry.getTimestamp()))).append("\n");
         if (entry.getLastCompletionTimestamp() > 0) {
-            sb.append("Last played: ").append(sdf.format(new Date(entry.getLastCompletionTimestamp()))).append("\n");
+            sb.append(getString(R.string.history_detail_last_played)).append(" ").append(sdf.format(new Date(entry.getLastCompletionTimestamp()))).append("\n");
         }
         List<Long> timestamps = entry.getCompletionTimestamps();
         if (timestamps != null && timestamps.size() > 1) {
-            sb.append("\nAll completions:\n");
+            sb.append("\n").append(getString(R.string.history_detail_all_completions)).append("\n");
             for (int i = 0; i < timestamps.size(); i++) {
                 sb.append("  ").append(i + 1).append(". ")
                   .append(sdf.format(new Date(timestamps.get(i)))).append("\n");
             }
         }
-        sb.append("\nBest time: ");
+        sb.append("\n").append(getString(R.string.history_detail_best_time)).append(" ");
         int bestTime = entry.getBestTime();
         if (bestTime > 0) sb.append(bestTime / 60).append("m ").append(bestTime % 60).append("s");
         else sb.append("\u2014");
         sb.append("\n");
-        sb.append("Best moves: ");
+        sb.append(getString(R.string.history_detail_best_moves)).append(" ");
         int bestMoves = entry.getBestMoves();
         sb.append(bestMoves > 0 ? bestMoves : "\u2014").append("\n");
-        sb.append("Optimal moves: ");
+        sb.append(getString(R.string.history_detail_optimal_moves)).append(" ");
         int optimalMoves = entry.getOptimalMoves();
         if (optimalMoves > 0) {
             sb.append(optimalMoves);
-            if (bestMoves > 0 && bestMoves == optimalMoves) sb.append(" \u2713 (perfect!)");
-            else if (bestMoves > 0) sb.append(" (+").append(bestMoves - optimalMoves).append(" extra)");
+            if (bestMoves > 0 && bestMoves == optimalMoves) sb.append(" \u2713 (").append(getString(R.string.history_detail_perfect)).append(")");
+            else if (bestMoves > 0) sb.append(" (").append(getString(R.string.history_detail_extra_moves, bestMoves - optimalMoves)).append(")");
         } else sb.append("\u2014");
         sb.append("\n");
-        sb.append("\nHint usage (this session): ");
+        sb.append("\n").append(getString(R.string.history_detail_hint_usage_last)).append(" ");
         int maxHint = entry.getMaxHintUsed();
-        if (maxHint < 0) sb.append("No hints used");
-        else if (maxHint == 0) sb.append("Pre-hint viewed (robot colors revealed)");
-        else sb.append("Up to hint #").append(maxHint + 1).append(" viewed");
+        if (maxHint < 0) sb.append(getString(R.string.history_detail_no_hints_used));
+        else if (maxHint == 0) sb.append(getString(R.string.history_detail_pre_hint_viewed));
+        else sb.append(getString(R.string.history_detail_up_to_hint, maxHint + 1));
         sb.append("\n");
-        sb.append("Hints ever used (all attempts): ")
-          .append(entry.isEverUsedHints() ? "Yes" : "No").append("\n");
-        sb.append("Qualifies for no-hints achievement: ")
-          .append(entry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
+        sb.append(getString(R.string.history_detail_hints_ever_used)).append(" ")
+          .append(entry.isEverUsedHints() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
+        sb.append(getString(R.string.history_detail_qualifies_no_hints)).append(" ")
+          .append(entry.qualifiesForNoHintsAchievement() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
         long lastNoHints = entry.getLastSolvedWithoutHints();
-        sb.append("Last solved without hints: ")
+        sb.append(getString(R.string.history_detail_last_solved_no_hints)).append(" ")
           .append(lastNoHints > 0 ? sdf.format(new Date(lastNoHints)) : "\u2014").append("\n");
         long lastPerfect = entry.getLastPerfectlySolvedWithoutHints();
-        sb.append("Last perfectly solved without hints: ")
+        sb.append(getString(R.string.history_detail_last_perfect_no_hints)).append(" ")
           .append(lastPerfect > 0 ? sdf.format(new Date(lastPerfect)) : "\u2014").append("\n");
         if (entry.getBoardSize() != null && !entry.getBoardSize().isEmpty()) {
-            sb.append("\nBoard: ").append(entry.getBoardSize()).append("\n");
+            sb.append("\n").append(getString(R.string.history_detail_board)).append(" ").append(entry.getBoardSize()).append("\n");
         }
-        sb.append("Map: ").append(entry.getMapName()).append("\n");
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        sb.append(getString(R.string.history_detail_map)).append(" ").append(entry.getMapName()).append("\n");
+        
+        // Create dialog with smaller text size
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle(entry.getMapName())
             .setMessage(sb.toString())
             .setPositiveButton(android.R.string.ok, null)
-            .show();
+            .create();
+        dialog.show();
+        
+        // Set smaller text size for message
+        android.widget.TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12);
+        }
     }
     
     /**

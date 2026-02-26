@@ -94,31 +94,34 @@ public class SaveGameFragment extends BaseGameFragment {
     
     // Sort/Filter options
     private enum SortOption {
-        LAST_SOLVED("Last Solved"),
-        LONGEST_FIRST_ATTEMPT("Longest First Attempt"),
-        OPTIMAL_NOT_FOUND("Optimal Not Found"),
-        UNSOLVED("Unsolved");
+        LAST_SOLVED,
+        LONGEST_FIRST_ATTEMPT,
+        OPTIMAL_NOT_FOUND,
+        UNSOLVED;
         
-        private final String label;
-        SortOption(String label) {
-            this.label = label;
-        }
-        public String getLabel() {
-            return label;
+        public String getLabel(android.content.Context context) {
+            switch (this) {
+                case LAST_SOLVED: return context.getString(R.string.sort_last_solved);
+                case LONGEST_FIRST_ATTEMPT: return context.getString(R.string.sort_longest_first_attempt);
+                case OPTIMAL_NOT_FOUND: return context.getString(R.string.sort_optimal_not_found);
+                case UNSOLVED: return context.getString(R.string.sort_unsolved);
+                default: return "";
+            }
         }
     }
     
     private enum FilterOption {
-        ALL("All"),
-        OPTIMAL_NOT_FOUND("Optimal Not Found"),
-        UNSOLVED("Unsolved");
+        ALL,
+        OPTIMAL_NOT_FOUND,
+        UNSOLVED;
         
-        private final String label;
-        FilterOption(String label) {
-            this.label = label;
-        }
-        public String getLabel() {
-            return label;
+        public String getLabel(android.content.Context context) {
+            switch (this) {
+                case ALL: return context.getString(R.string.filter_all);
+                case OPTIMAL_NOT_FOUND: return context.getString(R.string.filter_optimal_not_found);
+                case UNSOLVED: return context.getString(R.string.filter_unsolved);
+                default: return "";
+            }
         }
     }
     
@@ -595,9 +598,12 @@ public class SaveGameFragment extends BaseGameFragment {
      */
     private void setupSortFilterSpinners() {
         // Sort spinner
+        String[] sortOptions = new String[SortOption.values().length];
+        for (int i = 0; i < SortOption.values().length; i++) {
+            sortOptions[i] = SortOption.values()[i].getLabel(requireContext());
+        }
         ArrayAdapter<String> sortAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item,
-                new String[]{"Last Solved", "Longest First Attempt", "Optimal Not Found", "Unsolved"});
+                android.R.layout.simple_spinner_item, sortOptions);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(sortAdapter);
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -612,9 +618,12 @@ public class SaveGameFragment extends BaseGameFragment {
         });
         
         // Filter spinner
+        String[] filterOptions = new String[FilterOption.values().length];
+        for (int i = 0; i < FilterOption.values().length; i++) {
+            filterOptions[i] = FilterOption.values()[i].getLabel(requireContext());
+        }
         ArrayAdapter<String> filterAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item,
-                new String[]{"All", "Optimal Not Found", "Unsolved"});
+                android.R.layout.simple_spinner_item, filterOptions);
         filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         filterSpinner.setAdapter(filterAdapter);
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

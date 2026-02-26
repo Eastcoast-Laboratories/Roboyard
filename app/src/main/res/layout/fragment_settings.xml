@@ -371,6 +371,51 @@
                     />
             </RadioGroup>
 
+            <!-- Hint Auto-Move Section -->
+            <TextView
+                android:id="@+id/hint_auto_move_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_hint_auto_move"
+                android:textSize="@dimen/settings_label_text_size"
+                android:textStyle="bold"
+                android:textColor="#ffffff"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/hint_auto_move_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/hint_auto_move_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_yes"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:layout_marginEnd="32dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"
+                    android:contentDescription="@string/settings_hint_auto_move_on_a11y" />
+
+                <RadioButton
+                    android:id="@+id/hint_auto_move_off"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_no"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"
+                    android:contentDescription="@string/settings_hint_auto_move_off_a11y" />
+            </RadioGroup>
+
             <!-- Game Mode Section -->
             <TextView
                 android:id="@+id/game_mode_label"
