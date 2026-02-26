@@ -389,10 +389,6 @@
     <string name="editor_mode_wall_v">| 墙</string>
     <string name="editor_mode_erase">擦除</string>
     <string name="editor_color_pink">粉红色</string>
-    <string name="editor_color_green">绿色</string>
-    <string name="editor_color_blue">蓝色</string>
-    <string name="editor_color_yellow">黄色</string>
-    <string name="editor_color_silver">银色</string>
     <string name="editor_color_multi">多色</string>
     <string name="editor_load_autosave">加载自动保存</string>
     <string name="editor_cancel">取消</string>

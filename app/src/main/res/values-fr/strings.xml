@@ -296,11 +296,6 @@
     <string name="editor_mode_wall_h">– Mur</string>
     <string name="editor_mode_wall_v">| Mur</string>
     <string name="editor_mode_erase">Effacer</string>
-    <string name="editor_color_pink">Rose</string>
-    <string name="editor_color_green">Vert</string>
-    <string name="editor_color_blue">Bleu</string>
-    <string name="editor_color_yellow">Jaune</string>
-    <string name="editor_color_silver">Argent</string>
     <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Charger Sauvegarde Auto</string>
     <string name="editor_cancel">Annuler</string>

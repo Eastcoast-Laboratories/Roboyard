@@ -435,10 +435,6 @@
     <string name="editor_mode_wall_h">– Pared</string>
     <string name="editor_mode_wall_v">| Pared</string>
     <string name="editor_mode_erase">Borrar</string>
-    <string name="editor_color_pink">Rosa</string>
-    <string name="editor_color_green">Verde</string>
-    <string name="editor_color_blue">Azul</string>
-    <string name="editor_color_yellow">Amarillo</string>
     <string name="editor_color_silver">Plata</string>
     <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Cargar Guardado Automático</string>

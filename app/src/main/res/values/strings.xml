@@ -768,11 +768,6 @@
     <string name="editor_mode_wall_h">– Wall</string>
     <string name="editor_mode_wall_v">| Wall</string>
     <string name="editor_mode_erase">Erase</string>
-    <string name="editor_color_pink">Pink</string>
-    <string name="editor_color_green">Green</string>
-    <string name="editor_color_blue">Blue</string>
-    <string name="editor_color_yellow">Yellow</string>
-    <string name="editor_color_silver">Silver</string>
     <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Load Autosave</string>
     <string name="editor_cancel">Cancel</string>

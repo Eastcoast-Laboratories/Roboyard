@@ -225,11 +225,6 @@
     <string name="editor_mode_wall_h">–</string>
     <string name="editor_mode_wall_v">  |</string>
     <string name="editor_mode_erase">Del</string>
-    <string name="editor_color_pink">Pink</string>
-    <string name="editor_color_green">Grün</string>
-    <string name="editor_color_blue">Blau</string>
-    <string name="editor_color_yellow">Gelb</string>
-    <string name="editor_color_silver">Silber</string>
     <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Autosave laden</string>
     <string name="editor_cancel">Abbrechen</string>
