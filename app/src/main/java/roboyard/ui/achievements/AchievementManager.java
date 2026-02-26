@@ -104,21 +104,24 @@ public class AchievementManager {
      */
     public AchievementProgress getProgress(String achievementId) {
         switch (achievementId) {
-            // Levels completed
-            case "complete_10_levels":    return new AchievementProgress(levelsCompleted, 10);
-            case "complete_50_levels":    return new AchievementProgress(levelsCompleted, 50);
-            case "complete_all_levels":   return new AchievementProgress(levelsCompleted, 50);
+            // Level progression
+            case "level_10_complete":  return new AchievementProgress(levelsCompleted, 10);
+            case "level_50_complete":  return new AchievementProgress(levelsCompleted, 50);
+            case "level_140_complete": return new AchievementProgress(levelsCompleted, 140);
             // Perfect solutions (levels)
-            case "perfect_solution_5":    return new AchievementProgress(perfectSolutions, 5);
-            case "perfect_solution_20":   return new AchievementProgress(perfectSolutions, 20);
+            case "perfect_solutions_5":  return new AchievementProgress(perfectSolutions, 5);
+            case "perfect_solutions_10": return new AchievementProgress(perfectSolutions, 10);
+            case "perfect_solutions_50": return new AchievementProgress(perfectSolutions, 50);
             // Three-star levels
-            case "three_star_10_levels":  return new AchievementProgress(threeStarLevels, 10);
-            case "three_star_hard_5":     return new AchievementProgress(threeStarHardLevels, 5);
+            case "3_star_10_levels":      return new AchievementProgress(threeStarLevels, 10);
+            case "3_star_50_levels":      return new AchievementProgress(threeStarLevels, 50);
+            case "3_star_all_levels":     return new AchievementProgress(threeStarLevels, 140);
+            case "3_star_10_hard_levels": return new AchievementProgress(threeStarHardLevels, 10);
             // Impossible mode
-            case "impossible_mode_5":     return new AchievementProgress(impossibleModeGames, 5);
-            case "impossible_mode_10":    return new AchievementProgress(impossibleModeGames, 10);
-            case "impossible_mode_streak_3": return new AchievementProgress(impossibleModeStreak, 3);
-            case "impossible_mode_streak_5": return new AchievementProgress(impossibleModeStreak, 5);
+            case "impossible_mode_5":        return new AchievementProgress(impossibleModeGames, 5);
+            case "impossible_mode_10":       return new AchievementProgress(impossibleModeGames, 10);
+            case "impossible_mode_streak_5":  return new AchievementProgress(impossibleModeStreak, 5);
+            case "impossible_mode_streak_10": return new AchievementProgress(impossibleModeStreak, 10);
             // Perfect random games (cumulative)
             case "perfect_random_games_5":  return new AchievementProgress(perfectRandomGames, 5);
             case "perfect_random_games_10": return new AchievementProgress(perfectRandomGames, 10);
@@ -145,6 +148,19 @@ public class AchievementManager {
             // Binary achievements (no progress tracking)
             default: return null;
         }
+    }
+
+    /**
+     * Unlock an achievement if its counter-based progress is complete.
+     * Uses getProgress() as the single source of truth for required thresholds.
+     * @return true if newly unlocked
+     */
+    public boolean unlockIfComplete(String achievementId) {
+        AchievementProgress progress = getProgress(achievementId);
+        if (progress != null && progress.isComplete()) {
+            return unlock(achievementId);
+        }
+        return false;
     }
     
     
@@ -295,17 +311,17 @@ public class AchievementManager {
         
         // Level progression achievements
         if (levelId >= 1) unlock("level_1_complete");
-        if (levelsCompleted >= 10) unlock("level_10_complete");
-        if (levelsCompleted >= 50) unlock("level_50_complete");
-        if (levelsCompleted >= 140) unlock("level_140_complete");
+        unlockIfComplete("level_10_complete");
+        unlockIfComplete("level_50_complete");
+        unlockIfComplete("level_140_complete");
         
         // Perfect solution
         if (playerMoves == optimalMoves) {
             perfectSolutions++;
             saveCounter("perfect_solutions", perfectSolutions);
-            if (perfectSolutions >= 5) unlock("perfect_solutions_5");
-            if (perfectSolutions >= 10) unlock("perfect_solutions_10");
-            if (perfectSolutions >= 50) unlock("perfect_solutions_50");
+            unlockIfComplete("perfect_solutions_5");
+            unlockIfComplete("perfect_solutions_10");
+            unlockIfComplete("perfect_solutions_50");
         }
         
         // Note: no_hints_10 and no_hints_50 removed - hints are not allowed in levels
@@ -320,13 +336,13 @@ public class AchievementManager {
                 unlock("3_star_hard_level");
                 threeStarHardLevels++;
                 saveCounter("three_star_hard_levels", threeStarHardLevels);
-                if (threeStarHardLevels >= 10) unlock("3_star_10_hard_levels");
+                unlockIfComplete("3_star_10_hard_levels");
             }
             
             // Other 3-star achievements count all levels regardless of move count
-            if (threeStarLevels >= 10) unlock("3_star_10_levels");
-            if (threeStarLevels >= 50) unlock("3_star_50_levels");
-            if (threeStarLevels >= 140) unlock("3_star_all_levels");
+            unlockIfComplete("3_star_10_levels");
+            unlockIfComplete("3_star_50_levels");
+            unlockIfComplete("3_star_all_levels");
         }
         
         // Speedrun
@@ -367,14 +383,15 @@ public class AchievementManager {
             impossibleModeGames++;
             saveCounter("impossible_mode_games", impossibleModeGames);
             unlock("impossible_mode_1");
-            if (impossibleModeGames >= 5) unlock("impossible_mode_5");
+            unlockIfComplete("impossible_mode_5");
+            unlockIfComplete("impossible_mode_10");
             
             // Impossible mode streak (perfect solutions)
             if (playerMoves == optimalMoves) {
                 impossibleModeStreak++;
                 saveCounter("impossible_mode_streak", impossibleModeStreak);
-                if (impossibleModeStreak >= 5) unlock("impossible_mode_streak_5");
-                if (impossibleModeStreak >= 10) unlock("impossible_mode_streak_10");
+                unlockIfComplete("impossible_mode_streak_5");
+                unlockIfComplete("impossible_mode_streak_10");
             } else {
                 impossibleModeStreak = 0;
                 saveCounter("impossible_mode_streak", 0);
@@ -420,16 +437,16 @@ public class AchievementManager {
         if (playerMoves == optimalMoves && isFirstCompletion) {
             perfectRandomGames++;
             saveCounter("perfect_random_games", perfectRandomGames);
-            if (perfectRandomGames >= 5) unlock("perfect_random_games_5");
-            if (perfectRandomGames >= 10) unlock("perfect_random_games_10");
-            if (perfectRandomGames >= 20) unlock("perfect_random_games_20");
+            unlockIfComplete("perfect_random_games_5");
+            unlockIfComplete("perfect_random_games_10");
+            unlockIfComplete("perfect_random_games_20");
             
             // Perfect random games streak (resets on non-optimal)
             perfectRandomGamesStreak++;
             saveCounter("perfect_random_games_streak", perfectRandomGamesStreak);
-            if (perfectRandomGamesStreak >= 5) unlock("perfect_random_games_streak_5");
-            if (perfectRandomGamesStreak >= 10) unlock("perfect_random_games_streak_10");
-            if (perfectRandomGamesStreak >= 20) unlock("perfect_random_games_streak_20");
+            unlockIfComplete("perfect_random_games_streak_5");
+            unlockIfComplete("perfect_random_games_streak_10");
+            unlockIfComplete("perfect_random_games_streak_20");
             Timber.d("[ACHIEVEMENTS] Perfect game on unique map - total: %d, streak: %d", perfectRandomGames, perfectRandomGamesStreak);
         } else if (playerMoves == optimalMoves && !isFirstCompletion) {
             Timber.d("[ACHIEVEMENTS] Perfect game NOT counted - map already completed before");
@@ -451,14 +468,14 @@ public class AchievementManager {
             // Cumulative counter (never resets)
             noHintRandomGamesTotal++;
             saveCounter("no_hint_random_games_total", noHintRandomGamesTotal);
-            if (noHintRandomGamesTotal >= 10) unlock("no_hints_random_10");
-            if (noHintRandomGamesTotal >= 50) unlock("no_hints_random_50");
+            unlockIfComplete("no_hints_random_10");
+            unlockIfComplete("no_hints_random_50");
             
             // Streak counter (resets on hint usage)
             noHintRandomGames++;
             saveCounter("no_hint_random_games", noHintRandomGames);
-            if (noHintRandomGames >= 10) unlock("no_hints_streak_random_10");
-            if (noHintRandomGames >= 50) unlock("no_hints_streak_random_50");
+            unlockIfComplete("no_hints_streak_random_10");
+            unlockIfComplete("no_hints_streak_random_50");
             Timber.d("[ACHIEVEMENTS] No hints on unique map - total: %d, streak: %d", noHintRandomGamesTotal, noHintRandomGames);
         } else if (!qualifiesForNoHints) {
             // Reset streak counter when hints were used (on this or previous completion)
@@ -482,9 +499,9 @@ public class AchievementManager {
                     sameWallsMaxPositions = uniquePositions;
                     saveCounter("same_walls_max_positions", sameWallsMaxPositions);
                 }
-                if (sameWallsMaxPositions >= 2)  unlock("same_walls_2");
-                if (sameWallsMaxPositions >= 5)  unlock("same_walls_5");
-                if (sameWallsMaxPositions >= 10) unlock("same_walls_10");
+                unlockIfComplete("same_walls_2");
+                unlockIfComplete("same_walls_5");
+                unlockIfComplete("same_walls_10");
             }
         }
 
@@ -494,7 +511,7 @@ public class AchievementManager {
         if (timeMs < 30000) {
             speedrunRandomGamesUnder30s++;
             saveCounter("speedrun_random_30s", speedrunRandomGamesUnder30s);
-            if (speedrunRandomGamesUnder30s >= 5) unlock("speedrun_random_5_games_under_30s");
+            unlockIfComplete("speedrun_random_5_games_under_30s");
         }
         
         Timber.d("[ACHIEVEMENTS] Random game completed: moves=%d/%d, hints=%d, time=%dms, impossible=%s, robots=%d, targets=%d/%d",
@@ -567,8 +584,8 @@ public class AchievementManager {
         resetRobotTouchTracking();
         
         // Check daily login achievements
-        if (dailyLoginStreak >= 7) unlock("daily_login_7");
-        if (dailyLoginStreak >= 30) unlock("daily_login_30");
+        unlockIfComplete("daily_login_7");
+        unlockIfComplete("daily_login_30");
         
         Timber.d("[ACHIEVEMENTS] New game started - session flags reset");
     }
@@ -626,8 +643,8 @@ public class AchievementManager {
      */
     public void checkAndUnlockStreakAchievements() {
         int streakDays = dailyLoginStreak;
-        if (streakDays >= 7) unlock("daily_login_7");
-        if (streakDays >= 30) unlock("daily_login_30");
+        unlockIfComplete("daily_login_7");
+        unlockIfComplete("daily_login_30");
         Timber.d("[ACHIEVEMENT] Checked Login Streak achievements at game start - streak: %d days", streakDays);
     }
     
