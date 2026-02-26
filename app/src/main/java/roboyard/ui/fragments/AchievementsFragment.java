@@ -215,7 +215,21 @@ public class AchievementsFragment extends BaseGameFragment {
         descText.setTextSize(12);
         descText.setTextColor(Color.parseColor("#666666"));
         textContainer.addView(descText);
-        
+
+        // Progress text for counter-based achievements (only when not yet unlocked)
+        if (!achievement.isUnlocked()) {
+            AchievementManager.AchievementProgress progress = achievementManager.getProgress(achievement.getId());
+            if (progress != null && progress.hasProgress()) {
+                TextView progressView = new TextView(requireContext());
+                int clamped = Math.min(progress.current, progress.required);
+                progressView.setText(clamped + " / " + progress.required);
+                progressView.setTextSize(12);
+                progressView.setTextColor(Color.parseColor("#1565C0")); // blue
+                progressView.setTypeface(null, android.graphics.Typeface.BOLD);
+                textContainer.addView(progressView);
+            }
+        }
+
         itemLayout.addView(textContainer);
         
         // Unlocked indicator

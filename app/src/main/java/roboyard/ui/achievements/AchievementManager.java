@@ -82,6 +82,70 @@ public class AchievementManager {
     public void setUnlockListener(AchievementUnlockListener listener) {
         this.unlockListener = listener;
     }
+
+    /**
+     * Progress snapshot for a counter-based achievement.
+     * current == required means the achievement can be / is unlocked.
+     */
+    public static class AchievementProgress {
+        public final int current;
+        public final int required;
+        public AchievementProgress(int current, int required) {
+            this.current = current;
+            this.required = required;
+        }
+        public boolean hasProgress() { return required > 1; }
+        public boolean isComplete() { return current >= required; }
+    }
+
+    /**
+     * Returns progress for counter-based achievements, or null for binary achievements.
+     * This is the central method for progress display and auto-unlock at 100%.
+     */
+    public AchievementProgress getProgress(String achievementId) {
+        switch (achievementId) {
+            // Levels completed
+            case "complete_10_levels":    return new AchievementProgress(levelsCompleted, 10);
+            case "complete_50_levels":    return new AchievementProgress(levelsCompleted, 50);
+            case "complete_all_levels":   return new AchievementProgress(levelsCompleted, 50);
+            // Perfect solutions (levels)
+            case "perfect_solution_5":    return new AchievementProgress(perfectSolutions, 5);
+            case "perfect_solution_20":   return new AchievementProgress(perfectSolutions, 20);
+            // Three-star levels
+            case "three_star_10_levels":  return new AchievementProgress(threeStarLevels, 10);
+            case "three_star_hard_5":     return new AchievementProgress(threeStarHardLevels, 5);
+            // Impossible mode
+            case "impossible_mode_5":     return new AchievementProgress(impossibleModeGames, 5);
+            case "impossible_mode_10":    return new AchievementProgress(impossibleModeGames, 10);
+            case "impossible_mode_streak_3": return new AchievementProgress(impossibleModeStreak, 3);
+            case "impossible_mode_streak_5": return new AchievementProgress(impossibleModeStreak, 5);
+            // Perfect random games (cumulative)
+            case "perfect_random_games_5":  return new AchievementProgress(perfectRandomGames, 5);
+            case "perfect_random_games_10": return new AchievementProgress(perfectRandomGames, 10);
+            case "perfect_random_games_20": return new AchievementProgress(perfectRandomGames, 20);
+            // Perfect random games streak
+            case "perfect_random_games_streak_5":  return new AchievementProgress(perfectRandomGamesStreak, 5);
+            case "perfect_random_games_streak_10": return new AchievementProgress(perfectRandomGamesStreak, 10);
+            case "perfect_random_games_streak_20": return new AchievementProgress(perfectRandomGamesStreak, 20);
+            // No-hints random games (cumulative)
+            case "no_hints_random_10": return new AchievementProgress(noHintRandomGamesTotal, 10);
+            case "no_hints_random_50": return new AchievementProgress(noHintRandomGamesTotal, 50);
+            // No-hints streak
+            case "no_hints_streak_random_10": return new AchievementProgress(noHintRandomGames, 10);
+            case "no_hints_streak_random_50": return new AchievementProgress(noHintRandomGames, 50);
+            // Daily login streak
+            case "daily_login_7":  return new AchievementProgress(dailyLoginStreak, 7);
+            case "daily_login_30": return new AchievementProgress(dailyLoginStreak, 30);
+            // Speedrun streak
+            case "speedrun_random_5_games_under_30s": return new AchievementProgress(speedrunRandomGamesUnder30s, 5);
+            // Same-walls
+            case "same_walls_2":  return new AchievementProgress(sameWallsMaxPositions, 2);
+            case "same_walls_5":  return new AchievementProgress(sameWallsMaxPositions, 5);
+            case "same_walls_10": return new AchievementProgress(sameWallsMaxPositions, 10);
+            // Binary achievements (no progress tracking)
+            default: return null;
+        }
+    }
     
     
     private void loadState() {

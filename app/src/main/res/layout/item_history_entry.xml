@@ -108,10 +108,10 @@
             android:id="@+id/info_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginTop="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/info_button_a11y"
             android:src="@android:drawable/ic_menu_info_details"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
