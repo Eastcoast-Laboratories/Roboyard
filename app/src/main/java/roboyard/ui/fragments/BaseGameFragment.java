@@ -179,6 +179,12 @@ public abstract class BaseGameFragment extends Fragment {
           .append(entry.isEverUsedHints() ? "Yes" : "No").append("\n");
         sb.append("Qualifies for no-hints achievement: ")
           .append(entry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
+        long lastNoHints = entry.getLastSolvedWithoutHints();
+        sb.append("Last solved without hints: ")
+          .append(lastNoHints > 0 ? sdf.format(new Date(lastNoHints)) : "\u2014").append("\n");
+        long lastPerfect = entry.getLastPerfectlySolvedWithoutHints();
+        sb.append("Last perfectly solved without hints: ")
+          .append(lastPerfect > 0 ? sdf.format(new Date(lastPerfect)) : "\u2014").append("\n");
         if (entry.getBoardSize() != null && !entry.getBoardSize().isEmpty()) {
             sb.append("\nBoard: ").append(entry.getBoardSize()).append("\n");
         }

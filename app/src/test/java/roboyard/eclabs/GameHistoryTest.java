@@ -240,16 +240,24 @@ public class GameHistoryTest {
     
     @Test
     public void testQualifiesForNoHintsAchievementWhenNoHintsUsed() {
-        entry.setSolvedWithoutHints(true);
-        // maxHintUsed is -1 by default
+        // Must use recordSolvedWithoutHints() to set the timestamp
+        entry.recordSolvedWithoutHints(false);
         assertTrue(entry.qualifiesForNoHintsAchievement());
     }
     
     @Test
-    public void testDoesNotQualifyForNoHintsAchievementWhenHintsUsed() {
-        entry.setSolvedWithoutHints(true);
+    public void testDoesNotQualifyForNoHintsAchievementWhenHintsUsedBeforeAnySolve() {
+        // Hints used without ever solving without hints => does NOT qualify
         entry.recordHintUsed(0);
         assertFalse(entry.qualifiesForNoHintsAchievement());
+    }
+
+    @Test
+    public void testStillQualifiesForNoHintsAfterLaterHintUsage() {
+        // Solved without hints first, then hints used later => STILL qualifies
+        entry.recordSolvedWithoutHints(false);
+        entry.recordHintUsed(0);
+        assertTrue("Qualification must survive later hint usage", entry.qualifiesForNoHintsAchievement());
     }
     
     @Test
@@ -261,19 +269,19 @@ public class GameHistoryTest {
     @Test
     public void testHintTrackingPersistsThroughMultipleCompletions() {
         // First completion without hints
-        entry.setSolvedWithoutHints(true);
+        entry.recordSolvedWithoutHints(false);
         assertTrue(entry.qualifiesForNoHintsAchievement());
         
         // Second completion - record completion doesn't change hint status
         entry.recordCompletion(100, 12);
         assertTrue(entry.qualifiesForNoHintsAchievement());
         
-        // If hints are used later, map is permanently marked
+        // If hints are used later, qualification is NOT revoked (new behavior)
         entry.recordHintUsed(0);
-        assertFalse(entry.qualifiesForNoHintsAchievement());
+        assertTrue("Qualification must NOT be revoked by later hint usage", entry.qualifiesForNoHintsAchievement());
         
-        // Even more completions don't fix it
+        // Even more completions don't change it
         entry.recordCompletion(80, 10);
-        assertFalse(entry.qualifiesForNoHintsAchievement());
+        assertTrue(entry.qualifiesForNoHintsAchievement());
     }
 }

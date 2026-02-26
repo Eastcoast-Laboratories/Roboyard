@@ -82,8 +82,14 @@ public class GameHistoryManager {
                         if (entry.getMaxHintUsed() >= 0 || entry.isEverUsedHints()) {
                             existing.markEverUsedHints();
                         }
-                        // solvedWithoutHints stays true only if FIRST completion was without hints
-                        // Don't update it on subsequent completions
+                        // lastSolvedWithoutHints / lastPerfectlySolvedWithoutHints:
+                        // Only update if new entry has a more recent no-hints solve
+                        if (entry.getLastSolvedWithoutHints() > existing.getLastSolvedWithoutHints()) {
+                            existing.setLastSolvedWithoutHints(entry.getLastSolvedWithoutHints());
+                        }
+                        if (entry.getLastPerfectlySolvedWithoutHints() > existing.getLastPerfectlySolvedWithoutHints()) {
+                            existing.setLastPerfectlySolvedWithoutHints(entry.getLastPerfectlySolvedWithoutHints());
+                        }
                         
                         // Log optimal solution achievement with full hint history
                         int optMoves = existing.getOptimalMoves() > 0 ? existing.getOptimalMoves() : entry.getOptimalMoves();
@@ -215,6 +221,9 @@ public class GameHistoryManager {
                     // everUsedHints: fallback to maxHintUsed>=0 for legacy entries
                     boolean legacyEverUsedHints = entry.getMaxHintUsed() >= 0;
                     entry.setEverUsedHints(entryJson.optBoolean("everUsedHints", legacyEverUsedHints));
+                    // Load no-hints timestamp fields (0 = never solved without hints)
+                    entry.setLastSolvedWithoutHints(entryJson.optLong("lastSolvedWithoutHints", 0));
+                    entry.setLastPerfectlySolvedWithoutHints(entryJson.optLong("lastPerfectlySolvedWithoutHints", 0));
                     
                     entries.add(entry);
                 }
@@ -323,6 +332,8 @@ public class GameHistoryManager {
                 entryJson.put("maxHintUsed", entry.getMaxHintUsed());
                 entryJson.put("solvedWithoutHints", entry.isSolvedWithoutHints());
                 entryJson.put("everUsedHints", entry.isEverUsedHints());
+                entryJson.put("lastSolvedWithoutHints", entry.getLastSolvedWithoutHints());
+                entryJson.put("lastPerfectlySolvedWithoutHints", entry.getLastPerfectlySolvedWithoutHints());
                 entryJson.put("difficulty", entry.getDifficulty());
                 
                 entriesArray.put(entryJson);

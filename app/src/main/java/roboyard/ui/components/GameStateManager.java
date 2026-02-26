@@ -2216,6 +2216,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     isCompletionRecorded = true;
                     Timber.d("[HISTORY_FLOW] updateHintTracking: recordCompletion called, countBefore=%d, countAfter=%d, moveCount=%d",
                             countBefore, existing.getCompletionCount(), actualMoveCount);
+                    // If completed without hints, record the no-hints timestamp (never overwritten by later hint usage)
+                    if (maxHint < 0 && actualMoveCount > 0) {
+                        int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
+                                ? currentSolution.getMoves().size() : 0;
+                        boolean isOptimal = optMoves > 0 && actualMoveCount == optMoves;
+                        existing.recordSolvedWithoutHints(isOptimal);
+                        Timber.d("[HISTORY] updateHintTracking: recordSolvedWithoutHints isOptimal=%b, moves=%d, optimal=%d", isOptimal, actualMoveCount, optMoves);
+                    }
                 } else if (Boolean.TRUE.equals(isGameComplete.getValue())) {
                     Timber.d("[HISTORY_FLOW] updateHintTracking: completion already recorded this session, skipping");
                 }
@@ -2341,13 +2349,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int maxHintUsed = gameState.getMaxHintUsedThisSession();
             entry.setMaxHintUsed(maxHintUsed);
             // Mark as solved without hints only if no hints were used
-            entry.setSolvedWithoutHints(maxHintUsed < 0);
+            boolean noHintsThisSession = maxHintUsed < 0;
+            entry.setSolvedWithoutHints(noHintsThisSession);
             // Mark everUsedHints if hints were used in this session
             if (maxHintUsed >= 0) {
                 entry.markEverUsedHints();
             }
-            Timber.d("[HISTORY] Hint tracking: maxHintUsed=%d, solvedWithoutHints=%b, everUsedHints=%b", 
-                    maxHintUsed, entry.isSolvedWithoutHints(), entry.isEverUsedHints());
+            // If completed without hints, record the timestamp (never overwritten by later hint usage)
+            if (noHintsThisSession && actualMoveCount > 0) {
+                int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
+                        ? currentSolution.getMoves().size() : 0;
+                boolean isOptimal = optMoves > 0 && actualMoveCount == optMoves;
+                entry.recordSolvedWithoutHints(isOptimal);
+                Timber.d("[HISTORY] recordSolvedWithoutHints: isOptimal=%b, moves=%d, optimal=%d",
+                        isOptimal, actualMoveCount, optMoves);
+            }
+            Timber.d("[HISTORY] Hint tracking: maxHintUsed=%d, solvedWithoutHints=%b, everUsedHints=%b, lastSolvedWithoutHints=%d", 
+                    maxHintUsed, entry.isSolvedWithoutHints(), entry.isEverUsedHints(), entry.getLastSolvedWithoutHints());
 
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(activity, entry);

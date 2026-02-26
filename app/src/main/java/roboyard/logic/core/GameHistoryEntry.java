@@ -45,6 +45,11 @@ public class GameHistoryEntry {
     private boolean solvedWithoutHints;       // True if map was FIRST solved without using hints
     private boolean everUsedHints = false;    // True if hints were EVER used in ANY attempt (including later ones)
 
+    // Timestamps for no-hints achievement tracking
+    // These fields are only updated when solved without hints and never cleared by later hint usage
+    private long lastSolvedWithoutHints = 0;          // Timestamp of the last completion without hints (0 = never)
+    private long lastPerfectlySolvedWithoutHints = 0; // Timestamp of the last OPTIMAL completion without hints (0 = never)
+
     private String difficulty = "";           // Difficulty level when the game was created
 
     /**
@@ -292,12 +297,22 @@ public class GameHistoryEntry {
     
     /**
      * Check if this map qualifies for "no hints" achievements.
-     * A map only qualifies if it was FIRST solved without hints AND hints were NEVER used
-     * in any subsequent attempt either.
+     * A map qualifies if it was EVER solved without hints (lastSolvedWithoutHints > 0).
+     * Later hint usage in subsequent attempts does NOT revoke this qualification.
      * @return true if map qualifies for no-hints achievements
      */
     public boolean qualifiesForNoHintsAchievement() {
-        return solvedWithoutHints && !everUsedHints;
+        return lastSolvedWithoutHints > 0;
+    }
+
+    /**
+     * Check if this map qualifies for "perfect no hints" achievements.
+     * A map qualifies if it was EVER solved optimally without hints.
+     * Later hint usage in subsequent attempts does NOT revoke this qualification.
+     * @return true if map qualifies for perfect no-hints achievements
+     */
+    public boolean qualifiesForPerfectNoHintsAchievement() {
+        return lastPerfectlySolvedWithoutHints > 0;
     }
 
     public boolean isEverUsedHints() {
@@ -320,6 +335,32 @@ public class GameHistoryEntry {
      * Get the history index from the map path
      * @return The history index
      */
+    public long getLastSolvedWithoutHints() { return lastSolvedWithoutHints; }
+    public void setLastSolvedWithoutHints(long ts) { this.lastSolvedWithoutHints = ts; }
+
+    public long getLastPerfectlySolvedWithoutHints() { return lastPerfectlySolvedWithoutHints; }
+    public void setLastPerfectlySolvedWithoutHints(long ts) { this.lastPerfectlySolvedWithoutHints = ts; }
+
+    /**
+     * Record a no-hints completion. Updates lastSolvedWithoutHints.
+     * If also optimal, updates lastPerfectlySolvedWithoutHints.
+     *
+     * IMPORTANT: If hints were EVER used in ANY prior attempt (everUsedHints=true),
+     * this method does nothing. Once a map is disqualified (hints used), it stays disqualified
+     * permanently - even if later solved without hints.
+     */
+    public void recordSolvedWithoutHints(boolean isOptimal) {
+        if (everUsedHints) {
+            return; // permanently disqualified - cannot restore no-hints status
+        }
+        long now = System.currentTimeMillis();
+        this.lastSolvedWithoutHints = now;
+        this.solvedWithoutHints = true;
+        if (isOptimal) {
+            this.lastPerfectlySolvedWithoutHints = now;
+        }
+    }
+
     public String getDifficulty() { return difficulty != null ? difficulty : ""; }
     public void setDifficulty(String difficulty) { this.difficulty = difficulty != null ? difficulty : ""; }
 
