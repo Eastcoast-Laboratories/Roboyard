@@ -2,6 +2,15 @@ Changelog Deutsch
 =================
 
 
+## Version 40 (2026-02-28)
+- Roboter bewegen sich in den Hinweisen optional automatisch ins Ziel
+- Roboter Hinweispfeile direkt auf der Karte
+- Neue Achievements, verschiedene Karten mit den selben Wänden zu lösen
+- Es werden auch Karten mit ungeraden Dimensionen akzeptiert
+- Unendliche History gespeichert. Jetzt mit Sortierung und Filterung
+- Die Anzeige der Züge und der abweichung im Heiß-Kalt-Modus größer
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+
 ## Version 39 (2026-02-20)
 - Neu: Level Editor, wenn man alle level freigeschaltet hat
  - 10 verschiedene Kartengeneratoren
