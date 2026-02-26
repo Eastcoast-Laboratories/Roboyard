@@ -607,6 +607,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         if (solution != null && solution.getMoves() != null && solution.getMoves().size() > 0) {
                             optimalMoves = solution.getMoves().size();
                             Timber.d("Solution object hash (completion): %s", System.identityHashCode(solution));
+                        } else {
+                            // Solver may still be running - use last known min moves as fallback
+                            optimalMoves = gameStateManager.getLastSolutionMinMoves();
+                            Timber.d("[ACHIEVEMENTS][PERFECT] solution null, fallback optimalMoves=%d from lastSolutionMinMoves", optimalMoves);
                         }
                         int hintsUsed = state.getHintCount();
                         int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
@@ -716,9 +720,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         announceAccessibility(completionMessage_a11y);
                         updateStatusText(completionMessage, true);
                         
-                        // Save to history immediately on completion (bypasses time threshold)
-                        gameStateManager.saveToHistoryNow("completed");
-                        
                         // Trigger achievements for random game completion
                         int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
                                 gameStateManager.getMoveCount().getValue() : 0;
@@ -726,6 +727,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         GameSolution sol = gameStateManager.getCurrentSolution();
                         if (sol != null && sol.getMoves() != null) {
                             optimalMoves = sol.getMoves().size();
+                        } else {
+                            // Solver may still be running - use last known min moves as fallback
+                            optimalMoves = gameStateManager.getLastSolutionMinMoves();
+                            Timber.d("[ACHIEVEMENTS][PERFECT] random game: solution null, fallback optimalMoves=%d from lastSolutionMinMoves", optimalMoves);
                         }
                         int hintsUsed = state.getHintCount();
                         long elapsedTime = SystemClock.elapsedRealtime() - startTime;
@@ -739,10 +744,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         int targetCount = 1;
                         int targetsNeeded = 1;
                         
-                        // Check if this is a unique map (first completion) for anti-cheat
+                        // Check isFirstCompletion BEFORE saveToHistoryNow to avoid race condition:
+                        // saveToHistoryNow writes the entry, so isFirstCompletion would always return false after it.
                         String mapSignature = state.generateMapSignature();
                         boolean isFirstCompletion = GameHistoryManager.isFirstCompletion(
                                 requireActivity(), mapSignature);
+                        Timber.d("[ACHIEVEMENTS] isFirstCompletion=%b (checked before saveToHistoryNow)", isFirstCompletion);
+
+                        // Save to history immediately on completion (bypasses time threshold)
+                        gameStateManager.saveToHistoryNow("completed");
                         // Check if map qualifies for no-hints achievements
                         // For first completion: based on current session hint usage
                         // For repeat completion: check history entry
@@ -862,6 +872,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 } else {
                     stopEyeBlinkAnimation();
                 }
+            }
+        });
+
+        // Show toast when a wrong-colored robot lands on a target
+        gameStateManager.getWrongRobotAtTarget().observe(getViewLifecycleOwner(), wrongRobot -> {
+            if (Boolean.TRUE.equals(wrongRobot)) {
+                Toast.makeText(requireContext(), R.string.wrong_robot_on_target, Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -80,6 +80,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private final MutableLiveData<Integer> moveCount = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> squaresMoved = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> wrongRobotAtTarget = new MutableLiveData<>(false);
 
     // Move history for undo functionality
     private final ArrayList<GameState> stateHistory = new ArrayList<>();
@@ -1383,6 +1384,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // This prevents triggering goal event twice
                 if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
+                } else if (!isGameComplete.getValue() && state.isAnyWrongRobotOnTarget()) {
+                    wrongRobotAtTarget.setValue(true);
+                    wrongRobotAtTarget.setValue(false);
                 }
 
                 // Notify observers that the state has changed
@@ -1438,6 +1442,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // This prevents triggering goal event twice
                 if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
+                } else if (!isGameComplete.getValue() && state.isAnyWrongRobotOnTarget()) {
+                    wrongRobotAtTarget.setValue(true);
+                    wrongRobotAtTarget.setValue(false);
                 }
 
                 // Notify observers
@@ -2651,6 +2658,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      *
      * @return The current solution or null if none is available
      */
+    public LiveData<Boolean> getWrongRobotAtTarget() {
+        return wrongRobotAtTarget;
+    }
+
     public GameSolution getCurrentSolution() {
         return currentSolution;
     }

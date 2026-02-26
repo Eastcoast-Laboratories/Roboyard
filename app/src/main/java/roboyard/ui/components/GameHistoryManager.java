@@ -523,7 +523,9 @@ public class GameHistoryManager {
             return true; // No signature = treat as new
         }
         GameHistoryEntry existing = findByMapSignature(activity, mapSignature);
-        return existing == null;
+        // An entry is created on the first move (before completion), so we check
+        // completionCount == 0 to distinguish "started but not yet completed" from "already completed before".
+        return existing == null || existing.getCompletionCount() == 0;
     }
     
     /**

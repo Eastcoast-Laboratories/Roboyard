@@ -82,6 +82,7 @@
     <string name="optimal_moves">Optimal: %1$d moves</string>
     <string name="your_moves">Your moves: %1$d</string>
     <string name="level_complete">Level Complete!</string>
+    <string name="wrong_robot_on_target">Wrong robot! Move the correct colored robot to the goal.</string>
     <string name="level_stars_description">You earned %1$d stars</string>
     <string name="level_stars_a11y">You earned %1$d stars</string>
     <string name="stars_count">%1$d Stars</string>
@@ -152,7 +153,7 @@
     <string name="robot_move_direction_a11y">Move the %1$s robot %2$s</string>
     <string name="robot_selected_a11y">%1$s robot selected</string>
     <string name="robot_deselected_a11y">Robot deselected</string>
-    <string name="target_found_a11y">%1$s robot reached its target</string>
+    <string name="target_found_a11y">%1$s robot reached its goal</string>
     <string name="game_complete_a11y">Level complete! You solved the puzzle in %1$d moves</string>
     <string name="wall_hit_a11y">%1$s robot hit a wall</string>
     <string name="robot_hit_a11y">%1$s robot hit the %2$s robot</string>
@@ -190,7 +191,7 @@
     <string name="save_date_format">Saved: %1$s</string>
     <string name="save_level_format">Level: %1$s - Moves: %2$d</string>
     <string name="save_failed" translatable="false">Failed to save game.</string>
-    <string name="save_no_targets_a11y" translatable="false">Warning: This save has no targets and may cause problems</string>
+    <string name="save_no_targets_a11y" translatable="false">Warning: This save has no goals and may cause problems</string>
     
     <!-- Game screen -->
     <string name="game_move_count" comment="used in the game info box">Moves: %1$d</string>
@@ -207,7 +208,7 @@
     <!-- Help screen -->
     <string name="help_screen_content_title">How to Play Roboyard</string>
     <string name="help_goal_section_title">Goal</string>
-    <string name="help_goal_description">Move the colored robots to their matching colored targets. The game is completed when all robots are on their matching targets.</string>
+    <string name="help_goal_description">Move the colored robots to their matching colored goals. The game is completed when all robots are on their matching goals.</string>
     <string name="help_movement_section_title">Movement</string>
     <string name="help_movement_point_1">- Tap on a robot to select it.</string>
     <string name="help_movement_point_2">- Tap on an empty cell to move the selected robot in that direction.</string>
@@ -314,7 +315,7 @@
     <string name="color_pink_adj">Pink</string>
     <string name="color_silver_adj">Silver</string>
 
-    <!-- Target color forms -->
+    <!-- goal color forms -->
     <string name="color_red_target" comment="keep">Red</string>
     <string name="color_blue_target">Blue</string>
     <string name="color_green_target">Green</string>
@@ -326,8 +327,8 @@
     <string name="no_robot_selected" comment="Status message when no robot is currently selected [GameFragment]">No robot selected</string>
     <string name="robot_selected" comment="Status message showing which robot is selected">Selected: %1$s robot at (%2$d, %3$d)</string>
     <string name="robot_selected_info" comment="More detailed information about selected robot [GameFragment]">Selected: %1$s robot at position (%2$d, %3$d)</string>
-    <string name="robot_target_info" comment="Information about a target on the board [GameFragment]">%1$s target: (%2$d, %3$d)</string>
-    <string name="no_target_for_robot" comment="Message when a robot has no matching target [GameFragment]">No target for this robot</string>
+    <string name="robot_target_info" comment="Information about a target on the board [GameFragment]">%1$s goal: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot" comment="Message when a robot has no matching target [GameFragment]">No goal for this robot</string>
     <string name="move_count_text" comment="Text showing number of moves made">Moves: %1$d</string>
     <string name="moves_count" comment="Alternative text for move counter [GameFragment]">Moves: %1$d</string>
     <string name="squares_moved" comment="Text showing number of squares robots have moved [GameFragment]">Squares: %1$d</string>
@@ -347,13 +348,13 @@
     <string name="stars_earned" comment="Message showing stars earned for level completion">You earned %1$d stars</string>
     <string name="completed_in_moves" comment="Short text showing moves used to complete level">Completed in %1$d moves</string>
     <string name="starting_level" comment="Message shown when starting a level">Starting level %1$d</string>
-    <string name="target_reached" comment="Message shown when a robot reaches its target">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="target_reached" comment="Message shown when a robot reaches its target">Goal reached! Game complete in %1$d moves and %2$d squares moved</string>
     <string name="robot_move_initiated" comment="Message when robot starts moving">%1$s initiating move, starting at %2$d, %3$d</string>
     <string name="unknown_robot">Unknown: %1$d</string>
     <string name="unknown_color">Unknown: %1$s</string>
 
     <!-- Accessibility versions -->
-    <string name="game_completed_a11y" comment="Accessibility announcement when target is reached">Target reached! Game complete in %1$d moves and %2$d squares moved</string>
+    <string name="game_completed_a11y" comment="Accessibility announcement when target is reached">Goal reached! Game complete in %1$d moves and %2$d squares moved</string>
     <string name="robot_move_initiated_a11y" comment="Accessibility announcement when robot moves">%1$s robot move initiated, starting at %2$d, %3$d</string>
     <string name="starting_level_a11y" comment="Accessibility announcement when level starts">Starting level %1$d</string>
 
@@ -403,9 +404,9 @@
     <string name="settings_board_size">Board Size:</string>
     <string name="settings_difficulty">Difficulty Level:</string>
     <string name="settings_new_map_each_time">Generate New Map Each Time:</string>
-    <string name="settings_robots_reach_targets">Target Settings:</string>
+    <string name="settings_robots_reach_targets">Goal Settings:</string>
     <string name="settings_out_of">of</string>
-    <string name="settings_targets">Targets</string>
+    <string name="settings_targets">Goals</string>
     <string name="settings_sound">Sound Effects:</string>
     <string name="settings_background_sound">Background Sound:</string>
     <string name="settings_background_sound_a11y">Background sound volume slider</string>
@@ -418,15 +419,15 @@
     <string name="settings_game_mode">Game Mode:</string>
     <string name="settings_standard_game">Standard Game</string>
     <string name="settings_standard_game_a11y">Standard Game Mode</string>
-    <string name="settings_multi_target_mode">Multi-target Mode (beta)</string>
-    <string name="settings_multi_target_mode_a11y">Multi-target Mode beta</string>
+    <string name="settings_multi_target_mode">Multi-Goal Mode (beta)</string>
+    <string name="settings_multi_target_mode_a11y">Multi-Goal Mode beta</string>
     <string name="settings_fullscreen">Fullscreen Mode:</string>
     <string name="settings_fullscreen_a11y">Toggle fullscreen mode</string>
     <string name="settings_fullscreen_applying">Applying Fullscreen settings</string>
     <string name="settings_puzzle_parameters">Num Moves:</string>
     <string name="settings_min_solution_moves">Min:</string>
     <string name="settings_max_solution_moves">Max:</string>
-    <string name="settings_allow_multicolor_target">Allow Multicolor Target:</string>
+    <string name="settings_allow_multicolor_target">Allow Multicolor Goal:</string>
     <string name="settings_high_contrast_mode">High Contrast Mode:</string>
     
     <!-- Account Section -->
@@ -485,7 +486,7 @@
     <string name="edge_a11y">edge</string>
     <string name="wall_a11y">wall</string>
     <string name="walls_a11y">walls</string>
-    <string name="target_reached_a11y">with target reached</string>
+    <string name="target_reached_a11y">with goal reached</string>
     <string name="squares_north">squares north</string>
     <string name="squares_south">squares south</string>
     <string name="squares_east">squares east</string>
@@ -507,10 +508,10 @@
 
     <!-- Accessibility strings for GameGridView's components -->
     <string name="robot_position_a11y">robot at position</string>
-    <string name="target_position_a11y">Its target is at position</string>
+    <string name="target_position_a11y">Its goal is at position</string>
     <string name="position_a11y">Position</string>
     <string name="multicolored_a11y">Multi-colored</string>
-    <string name="target_a11y">Target at position %1$d, %2$d</string>
+    <string name="target_a11y">Goal at position %1$d, %2$d</string>
     <string name="at_position_a11y">at position</string>
     <string name="walls_on_a11y">Walls on</string>
     <string name="north_a11y">North</string>
@@ -532,7 +533,7 @@
     <string name="achievement_category_random_difficulty">Difficulty</string>
     <string name="achievement_category_random_solution">Solution Length</string>
     <string name="achievement_category_random_resolution">Screen Resolutions</string>
-    <string name="achievement_category_random_targets">Multiple Targets</string>
+    <string name="achievement_category_random_targets">Multiple Goals</string>
     <string name="achievement_category_random_robots">Fun Challenges</string>
     <string name="achievement_category_random_coverage">Square Coverage</string>
     <string name="achievement_category_random_streaks">Streaks</string>
@@ -773,14 +774,14 @@
     <string name="editor_board_preview">Board Preview</string>
     <string name="editor_board_preview_hint">Board Preview (Tap to edit)</string>
     <string name="editor_mode_robot">Robot</string>
-    <string name="editor_mode_target">Target</string>
+    <string name="editor_mode_target">Goal</string>
     <string name="editor_mode_wall_h">– Wall</string>
     <string name="editor_mode_wall_v">| Wall</string>
     <string name="editor_mode_erase">Erase</string>
     <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Load Autosave</string>
     <string name="editor_cancel">Cancel</string>
-    <string name="editor_random_robots_targets">Random Robots &amp; Targets</string>
+    <string name="editor_random_robots_targets">Random Robots &amp; Goals</string>
     <string name="editor_export_level">Export Level Text</string>
     <string name="editor_import_ascii_map">Import ASCII Map</string>
     <string name="editor_import_ascii_map_title">Paste ASCII Map</string>
@@ -808,7 +809,7 @@
     <string name="editor_loaded_map">Loaded last played map: %1$s</string>
     <string name="editor_board_size_invalid">Board size must be between 4x4 and 24x24</string>
     <string name="editor_invalid_numbers">Please enter valid numbers</string>
-    <string name="editor_map_needs_robot_target">Map needs at least one robot and one target to play</string>
+    <string name="editor_map_needs_robot_target">Map needs at least one robot and one goal to play</string>
     <string name="editor_error_encoding_map">Error encoding map data</string>
     <string name="editor_cannot_open_game">Cannot open game from editor</string>
     <string name="editor_copied_to_clipboard">Level data copied to clipboard</string>
@@ -820,15 +821,15 @@
     <string name="editor_saved_to_sourcecode">Level %1$d saved to sourcecode!</string>
     <string name="editor_added_robot">Added %1$s robot at (%2$d, %3$d)</string>
     <string name="editor_removed_robot">Removed robot at (%1$d, %2$d)</string>
-    <string name="editor_added_target">Added %1$s target at (%2$d, %3$d)</string>
-    <string name="editor_removed_target">Removed target at (%1$d, %2$d)</string>
+    <string name="editor_added_target">Added %1$s goal at (%2$d, %3$d)</string>
+    <string name="editor_removed_target">Removed goal at (%1$d, %2$d)</string>
     <string name="editor_added_horizontal_wall">Added horizontal wall at (%1$d, %2$d)</string>
     <string name="editor_removed_horizontal_wall">Removed horizontal wall at (%1$d, %2$d)</string>
     <string name="editor_added_vertical_wall">Added vertical wall at (%1$d, %2$d)</string>
     <string name="editor_removed_vertical_wall">Removed vertical wall at (%1$d, %2$d)</string>
     <string name="editor_erased_element">Erased element at (%1$d, %2$d)</string>
     <string name="editor_nothing_to_erase">Nothing to erase at (%1$d, %2$d)</string>
-    <string name="editor_cannot_place_in_carree">Cannot place robot or target in the center carree</string>
+    <string name="editor_cannot_place_in_carree">Cannot place robot or goal in the center carree</string>
 
     <!-- Login and Account Strings -->
     <string name="profile_a11y">User profile</string>

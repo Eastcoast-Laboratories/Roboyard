@@ -315,13 +315,21 @@ public class AchievementManager {
         unlockIfComplete("level_50_complete");
         unlockIfComplete("level_140_complete");
         
-        // Perfect solution
-        if (playerMoves == optimalMoves) {
+        // Perfect solution (optimalMoves must be > 0, i.e. solver result available)
+        if (optimalMoves > 0 && playerMoves == optimalMoves) {
             perfectSolutions++;
             saveCounter("perfect_solutions", perfectSolutions);
+            Timber.d("[ACHIEVEMENTS][PERFECT] Level %d: perfect solution counted! total=%d (playerMoves=%d == optimalMoves=%d)",
+                    levelId, perfectSolutions, playerMoves, optimalMoves);
             unlockIfComplete("perfect_solutions_5");
             unlockIfComplete("perfect_solutions_10");
             unlockIfComplete("perfect_solutions_50");
+        } else if (optimalMoves <= 0) {
+            Timber.w("[ACHIEVEMENTS][PERFECT] Level %d: optimalMoves=%d (solver not ready?), perfect solution NOT counted!",
+                    levelId, optimalMoves);
+        } else {
+            Timber.d("[ACHIEVEMENTS][PERFECT] Level %d: not perfect (playerMoves=%d, optimalMoves=%d), total=%d",
+                    levelId, playerMoves, optimalMoves, perfectSolutions);
         }
         
         // Note: no_hints_10 and no_hints_50 removed - hints are not allowed in levels

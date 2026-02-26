@@ -216,29 +216,26 @@ public class AchievementsFragment extends BaseGameFragment {
         descText.setTextColor(Color.parseColor("#666666"));
         textContainer.addView(descText);
 
-        // Progress text for counter-based achievements (only when not yet unlocked)
-        if (!achievement.isUnlocked()) {
+        itemLayout.addView(textContainer);
+
+        // Right-side indicator: green checkmark if unlocked, progress counter if locked and has progress
+        if (achievement.isUnlocked()) {
+            TextView unlockedText = new TextView(requireContext());
+            unlockedText.setText("\u2713");
+            unlockedText.setTextSize(24);
+            unlockedText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+            itemLayout.addView(unlockedText);
+        } else {
             AchievementManager.AchievementProgress progress = achievementManager.getProgress(achievement.getId());
             if (progress != null && progress.hasProgress()) {
                 TextView progressView = new TextView(requireContext());
                 int clamped = Math.min(progress.current, progress.required);
-                progressView.setText(clamped + " / " + progress.required);
-                progressView.setTextSize(12);
-                progressView.setTextColor(Color.parseColor("#1565C0")); // blue
+                progressView.setText(clamped + "/" + progress.required);
+                progressView.setTextSize(13);
+                progressView.setTextColor(Color.parseColor("#1565C0"));
                 progressView.setTypeface(null, android.graphics.Typeface.BOLD);
-                textContainer.addView(progressView);
+                itemLayout.addView(progressView);
             }
-        }
-
-        itemLayout.addView(textContainer);
-        
-        // Unlocked indicator
-        if (achievement.isUnlocked()) {
-            TextView unlockedText = new TextView(requireContext());
-            unlockedText.setText("✓");
-            unlockedText.setTextSize(24);
-            unlockedText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
-            itemLayout.addView(unlockedText);
         }
         
         achievementsContainer.addView(itemLayout);
