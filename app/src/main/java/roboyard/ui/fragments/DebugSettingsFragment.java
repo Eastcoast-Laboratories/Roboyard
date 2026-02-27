@@ -420,74 +420,33 @@ public class DebugSettingsFragment extends Fragment {
         statsLayout.setPadding(8, 8, 8, 8);
         statsLayout.setBackgroundColor(0xFF2a2a2a);
         
-        // Get memory statistics
-        Runtime runtime = Runtime.getRuntime();
-        long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024;
-        long maxMemory = runtime.maxMemory() / 1024 / 1024;
-        long totalMemory = runtime.totalMemory() / 1024 / 1024;
-        
-        // Total memory usage
+        // Total memory usage TextView (will be updated by refresh button)
         TextView totalMemText = new TextView(requireContext());
-        totalMemText.setText(String.format("Total Memory: %d MB / %d MB (%.1f%%)", 
-                usedMemory, maxMemory, (usedMemory * 100.0 / maxMemory)));
         totalMemText.setTextColor(0xFFFFFFFF);
         totalMemText.setTextSize(14);
         totalMemText.setPadding(0, 4, 0, 4);
         statsLayout.addView(totalMemText);
         
-        // Component-specific statistics
-        try {
-            // History entries - calculate actual size from JSON
-            java.util.List<roboyard.logic.core.GameHistoryEntry> historyEntries = roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
-            int historyCount = historyEntries.size();
-            long historyMemoryBytes = 0;
-            for (roboyard.logic.core.GameHistoryEntry entry : historyEntries) {
-                // Estimate: mapPath + mapName + boardSize + other fields
-                if (entry.getMapPath() != null) historyMemoryBytes += entry.getMapPath().length();
-                if (entry.getMapName() != null) historyMemoryBytes += entry.getMapName().length();
-                if (entry.getBoardSize() != null) historyMemoryBytes += entry.getBoardSize().length();
-                historyMemoryBytes += 200; // Other fields overhead
-            }
-            long historyMemoryKB = historyMemoryBytes / 1024;
-            long historyMemoryMB = historyMemoryKB / 1024;
-            
-            TextView historyText = new TextView(requireContext());
-            if (historyMemoryMB > 0) {
-                historyText.setText(String.format("History Entries: %d (%d MB)", historyCount, historyMemoryMB));
-            } else {
-                historyText.setText(String.format("History Entries: %d (%d KB)", historyCount, historyMemoryKB));
-            }
-            historyText.setTextColor(0xFFCCCCCC);
-            historyText.setTextSize(12);
-            historyText.setPadding(0, 2, 0, 2);
-            statsLayout.addView(historyText);
-            
-            // Achievement count
-            int achievementCount = achievementManager.getUnlockedCount();
-            TextView achievementText = new TextView(requireContext());
-            achievementText.setText(String.format("Achievements Unlocked: %d", achievementCount));
-            achievementText.setTextColor(0xFFCCCCCC);
-            achievementText.setTextSize(12);
-            achievementText.setPadding(0, 2, 0, 2);
-            statsLayout.addView(achievementText);
-            
-            // Level completion data
-            LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
-            int starsCount = completionManager.getTotalStars();
-            TextView levelText = new TextView(requireContext());
-            levelText.setText(String.format("Level Stars: %d/139", starsCount));
-            levelText.setTextColor(0xFFCCCCCC);
-            levelText.setTextSize(12);
-            levelText.setPadding(0, 2, 0, 2);
-            statsLayout.addView(levelText);
-            
-        } catch (Exception e) {
-            TextView errorText = new TextView(requireContext());
-            errorText.setText("Error loading component stats: " + e.getMessage());
-            errorText.setTextColor(0xFFFF0000);
-            errorText.setTextSize(12);
-            statsLayout.addView(errorText);
-        }
+        // History entries TextView
+        TextView historyText = new TextView(requireContext());
+        historyText.setTextColor(0xFFCCCCCC);
+        historyText.setTextSize(12);
+        historyText.setPadding(0, 2, 0, 2);
+        statsLayout.addView(historyText);
+        
+        // Achievement count TextView
+        TextView achievementText = new TextView(requireContext());
+        achievementText.setTextColor(0xFFCCCCCC);
+        achievementText.setTextSize(12);
+        achievementText.setPadding(0, 2, 0, 2);
+        statsLayout.addView(achievementText);
+        
+        // Level completion data TextView
+        TextView levelText = new TextView(requireContext());
+        levelText.setTextColor(0xFFCCCCCC);
+        levelText.setTextSize(12);
+        levelText.setPadding(0, 2, 0, 2);
+        statsLayout.addView(levelText);
         
         // Refresh button
         Button refreshBtn = new Button(requireContext());
@@ -496,9 +455,51 @@ public class DebugSettingsFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         refreshBtn.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Statistics refreshed", Toast.LENGTH_SHORT).show();
+            // Update all statistics
+            Runtime runtime = Runtime.getRuntime();
+            long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024;
+            long maxMemory = runtime.maxMemory() / 1024 / 1024;
+            totalMemText.setText(String.format("Total Memory: %d MB / %d MB (%.1f%%)", 
+                    usedMemory, maxMemory, (usedMemory * 100.0 / maxMemory)));
+            
+            try {
+                // History entries
+                java.util.List<roboyard.logic.core.GameHistoryEntry> historyEntries = 
+                    roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+                int historyCount = historyEntries.size();
+                long historyMemoryBytes = 0;
+                for (roboyard.logic.core.GameHistoryEntry entry : historyEntries) {
+                    if (entry.getMapPath() != null) historyMemoryBytes += entry.getMapPath().length();
+                    if (entry.getMapName() != null) historyMemoryBytes += entry.getMapName().length();
+                    if (entry.getBoardSize() != null) historyMemoryBytes += entry.getBoardSize().length();
+                    historyMemoryBytes += 200;
+                }
+                long historyMemoryKB = historyMemoryBytes / 1024;
+                long historyMemoryMB = historyMemoryKB / 1024;
+                if (historyMemoryMB > 0) {
+                    historyText.setText(String.format("History Entries: %d (%d MB)", historyCount, historyMemoryMB));
+                } else {
+                    historyText.setText(String.format("History Entries: %d (%d KB)", historyCount, historyMemoryKB));
+                }
+                
+                // Achievements
+                int achievementCount = achievementManager.getUnlockedCount();
+                achievementText.setText(String.format("Achievements Unlocked: %d", achievementCount));
+                
+                // Levels
+                LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+                int starsCount = completionManager.getTotalStars();
+                levelText.setText(String.format("Level Stars: %d/139", starsCount));
+                
+                Toast.makeText(requireContext(), "Statistics refreshed", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(requireContext(), "Error refreshing stats: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         statsLayout.addView(refreshBtn);
+        
+        // Initial update
+        refreshBtn.performClick();
         
         parent.addView(statsLayout);
     }
@@ -538,6 +539,25 @@ public class DebugSettingsFragment extends Fragment {
             try {
                 Timber.d("[DEBUG_DUMMY] Thread started");
                 
+                // Find the next available Test number
+                java.util.List<roboyard.logic.core.GameHistoryEntry> existingEntries = 
+                    roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+                int nextTestNumber = 1;
+                for (roboyard.logic.core.GameHistoryEntry entry : existingEntries) {
+                    String mapName = entry.getMapName();
+                    if (mapName != null && mapName.startsWith("Test")) {
+                        try {
+                            int testNum = Integer.parseInt(mapName.substring(4));
+                            if (testNum >= nextTestNumber) {
+                                nextTestNumber = testNum + 1;
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore non-numeric Test entries
+                        }
+                    }
+                }
+                Timber.d("[DEBUG_DUMMY] Next available Test number: %d", nextTestNumber);
+                
                 // Get level maps from assets/Maps directory
                 String[] assetFiles = requireActivity().getAssets().list("Maps");
                 Timber.d("[DEBUG_DUMMY] Found %d files in Maps directory", assetFiles != null ? assetFiles.length : 0);
@@ -574,12 +594,13 @@ public class DebugSettingsFragment extends Fragment {
                     String levelFile = levelFiles.get(i % levelFiles.size());
                     String mapPath = "Maps/" + levelFile;
                     
-                    Timber.d("[DEBUG_DUMMY] Creating entry %d with map: %s", i + 1, mapPath);
+                    int currentTestNumber = nextTestNumber + i;
+                    Timber.d("[DEBUG_DUMMY] Creating entry Test%d with map: %s", currentTestNumber, mapPath);
                     
                     // Create dummy history entry
                     roboyard.logic.core.GameHistoryEntry entry = new roboyard.logic.core.GameHistoryEntry();
                     entry.setMapPath(mapPath);
-                    entry.setMapName("Test" + (i + 1));
+                    entry.setMapName("Test" + currentTestNumber);
                     entry.setTimestamp(System.currentTimeMillis() - (i * 60000)); // Spread over time
                     entry.setPlayDuration((int)(Math.random() * 300) + 30); // 30-330 seconds
                     entry.setMovesMade((int)(Math.random() * 50) + 10); // 10-60 moves

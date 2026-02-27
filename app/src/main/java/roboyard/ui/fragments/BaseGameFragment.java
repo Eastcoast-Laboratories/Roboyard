@@ -106,7 +106,23 @@ public abstract class BaseGameFragment extends Fragment {
      * Shared between SaveGameFragment and LevelSelectionFragment (DRY).
      */
     protected Bitmap createMinimapFromPath(Context context, String mapPath, int width, int height) {
-        String saveData = FileReadWrite.loadAbsoluteData(mapPath);
+        String saveData = null;
+        
+        // save slots - load as absolute path
+        if (mapPath != null && mapPath.startsWith("/")) {
+            saveData = FileReadWrite.loadAbsoluteData(mapPath);
+        }
+        
+        // history entries - load relative path
+        if ((saveData == null || saveData.isEmpty()) && mapPath != null && mapPath.startsWith("Maps/")) {
+            try {
+                saveData = new String(context.getAssets().open(mapPath).readAllBytes());
+                Timber.d("[MINIMAP] Loaded history map from assets: %s", mapPath);
+            } catch (Exception e) {
+                Timber.e(e, "[MINIMAP] Error loading map from assets: %s", mapPath);
+            }
+        }
+        
         if (saveData != null && !saveData.isEmpty()) {
             try {
                 GameState gameState = GameState.parseFromSaveData(saveData, context);
