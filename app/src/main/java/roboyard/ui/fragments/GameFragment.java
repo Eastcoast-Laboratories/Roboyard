@@ -1082,20 +1082,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         gameGridView.selectRobotByColor(lastMovedRobotColor);
                         Timber.d("[ROBOTS][UNDO] Back-button: re-selected robot %d after undo", lastMovedRobotColor);
                     }
+                    // Force the grid view to redraw completely
+                    gameGridView.invalidate();
                     
                     // Update the game state display to reflect the undone move
                     if (currentState != null) {
                         updateGameState(currentState);
                     }
-                    
-                    // CRITICAL: Force grid layout recalculation to prevent board size reset bug
-                    // When undoing after "Next Level" from 8x8 to larger board, the grid dimensions
-                    // must be recalculated from the current state, not from the undo history
-                    gameGridView.requestLayout();
-                    Timber.d("[GRID_LAYOUT] Forced layout recalculation after undo to fix board size");
-                    
-                    // Force the grid view to redraw completely
-                    gameGridView.invalidate();
                 }
             } else {
                 Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
