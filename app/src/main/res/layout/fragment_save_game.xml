@@ -58,6 +58,43 @@
             android:layout_weight="1" />
     </LinearLayout>
 
+    <!-- Top pagination controls (visible from page 2 onwards) -->
+    <LinearLayout
+        android:id="@+id/pagination_controls_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintTop_toBottomOf="@+id/history_filter_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/prev_page_button_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Prev"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/page_info_text_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            tools:text="Page 2 of 5 (100 entries)" />
+
+        <Button
+            android:id="@+id/next_page_button_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next →" />
+    </LinearLayout>
+
     <!-- RecyclerView for save slots or history entries -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/save_slot_recycler_view"
@@ -68,7 +105,7 @@
         app:layout_constraintBottom_toTopOf="@+id/pagination_controls"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/history_filter_header" />
+        app:layout_constraintTop_toBottomOf="@+id/pagination_controls_top" />
 
     <!-- Pagination controls (visible only in history tab) -->
     <LinearLayout

@@ -87,6 +87,14 @@ public class DebugSettingsFragment extends Fragment {
         addSectionTitle(contentLayout, "UI DESIGN");
         addAlternativeLayoutToggle(contentLayout);
         
+        // Memory Statistics Section
+        addSectionTitle(contentLayout, "MEMORY STATISTICS");
+        addMemoryStatistics(contentLayout);
+        
+        // History Testing Section
+        addSectionTitle(contentLayout, "HISTORY TESTING");
+        addHistoryTestButtons(contentLayout);
+        
         // App Control Section
         addSectionTitle(contentLayout, "APP CONTROL");
         addAppControlButtons(contentLayout);
@@ -398,6 +406,207 @@ public class DebugSettingsFragment extends Fragment {
         buttonLayout.addView(resetLevelsBtn);
         
         parent.addView(buttonLayout);
+    }
+    
+    private void addMemoryStatistics(LinearLayout parent) {
+        LinearLayout statsLayout = new LinearLayout(requireContext());
+        statsLayout.setOrientation(LinearLayout.VERTICAL);
+        statsLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        statsLayout.setPadding(8, 8, 8, 8);
+        statsLayout.setBackgroundColor(0xFF2a2a2a);
+        
+        // Get memory statistics
+        Runtime runtime = Runtime.getRuntime();
+        long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024;
+        long maxMemory = runtime.maxMemory() / 1024 / 1024;
+        long totalMemory = runtime.totalMemory() / 1024 / 1024;
+        
+        // Total memory usage
+        TextView totalMemText = new TextView(requireContext());
+        totalMemText.setText(String.format("Total Memory: %d MB / %d MB (%.1f%%)", 
+                usedMemory, maxMemory, (usedMemory * 100.0 / maxMemory)));
+        totalMemText.setTextColor(0xFFFFFFFF);
+        totalMemText.setTextSize(14);
+        totalMemText.setPadding(0, 4, 0, 4);
+        statsLayout.addView(totalMemText);
+        
+        // Component-specific statistics
+        try {
+            // History entries count
+            int historyCount = roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity()).size();
+            TextView historyText = new TextView(requireContext());
+            historyText.setText(String.format("History Entries: %d (~%d KB)", 
+                    historyCount, historyCount * 2)); // Rough estimate: 2KB per entry
+            historyText.setTextColor(0xFFCCCCCC);
+            historyText.setTextSize(12);
+            historyText.setPadding(0, 2, 0, 2);
+            statsLayout.addView(historyText);
+            
+            // Achievement count
+            int achievementCount = achievementManager.getUnlockedCount();
+            TextView achievementText = new TextView(requireContext());
+            achievementText.setText(String.format("Achievements Unlocked: %d (~%d KB)", 
+                    achievementCount, achievementCount / 2)); // Rough estimate
+            achievementText.setTextColor(0xFFCCCCCC);
+            achievementText.setTextSize(12);
+            achievementText.setPadding(0, 2, 0, 2);
+            statsLayout.addView(achievementText);
+            
+            // Level completion data
+            LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+            int starsCount = completionManager.getTotalStars();
+            TextView levelText = new TextView(requireContext());
+            levelText.setText(String.format("Level Stars: %d/139 (~%d KB)", 
+                    starsCount, starsCount / 10)); // Rough estimate
+            levelText.setTextColor(0xFFCCCCCC);
+            levelText.setTextSize(12);
+            levelText.setPadding(0, 2, 0, 2);
+            statsLayout.addView(levelText);
+            
+        } catch (Exception e) {
+            TextView errorText = new TextView(requireContext());
+            errorText.setText("Error loading component stats: " + e.getMessage());
+            errorText.setTextColor(0xFFFF0000);
+            errorText.setTextSize(12);
+            statsLayout.addView(errorText);
+        }
+        
+        // Refresh button
+        Button refreshBtn = new Button(requireContext());
+        refreshBtn.setText("Refresh Statistics");
+        refreshBtn.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        refreshBtn.setOnClickListener(v -> {
+            // Recreate the view to refresh stats
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, new DebugSettingsFragment())
+                    .commit();
+        });
+        statsLayout.addView(refreshBtn);
+        
+        parent.addView(statsLayout);
+    }
+    
+    private void addHistoryTestButtons(LinearLayout parent) {
+        LinearLayout buttonLayout = new LinearLayout(requireContext());
+        buttonLayout.setOrientation(LinearLayout.VERTICAL);
+        buttonLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        
+        Button add100Btn = new Button(requireContext());
+        add100Btn.setText("Add 100 Dummy History Entries");
+        add100Btn.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        add100Btn.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Add Dummy History")
+                    .setMessage("This will add 100 test history entries using level maps. Continue?")
+                    .setPositiveButton("Add", (dialog, which) -> {
+                        addDummyHistoryEntries(100);
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+        buttonLayout.addView(add100Btn);
+        
+        parent.addView(buttonLayout);
+    }
+    
+    private void addDummyHistoryEntries(int count) {
+        Timber.d("[DEBUG_DUMMY] Starting to add %d dummy entries", count);
+        Toast.makeText(requireContext(), "Adding " + count + " dummy entries...", Toast.LENGTH_SHORT).show();
+        
+        new Thread(() -> {
+            try {
+                Timber.d("[DEBUG_DUMMY] Thread started");
+                
+                // Get level maps from assets/Maps directory
+                String[] assetFiles = requireActivity().getAssets().list("Maps");
+                Timber.d("[DEBUG_DUMMY] Found %d files in Maps directory", assetFiles != null ? assetFiles.length : 0);
+                
+                if (assetFiles == null || assetFiles.length == 0) {
+                    Timber.e("[DEBUG_DUMMY] No files found in assets/Maps");
+                    requireActivity().runOnUiThread(() -> 
+                        Toast.makeText(requireContext(), "No level files found in assets", Toast.LENGTH_LONG).show());
+                    return;
+                }
+                
+                // Filter for level files
+                java.util.List<String> levelFiles = new java.util.ArrayList<>();
+                for (String file : assetFiles) {
+                    if (file.startsWith("level_") && file.endsWith(".txt")) {
+                        levelFiles.add(file);
+                        Timber.d("[DEBUG_DUMMY] Found level file: %s", file);
+                    }
+                }
+                
+                Timber.d("[DEBUG_DUMMY] Total level files: %d", levelFiles.size());
+                
+                if (levelFiles.isEmpty()) {
+                    Timber.e("[DEBUG_DUMMY] No level files after filtering");
+                    requireActivity().runOnUiThread(() -> 
+                        Toast.makeText(requireContext(), "No level files found", Toast.LENGTH_LONG).show());
+                    return;
+                }
+                
+                int added = 0;
+                int failed = 0;
+                for (int i = 0; i < count; i++) {
+                    // Pick a level file (cycle through available levels)
+                    String levelFile = levelFiles.get(i % levelFiles.size());
+                    String mapPath = "Maps/" + levelFile;
+                    
+                    Timber.d("[DEBUG_DUMMY] Creating entry %d with map: %s", i + 1, mapPath);
+                    
+                    // Create dummy history entry
+                    roboyard.logic.core.GameHistoryEntry entry = new roboyard.logic.core.GameHistoryEntry();
+                    entry.setMapPath(mapPath);
+                    entry.setMapName("Test " + (i + 1));
+                    entry.setTimestamp(System.currentTimeMillis() - (i * 60000)); // Spread over time
+                    entry.setPlayDuration((int)(Math.random() * 300) + 30); // 30-330 seconds
+                    entry.setMovesMade((int)(Math.random() * 50) + 10); // 10-60 moves
+                    entry.setOptimalMoves((int)(Math.random() * 30) + 5); // 5-35 optimal
+                    entry.setBoardSize("12×12");
+                    entry.setDifficulty(i % 4 == 0 ? "Beginner" : i % 4 == 1 ? "Intermediate" : i % 4 == 2 ? "Advanced" : "Expert");
+                    entry.setCompletionCount(i % 3 == 0 ? 1 : 0); // Some completed
+                    
+                    // Add to history
+                    Boolean success = roboyard.ui.components.GameHistoryManager.addHistoryEntry(requireActivity(), entry);
+                    if (success != null && success) {
+                        added++;
+                        Timber.d("[DEBUG_DUMMY] Entry %d added successfully", i + 1);
+                    } else {
+                        failed++;
+                        Timber.e("[DEBUG_DUMMY] Failed to add entry %d, success=%s", i + 1, success);
+                    }
+                    
+                    // Update progress every 10 entries
+                    if ((added + failed) % 10 == 0) {
+                        final int currentAdded = added;
+                        final int currentFailed = failed;
+                        requireActivity().runOnUiThread(() -> 
+                            Toast.makeText(requireContext(), "Added " + currentAdded + "/" + count + " (failed: " + currentFailed + ")", Toast.LENGTH_SHORT).show());
+                    }
+                }
+                
+                final int finalAdded = added;
+                final int finalFailed = failed;
+                Timber.d("[DEBUG_DUMMY] Finished: added=%d, failed=%d", finalAdded, finalFailed);
+                requireActivity().runOnUiThread(() -> 
+                    Toast.makeText(requireContext(), "Added " + finalAdded + " entries (failed: " + finalFailed + ")", Toast.LENGTH_LONG).show());
+                
+            } catch (Exception e) {
+                Timber.e(e, "[DEBUG_DUMMY] Error adding dummy history entries");
+                requireActivity().runOnUiThread(() -> 
+                    Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
     }
     
     private void addAppControlButtons(LinearLayout parent) {

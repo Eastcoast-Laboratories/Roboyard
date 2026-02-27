@@ -1355,9 +1355,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Save history immediately on first move (before threshold)
                 // Move count is 0 here since game is not complete yet
                 if (wasFirstMove && !isHistorySaved) {
-                    Timber.d("[HISTORY] First move detected, saving history immediately");
-                    saveToHistory();
+                    Timber.d("[HISTORY] First move detected, saving history immediately (async)");
                     isHistorySaved = true;
+                    // Run on background thread to prevent ANR
+                    new Thread(() -> {
+                        try {
+                            saveToHistory();
+                        } catch (Exception e) {
+                            Timber.e(e, "[HISTORY] Error saving history on first move");
+                        }
+                    }).start();
                 }
             } else {
                 Timber.d("[GAME_COMPLETE] Game already completed, not incrementing move/squares counters");

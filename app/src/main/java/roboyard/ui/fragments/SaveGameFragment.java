@@ -74,6 +74,10 @@ public class SaveGameFragment extends BaseGameFragment {
     private Button prevPageButton;
     private Button nextPageButton;
     private TextView pageInfoText;
+    private LinearLayout paginationControlsTop;
+    private Button prevPageButtonTop;
+    private Button nextPageButtonTop;
+    private TextView pageInfoTextTop;
     
     // Adapters
     private SaveSlotAdapter saveSlotAdapter;
@@ -86,7 +90,7 @@ public class SaveGameFragment extends BaseGameFragment {
     private final List<SaveSlotInfo> saveSlots = new ArrayList<>();
     
     // Pagination and filtering state
-    private static final int ITEMS_PER_PAGE = 10;
+    private static final int ITEMS_PER_PAGE = 20;
     private int currentPage = 0;
     private int totalPages = 0;
     private List<GameHistoryEntry> allHistoryEntries = new ArrayList<>();
@@ -180,6 +184,10 @@ public class SaveGameFragment extends BaseGameFragment {
         prevPageButton = view.findViewById(R.id.prev_page_button);
         nextPageButton = view.findViewById(R.id.next_page_button);
         pageInfoText = view.findViewById(R.id.page_info_text);
+        paginationControlsTop = view.findViewById(R.id.pagination_controls_top);
+        prevPageButtonTop = view.findViewById(R.id.prev_page_button_top);
+        nextPageButtonTop = view.findViewById(R.id.next_page_button_top);
+        pageInfoTextTop = view.findViewById(R.id.page_info_text_top);
         
         // Set up tabs
         setupTabs();
@@ -189,6 +197,9 @@ public class SaveGameFragment extends BaseGameFragment {
         
         // Set up sort/filter spinners
         setupSortFilterSpinners();
+        
+        // Set up pagination buttons
+        setupPaginationButtons();
         
         // Set up back button
         backButton.setOnClickListener(v -> {
@@ -327,9 +338,10 @@ public class SaveGameFragment extends BaseGameFragment {
         Timber.d("[SaveGameFragment] Updating tab content for position: %d", tabPosition);
         boolean isHistoryTab = (tabPosition == 1);
         
-        // Show/hide sort/filter header and pagination controls
+        // Show/hide sort/filter header
         historyFilterHeader.setVisibility(isHistoryTab ? View.VISIBLE : View.GONE);
-        paginationControls.setVisibility(isHistoryTab ? View.VISIBLE : View.GONE);
+        
+        // Pagination controls visibility will be updated in updatePaginationUI based on entry count
         
         if (saveMode) {
             // Save mode tabs: Save (0) or History (1)
@@ -636,8 +648,13 @@ public class SaveGameFragment extends BaseGameFragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-        
-        // Pagination buttons
+    }
+    
+    /**
+     * Set up pagination button click listeners
+     */
+    private void setupPaginationButtons() {
+        // Bottom pagination buttons
         prevPageButton.setOnClickListener(v -> {
             if (currentPage > 0) {
                 currentPage--;
@@ -651,10 +668,29 @@ public class SaveGameFragment extends BaseGameFragment {
                 updatePaginationUI();
             }
         });
+        
+        // Top pagination buttons
+        prevPageButtonTop.setOnClickListener(v -> {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePaginationUI();
+                // Scroll to top of RecyclerView
+                saveSlotRecyclerView.scrollToPosition(0);
+            }
+        });
+        
+        nextPageButtonTop.setOnClickListener(v -> {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                updatePaginationUI();
+                // Scroll to top of RecyclerView
+                saveSlotRecyclerView.scrollToPosition(0);
+            }
+        });
     }
     
     /**
-     * Apply sort and filter to history entries, then update pagination
+     * Apply current filter and sort to history entries
      */
     private void applyFilterAndSort() {
         // Filter out level saves (entries with mapName starting with "Level")
@@ -753,10 +789,28 @@ public class SaveGameFragment extends BaseGameFragment {
         // Update adapter
         historyAdapter.updateHistoryEntries(entries);
         
-        // Update pagination info
-        pageInfoText.setText(String.format("Page %d of %d", currentPage + 1, totalPages));
-        prevPageButton.setEnabled(currentPage > 0);
-        nextPageButton.setEnabled(currentPage < totalPages - 1);
+        // Show/hide pagination controls based on total entries
+        if (filteredHistoryEntries.size() >= ITEMS_PER_PAGE) {
+            paginationControls.setVisibility(View.VISIBLE);
+            String pageInfo = String.format("Page %d of %d (%d entries)", 
+                    currentPage + 1, totalPages, filteredHistoryEntries.size());
+            pageInfoText.setText(pageInfo);
+            prevPageButton.setEnabled(currentPage > 0);
+            nextPageButton.setEnabled(currentPage < totalPages - 1);
+            
+            // Show top pagination from page 2 onwards
+            if (currentPage >= 1) {
+                paginationControlsTop.setVisibility(View.VISIBLE);
+                pageInfoTextTop.setText(pageInfo);
+                prevPageButtonTop.setEnabled(currentPage > 0);
+                nextPageButtonTop.setEnabled(currentPage < totalPages - 1);
+            } else {
+                paginationControlsTop.setVisibility(View.GONE);
+            }
+        } else {
+            paginationControls.setVisibility(View.GONE);
+            paginationControlsTop.setVisibility(View.GONE);
+        }
     }
     
     /**
