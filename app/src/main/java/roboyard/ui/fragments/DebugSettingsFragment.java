@@ -592,14 +592,36 @@ public class DebugSettingsFragment extends Fragment {
                 for (int i = 0; i < count; i++) {
                     // Pick a level file (cycle through available levels)
                     String levelFile = levelFiles.get(i % levelFiles.size());
-                    String mapPath = "Maps/" + levelFile;
+                    String assetPath = "Maps/" + levelFile;
                     
                     int currentTestNumber = nextTestNumber + i;
-                    Timber.d("[DEBUG_DUMMY] Creating entry Test%d with map: %s", currentTestNumber, mapPath);
+                    Timber.d("[DEBUG_DUMMY] Creating entry Test%d with asset: %s", currentTestNumber, assetPath);
                     
-                    // Create dummy history entry
+                    // Copy level file to internal storage to get absolute path (like real history entries)
+                    String absolutePath = null;
+                    try {
+                        java.io.InputStream is = requireActivity().getAssets().open(assetPath);
+                        String fileName = "test_" + currentTestNumber + "_" + levelFile;
+                        java.io.File file = new java.io.File(requireActivity().getFilesDir(), fileName);
+                        java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = is.read(buffer)) > 0) {
+                            fos.write(buffer, 0, length);
+                        }
+                        fos.close();
+                        is.close();
+                        absolutePath = file.getAbsolutePath();
+                        Timber.d("[DEBUG_DUMMY] Copied to: %s", absolutePath);
+                    } catch (Exception e) {
+                        Timber.e(e, "[DEBUG_DUMMY] Failed to copy level file");
+                        failed++;
+                        continue;
+                    }
+                    
+                    // Create dummy history entry with absolute path
                     roboyard.logic.core.GameHistoryEntry entry = new roboyard.logic.core.GameHistoryEntry();
-                    entry.setMapPath(mapPath);
+                    entry.setMapPath(absolutePath);
                     entry.setMapName("Test" + currentTestNumber);
                     entry.setTimestamp(System.currentTimeMillis() - (i * 60000)); // Spread over time
                     entry.setPlayDuration((int)(Math.random() * 300) + 30); // 30-330 seconds

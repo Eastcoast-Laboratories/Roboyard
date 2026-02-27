@@ -1,5 +1,14 @@
 package roboyard.eclabs.ui;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,13 +16,33 @@ import android.view.ViewGroup;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
+import java.util.List;
+
+import roboyard.eclabs.R;
+import roboyard.logic.core.GameHistoryEntry;
+import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.components.FileReadWrite;
+import roboyard.ui.components.GameHistoryManager;
+import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
 /**
- * Shared test utilities for Espresso UI tests.
- * Provides helpers for closing achievement and streak popups.
+ * Global test helper class with common test methods.
+ * Use these methods in all new tests instead of reinventing the wheel.
+ * 
+ * Available methods:
+ * - startNewSessionWithEmptyStorage() - Clear all history and start fresh
+ * - startAndWait8sForPopupClose() - Wait for achievement/streak popup to close
+ * - startRandomGame() - Click "New Random Game" button
+ * - startLevelGame(levelId) - Start a specific level
+ * - openDebugScreen() - Navigate to Debug Settings via long press
+ * - openLevelEditorThroughDebug() - Open Level Editor via Debug Settings
+ * - openSettingsAndScrollDown() - Open Settings and scroll to bottom
+ * - navigateToSaveLoadScreen() - Navigate to Save/Load screen
+ * - navigateToHistoryTab() - Switch to History tab in Save/Load
+ * - closeAchievementPopupIfPresent() - Close achievement popup programmatically
  *
- * Tags: test-helper, espresso, achievement-popup, streak-popup
+ * Tags: test-helper, espresso, navigation, setup, common-methods
  */
 public class TestHelper {
 
@@ -97,5 +126,172 @@ public class TestHelper {
             activity[0] = activities.iterator().next();
         }
         return activity[0];
+    }
+
+    // ==================== COMMON TEST METHODS ====================
+
+    /**
+     * Clear all history and start with empty storage.
+     * Use this at the beginning of tests that need a clean state.
+     */
+    public static void startNewSessionWithEmptyStorage(Activity activity) throws InterruptedException {
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        for (GameHistoryEntry e : entries) {
+            GameHistoryManager.deleteHistoryEntry(activity, e.getMapPath());
+        }
+        FileReadWrite.writePrivateData(activity, "history_index.json", "{\"historyEntries\":[]}");
+        Timber.d("[TEST_HELPER] History cleared (%d entries removed)", entries.size());
+        Thread.sleep(500);
+    }
+
+    /**
+     * Wait 8 seconds for achievement/streak popup to close.
+     * Use this after starting a test to ensure popups don't interfere.
+     */
+    public static void startAndWait8sForPopupClose() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Waiting 8 seconds for popup to close");
+        Thread.sleep(8000);
+    }
+
+    /**
+     * Start a random game by clicking the "New Random Game" button.
+     * Verifies that the game grid is displayed.
+     */
+    public static void startRandomGame() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Starting random game");
+        onView(withId(R.id.ui_button)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
+    }
+
+    /**
+     * Start a specific level game via GameStateManager.
+     * @param activityRule The activity scenario rule
+     * @param levelId The level ID to start (1-140)
+     */
+    public static void startLevelGame(ActivityScenarioRule<MainFragmentActivity> activityRule, int levelId) {
+        Timber.d("[TEST_HELPER] Starting level %d", levelId);
+        activityRule.getScenario().onActivity(a -> {
+            GameStateManager gameStateManager = a.getGameStateManager();
+            gameStateManager.startLevelGame(levelId);
+            roboyard.ui.fragments.GameFragment gameFragment = new roboyard.ui.fragments.GameFragment();
+            a.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, gameFragment)
+                    .commit();
+        });
+    }
+
+    /**
+     * Open Debug Settings screen via long press on settings title.
+     * Requires being in Settings screen first.
+     */
+    public static void openDebugScreen() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Opening Debug Settings");
+        // Click settings icon
+        onView(withId(R.id.settings_icon_button)).perform(click());
+        Thread.sleep(1000);
+        
+        // Long press on title for 3.5 seconds
+        onView(withId(R.id.title_text)).perform(longPressFor(3500));
+        Thread.sleep(1000);
+        
+        // Verify we're in Debug Settings
+        onView(withText("DEBUG SETTINGS")).check(matches(isDisplayed()));
+    }
+
+    /**
+     * Open Level Editor through Debug Settings.
+     * Assumes we're starting from main menu.
+     */
+    public static void openLevelEditorThroughDebug() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Opening Level Editor through Debug Settings");
+        openDebugScreen();
+        
+        // Scroll to and click Level Editor button
+        onView(withText("Open Level Editor")).perform(scrollTo(), click());
+        Thread.sleep(2000);
+    }
+
+    /**
+     * Open Settings screen and scroll to bottom.
+     */
+    public static void openSettingsAndScrollDown() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Opening Settings and scrolling down");
+        onView(withId(R.id.settings_icon_button)).perform(click());
+        Thread.sleep(1000);
+        
+        // Scroll to bottom (try to find a view that's typically at the bottom)
+        try {
+            onView(withText("Version")).perform(scrollTo());
+        } catch (Exception e) {
+            Timber.d("[TEST_HELPER] Could not scroll to Version text");
+        }
+        Thread.sleep(500);
+    }
+
+    /**
+     * Navigate to Save/Load screen.
+     * @param activityRule The activity scenario rule
+     */
+    public static void navigateToSaveLoadScreen(ActivityScenarioRule<MainFragmentActivity> activityRule) {
+        Timber.d("[TEST_HELPER] Navigating to Save/Load screen");
+        activityRule.getScenario().onActivity(a -> {
+            roboyard.ui.fragments.SaveGameFragment fragment = new roboyard.ui.fragments.SaveGameFragment();
+            a.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment)
+                    .commit();
+        });
+    }
+
+    /**
+     * Switch to History tab in Save/Load screen.
+     * Assumes we're already in Save/Load screen.
+     */
+    public static void navigateToHistoryTab() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Switching to History tab");
+        onView(withText("History")).perform(click());
+        Thread.sleep(2000);
+    }
+
+    /**
+     * Custom long press action with configurable duration.
+     */
+    private static androidx.test.espresso.ViewAction longPressFor(final long durationMs) {
+        return new androidx.test.espresso.ViewAction() {
+            @Override
+            public org.hamcrest.Matcher<android.view.View> getConstraints() {
+                return androidx.test.espresso.matcher.ViewMatchers.isDisplayed();
+            }
+            
+            @Override
+            public String getDescription() {
+                return "Long press for " + durationMs + " milliseconds";
+            }
+            
+            @Override
+            public void perform(androidx.test.espresso.UiController uiController, android.view.View view) {
+                int[] location = new int[2];
+                view.getLocationOnScreen(location);
+                float x = location[0] + view.getWidth() / 2f;
+                float y = location[1] + view.getHeight() / 2f;
+                
+                long downTime = android.os.SystemClock.uptimeMillis();
+                android.view.MotionEvent downEvent = android.view.MotionEvent.obtain(
+                        downTime, downTime, android.view.MotionEvent.ACTION_DOWN, x, y, 0);
+                view.dispatchTouchEvent(downEvent);
+                
+                uiController.loopMainThreadForAtLeast(durationMs);
+                
+                long upTime = android.os.SystemClock.uptimeMillis();
+                android.view.MotionEvent upEvent = android.view.MotionEvent.obtain(
+                        downTime, upTime, android.view.MotionEvent.ACTION_UP, x, y, 0);
+                view.dispatchTouchEvent(upEvent);
+                
+                downEvent.recycle();
+                upEvent.recycle();
+            }
+        };
     }
 }

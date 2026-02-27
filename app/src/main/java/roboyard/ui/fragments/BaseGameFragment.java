@@ -106,33 +106,42 @@ public abstract class BaseGameFragment extends Fragment {
      * Shared between SaveGameFragment and LevelSelectionFragment (DRY).
      */
     protected Bitmap createMinimapFromPath(Context context, String mapPath, int width, int height) {
-        String saveData = null;
+        Timber.d("[MINIMAP] Loading minimap from path: %s", mapPath);
         
-        // save slots - load as absolute path
-        if (mapPath != null && mapPath.startsWith("/")) {
-            saveData = FileReadWrite.loadAbsoluteData(mapPath);
+        // If path is just a filename (e.g. "history_0.txt"), construct full path
+        String fullPath = mapPath;
+        if (mapPath != null && !mapPath.startsWith("/")) {
+            // Relative path - construct full path in files directory
+            java.io.File file = new java.io.File(context.getFilesDir(), mapPath);
+            fullPath = file.getAbsolutePath();
+            Timber.d("[MINIMAP] Converted relative path '%s' to absolute: %s", mapPath, fullPath);
         }
         
-        // history entries - load relative path
-        if ((saveData == null || saveData.isEmpty()) && mapPath != null && mapPath.startsWith("Maps/")) {
-            try {
-                saveData = new String(context.getAssets().open(mapPath).readAllBytes());
-                Timber.d("[MINIMAP] Loaded history map from assets: %s", mapPath);
-            } catch (Exception e) {
-                Timber.e(e, "[MINIMAP] Error loading map from assets: %s", mapPath);
-            }
-        }
-        
-        if (saveData != null && !saveData.isEmpty()) {
+        String saveData = FileReadWrite.loadAbsoluteData(fullPath);
+        if (saveData == null || saveData.isEmpty()) {
+            Timber.e("[MINIMAP] Failed to load data from path: %s (data is null or empty)", mapPath);
+        } else {
+            Timber.d("[MINIMAP] Loaded %d bytes from %s", saveData.length(), mapPath);
             try {
                 GameState gameState = GameState.parseFromSaveData(saveData, context);
-                if (gameState != null) {
-                    return MinimapGenerator.getInstance().generateMinimap(context, gameState, width, height);
+                if (gameState == null) {
+                    Timber.e("[MINIMAP] GameState.parseFromSaveData returned null for path: %s", mapPath);
+                } else {
+                    Timber.d("[MINIMAP] Successfully parsed GameState, generating minimap");
+                    Bitmap minimap = MinimapGenerator.getInstance().generateMinimap(context, gameState, width, height);
+                    if (minimap != null) {
+                        Timber.d("[MINIMAP] Successfully generated minimap %dx%d", minimap.getWidth(), minimap.getHeight());
+                    } else {
+                        Timber.e("[MINIMAP] MinimapGenerator returned null");
+                    }
+                    return minimap;
                 }
             } catch (Exception e) {
-                Timber.e(e, "Error creating minimap from save data");
+                Timber.e(e, "[MINIMAP] Error creating minimap from save data for path: %s", mapPath);
             }
         }
+        
+        Timber.w("[MINIMAP] Returning dummy placeholder for path: %s", mapPath);
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.rgb(200, 230, 255));
