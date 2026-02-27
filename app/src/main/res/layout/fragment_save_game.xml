@@ -95,53 +95,65 @@
             android:text="Next →" />
     </LinearLayout>
 
-    <!-- RecyclerView for save slots or history entries -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/save_slot_recycler_view"
+    <!-- Scrollable container for history entries and pagination -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/history_scroll_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/pagination_controls"
+        app:layout_constraintBottom_toTopOf="@+id/back_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pagination_controls_top" />
+        app:layout_constraintTop_toBottomOf="@+id/pagination_controls_top">
 
-    <!-- Pagination controls (visible only in history tab) -->
-    <LinearLayout
-        android:id="@+id/pagination_controls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:gravity="center"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/back_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <Button
-            android:id="@+id/prev_page_button"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="← Prev"
-            android:layout_marginEnd="8dp" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/page_info_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            tools:text="Page 1 of 5" />
+            <!-- RecyclerView for save slots or history entries -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/save_slot_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
 
-        <Button
-            android:id="@+id/next_page_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Next →" />
-    </LinearLayout>
+            <!-- Pagination controls (visible only in history tab, inside scrollable area) -->
+            <LinearLayout
+                android:id="@+id/pagination_controls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/prev_page_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="← Prev"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/page_info_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    tools:text="Page 1 of 5" />
+
+                <Button
+                    android:id="@+id/next_page_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Next →" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Back button -->
     <Button

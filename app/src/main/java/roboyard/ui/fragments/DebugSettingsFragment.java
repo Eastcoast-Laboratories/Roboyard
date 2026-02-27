@@ -30,6 +30,9 @@ import roboyard.eclabs.R;
  */
 public class DebugSettingsFragment extends Fragment {
     
+    // Configurable constant for dummy history entries (reduce if memory issues occur)
+    private static final int DUMMY_ENTRIES_COUNT = 20;
+    
     private AchievementManager achievementManager;
     private StreakManager streakManager;
     
@@ -434,11 +437,26 @@ public class DebugSettingsFragment extends Fragment {
         
         // Component-specific statistics
         try {
-            // History entries count
-            int historyCount = roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity()).size();
+            // History entries - calculate actual size from JSON
+            java.util.List<roboyard.logic.core.GameHistoryEntry> historyEntries = roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+            int historyCount = historyEntries.size();
+            long historyMemoryBytes = 0;
+            for (roboyard.logic.core.GameHistoryEntry entry : historyEntries) {
+                // Estimate: mapPath + mapName + boardSize + other fields
+                if (entry.getMapPath() != null) historyMemoryBytes += entry.getMapPath().length();
+                if (entry.getMapName() != null) historyMemoryBytes += entry.getMapName().length();
+                if (entry.getBoardSize() != null) historyMemoryBytes += entry.getBoardSize().length();
+                historyMemoryBytes += 200; // Other fields overhead
+            }
+            long historyMemoryKB = historyMemoryBytes / 1024;
+            long historyMemoryMB = historyMemoryKB / 1024;
+            
             TextView historyText = new TextView(requireContext());
-            historyText.setText(String.format("History Entries: %d (~%d KB)", 
-                    historyCount, historyCount * 2)); // Rough estimate: 2KB per entry
+            if (historyMemoryMB > 0) {
+                historyText.setText(String.format("History Entries: %d (%d MB)", historyCount, historyMemoryMB));
+            } else {
+                historyText.setText(String.format("History Entries: %d (%d KB)", historyCount, historyMemoryKB));
+            }
             historyText.setTextColor(0xFFCCCCCC);
             historyText.setTextSize(12);
             historyText.setPadding(0, 2, 0, 2);
@@ -447,8 +465,7 @@ public class DebugSettingsFragment extends Fragment {
             // Achievement count
             int achievementCount = achievementManager.getUnlockedCount();
             TextView achievementText = new TextView(requireContext());
-            achievementText.setText(String.format("Achievements Unlocked: %d (~%d KB)", 
-                    achievementCount, achievementCount / 2)); // Rough estimate
+            achievementText.setText(String.format("Achievements Unlocked: %d", achievementCount));
             achievementText.setTextColor(0xFFCCCCCC);
             achievementText.setTextSize(12);
             achievementText.setPadding(0, 2, 0, 2);
@@ -458,8 +475,7 @@ public class DebugSettingsFragment extends Fragment {
             LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
             int starsCount = completionManager.getTotalStars();
             TextView levelText = new TextView(requireContext());
-            levelText.setText(String.format("Level Stars: %d/139 (~%d KB)", 
-                    starsCount, starsCount / 10)); // Rough estimate
+            levelText.setText(String.format("Level Stars: %d/139", starsCount));
             levelText.setTextColor(0xFFCCCCCC);
             levelText.setTextSize(12);
             levelText.setPadding(0, 2, 0, 2);
@@ -480,11 +496,7 @@ public class DebugSettingsFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         refreshBtn.setOnClickListener(v -> {
-            // Recreate the view to refresh stats
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.nav_host_fragment, new DebugSettingsFragment())
-                    .commit();
+            Toast.makeText(requireContext(), "Statistics refreshed", Toast.LENGTH_SHORT).show();
         });
         statsLayout.addView(refreshBtn);
         
@@ -499,16 +511,16 @@ public class DebugSettingsFragment extends Fragment {
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         
         Button add100Btn = new Button(requireContext());
-        add100Btn.setText("Add 100 Dummy History Entries");
+        add100Btn.setText("Add " + DUMMY_ENTRIES_COUNT + " Dummy History Entries");
         add100Btn.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         add100Btn.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Add Dummy History")
-                    .setMessage("This will add 100 test history entries using level maps. Continue?")
+                    .setMessage("This will add " + DUMMY_ENTRIES_COUNT + " test history entries using level maps. Continue?")
                     .setPositiveButton("Add", (dialog, which) -> {
-                        addDummyHistoryEntries(100);
+                        addDummyHistoryEntries(DUMMY_ENTRIES_COUNT);
                     })
                     .setNegativeButton("Cancel", null)
                     .show();
@@ -567,20 +579,22 @@ public class DebugSettingsFragment extends Fragment {
                     // Create dummy history entry
                     roboyard.logic.core.GameHistoryEntry entry = new roboyard.logic.core.GameHistoryEntry();
                     entry.setMapPath(mapPath);
-                    entry.setMapName("Test " + (i + 1));
+                    entry.setMapName("Test" + (i + 1));
                     entry.setTimestamp(System.currentTimeMillis() - (i * 60000)); // Spread over time
                     entry.setPlayDuration((int)(Math.random() * 300) + 30); // 30-330 seconds
                     entry.setMovesMade((int)(Math.random() * 50) + 10); // 10-60 moves
                     entry.setOptimalMoves((int)(Math.random() * 30) + 5); // 5-35 optimal
-                    entry.setBoardSize("12×12");
+                    entry.setBoardSize("12x12");
                     entry.setDifficulty(i % 4 == 0 ? "Beginner" : i % 4 == 1 ? "Intermediate" : i % 4 == 2 ? "Advanced" : "Expert");
                     entry.setCompletionCount(i % 3 == 0 ? 1 : 0); // Some completed
+                    
+                    Timber.d("[DEBUG_DUMMY] Entry %d boardSize before save: '%s'", i + 1, entry.getBoardSize());
                     
                     // Add to history
                     Boolean success = roboyard.ui.components.GameHistoryManager.addHistoryEntry(requireActivity(), entry);
                     if (success != null && success) {
                         added++;
-                        Timber.d("[DEBUG_DUMMY] Entry %d added successfully", i + 1);
+                        Timber.d("[DEBUG_DUMMY] Entry %d added successfully, boardSize='%s'", i + 1, entry.getBoardSize());
                     } else {
                         failed++;
                         Timber.e("[DEBUG_DUMMY] Failed to add entry %d, success=%s", i + 1, success);
