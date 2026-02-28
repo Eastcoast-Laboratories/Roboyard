@@ -294,4 +294,45 @@ public class TestHelper {
             }
         };
     }
+    
+    /**
+     * Set hint auto-move mode via Settings UI
+     * @param mode 0=Manual, 1=Full-Auto, 2=Semi-Auto
+     * @throws InterruptedException if thread is interrupted
+     */
+    public static void setHintAutoMoveMode(int mode) throws InterruptedException {
+        Timber.d("[TEST_HELPER] Setting hint auto-move mode to %d via Settings UI", mode);
+        
+        // Open Settings
+        openSettingsAndScrollDown();
+        Thread.sleep(1000);
+        
+        // Scroll to hint auto-move section
+        onView(withId(R.id.hint_auto_move_radio_group)).perform(scrollTo());
+        Thread.sleep(500);
+        
+        // Click the appropriate radio button
+        switch (mode) {
+            case 0: // Manual
+                onView(withId(R.id.hint_auto_move_manual)).perform(click());
+                Timber.d("[TEST_HELPER] Clicked Manual mode");
+                break;
+            case 1: // Full-Auto
+                onView(withId(R.id.hint_auto_move_full_auto)).perform(click());
+                Timber.d("[TEST_HELPER] Clicked Full-Auto mode");
+                break;
+            case 2: // Semi-Auto
+                onView(withId(R.id.hint_auto_move_semi_auto)).perform(click());
+                Timber.d("[TEST_HELPER] Clicked Semi-Auto mode");
+                break;
+        }
+        
+        Thread.sleep(500);
+        
+        // Go back to main screen
+        pressBack();
+        Thread.sleep(1000);
+        
+        Timber.d("[TEST_HELPER] Hint auto-move mode set to %d", mode);
+    }
 }

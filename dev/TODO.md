@@ -65,49 +65,17 @@ check if this all works:
 
 # last prompt:
 
-da ist was gannz doll im argen: einige files werden anscheinend nicht gespeichert:
-File does not exist: history_2.txt
-File does not exist: history_1.txt
-File does not exist: history_20.txt
-File does not exist: history_19.txt
-File does not exist: history_18.txt
-File does not exist: history_17.txt
+mach einen Espresso Test für 140 History Einträge + Pagination. also erst die app daten löschen, dann 140 eiträge erstellen (7x auf add 20 drücken)
 
-anscheinennd sind nicht die minimaps an sich das problem, sondern der speicher insgesamt. ich habe de 10000 einträge gelöscht, jetzt ist wieder alles flüssig, aber die minimaps werden jetzt gar nicht mehr geladen, dein map cache funktioniert nch  nicht!  
-
-baue einen test, der die history lädt und die minimap prüft und sieht, dass  sie nicht geladen wird (falls kein eintrag in der histry ist, erzeuge einen indem du ein random game startest und mindestens einen move machst), dann fixe das und teste erenuet.
-
-wenn das minimap cachen geht, dann committe das .
-
-dann baue einige sachen ein:
-1. In dem History Screen die pagination erweitern um Seite x von y und ausblenden, wenn unter 20 Einträge vorhanden sind.
-Immer 20 Einträge pro Seite anzeigen und ab Seite 2 auch oben die pagination buttons anzeigen. Die Buttons sollen im selben Container sein, wie die Einträge und mit scrollen. 
-
-1. Im debug screen anzeigen wie viel Daten im Speicher sind, total und anteilig Level, achievements, history,   ....
-
-2. Ruben button einbauen um 100 Dummy History Einträge zu generieren, benutze das die Level Maps und tausche den Namen durch Test aus also aus Level 1 wird"Test 1"
-
-Baue einen ui Espresso Test, der 5s in settings auf den Titel drückt um in den debug screen to kommen (durchsuche die bestehenden Tests dazu), dort den neuen 100 History Einträge 2x drückt und dann zum save screen navigiert und dort die pagination tester und die responsiveness bei so vielen Einträgen, falls das einen oom erzeugt, baue die History so um, dass nur die aktuellen sichtbaren Einträge in den Speicher geladen werden
-
-----
-die maps werden immer noch nicht geladen, man sieht nur die dummy map überall
-
-die 100 history entries werden nicht erstellt "Levels directory not found" suche beim levels screen wie die levels geladen werden
-
-erstelle einen nuen debug unittest, dass er sichtbar und genau so wie im DebugSettingsNavigationTest funktinoinrt,
-1. 
- die debug 100 histroy entries  mit espresso in der UI sichtbar in der debug seite erstellt 
-2. verifizieren dass kein fehler ist
-3.  die memory einträge verifiziert (im moment steht da überall 0MB)
-
-wenn die dummy entries funktionieren, dann committen
-
-dann mach weiter mit pagination fix, die funktiniert nämlich noch nciht
-1.. die pagination soll nur in dem scrollbaren bereich der history einträge mit drin sein und nur ganz unten innerhalb des scrollbaren bereichs sein, wenn man ganz runter scrollt. 
-2. der next button funktioniert nicht, es bleiben die ersten 20 sichtbar und die top paginatin erscheint auch nicht
-
-mach einen Espresso Test für 200 History Einträge + Pagination.
-
-führe ihn aus und reparier alles
+führe ihn aus und reparier finde heraus, wannn der speicher voll ist, wenn voll, dann versuche eine lösung zu finden, dass weniger speicher verwendet wird
 
 höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine fragen
+
+---
+@GameFragment.java#L3132-3133  hint auto-move bewegt ja den roboter automatisch, sobald der nächste hint angezeigt wird, der wird aber ja schon automatisch angezeigt, wenn ein roboter sich in die richtire richtung bewegt (suche diese stelle wo das initiiert wird) dadurch haben wir jetz t eine voll automatisierung seit commit cdf52d8a (schau dir den an) Das ist gut so!
+
+dies soll aber in dem radio button iin prefs nur die  option 1 sein, es soll aber auch eine option 2 geben, die statt voll-automatisch, den roboter nur immer dann genau einmal automatisch bewegt, wenn man auf den next hint button drückt, 
+
+Also den bereich @GameFragment.java#L3132-3175 in eine funktion auslagern und hier nur aufrufen, wenn option 1, wenn option 2 muss dieser bereich getriggert werden durch den next-hint button
+
+Beue einen unittest, der alle 3 optionen in einem random game testet mit espresso und höre erst auf, wenn du alle drei erfolgreich getestet hast, eeinmal durch händisch roboter inst zier, einmal voll automatisch und einmal durch wiederholtes drücken des next hint buttons

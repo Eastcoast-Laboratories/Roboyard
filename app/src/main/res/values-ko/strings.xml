@@ -334,6 +334,10 @@
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">힌트 자동 이동:</string>
-    <string name="settings_hint_auto_move_on_a11y">힌트 선택 시 로봇 자동 이동 활성화</string>
-    <string name="settings_hint_auto_move_off_a11y">힌트 선택 시 로봇 자동 이동 비활성화</string>
+    <string name="settings_hint_auto_move_manual">수동 (직접 로봇 이동)</string>
+    <string name="settings_hint_auto_move_manual_a11y">수동 모드: 로봇을 직접 이동합니다</string>
+    <string name="settings_hint_auto_move_full_auto">완전 자동 (로봇이 자동으로 이동)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">완전 자동 모드: 힌트가 표시되면 로봇이 자동으로 이동하고 다음 힌트로 진행합니다</string>
+    <string name="settings_hint_auto_move_semi_auto">반자동 (다음 힌트 버튼으로 이동)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">반자동 모드: 다음 힌트 버튼을 클릭하면 로봇이 이동합니다</string>
 </resources>

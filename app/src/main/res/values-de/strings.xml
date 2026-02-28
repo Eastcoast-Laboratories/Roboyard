@@ -792,6 +792,10 @@
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">Hinweis Auto-Bewegung:</string>
-    <string name="settings_hint_auto_move_on_a11y">Automatische Roboterbewegung beim Auswählen von Hinweisen aktivieren</string>
-    <string name="settings_hint_auto_move_off_a11y">Automatische Roboterbewegung beim Auswählen von Hinweisen deaktivieren</string>
+    <string name="settings_hint_auto_move_manual">Manuell (Roboter selbst bewegen)</string>
+    <string name="settings_hint_auto_move_manual_a11y">Manueller Modus: Sie bewegen die Roboter selbst</string>
+    <string name="settings_hint_auto_move_full_auto">Voll-Automatisch (Roboter bewegt sich automatisch)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Voll-Automatischer Modus: Roboter bewegt sich automatisch wenn Hinweis angezeigt wird und geht zum nächsten Hinweis</string>
+    <string name="settings_hint_auto_move_semi_auto">Halb-Automatisch (Bewegung bei Nächster-Hinweis-Button)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Halb-Automatischer Modus: Roboter bewegt sich wenn Sie den Nächster-Hinweis-Button klicken</string>
 </resources>

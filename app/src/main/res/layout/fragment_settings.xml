@@ -387,33 +387,46 @@
                 android:id="@+id/hint_auto_move_radio_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_marginBottom="24dp">
 
                 <RadioButton
-                    android:id="@+id/hint_auto_move_on"
+                    android:id="@+id/hint_auto_move_manual"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_yes"
+                    android:text="@string/settings_hint_auto_move_manual"
                     android:textSize="@dimen/settings_option_text_size"
-                    android:layout_marginEnd="32dp"
+                    android:layout_marginBottom="8dp"
                     android:focusable="true"
                     android:clickable="true"
                     android:textColor="#ffffff"
                     android:buttonTint="#ffffff"
-                    android:contentDescription="@string/settings_hint_auto_move_on_a11y" />
+                    android:contentDescription="@string/settings_hint_auto_move_manual_a11y" />
 
                 <RadioButton
-                    android:id="@+id/hint_auto_move_off"
+                    android:id="@+id/hint_auto_move_full_auto"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_no"
+                    android:text="@string/settings_hint_auto_move_full_auto"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:layout_marginBottom="8dp"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff"
+                    android:contentDescription="@string/settings_hint_auto_move_full_auto_a11y" />
+
+                <RadioButton
+                    android:id="@+id/hint_auto_move_semi_auto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_hint_auto_move_semi_auto"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
                     android:textColor="#ffffff"
                     android:buttonTint="#ffffff"
-                    android:contentDescription="@string/settings_hint_auto_move_off_a11y" />
+                    android:contentDescription="@string/settings_hint_auto_move_semi_auto_a11y" />
             </RadioGroup>
 
             <!-- Game Mode Section -->

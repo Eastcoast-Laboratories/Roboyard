@@ -37,7 +37,13 @@ public class Preferences {
     private static final String KEY_BACKGROUND_SOUND_VOLUME = "background_sound_volume";
     private static final String KEY_LIVE_MOVE_COUNTER_ENABLED = "live_move_counter_enabled";
     private static final String KEY_HINT_AUTO_MOVE_ENABLED = "hint_auto_move_enabled";
+    private static final String KEY_HINT_AUTO_MOVE_MODE = "hint_auto_move_mode";
     private static final String KEY_SOUND_EFFECTS_VOLUME = "sound_effects_volume";
+    
+    // Hint auto-move modes
+    public static final int HINT_AUTO_MOVE_MANUAL = 0;      // Manual: user moves robots manually
+    public static final int HINT_AUTO_MOVE_FULL_AUTO = 1;   // Full-Auto: robot moves automatically when hint shown
+    public static final int HINT_AUTO_MOVE_SEMI_AUTO = 2;   // Semi-Auto: robot moves when next-hint button clicked
     
     // Default values
     public static final int DEFAULT_ROBOT_COUNT = 1;
@@ -59,6 +65,7 @@ public class Preferences {
     public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 15;
     public static final boolean DEFAULT_LIVE_MOVE_COUNTER_ENABLED = false;
     public static final boolean DEFAULT_HINT_AUTO_MOVE_ENABLED = false;
+    public static final int DEFAULT_HINT_AUTO_MOVE_MODE = HINT_AUTO_MOVE_MANUAL;
     public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 80;
     
     // Cached values - accessible as static fields
@@ -81,6 +88,7 @@ public class Preferences {
     public static int backgroundSoundVolume;
     public static boolean liveMoveCounterEnabled;
     public static boolean hintAutoMoveEnabled;
+    public static int hintAutoMoveMode;
     public static int soundEffectsVolume;
     
     // For compatibility with existing code
@@ -361,6 +369,14 @@ public class Preferences {
             }
             
             try {
+                hintAutoMoveMode = prefs.getInt(KEY_HINT_AUTO_MOVE_MODE, DEFAULT_HINT_AUTO_MOVE_MODE);
+            } catch (ClassCastException e) {
+                Timber.e("[PREFERENCES] Error loading hint auto move mode: %s", e.getMessage());
+                prefs.edit().remove(KEY_HINT_AUTO_MOVE_MODE).apply();
+                hintAutoMoveMode = DEFAULT_HINT_AUTO_MOVE_MODE;
+            }
+            
+            try {
                 soundEffectsVolume = prefs.getInt(KEY_SOUND_EFFECTS_VOLUME, DEFAULT_SOUND_EFFECTS_VOLUME);
             } catch (ClassCastException e) {
                 Timber.e("[PREFERENCES] Error loading sound effects volume: %s", e.getMessage());
@@ -600,6 +616,32 @@ public class Preferences {
         
         notifyPreferencesChanged();
         Timber.d("[PREFERENCES] Hint auto-move enabled set to %s", enabled);
+    }
+    
+    /**
+     * Set the hint auto-move mode and save to preferences
+     * @param mode 0=Manual, 1=Full-Auto, 2=Semi-Auto (move on next-hint button)
+     */
+    public static void setHintAutoMoveMode(int mode) {
+        if (prefs == null) {
+            Timber.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveMode, attempting to initialize");
+            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
+                initialize(roboyard.ui.RoboyardApplication.getAppContext());
+            } else {
+                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
+                hintAutoMoveMode = mode;
+                return;
+            }
+        }
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_HINT_AUTO_MOVE_MODE, mode);
+        editor.apply();
+        
+        hintAutoMoveMode = mode;
+        
+        notifyPreferencesChanged();
+        Timber.d("[PREFERENCES] Hint auto-move mode set to %d", mode);
     }
     
     /**

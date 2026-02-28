@@ -135,7 +135,6 @@
 
     <!-- Game UI Messages -->
     <string name="ai_calculating">IA calcule une solution...</string>
-    <string name="nothing_to_undo">Rien à annuler</string>
     <string name="solution_found">IA a trouvé une solution!</string>
     <string name="pre_hint_less_than_x">L\'IA a trouvé une solution en moins de %1$d mouvements</string>
     <string name="pre_hint_less_than_1">Vous avez trouvé une meilleure solution que l\'IA!</string>
@@ -381,7 +380,11 @@
     <string name="filter_unsolved">Non résolu</string>
     
     <!-- Hint Auto-Move Settings -->
-    <string name="settings_hint_auto_move">Déplacement automatique des indices:</string>
-    <string name="settings_hint_auto_move_on_a11y">Activer le déplacement automatique du robot lors de la sélection d\'indices</string>
-    <string name="settings_hint_auto_move_off_a11y">Désactiver le déplacement automatique du robot lors de la sélection d\'indices</string>
+    <string name="settings_hint_auto_move">Mouvement auto des indices:</string>
+    <string name="settings_hint_auto_move_manual">Manuel (déplacer les robots vous-même)</string>
+    <string name="settings_hint_auto_move_manual_a11y">Mode manuel: vous déplacez les robots vous-même</string>
+    <string name="settings_hint_auto_move_full_auto">Automatique complet (robot se déplace automatiquement)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Mode automatique complet: le robot se déplace automatiquement lorsque l\'indice est affiché et passe à l\'indice suivant</string>
+    <string name="settings_hint_auto_move_semi_auto">Semi-automatique (déplacement au bouton indice suivant)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Mode semi-automatique: le robot se déplace lorsque vous cliquez sur le bouton indice suivant</string>
 </resources>

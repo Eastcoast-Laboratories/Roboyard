@@ -98,8 +98,9 @@ public class SettingsFragment extends Fragment {
     private RadioButton highContrastModeNo;
     
     private RadioGroup hintAutoMoveRadioGroup;
-    private RadioButton hintAutoMoveOn;
-    private RadioButton hintAutoMoveOff;
+    private RadioButton hintAutoMoveManual;
+    private RadioButton hintAutoMoveFullAuto;
+    private RadioButton hintAutoMoveSemiAuto;
     
     private android.widget.SeekBar backgroundSoundSeekbar;
     private android.widget.SeekBar soundEffectsVolumeSeekbar;
@@ -213,8 +214,9 @@ public class SettingsFragment extends Fragment {
             fullscreenOn = view.findViewById(R.id.fullscreen_on);
             fullscreenOff = view.findViewById(R.id.fullscreen_off);
             hintAutoMoveRadioGroup = view.findViewById(R.id.hint_auto_move_radio_group);
-            hintAutoMoveOn = view.findViewById(R.id.hint_auto_move_on);
-            hintAutoMoveOff = view.findViewById(R.id.hint_auto_move_off);
+            hintAutoMoveManual = view.findViewById(R.id.hint_auto_move_manual);
+            hintAutoMoveFullAuto = view.findViewById(R.id.hint_auto_move_full_auto);
+            hintAutoMoveSemiAuto = view.findViewById(R.id.hint_auto_move_semi_auto);
             // Game mode radio buttons
             gameModeRadioGroup = view.findViewById(R.id.game_mode_radio_group);
             standardGameModeButton = view.findViewById(R.id.standard_game_mode);
@@ -668,12 +670,21 @@ public class SettingsFragment extends Fragment {
                 Timber.e("fullscreenRadioGroup is null");
             }
             
-            // Set hint auto-move radio buttons
+            // Set hint auto-move radio buttons based on mode (0=Manual, 1=Full-Auto, 2=Semi-Auto)
             if (hintAutoMoveRadioGroup != null) {
-                if (Preferences.hintAutoMoveEnabled) {
-                    if (hintAutoMoveOn != null) hintAutoMoveOn.setChecked(true);
-                } else {
-                    if (hintAutoMoveOff != null) hintAutoMoveOff.setChecked(true);
+                switch (Preferences.hintAutoMoveMode) {
+                    case Preferences.HINT_AUTO_MOVE_MANUAL:
+                        if (hintAutoMoveManual != null) hintAutoMoveManual.setChecked(true);
+                        break;
+                    case Preferences.HINT_AUTO_MOVE_FULL_AUTO:
+                        if (hintAutoMoveFullAuto != null) hintAutoMoveFullAuto.setChecked(true);
+                        break;
+                    case Preferences.HINT_AUTO_MOVE_SEMI_AUTO:
+                        if (hintAutoMoveSemiAuto != null) hintAutoMoveSemiAuto.setChecked(true);
+                        break;
+                    default:
+                        if (hintAutoMoveManual != null) hintAutoMoveManual.setChecked(true);
+                        break;
                 }
             } else {
                 Timber.e("hintAutoMoveRadioGroup is null");
@@ -1615,11 +1626,17 @@ public class SettingsFragment extends Fragment {
                     try {
                         if (isUpdatingUI) return;
                         
-                        boolean hintAutoMoveEnabled = checkedId == R.id.hint_auto_move_on;
+                        int mode = Preferences.HINT_AUTO_MOVE_MANUAL; // Default
+                        if (checkedId == R.id.hint_auto_move_manual) {
+                            mode = Preferences.HINT_AUTO_MOVE_MANUAL;
+                        } else if (checkedId == R.id.hint_auto_move_full_auto) {
+                            mode = Preferences.HINT_AUTO_MOVE_FULL_AUTO;
+                        } else if (checkedId == R.id.hint_auto_move_semi_auto) {
+                            mode = Preferences.HINT_AUTO_MOVE_SEMI_AUTO;
+                        }
                         
-                        Preferences.setHintAutoMoveEnabled(hintAutoMoveEnabled);
-                        
-                        Timber.d("[PREFERENCES] Hint auto-move set to %b", hintAutoMoveEnabled);
+                        Preferences.setHintAutoMoveMode(mode);
+                        Timber.d("[SETTINGS] Hint auto-move mode set to %d", mode);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing hint auto-move selection");
                     }

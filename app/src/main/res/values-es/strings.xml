@@ -520,6 +520,10 @@
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">Movimiento automático de pistas:</string>
-    <string name="settings_hint_auto_move_on_a11y">Activar movimiento automático del robot al seleccionar pistas</string>
-    <string name="settings_hint_auto_move_off_a11y">Desactivar movimiento automático del robot al seleccionar pistas</string>
+    <string name="settings_hint_auto_move_manual">Manual (mover robots tú mismo)</string>
+    <string name="settings_hint_auto_move_manual_a11y">Modo manual: mueves los robots tú mismo</string>
+    <string name="settings_hint_auto_move_full_auto">Totalmente automático (robot se mueve automáticamente)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Modo totalmente automático: el robot se mueve automáticamente cuando se muestra la pista y avanza a la siguiente pista</string>
+    <string name="settings_hint_auto_move_semi_auto">Semi-automático (movimiento en botón siguiente pista)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Modo semi-automático: el robot se mueve cuando haces clic en el botón siguiente pista</string>
 </resources>

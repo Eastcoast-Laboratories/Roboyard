@@ -359,7 +359,7 @@
     <string name="starting_level_a11y" comment="Accessibility announcement when level starts">Starting level %1$d</string>
 
     <!-- Additional Game UI Messages -->
-    <string name="nothing_to_undo">Nothing to undo</string>
+    <string name="nothing_to_undo">No undo after completion</string>
     <string name="history_completed_once">Completed once</string>
     <string name="history_completed_times">Completed %1$d times</string>
     <string name="history_not_completed">Not completed yet</string>
@@ -462,8 +462,12 @@
     <string name="settings_allow_multicolor_target">Allow Multicolor Goal:</string>
     <string name="settings_high_contrast_mode">High Contrast Mode:</string>
     <string name="settings_hint_auto_move">Hint Auto-Move:</string>
-    <string name="settings_hint_auto_move_on_a11y">Enable automatic robot movement when selecting hints</string>
-    <string name="settings_hint_auto_move_off_a11y">Disable automatic robot movement when selecting hints</string>
+    <string name="settings_hint_auto_move_manual">Manual (move robots yourself)</string>
+    <string name="settings_hint_auto_move_manual_a11y">Manual mode: you move robots yourself</string>
+    <string name="settings_hint_auto_move_full_auto">Full-Auto (robot moves automatically)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Full-Auto mode: robot moves automatically when hint is shown and advances to next hint</string>
+    <string name="settings_hint_auto_move_semi_auto">Semi-Auto (move on next-hint button)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Semi-Auto mode: robot moves when you click next-hint button</string>
     
     <!-- Account Section -->
     <string name="settings_account_section">Roboyard Account</string>

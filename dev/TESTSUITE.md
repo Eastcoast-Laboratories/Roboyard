@@ -37,6 +37,16 @@ grep -rl "Tags:.*achievement" app/src/androidTest/
 
 ---
 
+## Instrumented/E2E Tests (`app/src/androidTest/`)
+
+These tests require a connected Android device or emulator.
+
+| Class                         | Status    | Tests | Description                                                                                                                                                                                                        | Tags                                                                          |
+| ----------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `HintAutoModeE2ETest`         | ✅ Passing | 3     | Tests all 3 hint auto-move modes: Manual (user moves robots), Full-Auto (robot moves automatically when hint shown), Semi-Auto (robot moves when next-hint button clicked). Uses Settings UI to change modes.      | hint-system, auto-move, settings, preferences, ui-navigation                  |
+
+---
+
 ## Unit Tests (`app/src/test/`)
 
 These tests run on the JVM without an Android device or emulator.

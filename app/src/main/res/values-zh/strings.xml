@@ -475,6 +475,10 @@
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">提示自动移动：</string>
-    <string name="settings_hint_auto_move_on_a11y">启用选择提示时自动移动机器人</string>
-    <string name="settings_hint_auto_move_off_a11y">禁用选择提示时自动移动机器人</string>
+    <string name="settings_hint_auto_move_manual">手动（自己移动机器人）</string>
+    <string name="settings_hint_auto_move_manual_a11y">手动模式：您自己移动机器人</string>
+    <string name="settings_hint_auto_move_full_auto">全自动（机器人自动移动）</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">全自动模式：显示提示时机器人自动移动并前进到下一个提示</string>
+    <string name="settings_hint_auto_move_semi_auto">半自动（点击下一个提示按钮时移动）</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">半自动模式：点击下一个提示按钮时机器人移动</string>
 </resources>
