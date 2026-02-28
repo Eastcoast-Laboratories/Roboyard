@@ -1,5 +1,7 @@
 package roboyard.ui.components;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.accessibility.AccessibilityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -154,6 +156,9 @@ public class GameGridView extends View {
     private boolean allowRobotDeselect = false;     // Flag to control robot deselection on tap
     private static final float ROBOT_MOVE_THRESHOLD = 60.0f;  // Minimum distance to trigger robot movement after activation
     private boolean robotAnimationInProgress = false;  // Track if a robot animation is in progress
+    private Handler animationTimeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable animationTimeoutRunnable = null;
+    private static final long ANIMATION_TIMEOUT_MS = 2000;  // 2 seconds timeout
 
     // Flag to track if an accessibility action is in progress
     private boolean accessibilityActionInProgress = false;
@@ -1274,8 +1279,7 @@ public class GameGridView extends View {
                             if (!robotMoveInitiated) {
                                 Timber.d("[SWIPE][TOUCH] Moving robot immediately: dx=%d, dy=%d, distance=%f", dx, dy, distance);
                                 robotMoveInitiated = true;  // Mark as moving before we start
-                                robotAnimationInProgress = true;  // Set animation flag
-                                Timber.d("[ANIM] Setting robotAnimationInProgress=true for swipe movement");
+                                setAnimationBlockWithTimeout();  // Set animation flag with 2s timeout
                                 
                                 // Reset the activation flag since we're proceeding with the move
                                 robotActivatedBySwipe = false;
@@ -1303,8 +1307,7 @@ public class GameGridView extends View {
                                     robotActivatedBySwipe = false;
                                 } else {
                                     // If the move failed, reset the flag
-                                    robotMoveInitiated = false;
-                                    robotAnimationInProgress = false;  // Clear animation flag on failure
+                                    clearAnimationBlock();  // Clear animation flag on failure
                                     Timber.d("[ANIM] Move failed, clearing animation flag");
                                     
                                     // Store the direction for retry on ACTION_UP
@@ -1377,8 +1380,7 @@ public class GameGridView extends View {
                             hasMovedRobotInCurrentGesture = true;
                         } else {
                             // If the move failed, reset the moving flag
-                            robotMoveInitiated = false;
-                            robotAnimationInProgress = false;  // Clear animation flag
+                            clearAnimationBlock();  // Clear animation flag
                             Timber.d("[ANIM] Move from ACTION_UP failed, clearing animation flag");
                         }
                     }
@@ -1451,8 +1453,7 @@ public class GameGridView extends View {
                                 // Use the improved moveRobotInDirection method which handles animation
                                 Timber.d("[TOUCH] Moving robot in direction: dx=%d, dy=%d", dx, dy);
                                 robotMoveInitiated = true;  // Mark as moving before we start
-                                robotAnimationInProgress = true;  // Track animation state
-                                Timber.d("[ANIM] Setting robotAnimationInProgress=true for tap movement");
+                                setAnimationBlockWithTimeout();  // Track animation state with 2s timeout
                                 boolean moved = gameStateManager.moveRobotInDirection(dx, dy);
                                 Timber.d("[ROBOTS][UNDO] After moveRobotInDirection: moved=%b, robotMoveInitiated=%b, robotAnimationInProgress=%b",
                                         moved, robotMoveInitiated, robotAnimationInProgress);
@@ -1581,9 +1582,50 @@ public class GameGridView extends View {
         }
         
         // Mark robot as finished moving - now other movements can be triggered
-        robotMoveInitiated = false;
-        robotAnimationInProgress = false;  // Clear animation flag
+        clearAnimationBlock();  // Clear animation flag and timeout
         Timber.d("[ANIM] Robot movement complete, animation finished, allowing new movements");
+    }
+    
+    /**
+     * Set animation block with 2s timeout to prevent permanent blocking
+     */
+    private void setAnimationBlockWithTimeout() {
+        // Cancel any existing timeout
+        if (animationTimeoutRunnable != null) {
+            animationTimeoutHandler.removeCallbacks(animationTimeoutRunnable);
+        }
+        
+        // Set animation flag
+        robotAnimationInProgress = true;
+        
+        // Create new timeout runnable
+        animationTimeoutRunnable = () -> {
+            if (robotAnimationInProgress) {
+                Timber.w("[ANIM] Animation timeout reached (2s), force-clearing animation block");
+                robotAnimationInProgress = false;
+                robotMoveInitiated = false;
+            }
+        };
+        
+        // Schedule timeout
+        animationTimeoutHandler.postDelayed(animationTimeoutRunnable, ANIMATION_TIMEOUT_MS);
+        Timber.d("[ANIM] Animation block set with 2s timeout");
+    }
+    
+    /**
+     * Clear animation block and cancel timeout
+     */
+    private void clearAnimationBlock() {
+        // Cancel timeout
+        if (animationTimeoutRunnable != null) {
+            animationTimeoutHandler.removeCallbacks(animationTimeoutRunnable);
+            animationTimeoutRunnable = null;
+        }
+        
+        // Clear flags
+        robotAnimationInProgress = false;
+        robotMoveInitiated = false;
+        Timber.d("[ANIM] Animation block cleared");
     }
     
     /**
@@ -1932,8 +1974,7 @@ public class GameGridView extends View {
         }
         
         // Reset move flags so touch events are not permanently blocked after undo
-        robotMoveInitiated = false;
-        robotAnimationInProgress = false;
+        clearAnimationBlock();  // Clear animation flag and timeout
         Timber.d("[ROBOTS][UNDO] applyPathSegmentUndoVisual: reset flags, robotMoveInitiated=%b, robotAnimationInProgress=%b",
                 robotMoveInitiated, robotAnimationInProgress);
         
