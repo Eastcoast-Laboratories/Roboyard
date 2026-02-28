@@ -1489,6 +1489,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Clear any hint text from the status display
             updateStatusText("", false);
             
+            // Reset button text to "Reset"
+            resetRobotsButton.setText(R.string.reset_button);
+            
             // Force another path clearing to ensure all paths are removed
             if (gameGridView != null) {
                 gameGridView.clearRobotPaths();
@@ -1602,6 +1605,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     
                     // Hide restart button for level games
                     newMapButton.setVisibility(View.GONE);
+                    
+                    // Reset button text to "Reset"
+                    resetRobotsButton.setText(R.string.reset_button);
                 } else {
                     // Random game - start a new random game
                     gameStateManager.startGame();
@@ -1639,6 +1645,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     
                     // Show restart button for random games
                     newMapButton.setVisibility(View.VISIBLE);
+                    
+                    // Reset button text to "Reset"
+                    resetRobotsButton.setText(R.string.reset_button);
                     
                     // Hide the optimal moves button when starting a new random game
                     if (optimalMovesButton != null) {
