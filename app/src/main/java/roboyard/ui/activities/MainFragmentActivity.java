@@ -69,6 +69,11 @@ public class MainFragmentActivity extends AppCompatActivity {
                 roboyard.logic.core.Preferences.robotCount, 
                 roboyard.logic.core.Preferences.targetColors);
         
+        // Start background sound service if volume > 0
+        Timber.d("[SOUND_SERVICE] MainFragmentActivity.onCreate: backgroundSoundVolume = %d", 
+                Preferences.backgroundSoundVolume);
+        startBackgroundSoundService(Preferences.backgroundSoundVolume);
+        
         // Log the board size at startup
         Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity onCreate - Current board size: %dx%d", 
                  getBoardWidth(), getBoardHeight());
@@ -791,6 +796,23 @@ public class MainFragmentActivity extends AppCompatActivity {
             Timber.d("[FULLSCREEN] Legacy normal mode applied");
         } catch (Exception e) {
             Timber.e(e, "[FULLSCREEN] Error applying legacy normal mode");
+        }
+    }
+
+    /**
+     * Start, update, or stop the background sound service based on volume level.
+     * Replicates exact logic from MainActivity and SettingsFragment
+     * @param volume Volume level 0-100 (0 stops the service)
+     */
+    private void startBackgroundSoundService(int volume) {
+        Intent intent = new Intent(this, roboyard.SoundService.class);
+        if (volume > 0) {
+            intent.putExtra(roboyard.SoundService.EXTRA_VOLUME, volume);
+            startService(intent);
+            Timber.d("[SOUND_SERVICE] Started background sound service with volume %d", volume);
+        } else {
+            stopService(intent);
+            Timber.d("[SOUND_SERVICE] Stopped background sound service");
         }
     }
 }

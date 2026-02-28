@@ -14,25 +14,41 @@ public class SoundService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Timber.d("[SOUND_SERVICE] onBind called");
         return null;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        player = MediaPlayer.create(this, R.raw.singing_bowls_in_a_forest);
-        if (player != null) {
-            player.setLooping(true);
-            Timber.d("[SOUND_SERVICE] MediaPlayer created");
-        } else {
-            Timber.e("[SOUND_SERVICE] Failed to create MediaPlayer");
+        Timber.d("[SOUND_SERVICE] ========== onCreate() START ==========");
+        Timber.d("[SOUND_SERVICE] Service instance created, player is currently: %s", player == null ? "NULL" : "NOT NULL");
+        
+        try {
+            player = MediaPlayer.create(this, R.raw.singing_bowls_in_a_forest);
+            if (player != null) {
+                player.setLooping(true);
+                Timber.d("[SOUND_SERVICE] MediaPlayer created successfully, looping enabled");
+                Timber.d("[SOUND_SERVICE] MediaPlayer state - isPlaying: %b, duration: %d", player.isPlaying(), player.getDuration());
+            } else {
+                Timber.e("[SOUND_SERVICE] CRITICAL: MediaPlayer.create() returned NULL");
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[SOUND_SERVICE] EXCEPTION in onCreate while creating MediaPlayer");
         }
+        
+        Timber.d("[SOUND_SERVICE] ========== onCreate() END ==========");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Timber.d("[SOUND_SERVICE] ========== onStartCommand() START ==========");
+        Timber.d("[SOUND_SERVICE] Intent: %s, flags: %d, startId: %d", intent, flags, startId);
+        Timber.d("[SOUND_SERVICE] Player state: %s", player == null ? "NULL" : "NOT NULL");
+        
         if (player == null) {
-            Timber.e("[SOUND_SERVICE] MediaPlayer is null in onStartCommand");
+            Timber.e("[SOUND_SERVICE] CRITICAL: MediaPlayer is NULL in onStartCommand - stopping service");
+            Timber.e("[SOUND_SERVICE] This means onCreate() was not called or MediaPlayer creation failed");
             stopSelf();
             return Service.START_NOT_STICKY;
         }
@@ -40,33 +56,53 @@ public class SoundService extends Service {
         int volumePercent = 10;
         if (intent != null && intent.hasExtra(EXTRA_VOLUME)) {
             volumePercent = intent.getIntExtra(EXTRA_VOLUME, 10);
+            Timber.d("[SOUND_SERVICE] Volume from intent: %d%%", volumePercent);
+        } else {
+            Timber.w("[SOUND_SERVICE] No volume in intent, using default: %d%%", volumePercent);
         }
 
         // Map slider 0-100 to actual volume 0-73%
         float actualVolume = (volumePercent / 100f) * 0.73f;
         player.setVolume(actualVolume, actualVolume);
-        Timber.d("[SOUND_SERVICE] Volume slider %d%%, actual %.0f%% (%.2f)", volumePercent, actualVolume * 100, actualVolume);
+        Timber.d("[SOUND_SERVICE] Volume set - slider: %d%%, actual: %.0f%% (%.2f)", volumePercent, actualVolume * 100, actualVolume);
 
         // Always restart from beginning so user hears the loudest part for calibration
         player.seekTo(0);
+        Timber.d("[SOUND_SERVICE] Seeked to position 0");
+        
         if (!player.isPlaying()) {
-            player.start();
-            Timber.d("[SOUND_SERVICE] Playback started");
+            try {
+                player.start();
+                Timber.d("[SOUND_SERVICE] ✓ Playback STARTED successfully");
+                Timber.d("[SOUND_SERVICE] MediaPlayer state - isPlaying: %b, position: %d, duration: %d", 
+                        player.isPlaying(), player.getCurrentPosition(), player.getDuration());
+            } catch (Exception e) {
+                Timber.e(e, "[SOUND_SERVICE] EXCEPTION while starting playback");
+            }
+        } else {
+            Timber.d("[SOUND_SERVICE] Player already playing, not starting again");
         }
 
+        Timber.d("[SOUND_SERVICE] ========== onStartCommand() END ==========");
         return Service.START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        Timber.d("[SOUND_SERVICE] ========== onDestroy() START ==========");
         if (player != null) {
+            Timber.d("[SOUND_SERVICE] Player exists, isPlaying: %b", player.isPlaying());
             if (player.isPlaying()) {
                 player.stop();
+                Timber.d("[SOUND_SERVICE] Playback stopped");
             }
             player.release();
             player = null;
-            Timber.d("[SOUND_SERVICE] MediaPlayer released");
+            Timber.d("[SOUND_SERVICE] MediaPlayer released and set to null");
+        } else {
+            Timber.w("[SOUND_SERVICE] Player was already null in onDestroy");
         }
         super.onDestroy();
+        Timber.d("[SOUND_SERVICE] ========== onDestroy() END ==========");
     }
 }

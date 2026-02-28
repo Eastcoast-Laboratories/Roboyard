@@ -346,10 +346,12 @@ public class Preferences {
             
             try {
                 backgroundSoundVolume = prefs.getInt(KEY_BACKGROUND_SOUND_VOLUME, DEFAULT_BACKGROUND_SOUND_VOLUME);
+                Timber.d("[PREFERENCES] Loaded background sound volume: %d (default: %d)", backgroundSoundVolume, DEFAULT_BACKGROUND_SOUND_VOLUME);
             } catch (ClassCastException e) {
                 Timber.e("[PREFERENCES] Error loading background sound volume: %s", e.getMessage());
                 prefs.edit().remove(KEY_BACKGROUND_SOUND_VOLUME).apply();
                 backgroundSoundVolume = DEFAULT_BACKGROUND_SOUND_VOLUME;
+                Timber.d("[PREFERENCES] Reset background sound volume to default: %d", DEFAULT_BACKGROUND_SOUND_VOLUME);
             }
             
             try {

@@ -56,12 +56,11 @@ public class MainActivity extends FragmentActivity
         // Initialize static Preferences
         Preferences.initialize(getApplicationContext());
         
-        // Start background sound service if volume > 0
-        if (Preferences.backgroundSoundVolume > 0) {
-            Intent soundIntent = new Intent(this, roboyard.SoundService.class);
-            soundIntent.putExtra(roboyard.SoundService.EXTRA_VOLUME, Preferences.backgroundSoundVolume);
-            startService(soundIntent);
-        }
+        // Start background sound service if volume > 0 (replicate exact logic from SettingsFragment)
+        Timber.d("[SOUND_SERVICE] MainActivity.onCreate: backgroundSoundVolume = %d, DEFAULT = %d", 
+                Preferences.backgroundSoundVolume, Preferences.DEFAULT_BACKGROUND_SOUND_VOLUME);
+        
+        startBackgroundSoundService(Preferences.backgroundSoundVolume);
         
         // Hide the status bar
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -168,12 +167,8 @@ public class MainActivity extends FragmentActivity
         
         // Restart background sound service if volume > 0
         // This ensures sound plays continuously across all screens and after app resume
-        if (Preferences.backgroundSoundVolume > 0) {
-            Intent soundIntent = new Intent(this, roboyard.SoundService.class);
-            soundIntent.putExtra(roboyard.SoundService.EXTRA_VOLUME, Preferences.backgroundSoundVolume);
-            startService(soundIntent);
-            Timber.d("[SOUND_SERVICE] Restarted in onResume with volume %d", Preferences.backgroundSoundVolume);
-        }
+        Timber.d("[SOUND_SERVICE] MainActivity.onResume: backgroundSoundVolume = %d", Preferences.backgroundSoundVolume);
+        startBackgroundSoundService(Preferences.backgroundSoundVolume);
     }
 
     @Override
@@ -200,6 +195,23 @@ public class MainActivity extends FragmentActivity
         if(mThread != null){
             mThread.interrupt();
             mThread = null;
+        }
+    }
+
+    /**
+     * Start, update, or stop the background sound service based on volume level.
+     * Replicates exact logic from SettingsFragment.updateBackgroundSoundService()
+     * @param volume Volume level 0-100 (0 stops the service)
+     */
+    private void startBackgroundSoundService(int volume) {
+        Intent intent = new Intent(this, roboyard.SoundService.class);
+        if (volume > 0) {
+            intent.putExtra(roboyard.SoundService.EXTRA_VOLUME, volume);
+            startService(intent);
+            Timber.d("[SOUND_SERVICE] Started background sound service with volume %d", volume);
+        } else {
+            stopService(intent);
+            Timber.d("[SOUND_SERVICE] Stopped background sound service");
         }
     }
 
