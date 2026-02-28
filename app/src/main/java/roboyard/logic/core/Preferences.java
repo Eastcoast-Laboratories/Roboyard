@@ -371,9 +371,20 @@ public class Preferences {
             try {
                 hintAutoMoveMode = prefs.getInt(KEY_HINT_AUTO_MOVE_MODE, DEFAULT_HINT_AUTO_MOVE_MODE);
             } catch (ClassCastException e) {
-                Timber.e("[PREFERENCES] Error loading hint auto move mode: %s", e.getMessage());
-                prefs.edit().remove(KEY_HINT_AUTO_MOVE_MODE).apply();
-                hintAutoMoveMode = DEFAULT_HINT_AUTO_MOVE_MODE;
+                // Migration: Old version stored this as boolean, new version uses int (0, 1, 2)
+                Timber.w("[PREFERENCES] Migrating hint auto move mode from boolean to int");
+                try {
+                    boolean oldBoolValue = prefs.getBoolean(KEY_HINT_AUTO_MOVE_MODE, false);
+                    hintAutoMoveMode = oldBoolValue ? 1 : 0; // Convert: false->0, true->1
+                    // Save migrated value as int
+                    prefs.edit().remove(KEY_HINT_AUTO_MOVE_MODE).apply();
+                    prefs.edit().putInt(KEY_HINT_AUTO_MOVE_MODE, hintAutoMoveMode).apply();
+                    Timber.d("[PREFERENCES] Migrated hint auto move mode: %b -> %d", oldBoolValue, hintAutoMoveMode);
+                } catch (Exception e2) {
+                    Timber.e("[PREFERENCES] Failed to migrate hint auto move mode: %s", e2.getMessage());
+                    prefs.edit().remove(KEY_HINT_AUTO_MOVE_MODE).apply();
+                    hintAutoMoveMode = DEFAULT_HINT_AUTO_MOVE_MODE;
+                }
             }
             
             try {
