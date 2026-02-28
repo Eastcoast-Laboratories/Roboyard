@@ -156,9 +156,8 @@
     <string name="robot_moved">Robot %1$s movido a (%2$d, %3$d)</string>
     <string name="no_target_for_robot">No hay objetivo para este robot</string>
     <string name="move_count_text">Movimientos: %1$d</string>
-    <string name="moves_count">Movimientos: %1$d</string>
-    <string name="distance_moved">Distancia: %1$d</string>
-    <string name="squares_moved">Casillas: %1$d</string>
+    <string name="moves_count">%1$d Movimientos</string>
+    <string name="squares_moved">%1$d Casillas</string>
     <string name="robot_info">Robot %1$s en (%2$d, %3$d)</string>
     <string name="target_info">Objetivo para robot %1$s en (%2$d, %3$d)</string>
     
