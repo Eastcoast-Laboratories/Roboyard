@@ -63,19 +63,35 @@ check if this all works:
 
 7. teste die Kommunikation eine Version ein (ver=1) die wird erwartet. Z.b. Beim deep Link der map erwartet der Ver 1 aber wenn die höher ist, dann macht er statt die map mit unerwarteten Daten zu starten einen Toast "your app needs an update" und lenkt zum Menü; Auch die Login communication und die Synchronisation entsprechend. So kann ich in Zukunft breaking changes in Laravel ausrollen ohne dass die alten Apps abgestürzen
 
-# last prompt:
+8.
+mach einen Espresso Test für 1000 History Einträge + Pagination. also erst die app daten löschen, dann 1000 einträge erstellen (50x auf add 20 drücken) erhöhe dazu den erlaubten espresso timeout auf 1h
 
-mach einen Espresso Test für 140 History Einträge + Pagination. also erst die app daten löschen, dann 140 eiträge erstellen (7x auf add 20 drücken)
-
-führe ihn aus und reparier finde heraus, wannn der speicher voll ist, wenn voll, dann versuche eine lösung zu finden, dass weniger speicher verwendet wird
+führe ihn aus ind finde heraus, wann der speicher voll ist, wenn voll, dann versuche eine lösung zu finden, dass weniger speicher verwendet wird
 
 höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine fragen
 
+
 ---
-@GameFragment.java#L3132-3133  hint auto-move bewegt ja den roboter automatisch, sobald der nächste hint angezeigt wird, der wird aber ja schon automatisch angezeigt, wenn ein roboter sich in die richtire richtung bewegt (suche diese stelle wo das initiiert wird) dadurch haben wir jetz t eine voll automatisierung seit commit cdf52d8a (schau dir den an) Das ist gut so!
+# last prompt:
+1. der play button soll nicht visibility gone haben, solange im menu das poup auf ist, nur der level button soll invisible sein, bis das schliesst.
 
-dies soll aber in dem radio button iin prefs nur die  option 1 sein, es soll aber auch eine option 2 geben, die statt voll-automatisch, den roboter nur immer dann genau einmal automatisch bewegt, wenn man auf den next hint button drückt, 
+2.
+der x-button im text container unter dem hint container setzt ja den z-index des containers zurück um hinter den buttons zu sein, der soll aber auch gleichzeitig den hint-container schliessen, aber nur, wenn der sichtbar ist
 
-Also den bereich @GameFragment.java#L3132-3175 in eine funktion auslagern und hier nur aufrufen, wenn option 1, wenn option 2 muss dieser bereich getriggert werden durch den next-hint button
+3.
+wenn man ein new game oder next-level klickt, dann soll der retry button wieder mit reset beschriftet werden, dies passiert im moment erst, wenn man den reset/retry button drückt
 
-Beue einen unittest, der alle 3 optionen in einem random game testet mit espresso und höre erst auf, wenn du alle drei erfolgreich getestet hast, eeinmal durch händisch roboter inst zier, einmal voll automatisch und einmal durch wiederholtes drücken des next hint buttons
+4.
+ändere die reihenfolge der buttons im game unten:
+save, hint, back
+reset/retry, new game, menu
+
+5.
+der back button soll orange sein, wie der next hint button und einen dreieckigen pfeil nach links als icon vor dem text erhalten, wie die hint pfeile im game
+
+1. 
+in der textbox das wort "Moves" soll hinter die Zahl der moves und viel kleiner. ebenso squares: "X Squares"  alles genau so klein. die difficulty soll auch noch kleiner. alles in allen dimens.xml
+
+ignoriere das alt-layout, aber beachte die beiden landscape layouts!
+
+mache alle 6 in einer reihe durch und suche vor jeder änderung einen passenden test aus, schaue ob der noch funktioniert, wenn nicht repariere ihn, dann fürhe die änderung durch und teste erneut mit dem selben test, wenn alles läuft  funktioniert, committe es ausnahmsweise selbt und fahre mit dem nächsten punkt fort
