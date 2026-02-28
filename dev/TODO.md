@@ -74,6 +74,15 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 ---
 # last prompt:
 
+1. der back button enthält nun nicht das wort Back ini der entsprechenden language, sondern den striing "@STRING/B..." da scheint an der falschen stelle replaced worden zu sein benutze dazu einen unittest um das zu fixen
+
+2. @TODO.md#L116-118 das soll so: 
+**New:** "0" (larger) " Moves" (smaller)
+also mit einer grösseren moves zahl und squares und difficulty soll noch kleiner
+
+3. Play Button Visibility with Popup ist imer noch unsichtbar unter dem poopup, das sieht man nur wenn man einen neuen tag startet oder die app das erste mal ffnet. benutze dazu einen unittest um das zu fixen
+
+4.
 GMS is unfree and fdrid cant build it. it does not work correctly anyway so disable it for now. leave all code in the system, but remove it globally with one flag, so we can enable it in a later version.
 
 ## UI Improvements (Test-Driven)
@@ -90,21 +99,21 @@ GMS is unfree and fdrid cant build it. it does not work correctly anyway so disa
 **Solution:** X-button soll auch hint_container schließen wenn sichtbar
 **Files:** GameFragment.java (game_info_close_button onClick)
 **Test:** Manual test - open hints, click X-button
-**Status:** TODO
+**Status:** DONE
 
 ### Task 3: Reset Button Label on New Game/Next Level
 **Problem:** Reset button wird erst zu "Reset" wenn man ihn drückt
 **Solution:** Button soll bei new game/next-level sofort "Reset" heißen
 **Files:** GameFragment.java (nextLevelButton onClick, newMapButton onClick)
 **Test:** Manual test - complete game, click next level, check reset button text
-**Status:** TODO
+**Status:** DONE
 
 ### Task 4: Reorder Bottom Buttons
 **Current:** hint, reset, save, menu
 **New:** save, hint, back, reset/retry, new game, menu
 **Files:** fragment_game_portrait.xml, fragment_game_landscape.xml, fragment_game_landscape_right.xml
 **Test:** Visual inspection after build
-**Status:** TODO
+**Status:** DONE
 
 ### Task 5: Orange Back Button with Left Arrow
 **Problem:** Back button needs orange color + left arrow icon
@@ -115,7 +124,7 @@ GMS is unfree and fdrid cant build it. it does not work correctly anyway so disa
 
 ### Task 6: Smaller Text for Moves/Squares/Difficulty
 **Current:** "Moves: 0", "Squares: 0", "Difficulty: Easy"
-**New:** "0 Moves" (smaller), "0 Squares" (smaller), smaller difficulty
+**New:** "0" (larger) " Moves" (smaller), "0 Squares" (smaller), smaller difficulty
 **Files:** All dimens.xml files, GameFragment.java (text formatting)
 **Test:** RoboyardSmokeTest
 **Status:** TODO

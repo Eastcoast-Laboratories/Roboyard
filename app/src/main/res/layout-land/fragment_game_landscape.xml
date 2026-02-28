@@ -313,10 +313,10 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/game_button_height"
                     android:layout_weight="1"
-                    android:background="@drawable/button_fancy_blue"
+                    android:background="@drawable/hint_button_fancy"
                     android:padding="@dimen/game_button_padding"
                     android:text="@string/button_back_game"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#1A1A1A"
                     android:textSize="@dimen/game_button_text_size"
                     android:textStyle="bold"
                     android:elevation="6dp" />

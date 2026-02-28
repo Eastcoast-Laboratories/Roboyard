@@ -1036,6 +1036,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // (Button text: "Back")
         // Back button - undo the last robot movement
         backButton = view.findViewById(R.id.back_button);
+        // Add left arrow icon to back button text
+        backButton.setText("◂ " + getString(R.string.button_back_game));
         backButton.setOnClickListener(v -> {
             Timber.d("GameFragment: Back button clicked");
             
