@@ -908,8 +908,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             // Number part: 1.5x larger, dark green
                             spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            // Label part: 0.7x smaller, dark green
-                            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            // Label part: 0.9x smaller, dark green
+                            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.9f), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             spannable.setSpan(new ForegroundColorSpan(darkGreen), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             // Delta part: 1.5x larger, deviation color
                             spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

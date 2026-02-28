@@ -3378,7 +3378,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             String deviationStr = (optimal > 0) ? " \u0394" + (deviation >= 0 ? "+" : "") + deviation : "";
             String text = context.getString(R.string.live_move_counter_optimal, cachedResult) + deviationStr;
             liveMoveCounterDeviation.setValue(deviation);
-            liveMoveCounterText.setValue(text);
+            liveMoveCounterText.setValue(text); // has an observer on the live move counter text in GameFragment.java
             liveSolverCalculating.setValue(false);
             Timber.d("[PRECOMP_SOLUTION] Used pre-computed result: %d remaining, %d current, %d optimal, Δ%+d", cachedResult, currentMoves, optimal, deviation);
             // Pre-compute next moves from this new position
