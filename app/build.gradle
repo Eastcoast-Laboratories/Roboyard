@@ -21,14 +21,14 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField "boolean", "ENABLE_PLAY_GAMES", "true"
+            buildConfigField "boolean", "ENABLE_PLAY_GAMES", "false"
         }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
-            buildConfigField "boolean", "ENABLE_PLAY_GAMES", "true"
+            buildConfigField "boolean", "ENABLE_PLAY_GAMES", "false"
         }
     }
     namespace 'roboyard.eclabs'
