@@ -324,25 +324,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/back_button"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/game_button_height"
-                android:layout_marginEnd="@dimen/game_button_margin"
-                android:layout_weight="1"
-                android:background="@drawable/button_fancy_blue"
-                android:padding="@dimen/game_button_padding"
-                android:text="@string/button_back_game"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:maxLines="1"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
-                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
-                app:autoSizeStepGranularity="1sp"
-                android:elevation="6dp" />
-
-            <Button
                 android:id="@+id/save_map_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/game_button_height"
@@ -361,14 +342,33 @@
                 app:autoSizeStepGranularity="1sp"
                 android:elevation="6dp" />
 
+            <ToggleButton
+                android:id="@+id/hint_button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/game_button_height"
+                android:layout_marginEnd="@dimen/game_button_margin"
+                android:layout_weight="1"
+                android:background="@drawable/button_fancy_gray"
+                android:padding="@dimen/game_button_padding"
+                android:textOn="@string/hint_cancel_button"
+                android:textOff="@string/hint_button"
+                android:textColor="#FFFFFF"
+                android:singleLine="true"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/game_button_text_size_min"
+                app:autoSizeMaxTextSize="@dimen/game_button_text_size_max"
+                app:autoSizeStepGranularity="1sp"
+                android:elevation="6dp" />
+
             <Button
-                android:id="@+id/reset_robots_button"
+                android:id="@+id/back_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/game_button_height"
                 android:layout_weight="1"
                 android:background="@drawable/button_fancy_blue"
                 android:padding="@dimen/game_button_padding"
-                android:text="@string/button_reset"
+                android:text="@string/button_back_game"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:singleLine="true"
@@ -386,17 +386,17 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <ToggleButton
-                android:id="@+id/hint_button"
+            <Button
+                android:id="@+id/reset_robots_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/game_button_height"
                 android:layout_marginEnd="@dimen/game_button_margin"
                 android:layout_weight="1"
-                android:background="@drawable/button_fancy_gray"
+                android:background="@drawable/button_fancy_blue"
                 android:padding="@dimen/game_button_padding"
-                android:textOn="@string/hint_cancel_button"
-                android:textOff="@string/hint_button"
+                android:text="@string/button_reset"
                 android:textColor="#FFFFFF"
+                android:textStyle="bold"
                 android:singleLine="true"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
