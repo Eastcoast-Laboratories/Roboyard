@@ -1075,6 +1075,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (gameStateManager.undoLastMove()) {
                 // Force grid view update after undo
                 if (gameGridView != null) {
+                    // Get the current state AFTER undo to get correct dimensions
+                    GameState undoState = gameStateManager.getCurrentState().getValue();
+                    
                     // Remove only the last path segment instead of clearing all paths
                     gameGridView.undoLastPathSegment();
                     // Re-select the robot that was undone with full visual treatment
@@ -1086,8 +1089,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     gameGridView.invalidate();
                     
                     // Update the game state display to reflect the undone move
-                    if (currentState != null) {
-                        updateGameState(currentState);
+                    if (undoState != null) {
+                        updateGameState(undoState);
+                    }else{
+                        Timber.e("[ROBOTS][UNDO] Back-button: undoState is null after undo");
                     }
                 }
             } else {
@@ -2255,7 +2260,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Get current state and update game grid (same as reset button)
             GameState currentState = gameStateManager != null ? gameStateManager.getCurrentState().getValue() : null;
             if (currentState != null) {
-                updateGameState(currentState); // This fixes the scaling problem when the app is losing focus and resuming game
+                updateGameState(currentState); // This fixes the scaling problem when the app is losing focus and resuming game (committed accidelntally by mentioning setGridElements() instead of updateGameState())
                 Timber.d("[GRID_LAYOUT] onResume: called updateGameState to fix scaling");
             }
             
