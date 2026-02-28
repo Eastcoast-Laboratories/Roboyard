@@ -98,6 +98,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     // Class member to track if a robot is currently selected
     private boolean isRobotSelected = false;
     
+    // Track if current game is a level game
+    private boolean isLevelGame = false;
+    
     // TalkBack accessibility controls
     private ViewGroup accessibilityControlsContainer;
     private Button btnMoveNorth;
@@ -939,7 +942,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private void checkIfMoveMatchesHint(GameState state) {
         // Update live move counter toggle visibility if we're on the exact solution pre-hint
         // This ensures the toggle appears immediately when the first move is made
-        if (showingPreHints && currentHintStep == numPreHints && liveMoveCounterToggle != null) {
+        // BUT: Never show in level games
+        if (showingPreHints && currentHintStep == numPreHints && liveMoveCounterToggle != null && !isLevelGame) {
             int moveCount = state.getMoveCount();
             // Keep toggle visible if live move counter is enabled
             boolean visible = moveCount >= 1 || gameStateManager.isLiveMoveCounterEnabled();
@@ -1062,7 +1066,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private void setupButtons(View view) {
         GameState currentState = gameStateManager.getCurrentState().getValue();
-        boolean isLevelGame;
         if (currentState != null && currentState.getLevelId() > 0) {
             isLevelGame = true;
         } else {
@@ -2986,7 +2989,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             updateOptimalMovesButton(totalMoves, true);
             
             // Show the live move counter live-move-toggle from this hint onwards (always visible from here)
-            if (liveMoveCounterToggle != null) {
+            // BUT: Never show in level games
+            if (liveMoveCounterToggle != null && !isLevelGame) {
                 liveMoveCounterToggle.setVisibility(View.VISIBLE);
                 Timber.d("[HINT_SYSTEM] Toggle button now visible from exact solution hint onwards");
             }
@@ -3622,7 +3626,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     hintContainer.setAlpha(1f);
                     hintContainer.clearAnimation();
                     // If live move counter is active, keep container visible with just status + live-move-toggle
-                    if (gameStateManager.isLiveMoveCounterEnabled()) {
+                    // BUT: Never show in level games
+                    if (gameStateManager.isLiveMoveCounterEnabled() && !isLevelGame) {
                         hintContainer.setVisibility(View.VISIBLE);
                         prevHintButton.setVisibility(View.GONE);
                         nextHintButton.setVisibility(View.GONE);

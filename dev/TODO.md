@@ -94,41 +94,6 @@ GMS is unfree and fdrid cant build it. it does not work correctly anyway so disa
 **Test:** Manual test - open achievement popup, check button visibility
 **Status:** TODO
 
-### Task 2: X-Button Closes Hint Container
-**Problem:** X-button (game_info_close_button) setzt nur z-index zurück
-**Solution:** X-button soll auch hint_container schließen wenn sichtbar
-**Files:** GameFragment.java (game_info_close_button onClick)
-**Test:** Manual test - open hints, click X-button
-**Status:** DONE
 
-### Task 3: Reset Button Label on New Game/Next Level
-**Problem:** Reset button wird erst zu "Reset" wenn man ihn drückt
-**Solution:** Button soll bei new game/next-level sofort "Reset" heißen
-**Files:** GameFragment.java (nextLevelButton onClick, newMapButton onClick)
-**Test:** Manual test - complete game, click next level, check reset button text
-**Status:** DONE
-
-### Task 4: Reorder Bottom Buttons
-**Current:** hint, reset, save, menu
-**New:** save, hint, back, reset/retry, new game, menu
-**Files:** fragment_game_portrait.xml, fragment_game_landscape.xml, fragment_game_landscape_right.xml
-**Test:** Visual inspection after build
-**Status:** DONE
-
-### Task 5: Orange Back Button with Left Arrow
-**Problem:** Back button needs orange color + left arrow icon
-**Solution:** Style like next_hint_button (orange) + add left arrow drawable
-**Files:** Layout XMLs, create/find left arrow drawable
-**Test:** Visual inspection after build
-**Status:** TODO
-
-### Task 6: Smaller Text for Moves/Squares/Difficulty
-**Current:** "Moves: 0", "Squares: 0", "Difficulty: Easy"
-**New:** "0" (larger) " Moves" (smaller), "0 Squares" (smaller), smaller difficulty
-**Files:** All dimens.xml files, GameFragment.java (text formatting)
-**Test:** RoboyardSmokeTest
-**Status:** TODO
 
 **Note:** Ignoriere alt-layout, beachte beide landscape layouts!
-
-mache alle 6 in einer reihe durch und suche vor jeder änderung einen passenden test aus, schaue ob der noch funktioniert, wenn nicht repariere ihn, dann fürhe die änderung durch und teste erneut mit dem selben test, wenn alles läuft  funktioniert, committe es ausnahmsweise selbt und fahre mit dem nächsten punkt fort
