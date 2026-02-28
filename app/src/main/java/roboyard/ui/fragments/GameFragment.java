@@ -901,15 +901,29 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     int darkGreen = Color.parseColor("#006400");
                     int deltaIdx = text.indexOf("Δ");
                     if (deltaIdx >= 0) {
-                        SpannableString spannable = new SpannableString(text);
-                        // Make entire text 2x larger
-                        spannable.setSpan(new android.text.style.RelativeSizeSpan(2.0f), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        // Number part is dark green
-                        spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        // Delta part gets deviation color
-                        int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
-                        spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        statusTextView.setText(spannable);
+                        // Find where the number ends (first space)
+                        int spaceIdx = text.indexOf(" ");
+                        if (spaceIdx > 0 && spaceIdx < deltaIdx) {
+                            SpannableString spannable = new SpannableString(text);
+                            // Number part: 1.5x larger, dark green
+                            spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            // Label part: 0.7x smaller, dark green
+                            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            spannable.setSpan(new ForegroundColorSpan(darkGreen), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            // Delta part: 1.5x larger, deviation color
+                            spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
+                            spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            statusTextView.setText(spannable);
+                        } else {
+                            // Fallback if format is unexpected
+                            SpannableString spannable = new SpannableString(text);
+                            spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
+                            spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            statusTextView.setText(spannable);
+                        }
                     } else {
                         statusTextView.setText(text);
                         statusTextView.setTextColor(darkGreen);
