@@ -31,6 +31,12 @@ android {
             buildConfigField "boolean", "ENABLE_PLAY_GAMES", "false"
         }
     }
+    
+    bundle {
+        abi {
+            enableSplit = false
+        }
+    }
     namespace 'roboyard.eclabs'
     buildToolsVersion '36.0.0'
     
