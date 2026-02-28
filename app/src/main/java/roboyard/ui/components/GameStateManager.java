@@ -3375,7 +3375,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
             int optimal = lastSolutionMinMoves;
             int deviation = (optimal > 0) ? (currentMoves + cachedResult) - optimal : 0;
-            String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
+            String deviationStr = (optimal > 0) ? " \u0394" + (deviation >= 0 ? "+" : "") + deviation : "";
             String text = context.getString(R.string.live_move_counter_optimal, cachedResult) + deviationStr;
             liveMoveCounterDeviation.setValue(deviation);
             liveMoveCounterText.setValue(text);
@@ -3399,7 +3399,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     int currentMoves = moveCount.getValue() != null ? moveCount.getValue() : 0;
                     int optimal = lastSolutionMinMoves;
                     int deviation = (optimal > 0) ? (currentMoves + remainingMoves) - optimal : 0;
-                    String deviationStr = (optimal > 0) ? " (\u0394" + (deviation >= 0 ? "+" : "") + deviation + ")" : "";
+                    String deviationStr = (optimal > 0) ? " \u0394" + (deviation >= 0 ? "+" : "") + deviation : "";
                     String text = context.getString(R.string.live_move_counter_optimal, remainingMoves) + deviationStr;
                     liveMoveCounterDeviation.setValue(deviation);
                     liveMoveCounterText.setValue(text);

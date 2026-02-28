@@ -897,17 +897,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         gameStateManager.getLiveMoveCounterText().observe(getViewLifecycleOwner(), text -> {
             if (text != null && !text.isEmpty() && gameStateManager.isLiveMoveCounterEnabled()) {
                 if (statusTextView != null) {
-                    // Main text always dark green, only the delta in parentheses changes color
+                    // Main text always dark green, delta changes color
                     int darkGreen = Color.parseColor("#006400");
-                    int deltaIdx = text.indexOf("(");
+                    int deltaIdx = text.indexOf("Δ");
                     if (deltaIdx >= 0) {
                         SpannableString spannable = new SpannableString(text);
-                        // Make number and delta symbol 2x larger (RelativeSizeSpan 2.0f)
-                        spannable.setSpan(new android.text.style.RelativeSizeSpan(2.0f), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        // Make entire text 2x larger
+                        spannable.setSpan(new android.text.style.RelativeSizeSpan(2.0f), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        // Number part is dark green
                         spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        
-                        // Make delta text 2x larger and apply color
-                        spannable.setSpan(new android.text.style.RelativeSizeSpan(2.0f), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        // Delta part gets deviation color
                         int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
                         spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         statusTextView.setText(spannable);
