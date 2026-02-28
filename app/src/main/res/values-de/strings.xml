@@ -405,7 +405,7 @@
     <string name="starting_level_a11y">Starte Level %1$d</string>
 
     <!-- Additional Game UI Messages -->
-    <string name="nothing_to_undo">Kein Zurück verfügbar, wenn das Ziel erreicht ist</string>
+    <string name="nothing_to_undo">Kein Zurück verfügbar</string>
     <string name="robots_reset">Roboter auf Startpositionen zurückgesetzt</string>
     <string name="no_game_in_progress">Kein Spiel läuft</string>
     <string name="no_robots_available">Keine Roboter verfügbar</string>

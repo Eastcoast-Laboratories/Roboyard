@@ -361,7 +361,7 @@
     <string name="starting_level_a11y" comment="Accessibility announcement when level starts">Starting level %1$d</string>
 
     <!-- Additional Game UI Messages -->
-    <string name="nothing_to_undo">No undo after completion</string>
+    <string name="nothing_to_undo">No undo possible</string>
     <string name="history_completed_once">Completed once</string>
     <string name="history_completed_times">Completed %1$d times</string>
     <string name="history_not_completed">Not completed yet</string>
