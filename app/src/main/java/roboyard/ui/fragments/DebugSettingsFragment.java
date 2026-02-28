@@ -90,6 +90,10 @@ public class DebugSettingsFragment extends Fragment {
         addSectionTitle(contentLayout, "UI DESIGN");
         addAlternativeLayoutToggle(contentLayout);
         
+        // Hint Auto Move Section
+        addSectionTitle(contentLayout, "HINT AUTO MOVE");
+        addHintAutoMoveSettings(contentLayout);
+        
         // Memory Statistics Section
         addSectionTitle(contentLayout, "MEMORY STATISTICS");
         addMemoryStatistics(contentLayout);
@@ -693,6 +697,59 @@ public class DebugSettingsFragment extends Fragment {
         buttonLayout.addView(restartBtn);
         
         parent.addView(buttonLayout);
+    }
+    
+    private void addHintAutoMoveSettings(LinearLayout parent) {
+        LinearLayout modeLayout = new LinearLayout(requireContext());
+        modeLayout.setOrientation(LinearLayout.VERTICAL);
+        modeLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        modeLayout.setPadding(0, 8, 0, 8);
+        
+        // Current mode display
+        TextView modeDisplay = new TextView(requireContext());
+        String[] modeNames = {"Manual", "Full-Auto", "Semi-Auto"};
+        modeDisplay.setText("Current mode: " + modeNames[roboyard.logic.core.Preferences.hintAutoMoveMode]);
+        modeDisplay.setTextColor(0xFFFFFF00);
+        modeDisplay.setTextSize(14);
+        modeDisplay.setPadding(0, 0, 0, 8);
+        modeLayout.addView(modeDisplay);
+        
+        // Mode buttons
+        LinearLayout buttonRow = new LinearLayout(requireContext());
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        
+        int[] modes = {
+            roboyard.logic.core.Preferences.HINT_AUTO_MOVE_MANUAL,
+            roboyard.logic.core.Preferences.HINT_AUTO_MOVE_FULL_AUTO,
+            roboyard.logic.core.Preferences.HINT_AUTO_MOVE_SEMI_AUTO
+        };
+        String[] buttonLabels = {"Manual", "Full-Auto", "Semi-Auto"};
+        
+        for (int i = 0; i < modes.length; i++) {
+            final int mode = modes[i];
+            final int index = i;
+            Button btn = new Button(requireContext());
+            btn.setText(buttonLabels[i]);
+            btn.setLayoutParams(new LinearLayout.LayoutParams(0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+            btn.setOnClickListener(v -> {
+                roboyard.logic.core.Preferences.setHintAutoMoveMode(mode);
+                modeDisplay.setText("Current mode: " + buttonLabels[index]);
+                Toast.makeText(requireContext(), 
+                        "Hint auto move mode set to: " + buttonLabels[index], 
+                        Toast.LENGTH_SHORT).show();
+                Timber.d("[DEBUG] Hint auto move mode set to %d (%s)", mode, buttonLabels[index]);
+            });
+            buttonRow.addView(btn);
+        }
+        
+        modeLayout.addView(buttonRow);
+        parent.addView(modeLayout);
     }
     
 }

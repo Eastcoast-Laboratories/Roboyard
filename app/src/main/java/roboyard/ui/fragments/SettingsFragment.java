@@ -672,6 +672,12 @@ public class SettingsFragment extends Fragment {
             
             // Set hint auto-move radio buttons based on mode (0=Manual, 1=Full-Auto, 2=Semi-Auto)
             if (hintAutoMoveRadioGroup != null) {
+                // Hide Full-Auto option unless it's already selected (only available in debug mode)
+                if (hintAutoMoveFullAuto != null) {
+                    boolean isFullAutoSelected = Preferences.hintAutoMoveMode == Preferences.HINT_AUTO_MOVE_FULL_AUTO;
+                    hintAutoMoveFullAuto.setVisibility(isFullAutoSelected ? View.VISIBLE : View.GONE);
+                }
+                
                 switch (Preferences.hintAutoMoveMode) {
                     case Preferences.HINT_AUTO_MOVE_MANUAL:
                         if (hintAutoMoveManual != null) hintAutoMoveManual.setChecked(true);
