@@ -611,8 +611,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Observe move count
         gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
         
-        // Observe squares moved
-        gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), this::updateSquaresMoved);
+        // Observe squares moved - display with smaller text
+        gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), squares -> {
+            if (squaresMovedTextView != null && squares != null) {
+                String text = squares + " " + getString(R.string.squares_label);
+                SpannableString spannable = new SpannableString(text);
+                // Make entire text smaller (0.6x base size)
+                spannable.setSpan(new android.text.style.RelativeSizeSpan(0.6f), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                squaresMovedTextView.setText(spannable);
+            }
+        });
         
         // Observe game completion
         gameStateManager.isGameComplete().observe(getViewLifecycleOwner(), isComplete -> {
@@ -2385,22 +2393,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), countStr.length(), fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             
             moveCountTextView.setText(spannable);
-        }
-    }
-    
-    private void updateSquaresMoved(Integer squares) {
-        if (squaresMovedTextView != null && squares != null) {
-            String countStr = String.valueOf(squares);
-            String labelStr = " " + getString(R.string.squares_label);
-            String fullText = countStr + labelStr;
-            
-            SpannableString spannable = new SpannableString(fullText);
-            // Make number larger (1.5x base size)
-            spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, countStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            // Make label smaller (0.7x base size)
-            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), countStr.length(), fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            
-            squaresMovedTextView.setText(spannable);
         }
     }
     
