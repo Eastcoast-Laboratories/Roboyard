@@ -475,6 +475,34 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Initialize achievement popup and listener
         ViewGroup rootView = (ViewGroup) view;
         achievementPopup = new AchievementPopup(requireContext(), rootView);
+        
+        // Set up popup visibility listener to handle button visibility during streak popup
+        achievementPopup.setPopupVisibilityListener((isVisible, isStreakPopup) -> {
+            if (!isStreakPopup) {
+                return; // Only handle streak popup
+            }
+            if (isVisible) {
+                // Hide nextLevelButton when streak popup is visible
+                if (nextLevelButton != null) {
+                    nextLevelButton.setVisibility(View.GONE);
+                }
+                // Keep newMapButton visible - don't hide it
+                Timber.d("[STREAK_POPUP] Hid nextLevelButton, kept newMapButton visible during streak popup");
+            } else {
+                // Restore nextLevelButton visibility if game is complete
+                if (nextLevelButton != null && gameStateManager != null) {
+                    Boolean isComplete = gameStateManager.isGameComplete().getValue();
+                    if (isComplete != null && isComplete) {
+                        GameState state = gameStateManager.getCurrentState().getValue();
+                        if (state != null && state.getLevelId() > 0) {
+                            nextLevelButton.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+                Timber.d("[STREAK_POPUP] Restored button visibility after streak popup hidden");
+            }
+        });
+        
         AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
             Timber.d("[ACHIEVEMENT_POPUP] Achievement unlocked: %s", achievement.getId());
             pendingAchievements.add(achievement);
