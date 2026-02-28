@@ -165,6 +165,15 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onResume(){
         super.onResume();
+        
+        // Restart background sound service if volume > 0
+        // This ensures sound plays continuously across all screens and after app resume
+        if (Preferences.backgroundSoundVolume > 0) {
+            Intent soundIntent = new Intent(this, roboyard.SoundService.class);
+            soundIntent.putExtra(roboyard.SoundService.EXTRA_VOLUME, Preferences.backgroundSoundVolume);
+            startService(soundIntent);
+            Timber.d("[SOUND_SERVICE] Restarted in onResume with volume %d", Preferences.backgroundSoundVolume);
+        }
     }
 
     @Override
