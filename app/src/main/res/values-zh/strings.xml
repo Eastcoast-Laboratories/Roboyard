@@ -115,8 +115,6 @@
     <string name="robot_selected_info">已选择: %1$s 机器人在 (%2$d, %3$d)</string>
     <string name="no_target_for_robot">这个机器人没有目标</string>
     <string name="move_count_text">步数: %1$d</string>
-    <string name="moves_count">%1$d 步数</string>
-    <string name="squares_moved">%1$d 方格</string>
 
     <!-- Hint System -->
     <string name="hint_button">💡 提示</string>
@@ -253,6 +251,12 @@
     <string name="direction_down">向下</string>
     <string name="direction_right">向右</string>
     <string name="direction_left">向左</string>
+    
+    <!-- Game stats -->
+    <string name="moves_count">%1$d 步</string>
+    <string name="moves_label">步</string>
+    <string name="squares_moved">%1$d 格</string>
+    <string name="squares_label">格</string>
 
     <!-- Accessibility Controls -->
     <string name="next_robot_button">下一个机器人</string>

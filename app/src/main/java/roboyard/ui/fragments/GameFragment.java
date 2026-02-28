@@ -2346,20 +2346,45 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     
     private void updateMoveCount(Integer count) {
         if (moveCountTextView != null && count != null) {
-            moveCountTextView.setText(getString(R.string.moves_count, count));
+            String countStr = String.valueOf(count);
+            String labelStr = " " + getString(R.string.moves_label);
+            String fullText = countStr + labelStr;
+            
+            SpannableString spannable = new SpannableString(fullText);
+            // Make number larger (1.5x base size)
+            spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, countStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // Make label smaller (0.7x base size)
+            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), countStr.length(), fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            moveCountTextView.setText(spannable);
         }
     }
     
     private void updateSquaresMoved(Integer squares) {
         if (squaresMovedTextView != null && squares != null) {
-            squaresMovedTextView.setText(getString(R.string.squares_moved, squares));
+            String countStr = String.valueOf(squares);
+            String labelStr = " " + getString(R.string.squares_label);
+            String fullText = countStr + labelStr;
+            
+            SpannableString spannable = new SpannableString(fullText);
+            // Make number larger (1.5x base size)
+            spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, countStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // Make label smaller (0.7x base size)
+            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), countStr.length(), fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            squaresMovedTextView.setText(spannable);
         }
     }
     
     private void updateDifficulty() {
         // Get difficulty string directly from GameStateManager
         String difficultyString = gameStateManager.getLocalizedDifficultyString();
-        difficultyTextView.setText(difficultyString);
+        
+        // Make difficulty text smaller
+        SpannableString spannable = new SpannableString(difficultyString);
+        spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), 0, difficultyString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        difficultyTextView.setText(spannable);
     }
     
     private void updateBoardSizeText() {

@@ -102,7 +102,9 @@
     <string name="no_target_for_robot">Pas de cible pour ce robot</string>
     <string name="move_count_text">Coups: %1$d</string>
     <string name="moves_count">%1$d Coups</string>
+    <string name="moves_label">Coups</string>
     <string name="squares_moved">%1$d Carrés</string>
+    <string name="squares_label">Carrés</string>
     <string name="board_size">Plateau: %1$dx%2$d</string>
 
     <!-- Game UI Buttons and Messages -->

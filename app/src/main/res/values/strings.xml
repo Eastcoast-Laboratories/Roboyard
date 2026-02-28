@@ -331,7 +331,9 @@
     <string name="no_target_for_robot" comment="Message when a robot has no matching target [GameFragment]">No goal for this robot</string>
     <string name="move_count_text" comment="Text showing number of moves made">Moves: %1$d</string>
     <string name="moves_count" comment="Alternative text for move counter [GameFragment]">%1$d Moves</string>
+    <string name="moves_label" comment="Label for moves counter [GameFragment]">Moves</string>
     <string name="squares_moved" comment="Text showing number of squares robots have moved [GameFragment]">%1$d Squares</string>
+    <string name="squares_label" comment="Label for squares counter [GameFragment]">Squares</string>
     <string name="board_size" comment="Text showing board dimensions [GameFragment]">Board: %1$dx%2$d</string>
     <string name="solution_error" comment="Error message when no solution can be found [GameFragment]">Could not find a solution: %1$s</string>
     <string name="direction_up" comment="Direction name for movement hints [GameFragment]">up</string>
