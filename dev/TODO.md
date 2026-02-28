@@ -73,25 +73,50 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 
 ---
 # last prompt:
-1. der play button soll nicht visibility gone haben, solange im menu das poup auf ist, nur der level button soll invisible sein, bis das schliesst.
+## UI Improvements (Test-Driven)
 
-2.
-der x-button im text container unter dem hint container setzt ja den z-index des containers zurück um hinter den buttons zu sein, der soll aber auch gleichzeitig den hint-container schliessen, aber nur, wenn der sichtbar ist
+### Task 1: Play Button Visibility with Popup
+**Problem:** Play button (newMapButton) wird GONE wenn Popup offen ist
+**Solution:** Nur nextLevelButton soll GONE sein, newMapButton soll VISIBLE bleiben
+**Files:** GameFragment.java (PopupVisibilityListener implementation)
+**Test:** Manual test - open achievement popup, check button visibility
+**Status:** TODO
 
-3.
-wenn man ein new game oder next-level klickt, dann soll der retry button wieder mit reset beschriftet werden, dies passiert im moment erst, wenn man den reset/retry button drückt
+### Task 2: X-Button Closes Hint Container
+**Problem:** X-button (game_info_close_button) setzt nur z-index zurück
+**Solution:** X-button soll auch hint_container schließen wenn sichtbar
+**Files:** GameFragment.java (game_info_close_button onClick)
+**Test:** Manual test - open hints, click X-button
+**Status:** TODO
 
-4.
-ändere die reihenfolge der buttons im game unten:
-save, hint, back
-reset/retry, new game, menu
+### Task 3: Reset Button Label on New Game/Next Level
+**Problem:** Reset button wird erst zu "Reset" wenn man ihn drückt
+**Solution:** Button soll bei new game/next-level sofort "Reset" heißen
+**Files:** GameFragment.java (nextLevelButton onClick, newMapButton onClick)
+**Test:** Manual test - complete game, click next level, check reset button text
+**Status:** TODO
 
-5.
-der back button soll orange sein, wie der next hint button und einen dreieckigen pfeil nach links als icon vor dem text erhalten, wie die hint pfeile im game
+### Task 4: Reorder Bottom Buttons
+**Current:** hint, reset, save, menu
+**New:** save, hint, back, reset/retry, new game, menu
+**Files:** fragment_game_portrait.xml, fragment_game_landscape.xml, fragment_game_landscape_right.xml
+**Test:** Visual inspection after build
+**Status:** TODO
 
-1. 
-in der textbox das wort "Moves" soll hinter die Zahl der moves und viel kleiner. ebenso squares: "X Squares"  alles genau so klein. die difficulty soll auch noch kleiner. alles in allen dimens.xml
+### Task 5: Orange Back Button with Left Arrow
+**Problem:** Back button needs orange color + left arrow icon
+**Solution:** Style like next_hint_button (orange) + add left arrow drawable
+**Files:** Layout XMLs, create/find left arrow drawable
+**Test:** Visual inspection after build
+**Status:** TODO
 
-ignoriere das alt-layout, aber beachte die beiden landscape layouts!
+### Task 6: Smaller Text for Moves/Squares/Difficulty
+**Current:** "Moves: 0", "Squares: 0", "Difficulty: Easy"
+**New:** "0 Moves" (smaller), "0 Squares" (smaller), smaller difficulty
+**Files:** All dimens.xml files, GameFragment.java (text formatting)
+**Test:** RoboyardSmokeTest
+**Status:** TODO
+
+**Note:** Ignoriere alt-layout, beachte beide landscape layouts!
 
 mache alle 6 in einer reihe durch und suche vor jeder änderung einen passenden test aus, schaue ob der noch funktioniert, wenn nicht repariere ihn, dann fürhe die änderung durch und teste erneut mit dem selben test, wenn alles läuft  funktioniert, committe es ausnahmsweise selbt und fahre mit dem nächsten punkt fort
