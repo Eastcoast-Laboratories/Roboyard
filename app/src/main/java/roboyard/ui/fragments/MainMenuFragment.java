@@ -75,25 +75,21 @@ public class MainMenuFragment extends BaseGameFragment {
                     return;
                 }
                 if (isVisible) {
-                    prevNewGameVisibility = newGameButton.getVisibility();
                     prevLevelGameVisibility = levelGameButton.getVisibility();
                     prevLoadGameVisibility = loadGameButton.getVisibility();
 
-                    newGameButton.setVisibility(View.INVISIBLE);
+                    // Keep play button visible, hide only level and load buttons
                     levelGameButton.setVisibility(View.INVISIBLE);
                     loadGameButton.setVisibility(View.INVISIBLE);
-                    Timber.d("[STREAK_POPUP] Hid main menu navigation buttons while streak popup is visible");
+                    Timber.d("[STREAK_POPUP] Hid level and load buttons while streak popup is visible (play button remains visible)");
                 } else {
-                    if (prevNewGameVisibility != null) {
-                        newGameButton.setVisibility(prevNewGameVisibility);
-                    }
                     if (prevLevelGameVisibility != null) {
                         levelGameButton.setVisibility(prevLevelGameVisibility);
                     }
                     if (prevLoadGameVisibility != null) {
                         loadGameButton.setVisibility(prevLoadGameVisibility);
                     }
-                    Timber.d("[STREAK_POPUP] Restored main menu navigation buttons after streak popup hidden");
+                    Timber.d("[STREAK_POPUP] Restored level and load buttons after streak popup hidden");
                 }
             });
         } else {
