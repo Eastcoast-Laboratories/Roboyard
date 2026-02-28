@@ -73,6 +73,9 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 
 ---
 # last prompt:
+
+GMS is unfree and fdrid cant build it. it does not work correctly anyway so disable it for now. leave all code in the system, but remove it globally with one flag, so we can enable it in a later version.
+
 ## UI Improvements (Test-Driven)
 
 ### Task 1: Play Button Visibility with Popup

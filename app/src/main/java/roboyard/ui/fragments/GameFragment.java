@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -450,6 +451,17 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     gameInfoContainer.setElevation(-100); // Send to back with negative elevation
                     closeButton.setVisibility(View.GONE); // Hide the close button
                     view.requestLayout();
+                }
+                
+                // Also close hint container if visible
+                LinearLayout hintContainer = view.findViewById(R.id.hint_container);
+                if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE) {
+                    hintContainer.setVisibility(View.GONE);
+                    // Reset hint button state
+                    if (hintButton != null) {
+                        hintButton.setChecked(false);
+                    }
+                    Timber.d("[HINT_SYSTEM] Hint container closed by X-button");
                 }
             });
         }
