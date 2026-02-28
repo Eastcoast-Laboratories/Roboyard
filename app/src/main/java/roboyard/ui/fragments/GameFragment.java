@@ -902,7 +902,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     int deltaIdx = text.indexOf("(");
                     if (deltaIdx >= 0) {
                         SpannableString spannable = new SpannableString(text);
+                        // Make number and delta symbol 2x larger (RelativeSizeSpan 2.0f)
+                        spannable.setSpan(new android.text.style.RelativeSizeSpan(2.0f), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        
+                        // Make delta text 2x larger and apply color
+                        spannable.setSpan(new android.text.style.RelativeSizeSpan(2.0f), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
                         spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         statusTextView.setText(spannable);
@@ -1381,19 +1386,28 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // Set up live move counter live-move-toggle — restore persisted state first
         if (liveMoveCounterToggle != null) {
-            boolean savedEnabled = Preferences.liveMoveCounterEnabled;
-            liveMoveCounterToggle.setOnCheckedChangeListener(null);
-            liveMoveCounterToggle.setChecked(savedEnabled);
-            if (savedEnabled) {
-                gameStateManager.setLiveMoveCounterEnabled(true);
-                // Show hint container with just status text + live-move-toggle
-                if (hintContainer != null) {
-                    hintContainer.setVisibility(View.VISIBLE);
-                    prevHintButton.setVisibility(View.GONE);
-                    nextHintButton.setVisibility(View.GONE);
+            // Hide live move toggle in level games - only show in random games
+            if (isLevelGame) {
+                // Level game - never show live move toggle
+                liveMoveCounterToggle.setVisibility(View.GONE);
+                gameStateManager.setLiveMoveCounterEnabled(false);
+                Timber.d("[LIVE_SOLVER] Level game detected - live move toggle hidden");
+            } else {
+                // Random game - show toggle based on saved preference
+                boolean savedEnabled = Preferences.liveMoveCounterEnabled;
+                liveMoveCounterToggle.setOnCheckedChangeListener(null);
+                liveMoveCounterToggle.setChecked(savedEnabled);
+                if (savedEnabled) {
+                    gameStateManager.setLiveMoveCounterEnabled(true);
+                    // Show hint container with just status text + live-move-toggle
+                    if (hintContainer != null) {
+                        hintContainer.setVisibility(View.VISIBLE);
+                        prevHintButton.setVisibility(View.GONE);
+                        nextHintButton.setVisibility(View.GONE);
+                    }
+                    liveMoveCounterToggle.setVisibility(View.VISIBLE);
+                    gameStateManager.triggerLiveSolver();
                 }
-                liveMoveCounterToggle.setVisibility(View.VISIBLE);
-                gameStateManager.triggerLiveSolver();
             }
             liveMoveCounterToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 Timber.d("[LIVE_SOLVER] live-move-toggle changed: %s", isChecked ? "ON" : "OFF");

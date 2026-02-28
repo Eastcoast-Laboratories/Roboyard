@@ -66,24 +66,26 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Level Editor in allen Sprachen: Deutsch, Französisch, Spanisch, Koreanisch, Chinesisch
+- Neue Option: Roboter bewegen sich in den Hinweisen automatisch ins Ziel
+- Roboter Hinweispfeile direkt auf der Karte
+- Neue Achievements, verschiedene Karten mit den selben Wänden zu lösen
 - Es werden auch Karten mit ungeraden Dimensionen akzeptiert
 - Unendliche History gespeichert. Jetzt mit Sortierung und Filterung
-- Neue Achievements, verschiedene Karten mit den selben Wänden zu lösen
-- Roboter Hinweispfeile direkt auf der Karte
-- Neue Option: Roboter bewegen sich in den Hinweisen automatisch ins Ziel
+- Level Editor in allen Sprachen: Deutsch, Französisch, Spanisch, Koreanisch, Chinesisch
+- Die Anzeige der Züge und der abweichung im Heiß-Kalt-Modus größer
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- Level Editor in all languages: German, French, Spanish, Korean, Chinese
+- New option: robots move automatically to the goal in the hints
+- robot hint direction arrows directly on the map
+- New achievements for solving different maps with the same walls
 - Maps with odd dimensions are also accepted
 - Infinite history saved. With sorting and filtering
-- New achievements for solving different maps with the same walls
-- robot hint direction arrows directly on the map
-- New option: robots move automatically to the goal in the hints
+- Level Editor in all languages: German, French, Spanish, Korean, Chinese
+- The display of moves and delta in the hot-cold mode is larger
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )
