@@ -50,7 +50,7 @@ public class GameHistoryEntry {
     private long lastSolvedWithoutHints = 0;          // Timestamp of the last completion without hints (0 = never)
     private long lastPerfectlySolvedWithoutHints = 0; // Timestamp of the last OPTIMAL completion without hints (0 = never)
 
-    private String difficulty = "";           // Difficulty level when the game was created
+    private int difficulty = Constants.DIFFICULTY_BEGINNER;  // Difficulty level ID when the game was created (0-3)
 
     /**
      * Constructor for a new history entry
@@ -361,8 +361,8 @@ public class GameHistoryEntry {
         }
     }
 
-    public String getDifficulty() { return difficulty != null ? difficulty : ""; }
-    public void setDifficulty(String difficulty) { this.difficulty = difficulty != null ? difficulty : ""; }
+    public int getDifficulty() { return difficulty; }
+    public void setDifficulty(int difficulty) { this.difficulty = difficulty; }
 
     public int getHistoryIndex() {
         // e.g. getMapPath() = history_1.txt

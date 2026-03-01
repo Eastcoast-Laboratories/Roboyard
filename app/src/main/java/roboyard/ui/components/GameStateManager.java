@@ -2348,8 +2348,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[HISTORY] Saving to history: moveCount=%d (gameComplete=%b), optimalMoves=%d",
                     actualMoveCount, isGameComplete.getValue(), optimalMovesCount);
             
-            // Set difficulty
-            entry.setDifficulty(getLocalizedDifficultyString());
+            // Set difficulty as int ID (0-3), not localized string
+            entry.setDifficulty(getEffectiveDifficulty());
 
             // Set map signatures for unique map tracking
             String wallSig = gameState.generateWallSignature();

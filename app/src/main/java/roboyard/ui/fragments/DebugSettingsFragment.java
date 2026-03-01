@@ -632,7 +632,8 @@ public class DebugSettingsFragment extends Fragment {
                     entry.setMovesMade((int)(Math.random() * 50) + 10); // 10-60 moves
                     entry.setOptimalMoves((int)(Math.random() * 30) + 5); // 5-35 optimal
                     entry.setBoardSize("12x12");
-                    entry.setDifficulty(i % 4 == 0 ? "Beginner" : i % 4 == 1 ? "Intermediate" : i % 4 == 2 ? "Advanced" : "Expert");
+                    // Use difficulty int IDs (0-3) instead of strings
+                    entry.setDifficulty(i % 4); // 0=Beginner, 1=Advanced, 2=Insane, 3=Impossible
                     entry.setCompletionCount(i % 3 == 0 ? 1 : 0); // Some completed
                     
                     Timber.d("[DEBUG_DUMMY] Entry %d boardSize before save: '%s'", i + 1, entry.getBoardSize());

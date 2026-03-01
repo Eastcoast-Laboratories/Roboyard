@@ -179,15 +179,15 @@ public class GameHistoryTest {
 
     @Test
     public void testDifficultyField() {
-        // Default is empty
-        assertEquals("", entry.getDifficulty());
+        // Default is BEGINNER (0)
+        assertEquals(roboyard.logic.core.Constants.DIFFICULTY_BEGINNER, entry.getDifficulty());
 
-        entry.setDifficulty("Expert");
-        assertEquals("Expert", entry.getDifficulty());
+        entry.setDifficulty(roboyard.logic.core.Constants.DIFFICULTY_IMPOSSIBLE);
+        assertEquals(roboyard.logic.core.Constants.DIFFICULTY_IMPOSSIBLE, entry.getDifficulty());
 
-        // Null should be treated as empty
-        entry.setDifficulty(null);
-        assertEquals("", entry.getDifficulty());
+        // Test all difficulty levels
+        entry.setDifficulty(roboyard.logic.core.Constants.DIFFICULTY_ADVANCED);
+        assertEquals(roboyard.logic.core.Constants.DIFFICULTY_ADVANCED, entry.getDifficulty());
     }
 
     @Test

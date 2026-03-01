@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
 import timber.log.Timber;
 
@@ -188,8 +189,20 @@ public class GameHistoryManager {
                     entry.setBoardSize(entryJson.optString("boardSize", ""));
                     entry.setPreviewImagePath(entryJson.optString("previewImagePath", ""));
                     
-                    // Load difficulty
-                    entry.setDifficulty(entryJson.optString("difficulty", ""));
+                    // Load difficulty - support both int (new) and string (legacy migration)
+                    int difficultyId = Constants.DIFFICULTY_BEGINNER; // default
+                    if (entryJson.has("difficulty")) {
+                        Object diffValue = entryJson.get("difficulty");
+                        if (diffValue instanceof Integer) {
+                            difficultyId = (Integer) diffValue;
+                        } else if (diffValue instanceof String) {
+                            // Migration: convert old string values to int
+                            String diffStr = (String) diffValue;
+                            difficultyId = migrateDifficultyStringToInt(diffStr);
+                            Timber.d("[HISTORY_MIGRATION] Converted difficulty '%s' to %d", diffStr, difficultyId);
+                        }
+                    }
+                    entry.setDifficulty(difficultyId);
                     
                     // Load new fields for unique map tracking
                     entry.setCompletionCount(entryJson.optInt("completionCount", 0));
@@ -334,6 +347,7 @@ public class GameHistoryManager {
                 entryJson.put("everUsedHints", entry.isEverUsedHints());
                 entryJson.put("lastSolvedWithoutHints", entry.getLastSolvedWithoutHints());
                 entryJson.put("lastPerfectlySolvedWithoutHints", entry.getLastPerfectlySolvedWithoutHints());
+                // Save difficulty as int ID (0-3), not localized string
                 entryJson.put("difficulty", entry.getDifficulty());
                 
                 entriesArray.put(entryJson);
@@ -585,5 +599,45 @@ public class GameHistoryManager {
     public static int getCompletionCount(Activity activity, String mapSignature) {
         GameHistoryEntry entry = findByMapSignature(activity, mapSignature);
         return entry != null ? entry.getCompletionCount() : 0;
+    }
+    
+    /**
+     * Migrate old string difficulty values to int IDs.
+     * Supports both English and German localized strings.
+     * @param difficultyStr The old string difficulty value
+     * @return The corresponding difficulty ID (0-3)
+     */
+    private static int migrateDifficultyStringToInt(String difficultyStr) {
+        if (difficultyStr == null || difficultyStr.isEmpty()) {
+            return Constants.DIFFICULTY_BEGINNER;
+        }
+        
+        String lower = difficultyStr.toLowerCase().trim();
+        
+        // English strings
+        if (lower.contains("beginner") || lower.contains("easy")) {
+            return Constants.DIFFICULTY_BEGINNER;
+        } else if (lower.contains("intermediate") || lower.contains("advanced") || lower.contains("medium")) {
+            return Constants.DIFFICULTY_ADVANCED;
+        } else if (lower.contains("insane") || lower.contains("hard")) {
+            return Constants.DIFFICULTY_INSANE;
+        } else if (lower.contains("impossible") || lower.contains("expert")) {
+            return Constants.DIFFICULTY_IMPOSSIBLE;
+        }
+        
+        // German strings (Anfänger, Fortgeschritten, verrückt, Unmöglich)
+        if (lower.substring(0, 3).equals("anf")) {
+            return Constants.DIFFICULTY_BEGINNER;
+        } else if (lower.substring(0, 3).equals("for")) {
+            return Constants.DIFFICULTY_ADVANCED;
+        } else if (lower.substring(0, 3).equals("ver")) {
+            return Constants.DIFFICULTY_INSANE;
+        } else if (lower.substring(0, 3).equals("unm")) {
+            return Constants.DIFFICULTY_IMPOSSIBLE;
+        }
+        
+        // Default fallback
+        Timber.w("[HISTORY_MIGRATION] Unknown difficulty string: '%s', defaulting to BEGINNER", difficultyStr);
+        return Constants.DIFFICULTY_BEGINNER;
     }
 }

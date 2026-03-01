@@ -777,7 +777,8 @@ public class SaveGameFragment extends BaseGameFragment {
                 completionStatus = getString(R.string.history_not_completed);
             }
             
-            String difficulty = entry.getDifficulty();
+            // Translate difficulty int ID to localized string for display
+            String difficulty = difficultyIntToString(entry.getDifficulty());
             String boardSize = entry.getBoardSize();
             
             // Create entry without minimap - will be loaded on-demand in adapter
