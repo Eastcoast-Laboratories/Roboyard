@@ -30,12 +30,9 @@
     <string name="button_cancel" comment="Standard cancel button text">Cancel</string>
     <string name="button_save" comment="Standard save button text">Save</string>
     <string name="button_restart" comment="Button to restart the current level">Restart</string>
-    <string name="button_pause" comment="Button to pause the game">Pause</string>
     <string name="button_resume" comment="Button to resume a paused game">Resume</string>
-    <string name="button_quit" comment="Button to quit/exit the current screen">Quit</string>
     <string name="button_back" comment="Navigation button to go back">Back</string>
     <string name="button_next" comment="Navigation button to proceed to next page/level">Next</string>
-    <string name="button_prev" comment="Navigation button to go to previous page/level">Previous</string>
     <string name="button_retry" comment="Button to retry the current level">Retry</string>
     <string name="button_hint" comment="Button to get a game hint">Hint</string>
     <string name="button_skip" comment="Button to skip a level or tutorial">Skip</string>

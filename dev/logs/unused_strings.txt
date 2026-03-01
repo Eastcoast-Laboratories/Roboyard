@@ -1,16 +1,9 @@
 about_screen_title
 action_settings
-ai_solution_format
 at_position_a11y
-autosave_tag
 back_button_a11y
-button_cancel
 button_hint
-button_next
 button_ok
-button_pause
-button_prev
-button_quit
 button_restart
 button_resume
 button_retry
@@ -101,7 +94,6 @@ robot_move_initiated
 robot_move_initiated_a11y
 save_confirm_message
 save_date_format
-save_empty
 save_failed
 save_level_format
 save_load_game_screen_title
