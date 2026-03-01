@@ -1943,9 +1943,15 @@ public class SaveGameFragment extends BaseGameFragment {
             }
             
             // Set difficulty (DRY - same metadata as save slots)
+            // Limit to 30 characters to handle corrupted entries
             if (entry.getDifficulty() != null && !entry.getDifficulty().isEmpty()) {
                 holder.difficultyText.setVisibility(View.VISIBLE);
-                holder.difficultyText.setText(entry.getDifficulty());
+                String difficulty = entry.getDifficulty();
+                if (difficulty.length() > 30) {
+                    difficulty = difficulty.substring(0, 30);
+                    Timber.w("[HISTORY] Truncated corrupted difficulty from %d to 30 chars", entry.getDifficulty().length());
+                }
+                holder.difficultyText.setText(difficulty);
             } else {
                 holder.difficultyText.setVisibility(View.GONE);
             }

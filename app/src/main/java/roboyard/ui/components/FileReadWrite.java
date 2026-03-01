@@ -34,7 +34,8 @@ public class FileReadWrite {
         FileOutputStream fOut = null;
         try {
             fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
-            fOut.write(content.getBytes());
+            // Use UTF-8 encoding explicitly to prevent corruption of umlauts (ä, ö, ü)
+            fOut.write(content.getBytes("UTF-8"));
             return true;
         } catch (Exception e) {
             Timber.d("Exception in writePrivateData for file: " + fileLocation + ": " + e.getMessage());
@@ -64,6 +65,7 @@ public class FileReadWrite {
         
         StringBuilder buffer = new StringBuilder();
         FileInputStream fin = null;
+        BufferedReader reader = null;
         try {
             File file = activity.getApplicationContext().getFileStreamPath(fileLocation);
             if(file == null || !file.exists()) {
@@ -71,15 +73,31 @@ public class FileReadWrite {
             }
 
             fin = activity.openFileInput(fileLocation);
-
-            int c;
-            while((c = fin.read()) != -1) {
-                buffer.append((char)c);
+            // Use UTF-8 encoding explicitly to prevent corruption of umlauts (ä, ö, ü)
+            reader = new BufferedReader(new InputStreamReader(fin, "UTF-8"));
+            
+            String line;
+            while((line = reader.readLine()) != null) {
+                buffer.append(line);
+                // Preserve line breaks (readLine removes them)
+                buffer.append('\n');
+            }
+            
+            // Remove trailing newline if present
+            if (buffer.length() > 0 && buffer.charAt(buffer.length() - 1) == '\n') {
+                buffer.setLength(buffer.length() - 1);
             }
         } catch (Exception e) {
             Timber.d("Exception readPrivateData: %s", e.toString());
             return "";
         } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    Timber.d("Error closing reader: %s", e.getMessage());
+                }
+            }
             if (fin != null) {
                 try {
                     fin.close();
