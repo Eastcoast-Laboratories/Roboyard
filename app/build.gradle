@@ -119,7 +119,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     
     // Google Play Games Services
-    implementation 'com.google.android.gms:play-services-games-v2:20.1.2'
+    // DISABLED FOR F-DROID: Comment out to re-enable
+    // implementation 'com.google.android.gms:play-services-games-v2:20.1.2'
     
     // Testing dependencies
     testImplementation 'junit:junit:4.13.2'

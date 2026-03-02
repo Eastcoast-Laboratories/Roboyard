@@ -2,8 +2,9 @@ package roboyard.ui.components;
 
 import android.app.Activity;
 import android.content.Context;
-import com.google.android.gms.games.PlayGames;
-import com.google.android.gms.games.PlayGamesSdk;
+// DISABLED FOR F-DROID: Comment out to re-enable
+// import com.google.android.gms.games.PlayGames;
+// import com.google.android.gms.games.PlayGamesSdk;
 import timber.log.Timber;
 import roboyard.eclabs.R;
 import roboyard.eclabs.BuildConfig;
@@ -50,7 +51,8 @@ public class PlayGamesManager {
         }
         
         try {
-            PlayGamesSdk.initialize(context);
+            // DISABLED FOR F-DROID: Uncomment to re-enable
+            // PlayGamesSdk.initialize(context);
             isInitialized = true;
             Timber.d("%s SDK initialized successfully", TAG);
         } catch (Exception e) {
@@ -80,7 +82,8 @@ public class PlayGamesManager {
         }
         
         try {
-            PlayGames.getAchievementsClient(activity).unlock(playGamesId);
+            // DISABLED FOR F-DROID: Uncomment to re-enable
+            // PlayGames.getAchievementsClient(activity).unlock(playGamesId);
             Timber.d("%s Unlocked achievement: %s -> %s", TAG, localAchievementId, playGamesId);
         } catch (Exception e) {
             Timber.e(e, "%s Failed to unlock achievement: %s", TAG, localAchievementId);
