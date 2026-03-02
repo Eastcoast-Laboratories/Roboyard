@@ -130,6 +130,116 @@ public class AchievementDefinitions {
     
     private static Map<String, Achievement> achievements;
     
+    /**
+     * Mapping of local achievement IDs to Google Play Games string resource keys.
+     * Used by AchievementManager.getPlayGamesAchievementId() to look up PGS IDs.
+     */
+    private static final Map<String, String> PLAY_GAMES_MAPPINGS = new LinkedHashMap<String, String>() {{
+        // Login & Special
+        put("daily_login_7", "pgs_weekly_player");
+        put("daily_login_30", "pgs_dedicated_player");
+        put("comeback_player", "pgs_welcome_back");
+        
+        // Progression
+        put("first_game", "pgs_welcome");
+        put("level_1_complete", "pgs_first_steps");
+        put("level_10_complete", "pgs_getting_started");
+        put("level_50_complete", "pgs_halfway_there");
+        put("level_140_complete", "pgs_level_master");
+        put("all_stars_collected", "pgs_star_collector");
+        
+        // Performance
+        put("perfect_solutions_5", "pgs_perfect_mover");
+        put("perfect_solutions_10", "pgs_precision_player");
+        put("perfect_solutions_50", "pgs_optimization_expert");
+        put("speedrun_under_30s", "pgs_quick_thinker");
+        put("speedrun_under_10s", "pgs_lightning_fast");
+        
+        // Mastery
+        put("3_star_hard_level", "pgs_hard_level_star");
+        put("3_star_10_levels", "pgs_rising_star");
+        put("3_star_10_hard_levels", "pgs_hard_level_master");
+        put("3_star_50_levels", "pgs_superstar");
+        put("3_star_all_levels", "pgs_perfect_master");
+        
+        // Random - Speed
+        put("speedrun_random_under_20s", "pgs_speed_demon");
+        put("speedrun_random_under_10s", "pgs_lightning_speed");
+        put("speedrun_random_5_games_under_30s", "pgs_speed_streak");
+        
+        // Random - Streaks
+        put("perfect_random_games_5", "pgs_perfect_5");
+        put("perfect_random_games_10", "pgs_perfect_10");
+        put("perfect_random_games_20", "pgs_perfect_20");
+        put("perfect_random_games_streak_5", "pgs_perfect_streak_5");
+        put("perfect_random_games_streak_10", "pgs_perfect_streak_10");
+        put("perfect_random_games_streak_20", "pgs_perfect_streak_20");
+        put("perfect_no_hints_random_1", "pgs_perfect_no_help");
+        put("no_hints_random_10", "pgs_no_help_needed_10");
+        put("no_hints_random_50", "pgs_no_help_needed_50");
+        put("no_hints_streak_random_10", "pgs_no_help_streak_10");
+        put("no_hints_streak_random_50", "pgs_no_help_streak_50");
+        
+        // Random - Difficulty
+        put("impossible_mode_1", "pgs_impossible_dream");
+        put("impossible_mode_5", "pgs_impossible_champion");
+        put("impossible_mode_streak_5", "pgs_impossible_streak");
+        put("impossible_mode_streak_10", "pgs_impossible_legend");
+        
+        // Random - Solution Length (18-29)
+        put("solution_18_moves", "pgs_18_move_master");
+        put("solution_19_moves", "pgs_19_move_master");
+        put("solution_20_moves", "pgs_20_move_master");
+        put("solution_21_moves", "pgs_21_move_master");
+        put("solution_22_moves", "pgs_22_move_master");
+        put("solution_23_moves", "pgs_23_move_master");
+        put("solution_24_moves", "pgs_24_move_master");
+        put("solution_25_moves", "pgs_25_move_master");
+        put("solution_26_moves", "pgs_26_move_master");
+        put("solution_27_moves", "pgs_27_move_master");
+        put("solution_28_moves", "pgs_28_move_master");
+        put("solution_29_moves", "pgs_29_move_master");
+        put("solution_30_plus_moves", "pgs_30_move_master");
+        
+        // Random - Resolution
+        put("play_10_move_games_all_resolutions", "pgs_resolution_explorer_10");
+        put("play_12_move_games_all_resolutions", "pgs_resolution_explorer_12");
+        put("play_15_move_games_all_resolutions", "pgs_resolution_explorer_15");
+        
+        // Random - Targets
+        put("game_2_targets", "pgs_double_target");
+        put("game_3_targets", "pgs_triple_target");
+        put("game_4_targets", "pgs_quad_target");
+        put("game_2_of_2_targets", "pgs_2_of_2");
+        put("game_2_of_3_targets", "pgs_2_of_3");
+        put("game_2_of_4_targets", "pgs_2_of_4");
+        put("game_3_of_3_targets", "pgs_3_of_3");
+        put("game_3_of_4_targets", "pgs_3_of_4");
+        put("game_4_of_4_targets", "pgs_4_of_4");
+        
+        // Random - Fun Challenges
+        put("game_5_robots", "pgs_full_team");
+        put("gimme_five", "pgs_gimme_five");
+        put("same_walls_2", "pgs_same_walls_2");
+        put("same_walls_10", "pgs_same_walls_10");
+        put("same_walls_100", "pgs_same_walls_100");
+        
+        // Random - Coverage
+        put("traverse_all_squares_1_robot", "pgs_solo_explorer");
+        put("traverse_all_squares_1_robot_goal", "pgs_solo_goal_explorer");
+        put("traverse_all_squares_all_robots", "pgs_team_explorer");
+        put("traverse_all_squares_all_robots_goal", "pgs_team_goal_explorer");
+    }};
+    
+    /**
+     * Get the Play Games string resource key for an achievement ID.
+     * @param achievementId The local achievement ID
+     * @return The Play Games string resource key, or null if not found
+     */
+    public static String getPlayGamesResourceKey(String achievementId) {
+        return PLAY_GAMES_MAPPINGS.get(achievementId);
+    }
+    
     public static Map<String, Achievement> getAll() {
         if (achievements == null) {
             achievements = new LinkedHashMap<>();

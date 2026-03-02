@@ -2,6 +2,8 @@ package roboyard.ui.components;
 
 import android.app.Activity;
 import android.content.Context;
+import com.google.android.gms.games.PlayGames;
+import com.google.android.gms.games.PlayGamesSdk;
 import timber.log.Timber;
 import roboyard.eclabs.BuildConfig;
 
@@ -10,7 +12,7 @@ import roboyard.eclabs.BuildConfig;
  * Handles authentication and achievement syncing.
  * 
  * This class is guarded by BuildConfig.ENABLE_PLAY_GAMES flag.
- * F-Droid flavor version - GMS disabled, all methods are no-ops.
+ * Play Store flavor version - GMS fully enabled.
  */
 public class PlayGamesManager {
     
@@ -34,7 +36,6 @@ public class PlayGamesManager {
     
     /**
      * Initialize Play Games SDK. Call this in Application.onCreate() or MainActivity.onCreate().
-     * No-op for F-Droid flavor.
      */
     public void initialize() {
         if (!BuildConfig.ENABLE_PLAY_GAMES) {
@@ -48,7 +49,7 @@ public class PlayGamesManager {
         }
         
         try {
-            // GMS not available in F-Droid flavor
+            PlayGamesSdk.initialize(context);
             isInitialized = true;
             Timber.d("%s SDK initialized successfully", TAG);
         } catch (Exception e) {
@@ -60,7 +61,6 @@ public class PlayGamesManager {
     /**
      * Unlock an achievement by its local ID.
      * Maps local achievement IDs to Google Play Games achievement IDs.
-     * No-op for F-Droid flavor.
      * 
      * @param activity The current activity
      * @param localAchievementId The local achievement ID (e.g., "first_game")
@@ -81,7 +81,7 @@ public class PlayGamesManager {
         }
         
         try {
-            // GMS not available in F-Droid flavor - no-op
+            PlayGames.getAchievementsClient(activity).unlock(playGamesId);
             Timber.d("%s Unlocked achievement: %s -> %s", TAG, localAchievementId, playGamesId);
         } catch (Exception e) {
             Timber.e(e, "%s Failed to unlock achievement: %s", TAG, localAchievementId);

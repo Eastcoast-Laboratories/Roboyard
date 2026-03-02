@@ -242,6 +242,35 @@ public class AchievementManager {
     }
     
     /**
+     * Map local achievement ID to Google Play Games achievement ID.
+     * Shared between Play and F-Droid flavors.
+     * Uses the mapping defined in AchievementDefinitions.
+     * 
+     * @param localId The local achievement ID
+     * @return The Google Play Games achievement ID, or null if not found
+     */
+    public String getPlayGamesAchievementId(String localId) {
+        try {
+            String resourceKey = AchievementDefinitions.getPlayGamesResourceKey(localId);
+            if (resourceKey == null) {
+                Timber.w("[ACHIEVEMENTS] Unknown achievement ID: %s", localId);
+                return null;
+            }
+            
+            int resId = context.getResources().getIdentifier(resourceKey, "string", context.getPackageName());
+            if (resId == 0) {
+                Timber.w("[ACHIEVEMENTS] String resource not found: %s", resourceKey);
+                return null;
+            }
+            
+            return context.getString(resId);
+        } catch (Exception e) {
+            Timber.e(e, "[ACHIEVEMENTS] Failed to get Play Games ID for: %s", localId);
+            return null;
+        }
+    }
+    
+    /**
      * Sync achievement unlock to Google Play Games Services.
      * Only works if ENABLE_PLAY_GAMES is true and user is signed in.
      */
