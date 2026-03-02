@@ -41,7 +41,6 @@ direction_east_a11y
 direction_north_a11y
 direction_south_a11y
 direction_west_a11y
-empty_text
 exit_confirm_message
 exit_confirm_title
 game_complete_a11y

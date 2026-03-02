@@ -4,7 +4,6 @@
     <string name="app_name">Roboyard</string>
     
     <!-- Main Menu Strings -->
-    <string name="action_settings">설정</string>
     <string name="settings_back">뒤로</string>
     <string name="empty_slot">비어있음</string>
 
@@ -77,7 +76,6 @@
     <string name="and">그리고</string>
     <string name="pre_hint_first_move">%1$s 로봇을 먼저 이동하세요</string>
     <string name="pre_hint_ready">단계별 힌트를 보여줄 준비가 되었습니다</string>
-    <string name="hint_move_robot_first">%1$s 로봇을 먼저 이동하세요</string>
     <string name="all_hints_shown">모든 힌트가 표시되었습니다</string>
     <string name="no_valid_hint">유효한 힌트가 없습니다</string>
     <string name="error_displaying_hint">힌트 표시 오류</string>
@@ -87,10 +85,6 @@
     <string name="direction_south">남쪽</string>
     <string name="direction_east">동쪽</string>
     <string name="direction_west">서쪽</string>
-    <string name="direction_north_a11y">북쪽</string>
-    <string name="direction_south_a11y">남쪽</string>
-    <string name="direction_east_a11y">동쪽</string>
-    <string name="direction_west_a11y">서쪽</string>
     <string name="direction_up">위쪽</string>
     <string name="direction_down">아래쪽</string>
     <string name="direction_right">오른쪽</string>
@@ -118,7 +112,6 @@
     <string name="position_a11y">위치</string>
     <string name="multicolored_a11y">다색</string>
     <string name="target_a11y">목표 위치 %1$d, %2$d</string>
-    <string name="at_position_a11y">위치에</string>
     <string name="walls_on_a11y">벽 방향</string>
     <string name="north_a11y">북쪽</string>
     <string name="south_a11y">남쪽</string>
@@ -132,15 +125,8 @@
     <string name="color_silver">은색</string>
     
     <!-- Color names for accessibility -->
-    <string name="color_red_a11y">빨강</string>
-    <string name="color_blue_a11y">파랑</string>
-    <string name="color_green_a11y">초록</string>
-    <string name="color_yellow_a11y">노랑</string>
-    <string name="color_pink_a11y">핑크</string>
-    <string name="color_silver_a11y">은색</string>
     
     <!-- Dative forms for Korean grammar -->
-    <string name="color_red_dative">빨간</string>
     <string name="color_blue_dative">파란</string>
     <string name="color_green_dative">초록</string>
     <string name="color_yellow_dative">노란</string>
@@ -148,7 +134,6 @@
     <string name="color_silver_dative">은색</string>
     
     <!-- Adjective forms for colors -->
-    <string name="color_red_adj">빨간</string>
     <string name="color_blue_adj">파란</string>
     <string name="color_green_adj">초록</string>
     <string name="color_yellow_adj">노란</string>
@@ -156,7 +141,6 @@
     <string name="color_silver_adj">은색</string>
     
     <!-- Target color forms -->
-    <string name="color_red_target">빨간</string>
     <string name="color_blue_target">파란</string>
     <string name="color_green_target">초록</string>
     <string name="color_yellow_target">노란</string>
@@ -345,4 +329,9 @@
     <string name="settings_hint_auto_move_full_auto_a11y">완전 자동 모드: 힌트가 표시되면 로봇이 자동으로 이동하고 다음 힌트로 진행합니다</string>
     <string name="settings_hint_auto_move_semi_auto">반자동 (다음 힌트 버튼으로 이동)</string>
     <string name="settings_hint_auto_move_semi_auto_a11y">반자동 모드: 다음 힌트 버튼을 클릭하면 로봇이 이동합니다</string>
+
+    <!-- Level Editor Strings -->
+    <string name="level_editor_unlocked">레벨 에디터가 잠금 해제되었습니다!</string>
+    <string name="level_editor_hint">레벨 에디터를 잠금 해제했습니다! 자신의 레벨을 만드세요.</string>
+
 </resources>

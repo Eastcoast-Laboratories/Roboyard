@@ -4,7 +4,6 @@
     <string name="app_name">Roboyard</string>
     
     <!-- Main Menu Strings -->
-    <string name="action_settings">Ajustes</string>
 
     <string name="new_random_game">Nuevo Juego</string>
     <string name="new_random_game_a11y">Comenzar un nuevo juego</string>
@@ -26,13 +25,9 @@
     <string name="credits">Créditos</string>
     
     <!-- Game Screens -->
-    <string name="game_screen_title">Juego</string>
-    <string name="save_load_game_screen_title">Guardar/Cargar Juego</string>
-    <string name="settings_screen_title">Ajustes</string>
     <string name="help_screen_title">Ayuda</string>
 
     <!-- Level Selection Screen -->
-    <string name="level_button_description">Nivel %1$d</string>
 
     <string name="back_description">Volver a la pantalla anterior</string>
 
@@ -40,17 +35,14 @@
     <string name="next_level_description">Ir al siguiente nivel</string>
     
     <string name="optimal_moves">Óptimo: %1$d movimientos</string>
-    <string name="your_moves">Tus movimientos: %1$d</string>
     <string name="level_complete">¡Nivel Completado!</string>
     <string name="level_stars_description">Has conseguido %1$d estrellas</string>
-    <string name="level_stars_a11y">Has conseguido %1$d estrellas</string>
     <string name="stars_count">%1$d estrellas</string>
     <string name="level_locked">Necesitas %1$d estrellas más para desbloquear este nivel</string>
     <string name="random_game_complete">¡Juego Completado!</string>
     <string name="new_random_game_button">Nuevo Juego</string>
     
     <!-- Robot Colors -->
-    <string name="color_red">Rojo</string>
     <string name="color_blue">Azul</string>
     <string name="color_green">Verde</string>
     <string name="color_yellow">Amarillo</string>
@@ -58,14 +50,8 @@
     <string name="color_none">Ninguno</string>
     
     <!-- Accessibility Color Names -->
-    <string name="color_red_a11y">Robot rojo</string>
-    <string name="color_blue_a11y">Robot azul</string>
-    <string name="color_green_a11y">Robot verde</string>
-    <string name="color_yellow_a11y">Robot amarillo</string>
-    <string name="color_silver_a11y">Robot plateado</string>
     
     <!-- Color Names (Dative Case) -->
-    <string name="color_red_dative">rojo</string>
     <string name="color_blue_dative">azul</string>
     <string name="color_green_dative">verde</string>
     <string name="color_yellow_dative">amarillo</string>
@@ -73,7 +59,6 @@
     <string name="color_silver_dative">plateado</string>
     
     <!-- Adjective forms for colors -->
-    <string name="color_red_adj">Rojo</string>
     <string name="color_blue_adj">Azul</string>
     <string name="color_green_adj">Verde</string>
     <string name="color_yellow_adj">Amarillo</string>
@@ -81,7 +66,6 @@
     <string name="color_silver_adj">Plateado</string>
     
     <!-- Target color forms -->
-    <string name="color_red_target">Rojo</string>
     <string name="color_blue_target">Azul</string>
     <string name="color_green_target">Verde</string>
     <string name="color_yellow_target">Amarillo</string>
@@ -124,14 +108,9 @@
     <string name="credits_special_thanks">Agradecimientos Especiales</string>
     <string name="credits_version">Versión %1$s</string>
     <string name="credits_eclabs">ECLabs</string>
-    <string name="credits_eclabs_description">Creado por ECLabs</string>
     
     <!-- Level Selection screen -->
     <string name="level_selection_title">Selección de Nivel</string>
-    <string name="level_category_beginner">Principiante</string>
-    <string name="level_category_intermediate">Intermedio</string>
-    <string name="level_category_advanced">Avanzado</string>
-    <string name="level_category_expert">Experto</string>
     <string name="level_difficulty">Dificultad: %1$s</string>
     <string name="level_stars">Estrellas: %1$d/%2$d</string>
     <string name="level_size">Tamaño: %1$dx%2$d</string>
@@ -170,7 +149,6 @@
     <string name="hint_loading">Calculando solución...</string>
     <string name="hint_move_robot">Mueve el robot %1$s</string>
     <string name="hint_move_robot_direction">Mueve el robot %1$s %2$s</string>
-    <string name="hint_move_robot_first">Mueve primero el robot %1$s</string>
     
     <!-- Game Buttons -->
     <string name="back_button">Atrás</string>
@@ -183,9 +161,7 @@
     <string name="announce_hint">Anunciar Pista</string>
     
     <!-- Accessibility Descriptions -->
-    <string name="back_button_a11y">Volver</string>
     <string name="menu_button_a11y">Volver al menú principal</string>
-    <string name="retry_button_a11y">Reintentar este nivel</string>
     <string name="restart_button_a11y">Reiniciar este nivel</string>
     <string name="save_map_button_a11y">Guardar el mapa actual</string>
     <string name="dice_button_a11y">Generar un nuevo mapa</string>
@@ -221,8 +197,6 @@
     
     <!-- Game Status Messages -->
     <string name="target_reached">¡Objetivo alcanzado! Juego completado en %1$d movimientos y %2$d casillas movidas</string>
-    <string name="robot_move_initiated">%1$s iniciando movimiento, comenzando en %2$d, %3$d</string>
-    <string name="unknown_robot">Desconocido: %1$d</string>
     <string name="unknown_color">Desconocido: %1$s</string>
     <string name="solution_found">¡La IA encontró una solución!</string>
     <string name="perfect_solution">¡Perfecto! ¡Encontraste la solución óptima!</string>
@@ -239,7 +213,6 @@
     <string name="error_displaying_hint">Error al mostrar la pista</string>
 
     <!-- AI messages -->
-    <string name="completed_in_moves">Completado en %1$d movimientos</string>
     
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Principiante</string>
@@ -268,12 +241,10 @@
     <!-- Toast messages -->
     <string name="error_email_app">No se pudo abrir la aplicación de correo electrónico</string>
     <string name="robot_movement_canceled">Movimiento del robot cancelado</string>
-    <string name="no_game_to_save">No hay juego disponible para guardar</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Ajustes</string>
     <string name="settings_language">Idioma</string>
-    <string name="settings_vibration">Vibración</string>
     <string name="settings_sound">Sonido</string>
     <string name="settings_background_sound">Sonido de fondo:</string>
     <string name="settings_sound_effects_volume">Volumen de efectos de sonido:</string>
@@ -305,8 +276,6 @@
     <string name="settings_reset_progress_success">Progreso restablecido correctamente</string>
     <string name="settings_reset_tutorial_confirm">¿Estás seguro de que quieres restablecer el tutorial? Volverás a ver todas las pantallas de ayuda.</string>
     <string name="settings_reset_tutorial_success">Tutorial restablecido correctamente</string>
-    <string name="language_changed_title">Idioma Cambiado</string>
-    <string name="language_changed_message">La configuración de idioma ha sido actualizada. Algunos cambios serán efectivos inmediatamente, otros después de volver al menú principal.</string>
     <string name="settings_new_map_each_time">Nuevo Mapa Cada Vez</string>
     <string name="settings_robots_reach_targets">Robots que deben alcanzar objetivos</string>
     <string name="settings_targets">objetivos</string>
@@ -346,7 +315,6 @@
     <string name="position_a11y">Posición</string>
     <string name="multicolored_a11y">Multicolor</string>
     <string name="target_a11y">Objetivo en posición %1$d, %2$d</string>
-    <string name="at_position_a11y">en posición</string>
     <string name="walls_on_a11y">Paredes en</string>
     <string name="north_a11y">Norte</string>
     <string name="south_a11y">Sur</string>
@@ -526,4 +494,9 @@
     <string name="settings_hint_auto_move_full_auto_a11y">Modo totalmente automático: el robot se mueve automáticamente cuando se muestra la pista y avanza a la siguiente pista</string>
     <string name="settings_hint_auto_move_semi_auto">Semi-automático (movimiento en botón siguiente pista)</string>
     <string name="settings_hint_auto_move_semi_auto_a11y">Modo semi-automático: el robot se mueve cuando haces clic en el botón siguiente pista</string>
+
+    <!-- Level Editor Strings -->
+    <string name="level_editor_unlocked">¡Editor de Niveles desbloqueado!</string>
+    <string name="level_editor_hint">¡Has desbloqueado el Editor de Niveles! Crea tus propios niveles.</string>
+
 </resources>
