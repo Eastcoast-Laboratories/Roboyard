@@ -3,7 +3,7 @@
     <string name="app_name">Roboyard</string>
     
     <!-- Main Menu Strings -->
-    <string name="new_random_game">Play</string>
+    <string name="new_random_game">Jouer</string>
     <string name="new_random_game_a11y">Commencer une nouvelle partie</string>
     <string name="level_game">Niveaux</string>
     <string name="level_game_a11y">Commencer un niveau</string>
@@ -545,7 +545,7 @@
     <string name="back_description">Retour à l\'écran précédent</string>
     <string name="button_back">Retour</string>
     <string name="button_menu">Menu</string>
-    <string name="button_new_game">Nouvelle carte</string>
+    <string name="button_new_game">Prochain</string>
     <string name="cannot_move_in_this_direction">Impossible de se déplacer dans cette direction</string>
     <string name="editor_level_editor_unlocked">Éditeur de niveau débloqué !</string>
     <string name="help_accessibility_description">Ce jeu est entièrement compatible avec le lecteur d\'écran TalkBack. Utilisez l\'exploration tactile pour entendre des informations sur les éléments du jeu et les boutons. Double-appuyez pour activer les boutons ou sélectionner les robots.</string>
