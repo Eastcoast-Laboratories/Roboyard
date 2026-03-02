@@ -1,0 +1,12 @@
+# Play Store Changelogs für Version 41
+
+<en-GB>
+- French translation complete
+- GMS Library removed
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Französische Übersetzung komplett
+- GMS Library entfenrt
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>

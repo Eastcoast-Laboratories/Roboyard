@@ -66,25 +66,16 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Roboter bewegen sich in den Hinweisen optional automatisch ins Ziel
-- Roboter Hinweispfeile direkt auf der Karte
-- Neue Achievements, verschiedene Karten mit den selben Wänden zu lösen
-- Es werden auch Karten mit ungeraden Dimensionen akzeptiert
-- Unendliche History gespeichert. Jetzt mit Sortierung und Filterung
-- Die Anzeige der Züge und der abweichung im Heiß-Kalt-Modus größer
+- Französische Übersetzung komplett
+- GMS Library entfenrt
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- New option: robots move automatically to the goal in the hints
-- robot hint direction arrows directly on the map
-- New achievements for solving different maps with the same walls
-- Maps with odd dimensions are also accepted
-- Infinite history saved. With sorting and filtering
-- Level Editor in all languages
-- The display of moves and delta in the hot-cold mode is larger
+- French translation complete
+- GMS Library removed
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )

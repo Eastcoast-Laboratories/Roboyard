@@ -1,0 +1,3 @@
+- French translation complete
+- GMS Library removed
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

@@ -2,6 +2,12 @@
 =========
 
 
+## Version 41 (2026-03-02)
+- French translation complete
+- GMS Library removed
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+
+
 ## Version 40 (2026-02-28)
 - New option: robots move automatically to the goal in the hints
 - robot hint direction arrows directly on the map

@@ -2,6 +2,12 @@ Changelog Deutsch
 =================
 
 
+## Version 41 (2026-03-02)
+- Französische Übersetzung komplett
+- GMS Library entfenrt
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+
+
 ## Version 40 (2026-02-28)
 - Roboter bewegen sich in den Hinweisen optional automatisch ins Ziel
 - Roboter Hinweispfeile direkt auf der Karte
