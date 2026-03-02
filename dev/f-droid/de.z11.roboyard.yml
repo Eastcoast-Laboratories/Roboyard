@@ -1,0 +1,210 @@
+Categories:
+  - Games
+License: GPL-3.0-only
+AuthorName: Ruben Barkow-Kuder
+AuthorEmail: roboyard-f-droid@it.z11.de
+SourceCode: https://github.com/Eastcoast-Laboratories/Roboyard
+IssueTracker: https://github.com/Eastcoast-Laboratories/Roboyard/issues
+Changelog: https://github.com/Eastcoast-Laboratories/Roboyard/blob/HEAD/CHANGELOG.md
+Donate: https://github.com/sponsors/rubo77
+
+AutoName: Roboyard
+
+RepoType: git
+Repo: https://github.com/Eastcoast-Laboratories/Roboyard.git
+Binaries: 
+  https://github.com/Eastcoast-Laboratories/Roboyard/releases/download/v%v/Roboyard_v%v.apk
+
+Builds:
+  - versionName: '13.2'
+    versionCode: 47
+    commit: 67b9a1d4bb20e082d39efdb11a62ec8105b0a15b
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '14'
+    versionCode: 48
+    commit: 0f2c8fa2c9d5f1b25dfdf5df615fa2f1bdb9708e
+    subdir: app
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '16.1'
+    versionCode: 54
+    commit: c86d4cf6873e3349fb6ebb425b40d6b1fe9220f1
+    subdir: app
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '17'
+    versionCode: 57
+    commit: 1e5a881dc1e17c3e1b09c3a197044fec6edcf969
+    subdir: app
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '18.1'
+    versionCode: 60
+    commit: 931b42d87796d6797fdfa4888df45934dbdc5311
+    subdir: app
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '18.2'
+    versionCode: 62
+    commit: 431fcd7166ed30bfdc6bc6485a0fde82b19e24e8
+    subdir: app
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '19'
+    versionCode: 64
+    commit: d59e06c65588df42da7184bf3837b1fc3bafcf4c
+    subdir: app
+    gradle:
+      - yes
+    binary: 
+      https://github.com/Eastcoast-Laboratories/Roboyard/raw/refs/tags/v20.1/download/Roboyard_v%v.apk
+    srclibs:
+      - reproducible-apk-tools@v0.3.0
+    prebuild:
+      - git reset --soft ff31b6299298e54b318a16ace622e0c82da13196
+      - echo 'releaseType=Release' > ../package.properties
+    postbuild: $$reproducible-apk-tools$$/inplace-fix.py --page-size 16 fix-pg-map-id
+      $$OUT$$ 'b767c4a'
+
+  - versionName: '20.1'
+    versionCode: 71
+    commit: 701d3dc1b36fba5777915dc64b08ebbe3f10ad59
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '22'
+    versionCode: 82
+    commit: 8ebcd9cb9ac7a28b9026272723d07215b39afc21
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '23'
+    versionCode: 83
+    commit: 3ded31ab80f7718f9114fa20ef510d952a2f14b3
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '24'
+    versionCode: 89
+    commit: cbf9f5e3ecfdeac61ad921501bd28446c2f876d2
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '25'
+    versionCode: 90
+    commit: c09f6ca125fbfab24a2bb44f9db7eaa115a32e0e
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '26'
+    versionCode: 91
+    commit: 781bc96c088b236893bdc90fdfb5be0f22674762
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '27'
+    versionCode: 92
+    commit: 2f41892522492eaeae7bc2d8a95eb2b2397d944a
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '28'
+    versionCode: 93
+    commit: 1d23ada4d66efa36a23fd66bed0b25d7b7bafe38
+    subdir: app
+    gradle:
+      - yes
+    prebuild: echo 'releaseType=Release' > ../package.properties
+
+  - versionName: '29'
+    versionCode: 94
+    commit: f58c9be2b00d07befe959f7972911d354703475c
+    subdir: app
+    gradle:
+      - yes
+    prebuild:
+      - echo 'releaseType=Release' > ../package.properties
+      - sed -i -e '/java.home/d' ../gradle.properties
+
+  - versionName: '30'
+    versionCode: 97
+    commit: 9aa7527b1964e4698b1f6298a3470c549d76a4b5
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    prebuild:
+      - echo 'releaseType=Release' > ../package.properties
+      - sed -i -e '/java.home/d' ../gradle.properties
+
+  - versionName: '41'
+    versionCode: 118
+    commit: e28516197ff22c602c4faf1d1b4856598a339037
+    subdir: app
+    sudo:
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+    prebuild:
+      - echo 'releaseType=Release' > ../package.properties
+      - sed -i -e '/java.home/d' ../gradle.properties
+    scandelete:
+      - dev/pgs_import/achievements_import.zip
+
+AllowedAPKSigningKeys: c8feba941949e5f0b6c9b7e20eaf52a5c1d4864f4cbbeb39fae9b7e19d1336b0
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '41'
+CurrentVersionCode: 118
