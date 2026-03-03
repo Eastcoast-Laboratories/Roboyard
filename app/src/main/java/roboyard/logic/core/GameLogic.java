@@ -308,9 +308,15 @@ public class GameLogic {
         Timber.d("[TARGET PLACEMENT] Starting target placement with difficulty=%d, targetMustBeInCorner=%b", 
                 currentLevel, targetMustBeInCorner);
         
+        // Multi-target mode validation: multi-colored targets not allowed when targetColors > 1
+        boolean isMultiTargetMode = (targetColors > 1);
+        if (isMultiTargetMode && allowMulticolorTarget) {
+            Timber.w("[TARGET_MULTI] Multi-colored target disabled: multi-target mode active (targetColors=%d)", targetColors);
+        }
+        
         // Use our color management methods to generate target and robot type strings
         String[] typesOfTargets;
-        if (allowMulticolorTarget) {
+        if (allowMulticolorTarget && !isMultiTargetMode) {
             // Include multi-color target if allowed
             typesOfTargets = new String[Constants.NUM_ROBOTS + 1]; // standard targets + multi-colored target
             for (int i = 0; i < Constants.NUM_ROBOTS; i++) {

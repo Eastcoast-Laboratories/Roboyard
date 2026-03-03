@@ -257,6 +257,15 @@ public class RRGetMap {
 
         // Multi-goal support: if more than 1 target found, set activeGoals
         if (targetInfoList.size() > 1) {
+            // Validate: multi-colored targets not allowed in multi-goal mode
+            for (int[] info : targetInfoList) {
+                int color = info[1];
+                if (color == Constants.COLOR_MULTI) {
+                    Timber.e("[SOLUTION_SOLVER] Multi-colored target not allowed in multi-goal mode. " +
+                           "Each robot must have a specific colored target. It was added target with ID " + color);
+                }
+            }
+            
             java.util.List<Board.Goal> activeGoals = new java.util.ArrayList<>();
             for (int[] info : targetInfoList) {
                 int pos = info[0];
