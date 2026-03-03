@@ -74,26 +74,4 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 ---
 # last prompt:
 
-1. der back button enthält nun nicht das wort Back ini der entsprechenden language, sondern den striing "@STRING/B..." da scheint an der falschen stelle replaced worden zu sein benutze dazu einen unittest um das zu fixen
-
-2. @TODO.md#L116-118 das soll so: 
-**New:** "0" (larger) " Moves" (smaller)
-also mit einer grösseren moves zahl und squares und difficulty soll noch kleiner
-
-3. Play Button Visibility with Popup ist imer noch unsichtbar unter dem poopup, das sieht man nur wenn man einen neuen tag startet oder die app das erste mal ffnet. benutze dazu einen unittest um das zu fixen
-
-4.
-GMS is unfree and fdrid cant build it. it does not work correctly anyway so disable it for now. leave all code in the system, but remove it globally with one flag, so we can enable it in a later version.
-
-## UI Improvements (Test-Driven)
-
-### Task 1: Play Button Visibility with Popup
-**Problem:** Play button (newMapButton) wird GONE wenn Popup offen ist
-**Solution:** Nur nextLevelButton soll GONE sein, newMapButton soll VISIBLE bleiben
-**Files:** GameFragment.java (PopupVisibilityListener implementation)
-**Test:** Manual test - open achievement popup, check button visibility
-**Status:** TODO
-
-
-
-**Note:** Ignoriere alt-layout, beachte beide landscape layouts!
+Das Problem ist: der Hint button checked status kontrolliert hja ob der rein slided oder upslided. Der Hint Button wird aber zu oft checked false (upslide) gesetzt. solange noch keine lösung gefunden ist, soll der auch nicht unchecken. erst, wenn die lösung akzeptiert ist, soll er unchecken. suche, wo der auf checked false gesetzt wird obwohl die lösung noch gar nicht akzeptiert wurde, er soll zwischen den versuchen nicht uncheken

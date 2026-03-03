@@ -845,10 +845,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Observe solver running state to update hint button text and save map button state
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
-                // Keep hint container visible during regeneration but hide toggle
-                if (hintContainer != null) {
-                    hintContainer.setVisibility(View.GONE);
-                }
+                // Keep hint container visible during solver to show "AI is calculating..."
+                // Only hide live move counter toggle
                 if (liveMoveCounterToggle != null) {
                     liveMoveCounterToggle.setVisibility(View.GONE);
                 }
@@ -880,10 +878,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 hintButton.setEnabled(true);
                 hintButton.setAlpha(1.0f);
                 
-                // Reset hint button text
-                hintButton.setChecked(false);
-                // Don't update the status text here - let callbacks handle it appropriately
-                // This prevents text flashing/flickering between states
+                // Don't uncheck hint button here - it should stay checked between solver attempts
+                // Only uncheck when solution is accepted (initializeGame) or user closes manually
+                Timber.d("[HINT_SYSTEM] Solver finished - keeping hint button state");
                 
                 // Enable save map button when solver finishes (solution found or cancelled)
                 if (saveMapButton != null && gameStateManager.getCurrentSolution() != null) {
@@ -3837,8 +3834,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         Timber.d("[HINT] Hint system initialized: totalMoves=%d, numPreHints=%d, isLevelGame=%b", 
                 totalPossibleHints, numPreHints, isLevelGame);
         
-        // Reset hint button text back to "Hint"
-        hintButton.setChecked(false);
+        // Don't uncheck hint button here - solution found but not yet accepted
+        // Will be unchecked in initializeGame() when user accepts the solution
+        Timber.d("[HINT_SYSTEM] Solution found - keeping hint button checked until user accepts");
         
         // hide the hint text
         updateStatusText(getString(R.string.solution_found), false);
@@ -3850,11 +3848,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
     @Override
     public void onSolutionCalculationFailed(String errorMessage) {
-        Timber.d("GameFragment: Solution calculation failed - %s", errorMessage);
+        Timber.d("[SOLVER][HINT] Solution calculation failed - %s", errorMessage);
         
         // Check if the fragment is still attached to an activity before proceeding
         if (!isAdded()) {
-            Timber.w("GameFragment: Fragment not attached to activity, skipping UI update");
+            Timber.w("[SOLVER][HINT] Fragment not attached to activity, skipping UI update");
             return;
         }
         
@@ -3862,7 +3860,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Reset hint button text back to "Hint"
             hintButton.setChecked(false);
             updateStatusText(getString(R.string.solution_error, errorMessage), true);
-            Timber.d("GameFragment: UI updated to show error");
+            Timber.d("[SOLVER][HINT] UI updated to show error");
         });
     }
     
