@@ -54,6 +54,11 @@ public class SolverIDDFS extends Solver {
     private final int[] minimumMovesToGoal;
     private final int[] directionIncrement;
     
+    // Multi-goal support
+    private final boolean isMultiGoalMode;
+    private final int[] activeGoalPositions;
+    private final int[] activeGoalRobots;
+    
     private int depthLimit;
     
 
@@ -71,6 +76,22 @@ public class SolverIDDFS extends Solver {
         this.isSolution01NoSpeedup = (true == this.isSolution01) && ((true == this.isBoardGoalWildcard) || (4 > this.board.getNumRobots()));
         this.minimumMovesToGoal = new int[board.size];
         this.directionIncrement = this.board.directionIncrement;
+        
+        // Multi-goal support
+        final List<Board.Goal> activeGoals = this.board.getActiveGoals();
+        this.isMultiGoalMode = (activeGoals.size() > 1);
+        this.activeGoalPositions = new int[activeGoals.size()];
+        this.activeGoalRobots = new int[activeGoals.size()];
+        for (int i = 0; i < activeGoals.size(); i++) {
+            this.activeGoalPositions[i] = activeGoals.get(i).position;
+            this.activeGoalRobots[i] = activeGoals.get(i).robotNumber;
+        }
+        if (this.isMultiGoalMode) {
+            Logger.println("[MULTI_GOAL] Multi-goal mode active with " + activeGoals.size() + " goals");
+            for (int i = 0; i < activeGoals.size(); i++) {
+                Logger.println("[MULTI_GOAL]   Goal " + i + ": robot=" + this.activeGoalRobots[i] + " position=" + this.activeGoalPositions[i]);
+            }
+        }
     }
     
     
@@ -410,6 +431,14 @@ public class SolverIDDFS extends Solver {
     
     
     private void buildSolution(final int depth) {
+        // Multi-goal check: verify ALL goals are reached in the final state
+        if (this.isMultiGoalMode) {
+            final int[] finalState = this.states[depth];
+            if (!isAllGoalsReached(finalState)) {
+                return; // not all goals reached yet - skip this solution
+            }
+        }
+        
         Solution newSolution = new Solution(this.board);
         int[] state0 = this.states[0].clone();
         swapGoalLast(state0);
@@ -424,6 +453,40 @@ public class SolverIDDFS extends Solver {
         if (false == this.lastResultSolutions.contains(newSolution)) {
             this.lastResultSolutions.add(newSolution);
         }
+    }
+    
+    /**
+     * Check if all active goals are reached in the given state.
+     * 
+     * KEY INSIGHT: 
+     * The solver's existing single-goal search already finds the PRIMARY goal.
+     * This method only needs to verify that ALL OTHER goals are ALSO reached in that same state.
+     * 
+     * Why this works with minimal code changes:
+     * 1. The IDDFS algorithm searches for ANY state where the primary goal robot reaches its target
+     * 2. When found, buildSolution() is called with that state
+     * 3. We simply check: "Does this state also satisfy all other goals?"
+     * 4. If not, we skip it (return early) and continue searching
+     * 5. The search naturally continues until it finds a state satisfying ALL goals
+     * 
+     * State uses swapGoalLast format: the primary goal robot is at the last index.
+     */
+    private boolean isAllGoalsReached(final int[] state) {
+        final int primaryGoalRobotNumber = (null == this.board.getGoal()) ? -1 : this.board.getGoal().robotNumber;
+        for (int i = 0; i < this.activeGoalPositions.length; i++) {
+            int robotIdx = this.activeGoalRobots[i];
+            // Account for swapGoalLast: primary goal robot is swapped to last position
+            if (!this.isBoardGoalWildcard && robotIdx == primaryGoalRobotNumber) {
+                robotIdx = state.length - 1;
+            } else if (!this.isBoardGoalWildcard && robotIdx == state.length - 1) {
+                // The robot that was originally at last position is now at primary goal robot's position
+                robotIdx = primaryGoalRobotNumber;
+            }
+            if (state[robotIdx] != this.activeGoalPositions[i]) {
+                return false;
+            }
+        }
+        return true;
     }
     
     
