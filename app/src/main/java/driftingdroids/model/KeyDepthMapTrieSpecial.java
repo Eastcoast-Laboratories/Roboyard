@@ -40,14 +40,14 @@ import java.util.Arrays;
  */
 public class KeyDepthMapTrieSpecial implements KeyDepthMap {
 
-    protected static final int NODE_ARRAY_SHIFT = 20; // 20 == 4MB
+    protected static final int NODE_ARRAY_SHIFT = 16; // 16 == 256KB (was 20==4MB; smaller arrays prevent OOM between memory checks)
     protected static final int NODE_ARRAY_SIZE = 1 << NODE_ARRAY_SHIFT;
     protected static final int NODE_ARRAY_MASK = NODE_ARRAY_SIZE - 1;
     protected final int[] rootNode;
     protected int[][] nodeArrays;
     protected int numNodeArrays, nextNode, nextNodeArray;
 
-    protected static final int LEAF_ARRAY_SHIFT = 20; // 20 == 1MB
+    protected static final int LEAF_ARRAY_SHIFT = 16; // 16 == 64KB (was 20==1MB; smaller arrays prevent OOM between memory checks)
     protected static final int LEAF_ARRAY_SIZE = 1 << LEAF_ARRAY_SHIFT;
     protected static final int LEAF_ARRAY_MASK = LEAF_ARRAY_SIZE - 1;
     protected byte[][] leafArrays;
@@ -61,8 +61,16 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
     
     protected int size = 0;
 
+    // Hard limit on total arrays to prevent OOM (calculated from heap size)
+    protected final int maxNodeArrays;
+    protected final int maxLeafArrays;
+    protected volatile boolean allocationLimitReached = false;
+
     public static KeyDepthMapTrieSpecial createInstance(final Board board, final boolean useMoreMemoryForSpeedup) {
-        if (useMoreMemoryForSpeedup && (8 == board.sizeNumBits) && ((4 == board.getNumRobots()) || (5 == board.getNumRobots()))) {
+        // The 8Bit variant allocates a 64MB lookup array - only use it if heap is large enough
+        final long maxHeapMB = Runtime.getRuntime().maxMemory() >> 20;
+        final boolean heapLargeEnough = maxHeapMB > 768;
+        if (useMoreMemoryForSpeedup && heapLargeEnough && (8 == board.sizeNumBits) && ((4 == board.getNumRobots()) || (5 == board.getNumRobots()))) {
             if (Solver.USE_SLOW_SEARCH_MORE_SOLUTIONS) {
                 Logger.println("UseSlowSearchMoreSolutions");
                 return new KeyDepthMapTrieSpecial8BitEqual(board);
@@ -110,7 +118,12 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
         this.nodeShift = board.sizeNumBits;
         this.nodeMask = (1 << board.sizeNumBits) - 1;
 
-        this.nodeArrays = new int[4][];
+        // Calculate hard allocation limits from heap size (25% for nodes, 10% for leaves)
+        final long maxHeap = Runtime.getRuntime().maxMemory();
+        this.maxNodeArrays = Math.max(16, (int)((maxHeap / 4) / (NODE_ARRAY_SIZE * 4L)));
+        this.maxLeafArrays = Math.max(16, (int)((maxHeap / 10) / LEAF_ARRAY_SIZE));
+
+        this.nodeArrays = new int[64][];
         this.rootNode = new int[NODE_ARRAY_SIZE];
         this.nodeArrays[0] = this.rootNode;
         this.numNodeArrays = 1;
@@ -122,18 +135,46 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
         this.leafNodeSize = this.leafNodeMask + 1;
         this.leafSize = 1 << (board.sizeNumBits - this.leafNodeShift);
         this.leafMask = this.leafSize - 1;
-        this.leafArrays = new byte[16][];
+        this.leafArrays = new byte[64][];
         this.numLeafArrays = 0;
         this.nextLeaf = this.leafSize;  //no leaves yet, but skip leaf "0" because this is the special value
         this.nextLeafArray = 0;         //no leaf arrays yet
     }
 
 
+    // Central allocation methods with hard limits to prevent OOM
+    protected final int[] tryAllocateNodeArray() {
+        if (this.numNodeArrays >= this.maxNodeArrays) {
+            this.allocationLimitReached = true;
+            return null;
+        }
+        try {
+            return new int[NODE_ARRAY_SIZE];
+        } catch (OutOfMemoryError oom) {
+            this.allocationLimitReached = true;
+            return null;
+        }
+    }
+
+    protected final byte[] tryAllocateLeafArray() {
+        if (this.numLeafArrays >= this.maxLeafArrays) {
+            this.allocationLimitReached = true;
+            return null;
+        }
+        try {
+            return new byte[LEAF_ARRAY_SIZE];
+        } catch (OutOfMemoryError oom) {
+            this.allocationLimitReached = true;
+            return null;
+        }
+    }
+
     /* (non-Javadoc)
      * @see driftingdroids.model.KeyDepthMap#putIfGreater(int, int)
      */
     @Override
     public boolean putIfGreater(int key, final int byteValue) {
+        if (this.allocationLimitReached) return false;
         //root node
         int nidx = key & this.nodeMask;
         int[] nodeArray = this.rootNode;
@@ -151,7 +192,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -194,7 +237,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -243,7 +288,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                 if (this.nodeArrays.length <= this.numNodeArrays) {
                     this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                 }
-                this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                final int[] newNodeArray = tryAllocateNodeArray();
+                if (newNodeArray == null) return false;
+                this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                 this.nextNode = this.nextNodeArray;
                 this.nextNodeArray += NODE_ARRAY_SIZE;
             }
@@ -286,7 +333,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                 if (this.leafArrays.length <= this.numLeafArrays) {
                     this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                 }
-                final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                final byte[] newLeafArray = tryAllocateLeafArray();
+                if (newLeafArray == null) return false;
                 this.leafArrays[this.numLeafArrays++] = newLeafArray;
                 this.nextLeafArray += LEAF_ARRAY_SIZE;
             }
@@ -331,7 +379,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -374,7 +424,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -423,7 +475,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                 if (this.nodeArrays.length <= this.numNodeArrays) {
                     this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                 }
-                this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                final int[] newNodeArray = tryAllocateNodeArray();
+                if (newNodeArray == null) return false;
+                this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                 this.nextNode = this.nextNodeArray;
                 this.nextNodeArray += NODE_ARRAY_SIZE;
             }
@@ -466,7 +520,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                 if (this.leafArrays.length <= this.numLeafArrays) {
                     this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                 }
-                final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                final byte[] newLeafArray = tryAllocateLeafArray();
+                if (newLeafArray == null) return false;
                 this.leafArrays[this.numLeafArrays++] = newLeafArray;
                 this.nextLeafArray += LEAF_ARRAY_SIZE;
             }
@@ -545,7 +600,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                         if (this.nodeArrays.length <= this.numNodeArrays) {
                             this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                         }
-                        this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                        final int[] newNodeArray = tryAllocateNodeArray();
+                        if (newNodeArray == null) return false;
+                        this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                         this.nextNode = this.nextNodeArray;
                         this.nextNodeArray += NODE_ARRAY_SIZE;
                     }
@@ -588,7 +645,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                         if (this.nodeArrays.length <= this.numNodeArrays) {
                             this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                         }
-                        this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                        final int[] newNodeArray = tryAllocateNodeArray();
+                        if (newNodeArray == null) return false;
+                        this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                         this.nextNode = this.nextNodeArray;
                         this.nextNodeArray += NODE_ARRAY_SIZE;
                     }
@@ -637,7 +696,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -680,7 +741,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.leafArrays.length <= this.numLeafArrays) {
                         this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                     }
-                    final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                    final byte[] newLeafArray = tryAllocateLeafArray();
+                    if (newLeafArray == null) return false;
                     this.leafArrays[this.numLeafArrays++] = newLeafArray;
                     this.nextLeafArray += LEAF_ARRAY_SIZE;
                 }
@@ -721,7 +783,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                         if (this.nodeArrays.length <= this.numNodeArrays) {
                             this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                         }
-                        this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                        final int[] newNodeArray = tryAllocateNodeArray();
+                        if (newNodeArray == null) return false;
+                        this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                         this.nextNode = this.nextNodeArray;
                         this.nextNodeArray += NODE_ARRAY_SIZE;
                     }
@@ -764,7 +828,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                         if (this.nodeArrays.length <= this.numNodeArrays) {
                             this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                         }
-                        this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                        final int[] newNodeArray = tryAllocateNodeArray();
+                        if (newNodeArray == null) return false;
+                        this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                         this.nextNode = this.nextNodeArray;
                         this.nextNodeArray += NODE_ARRAY_SIZE;
                     }
@@ -813,7 +879,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -856,7 +924,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.leafArrays.length <= this.numLeafArrays) {
                         this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                     }
-                    final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                    final byte[] newLeafArray = tryAllocateLeafArray();
+                    if (newLeafArray == null) return false;
                     this.leafArrays[this.numLeafArrays++] = newLeafArray;
                     this.nextLeafArray += LEAF_ARRAY_SIZE;
                 }
@@ -925,7 +994,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -968,7 +1039,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.leafArrays.length <= this.numLeafArrays) {
                         this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                     }
-                    final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                    final byte[] newLeafArray = tryAllocateLeafArray();
+                    if (newLeafArray == null) return false;
                     this.leafArrays[this.numLeafArrays++] = newLeafArray;
                     this.nextLeafArray += LEAF_ARRAY_SIZE;
                 }
@@ -1023,7 +1095,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -1071,7 +1145,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -1114,7 +1190,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.leafArrays.length <= this.numLeafArrays) {
                         this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                     }
-                    final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                    final byte[] newLeafArray = tryAllocateLeafArray();
+                    if (newLeafArray == null) return false;
                     this.leafArrays[this.numLeafArrays++] = newLeafArray;
                     this.nextLeafArray += LEAF_ARRAY_SIZE;
                 }
@@ -1185,7 +1262,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -1228,7 +1307,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.leafArrays.length <= this.numLeafArrays) {
                         this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                     }
-                    final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                    final byte[] newLeafArray = tryAllocateLeafArray();
+                    if (newLeafArray == null) return false;
                     this.leafArrays[this.numLeafArrays++] = newLeafArray;
                     this.nextLeafArray += LEAF_ARRAY_SIZE;
                 }
@@ -1283,7 +1363,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -1331,7 +1413,9 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.nodeArrays.length <= this.numNodeArrays) {
                         this.nodeArrays = Arrays.copyOf(this.nodeArrays, this.nodeArrays.length << 1);
                     }
-                    this.nodeArrays[this.numNodeArrays++] = new int[NODE_ARRAY_SIZE];
+                    final int[] newNodeArray = tryAllocateNodeArray();
+                    if (newNodeArray == null) return false;
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray;
                     this.nextNode = this.nextNodeArray;
                     this.nextNodeArray += NODE_ARRAY_SIZE;
                 }
@@ -1374,7 +1458,8 @@ public class KeyDepthMapTrieSpecial implements KeyDepthMap {
                     if (this.leafArrays.length <= this.numLeafArrays) {
                         this.leafArrays = Arrays.copyOf(this.leafArrays, this.leafArrays.length << 1);
                     }
-                    final byte[] newLeafArray = new byte[LEAF_ARRAY_SIZE];
+                    final byte[] newLeafArray = tryAllocateLeafArray();
+                    if (newLeafArray == null) return false;
                     this.leafArrays[this.numLeafArrays++] = newLeafArray;
                     this.nextLeafArray += LEAF_ARRAY_SIZE;
                 }

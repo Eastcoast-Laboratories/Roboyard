@@ -98,6 +98,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     // Solver
     private SolverManager solver;
+    private final ExecutorService solverExecutor = Executors.newSingleThreadExecutor(); // Single persistent executor
+    private volatile java.util.concurrent.Future<?> solverFuture; // Track current solver task for cancellation
     private Context context;
 
     // Minimap
@@ -2459,32 +2461,46 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         onSolutionCalculationStarted();
 
         try {
-            Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Initializing solver with current game state");
-            getSolverManager().initialize(elements);
-
-            // Run the solver on a background thread
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.execute(() -> {
+            // Cancel any previous solver task - the single-thread executor ensures
+            // the new task won't start until the old one finishes/is interrupted
+            if (solverFuture != null && !solverFuture.isDone()) {
+                Timber.d("[SOLUTION_SOLVER] Cancelling previous solver task before starting new one");
+                getSolverManager().cancelSolver();
+                solverFuture.cancel(true);
+            }
+            
+            // Capture elements for the background thread
+            final ArrayList<GridElement> capturedElements = new ArrayList<>(elements);
+            
+            // Submit new solver task to the persistent single-thread executor
+            // Both initialization and solving run on background thread to avoid Main-Thread OOM
+            solverFuture = solverExecutor.submit(() -> {
                 try {
-                    Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Running solver on background thread");
-                    // Get the current solver ID for tracing
+                    // Memory gate: wait for GC to reclaim previous solver's memory
+                    final Runtime rt = Runtime.getRuntime();
+                    final long minFreeBytes = rt.maxMemory() / 10; // 10% of heap must be free
+                    for (int attempt = 0; attempt < 5; attempt++) {
+                        long freeBytes = rt.maxMemory() - rt.totalMemory() + rt.freeMemory();
+                        if (freeBytes >= minFreeBytes) break;
+                        Timber.d("[SOLUTION_SOLVER] Memory gate: waiting for GC, free=%dMB need=%dMB attempt=%d",
+                                freeBytes >> 20, minFreeBytes >> 20, attempt);
+                        System.gc();
+                        Thread.sleep(200);
+                    }
+                    Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Initializing and running solver on background thread");
                     SolverManager manager = getSolverManager();
-                    // Ensure we're incrementing the counter before running
+                    manager.initialize(capturedElements);
                     SolverManager.ensureUniqueInvocationId();
                     Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Using solver manager with counter: %d",
                             SolverManager.getCurrentSolverInvocationId());
                     manager.run();
-                    // Note: The solver will call the listener methods (onSolverFinished)
-                    // when it completes, so we don't need to do anything more here
                 } catch (Exception e) {
                     Timber.e(e, "[SOLUTION_SOLVER] Error running solver");
-                    // Handle on main thread
                     new Handler(Looper.getMainLooper()).post(() -> {
                         onSolutionCalculationFailed("Error: " + e.getMessage());
                     });
                 }
             });
-            executor.shutdown();
         } catch (Exception e) {
             Timber.e(e, "[SOLUTION_SOLVER] Error initializing solver");
             onSolutionCalculationFailed("Error: " + e.getMessage());
@@ -2579,28 +2595,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 Timber.d("[SOLUTION_SOLVER][MOVES] Regeneration disabled (user left game screen), accepting current solution");
             }
         } else {
-            Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
-            
-            // Regenerate map if solution is null (likely OOM or unsolvable)
-            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
-                Timber.d("[SOLUTION_SOLVER][MOVES] Solution is null, regenerating map (attempt %d/%d)",
-                        regenerationCount + 1, MAX_AUTO_REGENERATIONS);
-                regenerationCount++;
-
-                // Force reset the solver state before starting a new game
-                SolverManager solverManager = getSolverManager();
-                solverManager.resetInitialization();
-                solverManager.cancelSolver(); // Cancel any running solver process
-
-                // Create a new game after a short delay to ensure the solver is fully reset
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-                }, 100);
-                return;
-            } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
-                Timber.w("[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d) with null solution. Accepting current game.", MAX_AUTO_REGENERATIONS);
-                regenerationCount = 0; // Reset for next time
-            }
+            // moveCount==0: solver hit memory/depth limit or puzzle is unsolvable.
+            // Accept the puzzle as-is instead of regenerating (which causes OOM from rapid solver restarts).
+            Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found (memory/depth limit), accepting puzzle");
         }
 
         // Store the solution for later use with getHint()
@@ -2666,10 +2663,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public void cancelSolver() {
         Timber.d("[SOLUTION_SOLVER] cancelSolver called");
-        if (Boolean.TRUE.equals(isSolverRunning.getValue())) {
-            getSolverManager().cancelSolver();
-            // The solver will call onSolverCancelled() via the listener
+        getSolverManager().cancelSolver();
+        // Cancel the current solver task (interrupts the thread)
+        if (solverFuture != null && !solverFuture.isDone()) {
+            Timber.d("[SOLUTION_SOLVER] Cancelling solver future");
+            solverFuture.cancel(true);
         }
+        isSolverRunning.setValue(false);
     }
     
     /**
@@ -2993,6 +2993,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
             Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
                     moveCount, requiredMoves, maxMoves);
+
+            // moveCount==0 means solver couldn't find a solution (memory/depth limit) - accept puzzle as-is
+            if (moveCount == 0) {
+                Timber.d("[DifficultyValidationCallback]: Solver found no solution (memory/depth limit), accepting puzzle");
+                validateDifficulty = true;
+                currentSolution = solution;
+                currentSolutionStep = 0;
+                updatePreCompRobotOrder(solution);
+                solutionWasAccepted = true;
+                isSolverRunning.setValue(false);
+                Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] No-solution puzzle accepted, notifying UI");
+                return;
+            }
 
             if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
                 // Puzzle too easy, generate a new one

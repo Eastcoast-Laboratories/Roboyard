@@ -128,6 +128,10 @@ public class SolverDD implements ISolver{
         }catch(InterruptedException e){
             Timber.e(e, "[SOLUTION_SOLVER] SolverDD.run(): Solver interrupted");
             solverStatus = SolverStatus.noSolution;
+        } finally {
+            // Release solver reference to allow GC to reclaim SolverIDDFS instance
+            // (includes states[][], obstacles[][], directions[][] and knownStates)
+            solver = null;
         }
     }
 

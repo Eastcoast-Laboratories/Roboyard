@@ -44,11 +44,11 @@ public class SolverIDDFS extends Solver {
     // These limits allow finding solutions while memory monitoring prevents crashes
     private static int getMaxDepthForMultiGoal(int numRobots) {
         if (numRobots >= 5) {
-            return 18; // Reasonable limit for 5+ robots in multi-goal mode
+            return 18; // 5+ robots: very large branching factor
         } else if (numRobots >= 4) {
-            return 20; // Reasonable limit for 4 robots in multi-goal mode
+            return 25; // 4 robots: DFS call-stack explodes at depth 15+ on 512MB heap
         } else {
-            return 24; // Reasonable limit for 1-3 robots in multi-goal mode
+            return 30; // 1-3 robots: smaller branching factor allows deeper search
         }
     }
     
@@ -76,8 +76,7 @@ public class SolverIDDFS extends Solver {
     private volatile boolean memoryLow = false;
     private int recursionCounter = 0;
     private int memoryCheckInterval; // Check every N recursions (set in constructor)
-    private static final double MEMORY_THRESHOLD_PERCENT = 70.0; // Abort when used > 70%
-    private final long maxKnownStatesBytes; // Max bytes for knownStates (50% of max heap)
+    // Memory checks use freeBytes = maxMemory - totalMemory + freeMemory, abort if < 25% free
     
     private int depthLimit;
     
@@ -100,11 +99,8 @@ public class SolverIDDFS extends Solver {
             getMaxDepthForMultiGoal(board.getNumRobots()) : 
             getMaxDepthForRobots(board.getNumRobots());
         
-        // Set memory check interval: more frequent for multi-goal (higher OOM risk)
-        this.memoryCheckInterval = this.isMultiGoalMode ? 200 : 5000;
-        
-        // Limit knownStates to 50% of max heap to leave room for other threads
-        this.maxKnownStatesBytes = Runtime.getRuntime().maxMemory() / 2;
+        // Set memory check interval: every recursion for multi-goal (DFS can allocate 100s MB between checks)
+        this.memoryCheckInterval = this.isMultiGoalMode ? 1 : 1000;
         
         this.obstacles = new int[MAX_DEPTH][]; // Initialize here
         this.initObstacles(); // Call after MAX_DEPTH and obstacles are initialized
@@ -152,9 +148,12 @@ public class SolverIDDFS extends Solver {
         Logger.println("***** " + this.getClass().getSimpleName() + " *****");
         Logger.println("Options: " + this.getOptionsAsString());
         Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Number of robots: %d, Using MAX_DEPTH: %d", board.getNumRobots(), this.MAX_DEPTH);
-        Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Available memory: %d MB, Max memory: %d MB", 
-                Runtime.getRuntime().freeMemory() / (1024 * 1024),
-                Runtime.getRuntime().maxMemory() / (1024 * 1024));
+        final Runtime rtMem = Runtime.getRuntime();
+        Logger.println(android.util.Log.DEBUG, "DriftingDroid", "[SOLVER_MEMORY] Available memory: %d MB (free=%d total=%d max=%d)", 
+                (rtMem.maxMemory() - rtMem.totalMemory() + rtMem.freeMemory()) / (1024 * 1024),
+                rtMem.freeMemory() / (1024 * 1024),
+                rtMem.totalMemory() / (1024 * 1024),
+                rtMem.maxMemory() / (1024 * 1024));
         
         if (null == this.board.getGoal()) {
             Logger.println("no goal is set - nothing to solve!");
@@ -246,7 +245,7 @@ public class SolverIDDFS extends Solver {
             } catch (OutOfMemoryError oom) {
                 // Emergency: free knownStates immediately to reclaim memory
                 this.knownStates = null;
-                System.gc();
+                // Do NOT call System.gc() here - it can trigger GcWatcher.finalize() timeout on Android
                 Logger.println("[MEMORY] OOM caught in iddfs at depthLimit=" + this.depthLimit + " - freed knownStates");
                 this.memoryLow = true;
             }
@@ -287,9 +286,8 @@ public class SolverIDDFS extends Solver {
                 throw new InterruptedException("Solver was cancelled");
             }
             final Runtime rt = Runtime.getRuntime();
-            final double usedPercent = ((rt.totalMemory() - rt.freeMemory()) * 100.0) / rt.maxMemory();
-            if (usedPercent > MEMORY_THRESHOLD_PERCENT) {
-                Logger.println("[MEMORY] DFS aborted: memory usage at " + String.format("%.1f", usedPercent) + "% (threshold: " + MEMORY_THRESHOLD_PERCENT + "%)");
+            final long freeBytes = rt.maxMemory() - rt.totalMemory() + rt.freeMemory();
+            if (freeBytes < rt.maxMemory() / 2) { // abort if less than 50% free
                 this.memoryLow = true;
                 return;
             }
@@ -380,9 +378,8 @@ public class SolverIDDFS extends Solver {
                 throw new InterruptedException("Solver was cancelled");
             }
             final Runtime rt = Runtime.getRuntime();
-            final double usedPercent = ((rt.totalMemory() - rt.freeMemory()) * 100.0) / rt.maxMemory();
-            if (usedPercent > MEMORY_THRESHOLD_PERCENT) {
-                Logger.println("[MEMORY] DFS aborted: memory usage at " + String.format("%.1f", usedPercent) + "% (threshold: " + MEMORY_THRESHOLD_PERCENT + "%)");
+            final long freeBytes = rt.maxMemory() - rt.totalMemory() + rt.freeMemory();
+            if (freeBytes < rt.maxMemory() / 2) { // abort if less than 50% free
                 this.memoryLow = true;
                 return;
             }
@@ -651,13 +648,47 @@ public class SolverIDDFS extends Solver {
             }
         }
 
+        // Deterministic memory limits (Runtime.freeMemory is unreliable on Android ART):
+        // - maxStates: hard cap on stored states (~600 bytes overhead per state)
+        // - maxBytes: Trie byte limit (25% of heap)
+        // These ensure the solver stops BEFORE exhausting physical RAM.
+        private final int maxStates;
+        private final long maxBytes;
+        private int stateCount = 0;
+        {
+            final long maxHeap = Runtime.getRuntime().maxMemory();
+            // Budget 25% of heap for states at ~600 bytes each
+            maxStates = (int) Math.min(200_000, (maxHeap / 4) / 600);
+            maxBytes = (maxHeap * 25) / 100;
+            Logger.println("[MEMORY] KnownStates maxStates=" + maxStates + " maxBytes=" + (maxBytes >> 20) + "MB (heap=" + (maxHeap >> 20) + "MB)");
+        }
+        
         public boolean add(int[] state, int depth) {
-            // Check if knownStates alone exceeds 50% of max heap - set memoryLow flag
-            if (this.allKeys.getBytesAllocated() > maxKnownStatesBytes) {
+            if (memoryLow) return false;
+            // Deterministic state count limit (O(1) check, no Runtime calls)
+            if (stateCount >= maxStates) {
+                Logger.println("[MEMORY] knownStates aborted: state limit reached (" + maxStates + ")");
                 memoryLow = true;
                 return false;
             }
-            return this.allKeys.add(state, depth);
+            // Expensive Trie-internal check every 500 states
+            if (stateCount > 0 && stateCount % 500 == 0) {
+                final long allocated = this.allKeys.getBytesAllocated();
+                if (allocated > maxBytes) {
+                    Logger.println("[MEMORY] knownStates aborted: Trie " + (allocated >> 20) + "MB > limit " + (maxBytes >> 20) + "MB at " + stateCount + " states");
+                    memoryLow = true;
+                    return false;
+                }
+            }
+            try {
+                final boolean added = this.allKeys.add(state, depth);
+                if (added) stateCount++;
+                return added;
+            } catch (OutOfMemoryError oom) {
+                Logger.println("[MEMORY] OOM in knownStates.add() at " + stateCount + " states - aborting search");
+                memoryLow = true;
+                return false;
+            }
         }
         public final int size() {
             return this.allKeys.theMap.size();

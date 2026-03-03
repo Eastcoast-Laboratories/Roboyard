@@ -72,8 +72,27 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 
 
 9. verhindere, das bei den map generatoren walls im inneren des mittleren carrees generiert werden
-
+10. einen Memory-Gate der wartet bis genug Speicher frei ist, bevor der Solver initialisiert wird.
 ---
 # last prompt:
 
 Das Problem ist: der Hint button checked status kontrolliert hja ob der rein slided oder upslided. Der Hint Button wird aber zu oft checked false (upslide) gesetzt. solange noch keine lösung gefunden ist, soll der auch nicht unchecken. erst, wenn die lösung akzeptiert ist, soll er unchecken. suche, wo der auf checked false gesetzt wird obwohl die lösung noch gar nicht akzeptiert wurde, er soll zwischen den versuchen nicht uncheken
+
+----
+
+
+
+1.
+erstelle auch eine helper funktion in testhelper um die logs zu sehen und zu analysieren
+
+2.
+merke dir: bevor du einen neuen test schreibst immer die TestHelper klasse analysieren was du benutzen kannst
+
+3.
+@GameLogic.java?%7B%22path%22%3A%22%2Fvar%2Fwww%2FRoboyard%2Fapp%2Fsrc%2Fmain%2Fjava%2Froboyard%2Flogic%2Fcore%2FGameLogic.java%22%2C%22ref%22%3A%22%22%7D#L311-316 
+        boolean isMultiTargetMode = (targetColors > 1);
+scheint mir falsch zusein, das ist doch immer true, oder? 
+das multitarget ist -1 und wenn es dabei ist, dann ist die anzahl tagets > NUM_ROBOTS , so könnte man das testen, oder? korrigiere mich, wenn ich falsch liege
+
+4.
+fahre fort mit dem OOM testing mit dem ImpossibleDifficultyNewGameTest.java durch ohne die max_depth zu reduzieren. Es müsste doch genauso möglich sein wie bei einem target, rätsel die 25 züge brauchen zu finden, also  den weg uu berechnen ohne dass die möglichkeiten explodieren. vieleicht is die lösung für mutli-tarets nicht optimal? 
