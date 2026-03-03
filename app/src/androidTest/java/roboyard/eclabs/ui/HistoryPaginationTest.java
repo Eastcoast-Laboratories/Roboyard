@@ -73,7 +73,7 @@ public class HistoryPaginationTest {
                     entry.setMovesMade((int)(Math.random() * 50) + 10);
                     entry.setOptimalMoves((int)(Math.random() * 30) + 5);
                     entry.setBoardSize("12×12");
-                    entry.setDifficulty(i % 4 == 0 ? "Beginner" : i % 4 == 1 ? "Intermediate" : i % 4 == 2 ? "Advanced" : "Expert");
+                    entry.setDifficulty(i % 4); // 0=Beginner, 1=Intermediate, 2=Advanced, 3=Expert
                     entry.setCompletionCount(i % 3 == 0 ? 1 : 0);
                     
                     GameHistoryManager.addHistoryEntry(activity, entry);
