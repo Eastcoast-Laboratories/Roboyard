@@ -883,8 +883,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 
                 // Uncheck hint button if solution was accepted, otherwise keep it checked
                 if (solutionAccepted) {
+                    // Hide live move counter toggle when solution is accepted
+                    // Keep counter enabled - it will re-appear when user opens hints
+                    if (liveMoveCounterToggle != null) {
+                        liveMoveCounterToggle.setVisibility(View.GONE);
+                    }
+
+                    // Hide hint container by unchecking the hint button
                     hintButton.setChecked(false);
-                    Timber.d("[HINT_SYSTEM] Solution accepted - unchecking hint button");
+
+                    Timber.d("[HINT_SYSTEM] Solution accepted - unchecking hint button and hiding toggle (counter stays enabled)");
                 } else {
                     Timber.d("[HINT_SYSTEM] Solver finished - keeping hint button checked (no solution accepted yet)");
                 }
@@ -3656,20 +3664,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     hintContainer.setTranslationY(0f);
                     hintContainer.setAlpha(1f);
                     hintContainer.clearAnimation();
-                    // If live move counter is active, keep container visible with just status + live-move-toggle
-                    // BUT: Never show in level games
-                    if (gameStateManager.isLiveMoveCounterEnabled() && !isLevelGame) {
-                        hintContainer.setVisibility(View.VISIBLE);
-                        prevHintButton.setVisibility(View.GONE);
-                        nextHintButton.setVisibility(View.GONE);
-                        if (liveMoveCounterToggle != null) {
-                            liveMoveCounterToggle.setVisibility(View.VISIBLE);
-                        }
-                        Timber.d("[HINT_SYSTEM] Animation UP completed, keeping container for live move counter");
-                    } else {
-                        hintContainer.setVisibility(View.GONE);
-                        Timber.d("[HINT_SYSTEM] Animation UP completed, container hidden");
-                    }
+                    hintContainer.setVisibility(View.GONE);
+                    Timber.d("[HINT_SYSTEM] Animation UP completed, container hidden");
                 }
             })
             .start();
