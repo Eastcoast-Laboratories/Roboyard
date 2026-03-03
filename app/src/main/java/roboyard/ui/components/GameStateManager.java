@@ -139,7 +139,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long uiTimerElapsedMs = 0;
     private boolean uiTimerWasRunning = false;
     private boolean isNewGameLoaded = false; // Flag to indicate if a new game was just loaded (timer should reset)
-    private boolean shouldResetTimerAfterRegeneration = false; // Flag to signal Fragment to reset timer after regeneration
+    private boolean solutionWasAccepted = false; // Flag to signal Fragment that the solution was accepted
 
     // Game history tracking variables
     private long gameStartTime;
@@ -1899,18 +1899,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
     
     /**
-     * Check if timer should be reset after regeneration
-     * @return true if timer should be reset
+     * Check if the solution was accepted
+     * @return true if the solution was accepted
      */
-    public boolean shouldResetTimerAfterRegeneration() {
-        return shouldResetTimerAfterRegeneration;
+    public boolean solutionWasAccepted() {
+        return solutionWasAccepted;
     }
     
     /**
-     * Clear the timer reset flag (called after timer is reset in Fragment)
+     * Clear the solution accepted flag (called in Fragment)
      */
-    public void clearTimerResetFlag() {
-        this.shouldResetTimerAfterRegeneration = false;
+    public void clearSolutionAcceptedFlag() {
+        this.solutionWasAccepted = false;
         Timber.d("[TIMER] Cleared timer reset flag");
     }
 
@@ -2590,7 +2590,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         
         // Set flag to signal Fragment to reset timer after regeneration
         if (regenerationCount > 0) {
-            shouldResetTimerAfterRegeneration = true;
+            solutionWasAccepted = true;
             Timber.d("[SOLUTION_SOLVER][TIMER] New map accepted after %d regenerations, signaling Fragment to reset timer", regenerationCount);
         }
         
@@ -2986,12 +2986,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 currentSolution = solution;
                 currentSolutionStep = 0;
                 updatePreCompRobotOrder(solution);
+                
+                // Set flag to signal Fragment that solution was accepted
+                solutionWasAccepted = true;
+                
                 isSolverRunning.setValue(false);
                 // Signal to UI that solution was accepted and hint container should be hidden
                 Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] Solution accepted, notifying UI to hide hint container");
-
-                // TODO: stop all other solver threads:
-
             }
         }
 

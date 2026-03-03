@@ -868,19 +868,26 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 }
             } else {
                 // Check if timer should be reset after regeneration
-                if (gameStateManager != null && gameStateManager.shouldResetTimerAfterRegeneration()) {
+                boolean solutionAccepted = gameStateManager.solutionWasAccepted();
+                if (gameStateManager != null && solutionAccepted) {
                     Timber.d("[TIMER] Solver stopped after regeneration - resetting timer to 0:00");
                     resetAndStartTimer();
-                    gameStateManager.clearTimerResetFlag();
+                    gameStateManager.clearSolutionAcceptedFlag();
+                } else if(gameStateManager == null) {
+                    Timber.d("[TIMER] GameStateManager is null - not resetting timer");
                 }
                 
                 // Re-enable hint button after regeneration
                 hintButton.setEnabled(true);
                 hintButton.setAlpha(1.0f);
                 
-                // Don't uncheck hint button here - it should stay checked between solver attempts
-                // Only uncheck when solution is accepted (initializeGame) or user closes manually
-                Timber.d("[HINT_SYSTEM] Solver finished - keeping hint button state");
+                // Uncheck hint button if solution was accepted, otherwise keep it checked
+                if (solutionAccepted) {
+                    hintButton.setChecked(false);
+                    Timber.d("[HINT_SYSTEM] Solution accepted - unchecking hint button");
+                } else {
+                    Timber.d("[HINT_SYSTEM] Solver finished - keeping hint button checked (no solution accepted yet)");
+                }
                 
                 // Enable save map button when solver finishes (solution found or cancelled)
                 if (saveMapButton != null && gameStateManager.getCurrentSolution() != null) {
@@ -3780,70 +3787,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
     @Override
     public void onSolutionCalculationCompleted(GameSolution solution) {
-        Timber.d("[HINT] Solution calculation completed. Solution has %d moves",
-                solution.getMoves().size());
-        
-        // Initialize hints variables
-        totalPossibleHints = solution.getMoves().size();
-        GameState currentState = gameStateManager.getCurrentState().getValue();
-        boolean isLevelGame;
-        if (currentState != null && currentState.getLevelId() > 0) {
-            isLevelGame = true;
-        } else {
-            isLevelGame = false;
-        }
-
-        Timber.d("[HINT] Game state analysis: currentState=%s, levelId=%d, isLevelGame=%b", 
-                currentState != null ? "present" : "null",
-                currentState != null ? currentState.getLevelId() : -1,
-                isLevelGame);
-        
-        // Set number of pre-hints based on game type
-        if (isLevelGame) {
-            Timber.d("[HINT] Level game detected - no pre-hints");
-            numPreHints = 0; // No pre-hints for level games
-            if (currentState != null && currentState.getLevelId() <= 10) {
-                // For levels 1-10, allow two normal hints (handled in hint click)
-                hintButton.setEnabled(true);
-                hintButton.setAlpha(1.0f);
-                Timber.d("[HINT] Level 1-10 - enabling hint button with 2 hint limit");
-            } else {
-                // For levels > 10, disable hint button immediately
-                hintButton.setEnabled(false);
-                hintButton.setAlpha(0.5f);
-                hintButton.setChecked(false); // Ensure it's unchecked
-                hintContainer.setVisibility(View.GONE); // Hide hint container
-                Timber.d("[HINT] Level > 10 - disabling hint button completely");
-            }
-        } else {
-            // Random game - Show pre-hints
-            Timber.d("[HINT] Random game detected - randomizing pre-hints");
-            // randomize between 2-4:
-            int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
-            Timber.d("[HINT] Randomized hint count: %d", randomHintCount);
-            numPreHints = randomHintCount;
-            hintButton.setEnabled(true);
-            hintButton.setAlpha(1.0f);
-        }
-        
-        // Reset hint counter and show pre-hints initially
-        currentHintStep = 0;
-        showingPreHints = true;
-        
-        // Log hint setup
-        Timber.d("[HINT] Hint system initialized: totalMoves=%d, numPreHints=%d, isLevelGame=%b", 
-                totalPossibleHints, numPreHints, isLevelGame);
-        
-        // Don't uncheck hint button here - solution found but not yet accepted
-        // Will be unchecked in initializeGame() when user accepts the solution
-        Timber.d("[HINT_SYSTEM] Solution found - keeping hint button checked until user accepts");
-        
-        // hide the hint text
-        updateStatusText(getString(R.string.solution_found), false);
-        Timber.d("[HINT] UI updated to show solution found");
-        
-        // Initialize the optimal moves button value
-        updateOptimalMovesButton(solution.getMoves().size(), false);
+        // this is never called.
+        // GameStateManager.onSolutionCalculationCompleted is called instead
+        Timber.d("[SOLVER][HINT][DEPRECATED] onSolutionCalculationCompleted was called - %s", solution);
     }
 
     @Override
