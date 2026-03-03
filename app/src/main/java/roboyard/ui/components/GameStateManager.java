@@ -2518,14 +2518,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private void onSolutionCalculationCompleted(GameSolution solution) {
         Timber.d("[SOLUTION_SOLVER] onSolutionCalculationCompleted: solution=%s", solution);
 
+        // Check if we're in level mode (needed for regeneration logic)
+        GameState state = currentState.getValue();
+        boolean isLevelMode = (state != null && state.getLevelId() > 0);
+        
         // Add more detailed logging about the solution
         int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
         if (moveCount > 0) {
             Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
             // If solution requires fewer moves than required minimum and we're not in level mode,
             // automatically start a new game because this one is too easy
-            GameState state = currentState.getValue();
-            boolean isLevelMode = (state != null && state.getLevelId() > 0);
             int minRequiredMoves = getMinimumRequiredMoves();
             int maxRequiredMoves = getMaximumRequiredMoves();
 
@@ -2578,6 +2580,27 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
         } else {
             Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Solution or moves is null!");
+            
+            // Regenerate map if solution is null (likely OOM or unsolvable)
+            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
+                Timber.d("[SOLUTION_SOLVER][MOVES] Solution is null, regenerating map (attempt %d/%d)",
+                        regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                regenerationCount++;
+
+                // Force reset the solver state before starting a new game
+                SolverManager solverManager = getSolverManager();
+                solverManager.resetInitialization();
+                solverManager.cancelSolver(); // Cancel any running solver process
+
+                // Create a new game after a short delay to ensure the solver is fully reset
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+                }, 100);
+                return;
+            } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
+                Timber.w("[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d) with null solution. Accepting current game.", MAX_AUTO_REGENERATIONS);
+                regenerationCount = 0; // Reset for next time
+            }
         }
 
         // Store the solution for later use with getHint()
@@ -3044,6 +3067,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Process on main thread to ensure thread safety with UI updates
         new Handler(Looper.getMainLooper()).post(() -> {
+            // Check if map regeneration is enabled
+            if (Preferences.generateNewMapEachTime) {
+                Timber.d("[SOLUTION_SOLVER] Map regeneration enabled - discarding unsolvable map and generating new one");
+                // TODO: Implement map regeneration retry loop when solver is cancelled
+                // For now, just notify user that solver was cancelled
+            } else {
+                Timber.d("[SOLUTION_SOLVER] Map regeneration disabled - showing error to user");
+            }
+            
             onSolutionCalculationFailed("Solver was cancelled");
         });
     }

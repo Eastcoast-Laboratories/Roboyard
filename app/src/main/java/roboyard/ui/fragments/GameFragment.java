@@ -1541,6 +1541,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 Timber.d("[ROBOTS] Cleared robot paths before starting new game");
             }
             
+            // Cancel all active solvers before generating new map
+            gameStateManager.cancelSolver();
+            Timber.d("[NEW_GAME] Cancelled all active solvers before starting new game");
+            
 			// Reset move counts and history explicitly to ensure all counters are zeroed
 	        gameStateManager.resetMoveCountsAndHistory();
 	        Timber.d("[NEW_GAME] Reset move counts and game history");

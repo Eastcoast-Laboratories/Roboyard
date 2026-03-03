@@ -34,6 +34,7 @@ public class SolverDD implements ISolver{
     private List<Solution> solutions;
     private final RRPiece[] pieces;
     private Board board;
+    private Thread solverThread; // Track the solver thread for cancellation
 
     public SolverDD(){
         solver = null;
@@ -41,6 +42,7 @@ public class SolverDD implements ISolver{
         solutions = null;
         pieces = new RRPiece[Constants.NUM_ROBOTS];
         board = null;
+        solverThread = null;
     }
 
     public void init(ArrayList<GridElement> elements){
@@ -89,6 +91,9 @@ public class SolverDD implements ISolver{
 
     @Override
     public void run() {
+        // Store reference to current thread for cancellation
+        solverThread = Thread.currentThread();
+        Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Solver thread started: %s", solverThread.getName());
 
         if(solver == null){
             Timber.d("[SOLUTION_SOLVER] SolverDD.run(): solver is null, aborting");
@@ -182,10 +187,19 @@ public class SolverDD implements ISolver{
     }
 
     /**
-     * Cancel the solver execution and set status to noSolution
+     * Cancel the solver execution and interrupt the solver thread
      */
     public void cancel() {
+        Timber.d("[SOLUTION_SOLVER] SolverDD.cancel(): Cancelling solver");
         this.solverStatus = SolverStatus.noSolution;
+        
+        // Interrupt the solver thread to allow graceful termination
+        if (solverThread != null && solverThread.isAlive()) {
+            Timber.d("[SOLUTION_SOLVER] SolverDD.cancel(): Interrupting solver thread: %s", solverThread.getName());
+            solverThread.interrupt();
+        } else {
+            Timber.d("[SOLUTION_SOLVER] SolverDD.cancel(): Solver thread is not running");
+        }
     }
 
     /**

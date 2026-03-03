@@ -335,4 +335,88 @@ public class TestHelper {
         
         Timber.d("[TEST_HELPER] Hint auto-move mode set to %d", mode);
     }
+
+    /**
+     * Set difficulty via Settings UI.
+     * Opens Settings, scrolls to difficulty section, clicks the appropriate radio button, goes back.
+     * @param difficultyResId R.id of the difficulty radio button (e.g. R.id.difficulty_impossible)
+     * @throws InterruptedException if thread is interrupted
+     */
+    public static void setDifficulty(int difficultyResId) throws InterruptedException {
+        Timber.d("[TEST_HELPER] Setting difficulty via Settings UI");
+        
+        openSettingsAndScrollDown();
+        Thread.sleep(1000);
+        
+        onView(withId(difficultyResId)).perform(scrollTo(), click());
+        Timber.d("[TEST_HELPER] Clicked difficulty radio button");
+        Thread.sleep(500);
+        
+        pressBack();
+        Thread.sleep(1000);
+        
+        Timber.d("[TEST_HELPER] Difficulty set successfully");
+    }
+
+    /**
+     * Enable Multi-Target game mode via Settings UI.
+     * Opens Settings, clicks Multi-Target radio button, sets robot count, goes back.
+     * @param robotCount number of robots that must reach targets (1-4)
+     * @throws InterruptedException if thread is interrupted
+     */
+    public static void setMultiTargetMode(int robotCount) throws InterruptedException {
+        Timber.d("[TEST_HELPER] Enabling Multi-Target mode with %d robots via Settings UI", robotCount);
+        
+        openSettingsAndScrollDown();
+        Thread.sleep(1000);
+        
+        // Scroll to and click Multi-Target Mode
+        onView(withId(R.id.multi_target_game_mode)).perform(scrollTo(), click());
+        Timber.d("[TEST_HELPER] Clicked Multi-Target game mode");
+        Thread.sleep(1000);
+        
+        // Scroll to robot count spinner and set value
+        onView(withId(R.id.robot_count_spinner)).perform(scrollTo());
+        Thread.sleep(500);
+        
+        // Set robot count programmatically (spinner index = robotCount - 1)
+        final int spinnerIndex = Math.max(0, robotCount - 1);
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Activity activity = getActivityFromInstrumentation();
+            if (activity != null) {
+                android.widget.Spinner spinner = activity.findViewById(R.id.robot_count_spinner);
+                if (spinner != null) {
+                    spinner.setSelection(spinnerIndex);
+                    Timber.d("[TEST_HELPER] Robot count spinner set to index %d (= %d robots)", spinnerIndex, robotCount);
+                }
+            }
+        });
+        Thread.sleep(1000);
+        
+        pressBack();
+        Thread.sleep(1000);
+        
+        Timber.d("[TEST_HELPER] Multi-Target mode enabled with %d robots", robotCount);
+    }
+
+    /**
+     * Set Standard game mode via Settings UI.
+     * Opens Settings, clicks Standard radio button, goes back.
+     * @throws InterruptedException if thread is interrupted
+     */
+    public static void setStandardGameMode() throws InterruptedException {
+        Timber.d("[TEST_HELPER] Setting Standard game mode via Settings UI");
+        
+        openSettingsAndScrollDown();
+        Thread.sleep(1000);
+        
+        onView(withId(R.id.standard_game_mode)).perform(scrollTo(), click());
+        Timber.d("[TEST_HELPER] Clicked Standard game mode");
+        Thread.sleep(500);
+        
+        pressBack();
+        Thread.sleep(1000);
+        
+        Timber.d("[TEST_HELPER] Standard game mode set");
+    }
 }

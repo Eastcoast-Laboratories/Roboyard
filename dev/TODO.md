@@ -71,6 +71,8 @@ führe ihn aus ind finde heraus, wann der speicher voll ist, wenn voll, dann ver
 höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine fragen
 
 
+9. verhindere, das bei den map generatoren walls im inneren des mittleren carrees generiert werden
+
 ---
 # last prompt:
 
