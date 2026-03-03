@@ -2588,10 +2588,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Update solver status
         isSolverRunning.setValue(false);
         
-        // Set flag to signal Fragment to reset timer after regeneration
+        // Set flag to signal Fragment that solution was found and accepted
+        solutionWasAccepted = true;
         if (regenerationCount > 0) {
-            solutionWasAccepted = true;
             Timber.d("[SOLUTION_SOLVER][TIMER] New map accepted after %d regenerations, signaling Fragment to reset timer", regenerationCount);
+        } else {
+            Timber.d("[SOLUTION_SOLVER] Solution found for loaded game, signaling Fragment");
         }
         
         // Reset regeneration count when map is accepted
