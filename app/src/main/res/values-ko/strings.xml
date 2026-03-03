@@ -75,6 +75,11 @@
     <string name="pre_hint_involved_robots">로봇을 이동하세요</string>
     <string name="and">그리고</string>
     <string name="pre_hint_first_move">%1$s 로봇을 먼저 이동하세요</string>
+    <string name="live_move_counter_label_a11y">남은 이동 표시</string>
+    <string name="live_move_counter_optimal">여기서 %1$d 이동</string>
+    <plurals name="live_move_counter_optimal_plural">
+        <item quantity="other">여기서 %1$d 이동</item>
+    </plurals>
     <string name="pre_hint_ready">단계별 힌트를 보여줄 준비가 되었습니다</string>
     <string name="all_hints_shown">모든 힌트가 표시되었습니다</string>
     <string name="no_valid_hint">유효한 힌트가 없습니다</string>
@@ -93,8 +98,14 @@
     <!-- Game stats -->
     <string name="moves_count">%1$d 이동</string>
     <string name="moves_label">이동</string>
+    <plurals name="moves_label_plural">
+        <item quantity="other">이동</item>
+    </plurals>
     <string name="squares_moved">%1$d 칸</string>
     <string name="squares_label">칸</string>
+    <plurals name="squares_label_plural">
+        <item quantity="other">칸</item>
+    </plurals>
     
     <!-- Settings strings -->
     <string name="settings_game_mode">게임 모드:</string>

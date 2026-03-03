@@ -136,8 +136,16 @@
     <string name="move_count_text">Movimientos: %1$d</string>
     <string name="moves_count">%1$d Movimientos</string>
     <string name="moves_label">Movimientos</string>
+    <plurals name="moves_label_plural">
+        <item quantity="one">Movimiento</item>
+        <item quantity="other">Movimientos</item>
+    </plurals>
     <string name="squares_moved">%1$d Casillas</string>
     <string name="squares_label">Casillas</string>
+    <plurals name="squares_label_plural">
+        <item quantity="one">Casilla</item>
+        <item quantity="other">Casillas</item>
+    </plurals>
     <string name="robot_info">Robot %1$s en (%2$d, %3$d)</string>
     <string name="target_info">Objetivo para robot %1$s en (%2$d, %3$d)</string>
     
@@ -207,6 +215,12 @@
     <string name="and">y</string>
     <string name="pre_hint_first_move">Mueve primero el robot %1$s</string>
     <string name="no_solution_found">No se encontró solución</string>
+    <string name="live_move_counter_label_a11y">Mostrar movimientos restantes</string>
+    <string name="live_move_counter_optimal">%1$d movimientos desde aquí</string>
+    <plurals name="live_move_counter_optimal_plural">
+        <item quantity="one">%1$d movimiento desde aquí</item>
+        <item quantity="other">%1$d movimientos desde aquí</item>
+    </plurals>
     <string name="pre_hint_ready">Listo para mostrar pistas paso a paso</string>
     <string name="all_hints_shown">Todas las pistas han sido mostradas</string>
     <string name="no_valid_hint">No hay pista válida disponible</string>

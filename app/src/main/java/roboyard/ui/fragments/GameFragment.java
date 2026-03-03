@@ -617,7 +617,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Observe squares moved - display with smaller text
         gameStateManager.getSquaresMoved().observe(getViewLifecycleOwner(), squares -> {
             if (squaresMovedTextView != null && squares != null) {
-                String text = squares + " " + getString(R.string.squares_label);
+                String text = squares + " " + getResources().getQuantityString(R.plurals.squares_label_plural, squares);
                 SpannableString spannable = new SpannableString(text);
                 // Make entire text smaller (0.6x base size)
                 spannable.setSpan(new android.text.style.RelativeSizeSpan(0.6f), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -2413,7 +2413,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private void updateMoveCount(Integer count) {
         if (moveCountTextView != null && count != null) {
             String countStr = String.valueOf(count);
-            String labelStr = " " + getString(R.string.moves_label);
+            String labelStr = " " + getResources().getQuantityString(R.plurals.moves_label_plural, count);
             String fullText = countStr + labelStr;
             
             SpannableString spannable = new SpannableString(fullText);

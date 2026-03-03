@@ -89,8 +89,16 @@
     <string name="move_count_text">Coups: %1$d</string>
     <string name="moves_count">%1$d Coups</string>
     <string name="moves_label">Coups</string>
+    <plurals name="moves_label_plural">
+        <item quantity="one">Coup</item>
+        <item quantity="other">Coups</item>
+    </plurals>
     <string name="squares_moved">%1$d Carrés</string>
     <string name="squares_label">Carrés</string>
+    <plurals name="squares_label_plural">
+        <item quantity="one">Carré</item>
+        <item quantity="other">Carrés</item>
+    </plurals>
     <string name="board_size">Plateau: %1$dx%2$d</string>
 
     <!-- Game UI Buttons and Messages -->
@@ -135,6 +143,12 @@
     <string name="no_valid_hint">Aucun indice valide disponible</string>
     <string name="error_displaying_hint">Erreur lors de l\'affichage de l\'indice</string>
     <string name="no_solution_found">Aucune solution trouvée</string>
+    <string name="live_move_counter_label_a11y">Afficher les coups restants</string>
+    <string name="live_move_counter_optimal">%1$d coups d\'ici</string>
+    <plurals name="live_move_counter_optimal_plural">
+        <item quantity="one">%1$d coup d\'ici</item>
+        <item quantity="other">%1$d coups d\'ici</item>
+    </plurals>
 
     <!-- Settings Screen -->
     <string name="settings_title">Paramètres</string>
