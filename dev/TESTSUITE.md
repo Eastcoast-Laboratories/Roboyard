@@ -65,8 +65,9 @@ These tests run on the JVM without an Android device or emulator.
 | `SpecialTargetSaveLoadTest`   | ✅ Passing | 5     | Silver robot+target, multi-color target (COLOR_MULTI=-1) serialize as 'ts'/'tm', 2 targets with 1 robot, board targetColors array, synchronizeTargets preserves silver color.                                      | save, load, serialization, silver, multi-color, target, robot, edge-cases     |
 | `DeepLinkBoardParsingTest`    | ✅ Passing | 10    | Deep-link compact format parsing: board:W,H; entry extraction, 12x12 board parsing (not 8x8), robot/target/wall counts, small/large board sizes, compact format detection.                                         | deep-link, board-size, compact-format, parsing, unit-test                     |
 | `NoHintsQualificationTest`    | ✅ Passing | 11    | qualifiesForNoHintsAchievement() regression: after solving optimally without hints, later hint usage must NOT revoke qualification. Tests lastSolvedWithoutHints + lastPerfectlySolvedWithoutHints timestamps.       | no-hints, achievement, history, qualification, regression, unit-test          |
+| `MultipleTargetsSolverTest`   | ✅ Passing | 3     | Multi-target solver support: single goal baseline, 2 goals (green+yellow robots verified at target positions), 3 goals (green+yellow+blue). Tests Board.activeGoals and SolverIDDFS multi-goal check.               | multi-target, solver, tdd, driftingdroids                                    |
 
-**Total unit tests: ~137 in 12 files, all passing.**
+**Total unit tests: ~140 in 13 files, all passing.**
 
 ---
 

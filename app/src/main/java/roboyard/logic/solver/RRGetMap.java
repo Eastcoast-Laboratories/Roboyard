@@ -89,6 +89,7 @@ public class RRGetMap {
 
         int robotCounter = 0;
         boolean targetFound = false;
+        java.util.List<int[]> targetInfoList = new java.util.ArrayList<>(); // [position, colorIndex]
         
         // CRITICAL CHANGE: First process all non-wall elements (targets, robots) before walls
         // This ensures targets get priority over walls at the same position
@@ -113,6 +114,7 @@ public class RRGetMap {
                 int targetColor = colors.getOrDefault(type, Constants.COLOR_PINK);
                 board.addGoal(position, targetColor, 1);
                 targetFound = true;
+                targetInfoList.add(new int[]{position, targetColor});
                 
                 // Set this as the active target
                 board.setGoal(position);
@@ -251,6 +253,29 @@ public class RRGetMap {
         // This prevents the NullPointerException in Board.isSolution01()
         if (!targetFound) {
             throw new RuntimeException("[SOLUTION_SOLVER] No target found in level");
+        }
+
+        // Multi-goal support: if more than 1 target found, set activeGoals
+        if (targetInfoList.size() > 1) {
+            java.util.List<Board.Goal> activeGoals = new java.util.ArrayList<>();
+            for (int[] info : targetInfoList) {
+                int pos = info[0];
+                int color = info[1];
+                for (Board.Goal g : board.getGoals()) {
+                    if (g.position == pos && g.robotNumber == color) {
+                        activeGoals.add(g);
+                        break;
+                    }
+                }
+            }
+            if (activeGoals.size() > 1) {
+                board.setActiveGoals(activeGoals);
+                Timber.d("[SOLUTION_SOLVER] Multi-goal mode: set %d active goals", activeGoals.size());
+                for (Board.Goal g : activeGoals) {
+                    Timber.d("[SOLUTION_SOLVER]   Goal: robot=%d position=%d (%d,%d)", 
+                            g.robotNumber, g.position, g.position % board.width, g.position / board.width);
+                }
+            }
         }
 
         return board;
