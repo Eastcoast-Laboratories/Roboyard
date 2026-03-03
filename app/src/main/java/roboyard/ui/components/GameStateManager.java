@@ -3376,7 +3376,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int optimal = lastSolutionMinMoves;
             int deviation = (optimal > 0) ? (currentMoves + cachedResult) - optimal : 0;
             String deviationStr = (optimal > 0) ? " \u0394" + (deviation >= 0 ? "+" : "") + deviation : "";
-            String text = context.getResources().getQuantityString(R.plurals.live_move_counter_optimal_plural, cachedResult, cachedResult) + deviationStr;
+            String text = roboyard.ui.RoboyardApplication.getAppContext().getResources().getQuantityString(R.plurals.live_move_counter_optimal_plural, cachedResult, cachedResult) + deviationStr;
             liveMoveCounterDeviation.setValue(deviation);
             liveMoveCounterText.setValue(text); // has an observer on the live move counter text in GameFragment.java
             liveSolverCalculating.setValue(false);
@@ -3400,7 +3400,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     int optimal = lastSolutionMinMoves;
                     int deviation = (optimal > 0) ? (currentMoves + remainingMoves) - optimal : 0;
                     String deviationStr = (optimal > 0) ? " \u0394" + (deviation >= 0 ? "+" : "") + deviation : "";
-                    String text = context.getResources().getQuantityString(R.plurals.live_move_counter_optimal_plural, remainingMoves, remainingMoves) + deviationStr;
+                    String text = roboyard.ui.RoboyardApplication.getAppContext().getResources().getQuantityString(R.plurals.live_move_counter_optimal_plural, remainingMoves, remainingMoves) + deviationStr;
                     liveMoveCounterDeviation.setValue(deviation);
                     liveMoveCounterText.setValue(text);
                     Timber.d("[LIVE_SOLVER] Result: %d remaining, %d current, %d optimal, Δ%+d", remainingMoves, currentMoves, optimal, deviation);
