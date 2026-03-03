@@ -41,6 +41,9 @@ import timber.log.Timber;
  * - navigateToSaveLoadScreen() - Navigate to Save/Load screen
  * - navigateToHistoryTab() - Switch to History tab in Save/Load
  * - closeAchievementPopupIfPresent() - Close achievement popup programmatically
+ * - collectLogcatLines(tag, grep, maxLines) - Collect filtered logcat lines for analysis
+ * - dumpLogcat(label, tag, grep, maxLines) - Print logcat lines to test output
+ * - clearLogcat() - Clear logcat buffer for clean test runs
  *
  * Tags: test-helper, espresso, navigation, setup, common-methods
  */
@@ -397,6 +400,75 @@ public class TestHelper {
         Thread.sleep(1000);
         
         Timber.d("[TEST_HELPER] Multi-Target mode enabled with %d robots", robotCount);
+    }
+
+    /**
+     * Collect logcat lines matching a tag or grep pattern.
+     * Useful for verifying solver behavior, memory warnings, or any diagnostic output in tests.
+     *
+     * @param tag     Logcat tag filter (e.g. "DriftingDroid", "GameStateManager"). Pass null to skip tag filter.
+     * @param grep    Additional grep pattern applied to output (e.g. "OOM", "MEMORY"). Pass null to skip.
+     * @param maxLines Maximum number of lines to return (newest first). 0 = unlimited.
+     * @return List of matching log lines (may be empty, never null)
+     */
+    public static java.util.List<String> collectLogcatLines(String tag, String grep, int maxLines) {
+        java.util.List<String> result = new java.util.ArrayList<>();
+        try {
+            java.util.List<String> cmd = new java.util.ArrayList<>();
+            cmd.add("logcat");
+            cmd.add("-d"); // dump and exit
+            if (tag != null && !tag.isEmpty()) {
+                cmd.add("-s");
+                cmd.add(tag);
+            }
+            Process process = Runtime.getRuntime().exec(cmd.toArray(new String[0]));
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (grep == null || line.contains(grep)) {
+                    result.add(line);
+                }
+            }
+            reader.close();
+            process.waitFor();
+        } catch (Exception e) {
+            Timber.w("[TEST_HELPER] collectLogcatLines failed: %s", e.getMessage());
+        }
+        // Return newest lines (tail) if maxLines > 0
+        if (maxLines > 0 && result.size() > maxLines) {
+            result = result.subList(result.size() - maxLines, result.size());
+        }
+        Timber.d("[TEST_HELPER] collectLogcatLines(tag=%s, grep=%s): %d lines", tag, grep, result.size());
+        return result;
+    }
+
+    /**
+     * Print collected logcat lines to the test output for debugging.
+     * @param label  A label to identify the log dump in test output
+     * @param tag    Logcat tag filter (null = all)
+     * @param grep   Grep pattern (null = all)
+     * @param maxLines Max lines (0 = unlimited)
+     */
+    public static void dumpLogcat(String label, String tag, String grep, int maxLines) {
+        java.util.List<String> lines = collectLogcatLines(tag, grep, maxLines);
+        System.out.println("=== LOGCAT DUMP: " + label + " (" + lines.size() + " lines) ===");
+        for (String line : lines) {
+            System.out.println(line);
+        }
+        System.out.println("=== END LOGCAT DUMP: " + label + " ===");
+    }
+
+    /**
+     * Clear logcat buffer. Call at test start to get clean logs for analysis.
+     */
+    public static void clearLogcat() {
+        try {
+            Runtime.getRuntime().exec(new String[]{"logcat", "-c"}).waitFor();
+            Timber.d("[TEST_HELPER] Logcat buffer cleared");
+        } catch (Exception e) {
+            Timber.w("[TEST_HELPER] clearLogcat failed: %s", e.getMessage());
+        }
     }
 
     /**

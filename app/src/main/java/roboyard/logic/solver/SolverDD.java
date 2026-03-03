@@ -132,6 +132,9 @@ public class SolverDD implements ISolver{
             // Release solver reference to allow GC to reclaim SolverIDDFS instance
             // (includes states[][], obstacles[][], directions[][] and knownStates)
             solver = null;
+            // Explicit GC: Android ART doesn't shrink the heap automatically.
+            // Without this, consecutive solver runs accumulate heap pressure until OOM.
+            System.gc();
         }
     }
 
