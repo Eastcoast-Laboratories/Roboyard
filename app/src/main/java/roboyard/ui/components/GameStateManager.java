@@ -2596,8 +2596,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
         } else {
             // moveCount==0: solver hit memory/depth limit or puzzle is unsolvable.
-            // Accept the puzzle as-is instead of regenerating (which causes OOM from rapid solver restarts).
-            Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found (memory/depth limit), accepting puzzle");
+            // Try a new map if regeneration is allowed; otherwise accept as-is.
+            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
+                Timber.d("[SOLUTION_SOLVER][MOVES] No solution found (memory/depth limit), trying new map (regen %d/%d)",
+                        regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                regenerationCount++;
+                SolverManager solverManager = getSolverManager();
+                solverManager.resetInitialization();
+                solverManager.cancelSolver();
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+                }, 100);
+                return;
+            }
+            Timber.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found, accepting puzzle (regen exhausted or disabled)");
         }
 
         // Store the solution for later use with getHint()
@@ -2994,16 +3006,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
                     moveCount, requiredMoves, maxMoves);
 
-            // moveCount==0 means solver couldn't find a solution (memory/depth limit) - accept puzzle as-is
-            if (moveCount == 0) {
-                Timber.d("[DifficultyValidationCallback]: Solver found no solution (memory/depth limit), accepting puzzle");
+            // moveCount==0 means solver couldn't find a solution (memory/depth limit).
+            // Try a new map instead of accepting an unsolved puzzle.
+            if (moveCount == 0 && attemptCount < MAX_ATTEMPTS) {
+                Timber.d("[DifficultyValidationCallback]: Solver found no solution (memory/depth limit), trying new map (attempt %d/%d)", attemptCount, MAX_ATTEMPTS);
+                createValidGame(width, height);
+                return;
+            } else if (moveCount == 0) {
+                // Exhausted attempts - accept puzzle as-is to avoid infinite loop
+                Timber.w("[DifficultyValidationCallback]: No solution after %d attempts, accepting puzzle", attemptCount);
                 validateDifficulty = true;
-                currentSolution = solution;
-                currentSolutionStep = 0;
-                updatePreCompRobotOrder(solution);
                 solutionWasAccepted = true;
                 isSolverRunning.setValue(false);
-                Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] No-solution puzzle accepted, notifying UI");
                 return;
             }
 

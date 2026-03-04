@@ -96,3 +96,22 @@ das multitarget ist -1 und wenn es dabei ist, dann ist die anzahl tagets > NUM_R
 
 4.
 fahre fort mit dem OOM testing mit dem ImpossibleDifficultyNewGameTest.java durch ohne die max_depth zu reduzieren. Es müsste doch genauso möglich sein wie bei einem target, rätsel die 25 züge brauchen zu finden, also  den weg uu berechnen ohne dass die möglichkeiten explodieren. vieleicht is die lösung für mutli-tarets nicht optimal? 
+
+---
+
+
+
+2.
+use collectLogcatLines(), dumpLogcat(), clearLogcat() from TestHelper in ImpossibleDifficultyNewGameTest where applicable
+
+3.
+erhöhe die wartezeit in ImpossibleDifficultyNewGameTest zwischen den klicks auf "New game" auf 60s und zähle in dem test, wie oft er eine lösung mit mind. 17 (bei insane difficulty) findet. der test failt, wenn er innerhalb 5 minuten keine lösung gefunden hat. teste den test aber noch nciht, den er scheint keine komplizierten llösungen mehr zu finden auch ohne multi-target mode . Aber
+erstelle zuerst einen test in ImpossibleDifficultyNewGameTest ohne multi-target-mode mit insane und lasse den 5x laufen mit new game und beweise, dass er lösungen findet 
+
+4. er findet jetzt keine lösungen mahr über 12 züge, auch ncint im normal mode ohne multi-target! irgendwas an deinen änderungen in den letztten 2 commits am solver lässt den nach ein paar verrworfenen maps hängen. schau dir die commits an was an dem solver algorythmus geaendert wurde und entferne die änderung, die um hängen führt und teste mit dem unittest bis das wieder läuft. erhängt jetzt bei dieser message:
+
+[MEMORY] Stopping search: memory was critically low during depth 12
+
+dann bricht er aber nicht so ab, dass die map verworfen werden kann und eine neue ausprobierrt wird, sondern hängt dann fest und macht nicht weiter
+
+löse das zuerst, dass er die map dann errfolgreich verrwirft und weiter probiert
