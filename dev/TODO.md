@@ -73,6 +73,9 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 
 9. verhindere, das bei den map generatoren walls im inneren des mittleren carrees generiert werden
 10. einen Memory-Gate der wartet bis genug Speicher frei ist, bevor der Solver initialisiert wird.
+
+- Wenn man zu schnell die auto-hints durchklickt gibts fehler, baue einen timeout von 1s ein, mit der man die hints durchklicken kann, wenn auto-hint aktiv ist
+  
 ---
 # last prompt:
 
@@ -98,5 +101,11 @@ das multitarget ist -1 und wenn es dabei ist, dann ist die anzahl tagets > NUM_R
 fahre fort mit dem OOM testing mit dem ImpossibleDifficultyNewGameTest.java durch ohne die max_depth zu reduzieren. Es müsste doch genauso möglich sein wie bei einem target, rätsel die 25 züge brauchen zu finden, also  den weg uu berechnen ohne dass die möglichkeiten explodieren. vieleicht is die lösung für mutli-tarets nicht optimal? 
 
 ---
+prompt 
+
+vergiss micht die comit message am ende
+
+benutze bestehende unittests oder erstelle einen neuen wenn es keinen gibt, der mit espresso in der ui wirklich kllcikt und das alles durchtestet
 
 
+höre erst auf, wenn du den fehler gefunden hast und nachbauen konntest und repariert hast

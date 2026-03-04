@@ -239,6 +239,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
+        loadedSolutions = null;
         preCompRobotOrder.clear();
         resetSolverRestartCount();
         resetLastSolutionMinMoves();
@@ -285,6 +286,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear any existing solution to prevent it from being reused
         currentSolution = null;
         currentSolutionStep = 0;
+        loadedSolutions = null;
         preCompRobotOrder.clear();
 
         // Load level from assets
@@ -535,6 +537,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         clearNextMovesCache();
         currentSolution = null;
         currentSolutionStep = 0;
+        loadedSolutions = null;
         preCompRobotOrder.clear();
         getSolverManager().resetInitialization();
         Timber.d("[GAME_LOAD] Cleared old game data and reset solver for new map");
@@ -2785,6 +2788,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[SOLUTION_SOLVER] onSolutionCalculationStarted");
         currentSolution = null;
         currentSolutionStep = 0;
+        loadedSolutions = null;
 
         // Notify callback if provided
         if (solutionCallback != null) {
@@ -2927,6 +2931,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Clear any partial solution
         currentSolution = null;
         currentSolutionStep = 0;
+        loadedSolutions = null;
 
         // Update solver status
         isSolverRunning.setValue(false);
