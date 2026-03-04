@@ -110,6 +110,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Solution state
     private GameSolution currentSolution = null;
     private int currentSolutionStep = 0;
+    private List<GameSolution> loadedSolutions = null; // Solutions loaded from save file for re-saving
 
     // Pre-computation: remembered robot order from last known solution.
     // Survives solver restarts so preComputeNextMoves can prioritize correctly.
@@ -560,6 +561,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Set predefined solution in SolverManager so solver doesn't need to run
                 SolverManager solverManager = getSolverManager();
                 if (solverManager != null && currentSolution.getMoves() != null) {
+                    // Store the loaded solutions in GameStateManager for re-saving
+                    this.loadedSolutions = loadedSolutions;
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Stored %d solutions in GameStateManager for re-saving", loadedSolutions.size());
                     // Convert solution to string format for predefined solution
                     // Use the same format as serializeAllSolutions: colorDirection (e.g., 0U,1R,0D,1L)
                     StringBuilder solutionStr = new StringBuilder();
@@ -1037,6 +1041,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     private String serializeAllSolutions() {
         try {
+            // First check if we have loaded solutions from a save file
+            if (loadedSolutions != null && !loadedSolutions.isEmpty()) {
+                Timber.d("[SOLUTIONS_SAVE_LOAD] Using %d loaded solutions for re-saving", loadedSolutions.size());
+                return serializeGameSolutions(loadedSolutions);
+            }
+            
             SolverManager solverManager = getSolverManager();
             if (solverManager == null) {
                 Timber.d("[SOLUTIONS_SAVE_LOAD] SolverManager is null");
@@ -1118,6 +1128,70 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             
         } catch (Exception e) {
             Timber.e(e, "[SOLUTIONS_SAVE_LOAD] Error serializing solutions: %s", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Serialize GameSolution objects directly (used for re-saving loaded games)
+     * @param gameSolutions List of GameSolution objects to serialize
+     * @return Solutions tag string or null if no solutions available
+     */
+    private String serializeGameSolutions(List<GameSolution> gameSolutions) {
+        try {
+            if (gameSolutions == null || gameSolutions.isEmpty()) {
+                Timber.d("[SOLUTIONS_SAVE_LOAD] No game solutions to serialize");
+                return null;
+            }
+            
+            StringBuilder sb = new StringBuilder("SOLUTIONS:");
+            boolean first = true;
+            int serializedCount = 0;
+            
+            for (GameSolution gameSolution : gameSolutions) {
+                if (gameSolution == null || gameSolution.getMoves() == null || gameSolution.getMoves().isEmpty()) {
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Skipping empty solution");
+                    continue;
+                }
+                
+                if (!first) {
+                    sb.append("|");
+                }
+                first = false;
+                
+                // Encode each move as colorDirection
+                boolean firstMove = true;
+                for (IGameMove move : gameSolution.getMoves()) {
+                    if (!firstMove) {
+                        sb.append(",");
+                    }
+                    firstMove = false;
+                    
+                    // Cast to RRGameMove to access methods
+                    roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                    int color = rrMove.getColor();
+                    int direction = rrMove.getDirection();
+                    
+                    sb.append(color);
+                    switch (direction) {
+                        case 1: sb.append("U"); break; // UP
+                        case 2: sb.append("R"); break; // RIGHT
+                        case 4: sb.append("D"); break; // DOWN
+                        case 8: sb.append("L"); break; // LEFT
+                        default: sb.append("?"); break;
+                    }
+                }
+                
+                serializedCount++;
+            }
+            
+            sb.append(";");
+            
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Serialized %d game solutions", serializedCount);
+            return sb.toString();
+            
+        } catch (Exception e) {
+            Timber.e(e, "[SOLUTIONS_SAVE_LOAD] Error serializing game solutions: %s", e.getMessage());
             return null;
         }
     }

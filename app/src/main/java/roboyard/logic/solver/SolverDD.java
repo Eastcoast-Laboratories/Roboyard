@@ -145,6 +145,17 @@ public class SolverDD implements ISolver{
     public List<Solution> getSolutionList(){
         return this.solutions;
     }
+    
+    /**
+     * Set solutions from a loaded save file
+     * This allows re-saving games without re-running the solver
+     * @param solutions List of Solution objects to store
+     */
+    public void setSolutions(List<Solution> solutions) {
+        this.solutions = solutions;
+        Timber.d("[SOLUTIONS_SAVE_LOAD] SolverDD.setSolutions(): Set %d solutions", 
+                solutions != null ? solutions.size() : 0);
+    }
 
     /**
      * get the solution number num from the list of found different solutions and add all moves to the result

@@ -165,6 +165,19 @@ public class SolverManager implements Runnable {
     }
     
     /**
+     * Set loaded solutions from a save file so they can be re-saved
+     * This is called when loading a game that has solutions stored
+     * @param solutions List of Solution objects to store
+     */
+    public void setLoadedSolutions(List<Solution> solutions) {
+        if (solver instanceof SolverDD) {
+            ((SolverDD) solver).setSolutions(solutions);
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Set %d loaded solutions in SolverManager", 
+                    solutions != null ? solutions.size() : 0);
+        }
+    }
+    
+    /**
      * Starts the solver in a background thread
      */
     public void startSolver() {
