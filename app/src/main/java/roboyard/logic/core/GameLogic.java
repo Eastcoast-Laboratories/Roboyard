@@ -308,9 +308,11 @@ public class GameLogic {
         Timber.d("[TARGET PLACEMENT] Starting target placement with difficulty=%d, targetMustBeInCorner=%b", 
                 currentLevel, targetMustBeInCorner);
         
+        // TODO: find a way for the solver to also check for multicolor targets (nice-to-have)
         // Multi-target mode validation: multi-colored targets not allowed when targetColors > 1
         boolean isMultiTargetMode = (targetColors > 1);
         if (isMultiTargetMode && allowMulticolorTarget) {
+            allowMulticolorTarget = false;
             Timber.w("[TARGET_MULTI] Multi-colored target disabled: multi-target mode active (targetColors=%d)", targetColors);
         }
         
