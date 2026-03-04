@@ -48,6 +48,7 @@ public class GameState implements Serializable {
     private long startTime;
     private int moveCount;
     private int robotCount = 1; // Default to 1 robot per color
+    private String savedSolutions; // Serialized solutions from save file
     private int targetColorsCount = Constants.NUM_ROBOTS; // Default to 4 different target colors
     private boolean completed = false;
     
@@ -383,6 +384,19 @@ public class GameState implements Serializable {
         this.levelName = levelName;
     }
     
+    /**
+     * Get the saved solutions string from save file
+     */
+    public String getSavedSolutions() {
+        return savedSolutions;
+    }
+    
+    /**
+     * Set the saved solutions string (used when loading from save file)
+     */
+    public void setSavedSolutions(String savedSolutions) {
+        this.savedSolutions = savedSolutions;
+    }
     
     /**
      * Get the move count
@@ -601,9 +615,9 @@ public class GameState implements Serializable {
             String fileName = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
             File saveFile = new File(saveDir, fileName);
             
-            Timber.d("Attempting to load game from slot %d with filename: %s", slotId, fileName);
-            Timber.d("Save directory path: %s, exists: %s", saveDir.getAbsolutePath(), saveDir.exists());
-            Timber.d("Save file path: %s, exists: %s, size: %d bytes", 
+            Timber.d("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Attempting to load game from slot %d with filename: %s", slotId, fileName);
+            Timber.d("[GAME_LOAD] Save directory path: %s, exists: %s", saveDir.getAbsolutePath(), saveDir.exists());
+            Timber.d("[GAME_LOAD] Save file path: %s, exists: %s, size: %d bytes", 
                   saveFile.getAbsolutePath(), saveFile.exists(), saveFile.exists() ? saveFile.length() : 0);
             
             if (!saveFile.exists()) {
@@ -624,6 +638,18 @@ public class GameState implements Serializable {
             
             GameState state = parseFromSaveData(saveData.toString(), context);
             
+            // Extract and store solutions from metadata if available
+            if (state != null) {
+                Map<String, String> metadata = roboyard.ui.components.GameStateManager.extractMetadataFromSaveData(saveData.toString());
+                if (metadata != null && metadata.containsKey("SOLUTIONS")) {
+                    String solutionsStr = metadata.get("SOLUTIONS");
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Found SOLUTIONS in metadata: %s", solutionsStr);
+                    state.setSavedSolutions(solutionsStr);
+                } else {
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] No SOLUTIONS found in save metadata");
+                }
+            }
+            
             // Debug: verify that targets were properly loaded
             if (state != null) {
                 int targetCount = 0;
@@ -633,7 +659,7 @@ public class GameState implements Serializable {
                 for (GameElement element : state.getGameElements()) {
                     if (element.getType() == GameElement.TYPE_TARGET) {
                         targetCount++;
-                        Timber.d("[GAME_LOAD_VERIFY] Found target in gameElements at (%d,%d) with color %d", 
+                        Timber.d("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Found target in gameElements at (%d,%d) with color %d", 
                                element.getX(), element.getY(), element.getColor());
                     }
                 }
@@ -644,33 +670,33 @@ public class GameState implements Serializable {
                         for (int x = 0; x < state.getWidth(); x++) {
                             if (state.getCellType(x, y) == Constants.TYPE_TARGET) {
                                 targetCount++;
-                                Timber.d("[GAME_LOAD_VERIFY] Found target in board array at (%d,%d) with color %d", 
+                                Timber.d("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Found target in board array at (%d,%d) with color %d", 
                                        x, y, state.getTargetColor(x, y));
                             }
                         }
                     }
                 }
                 
-                Timber.d("[GAME_LOAD_VERIFY] Loaded GameState has %d targets", targetCount);
+                Timber.d("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Loaded GameState has %d targets", targetCount);
                 
                 if (targetCount == 0) {
-                    Timber.e("[GAME_LOAD_ERROR] NO TARGETS FOUND after loading save file %s", fileName);
+                    Timber.e("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] NO TARGETS FOUND after loading save file %s", fileName);
                     // Try to examine the save file contents to debug this issue
                     String[] contentLines = saveData.toString().split("\n");
                     for (int i = 0; i < Math.min(contentLines.length, 20); i++) {
-                        Timber.e("[GAME_LOAD_ERROR] Line %d: %s", i, contentLines[i]);
+                        Timber.e("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Line %d: %s", i, contentLines[i]);
                     }
                     // Don't load games without targets - this is a critical error
                     Throwable t = new Throwable();
-                    Timber.e(t, "[GAME_LOAD_ERROR] Stack trace for no target found");
-                    throw new IllegalStateException("[GAME_LOAD_ERROR] Cannot load game: no targets found in save file");
+                    Timber.e(t, "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Stack trace for no target found");
+                    throw new IllegalStateException("[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Cannot load game: no targets found in save file");
                 }
             }
             
             return state;
             
         } catch (IOException e) {
-            Timber.e(e, "Error loading saved game from slot %d", slotId);
+            Timber.e(e, "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Error loading saved game from slot %d", slotId);
             return null;
         }
     }

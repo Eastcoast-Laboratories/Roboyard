@@ -413,6 +413,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[GAME_LOAD] Analyzing loaded game data");
         Timber.d("[GAME_LOAD] Board size: %d x %d", newState.getWidth(), newState.getHeight());
         Timber.d("[GAME_LOAD] Map name: %s", newState.getLevelName());
+        
+        // Store saved solutions string for later use (after reset)
+        String savedSolutionsStr = newState.getSavedSolutions();
+        if (savedSolutionsStr != null && !savedSolutionsStr.isEmpty()) {
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Found saved solutions in metadata: %s", savedSolutionsStr);
+        }
 
         // Log all game elements
         int robotCount = 0;
@@ -539,9 +545,69 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Initialize solver with grid elements from the loaded map
         initializeSolverForState(newState);
         
-        // Start calculating the solution automatically for the loaded map
-        Timber.d("[GAME_LOAD] Starting solver for loaded map");
-        calculateSolutionAsync(null);
+        // NOW deserialize and set solutions AFTER reset and initialization
+        if (savedSolutionsStr != null && !savedSolutionsStr.isEmpty()) {
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Deserializing saved solutions after reset: %s", savedSolutionsStr);
+            List<GameSolution> loadedSolutions = deserializeSolutions(savedSolutionsStr);
+            if (loadedSolutions != null && !loadedSolutions.isEmpty()) {
+                // Use the first solution as the current solution
+                this.currentSolution = loadedSolutions.get(0);
+                this.currentSolutionStep = 0;
+                Timber.d("[SOLUTIONS_SAVE_LOAD] Loaded %d solutions from save, using first solution with %d moves",
+                        loadedSolutions.size(), 
+                        currentSolution.getMoves() != null ? currentSolution.getMoves().size() : 0);
+                
+                // Set predefined solution in SolverManager so solver doesn't need to run
+                SolverManager solverManager = getSolverManager();
+                if (solverManager != null && currentSolution.getMoves() != null) {
+                    // Convert solution to string format for predefined solution
+                    // Use the same format as serializeAllSolutions: colorDirection (e.g., 0U,1R,0D,1L)
+                    StringBuilder solutionStr = new StringBuilder();
+                    for (IGameMove move : currentSolution.getMoves()) {
+                        if (solutionStr.length() > 0) {
+                            solutionStr.append(" ");
+                        }
+                        // Cast to RRGameMove to access methods
+                        roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                        int color = rrMove.getColor();
+                        int direction = rrMove.getDirection();
+                        
+                        // Append color as digit
+                        solutionStr.append(color);
+                        
+                        // Append direction using same codes as serializeAllSolutions
+                        Timber.d("[SOLUTIONS_SAVE_LOAD] interpreting color and binary direction " + color + "-" + direction + " in solution");
+                        switch (direction) {
+                            case 1: solutionStr.append("U"); break; // UP
+                            case 2: solutionStr.append("R"); break; // RIGHT
+                            case 4: solutionStr.append("D"); break; // DOWN
+                            case 8: solutionStr.append("L"); break; // LEFT
+                            default:
+                                Timber.e("[SOLUTIONS_SAVE_LOAD] unknown direction " + direction + " in solution");
+                                solutionStr.append(direction);
+                            break;
+                        }
+                    }
+                    solverManager.setPredefinedSolution(solutionStr.toString(), currentSolution.getMoves().size());
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Set predefined solution in SolverManager: %s", solutionStr.toString());
+                }
+            }
+        }
+        
+        // Only start solver if no solution was loaded from save file
+        if (currentSolution == null || currentSolution.getMoves() == null || currentSolution.getMoves().isEmpty()) {
+            Timber.d("[GAME_LOAD] No saved solution found, starting solver for loaded map");
+            calculateSolutionAsync(null);
+        } else {
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Using loaded solution with %d moves, skipping solver calculation", 
+                    currentSolution.getMoves().size());
+            // Mark solver as not running since we're using a pre-loaded solution
+            isSolverRunning.setValue(false);
+            // Notify that solution is ready
+            if (solutionCallback != null) {
+                solutionCallback.onSolutionCalculationCompleted(currentSolution);
+            }
+        }
 
         return true;
     }
@@ -811,6 +877,27 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.d("[SAVEDATA] Added map signature tag");
                 }
             }
+            
+            // Add all solver solutions if available
+            if (!enhancedSaveData.toString().contains("SOLUTIONS:")) {
+                String solutionsTag = serializeAllSolutions();
+                if (solutionsTag != null && !solutionsTag.isEmpty()) {
+                    int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
+                    enhancedSaveData.insert(insertPos, solutionsTag);
+                    // Count solutions: extract value between SOLUTIONS: and ;
+                    String solutionsValue = solutionsTag.substring("SOLUTIONS:".length(), solutionsTag.length() - 1);
+                    int solutionCount = 0;
+                    if (!solutionsValue.isEmpty()) {
+                        String[] parts = solutionsValue.split("\\|");
+                        for (String part : parts) {
+                            if (!part.trim().isEmpty()) {
+                                solutionCount++;
+                            }
+                        }
+                    }
+                    Timber.d("[SAVEDATA] Added solutions tag with %d solutions", solutionCount);
+                }
+            }
 
             // If this is an autosave (slot 0), store settings metadata for quick comparison
             if (saveId == 0) {
@@ -941,53 +1028,160 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
-     * Load a saved game from a specific slot
-     *
-     * @param context The context
-     * @param slotId  The save slot ID
-     * @return True if successful, false otherwise
+     * Serialize all solver solutions to a compact string format for saving
+     * Format: SOLUTIONS:0U,1R,0D|0U,2L,1D|...
+     * Each solution separated by |, each move as colorDirection (0U = robot 0 UP)
+     * Directions: U=UP, R=RIGHT, D=DOWN, L=LEFT
+     * 
+     * @return Solutions tag string or null if no solutions available
      */
-    public boolean loadSavedGame(Context context, int slotId) {
+    private String serializeAllSolutions() {
         try {
-            // Get save file path
-            String savePath = FileReadWrite.getSaveGamePath((Activity) context, slotId);
-            String saveData = FileReadWrite.loadAbsoluteData(savePath);
-
-            if (saveData != null && !saveData.isEmpty()) {
-                // Extract metadata
-                Map<String, String> metadata = extractMetadataFromSaveData(saveData);
-
-                // Store metadata for access by other methods
-                if (metadata != null) {
-                    if (metadata.containsKey("MAPNAME")) {
-                        this.currentMapName = metadata.get("MAPNAME");
-                    }
-
-                    if (metadata.containsKey("TIME")) {
-                        try {
-                            this.startTime = Long.parseLong(metadata.get("TIME"));
-                        } catch (NumberFormatException e) {
-                            Timber.e("Invalid time format: %s", metadata.get("TIME"));
-                        }
-                    }
-                }
-
-                // Create minimap for this save
-                try {
-                    this.minimap = createMinimapFromSaveData(context, saveData);
-                } catch (Exception e) {
-                    Timber.e(e, "Error creating minimap for slot %d", slotId);
-                }
-
-                return true;
+            SolverManager solverManager = getSolverManager();
+            if (solverManager == null) {
+                Timber.d("[SOLUTIONS_SAVE_LOAD] SolverManager is null");
+                return null;
             }
-
-            return false;
+            
+            List<driftingdroids.model.Solution> solutions = solverManager.getSolutionList();
+            if (solutions == null) {
+                Timber.d("[SOLUTIONS_SAVE_LOAD] Solution list is null");
+                return null;
+            }
+            if (solutions.isEmpty()) {
+                Timber.d("[SOLUTIONS_SAVE_LOAD] Solution list is empty (size=0)");
+                return null;
+            }
+            
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Found %d solutions from solver", solutions.size());
+            
+            StringBuilder sb = new StringBuilder("SOLUTIONS:");
+            boolean first = true;
+            int serializedCount = 0;
+            
+            for (int i = 0; i < solutions.size(); i++) {
+                GameSolution gameSolution = solverManager.getSolution(i);
+                if (gameSolution == null) {
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: GameSolution is null", i);
+                    continue;
+                }
+                if (gameSolution.getMoves() == null) {
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Moves list is null", i);
+                    continue;
+                }
+                if (gameSolution.getMoves().isEmpty()) {
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Moves list is empty", i);
+                    continue;
+                }
+                
+                Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Has %d moves", i, gameSolution.getMoves().size());
+                
+                if (!first) {
+                    sb.append("|");
+                }
+                first = false;
+                
+                // Encode each move as colorDirection
+                boolean firstMove = true;
+                for (IGameMove move : gameSolution.getMoves()) {
+                    if (!firstMove) {
+                        sb.append(",");
+                    }
+                    firstMove = false;
+                    
+                    // Cast to RRGameMove to access methods
+                    roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                    int color = rrMove.getColor();
+                    int direction = rrMove.getDirection();
+                    
+                    sb.append(color);
+                    Timber.d("[SOLUTIONS_SAVE_LOAD] serializing direction " + direction);
+                    switch (direction) {
+                        case 1: sb.append("U"); break; // UP
+                        case 2: sb.append("R"); break; // RIGHT
+                        case 4: sb.append("D"); break; // DOWN
+                        case 8: sb.append("L"); break; // LEFT
+                        default:
+                            Timber.e("[SOLUTIONS_SAVE_LOAD] unknown direction " + direction);
+                            sb.append(direction);
+                        break;
+                    }
+                }
+                
+                serializedCount++;
+            }
+            
+            sb.append(";");
+            
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Serialized %d solutions", serializedCount);
+            return sb.toString();
+            
         } catch (Exception e) {
-            Timber.e(e, "Error loading saved game from slot %d", slotId);
-            return false;
+            Timber.e(e, "[SOLUTIONS_SAVE_LOAD] Error serializing solutions: %s", e.getMessage());
+            return null;
         }
     }
+    
+    /**
+     * Deserialize solutions from save data and use them instead of running solver
+     * 
+     * @param solutionsString The SOLUTIONS: tag value from save metadata
+     * @return List of GameSolution objects or null if parsing failed
+     */
+    private List<GameSolution> deserializeSolutions(String solutionsString) {
+        try {
+            if (solutionsString == null || solutionsString.isEmpty()) {
+                return null;
+            }
+            
+            List<GameSolution> solutions = new ArrayList<>();
+            String[] solutionStrings = solutionsString.split("\\|");
+            
+            for (String solutionStr : solutionStrings) {
+                if (solutionStr.isEmpty()) {
+                    continue;
+                }
+                
+                GameSolution solution = new GameSolution();
+                String[] moves = solutionStr.split(",");
+                
+                for (String moveStr : moves) {
+                    if (moveStr.length() < 2) {
+                        continue;
+                    }
+                    
+                    // Parse color (all chars except last)
+                    int color = Integer.parseInt(moveStr.substring(0, moveStr.length() - 1));
+                    
+                    // Parse direction (last char)
+                    char dirChar = moveStr.charAt(moveStr.length() - 1);
+                    roboyard.pm.ia.ricochet.ERRGameMove direction;
+                    switch (dirChar) {
+                        case 'U': direction = roboyard.pm.ia.ricochet.ERRGameMove.UP; break;
+                        case 'R': direction = roboyard.pm.ia.ricochet.ERRGameMove.RIGHT; break;
+                        case 'D': direction = roboyard.pm.ia.ricochet.ERRGameMove.DOWN; break;
+                        case 'L': direction = roboyard.pm.ia.ricochet.ERRGameMove.LEFT; break;
+                        default: direction = roboyard.pm.ia.ricochet.ERRGameMove.NOMOVE; break;
+                    }
+                    
+                    // Create robot piece (position 0,0 is placeholder, color is what matters)
+                    roboyard.pm.ia.ricochet.RRPiece piece = new roboyard.pm.ia.ricochet.RRPiece(0, 0, color, color);
+                    solution.addMove(new roboyard.pm.ia.ricochet.RRGameMove(piece, direction));
+                }
+                
+                solutions.add(solution);
+            }
+            
+            Timber.d("[SOLUTIONS_SAVE_LOAD] Deserialized %d solutions from save data", solutions.size());
+            return solutions;
+            
+        } catch (Exception e) {
+            Timber.e(e, "[SOLUTIONS_SAVE_LOAD] Error deserializing solutions: %s", e.getMessage());
+            return null;
+        }
+    }
+
+    
 
     /**
      * Extract metadata from save data
@@ -1005,12 +1199,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (endOfFirstLine > 0) {
                 String metadataLine = saveData.substring(1, endOfFirstLine);
 
-                // Parse metadata entries (MAPNAME:name;TIME:seconds;MOVES:count;)
+                // Parse metadata entries (MAPNAME:name;TIME:seconds;MOVES:count;SOLUTIONS:0U,1R|0D,1L;)
+                // Note: SOLUTIONS can contain | separators, so we need to handle it specially
                 String[] entries = metadataLine.split(";");
                 for (String entry : entries) {
-                    String[] keyValue = entry.split(":");
-                    if (keyValue.length == 2) {
-                        metadata.put(keyValue[0], keyValue[1]);
+                    int colonPos = entry.indexOf(":");
+                    if (colonPos > 0) {
+                        String key = entry.substring(0, colonPos);
+                        String value = entry.substring(colonPos + 1);
+                        metadata.put(key, value);
                     }
                 }
             }

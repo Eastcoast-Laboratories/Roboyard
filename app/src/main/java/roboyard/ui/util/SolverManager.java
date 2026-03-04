@@ -153,7 +153,7 @@ public class SolverManager implements Runnable {
     public void setPredefinedSolution(String solution, int numMoves) {
         this.predefinedSolution = solution;
         this.predefinedNumMoves = numMoves;
-        Timber.d("[SOLUTION_SOLVER] SolverManager.setPredefinedSolution(): Set predefined solution with %d moves", numMoves);
+        Timber.d("[SOLUTION_SOLVER][SOLUTIONS_SAVE_LOAD] SolverManager.setPredefinedSolution(): Set predefined solution with %d moves", numMoves);
     }
     
     /**
@@ -296,23 +296,23 @@ public class SolverManager implements Runnable {
         try {
             // Check if we have a predefined solution - use it instead of running the solver
             if (hasPredefinedSolution()) {
-                Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Using predefined solution with %d moves", idForLog, predefinedNumMoves);
+                Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Using predefined solution with %d moves", idForLog, predefinedNumMoves);
                 currentSolution = parsePredefinedSolution(predefinedSolution);
                 if (currentSolution != null && currentSolution.getMoves() != null) {
                     int moveCount = currentSolution.getMoves().size();
-                    Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Parsed predefined solution with %d moves", idForLog, moveCount);
+                    Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Parsed predefined solution with %d moves", idForLog, moveCount);
                     if (listener != null) {
                         listener.onSolverFinished(true, moveCount, 1);
                     }
                     return;
                 } else {
-                    Timber.w("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Failed to parse predefined solution, falling back to solver", idForLog);
+                    Timber.w("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Failed to parse predefined solution, falling back to solver", idForLog);
                 }
             }
             
-            Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Starting solver with status: %s", idForLog, solver.getSolverStatus());
+            Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Starting solver with status: %s", idForLog, solver.getSolverStatus());
             solver.run();
-            Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Solver.run() completed, checking status...", idForLog);
+            Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Solver.run() completed, checking status...", idForLog);
             // Check if the solver found a solution
             if (solver.getSolverStatus().isFinished()) {
                 // Process solver results
