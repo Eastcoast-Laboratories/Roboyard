@@ -648,29 +648,20 @@ public class SolverIDDFS extends Solver {
             }
         }
 
-        // Deterministic memory limits (Runtime.freeMemory is unreliable on Android ART):
-        // - maxStates: hard cap on stored states (~600 bytes overhead per state)
-        // - maxBytes: Trie byte limit (25% of heap)
-        // These ensure the solver stops BEFORE exhausting physical RAM.
-        private final int maxStates;
+        // Deterministic memory limit (Runtime.freeMemory is unreliable on Android ART):
+        // - maxBytes: Trie byte limit (70% of heap) - checked every 500 states
+        // This ensures the solver stops BEFORE exhausting physical RAM.
         private final long maxBytes;
         private int stateCount = 0;
         {
             final long maxHeap = Runtime.getRuntime().maxMemory();
-            // Budget 25% of heap for states at ~600 bytes each
-            maxStates = (int) Math.min(200_000, (maxHeap / 4) / 600);
-            maxBytes = (maxHeap * 25) / 100;
-            Logger.println("[MEMORY] KnownStates maxStates=" + maxStates + " maxBytes=" + (maxBytes >> 20) + "MB (heap=" + (maxHeap >> 20) + "MB)");
+            // Budget 70% of heap for Trie states
+            maxBytes = (maxHeap * 70) / 100;
+            Logger.println("[MEMORY] KnownStates maxBytes=" + (maxBytes >> 20) + "MB (heap=" + (maxHeap >> 20) + "MB)");
         }
         
         public boolean add(int[] state, int depth) {
             if (memoryLow) return false;
-            // Deterministic state count limit (O(1) check, no Runtime calls)
-            if (stateCount >= maxStates) {
-                Logger.println("[MEMORY] knownStates aborted: state limit reached (" + maxStates + ")");
-                memoryLow = true;
-                return false;
-            }
             // Expensive Trie-internal check every 500 states
             if (stateCount > 0 && stateCount % 500 == 0) {
                 final long allocated = this.allKeys.getBytesAllocated();
