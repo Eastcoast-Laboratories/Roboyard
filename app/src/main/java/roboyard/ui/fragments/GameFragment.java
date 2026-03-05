@@ -136,6 +136,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private long lastCompletedTime = 0;
     private static final char[] DIGITS = {'0','1','2','3','4','5','6','7','8','9'};
     
+    // Guard to prevent rapid auto-hint clicks (1 second cooldown)
+    private long lastAutoHintClickTime = 0;
+    private static final long AUTO_HINT_COOLDOWN_MS = 1000;
+    
     private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -3418,6 +3422,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      * used by status text view, next hint button, etc.
      */
     private void showNextHint(String source) {
+        // Prevent rapid clicks in auto-hint mode (1 second cooldown)
+        if (currentHintStep>=(numPreHints + NUM_FIXED_PRE_HINTS - 1) && Preferences.hintAutoMoveMode == Preferences.HINT_AUTO_MOVE_SEMI_AUTO) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastAutoHintClickTime < AUTO_HINT_COOLDOWN_MS) {
+                Timber.d("[HINT_SYSTEM] Auto-hint cooldown active, ignoring rapid click (from %s)", source);
+                return;
+            }
+            lastAutoHintClickTime = currentTime;
+        }
+        
         // Check if this is a level game with level > 10 (no hints allowed)
         GameState currentState = gameStateManager.getCurrentState().getValue();
         if (currentState != null && currentState.getLevelId() > LEVEL_10_THRESHHOLD) {
