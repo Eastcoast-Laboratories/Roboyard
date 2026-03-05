@@ -4,20 +4,13 @@ import android.util.Log;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.uiautomator.UiDevice;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.eclabs.MainActivity;
+import roboyard.ui.activities.MainFragmentActivity;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -38,15 +31,13 @@ import static org.junit.Assert.assertTrue;
 public class LevelSyncToastTest {
 
     private static final String TAG = "LevelSyncToastTest";
-    private UiDevice device;
 
     @Rule
-    public ActivityScenarioRule<MainActivity> activityRule =
-            new ActivityScenarioRule<>(MainActivity.class);
+    public ActivityScenarioRule<MainFragmentActivity> activityRule =
+            new ActivityScenarioRule<>(MainFragmentActivity.class);
 
     @Before
     public void setUp() {
-        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         Log.d(TAG, "=== LEVEL SYNC TEST STARTED ===");
         Log.d(TAG, "Watch for [HISTORY_SYNC] logs to verify upload");
     }

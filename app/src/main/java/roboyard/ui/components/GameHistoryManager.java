@@ -228,6 +228,9 @@ public class GameHistoryManager {
                         entry.setCompletionTimestamps(completionTimestamps);
                     }
                     
+                    // Load stars earned
+                    entry.setStarsEarned(entryJson.optInt("starsEarned", 0));
+                    
                     // Load hint tracking fields
                     entry.setMaxHintUsed(entryJson.optInt("maxHintUsed", -1));
                     entry.setSolvedWithoutHints(entryJson.optBoolean("solvedWithoutHints", false));
@@ -340,6 +343,9 @@ public class GameHistoryManager {
                     }
                 }
                 entryJson.put("completionTimestamps", timestamps);
+                
+                // Save stars earned
+                entryJson.put("starsEarned", entry.getStarsEarned());
                 
                 // Save hint tracking fields
                 entryJson.put("maxHintUsed", entry.getMaxHintUsed());

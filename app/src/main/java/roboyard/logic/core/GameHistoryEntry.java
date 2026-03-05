@@ -105,6 +105,11 @@ public class GameHistoryEntry {
         completionCount++;
         lastCompletionTimestamp = now;
         
+        // Always update movesMade to reflect the latest completion
+        if (moves > 0) {
+            movesMade = moves;
+        }
+        
         boolean newBest = false;
         if (completionTime < bestTime || bestTime == 0) {
             bestTime = completionTime;

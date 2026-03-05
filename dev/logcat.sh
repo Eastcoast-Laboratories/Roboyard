@@ -1,26 +1,37 @@
 #!/bin/bash
 # Smart logcat viewer with auto-device selection
-# Usage: ./logcat.sh [device-serial] [tag-filter] [lines]
+# Arguments:
+#   -d device  (optional, if none given autodetect)
+#   -f filter  (grep pattern, default: HISTORY_SYNC)
+#   -n lines   (number of lines, default: 100)
+#   -h         help
+#
 # Examples:
-#   ./logcat.sh                          # Auto-select device, all logs, 100 lines
-#   ./logcat.sh emulator-5554            # Specific device, all logs, 100 lines
-#   ./logcat.sh emulator-5554 HISTORY    # Specific device, HISTORY filter, 100 lines
-#   ./logcat.sh "" HISTORY 50            # Auto-select device, HISTORY filter, 50 lines
+#   ./logcat.sh                          # Auto-select device, HISTORY_SYNC filter
+#   ./logcat.sh -d emulator-5554         # Specific device
+#   ./logcat.sh -f "AUTO_LOGIN"          # Different filter
+#   ./logcat.sh -f "SYNC\|LOGIN" -n 50   # Multiple filters, 50 lines
 
-DEVICE=$1
-TAG_FILTER=${2:-""}
-LINES=${3:-100}
+DEVICE=""
+TAG_FILTER="HISTORY_SYNC"
+LINES=100
 
-# If device is empty string, unset it to trigger auto-detection
-if [ "$DEVICE" = "" ]; then
-    unset DEVICE
-fi
-
-# arguments are: 
-# -d device (optional, if none given autodetect)
-# -f filter (default "HISTORY_SYNC")
-# -h help
-
+while getopts "d:f:n:h" opt; do
+    case $opt in
+        d) DEVICE="$OPTARG" ;;
+        f) TAG_FILTER="$OPTARG" ;;
+        n) LINES="$OPTARG" ;;
+        h)
+            echo "Usage: $0 [-d device] [-f filter] [-n lines] [-h]"
+            echo "  -d device   Device serial (auto-detect if omitted)"
+            echo "  -f filter   Grep filter pattern (default: HISTORY_SYNC)"
+            echo "  -n lines    Number of lines to show (default: 100)"
+            echo "  -h          Show this help"
+            exit 0
+            ;;
+        *) echo "Unknown option: -$OPTARG"; exit 1 ;;
+    esac
+done
 
 
 # Function to get the last log line for a device

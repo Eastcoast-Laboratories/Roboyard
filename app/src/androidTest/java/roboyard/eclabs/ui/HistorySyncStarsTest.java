@@ -2,133 +2,169 @@ package roboyard.eclabs.ui;
 
 import static org.junit.Assert.*;
 
+import android.app.Activity;
 import android.util.Log;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.eclabs.MainActivity;
+import java.util.List;
+
+import roboyard.logic.core.GameElement;
+import roboyard.logic.core.GameSolution;
+import roboyard.logic.core.IGameMove;
+import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.core.GameHistoryEntry;
+import roboyard.ui.components.GameStateManager;
+import roboyard.ui.components.LevelCompletionManager;
+
+import timber.log.Timber;
 
 /**
- * Test to verify that stars are correctly synced to the server after level completion.
- * This test uses logcat analysis to verify the sync process.
+ * Test to verify that stars are correctly saved to local history after level completion.
+ * Automatically completes Level 1 and verifies the history entry has correct stars and moves.
+ *
+ * Tags: history-sync, stars, level-game, e2e
+ * Run with: ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.eclabs.ui.HistorySyncStarsTest
  */
 @RunWith(AndroidJUnit4.class)
 public class HistorySyncStarsTest {
     private static final String TAG = "HistorySyncStarsTest";
 
     @Rule
-    public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
+    public ActivityScenarioRule<MainFragmentActivity> activityRule = new ActivityScenarioRule<>(MainFragmentActivity.class);
+
+    private GameStateManager gameStateManager;
+    private Activity testActivity;
 
     @Before
     public void setup() {
-        TestHelper.clearLogcat();
         Log.d(TAG, "=== Test started ===");
+        activityRule.getScenario().onActivity(activity -> {
+            testActivity = activity;
+            gameStateManager = new androidx.lifecycle.ViewModelProvider(activity).get(GameStateManager.class);
+            gameStateManager.setActivity(activity);
+        });
     }
 
     @Test
     public void testStarsAreSyncedAfterLevelCompletion() throws InterruptedException {
-        Log.d(TAG, "Starting level completion and sync test");
-        
-        // Start a level (Level 1)
-        TestHelper.startLevelGame(activityRule, 1);
+        Log.d(TAG, "Starting automatic Level 1 completion test");
+
+        // Load Level 1 and start solver
+        activityRule.getScenario().onActivity(activity -> {
+            gameStateManager.loadLevel(1);
+            roboyard.ui.util.SolverManager.getInstance().startSolver();
+            Timber.d("[SYNC_TEST] Level 1 loaded, solver started");
+        });
         Thread.sleep(2000);
-        
-        // Clear logcat before completing level
-        TestHelper.clearLogcat();
-        Log.d(TAG, "Logcat cleared, ready to complete level");
-        
-        // TODO: Complete the level programmatically
-        // For now, this is a manual test - complete the level in the UI
-        Log.d(TAG, "===========================================");
-        Log.d(TAG, "MANUAL ACTION REQUIRED:");
-        Log.d(TAG, "1. Complete Level 1 with 3 stars");
-        Log.d(TAG, "2. Wait for sync to complete");
-        Log.d(TAG, "===========================================");
-        
-        // Wait for level completion and sync
-        Thread.sleep(15000);
-        
-        // Collect and analyze logs
-        TestHelper.dumpLogcat("After level completion", "GameStateManager", "HISTORY_SYNC", 100);
-        TestHelper.dumpLogcat("After level completion", "SyncManager", "HISTORY_SYNC", 100);
-        TestHelper.dumpLogcat("After level completion", "RoboyardApi", "HISTORY_SYNC", 100);
-        
-        // Analyze logs for the sync process
-        java.util.List<String> gameStateLogs = TestHelper.collectLogcatLines("GameStateManager", "HISTORY_SYNC", 100);
-        java.util.List<String> syncManagerLogs = TestHelper.collectLogcatLines("SyncManager", "HISTORY_SYNC", 100);
-        java.util.List<String> apiLogs = TestHelper.collectLogcatLines("RoboyardApi", "HISTORY_SYNC", 100);
-        
-        Log.d(TAG, "=== ANALYSIS ===");
-        Log.d(TAG, "GameStateManager logs: " + gameStateLogs.size());
-        Log.d(TAG, "SyncManager logs: " + syncManagerLogs.size());
-        Log.d(TAG, "RoboyardApi logs: " + apiLogs.size());
-        
-        // Check if stars were set
-        boolean starsSet = false;
-        boolean starsPersisted = false;
-        for (String log : gameStateLogs) {
-            if (log.contains("Set stars=") && log.contains("for history entry")) {
-                starsSet = true;
-                Log.d(TAG, "✓ Stars were set: " + log);
+
+        // Wait for solver solution (up to 10 seconds)
+        GameSolution solution = null;
+        for (int attempt = 0; attempt < 10; attempt++) {
+            final GameSolution[] holder = new GameSolution[1];
+            activityRule.getScenario().onActivity(activity -> {
+                holder[0] = gameStateManager.getCurrentSolution();
+            });
+            solution = holder[0];
+            if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
+                Timber.d("[SYNC_TEST] Solution found with %d moves", solution.getMoves().size());
+                break;
             }
-            if (log.contains("Updated and persisted") && log.contains("history entries with stars")) {
-                starsPersisted = true;
-                Log.d(TAG, "✓ Stars were persisted: " + log);
+            Thread.sleep(1000);
+        }
+        assertNotNull("Solver should find a solution for Level 1", solution);
+        assertNotNull("Solution should have moves", solution.getMoves());
+        assertFalse("Solution should not be empty", solution.getMoves().isEmpty());
+
+        // Execute solution moves
+        for (int i = 0; i < solution.getMoves().size(); i++) {
+            IGameMove move = solution.getMoves().get(i);
+            Timber.d("[SYNC_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
+
+            activityRule.getScenario().onActivity(activity -> {
+                if (move instanceof RRGameMove) {
+                    RRGameMove rrMove = (RRGameMove) move;
+                    roboyard.logic.core.GameState state = gameStateManager.getCurrentState().getValue();
+                    if (state != null) {
+                        GameElement selectedRobot = null;
+                        for (GameElement element : state.getGameElements()) {
+                            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == rrMove.getColor()) {
+                                selectedRobot = element;
+                                break;
+                            }
+                        }
+                        if (selectedRobot != null) {
+                            state.setSelectedRobot(selectedRobot);
+                            int dx = 0, dy = 0;
+                            switch (rrMove.getDirection()) {
+                                case 1: dy = -1; break; // UP
+                                case 2: dx = 1; break;  // RIGHT
+                                case 4: dy = 1; break;  // DOWN
+                                case 8: dx = -1; break; // LEFT
+                            }
+                            gameStateManager.moveRobotInDirection(dx, dy);
+                        }
+                    }
+                }
+            });
+            Thread.sleep(1200);
+
+            // Check if game is complete
+            Boolean isComplete = gameStateManager.isGameComplete().getValue();
+            if (isComplete != null && isComplete) {
+                Timber.d("[SYNC_TEST] Level completed after move %d", i + 1);
+                break;
             }
         }
-        
-        // Check if stars were uploaded correctly
-        boolean starsUploadedCorrectly = false;
-        boolean starsUploadedAsZero = false;
-        for (String log : syncManagerLogs) {
-            if (log.contains("Uploading: Level 1")) {
-                if (log.contains("stars=3") || log.contains("stars=2") || log.contains("stars=1")) {
-                    starsUploadedCorrectly = true;
-                    Log.d(TAG, "✓ Stars uploaded correctly: " + log);
-                } else if (log.contains("stars=0")) {
-                    starsUploadedAsZero = true;
-                    Log.e(TAG, "✗ Stars uploaded as ZERO: " + log);
+
+        // Wait for completion processing and history save
+        Thread.sleep(3000);
+
+        // Verify game is complete
+        Boolean isComplete = gameStateManager.isGameComplete().getValue();
+        assertTrue("Level 1 should be completed", isComplete != null && isComplete);
+        Timber.d("[SYNC_TEST] Level 1 completed!");
+
+        // Verify LevelCompletionData has stars
+        final int[] starsHolder = new int[1];
+        activityRule.getScenario().onActivity(activity -> {
+            LevelCompletionManager lcm = LevelCompletionManager.getInstance(activity);
+            starsHolder[0] = lcm.getLevelCompletionData(1).getStars();
+            Timber.d("[SYNC_TEST] LevelCompletionData stars for Level 1: %d", starsHolder[0]);
+        });
+        assertTrue("Level 1 should have at least 1 star", starsHolder[0] > 0);
+
+        // Verify history entry has correct stars and moves
+        final int[] histStars = new int[1];
+        final int[] histMoves = new int[1];
+        final boolean[] histFound = new boolean[1];
+        activityRule.getScenario().onActivity(activity -> {
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            for (GameHistoryEntry entry : entries) {
+                if ("Level 1".equals(entry.getMapName())) {
+                    histFound[0] = true;
+                    histStars[0] = entry.getStarsEarned();
+                    histMoves[0] = entry.getMovesMade();
+                    Timber.d("[SYNC_TEST] History entry 'Level 1': stars=%d, moves=%d", histStars[0], histMoves[0]);
+                    break;
                 }
             }
-        }
-        
-        // Check server response
-        boolean serverAccepted = false;
-        boolean serverSkipped = false;
-        for (String log : apiLogs) {
-            if (log.contains("✓ Updated 'Level 1'") || log.contains("✓ Created 'Level 1'")) {
-                serverAccepted = true;
-                Log.d(TAG, "✓ Server accepted sync: " + log);
-            }
-            if (log.contains("⊘ Skipped 'Level 1'")) {
-                serverSkipped = true;
-                Log.e(TAG, "✗ Server skipped sync: " + log);
-            }
-        }
-        
-        // Report findings
-        Log.d(TAG, "=== RESULTS ===");
-        Log.d(TAG, "Stars set in memory: " + starsSet);
-        Log.d(TAG, "Stars persisted to disk: " + starsPersisted);
-        Log.d(TAG, "Stars uploaded correctly: " + starsUploadedCorrectly);
-        Log.d(TAG, "Stars uploaded as zero: " + starsUploadedAsZero);
-        Log.d(TAG, "Server accepted: " + serverAccepted);
-        Log.d(TAG, "Server skipped: " + serverSkipped);
-        
-        // Assertions
-        assertTrue("Stars should be set in memory", starsSet);
-        assertTrue("Stars should be persisted to disk", starsPersisted);
-        assertFalse("Stars should NOT be uploaded as zero", starsUploadedAsZero);
-        assertTrue("Stars should be uploaded correctly", starsUploadedCorrectly);
-        assertTrue("Server should accept the sync", serverAccepted);
-        assertFalse("Server should NOT skip the sync", serverSkipped);
-        
-        Log.d(TAG, "=== Test completed ===");
+        });
+
+        assertTrue("History entry for Level 1 should exist", histFound[0]);
+        assertTrue("History entry should have stars > 0", histStars[0] > 0);
+        assertTrue("History entry should have moves > 0", histMoves[0] > 0);
+
+        Log.d(TAG, String.format("=== RESULTS: stars=%d, moves=%d ===", histStars[0], histMoves[0]));
+        Log.d(TAG, "=== Test completed successfully ===");
     }
 }

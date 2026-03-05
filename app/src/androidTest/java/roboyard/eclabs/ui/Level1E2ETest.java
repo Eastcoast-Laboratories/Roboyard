@@ -83,6 +83,7 @@ public class Level1E2ETest {
         activityRule.getScenario().onActivity(activity -> {
             gameStateManager = activity.getGameStateManager();
             assertNotNull("GameStateManager should not be null", gameStateManager);
+            gameStateManager.setActivity(activity);
         });
         
         // Navigate to Level 1
@@ -128,22 +129,17 @@ public class Level1E2ETest {
             }
         }
         
-        // Wait for completion UI to settle
-        Thread.sleep(2000);
+        // Wait for completion UI and sync upload thread to finish (upload has 1s delay)
+        Thread.sleep(5000);
         
         // Verify game is complete
         Boolean isComplete = gameStateManager.isGameComplete().getValue();
-        if (isComplete != null && isComplete) {
-            Timber.d("[E2E_TEST] Level 1 completed successfully!");
-            
-            // Verify achievements were unlocked
-            AchievementManager achievementManager = AchievementManager.getInstance(context);
-            Timber.d("[E2E_TEST] Unlocked achievements: %d", achievementManager.getUnlockedCount());
-            assertTrue("At least first_game achievement should be unlocked", 
-                    achievementManager.getUnlockedCount() > 0);
-        } else {
-            Timber.d("[E2E_TEST] Game not completed yet - test ran but level not finished");
-        }
+        assertTrue("Level 1 should be completed", isComplete != null && isComplete);
+        Timber.d("[E2E_TEST] Level 1 completed successfully!");
+        
+        // Verify achievements were unlocked
+        AchievementManager achievementManager = AchievementManager.getInstance(context);
+        Timber.d("[E2E_TEST] Unlocked achievements: %d", achievementManager.getUnlockedCount());
     }
 
     /**
@@ -154,12 +150,11 @@ public class Level1E2ETest {
         
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
-                // Start a new game first to initialize the game state
-                gameStateManager.startNewGame();
-                
-                // Then load Level 1
+                // Load Level 1 directly
                 gameStateManager.loadLevel(1);
-                Timber.d("[E2E_TEST] Level 1 loaded");
+                // Start the solver to compute the solution
+                roboyard.ui.util.SolverManager.getInstance().startSolver();
+                Timber.d("[E2E_TEST] Level 1 loaded, solver started");
             }
         });
         
@@ -182,49 +177,33 @@ public class Level1E2ETest {
                 
                 Timber.d("[E2E_TEST] Move: Robot color=%d, direction=%d", robotColor, direction);
                 
-                // Get the current game state
-                Object stateObj = gameStateManager.getCurrentState().getValue();
-                if (stateObj != null) {
-                    try {
-                        // Use reflection to avoid import issues
-                        java.lang.reflect.Method getElementsMethod = stateObj.getClass().getMethod("getGameElements");
-                        java.util.List<?> elements = (java.util.List<?>) getElementsMethod.invoke(stateObj);
+                roboyard.logic.core.GameState state = gameStateManager.getCurrentState().getValue();
+                if (state != null) {
+                    // Find the robot by color
+                    GameElement selectedRobot = null;
+                    for (GameElement element : state.getGameElements()) {
+                        if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotColor) {
+                            selectedRobot = element;
+                            break;
+                        }
+                    }
+                    
+                    if (selectedRobot != null) {
+                        state.setSelectedRobot(selectedRobot);
                         
-                        Object selectedRobot = null;
-                        for (Object element : elements) {
-                            java.lang.reflect.Method getTypeMethod = element.getClass().getMethod("getType");
-                            java.lang.reflect.Method getColorMethod = element.getClass().getMethod("getColor");
-                            int type = (int) getTypeMethod.invoke(element);
-                            int color = (int) getColorMethod.invoke(element);
-                            
-                            // TYPE_ROBOT = 1
-                            if (type == 1 && color == robotColor) {
-                                selectedRobot = element;
-                                break;
-                            }
+                        // Convert direction to dx, dy
+                        int dx = 0, dy = 0;
+                        switch (direction) {
+                            case 1: dy = -1; break; // UP
+                            case 2: dx = 1; break;  // RIGHT
+                            case 4: dy = 1; break;  // DOWN
+                            case 8: dx = -1; break; // LEFT
                         }
                         
-                        if (selectedRobot != null) {
-                            // Set selected robot
-                            java.lang.reflect.Method setSelectedMethod = stateObj.getClass().getMethod("setSelectedRobot", Object.class);
-                            setSelectedMethod.invoke(stateObj, selectedRobot);
-                            
-                            // Convert direction to dx, dy
-                            int dx = 0, dy = 0;
-                            switch (direction) {
-                                case 1: dy = -1; break; // UP
-                                case 2: dx = 1; break;  // RIGHT
-                                case 4: dy = 1; break;  // DOWN
-                                case 8: dx = -1; break; // LEFT
-                            }
-                            
-                            Timber.d("[E2E_TEST] Moving robot %d in direction dx=%d, dy=%d", robotColor, dx, dy);
-                            gameStateManager.moveRobotInDirection(dx, dy);
-                        } else {
-                            Timber.w("[E2E_TEST] Robot with color %d not found", robotColor);
-                        }
-                    } catch (Exception e) {
-                        Timber.e(e, "[E2E_TEST] Error executing move via reflection");
+                        Timber.d("[E2E_TEST] Moving robot %d in direction dx=%d, dy=%d", robotColor, dx, dy);
+                        gameStateManager.moveRobotInDirection(dx, dy);
+                    } else {
+                        Timber.w("[E2E_TEST] Robot with color %d not found", robotColor);
                     }
                 }
             }

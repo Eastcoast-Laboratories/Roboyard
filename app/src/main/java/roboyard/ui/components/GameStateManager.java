@@ -1977,6 +1977,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void setGameComplete(boolean complete) {
         GameState state = currentState.getValue();
         if (state != null) {
+            // Guard: prevent duplicate completion triggers (called from both GameStateManager and GameGridView)
+            if (complete && Boolean.TRUE.equals(isGameComplete.getValue())) {
+                Timber.d("[HISTORY_SYNC] setGameComplete(true) called but already complete for level %d, ignoring duplicate", state.getLevelId());
+                return;
+            }
             Timber.d("Setting game complete: %s for level %d", complete, state.getLevelId());
             state.setCompleted(complete);
             isGameComplete.setValue(complete);
@@ -1996,7 +2001,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     // Auto-upload history after level completion (to sync stars immediately)
                     final int finalLevelId = state.getLevelId();
                     final int finalStars = data.getStars();
-                    Timber.d("[HISTORY_SYNC] Level %d completed with %d stars, triggering automatic history upload", finalLevelId, finalStars);
+                    final int finalMoves = state.getMoveCount();
+                    Timber.d("[HISTORY_SYNC] Level %d completed with %d stars, %d moves, triggering automatic history upload", finalLevelId, finalStars, finalMoves);
                     
                     final Activity currentActivity = getActivity();
                     
@@ -2011,7 +2017,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 return;
                             }
                             
-                            // Update ALL history entries for this level with stars before upload
+                            // Update ALL history entries for this level with stars and moves before upload
                             List<GameHistoryEntry> updatedEntries = null;
                             try {
                                 // Get all history entries
@@ -2023,15 +2029,21 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 for (GameHistoryEntry entry : allEntries) {
                                     if (entry.getMapName() != null && entry.getMapName().equals(levelName)) {
                                         entry.setStarsEarned(finalStars);
+                                        if (finalMoves > 0 && (entry.getMovesMade() == 0 || finalMoves < entry.getMovesMade())) {
+                                            entry.setMovesMade(finalMoves);
+                                        }
+                                        if (entry.getCompletionCount() == 0) {
+                                            entry.recordCompletion(0, finalMoves);
+                                        }
                                         updatedCount++;
-                                        Timber.d("[HISTORY_SYNC] Set stars=%d for history entry '%s'", finalStars, entry.getMapName());
+                                        Timber.d("[HISTORY_SYNC] Set stars=%d, moves=%d for history entry '%s'", finalStars, entry.getMovesMade(), entry.getMapName());
                                     }
                                 }
                                 
                                 if (updatedCount > 0) {
                                     // Force synchronous save to persist changes immediately
                                     GameHistoryManager.saveHistoryIndex(currentActivity, allEntries);
-                                    Timber.d("[HISTORY_SYNC] Updated and persisted %d history entries with stars", updatedCount);
+                                    Timber.d("[HISTORY_SYNC] Updated and persisted %d history entries with stars+moves", updatedCount);
                                     // Keep reference to updated entries for upload
                                     updatedEntries = allEntries;
                                 } else {

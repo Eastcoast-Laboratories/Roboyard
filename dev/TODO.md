@@ -108,14 +108,27 @@ merke dir: die roboyard.z11.de laravel app wird deployed mit cd /var/www/roboyar
 auch , wenn beim level syncen unauthorized kommt, soll er einmal versuchen sich neu einzuloggen und nur wenn dann immer noch unauthorized kommt , soll er die toast error meldung ausgeben, dass er nicht mehr eingeloggt ist
 
 
-2. 
-erweitere das script 
-@logcat-history-sync.sh#L8-13 und benenne es um in einfach logcat.sh
+- mainactivity kann weg
+---
 
-3.lass den history level test wieder laufen und verifiziere selbst mit dem logcat.sh script, dass alles läuft
-
-höere erst auf, wenn die history sync funktionierrt
- 
-4. kann die mainactivity weg? oder wird die noch benutzt?
+@logcat.sh#L18-23 errgänze argumente mit buchstaben: 
+# arguments are: 
+# -d device (optional, if none given autodetect)
+# -f filter (default "HISTORY_SYNC")
+# -h help
 
 merke dir: schreibe keine anleitungen, wie ich das testen kann, sondern teste es alle sselbst mithilfe von unittests und logcat
+
+sync funktioniert immer noch nicht:
+
+
+2026-03-05 16:47:07.449 26023-26023 SyncManager             de.z11.roboyard                      D  [HISTORY_SYNC] ✓ Upload complete: synced=0, skipped=12, total=12
+2026-03-05 16:47:07.450 26023-26023 SyncManager             de.z11.roboyard                      W  [HISTORY_SYNC] ⚠ Warning: No entries were synced (all 12 entries skipped)
+2026-03-05 16:47:07.450 26023-26023 GameStateManager        de.z11.roboyard                      E  [HISTORY_SYNC] Upload callback: error - No entries synced - all 12 entries were skipped (no changes detected)
+2026-03-05 16:47:07.455 26023-26023 GameStateManager        de.z11.roboyard                      E  [HISTORY_SYNC] ✗ Error toast shown: Failed to sync level 4: No entries synced - all 12 entries were skipped (no changes detected)
+
+
+repareire das mit dem unittest und logcat
+
+
+höre erst auf, wenn die history sync funktioniert

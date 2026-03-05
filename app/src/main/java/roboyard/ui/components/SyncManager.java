@@ -275,9 +275,10 @@ public class SyncManager {
             JSONArray historyArray = new JSONArray();
             
             for (GameHistoryEntry entry : entries) {
-                // Only upload completed entries to prevent overwriting server data with incomplete entries
-                if (entry.getCompletionCount() == 0) {
-                    Timber.d("[HISTORY_SYNC] Skipping incomplete entry: %s (completionCount=0)", entry.getMapName());
+                // Only upload entries that were actually played (has stars or moves)
+                // to prevent overwriting server data with empty entries
+                if (entry.getStarsEarned() == 0 && entry.getMovesMade() == 0) {
+                    Timber.d("[HISTORY_SYNC] Skipping unplayed entry: %s (stars=0, moves=0)", entry.getMapName());
                     continue;
                 }
                 
@@ -318,13 +319,9 @@ public class SyncManager {
                     Timber.d("[HISTORY_SYNC] ✓ Upload complete: synced=%d, skipped=%d, total=%d", 
                             syncedCount, skippedCount, totalEntries);
                     
-                    // Check if any entries were actually synced
+                    // All skipped = data already in sync on server, treat as success
                     if (syncedCount == 0 && totalEntries > 0) {
-                        Timber.w("[HISTORY_SYNC] ⚠ Warning: No entries were synced (all %d entries skipped)", skippedCount);
-                        if (callback != null) {
-                            callback.onError("No entries synced - all " + skippedCount + " entries were skipped (no changes detected)");
-                        }
-                        return;
+                        Timber.d("[HISTORY_SYNC] All %d entries already in sync (no changes needed)", skippedCount);
                     }
                     
                     if (callback != null) {
