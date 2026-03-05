@@ -134,8 +134,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     // Guard to prevent onLevelCompleted from being called multiple times for the same level
     private int lastCompletedLevelId = -1;
     private long lastCompletedTime = 0;
-    // Pre-allocated char array for timer display to avoid OOM in String.format
-    private final char[] timerChars = {'0','0',':','0','0'};
     private static final char[] DIGITS = {'0','1','2','3','4','5','6','7','8','9'};
     
     private final Runnable timerRunnable = new Runnable() {
@@ -147,12 +145,18 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 int minutes = seconds / 60;
                 seconds = seconds % 60;
                 
-                // Format time as mm:ss without any heap allocation
-                timerChars[0] = DIGITS[minutes / 10];
-                timerChars[1] = DIGITS[minutes % 10];
-                timerChars[3] = DIGITS[seconds / 10];
-                timerChars[4] = DIGITS[seconds % 10];
-                timerTextView.setText(new String(timerChars));
+                // Format time as mm:ss or hh:mm:ss for times over 99 minutes
+                String timeStr;
+                if (minutes < 100) {
+                    // mm:ss format for times under 100 minutes
+                    timeStr = String.format(Locale.US, "%02d:%02d", minutes, seconds);
+                } else {
+                    // hh:mm:ss format for times 100 minutes or more
+                    int hours = minutes / 60;
+                    int mins = minutes % 60;
+                    timeStr = String.format(Locale.US, "%02d:%02d:%02d", hours, mins, seconds);
+                }
+                timerTextView.setText(timeStr);
                 
                 // Check if we should perform autosave
                 long currentTime = SystemClock.elapsedRealtime();
