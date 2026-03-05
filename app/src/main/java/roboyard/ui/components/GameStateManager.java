@@ -1992,6 +1992,72 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 if (data != null) {
                     manager.saveLevelCompletionData(data);
                     Timber.d("Saved level completion data: %s", data);
+                    
+                    // Auto-upload history after level completion (to sync stars immediately)
+                    final int finalLevelId = state.getLevelId();
+                    final int finalStars = data.getStars();
+                    Timber.d("[HISTORY_SYNC] Level %d completed with %d stars, triggering automatic history upload", finalLevelId, finalStars);
+                    
+                    // Update the history entry with stars before upload
+                    Activity currentActivity = getActivity();
+                    if (currentActivity != null) {
+                        try {
+                            String mapSig = state.generateMapSignature();
+                            GameHistoryEntry historyEntry = GameHistoryManager.findByMapSignature(currentActivity, mapSig);
+                            if (historyEntry != null) {
+                                historyEntry.setStarsEarned(finalStars);
+                                // addHistoryEntry handles both add and update
+                                GameHistoryManager.addHistoryEntry(currentActivity, historyEntry);
+                                Timber.d("[HISTORY_SYNC] Updated history entry with %d stars before upload (mapSig=%s)", finalStars, mapSig);
+                            } else {
+                                Timber.e("[HISTORY_SYNC] Could not find history entry to update stars (mapSig=%s)", mapSig);
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "[HISTORY_SYNC] Error updating history entry with stars");
+                        }
+                    }
+                    
+                    new Thread(() -> {
+                        try {
+                            Timber.d("[HISTORY_SYNC] Starting upload for level %d...", finalLevelId);
+                            if (currentActivity == null) {
+                                Timber.e("[HISTORY_SYNC] Activity is null, cannot upload history");
+                                return;
+                            }
+                            
+                            // Upload with callback to show toast only after successful sync
+                            SyncManager.getInstance(context).uploadHistory(currentActivity, new SyncManager.HistoryUploadCallback() {
+                                @Override
+                                public void onSuccess(int syncedCount) {
+                                    Timber.d("[HISTORY_SYNC] Upload callback: success with %d entries synced", syncedCount);
+                                    // Show success toast on main thread
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        String message = String.format("Level %d synced! ⭐ %d", finalLevelId, finalStars);
+                                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                                        Timber.d("[HISTORY_SYNC] ✓ Toast shown: %s", message);
+                                    });
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    Timber.e("[HISTORY_SYNC] Upload callback: error - %s", error);
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        String errorMsg = "Failed to sync level " + finalLevelId + ": " + error;
+                                        Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show();
+                                        Timber.e("[HISTORY_SYNC] ✗ Error toast shown: %s", errorMsg);
+                                    });
+                                }
+                            });
+                            Timber.d("[HISTORY_SYNC] Upload request sent for level %d with callback", finalLevelId);
+                        } catch (Exception uploadError) {
+                            Timber.e(uploadError, "[HISTORY_SYNC] ✗ Exception during upload for level %d: %s", finalLevelId, uploadError.getMessage());
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                String errorMsg = "Failed to sync level " + finalLevelId;
+                                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show();
+                                Timber.e("[HISTORY_SYNC] ✗ Exception toast shown: %s", errorMsg);
+                            });
+                        }
+                    }).start();
                 }
 
                 int starsAfter = manager.getTotalStars();
@@ -2685,18 +2751,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
 
             Timber.d("[HISTORY] Game saved to history: %s (Map name: '%s')", historyPath, mapName);
-            
-            // Auto-upload history if level was completed (to sync stars immediately)
-            if (actualMoveCount > 0 && levelId > 0) {
-                Timber.d("[HISTORY_SYNC] Level %d completed, triggering automatic history upload", levelId);
-                new Thread(() -> {
-                    try {
-                        SyncManager.getInstance(context).uploadHistory(activity);
-                    } catch (Exception uploadError) {
-                        Timber.e(uploadError, "[HISTORY_SYNC] Auto-upload failed after level completion");
-                    }
-                }).start();
-            }
         } catch (Exception e) {
             Timber.e("[HISTORY] Error saving game to history: %s", e.getMessage());
         }

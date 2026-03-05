@@ -226,9 +226,24 @@ public class SyncManager {
     // ========== GAME HISTORY ==========
     
     /**
+     * Callback interface for history upload completion.
+     */
+    public interface HistoryUploadCallback {
+        void onSuccess(int syncedCount);
+        void onError(String error);
+    }
+
+    /**
      * Upload all local history entries to server.
      */
     public void uploadHistory(Activity activity) {
+        uploadHistory(activity, null);
+    }
+
+    /**
+     * Upload all local history entries to server with callback.
+     */
+    public void uploadHistory(Activity activity, HistoryUploadCallback callback) {
         RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
         if (!apiClient.isLoggedIn()) {
             Timber.d("[HISTORY_SYNC] Not logged in, skipping history upload");
@@ -260,6 +275,9 @@ public class SyncManager {
                 historyJson.put("stars_earned", entry.getStarsEarned());
                 historyJson.put("played_at", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp())));
                 
+                Timber.d("[HISTORY_SYNC] Uploading: %s (moves=%d, stars=%d, solved=%b)", 
+                        entry.getMapName(), entry.getMovesMade(), entry.getStarsEarned(), entry.getMovesMade() > 0);
+                
                 historyArray.put(historyJson);
             }
             
@@ -272,12 +290,29 @@ public class SyncManager {
             apiClient.syncHistory(historyArray, new RoboyardApiClient.ApiCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer syncedCount) {
-                    Timber.d("[HISTORY_SYNC] Upload complete: %d history entries synced", syncedCount);
+                    Timber.d("[HISTORY_SYNC] ✓ Upload complete: %d/%d history entries synced to server", syncedCount, historyArray.length());
+                    for (int i = 0; i < historyArray.length(); i++) {
+                        try {
+                            JSONObject entry = historyArray.getJSONObject(i);
+                            Timber.d("[HISTORY_SYNC] ✓ Synced: %s (stars=%d, moves=%d)", 
+                                    entry.optString("map_name", "Unknown"), 
+                                    entry.optInt("stars_earned", 0),
+                                    entry.optInt("move_count", 0));
+                        } catch (Exception e) {
+                            Timber.e(e, "[HISTORY_SYNC] Error logging entry details");
+                        }
+                    }
+                    if (callback != null) {
+                        callback.onSuccess(syncedCount);
+                    }
                 }
                 
                 @Override
                 public void onError(String error) {
-                    Timber.e("[HISTORY_SYNC] Upload failed: %s", error);
+                    Timber.e("[HISTORY_SYNC] ✗ Upload failed: %s", error);
+                    if (callback != null) {
+                        callback.onError(error);
+                    }
                 }
             });
             
