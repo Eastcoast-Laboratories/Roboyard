@@ -20,6 +20,7 @@ import java.util.List;
 
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
+import roboyard.logic.core.LevelCompletionData;
 import timber.log.Timber;
 
 /**
@@ -435,6 +436,9 @@ public class SyncManager {
                     
                     Timber.d("[HISTORY_SYNC] Download complete: %d history entries restored", restoredCount);
                     
+                    // Restore level stars from ALL history entries to LevelCompletionManager
+                    restoreLevelStarsFromHistory(activity, history);
+                    
                 } catch (Exception e) {
                     Timber.e(e, "[HISTORY_SYNC] Error restoring history");
                     if (callback != null) callback.onError("Error restoring history: " + e.getMessage());
@@ -472,11 +476,29 @@ public class SyncManager {
                     public void onSuccess(Integer historyRestored) {
                         Timber.d("[FULL_SYNC] History downloaded: %d restored", historyRestored);
                         
+                        // Count level entries separately
+                        int levelsRestored = 0;
+                        try {
+                            List<GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
+                            for (GameHistoryEntry entry : allEntries) {
+                                if (entry.getMapName() != null && entry.getMapName().startsWith("Level ")) {
+                                    levelsRestored++;
+                                }
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "[FULL_SYNC] Error counting level entries");
+                        }
+                        
+                        int randomMapsRestored = historyRestored - levelsRestored;
+                        
                         // Step 3: Upload local data to server
                         uploadSaveGames();
                         uploadHistory(activity);
                         
-                        String summary = savesRestored + " saves, " + historyRestored + " history entries restored";
+                        String summary = savesRestored + " saves, " + levelsRestored + " levels restored";
+                        if (randomMapsRestored > 0) {
+                            summary += ", " + randomMapsRestored + " random maps";
+                        }
                         Timber.d("[FULL_SYNC] Full sync complete: %s", summary);
                         if (callback != null) callback.onSuccess(summary);
                     }
@@ -589,6 +611,53 @@ public class SyncManager {
             }
         }
         return defaultValue;
+    }
+    
+    /**
+     * Restore level stars from downloaded history entries to LevelCompletionManager.
+     * Parses "Level X" from map_name and sets stars in the level completion data.
+     * Only updates if the downloaded stars are better than what's already stored.
+     */
+    private void restoreLevelStarsFromHistory(Activity activity, JSONArray history) {
+        try {
+            LevelCompletionManager lcm = LevelCompletionManager.getInstance(activity);
+            int restoredLevels = 0;
+            
+            for (int i = 0; i < history.length(); i++) {
+                JSONObject entry = history.getJSONObject(i);
+                String mapName = entry.optString("map_name", "");
+                int stars = entry.optInt("stars_earned", 0);
+                int moves = entry.optInt("move_count", 0);
+                boolean isSolved = entry.optBoolean("is_solved", false);
+                
+                if (!mapName.startsWith("Level ") || stars <= 0) continue;
+                
+                // Parse level number from "Level X"
+                int levelId;
+                try {
+                    levelId = Integer.parseInt(mapName.substring(6).trim());
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                
+                LevelCompletionData existing = lcm.getLevelCompletionData(levelId);
+                if (stars > existing.getStars()) {
+                    LevelCompletionData data = new LevelCompletionData(levelId);
+                    data.setCompleted(true);
+                    data.setStars(stars);
+                    if (moves > 0) {
+                        data.setMovesNeeded(moves);
+                    }
+                    lcm.saveLevelCompletionData(data);
+                    restoredLevels++;
+                    Timber.d("[HISTORY_SYNC] Restored level %d stars: %d (moves=%d)", levelId, stars, moves);
+                }
+            }
+            
+            Timber.d("[HISTORY_SYNC] Level stars restoration complete: %d levels updated", restoredLevels);
+        } catch (Exception e) {
+            Timber.e(e, "[HISTORY_SYNC] Error restoring level stars from history");
+        }
     }
     
     private int extractBoardWidthFromSize(String boardSize) {
