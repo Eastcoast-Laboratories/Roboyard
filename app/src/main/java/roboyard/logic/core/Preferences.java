@@ -62,11 +62,11 @@ public class Preferences {
     public static final int DEFAULT_MAX_SOLUTION_MOVES = 6;
     public static final boolean DEFAULT_ALLOW_MULTICOLOR_TARGET = true;
     public static final boolean DEFAULT_HIGH_CONTRAST_MODE = false;
-    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 15;
+    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 5;
     public static final boolean DEFAULT_LIVE_MOVE_COUNTER_ENABLED = false;
     public static final boolean DEFAULT_HINT_AUTO_MOVE_ENABLED = false;
     public static final int DEFAULT_HINT_AUTO_MOVE_MODE = HINT_AUTO_MOVE_MANUAL;
-    public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 80;
+    public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 50;
     
     // Cached values - accessible as static fields
     public static int robotCount;
