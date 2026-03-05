@@ -608,7 +608,7 @@ public class RoboyardApiClient {
     /**
      * Upload game history to server.
      */
-    public void syncHistory(JSONArray history, ApiCallback<Integer> callback) {
+    public void syncHistory(JSONArray history, ApiCallback<JSONObject> callback) {
         if (!isLoggedIn()) {
             postError(callback, "Not logged in");
             return;
@@ -628,9 +628,34 @@ public class RoboyardApiClient {
                 }
                 
                 int syncedCount = json.optInt("synced_count", 0);
-                postSuccess(callback, syncedCount);
+                int skippedCount = json.optInt("skipped_count", 0);
+                int totalEntries = json.optInt("total_entries", 0);
                 
-                Timber.tag(TAG).d("[HISTORY_SYNC] Uploaded %d history entries to server", syncedCount);
+                Timber.tag(TAG).d("[HISTORY_SYNC] Server response: synced=%d, skipped=%d, total=%d", 
+                        syncedCount, skippedCount, totalEntries);
+                
+                // Log details if available
+                if (json.has("details")) {
+                    JSONArray details = json.getJSONArray("details");
+                    for (int i = 0; i < details.length(); i++) {
+                        JSONObject detail = details.getJSONObject(i);
+                        String action = detail.optString("action", "unknown");
+                        String mapName = detail.optString("map_name", "Unknown");
+                        int stars = detail.optInt("stars_earned", 0);
+                        
+                        if ("updated".equals(action)) {
+                            String changes = detail.optString("changes", "");
+                            Timber.tag(TAG).d("[HISTORY_SYNC] ✓ Updated '%s': %s", mapName, changes);
+                        } else if ("created".equals(action)) {
+                            Timber.tag(TAG).d("[HISTORY_SYNC] ✓ Created '%s': stars=%d", mapName, stars);
+                        } else if ("skipped".equals(action)) {
+                            String reason = detail.optString("reason", "");
+                            Timber.tag(TAG).d("[HISTORY_SYNC] ⊘ Skipped '%s': %s", mapName, reason);
+                        }
+                    }
+                }
+                
+                postSuccess(callback, json);
                 
             } catch (JSONException e) {
                 Timber.tag(TAG).e(e, "[HISTORY_SYNC] JSON error during upload");

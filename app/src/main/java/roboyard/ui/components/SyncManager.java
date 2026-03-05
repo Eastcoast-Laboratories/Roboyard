@@ -244,6 +244,22 @@ public class SyncManager {
      * Upload all local history entries to server with callback.
      */
     public void uploadHistory(Activity activity, HistoryUploadCallback callback) {
+        try {
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            uploadHistory(activity, entries, callback);
+        } catch (Exception e) {
+            Timber.e(e, "[HISTORY_SYNC] Error loading history entries for upload");
+            if (callback != null) {
+                callback.onError("Failed to load history entries: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Upload specific history entries to server with callback.
+     * This overload accepts pre-loaded entries to avoid race conditions with disk I/O.
+     */
+    public void uploadHistory(Activity activity, List<GameHistoryEntry> entries, HistoryUploadCallback callback) {
         RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
         if (!apiClient.isLoggedIn()) {
             Timber.d("[HISTORY_SYNC] Not logged in, skipping history upload");
@@ -251,8 +267,7 @@ public class SyncManager {
         }
         
         try {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
-            if (entries.isEmpty()) {
+            if (entries == null || entries.isEmpty()) {
                 Timber.d("[HISTORY_SYNC] No history entries to upload");
                 return;
             }
@@ -287,21 +302,25 @@ public class SyncManager {
             }
             
             Timber.d("[HISTORY_SYNC] Uploading %d history entries to server", historyArray.length());
-            apiClient.syncHistory(historyArray, new RoboyardApiClient.ApiCallback<Integer>() {
+            apiClient.syncHistory(historyArray, new RoboyardApiClient.ApiCallback<JSONObject>() {
                 @Override
-                public void onSuccess(Integer syncedCount) {
-                    Timber.d("[HISTORY_SYNC] ✓ Upload complete: %d/%d history entries synced to server", syncedCount, historyArray.length());
-                    for (int i = 0; i < historyArray.length(); i++) {
-                        try {
-                            JSONObject entry = historyArray.getJSONObject(i);
-                            Timber.d("[HISTORY_SYNC] ✓ Synced: %s (stars=%d, moves=%d)", 
-                                    entry.optString("map_name", "Unknown"), 
-                                    entry.optInt("stars_earned", 0),
-                                    entry.optInt("move_count", 0));
-                        } catch (Exception e) {
-                            Timber.e(e, "[HISTORY_SYNC] Error logging entry details");
+                public void onSuccess(JSONObject response) {
+                    int syncedCount = response.optInt("synced_count", 0);
+                    int skippedCount = response.optInt("skipped_count", 0);
+                    int totalEntries = response.optInt("total_entries", 0);
+                    
+                    Timber.d("[HISTORY_SYNC] ✓ Upload complete: synced=%d, skipped=%d, total=%d", 
+                            syncedCount, skippedCount, totalEntries);
+                    
+                    // Check if any entries were actually synced
+                    if (syncedCount == 0 && totalEntries > 0) {
+                        Timber.w("[HISTORY_SYNC] ⚠ Warning: No entries were synced (all %d entries skipped)", skippedCount);
+                        if (callback != null) {
+                            callback.onError("No entries synced - all " + skippedCount + " entries were skipped (no changes detected)");
                         }
+                        return;
                     }
+                    
                     if (callback != null) {
                         callback.onSuccess(syncedCount);
                     }
