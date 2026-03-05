@@ -71,7 +71,7 @@
     <string name="empty_slot">Empty</string>
     
     <!-- Language Settings -->
-    <string name="language_settings_label">App Language:</string>
+    <string name="language_settings_label">Language:</string>
     <string name="language_settings_a11y">Select app display language</string>
     <string name="accessibility_language_label">TalkBack Language:</string>
     <string name="accessibility_language_a11y">Select TalkBack announcement language</string>
@@ -357,6 +357,8 @@
     <string name="settings_sound_effects_volume_a11y">Sound effects volume slider</string>
     <string name="settings_yes">Yes</string>
     <string name="settings_no">No</string>
+    <string name="settings_on">On</string>
+    <string name="settings_off">Off</string>
     <string name="settings_back">Back</string>
     <string name="settings_game_mode">Game Mode:</string>
     <string name="settings_standard_game">Standard Game</string>

@@ -111,24 +111,21 @@ auch , wenn beim level syncen unauthorized kommt, soll er einmal versuchen sich 
 - mainactivity kann weg
 ---
 
-@logcat.sh#L18-23 errgänze argumente mit buchstaben: 
-# arguments are: 
-# -d device (optional, if none given autodetect)
-# -f filter (default "HISTORY_SYNC")
-# -h help
+in den setttings muss der Logout button viel kleiner und nur rechts von dem @fragment_settings.xml#L48-56 
+es sei denn der login name ist so lang, dass es nicht in die selbe reihe passt
 
-merke dir: schreibe keine anleitungen, wie ich das testen kann, sondern teste es alle sselbst mithilfe von unittests und logcat
+login und register kann auch nebeneinander in eine reihe
 
-sync funktioniert immer noch nicht:
+"Board size" und der spinner für die board-size auch in eine Reihe
 
+@strings.xml#L74-75 muss noch in alle sprachen übersetzt werden
 
-2026-03-05 16:47:07.449 26023-26023 SyncManager             de.z11.roboyard                      D  [HISTORY_SYNC] ✓ Upload complete: synced=0, skipped=12, total=12
-2026-03-05 16:47:07.450 26023-26023 SyncManager             de.z11.roboyard                      W  [HISTORY_SYNC] ⚠ Warning: No entries were synced (all 12 entries skipped)
-2026-03-05 16:47:07.450 26023-26023 GameStateManager        de.z11.roboyard                      E  [HISTORY_SYNC] Upload callback: error - No entries synced - all 12 entries were skipped (no changes detected)
-2026-03-05 16:47:07.455 26023-26023 GameStateManager        de.z11.roboyard                      E  [HISTORY_SYNC] ✗ Error toast shown: Failed to sync level 4: No entries synced - all 12 entries were skipped (no changes detected)
+der sprach-spinner kann auch rechts neben das label @fragment_settings.xml#L127-128 
 
+"Sound effects" soll on/off statt yes no
 
-repareire das mit dem unittest und logcat
+Reset data soll auch die history entries alle löschen
+ 
+Board Size Section soll unterhalb der @fragment_settings.xml#L144 <!-- TalkBack Language Section
 
-
-höre erst auf, wenn die history sync funktioniert
+----

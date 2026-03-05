@@ -362,6 +362,12 @@ public class DataExportImportManager {
             deleteDirectory(historyDir);
         }
         
+        // Delete history index file
+        File historyIndexFile = new File(context.getFilesDir(), "history_index.json");
+        if (historyIndexFile.exists()) {
+            historyIndexFile.delete();
+        }
+        
         Timber.tag(TAG).d("Reset all data");
     }
     

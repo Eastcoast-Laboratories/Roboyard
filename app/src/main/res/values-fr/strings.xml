@@ -163,6 +163,8 @@
     <string name="settings_sound_effects_volume">Volume des effets sonores:</string>
     <string name="settings_yes">Oui</string>
     <string name="settings_no">Non</string>
+    <string name="settings_on">Activé</string>
+    <string name="settings_off">Désactivé</string>
     <string name="settings_back">Retour</string>
     <string name="empty_slot">Vide</string>
 
@@ -584,7 +586,7 @@
     <string name="history_tab_title">Historique</string>
     <string name="language_same_as_app">Identique à la langue de l\'application</string>
     <string name="language_settings_a11y">Sélectionner la langue d\'affichage de l\'application</string>
-    <string name="language_settings_label">Langue de l\'application :</string>
+    <string name="language_settings_label">Langue:</string>
     <string name="level_complete">Niveau terminé !</string>
     <string name="level_editor_button">Éditeur de niveau</string>
     <string name="level_editor_hint">Vous avez débloqué l\'Éditeur de niveau ! Créez vos propres niveaux.</string>

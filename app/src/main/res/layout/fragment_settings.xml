@@ -38,49 +38,111 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Board Size Section -->
-            <TextView
-                android:id="@+id/board_size_label"
+            <!-- Roboyard Account Section -->
+            <LinearLayout
+                android:id="@+id/account_logged_out_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_board_size"
-                android:textSize="@dimen/settings_label_text_size"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
+                android:orientation="vertical"
+                android:visibility="visible">
 
-            <Spinner
-                android:id="@+id/board_size_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Select board size"
-                android:minHeight="48dp"
-                android:layout_marginBottom="24dp"
-                android:focusable="true"
-                android:clickable="true" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_account_description"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#aaaaaa"
+                    android:layout_marginBottom="16dp" />
 
-            <!-- Language Section -->
-            <TextView
-                android:id="@+id/language_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/language_settings_label"
-                android:textSize="@dimen/settings_label_text_size"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
 
-            <Spinner
-                android:id="@+id/language_spinner"
+                    <Button
+                        android:id="@+id/login_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_login"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/register_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_register"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/account_logged_in_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/language_settings_a11y"
-                android:minHeight="48dp"
+                android:orientation="horizontal"
+                android:visibility="gone"
                 android:layout_marginBottom="16dp"
-                android:focusable="true"
-                android:clickable="true" />
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/logged_in_as_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_logged_in_as"
+                    android:textSize="@dimen/settings_option_text_size"
+                    android:textColor="#ffffff"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/logout_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_logout"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp" />
+            </LinearLayout>
+            
+            <!-- Language Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/language_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language_settings_label"
+                    android:textSize="@dimen/settings_label_text_size"
+                    android:textStyle="bold"
+                    android:textColor="#ffffff"
+                    android:layout_marginEnd="8dp" />
+
+                <Spinner
+                    android:id="@+id/language_spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/language_settings_a11y"
+                    android:minHeight="48dp"
+                    android:focusable="true"
+                    android:clickable="true" />
+            </LinearLayout>
 
             <!-- TalkBack Language Section (only shown when accessibility is enabled) -->
             <LinearLayout
@@ -105,6 +167,36 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/accessibility_language_a11y"
+                    android:minHeight="48dp"
+                    android:focusable="true"
+                    android:clickable="true" />
+            </LinearLayout>
+
+            <!-- Board Size Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/board_size_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_board_size"
+                    android:textSize="@dimen/settings_label_text_size"
+                    android:textStyle="bold"
+                    android:textColor="#ffffff"
+                    android:layout_marginEnd="8dp" />
+
+                <Spinner
+                    android:id="@+id/board_size_spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Select board size"
                     android:minHeight="48dp"
                     android:focusable="true"
                     android:clickable="true" />
@@ -558,7 +650,7 @@
                     android:id="@+id/sound_on"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_yes"
+                    android:text="@string/settings_on"
                     android:textSize="@dimen/settings_option_text_size"
                     android:layout_marginEnd="32dp"
                     android:focusable="true"
@@ -571,7 +663,7 @@
                     android:id="@+id/sound_off"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_no"
+                    android:text="@string/settings_off"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -735,7 +827,7 @@
                     android:id="@+id/accessibility_on"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="On"
+                    android:text="@string/settings_on"
                     android:textSize="@dimen/settings_option_text_size"
                     android:layout_marginEnd="32dp"
                     android:focusable="true"
@@ -748,7 +840,7 @@
                     android:id="@+id/accessibility_off"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Off"
+                    android:text="@string/settings_off"
                     android:textSize="@dimen/settings_option_text_size"
                     android:focusable="true"
                     android:clickable="true"
@@ -756,82 +848,6 @@
                     android:buttonTint="#333333"
                     android:contentDescription="Disable accessibility mode" />
             </RadioGroup>
-
-            <!-- Roboyard Account Section -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#444444"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:id="@+id/account_section_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_account_section"
-                android:textSize="@dimen/settings_label_text_size"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:id="@+id/account_logged_out_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_account_description"
-                    android:textSize="@dimen/settings_option_text_size"
-                    android:textColor="#aaaaaa"
-                    android:layout_marginBottom="16dp" />
-
-                <Button
-                    android:id="@+id/login_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_login"
-                    android:focusable="true"
-                    android:clickable="true" />
-
-                <Button
-                    android:id="@+id/register_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_register"
-                    android:layout_marginTop="8dp"
-                    android:focusable="true"
-                    android:clickable="true" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/account_logged_in_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/logged_in_as_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_logged_in_as"
-                    android:textSize="@dimen/settings_option_text_size"
-                    android:textColor="#ffffff"
-                    android:layout_marginBottom="16dp" />
-
-                <Button
-                    android:id="@+id/logout_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_logout"
-                    android:focusable="true"
-                    android:clickable="true" />
-            </LinearLayout>
 
             <!-- Data Export/Import Section -->
             <View
