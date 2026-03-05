@@ -51,6 +51,7 @@ public class GameHistoryEntry {
     private long lastPerfectlySolvedWithoutHints = 0; // Timestamp of the last OPTIMAL completion without hints (0 = never)
 
     private int difficulty = Constants.DIFFICULTY_BEGINNER;  // Difficulty level ID when the game was created (0-3)
+    private int starsEarned = 0;  // Stars earned for this level (0-4), synced to server
 
     /**
      * Constructor for a new history entry
@@ -363,6 +364,9 @@ public class GameHistoryEntry {
 
     public int getDifficulty() { return difficulty; }
     public void setDifficulty(int difficulty) { this.difficulty = difficulty; }
+
+    public int getStarsEarned() { return starsEarned; }
+    public void setStarsEarned(int starsEarned) { this.starsEarned = starsEarned; }
 
     public int getHistoryIndex() {
         // e.g. getMapPath() = history_1.txt

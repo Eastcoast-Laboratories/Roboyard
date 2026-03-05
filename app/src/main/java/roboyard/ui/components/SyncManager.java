@@ -257,6 +257,7 @@ public class SyncManager {
                 historyJson.put("move_count", entry.getMovesMade());
                 historyJson.put("is_solved", entry.getMovesMade() > 0);
                 historyJson.put("play_time_seconds", entry.getPlayDuration());
+                historyJson.put("stars_earned", entry.getStarsEarned());
                 historyJson.put("played_at", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp())));
                 
                 historyArray.put(historyJson);
@@ -336,6 +337,7 @@ public class SyncManager {
                             historyEntry.setOptimalMoves(0);
                             historyEntry.setBoardSize(entry.optInt("board_width", 12) + "x" + entry.optInt("board_height", 12));
                             historyEntry.setPreviewImagePath("");
+                            historyEntry.setStarsEarned(entry.optInt("stars_earned", 0));
                             
                             GameHistoryManager.addHistoryEntry(activity, historyEntry);
                             restoredCount++;

@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
+import roboyard.ui.components.SyncManager;
 import roboyard.logic.core.MapObjects;
 import roboyard.eclabs.R;
 import roboyard.ui.RoboyardApplication;
@@ -2638,6 +2639,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[MAPSIG] saveToHistory: posSig=%s", posSig);
             Timber.d("[MAPSIG] saveToHistory: mapSig=%s", mapSig);
             
+            // Set stars earned from LevelCompletionData (if this is a level game)
+            int levelId = gameState.getLevelId();
+            if (levelId > 0 && isGameComplete.getValue()) {
+                LevelCompletionManager lcm = LevelCompletionManager.getInstance(context);
+                LevelCompletionData lcd = lcm.getLevelCompletionData(levelId);
+                entry.setStarsEarned(lcd.getStars());
+                Timber.d("[HISTORY] Set starsEarned=%d for level %d", lcd.getStars(), levelId);
+            }
+
             // Set hint tracking - record if hints were used during this session
             int maxHintUsed = gameState.getMaxHintUsedThisSession();
             entry.setMaxHintUsed(maxHintUsed);
@@ -2675,6 +2685,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
 
             Timber.d("[HISTORY] Game saved to history: %s (Map name: '%s')", historyPath, mapName);
+            
+            // Auto-upload history if level was completed (to sync stars immediately)
+            if (actualMoveCount > 0 && levelId > 0) {
+                Timber.d("[HISTORY_SYNC] Level %d completed, triggering automatic history upload", levelId);
+                new Thread(() -> {
+                    try {
+                        SyncManager.getInstance(context).uploadHistory(activity);
+                    } catch (Exception uploadError) {
+                        Timber.e(uploadError, "[HISTORY_SYNC] Auto-upload failed after level completion");
+                    }
+                }).start();
+            }
         } catch (Exception e) {
             Timber.e("[HISTORY] Error saving game to history: %s", e.getMessage());
         }

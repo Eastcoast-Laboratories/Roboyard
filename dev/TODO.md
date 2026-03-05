@@ -79,8 +79,6 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 ---
 # last prompt:
 
-Das Problem ist: der Hint button checked status kontrolliert hja ob der rein slided oder upslided. Der Hint Button wird aber zu oft checked false (upslide) gesetzt. solange noch keine lösung gefunden ist, soll der auch nicht unchecken. erst, wenn die lösung akzeptiert ist, soll er unchecken. suche, wo der auf checked false gesetzt wird obwohl die lösung noch gar nicht akzeptiert wurde, er soll zwischen den versuchen nicht uncheken
-
 ----
 
 
