@@ -335,8 +335,38 @@ public class SyncManager {
                 @Override
                 public void onError(String error) {
                     Timber.e("[HISTORY_SYNC] ✗ Upload failed: %s", error);
-                    if (callback != null) {
-                        callback.onError(error);
+                    
+                    // If unauthorized, try to re-login once and retry
+                    if (error != null && error.toLowerCase().contains("unauthorized")) {
+                        Timber.d("[HISTORY_SYNC] Attempting auto re-login after 401...");
+                        apiClient.attemptReLogin(new RoboyardApiClient.ApiCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean reLoginSuccess) {
+                                if (reLoginSuccess) {
+                                    Timber.d("[HISTORY_SYNC] Re-login successful, retrying upload...");
+                                    // Retry the upload with the same entries
+                                    uploadHistory(activity, entries, callback);
+                                } else {
+                                    Timber.e("[HISTORY_SYNC] Re-login failed, user needs to login manually");
+                                    if (callback != null) {
+                                        callback.onError("Not logged in - please login again");
+                                    }
+                                }
+                            }
+                            
+                            @Override
+                            public void onError(String reLoginError) {
+                                Timber.e("[HISTORY_SYNC] Re-login error: %s", reLoginError);
+                                if (callback != null) {
+                                    callback.onError("Not logged in - please login again");
+                                }
+                            }
+                        });
+                    } else {
+                        // Not an auth error, just pass it through
+                        if (callback != null) {
+                            callback.onError(error);
+                        }
                     }
                 }
             });

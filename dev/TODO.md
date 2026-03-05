@@ -98,3 +98,24 @@ benutze bestehende unittests oder erstelle einen neuen wenn es keinen gibt, der 
 
 
 höre erst auf, wenn du den fehler gefunden hast und nachbauen konntest und repariert hast
+
+----
+
+merke dir: die roboyard.z11.de laravel app wird deployed mit cd /var/www/roboyard.z11; ./deploy.sh
+
+1. wenn man ausgeloggt wird, dann soll er sofort wieder einloggen und ein neues token erfragen. das passwort soll im localsorage gespeichert bleiben, damit die app sich jederzeit wenn ntig wieder einloggen kann. oder ist das schon genau so?
+
+auch , wenn beim level syncen unauthorized kommt, soll er einmal versuchen sich neu einzuloggen und nur wenn dann immer noch unauthorized kommt , soll er die toast error meldung ausgeben, dass er nicht mehr eingeloggt ist
+
+
+2. 
+erweitere das script 
+@logcat-history-sync.sh#L8-13 und benenne es um in einfach logcat.sh
+
+3.lass den history level test wieder laufen und verifiziere selbst mit dem logcat.sh script, dass alles läuft
+
+höere erst auf, wenn die history sync funktionierrt
+ 
+4. kann die mainactivity weg? oder wird die noch benutzt?
+
+merke dir: schreibe keine anleitungen, wie ich das testen kann, sondern teste es alle sselbst mithilfe von unittests und logcat

@@ -56,6 +56,24 @@ public class MainActivity extends FragmentActivity
         // Initialize static Preferences
         Preferences.initialize(getApplicationContext());
         
+        // Verify auth token on app start to maintain login session
+        roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(getApplicationContext());
+        apiClient.verifyToken(new roboyard.ui.components.RoboyardApiClient.ApiCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean isValid) {
+                if (isValid) {
+                    Timber.d("[AUTO_LOGIN] Token verified, user is logged in");
+                } else {
+                    Timber.d("[AUTO_LOGIN] No valid token, user needs to login");
+                }
+            }
+            
+            @Override
+            public void onError(String error) {
+                Timber.e("[AUTO_LOGIN] Error verifying token: %s", error);
+            }
+        });
+        
         // Start background sound service if volume > 0 (replicate exact logic from SettingsFragment)
         Timber.d("[SOUND_SERVICE] MainActivity.onCreate: backgroundSoundVolume = %d, DEFAULT = %d", 
                 Preferences.backgroundSoundVolume, Preferences.DEFAULT_BACKGROUND_SOUND_VOLUME);

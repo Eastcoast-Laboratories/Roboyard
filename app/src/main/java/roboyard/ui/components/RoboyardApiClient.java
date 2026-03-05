@@ -35,6 +35,7 @@ public class RoboyardApiClient {
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_ID = "user_id";
+    private static final String KEY_USER_PASSWORD = "user_password";
     
     private static RoboyardApiClient instance;
     private final Context context;
@@ -178,12 +179,13 @@ public class RoboyardApiClient {
                 String userName = json.optString("name", email);
                 int userId = json.optInt("user_id", -1);
                 
-                // Save credentials
+                // Save credentials including password for auto re-login
                 prefs.edit()
                     .putString(KEY_AUTH_TOKEN, token)
                     .putString(KEY_USER_EMAIL, email)
                     .putString(KEY_USER_NAME, userName)
                     .putInt(KEY_USER_ID, userId)
+                    .putString(KEY_USER_PASSWORD, password)
                     .apply();
                 
                 LoginResult result = new LoginResult(token, userName, email, userId);
@@ -229,12 +231,13 @@ public class RoboyardApiClient {
                 String token = json.getString("token");
                 int userId = json.optInt("user_id", -1);
                 
-                // Save credentials
+                // Save credentials including password for auto re-login
                 prefs.edit()
                     .putString(KEY_AUTH_TOKEN, token)
                     .putString(KEY_USER_EMAIL, email)
                     .putString(KEY_USER_NAME, name)
                     .putInt(KEY_USER_ID, userId)
+                    .putString(KEY_USER_PASSWORD, password)
                     .apply();
                 
                 LoginResult result = new LoginResult(token, name, email, userId);
@@ -253,6 +256,76 @@ public class RoboyardApiClient {
     }
     
     /**
+     * Verify the stored auth token is still valid.
+     * Should be called on app start to ensure user stays logged in.
+     */
+    public void verifyToken(ApiCallback<Boolean> callback) {
+        if (!isLoggedIn()) {
+            postSuccess(callback, false);
+            return;
+        }
+        
+        executor.execute(() -> {
+            try {
+                // Try to make an authenticated request to verify token
+                String response = makeAuthenticatedPostRequest("/api/mobile/verify-token", "{}");
+                JSONObject json = new JSONObject(response);
+                
+                if (json.has("error")) {
+                    // Token is invalid, logout
+                    Timber.tag(TAG).d("Token verification failed, logging out");
+                    logout();
+                    postSuccess(callback, false);
+                    return;
+                }
+                
+                // Token is valid
+                Timber.tag(TAG).d("Token verified successfully");
+                postSuccess(callback, true);
+                
+            } catch (JSONException e) {
+                Timber.tag(TAG).e(e, "JSON error during token verification");
+                logout();
+                postSuccess(callback, false);
+            } catch (IOException e) {
+                Timber.tag(TAG).e(e, "Network error during token verification");
+                // Don't logout on network error - token might still be valid
+                postSuccess(callback, false);
+            }
+        });
+    }
+    
+    /**
+     * Attempt to re-login using stored credentials.
+     * Called automatically when a 401 Unauthorized error occurs.
+     */
+    public void attemptReLogin(ApiCallback<Boolean> callback) {
+        String email = prefs.getString(KEY_USER_EMAIL, null);
+        String password = prefs.getString(KEY_USER_PASSWORD, null);
+        
+        if (email == null || password == null) {
+            Timber.tag(TAG).d("[AUTO_RELOGIN] No stored credentials, cannot re-login");
+            postSuccess(callback, false);
+            return;
+        }
+        
+        Timber.tag(TAG).d("[AUTO_RELOGIN] Attempting to re-login as: %s", email);
+        login(email, password, new ApiCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult result) {
+                Timber.tag(TAG).d("[AUTO_RELOGIN] Re-login successful");
+                postSuccess(callback, true);
+            }
+            
+            @Override
+            public void onError(String error) {
+                Timber.tag(TAG).e("[AUTO_RELOGIN] Re-login failed: %s", error);
+                postSuccess(callback, false);
+            }
+        });
+    }
+    
+    /**
      * Logout from roboyard.z11.de.
      */
     public void logout() {
@@ -261,6 +334,7 @@ public class RoboyardApiClient {
             .remove(KEY_USER_EMAIL)
             .remove(KEY_USER_NAME)
             .remove(KEY_USER_ID)
+            .remove(KEY_USER_PASSWORD)
             .apply();
         
         Timber.tag(TAG).d("Logged out");
