@@ -435,7 +435,7 @@ public class SettingsFragment extends Fragment {
             
             // Define all possible board sizes - exactly as in the original game
             int[][] boardSizes = {
-                    {7, 8},
+                    {8, 7},
                     {8, 8},
                     {8, 12}, 
                     {10, 10}, // board ratio: 1.0

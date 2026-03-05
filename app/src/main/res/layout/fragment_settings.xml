@@ -140,10 +140,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:contentDescription="@string/language_settings_a11y"
-                    android:minHeight="48dp"
+                    android:minHeight="32dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:background="@drawable/spinner_border" />
+                    android:background="@drawable/spinner_border"
+                    android:drawableRight="@drawable/ic_dropdown_arrow" />
             </LinearLayout>
 
             <!-- TalkBack Language Section (only shown when accessibility is enabled) -->
@@ -172,10 +173,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:contentDescription="@string/accessibility_language_a11y"
-                    android:minHeight="48dp"
+                    android:minHeight="20dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:background="@drawable/spinner_border" />
+                    android:background="@drawable/spinner_border"
+                    android:drawableRight="@drawable/ic_dropdown_arrow" />
             </LinearLayout>
 
             <!-- Board Size Section -->
@@ -204,10 +206,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:contentDescription="Select board size"
-                    android:minHeight="48dp"
+                    android:minHeight="32dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:background="@drawable/spinner_border" />
+                    android:background="@drawable/spinner_border"
+                    android:drawableRight="@drawable/ic_dropdown_arrow" />
             </LinearLayout>
 
             <!-- Difficulty Section -->
@@ -604,10 +607,11 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:contentDescription="Select number of robots that must reach targets"
-                        android:minHeight="48dp"
+                        android:minHeight="32dp"
                         android:focusable="true"
                         android:clickable="true"
-                        android:background="@drawable/spinner_border" />
+                        android:background="@drawable/spinner_border"
+                        android:drawableRight="@drawable/ic_dropdown_arrow" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -625,10 +629,11 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:contentDescription="Select number of different target colors"
-                        android:minHeight="48dp"
+                        android:minHeight="32dp"
                         android:focusable="true"
                         android:clickable="true"
-                        android:background="@drawable/spinner_border" />
+                        android:background="@drawable/spinner_border"
+                        android:drawableRight="@drawable/ic_dropdown_arrow" />
 
                     <TextView
                         android:layout_width="wrap_content"

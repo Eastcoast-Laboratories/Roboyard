@@ -104,7 +104,7 @@ public class Constants {
     
     // Accessibility constants
     public static final long ACCESSIBILITY_FOCUS_DELAY_MS = 500;
-    public static final int MIN_BOARD_SIZE = 8;
+    public static final int MIN_BOARD_SIZE = 6;
     public static final int MAX_BOARD_SIZE = 22;
     
     // Level completion stars configuration

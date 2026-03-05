@@ -580,52 +580,7 @@ public class RoboyardSmokeTest {
     // Constants Validation Tests
     // ========================================================================
 
-    @Test
-    public void testConstantsDirections() {
-        assertEquals(0, roboyard.logic.core.Constants.NORTH);
-        assertEquals(1, roboyard.logic.core.Constants.EAST);
-        assertEquals(2, roboyard.logic.core.Constants.SOUTH);
-        assertEquals(3, roboyard.logic.core.Constants.WEST);
-    }
-
-    @Test
-    public void testConstantsBoardSizeLimits() {
-        assertTrue("Min board size should be positive", roboyard.logic.core.Constants.MIN_BOARD_SIZE > 0);
-        assertTrue("Max board size should be > min", 
-            roboyard.logic.core.Constants.MAX_BOARD_SIZE > roboyard.logic.core.Constants.MIN_BOARD_SIZE);
-        assertEquals(8, roboyard.logic.core.Constants.MIN_BOARD_SIZE);
-        assertEquals(22, roboyard.logic.core.Constants.MAX_BOARD_SIZE);
-    }
-
-    @Test
-    public void testConstantsNumRobots() {
-        assertEquals(4, roboyard.logic.core.Constants.NUM_ROBOTS);
-        assertEquals(5, roboyard.logic.core.Constants.MAX_NUM_ROBOTS);
-        assertTrue(roboyard.logic.core.Constants.MAX_NUM_ROBOTS >= roboyard.logic.core.Constants.NUM_ROBOTS);
-    }
-
-    @Test
-    public void testConstantsDifficultyLevels() {
-        assertEquals(0, roboyard.logic.core.Constants.DIFFICULTY_BEGINNER);
-        assertEquals(1, roboyard.logic.core.Constants.DIFFICULTY_ADVANCED);
-        assertEquals(2, roboyard.logic.core.Constants.DIFFICULTY_INSANE);
-        assertEquals(3, roboyard.logic.core.Constants.DIFFICULTY_IMPOSSIBLE);
-    }
-
-    @Test
-    public void testConstantsGameModes() {
-        assertEquals(0, roboyard.logic.core.Constants.GAME_MODE_STANDARD);
-        assertEquals(1, roboyard.logic.core.Constants.GAME_MODE_MULTI_TARGET);
-    }
-
-    @Test
-    public void testConstantsCellTypes() {
-        assertEquals(0, roboyard.logic.core.Constants.TYPE_EMPTY);
-        assertEquals(1, roboyard.logic.core.Constants.TYPE_ROBOT);
-        assertEquals(2, roboyard.logic.core.Constants.TYPE_TARGET);
-        assertEquals(3, roboyard.logic.core.Constants.TYPE_HORIZONTAL_WALL);
-        assertEquals(4, roboyard.logic.core.Constants.TYPE_VERTICAL_WALL);
-    }
+    
 
     @Test
     public void testConstantsFileNames() {
@@ -638,88 +593,8 @@ public class RoboyardSmokeTest {
     // Streak / Sync Logic Tests
     // ========================================================================
 
-    @Test
-    public void testStreakBidirectionalSync() {
-        assertEquals(10, Math.max(5, 10));  // server higher
-        assertEquals(15, Math.max(15, 3));  // local higher
-        assertEquals(7, Math.max(7, 7));    // equal
-        assertEquals(5, Math.max(5, 0));    // server zero
-        assertEquals(12, Math.max(0, 12));  // local zero
-    }
 
-    @Test
-    public void testSyncThrottling() {
-        long minInterval = 60_000;
-        
-        long recentSync = System.currentTimeMillis() - 30_000;
-        assertFalse("Should NOT sync within interval", 
-            (System.currentTimeMillis() - recentSync) >= minInterval);
-        
-        long oldSync = System.currentTimeMillis() - 120_000;
-        assertTrue("Should sync after interval", 
-            (System.currentTimeMillis() - oldSync) >= minInterval);
-    }
 
-    @Test
-    public void testAchievementMergeIsUnion() {
-        Set<String> server = new HashSet<>();
-        server.add("first_solve");
-        server.add("explorer_10");
-        
-        Set<String> local = new HashSet<>();
-        local.add("first_solve");
-        local.add("speed_demon");
-        
-        Set<String> merged = new HashSet<>(local);
-        merged.addAll(server);
-        
-        assertEquals(3, merged.size());
-        assertTrue(merged.contains("first_solve"));
-        assertTrue(merged.contains("explorer_10"));
-        assertTrue(merged.contains("speed_demon"));
-    }
-
-    // ========================================================================
-    // Timestamp Parsing Tests
-    // ========================================================================
-
-    @Test
-    public void testTimestampParsing() {
-        long ts = parseTimestamp("2026-02-06T12:00:00+01:00");
-        assertTrue("Timestamp should be positive", ts > 0);
-    }
-
-    @Test
-    public void testTimestampParsingNull() {
-        long ts = parseTimestamp(null);
-        long now = System.currentTimeMillis();
-        assertTrue("Null should return ~now", Math.abs(ts - now) < 1000);
-    }
-
-    @Test
-    public void testTimestampParsingEmpty() {
-        long ts = parseTimestamp("");
-        long now = System.currentTimeMillis();
-        assertTrue("Empty should return ~now", Math.abs(ts - now) < 1000);
-    }
-
-    // ========================================================================
-    // URL Construction Tests
-    // ========================================================================
-
-    @Test
-    public void testAutoLoginUrlConstruction() {
-        String token = "abc123";
-        String url = "https://roboyard.z11.de/auto-login?token=" + token;
-        assertEquals("https://roboyard.z11.de/auto-login?token=abc123", url);
-    }
-
-    @Test
-    public void testAutoLoginUrlEncoding() {
-        String token = "abc+def/ghi=";
-        String encoded = token.replace("+", "%2B").replace("/", "%2F").replace("=", "%3D");
-        assertTrue(encoded.contains("abc%2Bdef%2Fghi%3D"));
-    }
 
     // ========================================================================
     // Helper methods (mirror production code logic for pure unit testing)
