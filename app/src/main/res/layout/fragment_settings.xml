@@ -143,8 +143,7 @@
                     android:minHeight="32dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:background="@drawable/spinner_border"
-                    android:drawableRight="@drawable/ic_dropdown_arrow" />
+                    android:background="@drawable/ic_dropdown_arrow" />
             </LinearLayout>
 
             <!-- TalkBack Language Section (only shown when accessibility is enabled) -->
@@ -176,8 +175,7 @@
                     android:minHeight="20dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:background="@drawable/spinner_border"
-                    android:drawableRight="@drawable/ic_dropdown_arrow" />
+                    android:background="@drawable/ic_dropdown_arrow" />
             </LinearLayout>
 
             <!-- Board Size Section -->
@@ -209,8 +207,7 @@
                     android:minHeight="32dp"
                     android:focusable="true"
                     android:clickable="true"
-                    android:background="@drawable/spinner_border"
-                    android:drawableRight="@drawable/ic_dropdown_arrow" />
+                    android:background="@drawable/ic_dropdown_arrow" />
             </LinearLayout>
 
             <!-- Difficulty Section -->
@@ -610,8 +607,7 @@
                         android:minHeight="32dp"
                         android:focusable="true"
                         android:clickable="true"
-                        android:background="@drawable/spinner_border"
-                        android:drawableRight="@drawable/ic_dropdown_arrow" />
+                        android:background="@drawable/ic_dropdown_arrow" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -632,8 +628,7 @@
                         android:minHeight="32dp"
                         android:focusable="true"
                         android:clickable="true"
-                        android:background="@drawable/spinner_border"
-                        android:drawableRight="@drawable/ic_dropdown_arrow" />
+                        android:background="@drawable/ic_dropdown_arrow" />
 
                     <TextView
                         android:layout_width="wrap_content"
