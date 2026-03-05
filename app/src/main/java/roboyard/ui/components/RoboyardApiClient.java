@@ -98,7 +98,9 @@ public class RoboyardApiClient {
      * Check if user is logged in.
      */
     public boolean isLoggedIn() {
-        return prefs.getString(KEY_AUTH_TOKEN, null) != null;
+        String token = prefs.getString(KEY_AUTH_TOKEN, null);
+        Timber.tag(TAG).d("[AUTH_DEBUG] isLoggedIn check: token=%s", token != null ? "present" : "null");
+        return token != null;
     }
     
     /**
@@ -187,6 +189,8 @@ public class RoboyardApiClient {
                     .putInt(KEY_USER_ID, userId)
                     .putString(KEY_USER_PASSWORD, password)
                     .apply();
+                
+                Timber.tag(TAG).d("[AUTH_DEBUG] Token saved to SharedPreferences: %s", token.substring(0, Math.min(10, token.length())) + "...");
                 
                 LoginResult result = new LoginResult(token, userName, email, userId);
                 postSuccess(callback, result);
