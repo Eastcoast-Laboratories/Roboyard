@@ -125,8 +125,9 @@
 
                 <TextView
                     android:id="@+id/language_label"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="@string/language_settings_label"
                     android:textSize="@dimen/settings_label_text_size"
                     android:textStyle="bold"
@@ -141,7 +142,8 @@
                     android:contentDescription="@string/language_settings_a11y"
                     android:minHeight="48dp"
                     android:focusable="true"
-                    android:clickable="true" />
+                    android:clickable="true"
+                    android:background="@drawable/spinner_border" />
             </LinearLayout>
 
             <!-- TalkBack Language Section (only shown when accessibility is enabled) -->
@@ -172,7 +174,8 @@
                     android:contentDescription="@string/accessibility_language_a11y"
                     android:minHeight="48dp"
                     android:focusable="true"
-                    android:clickable="true" />
+                    android:clickable="true"
+                    android:background="@drawable/spinner_border" />
             </LinearLayout>
 
             <!-- Board Size Section -->
@@ -203,7 +206,8 @@
                     android:contentDescription="Select board size"
                     android:minHeight="48dp"
                     android:focusable="true"
-                    android:clickable="true" />
+                    android:clickable="true"
+                    android:background="@drawable/spinner_border" />
             </LinearLayout>
 
             <!-- Difficulty Section -->
@@ -600,7 +604,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:contentDescription="Select number of robots that must reach targets"
-                        android:minHeight="48dp" />
+                        android:minHeight="48dp"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:background="@drawable/spinner_border" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -618,7 +625,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:contentDescription="Select number of different target colors"
-                        android:minHeight="48dp" />
+                        android:minHeight="48dp"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:background="@drawable/spinner_border" />
 
                     <TextView
                         android:layout_width="wrap_content"
