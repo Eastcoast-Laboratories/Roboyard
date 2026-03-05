@@ -32,6 +32,7 @@ public class AchievementsFragment extends BaseGameFragment {
     private LinearLayout achievementsContainer;
     private TextView progressText;
     private int currentLoginStreakDays = 1;
+    private Button userProfileButton;
     
     @Override
     public String getScreenTitle() {
@@ -46,6 +47,10 @@ public class AchievementsFragment extends BaseGameFragment {
         // Set up back button - always navigate to MainMenuFragment
         Button backButton = view.findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> navigateToMainMenu());
+        
+        // Set up user profile button
+        userProfileButton = view.findViewById(R.id.user_profile_button);
+        setupUserProfileButton(userProfileButton);
         
         // Get references to UI elements
         progressText = view.findViewById(R.id.progress_text);
@@ -67,8 +72,20 @@ public class AchievementsFragment extends BaseGameFragment {
                 }
             });
         
+        // Update user profile button UI
+        updateUserProfileButton(userProfileButton);
+        
         achievementManager = AchievementManager.getInstance(requireContext());
         loadAchievements();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update user profile button when returning to this screen
+        if (userProfileButton != null) {
+            updateUserProfileButton(userProfileButton);
+        }
     }
     
     /**

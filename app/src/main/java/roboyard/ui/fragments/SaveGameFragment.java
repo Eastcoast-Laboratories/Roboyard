@@ -67,6 +67,7 @@ public class SaveGameFragment extends BaseGameFragment {
     private TabLayout tabLayout;
     private RecyclerView saveSlotRecyclerView;
     private Button backButton;
+    private Button userProfileButton;
     private LinearLayout historyFilterHeader;
     private Spinner sortSpinner;
     private Spinner filterSpinner;
@@ -177,6 +178,7 @@ public class SaveGameFragment extends BaseGameFragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         saveSlotRecyclerView = view.findViewById(R.id.save_slot_recycler_view);
         backButton = view.findViewById(R.id.back_button);
+        userProfileButton = view.findViewById(R.id.user_profile_button);
         historyFilterHeader = view.findViewById(R.id.history_filter_header);
         sortSpinner = view.findViewById(R.id.sort_spinner);
         filterSpinner = view.findViewById(R.id.filter_spinner);
@@ -219,6 +221,9 @@ public class SaveGameFragment extends BaseGameFragment {
             }
         });
         
+        // Set up user profile button
+        setupUserProfileButton(userProfileButton);
+        
         return view;
     }
     
@@ -226,10 +231,24 @@ public class SaveGameFragment extends BaseGameFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
+        // Update user profile button UI
+        if (userProfileButton != null) {
+            updateUserProfileButton(userProfileButton);
+        }
+        
         // Stop map regeneration when in save/load screen
         if (gameStateManager != null) {
             gameStateManager.stopRegeneration();
             Timber.d("[SOLVER] Stopped regeneration in save/load screen");
+        }
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update user profile button when returning to this screen
+        if (userProfileButton != null) {
+            updateUserProfileButton(userProfileButton);
         }
     }
     

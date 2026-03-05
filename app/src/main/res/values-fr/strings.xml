@@ -14,6 +14,8 @@
     <string name="help">Comment jouer?</string>
     <string name="help_a11y">Instructions pour jouer</string>
     <string name="credits">Crédits</string>
+    
+    <string name="user_profile_button_a11y">Profil utilisateur et connexion</string>
 
     <!-- Color names -->
     <string name="color_red">Rouge</string>

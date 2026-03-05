@@ -14,10 +14,25 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/user_profile_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Select slot to save game" />
+
+    <!-- User profile button at top right -->
+    <Button
+        android:id="@+id/user_profile_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:padding="0dp"
+        android:background="@drawable/button_fancy_blue"
+        android:elevation="4dp"
+        android:contentDescription="@string/user_profile_button_a11y"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Tab layout for save/load/history tabs -->
     <com.google.android.material.tabs.TabLayout

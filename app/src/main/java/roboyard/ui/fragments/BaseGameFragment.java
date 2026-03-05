@@ -231,6 +231,76 @@ public abstract class BaseGameFragment extends Fragment {
     }
     
     /**
+     * Setup user profile button with click listener
+     * Handles both initialization and click listener setup in one call
+     * Shows user initials in circle when logged in, or user icon when logged out
+     * This is a reusable method for any fragment that needs to display the login circle
+     */
+    protected void setupUserProfileButton(android.widget.Button userProfileButton) {
+        if (userProfileButton == null) {
+            Timber.w("setupUserProfileButton: userProfileButton is null");
+            return;
+        }
+        
+        // Update the button UI based on login state
+        updateUserProfileButton(userProfileButton);
+        
+        // Set up click listener
+        userProfileButton.setOnClickListener(v -> {
+            roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+            if (apiClient.isLoggedIn()) {
+                // Open profile in browser with auto-login token
+                String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
+                android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                startActivity(intent);
+            } else {
+                // Show login dialog
+                roboyard.ui.components.LoginDialogHelper.showLoginDialog(requireContext(), new roboyard.ui.components.LoginDialogHelper.LoginCallback() {
+                    @Override
+                    public void onLoginSuccess(roboyard.ui.components.RoboyardApiClient.LoginResult result) {
+                        updateUserProfileButton(userProfileButton);
+                    }
+                    
+                    @Override
+                    public void onLoginError(String error) {
+                        // Error handling is done in LoginDialogHelper
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Update user profile button based on login state
+     * Shows user initials in circle when logged in, or user icon when logged out
+     * This is a reusable method for any fragment that needs to display the login circle
+     */
+    protected void updateUserProfileButton(android.widget.Button userProfileButton) {
+        if (userProfileButton == null) {
+            Timber.w("updateUserProfileButton: userProfileButton is null");
+            return;
+        }
+        
+        roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+        if (apiClient.isLoggedIn()) {
+            String userName = apiClient.getUserName();
+            if (userName == null) userName = apiClient.getUserEmail();
+            if (userName != null && !userName.isEmpty()) {
+                String initials = String.valueOf(userName.charAt(0)).toUpperCase();
+                userProfileButton.setText(initials);
+                userProfileButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                userProfileButton.setGravity(android.view.Gravity.CENTER);
+                userProfileButton.setContentDescription(initials);
+            }
+        } else {
+            userProfileButton.setText("");
+            userProfileButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_user_profile, 0, 0);
+            userProfileButton.setGravity(android.view.Gravity.CENTER);
+            userProfileButton.setPadding(8, 14, 8, 8);
+        }
+    }
+    
+    /**
      * Applies the language settings to the application context
      */
     private void applyLanguageSettings() {

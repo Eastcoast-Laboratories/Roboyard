@@ -30,6 +30,8 @@
 
     <string name="credits">制作人员</string>
     
+    <string name="user_profile_button_a11y">用户资料和登录</string>
+    
     <!-- Game Screens -->
     <string name="help_screen_title">帮助</string>
 

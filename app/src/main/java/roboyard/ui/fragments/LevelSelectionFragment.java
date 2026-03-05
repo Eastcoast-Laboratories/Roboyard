@@ -43,6 +43,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
     private TextView starsTextView;
+    private Button userProfileButton;
     private final List<Integer> availableLevels = new ArrayList<>();
     private LevelCompletionManager completionManager;
     private int totalStars = 0;
@@ -164,6 +165,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
             navigateToDirect(menuFragment);
         });
 
+        // Set up user profile button
+        userProfileButton = view.findViewById(R.id.user_profile_button);
+        setupUserProfileButton(userProfileButton);
+
         // Show Level Editor button if all 140 levels (except 139) are unlocked
         Button levelEditorButton = view.findViewById(R.id.level_editor_button);
         if (levelEditorButton != null) {
@@ -186,13 +191,18 @@ public class LevelSelectionFragment extends BaseGameFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
+        // Update user profile button UI
+        if (userProfileButton != null) {
+            updateUserProfileButton(userProfileButton);
+        }
+        
         // Stop map regeneration when in level selection screen
         if (gameStateManager != null) {
             gameStateManager.stopRegeneration();
             Timber.d("[SOLVER] Stopped regeneration in level selection screen");
         }
     }
-
+    
     /**
      * Scroll to the last played level automatically, positioning it in the middle of the screen
      */
@@ -246,6 +256,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
     @Override
     public void onResume() {
         super.onResume();
+        
+        // Update user profile button when returning to this screen
+        if (userProfileButton != null) {
+            updateUserProfileButton(userProfileButton);
+        }
+        
         // Update total stars
         totalStars = completionManager.getTotalStars();
 

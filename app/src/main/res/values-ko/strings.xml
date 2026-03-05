@@ -34,6 +34,8 @@
 
     <string name="credits">크레딧</string>
     
+    <string name="user_profile_button_a11y">사용자 프로필 및 로그인</string>
+    
     <!-- Accessibility Controls -->
     <string name="announce">안내</string>
     <string name="next_robot">다음 로봇</string>

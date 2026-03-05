@@ -406,25 +406,19 @@ public class MainMenuFragment extends BaseGameFragment {
     }
     
     /**
+     * Setup user profile button with click listener
+     * Uses the reusable method from BaseGameFragment
+     */
+    private void setupUserProfileButton() {
+        setupUserProfileButton(userProfileButton);
+    }
+    
+    /**
      * Update user profile button based on login state
+     * Uses the reusable method from BaseGameFragment
      */
     private void updateUserProfileButton() {
-        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
-        if (apiClient.isLoggedIn()) {
-            String userName = apiClient.getUserName();
-            if (userName == null) userName = apiClient.getUserEmail();
-            if (userName != null && !userName.isEmpty()) {
-                String initials = String.valueOf(userName.charAt(0)).toUpperCase();
-                userProfileButton.setText(initials);
-                userProfileButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                userProfileButton.setGravity(android.view.Gravity.CENTER);
-                userProfileButton.setContentDescription(initials);
-            }
-        } else {
-            userProfileButton.setText("");
-            userProfileButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_user_profile, 0, 0);
-            userProfileButton.setGravity(android.view.Gravity.CENTER);
-        }
+        updateUserProfileButton(userProfileButton);
     }
     
     @Override

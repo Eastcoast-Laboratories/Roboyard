@@ -24,6 +24,8 @@
 
     <string name="credits">Créditos</string>
     
+    <string name="user_profile_button_a11y">Perfil de usuario e inicio de sesión</string>
+    
     <!-- Game Screens -->
     <string name="help_screen_title">Ayuda</string>
 

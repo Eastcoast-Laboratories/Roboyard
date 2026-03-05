@@ -114,28 +114,45 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
             
             <!-- Title centered at the top with smaller size and no top margin -->
             <TextView
                 android:id="@+id/level_selection_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/level_selection_title"
-                android:textSize="15dp"
+                android:textSize="20dp"
                 android:textStyle="bold"
                 android:textAlignment="center"
                 android:gravity="center"
-                android:layout_marginTop="0dp"
                 android:textColor="#212121"
                 android:shadowColor="#80000000"
                 android:shadowDx="1"
                 android:shadowDy="1"
                 android:shadowRadius="2"
-                android:paddingTop="0dp"
+                android:paddingTop="8dp"
                 android:paddingBottom="4dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/user_profile_button"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            
+            <!-- User profile button at top right -->
+            <Button
+                android:id="@+id/user_profile_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:padding="0dp"
+                android:layout_marginTop="0dp"
+                android:background="@drawable/button_fancy_blue"
+                android:elevation="4dp"
+                android:contentDescription="@string/user_profile_button_a11y"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
                 
             <!-- Stars counter with more left padding and nowrap -->
