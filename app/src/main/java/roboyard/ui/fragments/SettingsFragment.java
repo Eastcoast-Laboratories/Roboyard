@@ -2192,6 +2192,11 @@ public class SettingsFragment extends Fragment {
                 try {
                     DataExportImportManager manager = new DataExportImportManager(requireContext());
                     manager.resetAllData();
+                    
+                    // Logout user when resetting all data
+                    roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+                    apiClient.logout();
+                    
                     Toast.makeText(requireContext(), R.string.settings_reset_success, Toast.LENGTH_LONG).show();
                 } catch (Exception e) {
                     Timber.e(e, "Error resetting data");
