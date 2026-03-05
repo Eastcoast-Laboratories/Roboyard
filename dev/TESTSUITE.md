@@ -44,6 +44,7 @@ These tests require a connected Android device or emulator.
 | Class                         | Status    | Tests | Description                                                                                                                                                                                                        | Tags                                                                          |
 | ----------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
 | `HintAutoModeE2ETest`         | ✅ Passing | 3     | Tests all 3 hint auto-move modes: Manual (user moves robots), Full-Auto (robot moves automatically when hint shown), Semi-Auto (robot moves when next-hint button clicked). Uses Settings UI to change modes.      | hint-system, auto-move, settings, preferences, ui-navigation                  |
+| `HistorySyncStarsTest`        | ⏳ Manual  | 1     | Verifies that stars are correctly synced to server after level completion. Uses logcat analysis via TestHelper to verify sync process. Requires manual level completion during test execution.                     | history-sync, stars, server-sync, logcat-analysis, manual-test                |
 
 ---
 

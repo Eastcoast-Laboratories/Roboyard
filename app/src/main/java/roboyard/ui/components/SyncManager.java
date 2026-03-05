@@ -275,6 +275,12 @@ public class SyncManager {
             JSONArray historyArray = new JSONArray();
             
             for (GameHistoryEntry entry : entries) {
+                // Only upload completed entries to prevent overwriting server data with incomplete entries
+                if (entry.getCompletionCount() == 0) {
+                    Timber.d("[HISTORY_SYNC] Skipping incomplete entry: %s (completionCount=0)", entry.getMapName());
+                    continue;
+                }
+                
                 // Read the actual map data from the history file
                 String mapData = readHistoryFileData(activity, entry);
                 if (mapData == null || mapData.isEmpty()) continue;
@@ -290,8 +296,8 @@ public class SyncManager {
                 historyJson.put("stars_earned", entry.getStarsEarned());
                 historyJson.put("played_at", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp())));
                 
-                Timber.d("[HISTORY_SYNC] Uploading: %s (moves=%d, stars=%d, solved=%b)", 
-                        entry.getMapName(), entry.getMovesMade(), entry.getStarsEarned(), entry.getMovesMade() > 0);
+                Timber.d("[HISTORY_SYNC] Uploading: %s (moves=%d, stars=%d, completed=true)", 
+                        entry.getMapName(), entry.getMovesMade(), entry.getStarsEarned());
                 
                 historyArray.put(historyJson);
             }
