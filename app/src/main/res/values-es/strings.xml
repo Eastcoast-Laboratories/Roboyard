@@ -276,8 +276,14 @@
     <string name="settings_cancel">Cancelar</string>
     <string name="settings_yes">Sí</string>
     <string name="settings_no">No</string>
+    <string name="settings_on">Activado</string>
+    <string name="settings_off">Desactivado</string>
     <string name="settings_back">Atrás</string>
     <string name="empty_slot">Vacío</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">Idioma:</string>
+    <string name="language_settings_a11y">Seleccionar idioma de la aplicación</string>
     <string name="settings_contact">Contacto</string>
     <string name="settings_contact_us">Contáctanos</string>
     <string name="settings_contact_email">soporte@roboyard.com</string>

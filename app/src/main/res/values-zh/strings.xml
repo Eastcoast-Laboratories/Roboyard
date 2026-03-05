@@ -6,6 +6,10 @@
     <!-- Main Menu Strings -->
     <string name="settings_back">返回</string>
     <string name="empty_slot">空</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">语言:</string>
+    <string name="language_settings_a11y">选择应用显示语言</string>
 
     <string name="new_random_game">新游戏</string>
     <string name="new_random_game_a11y">开始新游戏</string>
@@ -190,6 +194,8 @@
     <string name="settings_sound_effects_volume">音效音量：</string>
     <string name="settings_yes">是</string>
     <string name="settings_no">否</string>
+    <string name="settings_on">开</string>
+    <string name="settings_off">关</string>
     <string name="settings_language">语言：</string>
     <string name="settings_english">English</string>
     <string name="settings_german">Deutsch</string>

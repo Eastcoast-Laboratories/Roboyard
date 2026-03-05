@@ -6,6 +6,14 @@
     <!-- Main Menu Strings -->
     <string name="settings_back">뒤로</string>
     <string name="empty_slot">비어있음</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">언어:</string>
+    <string name="language_settings_a11y">앱 표시 언어 선택</string>
+    <string name="settings_on">켜기</string>
+    <string name="settings_off">끄기</string>
+    <string name="settings_yes">예</string>
+    <string name="settings_no">아니오</string>
 
     <string name="new_random_game">새 게임</string>
     <string name="new_random_game_a11y">새 게임 시작</string>
