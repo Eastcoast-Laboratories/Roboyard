@@ -284,4 +284,80 @@ public class GameHistoryTest {
         entry.recordCompletion(80, 10);
         assertTrue(entry.qualifiesForNoHintsAchievement());
     }
+
+    // ========== OptimalMoves Persistence Tests ==========
+
+    @Test
+    public void testOptimalMovesSetInConstructor() {
+        // Constructor sets optimalMoves = 10
+        assertEquals(10, entry.getOptimalMoves());
+    }
+
+    @Test
+    public void testOptimalMovesSetterGetter() {
+        entry.setOptimalMoves(7);
+        assertEquals(7, entry.getOptimalMoves());
+    }
+
+    @Test
+    public void testOptimalMovesSurvivesRecordCompletion() {
+        // optimalMoves should not be changed by recordCompletion
+        assertEquals(10, entry.getOptimalMoves());
+        entry.recordCompletion(100, 12);
+        assertEquals(10, entry.getOptimalMoves());
+    }
+
+    @Test
+    public void testBestMovesUpdatedByRecordCompletion() {
+        // First completion sets bestMoves
+        entry.recordCompletion(100, 12);
+        assertEquals(12, entry.getBestMoves());
+
+        // Better completion updates bestMoves
+        entry.recordCompletion(80, 8);
+        assertEquals(8, entry.getBestMoves());
+
+        // Worse completion does NOT update bestMoves
+        entry.recordCompletion(120, 15);
+        assertEquals(8, entry.getBestMoves());
+    }
+
+    @Test
+    public void testMovesMadeUpdatedByRecordCompletion() {
+        // movesMade in constructor = 15
+        assertEquals(15, entry.getMovesMade());
+
+        // recordCompletion always updates movesMade to latest
+        entry.recordCompletion(100, 12);
+        assertEquals(12, entry.getMovesMade());
+
+        entry.recordCompletion(80, 20);
+        assertEquals(20, entry.getMovesMade());
+    }
+
+    @Test
+    public void testOptimalMovesCanBeUpdatedAfterIntermediateSave() {
+        // Simulate: entry created with optimalMoves=0 (intermediate save, solution not yet available)
+        GameHistoryEntry intermediateEntry = new GameHistoryEntry(
+                "history_2.txt", "Test Map 2", 2000000L, 60, 0, 0, "12x12", "preview.txt");
+        assertEquals(0, intermediateEntry.getOptimalMoves());
+
+        // Later, when game completes via updateHintTracking path, optimalMoves is set
+        intermediateEntry.setOptimalMoves(5);
+        assertEquals(5, intermediateEntry.getOptimalMoves());
+
+        // recordCompletion updates bestMoves and movesMade but not optimalMoves
+        intermediateEntry.recordCompletion(90, 7);
+        assertEquals(5, intermediateEntry.getOptimalMoves());
+        assertEquals(7, intermediateEntry.getBestMoves());
+        assertEquals(7, intermediateEntry.getMovesMade());
+    }
+
+    @Test
+    public void testQualifiesForNoHintsWithOptimalMoves() {
+        // Solve optimally without hints
+        entry.recordSolvedWithoutHints(true); // isOptimal=true
+        assertTrue(entry.qualifiesForNoHintsAchievement());
+        assertTrue(entry.getLastPerfectlySolvedWithoutHints() > 0);
+    }
 }

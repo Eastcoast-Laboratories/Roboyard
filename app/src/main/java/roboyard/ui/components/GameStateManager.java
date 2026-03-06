@@ -2606,10 +2606,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     isCompletionRecorded = true;
                     Timber.d("[HISTORY_FLOW] updateHintTracking: recordCompletion called, countBefore=%d, countAfter=%d, moveCount=%d",
                             countBefore, existing.getCompletionCount(), actualMoveCount);
+
+                    // Update optimalMoves from current solution (was missing here, causing 0 in history details)
+                    int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
+                            ? currentSolution.getMoves().size() : 0;
+                    if (optMoves > 0) {
+                        existing.setOptimalMoves(optMoves);
+                        Timber.d("[HISTORY] updateHintTracking: setOptimalMoves=%d", optMoves);
+                    }
+
                     // If completed without hints, record the no-hints timestamp (never overwritten by later hint usage)
                     if (maxHint < 0 && actualMoveCount > 0) {
-                        int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
-                                ? currentSolution.getMoves().size() : 0;
                         boolean isOptimal = optMoves > 0 && actualMoveCount == optMoves;
                         existing.recordSolvedWithoutHints(isOptimal);
                         Timber.d("[HISTORY] updateHintTracking: recordSolvedWithoutHints isOptimal=%b, moves=%d, optimal=%d", isOptimal, actualMoveCount, optMoves);
