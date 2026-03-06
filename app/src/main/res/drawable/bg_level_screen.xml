@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base green gradient background -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#2E7D32"
+                android:centerColor="#4CAF50"
+                android:endColor="#2E7D32"
+                android:angle="135" />
+        </shape>
+    </item>
+    <!-- Subtle golden shimmer overlay from edges -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#30FFD700"
+                android:centerColor="#00FFD700"
+                android:endColor="#30FFD700"
+                android:angle="0" />
+        </shape>
+    </item>
+</layer-list>

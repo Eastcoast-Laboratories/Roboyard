@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Gold gradient background -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#C8A415"
+                android:centerColor="#E8C840"
+                android:endColor="#A07A10"
+                android:angle="135" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Gold border -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="2dp" android:color="#FFD700" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Inner content area (lighter) with margin for border effect -->
+    <item android:left="3dp" android:top="3dp" android:right="3dp" android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#D4A820"
+                android:centerColor="#F0D860"
+                android:endColor="#B8921A"
+                android:angle="90" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+</layer-list>

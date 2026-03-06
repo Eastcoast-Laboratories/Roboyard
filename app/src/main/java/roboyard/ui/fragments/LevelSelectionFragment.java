@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,10 +45,13 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
     private TextView starsTextView;
+    private TextView progressText;
+    private View progressFill;
     private Button userProfileButton;
     private final List<Integer> availableLevels = new ArrayList<>();
     private LevelCompletionManager completionManager;
     private int totalStars = 0;
+    private int completedLevelCount = 0;
     /** Maps level file map name (e.g. "level_1") to history entry, for minimap + info-box reuse */
     private final Map<String, GameHistoryEntry> historyByMapName = new HashMap<>();
 
@@ -84,6 +89,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Set up UI elements
         titleTextView = view.findViewById(R.id.level_selection_title);
         starsTextView = view.findViewById(R.id.stars_count_text);
+        progressText = view.findViewById(R.id.progress_text);
+        progressFill = view.findViewById(R.id.progress_fill);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
 
         // Set title
@@ -93,45 +100,17 @@ public class LevelSelectionFragment extends BaseGameFragment {
         int spanCount = getResources().getConfiguration().orientation == 
                 android.content.res.Configuration.ORIENTATION_LANDSCAPE ? 6 : 3;
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
-        levelRecyclerView.setLayoutManager(layoutManager);
-
-        // Add a custom ItemDecoration with thin separator lines between grid items
-        levelRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-            private final android.graphics.Paint paint = new android.graphics.Paint();
-            
-            {
-                paint.setColor(android.graphics.Color.parseColor("#20000000")); // Very light gray (20% opacity)
-                paint.setStrokeWidth(1); // 1px thin line
-            }
-            
+        // Make headers span full width
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
-            public void getItemOffsets(@NonNull android.graphics.Rect outRect, @NonNull View view, 
-                                       @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                // Set minimal margins for separator lines
-                int spacing = 1; // 1dp
-                outRect.left = spacing;
-                outRect.right = spacing;
-                outRect.top = spacing;
-                outRect.bottom = spacing;
-            }
-            
-            @Override
-            public void onDraw(@NonNull android.graphics.Canvas c, @NonNull RecyclerView parent, 
-                              @NonNull RecyclerView.State state) {
-                int childCount = parent.getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    View child = parent.getChildAt(i);
-                    
-                    // Draw bottom line
-                    c.drawLine(child.getLeft(), child.getBottom(), 
-                              child.getRight(), child.getBottom(), paint);
-                    
-                    // Draw right line
-                    c.drawLine(child.getRight(), child.getTop(), 
-                              child.getRight(), child.getBottom(), paint);
+            public int getSpanSize(int position) {
+                if (levelAdapter != null && levelAdapter.getItemViewType(position) == LevelAdapter.VIEW_TYPE_HEADER) {
+                    return spanCount;
                 }
+                return 1;
             }
         });
+        levelRecyclerView.setLayoutManager(layoutManager);
 
         // Get the level completion manager
         completionManager = LevelCompletionManager.getInstance(requireContext());
@@ -145,10 +124,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Load history entries mapped by level map name
         loadHistoryByMapName();
 
-        // Display total stars with format X/420
-        if (starsTextView != null) {
-            starsTextView.setText(String.format("%d/%d", totalStars, 420));
-        }
+        // Count completed levels and update progress
+        updateProgressUI();
 
         // Set up adapter
         levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars, historyByMapName);
@@ -265,10 +242,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Update total stars
         totalStars = completionManager.getTotalStars();
 
-        // Update the stars text view with format X/420
-        if (starsTextView != null) {
-            starsTextView.setText(String.format("%d/%d", totalStars, 420));
-        }
+        // Update progress UI
+        updateProgressUI();
 
         // Reload history entries (may have new entries after playing)
         loadHistoryByMapName();
@@ -415,11 +390,48 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void calculateTotalStars() {
         totalStars = 0;
+        completedLevelCount = 0;
         for (Integer levelId : availableLevels) {
             LevelCompletionData data = completionManager.getLevelCompletionData(levelId);
             if (data != null) {
                 totalStars += data.getStars();
+                if (data.getStars() > 0) {
+                    completedLevelCount++;
+                }
             }
+        }
+    }
+
+    /**
+     * Updates the progress bar and stars count in the header.
+     * Shows "X / Y Level completed" in the progress bar and "X / Y" as star count.
+     */
+    private void updateProgressUI() {
+        calculateTotalStars();
+        int totalLevels = availableLevels.size();
+
+        // Update stars count text (right side, large golden text)
+        if (starsTextView != null) {
+            starsTextView.setText(String.format("%d / %d", completedLevelCount, totalLevels));
+        }
+
+        // Update progress text inside progress bar
+        if (progressText != null) {
+            progressText.setText(String.format("%d / %d %s",
+                    completedLevelCount, totalLevels,
+                    getString(R.string.level_progress_completed)));
+        }
+
+        // Update progress bar fill width
+        if (progressFill != null && totalLevels > 0) {
+            progressFill.post(() -> {
+                View parent = (View) progressFill.getParent();
+                int parentWidth = parent.getWidth();
+                float fraction = (float) completedLevelCount / totalLevels;
+                ViewGroup.LayoutParams params = progressFill.getLayoutParams();
+                params.width = (int) (parentWidth * fraction);
+                progressFill.setLayoutParams(params);
+            });
         }
     }
 
@@ -668,157 +680,158 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
     /**
      * ViewHolder for level items in the RecyclerView.
-     * Contains a button for the level, completion stars, and optionally a minimap + info button
-     * when a history entry exists for the level.
+     * Displays level cards in 3 states: gold (completed), blue (playable), gray (locked).
      */
     private static class LevelViewHolder extends RecyclerView.ViewHolder {
-        private final Button levelButton;
+        private final ConstraintLayout levelCard;
+        private final TextView levelNumberText;
+        private final TextView levelNameText;
         private final ImageView starOne;
         private final ImageView starTwo;
         private final ImageView starThree;
         private final ImageView starFour;
-        private final LinearLayout statsOverlay;
-        private final TextView levelNameText;
-        private final TextView movesText;
-        private final TextView timeText;
         private final ImageView minimapView;
-        private final ImageButton infoButton;
+        private final ImageView lockIcon;
+        private final ImageView playArrow;
 
-        /**
-         * Constructor for the LevelViewHolder.
-         * Finds and stores references to the level button, completion star views, minimap, and info button.
-         * 
-         * @param itemView The root view of the level item
-         */
         public LevelViewHolder(@NonNull View itemView) {
             super(itemView);
-            levelButton = itemView.findViewById(R.id.level_button);
+            levelCard = itemView.findViewById(R.id.level_card);
+            levelNumberText = itemView.findViewById(R.id.level_number_text);
+            levelNameText = itemView.findViewById(R.id.level_name_text);
             starOne = itemView.findViewById(R.id.level_star_1);
             starTwo = itemView.findViewById(R.id.level_star_2);
             starThree = itemView.findViewById(R.id.level_star_3);
             starFour = itemView.findViewById(R.id.level_star_4);
-            statsOverlay = itemView.findViewById(R.id.stats_overlay);
-            levelNameText = itemView.findViewById(R.id.level_name_text);
-            movesText = itemView.findViewById(R.id.level_moves_text);
-            timeText = itemView.findViewById(R.id.level_time_text);
             minimapView = itemView.findViewById(R.id.level_minimap_view);
-            infoButton = itemView.findViewById(R.id.level_info_button);
+            lockIcon = itemView.findViewById(R.id.lock_icon);
+            playArrow = itemView.findViewById(R.id.play_arrow);
         }
 
         /**
          * Binds data to this ViewHolder.
-         * This method:
-         * 1. Sets the level number on the button (only visible for non-completed levels)
-         * 2. Sets a click listener to handle level selection
-         * 3. Shows the appropriate number of stars for completed levels
-         * 4. Shows the statistics directly on the button for completed levels
-         * 5. Enables or disables the button based on whether the level is unlocked
-         * 6. Highlights the last played level with a light green background
-         * 
-         * @param levelId The ID of the level to display
-         * @param listener The listener to handle level selection events
-         * @param isCompleted Whether the level has been completed
-         * @param starsEarned Number of stars earned for this level (0-3)
-         * @param isUnlocked Whether the level is unlocked
+         * Three visual states:
+         * - GOLD card: completed level with stars, minimap preview, and "Level X" label
+         * - BLUE card: playable level with large number and play arrow
+         * - GRAY card: locked level with lock icon
          */
         public void bind(int levelId, LevelSelectionFragment fragment, boolean isCompleted,
                         int starsEarned, boolean isUnlocked, GameHistoryEntry historyEntry) {
-            // Set level number (only visible for non-completed levels)
-            levelButton.setText(String.valueOf(levelId));
-            levelButton.setContentDescription("Level " + levelId);
-            
-            // Highlight the last played level with a light green background
-            int lastPlayedLevel = LevelCompletionManager.getInstance(itemView.getContext()).getLastPlayedLevel();
-            if (levelId == lastPlayedLevel) {
-                itemView.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9")); // Light green
-            } else {
-                itemView.setBackgroundColor(android.graphics.Color.TRANSPARENT); // Transparent for others
-            }
 
-            // Get the completion data if the level is completed
-            final LevelCompletionData completionData = isCompleted ?
-                    LevelCompletionManager.getInstance(itemView.getContext())
-                        .getLevelCompletionData(levelId) : null;
+            levelCard.setContentDescription("Level " + levelId);
 
-            // Show stars based on stars earned
-            starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
-            starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
-            starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
-            starFour.setVisibility(starsEarned >= 4 ? View.VISIBLE : View.GONE);
+            if (isCompleted && starsEarned > 0) {
+                // === GOLD CARD: Completed level ===
+                levelCard.setBackgroundResource(R.drawable.bg_level_card_gold);
 
-            // Handle stats display
-            if (completionData != null) {
-                // Hide the level number text when showing stats
-                levelButton.setText("");
+                // Show stars
+                starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
+                starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
+                starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
+                starFour.setVisibility(starsEarned >= 4 ? View.VISIBLE : View.GONE);
 
-                // Explicitly set the statsOverlay to VISIBLE
-                statsOverlay.setVisibility(View.VISIBLE);
-
-                // Set level name
-                levelNameText.setText("Level " + levelId);
-                levelNameText.setVisibility(View.VISIBLE); // Ensure visibility
-
-                // Format moves/robots: "optimal/moves robots:count" (swapped from moves/optimal to optimal/moves)
-                String movesRobots = String.format("%d/%d %s%d", 
-                        completionData.getOptimalMoves(),
-                        completionData.getMovesNeeded(),
-                        fragment.getString(R.string.level_robots_label),
-                        completionData.getRobotsUsed());
-                movesText.setText(movesRobots);
-                movesText.setVisibility(View.VISIBLE); // Ensure visibility
-
-                // Format time/squares: "0:12 squares:10"
-                long timeMs = completionData.getTimeNeeded();
-                long seconds = timeMs / 1000;
-                long minutes = seconds / 60;
-                seconds = seconds % 60;
-                String timeSquares = String.format("%d:%02d %s%d", 
-                        minutes, seconds, 
-                        fragment.getString(R.string.level_squares_label),
-                        completionData.getSquaresSurpassed());
-                timeText.setText(timeSquares);
-                timeText.setVisibility(View.VISIBLE); // Ensure visibility
-
-                // Log debug information
-                // Timber.d("Level %d stats - Name: %s, Moves: %s, Time: %s", 
-                //         levelId, levelNameText.getText(), movesText.getText(), timeText.getText());
-            } else {
-                // If not completed, make sure the stats overlay is hidden
-                statsOverlay.setVisibility(View.GONE);
-                levelNameText.setVisibility(View.GONE);
-                movesText.setVisibility(View.GONE);
-                timeText.setVisibility(View.GONE);
-            }
-
-            // Show minimap and info button when a history entry exists for this level
-            if (historyEntry != null && minimapView != null && infoButton != null) {
-                String mapPath = historyEntry.getMapPath();
-                String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
-                        ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
-                        : mapPath;
-                if (absolutePath != null) {
-                    Bitmap minimap = fragment.createMinimapFromPath(itemView.getContext(), absolutePath, 100, 100);
-                    minimapView.setImageBitmap(minimap);
-                    minimapView.setVisibility(View.VISIBLE);
+                // Show minimap if history entry exists
+                if (historyEntry != null && minimapView != null) {
+                    String mapPath = historyEntry.getMapPath();
+                    String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
+                            ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
+                            : mapPath;
+                    if (absolutePath != null) {
+                        Bitmap minimap = fragment.createMinimapFromPath(
+                                itemView.getContext(), absolutePath, 120, 120);
+                        minimapView.setImageBitmap(minimap);
+                        minimapView.setVisibility(View.VISIBLE);
+                        levelNumberText.setVisibility(View.GONE);
+                    } else {
+                        minimapView.setVisibility(View.GONE);
+                        levelNumberText.setText(String.valueOf(levelId));
+                        levelNumberText.setVisibility(View.VISIBLE);
+                    }
                 } else {
-                    minimapView.setVisibility(View.GONE);
+                    if (minimapView != null) minimapView.setVisibility(View.GONE);
+                    levelNumberText.setText(String.valueOf(levelId));
+                    levelNumberText.setVisibility(View.VISIBLE);
                 }
-                infoButton.setVisibility(View.VISIBLE);
-                infoButton.setOnClickListener(v -> fragment.showMapInfoPopup(historyEntry));
-            } else {
+
+                // Show level name at bottom
+                levelNameText.setText("Level " + levelId);
+                levelNameText.setVisibility(View.VISIBLE);
+
+                // Hide lock & play arrow
+                lockIcon.setVisibility(View.GONE);
+                playArrow.setVisibility(View.GONE);
+
+                levelCard.setAlpha(1.0f);
+
+            } else if (isUnlocked) {
+                // === BLUE CARD: Playable but not yet completed ===
+                levelCard.setBackgroundResource(R.drawable.bg_level_card_blue);
+
+                // Hide stars, minimap, level name
+                starOne.setVisibility(View.GONE);
+                starTwo.setVisibility(View.GONE);
+                starThree.setVisibility(View.GONE);
+                starFour.setVisibility(View.GONE);
                 if (minimapView != null) minimapView.setVisibility(View.GONE);
-                if (infoButton != null) infoButton.setVisibility(View.GONE);
+                levelNameText.setVisibility(View.GONE);
+                lockIcon.setVisibility(View.GONE);
+
+                // Show large level number
+                levelNumberText.setText(String.valueOf(levelId));
+                levelNumberText.setVisibility(View.VISIBLE);
+
+                // Show play arrow
+                playArrow.setVisibility(View.VISIBLE);
+
+                levelCard.setAlpha(1.0f);
+
+            } else {
+                // === GRAY CARD: Locked level ===
+                levelCard.setBackgroundResource(R.drawable.bg_level_card_locked);
+
+                // Hide stars, minimap, level name, play arrow
+                starOne.setVisibility(View.GONE);
+                starTwo.setVisibility(View.GONE);
+                starThree.setVisibility(View.GONE);
+                starFour.setVisibility(View.GONE);
+                if (minimapView != null) minimapView.setVisibility(View.GONE);
+                levelNameText.setVisibility(View.GONE);
+                playArrow.setVisibility(View.GONE);
+
+                // Show level number (dimmed) and lock icon
+                levelNumberText.setText(String.valueOf(levelId));
+                levelNumberText.setVisibility(View.VISIBLE);
+                levelNumberText.setAlpha(0.3f);
+                lockIcon.setVisibility(View.VISIBLE);
+
+                levelCard.setAlpha(0.8f);
             }
 
-            // Set click listener on the entire item view AND the button
-            View.OnClickListener clickListener = v -> fragment.onLevelSelected(levelId);
-            levelButton.setOnClickListener(clickListener);
-            itemView.setOnClickListener(clickListener);
+            // Highlight the last played level
+            int lastPlayedLevel = LevelCompletionManager.getInstance(
+                    itemView.getContext()).getLastPlayedLevel();
+            if (levelId == lastPlayedLevel) {
+                levelCard.setForeground(null);
+                levelCard.setBackgroundResource(isCompleted && starsEarned > 0
+                        ? R.drawable.bg_level_card_gold : R.drawable.bg_level_card_blue);
+                // Add a subtle highlight border effect via elevation
+                levelCard.setElevation(8f);
+            } else {
+                levelCard.setElevation(2f);
+            }
 
-            // Enable/disable based on unlock status
-            levelButton.setEnabled(isUnlocked);
-            itemView.setEnabled(isUnlocked);
-            itemView.setAlpha(isUnlocked ? 1.0f : 0.5f); // Visual feedback for locked levels
+            // Reset alpha on levelNumberText for non-locked
+            if (isUnlocked) {
+                levelNumberText.setAlpha(1.0f);
+            }
+
+            // Set click listener on the card
+            View.OnClickListener clickListener = v -> fragment.onLevelSelected(levelId);
+            levelCard.setOnClickListener(clickListener);
+
+            // Disable click for locked levels
+            levelCard.setClickable(isUnlocked);
+            levelCard.setFocusable(isUnlocked);
         }
     }
 }

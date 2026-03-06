@@ -39,6 +39,7 @@
     <!-- Level Selection Screen -->
     <string name="level_stars" comment="Text showing stars earned on a level">You earned %1$d stars</string>
     <string name="level_locked" comment="Text shown for locked/unavailable levels [LevelSelectionFragment]">You need %1$d more stars to unlock this level</string>
+    <string name="level_progress_completed" comment="Text in progress bar showing completed levels">Level completed</string>
 
     <string name="back">Back</string>
     <string name="back_description">Return to previous screen</string>
