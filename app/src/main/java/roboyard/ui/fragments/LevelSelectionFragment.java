@@ -693,6 +693,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         private final ImageView minimapView;
         private final ImageView lockIcon;
         private final ImageView playArrow;
+        private final ImageButton infoButton;
 
         public LevelViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -706,6 +707,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             minimapView = itemView.findViewById(R.id.level_minimap_view);
             lockIcon = itemView.findViewById(R.id.lock_icon);
             playArrow = itemView.findViewById(R.id.play_arrow);
+            infoButton = itemView.findViewById(R.id.level_info_button);
         }
 
         /**
@@ -729,6 +731,14 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
                 starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
                 starFour.setVisibility(starsEarned >= 4 ? View.VISIBLE : View.GONE);
+
+                // Show info button if history entry exists
+                if (historyEntry != null && infoButton != null) {
+                    infoButton.setVisibility(View.VISIBLE);
+                    infoButton.setOnClickListener(v -> fragment.showMapInfoPopup(historyEntry));
+                } else {
+                    if (infoButton != null) infoButton.setVisibility(View.GONE);
+                }
 
                 // Show minimap if history entry exists
                 if (historyEntry != null && minimapView != null) {
@@ -767,12 +777,13 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === BLUE CARD: Playable but not yet completed ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_blue);
 
-                // Hide stars, minimap, level name
+                // Hide stars, minimap, level name, info button
                 starOne.setVisibility(View.GONE);
                 starTwo.setVisibility(View.GONE);
                 starThree.setVisibility(View.GONE);
                 starFour.setVisibility(View.GONE);
                 if (minimapView != null) minimapView.setVisibility(View.GONE);
+                if (infoButton != null) infoButton.setVisibility(View.GONE);
                 levelNameText.setVisibility(View.GONE);
                 lockIcon.setVisibility(View.GONE);
 
@@ -789,12 +800,13 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === GRAY CARD: Locked level ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_locked);
 
-                // Hide stars, minimap, level name, play arrow
+                // Hide stars, minimap, level name, play arrow, info button
                 starOne.setVisibility(View.GONE);
                 starTwo.setVisibility(View.GONE);
                 starThree.setVisibility(View.GONE);
                 starFour.setVisibility(View.GONE);
                 if (minimapView != null) minimapView.setVisibility(View.GONE);
+                if (infoButton != null) infoButton.setVisibility(View.GONE);
                 levelNameText.setVisibility(View.GONE);
                 playArrow.setVisibility(View.GONE);
 

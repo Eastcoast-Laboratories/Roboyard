@@ -594,6 +594,7 @@
     <string name="level_editor_hint">Vous avez débloqué l\'Éditeur de niveau ! Créez vos propres niveaux.</string>
     <string name="level_id_text">Niveau %1$d</string>
     <string name="level_locked">Vous avez besoin de %1$d étoiles supplémentaires pour débloquer ce niveau</string>
+    <string name="level_progress_completed">Niveau terminé</string>
     <string name="level_robots_label">Robots :</string>
     <string name="level_selection_title">Sélection de niveau</string>
     <string name="level_squares_label">Cases :</string>

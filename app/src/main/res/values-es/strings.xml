@@ -41,6 +41,7 @@
     <string name="level_stars_description">Has conseguido %1$d estrellas</string>
     <string name="stars_count">%1$d estrellas</string>
     <string name="level_locked">Necesitas %1$d estrellas más para desbloquear este nivel</string>
+    <string name="level_progress_completed">Nivel completado</string>
     <string name="random_game_complete">¡Juego Completado!</string>
     <string name="new_random_game_button">Nuevo Juego</string>
     

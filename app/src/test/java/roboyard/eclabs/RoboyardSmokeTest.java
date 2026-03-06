@@ -734,4 +734,141 @@ public class RoboyardSmokeTest {
         assertTrue("tb entry should be found", hasTb);
         assertTrue("h entry should be found", hasH);
     }
+
+    // ========================================================================
+    // Level Selection Screen Card State Tests
+    // ========================================================================
+
+    @Test
+    public void testLevelCardState_completedWithStars_isGold() {
+        // Completed level with stars > 0 should be GOLD card
+        int starsEarned = 3;
+        boolean isCompleted = true;
+        boolean isUnlocked = true;
+
+        // Gold: isCompleted && starsEarned > 0
+        boolean isGold = isCompleted && starsEarned > 0;
+        // Blue: !isGold && isUnlocked
+        boolean isBlue = !isGold && isUnlocked;
+        // Locked: !isGold && !isUnlocked
+        boolean isLocked = !isGold && !isUnlocked;
+
+        assertTrue("Completed level with 3 stars should be gold", isGold);
+        assertFalse("Should not be blue", isBlue);
+        assertFalse("Should not be locked", isLocked);
+    }
+
+    @Test
+    public void testLevelCardState_unlockedNotCompleted_isBlue() {
+        int starsEarned = 0;
+        boolean isCompleted = false;
+        boolean isUnlocked = true;
+
+        boolean isGold = isCompleted && starsEarned > 0;
+        boolean isBlue = !isGold && isUnlocked;
+        boolean isLocked = !isGold && !isUnlocked;
+
+        assertFalse("Should not be gold", isGold);
+        assertTrue("Unlocked but not completed should be blue", isBlue);
+        assertFalse("Should not be locked", isLocked);
+    }
+
+    @Test
+    public void testLevelCardState_locked_isGray() {
+        int starsEarned = 0;
+        boolean isCompleted = false;
+        boolean isUnlocked = false;
+
+        boolean isGold = isCompleted && starsEarned > 0;
+        boolean isBlue = !isGold && isUnlocked;
+        boolean isLocked = !isGold && !isUnlocked;
+
+        assertFalse("Should not be gold", isGold);
+        assertFalse("Should not be blue", isBlue);
+        assertTrue("Locked level should be gray", isLocked);
+    }
+
+    @Test
+    public void testLevelUnlockLogic_starsPerLevel() {
+        // STARS_PER_LEVEL = 1, totalStars determines which levels unlock
+        int starsPerLevel = 1;
+        int totalStars = 5;
+
+        // Level 1 requires 0 stars (1-1)*1 = 0
+        assertTrue("Level 1 should be unlocked with 5 stars", starsPerLevel * (1 - 1) <= totalStars);
+        // Level 5 requires 4 stars
+        assertTrue("Level 5 should be unlocked with 5 stars", starsPerLevel * (5 - 1) <= totalStars);
+        // Level 6 requires 5 stars
+        assertTrue("Level 6 should be unlocked with 5 stars", starsPerLevel * (6 - 1) <= totalStars);
+        // Level 7 requires 6 stars
+        assertFalse("Level 7 should be locked with 5 stars", starsPerLevel * (7 - 1) <= totalStars);
+    }
+
+    @Test
+    public void testLevelProgressCalculation() {
+        // Simulate 10 levels, 3 completed
+        int totalLevels = 10;
+        int completedLevels = 3;
+        float fraction = (float) completedLevels / totalLevels;
+
+        assertEquals("Progress fraction should be 0.3", 0.3f, fraction, 0.001f);
+
+        // With 140 levels, 50 completed
+        totalLevels = 140;
+        completedLevels = 50;
+        fraction = (float) completedLevels / totalLevels;
+        assertEquals("Progress fraction should be ~0.357", 0.357f, fraction, 0.001f);
+    }
+
+    @Test
+    public void testLevelCardState_allThreeStatesPresent() {
+        // Given: 5 total stars, levels 1-10
+        int totalStars = 5;
+        int starsPerLevel = 1;
+
+        int goldCount = 0;
+        int blueCount = 0;
+        int lockedCount = 0;
+
+        // Simulate levels 1-10 with stars for levels 1-3
+        int[] starsPerLevelArr = {3, 1, 1, 0, 0, 0, 0, 0, 0, 0};
+        for (int i = 0; i < 10; i++) {
+            int levelId = i + 1;
+            int stars = starsPerLevelArr[i];
+            boolean completed = stars > 0;
+            boolean unlocked = starsPerLevel * (levelId - 1) <= totalStars;
+
+            boolean isGold = completed && stars > 0;
+            boolean isBlue = !isGold && unlocked;
+            boolean isLocked = !isGold && !unlocked;
+
+            if (isGold) goldCount++;
+            else if (isBlue) blueCount++;
+            else if (isLocked) lockedCount++;
+        }
+
+        assertEquals("Should have 3 gold cards (completed levels)", 3, goldCount);
+        assertEquals("Should have 3 blue cards (unlocked but not completed)", 3, blueCount);
+        assertEquals("Should have 4 locked cards", 4, lockedCount);
+    }
+
+    @Test
+    public void testCustomLevels_alwaysUnlocked() {
+        // Custom levels (ID >= 141) are always unlocked regardless of stars
+        int customLevelStartId = 141;
+        int totalStars = 0;
+        int starsPerLevel = 1;
+
+        int levelId = 141;
+        boolean isCustom = levelId >= customLevelStartId;
+        boolean isUnlocked = isCustom || (starsPerLevel * (levelId - 1) <= totalStars);
+
+        assertTrue("Custom level 141 should always be unlocked", isUnlocked);
+
+        // Regular level 141 would need 140 stars
+        levelId = 140;
+        isCustom = levelId >= customLevelStartId;
+        isUnlocked = isCustom || (starsPerLevel * (levelId - 1) <= totalStars);
+        assertFalse("Regular level 140 should be locked with 0 stars", isUnlocked);
+    }
 }

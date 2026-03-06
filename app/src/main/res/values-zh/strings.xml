@@ -48,6 +48,7 @@
     <string name="level_stars_description">你获得了 %1$d 颗星</string>
     <string name="stars_count">%1$d 颗星</string>
     <string name="level_locked">你需要再获得 %1$d 颗星来解锁此关卡</string>
+    <string name="level_progress_completed">关卡已完成</string>
     <string name="random_game_complete">游戏完成！</string>
     <string name="new_random_game_button">新游戏</string>
     

@@ -37,6 +37,7 @@
     <string name="level_stars_description">Du hast %1$d Sterne verdient</string>
     <string name="stars_count">%1$d Sterne</string>
     <string name="level_locked">Du brauchst %1$d weitere Sterne, um dieses Level freizuschalten</string>
+    <string name="level_progress_completed">Level abgeschlossen</string>
     <string name="random_game_complete">Level geschafft!</string>
     <string name="new_random_game_button">Neues Spiel</string>
     <string name="robot_a11y">Roboter auf Position</string>

@@ -16,14 +16,15 @@
         android:foreground="?android:attr/selectableItemBackground"
         android:padding="4dp">
 
-        <!-- Stars row at top -->
+        <!-- Stars row at top left -->
         <LinearLayout
             android:id="@+id/stars_container"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:gravity="start"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="2dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -62,6 +63,21 @@
                 android:visibility="gone"
                 android:importantForAccessibility="no" />
         </LinearLayout>
+
+        <!-- Info button at top right (for completed levels with history) -->
+        <ImageButton
+            android:id="@+id/level_info_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginTop="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_info_details"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            android:contentDescription="@string/info_button_a11y"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Minimap image (shown for completed levels with history) -->
         <ImageView
@@ -167,15 +183,6 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
         </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/level_info_button"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            android:contentDescription="@string/info_button_a11y"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
