@@ -1,10 +1,16 @@
 package roboyard.ui.fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -446,7 +452,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
      * 
      * @param levelId The ID of the selected level
      */
-    public void onLevelSelected(int levelId) {
+    public void onLevelSelected(int levelId, View clickedCard) {
         Timber.d("Selected level: %d", levelId);
 
         // Custom levels are always unlocked, regular levels have star requirements
@@ -463,15 +469,100 @@ public class LevelSelectionFragment extends BaseGameFragment {
             return;
         }
 
-        // Reset achievement game session flags for new game
-        AchievementManager.getInstance(requireContext()).onNewGameStarted();
-        
-        // Start a new game with the selected level
-        gameStateManager.startLevelGame(levelId);
+        // Prevent double-clicks during animation
+        clickedCard.setClickable(false);
 
-        // For UI, use GameFragment
-        GameFragment gameFragment = new GameFragment();
-        navigateToDirect(gameFragment);
+        // Animate the card zooming to fill the upper half of the screen
+        animateLevelZoom(clickedCard, levelId);
+    }
+
+    /**
+     * Animates the clicked level card zooming to fill the upper half of the screen,
+     * then navigates to the GameFragment.
+     * Creates a bitmap snapshot of the card, places it as an overlay above everything,
+     * hides the original card, and animates the overlay.
+     */
+    private void animateLevelZoom(View card, int levelId) {
+        View rootView = getView();
+        if (!(rootView instanceof FrameLayout)) return;
+        FrameLayout rootFrame = (FrameLayout) rootView;
+
+        // Create a bitmap snapshot of the card
+        card.setDrawingCacheEnabled(true);
+        card.buildDrawingCache();
+        Bitmap snapshot = Bitmap.createBitmap(card.getDrawingCache());
+        card.setDrawingCacheEnabled(false);
+
+        // Get the card's position relative to the root FrameLayout
+        int[] cardLocation = new int[2];
+        int[] rootLocation = new int[2];
+        card.getLocationOnScreen(cardLocation);
+        rootFrame.getLocationOnScreen(rootLocation);
+
+        int startX = cardLocation[0] - rootLocation[0];
+        int startY = cardLocation[1] - rootLocation[1];
+
+        // Create an ImageView overlay with the snapshot, placed exactly over the original card
+        ImageView overlay = new ImageView(requireContext());
+        overlay.setImageBitmap(snapshot);
+        overlay.setScaleType(ImageView.ScaleType.FIT_XY);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(card.getWidth(), card.getHeight());
+        params.leftMargin = startX;
+        params.topMargin = startY;
+        overlay.setLayoutParams(params);
+        overlay.setElevation(100f);
+
+        // Add overlay on top of everything and hide the original card
+        rootFrame.addView(overlay);
+        card.setVisibility(View.INVISIBLE);
+
+        // Target: center of upper half of screen
+        float targetCenterX = rootFrame.getWidth() / 2f;
+        float targetCenterY = rootFrame.getHeight() / 4f;
+        float overlayCenterX = startX + card.getWidth() / 2f;
+        float overlayCenterY = startY + card.getHeight() / 2f;
+
+        // Scale to fill upper half of screen
+        float scaleX = (float) rootFrame.getWidth() / card.getWidth();
+        float scaleY = (float) (rootFrame.getHeight() / 2f) / card.getHeight();
+        float scale = Math.max(scaleX, scaleY);
+
+        // Translation to move overlay center to target center
+        float translateX = targetCenterX - overlayCenterX;
+        float translateY = targetCenterY - overlayCenterY;
+
+        // Animate the overlay
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(
+                ObjectAnimator.ofFloat(overlay, "scaleX", 1f, scale),
+                ObjectAnimator.ofFloat(overlay, "scaleY", 1f, scale),
+                ObjectAnimator.ofFloat(overlay, "translationX", 0f, translateX),
+                ObjectAnimator.ofFloat(overlay, "translationY", 0f, translateY)
+        );
+        animatorSet.setDuration(400);
+        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                // Clean up: remove overlay, restore original card
+                rootFrame.removeView(overlay);
+                card.setVisibility(View.VISIBLE);
+                card.setClickable(true);
+
+                // Reset achievement game session flags for new game
+                AchievementManager.getInstance(requireContext()).onNewGameStarted();
+
+                // Start a new game with the selected level
+                gameStateManager.startLevelGame(levelId);
+
+                // Navigate to GameFragment
+                GameFragment gameFragment = new GameFragment();
+                navigateToDirect(gameFragment);
+            }
+        });
+
+        animatorSet.start();
     }
 
     /**
@@ -675,6 +766,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         public void bind(String headerText) {
             headerTextView.setText(headerText);
+            // Hide "Standard Levels" header, show "Custom Levels" header
+            if ("Standard Levels".equals(headerText)) {
+                itemView.setVisibility(View.GONE);
+            } else {
+                itemView.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -819,16 +916,15 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 levelCard.setAlpha(0.8f);
             }
 
-            // Highlight the last played level
+            // Highlight the last played level with yellow border
             int lastPlayedLevel = LevelCompletionManager.getInstance(
                     itemView.getContext()).getLastPlayedLevel();
             if (levelId == lastPlayedLevel) {
-                levelCard.setForeground(null);
-                levelCard.setBackgroundResource(isCompleted && starsEarned > 0
-                        ? R.drawable.bg_level_card_gold : R.drawable.bg_level_card_blue);
-                // Add a subtle highlight border effect via elevation
+                // Apply yellow border as foreground for last played level
+                levelCard.setForeground(itemView.getContext().getDrawable(R.drawable.bg_level_card_last_played));
                 levelCard.setElevation(8f);
             } else {
+                levelCard.setForeground(null);
                 levelCard.setElevation(2f);
             }
 
@@ -838,7 +934,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             }
 
             // Set click listener on the card
-            View.OnClickListener clickListener = v -> fragment.onLevelSelected(levelId);
+            View.OnClickListener clickListener = v -> fragment.onLevelSelected(levelId, levelCard);
             levelCard.setOnClickListener(clickListener);
 
             // Disable click for locked levels
