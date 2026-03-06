@@ -429,15 +429,22 @@ public class SettingsFragment extends Fragment {
             // Calculate device screen ratio
             float displayRatio = calculateDeviceRatio();
             float maxBoardRatio = calculateMaxBoardRatio(displayRatio);
+            Timber.d("[RATIO] Display ratio: %f, Max board ratio: %f", displayRatio, maxBoardRatio);
+            
+            // Check if device is in landscape mode
+            int orientation = getResources().getConfiguration().orientation;
+            boolean isLandscape = orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+            Timber.d("[RATIO] isLandscape=" + isLandscape);
             
             // Create list of valid board sizes
             validBoardSizes = new ArrayList<>();
             
             // Define all possible board sizes - exactly as in the original game
             int[][] boardSizes = {
-                    {8, 7},
-                    {8, 8},
-                    {8, 12}, 
+                    {8, 7}, // board ratio: 0.875
+                    {8, 8}, // board ratio: 1.0
+                    {8, 12}, // board ratio: 1.5
+                    {10, 8}, // board ratio: 0.8
                     {10, 10}, // board ratio: 1.0
                     {10, 12}, // board ratio: 1.2
                     {10, 14}, // board ratio: 1.4
@@ -452,10 +459,12 @@ public class SettingsFragment extends Fragment {
                     {18, 20}, {18, 22}
             };
             
-            // Filter board sizes based on device ratio
+            // Filter board sizes based on device ratio and orientation
             for (int[] size : boardSizes) {
                 float boardRatio = (float) size[1] / size[0];
-                if (boardRatio <= maxBoardRatio) {
+                // In landscape mode, allow all ratios
+                // In portrait mode, only allow ratios that fit the device
+                if (isLandscape || boardRatio * 1.3 <= maxBoardRatio) {
                     validBoardSizes.add(size);
                 }
             }
@@ -544,14 +553,14 @@ public class SettingsFragment extends Fragment {
         try {
             Context context = getContext();
             if (context == null) {
-                Timber.e("calculateDeviceRatio: Context is null");
+                Timber.e("[RATIO] calculateDeviceRatio: Context is null");
                 return ratio;
             }
             
             // Get window manager service
             android.view.WindowManager windowManager = (android.view.WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             if (windowManager == null) {
-                Timber.e("calculateDeviceRatio: WindowManager is null");
+                Timber.e("[RATIO] calculateDeviceRatio: WindowManager is null");
                 return ratio;
             }
             
@@ -559,10 +568,10 @@ public class SettingsFragment extends Fragment {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                 try {
                     android.graphics.Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
-                    Timber.d("Using WindowMetrics API for device ratio calculation");
+                    Timber.d("[RATIO] Using WindowMetrics API for device ratio calculation");
                     return (float) bounds.height() / bounds.width();
                 } catch (Exception e) {
-                    Timber.e(e, "Error using WindowMetrics API, falling back to DisplayMetrics");
+                    Timber.e(e, "[RATIO] Error using WindowMetrics API, falling back to DisplayMetrics");
                     // Fall through to DisplayMetrics approach
                 }
             }
@@ -580,15 +589,15 @@ public class SettingsFragment extends Fragment {
                         ratio = (float) displayHeight / displayWidth;
                     }
                     
-                    Timber.d("Using DisplayMetrics API for device ratio calculation: %f", ratio);
+                    Timber.d("[RATIO] Using DisplayMetrics API for device ratio calculation: %f", ratio);
                 } else {
-                    Timber.e("calculateDeviceRatio: Display is null");
+                    Timber.e("[RATIO] calculateDeviceRatio: Display is null");
                 }
             } catch (Exception e) {
-                Timber.e(e, "Error using DisplayMetrics, returning default ratio");
+                Timber.e(e, "[RATIO] Error using DisplayMetrics, returning default ratio");
             }
         } catch (Exception e) {
-            Timber.e(e, "Unexpected error in calculateDeviceRatio");
+            Timber.e(e, "[RATIO] Unexpected error in calculateDeviceRatio");
         }
         
         return ratio;
