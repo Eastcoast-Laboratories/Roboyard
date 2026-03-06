@@ -2,6 +2,14 @@ Changelog Deutsch
 =================
 
 
+## Version 42 (2026-03-07)
+- Die A.I. kann jetzt Multi-Target-Rätsel lösen
+- Kleinere Spielfeldgröße unterstützt: 7x8, 10x8 und 16x14  Felder
+- Der Level-Fortschritt kann jetzt optional mit einem Online-Server synchronisiert werden
+- Die Lautstärke des Hintergrund-Atmosphären Sounds wurde korrigiert
+- Verschiedene UI-Verbesserungen und Fehlerbehebungen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+
 ## Version 41 (2026-03-02)
 - Französische Übersetzung komplett
 - GMS Library entfenrt

@@ -2,6 +2,14 @@
 =========
 
 
+## Version 42 (2026-03-07)
+- A.I can solve Multi-goal puzzles now
+- Smaller board sizes supported: 7x8, 10x8 and 16x14 squares
+- Level progress is now optional synced with online server
+- Ambient background sound volume corrected
+- Various UI improvements and bug fixes
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+
 ## Version 41 (2026-03-02)
 - French translation complete
 - GMS Library removed
