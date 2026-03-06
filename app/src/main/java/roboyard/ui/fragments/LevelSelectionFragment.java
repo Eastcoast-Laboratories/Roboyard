@@ -137,6 +137,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars, historyByMapName);
         levelRecyclerView.setAdapter(levelAdapter);
 
+        // Add scroll listener to fade out cards earlier when scrolling up (keeps header visible)
+        setupScrollFadeEffect();
+
         // Auto-scroll to the last played level
         scrollToLastPlayedLevel();
 
@@ -186,6 +189,48 @@ public class LevelSelectionFragment extends BaseGameFragment {
         }
     }
     
+    /**
+     * Sets up scroll fade effect: level cards fade out earlier when scrolling up
+     * to keep header and progress bar always visible.
+     */
+    private void setupScrollFadeEffect() {
+        // Config: fade starts when item is this many pixels below the progress bar
+        final int FADE_START_OFFSET_PX = -110;
+        final int FADE_DISTANCE_PX = 150;
+
+        levelRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                // Get the progress container height to know where cards should start fading
+                View progressContainer = getView() != null ? getView().findViewById(R.id.progress_container) : null;
+                if (progressContainer == null) return;
+
+                int progressBottom = progressContainer.getBottom();
+                int fadeStartY = progressBottom + FADE_START_OFFSET_PX;
+
+                // Iterate through visible children and apply fade based on position
+                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+                    View child = recyclerView.getChildAt(i);
+                    if (child == null) continue;
+
+                    int childTop = child.getTop();
+
+                    if (childTop < fadeStartY) {
+                        // Card is in fade zone
+                        float fadeProgress = Math.max(0f, Math.min(1f, 
+                                (fadeStartY - childTop) / (float) FADE_DISTANCE_PX));
+                        child.setAlpha(1f - fadeProgress);
+                    } else {
+                        // Card is fully visible
+                        child.setAlpha(1f);
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * Scroll to the last played level automatically, positioning it in the middle of the screen
      */
@@ -538,17 +583,50 @@ public class LevelSelectionFragment extends BaseGameFragment {
         float translateX = targetX - overlayCenterX;
         float translateY = targetY - overlayCenterY;
 
+        // Check if this is the last played level (has yellow border)
+        int lastPlayedLevel = LevelCompletionManager.getInstance(requireContext()).getLastPlayedLevel();
+        boolean hasYellowBorder = (levelId == lastPlayedLevel);
+
+        // Create a separate border overlay if this level has the yellow border
+        ImageView borderOverlay = null;
+        if (hasYellowBorder) {
+            borderOverlay = new ImageView(requireContext());
+            borderOverlay.setImageDrawable(requireContext().getDrawable(R.drawable.bg_level_card_last_played));
+            borderOverlay.setScaleType(ImageView.ScaleType.FIT_XY);
+            FrameLayout.LayoutParams borderParams = new FrameLayout.LayoutParams(card.getWidth(), card.getHeight());
+            borderParams.leftMargin = startX;
+            borderParams.topMargin = startY;
+            borderOverlay.setLayoutParams(borderParams);
+            borderOverlay.setElevation(101f); // Above the main overlay
+            rootFrame.addView(borderOverlay);
+        }
+
         // Animate the overlay
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(
-                ObjectAnimator.ofFloat(overlay, "scaleX", 1f, scaleX),
-                ObjectAnimator.ofFloat(overlay, "scaleY", 1f, scaleY),
-                ObjectAnimator.ofFloat(overlay, "translationX", 0f, translateX),
-                ObjectAnimator.ofFloat(overlay, "translationY", 0f, translateY)
-        );
+        ObjectAnimator scaleXAnim = ObjectAnimator.ofFloat(overlay, "scaleX", 1f, scaleX);
+        ObjectAnimator scaleYAnim = ObjectAnimator.ofFloat(overlay, "scaleY", 1f, scaleY);
+        ObjectAnimator transXAnim = ObjectAnimator.ofFloat(overlay, "translationX", 0f, translateX);
+        ObjectAnimator transYAnim = ObjectAnimator.ofFloat(overlay, "translationY", 0f, translateY);
+
+        animatorSet.playTogether(scaleXAnim, scaleYAnim, transXAnim, transYAnim);
+
+        // If yellow border exists, animate it too (same scale/translation) + fade out
+        if (hasYellowBorder && borderOverlay != null) {
+            ImageView finalBorderOverlay = borderOverlay;
+            ObjectAnimator borderScaleX = ObjectAnimator.ofFloat(finalBorderOverlay, "scaleX", 1f, scaleX);
+            ObjectAnimator borderScaleY = ObjectAnimator.ofFloat(finalBorderOverlay, "scaleY", 1f, scaleY);
+            ObjectAnimator borderTransX = ObjectAnimator.ofFloat(finalBorderOverlay, "translationX", 0f, translateX);
+            ObjectAnimator borderTransY = ObjectAnimator.ofFloat(finalBorderOverlay, "translationY", 0f, translateY);
+            ObjectAnimator borderFadeOut = ObjectAnimator.ofFloat(finalBorderOverlay, "alpha", 1f, 0f);
+
+            animatorSet.playTogether(scaleXAnim, scaleYAnim, transXAnim, transYAnim,
+                    borderScaleX, borderScaleY, borderTransX, borderTransY, borderFadeOut);
+        }
+
         animatorSet.setDuration(ZOOM_DURATION_MS);
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
 
+        ImageView finalBorderOverlayForCleanup = borderOverlay;
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -565,6 +643,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // Clean up overlay after navigation (post to ensure fragment transaction started)
                 rootFrame.post(() -> {
                     rootFrame.removeView(overlay);
+                    if (finalBorderOverlayForCleanup != null) {
+                        rootFrame.removeView(finalBorderOverlayForCleanup);
+                    }
                     card.setVisibility(View.VISIBLE);
                     card.setClickable(true);
                 });

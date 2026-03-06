@@ -74,8 +74,11 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 9. verhindere, das bei den map generatoren walls im inneren des mittleren carrees generiert werden
 10. einen Memory-Gate der wartet bis genug Speicher frei ist, bevor der Solver initialisiert wird.
 
-- Wenn man zu schnell die auto-hints durchklickt gibts fehler, baue einen timeout von 1s ein, mit der man die hints durchklicken kann, wenn auto-hint aktiv ist
-  
+
+- mainactivity kann weg
+
+- deselecting prbots braucht man nicht. wenn man auf einen roboter touched soll der immer selected werden, so dass immer einer selected bleibt
+
 ---
 # last prompt:
 
@@ -108,24 +111,4 @@ merke dir: die roboyard.z11.de laravel app wird deployed mit cd /var/www/roboyar
 auch , wenn beim level syncen unauthorized kommt, soll er einmal versuchen sich neu einzuloggen und nur wenn dann immer noch unauthorized kommt , soll er die toast error meldung ausgeben, dass er nicht mehr eingeloggt ist
 
 
-- mainactivity kann weg
 ---
-
-in den setttings muss der Logout button viel kleiner und nur rechts von dem @fragment_settings.xml#L48-56 
-es sei denn der login name ist so lang, dass es nicht in die selbe reihe passt
-
-login und register kann auch nebeneinander in eine reihe
-
-"Board size" und der spinner für die board-size auch in eine Reihe
-
-@strings.xml#L74-75 muss noch in alle sprachen übersetzt werden
-
-der sprach-spinner kann auch rechts neben das label @fragment_settings.xml#L127-128 
-
-"Sound effects" soll on/off statt yes no
-
-Reset data soll auch die history entries alle löschen
- 
-Board Size Section soll unterhalb der @fragment_settings.xml#L144 <!-- TalkBack Language Section
-
-----
