@@ -477,12 +477,15 @@ public class LevelSelectionFragment extends BaseGameFragment {
     }
 
     /**
-     * Animates the clicked level card zooming to fill the upper half of the screen,
+     * Animates the clicked level card zooming to match the game board position/size,
      * then navigates to the GameFragment.
      * Creates a bitmap snapshot of the card, places it as an overlay above everything,
      * hides the original card, and animates the overlay.
      */
     private void animateLevelZoom(View card, int levelId) {
+        // --- Config ---
+        final int ZOOM_DURATION_MS = 999;
+
         View rootView = getView();
         if (!(rootView instanceof FrameLayout)) return;
         FrameLayout rootFrame = (FrameLayout) rootView;
@@ -516,49 +519,55 @@ public class LevelSelectionFragment extends BaseGameFragment {
         rootFrame.addView(overlay);
         card.setVisibility(View.INVISIBLE);
 
-        // Target: center of upper half of screen
-        float targetCenterX = rootFrame.getWidth() / 2f;
-        float targetCenterY = rootFrame.getHeight() / 4f;
+        // Target: match the game board position in GameFragment (full width, top-aligned, square)
+        // The game board in portrait mode is full-width starting at Y=0, height = width (square boards)
+        int screenWidth = rootFrame.getWidth();
+        float targetWidth = screenWidth;
+        float targetHeight = screenWidth; // Square board assumption (most levels are ~square)
+        float targetX = targetWidth / 2f;  // Center X = half screen width
+        float targetY = targetHeight / 2f; // Center Y = half of board height (top-aligned)
+
         float overlayCenterX = startX + card.getWidth() / 2f;
         float overlayCenterY = startY + card.getHeight() / 2f;
 
-        // Scale to fill upper half of screen
-        float scaleX = (float) rootFrame.getWidth() / card.getWidth();
-        float scaleY = (float) (rootFrame.getHeight() / 2f) / card.getHeight();
-        float scale = Math.max(scaleX, scaleY);
+        // Scale to match game board size
+        float scaleX = targetWidth / card.getWidth();
+        float scaleY = targetHeight / card.getHeight();
 
-        // Translation to move overlay center to target center
-        float translateX = targetCenterX - overlayCenterX;
-        float translateY = targetCenterY - overlayCenterY;
+        // Translation to move overlay center to board center
+        float translateX = targetX - overlayCenterX;
+        float translateY = targetY - overlayCenterY;
 
         // Animate the overlay
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(
-                ObjectAnimator.ofFloat(overlay, "scaleX", 1f, scale),
-                ObjectAnimator.ofFloat(overlay, "scaleY", 1f, scale),
+                ObjectAnimator.ofFloat(overlay, "scaleX", 1f, scaleX),
+                ObjectAnimator.ofFloat(overlay, "scaleY", 1f, scaleY),
                 ObjectAnimator.ofFloat(overlay, "translationX", 0f, translateX),
                 ObjectAnimator.ofFloat(overlay, "translationY", 0f, translateY)
         );
-        animatorSet.setDuration(400);
+        animatorSet.setDuration(ZOOM_DURATION_MS);
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
 
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                // Clean up: remove overlay, restore original card
-                rootFrame.removeView(overlay);
-                card.setVisibility(View.VISIBLE);
-                card.setClickable(true);
-
                 // Reset achievement game session flags for new game
                 AchievementManager.getInstance(requireContext()).onNewGameStarted();
 
                 // Start a new game with the selected level
                 gameStateManager.startLevelGame(levelId);
 
-                // Navigate to GameFragment
+                // Navigate to GameFragment BEFORE removing overlay to avoid flash-back glitch
                 GameFragment gameFragment = new GameFragment();
                 navigateToDirect(gameFragment);
+
+                // Clean up overlay after navigation (post to ensure fragment transaction started)
+                rootFrame.post(() -> {
+                    rootFrame.removeView(overlay);
+                    card.setVisibility(View.VISIBLE);
+                    card.setClickable(true);
+                });
             }
         });
 
