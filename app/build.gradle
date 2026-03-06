@@ -9,8 +9,8 @@ android {
         applicationId "de.z11.roboyard"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 118
-        versionName "41"
+        versionCode 121
+        versionName "42"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
@@ -29,6 +29,14 @@ android {
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
             buildConfigField "boolean", "ENABLE_PLAY_GAMES", "false"
+        }
+    }
+    
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (variant.buildType.name == 'release') {
+                outputFileName = "Roboyard_v${defaultConfig.versionName}.apk"
+            }
         }
     }
     

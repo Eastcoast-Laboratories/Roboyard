@@ -14,8 +14,8 @@ if [ "$1" = "-u" ]; then
 fi
 
 # Get version from build.gradle
-VERSION_NAME=$(grep versionName $BUILD_GRADLE | awk -F\" '{print $2}')
-VERSION_CODE=$(grep versionCode $BUILD_GRADLE | awk '{print $2}')
+VERSION_NAME=$(grep "versionName" $BUILD_GRADLE | head -1 | awk -F\" '{print $2}')
+VERSION_CODE=$(grep "versionCode" $BUILD_GRADLE | head -1 | awk '{print $2}')
 
 # If -u flag is set, increment version and versionCode
 if [ "$UPDATE_VERSION" = true ]; then
@@ -66,16 +66,22 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Französische Übersetzung komplett
-- GMS Library entfenrt
+- Die A.I. kann jetzt Multi-Target-Rätsel lösen
+- Kleinere Spielfeldgröße unterstützt: 7x8, 10x8 und 16x14  Felder
+- Der Level-Fortschritt kann jetzt optional mit einem Online-Server synchronisiert werden
+- Die Lautstärke des Hintergrund-Atmosphären Sounds wurde korrigiert
+- Verschiedene UI-Verbesserungen und Fehlerbehebungen
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- French translation complete
-- GMS Library removed
+- A.I can solve Multi-goal puzzles now
+- Smaller board sizes supported: 7x8, 10x8 and 16x14 squares
+- Level progress is now optional synced with online server
+- Ambient background sound volume corrected
+- Various UI improvements and bug fixes
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )
@@ -265,8 +271,8 @@ else
 fi
 
 echo "Changelogs successfully updated!"
-echo "Fastlane-Changelogs: de/${VERSION_NAME}.txt und en-US/${VERSION_NAME}.txt"
-echo "Play Store Changelogs: $PLAYSTORE_CHANGELOG_FILE"
+echo "Fastlane-Changelogs: de/${VERSION_NAME} und en-US/${VERSION_NAME}"
+echo "Play Store Changelogs: fastlane/metadata/android/playstore/changelog_${VERSION_NAME}"
 echo ""
 echo "Play Store Changelogs can be copied like this:"
-echo "cat $PLAYSTORE_CHANGELOG_FILE"
+echo "cat fastlane/metadata/android/playstore/changelog_${VERSION_NAME}"
