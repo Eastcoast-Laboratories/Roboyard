@@ -154,7 +154,7 @@
             android:paddingEnd="24dp"
             android:paddingBottom="0dp"
             android:paddingTop="0dp"
-            android:translationY="20dp"
+            android:translationY="7dp"
             android:elevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
