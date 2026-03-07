@@ -57,6 +57,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private RecyclerView levelRecyclerView;
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
+    private TextView totalStarsText;
     private TextView progressText;
     private View progressFill;
     private Button userProfileButton;
@@ -101,6 +102,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Set up UI elements
         titleTextView = view.findViewById(R.id.level_selection_title);
+        totalStarsText = view.findViewById(R.id.total_stars_text);
         progressText = view.findViewById(R.id.progress_text);
         progressFill = view.findViewById(R.id.progress_fill);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
@@ -549,11 +551,16 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
     /**
      * Updates the progress bar and stars count in the header.
-     * Shows "X / Y Level completed" in the progress bar and "X / Y" as star count.
+     * Shows "X / Y Level completed" in the progress bar and "X" as total star count.
      */
     private void updateProgressUI() {
         calculateTotalStars();
         int totalLevels = availableLevels.size();
+
+        // Update total stars count (large golden number left of star icon)
+        if (totalStarsText != null) {
+            totalStarsText.setText(String.valueOf(totalStars));
+        }
 
         // Update progress text inside progress bar
         if (progressText != null) {

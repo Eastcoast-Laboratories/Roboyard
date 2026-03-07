@@ -71,6 +71,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <!-- Total stars count (large golden number) -->
+            <TextView
+                android:id="@+id/total_stars_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFD700"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_marginEnd="4dp" />
+
             <!-- Star icon -->
             <ImageView
                 android:id="@+id/progress_checkmark"
