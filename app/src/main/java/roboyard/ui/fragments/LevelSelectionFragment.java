@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -240,7 +242,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void setupScrollFadeEffect() {
         // Config: fade starts when item is this many pixels below the progress bar
-        final int FADE_START_OFFSET_PX = -170;
+        // Different values for portrait vs landscape due to different header heights
+        boolean isLandscape = getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+        final int FADE_START_OFFSET_PX = isLandscape ? -80 : -170;
         final int FADE_DISTANCE_PX = 150;
         final int FADE_COMPLETE_DELAY_MS = 200;
 
@@ -692,13 +696,34 @@ public class LevelSelectionFragment extends BaseGameFragment {
         rootFrame.addView(overlay);
         card.setVisibility(View.INVISIBLE);
 
-        // Target: match the game board position in GameFragment (full width, top-aligned, square)
-        // The game board in portrait mode is full-width starting at Y=0, height = width (square boards)
+        // Target: match the game board position in GameFragment
+        // Portrait: full width, top-aligned, square
+        // Landscape: left or right half, depending on card position
+        boolean isLandscape = getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
         int screenWidth = rootFrame.getWidth();
-        float targetWidth = screenWidth;
-        float targetHeight = screenWidth; // Square board assumption (most levels are ~square)
-        float targetX = targetWidth / 2f;  // Center X = half screen width
-        float targetY = targetHeight / 2f; // Center Y = half of board height (top-aligned)
+        int screenHeight = rootFrame.getHeight();
+        
+        float targetWidth, targetHeight, targetX, targetY;
+        
+        if (isLandscape) {
+            // Landscape: zoom to left or right half based on selected layout preference
+            // isGridLeft=true → grid_left layout → zoom to LEFT half
+            // isGridLeft=false → standard landscape → zoom to RIGHT half
+            SharedPreferences prefs = requireContext().getSharedPreferences("RoboyardPrefs", Context.MODE_PRIVATE);
+            boolean isGridLeft = prefs.getBoolean("landscape_grid_left", true);
+            boolean zoomToLeft = isGridLeft; // Grid left means zoom to left
+            
+            targetWidth = screenWidth / 2f;  // Half screen width
+            targetHeight = screenHeight;     // Full screen height
+            targetX = zoomToLeft ? (targetWidth / 2f) : (screenWidth - targetWidth / 2f);
+            targetY = targetHeight / 2f;
+        } else {
+            // Portrait: full width, top-aligned, square
+            targetWidth = screenWidth;
+            targetHeight = screenWidth; // Square board assumption (most levels are ~square)
+            targetX = targetWidth / 2f;  // Center X = half screen width
+            targetY = targetHeight / 2f; // Center Y = half of board height (top-aligned)
+        }
 
         float overlayCenterX = startX + card.getWidth() / 2f;
         float overlayCenterY = startY + card.getHeight() / 2f;

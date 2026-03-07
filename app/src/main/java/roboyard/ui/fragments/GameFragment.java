@@ -414,15 +414,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         Configuration config = getResources().getConfiguration();
         if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape mode, check preference for layout direction
-            boolean isGridRight = prefs.getBoolean("landscape_grid_right", true);
+            boolean isGridLeft = prefs.getBoolean("landscape_grid_left", true);
             
-            if (isGridRight) {
-                layoutId = R.layout.fragment_game_landscape_right;
+            if (isGridLeft) {
+                layoutId = R.layout.fragment_game_landscape_grid_left;
             } else {
                 layoutId = R.layout.fragment_game_landscape;
             }
-            Timber.d("[LAYOUT_SELECTION] Landscape mode: using %s layout (grid_right=%s)", 
-                    isGridRight ? "landscape_right" : "landscape", isGridRight);
+            Timber.d("[LAYOUT_SELECTION] Landscape mode: using %s layout (grid_left=%s)", 
+                    isGridLeft ? "landscape_grid_left" : "landscape", isGridLeft);
         } else if (useAltLayout) {
             layoutId = R.layout.fragment_game_alt;
             Timber.d("[LAYOUT_SELECTION] Portrait mode: using alternative icon layout");
@@ -1648,9 +1648,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Set initial button text based on current preference
             Configuration config = getResources().getConfiguration();
             if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                boolean isGridRight = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
-                        .getBoolean("landscape_grid_right", true);
-                layoutToggleButton.setText(isGridRight ? "⇄" : "⇆");
+                boolean isGridLeft = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                        .getBoolean("landscape_grid_left", true);
+                layoutToggleButton.setText(isGridLeft ? "⇄" : "⇆");
             }
         }
         
@@ -3891,21 +3891,21 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         
         // Get current layout direction from shared preferences
-        boolean isGridRight = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
-                .getBoolean("landscape_grid_right", true); // Default: grid on right
+        boolean isGridLeft = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                .getBoolean("landscape_grid_left", true); // Default: grid on right
         
         // Toggle the preference
-        boolean newGridRight = !isGridRight;
+        boolean newGridLeft = !isGridLeft;
         requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
                 .edit()
-                .putBoolean("landscape_grid_right", newGridRight)
+                .putBoolean("landscape_grid_left", newGridLeft)
                 .apply();
         
-        Timber.d("[LAYOUT_TOGGLE] Toggled layout: grid_right=%s -> %s", isGridRight, newGridRight);
+        Timber.d("[LAYOUT_TOGGLE] Toggled layout: grid_left=%s -> %s", isGridLeft, newGridLeft);
         
         // Update button text to show current state
         if (layoutToggleButton != null) {
-            layoutToggleButton.setText(newGridRight ? "⇄" : "⇆");
+            layoutToggleButton.setText(newGridLeft ? "⇄" : "⇆");
         }
         
         // Recreate the activity to apply the new layout
