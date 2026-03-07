@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <gradient
-        android:startColor="#43A047"
-        android:endColor="#66BB6A"
-        android:angle="0" />
-    <corners android:radius="16dp" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Yellow/orange gradient fill -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#FFA726"
+                android:endColor="#FFB74D"
+                android:angle="0" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <!-- Diagonal separator line (right edge) -->
+    <item android:right="0dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="100%"
+            android:pivotY="0%">
+            <shape android:shape="rectangle">
+                <solid android:color="#1565C0" />
+                <size android:width="4dp" android:height="100dp" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

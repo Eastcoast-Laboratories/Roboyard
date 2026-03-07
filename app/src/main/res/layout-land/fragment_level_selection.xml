@@ -131,10 +131,10 @@
         <!-- Scroll up arrow button (shown when not at top) -->
         <Button
             android:id="@+id/scroll_up_arrow"
-            android:layout_width="0dp"
+            android:layout_width="400dp"
             android:layout_height="24dp"
             android:text="▲"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:background="@drawable/button_fancy_blue"

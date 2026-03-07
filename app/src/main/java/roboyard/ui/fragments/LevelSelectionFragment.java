@@ -246,7 +246,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Config: fade starts when item is this many pixels below the progress bar
         // Different values for portrait vs landscape due to different header heights
         boolean isLandscape = getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-        final int FADE_START_OFFSET_PX = isLandscape ? -80 : -170;
+        final int FADE_START_OFFSET_PX = isLandscape ? -80 : -190;
         final int FADE_DISTANCE_PX = 150;
         final int FADE_COMPLETE_DELAY_MS = 200;
 
