@@ -114,7 +114,7 @@
         <!-- Scroll up arrow button (shown when not at top) -->
         <Button
             android:id="@+id/scroll_up_arrow"
-            android:layout_width="0dp"
+            android:layout_width="220dp"
             android:layout_height="32dp"
             android:text="▲"
             android:textSize="20sp"
@@ -132,13 +132,16 @@
             android:id="@+id/level_recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:padding="8dp"
-            android:clipToPadding="false"
-            android:clipChildren="false"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="6dp"
+            android:clipToPadding="true"
+            android:clipChildren="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/scroll_up_arrow"
-            app:layout_constraintBottom_toTopOf="@id/bottom_button_row" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- Bottom button row - overlaps bottom border by half -->
         <LinearLayout

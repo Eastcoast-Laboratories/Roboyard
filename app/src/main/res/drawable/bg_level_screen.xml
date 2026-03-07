@@ -18,7 +18,7 @@
             <corners android:radius="14dp" />
         </shape>
     </item>
-    <!-- Lemon-green gradient background (darker inside bottom to lighter yellow-white top) -->
+    <!-- Lemon-green gradient background (darker top to lighter yellow-white bottom) -->
     <item
         android:left="6dp"
         android:top="6dp"
@@ -26,9 +26,9 @@
         android:bottom="6dp">
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#FFFFF8DC"
+                android:startColor="#7CB342"
                 android:centerColor="#CCDB44"
-                android:endColor="#7CB342"
+                android:endColor="#848436"
                 android:angle="90" />
             <corners android:radius="10dp" />
         </shape>
