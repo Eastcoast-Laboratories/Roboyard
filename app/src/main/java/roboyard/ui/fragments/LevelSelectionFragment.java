@@ -1,5 +1,7 @@
 package roboyard.ui.fragments;
 
+import static roboyard.logic.core.Constants.PREFS_NAME;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -709,7 +711,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             // Landscape: zoom to left or right half based on selected layout preference
             // isGridLeft=true → grid_left layout → zoom to LEFT half
             // isGridLeft=false → standard landscape → zoom to RIGHT half
-            SharedPreferences prefs = requireContext().getSharedPreferences("RoboyardPrefs", Context.MODE_PRIVATE);
+            SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             boolean isGridLeft = prefs.getBoolean("landscape_grid_left", true);
             boolean zoomToLeft = isGridLeft; // Grid left means zoom to left
             

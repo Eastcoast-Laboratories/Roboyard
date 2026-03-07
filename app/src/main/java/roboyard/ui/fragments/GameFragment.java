@@ -1,5 +1,7 @@
 package roboyard.ui.fragments;
 
+import static roboyard.logic.core.Constants.PREFS_NAME;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -408,7 +410,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Choose layout based on orientation and preference
         int layoutId = R.layout.fragment_game_portrait; // Default layout
 
-        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE);
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         boolean useAltLayout = prefs.getBoolean("use_alternative_layout", false);
 
         Configuration config = getResources().getConfiguration();
@@ -1648,7 +1650,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Set initial button text based on current preference
             Configuration config = getResources().getConfiguration();
             if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                boolean isGridLeft = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+                boolean isGridLeft = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                         .getBoolean("landscape_grid_left", true);
                 layoutToggleButton.setText(isGridLeft ? "⇄" : "⇆");
             }
@@ -3891,12 +3893,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         
         // Get current layout direction from shared preferences
-        boolean isGridLeft = requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+        boolean isGridLeft = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getBoolean("landscape_grid_left", true); // Default: grid on right
         
         // Toggle the preference
         boolean newGridLeft = !isGridLeft;
-        requireContext().getSharedPreferences("roboyard_prefs", Context.MODE_PRIVATE)
+        requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit()
                 .putBoolean("landscape_grid_left", newGridLeft)
                 .apply();
