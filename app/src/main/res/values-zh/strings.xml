@@ -458,6 +458,7 @@
     <string name="history_detail_no">否</string>
     
     <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">按日期</string>
     <string name="sort_last_solved">最后解决</string>
     <string name="sort_longest_first_attempt">最长首次尝试</string>
     <string name="sort_optimal_not_found">未找到最优</string>
@@ -465,6 +466,11 @@
     <string name="filter_all">全部</string>
     <string name="filter_optimal_not_found">未找到最优</string>
     <string name="filter_unsolved">未解决</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">第 %1$d 页，共 %2$d 页 (%3$d)</string>
+    <string name="pagination_prev">上一页</string>
+    <string name="pagination_next">下一页</string>
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">提示自动移动：</string>

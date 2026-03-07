@@ -730,6 +730,7 @@
     <string name="history_detail_no">Nein</string>
     
     <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">Nach Datum</string>
     <string name="sort_last_solved">Zuletzt gelöst</string>
     <string name="sort_longest_first_attempt">Längster erster Versuch</string>
     <string name="sort_optimal_not_found">Optimal nicht gefunden</string>
@@ -737,6 +738,11 @@
     <string name="filter_all">Alle</string>
     <string name="filter_optimal_not_found">Optimal nicht gefunden</string>
     <string name="filter_unsolved">Ungelöst</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">Seite %1$d von %2$d (%3$d)</string>
+    <string name="pagination_prev">Zurück</string>
+    <string name="pagination_next">Weiter</string>
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">Hinweis Auto-Bewegung:</string>

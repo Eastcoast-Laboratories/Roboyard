@@ -99,6 +99,7 @@ public class SaveGameFragment extends BaseGameFragment {
     
     // Sort/Filter options
     private enum SortOption {
+        BY_DATE,
         LAST_SOLVED,
         LONGEST_FIRST_ATTEMPT,
         OPTIMAL_NOT_FOUND,
@@ -106,6 +107,7 @@ public class SaveGameFragment extends BaseGameFragment {
         
         public String getLabel(android.content.Context context) {
             switch (this) {
+                case BY_DATE: return context.getString(R.string.sort_by_date);
                 case LAST_SOLVED: return context.getString(R.string.sort_last_solved);
                 case LONGEST_FIRST_ATTEMPT: return context.getString(R.string.sort_longest_first_attempt);
                 case OPTIMAL_NOT_FOUND: return context.getString(R.string.sort_optimal_not_found);
@@ -130,7 +132,7 @@ public class SaveGameFragment extends BaseGameFragment {
         }
     }
     
-    private SortOption currentSort = SortOption.LAST_SOLVED;
+    private SortOption currentSort = SortOption.BY_DATE;
     private FilterOption currentFilter = FilterOption.ALL;
 
     @Override
@@ -744,6 +746,10 @@ public class SaveGameFragment extends BaseGameFragment {
         
         // Apply sort
         switch (currentSort) {
+            case BY_DATE:
+                // Sort by timestamp (newest first)
+                filteredHistoryEntries.sort((a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
+                break;
             case LAST_SOLVED:
                 filteredHistoryEntries.sort((a, b) -> Long.compare(b.getLastCompletionTimestamp(), a.getLastCompletionTimestamp()));
                 break;
@@ -812,9 +818,11 @@ public class SaveGameFragment extends BaseGameFragment {
         // Show/hide pagination controls based on total entries
         if (filteredHistoryEntries.size() >= ITEMS_PER_PAGE) {
             paginationControls.setVisibility(View.VISIBLE);
-            String pageInfo = String.format("Page %d of %d (%d entries)", 
+            String pageInfo = getString(R.string.pagination_page_info,
                     currentPage + 1, totalPages, filteredHistoryEntries.size());
             pageInfoText.setText(pageInfo);
+            prevPageButton.setText(getString(R.string.pagination_prev));
+            nextPageButton.setText(getString(R.string.pagination_next));
             prevPageButton.setEnabled(currentPage > 0);
             nextPageButton.setEnabled(currentPage < totalPages - 1);
             
@@ -822,6 +830,8 @@ public class SaveGameFragment extends BaseGameFragment {
             if (currentPage >= 1) {
                 paginationControlsTop.setVisibility(View.VISIBLE);
                 pageInfoTextTop.setText(pageInfo);
+                prevPageButtonTop.setText(getString(R.string.pagination_prev));
+                nextPageButtonTop.setText(getString(R.string.pagination_next));
                 prevPageButtonTop.setEnabled(currentPage > 0);
                 nextPageButtonTop.setEnabled(currentPage < totalPages - 1);
             } else {

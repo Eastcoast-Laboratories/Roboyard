@@ -117,8 +117,6 @@
     <string name="level_difficulty">Dificultad: %1$s</string>
     <string name="level_stars">Estrellas: %1$d/%2$d</string>
     <string name="level_size">Tamaño: %1$dx%2$d</string>
-    <string name="filter_all">Todos</string>
-    <string name="filter_unsolved">No Resueltos</string>
     <string name="filter_played">Jugados</string>
     <string name="level_filter">Filtro: %1$s</string>
     <string name="robots_label">Robots:</string>
@@ -503,11 +501,19 @@
     <string name="history_detail_no">No</string>
     
     <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">Por Fecha</string>
     <string name="sort_last_solved">Último resuelto</string>
     <string name="sort_longest_first_attempt">Primer intento más largo</string>
     <string name="sort_optimal_not_found">Óptimo no encontrado</string>
     <string name="sort_unsolved">Sin resolver</string>
+    <string name="filter_all">Todos</string>
     <string name="filter_optimal_not_found">Óptimo no encontrado</string>
+    <string name="filter_unsolved">Sin resolver</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">Página %1$d de %2$d (%3$d)</string>
+    <string name="pagination_prev">Anterior</string>
+    <string name="pagination_next">Siguiente</string>
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">Movimiento automático de pistas:</string>

@@ -334,13 +334,19 @@
     <string name="history_detail_no">아니오</string>
     
     <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">날짜순</string>
     <string name="sort_last_solved">마지막 해결</string>
     <string name="sort_longest_first_attempt">가장 긴 첫 시도</string>
     <string name="sort_optimal_not_found">최적 찾지 못함</string>
     <string name="sort_unsolved">미해결</string>
-    <string name="filter_all">전체</string>
+    <string name="filter_all">모두</string>
     <string name="filter_optimal_not_found">최적 찾지 못함</string>
     <string name="filter_unsolved">미해결</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">페이지 %1$d / %2$d (%3$d)</string>
+    <string name="pagination_prev">이전</string>
+    <string name="pagination_next">다음</string>
     
     <!-- Hint Auto-Move Settings -->
     <string name="settings_hint_auto_move">힌트 자동 이동:</string>

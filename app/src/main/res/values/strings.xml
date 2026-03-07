@@ -321,6 +321,7 @@
     <string name="history_detail_no">No</string>
     
     <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">By Date</string>
     <string name="sort_last_solved">Last Solved</string>
     <string name="sort_longest_first_attempt">Longest First Attempt</string>
     <string name="sort_optimal_not_found">Optimal Not Found</string>
@@ -328,6 +329,11 @@
     <string name="filter_all">All</string>
     <string name="filter_optimal_not_found">Optimal Not Found</string>
     <string name="filter_unsolved">Unsolved</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">Page %1$d of %2$d (%3$d)</string>
+    <string name="pagination_prev">Previous</string>
+    <string name="pagination_next">Next</string>
 
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner" comment="Name of easiest difficulty level [GameStateManager][SettingsFragment]">Beginner</string>

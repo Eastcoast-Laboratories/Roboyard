@@ -601,7 +601,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 View parent = (View) progressFill.getParent();
                 int parentWidth = parent.getWidth();
                 float fraction = (float) completedLevelCount / totalLevels;
-                int fillWidth = (int) (parentWidth * fraction);
+                // Ensure minimum width of 1 to keep bar visible
+                int fillWidth = Math.max(1, (int) (parentWidth * fraction));
 
                 // Update fill width
                 ViewGroup.LayoutParams params = progressFill.getLayoutParams();
