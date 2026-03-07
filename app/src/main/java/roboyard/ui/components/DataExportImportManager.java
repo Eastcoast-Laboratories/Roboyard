@@ -350,6 +350,10 @@ public class DataExportImportManager {
             prefs.edit().clear().apply();
         }
         
+        // Reset level completion data (stars and solved status)
+        LevelCompletionManager levelCompletionManager = LevelCompletionManager.getInstance(context);
+        levelCompletionManager.resetAll();
+        
         // Delete save games
         File savesDir = new File(context.getFilesDir(), SAVES_DIRECTORY);
         if (savesDir.exists()) {
