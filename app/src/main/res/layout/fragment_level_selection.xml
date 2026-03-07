@@ -90,37 +90,84 @@
                 android:src="@drawable/star"
                 android:importantForAccessibility="no" />
 
-            <!-- Progress bar with text overlay -->
+            <!-- Progress bar with diagonal separator and floating text -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp">
+                android:layout_marginEnd="8dp"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
+                <!-- Progress bar background (blue) -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@drawable/bg_progress_bar" />
 
+                <!-- Progress fill (yellow) -->
                 <View
                     android:id="@+id/progress_fill"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/bg_progress_fill" />
 
-                <TextView
-                    android:id="@+id/progress_text"
+                <!-- Diagonal SVG separator positioned at the edge of the fill -->
+                <ImageView
+                    android:id="@+id/progress_diagonal"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/progress_diagonal_separator"
+                    android:scaleType="fitXY"
+                    android:importantForAccessibility="no" />
+
+                <!-- Text layer floating above the bar (z-order) -->
+                <LinearLayout
+                    android:id="@+id/progress_text_container"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:shadowColor="#80000000"
-                    android:shadowDx="1"
-                    android:shadowDy="1"
-                    android:shadowRadius="2" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <!-- Left text (linksbündig) -->
+                    <TextView
+                        android:id="@+id/progress_text_left"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="start|center_vertical"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="4dp"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:shadowColor="#80000000"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="2"
+                        android:ellipsize="none" />
+
+                    <!-- Right text (rechtsbündig) -->
+                    <TextView
+                        android:id="@+id/progress_text_right"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end|center_vertical"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="8dp"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:shadowColor="#80000000"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="2"
+                        android:ellipsize="none" />
+                </LinearLayout>
             </FrameLayout>
 
         </LinearLayout>

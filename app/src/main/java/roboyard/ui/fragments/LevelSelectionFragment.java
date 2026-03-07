@@ -58,8 +58,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
     private TextView totalStarsText;
-    private TextView progressText;
+    private TextView progressTextLeft;
+    private TextView progressTextRight;
     private View progressFill;
+    private ImageView progressDiagonal;
     private Button userProfileButton;
     private Button scrollUpArrow;
     private final List<Integer> availableLevels = new ArrayList<>();
@@ -103,8 +105,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Set up UI elements
         titleTextView = view.findViewById(R.id.level_selection_title);
         totalStarsText = view.findViewById(R.id.total_stars_text);
-        progressText = view.findViewById(R.id.progress_text);
+        progressTextLeft = view.findViewById(R.id.progress_text_left);
+        progressTextRight = view.findViewById(R.id.progress_text_right);
         progressFill = view.findViewById(R.id.progress_fill);
+        progressDiagonal = view.findViewById(R.id.progress_diagonal);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
 
         // Set title
@@ -552,6 +556,11 @@ public class LevelSelectionFragment extends BaseGameFragment {
     /**
      * Updates the progress bar and stars count in the header.
      * Shows "X / Y Level completed" in the progress bar and "X" as total star count.
+     * Dynamically positions text based on progress percentage:
+     * - 0-30%: All text on right (blue area)
+     * - 30-70%: Description left (yellow), numbers right (blue)
+     * - 70-100%: All text on left (yellow area)
+     * Positions diagonal SVG separator at the edge of the yellow fill.
      */
     private void updateProgressUI() {
         calculateTotalStars();
@@ -562,22 +571,57 @@ public class LevelSelectionFragment extends BaseGameFragment {
             totalStarsText.setText(String.valueOf(totalStars));
         }
 
-        // Update progress text inside progress bar
-        if (progressText != null) {
-            progressText.setText(String.format("%d / %d %s",
-                    completedLevelCount, totalLevels,
-                    getString(R.string.level_progress_completed)));
+        // Calculate progress percentage
+        float progressPercentage = totalLevels > 0 ? (float) completedLevelCount / totalLevels : 0f;
+
+        // Prepare text components
+        String numbersText = String.format("%d / %d", completedLevelCount, totalLevels);
+        String descriptionText = getString(R.string.level_progress_completed);
+
+        // Update text positioning based on progress
+        if (progressTextLeft != null && progressTextRight != null) {
+            if (progressPercentage < 0.3f) {
+                // 0-30%: All text on right (blue area)
+                progressTextLeft.setText("");
+                progressTextRight.setText(numbersText + " " + descriptionText);
+            } else if (progressPercentage < 0.7f) {
+                // 30-70%: Description left (yellow), numbers right (blue)
+                progressTextLeft.setText(descriptionText);
+                progressTextRight.setText(numbersText);
+            } else {
+                // 70-100%: All text on left (yellow area)
+                progressTextLeft.setText(numbersText + " " + descriptionText);
+                progressTextRight.setText("");
+            }
         }
 
-        // Update progress bar fill width
+        // Update progress bar fill width and diagonal separator position
         if (progressFill != null && totalLevels > 0) {
             progressFill.post(() -> {
                 View parent = (View) progressFill.getParent();
                 int parentWidth = parent.getWidth();
                 float fraction = (float) completedLevelCount / totalLevels;
+                int fillWidth = (int) (parentWidth * fraction);
+
+                // Update fill width
                 ViewGroup.LayoutParams params = progressFill.getLayoutParams();
-                params.width = (int) (parentWidth * fraction);
+                params.width = fillWidth;
                 progressFill.setLayoutParams(params);
+
+                // Position diagonal separator at the right edge of the fill
+                if (progressDiagonal != null) {
+                    int diagonalWidth = progressDiagonal.getWidth();
+                    if (diagonalWidth == 0) diagonalWidth = (int) (20 * getResources().getDisplayMetrics().density);
+                    // Center the diagonal on the fill edge
+                    float diagonalX = fillWidth - (diagonalWidth / 2f);
+                    // Clamp to stay within bar bounds
+                    diagonalX = Math.max(0, Math.min(diagonalX, parentWidth - diagonalWidth));
+                    progressDiagonal.setTranslationX(diagonalX);
+
+                    // Hide diagonal when progress is 0% or 100%
+                    progressDiagonal.setVisibility(
+                            (fraction <= 0f || fraction >= 1f) ? View.GONE : View.VISIBLE);
+                }
             });
         }
     }
@@ -1024,6 +1068,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         private final ConstraintLayout levelCard;
         private final TextView levelNumberText;
         private final TextView levelNameText;
+        private final ImageView checkGreen;
         private final ImageView starOne;
         private final ImageView starTwo;
         private final ImageView starThree;
@@ -1040,6 +1085,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             levelCard = itemView.findViewById(R.id.level_card);
             levelNumberText = itemView.findViewById(R.id.level_number_text);
             levelNameText = itemView.findViewById(R.id.level_name_text);
+            checkGreen = itemView.findViewById(R.id.level_check_green);
             starOne = itemView.findViewById(R.id.level_star_1);
             starTwo = itemView.findViewById(R.id.level_star_2);
             starThree = itemView.findViewById(R.id.level_star_3);
@@ -1073,7 +1119,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === GOLD CARD: Completed level (even with 0 stars) ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_gold);
 
-                // Show stars (all hidden if 0 stars earned)
+                // Show green checkmark when completed with 0 stars, otherwise show stars
+                if (starsEarned == 0) {
+                    checkGreen.setVisibility(View.VISIBLE);
+                } else {
+                    checkGreen.setVisibility(View.GONE);
+                }
                 starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
                 starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
                 starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
@@ -1130,7 +1181,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === BLUE CARD: Playable but not yet completed ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_blue);
 
-                // Hide stars, minimap, minimap level number, level name, info button, locked label
+                // Hide checkmark, stars, minimap, minimap level number, level name, info button, locked label
+                checkGreen.setVisibility(View.GONE);
                 starOne.setVisibility(View.GONE);
                 starTwo.setVisibility(View.GONE);
                 starThree.setVisibility(View.GONE);
@@ -1155,7 +1207,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === GRAY CARD: Locked level ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_locked);
 
-                // Hide stars, minimap, minimap level number, level name, play arrow, info button
+                // Hide checkmark, stars, minimap, minimap level number, level name, play arrow, info button
+                checkGreen.setVisibility(View.GONE);
                 starOne.setVisibility(View.GONE);
                 starTwo.setVisibility(View.GONE);
                 starThree.setVisibility(View.GONE);

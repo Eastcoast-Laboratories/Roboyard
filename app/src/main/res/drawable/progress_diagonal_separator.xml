@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="32dp"
+    android:viewportWidth="20"
+    android:viewportHeight="32">
+    <!-- Left triangle (yellow/orange - matching progress fill) -->
+    <path
+        android:pathData="M0,0 L0,32 L20,32 Z"
+        android:fillColor="#FFB74D" />
+    <!-- Right triangle (blue - matching progress bar background) -->
+    <path
+        android:pathData="M0,0 L20,32 L20,0 Z"
+        android:fillColor="#1E88E5" />
+</vector>

@@ -91,7 +91,7 @@
             android:id="@+id/prev_page_button_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="← Prev"
+            android:text="←"
             android:layout_marginEnd="8dp" />
 
         <TextView
@@ -101,13 +101,13 @@
             android:textSize="14sp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            tools:text="Page 2 of 5 (100 entries)" />
+            tools:text="2 of 5 (100)" />
 
         <Button
             android:id="@+id/next_page_button_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Next →" />
+            android:text="→" />
     </LinearLayout>
 
     <!-- Scrollable container for history entries and pagination -->
@@ -149,7 +149,7 @@
                     android:id="@+id/prev_page_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="← Prev"
+                    android:text="←"
                     android:layout_marginEnd="8dp" />
 
                 <TextView
@@ -159,13 +159,13 @@
                     android:textSize="14sp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginStart="8dp"
-                    tools:text="Page 1 of 5" />
+                    tools:text="1 of 5" />
 
                 <Button
                     android:id="@+id/next_page_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Next →" />
+                    android:text="→" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
