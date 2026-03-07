@@ -93,6 +93,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/stars_container" />
 
+        <!-- Level number overlay on minimap (shown for completed levels) -->
+        <TextView
+            android:id="@+id/minimap_level_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/level_minimap_view"
+            app:layout_constraintEnd_toEndOf="@id/level_minimap_view"
+            app:layout_constraintStart_toStartOf="@id/level_minimap_view"
+            app:layout_constraintTop_toTopOf="@id/level_minimap_view" />
+
         <!-- Large level number (shown for playable / not-yet-played levels) -->
         <TextView
             android:id="@+id/level_number_text"
@@ -117,13 +135,27 @@
             android:id="@+id/lock_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginBottom="20dp"
             android:src="@drawable/ic_lock"
             android:visibility="gone"
             android:importantForAccessibility="no"
             app:layout_constraintBottom_toBottomOf="@id/level_number_text"
             app:layout_constraintEnd_toEndOf="@id/level_number_text"
+            app:layout_constraintStart_toStartOf="@id/level_number_text" />
+
+        <!-- Level label for locked levels (shown below lock icon) -->
+        <TextView
+            android:id="@+id/locked_level_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:alpha="0.5"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@id/level_number_text"
             app:layout_constraintStart_toStartOf="@id/level_number_text"
-            app:layout_constraintTop_toTopOf="@id/level_number_text" />
+            app:layout_constraintTop_toBottomOf="@id/lock_icon" />
 
         <!-- Play arrow indicator (bottom right, for playable levels) -->
         <ImageView

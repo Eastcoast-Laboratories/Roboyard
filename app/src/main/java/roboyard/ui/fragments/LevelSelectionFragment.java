@@ -6,7 +6,10 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +57,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private TextView progressText;
     private View progressFill;
     private Button userProfileButton;
+    private Button scrollUpArrow;
     private final List<Integer> availableLevels = new ArrayList<>();
     private LevelCompletionManager completionManager;
     private int totalStars = 0;
@@ -140,6 +144,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Add scroll listener to fade out cards earlier when scrolling up (keeps header visible)
         setupScrollFadeEffect();
 
+        // Set up scroll up arrow button
+        scrollUpArrow = view.findViewById(R.id.scroll_up_arrow);
+        setupScrollUpArrow(spanCount);
+
         // Auto-scroll to the last played level
         scrollToLastPlayedLevel();
 
@@ -190,6 +198,38 @@ public class LevelSelectionFragment extends BaseGameFragment {
     }
     
     /**
+     * Sets up scroll up arrow button that appears when not at top and scrolls up one row.
+     */
+    private void setupScrollUpArrow(int spanCount) {
+        scrollUpArrow.setOnClickListener(v -> {
+            GridLayoutManager layoutManager = (GridLayoutManager) levelRecyclerView.getLayoutManager();
+            if (layoutManager != null) {
+                int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
+                if (firstVisiblePosition > 0) {
+                    // Scroll up by one row (spanCount items)
+                    int targetPosition = Math.max(0, firstVisiblePosition - spanCount);
+                    levelRecyclerView.smoothScrollToPosition(targetPosition);
+                }
+            }
+        });
+
+        // Show/hide arrow based on scroll position
+        levelRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                
+                GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
+                    // Show arrow if not at the very top
+                    scrollUpArrow.setVisibility(firstVisiblePosition > 0 ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+    }
+
+    /**
      * Sets up scroll fade effect: level cards fade out earlier when scrolling up
      * to keep header and progress bar always visible.
      */
@@ -197,11 +237,20 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Config: fade starts when item is this many pixels below the progress bar
         final int FADE_START_OFFSET_PX = -110;
         final int FADE_DISTANCE_PX = 150;
+        final int FADE_COMPLETE_DELAY_MS = 200;
+
+        final Handler fadeHandler = new Handler(Looper.getMainLooper());
+        final Runnable[] completeFadeRunnable = new Runnable[1];
 
         levelRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                // Cancel any pending complete-fade operation
+                if (completeFadeRunnable[0] != null) {
+                    fadeHandler.removeCallbacks(completeFadeRunnable[0]);
+                }
 
                 // Get the progress container height to know where cards should start fading
                 View progressContainer = getView() != null ? getView().findViewById(R.id.progress_container) : null;
@@ -226,6 +275,42 @@ public class LevelSelectionFragment extends BaseGameFragment {
                         // Card is fully visible
                         child.setAlpha(1f);
                     }
+                }
+            }
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                // When scroll stops, complete any partial fades
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    completeFadeRunnable[0] = () -> {
+                        View progressContainer = getView() != null ? getView().findViewById(R.id.progress_container) : null;
+                        if (progressContainer == null) return;
+
+                        int progressBottom = progressContainer.getBottom();
+                        int fadeStartY = progressBottom + FADE_START_OFFSET_PX;
+
+                        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+                            View child = recyclerView.getChildAt(i);
+                            if (child == null) continue;
+
+                            int childTop = child.getTop();
+                            float currentAlpha = child.getAlpha();
+
+                            // If partially faded, complete the fade
+                            if (currentAlpha > 0f && currentAlpha < 1f) {
+                                if (childTop < fadeStartY) {
+                                    // Fade out completely
+                                    child.animate().alpha(0f).setDuration(150).start();
+                                } else {
+                                    // Fade in completely
+                                    child.animate().alpha(1f).setDuration(150).start();
+                                }
+                            }
+                        }
+                    };
+                    fadeHandler.postDelayed(completeFadeRunnable[0], FADE_COMPLETE_DELAY_MS);
                 }
             }
         });
@@ -535,11 +620,27 @@ public class LevelSelectionFragment extends BaseGameFragment {
         if (!(rootView instanceof FrameLayout)) return;
         FrameLayout rootFrame = (FrameLayout) rootView;
 
-        // Create a bitmap snapshot of the card
+        // Check if this is the last played level (has yellow border)
+        int lastPlayedLevel = LevelCompletionManager.getInstance(requireContext()).getLastPlayedLevel();
+        boolean hasYellowBorder = (levelId == lastPlayedLevel);
+
+        // Temporarily remove yellow border foreground before taking snapshot
+        Drawable originalForeground = null;
+        if (hasYellowBorder && card.getForeground() != null) {
+            originalForeground = card.getForeground();
+            card.setForeground(null);
+        }
+
+        // Create a bitmap snapshot of the card (without border)
         card.setDrawingCacheEnabled(true);
         card.buildDrawingCache();
         Bitmap snapshot = Bitmap.createBitmap(card.getDrawingCache());
         card.setDrawingCacheEnabled(false);
+
+        // Restore original foreground
+        if (originalForeground != null) {
+            card.setForeground(originalForeground);
+        }
 
         // Get the card's position relative to the root FrameLayout
         int[] cardLocation = new int[2];
@@ -582,10 +683,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Translation to move overlay center to board center
         float translateX = targetX - overlayCenterX;
         float translateY = targetY - overlayCenterY;
-
-        // Check if this is the last played level (has yellow border)
-        int lastPlayedLevel = LevelCompletionManager.getInstance(requireContext()).getLastPlayedLevel();
-        boolean hasYellowBorder = (levelId == lastPlayedLevel);
 
         // Create a separate border overlay if this level has the yellow border
         ImageView borderOverlay = null;
@@ -878,7 +975,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         private final ImageView starThree;
         private final ImageView starFour;
         private final ImageView minimapView;
+        private final TextView minimapLevelNumber;
         private final ImageView lockIcon;
+        private final TextView lockedLevelLabel;
         private final ImageView playArrow;
         private final ImageButton infoButton;
 
@@ -892,7 +991,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
             starThree = itemView.findViewById(R.id.level_star_3);
             starFour = itemView.findViewById(R.id.level_star_4);
             minimapView = itemView.findViewById(R.id.level_minimap_view);
+            minimapLevelNumber = itemView.findViewById(R.id.minimap_level_number);
             lockIcon = itemView.findViewById(R.id.lock_icon);
+            lockedLevelLabel = itemView.findViewById(R.id.locked_level_label);
             playArrow = itemView.findViewById(R.id.play_arrow);
             infoButton = itemView.findViewById(R.id.level_info_button);
         }
@@ -939,13 +1040,19 @@ public class LevelSelectionFragment extends BaseGameFragment {
                         minimapView.setImageBitmap(minimap);
                         minimapView.setVisibility(View.VISIBLE);
                         levelNumberText.setVisibility(View.GONE);
+                        
+                        // Show level number overlay on minimap
+                        minimapLevelNumber.setText(String.valueOf(levelId));
+                        minimapLevelNumber.setVisibility(View.VISIBLE);
                     } else {
                         minimapView.setVisibility(View.GONE);
+                        minimapLevelNumber.setVisibility(View.GONE);
                         levelNumberText.setText(String.valueOf(levelId));
                         levelNumberText.setVisibility(View.VISIBLE);
                     }
                 } else {
                     if (minimapView != null) minimapView.setVisibility(View.GONE);
+                    minimapLevelNumber.setVisibility(View.GONE);
                     levelNumberText.setText(String.valueOf(levelId));
                     levelNumberText.setVisibility(View.VISIBLE);
                 }
@@ -954,8 +1061,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 levelNameText.setText("Level " + levelId);
                 levelNameText.setVisibility(View.VISIBLE);
 
-                // Hide lock & play arrow
+                // Hide lock, locked label & play arrow
                 lockIcon.setVisibility(View.GONE);
+                lockedLevelLabel.setVisibility(View.GONE);
                 playArrow.setVisibility(View.GONE);
 
                 levelCard.setAlpha(1.0f);
@@ -964,15 +1072,17 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === BLUE CARD: Playable but not yet completed ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_blue);
 
-                // Hide stars, minimap, level name, info button
+                // Hide stars, minimap, minimap level number, level name, info button, locked label
                 starOne.setVisibility(View.GONE);
                 starTwo.setVisibility(View.GONE);
                 starThree.setVisibility(View.GONE);
                 starFour.setVisibility(View.GONE);
                 if (minimapView != null) minimapView.setVisibility(View.GONE);
+                minimapLevelNumber.setVisibility(View.GONE);
                 if (infoButton != null) infoButton.setVisibility(View.GONE);
                 levelNameText.setVisibility(View.GONE);
                 lockIcon.setVisibility(View.GONE);
+                lockedLevelLabel.setVisibility(View.GONE);
 
                 // Show large level number
                 levelNumberText.setText(String.valueOf(levelId));
@@ -987,21 +1097,22 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // === GRAY CARD: Locked level ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_locked);
 
-                // Hide stars, minimap, level name, play arrow, info button
+                // Hide stars, minimap, minimap level number, level name, play arrow, info button
                 starOne.setVisibility(View.GONE);
                 starTwo.setVisibility(View.GONE);
                 starThree.setVisibility(View.GONE);
                 starFour.setVisibility(View.GONE);
                 if (minimapView != null) minimapView.setVisibility(View.GONE);
+                minimapLevelNumber.setVisibility(View.GONE);
                 if (infoButton != null) infoButton.setVisibility(View.GONE);
                 levelNameText.setVisibility(View.GONE);
                 playArrow.setVisibility(View.GONE);
 
-                // Show level number (dimmed) and lock icon
-                levelNumberText.setText(String.valueOf(levelId));
-                levelNumberText.setVisibility(View.VISIBLE);
-                levelNumberText.setAlpha(0.3f);
+                // Hide large level number, show lock icon and "Level X" label below it
+                levelNumberText.setVisibility(View.GONE);
                 lockIcon.setVisibility(View.VISIBLE);
+                lockedLevelLabel.setText("Level " + levelId);
+                lockedLevelLabel.setVisibility(View.VISIBLE);
 
                 levelCard.setAlpha(0.8f);
             }
