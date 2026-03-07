@@ -61,10 +61,10 @@ public class SoundService extends Service {
             Timber.w("[SOUND_SERVICE] No volume in intent, using default: %d%%", volumePercent);
         }
 
-        // Map slider 0-100 to actual volume 0-73%
-        float actualVolume = (volumePercent / 100f) * 0.73f;
-        player.setVolume(actualVolume, actualVolume);
-        Timber.d("[SOUND_SERVICE] Volume set - slider: %d%%, actual: %.0f%% (%.2f)", volumePercent, actualVolume * 100, actualVolume);
+        // Convert linear slider (0-100) to logarithmic volume (0.0-1.0)
+        float logVolume = roboyard.logic.core.Preferences.getLogarithmicVolume(volumePercent);
+        player.setVolume(logVolume, logVolume);
+        Timber.d("[SOUND_SERVICE] Volume set - slider: %d%%, logarithmic: %.2f", volumePercent, logVolume);
 
         // Always restart from beginning so user hears the loudest part for calibration
         player.seekTo(0);

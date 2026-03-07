@@ -143,6 +143,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long uiTimerElapsedMs = 0;
     private boolean uiTimerWasRunning = false;
     private boolean isNewGameLoaded = false; // Flag to indicate if a new game was just loaded (timer should reset)
+    private final MutableLiveData<Boolean> newGameLoadedEvent = new MutableLiveData<>(false); // LiveData to trigger observer when new game is loaded
     private boolean solutionWasAccepted = false; // Flag to signal Fragment that the solution was accepted
 
     // Game history tracking variables
@@ -181,6 +182,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private ExecutorService preComputeExecutor;
     private volatile boolean preComputeRunning = false;
     private volatile boolean preComputeCancelled = false;
+
+    // Hint button reset timer to avoid race condition when loading games from history
+    private Runnable hintButtonResetRunnable = null;
+    private static final long HINT_BUTTON_RESET_DELAY_MS = 1000; // close hint container after some milliseconds
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public GameStateManager(Application application) {
         super(application);
@@ -408,7 +414,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public boolean applyLoadedGameState(GameState newState) {
         // Mark that a new game was loaded - timer should reset
         isNewGameLoaded = true;
+        newGameLoadedEvent.setValue(true); // Trigger observer
         Timber.d("[TIMER] New game loaded - timer will reset");
+        Timber.d("[HINT_SYSTEM] New game loaded event triggered");
         
         // Set reference to this GameStateManager in the new state
         newState.setGameStateManager(this);
@@ -1828,6 +1836,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     public LiveData<Boolean> isSolverRunning() {
         return isSolverRunning;
+    }
+    
+    public LiveData<Boolean> getNewGameLoadedEvent() {
+        return newGameLoadedEvent;
     }
     
     /**
@@ -4296,9 +4308,38 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         Timber.d("[AUTOSAVE_META] Metadata cleared");
     }
 
+    /**
+     * Schedule hint button reset after a delay to avoid race condition when loading games.
+     * Called when a new game is loaded from history, save, or level.
+     * @param hintButton The ToggleButton to reset
+     */
+    public void scheduleHintButtonReset(android.widget.ToggleButton hintButton) {
+        if (hintButton == null) return;
+        
+        Timber.d("[HINT_SYSTEM] New game loaded - scheduling hint button reset in %d ms", HINT_BUTTON_RESET_DELAY_MS);
+        
+        // Cancel any pending reset
+        if (hintButtonResetRunnable != null) {
+            mainHandler.removeCallbacks(hintButtonResetRunnable);
+        }
+        
+        // Schedule hint button reset after delay to avoid race condition
+        hintButtonResetRunnable = () -> {
+            if (hintButton != null && hintButton.isChecked()) {
+                Timber.d("[HINT_SYSTEM] Executing delayed hint button reset");
+                hintButton.setChecked(false);
+            }
+        };
+        mainHandler.postDelayed(hintButtonResetRunnable, HINT_BUTTON_RESET_DELAY_MS);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();
+        // Cancel any pending hint button reset
+        if (hintButtonResetRunnable != null) {
+            mainHandler.removeCallbacks(hintButtonResetRunnable);
+        }
         if (liveSolverManager != null) {
             liveSolverManager.shutdown();
         }

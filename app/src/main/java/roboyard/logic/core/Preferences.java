@@ -62,11 +62,11 @@ public class Preferences {
     public static final int DEFAULT_MAX_SOLUTION_MOVES = 6;
     public static final boolean DEFAULT_ALLOW_MULTICOLOR_TARGET = true;
     public static final boolean DEFAULT_HIGH_CONTRAST_MODE = false;
-    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 5;
+    public static final int DEFAULT_BACKGROUND_SOUND_VOLUME = 1;
     public static final boolean DEFAULT_LIVE_MOVE_COUNTER_ENABLED = false;
     public static final boolean DEFAULT_HINT_AUTO_MOVE_ENABLED = false;
     public static final int DEFAULT_HINT_AUTO_MOVE_MODE = HINT_AUTO_MOVE_MANUAL;
-    public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 50;
+    public static final int DEFAULT_SOUND_EFFECTS_VOLUME = 20;
     
     // Cached values - accessible as static fields
     public static int robotCount;
@@ -1237,5 +1237,32 @@ public class Preferences {
         highContrastMode = enabled;
         notifyPreferencesChanged();
         Timber.d("[PREFERENCES] High contrast mode set to %b", enabled);
+    }
+    
+    /**
+     * Convert linear slider value (0-100) to logarithmic volume (0.0-1.0).
+     * This provides a more natural volume curve where most of the range is quiet,
+     * and only the right side of the slider produces louder volumes.
+     * 
+     * Formula: volume = (2^(x/50) - 1) / 1.93
+     * Where x is the slider value 0-100
+     * At 50% slider = ~20% volume, at 100% = 100% volume
+     * 
+     * @param sliderValue Linear slider value 0-100
+     * @return Logarithmic volume 0.0-1.0
+     */
+    public static float getLogarithmicVolume(int sliderValue) {
+        if (sliderValue <= 0) return 0.0f;
+        if (sliderValue >= 100) return 1.0f;
+        
+        // Normalize slider value to 0-1 range
+        float normalized = sliderValue / 100.0f;
+        
+        // Apply steeper logarithmic curve: (2^(2*x) - 1) / 3
+        // This creates a much steeper curve where 50% slider ≈ 20% volume
+        float logVolume = (float) ((Math.pow(2, 2 * normalized) - 1) / 3);
+        
+        // Clamp to 0-1 range
+        return Math.max(0.0f, Math.min(1.0f, logVolume));
     }
 }

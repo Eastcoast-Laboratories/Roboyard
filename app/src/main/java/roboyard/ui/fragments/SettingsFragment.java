@@ -2239,6 +2239,7 @@ public class SettingsFragment extends Fragment {
     
     /**
      * Play robot_hit_robot sound as a preview at the given volume level.
+     * Uses logarithmic volume conversion for natural volume curve.
      * @param volumePercent Volume level 0-100
      */
     private void playSfxPreview(int volumePercent) {
@@ -2248,13 +2249,15 @@ public class SettingsFragment extends Fragment {
             }
             sfxPreviewPlayer = android.media.MediaPlayer.create(requireContext(), R.raw.robot_hit_robot);
             if (sfxPreviewPlayer != null) {
-                float vol = volumePercent / 100f;
-                sfxPreviewPlayer.setVolume(vol, vol);
+                // Convert linear slider (0-100) to logarithmic volume (0.0-1.0)
+                float logVolume = roboyard.logic.core.Preferences.getLogarithmicVolume(volumePercent);
+                sfxPreviewPlayer.setVolume(logVolume, logVolume);
                 sfxPreviewPlayer.setOnCompletionListener(mp -> {
                     mp.release();
                     if (sfxPreviewPlayer == mp) sfxPreviewPlayer = null;
                 });
                 sfxPreviewPlayer.start();
+                Timber.d("[SFX_PREVIEW] Playing preview - slider: %d%%, logarithmic: %.2f", volumePercent, logVolume);
             }
         } catch (Exception e) {
             Timber.e(e, "[SFX_PREVIEW] Error playing preview sound");

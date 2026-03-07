@@ -863,14 +863,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
         });
         
-        // Observe game state changes to hide hint container when new game is loaded
-        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), newState -> {
-            if (newState != null && gameStateManager.isNewGameLoaded()) {
-                // New game loaded (from history, save, or level) - hide hint container
-                if (hintButton != null && hintButton.isChecked()) {
-                    Timber.d("[HINT_SYSTEM] New game loaded - unchecking hint button");
-                    hintButton.setChecked(false);
-                }
+        // Observe new game loaded event to reset hint button
+        gameStateManager.getNewGameLoadedEvent().observe(getViewLifecycleOwner(), isNewGameLoaded -> {
+            if (Boolean.TRUE.equals(isNewGameLoaded)) {
+                // New game loaded (from history, save, or level) - delegate to GameStateManager
+                Timber.d("[HINT_SYSTEM] New game loaded event received in GameFragment");
+                gameStateManager.scheduleHintButtonReset(hintButton);
             }
         });
         
@@ -1739,42 +1737,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     announceGameStart();
                     
                     // Hide restart button for level games
-                    newMapButton.setVisibility(View.GONE);
-                    
-                    // Reset button text to "Reset"
-                    resetRobotsButton.setText(R.string.reset_button);
-                } else {
-                    // Random game - start a new random game
-                    gameStateManager.startGame();
-                    
-                    // Update difficulty display to reflect current settings (not savegame)
-                    updateDifficulty();
-                    Timber.d("[NEW_GAME] Updated difficulty display after starting new random game");
-                    
-                    // Clear robot paths
-                    if (gameGridView != null) {
-                        gameGridView.clearRobotPaths();
-                        gameGridView.invalidate();
-                    }
-                    
-                    // Reset timer
-                    stopTimer();
-                    startTimer();
-                    
-                    // Reset hint system for new random game
-                    gameStateManager.resetSolutionStep();
-                    showingPreHints = true;
-                    hintButton.setEnabled(true);
-                    hintButton.setAlpha(1.0f);
-                    Timber.d("[HINT] Reset hint system for new random game");
-                    
-                    // Hide the Next Level button
-                    nextLevelButton.setVisibility(View.GONE);
-                    
-                    // Clear any hint text from the status display
-                    updateStatusText("", false);
-                    
-                    // Announce new game
                     announceAccessibility("Starting new random game");
                     announceGameStart();
                     
