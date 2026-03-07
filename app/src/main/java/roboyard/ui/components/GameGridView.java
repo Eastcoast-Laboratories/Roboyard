@@ -156,6 +156,9 @@ public class GameGridView extends View {
     private boolean allowRobotDeselect = false;     // Flag to control robot deselection on tap
     private static final float ROBOT_MOVE_THRESHOLD = 60.0f;  // Minimum distance to trigger robot movement after activation
     private boolean robotAnimationInProgress = false;  // Track if a robot animation is in progress
+    
+    // Global flag to enable/disable robot deselection feature (default: false = disabled)
+    private static final boolean ROBOT_DESELECTION_ENABLED = false;
     private Handler animationTimeoutHandler = new Handler(Looper.getMainLooper());
     private Runnable animationTimeoutRunnable = null;
     private static final long ANIMATION_TIMEOUT_MS = 2000;  // 2 seconds timeout
@@ -1186,17 +1189,19 @@ public class GameGridView extends View {
                     // Check if a robot was touched at the start
                     touchedRobot = state.getRobotAt(gridX, gridY);
                     
-                    // Check if this is a second tap on the same robot
-                    GameElement selectedRobot = state.getSelectedRobot();
-                    if (touchedRobot != null && selectedRobot != null && 
-                        touchedRobot.getX() == selectedRobot.getX() && 
-                        touchedRobot.getY() == selectedRobot.getY()) {
-                        // This is a tap on an already selected robot - enable deselect on next ACTION_UP
-                        allowRobotDeselect = true;
-                        Timber.d("[TOUCH] Tapped on already selected robot - will allow deselect");
-                    } else {
-                        // Not tapping on the currently selected robot
-                        allowRobotDeselect = false;
+                    // Check if this is a second tap on the same robot (only if deselection is enabled)
+                    if (ROBOT_DESELECTION_ENABLED) {
+                        GameElement selectedRobot = state.getSelectedRobot();
+                        if (touchedRobot != null && selectedRobot != null && 
+                            touchedRobot.getX() == selectedRobot.getX() && 
+                            touchedRobot.getY() == selectedRobot.getY()) {
+                            // This is a tap on an already selected robot - enable deselect on next ACTION_UP
+                            allowRobotDeselect = true;
+                            Timber.d("[TOUCH] Tapped on already selected robot - will allow deselect");
+                        } else {
+                            // Not tapping on the currently selected robot
+                            allowRobotDeselect = false;
+                        }
                     }
                     
                     // Announce selection for accessibility
@@ -1407,17 +1412,21 @@ public class GameGridView extends View {
                     if (isTap) {
                         GameElement selectedRobot = state.getSelectedRobot();
                         Timber.d("[TOUCH] ACTION_UP - selectedRobot: %s", getRobotDescription(selectedRobot));
-                        // Check if user tapped on the currently selected robot to deselect it
+                        // Check if user tapped on the currently selected robot to deselect it (only if enabled)
                         if (selectedRobot != null && gridX == selectedRobot.getX() && gridY == selectedRobot.getY()) {
-                            // User tapped on the currently selected robot, deselect it
+                            // User tapped on the currently selected robot
                             Timber.d("[TOUCH] Try Deselecting robot at (%d,%d)", gridX, gridY);
-                            if (allowRobotDeselect) {
+                            if (ROBOT_DESELECTION_ENABLED && allowRobotDeselect) {
+                                // Deselection is enabled - deselect the robot
                                 state.setSelectedRobot(null);
                                 shrinkNonSelectedRobots(null);
                                 animateRobotScale(selectedRobot, SELECTED_ROBOT_SCALE, DEFAULT_ROBOT_SCALE); // Animate back to default size
                                 // announceForAccessibility(getRobotDescription(selectedRobot) + " deselected");
                                 Timber.d("[TOUCH] Deselecting robot at (%d,%d)", gridX, gridY);
                                 invalidate();
+                            } else {
+                                // Deselection is disabled - keep robot selected
+                                Timber.d("[TOUCH] Deselection disabled - keeping robot selected at (%d,%d)", gridX, gridY);
                             }
                             return true;
                         }
