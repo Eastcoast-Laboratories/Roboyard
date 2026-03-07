@@ -602,6 +602,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Prevent double-clicks during animation
         clickedCard.setClickable(false);
 
+        // Remove any border (foreground) immediately on click before zoom starts
+        clickedCard.setForeground(null);
+
         // Animate the card zooming to fill the upper half of the screen
         animateLevelZoom(clickedCard, levelId);
     }
@@ -624,23 +627,15 @@ public class LevelSelectionFragment extends BaseGameFragment {
         int lastPlayedLevel = LevelCompletionManager.getInstance(requireContext()).getLastPlayedLevel();
         boolean hasYellowBorder = (levelId == lastPlayedLevel);
 
-        // Temporarily remove yellow border foreground before taking snapshot
-        Drawable originalForeground = null;
-        if (hasYellowBorder && card.getForeground() != null) {
-            originalForeground = card.getForeground();
-            card.setForeground(null);
-        }
+        // Remove any foreground (border) before taking snapshot
+        // The border was already removed in onLevelSelected, but ensure it's gone
+        card.setForeground(null);
 
         // Create a bitmap snapshot of the card (without border)
         card.setDrawingCacheEnabled(true);
         card.buildDrawingCache();
         Bitmap snapshot = Bitmap.createBitmap(card.getDrawingCache());
         card.setDrawingCacheEnabled(false);
-
-        // Restore original foreground
-        if (originalForeground != null) {
-            card.setForeground(originalForeground);
-        }
 
         // Get the card's position relative to the root FrameLayout
         int[] cardLocation = new int[2];
