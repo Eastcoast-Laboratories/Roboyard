@@ -201,6 +201,11 @@ public class LevelSelectionFragment extends BaseGameFragment {
      * Sets up scroll up arrow button that appears when not at top and scrolls up one row.
      */
     private void setupScrollUpArrow(int spanCount) {
+        // Only set up if scroll up arrow exists (may not be in all layouts)
+        if (scrollUpArrow == null) {
+            return;
+        }
+        
         scrollUpArrow.setOnClickListener(v -> {
             GridLayoutManager layoutManager = (GridLayoutManager) levelRecyclerView.getLayoutManager();
             if (layoutManager != null) {
@@ -220,7 +225,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 super.onScrolled(recyclerView, dx, dy);
                 
                 GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
-                if (layoutManager != null) {
+                if (layoutManager != null && scrollUpArrow != null) {
                     int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
                     // Show arrow if not at the very top
                     scrollUpArrow.setVisibility(firstVisiblePosition > 0 ? View.VISIBLE : View.GONE);
@@ -235,7 +240,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void setupScrollFadeEffect() {
         // Config: fade starts when item is this many pixels below the progress bar
-        final int FADE_START_OFFSET_PX = -110;
+        final int FADE_START_OFFSET_PX = -170;
         final int FADE_DISTANCE_PX = 150;
         final int FADE_COMPLETE_DELAY_MS = 200;
 
@@ -604,6 +609,23 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Remove borders (both foreground and background) on click
         clickedCard.setForeground(null);
+        
+        // Hide stars bar and stretch minimap to fill card before zoom
+        View starsContainer = clickedCard.findViewById(R.id.stars_container);
+        if (starsContainer != null) {
+            starsContainer.setVisibility(View.GONE);
+        }
+        ImageView minimapView = clickedCard.findViewById(R.id.level_minimap_view);
+        if (minimapView != null && minimapView.getVisibility() == View.VISIBLE) {
+            // Remove 1:1 ratio and stretch minimap to fill entire card
+            ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) minimapView.getLayoutParams();
+            lp.dimensionRatio = null;
+            lp.topToBottom = ConstraintLayout.LayoutParams.UNSET;
+            lp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+            lp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+            lp.topMargin = 0;
+            minimapView.setLayoutParams(lp);
+        }
         
         // Determine card type and set borderless background
         boolean isCompleted = completionManager.isLevelCompleted(levelId);
@@ -1012,6 +1034,11 @@ public class LevelSelectionFragment extends BaseGameFragment {
          */
         public void bind(int levelId, LevelSelectionFragment fragment, boolean isCompleted,
                         int starsEarned, boolean isUnlocked, GameHistoryEntry historyEntry) {
+
+            // Skip binding if levelCard is not found (may happen in some layout configurations)
+            if (levelCard == null) {
+                return;
+            }
 
             levelCard.setContentDescription("Level " + levelId);
 
