@@ -542,7 +542,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             LevelCompletionData data = completionManager.getLevelCompletionData(levelId);
             if (data != null) {
                 totalStars += data.getStars();
-                if (data.getStars() > 0) {
+                if (data.isCompleted()) {
                     completedLevelCount++;
                 }
             }
@@ -1069,11 +1069,11 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
             levelCard.setContentDescription("Level " + levelId);
 
-            if (isCompleted && starsEarned > 0) {
-                // === GOLD CARD: Completed level ===
+            if (isCompleted) {
+                // === GOLD CARD: Completed level (even with 0 stars) ===
                 levelCard.setBackgroundResource(R.drawable.bg_level_card_gold);
 
-                // Show stars
+                // Show stars (all hidden if 0 stars earned)
                 starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
                 starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
                 starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
