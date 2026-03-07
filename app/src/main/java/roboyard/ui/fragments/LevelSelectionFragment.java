@@ -602,8 +602,18 @@ public class LevelSelectionFragment extends BaseGameFragment {
         // Prevent double-clicks during animation
         clickedCard.setClickable(false);
 
-        // Remove any border (foreground) immediately on click before zoom starts
+        // Remove borders (both foreground and background) on click
         clickedCard.setForeground(null);
+        
+        // Determine card type and set borderless background
+        boolean isCompleted = completionManager.isLevelCompleted(levelId);
+        if (isCompleted) {
+            // Gold card - use borderless version
+            clickedCard.setBackgroundResource(R.drawable.bg_level_card_gold_no_border);
+        } else if (isUnlocked) {
+            // Blue card - use borderless version
+            clickedCard.setBackgroundResource(R.drawable.bg_level_card_blue_no_border);
+        }
 
         // Animate the card zooming to fill the upper half of the screen
         animateLevelZoom(clickedCard, levelId);
@@ -617,7 +627,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void animateLevelZoom(View card, int levelId) {
         // --- Config ---
-        final int ZOOM_DURATION_MS = 999;
+        final int ZOOM_DURATION_MS = 199;
 
         View rootView = getView();
         if (!(rootView instanceof FrameLayout)) return;
