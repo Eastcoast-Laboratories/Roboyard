@@ -112,15 +112,11 @@ auch , wenn beim level syncen unauthorized kommt, soll er einmal versuchen sich 
 
 
 ---
-Yellow border fades out during zoom animation (alpha 1→0) geht noch nciht, de bleibt einfach immer dick, bis alles hoch gezoomt ist
+1. ich sehe das problem beiden borders: da ist eine extra border, wenn man den level , der zuletzt gespielt. das soll aber nicht. es soll die vorhandene gelbe border (gelb bei gespielten, blau bei nicht-gespielten grün werden und diese einzige border soll ausfaden, die extra border soll entfernt werden 
 
-2.  wenn man die level hoch scrollt, dürfen keine level halb ausgefadet übrig bleiben, also wenn man aufhört u scrollen, sollen alle halb gefadeten levels sich zuende ausfaden. 
 
-2a. wenn der oberste level nicht ganz oben ist, soll über den leveln ein breiter pfeil Button nach oben sein in blau, der genau eine reihe hochscrollt on touch, der pfeil breit aber wenig höhe
+4. die nicht geschafften level boxen (freigeschaltete und nicht-frei), die in der selben reihe sind, wie geschaffte, sollen alle etwas mehr height bekommen, so dass sie genau so gross sind wie die boxen mit den geschafften. wenn kein geschaffter in der selben reihe ist, sollen sie nur GENAU halb so hoch sein wie die geschafftenboxen
 
-3. alle geschafften level sollen noch eine kleine zahl in weiß in der mitte der minimap haben mit der level nummer
+5. die nicht freigeschaleten sollen die level Zahl kleiner und unterhalb des schlosses haben und das wort "Level" davor, also "Level X" unter das schloss und genau halb so hch wie die geschafften ((im moment sind die viel zu niedrig) und die schrift "Level X" kann man nicht sehen
 
-4. die nicht geschafften level oxen (freigeschaltete und nicht-frei), die in der selben reihe sind, wie geschaffte, sollen alle etwas mehr haight bekommen, so dass sie so gross sind wie die boxen mit den geschafften. wenn kein geschaffter in der selben reihe ist, sollen sie nur halb so hoch sein
-
-5. die nicht freigeschaleten sollen die level Zahl kleiner und unterhalb des schlosses haben und das wort "Level" davor, also "Level X" unter das schloss
 
