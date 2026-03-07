@@ -863,6 +863,17 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
         });
         
+        // Observe game state changes to hide hint container when new game is loaded
+        gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), newState -> {
+            if (newState != null && gameStateManager.isNewGameLoaded()) {
+                // New game loaded (from history, save, or level) - hide hint container
+                if (hintButton != null && hintButton.isChecked()) {
+                    Timber.d("[HINT_SYSTEM] New game loaded - unchecking hint button");
+                    hintButton.setChecked(false);
+                }
+            }
+        });
+        
         // Observe solver running state to update hint button text and save map button state
         gameStateManager.isSolverRunning().observe(getViewLifecycleOwner(), isRunning -> {
             if (isRunning) {
@@ -1584,6 +1595,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             showingPreHints = true;
             hintButton.setEnabled(true);
             hintButton.setAlpha(1.0f);
+            
+            // Hide hint container when starting new game
+            if (hintButton.isChecked()) {
+                hintButton.setChecked(false);
+                Timber.d("[HINT_SYSTEM] Unchecked hint button when starting new game");
+            }
+            
             Timber.d("[HINT] Reset hint system for new random game via New Game button");
             
             // Hide the optimal moves button when starting a new game

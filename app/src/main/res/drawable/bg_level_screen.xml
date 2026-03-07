@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Base green gradient background -->
+    <!-- Thin black outline -->
     <item>
         <shape android:shape="rectangle">
-            <gradient
-                android:startColor="#2E7D32"
-                android:centerColor="#4CAF50"
-                android:endColor="#2E7D32"
-                android:angle="135" />
+            <solid android:color="#000000" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
-    <!-- Subtle golden shimmer overlay from edges -->
-    <item>
+    <!-- Yellow border (inset from black outline) -->
+    <item
+        android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFD700" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <!-- Lemon-green gradient background (darker inside bottom to lighter yellow-white top) -->
+    <item
+        android:left="6dp"
+        android:top="6dp"
+        android:right="6dp"
+        android:bottom="6dp">
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#30FFD700"
-                android:centerColor="#00FFD700"
-                android:endColor="#30FFD700"
-                android:angle="0" />
+                android:startColor="#FFFFF8DC"
+                android:centerColor="#CCDB44"
+                android:endColor="#7CB342"
+                android:angle="90" />
+            <corners android:radius="10dp" />
         </shape>
     </item>
 </layer-list>

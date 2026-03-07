@@ -57,7 +57,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private RecyclerView levelRecyclerView;
     private LevelAdapter levelAdapter;
     private TextView titleTextView;
-    private TextView starsTextView;
     private TextView progressText;
     private View progressFill;
     private Button userProfileButton;
@@ -102,7 +101,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
         // Set up UI elements
         titleTextView = view.findViewById(R.id.level_selection_title);
-        starsTextView = view.findViewById(R.id.stars_count_text);
         progressText = view.findViewById(R.id.progress_text);
         progressFill = view.findViewById(R.id.progress_fill);
         levelRecyclerView = view.findViewById(R.id.level_recycler_view);
@@ -556,11 +554,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private void updateProgressUI() {
         calculateTotalStars();
         int totalLevels = availableLevels.size();
-
-        // Update stars count text (right side, large golden text)
-        if (starsTextView != null) {
-            starsTextView.setText(String.format("%d / %d", completedLevelCount, totalLevels));
-        }
 
         // Update progress text inside progress bar
         if (progressText != null) {
@@ -1116,9 +1109,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
                     levelNumberText.setVisibility(View.VISIBLE);
                 }
 
-                // Show level name at bottom
-                levelNameText.setText("Level " + levelId);
-                levelNameText.setVisibility(View.VISIBLE);
+                // Hide level name (number already shown in center)
+                levelNameText.setVisibility(View.GONE);
 
                 // Hide lock, locked label & play arrow
                 lockIcon.setVisibility(View.GONE);

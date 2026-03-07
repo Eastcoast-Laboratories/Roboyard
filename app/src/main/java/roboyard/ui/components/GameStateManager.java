@@ -609,6 +609,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         } else {
             Timber.d("[SOLUTIONS_SAVE_LOAD] Using loaded solution with %d moves, skipping solver calculation", 
                     currentSolution.getMoves().size());
+            // Signal Fragment that solution was accepted (hides hint container)
+            solutionWasAccepted = true;
             // Mark solver as not running since we're using a pre-loaded solution
             isSolverRunning.setValue(false);
             // Notify that solution is ready

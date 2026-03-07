@@ -70,12 +70,13 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginEnd="2dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="0dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_info_details"
             android:scaleType="fitCenter"
             android:visibility="gone"
             android:contentDescription="@string/info_button_a11y"
+            app:tint="#000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
