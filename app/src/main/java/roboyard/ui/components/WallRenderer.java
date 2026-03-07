@@ -39,7 +39,7 @@ public class WallRenderer {
     }
     
     /**
-     * Draws all walls on the canvas.
+     * Draws all walls on the canvas, excluding walls in the center square.
      *
      * @param canvas The canvas to draw on
      * @param offsetX The x offset for drawing
@@ -47,12 +47,58 @@ public class WallRenderer {
      */
     public void drawWalls(Canvas canvas, float offsetX, float offsetY) {
         for (Wall wall : model.getWalls()) {
+            // Skip walls in the center square
+            if (isWallInCenterSquare(wall)) {
+                continue;
+            }
+            
             if (wall.getType() == WallType.HORIZONTAL) {
                 drawHorizontalWall(canvas, wall, offsetX, offsetY);
             } else {
                 drawVerticalWall(canvas, wall, offsetX, offsetY);
             }
         }
+    }
+    
+    /**
+     * Checks if a wall forms the cross (4 walls) inside the center 2x2 square.
+     * The center square is the middle 2x2 area of the board.
+     * For a 12x14 board: Vertical (6,6), (6,7), Horizontal (5,7), (6,7)
+     * For a 16x16 board: Vertical (8,7), (8,8), Horizontal (7,8), (8,8)
+     *
+     * @param wall The wall to check
+     * @return true if the wall is one of the 4 center cross walls, false otherwise
+     */
+    private boolean isWallInCenterSquare(Wall wall) {
+        int x = wall.getX();
+        int y = wall.getY();
+        WallType type = wall.getType();
+        
+        // Calculate center square top-left corner
+        int centerX = (model.getBoardWidth() / 2) - 1;
+        int centerY = (model.getBoardHeight() / 2) - 1;
+        
+        // The 4 walls that form the cross inside the 2x2 center:
+        boolean isCenterWall = false;
+        
+        if (type == WallType.VERTICAL) {
+            // Vertical walls: (centerX+1, centerY) and (centerX+1, centerY+1)
+            // For 12x14: (6,6) and (6,7)
+            // For 16x16: (8,7) and (8,8)
+            isCenterWall = (x == centerX + 1 && (y == centerY || y == centerY + 1));
+        } else if (type == WallType.HORIZONTAL) {
+            // Horizontal walls: (centerX, centerY+1) and (centerX+1, centerY+1)
+            // For 12x14: (5,7) and (6,7)
+            // For 16x16: (7,8) and (8,8)
+            isCenterWall = (y == centerY + 1 && (x == centerX || x == centerX + 1));
+        }
+        
+        if (isCenterWall) {
+            Timber.d("[CARREE] Filtering wall: type=%s, x=%d, y=%d (center at %d,%d, board %dx%d)", 
+                    type, x, y, centerX, centerY, model.getBoardWidth(), model.getBoardHeight());
+        }
+        
+        return isCenterWall;
     }
     
     /**

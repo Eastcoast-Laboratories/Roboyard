@@ -57,11 +57,10 @@ check if this all works:
 
 3. der hint container soll sich auch wenn der live-move-toggle an ist ausblenden, sobald der solver was gefunden hat und die map angenommen wurde. Im moment blendet der nur aus, wenn der live-move-toggle aus ist
   
-4. add achievements tracking same walls, different positions
-5. für die achievements ist der entscheindende hint der wo gesagt wird, welche farben der robots benutzt werden müssen, ab dann oder wenn live move aktiv wargilt die map nicht merh als ohne hints gelöst. das muss dauerhaft iin dem history eintrag der map gespeihert werden, auch wenn man die selbe map später noch mal ohne hints löst, gilt diese trothzdem nur als mit hints gelöst
-6. teste ob wenn der live move aktiv ist, gilt eine map immer sofort, wenn ein live move angezeigt wird als nicht ohne hint gelöst, das muss sofort in der history gespeichert werden (auch der grund)
+4. für die achievements ist der entscheindende hint der wo gesagt wird, welche farben der robots benutzt werden müssen, ab dann oder wenn live move aktiv war gilt die map nicht merh als ohne hints gelöst. das muss dauerhaft iin dem history eintrag der map gespeihert werden, auch wenn man die selbe map später noch mal ohne hints löst, gilt diese trothzdem nur als mit hints gelöst
+5. teste ob wenn der live move aktiv ist, gilt eine map immer sofort, wenn ein live move angezeigt wird als nicht ohne hint gelöst, das muss sofort in der history gespeichert werden (auch der grund)
 
-7. teste die Kommunikation eine Version ein (ver=1) die wird erwartet. Z.b. Beim deep Link der map erwartet der Ver 1 aber wenn die höher ist, dann macht er statt die map mit unerwarteten Daten zu starten einen Toast "your app needs an update" und lenkt zum Menü; Auch die Login communication und die Synchronisation entsprechend. So kann ich in Zukunft breaking changes in Laravel ausrollen ohne dass die alten Apps abgestürzen
+6. teste die Kommunikation eine Version ein (ver=1) die wird erwartet. Z.b. Beim deep Link der map erwartet der Ver 1 aber wenn die höher ist, dann macht er statt die map mit unerwarteten Daten zu starten einen Toast "your app needs an update" und lenkt zum Menü; Auch die Login communication und die Synchronisation entsprechend. So kann ich in Zukunft breaking changes in Laravel ausrollen ohne dass die alten Apps abgestürzen
 
 8.
 mach einen Espresso Test für 1000 History Einträge + Pagination. also erst die app daten löschen, dann 1000 einträge erstellen (50x auf add 20 drücken) erhöhe dazu den erlaubten espresso timeout auf 1h
@@ -71,8 +70,7 @@ führe ihn aus ind finde heraus, wann der speicher voll ist, wenn voll, dann ver
 höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine fragen
 
 
-9. verhindere, das bei den map generatoren walls im inneren des mittleren carrees generiert werden
-10. einen Memory-Gate der wartet bis genug Speicher frei ist, bevor der Solver initialisiert wird.
+2.  einen Memory-Gate der wartet bis genug Speicher frei ist, bevor der Solver initialisiert wird.
 
 
 - mainactivity kann weg
@@ -82,6 +80,9 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 ---
 # last prompt:
 
+
+1. verhindere, dass bei jeglicher map walls im inneren des mittleren carrees angezeigt werden, einfach ignorieren, wenn da walls in der mitte drin sind
+2. 
 ----
 
 
