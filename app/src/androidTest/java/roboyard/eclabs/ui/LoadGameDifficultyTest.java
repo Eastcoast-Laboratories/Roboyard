@@ -120,11 +120,11 @@ public class LoadGameDifficultyTest {
         
         // Click save button
         try {
-            onView(withId(R.id.save_button)).check(matches(isDisplayed())).perform(click());
+            gameStateManager.saveGame(1);
             Thread.sleep(1000);
-            Timber.d("[LOAD_GAME_TEST] Save button clicked");
+            Timber.d("[LOAD_GAME_TEST] Game saved to slot 1");
         } catch (Exception e) {
-            Timber.e(e, "[LOAD_GAME_TEST] Could not find save button, trying menu");
+            Timber.e(e, "[LOAD_GAME_TEST] Could not save game");
             // Try alternative save method if direct button not available
         }
         
@@ -229,7 +229,7 @@ public class LoadGameDifficultyTest {
         
         // Save the game
         try {
-            onView(withId(R.id.save_button)).check(matches(isDisplayed())).perform(click());
+            gameStateManager.saveGame(1);
             Thread.sleep(1000);
         } catch (Exception e) {
             Timber.w(e, "[LOAD_GAME_TEST] Could not save game");

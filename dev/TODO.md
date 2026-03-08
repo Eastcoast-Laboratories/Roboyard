@@ -75,8 +75,8 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 
 - mainactivity kann weg
 
-- deselecting prbots braucht man nicht. wenn man auf einen roboter touched soll der immer selected werden, so dass immer einer selected bleibt
-
+- wenn man eine  externe map lädt, dann startet der solver nicht richtig, er findet keine lösung und es bleibt "ai calaculating..." stehen
+- 
 ---
 # last prompt:
 

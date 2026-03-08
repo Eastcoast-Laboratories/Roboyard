@@ -1373,291 +1373,33 @@ public class SaveGameFragment extends BaseGameFragment {
                 if (saveData != null && !saveData.isEmpty()) {
                     Timber.d("[SHARE] Loaded save data, length: %d characters", saveData.length());
                     
-                    // Manually extract map name and move count from the save data
-                    String mapName = "Shared Map";
-                    int moveCount = 0;
-                    int optimalMoveCount = 5; // Default to 5 for testing if not found
-                    int width = 16;
-                    int height = 16;
+                    // Parse save data using shared static method
+                    ShareParseResult result = parseSaveDataForShare(saveData);
                     
-                    String[] lines = saveData.split("\n");
-                    Timber.d("[SHARE] Save data has %d lines", lines.length);
-                    
-                    // Parse metadata from the first line if it starts with #
-                    if (lines.length > 0 && lines[0].startsWith("#")) {
-                        String metadataLine = lines[0];
-                        Timber.d("[SHARE] Metadata line: %s", metadataLine);
-                        String[] metadata = metadataLine.substring(1).split(";");
-                        
-                        for (String item : metadata) {
-                            Timber.d("[SHARE] Metadata item: '%s'", item);
-                            if (item.startsWith("MAPNAME:")) {
-                                mapName = item.substring("MAPNAME:".length());
-                                Timber.d("[SHARE] Found map name: %s", mapName);
-                            } else if (item.startsWith("MOVES:")) {
-                                try {
-                                    moveCount = Integer.parseInt(item.substring("MOVES:".length()));
-                                    Timber.d("[SHARE] Found move count: %d", moveCount);
-                                } catch (NumberFormatException e) {
-                                    Timber.e(e, "[SHARE] Error parsing move count");
-                                }
-                            } else if (item.startsWith("OPTIMAL:")) {
-                                try {
-                                    optimalMoveCount = Integer.parseInt(item.substring("OPTIMAL:".length()));
-                                    Timber.d("[SHARE] Found optimal move count: %d", optimalMoveCount);
-                                } catch (NumberFormatException e) {
-                                    Timber.e(e, "[SHARE] Error parsing optimal move count");
-                                }
-                            }
-                        }
+                    if (result == null) {
+                        Toast.makeText(requireContext(), "Cannot share - failed to parse save data", Toast.LENGTH_LONG).show();
+                        Timber.e("[SHARE_ERROR] parseSaveDataForShare returned null for slot %d", slotId);
+                        return;
                     }
                     
-                    // Look for board dimensions
-                    for (String line : lines) {
-                        if (line.startsWith("WIDTH:")) {
-                            try {
-                                width = Integer.parseInt(line.substring("WIDTH:".length()).trim().replace(";", ""));
-                                Timber.d("[SHARE] Found width: %d", width);
-                            } catch (NumberFormatException e) {
-                                Timber.e(e, "[SHARE] Error parsing width");
-                            }
-                        } else if (line.startsWith("HEIGHT:")) {
-                            try {
-                                height = Integer.parseInt(line.substring("HEIGHT:".length()).trim().replace(";", ""));
-                                Timber.d("[SHARE] Found height: %d", height);
-                            } catch (NumberFormatException e) {
-                                Timber.e(e, "[SHARE] Error parsing height");
-                            }
-                        }
-                    }
-                    
-                    // Build the data string in the format expected by the share system
-                    StringBuilder formattedData = new StringBuilder();
-                    formattedData.append("name:").append(mapName).append(";");
-                    
-                    // Use the optimal move count if available, otherwise use the current move count
-                    int numMoves = optimalMoveCount > 0 ? optimalMoveCount : moveCount;
-                    formattedData.append("num_moves:").append(numMoves).append(";");
-                    formattedData.append("solution:board:").append(width).append(",").append(height).append(";");
-                    
-                    // Parse the board data more comprehensively
-                    boolean inBoardSection = false;
-                    boolean inRobotsSection = false;
-                    boolean inWallsSection = false;
-                    boolean inTargetsSection = false;
-                    
-                    int wallCount = 0;
-                    int targetCount = 0;
-                    int robotCount = 0;
-                    
-                    // Use sets to ensure we don't add duplicate entries
-                    Set<String> wallEntries = new HashSet<>();
-                    Set<String> targetEntries = new HashSet<>();
-                    Set<String> robotEntries = new HashSet<>();
-                    
-                    // For board data, we need to parse walls and other elements
-                    for (int i = 0; i < lines.length; i++) {
-                        String line = lines[i].trim();
-                        
-                        // Skip empty lines
-                        if (line.isEmpty()) {
-                            continue;
-                        }
-                        
-                        // Check for section markers
-                        if (line.equals("BOARD:")) {
-                            inBoardSection = true;
-                            inRobotsSection = false;
-                            inWallsSection = false;
-                            inTargetsSection = false;
-                            Timber.d("[SHARE] Found BOARD section");
-                            continue;
-                        } else if (line.equals("ROBOTS:")) {
-                            inBoardSection = false;
-                            inRobotsSection = true;
-                            inWallsSection = false;
-                            inTargetsSection = false;
-                            Timber.d("[SHARE] Found ROBOTS section");
-                            continue;
-                        } else if (line.equals("WALLS:")) {
-                            inBoardSection = false;
-                            inRobotsSection = false;
-                            inWallsSection = true;
-                            inTargetsSection = false;
-                            Timber.d("[SHARE] Found WALLS section");
-                            continue;
-                        } else if (line.equals("TARGET_SECTION:")) {
-                            inBoardSection = false;
-                            inRobotsSection = false;
-                            inWallsSection = false;
-                            inTargetsSection = true;
-                            Timber.d("[SHARE] Found TARGET_SECTION section");
-                            continue;
-                        }
-                        
-                        try {
-                            // Parse wall data
-                            if (inWallsSection) {
-                                // Format could be either:
-                                // 1. 'H,y,x' or 'V,y,x' (H=horizontal, V=vertical)
-                                // 2. 'x,y,direction' (direction = 'h' or 'v')
-                                String[] parts = line.split(",");
-                                if (parts.length >= 3) {
-                                    // Check if the first part is a direction letter (H or V)
-                                    if (parts[0].equals("H") || parts[0].equals("V")) {
-                                        // Format is 'H,y,x' or 'V,y,x'
-                                        String direction = parts[0];
-                                        // Validate that parts[1] and parts[2] are numbers
-                                        if (parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                                            int y = Integer.parseInt(parts[1]);
-                                            int x = Integer.parseInt(parts[2].replace(";", ""));
-                                            
-                                            // Skip border walls (x=0, y=0, x=width-1, y=height-1)
-                                            if (isBorderWall(x, y, width, height)) {
-                                                continue;
-                                            }
-                                            
-                                            String wallEntry;
-                                            if ("H".equals(direction)) {
-                                                wallEntry = "\nmh" + y + "," + x + ";";
-                                            } else { // "V".equals(direction)
-                                                wallEntry = "\nmv" + y + "," + x + ";";
-                                            }
-                                            
-                                            // Only add if not already added
-                                            if (wallEntries.add(wallEntry)) {
-                                                formattedData.append(wallEntry);
-                                                wallCount++;
-                                            }
-                                        } else {
-                                            Timber.e("[SHARE] Invalid wall coordinates: %s", line);
-                                        }
-                                    } else {
-                                        // Try the format 'x,y,direction'
-                                        // Validate that parts[0] and parts[1] are numbers
-                                        if (parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
-                                            int x = Integer.parseInt(parts[0]);
-                                            int y = Integer.parseInt(parts[1]);
-                                            String direction = parts[2].replace(";", "");
-                                            
-                                            // Skip border walls (x=0, y=0, x=width-1, y=height-1)
-                                            if (isBorderWall(x, y, width, height)) {
-                                                continue;
-                                            }
-                                            
-                                            String wallEntry;
-                                            if ("h".equals(direction)) {
-                                                wallEntry = "\nmh" + y + "," + x + ";";
-                                            } else { // "v".equals(direction)
-                                                wallEntry = "\nmv" + y + "," + x + ";";
-                                            }
-                                            
-                                            // Only add if not already added
-                                            if (wallEntries.add(wallEntry)) {
-                                                formattedData.append(wallEntry);
-                                                wallCount++;
-                                            }
-                                        } else {
-                                            Timber.e("[SHARE] Invalid wall coordinates: %s", line);
-                                        }
-                                    }
-                                }
-                            }
-                            // Parse target data
-                            else if (inTargetsSection && line.startsWith("TARGET_SECTION:") && line.length() > 15) {
-                                // Format: TARGET_SECTION:x,y,color
-                                try {
-                                    String targetData = line.substring("TARGET_SECTION:".length());
-                                    String[] parts = targetData.split(",");
-                                    if (parts.length >= 3) {
-                                        // Validate that all parts are numbers (allow negative for color -1 = multicolor)
-                                        if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("-?\\d+")) {
-                                            int x = Integer.parseInt(parts[0]);
-                                            int y = Integer.parseInt(parts[1]);
-                                            int color = Integer.parseInt(parts[2].replace(";", ""));
-                                            
-                                            // Map color code to color name (-1 = multicolor target)
-                                            String colorName = getRobotColorName(color);
-                                            String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
-                                            
-                                            // Only add if not already added
-                                            if (targetEntries.add(targetEntry)) {
-                                                formattedData.append(targetEntry);
-                                                targetCount++;
-                                                Timber.d("[SHARE] Added target at (%d,%d) with color %d (%s)", x, y, color, colorName);
-                                            }
-                                        } else {
-                                            Timber.e("[SHARE] Invalid target data format: %s", targetData);
-                                        }
-                                    } else {
-                                        Timber.e("[SHARE] Insufficient target data parts in: %s", targetData);
-                                    }
-                                } catch (Exception e) {
-                                    Timber.e(e, "[SHARE] Error parsing target line: %s", line);
-                                }
-                                continue;
-                            }
-                            // Parse robot data
-                            else if (inRobotsSection) {
-                                // Format: x,y,color
-                                String[] parts = line.split(",");
-                                if (parts.length >= 3) {
-                                    // Validate that all parts are numbers
-                                    if (parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                                        int x = Integer.parseInt(parts[0]);
-                                        int y = Integer.parseInt(parts[1]);
-                                        int color = Integer.parseInt(parts[2].replace(";", ""));
-                                        
-                                        // Map color code to color name
-                                        String colorName = getRobotColorName(color);
-                                        String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
-                                        
-                                        // Only add if not already added
-                                        if (robotEntries.add(robotEntry)) {
-                                            formattedData.append(robotEntry);
-                                            robotCount++;
-                                        }
-                                    } else {
-                                        Timber.e("[SHARE] Invalid robot coordinates or color: %s", line);
-                                    }
-                                }
-                            }
-                        } catch (Exception e) {
-                            Timber.e(e, "[SHARE] Error parsing line: %s", line);
-                        }
-                    }
-                    
-                    Timber.d("[SHARE] Parsed %d walls, %d targets, %d robots", wallCount, targetCount, robotCount);
+                    Timber.d("[SHARE] Parsed %d walls, %d targets, %d robots", result.wallCount, result.targetCount, result.robotCount);
                     
                     // Final check for targets
-                    if (targetCount == 0) {
-                        Throwable t = new Throwable();
-                        Timber.e(t, "[SHARE_ERROR] No targets found in save data, cannot share");
-                        // Show a toast message instead of creating a fake target
+                    if (result.targetCount == 0) {
+                        Timber.e("[SHARE_ERROR] No targets found in save data, cannot share slot %d", slotId);
+                        Timber.e("[SHARE_ERROR] Map name: %s, Size: %dx%d, Robots: %d, Walls: %d", 
+                                result.mapName, result.width, result.height, result.robotCount, result.wallCount);
                         Toast.makeText(requireContext(), 
                             "Cannot share - no target data found in save file", 
                             Toast.LENGTH_LONG).show();
-                        // Add comprehensive logging to help debug the issue
-                        Timber.e("[SHARE_ERROR] Could not share save slot %d - no targets found", slotId);
-                        Timber.e("[SHARE_ERROR] Save data contains %d lines", lines.length);
-                        Timber.e("[SHARE_ERROR] Map name: %s, Width: %d, Height: %d", mapName, width, height);
-                        Timber.e("[SHARE_ERROR] Robot count: %d, Wall count: %d", robotCount, wallCount);
-                        
-                        // Log the first 10 lines of save data to help diagnose issues
-                        int linesToLog = Math.min(lines.length, 10);
-                        for (int i = 0; i < linesToLog; i++) {
-                            Timber.d("[SHARE_ERROR] Line %d: %s", i, lines[i]);
-                        }
-                        
-                        return; // Don't continue with sharing
+                        return;
                     }
                     
                     // URL encode the formatted data
                     String encodedData;
                     try {
-                        encodedData = URLEncoder.encode(formattedData.toString(), "UTF-8");
+                        encodedData = URLEncoder.encode(result.formattedData, "UTF-8");
                         Timber.d("[SHARE] Encoded data length: %d chars", encodedData.length());
-                        // Log the first 100 chars of the encoded data to help diagnose issues
                         Timber.d("[SHARE] Full encoded data: %s", encodedData);
                     } catch (Exception e) {
                         Timber.e(e, "[SHARE] Error encoding data");
@@ -1701,7 +1443,7 @@ public class SaveGameFragment extends BaseGameFragment {
      * @param height Board height
      * @return true if the wall is a border wall
      */
-    private boolean isBorderWall(int x, int y, int width, int height) {
+    static boolean isBorderWall(int x, int y, int width, int height) {
         // Note: In Roboyard, walls are indexed starting at -1
         // Walls at x=0 or y=0 are NOT border walls, they are valid game elements
         // Only consider walls at the absolute edge (which would be at -1 if walls were indexed properly)
@@ -1714,7 +1456,7 @@ public class SaveGameFragment extends BaseGameFragment {
      * @param color Color constant
      * @return Color name for URL
      */
-    private String getRobotColorName(int color) {
+    static String getRobotColorName(int color) {
         switch (color) {
             case -1: // Multicolor target (any robot can reach it)
                 return "multi";
@@ -1740,6 +1482,171 @@ public class SaveGameFragment extends BaseGameFragment {
                 return "multi";
             default:
                 return "unknown";
+        }
+    }
+    
+    /**
+     * Parse save data string into formatted share data.
+     * Package-visible for testing.
+     * 
+     * @param saveData The raw save data string
+     * @return ShareParseResult with parsed data, or null on failure
+     */
+    public static ShareParseResult parseSaveDataForShare(String saveData) {
+        if (saveData == null || saveData.isEmpty()) return null;
+        
+        String mapName = "Shared Map";
+        int moveCount = 0;
+        int optimalMoveCount = 0;
+        int width = 16;
+        int height = 16;
+        
+        String[] lines = saveData.split("\n");
+        
+        // Collect all items from metadata line and separate lines
+        List<String> allItems = new ArrayList<>();
+        if (lines.length > 0 && lines[0].startsWith("#")) {
+            String[] metadata = lines[0].substring(1).split(";");
+            for (String item : metadata) {
+                if (!item.trim().isEmpty()) {
+                    allItems.add(item.trim());
+                }
+            }
+        }
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (!line.isEmpty()) {
+                allItems.add(line);
+            }
+        }
+        
+        // Pass 1: dimensions and metadata
+        for (String item : allItems) {
+            if (item.startsWith("MAPNAME:")) {
+                mapName = item.substring("MAPNAME:".length());
+            } else if (item.startsWith("MOVES:")) {
+                try { moveCount = Integer.parseInt(item.substring("MOVES:".length())); } catch (NumberFormatException ignored) {}
+            } else if (item.startsWith("OPTIMAL:")) {
+                try { optimalMoveCount = Integer.parseInt(item.substring("OPTIMAL:".length())); } catch (NumberFormatException ignored) {}
+            } else if (item.startsWith("SIZE:")) {
+                try {
+                    String[] sizeParts = item.substring("SIZE:".length()).split(",");
+                    if (sizeParts.length == 2) {
+                        width = Integer.parseInt(sizeParts[0].trim());
+                        height = Integer.parseInt(sizeParts[1].trim());
+                    }
+                } catch (NumberFormatException ignored) {}
+            } else if (item.startsWith("WIDTH:")) {
+                try { width = Integer.parseInt(item.substring("WIDTH:".length()).trim().replace(";", "")); } catch (NumberFormatException ignored) {}
+            } else if (item.startsWith("HEIGHT:")) {
+                try { height = Integer.parseInt(item.substring("HEIGHT:".length()).trim().replace(";", "")); } catch (NumberFormatException ignored) {}
+            }
+        }
+        
+        StringBuilder formattedData = new StringBuilder();
+        formattedData.append("name:").append(mapName).append(";");
+        int numMoves = optimalMoveCount > 0 ? optimalMoveCount : moveCount;
+        formattedData.append("num_moves:").append(numMoves).append(";");
+        formattedData.append("solution:board:").append(width).append(",").append(height).append(";");
+        
+        int wallCount = 0, targetCount = 0, robotCount = 0;
+        Set<String> wallEntries = new HashSet<>();
+        Set<String> targetEntries = new HashSet<>();
+        Set<String> robotEntries = new HashSet<>();
+        
+        // Pass 2: board elements
+        for (String item : allItems) {
+            try {
+                String data = item;
+                if (data.startsWith("||")) data = data.substring(2);
+                else if (data.startsWith("|")) data = data.substring(1);
+                
+                if (data.startsWith("MAPNAME:") || data.startsWith("MOVES:") || 
+                    data.startsWith("OPTIMAL:") || data.startsWith("SIZE:") ||
+                    data.startsWith("WIDTH:") || data.startsWith("HEIGHT:") ||
+                    data.startsWith("MAX_HINT_USED:") || data.startsWith("SOLVED:") ||
+                    data.startsWith("DIFFICULTY:") || data.startsWith("TIME:")) {
+                    continue;
+                }
+                
+                if (data.matches("R-?\\d+@\\d+,\\d+")) {
+                    String[] parts = data.split("@");
+                    int color = Integer.parseInt(parts[0].substring(1));
+                    String[] coords = parts[1].split(",");
+                    int x = Integer.parseInt(coords[0]);
+                    int y = Integer.parseInt(coords[1]);
+                    String colorName = getRobotColorName(color);
+                    String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
+                    if (robotEntries.add(robotEntry)) {
+                        formattedData.append(robotEntry);
+                        robotCount++;
+                    }
+                    continue;
+                }
+                
+                if (data.matches("T-?\\d+@\\d+,\\d+")) {
+                    String[] parts = data.split("@");
+                    int color = Integer.parseInt(parts[0].substring(1));
+                    String[] coords = parts[1].split(",");
+                    int x = Integer.parseInt(coords[0]);
+                    int y = Integer.parseInt(coords[1]);
+                    String colorName = getRobotColorName(color);
+                    String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
+                    if (targetEntries.add(targetEntry)) {
+                        formattedData.append(targetEntry);
+                        targetCount++;
+                    }
+                    continue;
+                }
+                
+                if (data.matches("m[hv]\\d+,\\d+")) {
+                    String type = data.substring(0, 2);
+                    String coords = data.substring(2);
+                    String[] parts = coords.split(",");
+                    int coordY = Integer.parseInt(parts[0]);
+                    int coordX = Integer.parseInt(parts[1]);
+                    if (!isBorderWall(coordX, coordY, width, height)) {
+                        String wallEntry = "\n" + type + coordY + "," + coordX + ";";
+                        if (wallEntries.add(wallEntry)) {
+                            formattedData.append(wallEntry);
+                            wallCount++;
+                        }
+                    }
+                    continue;
+                }
+            } catch (Exception e) {
+                Timber.e(e, "[SHARE] Error parsing item in static method: %s", item);
+            }
+        }
+        
+        return new ShareParseResult(formattedData.toString(), mapName, width, height, 
+                wallCount, targetCount, robotCount, numMoves);
+    }
+    
+    /**
+     * Result of parsing save data for sharing.
+     * Package-visible for testing.
+     */
+    public static class ShareParseResult {
+        public final String formattedData;
+        public final String mapName;
+        public final int width;
+        public final int height;
+        public final int wallCount;
+        public final int targetCount;
+        public final int robotCount;
+        public final int numMoves;
+        
+        ShareParseResult(String formattedData, String mapName, int width, int height,
+                int wallCount, int targetCount, int robotCount, int numMoves) {
+            this.formattedData = formattedData;
+            this.mapName = mapName;
+            this.width = width;
+            this.height = height;
+            this.wallCount = wallCount;
+            this.targetCount = targetCount;
+            this.robotCount = robotCount;
+            this.numMoves = numMoves;
         }
     }
     

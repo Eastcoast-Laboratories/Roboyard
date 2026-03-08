@@ -125,6 +125,7 @@ These tests require a connected Android device or emulator.
 | `WallSerializationTest`  | ✅ Passing           | 13    | Outer boundary wall serialization/deserialization (right/bottom edges at grid+1).             | walls, serialization, deserialization, boundary, instrumented |
 | `MoveCountDebugTest`     | ✅ Passing           | 1     | Debug: play random level with optimal + 5 extra moves, verify move count in history.          | debug, move-count, history, solver, random-game               |
 | `RoboyardApiClientTest`  | ⚠️ Requires network | 7     | Integration tests for user registration API against real `roboyard.z11.de`. Requires network. | api, network, registration, sync, integration-test            |
+| `ShareParsingTest`       | ✅ Passing           | 4     | Share URL parsing: compact metadata format (||R, |T, mv/mh in # line), SIZE field, multicolor targets, real save file round-trip, null/empty handling. | share, parsing, save-data, compact-format, instrumented       |
 
 ### Achievement Tests (`roboyard.eclabs.achievements`)
 
