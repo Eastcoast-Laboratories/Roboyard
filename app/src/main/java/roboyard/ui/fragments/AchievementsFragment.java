@@ -209,6 +209,7 @@ public class AchievementsFragment extends BaseGameFragment {
         TextView nameText = new TextView(requireContext());
         nameText.setText(getStringByName(achievement.getNameKey()));
         nameText.setTextSize(16);
+        nameText.setTypeface(null, android.graphics.Typeface.BOLD);
         nameText.setTextColor(achievement.isUnlocked() ?
                 Color.parseColor("#1B5E20") : // Dark green for unlocked
                 Color.parseColor("#9E9E9E")); // Gray for locked

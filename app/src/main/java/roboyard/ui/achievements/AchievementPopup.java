@@ -172,7 +172,8 @@ public class AchievementPopup {
         TextView buttonText = new TextView(context);
         buttonText.setText(R.string.view_achievements);
         buttonText.setTextColor(Color.WHITE);
-        buttonText.setTextSize(14);
+        buttonText.setTextSize(16);
+        buttonText.setTypeface(null, android.graphics.Typeface.BOLD);
         buttonText.setGravity(Gravity.CENTER);
         buttonText.setLayoutParams(new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -358,6 +359,8 @@ public class AchievementPopup {
             nameText.setTextSize(nameTextSize);
             nameText.setTextColor(Color.parseColor("#333333"));
             nameText.setTypeface(null, android.graphics.Typeface.BOLD);
+            // Add white outline effect using shadow (same as description)
+            nameText.setShadowLayer(2f, 3f, 3f, Color.WHITE);
             textContainer.addView(nameText);
             
             // Description with white outline
@@ -365,7 +368,7 @@ public class AchievementPopup {
             descText.setText(getStringByName(achievement.getDescriptionKey(), achievement.getDescriptionFormatArgs()));
             descText.setTextSize(descTextSize);
             descText.setTextColor(Color.parseColor("#000000"));
-            descText.setTypeface(null, android.graphics.Typeface.ITALIC);
+            descText.setTypeface(null, android.graphics.Typeface.BOLD_ITALIC);
             
             // Add white outline effect using shadow
             descText.setShadowLayer(2f, 3f, 3f, Color.WHITE);
