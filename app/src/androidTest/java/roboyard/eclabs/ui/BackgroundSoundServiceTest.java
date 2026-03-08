@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.logic.core.Preferences;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 import static org.junit.Assert.assertTrue;
@@ -27,8 +27,8 @@ import static org.junit.Assert.assertTrue;
 public class BackgroundSoundServiceTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule = 
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule = 
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
 
@@ -116,7 +116,7 @@ public class BackgroundSoundServiceTest {
         Thread.sleep(1000);
         
         Timber.d("[SOUND_TEST] Restarting activity...");
-        ActivityScenario<MainFragmentActivity> newScenario = ActivityScenario.launch(MainFragmentActivity.class);
+        ActivityScenario<MainActivity> newScenario = ActivityScenario.launch(MainActivity.class);
         
         // Wait for activity to start
         Thread.sleep(2000);

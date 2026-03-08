@@ -38,7 +38,7 @@ import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
@@ -68,8 +68,8 @@ public class LevelScreenMinimapE2ETest {
     private static final String TAG = "[LEVEL_MINIMAP_E2E]";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private GameStateManager gameStateManager;
 
@@ -77,7 +77,7 @@ public class LevelScreenMinimapE2ETest {
     public void setUp() throws InterruptedException {
         step("setUp", "Initializing and clearing history");
         activityRule.getScenario().onActivity(a ->
-                gameStateManager = ((MainFragmentActivity) a).getGameStateManager());
+                gameStateManager = ((MainActivity) a).getGameStateManager());
         assertNotNull("GameStateManager must not be null", gameStateManager);
         clearAllHistory();
         Thread.sleep(2000);

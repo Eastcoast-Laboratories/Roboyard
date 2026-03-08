@@ -32,7 +32,7 @@ import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
@@ -59,8 +59,8 @@ public class HistoryCompletionE2ETest {
     private static final String TAG = "[HISTORY_E2E]";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private GameStateManager gameStateManager;
 
@@ -70,7 +70,7 @@ public class HistoryCompletionE2ETest {
         AtomicReference<Activity> activityRef = new AtomicReference<>();
         activityRule.getScenario().onActivity(a -> {
             activityRef.set(a);
-            gameStateManager = ((MainFragmentActivity) a).getGameStateManager();
+            gameStateManager = ((MainActivity) a).getGameStateManager();
         });
         assertNotNull("GameStateManager must not be null", gameStateManager);
         clearAllHistory();

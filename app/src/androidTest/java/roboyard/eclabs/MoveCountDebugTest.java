@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameState;
 import roboyard.ui.components.GameHistoryManager;
@@ -45,8 +45,8 @@ import timber.log.Timber;
 public class MoveCountDebugTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Activity activity;
     private GameStateManager gameStateManager;
@@ -64,7 +64,7 @@ public class MoveCountDebugTest {
         // Initialize
         GameHistoryManager.initialize(activity);
         activityRule.getScenario().onActivity(a -> {
-            gameStateManager = ((MainFragmentActivity) a).getGameStateManager();
+            gameStateManager = ((MainActivity) a).getGameStateManager();
         });
     }
 

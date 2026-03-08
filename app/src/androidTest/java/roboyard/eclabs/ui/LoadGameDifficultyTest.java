@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
@@ -46,8 +46,8 @@ import timber.log.Timber;
 public class LoadGameDifficultyTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private GameStateManager gameStateManager;

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameState;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -51,8 +51,8 @@ import timber.log.Timber;
 public class SolutionSaveLoadIntegrationTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule = 
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule = 
+            new ActivityScenarioRule<>(MainActivity.class);
 
     @Before
     public void setUp() throws InterruptedException {

@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameHistoryManager;
 import timber.log.Timber;
 
@@ -37,8 +37,8 @@ import timber.log.Timber;
 public class HistoryPaginationTest {
     
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
     
     @Before
     public void setUp() throws Exception {

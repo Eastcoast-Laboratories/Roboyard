@@ -20,7 +20,7 @@ import java.util.List;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
@@ -172,7 +172,7 @@ public class TestHelper {
      * @param activityRule The activity scenario rule
      * @param levelId The level ID to start (1-140)
      */
-    public static void startLevelGame(ActivityScenarioRule<MainFragmentActivity> activityRule, int levelId) {
+    public static void startLevelGame(ActivityScenarioRule<MainActivity> activityRule, int levelId) {
         Timber.d("[TEST_HELPER] Starting level %d", levelId);
         activityRule.getScenario().onActivity(a -> {
             GameStateManager gameStateManager = a.getGameStateManager();
@@ -237,7 +237,7 @@ public class TestHelper {
      * Navigate to Save/Load screen.
      * @param activityRule The activity scenario rule
      */
-    public static void navigateToSaveLoadScreen(ActivityScenarioRule<MainFragmentActivity> activityRule) {
+    public static void navigateToSaveLoadScreen(ActivityScenarioRule<MainActivity> activityRule) {
         Timber.d("[TEST_HELPER] Navigating to Save/Load screen");
         activityRule.getScenario().onActivity(a -> {
             roboyard.ui.fragments.SaveGameFragment fragment = new roboyard.ui.fragments.SaveGameFragment();

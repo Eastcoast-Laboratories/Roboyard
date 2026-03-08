@@ -17,7 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameElement;
@@ -42,8 +42,8 @@ import java.util.List;
 public class GimmeFiveAchievementTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private AchievementManager achievementManager;

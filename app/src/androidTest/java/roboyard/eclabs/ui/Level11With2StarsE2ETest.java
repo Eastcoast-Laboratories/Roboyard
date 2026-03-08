@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
@@ -46,8 +46,8 @@ import timber.log.Timber;
 public class Level11With2StarsE2ETest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private AchievementManager achievementManager;

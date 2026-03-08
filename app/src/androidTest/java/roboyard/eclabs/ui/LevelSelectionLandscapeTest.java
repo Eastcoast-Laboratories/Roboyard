@@ -18,7 +18,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.R;
 
 import timber.log.Timber;
@@ -27,7 +27,7 @@ import timber.log.Timber;
  * Landscape mode UI test for Level Selection screen.
  * 
  * This test:
- * 1. Starts the MainFragmentActivity
+ * 1. Starts the MainActivity
  * 2. Rotates device to landscape orientation
  * 3. Verifies level selection screen loads without crashing
  * 4. Verifies scroll up arrow is not present in landscape (null check)
@@ -41,8 +41,8 @@ import timber.log.Timber;
 public class LevelSelectionLandscapeTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
 

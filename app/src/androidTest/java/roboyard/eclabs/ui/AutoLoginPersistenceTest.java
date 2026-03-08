@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Random;
 
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.RoboyardApiClient;
 import timber.log.Timber;
 

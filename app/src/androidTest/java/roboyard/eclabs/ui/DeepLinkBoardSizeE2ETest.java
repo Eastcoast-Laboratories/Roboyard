@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
@@ -150,8 +150,8 @@ public class DeepLinkBoardSizeE2ETest {
             "rb11,3;\n";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private GameStateManager gameStateManager;
@@ -385,7 +385,7 @@ public class DeepLinkBoardSizeE2ETest {
             // Build the URI with the map data as a query parameter
             Uri uri = Uri.parse("roboyard://open?data=" + Uri.encode(DEEP_LINK_MAP_DATA_12x12));
             intent.setData(uri);
-            intent.setClass(activity, MainFragmentActivity.class);
+            intent.setClass(activity, MainActivity.class);
 
             // Send the intent to the activity
             activity.onNewIntent(intent);

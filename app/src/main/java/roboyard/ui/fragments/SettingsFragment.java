@@ -32,7 +32,7 @@ import roboyard.ui.components.DataExportImportManager;
 import roboyard.eclabs.R;
 import roboyard.ui.components.RoboyardApiClient;
 import roboyard.ui.RoboyardApplication;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
 import timber.log.Timber;
@@ -1684,7 +1684,7 @@ public class SettingsFragment extends Fragment {
                             
                             // Restart the activity to apply the fullscreen setting
                             requireActivity().finish();
-                            Intent intent = new Intent(requireActivity(), MainFragmentActivity.class);
+                            Intent intent = new Intent(requireActivity(), MainActivity.class);
                             startActivity(intent);
                         }
                     } catch (Exception e) {

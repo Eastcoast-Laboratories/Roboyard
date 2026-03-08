@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.achievements.AchievementManager;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
 
@@ -50,8 +50,8 @@ public class SameWallsAchievementTest {
     private static final String SHARED_WALL_SIGNATURE = "12x14;mh0,0;mh1,0;mh2,0;mh3,0;mh4,0;mh5,0;";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private AchievementManager achievementManager;

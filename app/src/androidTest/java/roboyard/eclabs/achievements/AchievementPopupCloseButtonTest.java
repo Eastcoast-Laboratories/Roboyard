@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 /**
@@ -39,7 +39,7 @@ import timber.log.Timber;
 @RunWith(AndroidJUnit4.class)
 public class AchievementPopupCloseButtonTest {
 
-    private ActivityScenario<MainFragmentActivity> scenario;
+    private ActivityScenario<MainActivity> scenario;
 
     @Before
     public void setUp() {
@@ -60,7 +60,7 @@ public class AchievementPopupCloseButtonTest {
     @Test
     public void testStreakPopupCloseButtonAppears() throws InterruptedException {
         Timber.d("[TEST] Launching MainActivity");
-        scenario = ActivityScenario.launch(MainFragmentActivity.class);
+        scenario = ActivityScenario.launch(MainActivity.class);
         
         // Wait for the streak popup to appear (it shows on app start)
         Thread.sleep(3000);
@@ -116,7 +116,7 @@ public class AchievementPopupCloseButtonTest {
     @Test
     public void testCloseButtonHidesPopup() throws InterruptedException {
         Timber.d("[TEST] Launching MainActivity for close button test");
-        scenario = ActivityScenario.launch(MainFragmentActivity.class);
+        scenario = ActivityScenario.launch(MainActivity.class);
         
         // Wait for the streak popup to appear
         Thread.sleep(3000);

@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
 import java.util.Locale;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.containsString;
 @LargeTest
 public class LiveMoveCounterGermanTest {
 
-    private androidx.test.core.app.ActivityScenario<MainFragmentActivity> scenario;
+    private androidx.test.core.app.ActivityScenario<MainActivity> scenario;
 
     @Before
     public void setUp() throws InterruptedException {
@@ -61,7 +61,7 @@ public class LiveMoveCounterGermanTest {
         
         // NOW launch the activity - it will load preferences and apply German locale
         System.out.println("Launching activity...");
-        scenario = androidx.test.core.app.ActivityScenario.launch(MainFragmentActivity.class);
+        scenario = androidx.test.core.app.ActivityScenario.launch(MainActivity.class);
         System.out.println("Activity launched");
         
         // Wait for activity to fully start

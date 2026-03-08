@@ -20,7 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
 import roboyard.ui.achievements.AchievementManager;
@@ -35,7 +35,7 @@ import timber.log.Timber;
  * End-to-End test that plays Level 1 automatically.
  * 
  * This test:
- * 1. Starts the MainFragmentActivity
+ * 1. Starts the MainActivity
  * 2. Navigates to Level 1
  * 3. Automatically executes the solution moves
  * 4. Verifies the level is completed
@@ -49,8 +49,8 @@ import timber.log.Timber;
 public class Level1E2ETest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private GameStateManager gameStateManager;

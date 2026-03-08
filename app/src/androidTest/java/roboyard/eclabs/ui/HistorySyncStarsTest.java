@@ -20,7 +20,7 @@ import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.components.GameStateManager;
@@ -40,7 +40,7 @@ public class HistorySyncStarsTest {
     private static final String TAG = "HistorySyncStarsTest";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule = new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
 
     private GameStateManager gameStateManager;
     private Activity testActivity;

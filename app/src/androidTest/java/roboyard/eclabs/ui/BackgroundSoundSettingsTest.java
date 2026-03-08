@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.SoundService;
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.Preferences;
 import timber.log.Timber;
 
@@ -42,8 +42,8 @@ import timber.log.Timber;
 public class BackgroundSoundSettingsTest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     @After
     public void tearDown() {

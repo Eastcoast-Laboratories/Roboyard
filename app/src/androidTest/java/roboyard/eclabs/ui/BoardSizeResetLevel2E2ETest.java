@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
@@ -48,8 +48,8 @@ import timber.log.Timber;
 public class BoardSizeResetLevel2E2ETest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private Context context;
     private GameStateManager gameStateManager;

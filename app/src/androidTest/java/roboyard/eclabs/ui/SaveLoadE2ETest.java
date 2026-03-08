@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 
 import static androidx.test.espresso.Espresso.onView;
@@ -51,8 +51,8 @@ import static org.junit.Assert.assertNotNull;
 public class SaveLoadE2ETest {
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     @Before
     public void setUp() throws InterruptedException {

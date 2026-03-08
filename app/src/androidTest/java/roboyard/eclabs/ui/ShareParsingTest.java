@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import roboyard.eclabs.R;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameStateManager;
 import roboyard.ui.fragments.SaveGameFragment;
@@ -45,8 +45,8 @@ public class ShareParsingTest {
     private static final String TAG = "[SHARE_PARSING]";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private GameStateManager gameStateManager;
 
@@ -54,7 +54,7 @@ public class ShareParsingTest {
     public void setUp() throws InterruptedException {
         step("setUp", "Initializing GameStateManager");
         activityRule.getScenario().onActivity(a ->
-                gameStateManager = ((MainFragmentActivity) a).getGameStateManager());
+                gameStateManager = ((MainActivity) a).getGameStateManager());
         assertNotNull("GameStateManager must not be null", gameStateManager);
         Thread.sleep(2000);
     }

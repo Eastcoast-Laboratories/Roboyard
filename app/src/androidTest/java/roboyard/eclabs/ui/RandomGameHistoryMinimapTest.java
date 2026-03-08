@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameState;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
@@ -57,8 +57,8 @@ public class RandomGameHistoryMinimapTest {
     private static final String TAG = "[RANDOM_HISTORY_MINIMAP]";
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule =
-            new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule =
+            new ActivityScenarioRule<>(MainActivity.class);
 
     private GameStateManager gameStateManager;
 
@@ -66,7 +66,7 @@ public class RandomGameHistoryMinimapTest {
     public void setUp() throws InterruptedException {
         step("setUp", "Initializing and clearing history");
         activityRule.getScenario().onActivity(a ->
-                gameStateManager = ((MainFragmentActivity) a).getGameStateManager());
+                gameStateManager = ((MainActivity) a).getGameStateManager());
         assertNotNull("GameStateManager must not be null", gameStateManager);
         clearAllHistory();
         Thread.sleep(2000);

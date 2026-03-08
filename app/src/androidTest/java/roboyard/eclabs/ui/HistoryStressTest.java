@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainFragmentActivity;
+import roboyard.ui.activities.MainActivity;
 
 /**
  * Espresso test for 60 history entries with pagination and memory monitoring.
@@ -39,7 +39,7 @@ public class HistoryStressTest {
     private static final int TOTAL_ENTRIES = ENTRIES_PER_BATCH * TOTAL_BATCHES; // 60
 
     @Rule
-    public ActivityScenarioRule<MainFragmentActivity> activityRule = new ActivityScenarioRule<>(MainFragmentActivity.class);
+    public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
 
     @Before
     public void setUp() throws InterruptedException {

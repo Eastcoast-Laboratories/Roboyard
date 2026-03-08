@@ -32,7 +32,7 @@ import roboyard.logic.core.GameElement;
  * Main activity for the game, hosts the fragment-based UI.
  * Acts as the container for all game fragments and provides access to the GameStateManager.
  */
-public class MainFragmentActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     
     private GameStateManager gameStateManager;
     private NavController navController;
@@ -88,7 +88,7 @@ public class MainFragmentActivity extends AppCompatActivity {
         });
         
         // Start background sound service if volume > 0
-        Timber.d("[SOUND_SERVICE] MainFragmentActivity.onCreate: backgroundSoundVolume = %d", 
+        Timber.d("[SOUND_SERVICE] MainActivity.onCreate: backgroundSoundVolume = %d", 
                 Preferences.backgroundSoundVolume);
         startBackgroundSoundService(Preferences.backgroundSoundVolume);
         
