@@ -135,9 +135,8 @@
                     <!-- Left text (linksbündig) -->
                     <TextView
                         android:id="@+id/progress_text_left"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:gravity="start|center_vertical"
                         android:paddingStart="8dp"
                         android:paddingEnd="4dp"
@@ -148,7 +147,8 @@
                         android:shadowDx="1"
                         android:shadowDy="1"
                         android:shadowRadius="2"
-                        android:ellipsize="none" />
+                        android:maxLines="1"
+                        android:singleLine="true" />
 
                     <!-- Right text (rechtsbündig) -->
                     <TextView
