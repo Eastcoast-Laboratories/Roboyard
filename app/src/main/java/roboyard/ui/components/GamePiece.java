@@ -23,8 +23,8 @@ public class GamePiece implements IGameObject {
     private int yGrid               = 500;
     private int xDraw               = 0;
     private int yDraw               = 0;
-    private float numSquaresX       = Constants.boardSizeX;
-    private float numSquaresY       = Constants.boardSizeY;
+    private float numSquaresX       = roboyard.ui.activities.MainActivity.boardSizeX;
+    private float numSquaresY       = roboyard.ui.activities.MainActivity.boardSizeY;
     private int radius;
     private int color               = Color.RED;
     private boolean inMovement      = false;

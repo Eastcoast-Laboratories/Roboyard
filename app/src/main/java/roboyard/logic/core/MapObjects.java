@@ -1,5 +1,6 @@
 package roboyard.logic.core;
 import roboyard.logic.core.GridElement;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GridGameView;
 
 import java.security.MessageDigest;
@@ -59,8 +60,8 @@ public class MapObjects {
                 // Update and persist board size for this game
                 Timber.d("Loading board size from save: %dx%d", boardX, boardY);
                 Preferences.setBoardSize(boardX, boardY);
-                Constants.boardSizeX = boardX;
-                Constants.boardSizeY = boardY;
+                MainActivity.boardSizeX = boardX;
+                MainActivity.boardSizeY = boardY;
             }
         }
 

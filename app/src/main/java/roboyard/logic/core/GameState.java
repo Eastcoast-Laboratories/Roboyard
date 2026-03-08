@@ -5,6 +5,7 @@ import android.util.Log;
 
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.LevelFormatParser;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 
@@ -1884,7 +1885,7 @@ public class GameState implements Serializable {
         // Log initial board size and requested size
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] createRandom called with size: " + Preferences.boardSizeX + "x" + Preferences.boardSizeY);
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Current board size before setting: " +
-                Constants.boardSizeX + "x" + Constants.boardSizeY);
+                MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
         
         // Save current board dimensions and set them for game generation
         // Ensure board dimensions are never zero to prevent ArrayIndexOutOfBoundsException
@@ -1901,9 +1902,9 @@ public class GameState implements Serializable {
             Preferences.setBoardSize(boardSizeX, boardSizeY);
         }
         
-        // Set the board size in Constants for compatibility with existing code
-        Constants.boardSizeX = boardSizeX;
-        Constants.boardSizeY = boardSizeY;
+        // Set the board size in MainActivity for compatibility with existing code
+        MainActivity.boardSizeX = boardSizeX;
+        MainActivity.boardSizeY = boardSizeY;
         
         // Log the board size being used for map generation
         Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Using board size: %dx%d", boardSizeX, boardSizeY);

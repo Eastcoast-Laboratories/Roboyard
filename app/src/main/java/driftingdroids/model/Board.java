@@ -41,10 +41,10 @@ import timber.log.Timber;
 public class Board {
 
     public static L10N L10N = new L10N();
-    public static final int WIDTH_STANDARD = Constants.boardSizeX;
+    public static final int WIDTH_STANDARD = roboyard.ui.activities.MainActivity.boardSizeX;
     public static final int WIDTH_MIN = 3;
     public static final int WIDTH_MAX = 100;
-    public static final int HEIGHT_STANDARD = Constants.boardSizeY;
+    public static final int HEIGHT_STANDARD = roboyard.ui.activities.MainActivity.boardSizeY;
     public static final int HEIGHT_MIN = 3;
     public static final int HEIGHT_MAX = 100;
     public static final int SIZE_MAX = 4096; // 12 bits

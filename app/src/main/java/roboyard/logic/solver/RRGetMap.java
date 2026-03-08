@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import roboyard.ui.activities.MainActivity;
 
 /**
  * Utility class for converting between Roboyard's game elements and DriftingDroids board format.
@@ -52,7 +53,7 @@ public class RRGetMap {
         int boardHeight = maxY + 1;
         
         // Log the actual board dimensions we're using
-        Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (Constants dimensions: " + Constants.boardSizeX + "x" + Constants.boardSizeY + "") ;
+        Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (MainActivity dimensions: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY + "") ;
 
         // Generate the ASCII map for debugging
         String asciiMap = generateAsciiMap(gridElements);

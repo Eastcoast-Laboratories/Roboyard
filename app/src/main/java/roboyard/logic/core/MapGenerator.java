@@ -1,9 +1,9 @@
 package roboyard.logic.core;
 
-
 import java.util.ArrayList;
 import java.util.Random;
 
+import roboyard.ui.activities.MainActivity;
 import timber.log.Timber;
 import roboyard.logic.core.WallStorage;
 
@@ -49,17 +49,17 @@ public class MapGenerator {
         rand = new Random();
 
         // Initialize square position based on current board size
-        carrePosX = (Constants.boardSizeX/2)-1;
-        carrePosY = (Constants.boardSizeY/2)-1;
+        carrePosX = (MainActivity.boardSizeX/2)-1;
+        carrePosY = (MainActivity.boardSizeY/2)-1;
 
         // Calculate walls per quadrant based on board width
-        wallsPerQuadrant = Constants.boardSizeX/4;  // Default: quarter of board width
+        wallsPerQuadrant = MainActivity.boardSizeX/4;  // Default: quarter of board width
 
         // Get difficulty directly from Preferences
         int level = Preferences.difficulty;
         
         // Initialize GameLogic with the same configuration
-        gameLogic = new GameLogic(Constants.boardSizeX, Constants.boardSizeY, level);
+        gameLogic = new GameLogic(MainActivity.boardSizeX, MainActivity.boardSizeY, level);
         
         // Synchronize with GameLogic's static setting
         GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
@@ -75,8 +75,8 @@ public class MapGenerator {
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
                 // TODO: does not work with the roboyard in the middle, that is not moved to the new random position
                 // random position of square in the middle
-                // carrePosX=getRandom(3,Constants.boardSizeX-5);
-                // carrePosY=getRandom(3,Constants.boardSizeY-5);
+                // carrePosX=getRandom(3,MainActivity.boardSizeX-5);
+                // carrePosY=getRandom(3,MainActivity.boardSizeY-5);
             }
             
             if(level == DIFFICULTY_INSANE){ // Insane
@@ -98,16 +98,16 @@ public class MapGenerator {
 
             maxWallsInOneVerticalCol = 5;
             maxWallsInOneHorizontalRow = 5;
-            wallsPerQuadrant = Constants.boardSizeX/3;
+            wallsPerQuadrant = MainActivity.boardSizeX/3;
         }
         if(level == DIFFICULTY_IMPOSSIBLE) {
-            wallsPerQuadrant = (int) (Constants.boardSizeX/2.3); // for debug, set to 1.3 with lots of walls
+            wallsPerQuadrant = (int) (MainActivity.boardSizeX/2.3); // for debug, set to 1.3 with lots of walls
         }
-        if (Constants.boardSizeX * Constants.boardSizeY > 64) {
+        if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
         
-        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + Constants.boardSizeX + "x" + Constants.boardSizeY);
+        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
     }
     
     /**

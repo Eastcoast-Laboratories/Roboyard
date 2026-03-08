@@ -227,10 +227,17 @@ public class LevelCompletionManager {
      * Unlock 1 star per level for all levels except level 139 (used for debug/level design editor unlock)
      */
     public void unlockAllStars() {
-        Timber.d("[LEVEL_COMPLETION] Unlocking 1 star per level (except level 139) for level design editor");
+        unlockStars(139);
+    }
+    
+    /**
+     * Unlock 1 star per level for the first N levels
+     * @param numLevels Number of levels to unlock (1 star per level)
+     */
+    public void unlockStars(int numLevels) {
+        Timber.d("[LEVEL_COMPLETION] Unlocking 1 star per level for first %d levels", numLevels);
         
-        for (int levelId = 1; levelId <= 140; levelId++) {
-            if (levelId == 139) continue; // Level 139 stays locked
+        for (int levelId = 1; levelId <= numLevels; levelId++) {
             LevelCompletionData data = getLevelCompletionData(levelId);
             data.setCompleted(true);
             data.setStars(1);
@@ -240,7 +247,7 @@ public class LevelCompletionManager {
         }
         
         saveCompletionData();
-        Timber.d("[LEVEL_COMPLETION] 1 star per level unlocked (except level 139) successfully");
+        Timber.d("[LEVEL_COMPLETION] 1 star per level unlocked for first %d levels successfully", numLevels);
     }
     
     /**

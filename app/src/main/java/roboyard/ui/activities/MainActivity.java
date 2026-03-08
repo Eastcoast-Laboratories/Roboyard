@@ -36,16 +36,20 @@ public class MainActivity extends AppCompatActivity {
     
     private GameStateManager gameStateManager;
     private NavController navController;
+    
+    // Current board size - can be changed at runtime
+    public static int boardSizeX = Constants.DEFAULT_BOARD_SIZE_X;
+    public static int boardSizeY = Constants.DEFAULT_BOARD_SIZE_Y;
 
-    // Get board dimensions from Constants
+    // Get board dimensions
     public static int getBoardWidth() {
-        int width = Constants.boardSizeX;
+        int width = boardSizeX;
         Timber.d("[BOARD_SIZE_DEBUG] getBoardWidth() called, returning: %d", width);
         return width;
     }
 
     public static int getBoardHeight() {
-        int height = Constants.boardSizeY;
+        int height = boardSizeY;
         Timber.d("[BOARD_SIZE_DEBUG] getBoardHeight() called, returning: %d", height);
         return height;
     }

@@ -377,17 +377,56 @@ public class DebugSettingsFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         
-        // Unlock All Stars button
+        // Input container for custom star count
+        LinearLayout inputContainer = new LinearLayout(requireContext());
+        inputContainer.setOrientation(LinearLayout.HORIZONTAL);
+        inputContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        inputContainer.setPadding(0, 8, 0, 8);
+        
+        // Label
+        android.widget.TextView label = new android.widget.TextView(requireContext());
+        label.setText("Stars to unlock:");
+        label.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1));
+        label.setTextColor(android.graphics.Color.BLACK);
+        inputContainer.addView(label);
+        
+        // Input field
+        android.widget.EditText starInput = new android.widget.EditText(requireContext());
+        starInput.setText("139");
+        starInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        starInput.setLayoutParams(new LinearLayout.LayoutParams(
+                100,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        starInput.setPadding(8, 8, 8, 8);
+        inputContainer.addView(starInput);
+        
+        buttonLayout.addView(inputContainer);
+        
+        // Unlock Stars button (with custom count)
         Button unlockStarsBtn = new Button(requireContext());
-        unlockStarsBtn.setText("Unlock All Stars");
+        unlockStarsBtn.setText("Unlock Stars");
         unlockStarsBtn.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         unlockStarsBtn.setOnClickListener(v -> {
-            LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
-            completionManager.unlockAllStars();
-            Toast.makeText(requireContext(), "139 stars unlocked", Toast.LENGTH_SHORT).show();
-            Timber.d("[DEBUG] Unlocked 139 stars via debug button");
+            try {
+                int numStars = Integer.parseInt(starInput.getText().toString());
+                if (numStars <= 0 || numStars > 140) {
+                    Toast.makeText(requireContext(), "Please enter a number between 1 and 140", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+                completionManager.unlockStars(numStars);
+                Toast.makeText(requireContext(), numStars + " stars unlocked", Toast.LENGTH_SHORT).show();
+                Timber.d("[DEBUG] Unlocked %d stars via debug button", numStars);
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Invalid number", Toast.LENGTH_SHORT).show();
+            }
         });
         buttonLayout.addView(unlockStarsBtn);
         
