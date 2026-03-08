@@ -702,6 +702,82 @@ public class GameState implements Serializable {
     }
     
     /**
+     * Parse metadata from save data string.
+     * Extracts map name, dimensions, move counts, time, and all items.
+     * 
+     * @param saveData The raw save data string
+     * @return Map with keys: mapName, width, height, moveCount, optimalMoveCount, timePlayed, allItems
+     */
+    public static Map<String, Object> parseMetadata(String saveData) {
+        Map<String, Object> result = new HashMap<>();
+        
+        if (saveData == null || saveData.isEmpty()) return null;
+        
+        String mapName = "Loaded Game";
+        int width = 16;
+        int height = 16;
+        int moveCount = 0;
+        int optimalMoveCount = 0;
+        long timePlayed = 0;
+        
+        String[] lines = saveData.split("\n");
+        
+        // Collect all items from metadata line and separate lines
+        List<String> allItems = new ArrayList<>();
+        if (lines.length > 0 && lines[0].startsWith("#")) {
+            String[] metadata = lines[0].substring(1).split(";");
+            for (String item : metadata) {
+                if (!item.trim().isEmpty()) {
+                    allItems.add(item.trim());
+                }
+            }
+        }
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (!line.isEmpty()) {
+                allItems.add(line);
+            }
+        }
+        
+        // Parse metadata items
+        for (String item : allItems) {
+            try {
+                if (item.startsWith("MAPNAME:")) {
+                    mapName = item.substring("MAPNAME:".length());
+                } else if (item.startsWith("MOVES:")) {
+                    moveCount = Integer.parseInt(item.substring("MOVES:".length()));
+                } else if (item.startsWith("OPTIMAL:")) {
+                    optimalMoveCount = Integer.parseInt(item.substring("OPTIMAL:".length()));
+                } else if (item.startsWith("TIME:")) {
+                    timePlayed = Long.parseLong(item.substring("TIME:".length()));
+                } else if (item.startsWith("SIZE:")) {
+                    String[] sizeParts = item.substring("SIZE:".length()).split(",");
+                    if (sizeParts.length == 2) {
+                        width = Integer.parseInt(sizeParts[0].trim());
+                        height = Integer.parseInt(sizeParts[1].trim());
+                    }
+                } else if (item.startsWith("WIDTH:")) {
+                    width = Integer.parseInt(item.substring("WIDTH:".length()).trim().replace(";", ""));
+                } else if (item.startsWith("HEIGHT:")) {
+                    height = Integer.parseInt(item.substring("HEIGHT:".length()).trim().replace(";", ""));
+                }
+            } catch (NumberFormatException e) {
+                // Ignore parse errors for individual items
+            }
+        }
+        
+        result.put("mapName", mapName);
+        result.put("width", width);
+        result.put("height", height);
+        result.put("moveCount", moveCount);
+        result.put("optimalMoveCount", optimalMoveCount);
+        result.put("timePlayed", timePlayed);
+        result.put("allItems", allItems);
+        
+        return result;
+    }
+    
+    /**
      * Parse a game state from save data
      * @param saveData The save data string
      * @param context The context
@@ -709,54 +785,33 @@ public class GameState implements Serializable {
      */
     public static GameState parseFromSaveData(String saveData, Context context) {
         try {
-            String[] lines = saveData.split("\n");
-            Timber.d("[TARGET LOADING] Parsing save data with %d lines", lines.length);
+            // Use central metadata parser (DRY)
+            Map<String, Object> metadata = parseMetadata(saveData);
+            if (metadata == null) {
+                Timber.e("[TARGET LOADING] Failed to parse save data metadata");
+                return null;
+            }
             
-            // Default values
-            int width = 8;
-            int height = 8;
-            String mapName = "Loaded Game";
-            long timePlayed = 0;
-            int moveCount = 0;
+            int width = (Integer) metadata.get("width");
+            int height = (Integer) metadata.get("height");
+            String mapName = (String) metadata.get("mapName");
+            int moveCount = (Integer) metadata.get("moveCount");
+            long timePlayed = (Long) metadata.get("timePlayed");
+            
+            Timber.d("[TARGET LOADING] Parsing save data: %dx%d, %s", width, height, mapName);
             
             boolean inRobotsSection = false;
             boolean inInitialPositionsSection = false;
             boolean boardDataStarted = false;
             boolean inTargetSection = false;
             
-            // Parse metadata from the first line if it starts with #
-            if (lines.length > 0 && lines[0].startsWith("#")) {
-                String metadataLine = lines[0];
-                String[] metadata = metadataLine.substring(1).split(";");
-                
-                for (String item : metadata) {
-                    if (item.startsWith("MAPNAME:")) {
-                        mapName = item.substring("MAPNAME:".length());
-                        Timber.d("[MAPNAME] parseFromSaveData - Parsed map name: '%s'", mapName);
-                    } else if (item.startsWith("TIME:")) {
-                        timePlayed = Long.parseLong(item.substring("TIME:".length()));
-                    } else if (item.startsWith("MOVES:")) {
-                        moveCount = Integer.parseInt(item.substring("MOVES:".length()));
-                    }
-                }
-            }
-            
-            // Look for WIDTH and HEIGHT in the file
-            for (String line : lines) {
-                if (line.startsWith("WIDTH:")) {
-                    width = Integer.parseInt(line.substring("WIDTH:".length()).trim().replace(";", ""));
-                    Timber.d("Found WIDTH: %d", width);
-                } else if (line.startsWith("HEIGHT:")) {
-                    height = Integer.parseInt(line.substring("HEIGHT:".length()).trim().replace(";", ""));
-                    Timber.d("Found HEIGHT: %d", height);
-                }
-            }
-            
             // Create the game state with the parsed dimensions
             GameState state = new GameState(width, height);
             state.setLevelName(mapName);
             state.setMoveCount(moveCount);
             state.startTime = System.currentTimeMillis() - timePlayed;
+            
+            String[] lines = saveData.split("\n");
             
             // Parse board data
             int boardLine = 0;
@@ -780,7 +835,7 @@ public class GameState implements Serializable {
                 // Parse new compact format using central parser (handles comments and line breaks)
                 java.util.List<LevelFormatParser.LevelEntry> entries = LevelFormatParser.parseEntries(saveData);
                 
-                // First pass: extract board dimensions
+                // First pass: extract board dimensions (may override metadata dimensions)
                 for (LevelFormatParser.LevelEntry entry : entries) {
                     if (entry.type.equals("board")) {
                         String cleanData = entry.data.startsWith(":") ? entry.data.substring(1) : entry.data;
@@ -1022,12 +1077,12 @@ public class GameState implements Serializable {
                     Timber.d("Started parsing board data at line %d", i);
                 }
                 
-                if (boardDataStarted && boardLine < height) {
+                if (boardDataStarted && boardLine < state.getHeight()) {
                     // Parse this line of board data
                     String[] cells = line.split(",");
                     Timber.d("[TARGET LOADING] Parsing board line %d with %d cells", boardLine, cells.length);
                     
-                    for (int x = 0; x < Math.min(width, cells.length); x++) {
+                    for (int x = 0; x < Math.min(state.getWidth(), cells.length); x++) {
                         String cellData = cells[x];
                         
                         // Don't skip empty cells, they might be important for column 0

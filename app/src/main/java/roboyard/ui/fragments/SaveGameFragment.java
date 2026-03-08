@@ -1493,55 +1493,17 @@ public class SaveGameFragment extends BaseGameFragment {
      * @return ShareParseResult with parsed data, or null on failure
      */
     public static ShareParseResult parseSaveDataForShare(String saveData) {
-        if (saveData == null || saveData.isEmpty()) return null;
+        // Use central metadata parser (DRY)
+        Map<String, Object> metadata = GameState.parseMetadata(saveData);
+        if (metadata == null) return null;
         
-        String mapName = "Shared Map";
-        int moveCount = 0;
-        int optimalMoveCount = 0;
-        int width = 16;
-        int height = 16;
-        
-        String[] lines = saveData.split("\n");
-        
-        // Collect all items from metadata line and separate lines
-        List<String> allItems = new ArrayList<>();
-        if (lines.length > 0 && lines[0].startsWith("#")) {
-            String[] metadata = lines[0].substring(1).split(";");
-            for (String item : metadata) {
-                if (!item.trim().isEmpty()) {
-                    allItems.add(item.trim());
-                }
-            }
-        }
-        for (int i = 1; i < lines.length; i++) {
-            String line = lines[i].trim();
-            if (!line.isEmpty()) {
-                allItems.add(line);
-            }
-        }
-        
-        // Pass 1: dimensions and metadata
-        for (String item : allItems) {
-            if (item.startsWith("MAPNAME:")) {
-                mapName = item.substring("MAPNAME:".length());
-            } else if (item.startsWith("MOVES:")) {
-                try { moveCount = Integer.parseInt(item.substring("MOVES:".length())); } catch (NumberFormatException ignored) {}
-            } else if (item.startsWith("OPTIMAL:")) {
-                try { optimalMoveCount = Integer.parseInt(item.substring("OPTIMAL:".length())); } catch (NumberFormatException ignored) {}
-            } else if (item.startsWith("SIZE:")) {
-                try {
-                    String[] sizeParts = item.substring("SIZE:".length()).split(",");
-                    if (sizeParts.length == 2) {
-                        width = Integer.parseInt(sizeParts[0].trim());
-                        height = Integer.parseInt(sizeParts[1].trim());
-                    }
-                } catch (NumberFormatException ignored) {}
-            } else if (item.startsWith("WIDTH:")) {
-                try { width = Integer.parseInt(item.substring("WIDTH:".length()).trim().replace(";", "")); } catch (NumberFormatException ignored) {}
-            } else if (item.startsWith("HEIGHT:")) {
-                try { height = Integer.parseInt(item.substring("HEIGHT:".length()).trim().replace(";", "")); } catch (NumberFormatException ignored) {}
-            }
-        }
+        String mapName = (String) metadata.get("mapName");
+        int width = (Integer) metadata.get("width");
+        int height = (Integer) metadata.get("height");
+        int moveCount = (Integer) metadata.get("moveCount");
+        int optimalMoveCount = (Integer) metadata.get("optimalMoveCount");
+        @SuppressWarnings("unchecked")
+        List<String> allItems = (List<String>) metadata.get("allItems");
         
         StringBuilder formattedData = new StringBuilder();
         formattedData.append("name:").append(mapName).append(";");
@@ -1554,7 +1516,7 @@ public class SaveGameFragment extends BaseGameFragment {
         Set<String> targetEntries = new HashSet<>();
         Set<String> robotEntries = new HashSet<>();
         
-        // Pass 2: board elements
+        // Parse board elements from metadata items
         for (String item : allItems) {
             try {
                 String data = item;
