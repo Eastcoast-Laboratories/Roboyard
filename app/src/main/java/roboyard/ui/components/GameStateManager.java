@@ -142,6 +142,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // UI timer tracking (survives fragment recreation)
     private long uiTimerElapsedMs = 0;
     private boolean uiTimerWasRunning = false;
+    
+    // Move cooldown to prevent multiple moves within
+    private static final long MOVE_COOLDOWN_MS = 400; // milliseconds
+    private long lastMoveTime = 0;
     private boolean isNewGameLoaded = false; // Flag to indicate if a new game was just loaded (timer should reset)
     private final MutableLiveData<Boolean> newGameLoadedEvent = new MutableLiveData<>(false); // LiveData to trigger observer when new game is loaded
     private boolean solutionWasAccepted = false; // Flag to signal Fragment that the solution was accepted
@@ -1386,6 +1390,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return True if the robot moved, false otherwise
      */
     public boolean moveRobotInDirection(int dx, int dy) {
+        // Check if move cooldown is active
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastMoveTime < MOVE_COOLDOWN_MS) {
+            Timber.d("[MOVE_COOLDOWN] Move blocked: %dms remaining", MOVE_COOLDOWN_MS - (currentTime - lastMoveTime));
+            return false;
+        }
+        
         // Cancel any running pre-computation immediately on robot move
         cancelPreComputation();
 
@@ -1753,6 +1764,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Trigger live solver after move completes (immediate mode)
                 triggerLiveSolver();
             }
+            
+            // Update the last move time to enforce cooldown
+            lastMoveTime = System.currentTimeMillis();
+            Timber.d("[MOVE_COOLDOWN] Move completed, cooldown activated for 2 seconds");
+            
             return true;
         }
 
