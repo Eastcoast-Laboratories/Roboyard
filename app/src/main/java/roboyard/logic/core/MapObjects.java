@@ -1,6 +1,5 @@
 package roboyard.logic.core;
 import roboyard.logic.core.GridElement;
-import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GridGameView;
 
 import java.security.MessageDigest;
@@ -58,9 +57,10 @@ public class MapObjects {
             // Only update board size if explicitly requested (when loading a game)
             if (applyBoardSize) {
                 // Update and persist board size for this game
-                MainActivity activity = GridGameView.gameManager.getActivity();
                 Timber.d("Loading board size from save: %dx%d", boardX, boardY);
-                activity.setAndSaveBoardSizeToPreferences(activity, boardX, boardY);
+                Preferences.setBoardSize(boardX, boardY);
+                Constants.boardSizeX = boardX;
+                Constants.boardSizeY = boardY;
             }
         }
 

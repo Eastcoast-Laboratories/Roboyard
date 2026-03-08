@@ -5,7 +5,6 @@ import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Wall;
 import roboyard.logic.core.WallModel;
 import roboyard.logic.core.WallType;
-import roboyard.ui.activities.MainActivity;
 
 import android.graphics.Color;
 
@@ -53,7 +52,7 @@ public class RRGetMap {
         int boardHeight = maxY + 1;
         
         // Log the actual board dimensions we're using
-        Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (MainActivity dimensions: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY + ")");
+        Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (Constants dimensions: " + Constants.boardSizeX + "x" + Constants.boardSizeY + "") ;
 
         // Generate the ASCII map for debugging
         String asciiMap = generateAsciiMap(gridElements);
@@ -62,7 +61,7 @@ public class RRGetMap {
         // IMPORTANT: Use boardWidth/boardHeight calculated from GridElements, not MainActivity dimensions
         // The GridElements may have coordinates up to boardWidth-1, so we need a board of that size
         // Using MainActivity dimensions caused walls at x=12 to wrap around to x=0 of the next row
-        Board board = Board.createBoardFreestyle(null, boardWidth, boardHeight, MainActivity.numRobots);
+        Board board = Board.createBoardFreestyle(null, boardWidth, boardHeight, Constants.NUM_ROBOTS);
         board.removeGoals();
         
         Timber.d("[SOLUTION_SOLVER] Board created with width=%d, height=%d", board.width, board.height);

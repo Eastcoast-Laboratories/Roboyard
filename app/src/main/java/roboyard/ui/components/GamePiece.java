@@ -1,6 +1,5 @@
 package roboyard.ui.components;
 import roboyard.logic.core.Preferences;
-import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.IGameObject;
 import roboyard.ui.components.GameManager;
 import roboyard.eclabs.R;
@@ -24,8 +23,8 @@ public class GamePiece implements IGameObject {
     private int yGrid               = 500;
     private int xDraw               = 0;
     private int yDraw               = 0;
-    private float numSquaresX       = MainActivity.getBoardWidth();
-    private float numSquaresY       = MainActivity.getBoardHeight();
+    private float numSquaresX       = Constants.boardSizeX;
+    private float numSquaresY       = Constants.boardSizeY;
     private int radius;
     private int color               = Color.RED;
     private boolean inMovement      = false;
@@ -364,9 +363,9 @@ public class GamePiece implements IGameObject {
      */
     private void playRobotSound(GameManager gameManager, String wichSound) {
         try {
-            // Get the activity from the game manager
-            MainActivity activity = gameManager.getActivity();
-            if (activity != null) {
+            // Get the context from Preferences
+            android.content.Context context = Preferences.getContext();
+            if (context != null) {
                 // Check if sound is enabled in preferences
                 if (Preferences.soundEnabled) {
                     // If a sound is already playing, don't play another one
@@ -391,16 +390,16 @@ public class GamePiece implements IGameObject {
                     // Create and play the robot sound
                     MediaPlayer mp = null;
                     if(wichSound.equals("move")) {
-                        mp = MediaPlayer.create(activity, R.raw.robot_move);
+                        mp = MediaPlayer.create(context, R.raw.robot_move);
                     } else if (wichSound.equals("hit_wall")) {
-                        mp = MediaPlayer.create(activity, R.raw.robot_hit_wall);
+                        mp = MediaPlayer.create(context, R.raw.robot_hit_wall);
                     } else if (wichSound.equals("hit_robot")) {
-                        mp = MediaPlayer.create(activity, R.raw.robot_hit_robot);
+                        mp = MediaPlayer.create(context, R.raw.robot_hit_robot);
                     } else if (wichSound.equals("win")) {
-                        mp = MediaPlayer.create(activity, R.raw.robot_win);
+                        mp = MediaPlayer.create(context, R.raw.robot_win);
                     } else if (wichSound.equals("lose")) {
                         // TODO: add sound
-                        // mp = MediaPlayer.create(activity, R.raw.robot_lose);
+                        // mp = MediaPlayer.create(context, R.raw.robot_lose);
                     } else if (wichSound.equals("none")) {
                         Timber.d("No sound to play");
                         return;

@@ -1,7 +1,6 @@
 package roboyard.ui.components;
 import roboyard.logic.core.Constants;
 import roboyard.ui.components.RenderManager;
-import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameScreen;
 
 import android.util.SparseArray;
@@ -20,19 +19,6 @@ public class GameManager {
     private final RenderManager renderManager;
     private final int sWidth;
     private final int sHeight;
-    private final MainActivity activity;
-
-    /**
-     * Returns the main activity instance associated with the game manager.
-     * It allows other classes and components to interact with the main activity,
-     * which is necessary for performing various tasks and accessing resources.
-     *
-     * @return The main activity instance.
-     */
-    public MainActivity getActivity() {
-        return this.activity;
-    }
-
     /**
      * Constructor for the GameManager class.
      * Initializes the GameManager with necessary components.
@@ -41,15 +27,13 @@ public class GameManager {
      * @param renderManager Reference to the render manager (RenderManager).
      * @param sWidth        Width of the screen.
      * @param sHeight       Height of the screen.
-     * @param activity      The main activity instance.
      */
-    public GameManager(InputManager inputManager, RenderManager renderManager, int sWidth, int sHeight, MainActivity activity) {
+    public GameManager(InputManager inputManager, RenderManager renderManager, int sWidth, int sHeight) {
         this.inputManager = inputManager;
         this.renderManager = renderManager;
         this.sWidth = sWidth;
         this.sHeight = sHeight;
         this.screens = new SparseArray<>();
-        this.activity = activity;
 
         this.currentScreen = this.screens.get(Constants.SCREEN_START);
         this.previousScreen = this.screens.get(Constants.SCREEN_START);

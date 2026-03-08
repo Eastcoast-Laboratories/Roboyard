@@ -76,6 +76,14 @@ public class Constants {
     public static final int NUM_ROBOTS = 4; // number of robots
     public static final int MAX_NUM_ROBOTS = 5; // maximal allowed num robots
     
+    // Default board sizes
+    public static final int DEFAULT_BOARD_SIZE_X = 12;
+    public static final int DEFAULT_BOARD_SIZE_Y = 14;
+    
+    // Current board size - can be changed at runtime
+    public static int boardSizeX = DEFAULT_BOARD_SIZE_X;
+    public static int boardSizeY = DEFAULT_BOARD_SIZE_Y;
+    
     // Debug settings
     public static final long DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS = 3000; // milliseconds to open debug screen
 

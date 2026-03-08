@@ -73,7 +73,8 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 2.  einen Memory-Gate der wartet bis genug Speicher frei ist, bevor der Solver initialisiert wird.
 
 
-- mainactivity kann weg
+-  achievements: die schrift muss bolder sein, die überschriften brauchen die selbe weise shadow wie die beschreibungen. alle schriften in den a hievements bolder
+
 
 - wenn man eine  externe map lädt, dann startet der solver nicht richtig, er findet keine lösung und es bleibt "ai calaculating..." stehen
 - 

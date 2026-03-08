@@ -37,16 +37,16 @@ public class MainFragmentActivity extends AppCompatActivity {
     private GameStateManager gameStateManager;
     private NavController navController;
 
-    // Forward to the regular MainActivity's static methods
+    // Get board dimensions from Constants
     public static int getBoardWidth() {
-        int width = roboyard.ui.activities.MainActivity.getBoardWidth();
-        Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity.getBoardWidth() called, returning: %d", width);
+        int width = Constants.boardSizeX;
+        Timber.d("[BOARD_SIZE_DEBUG] getBoardWidth() called, returning: %d", width);
         return width;
     }
 
     public static int getBoardHeight() {
-        int height = roboyard.ui.activities.MainActivity.getBoardHeight();
-        Timber.d("[BOARD_SIZE_DEBUG] UI MainActivity.getBoardHeight() called, returning: %d", height);
+        int height = Constants.boardSizeY;
+        Timber.d("[BOARD_SIZE_DEBUG] getBoardHeight() called, returning: %d", height);
         return height;
     }
 
