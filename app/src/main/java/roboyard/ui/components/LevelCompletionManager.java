@@ -73,23 +73,33 @@ public class LevelCompletionManager {
             boolean starsImproved = data.getStars() > existingData.getStars();
             boolean starsAtLeastSame = data.getStars() >= existingData.getStars();
 
+            // Always update hints shown (relevant for achievement tracking)
+            existingData.setHintsShown(data.getHintsShown());
+            // Only update optimal moves if new value is valid (> 0), to avoid overwriting with 0
+            if (data.getOptimalMoves() > 0) {
+                existingData.setOptimalMoves(data.getOptimalMoves());
+            }
+
             if (starsImproved) {
                 Timber.d("[LEVEL_COMPLETION] Stars improved from %d to %d - updating stars and related metrics",
                         existingData.getStars(), data.getStars());
 
                 // If stars have improved, update stars and related metrics
                 existingData.setStars(data.getStars());
-                existingData.setOptimalMoves(data.getOptimalMoves());
+                existingData.setMovesNeeded(data.getMovesNeeded());
+                existingData.setTimeNeeded(data.getTimeNeeded());
+                existingData.setRobotsUsed(data.getRobotsUsed());
+                existingData.setSquaresSurpassed(data.getSquaresSurpassed());
             } else {
                 Timber.d("[LEVEL_COMPLETION] Stars not improved (%d vs %d) - not updating stars",
                         data.getStars(), existingData.getStars());
             }
 
-            // Only update hintsShown and robotsUsed if stars are at least the same
+            // Only update robotsUsed if stars are at least the same
             if (data.isCompleted() && starsAtLeastSame) {
                 existingData.setCompleted(true);
-                existingData.setHintsShown(data.getHintsShown());
                 existingData.setRobotsUsed(data.getRobotsUsed());
+                // TODO: robots used is nowhere displayed, maybe an achievement later
             }
 
             // Always update moves if it's lower (better) than existing value

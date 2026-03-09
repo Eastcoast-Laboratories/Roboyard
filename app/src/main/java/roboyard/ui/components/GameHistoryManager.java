@@ -130,11 +130,15 @@ public class GameHistoryManager {
             
             // Add new entry if not updated
             if (!updated) {
-                // If game was completed (movesMade > 0), record the completion on the new entry
-                if (entry.getMovesMade() > 0) {
+                // If game was completed (movesMade > 0) AND completionCount is still 0 (not pre-set from server restore),
+                // record the completion on the new entry
+                if (entry.getMovesMade() > 0 && entry.getCompletionCount() == 0) {
                     entry.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
                     Timber.d("[HISTORY_FLOW] addHistoryEntry(new): recordCompletion called on new entry, movesMade=%d, countAfter=%d",
                             entry.getMovesMade(), entry.getCompletionCount());
+                } else if (entry.getCompletionCount() > 0) {
+                    Timber.d("[HISTORY_FLOW] addHistoryEntry(new): completionCount already set to %d (server restore), skipping recordCompletion",
+                            entry.getCompletionCount());
                 } else {
                     Timber.d("[HISTORY_FLOW] addHistoryEntry(new): movesMade=0, new entry added with completionCount=0");
                 }
@@ -234,9 +238,7 @@ public class GameHistoryManager {
                     // Load hint tracking fields
                     entry.setMaxHintUsed(entryJson.optInt("maxHintUsed", -1));
                     entry.setSolvedWithoutHints(entryJson.optBoolean("solvedWithoutHints", false));
-                    // everUsedHints: fallback to maxHintUsed>=0 for legacy entries
-                    boolean legacyEverUsedHints = entry.getMaxHintUsed() >= 0;
-                    entry.setEverUsedHints(entryJson.optBoolean("everUsedHints", legacyEverUsedHints));
+                    entry.setEverUsedHints(entryJson.optBoolean("everUsedHints", false));
                     // Load no-hints timestamp fields (0 = never solved without hints)
                     entry.setLastSolvedWithoutHints(entryJson.optLong("lastSolvedWithoutHints", 0));
                     entry.setLastPerfectlySolvedWithoutHints(entryJson.optLong("lastPerfectlySolvedWithoutHints", 0));
