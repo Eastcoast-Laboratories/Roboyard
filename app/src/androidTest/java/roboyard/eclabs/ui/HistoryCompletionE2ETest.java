@@ -329,6 +329,52 @@ public class HistoryCompletionE2ETest {
         step("PASS", "testBestMovesAndHintsTrackedCorrectly PASSED");
     }
 
+    /**
+     * Starts a random game, makes moves with all 4 robots, saves to slot 1, and verifies
+     * that the save-slot info popup resolves the existing history entry for the same map.
+     */
+    @Test
+    public void testSaveSlotInfoPopupFindsHistoryForPlayedMap() throws InterruptedException {
+        step("SAVE1", "Starting random game via shared TestHelper");
+        TestHelper.startRandomGame();
+        Thread.sleep(3000);
+
+        step("SAVE2", "Waiting for AI solution");
+        GameSolution solution = waitForSolution(20);
+        assertNotNull(TAG + " Solution must be available", solution);
+
+        step("SAVE3", "Making moves with all 4 robots to trigger early history save");
+        int movedRobots = moveAllRobotsOnce();
+        assertEquals("All 4 robots should be moved at least once", 4, movedRobots);
+        Thread.sleep(2000);
+
+        List<GameHistoryEntry> entriesAfterMoves = getHistoryEntries();
+        assertNotNull("History entries must not be null after moves", entriesAfterMoves);
+        assertFalse("History should contain an entry after first moves", entriesAfterMoves.isEmpty());
+
+        step("SAVE4", "Saving game to slot 1 programmatically");
+        activityRule.getScenario().onActivity(a -> {
+            boolean saved = gameStateManager.saveGame(1);
+            Timber.d(TAG + " saveGame(1)=%b", saved);
+        });
+        Thread.sleep(1500);
+
+        step("SAVE5", "Navigating to Save/Load screen");
+        TestHelper.navigateToSaveLoadScreen(activityRule);
+        Thread.sleep(2000);
+
+        step("SAVE6", "Opening save-slot info popup for slot 1");
+        onView(withId(R.id.save_slot_recycler_view))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(1,
+                        new ClickChildViewWithId(R.id.info_button)));
+        Thread.sleep(1000);
+
+        step("SAVE7", "Verifying popup uses history details instead of fallback message");
+        onView(withText(containsString("Completions:"))).check(matches(isDisplayed()));
+        onView(withText(containsString("Map:"))).check(matches(isDisplayed()));
+        step("SAVE7", "PASS: Save-slot info popup found matching history entry");
+    }
+
     // ==================== HELPERS ====================
 
     private void step(String step, String msg) {
@@ -478,6 +524,48 @@ public class HistoryCompletionE2ETest {
         int endMoveCount = gameStateManager.getMoveCount().getValue() != null
                 ? gameStateManager.getMoveCount().getValue() : 0;
         return endMoveCount - startMoveCount; // return only the extra moves delta
+    }
+
+    private int moveAllRobotsOnce() throws InterruptedException {
+        java.util.Set<Integer> movedColors = new java.util.HashSet<>();
+        int[][] directions = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+
+        for (int color = 0; color < 4; color++) {
+            boolean moved = false;
+            for (int[] dir : directions) {
+                AtomicReference<Integer> before = new AtomicReference<>(0);
+                activityRule.getScenario().onActivity(a -> {
+                    Integer moveCount = gameStateManager.getMoveCount().getValue();
+                    before.set(moveCount != null ? moveCount : 0);
+                    GameState state = gameStateManager.getCurrentState().getValue();
+                    if (state == null) {
+                        return;
+                    }
+                    for (GameElement el : state.getGameElements()) {
+                        if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == color) {
+                            state.setSelectedRobot(el);
+                            break;
+                        }
+                    }
+                    gameStateManager.moveRobotInDirection(dir[0], dir[1]);
+                });
+                Thread.sleep(700);
+
+                Integer after = gameStateManager.getMoveCount().getValue();
+                int afterValue = after != null ? after : 0;
+                if (afterValue > before.get()) {
+                    movedColors.add(color);
+                    moved = true;
+                    step("MOVE4", "Robot " + color + " moved once");
+                    break;
+                }
+            }
+            if (!moved) {
+                step("MOVE4", "Robot " + color + " could not move in any direction");
+            }
+        }
+
+        return movedColors.size();
     }
 
     private List<GameHistoryEntry> getHistoryEntries() {

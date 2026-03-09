@@ -722,6 +722,7 @@
     <string name="history_detail_up_to_hint">Bis Hinweis #%1$d angesehen</string>
     <string name="history_detail_hints_ever_used">Hinweise jemals benutzt (alle Versuche):</string>
     <string name="history_detail_qualifies_no_hints">Qualifiziert für Keine-Hinweise-Achievement:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifiziert für Perfekt-ohne-Hinweise-Achievement:</string>
     <string name="history_detail_last_solved_no_hints">Zuletzt ohne Hinweise gelöst:</string>
     <string name="history_detail_last_perfect_no_hints">Zuletzt perfekt ohne Hinweise gelöst:</string>
     <string name="history_detail_board">Brett:</string>

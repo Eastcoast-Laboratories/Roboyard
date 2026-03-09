@@ -493,6 +493,7 @@
     <string name="history_detail_up_to_hint">Hasta pista #%1$d vista</string>
     <string name="history_detail_hints_ever_used">Pistas usadas alguna vez (todos los intentos):</string>
     <string name="history_detail_qualifies_no_hints">Califica para logro sin pistas:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Califica para logro perfecto sin pistas:</string>
     <string name="history_detail_last_solved_no_hints">Última vez resuelto sin pistas:</string>
     <string name="history_detail_last_perfect_no_hints">Última vez resuelto perfectamente sin pistas:</string>
     <string name="history_detail_board">Tablero:</string>

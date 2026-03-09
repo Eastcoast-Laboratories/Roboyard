@@ -326,6 +326,7 @@
     <string name="history_detail_up_to_hint">힌트 #%1$d까지 확인됨</string>
     <string name="history_detail_hints_ever_used">힌트 사용 여부 (모든 시도):</string>
     <string name="history_detail_qualifies_no_hints">힌트 없음 업적 자격:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">완벽한 힌트 없음 업적 자격:</string>
     <string name="history_detail_last_solved_no_hints">마지막 힌트 없이 해결:</string>
     <string name="history_detail_last_perfect_no_hints">마지막 완벽하게 힌트 없이 해결:</string>
     <string name="history_detail_board">보드:</string>

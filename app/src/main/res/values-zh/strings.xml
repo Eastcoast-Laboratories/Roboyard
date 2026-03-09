@@ -450,6 +450,7 @@
     <string name="history_detail_up_to_hint">已查看到提示 #%1$d</string>
     <string name="history_detail_hints_ever_used">曾使用提示（所有尝试）：</string>
     <string name="history_detail_qualifies_no_hints">符合无提示成就：</string>
+    <string name="history_detail_qualifies_no_hints_perfect">符合完美无提示成就：</string>
     <string name="history_detail_last_solved_no_hints">上次无提示解决：</string>
     <string name="history_detail_last_perfect_no_hints">上次完美无提示解决：</string>
     <string name="history_detail_board">棋盘：</string>

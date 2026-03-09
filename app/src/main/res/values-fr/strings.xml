@@ -366,6 +366,7 @@
     <string name="history_detail_up_to_hint">Jusqu\'à l\'indice #%1$d vu</string>
     <string name="history_detail_hints_ever_used">Indices déjà utilisés (toutes les tentatives):</string>
     <string name="history_detail_qualifies_no_hints">Qualifié pour le succès sans indices:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifié pour le succès parfait sans indices:</string>
     <string name="history_detail_last_solved_no_hints">Dernière résolution sans indices:</string>
     <string name="history_detail_last_perfect_no_hints">Dernière résolution parfaite sans indices:</string>
     <string name="history_detail_board">Plateau:</string>

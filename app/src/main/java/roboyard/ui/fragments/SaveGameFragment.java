@@ -2169,24 +2169,7 @@ public class SaveGameFragment extends BaseGameFragment {
             if (histEntry != null) {
                 Timber.d("[SAVE_GAME] Found history entry for MAP_SIG");
                 sb.append("\n--- History for this map ---\n");
-                sb.append("Total completions: ").append(histEntry.getCompletionCount()).append("\n");
-                if (histEntry.getBestTime() > 0) {
-                    int bt = histEntry.getBestTime();
-                    sb.append("Best time: ").append(bt / 60).append("m ").append(bt % 60).append("s\n");
-                }
-                if (histEntry.getBestMoves() > 0) {
-                    sb.append("Best moves: ").append(histEntry.getBestMoves()).append("\n");
-                }
-                if (histEntry.getOptimalMoves() > 0) {
-                    sb.append("Optimal moves: ").append(histEntry.getOptimalMoves()).append("\n");
-                }
-                sb.append("No-hints achievement: ")
-                  .append(histEntry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
-                sb.append("Perfect no-hints achievement: ")
-                  .append(histEntry.qualifiesForPerfectNoHintsAchievement() ? "Yes" : "No").append("\n");
-                long lastPerfect = histEntry.getLastPerfectlySolvedWithoutHints();
-                sb.append("Last perfect no-hints: ")
-                  .append(lastPerfect > 0 ? sdf.format(new Date(lastPerfect)) : "—").append("\n");
+                sb.append(buildMapInfoPopupMessage(histEntry));
             } else {
                 Timber.d("[SAVE_GAME] MAP_SIG found but no history entry exists");
                 sb.append("\n--- History for this map ---\n");

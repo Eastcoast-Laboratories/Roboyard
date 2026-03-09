@@ -163,6 +163,27 @@ public abstract class BaseGameFragment extends Fragment {
      */
     protected void showMapInfoPopup(GameHistoryEntry entry) {
         if (entry == null || getContext() == null) return;
+        StringBuilder sb = new StringBuilder(buildMapInfoPopupMessage(entry));
+        
+        // Create dialog with smaller text size
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(entry.getMapName())
+            .setMessage(sb.toString())
+            .setPositiveButton(android.R.string.ok, null)
+            .create();
+        dialog.show();
+        
+        // Set smaller text size for message
+        android.widget.TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12);
+        }
+    }
+
+    protected String buildMapInfoPopupMessage(GameHistoryEntry entry) {
+        if (entry == null || getContext() == null) {
+            return "";
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
         StringBuilder sb = new StringBuilder();
         sb.append(getString(R.string.history_detail_completions)).append(" ").append(entry.getCompletionCount()).append("\n");
@@ -216,20 +237,7 @@ public abstract class BaseGameFragment extends Fragment {
             sb.append("\n").append(getString(R.string.history_detail_board)).append(" ").append(entry.getBoardSize()).append("\n");
         }
         sb.append(getString(R.string.history_detail_map)).append(" ").append(entry.getMapName()).append("\n");
-        
-        // Create dialog with smaller text size
-        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle(entry.getMapName())
-            .setMessage(sb.toString())
-            .setPositiveButton(android.R.string.ok, null)
-            .create();
-        dialog.show();
-        
-        // Set smaller text size for message
-        android.widget.TextView messageView = dialog.findViewById(android.R.id.message);
-        if (messageView != null) {
-            messageView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12);
-        }
+        return sb.toString();
     }
     
     /**
