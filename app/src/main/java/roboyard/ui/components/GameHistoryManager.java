@@ -13,6 +13,7 @@ import java.util.List;
 
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
+import roboyard.logic.core.GameState;
 import timber.log.Timber;
 
 /**
@@ -243,7 +244,25 @@ public class GameHistoryManager {
                     entry.setLastSolvedWithoutHints(entryJson.optLong("lastSolvedWithoutHints", 0));
                     entry.setLastPerfectlySolvedWithoutHints(entryJson.optLong("lastPerfectlySolvedWithoutHints", 0));
                     
+                    // MIGRATION: If mapSignature is missing, compute it from the saved game file
+                    if (entry.getMapSignature() == null || entry.getMapSignature().isEmpty()) {
+                        computeAndSetMapSignature(activity, entry);
+                    }
+                    
                     entries.add(entry);
+                }
+                
+                // Save index if any entries were migrated (to persist the computed signatures)
+                boolean anyMigrated = false;
+                for (GameHistoryEntry e : entries) {
+                    if (e.getMapSignature() != null && !e.getMapSignature().isEmpty()) {
+                        anyMigrated = true;
+                        break;
+                    }
+                }
+                if (anyMigrated) {
+                    saveHistoryIndex(activity, entries);
+                    Timber.d("[HISTORY_MIGRATION] Saved migrated signatures to index");
                 }
             }
         } catch (Exception e) {
@@ -252,6 +271,54 @@ public class GameHistoryManager {
         return entries;
     }
 
+    /**
+     * Compute and set mapSignature for a history entry by loading its saved game file.
+     * This is used for migration of old entries that don't have mapSignature stored.
+     * @param activity The activity context
+     * @param entry The history entry to update
+     */
+    private static void computeAndSetMapSignature(Activity activity, GameHistoryEntry entry) {
+        try {
+            // Read the save data from the history file
+            File historyFile = new File(entry.getMapPath());
+            if (!historyFile.isAbsolute()) {
+                historyFile = activity.getFileStreamPath(entry.getMapPath());
+            }
+            if (!historyFile.exists()) {
+                Timber.w("[HISTORY_MIGRATION] Cannot compute mapSignature: file not found: %s", entry.getMapPath());
+                return;
+            }
+            
+            StringBuilder saveData = new StringBuilder();
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(historyFile);
+                 java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(fis))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    saveData.append(line).append("\n");
+                }
+            }
+            
+            // Parse the save data to get the GameState
+            GameState state = GameState.parseFromSaveData(saveData.toString(), activity.getApplication());
+            if (state != null) {
+                // Compute signatures from the loaded state
+                String wallSig = state.generateWallSignature();
+                String posSig = state.generatePositionSignature();
+                String mapSig = state.generateMapSignature();
+                
+                entry.setWallSignature(wallSig);
+                entry.setPositionSignature(posSig);
+                entry.setMapSignature(mapSig);
+                
+                Timber.d("[HISTORY_MIGRATION] Computed mapSignature for '%s': %s", entry.getMapName(), mapSig);
+            } else {
+                Timber.w("[HISTORY_MIGRATION] Failed to parse GameState for: %s", entry.getMapPath());
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[HISTORY_MIGRATION] Error computing mapSignature for: %s", entry.getMapPath());
+        }
+    }
+    
     /**
      * Delete a history entry
      */
