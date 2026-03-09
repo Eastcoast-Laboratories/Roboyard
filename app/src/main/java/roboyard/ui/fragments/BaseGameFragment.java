@@ -204,6 +204,8 @@ public abstract class BaseGameFragment extends Fragment {
           .append(entry.isEverUsedHints() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
         sb.append(getString(R.string.history_detail_qualifies_no_hints)).append(" ")
           .append(entry.qualifiesForNoHintsAchievement() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
+        sb.append(getString(R.string.history_detail_qualifies_no_hints_perfect)).append(" ")
+          .append(entry.qualifiesForPerfectNoHintsAchievement() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
         long lastNoHints = entry.getLastSolvedWithoutHints();
         sb.append(getString(R.string.history_detail_last_solved_no_hints)).append(" ")
           .append(lastNoHints > 0 ? sdf.format(new Date(lastNoHints)) : "\u2014").append("\n");

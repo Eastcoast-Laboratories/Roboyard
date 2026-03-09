@@ -170,6 +170,8 @@ public class HistorySyncE2ETest {
         int uploadedBestMoves = uploadedEntry.getBestMoves();
         int uploadedCompletionCount = uploadedEntry.getCompletionCount();
         int uploadedTimestampsSize = uploadedEntry.getCompletionTimestamps() != null ? uploadedEntry.getCompletionTimestamps().size() : 0;
+        long uploadedLastSolvedWithoutHints = uploadedEntry.getLastSolvedWithoutHints();
+        long uploadedLastPerfectlySolvedWithoutHints = uploadedEntry.getLastPerfectlySolvedWithoutHints();
         step("3/8", "Local entry: mapName=" + uploadedMapName +
                 ", optimalMoves=" + uploadedOptimalMoves +
                 ", maxHintUsed=" + uploadedMaxHintUsed +
@@ -177,6 +179,8 @@ public class HistorySyncE2ETest {
                 ", bestTime=" + uploadedBestTime +
                 ", bestMoves=" + uploadedBestMoves +
                 ", completionCount=" + uploadedCompletionCount +
+                ", lastSolvedNoHints=" + uploadedLastSolvedWithoutHints +
+                ", lastPerfectNoHints=" + uploadedLastPerfectlySolvedWithoutHints +
                 ", timestamps=" + uploadedTimestampsSize);
         assertTrue("CompletionCount must be >= 1 after game", uploadedCompletionCount >= 1);
         assertTrue("BestMoves must be > 0 after game", uploadedBestMoves > 0);
@@ -322,6 +326,8 @@ public class HistorySyncE2ETest {
                 ", completionCount=" + restoredEntry.getCompletionCount() +
                 ", timestamps=" + (restoredEntry.getCompletionTimestamps() != null ? restoredEntry.getCompletionTimestamps().size() : 0) +
                 ", starsEarned=" + restoredEntry.getStarsEarned() +
+                ", lastSolvedNoHints=" + restoredEntry.getLastSolvedWithoutHints() +
+                ", lastPerfectNoHints=" + restoredEntry.getLastPerfectlySolvedWithoutHints() +
                 ", movesMade=" + restoredEntry.getMovesMade());
 
         // Verify key fields were restored
@@ -342,6 +348,10 @@ public class HistorySyncE2ETest {
         int restoredTimestampsSize = restoredEntry.getCompletionTimestamps() != null ? restoredEntry.getCompletionTimestamps().size() : 0;
         assertEquals("CompletionTimestamps count must be restored",
                 uploadedTimestampsSize, restoredTimestampsSize);
+        assertEquals("LastSolvedWithoutHints must be restored",
+                uploadedLastSolvedWithoutHints, restoredEntry.getLastSolvedWithoutHints());
+        assertEquals("LastPerfectlySolvedWithoutHints must be restored",
+                uploadedLastPerfectlySolvedWithoutHints, restoredEntry.getLastPerfectlySolvedWithoutHints());
 
         // Verify timestamps are not in the future (timezone bug check)
         long now = System.currentTimeMillis();

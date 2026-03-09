@@ -315,6 +315,7 @@
     <string name="history_detail_qualifies_no_hints">Qualifies for no-hints achievement:</string>
     <string name="history_detail_last_solved_no_hints">Last solved without hints:</string>
     <string name="history_detail_last_perfect_no_hints">Last perfectly solved without hints:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifies for perfect-no-hints achievement:</string>
     <string name="history_detail_board">Board:</string>
     <string name="history_detail_map">Map:</string>
     <string name="history_detail_yes">Yes</string>

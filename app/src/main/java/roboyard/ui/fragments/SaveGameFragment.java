@@ -2164,8 +2164,10 @@ public class SaveGameFragment extends BaseGameFragment {
         
         // Look up full history entry if map signature available
         if (mapSig != null && !mapSig.isEmpty()) {
+            Timber.d("[SAVE_GAME] Found MAP_SIG: %s", mapSig);
             GameHistoryEntry histEntry = GameHistoryManager.findByMapSignature(requireActivity(), mapSig);
             if (histEntry != null) {
+                Timber.d("[SAVE_GAME] Found history entry for MAP_SIG");
                 sb.append("\n--- History for this map ---\n");
                 sb.append("Total completions: ").append(histEntry.getCompletionCount()).append("\n");
                 if (histEntry.getBestTime() > 0) {
@@ -2180,9 +2182,22 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
                 sb.append("No-hints achievement: ")
                   .append(histEntry.qualifiesForNoHintsAchievement() ? "Yes" : "No").append("\n");
+                sb.append("Perfect no-hints achievement: ")
+                  .append(histEntry.qualifiesForPerfectNoHintsAchievement() ? "Yes" : "No").append("\n");
+                long lastPerfect = histEntry.getLastPerfectlySolvedWithoutHints();
+                sb.append("Last perfect no-hints: ")
+                  .append(lastPerfect > 0 ? sdf.format(new Date(lastPerfect)) : "—").append("\n");
+            } else {
+                Timber.d("[SAVE_GAME] MAP_SIG found but no history entry exists");
+                sb.append("\n--- History for this map ---\n");
+                sb.append("No history entry found (map not played yet)\n");
             }
+        } else {
+            Timber.d("[SAVE_GAME] No MAP_SIG in save header (old save format)");
+            sb.append("\n--- History for this map ---\n");
+            sb.append("No history available (old save format)\n");
         }
-        
+        Timber.d("[SAVE_GAME] Save details: %s", sb.toString());
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle(slot.getName())
             .setMessage(sb.toString())
