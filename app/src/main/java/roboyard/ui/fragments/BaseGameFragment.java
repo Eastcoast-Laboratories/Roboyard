@@ -233,10 +233,7 @@ public abstract class BaseGameFragment extends Fragment {
         long lastPerfect = entry.getLastPerfectlySolvedWithoutHints();
         sb.append(getString(R.string.history_detail_last_perfect_no_hints)).append(" ")
           .append(lastPerfect > 0 ? sdf.format(new Date(lastPerfect)) : "\u2014").append("\n");
-        if (entry.getBoardSize() != null && !entry.getBoardSize().isEmpty()) {
-            sb.append("\n").append(getString(R.string.history_detail_board)).append(" ").append(entry.getBoardSize()).append("\n");
-        }
-        sb.append(getString(R.string.history_detail_map)).append(" ").append(entry.getMapName()).append("\n");
+        
         return sb.toString();
     }
     

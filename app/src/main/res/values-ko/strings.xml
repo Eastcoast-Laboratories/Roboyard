@@ -334,6 +334,18 @@
     <string name="history_detail_yes">예</string>
     <string name="history_detail_no">아니오</string>
     
+    <!-- Save Slot Info Popup -->
+    <string name="save_slot_saved">저장됨:</string>
+    <string name="save_slot_status">상태:</string>
+    <string name="save_slot_solved">해결됨</string>
+    <string name="save_slot_in_progress">진행 중</string>
+    <string name="save_slot_moves_at_save">저장 시 이동 수:</string>
+    <string name="save_slot_difficulty">난이도:</string>
+    <string name="save_slot_hint_usage_at_save">저장 시 힌트 사용:</string>
+    <string name="save_slot_history_header">--- 이 맵의 기록 ---</string>
+    <string name="save_slot_no_history_entry">기록을 찾을 수 없음 (아직 플레이하지 않은 맵)</string>
+    <string name="save_slot_no_history_old_format">기록 없음 (이전 저장 형식)</string>
+
     <!-- SaveGameFragment Sort/Filter Options -->
     <string name="sort_by_date">날짜순</string>
     <string name="sort_last_solved">마지막 해결</string>

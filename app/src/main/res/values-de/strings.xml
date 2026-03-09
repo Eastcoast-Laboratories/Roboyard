@@ -722,7 +722,7 @@
     <string name="history_detail_up_to_hint">Bis Hinweis #%1$d angesehen</string>
     <string name="history_detail_hints_ever_used">Hinweise jemals benutzt (alle Versuche):</string>
     <string name="history_detail_qualifies_no_hints">Qualifiziert für Keine-Hinweise-Achievement:</string>
-    <string name="history_detail_qualifies_no_hints_perfect">Qualifiziert für Perfekt-ohne-Hinweise-Achievement:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifiziert für Perfekt-\u200Bohne-\u200BHinweise-\u200BAchievement:</string>
     <string name="history_detail_last_solved_no_hints">Zuletzt ohne Hinweise gelöst:</string>
     <string name="history_detail_last_perfect_no_hints">Zuletzt perfekt ohne Hinweise gelöst:</string>
     <string name="history_detail_board">Brett:</string>
@@ -730,6 +730,18 @@
     <string name="history_detail_yes">Ja</string>
     <string name="history_detail_no">Nein</string>
     
+    <!-- Save Slot Info Popup -->
+    <string name="save_slot_saved">Gespeichert:</string>
+    <string name="save_slot_status">Status:</string>
+    <string name="save_slot_solved">Gelöst</string>
+    <string name="save_slot_in_progress">nicht gelöst</string>
+    <string name="save_slot_moves_at_save">Züge beim Speichern:</string>
+    <string name="save_slot_difficulty">Schwierigkeit:</string>
+    <string name="save_slot_hint_usage_at_save">Hinweis-Nutzung beim Speichern:</string>
+    <string name="save_slot_history_header">--- History für diese Karte ---</string>
+    <string name="save_slot_no_history_entry">Kein History-Eintrag gefunden (Karte noch nicht gespielt)</string>
+    <string name="save_slot_no_history_old_format">Keine History verfügbar (altes Speicherformat)</string>
+
     <!-- SaveGameFragment Sort/Filter Options -->
     <string name="sort_by_date">Nach Datum</string>
     <string name="sort_last_solved">Zuletzt gelöst</string>

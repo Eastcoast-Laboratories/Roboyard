@@ -315,12 +315,24 @@
     <string name="history_detail_qualifies_no_hints">Qualifies for no-hints achievement:</string>
     <string name="history_detail_last_solved_no_hints">Last solved without hints:</string>
     <string name="history_detail_last_perfect_no_hints">Last perfectly solved without hints:</string>
-    <string name="history_detail_qualifies_no_hints_perfect">Qualifies for perfect-no-hints achievement:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifies for perfect-no-\u200Bhints achievement:</string>
     <string name="history_detail_board">Board:</string>
     <string name="history_detail_map">Map:</string>
     <string name="history_detail_yes">Yes</string>
     <string name="history_detail_no">No</string>
     
+    <!-- Save Slot Info Popup -->
+    <string name="save_slot_saved">Saved:</string>
+    <string name="save_slot_status">Status:</string>
+    <string name="save_slot_solved">Solved</string>
+    <string name="save_slot_in_progress">In progress</string>
+    <string name="save_slot_moves_at_save">Moves at save:</string>
+    <string name="save_slot_difficulty">Difficulty:</string>
+    <string name="save_slot_hint_usage_at_save">Hint usage at save:</string>
+    <string name="save_slot_history_header">--- History for this map ---</string>
+    <string name="save_slot_no_history_entry">No history entry found (map not played yet)</string>
+    <string name="save_slot_no_history_old_format">No history available (old save format)</string>
+
     <!-- SaveGameFragment Sort/Filter Options -->
     <string name="sort_by_date">By Date</string>
     <string name="sort_last_solved">Last Solved</string>

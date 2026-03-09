@@ -2134,7 +2134,16 @@ public class SaveGameFragment extends BaseGameFragment {
                 } else if (part.startsWith("MOVES:")) {
                     try { moves = Integer.parseInt(part.substring("MOVES:".length())); } catch (Exception ignored) {}
                 } else if (part.startsWith("MAP_SIG:")) {
-                    mapSig = part.substring("MAP_SIG:".length());
+                    String raw = part.substring("MAP_SIG:".length());
+                    // Decode Base64-encoded map signature (new format)
+                    // Old saves had raw signatures containing ';' which got truncated by header split
+                    try {
+                        mapSig = new String(android.util.Base64.decode(raw, android.util.Base64.NO_WRAP), java.nio.charset.StandardCharsets.UTF_8);
+                    } catch (Exception e) {
+                        // Fallback for old unencoded saves (will likely be truncated but better than nothing)
+                        mapSig = raw;
+                        Timber.d("[SAVE_GAME] MAP_SIG not Base64-encoded (old save format), using raw: %s", raw);
+                    }
                 } else if (part.startsWith("SOLVED:")) {
                     solved = "true".equals(part.substring("SOLVED:".length()));
                 }
@@ -2144,21 +2153,20 @@ public class SaveGameFragment extends BaseGameFragment {
         // Basic save info
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
         if (slot.getDate() != null) {
-            sb.append("Saved: ").append(sdf.format(slot.getDate())).append("\n");
+            sb.append(getString(R.string.save_slot_saved)).append(" ").append(sdf.format(slot.getDate())).append("\n");
         }
-        sb.append("Status: ").append(solved ? "Solved" : "In progress").append("\n");
-        if (moves >= 0) sb.append("Moves at save: ").append(moves).append("\n");
-        if (slot.getBoardSize() != null) sb.append("Board: ").append(slot.getBoardSize()).append("\n");
-        if (slot.getDifficulty() != null) sb.append("Difficulty: ").append(slot.getDifficulty()).append("\n");
+        sb.append(getString(R.string.save_slot_status)).append(" ").append(solved ? getString(R.string.save_slot_solved) : getString(R.string.save_slot_in_progress)).append("\n");
+        if (moves >= 0) sb.append(getString(R.string.save_slot_moves_at_save)).append(" ").append(moves).append("\n");
+        if (slot.getDifficulty() != null) sb.append(getString(R.string.save_slot_difficulty)).append(" ").append(slot.getDifficulty()).append("\n");
         
         // Hint info from save
-        sb.append("\nHint usage at save: ");
+        sb.append("\n").append(getString(R.string.save_slot_hint_usage_at_save)).append(" ");
         if (maxHintUsed < 0) {
-            sb.append("No hints used");
+            sb.append(getString(R.string.history_detail_no_hints_used));
         } else if (maxHintUsed == 0) {
-            sb.append("Pre-hint viewed (robot colors revealed)");
+            sb.append(getString(R.string.history_detail_pre_hint_viewed));
         } else {
-            sb.append("Up to hint #").append(maxHintUsed + 1).append(" viewed");
+            sb.append(getString(R.string.history_detail_up_to_hint, maxHintUsed + 1));
         }
         sb.append("\n");
         
@@ -2168,17 +2176,17 @@ public class SaveGameFragment extends BaseGameFragment {
             GameHistoryEntry histEntry = GameHistoryManager.findByMapSignature(requireActivity(), mapSig);
             if (histEntry != null) {
                 Timber.d("[SAVE_GAME] Found history entry for MAP_SIG");
-                sb.append("\n--- History for this map ---\n");
+                sb.append("\n").append(getString(R.string.save_slot_history_header)).append("\n");
                 sb.append(buildMapInfoPopupMessage(histEntry));
             } else {
                 Timber.d("[SAVE_GAME] MAP_SIG found but no history entry exists");
-                sb.append("\n--- History for this map ---\n");
-                sb.append("No history entry found (map not played yet)\n");
+                sb.append("\n").append(getString(R.string.save_slot_history_header)).append("\n");
+                sb.append(getString(R.string.save_slot_no_history_entry)).append("\n");
             }
         } else {
             Timber.d("[SAVE_GAME] No MAP_SIG in save header (old save format)");
-            sb.append("\n--- History for this map ---\n");
-            sb.append("No history available (old save format)\n");
+            sb.append("\n").append(getString(R.string.save_slot_history_header)).append("\n");
+            sb.append(getString(R.string.save_slot_no_history_old_format)).append("\n");
         }
         Timber.d("[SAVE_GAME] Save details: %s", sb.toString());
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())

@@ -1,7 +1,9 @@
 package roboyard.eclabs.ui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -136,7 +138,8 @@ public class HistoryReplayImprovementE2ETest {
                 // Update maxHintUsed to 2 (viewed hints 0, 1, 2)
                 entry.setMaxHintUsed(2);
                 entry.markEverUsedHints();
-                // No completion, so we just save the updated entry
+                // Hint-only update: set movesMade=0 so addHistoryEntry does NOT record another completion
+                entry.setMovesMade(0);
                 GameHistoryManager.addHistoryEntry(activity, entry);
                 step("INFO", "Updated entry: maxHintUsed=2, everUsedHints=true (no completion)");
             }

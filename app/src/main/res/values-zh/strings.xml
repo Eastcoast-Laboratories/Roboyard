@@ -458,6 +458,18 @@
     <string name="history_detail_yes">是</string>
     <string name="history_detail_no">否</string>
     
+    <!-- Save Slot Info Popup -->
+    <string name="save_slot_saved">已保存：</string>
+    <string name="save_slot_status">状态：</string>
+    <string name="save_slot_solved">已解决</string>
+    <string name="save_slot_in_progress">进行中</string>
+    <string name="save_slot_moves_at_save">保存时移动数：</string>
+    <string name="save_slot_difficulty">难度：</string>
+    <string name="save_slot_hint_usage_at_save">保存时提示使用：</string>
+    <string name="save_slot_history_header">--- 此地图的历史记录 ---</string>
+    <string name="save_slot_no_history_entry">未找到历史记录（地图尚未游玩）</string>
+    <string name="save_slot_no_history_old_format">无历史记录（旧存档格式）</string>
+
     <!-- SaveGameFragment Sort/Filter Options -->
     <string name="sort_by_date">按日期</string>
     <string name="sort_last_solved">最后解决</string>

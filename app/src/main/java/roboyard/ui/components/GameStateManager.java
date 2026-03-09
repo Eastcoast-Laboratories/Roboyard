@@ -890,13 +890,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
             
             // Add map signature for history lookup (DRY with history)
+            // Base64-encode to avoid semicolons in signature colliding with header delimiter
             if (!enhancedSaveData.toString().contains("MAP_SIG:")) {
                 String mapSig = gameState.generateMapSignature();
                 if (mapSig != null && !mapSig.isEmpty()) {
-                    String sigTag = "MAP_SIG:" + mapSig + ";";
+                    String encoded = android.util.Base64.encodeToString(mapSig.getBytes(java.nio.charset.StandardCharsets.UTF_8), android.util.Base64.NO_WRAP);
+                    String sigTag = "MAP_SIG:" + encoded + ";";
                     int insertPos = enhancedSaveData.indexOf(";", 0) + 1;
                     enhancedSaveData.insert(insertPos, sigTag);
-                    Timber.d("[SAVEDATA] Added map signature tag");
+                    Timber.d("[SAVEDATA] Added map signature tag (base64-encoded)");
                 }
             }
             

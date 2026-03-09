@@ -335,9 +335,9 @@ public class HistoryCompletionE2ETest {
      */
     @Test
     public void testSaveSlotInfoPopupFindsHistoryForPlayedMap() throws InterruptedException {
-        step("SAVE1", "Starting random game via shared TestHelper");
-        TestHelper.startRandomGame();
-        Thread.sleep(3000);
+        step("SAVE1", "Starting random game via GameStateManager");
+        startRandomGameViaGameStateManager();
+        Thread.sleep(5000);
 
         step("SAVE2", "Waiting for AI solution");
         GameSolution solution = waitForSolution(20);
@@ -531,6 +531,7 @@ public class HistoryCompletionE2ETest {
         int[][] directions = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 
         for (int color = 0; color < 4; color++) {
+            final int c = color;
             boolean moved = false;
             for (int[] dir : directions) {
                 AtomicReference<Integer> before = new AtomicReference<>(0);
@@ -542,7 +543,7 @@ public class HistoryCompletionE2ETest {
                         return;
                     }
                     for (GameElement el : state.getGameElements()) {
-                        if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == color) {
+                        if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == c) {
                             state.setSelectedRobot(el);
                             break;
                         }
@@ -554,14 +555,14 @@ public class HistoryCompletionE2ETest {
                 Integer after = gameStateManager.getMoveCount().getValue();
                 int afterValue = after != null ? after : 0;
                 if (afterValue > before.get()) {
-                    movedColors.add(color);
+                    movedColors.add(c);
                     moved = true;
-                    step("MOVE4", "Robot " + color + " moved once");
+                    step("MOVE4", "Robot " + c + " moved once");
                     break;
                 }
             }
             if (!moved) {
-                step("MOVE4", "Robot " + color + " could not move in any direction");
+                step("MOVE4", "Robot " + c + " could not move in any direction");
             }
         }
 
