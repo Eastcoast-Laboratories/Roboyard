@@ -304,7 +304,10 @@ public class SyncManager {
                 historyJson.put("is_solved", entry.getMovesMade() > 0);
                 historyJson.put("play_time_seconds", entry.getPlayDuration());
                 historyJson.put("stars_earned", entry.getStarsEarned());
-                historyJson.put("played_at", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp())));
+                // CRITICAL: Send played_at in UTC timezone to prevent timezone offset issues
+                java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US);
+                utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                historyJson.put("played_at", utcFormat.format(new java.util.Date(entry.getTimestamp())));
                 historyJson.put("best_time", entry.getBestTime());
                 historyJson.put("best_moves", entry.getBestMoves());
                 historyJson.put("completion_count", entry.getCompletionCount());
@@ -317,9 +320,16 @@ public class SyncManager {
                 }
                 historyJson.put("completion_timestamps", tsArray);
                 
+                // Log timestamps with human-readable format for debugging timezone issues
+                String playedAtStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp()));
+                String lastCompletionStr = entry.getLastCompletionTimestamp() > 0 
+                    ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(entry.getLastCompletionTimestamp()))
+                    : "never";
                 Timber.d("[HISTORY_SYNC] Uploading: %s (moves=%d, optimal=%d, maxHint=%d, everHints=%b, stars=%d)", 
                         entry.getMapName(), entry.getMovesMade(), entry.getOptimalMoves(), 
                         entry.getMaxHintUsed(), entry.isEverUsedHints(), entry.getStarsEarned());
+                Timber.d("[HISTORY_SYNC_TIME] Upload timestamps - played_at='%s' (millis=%d), last_completion='%s' (millis=%d)", 
+                        playedAtStr, entry.getTimestamp(), lastCompletionStr, entry.getLastCompletionTimestamp());
                 
                 historyArray.put(historyJson);
             }
@@ -467,7 +477,15 @@ public class SyncManager {
                             GameHistoryManager.addHistoryEntry(activity, historyEntry);
                             restoredCount++;
                             
+                            // Log timestamps with human-readable format for debugging timezone issues
+                            String downloadedPlayedAt = entry.optString("played_at", "null");
+                            String parsedTimestampStr = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(historyEntry.getTimestamp()));
+                            String lastCompletionStr = historyEntry.getLastCompletionTimestamp() > 0 
+                                ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(historyEntry.getLastCompletionTimestamp()))
+                                : "never";
                             Timber.d("[HISTORY_SYNC] Restored history entry: %s", mapName);
+                            Timber.d("[HISTORY_SYNC_TIME] Download timestamps - server_played_at='%s', parsed_timestamp='%s' (millis=%d), last_completion='%s' (millis=%d)", 
+                                    downloadedPlayedAt, parsedTimestampStr, historyEntry.getTimestamp(), lastCompletionStr, historyEntry.getLastCompletionTimestamp());
                         }
                     }
                     
@@ -603,10 +621,30 @@ public class SyncManager {
             return System.currentTimeMillis();
         }
         try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US);
-            java.util.Date date = sdf.parse(isoTimestamp);
-            return date != null ? date.getTime() : System.currentTimeMillis();
+            // IMPORTANT: Server sends ISO 8601 with UTC timezone (e.g., "2026-03-09T08:26:56+00:00")
+            // Use java.time API (Android API 26+) for correct ISO 8601 parsing
+            // OffsetDateTime.parse() correctly handles timezone offset and converts to UTC
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(isoTimestamp);
+                long millis = odt.toInstant().toEpochMilli();
+                
+                // For logging: show both UTC and local time to verify correct parsing
+                java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
+                utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
+                Timber.d("[HISTORY_SYNC_TIME] parseTimestamp: input='%s' → millis=%d → UTC='%s', local='%s'", 
+                        isoTimestamp, millis, 
+                        utcFormat.format(new java.util.Date(millis)),
+                        localFormat.format(new java.util.Date(millis)));
+                return millis;
+            } else {
+                // Fallback for older Android versions: SimpleDateFormat (less reliable)
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US);
+                java.util.Date date = sdf.parse(isoTimestamp);
+                return date != null ? date.getTime() : System.currentTimeMillis();
+            }
         } catch (Exception e) {
+            Timber.e(e, "[HISTORY_SYNC_TIME] Failed to parse timestamp: %s", isoTimestamp);
             return System.currentTimeMillis();
         }
     }

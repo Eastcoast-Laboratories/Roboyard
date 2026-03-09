@@ -343,7 +343,24 @@ public class HistorySyncE2ETest {
         assertEquals("CompletionTimestamps count must be restored",
                 uploadedTimestampsSize, restoredTimestampsSize);
 
-        step("PASS", "testFullHistorySyncRoundTrip PASSED - all fields restored correctly");
+        // Verify timestamps are not in the future (timezone bug check)
+        long now = System.currentTimeMillis();
+        long timeDiffMs = restoredEntry.getTimestamp() - now;
+        long timeDiffSeconds = timeDiffMs / 1000;
+        step("8/8", "Timestamp check: restored=" + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(restoredEntry.getTimestamp())) +
+                ", now=" + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(now)) +
+                ", diff=" + timeDiffSeconds + "s");
+        assertTrue("Restored timestamp must not be more than 60s in the future (timezone bug), diff=" + timeDiffSeconds + "s",
+                timeDiffMs < 60000);
+        
+        if (restoredEntry.getLastCompletionTimestamp() > 0) {
+            long lastCompDiffMs = restoredEntry.getLastCompletionTimestamp() - now;
+            long lastCompDiffSeconds = lastCompDiffMs / 1000;
+            assertTrue("Last completion timestamp must not be more than 60s in the future, diff=" + lastCompDiffSeconds + "s",
+                    lastCompDiffMs < 60000);
+        }
+
+        step("PASS", "testFullHistorySyncRoundTrip PASSED - all fields restored correctly, timestamps valid");
     }
 
     // ==================== HELPERS ====================
