@@ -2,19 +2,19 @@
 =========
 
 
-## Version 42 (2026-03-07)
+## Version 43 (2026-03-10)
 - A.I can solve Multi-goal puzzles now
 - Smaller board sizes supported: 7x8, 10x8 and 16x14 squares
 - Level progress is now optional synced with online server
 - Ambient background sound volume corrected
 - Various UI improvements and bug fixes
-- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+
+## Version 42 (2026-03-07)
+- revised
 
 ## Version 41 (2026-03-02)
 - French translation complete
 - GMS Library removed
-- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
-
 
 ## Version 40 (2026-02-28)
 - New option: robots move automatically to the goal in the hints
@@ -24,13 +24,11 @@
 - Infinite history saved. With sorting and filtering
 - Level Editor in all languages
 - The display of moves and delta in the hot-cold mode is larger
-- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 
 ## Version 39 (2026-02-20)
 - New Level editor after all levels are unlocked:
  - 10 different map generators
  - play and share custom levels online
-
 
 ## Version 38 (2026-02-18)
 - Live move counter button, that shows the remaining optimal moves from the current position
@@ -48,7 +46,6 @@
 - Loaded games are solvable by the A.I. again
 - History stores all maps after 30s
 - Bugfixes
-
 
 ## Version 35 (2026-02-10)
 - Difficulty adjustments for many levels

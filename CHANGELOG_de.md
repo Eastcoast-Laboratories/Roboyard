@@ -2,19 +2,19 @@ Changelog Deutsch
 =================
 
 
-## Version 42 (2026-03-07)
+## Version 43 (2026-03-10)
 - Die A.I. kann jetzt Multi-Target-Rätsel lösen
 - Kleinere Spielfeldgröße unterstützt: 7x8, 10x8 und 16x14  Felder
 - Der Level-Fortschritt kann jetzt optional mit einem Online-Server synchronisiert werden
 - Die Lautstärke des Hintergrund-Atmosphären Sounds wurde korrigiert
 - Verschiedene UI-Verbesserungen und Fehlerbehebungen
-- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+
+## Version 42 (2026-03-07)
+- revised
 
 ## Version 41 (2026-03-02)
 - Französische Übersetzung komplett
 - GMS Library entfenrt
-- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
-
 
 ## Version 40 (2026-02-28)
 - Roboter bewegen sich in den Hinweisen optional automatisch ins Ziel
@@ -23,13 +23,11 @@ Changelog Deutsch
 - Es werden auch Karten mit ungeraden Dimensionen akzeptiert
 - Unendliche History gespeichert. Jetzt mit Sortierung und Filterung
 - Die Anzeige der Züge und der abweichung im Heiß-Kalt-Modus größer
-- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 
 ## Version 39 (2026-02-20)
 - Neu: Level Editor, wenn man alle level freigeschaltet hat
  - 10 verschiedene Kartengeneratoren
  - spiele und teile custom Levels online
-
 
 ## Version 38 (2026-02-18)
 - Live Move Counter Button, der die optimale Anzahl der Züge von der aktuellen Position zeigt
@@ -48,14 +46,12 @@ Changelog Deutsch
 - In der History werden alle Karten nach 30s gespeichert
 - Bugfixes
 
-
 ## Version 35 (2026-02-10)
 - Schwierigkeitsanpassungen für viele Levels
 - Mehr Feinschliff für Anfänger-Levels
 - die ersten 10 abgeschlossenen Levels geben jetzt immer mindestens einen Stern
 - Landschaftsmodus nutzt jetzt den Bildschirm besser
 - Accessibility-Steuerung für blinden Spieler kompakter gestaltet
-
 
 ## Version 34 (2026-02-07)
 - Achievements
@@ -66,7 +62,6 @@ Changelog Deutsch
 - Fehler behoben, der ungültige Lösungswege vorschlug
 - Die Sprachausgaben bei der Steuerung über Barrierefreiheits-Buttons wurde optimiert
 - Synchronisation des Spielfortschritts und Achievements mit dem online server
-
 
 ## Version 33 - 31
 - unreleased
@@ -80,7 +75,6 @@ Changelog Deutsch
 - Fix: alle Levels werden jetzt korrekt gelöst
 - Fix: Solver startet jetzt korrekt nach Laden eines Spielstands
 
-
 ## Version 29 (2025-09-29)
 - Landscape-Modus hinzugefügt mit Toggle-Button für die Ausrichtung des Spielfeldes
 - Fix: Accessibility Nachrichten korrigiert, wo das Ziel ein Feld daneben angekündet wurde
@@ -90,11 +84,9 @@ Changelog Deutsch
 - Neuer extra Hinweis, welche Roboter in der Lösung eine Rolle spielen.
 - Überarbeitete UI für verschiedene Display-Größen
 
-
 ## Version 27 (2025-06-25)
 - mehrfarbiges Ziel wieder aktiviert
 - Ansagen für blinde Spieler repariert (Talkback) und optimiert
-
 
 ## Version 26 (2025-05-11)
 - Verbesserte Accessibility-Übersetzungen
