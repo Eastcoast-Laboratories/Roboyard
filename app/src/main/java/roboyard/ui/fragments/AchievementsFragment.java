@@ -44,9 +44,9 @@ public class AchievementsFragment extends BaseGameFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_achievements, container, false);
         
-        // Set up back button - always navigate to MainMenuFragment
+        // Set up back button - navigate back to previous screen
         Button backButton = view.findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> navigateToMainMenu());
+        backButton.setOnClickListener(v -> navigateBack());
         
         // Set up user profile button
         userProfileButton = view.findViewById(R.id.user_profile_button);
@@ -63,12 +63,12 @@ public class AchievementsFragment extends BaseGameFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         
-        // Intercept system back button to navigate to MainMenuFragment
+        // Intercept system back button to navigate back to previous screen
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), 
             new androidx.activity.OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
-                    navigateToMainMenu();
+                    navigateBack();
                 }
             });
         
@@ -89,14 +89,19 @@ public class AchievementsFragment extends BaseGameFragment {
     }
     
     /**
-     * Navigate to MainMenuFragment
+     * Navigate back to the previous screen (respects back stack).
+     * If back stack is empty, navigate to MainMenuFragment as fallback.
      */
-    private void navigateToMainMenu() {
-        MainMenuFragment fragment = new MainMenuFragment();
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.nav_host_fragment, fragment)
-                .commit();
+    private void navigateBack() {
+        boolean popped = requireActivity().getSupportFragmentManager().popBackStackImmediate();
+        if (!popped) {
+            Timber.d("[ACHIEVEMENTS] Back stack empty, navigating to MainMenu as fallback");
+            MainMenuFragment fragment = new MainMenuFragment();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment)
+                    .commit();
+        }
     }
     
     private void loadAchievements() {
