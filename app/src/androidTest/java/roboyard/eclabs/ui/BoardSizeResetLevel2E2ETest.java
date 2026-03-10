@@ -57,7 +57,7 @@ public class BoardSizeResetLevel2E2ETest {
     @Before
     public void setUp() throws InterruptedException {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        Timber.d("[BOARD_SIZE_E2E] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] ========== TEST STARTED ==========");
         
         // Wait for achievement/streak popup to close
         TestHelper.startAndWait8sForPopupClose();
@@ -65,12 +65,12 @@ public class BoardSizeResetLevel2E2ETest {
 
     @After
     public void tearDown() {
-        Timber.d("[BOARD_SIZE_E2E] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testBoardSizeNotResetAfterUndoInLevel2() throws InterruptedException {
-        Timber.d("[BOARD_SIZE_E2E] Starting test: Board size should not reset on undo in Level 2");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Starting test: Board size should not reset on undo in Level 2");
         
         // Close any remaining popups
         TestHelper.closeAchievementPopupIfPresent();
@@ -90,7 +90,7 @@ public class BoardSizeResetLevel2E2ETest {
             if (state != null) {
                 level1Size[0] = state.getWidth();
                 level1Size[1] = state.getHeight();
-                Timber.d("[BOARD_SIZE_E2E] Level 1 board size: %dx%d", level1Size[0], level1Size[1]);
+                Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Level 1 board size: %dx%d", level1Size[0], level1Size[1]);
             }
         });
         
@@ -98,7 +98,7 @@ public class BoardSizeResetLevel2E2ETest {
         assertEquals("Level 1 should be 10 high", 10, level1Size[1]);
         
         // COMPLETE Level 1 by executing solution (real user behavior)
-        Timber.d("[BOARD_SIZE_E2E] Completing Level 1...");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Completing Level 1...");
         executeSolutionForCurrentLevel();
         Thread.sleep(2000);
         
@@ -107,7 +107,7 @@ public class BoardSizeResetLevel2E2ETest {
         Thread.sleep(500);
         
         // Click Next Level button (real user behavior)
-        Timber.d("[BOARD_SIZE_E2E] Clicking Next Level button");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Clicking Next Level button");
         onView(withId(R.id.next_level_button)).perform(click());
         Thread.sleep(2000);
         
@@ -118,7 +118,7 @@ public class BoardSizeResetLevel2E2ETest {
             if (state != null) {
                 level2Size[0] = state.getWidth();
                 level2Size[1] = state.getHeight();
-                Timber.d("[BOARD_SIZE_E2E] Level 2 board size: %dx%d", level2Size[0], level2Size[1]);
+                Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Level 2 board size: %dx%d", level2Size[0], level2Size[1]);
             }
         });
         
@@ -131,7 +131,7 @@ public class BoardSizeResetLevel2E2ETest {
             if (gameStateManager != null) {
                 // Move robot right
                 gameStateManager.moveRobotInDirection(1, 0);
-                Timber.d("[BOARD_SIZE_E2E] Made move in Level 2");
+                Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Made move in Level 2");
             }
         });
         
@@ -144,12 +144,12 @@ public class BoardSizeResetLevel2E2ETest {
             if (state != null) {
                 sizeBeforeUndo[0] = state.getWidth();
                 sizeBeforeUndo[1] = state.getHeight();
-                Timber.d("[BOARD_SIZE_E2E] Board size BEFORE undo: %dx%d", sizeBeforeUndo[0], sizeBeforeUndo[1]);
+                Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Board size BEFORE undo: %dx%d", sizeBeforeUndo[0], sizeBeforeUndo[1]);
             }
         });
         
         // Click BACK button (undo)
-        Timber.d("[BOARD_SIZE_E2E] Clicking BACK button (undo)");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Clicking BACK button (undo)");
         onView(withId(R.id.back_button)).perform(click());
         Thread.sleep(1000);
         
@@ -160,7 +160,7 @@ public class BoardSizeResetLevel2E2ETest {
             if (state != null) {
                 sizeAfterUndo[0] = state.getWidth();
                 sizeAfterUndo[1] = state.getHeight();
-                Timber.d("[BOARD_SIZE_E2E] Board size AFTER undo: %dx%d", sizeAfterUndo[0], sizeAfterUndo[1]);
+                Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Board size AFTER undo: %dx%d", sizeAfterUndo[0], sizeAfterUndo[1]);
             }
         });
         
@@ -176,7 +176,7 @@ public class BoardSizeResetLevel2E2ETest {
         assertEquals("Board height should match size before undo", 
                 sizeBeforeUndo[1], sizeAfterUndo[1]);
         
-        Timber.d("[BOARD_SIZE_E2E] ✓ Test passed: Board size correctly maintained after undo");
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] ✓ Test passed: Board size correctly maintained after undo");
     }
     
     /**
@@ -193,7 +193,7 @@ public class BoardSizeResetLevel2E2ETest {
             if (gameStateManager != null) {
                 solutionHolder[0] = gameStateManager.getCurrentSolution();
                 if (solutionHolder[0] != null) {
-                    Timber.d("[BOARD_SIZE_E2E] Found solution with %d moves", 
+                    Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Found solution with %d moves", 
                             solutionHolder[0].getMoves().size());
                 } else {
                     Timber.w("[BOARD_SIZE_E2E] No solution found yet");
@@ -222,7 +222,7 @@ public class BoardSizeResetLevel2E2ETest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[BOARD_SIZE_E2E] Executing %d moves", moves.size());
+        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Executing %d moves", moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);

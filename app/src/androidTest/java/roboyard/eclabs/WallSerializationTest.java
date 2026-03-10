@@ -161,7 +161,7 @@ public class WallSerializationTest {
         GameState original = createTestGameState(width, height);
         String serialized = original.serialize();
 
-        Timber.d("[WALL_TEST] Serialized data:\n%s", serialized);
+        Timber.d("[UNITTESTS][WALL_TEST] Serialized data:\n%s", serialized);
 
         // Parse back
         GameState loaded = GameState.parseFromSaveData(serialized, context);
@@ -180,8 +180,8 @@ public class WallSerializationTest {
             if (e.getType() == GameElement.TYPE_VERTICAL_WALL) loadedVWalls++;
         }
 
-        Timber.d("[WALL_TEST] Original: %d H-walls, %d V-walls", origHWalls, origVWalls);
-        Timber.d("[WALL_TEST] Loaded:   %d H-walls, %d V-walls", loadedHWalls, loadedVWalls);
+        Timber.d("[UNITTESTS][WALL_TEST] Original: %d H-walls, %d V-walls", origHWalls, origVWalls);
+        Timber.d("[UNITTESTS][WALL_TEST] Loaded:   %d H-walls, %d V-walls", loadedHWalls, loadedVWalls);
 
         assertEquals("Horizontal wall count should match", origHWalls, loadedHWalls);
         assertEquals("Vertical wall count should match", origVWalls, loadedVWalls);
@@ -204,7 +204,7 @@ public class WallSerializationTest {
             }
         }
 
-        Timber.d("[WALL_TEST] Right boundary walls found: %s", rightWalls);
+        Timber.d("[UNITTESTS][WALL_TEST] Right boundary walls found: %s", rightWalls);
 
         for (int y = 0; y < height; y++) {
             String key = width + "," + y;
@@ -230,7 +230,7 @@ public class WallSerializationTest {
             }
         }
 
-        Timber.d("[WALL_TEST] Bottom boundary walls found: %s", bottomWalls);
+        Timber.d("[UNITTESTS][WALL_TEST] Bottom boundary walls found: %s", bottomWalls);
 
         for (int x = 0; x < width; x++) {
             String key = x + "," + height;
@@ -304,7 +304,7 @@ public class WallSerializationTest {
             }
         }
 
-        Timber.d("[WALL_TEST] %dx%d: original=%d walls, loaded=%d walls", width, height, origWalls, loadedWalls);
+        Timber.d("[UNITTESTS][WALL_TEST] %dx%d: original=%d walls, loaded=%d walls", width, height, origWalls, loadedWalls);
         assertEquals("Wall count should match for " + width + "x" + height, origWalls, loadedWalls);
 
         // Verify right boundary

@@ -53,7 +53,7 @@ public class AchievementCounterTest {
     public void testLevel10CompleteNotUnlockedBefore10Levels() {
         // Complete levels 1-5 with perfect solutions and no hints
         for (int i = 1; i <= 5; i++) {
-            Timber.d("[TEST] Completing level %d with perfect solution and no hints", i);
+            Timber.d("[UNITTESTS][TEST] Completing level %d with perfect solution and no hints", i);
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
             
             // Check that level_10_complete is NOT unlocked yet
@@ -66,7 +66,7 @@ public class AchievementCounterTest {
             
         }
         
-        Timber.d("[TEST] All assertions passed - achievements NOT unlocked before level 10");
+        Timber.d("[UNITTESTS][TEST] All assertions passed - achievements NOT unlocked before level 10");
     }
 
     /**
@@ -77,7 +77,7 @@ public class AchievementCounterTest {
         // Complete levels 1-10 with perfect solutions and no hints
         for (int i = 1; i <= 10; i++) {
             achievementManager.onNewGameStarted();
-            Timber.d("[TEST] Completing level %d", i);
+            Timber.d("[UNITTESTS][TEST] Completing level %d", i);
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
         
@@ -87,7 +87,7 @@ public class AchievementCounterTest {
         assertTrue("perfect_solutions_10 should be unlocked after 10 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
         
-        Timber.d("[TEST] All assertions passed - achievements unlocked after level 10");
+        Timber.d("[UNITTESTS][TEST] All assertions passed - achievements unlocked after level 10");
     }
 
     /**
@@ -109,7 +109,7 @@ public class AchievementCounterTest {
         assertFalse("perfect_solutions_10 should NOT be unlocked with non-optimal moves",
                 achievementManager.isUnlocked("perfect_solutions_10"));
         
-        Timber.d("[TEST] Assertion passed - perfect_solutions_10 NOT unlocked with non-optimal moves");
+        Timber.d("[UNITTESTS][TEST] Assertion passed - perfect_solutions_10 NOT unlocked with non-optimal moves");
     }
 
     // Note: testNoHints10NotUnlockedWithHints removed - no_hints_10/50 achievements are removed (hints not allowed in levels)

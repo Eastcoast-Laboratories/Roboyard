@@ -54,7 +54,7 @@ public class LevelSelectionLandscapeTest {
 
     @Test
     public void testLevelSelectionLandscapeMode() throws InterruptedException {
-        Timber.d("[LANDSCAPE_TEST] Starting landscape mode test");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Starting landscape mode test");
 
         // Rotate device to landscape
         activityRule.getScenario().onActivity(activity -> {
@@ -68,18 +68,18 @@ public class LevelSelectionLandscapeTest {
         onView(withId(R.id.level_recycler_view))
                 .check(matches(isDisplayed()));
 
-        Timber.d("[LANDSCAPE_TEST] Level selection screen displayed in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Level selection screen displayed in landscape");
 
         // Verify at least one level card is visible
         // Note: We don't check for scroll_up_arrow as it may not exist in landscape layout
         Thread.sleep(500);
 
-        Timber.d("[LANDSCAPE_TEST] Landscape mode test completed successfully");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Landscape mode test completed successfully");
     }
 
     @Test
     public void testLevelSelectionLandscapeNoScrollArrowCrash() throws InterruptedException {
-        Timber.d("[LANDSCAPE_TEST] Testing scroll arrow null safety in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Testing scroll arrow null safety in landscape");
 
         // Rotate device to landscape
         activityRule.getScenario().onActivity(activity -> {
@@ -95,17 +95,17 @@ public class LevelSelectionLandscapeTest {
         onView(withId(R.id.level_recycler_view))
                 .check(matches(isDisplayed()));
 
-        Timber.d("[LANDSCAPE_TEST] No crash when scroll_up_arrow is null in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] No crash when scroll_up_arrow is null in landscape");
 
         // Verify we can still interact with level cards
         Thread.sleep(500);
 
-        Timber.d("[LANDSCAPE_TEST] Scroll arrow null safety test passed");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Scroll arrow null safety test passed");
     }
 
     @Test
     public void testLevelSelectionLandscapeCardBinding() throws InterruptedException {
-        Timber.d("[LANDSCAPE_TEST] Testing card binding in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Testing card binding in landscape");
 
         // Rotate device to landscape
         activityRule.getScenario().onActivity(activity -> {
@@ -123,12 +123,12 @@ public class LevelSelectionLandscapeTest {
         // This verifies the null check for levelCard works correctly
         Thread.sleep(500);
 
-        Timber.d("[LANDSCAPE_TEST] Card binding test passed - no crashes in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Card binding test passed - no crashes in landscape");
     }
 
     @Test
     public void testLevelSelectionLandscapeStartLevel() throws InterruptedException {
-        Timber.d("[LANDSCAPE_TEST] Testing level start in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Testing level start in landscape");
 
         // Rotate device to landscape
         activityRule.getScenario().onActivity(activity -> {
@@ -150,6 +150,6 @@ public class LevelSelectionLandscapeTest {
         onView(withId(R.id.game_grid_view))
                 .check(matches(isDisplayed()));
 
-        Timber.d("[LANDSCAPE_TEST] Level started successfully in landscape");
+        Timber.d("[UNITTESTS][LANDSCAPE_TEST] Level started successfully in landscape");
     }
 }

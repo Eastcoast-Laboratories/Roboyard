@@ -67,7 +67,7 @@ public class ResetHintE2ETest {
 
     @Test
     public void testResetButtonHidesHint() throws InterruptedException {
-        Timber.d("[RESET_HINT_TEST] Starting test");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Starting test");
 
         // Wait for activity to load
         Thread.sleep(3000);
@@ -80,7 +80,7 @@ public class ResetHintE2ETest {
             // Load level data first
             gameStateManager.startNewGame();
             gameStateManager.loadLevel(1);
-            Timber.d("[RESET_HINT_TEST] Level 1 loaded into GameStateManager");
+            Timber.d("[UNITTESTS][RESET_HINT_TEST] Level 1 loaded into GameStateManager");
 
             // Navigate to ModernGameFragment via NavController
             NavHostFragment navHostFragment = (NavHostFragment) activity.getSupportFragmentManager()
@@ -88,7 +88,7 @@ public class ResetHintE2ETest {
             if (navHostFragment != null) {
                 NavController navController = navHostFragment.getNavController();
                 navController.navigate(R.id.gameFragment);
-                Timber.d("[RESET_HINT_TEST] Navigated to ModernGameFragment");
+                Timber.d("[UNITTESTS][RESET_HINT_TEST] Navigated to ModernGameFragment");
             }
         });
         Thread.sleep(5000);
@@ -100,16 +100,16 @@ public class ResetHintE2ETest {
             if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
                 break;
             }
-            Timber.d("[RESET_HINT_TEST] Waiting for solution... attempt %d", i + 1);
+            Timber.d("[UNITTESTS][RESET_HINT_TEST] Waiting for solution... attempt %d", i + 1);
             Thread.sleep(2000);
         }
         assertNotNull("Solution should be available", solution);
         assertTrue("Solution should have moves", solution.getMoves().size() > 0);
-        Timber.d("[RESET_HINT_TEST] Solution ready with %d moves", solution.getMoves().size());
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Solution ready with %d moves", solution.getMoves().size());
 
         // Step 2: Move a robot successfully (first move of the solution)
         IGameMove firstMove = solution.getMoves().get(0);
-        Timber.d("[RESET_HINT_TEST] Executing first move: %s", firstMove);
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Executing first move: %s", firstMove);
         activityRule.getScenario().onActivity(activity -> {
             executeSolutionMove(firstMove);
         });
@@ -118,61 +118,61 @@ public class ResetHintE2ETest {
         // Verify the move was made (move count should be 1)
         activityRule.getScenario().onActivity(activity -> {
             Integer moveCount = gameStateManager.getMoveCount().getValue();
-            Timber.d("[RESET_HINT_TEST] Move count after first move: %s", moveCount);
+            Timber.d("[UNITTESTS][RESET_HINT_TEST] Move count after first move: %s", moveCount);
             assertNotNull("Move count should not be null", moveCount);
             assertTrue("Move count should be >= 1 after moving a robot", moveCount >= 1);
         });
 
         // Step 3: Press the Hint button a few times
-        Timber.d("[RESET_HINT_TEST] Pressing Hint button (1st time)");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Pressing Hint button (1st time)");
         onView(withId(R.id.hint_button)).perform(click());
         Thread.sleep(1500);
 
         // Verify hint container is visible
         onView(withId(R.id.hint_container)).check(matches(isDisplayed()));
-        Timber.d("[RESET_HINT_TEST] Hint container is visible after 1st click");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Hint container is visible after 1st click");
 
         // Press next hint arrow a couple of times
-        Timber.d("[RESET_HINT_TEST] Pressing next hint arrow");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Pressing next hint arrow");
         onView(withId(R.id.next_hint_button)).perform(click());
         Thread.sleep(800);
         onView(withId(R.id.next_hint_button)).perform(click());
         Thread.sleep(800);
-        Timber.d("[RESET_HINT_TEST] Pressed next hint 2 times");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Pressed next hint 2 times");
 
         // Step 4: Activate hot/cold mode (live move counter toggle)
         // The eye toggle is inside the hint_container and only visible when hints are shown
-        Timber.d("[RESET_HINT_TEST] Activating hot/cold mode (live move counter)");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Activating hot/cold mode (live move counter)");
         activityRule.getScenario().onActivity(activity -> {
             ToggleButton toggle = activity.findViewById(R.id.live_move_counter_toggle);
             if (toggle != null && toggle.getVisibility() == View.VISIBLE) {
                 toggle.performClick();
-                Timber.d("[RESET_HINT_TEST] Clicked live_move_counter_toggle");
+                Timber.d("[UNITTESTS][RESET_HINT_TEST] Clicked live_move_counter_toggle");
             } else {
                 // Toggle might not be visible yet; enable it programmatically
                 if (toggle != null) {
                     toggle.setVisibility(View.VISIBLE);
                     toggle.setChecked(true);
-                    Timber.d("[RESET_HINT_TEST] Enabled live_move_counter_toggle programmatically");
+                    Timber.d("[UNITTESTS][RESET_HINT_TEST] Enabled live_move_counter_toggle programmatically");
                 }
                 gameStateManager.setLiveMoveCounterEnabled(true);
-                Timber.d("[RESET_HINT_TEST] Enabled live move counter via GameStateManager");
+                Timber.d("[UNITTESTS][RESET_HINT_TEST] Enabled live move counter via GameStateManager");
             }
         });
         Thread.sleep(1000);
 
         // Step 5: Press Reset
-        Timber.d("[RESET_HINT_TEST] Pressing Reset button");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Pressing Reset button");
         onView(withId(R.id.reset_robots_button)).perform(click());
         Thread.sleep(2000);
 
         // Step 6: Verify hintButton is unchecked (hint mode deactivated)
-        Timber.d("[RESET_HINT_TEST] Verifying hint state after reset");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Verifying hint state after reset");
         activityRule.getScenario().onActivity(activity -> {
             ToggleButton hintBtn = activity.findViewById(R.id.hint_button);
             assertNotNull("Hint button should exist", hintBtn);
             assertFalse("Hint button should be unchecked after reset", hintBtn.isChecked());
-            Timber.d("[RESET_HINT_TEST] Hint button isChecked=%s", hintBtn.isChecked());
+            Timber.d("[UNITTESTS][RESET_HINT_TEST] Hint button isChecked=%s", hintBtn.isChecked());
 
             // hint_container may still be VISIBLE if live move counter is active (shows status + eye toggle)
             // but the hint navigation arrows must be hidden
@@ -186,18 +186,18 @@ public class ResetHintE2ETest {
                 assertEquals("Next hint arrow should be GONE after reset",
                         View.GONE, nextBtn.getVisibility());
             }
-            Timber.d("[RESET_HINT_TEST] Hint arrows hidden: prev=%d, next=%d",
+            Timber.d("[UNITTESTS][RESET_HINT_TEST] Hint arrows hidden: prev=%d, next=%d",
                     prevBtn != null ? prevBtn.getVisibility() : -1,
                     nextBtn != null ? nextBtn.getVisibility() : -1);
 
             // Log status text
             android.widget.TextView statusText = activity.findViewById(R.id.status_text);
             if (statusText != null) {
-                Timber.d("[RESET_HINT_TEST] Status text after reset: '%s'", statusText.getText());
+                Timber.d("[UNITTESTS][RESET_HINT_TEST] Status text after reset: '%s'", statusText.getText());
             }
         });
 
-        Timber.d("[RESET_HINT_TEST] Test passed!");
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Test passed!");
     }
 
     /**
@@ -209,7 +209,7 @@ public class ResetHintE2ETest {
         int robotColor = rrMove.getColor();
         int direction = rrMove.getDirection();
 
-        Timber.d("[RESET_HINT_TEST] Moving robot color=%d direction=%d", robotColor, direction);
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Moving robot color=%d direction=%d", robotColor, direction);
 
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state == null) return;
@@ -234,7 +234,7 @@ public class ResetHintE2ETest {
                 case 8: dx = -1; break; // LEFT
             }
             gameStateManager.moveRobotInDirection(dx, dy);
-            Timber.d("[RESET_HINT_TEST] Robot moved successfully");
+            Timber.d("[UNITTESTS][RESET_HINT_TEST] Robot moved successfully");
         } else {
             Timber.w("[RESET_HINT_TEST] Robot with color %d not found", robotColor);
         }

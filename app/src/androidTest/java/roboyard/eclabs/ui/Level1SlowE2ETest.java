@@ -50,18 +50,18 @@ public class Level1SlowE2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[E2E_SLOW] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_SLOW] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_SLOW] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_SLOW] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testLevel1SlowCompletion_OnlyLevelAchievement() throws InterruptedException {
-        Timber.d("[E2E_SLOW] Starting slow completion test (>30s)");
+        Timber.d("[UNITTESTS][E2E_SLOW] Starting slow completion test (>30s)");
         
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
@@ -77,7 +77,7 @@ public class Level1SlowE2ETest {
         });
         
         // Move DOWN (wrong direction first)
-        Timber.d("[E2E_SLOW] Moving robot DOWN");
+        Timber.d("[UNITTESTS][E2E_SLOW] Moving robot DOWN");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, 1);
@@ -86,11 +86,11 @@ public class Level1SlowE2ETest {
         Thread.sleep(2000);
         
         // Wait 28 seconds to exceed 30s threshold
-        Timber.d("[E2E_SLOW] Waiting 28 seconds to exceed speedrun threshold...");
+        Timber.d("[UNITTESTS][E2E_SLOW] Waiting 28 seconds to exceed speedrun threshold...");
         Thread.sleep(28000);
         
         // Move UP
-        Timber.d("[E2E_SLOW] Moving robot UP");
+        Timber.d("[UNITTESTS][E2E_SLOW] Moving robot UP");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
@@ -99,7 +99,7 @@ public class Level1SlowE2ETest {
         Thread.sleep(2000);
         
         // Move RIGHT to complete
-        Timber.d("[E2E_SLOW] Moving robot RIGHT to complete level");
+        Timber.d("[UNITTESTS][E2E_SLOW] Moving robot RIGHT to complete level");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(1, 0);
@@ -125,6 +125,6 @@ public class Level1SlowE2ETest {
         assertFalse("speedrun_under_10s should NOT be unlocked (took >30s)", 
                 achievementManager.isUnlocked("speedrun_under_10s"));
         
-        Timber.d("[E2E_SLOW] ✓ Test passed: Level completed, only level_1_complete unlocked");
+        Timber.d("[UNITTESTS][E2E_SLOW] ✓ Test passed: Level completed, only level_1_complete unlocked");
     }
 }

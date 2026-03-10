@@ -89,7 +89,7 @@ public class ReverseMoveUndoBugTest {
             }
 
             result[0] = gameStateManager.moveRobotInDirection(dx, dy);
-            Timber.d("[UNDO_BUG_TEST] moveRobotInDirection(%d,%d) returned %b", dx, dy, result[0]);
+            Timber.d("[UNITTESTS][UNDO_BUG_TEST] moveRobotInDirection(%d,%d) returned %b", dx, dy, result[0]);
         });
         Thread.sleep(800);
         return result[0];
@@ -97,21 +97,21 @@ public class ReverseMoveUndoBugTest {
 
     @Test
     public void testReverseMoveUndoDoesNotBlockSubsequentMoves() throws InterruptedException {
-        Timber.d("[UNDO_BUG_TEST] ===== START testReverseMoveUndoDoesNotBlockSubsequentMoves =====");
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] ===== START testReverseMoveUndoDoesNotBlockSubsequentMoves =====");
 
         // Step 1: Move blue robot LEFT
         boolean movedLeft = selectBlueAndMove(-1, 0);
-        Timber.d("[UNDO_BUG_TEST] Move LEFT result: %b", movedLeft);
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move LEFT result: %b", movedLeft);
 
         final int[] moveCountAfterLeft = {-1};
         activityRule.getScenario().onActivity(activity -> {
             moveCountAfterLeft[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[UNDO_BUG_TEST] Move count after LEFT: %d", moveCountAfterLeft[0]);
+            Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move count after LEFT: %d", moveCountAfterLeft[0]);
         });
 
         // Step 2: Move blue robot UP
         boolean movedUp = selectBlueAndMove(0, -1);
-        Timber.d("[UNDO_BUG_TEST] Move UP result: %b", movedUp);
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move UP result: %b", movedUp);
 
         final int[] moveCountAfterUp = {-1};
         final int[] blueXAfterUp = {-1};
@@ -128,13 +128,13 @@ public class ReverseMoveUndoBugTest {
                     }
                 }
             }
-            Timber.d("[UNDO_BUG_TEST] Move count after UP: %d, blue robot at (%d,%d)",
+            Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move count after UP: %d, blue robot at (%d,%d)",
                     moveCountAfterUp[0], blueXAfterUp[0], blueYAfterUp[0]);
         });
 
         // Step 3: Move blue robot DOWN (reverse of UP -> should trigger undo)
         boolean movedDown = selectBlueAndMove(0, 1);
-        Timber.d("[UNDO_BUG_TEST] Move DOWN (reverse-undo) result: %b", movedDown);
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move DOWN (reverse-undo) result: %b", movedDown);
 
         final int[] moveCountAfterUndo = {-1};
         final int[] blueXAfterUndo = {-1};
@@ -151,7 +151,7 @@ public class ReverseMoveUndoBugTest {
                     }
                 }
             }
-            Timber.d("[UNDO_BUG_TEST] Move count after DOWN-undo: %d, blue robot at (%d,%d)",
+            Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move count after DOWN-undo: %d, blue robot at (%d,%d)",
                     moveCountAfterUndo[0], blueXAfterUndo[0], blueYAfterUndo[0]);
         });
 
@@ -164,7 +164,7 @@ public class ReverseMoveUndoBugTest {
         // Step 4: THE CRITICAL STEP - move RIGHT after the undo
         // This is where the bug manifests: robotAnimationInProgress stays true, blocking all moves
         boolean movedRight = selectBlueAndMove(1, 0);
-        Timber.d("[UNDO_BUG_TEST] Move RIGHT after undo result: %b", movedRight);
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move RIGHT after undo result: %b", movedRight);
 
         final int[] moveCountAfterRight = {-1};
         final int[] blueXAfterRight = {-1};
@@ -181,7 +181,7 @@ public class ReverseMoveUndoBugTest {
                     }
                 }
             }
-            Timber.d("[UNDO_BUG_TEST] Move count after RIGHT: %d, blue robot at (%d,%d)",
+            Timber.d("[UNITTESTS][UNDO_BUG_TEST] Move count after RIGHT: %d, blue robot at (%d,%d)",
                     moveCountAfterRight[0], blueXAfterRight[0], blueYAfterRight[0]);
         });
 
@@ -192,6 +192,6 @@ public class ReverseMoveUndoBugTest {
         assertTrue("Move count must have increased after RIGHT move post-undo",
                 moveCountAfterRight[0] > moveCountAfterUndo[0]);
 
-        Timber.d("[UNDO_BUG_TEST] ===== TEST PASSED =====");
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] ===== TEST PASSED =====");
     }
 }

@@ -63,7 +63,7 @@ public class HistorySyncStarsTest {
         activityRule.getScenario().onActivity(activity -> {
             gameStateManager.loadLevel(1);
             roboyard.ui.util.SolverManager.getInstance().startSolver();
-            Timber.d("[SYNC_TEST] Level 1 loaded, solver started");
+            Timber.d("[UNITTESTS][SYNC_TEST] Level 1 loaded, solver started");
         });
         Thread.sleep(2000);
 
@@ -76,7 +76,7 @@ public class HistorySyncStarsTest {
             });
             solution = holder[0];
             if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
-                Timber.d("[SYNC_TEST] Solution found with %d moves", solution.getMoves().size());
+                Timber.d("[UNITTESTS][SYNC_TEST] Solution found with %d moves", solution.getMoves().size());
                 break;
             }
             Thread.sleep(1000);
@@ -88,7 +88,7 @@ public class HistorySyncStarsTest {
         // Execute solution moves
         for (int i = 0; i < solution.getMoves().size(); i++) {
             IGameMove move = solution.getMoves().get(i);
-            Timber.d("[SYNC_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
+            Timber.d("[UNITTESTS][SYNC_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
 
             activityRule.getScenario().onActivity(activity -> {
                 if (move instanceof RRGameMove) {
@@ -121,7 +121,7 @@ public class HistorySyncStarsTest {
             // Check if game is complete
             Boolean isComplete = gameStateManager.isGameComplete().getValue();
             if (isComplete != null && isComplete) {
-                Timber.d("[SYNC_TEST] Level completed after move %d", i + 1);
+                Timber.d("[UNITTESTS][SYNC_TEST] Level completed after move %d", i + 1);
                 break;
             }
         }
@@ -132,14 +132,14 @@ public class HistorySyncStarsTest {
         // Verify game is complete
         Boolean isComplete = gameStateManager.isGameComplete().getValue();
         assertTrue("Level 1 should be completed", isComplete != null && isComplete);
-        Timber.d("[SYNC_TEST] Level 1 completed!");
+        Timber.d("[UNITTESTS][SYNC_TEST] Level 1 completed!");
 
         // Verify LevelCompletionData has stars
         final int[] starsHolder = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             LevelCompletionManager lcm = LevelCompletionManager.getInstance(activity);
             starsHolder[0] = lcm.getLevelCompletionData(1).getStars();
-            Timber.d("[SYNC_TEST] LevelCompletionData stars for Level 1: %d", starsHolder[0]);
+            Timber.d("[UNITTESTS][SYNC_TEST] LevelCompletionData stars for Level 1: %d", starsHolder[0]);
         });
         assertTrue("Level 1 should have at least 1 star", starsHolder[0] > 0);
 
@@ -154,7 +154,7 @@ public class HistorySyncStarsTest {
                     histFound[0] = true;
                     histStars[0] = entry.getStarsEarned();
                     histMoves[0] = entry.getMovesMade();
-                    Timber.d("[SYNC_TEST] History entry 'Level 1': stars=%d, moves=%d", histStars[0], histMoves[0]);
+                    Timber.d("[UNITTESTS][SYNC_TEST] History entry 'Level 1': stars=%d, moves=%d", histStars[0], histMoves[0]);
                     break;
                 }
             }

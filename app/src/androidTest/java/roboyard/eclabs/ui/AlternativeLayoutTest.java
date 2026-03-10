@@ -60,12 +60,12 @@ public class AlternativeLayoutTest {
         Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
         ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit().putBoolean(KEY_ALT_LAYOUT, false).apply();
-        Timber.d("[TEST_ALT_LAYOUT] Teardown: reset use_alternative_layout to false");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] Teardown: reset use_alternative_layout to false");
     }
 
     @Test
     public void testAlternativeLayoutButtonsAndToggle() throws InterruptedException {
-        Timber.d("[TEST_ALT_LAYOUT] Starting alternative layout test");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] Starting alternative layout test");
 
         // Step 1: Navigate to Settings
         onView(withId(R.id.settings_icon_button)).perform(click());
@@ -91,7 +91,7 @@ public class AlternativeLayoutTest {
         if (!altLayoutEnabled) {
             throw new AssertionError("[TEST_ALT_LAYOUT] ALT LAYOUT preference was not set to true after clicking toggle");
         }
-        Timber.d("[TEST_ALT_LAYOUT] ALT LAYOUT is now ON (verified via SharedPreferences)");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] ALT LAYOUT is now ON (verified via SharedPreferences)");
 
         // Step 5: Back to Settings, then back to Main Menu
         pressBack();
@@ -105,7 +105,7 @@ public class AlternativeLayoutTest {
 
         // Step 7: Verify game screen with game_grid_view
         onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
-        Timber.d("[TEST_ALT_LAYOUT] game_grid_view displayed in alt layout");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] game_grid_view displayed in alt layout");
 
         // Step 8: Verify bottom bar buttons (hint|back|new_map|save|reset)
         onView(withId(R.id.hint_button)).check(matches(isDisplayed()));
@@ -113,17 +113,17 @@ public class AlternativeLayoutTest {
         onView(withId(R.id.new_map_button)).check(matches(isDisplayed()));
         onView(withId(R.id.save_map_button)).check(matches(isDisplayed()));
         onView(withId(R.id.reset_robots_button)).check(matches(isDisplayed()));
-        Timber.d("[TEST_ALT_LAYOUT] All bottom bar buttons visible");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] All bottom bar buttons visible");
 
         // Step 9: Eye-toggle (hot/cold) must be visible in top bar
         onView(withId(R.id.live_move_counter_toggle)).check(matches(isDisplayed()));
-        Timber.d("[TEST_ALT_LAYOUT] Eye-toggle visible in top bar");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] Eye-toggle visible in top bar");
 
         // Step 10: Move counter visible
         onView(withId(R.id.move_count_text)).check(matches(isDisplayed()));
-        Timber.d("[TEST_ALT_LAYOUT] Move counter visible");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] Move counter visible");
 
-        Timber.d("[TEST_ALT_LAYOUT] ALTERNATIVE LAYOUT TEST PASSED");
+        Timber.d("[UNITTESTS][TEST_ALT_LAYOUT] ALTERNATIVE LAYOUT TEST PASSED");
     }
 
     /**

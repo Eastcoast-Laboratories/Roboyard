@@ -56,7 +56,7 @@ public class BackgroundSoundSettingsTest {
 
     @Test
     public void testBackgroundSoundSeekBarIsDisplayed() throws InterruptedException {
-        Timber.d("[TEST] Starting background sound seekbar visibility test");
+        Timber.d("[UNITTESTS][TEST] Starting background sound seekbar visibility test");
 
         // Navigate to Settings
         onView(withId(R.id.settings_icon_button)).perform(click());
@@ -71,12 +71,12 @@ public class BackgroundSoundSettingsTest {
         // Verify the seekbar is displayed
         onView(withId(R.id.background_sound_seekbar)).check(matches(isDisplayed()));
 
-        Timber.d("[TEST] Background sound seekbar is visible in settings");
+        Timber.d("[UNITTESTS][TEST] Background sound seekbar is visible in settings");
     }
 
     @Test
     public void testBackgroundSoundSeekBarChangesPreference() throws InterruptedException {
-        Timber.d("[TEST] Starting background sound preference persistence test");
+        Timber.d("[UNITTESTS][TEST] Starting background sound preference persistence test");
 
         // Navigate to Settings
         onView(withId(R.id.settings_icon_button)).perform(click());
@@ -90,7 +90,7 @@ public class BackgroundSoundSettingsTest {
         assert Preferences.backgroundSoundVolume == 50 :
                 "Expected volume 50, got " + Preferences.backgroundSoundVolume;
 
-        Timber.d("[TEST] Background sound preference persisted correctly: %d", Preferences.backgroundSoundVolume);
+        Timber.d("[UNITTESTS][TEST] Background sound preference persisted correctly: %d", Preferences.backgroundSoundVolume);
 
         // Set seekbar to 0 (off)
         onView(withId(R.id.background_sound_seekbar)).perform(setSeekBarProgress(0));
@@ -99,7 +99,7 @@ public class BackgroundSoundSettingsTest {
         assert Preferences.backgroundSoundVolume == 0 :
                 "Expected volume 0, got " + Preferences.backgroundSoundVolume;
 
-        Timber.d("[TEST] Background sound preference reset to 0");
+        Timber.d("[UNITTESTS][TEST] Background sound preference reset to 0");
     }
 
     /**

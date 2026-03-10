@@ -50,18 +50,18 @@ public class Level1FastE2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[E2E_FAST] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_FAST] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_FAST] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_FAST] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testLevel1FastCompletion_BothSpeedrunAchievements() throws InterruptedException {
-        Timber.d("[E2E_FAST] Starting fast completion test (<10s)");
+        Timber.d("[UNITTESTS][E2E_FAST] Starting fast completion test (<10s)");
         
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
@@ -77,7 +77,7 @@ public class Level1FastE2ETest {
         });
         
         // Move UP immediately
-        Timber.d("[E2E_FAST] Moving robot UP");
+        Timber.d("[UNITTESTS][E2E_FAST] Moving robot UP");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
@@ -86,7 +86,7 @@ public class Level1FastE2ETest {
         Thread.sleep(2000);
         
         // Move RIGHT to complete
-        Timber.d("[E2E_FAST] Moving robot RIGHT to complete level");
+        Timber.d("[UNITTESTS][E2E_FAST] Moving robot RIGHT to complete level");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(1, 0);
@@ -112,6 +112,6 @@ public class Level1FastE2ETest {
         assertTrue("speedrun_under_10s should be unlocked (took <10s)", 
                 achievementManager.isUnlocked("speedrun_under_10s"));
         
-        Timber.d("[E2E_FAST] ✓ Test passed: Level completed, all speedrun achievements unlocked");
+        Timber.d("[UNITTESTS][E2E_FAST] ✓ Test passed: Level completed, all speedrun achievements unlocked");
     }
 }

@@ -245,12 +245,12 @@ public class PreComputationTest {
      */
     @Test
     public void testSolverFinds21MoveSolution() {
-        Timber.d("[PRECOMP_TEST] Testing solver with 19x19 map");
+        Timber.d("[UNITTESTS][PRECOMP_TEST] Testing solver with 19x19 map");
         
         // Log robot positions for debugging
         for (GridElement e : mapElements) {
             if (e.getType().startsWith("robot_")) {
-                Timber.d("[PRECOMP_TEST] Robot %s at (%d,%d)", e.getType(), e.getX(), e.getY());
+                Timber.d("[UNITTESTS][PRECOMP_TEST] Robot %s at (%d,%d)", e.getType(), e.getX(), e.getY());
             }
         }
 
@@ -265,13 +265,13 @@ public class PreComputationTest {
         GameSolution solution = solver.getSolution(0);
         assertNotNull("First solution should not be null", solution);
         int moves = solution.getMoves().size();
-        Timber.d("[PRECOMP_TEST] Solution found with %d moves", moves);
+        Timber.d("[UNITTESTS][PRECOMP_TEST] Solution found with %d moves", moves);
         
         // Log ALL moves using toString
         if (solution.getMoves() != null && solution.getMoves().size() > 0) {
             for (int i = 0; i < solution.getMoves().size(); i++) {
                 IGameMove m = solution.getMoves().get(i);
-                Timber.d("[PRECOMP_TEST] Move %d: %s (class: %s)", i, m.toString(), m.getClass().getSimpleName());
+                Timber.d("[UNITTESTS][PRECOMP_TEST] Move %d: %s (class: %s)", i, m.toString(), m.getClass().getSimpleName());
             }
         }
         
@@ -283,7 +283,7 @@ public class PreComputationTest {
      */
     @Test
     public void testLiveSolverFromInitialPosition() throws InterruptedException {
-        Timber.d("[PRECOMP_TEST] Testing LiveSolverManager from initial position");
+        Timber.d("[UNITTESTS][PRECOMP_TEST] Testing LiveSolverManager from initial position");
 
         LiveSolverManager liveSolver = new LiveSolverManager();
         CountDownLatch latch = new CountDownLatch(1);
@@ -293,7 +293,7 @@ public class PreComputationTest {
             @Override
             public void onLiveSolverFinished(int optimalMoves, GameSolution solution) {
                 result[0] = optimalMoves;
-                Timber.d("[PRECOMP_TEST] LiveSolver result: %d moves", optimalMoves);
+                Timber.d("[UNITTESTS][PRECOMP_TEST] LiveSolver result: %d moves", optimalMoves);
                 latch.countDown();
             }
 
@@ -317,7 +317,7 @@ public class PreComputationTest {
      */
     @Test
     public void testPreComputationAfterFirstMove() throws InterruptedException {
-        Timber.d("[PRECOMP_TEST] Testing pre-computation after first move (yE)");
+        Timber.d("[UNITTESTS][PRECOMP_TEST] Testing pre-computation after first move (yE)");
 
         // First solve from initial position
         LiveSolverManager liveSolver = new LiveSolverManager();
@@ -341,7 +341,7 @@ public class PreComputationTest {
         for (GridElement e : mapElements) {
             if (e.getType().equals("robot_yellow")) {
                 postMoveElements.add(new GridElement(17, 1, "robot_yellow"));
-                Timber.d("[PRECOMP_TEST] Yellow moved East: (10,1) → (17,1)");
+                Timber.d("[UNITTESTS][PRECOMP_TEST] Yellow moved East: (10,1) → (17,1)");
             } else {
                 postMoveElements.add(e);
             }
@@ -355,7 +355,7 @@ public class PreComputationTest {
             @Override
             public void onLiveSolverFinished(int optimalMoves, GameSolution solution) {
                 postMoveResult[0] = optimalMoves;
-                Timber.d("[PRECOMP_TEST] Post-yE result: %d moves remaining", optimalMoves);
+                Timber.d("[UNITTESTS][PRECOMP_TEST] Post-yE result: %d moves remaining", optimalMoves);
                 latch2.countDown();
             }
             @Override
@@ -380,8 +380,8 @@ public class PreComputationTest {
      */
     @Test
     public void testSequentialPreComputationMultipleRobots() {
-        Timber.d("[PRECOMP_TEST] === Starting sequential pre-computation test ===");
-        Timber.d("[PRECOMP_TEST] Testing that solver runs for MULTIPLE robots sequentially");
+        Timber.d("[UNITTESTS][PRECOMP_TEST] === Starting sequential pre-computation test ===");
+        Timber.d("[UNITTESTS][PRECOMP_TEST] Testing that solver runs for MULTIPLE robots sequentially");
 
         // 4 hypothetical moves: one per robot, each sliding to a board edge
         // These simulate what preComputeNextMoves() would compute
@@ -405,7 +405,7 @@ public class PreComputationTest {
             int newX = Integer.parseInt(testMoves[i][3]);
             int newY = Integer.parseInt(testMoves[i][4]);
 
-            Timber.d("[PRECOMP_TEST] [%d/%d] Solving: %s %s → (%d,%d)...",
+            Timber.d("[UNITTESTS][PRECOMP_TEST] [%d/%d] Solving: %s %s → (%d,%d)...",
                     i + 1, testMoves.length, robotName, direction, newX, newY);
             long solveStart = System.currentTimeMillis();
 
@@ -450,17 +450,17 @@ public class PreComputationTest {
                     int moves = (solution != null && solution.getMoves() != null) ? solution.getMoves().size() : 0;
                     if (solver.isSolution01()) moves = 1;
                     solved++;
-                    Timber.d("[PRECOMP_TEST] [%d/%d] Solved in %dms: %s %s → (%d,%d) = %d moves",
+                    Timber.d("[UNITTESTS][PRECOMP_TEST] [%d/%d] Solved in %dms: %s %s → (%d,%d) = %d moves",
                             i + 1, testMoves.length, solveElapsed, robotName, direction, newX, newY, moves);
                 } else {
-                    Timber.d("[PRECOMP_TEST] [%d/%d] No solution in %dms: %s %s → (%d,%d)",
+                    Timber.d("[UNITTESTS][PRECOMP_TEST] [%d/%d] No solution in %dms: %s %s → (%d,%d)",
                             i + 1, testMoves.length, solveElapsed, robotName, direction, newX, newY);
                 }
             }
         }
 
         long totalElapsed = System.currentTimeMillis() - totalStart;
-        Timber.d("[PRECOMP_TEST] === Finished: %d solved, %d timeout, total %dms ===",
+        Timber.d("[UNITTESTS][PRECOMP_TEST] === Finished: %d solved, %d timeout, total %dms ===",
                 solved, timeout, totalElapsed);
 
         // Verify that at least 2 different robots were solved (not just the first one)

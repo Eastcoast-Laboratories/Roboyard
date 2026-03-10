@@ -45,11 +45,11 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testLevel1FileExists() throws Exception {
-        Timber.d("[TEST_LEVEL_PARSE] Testing level_1.txt exists in assets");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing level_1.txt exists in assets");
         InputStream is = context.getAssets().open("Maps/level_1.txt");
         assertNotNull("level_1.txt should exist in assets", is);
         is.close();
-        Timber.d("[TEST_LEVEL_PARSE] level_1.txt exists");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] level_1.txt exists");
     }
 
     /**
@@ -57,14 +57,14 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testParseLevelBoardDimensions() {
-        Timber.d("[TEST_LEVEL_PARSE] Testing board dimension parsing");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing board dimension parsing");
         String levelContent = "board:12,14;\nmh0,0;\nmh1,0;\nmv0,0;\nmv12,0;\n";
         GameState state = GameState.parseLevel(context, levelContent, 999);
 
         assertNotNull("Parsed state should not be null", state);
         assertEquals("Board width should be 12", 12, state.getWidth());
         assertEquals("Board height should be 14", 14, state.getHeight());
-        Timber.d("[TEST_LEVEL_PARSE] Board dimensions parsed correctly: %dx%d", state.getWidth(), state.getHeight());
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Board dimensions parsed correctly: %dx%d", state.getWidth(), state.getHeight());
     }
 
     /**
@@ -72,7 +72,7 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testParseHorizontalWalls() {
-        Timber.d("[TEST_LEVEL_PARSE] Testing horizontal wall parsing");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing horizontal wall parsing");
         String levelContent = "board:12,14;\nmh0,0;\nmh5,7;\nmh11,14;\n";
         GameState state = GameState.parseLevel(context, levelContent, 999);
 
@@ -94,7 +94,7 @@ public class LevelEditorParsingTest {
         assertTrue("Should have wall at (0,0)", foundTopLeft);
         assertTrue("Should have wall at (5,7)", foundMiddle);
         assertTrue("Should have wall at (11,14) - bottom boundary", foundBottomRight);
-        Timber.d("[TEST_LEVEL_PARSE] Horizontal walls parsed correctly");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Horizontal walls parsed correctly");
     }
 
     /**
@@ -102,7 +102,7 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testParseVerticalWalls() {
-        Timber.d("[TEST_LEVEL_PARSE] Testing vertical wall parsing");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing vertical wall parsing");
         String levelContent = "board:12,14;\nmv0,0;\nmv6,5;\nmv12,13;\n";
         GameState state = GameState.parseLevel(context, levelContent, 999);
 
@@ -124,7 +124,7 @@ public class LevelEditorParsingTest {
         assertTrue("Should have wall at (0,0) - left boundary", foundLeft);
         assertTrue("Should have wall at (6,5)", foundMiddle);
         assertTrue("Should have wall at (12,13) - right boundary", foundRight);
-        Timber.d("[TEST_LEVEL_PARSE] Vertical walls parsed correctly");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Vertical walls parsed correctly");
     }
 
     /**
@@ -132,7 +132,7 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testLoadLevel1FromAssets() throws Exception {
-        Timber.d("[TEST_LEVEL_PARSE] Testing full level 1 loading from assets");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing full level 1 loading from assets");
 
         InputStream is = context.getAssets().open("Maps/level_1.txt");
         Scanner scanner = new Scanner(is);
@@ -180,9 +180,9 @@ public class LevelEditorParsingTest {
         assertTrue("Level 1 should have robots", robots > 0);
         assertTrue("Level 1 should have targets", targets > 0);
 
-        Timber.d("[TEST_LEVEL_PARSE] Level 1 loaded: %d hWalls, %d vWalls, %d robots, %d targets",
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Level 1 loaded: %d hWalls, %d vWalls, %d robots, %d targets",
                 hWalls, vWalls, robots, targets);
-        Timber.d("[TEST_LEVEL_PARSE] LEVEL 1 LOADING TEST PASSED");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] LEVEL 1 LOADING TEST PASSED");
     }
 
     /**
@@ -190,7 +190,7 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testParseRobotsAndTargets() {
-        Timber.d("[TEST_LEVEL_PARSE] Testing robot and target parsing");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing robot and target parsing");
         String levelContent = "board:12,14;\n" +
                 "robot_red1,9;\n" +
                 "robot_blue3,12;\n" +
@@ -208,7 +208,7 @@ public class LevelEditorParsingTest {
 
         assertEquals("Should have 4 robots", 4, robots);
         assertEquals("Should have 1 target", 1, targets);
-        Timber.d("[TEST_LEVEL_PARSE] Robots and targets parsed correctly");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Robots and targets parsed correctly");
     }
 
     /**
@@ -217,7 +217,7 @@ public class LevelEditorParsingTest {
      */
     @Test
     public void testNewLevelOuterWallPositions() {
-        Timber.d("[TEST_LEVEL_PARSE] Testing outer wall positions for new level");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing outer wall positions for new level");
 
         // Simulate what createBorderWalls does
         int boardWidth = 12;
@@ -262,8 +262,8 @@ public class LevelEditorParsingTest {
         assertEquals("Left walls should span full height", boardHeight, leftWalls);
         assertEquals("Right walls at x=" + boardWidth + " should span full height", boardHeight, rightWalls);
 
-        Timber.d("[TEST_LEVEL_PARSE] Outer wall positions correct: top=%d, bottom=%d, left=%d, right=%d",
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Outer wall positions correct: top=%d, bottom=%d, left=%d, right=%d",
                 topWalls, bottomWalls, leftWalls, rightWalls);
-        Timber.d("[TEST_LEVEL_PARSE] OUTER WALL POSITIONS TEST PASSED");
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] OUTER WALL POSITIONS TEST PASSED");
     }
 }

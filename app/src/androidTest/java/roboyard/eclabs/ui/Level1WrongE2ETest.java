@@ -50,18 +50,18 @@ public class Level1WrongE2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[E2E_WRONG] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_WRONG] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_WRONG] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_WRONG] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testLevel1WrongMoves_LevelNotCompleted() throws InterruptedException {
-        Timber.d("[E2E_WRONG] Starting wrong moves test");
+        Timber.d("[UNITTESTS][E2E_WRONG] Starting wrong moves test");
         
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
@@ -77,7 +77,7 @@ public class Level1WrongE2ETest {
         });
         
         // Move UP
-        Timber.d("[E2E_WRONG] Moving robot UP");
+        Timber.d("[UNITTESTS][E2E_WRONG] Moving robot UP");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
@@ -86,7 +86,7 @@ public class Level1WrongE2ETest {
         Thread.sleep(2000);
         
         // Move LEFT (WRONG - should be RIGHT)
-        Timber.d("[E2E_WRONG] Moving robot LEFT (wrong direction)");
+        Timber.d("[UNITTESTS][E2E_WRONG] Moving robot LEFT (wrong direction)");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(-1, 0);
@@ -109,6 +109,6 @@ public class Level1WrongE2ETest {
         assertFalse("level_1_complete should NOT be unlocked", 
                 achievementManager.isUnlocked("level_1_complete"));
         
-        Timber.d("[E2E_WRONG] ✓ Test passed: Level correctly NOT completed with wrong moves");
+        Timber.d("[UNITTESTS][E2E_WRONG] ✓ Test passed: Level correctly NOT completed with wrong moves");
     }
 }

@@ -83,7 +83,7 @@ public class MoveCountDebugTest {
 
     @Test
     public void testMoveCountWithExtraMovesDebug() {
-        Timber.d("[MOVE_COUNT_TEST] Starting test - will play random level with optimal solution + 5 extra moves");
+        Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Starting test - will play random level with optimal solution + 5 extra moves");
 
         // Start a new random game
         activityRule.getScenario().onActivity(a -> {
@@ -102,7 +102,7 @@ public class MoveCountDebugTest {
         assertNotNull("Game state should be loaded", gameState);
         
         int initialMoves = gameState.getMoveCount();
-        Timber.d("[MOVE_COUNT_TEST] Initial move count: %d", initialMoves);
+        Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Initial move count: %d", initialMoves);
 
         // Get the solution
         GameSolution solution = gameStateManager.getCurrentSolution();
@@ -110,33 +110,33 @@ public class MoveCountDebugTest {
         assertNotNull("Solution moves should not be null", solution.getMoves());
         
         int optimalMoves = solution.getMoves().size();
-        Timber.d("[MOVE_COUNT_TEST] Optimal solution requires %d moves", optimalMoves);
+        Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Optimal solution requires %d moves", optimalMoves);
 
         // Execute the optimal solution moves
         for (int i = 0; i < optimalMoves; i++) {
             IGameMove move = solution.getMoves().get(i);
             if (move instanceof RRGameMove) {
                 RRGameMove rrMove = (RRGameMove) move;
-                Timber.d("[MOVE_COUNT_TEST] Executing optimal move %d: robot color=%d, direction=%d",
+                Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Executing optimal move %d: robot color=%d, direction=%d",
                         i + 1, rrMove.getColor(), rrMove.getDirection());
                 // Execute the move (simplified - in real test would need to interact with UI)
                 // executeMove not available - moves are executed via moveRobotInDirection
-                Timber.d("[MOVE_COUNT_TEST] Would execute move: robot=%d dir=%d", rrMove.getColor(), rrMove.getDirection());
+                Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Would execute move: robot=%d dir=%d", rrMove.getColor(), rrMove.getDirection());
             }
         }
 
         // Now make 5 extra non-optimal moves (move a robot not involved in solution)
         // This is a simplified version - in real test would need proper robot selection
-        Timber.d("[MOVE_COUNT_TEST] Now making 5 extra non-optimal moves...");
+        Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Now making 5 extra non-optimal moves...");
         for (int i = 0; i < 5; i++) {
             // Move a robot that's not in the solution (simplified)
             // In a real test, we'd need to identify which robot to move
-            Timber.d("[MOVE_COUNT_TEST] Extra move %d", i + 1);
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Extra move %d", i + 1);
             // gameStateManager.executeMove(...) - would need proper move object
         }
 
         int finalMoves = gameState.getMoveCount();
-        Timber.d("[MOVE_COUNT_TEST] Final move count: %d (optimal=%d, expected=%d)",
+        Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Final move count: %d (optimal=%d, expected=%d)",
                 finalMoves, optimalMoves, optimalMoves + 5);
 
         // Complete the game (undo the extra moves or just complete)
@@ -144,20 +144,20 @@ public class MoveCountDebugTest {
         
         // Check history entries
         List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
-        Timber.d("[MOVE_COUNT_TEST] History entries count: %d", entries.size());
+        Timber.d("[UNITTESTS][MOVE_COUNT_TEST] History entries count: %d", entries.size());
 
         for (GameHistoryEntry entry : entries) {
-            Timber.d("[MOVE_COUNT_TEST] ===== HISTORY ENTRY =====");
-            Timber.d("[MOVE_COUNT_TEST] Map: %s", entry.getMapName());
-            Timber.d("[MOVE_COUNT_TEST] Moves made: %d", entry.getMovesMade());
-            Timber.d("[MOVE_COUNT_TEST] Best moves: %d", entry.getBestMoves());
-            Timber.d("[MOVE_COUNT_TEST] Optimal moves: %d", entry.getOptimalMoves());
-            Timber.d("[MOVE_COUNT_TEST] Completion count: %d", entry.getCompletionCount());
-            Timber.d("[MOVE_COUNT_TEST] Max hint used: %d", entry.getMaxHintUsed());
-            Timber.d("[MOVE_COUNT_TEST] Ever used hints: %b", entry.isEverUsedHints());
-            Timber.d("[MOVE_COUNT_TEST] Solved without hints: %b", entry.isSolvedWithoutHints());
-            Timber.d("[MOVE_COUNT_TEST] Qualifies no-hints: %b", entry.qualifiesForNoHintsAchievement());
-            Timber.d("[MOVE_COUNT_TEST] ========================");
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] ===== HISTORY ENTRY =====");
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Map: %s", entry.getMapName());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Moves made: %d", entry.getMovesMade());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Best moves: %d", entry.getBestMoves());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Optimal moves: %d", entry.getOptimalMoves());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Completion count: %d", entry.getCompletionCount());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Max hint used: %d", entry.getMaxHintUsed());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Ever used hints: %b", entry.isEverUsedHints());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Solved without hints: %b", entry.isSolvedWithoutHints());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Qualifies no-hints: %b", entry.qualifiesForNoHintsAchievement());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] ========================");
         }
 
         // Verify that move counts are reasonable
@@ -166,13 +166,13 @@ public class MoveCountDebugTest {
             int movesMade = lastEntry.getMovesMade();
             int optimalMovesInEntry = lastEntry.getOptimalMoves();
             
-            Timber.d("[MOVE_COUNT_TEST] ANALYSIS: movesMade=%d, optimalMoves=%d, difference=%d",
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] ANALYSIS: movesMade=%d, optimalMoves=%d, difference=%d",
                     movesMade, optimalMovesInEntry, movesMade - optimalMovesInEntry);
             
             // The bug: movesMade should be optimalMoves + 5, not optimalMoves + 1
             if (optimalMovesInEntry > 0) {
                 int expectedMoves = optimalMovesInEntry + 5;
-                Timber.d("[MOVE_COUNT_TEST] Expected moves: %d, Actual: %d, Bug present: %b",
+                Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Expected moves: %d, Actual: %d, Bug present: %b",
                         expectedMoves, movesMade, movesMade != expectedMoves);
             }
         }

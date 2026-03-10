@@ -80,10 +80,10 @@ public class SolutionSaveLoadIntegrationTest {
      */
     @Test
     public void testSolutionNotLeakedBetweenGames() throws InterruptedException {
-        Timber.d("[TEST_SOLUTION_LEAK] ========== Starting Solution Leak Test ==========");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] ========== Starting Solution Leak Test ==========");
         
         // ===== STEP 1: Start game A, wait for solver, capture map name and solution =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 1: Starting game A");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 1: Starting game A");
         TestHelper.startRandomGame();
         Thread.sleep(2000);
         
@@ -101,11 +101,11 @@ public class SolutionSaveLoadIntegrationTest {
             GameState stateA = gsm.getCurrentState().getValue();
             assertNotNull("Game A state should exist", stateA);
             mapNameA.set(stateA.getLevelName());
-            Timber.d("[TEST_SOLUTION_LEAK] Game A map: %s", mapNameA.get());
+            Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Game A map: %s", mapNameA.get());
         });
         
         // ===== STEP 2: Save game A to slot 1 =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 2: Saving game A to slot 1");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 2: Saving game A to slot 1");
         final AtomicReference<Boolean> saveAResult = new AtomicReference<>(false);
         activityRule.getScenario().onActivity(activity -> {
             GameStateManager gsm = activity.getGameStateManager();
@@ -113,18 +113,18 @@ public class SolutionSaveLoadIntegrationTest {
         });
         Thread.sleep(500);
         assertTrue("Game A should be saved successfully to slot 1", saveAResult.get());
-        Timber.d("[TEST_SOLUTION_LEAK] Game A saved to slot 1");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Game A saved to slot 1");
         
         // Extract solution string from save logs
         List<String> saveALogs = TestHelper.collectLogcatLines(null, "SOLUTIONS_SAVE_LOAD", 200);
         for (String log : saveALogs) {
             if (log.contains("Serialized") && log.contains("solutions")) {
-                Timber.d("[TEST_SOLUTION_LEAK] Save A log: %s", log);
+                Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Save A log: %s", log);
             }
         }
         
         // ===== STEP 3: Start game B (new random game), wait for solver =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 3: Going back and starting game B");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 3: Going back and starting game B");
         // Navigate back to main menu
         androidx.test.espresso.Espresso.pressBack();
         Thread.sleep(1000);
@@ -148,17 +148,17 @@ public class SolutionSaveLoadIntegrationTest {
             GameState stateB = gsm.getCurrentState().getValue();
             assertNotNull("Game B state should exist", stateB);
             mapNameB.set(stateB.getLevelName());
-            Timber.d("[TEST_SOLUTION_LEAK] Game B map: %s", mapNameB.get());
+            Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Game B map: %s", mapNameB.get());
         });
         
         // Verify that maps are different (random games should be different)
         assertNotEquals("Game A and B should have different maps", 
                 mapNameA.get(), mapNameB.get());
-        Timber.d("[TEST_SOLUTION_LEAK] Confirmed: maps are different (A=%s, B=%s)", 
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Confirmed: maps are different (A=%s, B=%s)", 
                 mapNameA.get(), mapNameB.get());
         
         // ===== STEP 4: Save game B to slot 2 =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 4: Saving game B to slot 2");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 4: Saving game B to slot 2");
         final AtomicReference<Boolean> saveBResult = new AtomicReference<>(false);
         activityRule.getScenario().onActivity(activity -> {
             GameStateManager gsm = activity.getGameStateManager();
@@ -166,10 +166,10 @@ public class SolutionSaveLoadIntegrationTest {
         });
         Thread.sleep(500);
         assertTrue("Game B should be saved successfully to slot 2", saveBResult.get());
-        Timber.d("[TEST_SOLUTION_LEAK] Game B saved to slot 2");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Game B saved to slot 2");
         
         // ===== STEP 5: Load game A from slot 1 and verify solution =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 5: Loading game A from slot 1");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 5: Loading game A from slot 1");
         TestHelper.clearLogcat();
         Thread.sleep(200);
         
@@ -186,7 +186,7 @@ public class SolutionSaveLoadIntegrationTest {
             GameState loadedState = gsm.getCurrentState().getValue();
             assertNotNull("Loaded state should exist", loadedState);
             loadedMapName.set(loadedState.getLevelName());
-            Timber.d("[TEST_SOLUTION_LEAK] Loaded map name: %s (expected: %s)", 
+            Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Loaded map name: %s (expected: %s)", 
                     loadedMapName.get(), mapNameA.get());
         });
         assertEquals("Loaded map should be game A's map", mapNameA.get(), loadedMapName.get());
@@ -207,7 +207,7 @@ public class SolutionSaveLoadIntegrationTest {
         assertFalse("Solver should NOT start when loading game A with solution", solverStarted);
         
         // ===== STEP 6: Re-save game A to slot 3 and verify solution persists =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 6: Re-saving loaded game A to slot 3");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 6: Re-saving loaded game A to slot 3");
         TestHelper.clearLogcat();
         Thread.sleep(200);
         
@@ -233,7 +233,7 @@ public class SolutionSaveLoadIntegrationTest {
         assertTrue("Re-saved game should include solutions", resavedWithSolution);
         
         // ===== STEP 7: Load game B from slot 2, verify solution is B's, not A's =====
-        Timber.d("[TEST_SOLUTION_LEAK] Step 7: Loading game B from slot 2");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Step 7: Loading game B from slot 2");
         TestHelper.clearLogcat();
         Thread.sleep(200);
         
@@ -249,7 +249,7 @@ public class SolutionSaveLoadIntegrationTest {
             GameState loadedState = gsm.getCurrentState().getValue();
             assertNotNull("Loaded state should exist", loadedState);
             loadedMapName.set(loadedState.getLevelName());
-            Timber.d("[TEST_SOLUTION_LEAK] Loaded map name: %s (expected: %s)", 
+            Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Loaded map name: %s (expected: %s)", 
                     loadedMapName.get(), mapNameB.get());
         });
         assertEquals("Loaded map should be game B's map", mapNameB.get(), loadedMapName.get());
@@ -266,7 +266,7 @@ public class SolutionSaveLoadIntegrationTest {
         assertTrue("Should find solutions in game B save metadata", foundBSolutions);
         assertTrue("Should skip solver when loading game B", solverBSkipped);
         
-        Timber.d("[TEST_SOLUTION_LEAK] ========== Test PASSED: Solutions correctly isolated between games ==========");
+        Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] ========== Test PASSED: Solutions correctly isolated between games ==========");
     }
     
     /**
@@ -287,7 +287,7 @@ public class SolutionSaveLoadIntegrationTest {
             });
             
             if (!running.get()) {
-                Timber.d("[TEST_SOLUTION_LEAK] Solver finished (took %dms)", 
+                Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Solver finished (took %dms)", 
                         System.currentTimeMillis() - startTime);
                 return true;
             }

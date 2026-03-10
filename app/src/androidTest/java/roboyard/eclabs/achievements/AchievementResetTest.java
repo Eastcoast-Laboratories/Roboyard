@@ -39,13 +39,13 @@ public class AchievementResetTest {
         achievementManager.resetAll();
         // Reset game session flags so achievements can be unlocked
         achievementManager.onNewGameStarted();
-        Timber.d("[RESET_TEST] setUp complete - all achievements reset");
+        Timber.d("[UNITTESTS][RESET_TEST] setUp complete - all achievements reset");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[RESET_TEST] tearDown complete - all achievements reset");
+        Timber.d("[UNITTESTS][RESET_TEST] tearDown complete - all achievements reset");
     }
 
     /**
@@ -55,11 +55,11 @@ public class AchievementResetTest {
      */
     @Test
     public void testCountersResetBetweenTests() {
-        Timber.d("[RESET_TEST] ===== FIRST SCENARIO: Complete 5 levels =====");
+        Timber.d("[UNITTESTS][RESET_TEST] ===== FIRST SCENARIO: Complete 5 levels =====");
         
         // Complete 5 levels with perfect solutions and no hints
         for (int i = 1; i <= 5; i++) {
-            Timber.d("[RESET_TEST] Completing level %d", i);
+            Timber.d("[UNITTESTS][RESET_TEST] Completing level %d", i);
             achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
@@ -70,10 +70,10 @@ public class AchievementResetTest {
         assertFalse("perfect_solutions_10 should NOT be unlocked after 5 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
         
-        Timber.d("[RESET_TEST] ✓ After 5 levels: achievements NOT unlocked");
+        Timber.d("[UNITTESTS][RESET_TEST] ✓ After 5 levels: achievements NOT unlocked");
         
         // Reset (simulating end of first test)
-        Timber.d("[RESET_TEST] Resetting achievements");
+        Timber.d("[UNITTESTS][RESET_TEST] Resetting achievements");
         achievementManager.resetAll();
         
         // Verify reset worked
@@ -82,14 +82,14 @@ public class AchievementResetTest {
         assertFalse("perfect_solutions_10 should be locked after reset",
                 achievementManager.isUnlocked("perfect_solutions_10"));
         
-        Timber.d("[RESET_TEST] ✓ After reset: all achievements locked");
+        Timber.d("[UNITTESTS][RESET_TEST] ✓ After reset: all achievements locked");
         
         // Now simulate second test starting fresh
-        Timber.d("[RESET_TEST] ===== SECOND SCENARIO: Complete 5 more levels (should start fresh) =====");
+        Timber.d("[UNITTESTS][RESET_TEST] ===== SECOND SCENARIO: Complete 5 more levels (should start fresh) =====");
         
         // Complete 5 more levels
         for (int i = 1; i <= 5; i++) {
-            Timber.d("[RESET_TEST] Completing level %d (second scenario)", i);
+            Timber.d("[UNITTESTS][RESET_TEST] Completing level %d (second scenario)", i);
             achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
             
@@ -100,12 +100,12 @@ public class AchievementResetTest {
                     achievementManager.isUnlocked("perfect_solutions_10"));
         }
         
-        Timber.d("[RESET_TEST] ✓ After 5 more levels: achievements still NOT unlocked");
+        Timber.d("[UNITTESTS][RESET_TEST] ✓ After 5 more levels: achievements still NOT unlocked");
         
         // Complete 5 more levels to reach 10 total
-        Timber.d("[RESET_TEST] ===== COMPLETING 5 MORE LEVELS TO REACH 10 =====");
+        Timber.d("[UNITTESTS][RESET_TEST] ===== COMPLETING 5 MORE LEVELS TO REACH 10 =====");
         for (int i = 6; i <= 10; i++) {
-            Timber.d("[RESET_TEST] Completing level %d (to reach 10)", i);
+            Timber.d("[UNITTESTS][RESET_TEST] Completing level %d (to reach 10)", i);
             achievementManager.onNewGameStarted();
             achievementManager.onLevelCompleted(i, 5, 5, 0, 3, 10000);
         }
@@ -116,7 +116,7 @@ public class AchievementResetTest {
         assertTrue("perfect_solutions_10 should be unlocked after 10 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
         
-        Timber.d("[RESET_TEST] ✓ After 10 levels: all achievements unlocked");
+        Timber.d("[UNITTESTS][RESET_TEST] ✓ After 10 levels: all achievements unlocked");
     }
 
     /**
@@ -135,7 +135,7 @@ public class AchievementResetTest {
         int levelsCompleted = prefs.getInt("counter_levels_completed", -1);
         int perfectSolutions = prefs.getInt("counter_perfect_solutions", -1);
         
-        Timber.d("[RESET_TEST] Before reset: levelsCompleted=%d, perfectSolutions=%d",
+        Timber.d("[UNITTESTS][RESET_TEST] Before reset: levelsCompleted=%d, perfectSolutions=%d",
                 levelsCompleted, perfectSolutions);
         
         assertEquals("levelsCompleted should be 5", 5, levelsCompleted);
@@ -148,7 +148,7 @@ public class AchievementResetTest {
         levelsCompleted = prefs.getInt("counter_levels_completed", -1);
         perfectSolutions = prefs.getInt("counter_perfect_solutions", -1);
         
-        Timber.d("[RESET_TEST] After reset: levelsCompleted=%d, perfectSolutions=%d",
+        Timber.d("[UNITTESTS][RESET_TEST] After reset: levelsCompleted=%d, perfectSolutions=%d",
                 levelsCompleted, perfectSolutions);
         
         assertEquals("levelsCompleted should be cleared", -1, levelsCompleted);

@@ -63,8 +63,8 @@ public class LoadGameDifficultyTest {
         // Set difficulty to Beginner for the initial game
         Preferences.difficulty = Constants.DIFFICULTY_BEGINNER;
         
-        Timber.d("[LOAD_GAME_TEST] ========== TEST STARTED ==========");
-        Timber.d("[LOAD_GAME_TEST] Original difficulty: %d, set to Beginner: %d", 
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Original difficulty: %d, set to Beginner: %d", 
                 originalDifficulty, Constants.DIFFICULTY_BEGINNER);
     }
 
@@ -72,16 +72,16 @@ public class LoadGameDifficultyTest {
     public void tearDown() {
         // Restore original difficulty
         Preferences.difficulty = originalDifficulty;
-        Timber.d("[LOAD_GAME_TEST] Restored difficulty to: %d", originalDifficulty);
-        Timber.d("[LOAD_GAME_TEST] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Restored difficulty to: %d", originalDifficulty);
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testLoadBeginnerGameWithInsaneDifficulty() throws InterruptedException {
-        Timber.d("[LOAD_GAME_TEST] Starting test: Load Beginner game with Insane difficulty settings");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Starting test: Load Beginner game with Insane difficulty settings");
         
         // Step 1: Start a new random game in Beginner mode
-        Timber.d("[LOAD_GAME_TEST] Step 1: Starting new random game in Beginner mode");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 1: Starting new random game in Beginner mode");
         Thread.sleep(500);
         
         onView(withId(R.id.ui_button)).check(matches(isDisplayed())).perform(click());
@@ -108,7 +108,7 @@ public class LoadGameDifficultyTest {
         Thread.sleep(500);
         
         assertNotNull("Game state should not be null", gameStateHolder[0]);
-        Timber.d("[LOAD_GAME_TEST] Game created with %d solution moves, difficulty: %d", 
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Game created with %d solution moves, difficulty: %d", 
                 solutionMovesHolder[0], gameStateHolder[0].getDifficulty());
         
         // Verify the game difficulty is Beginner
@@ -116,20 +116,20 @@ public class LoadGameDifficultyTest {
                 Constants.DIFFICULTY_BEGINNER, gameStateHolder[0].getDifficulty());
         
         // Step 2: Save the game
-        Timber.d("[LOAD_GAME_TEST] Step 2: Saving the game");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 2: Saving the game");
         
         // Click save button
         try {
             gameStateManager.saveGame(1);
             Thread.sleep(1000);
-            Timber.d("[LOAD_GAME_TEST] Game saved to slot 1");
+            Timber.d("[UNITTESTS][LOAD_GAME_TEST] Game saved to slot 1");
         } catch (Exception e) {
             Timber.e(e, "[LOAD_GAME_TEST] Could not save game");
             // Try alternative save method if direct button not available
         }
         
         // Step 3: Go back to main menu and change difficulty to Insane
-        Timber.d("[LOAD_GAME_TEST] Step 3: Changing difficulty to Insane");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 3: Changing difficulty to Insane");
         
         // Navigate back to main menu
         try {
@@ -141,16 +141,16 @@ public class LoadGameDifficultyTest {
         
         // Change difficulty to Insane (programmatically since we're testing the load behavior)
         Preferences.difficulty = Constants.DIFFICULTY_INSANE;
-        Timber.d("[LOAD_GAME_TEST] Difficulty changed to Insane: %d", Preferences.difficulty);
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Difficulty changed to Insane: %d", Preferences.difficulty);
         
         // Step 4: Load the saved game
-        Timber.d("[LOAD_GAME_TEST] Step 4: Loading the saved game");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 4: Loading the saved game");
         
         // Navigate to Load Game screen
         try {
             onView(withId(R.id.load_game_button)).check(matches(isDisplayed())).perform(click());
             Thread.sleep(1000);
-            Timber.d("[LOAD_GAME_TEST] Load Game button clicked");
+            Timber.d("[UNITTESTS][LOAD_GAME_TEST] Load Game button clicked");
         } catch (Exception e) {
             Timber.e(e, "[LOAD_GAME_TEST] Could not click Load Game button");
             fail("Could not navigate to Load Game screen");
@@ -163,14 +163,14 @@ public class LoadGameDifficultyTest {
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.loadGame(0); // Load from slot 0
-                Timber.d("[LOAD_GAME_TEST] loadGame(0) called");
+                Timber.d("[UNITTESTS][LOAD_GAME_TEST] loadGame(0) called");
             }
         });
         
         Thread.sleep(3000); // Wait for game to load and solver to run
         
         // Step 5: Verify the game was NOT regenerated
-        Timber.d("[LOAD_GAME_TEST] Step 5: Verifying game was not regenerated");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 5: Verifying game was not regenerated");
         
         final GameState[] loadedStateHolder = new GameState[1];
         final boolean[] isLoadedFromSaveHolder = new boolean[1];
@@ -192,12 +192,12 @@ public class LoadGameDifficultyTest {
                 isLoadedFromSaveHolder[0]);
         
         // Step 6: Verify the displayed difficulty is from the savegame (Beginner), not from settings (Insane)
-        Timber.d("[LOAD_GAME_TEST] Step 6: Verifying displayed difficulty");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 6: Verifying displayed difficulty");
         
         assertEquals("Effective difficulty should be Beginner (from savegame), not Insane (from settings)", 
                 Constants.DIFFICULTY_BEGINNER, effectiveDifficultyHolder[0]);
         
-        Timber.d("[LOAD_GAME_TEST] Loaded game difficulty: %d, effective difficulty: %d, settings difficulty: %d",
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Loaded game difficulty: %d, effective difficulty: %d, settings difficulty: %d",
                 loadedStateHolder[0].getDifficulty(), effectiveDifficultyHolder[0], Preferences.difficulty);
         
         // Verify the game state difficulty matches the original Beginner game
@@ -208,13 +208,13 @@ public class LoadGameDifficultyTest {
         assertEquals("Settings difficulty should still be Insane", 
                 Constants.DIFFICULTY_INSANE, Preferences.difficulty);
         
-        Timber.d("[LOAD_GAME_TEST] ✓ Test passed: Loaded Beginner game with Insane settings, game was not regenerated");
-        Timber.d("[LOAD_GAME_TEST] ✓ Effective difficulty correctly shows Beginner from savegame");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] ✓ Test passed: Loaded Beginner game with Insane settings, game was not regenerated");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] ✓ Effective difficulty correctly shows Beginner from savegame");
     }
     
     @Test
     public void testNewGameResetsLoadedFromSaveFlag() throws InterruptedException {
-        Timber.d("[LOAD_GAME_TEST] Starting test: New Game resets isLoadedFromSave flag");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Starting test: New Game resets isLoadedFromSave flag");
         
         // First, simulate loading a game
         Preferences.difficulty = Constants.DIFFICULTY_BEGINNER;
@@ -254,7 +254,7 @@ public class LoadGameDifficultyTest {
         assertTrue("isLoadedFromSave should be true after loading", isLoadedFromSaveHolder[0]);
         
         // Now start a new game
-        Timber.d("[LOAD_GAME_TEST] Starting new game to reset flag");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] Starting new game to reset flag");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.startNewGame();
@@ -271,6 +271,6 @@ public class LoadGameDifficultyTest {
         
         assertFalse("isLoadedFromSave should be false after starting new game", isLoadedFromSaveHolder[0]);
         
-        Timber.d("[LOAD_GAME_TEST] ✓ Test passed: New game correctly resets isLoadedFromSave flag");
+        Timber.d("[UNITTESTS][LOAD_GAME_TEST] ✓ Test passed: New game correctly resets isLoadedFromSave flag");
     }
 }

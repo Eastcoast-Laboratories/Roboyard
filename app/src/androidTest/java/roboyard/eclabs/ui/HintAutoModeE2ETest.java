@@ -39,7 +39,7 @@ public class HintAutoModeE2ETest {
     
     @Before
     public void setUp() throws InterruptedException {
-        Timber.d("[HINT_AUTO_MODE_E2E] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] ========== TEST STARTED ==========");
         
         // Clear history and start fresh
         activityRule.getScenario().onActivity(activity -> {
@@ -58,7 +58,7 @@ public class HintAutoModeE2ETest {
     
     @After
     public void tearDown() {
-        Timber.d("[HINT_AUTO_MODE_E2E] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] ========== TEST FINISHED ==========");
     }
     
     /**
@@ -66,7 +66,7 @@ public class HintAutoModeE2ETest {
      */
     @Test
     public void testManualMode() throws InterruptedException {
-        Timber.d("[HINT_AUTO_MODE_E2E] Testing Manual Mode (Mode 0)");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Testing Manual Mode (Mode 0)");
         
         // Set mode to Manual via Settings UI
         TestHelper.setHintAutoMoveMode(0);
@@ -83,7 +83,7 @@ public class HintAutoModeE2ETest {
         final int[] initialMoveCount = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             initialMoveCount[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[HINT_AUTO_MODE_E2E] Initial move count: %d", initialMoveCount[0]);
+            Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Initial move count: %d", initialMoveCount[0]);
         });
         
         // Click hint button to show hints
@@ -100,13 +100,13 @@ public class HintAutoModeE2ETest {
         final int[] finalMoveCount = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             finalMoveCount[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[HINT_AUTO_MODE_E2E] Final move count: %d", finalMoveCount[0]);
+            Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Final move count: %d", finalMoveCount[0]);
         });
         
         assertEquals("Manual mode: move count should not change", 
                 initialMoveCount[0], finalMoveCount[0]);
         
-        Timber.d("[HINT_AUTO_MODE_E2E] ✓ Manual mode test passed");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] ✓ Manual mode test passed");
     }
     
     /**
@@ -114,7 +114,7 @@ public class HintAutoModeE2ETest {
      */
     @Test
     public void testFullAutoMode() throws InterruptedException {
-        Timber.d("[HINT_AUTO_MODE_E2E] Testing Full-Auto Mode (Mode 1)");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Testing Full-Auto Mode (Mode 1)");
         
         // Set mode to Full-Auto via Settings UI
         TestHelper.setHintAutoMoveMode(1);
@@ -131,7 +131,7 @@ public class HintAutoModeE2ETest {
         final int[] initialMoveCount = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             initialMoveCount[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[HINT_AUTO_MODE_E2E] Initial move count: %d", initialMoveCount[0]);
+            Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Initial move count: %d", initialMoveCount[0]);
         });
         
         // Click hint button to show first hint
@@ -145,10 +145,10 @@ public class HintAutoModeE2ETest {
             try {
                 onView(withId(R.id.next_hint_button)).perform(click());
                 Thread.sleep(800);
-                Timber.d("[HINT_AUTO_MODE_E2E] Clicked next hint %d times", i + 1);
+                Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Clicked next hint %d times", i + 1);
             } catch (Exception e) {
                 // Button might not be visible anymore
-                Timber.d("[HINT_AUTO_MODE_E2E] Next hint button not visible after %d clicks", i + 1);
+                Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Next hint button not visible after %d clicks", i + 1);
                 break;
             }
         }
@@ -162,13 +162,13 @@ public class HintAutoModeE2ETest {
         final int[] afterFirstHint = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             afterFirstHint[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[HINT_AUTO_MODE_E2E] After first hint: %d moves", afterFirstHint[0]);
+            Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] After first hint: %d moves", afterFirstHint[0]);
         });
         
         assertTrue("Full-Auto mode: move count should increase after first hint", 
                 afterFirstHint[0] > initialMoveCount[0]);
         
-        Timber.d("[HINT_AUTO_MODE_E2E] ✓ Full-Auto mode test passed - robot moved automatically");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] ✓ Full-Auto mode test passed - robot moved automatically");
     }
     
     /**
@@ -176,7 +176,7 @@ public class HintAutoModeE2ETest {
      */
     @Test
     public void testSemiAutoMode() throws InterruptedException {
-        Timber.d("[HINT_AUTO_MODE_E2E] Testing Semi-Auto Mode (Mode 2)");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Testing Semi-Auto Mode (Mode 2)");
         
         // Set mode to Semi-Auto via Settings UI
         TestHelper.setHintAutoMoveMode(2);
@@ -193,7 +193,7 @@ public class HintAutoModeE2ETest {
         final int[] initialMoveCount = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             initialMoveCount[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[HINT_AUTO_MODE_E2E] Initial move count: %d", initialMoveCount[0]);
+            Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Initial move count: %d", initialMoveCount[0]);
         });
         
         // Click hint button to show first hint (pre-hint)
@@ -208,9 +208,9 @@ public class HintAutoModeE2ETest {
                 onView(withId(R.id.next_hint_button)).perform(click());
                 Thread.sleep(800);
                 clickCount[0]++;
-                Timber.d("[HINT_AUTO_MODE_E2E] Clicked next hint %d times", clickCount[0]);
+                Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Clicked next hint %d times", clickCount[0]);
             } catch (Exception e) {
-                Timber.d("[HINT_AUTO_MODE_E2E] Next hint button not visible after %d clicks", clickCount[0]);
+                Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Next hint button not visible after %d clicks", clickCount[0]);
                 break;
             }
         }
@@ -219,12 +219,12 @@ public class HintAutoModeE2ETest {
         final int[] finalMoveCount = new int[1];
         activityRule.getScenario().onActivity(activity -> {
             finalMoveCount[0] = gameStateManager.getMoveCount().getValue();
-            Timber.d("[HINT_AUTO_MODE_E2E] Final move count after %d clicks: %d moves", clickCount[0], finalMoveCount[0]);
+            Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] Final move count after %d clicks: %d moves", clickCount[0], finalMoveCount[0]);
         });
         
         assertTrue("Semi-Auto mode: robot should move when next-hint button is clicked", 
                 finalMoveCount[0] > initialMoveCount[0]);
         
-        Timber.d("[HINT_AUTO_MODE_E2E] ✓ Semi-Auto mode test passed");
+        Timber.d("[UNITTESTS][HINT_AUTO_MODE_E2E] ✓ Semi-Auto mode test passed");
     }
 }

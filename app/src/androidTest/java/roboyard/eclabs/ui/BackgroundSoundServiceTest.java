@@ -40,52 +40,52 @@ public class BackgroundSoundServiceTest {
         Preferences.initialize(context);
         if (Preferences.backgroundSoundVolume == 0) {
             Preferences.setBackgroundSoundVolume(50);
-            Timber.d("[SOUND_TEST] Set background sound volume to 50 for testing");
+            Timber.d("[UNITTESTS][SOUND_TEST] Set background sound volume to 50 for testing");
         }
         
-        Timber.d("[SOUND_TEST] ========== TEST SETUP COMPLETE ==========");
-        Timber.d("[SOUND_TEST] Background sound volume: %d", Preferences.backgroundSoundVolume);
+        Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST SETUP COMPLETE ==========");
+        Timber.d("[UNITTESTS][SOUND_TEST] Background sound volume: %d", Preferences.backgroundSoundVolume);
     }
 
     @After
     public void tearDown() {
-        Timber.d("[SOUND_TEST] ========== TEST TEARDOWN ==========");
+        Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST TEARDOWN ==========");
     }
 
     @Test
     public void testBackgroundSoundStartsOnAppLaunch() throws InterruptedException {
-        Timber.d("[SOUND_TEST] ========== TEST START: testBackgroundSoundStartsOnAppLaunch ==========");
+        Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST START: testBackgroundSoundStartsOnAppLaunch ==========");
         
         // Wait for activity to fully start
         Thread.sleep(2000);
         
         activityRule.getScenario().onActivity(activity -> {
-            Timber.d("[SOUND_TEST] Activity is running: %s", activity.getClass().getSimpleName());
-            Timber.d("[SOUND_TEST] Background sound volume from Preferences: %d", Preferences.backgroundSoundVolume);
+            Timber.d("[UNITTESTS][SOUND_TEST] Activity is running: %s", activity.getClass().getSimpleName());
+            Timber.d("[UNITTESTS][SOUND_TEST] Background sound volume from Preferences: %d", Preferences.backgroundSoundVolume);
             
             // Check if sound service is running
             boolean serviceRunning = isServiceRunning(context, "roboyard.SoundService");
-            Timber.d("[SOUND_TEST] SoundService running: %b", serviceRunning);
+            Timber.d("[UNITTESTS][SOUND_TEST] SoundService running: %b", serviceRunning);
             
             if (!serviceRunning) {
                 Timber.e("[SOUND_TEST] FAILURE: SoundService is NOT running!");
                 Timber.e("[SOUND_TEST] Expected: Service should be running with volume %d", Preferences.backgroundSoundVolume);
             } else {
-                Timber.d("[SOUND_TEST] SUCCESS: SoundService is running");
+                Timber.d("[UNITTESTS][SOUND_TEST] SUCCESS: SoundService is running");
             }
         });
         
         // Wait a bit more to see if service starts delayed
-        Timber.d("[SOUND_TEST] Waiting 3 more seconds to check if service starts delayed...");
+        Timber.d("[UNITTESTS][SOUND_TEST] Waiting 3 more seconds to check if service starts delayed...");
         Thread.sleep(3000);
         
         activityRule.getScenario().onActivity(activity -> {
             boolean serviceRunning = isServiceRunning(context, "roboyard.SoundService");
-            Timber.d("[SOUND_TEST] SoundService running after 3s wait: %b", serviceRunning);
+            Timber.d("[UNITTESTS][SOUND_TEST] SoundService running after 3s wait: %b", serviceRunning);
             
             // Log final verdict
             if (serviceRunning) {
-                Timber.d("[SOUND_TEST] ========== TEST PASSED: Sound service is running ==========");
+                Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST PASSED: Sound service is running ==========");
             } else {
                 Timber.e("[SOUND_TEST] ========== TEST FAILED: Sound service is NOT running ==========");
                 Timber.e("[SOUND_TEST] Check logs above for:");
@@ -98,37 +98,37 @@ public class BackgroundSoundServiceTest {
             assertTrue("Background sound service should be running on app launch", serviceRunning);
         });
         
-        Timber.d("[SOUND_TEST] ========== TEST END ==========");
+        Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST END ==========");
     }
 
     @Test
     public void testBackgroundSoundStartsAfterRestart() throws InterruptedException {
-        Timber.d("[SOUND_TEST] ========== TEST START: testBackgroundSoundStartsAfterRestart ==========");
+        Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST START: testBackgroundSoundStartsAfterRestart ==========");
         
         // Wait for initial activity start
         Thread.sleep(2000);
         
         // Close and restart activity
-        Timber.d("[SOUND_TEST] Closing activity...");
+        Timber.d("[UNITTESTS][SOUND_TEST] Closing activity...");
         activityRule.getScenario().close();
         
-        Timber.d("[SOUND_TEST] Waiting 1 second before restart...");
+        Timber.d("[UNITTESTS][SOUND_TEST] Waiting 1 second before restart...");
         Thread.sleep(1000);
         
-        Timber.d("[SOUND_TEST] Restarting activity...");
+        Timber.d("[UNITTESTS][SOUND_TEST] Restarting activity...");
         ActivityScenario<MainActivity> newScenario = ActivityScenario.launch(MainActivity.class);
         
         // Wait for activity to start
         Thread.sleep(2000);
         
         newScenario.onActivity(activity -> {
-            Timber.d("[SOUND_TEST] Activity restarted: %s", activity.getClass().getSimpleName());
+            Timber.d("[UNITTESTS][SOUND_TEST] Activity restarted: %s", activity.getClass().getSimpleName());
             
             boolean serviceRunning = isServiceRunning(context, "roboyard.SoundService");
-            Timber.d("[SOUND_TEST] SoundService running after restart: %b", serviceRunning);
+            Timber.d("[UNITTESTS][SOUND_TEST] SoundService running after restart: %b", serviceRunning);
             
             if (serviceRunning) {
-                Timber.d("[SOUND_TEST] ========== TEST PASSED: Sound service running after restart ==========");
+                Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST PASSED: Sound service running after restart ==========");
             } else {
                 Timber.e("[SOUND_TEST] ========== TEST FAILED: Sound service NOT running after restart ==========");
             }
@@ -137,7 +137,7 @@ public class BackgroundSoundServiceTest {
         });
         
         newScenario.close();
-        Timber.d("[SOUND_TEST] ========== TEST END ==========");
+        Timber.d("[UNITTESTS][SOUND_TEST] ========== TEST END ==========");
     }
 
     /**
@@ -152,7 +152,7 @@ public class BackgroundSoundServiceTest {
         
         for (android.app.ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClassName.equals(service.service.getClassName())) {
-                Timber.d("[SOUND_TEST] Found service: %s, started: %b, foreground: %b", 
+                Timber.d("[UNITTESTS][SOUND_TEST] Found service: %s, started: %b, foreground: %b", 
                         service.service.getClassName(), service.started, service.foreground);
                 return true;
             }

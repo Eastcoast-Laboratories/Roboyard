@@ -51,10 +51,10 @@ public class AchievementCallCountTest {
      */
     @Test
     public void testLevel5DoesNotUnlockLevel10Achievements() {
-        Timber.d("[CALL_COUNT_TEST] Completing levels 1-5");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] Completing levels 1-5");
         
         for (int i = 1; i <= 5; i++) {
-            Timber.d("[CALL_COUNT_TEST] Level %d: calling onLevelCompleted(levelId=%d, moves=3, optimal=3, hints=0, stars=3, time=4500)", i, i);
+            Timber.d("[UNITTESTS][CALL_COUNT_TEST] Level %d: calling onLevelCompleted(levelId=%d, moves=3, optimal=3, hints=0, stars=3, time=4500)", i, i);
             achievementManager.onLevelCompleted(i, 3, 3, 0, 3, 4500);
             
             // Check achievements after each level
@@ -62,7 +62,7 @@ public class AchievementCallCountTest {
             boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
             boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
             
-            Timber.d("[CALL_COUNT_TEST] After level %d: level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
+            Timber.d("[UNITTESTS][CALL_COUNT_TEST] After level %d: level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
                     i, level10, perfect10, threeStar10);
             
             // These should all be false
@@ -77,7 +77,7 @@ public class AchievementCallCountTest {
             assertFalse("3_star_10_levels should NOT be unlocked after level " + i, threeStar10);
         }
         
-        Timber.d("[CALL_COUNT_TEST] ✓ Test passed - no achievements unlocked after level 5");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] ✓ Test passed - no achievements unlocked after level 5");
     }
 
     /**
@@ -85,7 +85,7 @@ public class AchievementCallCountTest {
      */
     @Test
     public void testCounterLoadingFromPreferences() {
-        Timber.d("[CALL_COUNT_TEST] ===== TESTING COUNTER LOADING =====");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] ===== TESTING COUNTER LOADING =====");
         
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         
@@ -96,7 +96,7 @@ public class AchievementCallCountTest {
                 .putInt("counter_no_hint_levels", 10)
                 .apply();
         
-        Timber.d("[CALL_COUNT_TEST] Manually set counters to 10 in SharedPreferences");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] Manually set counters to 10 in SharedPreferences");
         
         // Reset the singleton to force reload from SharedPreferences
         achievementManager.resetAll();
@@ -105,14 +105,14 @@ public class AchievementCallCountTest {
         boolean level10 = achievementManager.isUnlocked("level_10_complete");
         boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
         
-        Timber.d("[CALL_COUNT_TEST] After resetAll: level_10_complete=%s, perfect_solutions_10=%s",
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] After resetAll: level_10_complete=%s, perfect_solutions_10=%s",
                 level10, perfect10);
         
         // These should be false because resetAll clears everything
         assertFalse("level_10_complete should be false after resetAll", level10);
         assertFalse("perfect_solutions_10 should be false after resetAll", perfect10);
         
-        Timber.d("[CALL_COUNT_TEST] ✓ Test passed - resetAll properly clears achievements");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] ✓ Test passed - resetAll properly clears achievements");
     }
 
     /**
@@ -120,21 +120,21 @@ public class AchievementCallCountTest {
      */
     @Test
     public void testLevelIdParameter() {
-        Timber.d("[CALL_COUNT_TEST] ===== TESTING LEVEL ID PARAMETER =====");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] ===== TESTING LEVEL ID PARAMETER =====");
         
         // Complete levels 1-10 to unlock 3_star_10_levels
         for (int i = 1; i <= 10; i++) {
             achievementManager.onNewGameStarted();
-            Timber.d("[CALL_COUNT_TEST] Calling onLevelCompleted(levelId=%d, moves=3, optimal=3, hints=0, stars=3, time=4500)", i);
+            Timber.d("[UNITTESTS][CALL_COUNT_TEST] Calling onLevelCompleted(levelId=%d, moves=3, optimal=3, hints=0, stars=3, time=4500)", i);
             achievementManager.onLevelCompleted(i, 3, 3, 0, 3, 4500);
         }
         
         // Check if 3_star_10_levels is unlocked
         boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
-        Timber.d("[CALL_COUNT_TEST] After level 10: 3_star_10_levels=%s", threeStar10);
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] After level 10: 3_star_10_levels=%s", threeStar10);
         
         assertTrue("3_star_10_levels should be unlocked when levelId >= 10", threeStar10);
         
-        Timber.d("[CALL_COUNT_TEST] ✓ Test passed - levelId parameter works correctly");
+        Timber.d("[UNITTESTS][CALL_COUNT_TEST] ✓ Test passed - levelId parameter works correctly");
     }
 }

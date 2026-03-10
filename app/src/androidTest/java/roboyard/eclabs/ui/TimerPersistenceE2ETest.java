@@ -46,10 +46,10 @@ public class TimerPersistenceE2ETest {
 
     @Test
     public void testTimerPersistsAfterMenuAndBack() throws InterruptedException {
-        Timber.d("[E2E_TIMER] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_TIMER] ========== TEST STARTED ==========");
 
         // Step 1: Navigate to New Game (Random Game)
-        Timber.d("[E2E_TIMER] Step 1: Starting random game");
+        Timber.d("[UNITTESTS][E2E_TIMER] Step 1: Starting random game");
         Thread.sleep(2000);
         // Click New Game button programmatically (streak popup may keep it INVISIBLE)
         activityRule.getScenario().onActivity(activity -> {
@@ -57,13 +57,13 @@ public class TimerPersistenceE2ETest {
             if (btn != null) {
                 btn.setVisibility(android.view.View.VISIBLE);
                 btn.performClick();
-                Timber.d("[E2E_TIMER] Clicked New Game button programmatically");
+                Timber.d("[UNITTESTS][E2E_TIMER] Clicked New Game button programmatically");
             }
         });
         Thread.sleep(3000);
 
         // Step 2: Wait 5 seconds for timer to accumulate
-        Timber.d("[E2E_TIMER] Step 2: Waiting 5 seconds for timer to accumulate");
+        Timber.d("[UNITTESTS][E2E_TIMER] Step 2: Waiting 5 seconds for timer to accumulate");
         Thread.sleep(5000);
 
         // Read timer value before navigation
@@ -72,17 +72,17 @@ public class TimerPersistenceE2ETest {
             TextView timerView = activity.findViewById(R.id.game_timer);
             if (timerView != null) {
                 timerBefore[0] = timerView.getText().toString();
-                Timber.d("[E2E_TIMER] Timer before menu: %s", timerBefore[0]);
+                Timber.d("[UNITTESTS][E2E_TIMER] Timer before menu: %s", timerBefore[0]);
             }
         });
         Thread.sleep(200);
 
         assertNotNull("Timer text should not be null before navigation", timerBefore[0]);
         assertNotEquals("Timer should not be 00:00 after 5 seconds", "00:00", timerBefore[0]);
-        Timber.d("[E2E_TIMER] Timer before navigation: %s", timerBefore[0]);
+        Timber.d("[UNITTESTS][E2E_TIMER] Timer before navigation: %s", timerBefore[0]);
 
         // Step 3: Click Save Map button to navigate away (uses fragment replace)
-        Timber.d("[E2E_TIMER] Step 3: Clicking Save Map button");
+        Timber.d("[UNITTESTS][E2E_TIMER] Step 3: Clicking Save Map button");
         try {
             onView(withId(R.id.save_map_button)).perform(scrollTo(), click());
         } catch (Exception e) {
@@ -92,7 +92,7 @@ public class TimerPersistenceE2ETest {
         Thread.sleep(1000);
 
         // Step 4: Press back to return to the game
-        Timber.d("[E2E_TIMER] Step 4: Pressing back to return to game");
+        Timber.d("[UNITTESTS][E2E_TIMER] Step 4: Pressing back to return to game");
         androidx.test.espresso.Espresso.pressBack();
         Thread.sleep(2000);
 
@@ -102,7 +102,7 @@ public class TimerPersistenceE2ETest {
             TextView timerView = activity.findViewById(R.id.game_timer);
             if (timerView != null) {
                 timerAfter[0] = timerView.getText().toString();
-                Timber.d("[E2E_TIMER] Timer after back: %s", timerAfter[0]);
+                Timber.d("[UNITTESTS][E2E_TIMER] Timer after back: %s", timerAfter[0]);
             }
         });
         Thread.sleep(200);
@@ -114,7 +114,7 @@ public class TimerPersistenceE2ETest {
         int secondsBefore = parseTimerSeconds(timerBefore[0]);
         int secondsAfter = parseTimerSeconds(timerAfter[0]);
 
-        Timber.d("[E2E_TIMER] Seconds before: %d, seconds after: %d", secondsBefore, secondsAfter);
+        Timber.d("[UNITTESTS][E2E_TIMER] Seconds before: %d, seconds after: %d", secondsBefore, secondsAfter);
 
         // Timer after should be >= timer before (it continued counting)
         assertTrue("Timer after returning (" + timerAfter[0] + " = " + secondsAfter + "s) should be >= timer before menu (" + 
@@ -125,9 +125,9 @@ public class TimerPersistenceE2ETest {
         assertTrue("Timer should show at least 5 seconds after returning, but shows: " + timerAfter[0],
                 secondsAfter >= 5);
 
-        Timber.d("[E2E_TIMER] ✓ Timer persisted: before=%s (%ds), after=%s (%ds)",
+        Timber.d("[UNITTESTS][E2E_TIMER] ✓ Timer persisted: before=%s (%ds), after=%s (%ds)",
                 timerBefore[0], secondsBefore, timerAfter[0], secondsAfter);
-        Timber.d("[E2E_TIMER] ========== TEST PASSED ==========");
+        Timber.d("[UNITTESTS][E2E_TIMER] ========== TEST PASSED ==========");
     }
 
     /**

@@ -70,10 +70,10 @@ public class SameWallsAchievementTest {
         runOnMainThreadSync(act -> {
             FileReadWrite.deletePrivateData(act, "history_index.json");
             achievementManager.setCurrentActivity(act);
-            Timber.d("[SAME_WALLS_TEST] History cleared, activity set");
+            Timber.d("[UNITTESTS][SAME_WALLS_TEST] History cleared, activity set");
         });
 
-        Timber.d("[SAME_WALLS_TEST] setUp complete");
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] setUp complete");
     }
 
     @After
@@ -112,7 +112,7 @@ public class SameWallsAchievementTest {
             entry.setMapSignature(mapSignature);
             entry.recordCompletion(30, 5);
             GameHistoryManager.addHistoryEntry(act, entry);
-            Timber.d("[SAME_WALLS_TEST] Added history entry #%d: wallSig=%s", positionIndex, wallSig);
+            Timber.d("[UNITTESTS][SAME_WALLS_TEST] Added history entry #%d: wallSig=%s", positionIndex, wallSig);
 
             // Mirror GameFragment: setCurrentActivity + onRandomGameCompleted after saveToHistoryNow
             achievementManager.setCurrentActivity(act);
@@ -128,13 +128,13 @@ public class SameWallsAchievementTest {
      */
     @Test
     public void testSameWalls2Unlocks() throws InterruptedException {
-        Timber.d("[SAME_WALLS_TEST] ===== testSameWalls2Unlocks =====");
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] ===== testSameWalls2Unlocks =====");
 
         // Game 1: 1 unique position
         addHistoryAndCompleteGame(0, SHARED_WALL_SIGNATURE);
 
         AchievementManager.AchievementProgress progress1 = achievementManager.getProgress("same_walls_2");
-        Timber.d("[SAME_WALLS_TEST] After game 1: progress=%d/%d, unlocked=%b",
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] After game 1: progress=%d/%d, unlocked=%b",
                 progress1 != null ? progress1.current : -1,
                 progress1 != null ? progress1.required : -1,
                 achievementManager.isUnlocked("same_walls_2"));
@@ -146,7 +146,7 @@ public class SameWallsAchievementTest {
         addHistoryAndCompleteGame(1, SHARED_WALL_SIGNATURE);
 
         AchievementManager.AchievementProgress progress2 = achievementManager.getProgress("same_walls_2");
-        Timber.d("[SAME_WALLS_TEST] After game 2: progress=%d/%d, unlocked=%b",
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] After game 2: progress=%d/%d, unlocked=%b",
                 progress2 != null ? progress2.current : -1,
                 progress2 != null ? progress2.required : -1,
                 achievementManager.isUnlocked("same_walls_2"));
@@ -154,7 +154,7 @@ public class SameWallsAchievementTest {
         assertTrue("same_walls_2 MUST be unlocked after 2 positions with same wall layout",
                 achievementManager.isUnlocked("same_walls_2"));
 
-        Timber.d("[SAME_WALLS_TEST] ✓ same_walls_2 UNLOCKED after 2 unique positions!");
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] ✓ same_walls_2 UNLOCKED after 2 unique positions!");
     }
 
     /**
@@ -162,7 +162,7 @@ public class SameWallsAchievementTest {
      */
     @Test
     public void testSameWalls2RequiresSameWalls() throws InterruptedException {
-        Timber.d("[SAME_WALLS_TEST] ===== testSameWalls2RequiresSameWalls =====");
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] ===== testSameWalls2RequiresSameWalls =====");
 
         String wallSigA = SHARED_WALL_SIGNATURE;
         String wallSigB = "12x14;mh0,0;mh1,0;mh9,9;mh10,10;";
@@ -173,7 +173,7 @@ public class SameWallsAchievementTest {
         assertFalse("same_walls_2 should NOT unlock with 2 different wall signatures",
                 achievementManager.isUnlocked("same_walls_2"));
 
-        Timber.d("[SAME_WALLS_TEST] ✓ same_walls_2 correctly NOT unlocked with different walls");
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] ✓ same_walls_2 correctly NOT unlocked with different walls");
     }
 
     /**
@@ -182,7 +182,7 @@ public class SameWallsAchievementTest {
      */
     @Test
     public void testSameWallsProgressCounter() throws InterruptedException {
-        Timber.d("[SAME_WALLS_TEST] ===== testSameWallsProgressCounter =====");
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] ===== testSameWallsProgressCounter =====");
 
         for (int i = 0; i < 3; i++) {
             addHistoryAndCompleteGame(i, SHARED_WALL_SIGNATURE);
@@ -194,15 +194,15 @@ public class SameWallsAchievementTest {
         assertNotNull("same_walls_2 progress should not be null", progress2);
         assertNotNull("same_walls_10 progress should not be null", progress10);
 
-        Timber.d("[SAME_WALLS_TEST] same_walls_2 progress: %d/%d", progress2.current, progress2.required);
-        Timber.d("[SAME_WALLS_TEST] same_walls_10 progress: %d/%d", progress10.current, progress10.required);
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] same_walls_2 progress: %d/%d", progress2.current, progress2.required);
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] same_walls_10 progress: %d/%d", progress10.current, progress10.required);
 
         assertTrue("sameWallsMaxPositions should be >= 3 after 3 unique positions",
                 progress2.current >= 3);
         assertTrue("same_walls_2 should be unlocked when 3 positions found",
                 achievementManager.isUnlocked("same_walls_2"));
 
-        Timber.d("[SAME_WALLS_TEST] ✓ progress counter tracks correctly (sameWallsMaxPositions=%d)",
+        Timber.d("[UNITTESTS][SAME_WALLS_TEST] ✓ progress counter tracks correctly (sameWallsMaxPositions=%d)",
                 progress2.current);
     }
 }

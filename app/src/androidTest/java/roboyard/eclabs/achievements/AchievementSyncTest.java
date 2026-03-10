@@ -49,14 +49,14 @@ public class AchievementSyncTest {
         // Reset achievements for clean test
         achievementManager.resetAll();
         
-        Timber.d("[ACHIEVEMENT_SYNC_TEST] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         // Reset achievements after test
         achievementManager.resetAll();
-        Timber.d("[ACHIEVEMENT_SYNC_TEST] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] ========== TEST FINISHED ==========");
     }
 
     @Test
@@ -68,7 +68,7 @@ public class AchievementSyncTest {
         achievementManager.syncToServer();
         
         // If we get here without exception, test passes
-        Timber.d("[ACHIEVEMENT_SYNC_TEST] Sync skipped correctly when not logged in");
+        Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] Sync skipped correctly when not logged in");
     }
 
     @Test
@@ -81,7 +81,7 @@ public class AchievementSyncTest {
         
         // The sync is triggered with a delay, so we just verify the achievement is unlocked
         // The actual sync will happen asynchronously
-        Timber.d("[ACHIEVEMENT_SYNC_TEST] Achievement unlocked, sync should be triggered");
+        Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] Achievement unlocked, sync should be triggered");
     }
 
     @Test
@@ -118,7 +118,7 @@ public class AchievementSyncTest {
         }
         
         assertTrue("first_game should be in achievements array", foundFirstGame);
-        Timber.d("[ACHIEVEMENT_SYNC_TEST] Achievement data structure is correct");
+        Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] Achievement data structure is correct");
     }
 
     @Test
@@ -139,7 +139,7 @@ public class AchievementSyncTest {
         assertTrue("Should have total_games_solved_no_hints", stats.has("total_games_solved_no_hints"));
         assertTrue("Should have total_perfect_solutions", stats.has("total_perfect_solutions"));
         
-        Timber.d("[ACHIEVEMENT_SYNC_TEST] Stats data structure is correct");
+        Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] Stats data structure is correct");
     }
 
     @Test
@@ -147,7 +147,7 @@ public class AchievementSyncTest {
         // This test requires a logged-in user
         // Skip if not logged in
         if (!apiClient.isLoggedIn()) {
-            Timber.d("[ACHIEVEMENT_SYNC_TEST] Skipping real server test - not logged in");
+            Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] Skipping real server test - not logged in");
             return;
         }
         
@@ -181,7 +181,7 @@ public class AchievementSyncTest {
                 @Override
                 public void onSuccess(RoboyardApiClient.AchievementSyncResult result) {
                     syncSuccess[0] = result.success;
-                    Timber.d("[ACHIEVEMENT_SYNC_TEST] Sync result: success=%s, synced=%d, new=%d",
+                    Timber.d("[UNITTESTS][ACHIEVEMENT_SYNC_TEST] Sync result: success=%s, synced=%d, new=%d",
                             result.success, result.syncedCount, result.newAchievements);
                     latch.countDown();
                 }

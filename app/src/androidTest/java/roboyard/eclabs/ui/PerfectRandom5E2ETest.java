@@ -77,22 +77,22 @@ public class PerfectRandom5E2ETest {
         // Clear game history so isFirstCompletion returns true for all maps
         activityRule.getScenario().onActivity(activity -> {
             FileReadWrite.deletePrivateData(activity, "history_index.json");
-            Timber.d("[PERFECT5_TEST] History cleared");
+            Timber.d("[UNITTESTS][PERFECT5_TEST] History cleared");
         });
 
-        Timber.d("[PERFECT5_TEST] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][PERFECT5_TEST] ========== TEST STARTED ==========");
         Thread.sleep(300);
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[PERFECT5_TEST] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][PERFECT5_TEST] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testPerfectRandom5AchievementUnlocks() throws InterruptedException {
-        Timber.d("[PERFECT5_TEST] Starting test: play 5 perfect random games");
+        Timber.d("[UNITTESTS][PERFECT5_TEST] Starting test: play 5 perfect random games");
 
         // Navigate to Random Game via "New Game" button (ui_button on main screen)
         onView(withId(R.id.ui_button)).check(matches(isDisplayed())).perform(click());
@@ -106,7 +106,7 @@ public class PerfectRandom5E2ETest {
         int perfectGamesCounter = 0;
 
         for (int game = 1; game <= 5; game++) {
-            Timber.d("[PERFECT5_TEST] ===== Game %d/5 =====", game);
+            Timber.d("[UNITTESTS][PERFECT5_TEST] ===== Game %d/5 =====", game);
             achievementManager.onNewGameStarted();
 
             // Wait for solver
@@ -130,14 +130,14 @@ public class PerfectRandom5E2ETest {
             Thread.sleep(300);
 
             assertTrue("Game " + game + " should be completed", Boolean.TRUE.equals(gameCompleted));
-            Timber.d("[PERFECT5_TEST] Game %d completed!", game);
+            Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d completed!", game);
 
             // Check counter progress
             AchievementManager.AchievementProgress progress =
                     achievementManager.getProgress("perfect_random_games_5");
             if (progress != null) {
                 perfectGamesCounter = progress.current;
-                Timber.d("[PERFECT5_TEST] After game %d: perfect_random_games progress = %d/%d",
+                Timber.d("[UNITTESTS][PERFECT5_TEST] After game %d: perfect_random_games progress = %d/%d",
                         game, progress.current, progress.required);
             }
 
@@ -145,7 +145,7 @@ public class PerfectRandom5E2ETest {
             if (game == 5) {
                 Thread.sleep(1000);
                 boolean unlocked = achievementManager.isUnlocked("perfect_random_games_5");
-                Timber.d("[PERFECT5_TEST] perfect_random_games_5 unlocked: %b", unlocked);
+                Timber.d("[UNITTESTS][PERFECT5_TEST] perfect_random_games_5 unlocked: %b", unlocked);
                 assertTrue("perfect_random_games_5 MUST be unlocked after 5 perfect random games", unlocked);
 
                 // Navigate to achievements screen and verify counter there too
@@ -155,7 +155,7 @@ public class PerfectRandom5E2ETest {
 
             // Start next game
             Thread.sleep(1500);
-            Timber.d("[PERFECT5_TEST] Pressing New Game button for game %d", game + 1);
+            Timber.d("[UNITTESTS][PERFECT5_TEST] Pressing New Game button for game %d", game + 1);
             try {
                 onView(withId(R.id.next_level_button)).check(matches(isDisplayed())).perform(click());
                 Thread.sleep(500);
@@ -182,7 +182,7 @@ public class PerfectRandom5E2ETest {
             });
             if (solutionHolder[0] != null && solutionHolder[0].getMoves() != null
                     && !solutionHolder[0].getMoves().isEmpty()) {
-                Timber.d("[PERFECT5_TEST] Game %d: Solver found solution with %d moves after %d retries",
+                Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d: Solver found solution with %d moves after %d retries",
                         game, solutionHolder[0].getMoves().size(), retries);
                 return;
             }
@@ -211,7 +211,7 @@ public class PerfectRandom5E2ETest {
 
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
-        Timber.d("[PERFECT5_TEST] Game %d: Executing %d optimal moves", game, moves.size());
+        Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d: Executing %d optimal moves", game, moves.size());
 
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);
@@ -256,7 +256,7 @@ public class PerfectRandom5E2ETest {
      * Navigate to achievements screen and verify perfect_random_games_5 is unlocked
      */
     private void verifyAchievementScreenShowsUnlocked() throws InterruptedException {
-        Timber.d("[PERFECT5_TEST] Navigating to achievements screen...");
+        Timber.d("[UNITTESTS][PERFECT5_TEST] Navigating to achievements screen...");
 
         // Press back to main menu first
         try {
@@ -273,7 +273,7 @@ public class PerfectRandom5E2ETest {
 
             // Achievement is checked in AchievementManager, screen just shows state
             boolean unlocked = achievementManager.isUnlocked("perfect_random_games_5");
-            Timber.d("[PERFECT5_TEST] Achievements screen open - perfect_random_games_5 unlocked: %b", unlocked);
+            Timber.d("[UNITTESTS][PERFECT5_TEST] Achievements screen open - perfect_random_games_5 unlocked: %b", unlocked);
             assertTrue("perfect_random_games_5 must be unlocked in achievement screen", unlocked);
         } catch (Exception e) {
             Timber.w("[PERFECT5_TEST] Could not open achievements screen: %s - checking manager directly", e.getMessage());
@@ -282,7 +282,7 @@ public class PerfectRandom5E2ETest {
             assertTrue("perfect_random_games_5 must be unlocked", unlocked);
         }
 
-        Timber.d("[PERFECT5_TEST] ✓ perfect_random_games_5 is UNLOCKED after 5 perfect random games!");
+        Timber.d("[UNITTESTS][PERFECT5_TEST] ✓ perfect_random_games_5 is UNLOCKED after 5 perfect random games!");
     }
 
     private int getDirectionX(ERRGameMove direction) {

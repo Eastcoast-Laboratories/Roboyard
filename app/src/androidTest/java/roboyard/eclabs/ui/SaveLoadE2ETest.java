@@ -56,19 +56,19 @@ public class SaveLoadE2ETest {
 
     @Before
     public void setUp() throws InterruptedException {
-        Timber.d("[SAVE_LOAD_E2E] Starting SaveLoad E2E test");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Starting SaveLoad E2E test");
         TestHelper.closeAchievementPopupIfPresent();
     }
 
     @Test
     public void testSaveAndLoadRandomGame() throws InterruptedException {
         // Step 1: Start random game
-        Timber.d("[SAVE_LOAD_E2E] Step 1: Click Play to start random game");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 1: Click Play to start random game");
         onView(allOf(withId(R.id.ui_button), isDisplayed())).perform(click());
         Thread.sleep(2000);
 
         // Step 2: Verify game grid
-        Timber.d("[SAVE_LOAD_E2E] Step 2: Verify game grid is displayed");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 2: Verify game grid is displayed");
         onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
 
         // Step 3: Read map name before saving
@@ -76,64 +76,64 @@ public class SaveLoadE2ETest {
         onView(withId(R.id.unique_map_id_text)).check((view, noViewFoundException) -> {
             if (view instanceof TextView) {
                 mapNameBefore[0] = ((TextView) view).getText().toString();
-                Timber.d("[SAVE_LOAD_E2E] Map name before save: '%s'", mapNameBefore[0]);
+                Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Map name before save: '%s'", mapNameBefore[0]);
             }
         });
 
         // Step 4: Wait for solver to finish so save button is enabled
-        Timber.d("[SAVE_LOAD_E2E] Step 3: Waiting for solver to finish");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 3: Waiting for solver to finish");
         Thread.sleep(3000);
 
         // Step 5: Click Save Map button
-        Timber.d("[SAVE_LOAD_E2E] Step 4: Click Save Map button");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 4: Click Save Map button");
         onView(allOf(withId(R.id.save_map_button), isDisplayed())).perform(click());
         Thread.sleep(1000);
 
         // Step 6: Verify save screen
-        Timber.d("[SAVE_LOAD_E2E] Step 5: Verify save screen is displayed");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 5: Verify save screen is displayed");
         onView(withId(R.id.save_slot_recycler_view)).check(matches(isDisplayed()));
 
         // Step 7: Save to Slot 1 (index 1, since index 0 is auto-save)
-        Timber.d("[SAVE_LOAD_E2E] Step 6: Click on Slot 1 to save");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 6: Click on Slot 1 to save");
         onView(withId(R.id.save_slot_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(1, click()));
         Thread.sleep(1500);
 
         // Step 8: After saving, fragment switches to load mode.
         // Verify the saved slot does NOT have a red cross (no target validation error).
-        Timber.d("[SAVE_LOAD_E2E] Step 7: Verify saved slot has no red cross error indicator");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 7: Verify saved slot has no red cross error indicator");
         verifySavedSlotHasNoRedCross(1);
 
         // Step 9: Press back to return to game
-        Timber.d("[SAVE_LOAD_E2E] Step 8: Press back to return to game");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 8: Press back to return to game");
         pressBack();
         Thread.sleep(1000);
 
         // Step 10: Go back to main menu
-        Timber.d("[SAVE_LOAD_E2E] Step 9: Click Menu button to return to main menu");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 9: Click Menu button to return to main menu");
         onView(allOf(withId(R.id.menu_button), isDisplayed())).perform(click());
         Thread.sleep(1000);
 
         TestHelper.closeAchievementPopupIfPresent();
 
         // Step 11: Click Load Game
-        Timber.d("[SAVE_LOAD_E2E] Step 10: Click Load Game button");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 10: Click Load Game button");
         onView(allOf(withId(R.id.load_game_button), isDisplayed())).perform(click());
         Thread.sleep(1000);
 
         // Step 12: Verify load screen and no red cross on Slot 1
-        Timber.d("[SAVE_LOAD_E2E] Step 11: Verify load screen and slot integrity");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 11: Verify load screen and slot integrity");
         onView(withId(R.id.save_slot_recycler_view)).check(matches(isDisplayed()));
         verifySavedSlotHasNoRedCross(1);
 
         // Step 13: Load from Slot 1
-        Timber.d("[SAVE_LOAD_E2E] Step 12: Click on Slot 1 to load");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 12: Click on Slot 1 to load");
         onView(withId(R.id.save_slot_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(1, click()));
         Thread.sleep(2000);
 
         // Step 14: Verify game grid displayed after load
-        Timber.d("[SAVE_LOAD_E2E] Step 13: Verify game grid is displayed after load");
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Step 13: Verify game grid is displayed after load");
         onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
 
         // Step 15: Verify map name matches
@@ -141,7 +141,7 @@ public class SaveLoadE2ETest {
         onView(withId(R.id.unique_map_id_text)).check((view, noViewFoundException) -> {
             if (view instanceof TextView) {
                 mapNameAfter[0] = ((TextView) view).getText().toString();
-                Timber.d("[SAVE_LOAD_E2E] Map name after load: '%s'", mapNameAfter[0]);
+                Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Map name after load: '%s'", mapNameAfter[0]);
             }
         });
 
@@ -149,7 +149,7 @@ public class SaveLoadE2ETest {
         assertNotNull("Map name after load should not be null", mapNameAfter[0]);
         assertEquals("Map name must match after save/load cycle", mapNameBefore[0], mapNameAfter[0]);
 
-        Timber.d("[SAVE_LOAD_E2E] PASSED: game saved and loaded, map name matches: '%s'", mapNameBefore[0]);
+        Timber.d("[UNITTESTS][SAVE_LOAD_E2E] PASSED: game saved and loaded, map name matches: '%s'", mapNameBefore[0]);
     }
 
     /**
@@ -173,7 +173,7 @@ public class SaveLoadE2ETest {
             String text = nameText.getText().toString();
             int textColor = nameText.getCurrentTextColor();
 
-            Timber.d("[SAVE_LOAD_E2E] Slot %d: text='%s', textColor=%d (red=%d)",
+            Timber.d("[UNITTESTS][SAVE_LOAD_E2E] Slot %d: text='%s', textColor=%d (red=%d)",
                     position, text, textColor, Color.RED);
 
             assertFalse(

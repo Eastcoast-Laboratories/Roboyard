@@ -164,7 +164,7 @@ public class UISmokeTest {
     }
 
     private void step(String id, String msg) {
-        Timber.d("[SMOKE_TEST] %s [%s] %s", TAG, id, msg);
+        Timber.d("[UNITTESTS][SMOKE_TEST] %s [%s] %s", TAG, id, msg);
         System.out.println(TAG + " [" + id + "] " + msg);
     }
 }

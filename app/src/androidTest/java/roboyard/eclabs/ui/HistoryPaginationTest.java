@@ -42,12 +42,12 @@ public class HistoryPaginationTest {
     
     @Before
     public void setUp() throws Exception {
-        Timber.d("[PAGINATION_TEST] Setting up test");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Setting up test");
         
         // Create 100 dummy history entries (reduced from 200 to avoid timeout)
         activityRule.getScenario().onActivity(activity -> {
             try {
-                Timber.d("[PAGINATION_TEST] Creating 100 dummy entries");
+                Timber.d("[UNITTESTS][PAGINATION_TEST] Creating 100 dummy entries");
                 String[] assetFiles = activity.getAssets().list("Maps");
                 
                 java.util.List<String> levelFiles = new java.util.ArrayList<>();
@@ -79,11 +79,11 @@ public class HistoryPaginationTest {
                     GameHistoryManager.addHistoryEntry(activity, entry);
                     
                     if ((i + 1) % 25 == 0) {
-                        Timber.d("[PAGINATION_TEST] Created %d/100 entries", i + 1);
+                        Timber.d("[UNITTESTS][PAGINATION_TEST] Created %d/100 entries", i + 1);
                     }
                 }
                 
-                Timber.d("[PAGINATION_TEST] Successfully created 100 entries");
+                Timber.d("[UNITTESTS][PAGINATION_TEST] Successfully created 100 entries");
             } catch (Exception e) {
                 Timber.e(e, "[PAGINATION_TEST] Error creating dummy entries");
                 throw new RuntimeException("Failed to create dummy entries", e);
@@ -95,15 +95,15 @@ public class HistoryPaginationTest {
     
     @Test
     public void testPaginationWith200Entries() throws InterruptedException {
-        Timber.d("[PAGINATION_TEST] Starting pagination test");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Starting pagination test");
         
         // Step 1: Navigate to Save/Load screen
-        Timber.d("[PAGINATION_TEST] Step 1: Navigating to Save/Load screen");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 1: Navigating to Save/Load screen");
         onView(withId(R.id.load_game_button)).perform(click());
         Thread.sleep(1000);
         
         // Step 2: Switch to History tab (tab index 2)
-        Timber.d("[PAGINATION_TEST] Step 2: Switching to History tab");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 2: Switching to History tab");
         activityRule.getScenario().onActivity(activity -> {
             com.google.android.material.tabs.TabLayout tabLayout = activity.findViewById(R.id.tab_layout);
             if (tabLayout != null && tabLayout.getTabCount() > 2) {
@@ -116,18 +116,18 @@ public class HistoryPaginationTest {
         Thread.sleep(3000); // Wait for async minimap loading
         
         // Step 3: Verify pagination is visible
-        Timber.d("[PAGINATION_TEST] Step 3: Verifying pagination controls");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 3: Verifying pagination controls");
         onView(withId(R.id.pagination_controls)).check(matches(isDisplayed()));
         onView(withId(R.id.page_info_text)).check(matches(withText(containsString("Page 1 of 5"))));
         onView(withId(R.id.page_info_text)).check(matches(withText(containsString("100 entries"))));
         
         // Step 4: Verify prev button is disabled on page 1
-        Timber.d("[PAGINATION_TEST] Step 4: Checking prev button disabled on page 1");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 4: Checking prev button disabled on page 1");
         onView(withId(R.id.prev_page_button)).check(matches(not(isEnabled())));
         onView(withId(R.id.next_page_button)).check(matches(isEnabled()));
         
         // Step 5: Click next button and verify page 2
-        Timber.d("[PAGINATION_TEST] Step 5: Navigating to page 2");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 5: Navigating to page 2");
         onView(withId(R.id.next_page_button)).perform(click());
         Thread.sleep(2000); // Wait for page to load
         
@@ -136,12 +136,12 @@ public class HistoryPaginationTest {
         onView(withId(R.id.next_page_button)).check(matches(isEnabled()));
         
         // Step 6: Verify top pagination appears on page 2
-        Timber.d("[PAGINATION_TEST] Step 6: Verifying top pagination on page 2");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 6: Verifying top pagination on page 2");
         onView(withId(R.id.pagination_controls_top)).check(matches(isDisplayed()));
         onView(withId(R.id.page_info_text_top)).check(matches(withText(containsString("Page 2 of 5"))));
         
         // Step 7: Navigate to page 4 using next button
-        Timber.d("[PAGINATION_TEST] Step 7: Navigating to page 4");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 7: Navigating to page 4");
         for (int i = 0; i < 2; i++) {
             onView(withId(R.id.next_page_button)).perform(click());
             Thread.sleep(1500);
@@ -150,14 +150,14 @@ public class HistoryPaginationTest {
         onView(withId(R.id.page_info_text)).check(matches(withText(containsString("Page 4 of 5"))));
         
         // Step 8: Navigate back using prev button
-        Timber.d("[PAGINATION_TEST] Step 8: Navigating back to page 3");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 8: Navigating back to page 3");
         onView(withId(R.id.prev_page_button)).perform(click());
         Thread.sleep(1500);
         
         onView(withId(R.id.page_info_text)).check(matches(withText(containsString("Page 3 of 5"))));
         
         // Step 9: Navigate to last page (page 5)
-        Timber.d("[PAGINATION_TEST] Step 9: Navigating to last page");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 9: Navigating to last page");
         for (int i = 0; i < 2; i++) {
             onView(withId(R.id.next_page_button)).perform(click());
             Thread.sleep(1500);
@@ -168,7 +168,7 @@ public class HistoryPaginationTest {
         onView(withId(R.id.prev_page_button)).check(matches(isEnabled()));
         
         // Step 10: Use top pagination to go back to page 1
-        Timber.d("[PAGINATION_TEST] Step 10: Using top pagination to go back");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 10: Using top pagination to go back");
         for (int i = 0; i < 4; i++) {
             onView(withId(R.id.prev_page_button_top)).perform(click());
             Thread.sleep(1500);
@@ -177,16 +177,16 @@ public class HistoryPaginationTest {
         onView(withId(R.id.page_info_text)).check(matches(withText(containsString("Page 1 of 5"))));
         
         // Step 11: Verify top pagination is hidden on page 1
-        Timber.d("[PAGINATION_TEST] Step 11: Verifying top pagination hidden on page 1");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 11: Verifying top pagination hidden on page 1");
         onView(withId(R.id.pagination_controls_top)).check(matches(not(isDisplayed())));
         
         // Step 12: Verify RecyclerView is responsive (no OOM)
-        Timber.d("[PAGINATION_TEST] Step 12: Checking RecyclerView responsiveness");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] Step 12: Checking RecyclerView responsiveness");
         activityRule.getScenario().onActivity(activity -> {
             androidx.recyclerview.widget.RecyclerView recyclerView = activity.findViewById(R.id.save_slot_recycler_view);
             if (recyclerView != null && recyclerView.getAdapter() != null) {
                 int itemCount = recyclerView.getAdapter().getItemCount();
-                Timber.d("[PAGINATION_TEST] RecyclerView has %d items (should be 20)", itemCount);
+                Timber.d("[UNITTESTS][PAGINATION_TEST] RecyclerView has %d items (should be 20)", itemCount);
                 if (itemCount != 20) {
                     throw new AssertionError("Expected 20 items per page, got " + itemCount);
                 }
@@ -195,6 +195,6 @@ public class HistoryPaginationTest {
             }
         });
         
-        Timber.d("[PAGINATION_TEST] PAGINATION TEST PASSED - No OOM, UI responsive");
+        Timber.d("[UNITTESTS][PAGINATION_TEST] PAGINATION TEST PASSED - No OOM, UI responsive");
     }
 }

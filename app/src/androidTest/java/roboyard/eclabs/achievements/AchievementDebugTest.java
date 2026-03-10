@@ -39,13 +39,13 @@ public class AchievementDebugTest {
         achievementManager.resetAll();
         // Reset game session flags so achievements can be unlocked
         achievementManager.onNewGameStarted();
-        Timber.d("[DEBUG_TEST] setUp complete");
+        Timber.d("[UNITTESTS][DEBUG_TEST] setUp complete");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[DEBUG_TEST] tearDown complete");
+        Timber.d("[UNITTESTS][DEBUG_TEST] tearDown complete");
     }
 
     /**
@@ -55,11 +55,11 @@ public class AchievementDebugTest {
      */
     @Test
     public void testReproduceLogsScenario() {
-        Timber.d("[DEBUG_TEST] ===== REPRODUCING LOG SCENARIO =====");
+        Timber.d("[UNITTESTS][DEBUG_TEST] ===== REPRODUCING LOG SCENARIO =====");
         
         // Complete levels 1-5 exactly as shown in logs
         for (int level = 1; level <= 5; level++) {
-            Timber.d("[DEBUG_TEST] ===== LEVEL %d =====", level);
+            Timber.d("[UNITTESTS][DEBUG_TEST] ===== LEVEL %d =====", level);
             
             // Log before completion
             SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -67,7 +67,7 @@ public class AchievementDebugTest {
             int perfectSolutionsBefore = prefs.getInt("counter_perfect_solutions", 0);
             int noHintLevelsBefore = prefs.getInt("counter_no_hint_levels", 0);
             
-            Timber.d("[DEBUG_TEST] BEFORE: levelsCompleted=%d, perfectSolutions=%d, noHintLevels=%d",
+            Timber.d("[UNITTESTS][DEBUG_TEST] BEFORE: levelsCompleted=%d, perfectSolutions=%d, noHintLevels=%d",
                     levelsCompletedBefore, perfectSolutionsBefore, noHintLevelsBefore);
             
             // Complete level with perfect solution and no hints
@@ -79,7 +79,7 @@ public class AchievementDebugTest {
             int perfectSolutionsAfter = prefs.getInt("counter_perfect_solutions", 0);
             int noHintLevelsAfter = prefs.getInt("counter_no_hint_levels", 0);
             
-            Timber.d("[DEBUG_TEST] AFTER: levelsCompleted=%d, perfectSolutions=%d, noHintLevels=%d",
+            Timber.d("[UNITTESTS][DEBUG_TEST] AFTER: levelsCompleted=%d, perfectSolutions=%d, noHintLevels=%d",
                     levelsCompletedAfter, perfectSolutionsAfter, noHintLevelsAfter);
             
             // Check achievements
@@ -87,7 +87,7 @@ public class AchievementDebugTest {
             boolean perfect10 = achievementManager.isUnlocked("perfect_solutions_10");
             boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
             
-            Timber.d("[DEBUG_TEST] ACHIEVEMENTS: level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
+            Timber.d("[UNITTESTS][DEBUG_TEST] ACHIEVEMENTS: level_10_complete=%s, perfect_solutions_10=%s, 3_star_10_levels=%s",
                     level10Complete, perfect10, threeStar10);
             
             // CRITICAL: Assert that achievements are NOT unlocked
@@ -99,7 +99,7 @@ public class AchievementDebugTest {
                     threeStar10);
         }
         
-        Timber.d("[DEBUG_TEST] ✓ Test passed - no achievements unlocked after level 5");
+        Timber.d("[UNITTESTS][DEBUG_TEST] ✓ Test passed - no achievements unlocked after level 5");
     }
 
     /**
@@ -107,7 +107,7 @@ public class AchievementDebugTest {
      */
     @Test
     public void testSingletonInstance() {
-        Timber.d("[DEBUG_TEST] ===== TESTING SINGLETON INSTANCE =====");
+        Timber.d("[UNITTESTS][DEBUG_TEST] ===== TESTING SINGLETON INSTANCE =====");
         
         // Get instance multiple times
         AchievementManager instance1 = AchievementManager.getInstance(context);
@@ -116,7 +116,7 @@ public class AchievementDebugTest {
         // They should be the same object
         assertSame("Singleton instances should be the same", instance1, instance2);
         
-        Timber.d("[DEBUG_TEST] ✓ Singleton instance is correct");
+        Timber.d("[UNITTESTS][DEBUG_TEST] ✓ Singleton instance is correct");
     }
 
     /**
@@ -124,7 +124,7 @@ public class AchievementDebugTest {
      */
     @Test
     public void testCounterIncrementation() {
-        Timber.d("[DEBUG_TEST] ===== TESTING COUNTER INCREMENTATION =====");
+        Timber.d("[UNITTESTS][DEBUG_TEST] ===== TESTING COUNTER INCREMENTATION =====");
         
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         
@@ -132,7 +132,7 @@ public class AchievementDebugTest {
         int initialLevels = prefs.getInt("counter_levels_completed", 0);
         int initialPerfect = prefs.getInt("counter_perfect_solutions", 0);
         
-        Timber.d("[DEBUG_TEST] Initial: levels=%d, perfect=%d",
+        Timber.d("[UNITTESTS][DEBUG_TEST] Initial: levels=%d, perfect=%d",
                 initialLevels, initialPerfect);
         
         assertEquals("Initial levels should be 0", 0, initialLevels);
@@ -146,7 +146,7 @@ public class AchievementDebugTest {
         int afterLevel1Levels = prefs.getInt("counter_levels_completed", 0);
         int afterLevel1Perfect = prefs.getInt("counter_perfect_solutions", 0);
         
-        Timber.d("[DEBUG_TEST] After level 1: levels=%d, perfect=%d",
+        Timber.d("[UNITTESTS][DEBUG_TEST] After level 1: levels=%d, perfect=%d",
                 afterLevel1Levels, afterLevel1Perfect);
         
         assertEquals("After level 1, levels should be 1", 1, afterLevel1Levels);
@@ -162,7 +162,7 @@ public class AchievementDebugTest {
         int afterLevel10Levels = prefs.getInt("counter_levels_completed", 0);
         int afterLevel10Perfect = prefs.getInt("counter_perfect_solutions", 0);
         
-        Timber.d("[DEBUG_TEST] After level 10: levels=%d, perfect=%d",
+        Timber.d("[UNITTESTS][DEBUG_TEST] After level 10: levels=%d, perfect=%d",
                 afterLevel10Levels, afterLevel10Perfect);
         
         assertEquals("After level 10, levels should be 10", 10, afterLevel10Levels);
@@ -174,6 +174,6 @@ public class AchievementDebugTest {
         assertTrue("perfect_solutions_10 should be unlocked after 10 perfect solutions",
                 achievementManager.isUnlocked("perfect_solutions_10"));
         
-        Timber.d("[DEBUG_TEST] ✓ Counter incrementation is correct");
+        Timber.d("[UNITTESTS][DEBUG_TEST] ✓ Counter incrementation is correct");
     }
 }

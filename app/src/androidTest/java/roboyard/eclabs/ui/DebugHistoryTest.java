@@ -38,52 +38,52 @@ public class DebugHistoryTest {
     
     @Test
     public void testDebugHistoryCreationAndMemoryStats() throws InterruptedException {
-        Timber.d("[DEBUG_TEST] Starting Debug History test");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Starting Debug History test");
         
         // Get initial history count
         int[] initialCount = {0};
         activityRule.getScenario().onActivity(activity -> {
             initialCount[0] = GameHistoryManager.getHistoryEntries(activity).size();
-            Timber.d("[DEBUG_TEST] Initial history count: %d", initialCount[0]);
+            Timber.d("[UNITTESTS][DEBUG_TEST] Initial history count: %d", initialCount[0]);
         });
         
         // Step 1: Navigate to Settings
-        Timber.d("[DEBUG_TEST] Step 1: Navigating to Settings");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 1: Navigating to Settings");
         onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
         
         // Step 2: Long press on title to access Debug Settings (5 seconds)
-        Timber.d("[DEBUG_TEST] Step 2: Long pressing title for 5 seconds");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 2: Long pressing title for 5 seconds");
         onView(withId(R.id.title_text)).perform(longPressFor(5000));
         Thread.sleep(1000);
         
         // Step 3: Verify Debug Settings screen is displayed
-        Timber.d("[DEBUG_TEST] Step 3: Verifying Debug Settings screen");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 3: Verifying Debug Settings screen");
         onView(withText("DEBUG SETTINGS")).check(matches(isDisplayed()));
         
         // Step 4: Scroll to History Testing section
-        Timber.d("[DEBUG_TEST] Step 4: Scrolling to History Testing section");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 4: Scrolling to History Testing section");
         Thread.sleep(1000);
         
         // Step 5: Click "Add 100 Dummy History Entries" button
-        Timber.d("[DEBUG_TEST] Step 5: Clicking Add 100 Dummy History Entries");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 5: Clicking Add 100 Dummy History Entries");
         onView(withText("Add 100 Dummy History Entries")).perform(androidx.test.espresso.action.ViewActions.scrollTo(), click());
         Thread.sleep(500);
         
         // Step 6: Confirm dialog
-        Timber.d("[DEBUG_TEST] Step 6: Confirming dialog");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 6: Confirming dialog");
         Thread.sleep(1000); // Wait for dialog to appear
         onView(withText("Add")).check(matches(isDisplayed())).perform(click());
         Thread.sleep(2000); // Wait for thread to start
-        Timber.d("[DEBUG_TEST] Waiting for entries to be created...");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Waiting for entries to be created...");
         Thread.sleep(20000); // Wait for entries to be created (100 entries takes ~15-20 seconds)
         
         // Step 7: Verify entries were created
-        Timber.d("[DEBUG_TEST] Step 7: Verifying entries were created");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 7: Verifying entries were created");
         int[] finalCount = {0};
         activityRule.getScenario().onActivity(activity -> {
             finalCount[0] = GameHistoryManager.getHistoryEntries(activity).size();
-            Timber.d("[DEBUG_TEST] Final history count: %d", finalCount[0]);
+            Timber.d("[UNITTESTS][DEBUG_TEST] Final history count: %d", finalCount[0]);
             
             int added = finalCount[0] - initialCount[0];
             if (added < 100) {
@@ -92,21 +92,21 @@ public class DebugHistoryTest {
         });
         
         // Step 8: Scroll to and click Refresh Statistics
-        Timber.d("[DEBUG_TEST] Step 8: Refreshing statistics");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 8: Refreshing statistics");
         onView(withText("Refresh Statistics")).perform(androidx.test.espresso.action.ViewActions.scrollTo(), click());
         Thread.sleep(2000);
         
         // Step 9: Verify memory stats are updated (should show > 0 entries)
-        Timber.d("[DEBUG_TEST] Step 9: Verifying updated memory stats");
+        Timber.d("[UNITTESTS][DEBUG_TEST] Step 9: Verifying updated memory stats");
         activityRule.getScenario().onActivity(activity -> {
             int historyCount = GameHistoryManager.getHistoryEntries(activity).size();
-            Timber.d("[DEBUG_TEST] History entries after refresh: %d", historyCount);
+            Timber.d("[UNITTESTS][DEBUG_TEST] History entries after refresh: %d", historyCount);
             if (historyCount == 0) {
                 throw new AssertionError("Memory stats show 0 entries but " + finalCount[0] + " should exist");
             }
         });
         
-        Timber.d("[DEBUG_TEST] DEBUG HISTORY TEST PASSED");
+        Timber.d("[UNITTESTS][DEBUG_TEST] DEBUG HISTORY TEST PASSED");
     }
     
     /**

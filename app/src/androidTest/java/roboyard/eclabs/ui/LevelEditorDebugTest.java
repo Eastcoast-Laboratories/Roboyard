@@ -47,45 +47,45 @@ public class LevelEditorDebugTest {
      */
     @Test
     public void testLevelEditorButtonInDebugSettings() throws InterruptedException {
-        Timber.d("[TEST_LEVEL_EDITOR] Starting Level Editor debug button test");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Starting Level Editor debug button test");
 
         // Step 1: Navigate to Settings
-        Timber.d("[TEST_LEVEL_EDITOR] Step 1: Clicking Settings button");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 1: Clicking Settings button");
         onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
 
         // Verify Settings screen
         onView(withId(R.id.title_text)).check(matches(isDisplayed()));
-        Timber.d("[TEST_LEVEL_EDITOR] Settings screen displayed");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Settings screen displayed");
 
         // Step 2: Long press title for 3.5s to open Debug Settings
-        Timber.d("[TEST_LEVEL_EDITOR] Step 2: Long pressing title for 3.5 seconds");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 2: Long pressing title for 3.5 seconds");
         onView(withId(R.id.title_text)).perform(longPressFor(3500));
         Thread.sleep(1000);
 
         // Step 3: Verify Debug Settings is displayed with Level Editor section
-        Timber.d("[TEST_LEVEL_EDITOR] Step 3: Verifying Debug Settings with Level Editor section");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 3: Verifying Debug Settings with Level Editor section");
         onView(withText("DEBUG SETTINGS")).check(matches(isDisplayed()));
         onView(withText("LEVELS")).check(matches(isDisplayed()));
         onView(withText("Open Level Editor")).check(matches(isDisplayed()));
-        Timber.d("[TEST_LEVEL_EDITOR] Level Editor section found in Debug Settings");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Level Editor section found in Debug Settings");
 
         // Step 4: Click "Open Level Editor" button
-        Timber.d("[TEST_LEVEL_EDITOR] Step 4: Clicking Open Level Editor button");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 4: Clicking Open Level Editor button");
         onView(withText("Open Level Editor")).perform(click());
         Thread.sleep(2000);
 
         // Step 5: Verify Level Editor is displayed (check for editor-specific UI elements)
-        Timber.d("[TEST_LEVEL_EDITOR] Step 5: Verifying Level Editor is displayed");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 5: Verifying Level Editor is displayed");
         onView(withId(R.id.board_preview_container)).check(matches(isDisplayed()));
-        Timber.d("[TEST_LEVEL_EDITOR] Level Editor displayed successfully");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Level Editor displayed successfully");
 
         // Step 6: Press back to return
-        Timber.d("[TEST_LEVEL_EDITOR] Step 6: Pressing back");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 6: Pressing back");
         pressBack();
         Thread.sleep(1000);
 
-        Timber.d("[TEST_LEVEL_EDITOR] LEVEL EDITOR DEBUG BUTTON TEST PASSED");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] LEVEL EDITOR DEBUG BUTTON TEST PASSED");
     }
 
     /**
@@ -94,26 +94,26 @@ public class LevelEditorDebugTest {
      */
     @Test
     public void testLevelEditorLoadsLevel1() throws InterruptedException {
-        Timber.d("[TEST_LEVEL_EDITOR] Starting Level Editor level loading test");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Starting Level Editor level loading test");
 
         // Step 1: Navigate to Settings
-        Timber.d("[TEST_LEVEL_EDITOR] Step 1: Clicking Settings button");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 1: Clicking Settings button");
         onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
 
         // Step 2: Long press title to open Debug Settings
-        Timber.d("[TEST_LEVEL_EDITOR] Step 2: Long pressing title for 3.5 seconds");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 2: Long pressing title for 3.5 seconds");
         onView(withId(R.id.title_text)).perform(longPressFor(3500));
         Thread.sleep(1000);
 
         // Step 3: Open Level Editor
-        Timber.d("[TEST_LEVEL_EDITOR] Step 3: Opening Level Editor");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 3: Opening Level Editor");
         onView(withText("Open Level Editor")).perform(click());
         Thread.sleep(2000);
 
         // Step 4: Verify the editor loaded with a board (level 1 is loaded by default)
         // The board preview container should be visible and contain the game board
-        Timber.d("[TEST_LEVEL_EDITOR] Step 4: Verifying level loaded in editor");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 4: Verifying level loaded in editor");
         onView(withId(R.id.board_preview_container)).check(matches(isDisplayed()));
 
         // Verify the board width/height fields show the correct values for level 1 (10x10)
@@ -121,13 +121,13 @@ public class LevelEditorDebugTest {
         onView(withId(R.id.board_height_edit_text)).check(matches(isDisplayed()));
         onView(withId(R.id.board_width_edit_text)).check(matches(withText("10")));
         onView(withId(R.id.board_height_edit_text)).check(matches(withText("10")));
-        Timber.d("[TEST_LEVEL_EDITOR] Level 1 loaded correctly with board size 10x10");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Level 1 loaded correctly with board size 10x10");
 
         // Step 5: Press back
         pressBack();
         Thread.sleep(1000);
 
-        Timber.d("[TEST_LEVEL_EDITOR] LEVEL EDITOR LEVEL LOADING TEST PASSED");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] LEVEL EDITOR LEVEL LOADING TEST PASSED");
     }
 
     /**
@@ -136,31 +136,31 @@ public class LevelEditorDebugTest {
      */
     @Test
     public void testLongPressOnLevelSelectionTitleDoesNothing() throws InterruptedException {
-        Timber.d("[TEST_LEVEL_EDITOR] Starting longpress removal test");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Starting longpress removal test");
 
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
 
         // Step 1: Navigate to Level Selection (click Level Game button)
-        Timber.d("[TEST_LEVEL_EDITOR] Step 1: Clicking Level Game button");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 1: Clicking Level Game button");
         onView(withId(R.id.level_game_button)).perform(click());
         Thread.sleep(1000);
 
         // Step 2: Verify Level Selection is displayed
-        Timber.d("[TEST_LEVEL_EDITOR] Step 2: Verifying Level Selection screen");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 2: Verifying Level Selection screen");
         onView(withId(R.id.level_recycler_view)).check(matches(isDisplayed()));
 
         // Step 3: Long press on the title - should NOT open Level Editor
-        Timber.d("[TEST_LEVEL_EDITOR] Step 3: Long pressing title (should do nothing)");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 3: Long pressing title (should do nothing)");
         onView(withId(R.id.level_selection_title)).perform(longPressFor(2000));
         Thread.sleep(1000);
 
         // Step 4: Verify we're still on Level Selection (not Level Editor)
-        Timber.d("[TEST_LEVEL_EDITOR] Step 4: Verifying still on Level Selection");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Step 4: Verifying still on Level Selection");
         onView(withId(R.id.level_recycler_view)).check(matches(isDisplayed()));
-        Timber.d("[TEST_LEVEL_EDITOR] Longpress on title correctly does nothing");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] Longpress on title correctly does nothing");
 
-        Timber.d("[TEST_LEVEL_EDITOR] LONGPRESS REMOVAL TEST PASSED");
+        Timber.d("[UNITTESTS][TEST_LEVEL_EDITOR] LONGPRESS REMOVAL TEST PASSED");
     }
 
     /**

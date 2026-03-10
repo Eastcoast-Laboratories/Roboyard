@@ -95,18 +95,18 @@ public class Level140E2ETest {
         achievementManager.resetAll();
         levelResults.clear();
         totalStarsEarned = 0;
-        Timber.d("[E2E_140LEVELS] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_140LEVELS] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testComplete140Levels_UnlocksAllMasteryAchievements() throws InterruptedException {
-        Timber.d("[E2E_140LEVELS] Starting mastery achievements test");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] Starting mastery achievements test");
         Thread.sleep(500);
         
         // Get GameStateManager from activity
@@ -124,11 +124,11 @@ public class Level140E2ETest {
         
         // Complete levels to test mastery achievements
         for (int level = 1; level <= MAX_LEVEL; level++) {
-            Timber.d("[E2E_140LEVELS] ===== Starting Level %d =====", level);
+            Timber.d("[UNITTESTS][E2E_140LEVELS] ===== Starting Level %d =====", level);
             
             // Print stats before Level 140
             if (level == 140) {
-                Timber.d("[E2E_140LEVELS] ===== STATS BEFORE LEVEL 140 =====");
+                Timber.d("[UNITTESTS][E2E_140LEVELS] ===== STATS BEFORE LEVEL 140 =====");
                 printStatsReport();
             }
             
@@ -138,7 +138,7 @@ public class Level140E2ETest {
             // Start level directly via GameStateManager
             final int currentLevel = level;
             activityRule.getScenario().onActivity(activity -> {
-                Timber.d("[E2E_140LEVELS] Starting level %d via GameStateManager", currentLevel);
+                Timber.d("[UNITTESTS][E2E_140LEVELS] Starting level %d via GameStateManager", currentLevel);
                 gameStateManager.startLevelGame(currentLevel);
             });
             
@@ -182,7 +182,7 @@ public class Level140E2ETest {
                             currentResult.playerMoves, currentResult.optimalMoves, currentResult.hintsUsed);
                     currentResult.completed = levelCompleted != null && levelCompleted;
                     
-                    Timber.d("[E2E_140LEVELS] Level %d completed: %s, stars: %d (moves: %d/%d, hints: %d)", 
+                    Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d completed: %s, stars: %d (moves: %d/%d, hints: %d)", 
                             currentLevel, levelCompleted, currentResult.starsEarned,
                             currentResult.playerMoves, currentResult.optimalMoves, currentResult.hintsUsed);
                 }
@@ -207,19 +207,19 @@ public class Level140E2ETest {
             if (level == 10) {
                 Thread.sleep(2000);
                 boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
-                Timber.d("[E2E_140LEVELS] After Level 10: 3_star_10_levels = %s", threeStar10);
+                Timber.d("[UNITTESTS][E2E_140LEVELS] After Level 10: 3_star_10_levels = %s", threeStar10);
             }
             
             if (level == 50) {
                 Thread.sleep(2000);
                 boolean threeStar50 = achievementManager.isUnlocked("3_star_50_levels");
-                Timber.d("[E2E_140LEVELS] After Level 50: 3_star_50_levels = %s", threeStar50);
+                Timber.d("[UNITTESTS][E2E_140LEVELS] After Level 50: 3_star_50_levels = %s", threeStar50);
             }
             
             if (level == MAX_LEVEL) {
                 Thread.sleep(1000);
                 boolean threeStarAll = achievementManager.isUnlocked("3_star_all_levels");
-                Timber.d("[E2E_140LEVELS] After Level %d: 3_star_all_levels = %s", MAX_LEVEL, threeStarAll);
+                Timber.d("[UNITTESTS][E2E_140LEVELS] After Level %d: 3_star_all_levels = %s", MAX_LEVEL, threeStarAll);
             }
             
             // No need to click Next Level button - we start levels directly via GameStateManager
@@ -232,7 +232,7 @@ public class Level140E2ETest {
         Thread.sleep(5000);
         
         // Print final stats
-        Timber.d("[E2E_140LEVELS] ===== FINAL STATS AFTER ALL LEVELS =====");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ===== FINAL STATS AFTER ALL LEVELS =====");
         printStatsReport();
         
         // Generate detailed final report
@@ -268,9 +268,9 @@ public class Level140E2ETest {
         }
         
         if (problemLevels.isEmpty()) {
-            Timber.d("[E2E_140LEVELS] ✓ Test passed: All %d levels completed with 3 stars", MAX_LEVEL);
+            Timber.d("[UNITTESTS][E2E_140LEVELS] ✓ Test passed: All %d levels completed with 3 stars", MAX_LEVEL);
         } else {
-            Timber.d("[E2E_140LEVELS] ✗ Test failed: %d levels without 3 stars", problemLevels.size());
+            Timber.d("[UNITTESTS][E2E_140LEVELS] ✗ Test failed: %d levels without 3 stars", problemLevels.size());
         }
     }
     
@@ -298,7 +298,7 @@ public class Level140E2ETest {
             });
             
             if (solutionHolder[0] != null && moveCount[0] > 0) {
-                Timber.d("[E2E_140LEVELS] Level %d: Found solution with %d moves after %d retries", 
+                Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d: Found solution with %d moves after %d retries", 
                         level, moveCount[0], retries);
                 break;
             }
@@ -307,7 +307,7 @@ public class Level140E2ETest {
             retries++;
             
             if (retries % 10 == 0) {
-                Timber.d("[E2E_140LEVELS] Level %d: Still waiting for solution... (%d/%d)", level, retries, maxRetries);
+                Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d: Still waiting for solution... (%d/%d)", level, retries, maxRetries);
             }
         }
         
@@ -320,7 +320,7 @@ public class Level140E2ETest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[E2E_140LEVELS] Level %d: Executing %d moves", level, moves.size());
+        Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d: Executing %d moves", level, moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);
@@ -329,7 +329,7 @@ public class Level140E2ETest {
                 int robotColor = rrMove.getColor();
                 ERRGameMove direction = rrMove.getMove();
                 
-                Timber.d("[E2E_140LEVELS] Move %d/%d: Robot color=%d -> %s", i + 1, moves.size(), robotColor, direction);
+                Timber.d("[UNITTESTS][E2E_140LEVELS] Move %d/%d: Robot color=%d -> %s", i + 1, moves.size(), robotColor, direction);
                 
                 final int dx = getDirectionX(direction);
                 final int dy = getDirectionY(direction);
@@ -354,13 +354,13 @@ public class Level140E2ETest {
                                 
                                 if (selectedRobot != null) {
                                     state.setSelectedRobot(selectedRobot);
-                                    Timber.d("[E2E_140LEVELS] Move %d: Selected robot color=%d at pos (%d,%d)", 
+                                    Timber.d("[UNITTESTS][E2E_140LEVELS] Move %d: Selected robot color=%d at pos (%d,%d)", 
                                             moveIndex + 1, color, selectedRobot.getX(), selectedRobot.getY());
                                     
                                     // Execute move
                                     gameStateManager.moveRobotInDirection(dx, dy);
                                     moveExecuted[0] = true;
-                                    Timber.d("[E2E_140LEVELS] Move %d: Executed direction (%d,%d)", moveIndex + 1, dx, dy);
+                                    Timber.d("[UNITTESTS][E2E_140LEVELS] Move %d: Executed direction (%d,%d)", moveIndex + 1, dx, dy);
                                 } else {
                                     Timber.e("[E2E_140LEVELS] Move %d: Robot with color %d not found!", moveIndex + 1, color);
                                 }
@@ -435,23 +435,23 @@ public class Level140E2ETest {
             }
         }
         
-        Timber.d("[E2E_140LEVELS] ===== CURRENT STATS =====");
-        Timber.d("[E2E_140LEVELS] Levels completed: %d", levelResults.size());
-        Timber.d("[E2E_140LEVELS] Total Stars Earned: %d / %d", totalStarsEarned, maxStars);
-        Timber.d("[E2E_140LEVELS] ");
-        Timber.d("[E2E_140LEVELS] ⭐⭐⭐ 3 stars: %d levels", levelsWithThreeStars);
-        Timber.d("[E2E_140LEVELS] ⭐⭐   2 stars: %d levels", levelsWithTwoStars);
-        Timber.d("[E2E_140LEVELS] ⭐     1 star:  %d levels", levelsWithOneStar);
-        Timber.d("[E2E_140LEVELS] ☆     0 stars: %d levels", levelsWithZeroStars);
-        Timber.d("[E2E_140LEVELS] ❌    Failed:  %d levels", failedLevels);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ===== CURRENT STATS =====");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] Levels completed: %d", levelResults.size());
+        Timber.d("[UNITTESTS][E2E_140LEVELS] Total Stars Earned: %d / %d", totalStarsEarned, maxStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ⭐⭐⭐ 3 stars: %d levels", levelsWithThreeStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ⭐⭐   2 stars: %d levels", levelsWithTwoStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ⭐     1 star:  %d levels", levelsWithOneStar);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ☆     0 stars: %d levels", levelsWithZeroStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ❌    Failed:  %d levels", failedLevels);
         
         if (!problemLevels.isEmpty()) {
-            Timber.d("[E2E_140LEVELS] ===== PROBLEM LEVELS =====");
+            Timber.d("[UNITTESTS][E2E_140LEVELS] ===== PROBLEM LEVELS =====");
             for (LevelResult result : problemLevels) {
-                Timber.d("[E2E_140LEVELS] %s", result.toString());
+                Timber.d("[UNITTESTS][E2E_140LEVELS] %s", result.toString());
             }
         }
-        Timber.d("[E2E_140LEVELS] ============================");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ============================");
     }
     
     /**
@@ -490,26 +490,26 @@ public class Level140E2ETest {
             }
         }
         
-        Timber.d("[E2E_140LEVELS] ===== FINAL REPORT =====");
-        Timber.d("[E2E_140LEVELS] Levels tested: %d (skipped Level 140 due to OOM)", MAX_LEVEL);
-        Timber.d("[E2E_140LEVELS] Total Stars Earned: %d / %d", totalStarsEarned, maxStars);
-        Timber.d("[E2E_140LEVELS] ");
-        Timber.d("[E2E_140LEVELS] ⭐⭐⭐ 3 stars: %d levels", levelsWithThreeStars);
-        Timber.d("[E2E_140LEVELS] ⭐⭐   2 stars: %d levels", levelsWithTwoStars);
-        Timber.d("[E2E_140LEVELS] ⭐     1 star:  %d levels", levelsWithOneStar);
-        Timber.d("[E2E_140LEVELS] ☆     0 stars: %d levels", levelsWithZeroStars);
-        Timber.d("[E2E_140LEVELS] ❌    Failed:  %d levels", failedLevels);
-        Timber.d("[E2E_140LEVELS] ");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ===== FINAL REPORT =====");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] Levels tested: %d (skipped Level 140 due to OOM)", MAX_LEVEL);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] Total Stars Earned: %d / %d", totalStarsEarned, maxStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ⭐⭐⭐ 3 stars: %d levels", levelsWithThreeStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ⭐⭐   2 stars: %d levels", levelsWithTwoStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ⭐     1 star:  %d levels", levelsWithOneStar);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ☆     0 stars: %d levels", levelsWithZeroStars);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ❌    Failed:  %d levels", failedLevels);
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ");
         
         if (!problemLevels.isEmpty()) {
-            Timber.d("[E2E_140LEVELS] ===== PROBLEM LEVELS =====");
+            Timber.d("[UNITTESTS][E2E_140LEVELS] ===== PROBLEM LEVELS =====");
             for (LevelResult result : problemLevels) {
-                Timber.d("[E2E_140LEVELS] %s", result.toString());
+                Timber.d("[UNITTESTS][E2E_140LEVELS] %s", result.toString());
             }
         } else {
-            Timber.d("[E2E_140LEVELS] ✓ All levels completed with 3 stars!");
+            Timber.d("[UNITTESTS][E2E_140LEVELS] ✓ All levels completed with 3 stars!");
         }
         
-        Timber.d("[E2E_140LEVELS] ============================");
+        Timber.d("[UNITTESTS][E2E_140LEVELS] ============================");
     }
 }

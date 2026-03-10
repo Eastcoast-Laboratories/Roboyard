@@ -73,12 +73,12 @@ public class TestHelper {
                         restoreInvisibleButtons(rootView);
                     }
                 } catch (Exception e) {
-                    Timber.d("[TEST_HELPER] Error removing popup: %s", e.getMessage());
+                    Timber.d("[UNITTESTS][TEST_HELPER] Error removing popup: %s", e.getMessage());
                 }
             });
             Thread.sleep(300);
         } catch (Exception e) {
-            Timber.d("[TEST_HELPER] No achievement popup to close: %s", e.getMessage());
+            Timber.d("[UNITTESTS][TEST_HELPER] No achievement popup to close: %s", e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class TestHelper {
         for (int i = parent.getChildCount() - 1; i >= 0; i--) {
             View child = parent.getChildAt(i);
             if (child.getElevation() >= 900 || child.getZ() >= 900) {
-                Timber.d("[TEST_HELPER] Removing popup view with elevation=%.0f Z=%.0f", 
+                Timber.d("[UNITTESTS][TEST_HELPER] Removing popup view with elevation=%.0f Z=%.0f", 
                     child.getElevation(), child.getZ());
                 parent.removeView(child);
                 removed = true;
@@ -113,7 +113,7 @@ public class TestHelper {
             View child = parent.getChildAt(i);
             if (child.getVisibility() == View.INVISIBLE && child instanceof android.widget.Button) {
                 child.setVisibility(View.VISIBLE);
-                Timber.d("[TEST_HELPER] Restored button visibility: %s", child.toString().substring(0, Math.min(80, child.toString().length())));
+                Timber.d("[UNITTESTS][TEST_HELPER] Restored button visibility: %s", child.toString().substring(0, Math.min(80, child.toString().length())));
             }
             if (child instanceof ViewGroup) {
                 restoreInvisibleButtons((ViewGroup) child);
@@ -143,7 +143,7 @@ public class TestHelper {
             GameHistoryManager.deleteHistoryEntry(activity, e.getMapPath());
         }
         FileReadWrite.writePrivateData(activity, "history_index.json", "{\"historyEntries\":[]}");
-        Timber.d("[TEST_HELPER] History cleared (%d entries removed)", entries.size());
+        Timber.d("[UNITTESTS][TEST_HELPER] History cleared (%d entries removed)", entries.size());
         Thread.sleep(500);
     }
 
@@ -152,7 +152,7 @@ public class TestHelper {
      * Use this after starting a test to ensure popups don't interfere.
      */
     public static void startAndWait8sForPopupClose() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Waiting 8 seconds for popup to close");
+        Timber.d("[UNITTESTS][TEST_HELPER] Waiting 8 seconds for popup to close");
         Thread.sleep(8000);
     }
 
@@ -161,7 +161,7 @@ public class TestHelper {
      * Verifies that the game grid is displayed.
      */
     public static void startRandomGame() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Starting random game");
+        Timber.d("[UNITTESTS][TEST_HELPER] Starting random game");
         onView(withId(R.id.ui_button)).perform(click());
         Thread.sleep(2000);
         onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
@@ -173,7 +173,7 @@ public class TestHelper {
      * @param levelId The level ID to start (1-140)
      */
     public static void startLevelGame(ActivityScenarioRule<MainActivity> activityRule, int levelId) {
-        Timber.d("[TEST_HELPER] Starting level %d", levelId);
+        Timber.d("[UNITTESTS][TEST_HELPER] Starting level %d", levelId);
         activityRule.getScenario().onActivity(a -> {
             GameStateManager gameStateManager = a.getGameStateManager();
             gameStateManager.startLevelGame(levelId);
@@ -190,7 +190,7 @@ public class TestHelper {
      * Requires being in Settings screen first.
      */
     public static void openDebugScreen() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Opening Debug Settings");
+        Timber.d("[UNITTESTS][TEST_HELPER] Opening Debug Settings");
         // Click settings icon
         onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
@@ -208,7 +208,7 @@ public class TestHelper {
      * Assumes we're starting from main menu.
      */
     public static void openLevelEditorThroughDebug() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Opening Level Editor through Debug Settings");
+        Timber.d("[UNITTESTS][TEST_HELPER] Opening Level Editor through Debug Settings");
         openDebugScreen();
         
         // Scroll to and click Level Editor button
@@ -220,7 +220,7 @@ public class TestHelper {
      * Open Settings screen and scroll to bottom.
      */
     public static void openSettingsAndScrollDown() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Opening Settings and scrolling down");
+        Timber.d("[UNITTESTS][TEST_HELPER] Opening Settings and scrolling down");
         onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
         
@@ -228,7 +228,7 @@ public class TestHelper {
         try {
             onView(withText("Version")).perform(scrollTo());
         } catch (Exception e) {
-            Timber.d("[TEST_HELPER] Could not scroll to Version text");
+            Timber.d("[UNITTESTS][TEST_HELPER] Could not scroll to Version text");
         }
         Thread.sleep(500);
     }
@@ -238,7 +238,7 @@ public class TestHelper {
      * @param activityRule The activity scenario rule
      */
     public static void navigateToSaveLoadScreen(ActivityScenarioRule<MainActivity> activityRule) {
-        Timber.d("[TEST_HELPER] Navigating to Save/Load screen");
+        Timber.d("[UNITTESTS][TEST_HELPER] Navigating to Save/Load screen");
         activityRule.getScenario().onActivity(a -> {
             roboyard.ui.fragments.SaveGameFragment fragment = new roboyard.ui.fragments.SaveGameFragment();
             a.getSupportFragmentManager()
@@ -253,7 +253,7 @@ public class TestHelper {
      * Assumes we're already in Save/Load screen.
      */
     public static void navigateToHistoryTab() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Switching to History tab");
+        Timber.d("[UNITTESTS][TEST_HELPER] Switching to History tab");
         onView(withText("History")).perform(click());
         Thread.sleep(2000);
     }
@@ -304,7 +304,7 @@ public class TestHelper {
      * @throws InterruptedException if thread is interrupted
      */
     public static void setHintAutoMoveMode(int mode) throws InterruptedException {
-        Timber.d("[TEST_HELPER] Setting hint auto-move mode to %d via Settings UI", mode);
+        Timber.d("[UNITTESTS][TEST_HELPER] Setting hint auto-move mode to %d via Settings UI", mode);
         
         // Open Settings
         openSettingsAndScrollDown();
@@ -318,15 +318,15 @@ public class TestHelper {
         switch (mode) {
             case 0: // Manual
                 onView(withId(R.id.hint_auto_move_manual)).perform(click());
-                Timber.d("[TEST_HELPER] Clicked Manual mode");
+                Timber.d("[UNITTESTS][TEST_HELPER] Clicked Manual mode");
                 break;
             case 1: // Full-Auto
                 onView(withId(R.id.hint_auto_move_full_auto)).perform(click());
-                Timber.d("[TEST_HELPER] Clicked Full-Auto mode");
+                Timber.d("[UNITTESTS][TEST_HELPER] Clicked Full-Auto mode");
                 break;
             case 2: // Semi-Auto
                 onView(withId(R.id.hint_auto_move_semi_auto)).perform(click());
-                Timber.d("[TEST_HELPER] Clicked Semi-Auto mode");
+                Timber.d("[UNITTESTS][TEST_HELPER] Clicked Semi-Auto mode");
                 break;
         }
         
@@ -336,7 +336,7 @@ public class TestHelper {
         pressBack();
         Thread.sleep(1000);
         
-        Timber.d("[TEST_HELPER] Hint auto-move mode set to %d", mode);
+        Timber.d("[UNITTESTS][TEST_HELPER] Hint auto-move mode set to %d", mode);
     }
 
     /**
@@ -346,19 +346,19 @@ public class TestHelper {
      * @throws InterruptedException if thread is interrupted
      */
     public static void setDifficulty(int difficultyResId) throws InterruptedException {
-        Timber.d("[TEST_HELPER] Setting difficulty via Settings UI");
+        Timber.d("[UNITTESTS][TEST_HELPER] Setting difficulty via Settings UI");
         
         openSettingsAndScrollDown();
         Thread.sleep(1000);
         
         onView(withId(difficultyResId)).perform(scrollTo(), click());
-        Timber.d("[TEST_HELPER] Clicked difficulty radio button");
+        Timber.d("[UNITTESTS][TEST_HELPER] Clicked difficulty radio button");
         Thread.sleep(500);
         
         pressBack();
         Thread.sleep(1000);
         
-        Timber.d("[TEST_HELPER] Difficulty set successfully");
+        Timber.d("[UNITTESTS][TEST_HELPER] Difficulty set successfully");
     }
 
     /**
@@ -368,14 +368,14 @@ public class TestHelper {
      * @throws InterruptedException if thread is interrupted
      */
     public static void setMultiTargetMode(int robotCount) throws InterruptedException {
-        Timber.d("[TEST_HELPER] Enabling Multi-Target mode with %d robots via Settings UI", robotCount);
+        Timber.d("[UNITTESTS][TEST_HELPER] Enabling Multi-Target mode with %d robots via Settings UI", robotCount);
         
         openSettingsAndScrollDown();
         Thread.sleep(1000);
         
         // Scroll to and click Multi-Target Mode
         onView(withId(R.id.multi_target_game_mode)).perform(scrollTo(), click());
-        Timber.d("[TEST_HELPER] Clicked Multi-Target game mode");
+        Timber.d("[UNITTESTS][TEST_HELPER] Clicked Multi-Target game mode");
         Thread.sleep(1000);
         
         // Scroll to robot count spinner and set value
@@ -390,7 +390,7 @@ public class TestHelper {
                 android.widget.Spinner spinner = activity.findViewById(R.id.robot_count_spinner);
                 if (spinner != null) {
                     spinner.setSelection(spinnerIndex);
-                    Timber.d("[TEST_HELPER] Robot count spinner set to index %d (= %d robots)", spinnerIndex, robotCount);
+                    Timber.d("[UNITTESTS][TEST_HELPER] Robot count spinner set to index %d (= %d robots)", spinnerIndex, robotCount);
                 }
             }
         });
@@ -399,7 +399,7 @@ public class TestHelper {
         pressBack();
         Thread.sleep(1000);
         
-        Timber.d("[TEST_HELPER] Multi-Target mode enabled with %d robots", robotCount);
+        Timber.d("[UNITTESTS][TEST_HELPER] Multi-Target mode enabled with %d robots", robotCount);
     }
 
     /**
@@ -439,7 +439,7 @@ public class TestHelper {
         if (maxLines > 0 && result.size() > maxLines) {
             result = result.subList(result.size() - maxLines, result.size());
         }
-        Timber.d("[TEST_HELPER] collectLogcatLines(tag=%s, grep=%s): %d lines", tag, grep, result.size());
+        Timber.d("[UNITTESTS][TEST_HELPER] collectLogcatLines(tag=%s, grep=%s): %d lines", tag, grep, result.size());
         return result;
     }
 
@@ -465,7 +465,7 @@ public class TestHelper {
     public static void clearLogcat() {
         try {
             Runtime.getRuntime().exec(new String[]{"logcat", "-c"}).waitFor();
-            Timber.d("[TEST_HELPER] Logcat buffer cleared");
+            Timber.d("[UNITTESTS][TEST_HELPER] Logcat buffer cleared");
         } catch (Exception e) {
             Timber.w("[TEST_HELPER] clearLogcat failed: %s", e.getMessage());
         }
@@ -477,18 +477,18 @@ public class TestHelper {
      * @throws InterruptedException if thread is interrupted
      */
     public static void setStandardGameMode() throws InterruptedException {
-        Timber.d("[TEST_HELPER] Setting Standard game mode via Settings UI");
+        Timber.d("[UNITTESTS][TEST_HELPER] Setting Standard game mode via Settings UI");
         
         openSettingsAndScrollDown();
         Thread.sleep(1000);
         
         onView(withId(R.id.standard_game_mode)).perform(scrollTo(), click());
-        Timber.d("[TEST_HELPER] Clicked Standard game mode");
+        Timber.d("[UNITTESTS][TEST_HELPER] Clicked Standard game mode");
         Thread.sleep(500);
         
         pressBack();
         Thread.sleep(1000);
         
-        Timber.d("[TEST_HELPER] Standard game mode set");
+        Timber.d("[UNITTESTS][TEST_HELPER] Standard game mode set");
     }
 }

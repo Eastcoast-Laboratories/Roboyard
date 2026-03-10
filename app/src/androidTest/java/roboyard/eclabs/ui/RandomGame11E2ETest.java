@@ -64,18 +64,18 @@ public class RandomGame11E2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[E2E_RANDOM11] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_RANDOM11] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_RANDOM11] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_RANDOM11] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testComplete11RandomGames_WithHintOnGame10() throws InterruptedException {
-        Timber.d("[E2E_RANDOM11] Starting 11 random games test (hint on game 10)");
+        Timber.d("[UNITTESTS][E2E_RANDOM11] Starting 11 random games test (hint on game 10)");
         Thread.sleep(200);
         
         // Navigate to New Game (Random Game) - button is called ui_button
@@ -88,7 +88,7 @@ public class RandomGame11E2ETest {
         
         // Complete 11 random games
         for (int game = 1; game <= 11; game++) {
-            Timber.d("[E2E_RANDOM11] ===== Starting Random Game %d =====", game);
+            Timber.d("[UNITTESTS][E2E_RANDOM11] ===== Starting Random Game %d =====", game);
             
             // Reset game session flag for new game
             achievementManager.onNewGameStarted();
@@ -98,14 +98,14 @@ public class RandomGame11E2ETest {
             
             // On game 10, press the hint button first
             if (game == 10) {
-                Timber.d("[E2E_RANDOM11] Game 10: Pressing HINT button before solving");
+                Timber.d("[UNITTESTS][E2E_RANDOM11] Game 10: Pressing HINT button before solving");
                 try {
                     onView(withId(R.id.hint_button)).check(matches(isDisplayed())).perform(click());
                     Thread.sleep(1000);
                     
                     // Notify achievement manager that hint was used
                     achievementManager.onHintUsed();
-                    Timber.d("[E2E_RANDOM11] Game 10: Hint button pressed, onHintUsed() called");
+                    Timber.d("[UNITTESTS][E2E_RANDOM11] Game 10: Hint button pressed, onHintUsed() called");
                 } catch (Exception e) {
                     Timber.e(e, "[E2E_RANDOM11] Could not press hint button");
                 }
@@ -122,7 +122,7 @@ public class RandomGame11E2ETest {
             activityRule.getScenario().onActivity(activity -> {
                 if (gameStateManager != null) {
                     gameCompleted = gameStateManager.isGameComplete().getValue();
-                    Timber.d("[E2E_RANDOM11] Game %d completed: %s", currentGame, gameCompleted);
+                    Timber.d("[UNITTESTS][E2E_RANDOM11] Game %d completed: %s", currentGame, gameCompleted);
                 }
             });
             
@@ -138,7 +138,7 @@ public class RandomGame11E2ETest {
             boolean perfectRandom10 = achievementManager.isUnlocked("perfect_random_games_10");
             boolean noHintsRandom10 = achievementManager.isUnlocked("no_hints_streak_random_10");
             
-            Timber.d("[E2E_RANDOM11] After Game %d: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
+            Timber.d("[UNITTESTS][E2E_RANDOM11] After Game %d: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
                     game, perfectRandom10, noHintsRandom10);
             
             // ASSERTIONS before game 10
@@ -151,7 +151,7 @@ public class RandomGame11E2ETest {
             
             // After Game 10, check achievements
             if (game == 10) {
-                Timber.d("[E2E_RANDOM11] ===== CHECKING ACHIEVEMENTS AFTER GAME 10 =====");
+                Timber.d("[UNITTESTS][E2E_RANDOM11] ===== CHECKING ACHIEVEMENTS AFTER GAME 10 =====");
                 
                 // Wait for achievements to be processed
                 Thread.sleep(2000);
@@ -159,7 +159,7 @@ public class RandomGame11E2ETest {
                 boolean perfectRandom10Check = achievementManager.isUnlocked("perfect_random_games_10");
                 boolean noHintsRandom10Check = achievementManager.isUnlocked("no_hints_streak_random_10");
                 
-                Timber.d("[E2E_RANDOM11] Game 10 final check: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
+                Timber.d("[UNITTESTS][E2E_RANDOM11] Game 10 final check: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
                         perfectRandom10Check, noHintsRandom10Check);
                 
                 // perfect_random_games_10 SHOULD be unlocked (10 perfect games)
@@ -174,7 +174,7 @@ public class RandomGame11E2ETest {
             // If not the last game, start a new game
             if (game < 11) {
                 Thread.sleep(2000);
-                Timber.d("[E2E_RANDOM11] Starting new random game");
+                Timber.d("[UNITTESTS][E2E_RANDOM11] Starting new random game");
                 try {
                     // In random game mode, the next_level_button acts as "New Game" button
                     onView(withId(R.id.next_level_button)).check(matches(isDisplayed())).perform(click());
@@ -192,12 +192,12 @@ public class RandomGame11E2ETest {
         // Final achievement check
         Thread.sleep(3000);
         
-        Timber.d("[E2E_RANDOM11] ===== FINAL ACHIEVEMENT CHECK =====");
+        Timber.d("[UNITTESTS][E2E_RANDOM11] ===== FINAL ACHIEVEMENT CHECK =====");
         
         boolean finalPerfectRandom10 = achievementManager.isUnlocked("perfect_random_games_10");
         boolean finalNoHintsRandom10 = achievementManager.isUnlocked("no_hints_streak_random_10");
         
-        Timber.d("[E2E_RANDOM11] Final: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
+        Timber.d("[UNITTESTS][E2E_RANDOM11] Final: perfect_random_games_10=%s, no_hints_streak_random_10=%s", 
                 finalPerfectRandom10, finalNoHintsRandom10);
         
         // Final assertions
@@ -206,7 +206,7 @@ public class RandomGame11E2ETest {
         assertFalse("no_hints_streak_random_10 should NOT be unlocked because hint was used in game 10", 
                 finalNoHintsRandom10);
         
-        Timber.d("[E2E_RANDOM11] ✓ Test passed: 11 random games completed, achievements verified");
+        Timber.d("[UNITTESTS][E2E_RANDOM11] ✓ Test passed: 11 random games completed, achievements verified");
     }
     
     /**
@@ -220,7 +220,7 @@ public class RandomGame11E2ETest {
             if (gameStateManager != null) {
                 solutionHolder[0] = gameStateManager.getCurrentSolution();
                 if (solutionHolder[0] != null) {
-                    Timber.d("[E2E_RANDOM11] Game %d: Found solution with %d moves", 
+                    Timber.d("[UNITTESTS][E2E_RANDOM11] Game %d: Found solution with %d moves", 
                             game, solutionHolder[0].getMoves().size());
                 } else {
                     Timber.w("[E2E_RANDOM11] Game %d: No solution found yet", game);
@@ -249,7 +249,7 @@ public class RandomGame11E2ETest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[E2E_RANDOM11] Game %d: Executing %d moves (optimal)", game, moves.size());
+        Timber.d("[UNITTESTS][E2E_RANDOM11] Game %d: Executing %d moves (optimal)", game, moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);
@@ -258,7 +258,7 @@ public class RandomGame11E2ETest {
                 int robotColor = rrMove.getColor();
                 ERRGameMove direction = rrMove.getMove();
                 
-                Timber.d("[E2E_RANDOM11] Move %d: Robot %d -> %s", i + 1, robotColor, direction);
+                Timber.d("[UNITTESTS][E2E_RANDOM11] Move %d: Robot %d -> %s", i + 1, robotColor, direction);
                 
                 // Select robot and move
                 final int dx = getDirectionX(direction);
@@ -273,7 +273,7 @@ public class RandomGame11E2ETest {
                             for (GameElement element : state.getRobots()) {
                                 if (element.getColor() == color) {
                                     state.setSelectedRobot(element);
-                                    Timber.d("[E2E_RANDOM11] Selected robot with color %d", color);
+                                    Timber.d("[UNITTESTS][E2E_RANDOM11] Selected robot with color %d", color);
                                     break;
                                 }
                             }

@@ -43,7 +43,7 @@ public class AchievementPopupCloseButtonTest {
 
     @Before
     public void setUp() {
-        Timber.d("[TEST] Starting AchievementPopupCloseButtonTest");
+        Timber.d("[UNITTESTS][TEST] Starting AchievementPopupCloseButtonTest");
     }
 
     @After
@@ -59,19 +59,19 @@ public class AchievementPopupCloseButtonTest {
      */
     @Test
     public void testStreakPopupCloseButtonAppears() throws InterruptedException {
-        Timber.d("[TEST] Launching MainActivity");
+        Timber.d("[UNITTESTS][TEST] Launching MainActivity");
         scenario = ActivityScenario.launch(MainActivity.class);
         
         // Wait for the streak popup to appear (it shows on app start)
         Thread.sleep(3000);
         
-        Timber.d("[TEST] Looking for streak popup");
+        Timber.d("[UNITTESTS][TEST] Looking for streak popup");
         
         // The popup should be visible - look for the "View Achievements" button text
         try {
             onView(withText(containsString("View")))
                 .check(matches(isDisplayed()));
-            Timber.d("[TEST] Found View Achievements button - popup is visible");
+            Timber.d("[UNITTESTS][TEST] Found View Achievements button - popup is visible");
         } catch (Exception e) {
             Timber.e("[TEST] Could not find View Achievements button: %s", e.getMessage());
         }
@@ -79,22 +79,22 @@ public class AchievementPopupCloseButtonTest {
         // Now tap on the popup content area (not the button) to trigger close button
         // We need to find the ScrollView and tap it
         scenario.onActivity(activity -> {
-            Timber.d("[TEST] Searching for popup views in activity");
+            Timber.d("[UNITTESTS][TEST] Searching for popup views in activity");
             View rootView = activity.getWindow().getDecorView().getRootView();
             findAndLogAllViews(rootView, 0);
             
             // Find contentLayout (LinearLayout inside ScrollView) in the popup
             android.widget.LinearLayout contentLayout = findContentLayoutInPopup(rootView);
             if (contentLayout != null) {
-                Timber.d("[TEST] Found contentLayout, performing click");
+                Timber.d("[UNITTESTS][TEST] Found contentLayout, performing click");
                 contentLayout.performClick();
                 
                 // Check if close button is now visible
                 TextView closeButton = findCloseButton(rootView);
                 if (closeButton != null) {
-                    Timber.d("[TEST] Close button found! Visibility: %d (VISIBLE=0, INVISIBLE=4, GONE=8)", closeButton.getVisibility());
+                    Timber.d("[UNITTESTS][TEST] Close button found! Visibility: %d (VISIBLE=0, INVISIBLE=4, GONE=8)", closeButton.getVisibility());
                     if (closeButton.getVisibility() == View.VISIBLE) {
-                        Timber.d("[TEST] SUCCESS: Close button is VISIBLE!");
+                        Timber.d("[UNITTESTS][TEST] SUCCESS: Close button is VISIBLE!");
                     } else {
                         Timber.e("[TEST] FAIL: Close button exists but is NOT visible");
                     }
@@ -115,7 +115,7 @@ public class AchievementPopupCloseButtonTest {
      */
     @Test
     public void testCloseButtonHidesPopup() throws InterruptedException {
-        Timber.d("[TEST] Launching MainActivity for close button test");
+        Timber.d("[UNITTESTS][TEST] Launching MainActivity for close button test");
         scenario = ActivityScenario.launch(MainActivity.class);
         
         // Wait for the streak popup to appear
@@ -127,15 +127,15 @@ public class AchievementPopupCloseButtonTest {
             // Find and click contentLayout to show close button
             android.widget.LinearLayout contentLayout = findContentLayoutInPopup(rootView);
             if (contentLayout != null) {
-                Timber.d("[TEST] Clicking contentLayout to show close button");
+                Timber.d("[UNITTESTS][TEST] Clicking contentLayout to show close button");
                 contentLayout.performClick();
                 
                 // Now find and click the close button
                 TextView closeButton = findCloseButton(rootView);
                 if (closeButton != null && closeButton.getVisibility() == View.VISIBLE) {
-                    Timber.d("[TEST] Clicking close button");
+                    Timber.d("[UNITTESTS][TEST] Clicking close button");
                     closeButton.performClick();
-                    Timber.d("[TEST] SUCCESS: Close button clicked!");
+                    Timber.d("[UNITTESTS][TEST] SUCCESS: Close button clicked!");
                 } else {
                     Timber.e("[TEST] Close button not visible or not found");
                 }
@@ -162,7 +162,7 @@ public class AchievementPopupCloseButtonTest {
             viewInfo += " text=\"" + tv.getText() + "\"";
         }
         
-        Timber.d("[VIEW_HIERARCHY] %s", viewInfo);
+        Timber.d("[UNITTESTS][VIEW_HIERARCHY] %s", viewInfo);
         
         if (view instanceof android.view.ViewGroup) {
             android.view.ViewGroup vg = (android.view.ViewGroup) view;
@@ -179,10 +179,10 @@ public class AchievementPopupCloseButtonTest {
         if (view instanceof ScrollView) {
             // Check if this ScrollView is inside a FrameLayout (popup structure)
             if (view.getParent() instanceof FrameLayout) {
-                Timber.d("[TEST] Found ScrollView in FrameLayout parent");
+                Timber.d("[UNITTESTS][TEST] Found ScrollView in FrameLayout parent");
                 ScrollView sv = (ScrollView) view;
                 if (sv.getChildCount() > 0 && sv.getChildAt(0) instanceof android.widget.LinearLayout) {
-                    Timber.d("[TEST] Found contentLayout inside ScrollView");
+                    Timber.d("[UNITTESTS][TEST] Found contentLayout inside ScrollView");
                     return (android.widget.LinearLayout) sv.getChildAt(0);
                 }
             }
@@ -208,7 +208,7 @@ public class AchievementPopupCloseButtonTest {
         if (view instanceof TextView) {
             TextView tv = (TextView) view;
             if ("✕".equals(tv.getText().toString())) {
-                Timber.d("[TEST] Found close button TextView");
+                Timber.d("[UNITTESTS][TEST] Found close button TextView");
                 return tv;
             }
         }

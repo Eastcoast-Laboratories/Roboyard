@@ -41,39 +41,39 @@ public class DebugSettingsNavigationTest {
     
     @Test
     public void testDebugSettingsNavigationFlow() throws InterruptedException {
-        Timber.d("[TEST] Starting Debug Settings navigation test");
+        Timber.d("[UNITTESTS][TEST] Starting Debug Settings navigation test");
         
         // Step 1: Navigate to Settings from Main Menu
-        Timber.d("[TEST] Step 1: Clicking Settings button");
+        Timber.d("[UNITTESTS][TEST] Step 1: Clicking Settings button");
         onView(withId(R.id.settings_icon_button)).perform(click());
         Thread.sleep(1000);
         
         // Verify we're in Settings
         onView(withId(R.id.title_text)).check(matches(isDisplayed()));
-        Timber.d("[TEST] Settings screen displayed");
+        Timber.d("[UNITTESTS][TEST] Settings screen displayed");
         
         // Step 2: Long press on title for 3+ seconds to open Debug Settings
-        Timber.d("[TEST] Step 2: Long pressing title for 3.5 seconds");
+        Timber.d("[UNITTESTS][TEST] Step 2: Long pressing title for 3.5 seconds");
         onView(withId(R.id.title_text)).perform(longPressFor(3500));
         Thread.sleep(1000);
         
         // Step 3: Verify Debug Settings is displayed
-        Timber.d("[TEST] Step 3: Verifying Debug Settings is displayed");
+        Timber.d("[UNITTESTS][TEST] Step 3: Verifying Debug Settings is displayed");
         onView(withText("DEBUG SETTINGS")).check(matches(isDisplayed()));
         onView(withText("STREAK TESTING")).check(matches(isDisplayed()));
-        Timber.d("[TEST] Debug Settings screen displayed");
+        Timber.d("[UNITTESTS][TEST] Debug Settings screen displayed");
         
         // Step 4: Press back to return to Settings
-        Timber.d("[TEST] Step 4: Pressing back to return to Settings");
+        Timber.d("[UNITTESTS][TEST] Step 4: Pressing back to return to Settings");
         pressBack();
         Thread.sleep(1000);
         
         // Step 5: Verify we're back in Settings
-        Timber.d("[TEST] Step 5: Verifying we are back in Settings");
+        Timber.d("[UNITTESTS][TEST] Step 5: Verifying we are back in Settings");
         onView(withId(R.id.title_text)).check(matches(isDisplayed()));
-        Timber.d("[TEST] Back in Settings screen");
+        Timber.d("[UNITTESTS][TEST] Back in Settings screen");
         
-        Timber.d("[TEST] DEBUG SETTINGS NAVIGATION TEST PASSED");
+        Timber.d("[UNITTESTS][TEST] DEBUG SETTINGS NAVIGATION TEST PASSED");
     }
     
     /**

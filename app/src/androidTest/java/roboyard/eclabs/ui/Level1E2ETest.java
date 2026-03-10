@@ -74,7 +74,7 @@ public class Level1E2ETest {
      */
     @Test
     public void testLevel1CompletionWithAutomaticSolution() throws InterruptedException {
-        Timber.d("[E2E_TEST] Starting Level 1 E2E test");
+        Timber.d("[UNITTESTS][E2E_TEST] Starting Level 1 E2E test");
         
         // Wait for MainActivity to load
         Thread.sleep(3000);
@@ -98,7 +98,7 @@ public class Level1E2ETest {
         // If solution is null, wait a bit more and try again
         int attempts = 0;
         while (solution == null && attempts < 5) {
-            Timber.d("[E2E_TEST] Solution not ready yet, waiting... (attempt %d)", attempts + 1);
+            Timber.d("[UNITTESTS][E2E_TEST] Solution not ready yet, waiting... (attempt %d)", attempts + 1);
             Thread.sleep(2000);
             solution = gameStateManager.getCurrentSolution();
             attempts++;
@@ -108,12 +108,12 @@ public class Level1E2ETest {
             Timber.w("[E2E_TEST] Solution could not be loaded, but continuing with manual moves");
             // Continue anyway - we can still test manual moves
         } else {
-            Timber.d("[E2E_TEST] Solution has %d moves", solution.getMoves().size());
+            Timber.d("[UNITTESTS][E2E_TEST] Solution has %d moves", solution.getMoves().size());
             
             // Execute each move from the solution
             for (int i = 0; i < solution.getMoves().size() && i < 20; i++) {
                 IGameMove move = solution.getMoves().get(i);
-                Timber.d("[E2E_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
+                Timber.d("[UNITTESTS][E2E_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
                 
                 executeMove(move);
                 
@@ -123,7 +123,7 @@ public class Level1E2ETest {
                 // Check if game is complete
                 Boolean isComplete = gameStateManager.isGameComplete().getValue();
                 if (isComplete != null && isComplete) {
-                    Timber.d("[E2E_TEST] Level completed after move %d", i + 1);
+                    Timber.d("[UNITTESTS][E2E_TEST] Level completed after move %d", i + 1);
                     break;
                 }
             }
@@ -135,18 +135,18 @@ public class Level1E2ETest {
         // Verify game is complete
         Boolean isComplete = gameStateManager.isGameComplete().getValue();
         assertTrue("Level 1 should be completed", isComplete != null && isComplete);
-        Timber.d("[E2E_TEST] Level 1 completed successfully!");
+        Timber.d("[UNITTESTS][E2E_TEST] Level 1 completed successfully!");
         
         // Verify achievements were unlocked
         AchievementManager achievementManager = AchievementManager.getInstance(context);
-        Timber.d("[E2E_TEST] Unlocked achievements: %d", achievementManager.getUnlockedCount());
+        Timber.d("[UNITTESTS][E2E_TEST] Unlocked achievements: %d", achievementManager.getUnlockedCount());
     }
 
     /**
      * Navigate to Level 1 by loading it directly via GameStateManager.
      */
     private void navigateToLevel1() throws InterruptedException {
-        Timber.d("[E2E_TEST] Navigating to Level 1");
+        Timber.d("[UNITTESTS][E2E_TEST] Navigating to Level 1");
         
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
@@ -154,7 +154,7 @@ public class Level1E2ETest {
                 gameStateManager.loadLevel(1);
                 // Start the solver to compute the solution
                 roboyard.ui.util.SolverManager.getInstance().startSolver();
-                Timber.d("[E2E_TEST] Level 1 loaded, solver started");
+                Timber.d("[UNITTESTS][E2E_TEST] Level 1 loaded, solver started");
             }
         });
         
@@ -167,7 +167,7 @@ public class Level1E2ETest {
      * @param move The move to execute
      */
     private void executeMove(IGameMove move) {
-        Timber.d("[E2E_TEST] Executing move: %s", move);
+        Timber.d("[UNITTESTS][E2E_TEST] Executing move: %s", move);
         
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null && move instanceof RRGameMove) {
@@ -175,7 +175,7 @@ public class Level1E2ETest {
                 int robotColor = rrMove.getColor();
                 int direction = rrMove.getDirection();
                 
-                Timber.d("[E2E_TEST] Move: Robot color=%d, direction=%d", robotColor, direction);
+                Timber.d("[UNITTESTS][E2E_TEST] Move: Robot color=%d, direction=%d", robotColor, direction);
                 
                 roboyard.logic.core.GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
@@ -200,7 +200,7 @@ public class Level1E2ETest {
                             case 8: dx = -1; break; // LEFT
                         }
                         
-                        Timber.d("[E2E_TEST] Moving robot %d in direction dx=%d, dy=%d", robotColor, dx, dy);
+                        Timber.d("[UNITTESTS][E2E_TEST] Moving robot %d in direction dx=%d, dy=%d", robotColor, dx, dy);
                         gameStateManager.moveRobotInDirection(dx, dy);
                     } else {
                         Timber.w("[E2E_TEST] Robot with color %d not found", robotColor);
@@ -216,7 +216,7 @@ public class Level1E2ETest {
      */
     @Test
     public void testLevel1WithSwipeGestures() throws InterruptedException {
-        Timber.d("[E2E_TEST] Starting Level 1 with swipe gestures");
+        Timber.d("[UNITTESTS][E2E_TEST] Starting Level 1 with swipe gestures");
         
         Thread.sleep(3000);
         
@@ -233,12 +233,12 @@ public class Level1E2ETest {
         GameSolution solution = gameStateManager.getCurrentSolution();
         
         if (solution != null && solution.getMoves().size() > 0) {
-            Timber.d("[E2E_TEST] Solution has %d moves", solution.getMoves().size());
+            Timber.d("[UNITTESTS][E2E_TEST] Solution has %d moves", solution.getMoves().size());
             
             // Execute moves by simulating swipes
             for (int i = 0; i < solution.getMoves().size() && i < 20; i++) {
                 IGameMove move = solution.getMoves().get(i);
-                Timber.d("[E2E_TEST] Executing move %d: %s", i + 1, move);
+                Timber.d("[UNITTESTS][E2E_TEST] Executing move %d: %s", i + 1, move);
                 
                 // Simulate the move by calling the game state manager directly
                 executeMoveDirectly(move);
@@ -247,7 +247,7 @@ public class Level1E2ETest {
                 
                 Boolean isComplete = gameStateManager.isGameComplete().getValue();
                 if (isComplete != null && isComplete) {
-                    Timber.d("[E2E_TEST] Level completed!");
+                    Timber.d("[UNITTESTS][E2E_TEST] Level completed!");
                     break;
                 }
             }
@@ -257,10 +257,10 @@ public class Level1E2ETest {
             // Verify completion
             Boolean isComplete = gameStateManager.isGameComplete().getValue();
             if (isComplete != null && isComplete) {
-                Timber.d("[E2E_TEST] Level 1 completed successfully with swipe gestures!");
+                Timber.d("[UNITTESTS][E2E_TEST] Level 1 completed successfully with swipe gestures!");
             }
         } else {
-            Timber.d("[E2E_TEST] Solution not available, but test ran successfully");
+            Timber.d("[UNITTESTS][E2E_TEST] Solution not available, but test ran successfully");
         }
     }
 
@@ -278,12 +278,12 @@ public class Level1E2ETest {
                     // This is a simplified implementation
                     // In reality, we'd need to parse the move object properly
                     
-                    Timber.d("[E2E_TEST] Executing move directly: %s", move.getClass().getSimpleName());
+                    Timber.d("[UNITTESTS][E2E_TEST] Executing move directly: %s", move.getClass().getSimpleName());
                     
                     // Try to extract direction from move
                     // This depends on the actual IGameMove implementation
                     String moveStr = move.toString();
-                    Timber.d("[E2E_TEST] Move string: %s", moveStr);
+                    Timber.d("[UNITTESTS][E2E_TEST] Move string: %s", moveStr);
                     
                 } catch (Exception e) {
                     Timber.e(e, "[E2E_TEST] Error executing move");
@@ -297,7 +297,7 @@ public class Level1E2ETest {
      */
     @Test
     public void testAchievementPopupAppearsAfterLevelCompletion() throws InterruptedException {
-        Timber.d("[E2E_TEST] Testing achievement popup visibility");
+        Timber.d("[UNITTESTS][E2E_TEST] Testing achievement popup visibility");
         
         Thread.sleep(3000);
         
@@ -314,7 +314,7 @@ public class Level1E2ETest {
         GameSolution solution = gameStateManager.getCurrentSolution();
         
         if (solution != null && solution.getMoves().size() > 0) {
-            Timber.d("[E2E_TEST] Executing %d moves", solution.getMoves().size());
+            Timber.d("[UNITTESTS][E2E_TEST] Executing %d moves", solution.getMoves().size());
             
             // Execute all moves
             for (int i = 0; i < solution.getMoves().size() && i < 20; i++) {
@@ -324,7 +324,7 @@ public class Level1E2ETest {
                 
                 Boolean isComplete = gameStateManager.isGameComplete().getValue();
                 if (isComplete != null && isComplete) {
-                    Timber.d("[E2E_TEST] Level completed after move %d", i + 1);
+                    Timber.d("[UNITTESTS][E2E_TEST] Level completed after move %d", i + 1);
                     break;
                 }
             }
@@ -337,12 +337,12 @@ public class Level1E2ETest {
         AchievementManager achievementManager = AchievementManager.getInstance(context);
         int unlockedCount = achievementManager.getUnlockedCount();
         
-        Timber.d("[E2E_TEST] Unlocked achievements: %d", unlockedCount);
+        Timber.d("[UNITTESTS][E2E_TEST] Unlocked achievements: %d", unlockedCount);
         
         if (unlockedCount > 0) {
-            Timber.d("[E2E_TEST] Achievement popup should be visible now");
+            Timber.d("[UNITTESTS][E2E_TEST] Achievement popup should be visible now");
         } else {
-            Timber.d("[E2E_TEST] No achievements unlocked yet, but test ran successfully");
+            Timber.d("[UNITTESTS][E2E_TEST] No achievements unlocked yet, but test ran successfully");
         }
     }
 }

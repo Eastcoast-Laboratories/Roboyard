@@ -67,7 +67,7 @@ public class SaveLoadCombinationsE2ETest {
     @Before
     public void setUp() throws InterruptedException {
         stepCounter = 0;
-        Timber.d("%s Starting SaveLoadCombinations E2E test", TAG);
+        Timber.d("[UNITTESTS]%s Starting SaveLoadCombinations E2E test", TAG);
         TestHelper.closeAchievementPopupIfPresent();
         activityRule.getScenario().onActivity(activity -> {
             gameStateManager = activity.getGameStateManager();
@@ -115,7 +115,7 @@ public class SaveLoadCombinationsE2ETest {
             onView(allOf(withId(R.id.next_hint_button), isDisplayed())).perform(click());
             Thread.sleep(500);
         } catch (Exception e) {
-            Timber.d("%s next_hint_button not visible, continuing with hints toggled on", TAG);
+            Timber.d("[UNITTESTS]%s next_hint_button not visible, continuing with hints toggled on", TAG);
         }
 
         step("Save to slot 2");
@@ -145,7 +145,7 @@ public class SaveLoadCombinationsE2ETest {
             onView(allOf(withId(R.id.live_move_counter_toggle), isDisplayed())).perform(click());
             Thread.sleep(500);
         } catch (Exception e) {
-            Timber.d("%s live_move_counter_toggle not visible, continuing", TAG);
+            Timber.d("[UNITTESTS]%s live_move_counter_toggle not visible, continuing", TAG);
         }
 
         step("Save to slot 3");
@@ -198,7 +198,7 @@ public class SaveLoadCombinationsE2ETest {
             onView(allOf(withId(R.id.next_hint_button), isDisplayed())).perform(click());
             Thread.sleep(300);
         } catch (Exception e) {
-            Timber.d("%s next_hint_button not visible, continuing", TAG);
+            Timber.d("[UNITTESTS]%s next_hint_button not visible, continuing", TAG);
         }
 
         step("Toggle live move counter ON");
@@ -206,7 +206,7 @@ public class SaveLoadCombinationsE2ETest {
             onView(allOf(withId(R.id.live_move_counter_toggle), isDisplayed())).perform(click());
             Thread.sleep(500);
         } catch (Exception e) {
-            Timber.d("%s live_move_counter_toggle not visible, continuing", TAG);
+            Timber.d("[UNITTESTS]%s live_move_counter_toggle not visible, continuing", TAG);
         }
 
         step("Swipe on the game grid to make moves");
@@ -325,7 +325,7 @@ public class SaveLoadCombinationsE2ETest {
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.startLevelGame(1);
-                Timber.d("%s Level 1 loaded via GameStateManager", TAG);
+                Timber.d("[UNITTESTS]%s Level 1 loaded via GameStateManager", TAG);
             }
         });
         Thread.sleep(3000);
@@ -347,7 +347,7 @@ public class SaveLoadCombinationsE2ETest {
 
     private void step(String description) {
         stepCounter++;
-        Timber.d("%s Step %d: %s", TAG, stepCounter, description);
+        Timber.d("[UNITTESTS]%s Step %d: %s", TAG, stepCounter, description);
     }
 
     private void startRandomGame() throws InterruptedException {
@@ -424,7 +424,7 @@ public class SaveLoadCombinationsE2ETest {
             String text = nameText.getText().toString();
             int textColor = nameText.getCurrentTextColor();
 
-            Timber.d("%s Slot %d: text='%s', textColor=%d (red=%d)",
+            Timber.d("[UNITTESTS]%s Slot %d: text='%s', textColor=%d (red=%d)",
                     TAG, position, text, textColor, Color.RED);
 
             assertFalse(

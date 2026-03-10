@@ -59,7 +59,7 @@ public class Level11With2StarsE2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[E2E_2STARS] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_2STARS] ========== TEST STARTED ==========");
         
         // Wait for achievement/streak popup to close
         TestHelper.startAndWait8sForPopupClose();
@@ -68,12 +68,12 @@ public class Level11With2StarsE2ETest {
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_2STARS] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_2STARS] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testLevel11With2StarsInLevel1_3StarAchievementNotUnlocked() throws InterruptedException {
-        Timber.d("[E2E_2STARS] Starting test: 11 levels with only 2 stars in level 1");
+        Timber.d("[UNITTESTS][E2E_2STARS] Starting test: 11 levels with only 2 stars in level 1");
         
         // Close any remaining popups
         TestHelper.closeAchievementPopupIfPresent();
@@ -88,7 +88,7 @@ public class Level11With2StarsE2ETest {
         
         // Complete levels 1-11
         for (int level = 1; level <= 11; level++) {
-            Timber.d("[E2E_2STARS] ===== Starting Level %d =====", level);
+            Timber.d("[UNITTESTS][E2E_2STARS] ===== Starting Level %d =====", level);
             
             // Wait for solver to find solution
             Thread.sleep(3000);
@@ -100,7 +100,7 @@ public class Level11With2StarsE2ETest {
             
             // For level 1, make a wrong move first to get only 2 stars
             if (level == 1) {
-                Timber.d("[E2E_2STARS] Level 1: Making wrong move to get only 2 stars");
+                Timber.d("[UNITTESTS][E2E_2STARS] Level 1: Making wrong move to get only 2 stars");
                 activityRule.getScenario().onActivity(activity -> {
                     if (gameStateManager != null) {
                         GameState state = gameStateManager.getCurrentState().getValue();
@@ -109,7 +109,7 @@ public class Level11With2StarsE2ETest {
                             for (GameElement element : state.getRobots()) {
                                 if (element.getColor() == 0) {
                                     state.setSelectedRobot(element);
-                                    Timber.d("[E2E_2STARS] Selected blue robot");
+                                    Timber.d("[UNITTESTS][E2E_2STARS] Selected blue robot");
                                     break;
                                 }
                             }
@@ -123,7 +123,7 @@ public class Level11With2StarsE2ETest {
                 activityRule.getScenario().onActivity(activity -> {
                     if (gameStateManager != null) {
                         gameStateManager.moveRobotInDirection(0, 1);
-                        Timber.d("[E2E_2STARS] Moved blue robot DOWN (wrong move)");
+                        Timber.d("[UNITTESTS][E2E_2STARS] Moved blue robot DOWN (wrong move)");
                     }
                 });
                 
@@ -154,7 +154,7 @@ public class Level11With2StarsE2ETest {
                             gameStateManager.getCurrentState().getValue().getHintCount() : 0;
                     starsEarned[0] = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
                     
-                    Timber.d("[E2E_2STARS] Level %d completed: %s, stars: %d", currentLevel, levelCompleted, starsEarned[0]);
+                    Timber.d("[UNITTESTS][E2E_2STARS] Level %d completed: %s, stars: %d", currentLevel, levelCompleted, starsEarned[0]);
                 }
             });
             
@@ -169,14 +169,14 @@ public class Level11With2StarsE2ETest {
             if (level == 10) {
                 Thread.sleep(2000);
                 boolean threeStar10 = achievementManager.isUnlocked("3_star_10_levels");
-                Timber.d("[E2E_2STARS] After Level 10: 3_star_10_levels = %s (should be false - only 9 levels with 3 stars)", threeStar10);
+                Timber.d("[UNITTESTS][E2E_2STARS] After Level 10: 3_star_10_levels = %s (should be false - only 9 levels with 3 stars)", threeStar10);
                 assertFalse("3_star_10_levels should NOT be unlocked yet (only 9 levels with 3 stars)", threeStar10);
             }
             
             // If not the last level, click Next Level button
             if (level < 11) {
                 Thread.sleep(3000);
-                Timber.d("[E2E_2STARS] Clicking Next Level button");
+                Timber.d("[UNITTESTS][E2E_2STARS] Clicking Next Level button");
                 
                 // Close achievement popup before clicking Next Level
                 TestHelper.closeAchievementPopupIfPresent();
@@ -198,14 +198,14 @@ public class Level11With2StarsE2ETest {
         // Wait for achievements to be processed
         Thread.sleep(5000);
         
-        Timber.d("[E2E_2STARS] ===== FINAL CHECK =====");
+        Timber.d("[UNITTESTS][E2E_2STARS] ===== FINAL CHECK =====");
         
         // Final assertion: 3_star_10_levels SHOULD be unlocked after 11 levels (10 with 3 stars)
         boolean threeStar10Final = achievementManager.isUnlocked("3_star_10_levels");
-        Timber.d("[E2E_2STARS] Final check: 3_star_10_levels = %s (should be true after 11 levels)", threeStar10Final);
+        Timber.d("[UNITTESTS][E2E_2STARS] Final check: 3_star_10_levels = %s (should be true after 11 levels)", threeStar10Final);
         assertTrue("3_star_10_levels should be unlocked after 11 levels (10 with 3 stars)", threeStar10Final);
         
-        Timber.d("[E2E_2STARS] ✓ Test passed: 3_star_10_levels correctly unlocked after 11 levels");
+        Timber.d("[UNITTESTS][E2E_2STARS] ✓ Test passed: 3_star_10_levels correctly unlocked after 11 levels");
     }
     
     /**
@@ -219,7 +219,7 @@ public class Level11With2StarsE2ETest {
             if (gameStateManager != null) {
                 solutionHolder[0] = gameStateManager.getCurrentSolution();
                 if (solutionHolder[0] != null) {
-                    Timber.d("[E2E_2STARS] Level %d: Found solution with %d moves", 
+                    Timber.d("[UNITTESTS][E2E_2STARS] Level %d: Found solution with %d moves", 
                             level, solutionHolder[0].getMoves().size());
                 } else {
                     Timber.w("[E2E_2STARS] Level %d: No solution found yet", level);
@@ -248,7 +248,7 @@ public class Level11With2StarsE2ETest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[E2E_2STARS] Level %d: Executing %d moves", level, moves.size());
+        Timber.d("[UNITTESTS][E2E_2STARS] Level %d: Executing %d moves", level, moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);

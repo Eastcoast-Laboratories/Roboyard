@@ -45,7 +45,7 @@ public class AutoLoginPersistenceTest {
         // Clear any existing auth data
         clearAuthData();
         
-        Timber.d("[AUTO_LOGIN_TEST] Test setup complete: email=%s", testEmail);
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] Test setup complete: email=%s", testEmail);
     }
     
     @After
@@ -57,7 +57,7 @@ public class AutoLoginPersistenceTest {
     private void clearAuthData() {
         SharedPreferences prefs = context.getSharedPreferences("roboyard_api", Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
-        Timber.d("[AUTO_LOGIN_TEST] Cleared auth data");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] Cleared auth data");
     }
     
     @Test
@@ -66,7 +66,7 @@ public class AutoLoginPersistenceTest {
         
         // Step 1: Verify not logged in initially
         assertFalse("[AUTO_LOGIN_TEST] Should not be logged in initially", apiClient.isLoggedIn());
-        Timber.d("[AUTO_LOGIN_TEST] ✓ Step 1: Verified not logged in initially");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ✓ Step 1: Verified not logged in initially");
         
         // Step 2: Register new test user
         final boolean[] registerSuccess = {false};
@@ -76,7 +76,7 @@ public class AutoLoginPersistenceTest {
             @Override
             public void onSuccess(RoboyardApiClient.LoginResult result) {
                 registerSuccess[0] = true;
-                Timber.d("[AUTO_LOGIN_TEST] Registration successful: token=%s", result.token.substring(0, 10) + "...");
+                Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] Registration successful: token=%s", result.token.substring(0, 10) + "...");
             }
             
             @Override
@@ -93,23 +93,23 @@ public class AutoLoginPersistenceTest {
             Timber.e("[AUTO_LOGIN_TEST] Registration error: %s", registerError[0]);
         }
         assertTrue("[AUTO_LOGIN_TEST] Registration should succeed", registerSuccess[0]);
-        Timber.d("[AUTO_LOGIN_TEST] ✓ Step 2: Registration successful");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ✓ Step 2: Registration successful");
         
         // Step 3: Verify logged in after registration
         assertTrue("[AUTO_LOGIN_TEST] Should be logged in after registration", apiClient.isLoggedIn());
         String tokenAfterRegister = apiClient.getAuthToken();
         assertNotNull("[AUTO_LOGIN_TEST] Token should exist after registration", tokenAfterRegister);
-        Timber.d("[AUTO_LOGIN_TEST] ✓ Step 3: Logged in after registration, token=%s", tokenAfterRegister.substring(0, 10) + "...");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ✓ Step 3: Logged in after registration, token=%s", tokenAfterRegister.substring(0, 10) + "...");
         
         // Step 4: Simulate app restart by creating new ApiClient instance
-        Timber.d("[AUTO_LOGIN_TEST] ===== SIMULATING APP RESTART =====");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ===== SIMULATING APP RESTART =====");
         
         // Force a new instance by clearing the singleton (reflection)
         try {
             java.lang.reflect.Field instanceField = RoboyardApiClient.class.getDeclaredField("instance");
             instanceField.setAccessible(true);
             instanceField.set(null, null);
-            Timber.d("[AUTO_LOGIN_TEST] Cleared RoboyardApiClient singleton");
+            Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] Cleared RoboyardApiClient singleton");
         } catch (Exception e) {
             Timber.e(e, "[AUTO_LOGIN_TEST] Failed to clear singleton");
             fail("Failed to clear singleton: " + e.getMessage());
@@ -122,7 +122,7 @@ public class AutoLoginPersistenceTest {
         boolean isLoggedInAfterRestart = apiClientAfterRestart.isLoggedIn();
         String tokenAfterRestart = apiClientAfterRestart.getAuthToken();
         
-        Timber.d("[AUTO_LOGIN_TEST] After restart: isLoggedIn=%s, token=%s", 
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] After restart: isLoggedIn=%s, token=%s", 
                 isLoggedInAfterRestart, 
                 tokenAfterRestart != null ? tokenAfterRestart.substring(0, 10) + "..." : "null");
         
@@ -130,7 +130,7 @@ public class AutoLoginPersistenceTest {
         assertNotNull("[AUTO_LOGIN_TEST] Token should still exist after restart", tokenAfterRestart);
         assertEquals("[AUTO_LOGIN_TEST] Token should be the same after restart", tokenAfterRegister, tokenAfterRestart);
         
-        Timber.d("[AUTO_LOGIN_TEST] ✓ Step 5: Still logged in after restart");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ✓ Step 5: Still logged in after restart");
         
         // Step 6: Verify token with server
         final boolean[] verifySuccess = {false};
@@ -140,7 +140,7 @@ public class AutoLoginPersistenceTest {
             @Override
             public void onSuccess(Boolean isValid) {
                 verifySuccess[0] = isValid;
-                Timber.d("[AUTO_LOGIN_TEST] Token verification result: %s", isValid);
+                Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] Token verification result: %s", isValid);
             }
             
             @Override
@@ -157,8 +157,8 @@ public class AutoLoginPersistenceTest {
             Timber.e("[AUTO_LOGIN_TEST] Verification error: %s", verifyError[0]);
         }
         assertTrue("[AUTO_LOGIN_TEST] Token should be valid on server", verifySuccess[0]);
-        Timber.d("[AUTO_LOGIN_TEST] ✓ Step 6: Token verified with server");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ✓ Step 6: Token verified with server");
         
-        Timber.d("[AUTO_LOGIN_TEST] ===== TEST PASSED: AUTO-LOGIN PERSISTS ACROSS RESTARTS =====");
+        Timber.d("[UNITTESTS][AUTO_LOGIN_TEST] ===== TEST PASSED: AUTO-LOGIN PERSISTS ACROSS RESTARTS =====");
     }
 }

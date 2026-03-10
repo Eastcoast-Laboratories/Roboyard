@@ -39,27 +39,27 @@ public class HistoryMinimapTest {
     
     @Test
     public void testHistoryMinimapLoading() throws InterruptedException {
-        Timber.d("[TEST] Starting History Minimap test");
+        Timber.d("[UNITTESTS][TEST] Starting History Minimap test");
         
         // Step 1: Check if history entries exist
         int[] historyCount = {0};
         activityRule.getScenario().onActivity(activity -> {
             historyCount[0] = GameHistoryManager.getHistoryEntries(activity).size();
-            Timber.d("[TEST] Found %d history entries", historyCount[0]);
+            Timber.d("[UNITTESTS][TEST] Found %d history entries", historyCount[0]);
         });
         
         if (historyCount[0] == 0) {
-            Timber.d("[TEST] SKIPPING TEST - No history entries exist. Run the app and play a game first.");
+            Timber.d("[UNITTESTS][TEST] SKIPPING TEST - No history entries exist. Run the app and play a game first.");
             return;
         }
         
         // Step 2: Navigate to Save/Load screen
-        Timber.d("[TEST] Step 2: Navigating to Save/Load screen");
+        Timber.d("[UNITTESTS][TEST] Step 2: Navigating to Save/Load screen");
         onView(withId(R.id.load_game_button)).perform(click());
         Thread.sleep(1000);
         
         // Step 3: Switch to History tab (tab index 2)
-        Timber.d("[TEST] Step 3: Switching to History tab");
+        Timber.d("[UNITTESTS][TEST] Step 3: Switching to History tab");
         activityRule.getScenario().onActivity(activity -> {
             com.google.android.material.tabs.TabLayout tabLayout = activity.findViewById(R.id.tab_layout);
             if (tabLayout != null && tabLayout.getTabCount() > 2) {
@@ -72,16 +72,16 @@ public class HistoryMinimapTest {
         Thread.sleep(3000); // Wait for async minimap loading
         
         // Step 4: Verify RecyclerView is displayed
-        Timber.d("[TEST] Step 4: Verifying RecyclerView is displayed");
+        Timber.d("[UNITTESTS][TEST] Step 4: Verifying RecyclerView is displayed");
         onView(withId(R.id.save_slot_recycler_view)).check(matches(isDisplayed()));
         
         // Step 5: Check if minimap is loaded in first item
-        Timber.d("[TEST] Step 5: Checking minimap in first history entry");
+        Timber.d("[UNITTESTS][TEST] Step 5: Checking minimap in first history entry");
         activityRule.getScenario().onActivity(activity -> {
             RecyclerView recyclerView = activity.findViewById(R.id.save_slot_recycler_view);
             if (recyclerView != null && recyclerView.getAdapter() != null) {
                 int itemCount = recyclerView.getAdapter().getItemCount();
-                Timber.d("[TEST] History RecyclerView has %d entries", itemCount);
+                Timber.d("[UNITTESTS][TEST] History RecyclerView has %d entries", itemCount);
                 
                 if (itemCount > 0) {
                     // Wait a bit more for async loading
@@ -99,7 +99,7 @@ public class HistoryMinimapTest {
                             boolean hasDrawable = minimapView.getDrawable() != null;
                             boolean isVisible = minimapView.getVisibility() == android.view.View.VISIBLE;
                             
-                            Timber.d("[TEST] Minimap - hasDrawable: %b, isVisible: %b", hasDrawable, isVisible);
+                            Timber.d("[UNITTESTS][TEST] Minimap - hasDrawable: %b, isVisible: %b", hasDrawable, isVisible);
                             
                             if (!hasDrawable || !isVisible) {
                                 throw new AssertionError("Minimap not loaded! hasDrawable=" + hasDrawable + ", isVisible=" + isVisible);
@@ -118,6 +118,6 @@ public class HistoryMinimapTest {
             }
         });
         
-        Timber.d("[TEST] HISTORY MINIMAP TEST PASSED");
+        Timber.d("[UNITTESTS][TEST] HISTORY MINIMAP TEST PASSED");
     }
 }

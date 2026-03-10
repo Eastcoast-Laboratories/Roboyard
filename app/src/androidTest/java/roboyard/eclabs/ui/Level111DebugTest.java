@@ -61,18 +61,18 @@ public class Level111DebugTest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[LEVEL111_DEBUG] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[LEVEL111_DEBUG] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testLevel111_DebugSolverSolution() throws InterruptedException {
-        Timber.d("[LEVEL111_DEBUG] Starting Level 111 debug test");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Starting Level 111 debug test");
         
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
@@ -87,7 +87,7 @@ public class Level111DebugTest {
         }
         
         // Unlock all levels: Long press on "Level Selection" title (3 seconds)
-        Timber.d("[LEVEL111_DEBUG] Unlocking all levels with long press on title");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Unlocking all levels with long press on title");
         try {
             onView(withId(R.id.level_selection_title)).perform(longClick());
             Thread.sleep(3500); // Wait for 3 second long press
@@ -113,7 +113,7 @@ public class Level111DebugTest {
         }
         
         // Click on level 111
-        Timber.d("[LEVEL111_DEBUG] Clicking on Level 111");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Clicking on Level 111");
         try {
             onView(allOf(withId(R.id.level_button), withText("111"))).check(matches(isDisplayed())).perform(click());
             Thread.sleep(2000);
@@ -134,30 +134,30 @@ public class Level111DebugTest {
             if (gameStateManager != null) {
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
-                    Timber.d("[LEVEL111_DEBUG] Board dimensions: %d x %d", state.getWidth(), state.getHeight());
-                    Timber.d("[LEVEL111_DEBUG] Level ID: %d", state.getLevelId());
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Board dimensions: %d x %d", state.getWidth(), state.getHeight());
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Level ID: %d", state.getLevelId());
                     
                     // Log robot positions
                     for (GameElement robot : state.getRobots()) {
-                        Timber.d("[LEVEL111_DEBUG] Robot color=%d at (%d, %d)", 
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Robot color=%d at (%d, %d)", 
                                 robot.getColor(), robot.getX(), robot.getY());
                     }
                     
                     // Log target position
                     for (GameElement target : state.getTargets()) {
-                        Timber.d("[LEVEL111_DEBUG] Target color=%d at (%d, %d)", 
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Target color=%d at (%d, %d)", 
                                 target.getColor(), target.getX(), target.getY());
                     }
                 }
                 
                 GameSolution solution = gameStateManager.getCurrentSolution();
                 if (solution != null && solution.getMoves() != null) {
-                    Timber.d("[LEVEL111_DEBUG] Solution has %d moves", solution.getMoves().size());
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Solution has %d moves", solution.getMoves().size());
                     for (int i = 0; i < solution.getMoves().size(); i++) {
                         IGameMove move = solution.getMoves().get(i);
                         if (move instanceof RRGameMove) {
                             RRGameMove rrMove = (RRGameMove) move;
-                            Timber.d("[LEVEL111_DEBUG] Move %d: Robot %d -> %s", 
+                            Timber.d("[UNITTESTS][LEVEL111_DEBUG] Move %d: Robot %d -> %s", 
                                     i + 1, rrMove.getColor(), rrMove.getMove());
                         }
                     }
@@ -168,7 +168,7 @@ public class Level111DebugTest {
         });
         
         // Execute solution moves and log each step
-        Timber.d("[LEVEL111_DEBUG] ===== EXECUTING SOLUTION MOVES =====");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] ===== EXECUTING SOLUTION MOVES =====");
         executeSolutionMovesWithLogging();
         
         // Wait for level completion
@@ -178,18 +178,18 @@ public class Level111DebugTest {
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 levelCompleted = gameStateManager.isGameComplete().getValue();
-                Timber.d("[LEVEL111_DEBUG] Level completed: %s", levelCompleted);
+                Timber.d("[UNITTESTS][LEVEL111_DEBUG] Level completed: %s", levelCompleted);
                 
                 // Log final robot positions
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
-                    Timber.d("[LEVEL111_DEBUG] ===== FINAL POSITIONS =====");
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] ===== FINAL POSITIONS =====");
                     for (GameElement robot : state.getRobots()) {
-                        Timber.d("[LEVEL111_DEBUG] Robot color=%d at (%d, %d)", 
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Robot color=%d at (%d, %d)", 
                                 robot.getColor(), robot.getX(), robot.getY());
                     }
                     for (GameElement target : state.getTargets()) {
-                        Timber.d("[LEVEL111_DEBUG] Target color=%d at (%d, %d)", 
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Target color=%d at (%d, %d)", 
                                 target.getColor(), target.getX(), target.getY());
                     }
                 }
@@ -202,11 +202,11 @@ public class Level111DebugTest {
             Timber.e("[LEVEL111_DEBUG] ⚠️ Level 111 NOT completed - solution is incorrect!");
             Timber.e("[LEVEL111_DEBUG] This confirms the solver issue - likely board dimension problem");
         } else {
-            Timber.d("[LEVEL111_DEBUG] ✓ Level 111 completed successfully");
+            Timber.d("[UNITTESTS][LEVEL111_DEBUG] ✓ Level 111 completed successfully");
         }
         
         // Don't fail the test - we want to see the logs
-        Timber.d("[LEVEL111_DEBUG] Test finished - check logs for analysis");
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Test finished - check logs for analysis");
     }
     
     /**
@@ -242,7 +242,7 @@ public class Level111DebugTest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[LEVEL111_DEBUG] Executing %d moves", moves.size());
+        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Executing %d moves", moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);
@@ -259,7 +259,7 @@ public class Level111DebugTest {
                         if (state != null) {
                             for (GameElement robot : state.getRobots()) {
                                 if (robot.getColor() == robotColor) {
-                                    Timber.d("[LEVEL111_DEBUG] Move %d: Robot %d at (%d, %d) -> %s", 
+                                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Move %d: Robot %d at (%d, %d) -> %s", 
                                             moveNum, robotColor, robot.getX(), robot.getY(), direction);
                                     break;
                                 }
@@ -307,7 +307,7 @@ public class Level111DebugTest {
                         if (state != null) {
                             for (GameElement robot : state.getRobots()) {
                                 if (robot.getColor() == robotColor) {
-                                    Timber.d("[LEVEL111_DEBUG] After move %d: Robot %d now at (%d, %d)", 
+                                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] After move %d: Robot %d now at (%d, %d)", 
                                             moveNumAfter, robotColor, robot.getX(), robot.getY());
                                     break;
                                 }

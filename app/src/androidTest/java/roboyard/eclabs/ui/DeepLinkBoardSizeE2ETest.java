@@ -172,7 +172,7 @@ public class DeepLinkBoardSizeE2ETest {
      */
     @Test
     public void testDeepLinkBoard12x12Dimensions() throws InterruptedException {
-        Timber.d("[DEEPLINK_E2E] Starting deep-link board size test");
+        Timber.d("[UNITTESTS][DEEPLINK_E2E] Starting deep-link board size test");
 
         // Wait for activity to initialize
         Thread.sleep(2000);
@@ -197,14 +197,14 @@ public class DeepLinkBoardSizeE2ETest {
             int width = currentState.getWidth();
             int height = currentState.getHeight();
 
-            Timber.d("[DEEPLINK_E2E] Board dimensions: %dx%d", width, height);
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] Board dimensions: %dx%d", width, height);
 
             // The bug was that board was parsed as 8x8 instead of 12x12
             assertEquals("Board width should be 12, not 8", 12, width);
             assertEquals("Board height should be 12, not 8", 12, height);
         });
 
-        Timber.d("[DEEPLINK_E2E] ✓ Board dimensions verified as 12x12");
+        Timber.d("[UNITTESTS][DEEPLINK_E2E] ✓ Board dimensions verified as 12x12");
     }
 
     /**
@@ -213,7 +213,7 @@ public class DeepLinkBoardSizeE2ETest {
      */
     @Test
     public void testRobotMovementBeyond8x8() throws InterruptedException {
-        Timber.d("[DEEPLINK_E2E] Starting robot movement test");
+        Timber.d("[UNITTESTS][DEEPLINK_E2E] Starting robot movement test");
 
         Thread.sleep(2000);
 
@@ -242,7 +242,7 @@ public class DeepLinkBoardSizeE2ETest {
             }
 
             assertNotNull("Robot at (11,3) should exist (rb11,3 from deep-link)", robotAtEdge);
-            Timber.d("[DEEPLINK_E2E] ✓ Found robot at edge position (11,3)");
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] ✓ Found robot at edge position (11,3)");
         });
 
         // Try to move a robot - if board was limited to 8x8, this would fail
@@ -267,7 +267,7 @@ public class DeepLinkBoardSizeE2ETest {
                 // Try to move up (dy = -1)
                 gameStateManager.moveRobotInDirection(0, -1);
 
-                Timber.d("[DEEPLINK_E2E] Moved robot from (7,8) upward");
+                Timber.d("[UNITTESTS][DEEPLINK_E2E] Moved robot from (7,8) upward");
             }
         });
 
@@ -282,7 +282,7 @@ public class DeepLinkBoardSizeE2ETest {
             assertEquals("Board width should remain 12 after move", 12, currentState.getWidth());
             assertEquals("Board height should remain 12 after move", 12, currentState.getHeight());
 
-            Timber.d("[DEEPLINK_E2E] ✓ Robot movement processed on 12x12 board");
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] ✓ Robot movement processed on 12x12 board");
         });
     }
 
@@ -291,7 +291,7 @@ public class DeepLinkBoardSizeE2ETest {
      */
     @Test
     public void testDeepLinkElementsLoaded() throws InterruptedException {
-        Timber.d("[DEEPLINK_E2E] Starting element loading test");
+        Timber.d("[UNITTESTS][DEEPLINK_E2E] Starting element loading test");
 
         Thread.sleep(2000);
 
@@ -313,11 +313,11 @@ public class DeepLinkBoardSizeE2ETest {
             for (GameElement element : currentState.getGameElements()) {
                 if (element.getType() == GameElement.TYPE_ROBOT) {
                     robotCount++;
-                    Timber.d("[DEEPLINK_E2E] Robot at (%d,%d) color=%d", 
+                    Timber.d("[UNITTESTS][DEEPLINK_E2E] Robot at (%d,%d) color=%d", 
                             element.getX(), element.getY(), element.getColor());
                 } else if (element.getType() == GameElement.TYPE_TARGET) {
                     targetCount++;
-                    Timber.d("[DEEPLINK_E2E] Target at (%d,%d) color=%d", 
+                    Timber.d("[UNITTESTS][DEEPLINK_E2E] Target at (%d,%d) color=%d", 
                             element.getX(), element.getY(), element.getColor());
                 } else if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL ||
                            element.getType() == GameElement.TYPE_VERTICAL_WALL) {
@@ -325,7 +325,7 @@ public class DeepLinkBoardSizeE2ETest {
                 }
             }
 
-            Timber.d("[DEEPLINK_E2E] Loaded: %d robots, %d targets, %d walls", 
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] Loaded: %d robots, %d targets, %d walls", 
                     robotCount, targetCount, wallCount);
 
             // From the deep-link data: 5 robots (rr, rs, ry, rg, rb), 1 target (ts), many walls
@@ -333,7 +333,7 @@ public class DeepLinkBoardSizeE2ETest {
             assertEquals("Should have 1 target", 1, targetCount);
             assertTrue("Should have walls", wallCount > 0);
 
-            Timber.d("[DEEPLINK_E2E] ✓ All elements loaded correctly");
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] ✓ All elements loaded correctly");
         });
     }
 
@@ -342,7 +342,7 @@ public class DeepLinkBoardSizeE2ETest {
      */
     @Test
     public void testTargetBeyond8x8() throws InterruptedException {
-        Timber.d("[DEEPLINK_E2E] Starting target accessibility test");
+        Timber.d("[UNITTESTS][DEEPLINK_E2E] Starting target accessibility test");
 
         Thread.sleep(2000);
 
@@ -368,7 +368,7 @@ public class DeepLinkBoardSizeE2ETest {
             }
 
             assertNotNull("Target at (10,0) should exist (ts10,0 from deep-link)", targetAtEdge);
-            Timber.d("[DEEPLINK_E2E] ✓ Target found at edge position (10,0)");
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] ✓ Target found at edge position (10,0)");
         });
     }
 
@@ -376,7 +376,7 @@ public class DeepLinkBoardSizeE2ETest {
      * Load the deep-link map by simulating the deep-link intent.
      */
     private void loadDeepLinkMap() throws InterruptedException {
-        Timber.d("[DEEPLINK_E2E] Loading deep-link map");
+        Timber.d("[UNITTESTS][DEEPLINK_E2E] Loading deep-link map");
 
         activityRule.getScenario().onActivity(activity -> {
             // Create a deep-link intent with the map data
@@ -390,7 +390,7 @@ public class DeepLinkBoardSizeE2ETest {
             // Send the intent to the activity
             activity.onNewIntent(intent);
 
-            Timber.d("[DEEPLINK_E2E] Deep-link intent sent");
+            Timber.d("[UNITTESTS][DEEPLINK_E2E] Deep-link intent sent");
         });
 
         // Wait for the map to be processed

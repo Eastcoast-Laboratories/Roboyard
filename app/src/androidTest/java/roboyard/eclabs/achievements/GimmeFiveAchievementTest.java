@@ -57,7 +57,7 @@ public class GimmeFiveAchievementTest {
         // Reset achievements before each test
         achievementManager.resetAll();
         
-        Timber.d("[GIMME_FIVE_TEST] Setup complete, achievements reset");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Setup complete, achievements reset");
     }
 
     @After
@@ -72,7 +72,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testGimmeFiveWithTwoRobots() {
-        Timber.d("[GIMME_FIVE_TEST] Testing gimme_five with 2 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing gimme_five with 2 robots");
         
         // Start a new game to reset tracking
         achievementManager.onNewGameStarted();
@@ -93,7 +93,7 @@ public class GimmeFiveAchievementTest {
         assertTrue("gimme_five should be unlocked after all robots touched", 
                 achievementManager.isUnlocked("gimme_five"));
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 2 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 2 robots");
     }
 
     /**
@@ -102,7 +102,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testGimmeFiveWithThreeRobots() {
-        Timber.d("[GIMME_FIVE_TEST] Testing gimme_five with 3 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing gimme_five with 3 robots");
         
         // Start a new game to reset tracking
         achievementManager.onNewGameStarted();
@@ -133,7 +133,7 @@ public class GimmeFiveAchievementTest {
         assertTrue("gimme_five should be unlocked after all robots touched", 
                 achievementManager.isUnlocked("gimme_five"));
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 3 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 3 robots");
     }
 
     /**
@@ -142,7 +142,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testGimmeFiveWithFourRobots() {
-        Timber.d("[GIMME_FIVE_TEST] Testing gimme_five with 4 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing gimme_five with 4 robots");
         
         // Start a new game to reset tracking
         achievementManager.onNewGameStarted();
@@ -172,7 +172,7 @@ public class GimmeFiveAchievementTest {
         assertTrue("gimme_five should be unlocked after all robots touched", 
                 achievementManager.isUnlocked("gimme_five"));
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 4 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 4 robots");
     }
 
     /**
@@ -180,7 +180,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testDuplicateTouchesIgnored() {
-        Timber.d("[GIMME_FIVE_TEST] Testing duplicate touches are ignored");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing duplicate touches are ignored");
         
         // Start a new game to reset tracking
         achievementManager.onNewGameStarted();
@@ -199,7 +199,7 @@ public class GimmeFiveAchievementTest {
         assertFalse("gimme_five should not be unlocked yet (only 1/3 pairs)", 
                 achievementManager.isUnlocked("gimme_five"));
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: duplicate touches ignored");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: duplicate touches ignored");
     }
 
     /**
@@ -207,7 +207,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testNewGameResetsTracking() {
-        Timber.d("[GIMME_FIVE_TEST] Testing new game resets tracking");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing new game resets tracking");
         
         // Start a new game
         achievementManager.onNewGameStarted();
@@ -227,7 +227,7 @@ public class GimmeFiveAchievementTest {
         progress = achievementManager.getRobotTouchProgress();
         assertEquals("Should have 0 pairs after new game", 0, progress[0]);
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: new game resets tracking");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: new game resets tracking");
     }
 
     /**
@@ -236,7 +236,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testGimmeFiveWithFiveRobots() {
-        Timber.d("[GIMME_FIVE_TEST] Testing gimme_five with 5 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing gimme_five with 5 robots");
         
         // Start a new game to reset tracking
         achievementManager.onNewGameStarted();
@@ -251,7 +251,7 @@ public class GimmeFiveAchievementTest {
             for (int j = i + 1; j < 5; j++) {
                 achievementManager.onRobotTouched(i, j, 5);
                 pairCount++;
-                Timber.d("[GIMME_FIVE_TEST] Pair %d: robot %d touched robot %d", pairCount, i, j);
+                Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Pair %d: robot %d touched robot %d", pairCount, i, j);
             }
         }
         
@@ -264,7 +264,7 @@ public class GimmeFiveAchievementTest {
         assertTrue("gimme_five should be unlocked after all robots touched", 
                 achievementManager.isUnlocked("gimme_five"));
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 5 robots");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: gimme_five unlocked with 5 robots");
     }
 
     /**
@@ -273,7 +273,7 @@ public class GimmeFiveAchievementTest {
      */
     @Test
     public void testGimmeFiveInRandomGame() throws InterruptedException {
-        Timber.d("[GIMME_FIVE_TEST] Testing gimme_five in random game");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Testing gimme_five in random game");
         
         // Wait for activity to load
         Thread.sleep(2000);
@@ -288,7 +288,7 @@ public class GimmeFiveAchievementTest {
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.startNewGame();
-                Timber.d("[GIMME_FIVE_TEST] New random game started");
+                Timber.d("[UNITTESTS][GIMME_FIVE_TEST] New random game started");
             }
         });
         
@@ -303,7 +303,7 @@ public class GimmeFiveAchievementTest {
                     List<GameElement> robots = state.getRobots();
                     if (robots != null) {
                         robotCount[0] = robots.size();
-                        Timber.d("[GIMME_FIVE_TEST] Game has %d robots", robotCount[0]);
+                        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Game has %d robots", robotCount[0]);
                     }
                 }
             }
@@ -326,6 +326,6 @@ public class GimmeFiveAchievementTest {
         assertTrue("gimme_five should be unlocked after all robots touched", 
                 achievementManager.isUnlocked("gimme_five"));
         
-        Timber.d("[GIMME_FIVE_TEST] Test passed: gimme_five works in random game context");
+        Timber.d("[UNITTESTS][GIMME_FIVE_TEST] Test passed: gimme_five works in random game context");
     }
 }

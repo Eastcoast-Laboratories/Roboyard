@@ -50,14 +50,14 @@ public class ImpossibleDifficultyNewGameTest {
 
     @Before
     public void setup() throws InterruptedException {
-        Timber.d("[TEST] ========== ImpossibleDifficultyNewGameTest STARTED ==========");
+        Timber.d("[UNITTESTS][TEST] ========== ImpossibleDifficultyNewGameTest STARTED ==========");
         TestHelper.closeAchievementPopupIfPresent();
         Thread.sleep(1000);
     }
 
     @Test
     public void testMultiTargetImpossibleDifficulty25Games() throws InterruptedException {
-        Timber.d("[TEST] Starting Multi-Target Impossible Difficulty 25 Games Test");
+        Timber.d("[UNITTESTS][TEST] Starting Multi-Target Impossible Difficulty 25 Games Test");
 
         // Step 1: Enable Multi-Target mode with 2 robots via TestHelper
         TestHelper.setMultiTargetMode(2);
@@ -68,30 +68,30 @@ public class ImpossibleDifficultyNewGameTest {
         TestHelper.closeAchievementPopupIfPresent();
 
         // Step 3: Start first random game
-        Timber.d("[TEST] Starting first random game");
+        Timber.d("[UNITTESTS][TEST] Starting first random game");
         TestHelper.startRandomGame();
         Thread.sleep(20000); // Wait 20s for solver to complete
 
         // Verify game grid is displayed
         onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
-        Timber.d("[TEST] Game 1/25 completed successfully");
+        Timber.d("[UNITTESTS][TEST] Game 1/25 completed successfully");
 
         // Step 4: Press "New Game" button 24 more times (total 25 games)
         for (int i = 2; i <= 25; i++) {
-            Timber.d("[TEST] ========== Starting Game %d/25 ==========", i);
+            Timber.d("[UNITTESTS][TEST] ========== Starting Game %d/25 ==========", i);
             
             // Press New Game button
             onView(withId(R.id.new_map_button)).perform(click());
-            Timber.d("[TEST] Pressed New Game button for game %d", i);
+            Timber.d("[UNITTESTS][TEST] Pressed New Game button for game %d", i);
             
             // Wait 20s for map generation and solver
             Thread.sleep(20000);
             
             // Verify game grid is still displayed (no crash)
             onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
-            Timber.d("[TEST] Game %d/25 completed successfully", i);
+            Timber.d("[UNITTESTS][TEST] Game %d/25 completed successfully", i);
         }
 
-        Timber.d("[TEST] ========== TEST COMPLETED: 25 games without crash! ==========");
+        Timber.d("[UNITTESTS][TEST] ========== TEST COMPLETED: 25 games without crash! ==========");
     }
 }

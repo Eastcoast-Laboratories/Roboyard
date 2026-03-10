@@ -94,7 +94,7 @@ public class LiveMoveCounterE2ETest {
             gameStateManager = activity.getGameStateManager();
         });
         assertNotNull("GameStateManager should not be null", gameStateManager);
-        Timber.d("[LIVE_COUNTER_TEST] Navigated to Level 1");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Navigated to Level 1");
     }
 
     /**
@@ -103,7 +103,7 @@ public class LiveMoveCounterE2ETest {
      */
     @Test
     public void testHintSystemWithoutLiveCounter() throws InterruptedException {
-        Timber.d("[LIVE_COUNTER_TEST] Starting hint system regression test");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Starting hint system regression test");
 
         navigateToLevel1();
 
@@ -113,7 +113,7 @@ public class LiveMoveCounterE2ETest {
             return;
         }
 
-        Timber.d("[LIVE_COUNTER_TEST] Solution has %d moves", solution.getMoves().size());
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Solution has %d moves", solution.getMoves().size());
 
         // Verify live counter is NOT enabled by default
         assertFalse("Live counter should be disabled by default",
@@ -137,7 +137,7 @@ public class LiveMoveCounterE2ETest {
         });
         assertTrue("Hint container should be visible after enabling hints", containerVisible[0]);
 
-        Timber.d("[LIVE_COUNTER_TEST] Hint system regression test passed");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Hint system regression test passed");
     }
 
     /**
@@ -146,7 +146,7 @@ public class LiveMoveCounterE2ETest {
      */
     @Test
     public void testEyeToggleVisibility() throws InterruptedException {
-        Timber.d("[LIVE_COUNTER_TEST] Starting eye toggle visibility test");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Starting eye toggle visibility test");
 
         navigateToLevel1();
 
@@ -183,7 +183,7 @@ public class LiveMoveCounterE2ETest {
             });
 
             if (isVisible[0]) {
-                Timber.d("[LIVE_COUNTER_TEST] Eye toggle became visible at hint step %d", i + 1);
+                Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Eye toggle became visible at hint step %d", i + 1);
                 // Found it! Test passes
                 return;
             }
@@ -200,7 +200,7 @@ public class LiveMoveCounterE2ETest {
      */
     @Test
     public void testLiveMoveCounterAfterMove() throws InterruptedException {
-        Timber.d("[LIVE_COUNTER_TEST] Starting live move counter test");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Starting live move counter test");
 
         navigateToLevel1();
 
@@ -225,7 +225,7 @@ public class LiveMoveCounterE2ETest {
                 gameStateManager.isLiveMoveCounterEnabled());
 
         // Execute a move (UP) - Level 1 has the robot pre-selected
-        Timber.d("[LIVE_COUNTER_TEST] Executing move UP");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Executing move UP");
         activityRule.getScenario().onActivity(activity -> {
             if (gameStateManager != null) {
                 gameStateManager.moveRobotInDirection(0, -1);
@@ -237,14 +237,14 @@ public class LiveMoveCounterE2ETest {
 
         // Check that the live counter text was updated
         String counterText = gameStateManager.getLiveMoveCounterText().getValue();
-        Timber.d("[LIVE_COUNTER_TEST] Live counter text: '%s'", counterText);
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Live counter text: '%s'", counterText);
 
         // The text should be non-empty (either a number or "?")
         assertNotNull("Live counter text should not be null", counterText);
         assertFalse("Live counter text should not be empty after a move",
                 counterText.isEmpty());
 
-        Timber.d("[LIVE_COUNTER_TEST] Live move counter test passed! Text: %s", counterText);
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Live move counter test passed! Text: %s", counterText);
     }
 
     /**
@@ -252,7 +252,7 @@ public class LiveMoveCounterE2ETest {
      */
     @Test
     public void testDisableLiveCounter() throws InterruptedException {
-        Timber.d("[LIVE_COUNTER_TEST] Starting disable live counter test");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Starting disable live counter test");
 
         navigateToLevel1();
 
@@ -275,14 +275,14 @@ public class LiveMoveCounterE2ETest {
         assertTrue("Text should be empty after disabling",
                 text == null || text.isEmpty());
 
-        Timber.d("[LIVE_COUNTER_TEST] Disable live counter test passed");
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Disable live counter test passed");
     }
 
     private GameSolution waitForSolution(int maxAttempts) throws InterruptedException {
         GameSolution solution = gameStateManager.getCurrentSolution();
         int attempts = 0;
         while (solution == null && attempts < maxAttempts) {
-            Timber.d("[LIVE_COUNTER_TEST] Waiting for solution... (attempt %d)", attempts + 1);
+            Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Waiting for solution... (attempt %d)", attempts + 1);
             Thread.sleep(2000);
             solution = gameStateManager.getCurrentSolution();
             attempts++;

@@ -59,18 +59,18 @@ public class Level10E2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManager.getInstance(context);
         achievementManager.resetAll();
-        Timber.d("[E2E_10LEVELS] ========== TEST STARTED ==========");
+        Timber.d("[UNITTESTS][E2E_10LEVELS] ========== TEST STARTED ==========");
     }
 
     @After
     public void tearDown() {
         achievementManager.resetAll();
-        Timber.d("[E2E_10LEVELS] ========== TEST FINISHED ==========");
+        Timber.d("[UNITTESTS][E2E_10LEVELS] ========== TEST FINISHED ==========");
     }
 
     @Test
     public void testComplete10Levels_Unlocks3Star10LevelsAchievement() throws InterruptedException {
-        Timber.d("[E2E_10LEVELS] Starting 10 levels completion test");
+        Timber.d("[UNITTESTS][E2E_10LEVELS] Starting 10 levels completion test");
         
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
@@ -87,7 +87,7 @@ public class Level10E2ETest {
         
         // Complete levels 1-11 (to ensure achievement is unlocked and visible)
         for (int level = 1; level <= 11; level++) {
-            Timber.d("[E2E_10LEVELS] ===== Starting Level %d =====", level);
+            Timber.d("[UNITTESTS][E2E_10LEVELS] ===== Starting Level %d =====", level);
             
             // Wait for solver to find solution
             Thread.sleep(2000);
@@ -103,7 +103,7 @@ public class Level10E2ETest {
             activityRule.getScenario().onActivity(activity -> {
                 if (gameStateManager != null) {
                     levelCompleted = gameStateManager.isGameComplete().getValue();
-                    Timber.d("[E2E_10LEVELS] Level %d completed: %s", currentLevel, levelCompleted);
+                    Timber.d("[UNITTESTS][E2E_10LEVELS] Level %d completed: %s", currentLevel, levelCompleted);
                 }
             });
             
@@ -117,7 +117,7 @@ public class Level10E2ETest {
             // Check achievement status after each level
             Thread.sleep(1000);
             boolean achievement3Star10Unlocked = achievementManager.isUnlocked("3_star_10_levels");
-            Timber.d("[E2E_10LEVELS] After Level %d: 3_star_10_levels = %s", level, achievement3Star10Unlocked);
+            Timber.d("[UNITTESTS][E2E_10LEVELS] After Level %d: 3_star_10_levels = %s", level, achievement3Star10Unlocked);
             
             // ASSERTION: Achievement should NOT be unlocked before Level 10
             if (level < 10) {
@@ -127,16 +127,16 @@ public class Level10E2ETest {
             
             // After Level 10, check if 3_star_10_levels achievement is unlocked
             if (level == 10) {
-                Timber.d("[E2E_10LEVELS] ===== CHECKING ACHIEVEMENT AFTER LEVEL 10 =====");
+                Timber.d("[UNITTESTS][E2E_10LEVELS] ===== CHECKING ACHIEVEMENT AFTER LEVEL 10 =====");
                 
                 // Wait longer for achievement to be processed
                 for (int wait = 0; wait < 5; wait++) {
                     Thread.sleep(2000);
                     boolean achievement3Star10Check = achievementManager.isUnlocked("3_star_10_levels");
-                    Timber.d("[E2E_10LEVELS] Achievement check %d/5: 3_star_10_levels = %s", wait + 1, achievement3Star10Check);
+                    Timber.d("[UNITTESTS][E2E_10LEVELS] Achievement check %d/5: 3_star_10_levels = %s", wait + 1, achievement3Star10Check);
                     
                     if (achievement3Star10Check) {
-                        Timber.d("[E2E_10LEVELS] ✓ VISUAL CONFIRMATION: 3_star_10_levels achievement UNLOCKED after %d seconds!", (wait + 1) * 2);
+                        Timber.d("[UNITTESTS][E2E_10LEVELS] ✓ VISUAL CONFIRMATION: 3_star_10_levels achievement UNLOCKED after %d seconds!", (wait + 1) * 2);
                         break;
                     }
                 }
@@ -145,7 +145,7 @@ public class Level10E2ETest {
             // If not the last level, click Next Level button
             if (level < 11) {
                 Thread.sleep(2000);
-                Timber.d("[E2E_10LEVELS] Clicking Next Level button");
+                Timber.d("[UNITTESTS][E2E_10LEVELS] Clicking Next Level button");
                 try {
                     onView(withId(R.id.next_level_button)).check(matches(isDisplayed())).perform(click());
                     Thread.sleep(500);
@@ -162,7 +162,7 @@ public class Level10E2ETest {
         // Wait for achievements to be processed after Level 11
         Thread.sleep(5000);
         
-        Timber.d("[E2E_10LEVELS] ===== FINAL ACHIEVEMENT CHECK =====");
+        Timber.d("[UNITTESTS][E2E_10LEVELS] ===== FINAL ACHIEVEMENT CHECK =====");
         
         // Assertions
         assertTrue("level_1_complete achievement should be unlocked", 
@@ -172,7 +172,7 @@ public class Level10E2ETest {
         assertTrue("3_star_10_levels achievement should be unlocked after completing 10 levels with 3 stars", 
                 achievementManager.isUnlocked("3_star_10_levels"));
         
-        Timber.d("[E2E_10LEVELS] ✓ Test passed: All 11 levels completed, 3_star_10_levels achievement confirmed unlocked");
+        Timber.d("[UNITTESTS][E2E_10LEVELS] ✓ Test passed: All 11 levels completed, 3_star_10_levels achievement confirmed unlocked");
     }
     
     /**
@@ -186,7 +186,7 @@ public class Level10E2ETest {
             if (gameStateManager != null) {
                 solutionHolder[0] = gameStateManager.getCurrentSolution();
                 if (solutionHolder[0] != null) {
-                    Timber.d("[E2E_10LEVELS] Level %d: Found solution with %d moves", 
+                    Timber.d("[UNITTESTS][E2E_10LEVELS] Level %d: Found solution with %d moves", 
                             level, solutionHolder[0].getMoves().size());
                 } else {
                     Timber.w("[E2E_10LEVELS] Level %d: No solution found yet", level);
@@ -215,7 +215,7 @@ public class Level10E2ETest {
         GameSolution solution = solutionHolder[0];
         ArrayList<IGameMove> moves = solution.getMoves();
         
-        Timber.d("[E2E_10LEVELS] Level %d: Executing %d moves", level, moves.size());
+        Timber.d("[UNITTESTS][E2E_10LEVELS] Level %d: Executing %d moves", level, moves.size());
         
         for (int i = 0; i < moves.size(); i++) {
             IGameMove move = moves.get(i);
@@ -224,7 +224,7 @@ public class Level10E2ETest {
                 int robotColor = rrMove.getColor();
                 ERRGameMove direction = rrMove.getMove();
                 
-                Timber.d("[E2E_10LEVELS] Move %d: Robot %d -> %s", i + 1, robotColor, direction);
+                Timber.d("[UNITTESTS][E2E_10LEVELS] Move %d: Robot %d -> %s", i + 1, robotColor, direction);
                 
                 // Select robot and move
                 final int dx = getDirectionX(direction);
@@ -239,7 +239,7 @@ public class Level10E2ETest {
                             for (GameElement element : state.getRobots()) {
                                 if (element.getColor() == color) {
                                     state.setSelectedRobot(element);
-                                    Timber.d("[E2E_10LEVELS] Selected robot with color %d", color);
+                                    Timber.d("[UNITTESTS][E2E_10LEVELS] Selected robot with color %d", color);
                                     break;
                                 }
                             }

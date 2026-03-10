@@ -85,7 +85,7 @@ public class GameModeMemoryE2ETest {
      */
     @Test
     public void testGameModeMemoryAfterViewingAchievements() throws InterruptedException {
-        Timber.d("[GAME_MODE_E2E] Starting Game Mode Memory E2E test");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Starting Game Mode Memory E2E test");
         
         // Wait for app to load
         Thread.sleep(3000);
@@ -103,21 +103,21 @@ public class GameModeMemoryE2ETest {
         TestHelper.closeAchievementPopupIfPresent();
         
         // Step 2: Click on "Level Game" button to go to level selection
-        Timber.d("[GAME_MODE_E2E] Step 2: Clicking Level Game button");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 2: Clicking Level Game button");
         try {
             onView(withId(R.id.level_game_button)).perform(click());
             Thread.sleep(2000);
-            Timber.d("[GAME_MODE_E2E] Clicked Level Game button");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Clicked Level Game button");
         } catch (Exception e) {
             Timber.w(e, "[GAME_MODE_E2E] Could not click Level Game button");
         }
         
         // Step 3: Click on Level 1
-        Timber.d("[GAME_MODE_E2E] Step 3: Clicking Level 1");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 3: Clicking Level 1");
         try {
             onView(withText("1")).perform(click());
             Thread.sleep(3000);
-            Timber.d("[GAME_MODE_E2E] Clicked Level 1");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Clicked Level 1");
         } catch (Exception e) {
             Timber.w(e, "[GAME_MODE_E2E] Could not click Level 1, loading directly");
             activityRule.getScenario().onActivity(activity -> {
@@ -130,14 +130,14 @@ public class GameModeMemoryE2ETest {
         activityRule.getScenario().onActivity(activity -> {
             assertTrue("Should be in level game mode", gameStateManager.isInLevelGame());
             assertEquals("Should be in level 1", 1, gameStateManager.getCurrentLevelId());
-            Timber.d("[GAME_MODE_E2E] Verified: in level 1");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Verified: in level 1");
         });
         
         // Wait for solution to be calculated
         Thread.sleep(3000);
         
         // Step 4: Solve Level 1 using the solution
-        Timber.d("[GAME_MODE_E2E] Step 4: Solving Level 1");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 4: Solving Level 1");
         
         // Get and execute the solution
         final GameSolution[] solutionHolder = new GameSolution[1];
@@ -147,11 +147,11 @@ public class GameModeMemoryE2ETest {
         
         GameSolution solution = solutionHolder[0];
         if (solution != null && solution.getMoves() != null) {
-            Timber.d("[GAME_MODE_E2E] Solution has %d moves", solution.getMoves().size());
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Solution has %d moves", solution.getMoves().size());
             
             for (int i = 0; i < solution.getMoves().size(); i++) {
                 IGameMove move = solution.getMoves().get(i);
-                Timber.d("[GAME_MODE_E2E] Executing move %d: %s", i + 1, move);
+                Timber.d("[UNITTESTS][GAME_MODE_E2E] Executing move %d: %s", i + 1, move);
                 
                 executeMove(move);
                 Thread.sleep(1500);
@@ -164,7 +164,7 @@ public class GameModeMemoryE2ETest {
                 });
                 
                 if (isComplete[0]) {
-                    Timber.d("[GAME_MODE_E2E] Level completed after move %d", i + 1);
+                    Timber.d("[UNITTESTS][GAME_MODE_E2E] Level completed after move %d", i + 1);
                     break;
                 }
             }
@@ -180,29 +180,29 @@ public class GameModeMemoryE2ETest {
         activityRule.getScenario().onActivity(activity -> {
             Boolean isComplete = gameStateManager.isGameComplete().getValue();
             assertTrue("Level 1 should be complete", isComplete != null && isComplete);
-            Timber.d("[GAME_MODE_E2E] Level 1 completed!");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Level 1 completed!");
         });
         
         // Wait for achievement popup
         Thread.sleep(2000);
         
         // Step 5: Click "View achievements" in the popup
-        Timber.d("[GAME_MODE_E2E] Step 5: Clicking 'View achievements'");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 5: Clicking 'View achievements'");
         try {
             onView(withText("View achievements")).perform(click());
             Thread.sleep(2000);
-            Timber.d("[GAME_MODE_E2E] Clicked 'View achievements'");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Clicked 'View achievements'");
         } catch (Exception e) {
             Timber.e(e, "[GAME_MODE_E2E] Could not find 'View achievements' button");
             fail("Could not find 'View achievements' button in achievement popup");
         }
         
         // Step 6: Press back button in achievements screen
-        Timber.d("[GAME_MODE_E2E] Step 6: Pressing back button");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 6: Pressing back button");
         try {
             onView(withId(R.id.back_button)).perform(click());
             Thread.sleep(2000);
-            Timber.d("[GAME_MODE_E2E] Clicked back button");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Clicked back button");
         } catch (Exception e) {
             Timber.w(e, "[GAME_MODE_E2E] Could not find back button, using system back");
             pressBack();
@@ -210,7 +210,7 @@ public class GameModeMemoryE2ETest {
         }
         
         // Step 7: Verify "Next Level" button is VISIBLE
-        Timber.d("[GAME_MODE_E2E] Step 7: Verifying 'Next Level' button is visible");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 7: Verifying 'Next Level' button is visible");
         
         // Verify we're still in level game mode and level is complete
         activityRule.getScenario().onActivity(activity -> {
@@ -220,26 +220,26 @@ public class GameModeMemoryE2ETest {
             Boolean isComplete = gameStateManager.isGameComplete().getValue();
             assertTrue("Level should still be complete (next level button visible)", isComplete != null && isComplete);
             
-            Timber.d("[GAME_MODE_E2E] Verified: still in level 1, isComplete=%b", isComplete);
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Verified: still in level 1, isComplete=%b", isComplete);
         });
         
         // Verify Next Level button is visible in the UI
         try {
             onView(withId(R.id.next_level_button)).check(matches(isDisplayed()));
-            Timber.d("[GAME_MODE_E2E] 'Next Level' button is VISIBLE - TEST PASSED!");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] 'Next Level' button is VISIBLE - TEST PASSED!");
         } catch (Exception e) {
             Timber.e(e, "[GAME_MODE_E2E] 'Next Level' button is NOT visible");
             fail("'Next Level' button should be visible after returning from achievements");
         }
         
         // Step 8: Verify no auto-regeneration happened
-        Timber.d("[GAME_MODE_E2E] Step 8: Verifying no auto-regeneration");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 8: Verifying no auto-regeneration");
         activityRule.getScenario().onActivity(activity -> {
             assertTrue("Should not have regenerated to random game", gameStateManager.isInLevelGame());
-            Timber.d("[GAME_MODE_E2E] No auto-regeneration - still in level game mode");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] No auto-regeneration - still in level game mode");
         });
         
-        Timber.d("[GAME_MODE_E2E] TEST PASSED: Game mode memory works correctly!");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] TEST PASSED: Game mode memory works correctly!");
     }
 
     /**
@@ -252,7 +252,7 @@ public class GameModeMemoryE2ETest {
                 int robotColor = rrMove.getColor();
                 int direction = rrMove.getDirection();
                 
-                Timber.d("[GAME_MODE_E2E] Move: Robot color=%d, direction=%d", robotColor, direction);
+                Timber.d("[UNITTESTS][GAME_MODE_E2E] Move: Robot color=%d, direction=%d", robotColor, direction);
                 
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
@@ -260,7 +260,7 @@ public class GameModeMemoryE2ETest {
                     for (GameElement element : state.getGameElements()) {
                         if (element.getType() == 1 && element.getColor() == robotColor) {
                             state.setSelectedRobot(element);
-                            Timber.d("[GAME_MODE_E2E] Selected robot color=%d", robotColor);
+                            Timber.d("[UNITTESTS][GAME_MODE_E2E] Selected robot color=%d", robotColor);
                             break;
                         }
                     }
@@ -274,7 +274,7 @@ public class GameModeMemoryE2ETest {
                         case 8: dx = -1; break; // LEFT
                     }
                     
-                    Timber.d("[GAME_MODE_E2E] Moving robot in direction dx=%d, dy=%d", dx, dy);
+                    Timber.d("[UNITTESTS][GAME_MODE_E2E] Moving robot in direction dx=%d, dy=%d", dx, dy);
                     gameStateManager.moveRobotInDirection(dx, dy);
                 }
             }
@@ -285,14 +285,14 @@ public class GameModeMemoryE2ETest {
      * Close the streak popup if it's shown.
      */
     private void closeStreakPopupIfPresent() {
-        Timber.d("[GAME_MODE_E2E] Step 1: Checking for streak popup");
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 1: Checking for streak popup");
         try {
             Thread.sleep(1000);
             // Click the close button (X) on the streak popup
             onView(withText("✕")).perform(click());
-            Timber.d("[GAME_MODE_E2E] Closed streak popup");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] Closed streak popup");
         } catch (Exception e) {
-            Timber.d("[GAME_MODE_E2E] No streak popup found or already closed");
+            Timber.d("[UNITTESTS][GAME_MODE_E2E] No streak popup found or already closed");
         }
     }
 }
