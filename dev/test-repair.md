@@ -64,16 +64,97 @@ All assertions passed:
 - ✅ Move count increased after subsequent move
 
 ### Affected Tests
-All Level-based tests should use `TestHelper.startLevelGame()`:
-- ✅ `ReverseMoveUndoBugTest` - **Fixed and verified**
-- ⚠️ `Level1E2ETest`, `Level1FastE2ETest`, `Level1SlowE2ETest`, `Level1WrongE2ETest`
-- ⚠️ `Level3E2ETest`, `Level10E2ETest`, `Level11With2StarsE2ETest`
-
-**Action Required:** Check and update remaining Level tests to use TestHelper.startLevelGame().
+All Level-based tests now use `TestHelper.startLevelGame()`:
+- ✅ `ReverseMoveUndoBugTest` - Fixed and verified
+- ✅ `Level1FastE2ETest` - Fixed and verified
+- ✅ `Level1SlowE2ETest` - Fixed and verified
+- ✅ `Level1WrongE2ETest` - Fixed and verified
+- ✅ `Level3E2ETest` - Fixed and verified
+- ✅ `Level10E2ETest` - Fixed and verified
+- ✅ `Level111DebugTest` - Fixed and verified
+- ✅ `LiveMoveCounterE2ETest` - Fixed and verified (4/4 tests)
+- ✅ `GameModeMemoryE2ETest` - Fixed and verified (+ app bug fix)
 
 ### Prevention
 Rule added to TESTSUITE.md:
 > **Level Navigation Rule:** Always use `TestHelper.startLevelGame(activityRule, levelId)` for programmatic level start. Only use UI-based level selection if testing the Level Selection screen itself (e.g., `LevelSelectionLandscapeTest`).
+
+---
+
+## DRY: Solution Execution Methods Extracted to TestHelper
+
+**Date:** 2025-03-10  
+**Status:** ✅ Completed & All Tests Verified  
+
+### Problem
+8 test files contained identical duplicated code for:
+- `executeSolutionMoves()` — wait for solver, iterate moves, select robot, execute direction
+- `getDirectionX()` / `getDirectionY()` — convert `ERRGameMove` to dx/dy
+- `waitForSolution()` — poll GameStateManager for solution
+- `selectRobotAndMove()` — find robot by color, set selected, move
+
+### Solution
+Extracted all methods into `TestHelper.java` as static helpers:
+```java
+TestHelper.executeSolutionMoves(activityRule, gameStateManager, levelId, logTag)
+TestHelper.selectRobotAndMove(activityRule, gameStateManager, robotColor, dx, dy)
+TestHelper.waitForSolution(activityRule, gameStateManager, maxRetries)
+TestHelper.completeLevelWithSolver(activityRule, gameStateManager, levelId, logTag)
+```
+
+### Tests Refactored (DRY)
+- ✅ `Level3E2ETest` — removed ~100 lines
+- ✅ `Level10E2ETest` — removed ~100 lines
+- ✅ `Level111DebugTest` — removed ~120 lines
+- ✅ `Level11With2StarsE2ETest` — removed ~80 lines
+- ✅ `Level140E2ETest` — removed ~110 lines
+- ✅ `BoardSizeResetLevel2E2ETest` — removed ~90 lines
+- ✅ `PerfectRandom5E2ETest` — removed ~70 lines
+- ✅ `RandomGame11E2ETest` — removed ~90 lines
+
+### Lesson Learned
+**When multiple tests need solver execution:**
+1. ✅ Use `TestHelper.executeSolutionMoves()` or `TestHelper.completeLevelWithSolver()`
+2. ❌ Don't copy-paste solution execution logic into each test
+3. ✅ Keep test-specific logic (wrong moves, star checking) in the test itself
+
+---
+
+## GameModeMemoryE2ETest - AchievementsFragment Back Navigation Bug
+
+**Date:** 2025-03-10  
+**Status:** ✅ Repaired & Verified  
+**Root Cause:** `AchievementsFragment.navigateToMainMenu()` always navigated to MainMenu, ignoring back stack
+
+### Problem
+After completing Level 1 → Achievement popup → "View achievements" → back button, the user landed on MainMenu instead of returning to the Game screen. The `next_level_button` was therefore not visible.
+
+### Solution
+Replaced `navigateToMainMenu()` with `navigateBack()` in `AchievementsFragment.java`:
+```java
+private void navigateBack() {
+    boolean popped = requireActivity().getSupportFragmentManager().popBackStackImmediate();
+    if (!popped) {
+        Timber.d("[ACHIEVEMENTS] Back stack empty, navigating to MainMenu as fallback");
+        MainMenuFragment fragment = new MainMenuFragment();
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment)
+                .commit();
+    }
+}
+```
+
+### Why This Works
+- `AchievementPopup.navigateToAchievements()` adds the fragment with `addToBackStack(null)`
+- `popBackStackImmediate()` returns to the previous fragment (Game or MainMenu)
+- Fallback to MainMenu only if back stack is empty (e.g., direct navigation)
+
+### Lesson Learned
+**When implementing back navigation in fragments:**
+1. ✅ Use `popBackStackImmediate()` to respect back stack
+2. ❌ Don't hardcode navigation target (e.g., always MainMenu)
+3. ✅ Add fallback for empty back stack
 
 ---
 

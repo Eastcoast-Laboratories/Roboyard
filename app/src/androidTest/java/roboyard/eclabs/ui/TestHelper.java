@@ -471,6 +471,177 @@ public class TestHelper {
         }
     }
 
+    // ==================== SOLVER / SOLUTION EXECUTION ====================
+
+    /**
+     * Convert ERRGameMove direction to X delta.
+     * @param direction ERRGameMove enum value
+     * @return -1 for LEFT, +1 for RIGHT, 0 otherwise
+     */
+    public static int getDirectionX(roboyard.pm.ia.ricochet.ERRGameMove direction) {
+        switch (direction) {
+            case LEFT: return -1;
+            case RIGHT: return 1;
+            default: return 0;
+        }
+    }
+
+    /**
+     * Convert ERRGameMove direction to Y delta.
+     * @param direction ERRGameMove enum value
+     * @return -1 for UP, +1 for DOWN, 0 otherwise
+     */
+    public static int getDirectionY(roboyard.pm.ia.ricochet.ERRGameMove direction) {
+        switch (direction) {
+            case UP: return -1;
+            case DOWN: return 1;
+            default: return 0;
+        }
+    }
+
+    /**
+     * Execute a single solution move: select robot by color and move in direction.
+     * @param activityRule The activity scenario rule
+     * @param gameStateManager The GameStateManager instance
+     * @param robotColor The robot color constant
+     * @param dx X direction (-1, 0, +1)
+     * @param dy Y direction (-1, 0, +1)
+     */
+    public static void selectRobotAndMove(
+            ActivityScenarioRule<MainActivity> activityRule,
+            GameStateManager gameStateManager,
+            int robotColor, int dx, int dy) throws InterruptedException {
+
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                roboyard.logic.core.GameState state = gameStateManager.getCurrentState().getValue();
+                if (state != null) {
+                    for (roboyard.logic.core.GameElement element : state.getRobots()) {
+                        if (element.getColor() == robotColor) {
+                            state.setSelectedRobot(element);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        Thread.sleep(100);
+
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                gameStateManager.moveRobotInDirection(dx, dy);
+            }
+        });
+        Thread.sleep(500);
+    }
+
+    /**
+     * Wait for solver solution to become available.
+     * @param gameStateManager The GameStateManager instance
+     * @param maxRetries Maximum number of retries (each 500ms)
+     * @return The solution, or null if not found
+     */
+    public static roboyard.logic.core.GameSolution waitForSolution(
+            ActivityScenarioRule<MainActivity> activityRule,
+            GameStateManager gameStateManager,
+            int maxRetries) throws InterruptedException {
+
+        final roboyard.logic.core.GameSolution[] holder = new roboyard.logic.core.GameSolution[1];
+
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                holder[0] = gameStateManager.getCurrentSolution();
+            }
+        });
+
+        int retries = 0;
+        while (holder[0] == null && retries < maxRetries) {
+            Thread.sleep(500);
+            retries++;
+            activityRule.getScenario().onActivity(activity -> {
+                if (gameStateManager != null) {
+                    holder[0] = gameStateManager.getCurrentSolution();
+                }
+            });
+        }
+
+        if (holder[0] != null) {
+            Timber.d("[UNITTESTS][TEST_HELPER] Solution found with %d moves (after %d retries)",
+                    holder[0].getMoves().size(), retries);
+        } else {
+            Timber.e("[UNITTESTS][TEST_HELPER] No solution found after %d retries", retries);
+        }
+        return holder[0];
+    }
+
+    /**
+     * Execute all solution moves for the current level.
+     * Uses the solver to get the optimal solution and executes each move.
+     * @param activityRule The activity scenario rule
+     * @param gameStateManager The GameStateManager instance
+     * @param levelId The level ID (for logging only)
+     * @param logTag The logging tag (e.g. "E2E_3LEVELS")
+     * @return true if all moves were executed successfully
+     */
+    public static boolean executeSolutionMoves(
+            ActivityScenarioRule<MainActivity> activityRule,
+            GameStateManager gameStateManager,
+            int levelId, String logTag) throws InterruptedException {
+
+        roboyard.logic.core.GameSolution solution = waitForSolution(activityRule, gameStateManager, 10);
+
+        if (solution == null) {
+            Timber.e("[UNITTESTS][%s] Level %d: Could not get solution", logTag, levelId);
+            return false;
+        }
+
+        java.util.ArrayList<roboyard.logic.core.IGameMove> moves = solution.getMoves();
+        Timber.d("[UNITTESTS][%s] Level %d: Executing %d moves", logTag, levelId, moves.size());
+
+        for (int i = 0; i < moves.size(); i++) {
+            roboyard.logic.core.IGameMove move = moves.get(i);
+            if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
+                roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                int robotColor = rrMove.getColor();
+                roboyard.pm.ia.ricochet.ERRGameMove direction = rrMove.getMove();
+                int dx = getDirectionX(direction);
+                int dy = getDirectionY(direction);
+
+                Timber.d("[UNITTESTS][%s] Move %d/%d: Robot %d -> %s", logTag, i + 1, moves.size(), robotColor, direction);
+                selectRobotAndMove(activityRule, gameStateManager, robotColor, dx, dy);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Complete a level using the solver solution and verify completion.
+     * Combines waitForSolution + executeSolutionMoves + completion check.
+     * @return true if level was completed
+     */
+    public static boolean completeLevelWithSolver(
+            ActivityScenarioRule<MainActivity> activityRule,
+            GameStateManager gameStateManager,
+            int levelId, String logTag) throws InterruptedException {
+
+        Thread.sleep(2000); // Wait for solver
+        boolean executed = executeSolutionMoves(activityRule, gameStateManager, levelId, logTag);
+        if (!executed) return false;
+
+        Thread.sleep(2000); // Wait for completion
+
+        final boolean[] completed = {false};
+        activityRule.getScenario().onActivity(activity -> {
+            if (gameStateManager != null) {
+                Boolean val = gameStateManager.isGameComplete().getValue();
+                completed[0] = val != null && val;
+                Timber.d("[UNITTESTS][%s] Level %d completed: %b", logTag, levelId, completed[0]);
+            }
+        });
+
+        return completed[0];
+    }
+
     /**
      * Set Standard game mode via Settings UI.
      * Opens Settings, clicks Standard radio button, goes back.

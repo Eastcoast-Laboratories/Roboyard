@@ -22,13 +22,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
-import roboyard.logic.core.GameElement;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.achievements.AchievementManager;
-import roboyard.logic.core.GameState;
-import roboyard.logic.core.GameSolution;
-import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
 import roboyard.ui.components.GameStateManager;
 
 import timber.log.Timber;
@@ -96,35 +91,13 @@ public class GameModeMemoryE2ETest {
             assertNotNull("GameStateManager should not be null", gameStateManager);
         });
         
-        // Step 1: Close streak popup if shown
-        closeStreakPopupIfPresent();
-        
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
         
-        // Step 2: Click on "Level Game" button to go to level selection
-        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 2: Clicking Level Game button");
-        try {
-            onView(withId(R.id.level_game_button)).perform(click());
-            Thread.sleep(2000);
-            Timber.d("[UNITTESTS][GAME_MODE_E2E] Clicked Level Game button");
-        } catch (Exception e) {
-            Timber.w(e, "[GAME_MODE_E2E] Could not click Level Game button");
-        }
-        
-        // Step 3: Click on Level 1
-        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 3: Clicking Level 1");
-        try {
-            onView(withText("1")).perform(click());
-            Thread.sleep(3000);
-            Timber.d("[UNITTESTS][GAME_MODE_E2E] Clicked Level 1");
-        } catch (Exception e) {
-            Timber.w(e, "[GAME_MODE_E2E] Could not click Level 1, loading directly");
-            activityRule.getScenario().onActivity(activity -> {
-                gameStateManager.startLevelGame(1);
-            });
-            Thread.sleep(3000);
-        }
+        // Start Level 1 programmatically
+        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 2+3: Starting Level 1 via TestHelper");
+        TestHelper.startLevelGame(activityRule, 1);
+        Thread.sleep(1000);
         
         // Verify we're in level 1
         activityRule.getScenario().onActivity(activity -> {
@@ -133,45 +106,10 @@ public class GameModeMemoryE2ETest {
             Timber.d("[UNITTESTS][GAME_MODE_E2E] Verified: in level 1");
         });
         
-        // Wait for solution to be calculated
-        Thread.sleep(3000);
-        
-        // Step 4: Solve Level 1 using the solution
+        // Step 4: Solve Level 1 using TestHelper
         Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 4: Solving Level 1");
-        
-        // Get and execute the solution
-        final GameSolution[] solutionHolder = new GameSolution[1];
-        activityRule.getScenario().onActivity(activity -> {
-            solutionHolder[0] = gameStateManager.getCurrentSolution();
-        });
-        
-        GameSolution solution = solutionHolder[0];
-        if (solution != null && solution.getMoves() != null) {
-            Timber.d("[UNITTESTS][GAME_MODE_E2E] Solution has %d moves", solution.getMoves().size());
-            
-            for (int i = 0; i < solution.getMoves().size(); i++) {
-                IGameMove move = solution.getMoves().get(i);
-                Timber.d("[UNITTESTS][GAME_MODE_E2E] Executing move %d: %s", i + 1, move);
-                
-                executeMove(move);
-                Thread.sleep(1500);
-                
-                // Check if game is complete
-                final boolean[] isComplete = {false};
-                activityRule.getScenario().onActivity(activity -> {
-                    Boolean complete = gameStateManager.isGameComplete().getValue();
-                    isComplete[0] = complete != null && complete;
-                });
-                
-                if (isComplete[0]) {
-                    Timber.d("[UNITTESTS][GAME_MODE_E2E] Level completed after move %d", i + 1);
-                    break;
-                }
-            }
-        } else {
-            Timber.w("[GAME_MODE_E2E] No solution available, cannot complete test");
-            fail("No solution available for Level 1");
-        }
+        boolean completed = TestHelper.completeLevelWithSolver(activityRule, gameStateManager, 1, "GAME_MODE_E2E");
+        assertTrue("Level 1 should be completed", completed);
         
         // Wait for completion UI
         Thread.sleep(2000);
@@ -242,57 +180,4 @@ public class GameModeMemoryE2ETest {
         Timber.d("[UNITTESTS][GAME_MODE_E2E] TEST PASSED: Game mode memory works correctly!");
     }
 
-    /**
-     * Execute a single move from the solution.
-     */
-    private void executeMove(IGameMove move) {
-        activityRule.getScenario().onActivity(activity -> {
-            if (gameStateManager != null && move instanceof RRGameMove) {
-                RRGameMove rrMove = (RRGameMove) move;
-                int robotColor = rrMove.getColor();
-                int direction = rrMove.getDirection();
-                
-                Timber.d("[UNITTESTS][GAME_MODE_E2E] Move: Robot color=%d, direction=%d", robotColor, direction);
-                
-                GameState state = gameStateManager.getCurrentState().getValue();
-                if (state != null) {
-                    // Find and select the robot
-                    for (GameElement element : state.getGameElements()) {
-                        if (element.getType() == 1 && element.getColor() == robotColor) {
-                            state.setSelectedRobot(element);
-                            Timber.d("[UNITTESTS][GAME_MODE_E2E] Selected robot color=%d", robotColor);
-                            break;
-                        }
-                    }
-                    
-                    // Convert direction to dx, dy
-                    int dx = 0, dy = 0;
-                    switch (direction) {
-                        case 1: dy = -1; break; // UP
-                        case 2: dx = 1; break;  // RIGHT
-                        case 4: dy = 1; break;  // DOWN
-                        case 8: dx = -1; break; // LEFT
-                    }
-                    
-                    Timber.d("[UNITTESTS][GAME_MODE_E2E] Moving robot in direction dx=%d, dy=%d", dx, dy);
-                    gameStateManager.moveRobotInDirection(dx, dy);
-                }
-            }
-        });
-    }
-
-    /**
-     * Close the streak popup if it's shown.
-     */
-    private void closeStreakPopupIfPresent() {
-        Timber.d("[UNITTESTS][GAME_MODE_E2E] Step 1: Checking for streak popup");
-        try {
-            Thread.sleep(1000);
-            // Click the close button (X) on the streak popup
-            onView(withText("✕")).perform(click());
-            Timber.d("[UNITTESTS][GAME_MODE_E2E] Closed streak popup");
-        } catch (Exception e) {
-            Timber.d("[UNITTESTS][GAME_MODE_E2E] No streak popup found or already closed");
-        }
-    }
 }

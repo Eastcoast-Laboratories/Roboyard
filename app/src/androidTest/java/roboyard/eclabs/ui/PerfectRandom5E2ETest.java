@@ -21,16 +21,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-
 import roboyard.eclabs.R;
 import roboyard.ui.achievements.AchievementManager;
-import roboyard.logic.core.GameElement;
-import roboyard.logic.core.GameState;
-import roboyard.logic.core.GameSolution;
-import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.pm.ia.ricochet.ERRGameMove;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
 import roboyard.ui.components.FileReadWrite;
@@ -172,84 +164,20 @@ public class PerfectRandom5E2ETest {
      * Wait for the solver to find a solution, up to 15 seconds
      */
     private void waitForSolver(int game) throws InterruptedException {
-        final GameSolution[] solutionHolder = new GameSolution[1];
-        int retries = 0;
-        while (retries < 30) {
-            activityRule.getScenario().onActivity(activity -> {
-                if (gameStateManager != null) {
-                    solutionHolder[0] = gameStateManager.getCurrentSolution();
-                }
-            });
-            if (solutionHolder[0] != null && solutionHolder[0].getMoves() != null
-                    && !solutionHolder[0].getMoves().isEmpty()) {
-                Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d: Solver found solution with %d moves after %d retries",
-                        game, solutionHolder[0].getMoves().size(), retries);
-                return;
-            }
-            Thread.sleep(500);
-            retries++;
+        roboyard.logic.core.GameSolution solution = TestHelper.waitForSolution(activityRule, gameStateManager, 30);
+        if (solution != null) {
+            Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d: Solver found solution with %d moves",
+                    game, solution.getMoves().size());
+        } else {
+            Timber.w("[PERFECT5_TEST] Game %d: Solver timeout", game);
         }
-        Timber.w("[PERFECT5_TEST] Game %d: Solver timeout after %d retries", game, retries);
     }
 
     /**
-     * Execute the optimal solution moves via GameStateManager
+     * Execute the optimal solution moves via TestHelper
      */
     private boolean executeSolutionMoves(int game) throws InterruptedException {
-        final GameSolution[] solutionHolder = new GameSolution[1];
-        activityRule.getScenario().onActivity(activity -> {
-            if (gameStateManager != null) {
-                solutionHolder[0] = gameStateManager.getCurrentSolution();
-            }
-        });
-
-        if (solutionHolder[0] == null || solutionHolder[0].getMoves() == null
-                || solutionHolder[0].getMoves().isEmpty()) {
-            Timber.e("[PERFECT5_TEST] Game %d: No solution available", game);
-            return false;
-        }
-
-        GameSolution solution = solutionHolder[0];
-        ArrayList<IGameMove> moves = solution.getMoves();
-        Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d: Executing %d optimal moves", game, moves.size());
-
-        for (int i = 0; i < moves.size(); i++) {
-            IGameMove move = moves.get(i);
-            if (move instanceof RRGameMove) {
-                RRGameMove rrMove = (RRGameMove) move;
-                int robotColor = rrMove.getColor();
-                ERRGameMove direction = rrMove.getMove();
-
-                final int dx = getDirectionX(direction);
-                final int dy = getDirectionY(direction);
-                final int color = robotColor;
-
-                // Select robot
-                activityRule.getScenario().onActivity(activity -> {
-                    if (gameStateManager != null) {
-                        GameState state = gameStateManager.getCurrentState().getValue();
-                        if (state != null) {
-                            for (GameElement element : state.getRobots()) {
-                                if (element.getColor() == color) {
-                                    state.setSelectedRobot(element);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                });
-                Thread.sleep(100);
-
-                // Execute move
-                activityRule.getScenario().onActivity(activity -> {
-                    if (gameStateManager != null) {
-                        gameStateManager.moveRobotInDirection(dx, dy);
-                    }
-                });
-                Thread.sleep(400);
-            }
-        }
-        return true;
+        return TestHelper.executeSolutionMoves(activityRule, gameStateManager, game, "PERFECT5_TEST");
     }
 
     /**
@@ -285,19 +213,4 @@ public class PerfectRandom5E2ETest {
         Timber.d("[UNITTESTS][PERFECT5_TEST] ✓ perfect_random_games_5 is UNLOCKED after 5 perfect random games!");
     }
 
-    private int getDirectionX(ERRGameMove direction) {
-        switch (direction) {
-            case LEFT: return -1;
-            case RIGHT: return 1;
-            default: return 0;
-        }
-    }
-
-    private int getDirectionY(ERRGameMove direction) {
-        switch (direction) {
-            case UP: return -1;
-            case DOWN: return 1;
-            default: return 0;
-        }
-    }
 }

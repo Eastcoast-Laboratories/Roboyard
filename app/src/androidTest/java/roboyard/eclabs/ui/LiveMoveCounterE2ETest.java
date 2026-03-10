@@ -75,19 +75,9 @@ public class LiveMoveCounterE2ETest {
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
         
-        // Click "Level Game" button on main menu (use programmatic click to avoid visibility issues)
-        activityRule.getScenario().onActivity(activity -> {
-            View levelGameBtn = activity.findViewById(R.id.level_game_button);
-            if (levelGameBtn != null) {
-                levelGameBtn.setVisibility(View.VISIBLE);
-                levelGameBtn.performClick();
-            }
-        });
+        // Start Level 1 programmatically
+        TestHelper.startLevelGame(activityRule, 1);
         Thread.sleep(1000);
-        
-        // Click level "1" button
-        onView(allOf(withId(R.id.level_button), withText("1"))).perform(click());
-        Thread.sleep(2000);
         
         // Get GameStateManager
         activityRule.getScenario().onActivity(activity -> {

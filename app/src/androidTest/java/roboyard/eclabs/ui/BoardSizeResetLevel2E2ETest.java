@@ -17,16 +17,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-
 import roboyard.eclabs.R;
-import roboyard.ui.activities.MainActivity;
-import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
-import roboyard.logic.core.GameSolution;
-import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.pm.ia.ricochet.ERRGameMove;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
 
 import timber.log.Timber;
@@ -99,7 +92,9 @@ public class BoardSizeResetLevel2E2ETest {
         
         // COMPLETE Level 1 by executing solution (real user behavior)
         Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Completing Level 1...");
-        executeSolutionForCurrentLevel();
+        Thread.sleep(3000); // Wait for solver
+        assertTrue("Solution should be executed for Level 1",
+                TestHelper.executeSolutionMoves(activityRule, gameStateManager, 1, "BOARD_SIZE_E2E"));
         Thread.sleep(2000);
         
         // Close achievement popup
@@ -177,114 +172,5 @@ public class BoardSizeResetLevel2E2ETest {
                 sizeBeforeUndo[1], sizeAfterUndo[1]);
         
         Timber.d("[UNITTESTS][BOARD_SIZE_E2E] ✓ Test passed: Board size correctly maintained after undo");
-    }
-    
-    /**
-     * Execute the solution for the current level
-     */
-    private void executeSolutionForCurrentLevel() throws InterruptedException {
-        final GameSolution[] solutionHolder = new GameSolution[1];
-        
-        // Wait for solver to find solution
-        Thread.sleep(3000);
-        
-        // Get solution from GameStateManager
-        activityRule.getScenario().onActivity(activity -> {
-            if (gameStateManager != null) {
-                solutionHolder[0] = gameStateManager.getCurrentSolution();
-                if (solutionHolder[0] != null) {
-                    Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Found solution with %d moves", 
-                            solutionHolder[0].getMoves().size());
-                } else {
-                    Timber.w("[BOARD_SIZE_E2E] No solution found yet");
-                }
-            }
-        });
-        
-        // Wait for solution if not available
-        int retries = 0;
-        while (solutionHolder[0] == null && retries < 10) {
-            Thread.sleep(500);
-            retries++;
-            activityRule.getScenario().onActivity(activity -> {
-                if (gameStateManager != null) {
-                    solutionHolder[0] = gameStateManager.getCurrentSolution();
-                }
-            });
-        }
-        
-        if (solutionHolder[0] == null) {
-            Timber.e("[BOARD_SIZE_E2E] Could not get solution after %d retries", retries);
-            fail("Could not get solution");
-            return;
-        }
-        
-        GameSolution solution = solutionHolder[0];
-        ArrayList<IGameMove> moves = solution.getMoves();
-        
-        Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Executing %d moves", moves.size());
-        
-        for (int i = 0; i < moves.size(); i++) {
-            IGameMove move = moves.get(i);
-            if (move instanceof RRGameMove) {
-                RRGameMove rrMove = (RRGameMove) move;
-                int robotColor = rrMove.getColor();
-                ERRGameMove direction = rrMove.getMove();
-                
-                // Select robot and move
-                final int dx = getDirectionX(direction);
-                final int dy = getDirectionY(direction);
-                final int color = robotColor;
-                
-                activityRule.getScenario().onActivity(activity -> {
-                    if (gameStateManager != null) {
-                        GameState state = gameStateManager.getCurrentState().getValue();
-                        if (state != null) {
-                            // Find and select robot by color
-                            for (GameElement element : state.getRobots()) {
-                                if (element.getColor() == color) {
-                                    state.setSelectedRobot(element);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                });
-                
-                Thread.sleep(100);
-                
-                // Move robot
-                activityRule.getScenario().onActivity(activity -> {
-                    if (gameStateManager != null) {
-                        gameStateManager.moveRobotInDirection(dx, dy);
-                    }
-                });
-                
-                // Wait for animation
-                Thread.sleep(500);
-            }
-        }
-    }
-    
-    /**
-     * Get X direction from ERRGameMove
-     */
-    private int getDirectionX(ERRGameMove direction) {
-        switch (direction) {
-            case LEFT: return -1;
-            case RIGHT: return 1;
-            default: return 0;
-        }
-    }
-    
-    /**
-     * Get Y direction from ERRGameMove
-     */
-    private int getDirectionY(ERRGameMove direction) {
-        switch (direction) {
-            case UP: return -1;
-            case DOWN: return 1;
-            default: return 0;
-        }
     }
 }

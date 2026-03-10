@@ -66,11 +66,8 @@ public class Level1SlowE2ETest {
         // Close achievement popup if present
         TestHelper.closeAchievementPopupIfPresent();
         
-        // Navigate to Level 1
-        onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());
-        Thread.sleep(200);
-        onView(allOf(withId(R.id.level_button), withText("1"))).check(matches(isDisplayed())).perform(click());
-        Thread.sleep(300);
+        // Start Level 1 programmatically
+        TestHelper.startLevelGame(activityRule, 1);
         
         activityRule.getScenario().onActivity(activity -> {
             gameStateManager = activity.getGameStateManager();

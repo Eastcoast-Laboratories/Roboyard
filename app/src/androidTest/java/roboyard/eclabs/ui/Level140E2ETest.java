@@ -27,12 +27,7 @@ import java.util.Map;
 
 import roboyard.eclabs.R;
 import roboyard.ui.achievements.AchievementManager;
-import roboyard.logic.core.GameElement;
-import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
-import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
-import roboyard.pm.ia.ricochet.ERRGameMove;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
 
@@ -275,133 +270,11 @@ public class Level140E2ETest {
     }
     
     /**
-     * Execute the solution moves for the current level
+     * Execute the solution moves for the current level via TestHelper
      * @return true if moves were executed, false if no solution found
      */
     private boolean executeSolutionMoves(int level) throws InterruptedException {
-        final GameSolution[] solutionHolder = new GameSolution[1];
-        final int[] moveCount = {0};
-        
-        // Wait for solution with actual moves (not just any solution)
-        int retries = 0;
-        int maxRetries = 30; // 30 * 500ms = 15 seconds max wait
-        
-        while (retries < maxRetries) {
-            activityRule.getScenario().onActivity(activity -> {
-                if (gameStateManager != null) {
-                    GameSolution sol = gameStateManager.getCurrentSolution();
-                    if (sol != null && sol.getMoves() != null && sol.getMoves().size() > 0) {
-                        solutionHolder[0] = sol;
-                        moveCount[0] = sol.getMoves().size();
-                    }
-                }
-            });
-            
-            if (solutionHolder[0] != null && moveCount[0] > 0) {
-                Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d: Found solution with %d moves after %d retries", 
-                        level, moveCount[0], retries);
-                break;
-            }
-            
-            Thread.sleep(500);
-            retries++;
-            
-            if (retries % 10 == 0) {
-                Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d: Still waiting for solution... (%d/%d)", level, retries, maxRetries);
-            }
-        }
-        
-        if (solutionHolder[0] == null || moveCount[0] == 0) {
-            Timber.e("[E2E_140LEVELS] Level %d: Solver returned 0 moves after %d retries (known solver bug)", level, retries);
-            // Mark level as having solver issue - return false to indicate failure
-            return false;
-        }
-        
-        GameSolution solution = solutionHolder[0];
-        ArrayList<IGameMove> moves = solution.getMoves();
-        
-        Timber.d("[UNITTESTS][E2E_140LEVELS] Level %d: Executing %d moves", level, moves.size());
-        
-        for (int i = 0; i < moves.size(); i++) {
-            IGameMove move = moves.get(i);
-            if (move instanceof RRGameMove) {
-                RRGameMove rrMove = (RRGameMove) move;
-                int robotColor = rrMove.getColor();
-                ERRGameMove direction = rrMove.getMove();
-                
-                Timber.d("[UNITTESTS][E2E_140LEVELS] Move %d/%d: Robot color=%d -> %s", i + 1, moves.size(), robotColor, direction);
-                
-                final int dx = getDirectionX(direction);
-                final int dy = getDirectionY(direction);
-                final int color = robotColor;
-                final int moveIndex = i;
-                
-                // Select robot and move in one action
-                final boolean[] moveExecuted = {false};
-                activityRule.getScenario().onActivity(activity -> {
-                    try {
-                        if (gameStateManager != null) {
-                            GameState state = gameStateManager.getCurrentState().getValue();
-                            if (state != null) {
-                                GameElement selectedRobot = null;
-                                // Find robot by color
-                                for (GameElement element : state.getRobots()) {
-                                    if (element.getColor() == color) {
-                                        selectedRobot = element;
-                                        break;
-                                    }
-                                }
-                                
-                                if (selectedRobot != null) {
-                                    state.setSelectedRobot(selectedRobot);
-                                    Timber.d("[UNITTESTS][E2E_140LEVELS] Move %d: Selected robot color=%d at pos (%d,%d)", 
-                                            moveIndex + 1, color, selectedRobot.getX(), selectedRobot.getY());
-                                    
-                                    // Execute move
-                                    gameStateManager.moveRobotInDirection(dx, dy);
-                                    moveExecuted[0] = true;
-                                    Timber.d("[UNITTESTS][E2E_140LEVELS] Move %d: Executed direction (%d,%d)", moveIndex + 1, dx, dy);
-                                } else {
-                                    Timber.e("[E2E_140LEVELS] Move %d: Robot with color %d not found!", moveIndex + 1, color);
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        Timber.e(e, "[E2E_140LEVELS] Move %d: Exception during move execution", moveIndex + 1);
-                    }
-                });
-                
-                if (!moveExecuted[0]) {
-                    Timber.w("[E2E_140LEVELS] Move %d: Move was not executed", i + 1);
-                }
-                
-                // Wait for animation
-                Thread.sleep(300);
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * Get X direction from ERRGameMove
-     */
-    private int getDirectionX(ERRGameMove direction) {
-        switch (direction) {
-            case LEFT: return -1;
-            case RIGHT: return 1;
-            default: return 0;
-        }
-    }
-    
-    /**
-     * Get Y direction from ERRGameMove
-     */
-    private int getDirectionY(ERRGameMove direction) {
-        switch (direction) {
-            case UP: return -1;
-            case DOWN: return 1;
-            default: return 0;
-        }
+        return TestHelper.executeSolutionMoves(activityRule, gameStateManager, level, "E2E_140LEVELS");
     }
     
     /**
