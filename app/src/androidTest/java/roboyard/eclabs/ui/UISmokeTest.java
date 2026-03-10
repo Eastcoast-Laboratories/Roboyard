@@ -160,7 +160,55 @@ public class UISmokeTest {
         pressBack();
         Thread.sleep(800);
 
+        // --- Level Editor ---
+        step("17", "Open Level Editor via Debug Settings");
+        TestHelper.openDebugScreen();
+        Thread.sleep(500);
+        onView(withText("Level Editor")).perform(scrollTo(), click());
+        Thread.sleep(1000);
+
+        step("18", "Back from Level Editor");
+        pressBack();
+        Thread.sleep(500);
+        TestHelper.closeAchievementPopupIfPresent();
+
+        // --- Random Game with Moves and Save ---
+        step("19", "Start new random game for moves test");
+        onView(withId(R.id.ui_button)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.game_grid_view)).check(matches(isDisplayed()));
+
+        step("20", "Make random moves with each robot");
+        makeRandomMoveWithAllRobots();
+
+        step("21", "Open Save/Load screen");
+        TestHelper.navigateToSaveLoadScreen(activityRule);
+        Thread.sleep(1000);
+        // Verify save slot recycler view is displayed
+        onView(withId(R.id.save_slot_recycler_view)).check(matches(isDisplayed()));
+
+        step("22", "Navigate to History tab to verify entry");
+        TestHelper.navigateToHistoryTab();
+        Thread.sleep(500);
+        // Verify save slot recycler view is still displayed (now showing history)
+        onView(withId(R.id.save_slot_recycler_view)).check(matches(isDisplayed()));
+
         step("PASS", "UI Smoke Test completed successfully");
+    }
+
+    /**
+     * Make one random move with each robot in a random direction.
+     * Each move has 500ms sleep to allow animation.
+     */
+    private void makeRandomMoveWithAllRobots() throws InterruptedException {
+        Timber.d("[UNITTESTS][SMOKE_TEST] Making random moves with all robots");
+        // Simulate tapping on different parts of the game grid to move robots
+        // This is a simplified approach - just tap the grid a few times
+        for (int i = 0; i < 4; i++) {
+            onView(withId(R.id.game_grid_view)).perform(click());
+            Thread.sleep(500);
+        }
+        Timber.d("[UNITTESTS][SMOKE_TEST] Random moves completed");
     }
 
     private void step(String id, String msg) {

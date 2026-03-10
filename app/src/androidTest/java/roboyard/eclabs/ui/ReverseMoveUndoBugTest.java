@@ -55,20 +55,18 @@ public class ReverseMoveUndoBugTest {
 
     @Before
     public void setUp() throws InterruptedException {
-        // Close achievement popup if present
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] setUp: starting Level 1");
         TestHelper.closeAchievementPopupIfPresent();
-
-        // Navigate to Level 1
-        onView(withId(R.id.level_game_button)).check(matches(isDisplayed())).perform(click());
-        Thread.sleep(200);
-        onView(allOf(withId(R.id.level_button), withText("1"))).check(matches(isDisplayed())).perform(click());
-        Thread.sleep(500);
-
+        
+        // Use TestHelper to start Level 1 programmatically (robust against UI layout changes)
+        TestHelper.startLevelGame(activityRule, 1);
+        
         activityRule.getScenario().onActivity(activity -> {
             gameStateManager = activity.getGameStateManager();
         });
 
         assertNotNull("GameStateManager must not be null", gameStateManager);
+        Timber.d("[UNITTESTS][UNDO_BUG_TEST] setUp: Level 1 started successfully");
     }
 
     /**
