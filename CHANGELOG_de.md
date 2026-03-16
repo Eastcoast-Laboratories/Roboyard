@@ -2,6 +2,13 @@ Changelog Deutsch
 =================
 
 
+## Version 44 (2026-03-16)
+- Verbesserter High-Contrast-Modus
+- Der Hintergrundsound pausiert jetzt, wenn die App im Hintergrund ist
+- Der Game-Timer pausiert jetzt, wenn die App im Hintergrund ist
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+
+
 ## Version 43 (2026-03-10)
 - Die A.I. kann jetzt Multi-Target-Rätsel lösen
 - Kleinere Spielfeldgröße unterstützt: 7x8, 10x8 und 16x14  Felder

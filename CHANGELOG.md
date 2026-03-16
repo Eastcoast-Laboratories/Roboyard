@@ -2,6 +2,11 @@
 =========
 
 
+## Version 44 (2026-03-16)
+- Enhanced high contrast mode support
+- Ambient background sound now pauses if the app is in background
+- Game-timer now pauses, if the app is in background
+
 ## Version 43 (2026-03-10)
 - A.I can solve Multi-goal puzzles now
 - Smaller board sizes supported: 7x8, 10x8 and 16x14 squares

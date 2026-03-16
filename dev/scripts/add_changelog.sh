@@ -67,6 +67,8 @@ check_length() {
 # German Changelog
 DE_CHANGES=$(cat << EOF
 - Verbesserter High-Contrast-Modus
+- Der Hintergrundsound pausiert jetzt, wenn die App im Hintergrund ist
+- Der Game-Timer pausiert jetzt, wenn die App im Hintergrund ist
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
@@ -74,6 +76,8 @@ EOF
 # English Changelog
 EN_CHANGES=$(cat << EOF
 - Enhanced high contrast mode support
+- Ambient background sound now pauses if the app is in background
+- Game-timer now pauses, if the app is in background
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )
