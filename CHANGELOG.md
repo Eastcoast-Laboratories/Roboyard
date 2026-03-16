@@ -2,7 +2,7 @@
 =========
 
 
-## Version 44 (2026-03-16)
+## Version 44 (126) - 2026-03-16
 - Enhanced high contrast mode support
 - Ambient background sound now pauses if the app is in background
 - Game-timer now pauses, if the app is in background

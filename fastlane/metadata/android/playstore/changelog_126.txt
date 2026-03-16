@@ -1,0 +1,14 @@
+# Play Store Changelogs für Version 44 (versionCode: 126)
+
+<en-GB>
+- Enhanced high contrast mode support
+- Ambient background sound now pauses if the app is in background
+- Game-timer now pauses, if the app is in background
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Verbesserter High-Contrast-Modus
+- Der Hintergrundsound pausiert jetzt, wenn die App im Hintergrund ist
+- Der Game-Timer pausiert jetzt, wenn die App im Hintergrund ist
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>

@@ -16,6 +16,7 @@ Roboyard allows to record up to 35 different maps. So if during your games you e
 - [Architecture](docs/ARCHITECTURE.md) - Technical architecture and components
 - [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
 - [Testing](docs/TESTING.md) - Testing guidelines and procedures
+- [Version Mapping](VERSION_MAPPING.md) - Mapping between versionName and versionCode for all releases
 
 # Download App
 

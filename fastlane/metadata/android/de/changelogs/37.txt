@@ -1,3 +1,0 @@
-- Dynamische Roboterkollisionsgeräusche - die Tonhöhe ändert sich je nach beteiligten Roboter
-- Verbesserte Sichtbarkeit des grünen Ziels im Hohen Kontrast Modus
-- Anfänger-Levels überarbeitet: Der User wird nun in alle wichtigen Spieltaktiken hineingeführt 

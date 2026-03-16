@@ -64,20 +64,32 @@ check_length() {
   fi
 }
 
-# German Changelog
+# German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
 - Verbesserter High-Contrast-Modus
 - Der Hintergrundsound pausiert jetzt, wenn die App im Hintergrund ist
 - Der Game-Timer pausiert jetzt, wenn die App im Hintergrund ist
-- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
 
-# English Changelog
+# English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
 - Enhanced high contrast mode support
 - Ambient background sound now pauses if the app is in background
 - Game-timer now pauses, if the app is in background
+EOF
+)
+
+# German Changelog for Fastlane/Play Store (with link) - DRY: append link to base content
+DE_CHANGES_WITH_LINK=$(cat << EOF
+${DE_CHANGES}
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+EOF
+)
+
+# English Changelog for Fastlane/Play Store (with link) - DRY: append link to base content
+EN_CHANGES_WITH_LINK=$(cat << EOF
+${EN_CHANGES}
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )
@@ -99,38 +111,38 @@ EOF
 if [ "$(echo "$PLAYSTORE_DE_DE" | grep -v '^<.*>$' | tr -d '\n' | tr -d ' ')" = "" ]; then
   PLAYSTORE_DE_DE=$(cat << EOF
 <de-DE>
-$DE_CHANGES
+$DE_CHANGES_WITH_LINK
 </de-DE>
 EOF
 )
-  echo "Using DE_CHANGES for PLAYSTORE_DE_DE as it was empty"
+  echo "Using DE_CHANGES_WITH_LINK for PLAYSTORE_DE_DE as it was empty"
 fi
 
 if [ "$(echo "$PLAYSTORE_EN_GB" | grep -v '^<.*>$' | tr -d '\n' | tr -d ' ')" = "" ]; then
   PLAYSTORE_EN_GB=$(cat << EOF
 <en-GB>
-$EN_CHANGES
+$EN_CHANGES_WITH_LINK
 </en-GB>
 EOF
 )
-  echo "Using EN_CHANGES for PLAYSTORE_EN_GB as it was empty"
+  echo "Using EN_CHANGES_WITH_LINK for PLAYSTORE_EN_GB as it was empty"
 fi
 
-# Fastlane-Changelogs erstellen
-# Deutsches Changelog
-DE_CHANGELOG_FILE="$BASE_DIR/de/changelogs/${VERSION_NAME}.txt"
+# Fastlane-Changelogs erstellen (use versionCode for filenames, not versionName)
+# Deutsches Changelog (with link)
+DE_CHANGELOG_FILE="$BASE_DIR/de/changelogs/${VERSION_CODE}.txt"
 mkdir -p "$(dirname "$DE_CHANGELOG_FILE")"
-echo "$DE_CHANGES" > "$DE_CHANGELOG_FILE"
+echo "$DE_CHANGES_WITH_LINK" > "$DE_CHANGELOG_FILE"
 
-# Englisches Changelog
-EN_CHANGELOG_FILE="$BASE_DIR/en-US/changelogs/${VERSION_NAME}.txt"
+# Englisches Changelog (with link)
+EN_CHANGELOG_FILE="$BASE_DIR/en-US/changelogs/${VERSION_CODE}.txt"
 mkdir -p "$(dirname "$EN_CHANGELOG_FILE")"
-echo "$EN_CHANGES" > "$EN_CHANGELOG_FILE"
+echo "$EN_CHANGES_WITH_LINK" > "$EN_CHANGELOG_FILE"
 
 # Play Store spezifische Changelogs erstellen
 mkdir -p "$PLAYSTORE_DIR"
-PLAYSTORE_CHANGELOG_FILE="$PLAYSTORE_DIR/changelog_${VERSION_NAME}.txt"
-echo "# Play Store Changelogs für Version $VERSION_NAME" > "$PLAYSTORE_CHANGELOG_FILE"
+PLAYSTORE_CHANGELOG_FILE="$PLAYSTORE_DIR/changelog_${VERSION_CODE}.txt"
+echo "# Play Store Changelogs für Version $VERSION_NAME (versionCode: $VERSION_CODE)" > "$PLAYSTORE_CHANGELOG_FILE"
 echo "" >> "$PLAYSTORE_CHANGELOG_FILE"
 echo "$PLAYSTORE_EN_GB" >> "$PLAYSTORE_CHANGELOG_FILE"
 echo "$PLAYSTORE_DE_DE" >> "$PLAYSTORE_CHANGELOG_FILE"
@@ -180,7 +192,7 @@ else
     head -n $((VERSION_LINE - 1)) "$CHANGELOG_MD" > "$TEMP_FILE"
     
     # Update the version header with current date
-    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    echo "## Version ${VERSION_NAME} (${VERSION_CODE}) - ${CURRENT_DATE}" >> "$TEMP_FILE"
     
     # Add the updated changes
     echo "$EN_CHANGES" >> "$TEMP_FILE"
@@ -201,7 +213,7 @@ else
     
     # add new entry after separator
     echo "" >> "$TEMP_FILE"
-    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    echo "## Version ${VERSION_NAME} (${VERSION_CODE}) - ${CURRENT_DATE}" >> "$TEMP_FILE"
     echo "$EN_CHANGES" >> "$TEMP_FILE"
     echo "" >> "$TEMP_FILE"
     
@@ -254,7 +266,7 @@ else
     
     # add new entry after separator
     echo "" >> "$TEMP_FILE"
-    echo "## Version ${VERSION_NAME} (${CURRENT_DATE})" >> "$TEMP_FILE"
+    echo "## Version ${VERSION_NAME} (${VERSION_CODE})" >> "$TEMP_FILE"
     echo "$DE_CHANGES" >> "$TEMP_FILE"
     echo "" >> "$TEMP_FILE"
     
