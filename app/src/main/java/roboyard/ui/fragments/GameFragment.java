@@ -983,7 +983,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         statusTextView.setTextColor(Preferences.highContrastMode ? Color.BLACK : darkGreen);
                     }
                     
-                    // Apply background based on mode
+                    // Apply background in live move counter based on mode
                     if (Preferences.highContrastMode) {
                         // White background with black border
                         GradientDrawable hcDrawable = new GradientDrawable();
@@ -2609,6 +2609,19 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 drawable.setStroke(4 * (int) getResources().getDisplayMetrics().density, Color.BLACK);
                 optimalMovesButton.setBackground(drawable);
                 optimalMovesButton.setTextColor(Color.BLACK);
+                optimalMovesButton.setPadding(0, 0, 0, 0);
+                
+                // Disable auto-sizing and set fixed large text size
+                androidx.appcompat.widget.AppCompatButton appCompatButton = (androidx.appcompat.widget.AppCompatButton) optimalMovesButton;
+                appCompatButton.setAutoSizeTextTypeWithDefaults(androidx.appcompat.widget.AppCompatTextView.AUTO_SIZE_TEXT_TYPE_NONE);
+                optimalMovesButton.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 48);
+                
+                // Set width a bit wider in high contrast mode
+                androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params = 
+                    (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) optimalMovesButton.getLayoutParams();
+                params.horizontalWeight = 0.25f; // Increase from 0.20 to 0.25 (25% instead of 20%)
+                optimalMovesButton.setLayoutParams(params);
+                
                 return;
             }
             
