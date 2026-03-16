@@ -133,12 +133,41 @@ public class MainActivity extends AppCompatActivity {
     }
     
     @Override
+    protected void onPause() {
+        super.onPause();
+        
+        // Pause background sound when app goes to background
+        Intent pauseIntent = new Intent(this, roboyard.SoundService.class);
+        pauseIntent.setAction(roboyard.SoundService.ACTION_PAUSE);
+        startService(pauseIntent);
+        Timber.d("[LIFECYCLE] App paused - background sound paused");
+        
+        // Pause timer in GameFragment if active
+        if (gameStateManager != null) {
+            gameStateManager.pauseTimer();
+            Timber.d("[LIFECYCLE] App paused - game timer paused");
+        }
+    }
+    
+    @Override
     protected void onResume() {
         super.onResume();
         
         // Re-apply fullscreen mode when resuming
         // This is needed in case the user changed the setting in the settings screen
         applyFullscreenMode();
+        
+        // Resume background sound when app comes to foreground
+        Intent resumeIntent = new Intent(this, roboyard.SoundService.class);
+        resumeIntent.setAction(roboyard.SoundService.ACTION_RESUME);
+        startService(resumeIntent);
+        Timber.d("[LIFECYCLE] App resumed - background sound resumed");
+        
+        // Resume timer in GameFragment if it was running
+        if (gameStateManager != null) {
+            gameStateManager.resumeTimer();
+            Timber.d("[LIFECYCLE] App resumed - game timer resumed");
+        }
         
         // Auto-sync when coming back online (uploads offline achievements/saves/history/streak)
         SyncManager.getInstance(this).syncOnResume(this);

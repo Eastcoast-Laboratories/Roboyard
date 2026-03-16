@@ -939,7 +939,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         gameStateManager.getLiveMoveCounterText().observe(getViewLifecycleOwner(), text -> {
             if (text != null && !text.isEmpty() && gameStateManager.isLiveMoveCounterEnabled()) {
                 if (statusTextView != null) {
-                    // Main text always dark green, delta changes color
+                    // Apply text formatting with size variations (same for both modes)
                     int darkGreen = Color.parseColor("#006400");
                     int deltaIdx = text.indexOf("Δ");
                     if (deltaIdx >= 0) {
@@ -947,16 +947,22 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         int spaceIdx = text.indexOf(" ");
                         if (spaceIdx > 0 && spaceIdx < deltaIdx) {
                             SpannableString spannable = new SpannableString(text);
-                            // Number part: 1.5x larger, dark green
+                            // Number part: 1.5x larger
                             spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            // Label part: 0.9x smaller, dark green
+                            // Label part: 0.9x smaller
                             spannable.setSpan(new android.text.style.RelativeSizeSpan(0.9f), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             spannable.setSpan(new ForegroundColorSpan(darkGreen), spaceIdx, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            // Delta part: 1.5x larger, deviation color
+                            // Delta part: 1.5x larger
                             spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
                             spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            
+                            // High contrast mode: override all colors to black (keep sizes)
+                            if (Preferences.highContrastMode) {
+                                spannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                            
                             statusTextView.setText(spannable);
                         } else {
                             // Fallback if format is unexpected
@@ -964,14 +970,32 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, deltaIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             int deviationColor = getDeviationColor(gameStateManager.getLiveMoveCounterDeviation().getValue());
                             spannable.setSpan(new ForegroundColorSpan(deviationColor), deltaIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            
+                            // High contrast mode: override all colors to black
+                            if (Preferences.highContrastMode) {
+                                spannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                            
                             statusTextView.setText(spannable);
                         }
                     } else {
                         statusTextView.setText(text);
-                        statusTextView.setTextColor(darkGreen);
+                        statusTextView.setTextColor(Preferences.highContrastMode ? Color.BLACK : darkGreen);
                     }
-                    // Always use standard light-green background for live move counter
-                    statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.hint_text_fancy_background));
+                    
+                    // Apply background based on mode
+                    if (Preferences.highContrastMode) {
+                        // White background with black border
+                        GradientDrawable hcDrawable = new GradientDrawable();
+                        hcDrawable.setShape(GradientDrawable.RECTANGLE);
+                        hcDrawable.setColor(Color.WHITE);
+                        hcDrawable.setCornerRadius(8);
+                        hcDrawable.setStroke(3, Color.BLACK);
+                        statusTextView.setBackground(hcDrawable);
+                    } else {
+                        // Always use standard light-green background for live move counter in normal mode
+                        statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.hint_text_fancy_background));
+                    }
                 }
             }
         });
@@ -2576,6 +2600,18 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             optimalMovesButton.setEllipsize(android.text.TextUtils.TruncateAt.END);
             optimalMovesButton.setVisibility(showButton ? View.VISIBLE : View.GONE);
             
+            // High contrast mode: white background, black text
+            if (Preferences.highContrastMode) {
+                GradientDrawable drawable = new GradientDrawable();
+                drawable.setShape(GradientDrawable.RECTANGLE);
+                drawable.setColor(Color.WHITE);
+                drawable.setCornerRadius(32 * getResources().getDisplayMetrics().density);
+                drawable.setStroke(4 * (int) getResources().getDisplayMetrics().density, Color.BLACK);
+                optimalMovesButton.setBackground(drawable);
+                optimalMovesButton.setTextColor(Color.BLACK);
+                return;
+            }
+            
             // Change button background color based on move count (cycle through 5 colors)
             int colorIndex = optimalMoves % 5;
             int backgroundColor;
@@ -3563,12 +3599,29 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     useCustomColors = true;
                 }
                 
-                // Apply the background drawable to the status text view
-                if (useCustomColors) {
-                    statusTextView.setBackground(backgroundDrawable);
+                // High contrast mode: white background, black text for hint container
+                if (Preferences.highContrastMode) {
+                    GradientDrawable hcDrawable = new GradientDrawable();
+                    hcDrawable.setShape(GradientDrawable.RECTANGLE);
+                    hcDrawable.setColor(Color.WHITE);
+                    hcDrawable.setCornerRadius(8);
+                    hcDrawable.setStroke(3, Color.BLACK);
+                    statusTextView.setBackground(hcDrawable);
+                    statusTextView.setTextColor(Color.BLACK);
+                    
+                    // Also set hint container background to white
+                    hintContainer.setBackgroundColor(Color.WHITE);
                 } else {
-                    // Use the default drawable resource
-                    statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
+                    // Apply the background drawable to the status text view
+                    if (useCustomColors) {
+                        statusTextView.setBackground(backgroundDrawable);
+                    } else {
+                        // Use the default drawable resource
+                        statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
+                    }
+                    
+                    // Reset hint container background to default
+                    hintContainer.setBackgroundColor(Color.parseColor("#DD000000"));
                 }
                 
                 // No vertical padding for compact hint display

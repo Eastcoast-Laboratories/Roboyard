@@ -10,7 +10,10 @@ import timber.log.Timber;
 
 public class SoundService extends Service {
     public static final String EXTRA_VOLUME = "volume";
+    public static final String ACTION_PAUSE = "pause";
+    public static final String ACTION_RESUME = "resume";
     private MediaPlayer player;
+    private boolean isPaused = false;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -53,6 +56,25 @@ public class SoundService extends Service {
             return Service.START_NOT_STICKY;
         }
 
+        // Handle pause/resume actions
+        if (intent != null && intent.getAction() != null) {
+            if (ACTION_PAUSE.equals(intent.getAction())) {
+                if (player.isPlaying()) {
+                    player.pause();
+                    isPaused = true;
+                    Timber.d("[SOUND_SERVICE] Playback PAUSED (app in background)");
+                }
+                return Service.START_NOT_STICKY;
+            } else if (ACTION_RESUME.equals(intent.getAction())) {
+                if (isPaused && !player.isPlaying()) {
+                    player.start();
+                    isPaused = false;
+                    Timber.d("[SOUND_SERVICE] Playback RESUMED (app in foreground)");
+                }
+                return Service.START_NOT_STICKY;
+            }
+        }
+
         int volumePercent = 10;
         if (intent != null && intent.hasExtra(EXTRA_VOLUME)) {
             volumePercent = intent.getIntExtra(EXTRA_VOLUME, 10);
@@ -73,6 +95,7 @@ public class SoundService extends Service {
         if (!player.isPlaying()) {
             try {
                 player.start();
+                isPaused = false;
                 Timber.d("[SOUND_SERVICE] ✓ Playback STARTED successfully");
                 Timber.d("[SOUND_SERVICE] MediaPlayer state - isPlaying: %b, position: %d, duration: %d", 
                         player.isPlaying(), player.getCurrentPosition(), player.getDuration());

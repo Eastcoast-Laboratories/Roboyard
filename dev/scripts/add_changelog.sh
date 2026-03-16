@@ -66,22 +66,14 @@ check_length() {
 
 # German Changelog
 DE_CHANGES=$(cat << EOF
-- Die A.I. kann jetzt Multi-Target-Rätsel lösen
-- Kleinere Spielfeldgröße unterstützt: 7x8, 10x8 und 16x14  Felder
-- Der Level-Fortschritt kann jetzt optional mit einem Online-Server synchronisiert werden
-- Die Lautstärke des Hintergrund-Atmosphären Sounds wurde korrigiert
-- Verschiedene UI-Verbesserungen und Fehlerbehebungen
+- Verbesserter High-Contrast-Modus
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 EOF
 )
 
 # English Changelog
 EN_CHANGES=$(cat << EOF
-- A.I can solve Multi-goal puzzles now
-- Smaller board sizes supported: 7x8, 10x8 and 16x14 squares
-- Level progress is now optional synced with online server
-- Ambient background sound volume corrected
-- Various UI improvements and bug fixes
+- Enhanced high contrast mode support
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 EOF
 )

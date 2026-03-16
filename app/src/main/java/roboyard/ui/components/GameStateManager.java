@@ -2277,6 +2277,28 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
+     * Pause the UI timer (called when app goes to background)
+     * This is a no-op in GameStateManager - the actual timer is in GameFragment
+     * GameFragment will call saveUiTimerElapsed() before pausing
+     */
+    public void pauseTimer() {
+        // Timer pause is handled by GameFragment
+        // This method exists for MainActivity lifecycle compatibility
+        Timber.d("[TIMER] pauseTimer() called (handled by GameFragment)");
+    }
+
+    /**
+     * Resume the UI timer (called when app comes to foreground)
+     * This is a no-op in GameStateManager - the actual timer is in GameFragment
+     * GameFragment will restore the timer using wasUiTimerRunning() and getUiTimerElapsedMs()
+     */
+    public void resumeTimer() {
+        // Timer resume is handled by GameFragment
+        // This method exists for MainActivity lifecycle compatibility
+        Timber.d("[TIMER] resumeTimer() called (handled by GameFragment)");
+    }
+
+    /**
      * Check if a new game was just loaded (timer should reset)
      * @return true if a new game was loaded
      */

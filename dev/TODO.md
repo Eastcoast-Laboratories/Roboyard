@@ -114,11 +114,13 @@ auch , wenn beim level syncen unauthorized kommt, soll er einmal versuchen sich 
 
 
 ---
-1. ich sehe das problem beiden borders: da ist eine extra border, wenn man den level , der zuletzt gespielt. das soll aber nicht. es soll die vorhandene gelbe border (gelb bei gespielten, blau bei nicht-gespielten grün werden und diese einzige border soll ausfaden, die extra border soll entfernt werden 
+
+der solver hat ja eingebaut, dass er einer lösungen findet, alslo mit nur einem zug lsbar, das ist dann issolution01()@Board.java#L871-872  die roboyard implementierung liest diese aber anschienen d falsch aus, denn er bekommt diese nicht zurück, also ich möchte gern, dass der solver, wenn das eine solution01 ist auch nur 1 move zurück bekommt, er bekommt aber immer einen umweg als lösung geliefert, wo ein roboter nicht direkt ins ziel laufen darf, das ist eine alternative alte regel, die ich nciht brauche aus dem driftingdroid source
 
 
-4. die nicht geschafften level boxen (freigeschaltete und nicht-frei), die in der selben reihe sind, wie geschaffte, sollen alle etwas mehr height bekommen, so dass sie genau so gross sind wie die boxen mit den geschafften. wenn kein geschaffter in der selben reihe ist, sollen sie nur GENAU halb so hoch sein wie die geschafftenboxen
-
-5. die nicht freigeschaleten sollen die level Zahl kleiner und unterhalb des schlosses haben und das wort "Level" davor, also "Level X" unter das schloss und genau halb so hch wie die geschafften ((im moment sind die viel zu niedrig) und die schrift "Level X" kann man nicht sehen
+z.b. beim live toggle wird wenn man einen zug vorm ziel ist, immer eine andere solution angezeigt mit mehr zügen
 
 
+sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst gefragt wird ob es eine isSolutioin01 ist und wenn ja, auch eine 1 zurückgibt  
+
+---
