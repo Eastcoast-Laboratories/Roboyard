@@ -185,7 +185,13 @@ public class GameHistoryManager {
                     JSONObject entryJson = entriesArray.getJSONObject(i);
                     GameHistoryEntry entry = new GameHistoryEntry();
                     
-                    entry.setMapPath(entryJson.getString("mapPath"));
+                    // MIGRATION: Remove "history/" prefix from old entries (Android doesn't allow path separators in filenames)
+                    String mapPath = entryJson.getString("mapPath");
+                    if (mapPath.startsWith("history/")) {
+                        mapPath = mapPath.substring(8); // Remove "history/" prefix
+                        Timber.d("[HISTORY_MIGRATION] Removed 'history/' prefix from mapPath: %s", mapPath);
+                    }
+                    entry.setMapPath(mapPath);
                     entry.setMapName(entryJson.optString("mapName", "Unnamed"));
                     entry.setTimestamp(entryJson.getLong("timestamp"));
                     entry.setPlayDuration(entryJson.getInt("playDuration"));
@@ -252,17 +258,19 @@ public class GameHistoryManager {
                     entries.add(entry);
                 }
                 
-                // Save index if any entries were migrated (to persist the computed signatures)
+                // Save index if any entries were migrated (to persist the computed signatures or removed prefixes)
                 boolean anyMigrated = false;
                 for (GameHistoryEntry e : entries) {
-                    if (e.getMapSignature() != null && !e.getMapSignature().isEmpty()) {
+                    // Check if mapSignature was computed OR if mapPath had history/ prefix removed
+                    if ((e.getMapSignature() != null && !e.getMapSignature().isEmpty()) ||
+                        (!e.getMapPath().startsWith("history/") && entriesArray.getJSONObject(entries.indexOf(e)).getString("mapPath").startsWith("history/"))) {
                         anyMigrated = true;
                         break;
                     }
                 }
                 if (anyMigrated) {
                     saveHistoryIndex(activity, entries);
-                    Timber.d("[HISTORY_MIGRATION] Saved migrated signatures to index");
+                    Timber.d("[HISTORY_MIGRATION] Saved migrated entries (signatures or removed 'history/' prefix) to index");
                 }
             }
         } catch (Exception e) {
