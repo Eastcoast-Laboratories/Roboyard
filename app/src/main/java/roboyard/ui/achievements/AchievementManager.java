@@ -168,7 +168,55 @@ public class AchievementManager {
     }
     
     
+    /**
+     * Migrate orphaned SharedPreferences keys written by a previous bug in syncFromServer().
+     * The bug wrote keys as "id_unlocked" / "id_timestamp" instead of "unlocked_id" / "timestamp_id".
+     * This migrates those keys to the correct format and removes the orphaned ones.
+     */
+    private void migrateOrphanedSyncKeys() {
+        boolean migrated = prefs.getBoolean("orphaned_keys_migrated", false);
+        if (migrated) return;
+        
+        SharedPreferences.Editor editor = prefs.edit();
+        int migratedCount = 0;
+        
+        for (String id : achievements.keySet()) {
+            // Check for orphaned keys: id + "_unlocked" (wrong format)
+            String wrongUnlockedKey = id + "_unlocked";
+            String wrongTimestampKey = id + "_timestamp";
+            String correctUnlockedKey = KEY_PREFIX_UNLOCKED + id;
+            String correctTimestampKey = KEY_PREFIX_TIMESTAMP + id;
+            
+            if (prefs.contains(wrongUnlockedKey)) {
+                boolean unlocked = prefs.getBoolean(wrongUnlockedKey, false);
+                long timestamp = prefs.getLong(wrongTimestampKey, 0);
+                
+                // Only migrate if the correct key doesn't already have a value
+                if (unlocked && !prefs.getBoolean(correctUnlockedKey, false)) {
+                    editor.putBoolean(correctUnlockedKey, true);
+                    editor.putLong(correctTimestampKey, timestamp);
+                    migratedCount++;
+                }
+                
+                // Remove orphaned keys
+                editor.remove(wrongUnlockedKey);
+                editor.remove(wrongTimestampKey);
+            }
+        }
+        
+        editor.putBoolean("orphaned_keys_migrated", true);
+        editor.apply();
+        
+        if (migratedCount > 0) {
+            Timber.d("[ACHIEVEMENTS] Migrated %d orphaned sync keys to correct format", migratedCount);
+        }
+    }
+    
     private void loadState() {
+        // One-time migration: fix orphaned keys from buggy syncFromServer() 
+        // that wrote "id_unlocked" instead of "unlocked_id"
+        migrateOrphanedSyncKeys();
+        
         // Load unlock status for all achievements
         for (Achievement achievement : achievements.values()) {
             boolean unlocked = prefs.getBoolean(KEY_PREFIX_UNLOCKED + achievement.getId(), false);
@@ -890,8 +938,8 @@ public class AchievementManager {
                             
                             // Save to SharedPreferences
                             prefs.edit()
-                                .putBoolean(id + "_unlocked", true)
-                                .putLong(id + "_timestamp", localAchievement.getUnlockedTimestamp())
+                                .putBoolean(KEY_PREFIX_UNLOCKED + id, true)
+                                .putLong(KEY_PREFIX_TIMESTAMP + id, localAchievement.getUnlockedTimestamp())
                                 .apply();
                             
                             restoredCount++;
