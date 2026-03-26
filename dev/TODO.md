@@ -82,8 +82,6 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 # last prompt:
 
 
-1. verhindere, dass bei jeglicher map walls im inneren des mittleren carrees angezeigt werden, einfach ignorieren, wenn da walls in der mitte drin sind
-2. 
 ----
 
 
@@ -124,3 +122,32 @@ z.b. beim live toggle wird wenn man einen zug vorm ziel ist, immer eine andere s
 sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst gefragt wird ob es eine isSolutioin01 ist und wenn ja, auch eine 1 zurückgibt  
 
 ---
+
+- Wenn man in den levels noch keinen Zug gemacht hat und auf den backknopf drückt, dann soll er ein pop-up öffnen, ob er den vorigen Level spielen soll
+
+- Wenn man einen Level geschafft hat und ins Menü geht und dann eine Back Geste macht kommt mal wieder in den Level und schafft ihn erneut, das wird auch gespeichert als noch mal geschafft. Soll aber nicht.
+
+- Oft, speichert er die neue best moves time nicht am Ende wenn man im Level 3 Sterne erreicht hat
+
+- Er schreibt jedes Mal, wenn man einen Level completed hat das erneut zu zählen. Jeder Level darf aber nur einmal für die achievements zählen
+
+- Der new Game Button funktioniert nicht mehr beim ersten klick
+
+- Speed Runner ist online, aber nicht im Game in der Liste
+
+- Level 39 zu einfach
+
+- Dies kann nach ein paar Tagen erneut: 
+    - Welcome Back. You logged in 2 days in a row
+    - Welcome!
+    - Play your first game
+    - First Steps Complete Level 1
+    - Getting Started
+    - Und solve 5 Games with optimal moves auch
+
+- Vielleicht sollte man noch irgendwie recorden, wenn man eine map besonders lange angeschaut hat, dass man sieht dann wahrscheinlich auch im Kopf gelöst hat
+
+- neues achievement: schaue eine map 1h an
+
+
+
