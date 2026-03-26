@@ -12,6 +12,8 @@ import java.util.Map;
 
 import timber.log.Timber;
 import roboyard.eclabs.BuildConfig;
+import roboyard.ui.achievements.AchievementManager;
+import roboyard.ui.achievements.StreakManager;
 
 /**
  * Manages export and import of all app data as JSON.
@@ -338,6 +340,61 @@ public class DataExportImportManager {
                 Timber.tag(TAG).e(e, "Error importing history entry: %s", filename);
             }
         }
+    }
+    
+    /**
+     * Reset only account-bound progress data for logout.
+     * Clears: achievements, streaks, level completion, history, saves.
+     * Keeps: app preferences (RoboYard), wall storage (WallStoragePrefs), UI prefs (RoboyardUIPrefs).
+     */
+    public void resetProgressData() {
+        Timber.tag(TAG).d("[LOGOUT][RESET] Starting progress data reset");
+        
+        // SharedPreferences to clear (only progress-related)
+        String[] progressPrefs = {
+            "roboyard_achievements",     // Achievement data
+            "roboyard_streaks",          // Streak data
+            "level_completion_prefs"     // Level completion data
+        };
+        
+        for (String prefsName : progressPrefs) {
+            SharedPreferences prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            Timber.tag(TAG).d("[LOGOUT][RESET] Cleared SharedPreferences: %s", prefsName);
+        }
+        
+        // Reset in-memory singleton state
+        AchievementManager.getInstance(context).resetAll();
+        Timber.tag(TAG).d("[ACHIEVEMENT][RESET] Achievement manager reset");
+        
+        StreakManager.getInstance(context).resetStreak();
+        Timber.tag(TAG).d("[STREAK][RESET] Streak manager reset");
+        
+        LevelCompletionManager.getInstance(context).resetAll();
+        Timber.tag(TAG).d("[LEVEL][RESET] Level completion manager reset");
+        
+        // Delete save games
+        File savesDir = new File(context.getFilesDir(), SAVES_DIRECTORY);
+        if (savesDir.exists()) {
+            deleteDirectory(savesDir);
+            Timber.tag(TAG).d("[SAVE][RESET] Deleted saves directory");
+        }
+        
+        // Delete game history
+        File historyDir = new File(context.getFilesDir(), "history");
+        if (historyDir.exists()) {
+            deleteDirectory(historyDir);
+            Timber.tag(TAG).d("[HISTORY][RESET] Deleted history directory");
+        }
+        
+        // Delete history index file
+        File historyIndexFile = new File(context.getFilesDir(), "history_index.json");
+        if (historyIndexFile.exists()) {
+            historyIndexFile.delete();
+            Timber.tag(TAG).d("[HISTORY][RESET] Deleted history_index.json");
+        }
+        
+        Timber.tag(TAG).d("[LOGOUT][RESET] Progress data reset complete");
     }
     
     /**

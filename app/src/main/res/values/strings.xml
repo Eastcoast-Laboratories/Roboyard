@@ -414,6 +414,9 @@
     <string name="settings_register_success">Registration successful</string>
     <string name="settings_register_failed">Registration failed: %1$s</string>
     <string name="settings_logout_success">Logged out</string>
+    <string name="settings_logout_confirm_title">Logout?</string>
+    <string name="settings_logout_confirm_message">Logging out will clear all local achievements, level progress, game history, and streaks from this device. Your data is saved on the server and will be restored on next login.</string>
+    <string name="settings_logging_out">Logging out…</string>
     <string name="needs_update_toast">Your app needs an update to use this feature.</string>
     <string name="login_dialog_title">Login to Roboyard</string>
     <string name="login_dialog_email">Email</string>

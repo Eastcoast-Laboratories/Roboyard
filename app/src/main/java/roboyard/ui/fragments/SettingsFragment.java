@@ -2042,12 +2042,48 @@ public class SettingsFragment extends Fragment {
         }
         
         if (logoutButton != null) {
-            logoutButton.setOnClickListener(v -> {
-                RoboyardApiClient.getInstance(requireContext()).logout();
-                updateAccountUI();
-                Toast.makeText(requireContext(), R.string.settings_logout_success, Toast.LENGTH_SHORT).show();
-            });
+            logoutButton.setOnClickListener(v -> showLogoutConfirmDialog());
         }
+    }
+    
+    /**
+     * Show logout confirmation dialog warning about data loss, then reset progress and restart app.
+     */
+    private void showLogoutConfirmDialog() {
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.settings_logout_confirm_title)
+            .setMessage(R.string.settings_logout_confirm_message)
+            .setPositiveButton(R.string.settings_logout, (dialog, which) -> {
+                Timber.d("[LOGOUT][RESET] User confirmed logout");
+                try {
+                    // Show toast before restart
+                    Toast.makeText(requireContext(), R.string.settings_logging_out, Toast.LENGTH_SHORT).show();
+                    
+                    // Clear all progress data (achievements, streaks, levels, history, saves)
+                    DataExportImportManager manager = new DataExportImportManager(requireContext());
+                    manager.resetProgressData();
+                    
+                    // Clear auth credentials
+                    RoboyardApiClient.getInstance(requireContext()).logout();
+                    Timber.d("[LOGOUT][RESET] Auth credentials cleared");
+                    
+                    // Restart the app after a short delay
+                    requireView().postDelayed(() -> {
+                        Intent intent = new Intent(requireContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        requireContext().startActivity(intent);
+                        if (requireActivity() != null) {
+                            requireActivity().finish();
+                        }
+                        Timber.d("[LOGOUT][RESET] App restart triggered");
+                    }, 500);
+                } catch (Exception e) {
+                    Timber.e(e, "[LOGOUT][RESET] Error during logout reset");
+                    Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            })
+            .setNegativeButton(R.string.button_cancel, null)
+            .show();
     }
     
     /**
