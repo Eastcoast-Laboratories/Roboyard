@@ -129,9 +129,9 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Oft, speichert er die neue best moves time nicht am Ende wenn man im Level 3 Sterne erreicht hat
 
-- Er schreibt jedes Mal, wenn man einen Level completed hat das erneut zu zählen. Jeder Level darf aber nur einmal für die achievements zählen
+- Er scheint jedes Mal, wenn man einen Level completed hat, das erneut zu den achievements zu zählen. Jeder Level darf aber nur einmal für die achievements zählen
 
-- Der new Game Button funktioniert nicht mehr beim ersten klick
+- Der grosse "new Game" Button, wenn man ein random game geschafft hat, funktioniert nicht mehr beim ersten klick, er wird einfach wieder klein und die buttons haben alle wieder die normale grösse in zwei zeilen wie beim game start. der normale "new game" button funktioniert dann  normal und startet ein neues random game, nur halt bei level comlete geht da nicht mehr.
 
 - Speed Runner ist online, aber nicht im Game in der Liste
 

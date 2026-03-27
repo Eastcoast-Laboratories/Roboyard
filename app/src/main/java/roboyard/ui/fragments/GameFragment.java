@@ -812,9 +812,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         Timber.d("[ACHIEVEMENTS] Game completion: isImpossibleMode=%b (Preferences.difficulty=%d), optimalMoves=%d", 
                                 isImpossibleMode, Preferences.difficulty, optimalMoves);
                         int robotCount = state.getRobots() != null ? state.getRobots().size() : 4;
-                        // TODO: Get actual target count from game state when multi-target is implemented
-                        int targetCount = 1;
-                        int targetsNeeded = 1;
+                        int targetCount = state.getTargets() != null ? state.getTargets().size() : 1;
+                        int targetsNeeded = state.getRobotCount();
+                        Timber.d("[ACHIEVEMENTS] Multi-target: targetCount=%d, targetsNeeded=%d", targetCount, targetsNeeded);
                         
                         // Check isFirstCompletion BEFORE saveToHistoryNow to avoid race condition:
                         // saveToHistoryNow writes the entry, so isFirstCompletion would always return false after it.
@@ -1760,20 +1760,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     announceAccessibility("Starting level " + nextLevelId);
                     announceGameStart();
                     
-                    // Hide restart button for level games
-                    announceAccessibility("Starting new random game");
-                    announceGameStart();
-                    
-                    // Show restart button for random games
-                    newMapButton.setVisibility(View.VISIBLE);
-                    
                     // Reset button text to "Reset"
                     resetRobotsButton.setText(R.string.reset_button);
-                    
-                    // Hide the optimal moves button when starting a new random game
-                    if (optimalMovesButton != null) {
-                        optimalMovesButton.setVisibility(View.GONE);
-                    }
+                } else {
+                    // Random game - delegate to the small "New Game" button (DRY)
+                    Timber.d("[NEW_GAME] Big completion button clicked for random game, delegating to newMapButton");
+                    newMapButton.performClick();
                 }
 
                 // Reset move counts and history explicitly to ensure all counters are zeroed
