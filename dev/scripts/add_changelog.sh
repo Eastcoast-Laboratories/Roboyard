@@ -66,17 +66,15 @@ check_length() {
 
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
-- Verbesserter High-Contrast-Modus
-- Der Hintergrundsound pausiert jetzt, wenn die App im Hintergrund ist
-- Der Game-Timer pausiert jetzt, wenn die App im Hintergrund ist
+- fix „Nächstes Spiel“-Button wenn ein spiel geschafft wurde
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
-- Enhanced high contrast mode support
-- Ambient background sound now pauses if the app is in background
-- Game-timer now pauses, if the app is in background
+- fix "Next Game" button when a game is completed
+- Various bug fixes and stability improvements
 EOF
 )
 

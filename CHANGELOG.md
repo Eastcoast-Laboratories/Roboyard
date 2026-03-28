@@ -2,6 +2,11 @@
 =========
 
 
+## Version 45 (127) - 2026-03-28
+- fix "Next Game" button when a game is completed
+- Various bug fixes and stability improvements
+
+
 ## Version 44 (126) - 2026-03-16
 - Enhanced high contrast mode support
 - Ambient background sound now pauses if the app is in background

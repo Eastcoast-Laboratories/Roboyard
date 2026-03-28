@@ -1,0 +1,3 @@
+- fix „Nächstes Spiel“-Button wenn ein spiel geschafft wurde
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md

@@ -1,0 +1,3 @@
+- fix "Next Game" button when a game is completed
+- Various bug fixes and stability improvements
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

@@ -1,0 +1,12 @@
+# Play Store Changelogs für Version 45 (versionCode: 127)
+
+<en-GB>
+- fix "Next Game" button when a game is completed
+- Various bug fixes and stability improvements
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- fix „Nächstes Spiel“-Button wenn ein spiel geschafft wurde
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>

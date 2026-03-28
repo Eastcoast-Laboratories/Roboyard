@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 45 (127)
+- fix „Nächstes Spiel“-Button wenn ein spiel geschafft wurde
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+
+
 ## Version 44 (2026-03-16)
 - Verbesserter High-Contrast-Modus
 - Der Hintergrundsound pausiert jetzt, wenn die App im Hintergrund ist
