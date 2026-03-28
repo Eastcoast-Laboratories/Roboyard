@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import roboyard.eclabs.BuildConfig;
+import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.PlayGamesManager;
 import roboyard.ui.components.RoboyardApiClient;
 import timber.log.Timber;
@@ -49,9 +51,8 @@ public class AchievementManager {
     private int noHintRandomGames;
     private int noHintRandomGamesTotal;
     private int dailyLoginStreak;
-    private int speedrunRandomGamesUnder30s;
-    // max unique robot-positions solved on any single wall layout
-    private int sameWallsMaxPositions;
+    private int speedrunRandomGamesUnder30s = 0;
+    private int sameWallsMaxPositions = 0;
     
     // Game session tracking
     private boolean hintUsedInCurrentGame = false;
@@ -107,11 +108,12 @@ public class AchievementManager {
      * This is the central method for progress display and auto-unlock at 100%.
      */
     public AchievementProgress getProgress(String achievementId) {
+        int uniqueCompletedLevels = getUniqueCompletedLevelCount();
         switch (achievementId) {
             // Level progression
-            case "level_10_complete":  return new AchievementProgress(levelsCompleted, 10);
-            case "level_50_complete":  return new AchievementProgress(levelsCompleted, 50);
-            case "level_140_complete": return new AchievementProgress(levelsCompleted, 140);
+            case "level_10_complete":  return new AchievementProgress(uniqueCompletedLevels, 10);
+            case "level_50_complete":  return new AchievementProgress(uniqueCompletedLevels, 50);
+            case "level_140_complete": return new AchievementProgress(uniqueCompletedLevels, 140);
             // Perfect solutions (levels)
             case "perfect_solutions_5":  return new AchievementProgress(perfectSolutions, 5);
             case "perfect_solutions_10": return new AchievementProgress(perfectSolutions, 10);
@@ -383,11 +385,18 @@ public class AchievementManager {
         // Log the levelId for debugging
         Timber.d("[ACHIEVEMENTS] onLevelCompleted called: levelId=%d, levelsCompleted=%d->%d, playerMoves=%d, optimalMoves=%d, hintsUsed=%d, stars=%d, time=%dms",
                 levelId, levelsCompleted, levelsCompleted + 1, playerMoves, optimalMoves, hintsUsed, stars, timeMs);
+
+        int uniqueCompletedLevelsBefore = getUniqueCompletedLevelCount();
+        if (uniqueCompletedLevelsBefore <= levelsCompleted) {
+            Timber.d("[ACHIEVEMENTS][LEVEL] Skipping duplicate level completion for levelId=%d (history count=%d, stored=%d)",
+                    levelId, uniqueCompletedLevelsBefore, levelsCompleted);
+            return;
+        }
         
         // First game achievement (any game completion)
         unlock("first_game");
         
-        levelsCompleted++;
+        levelsCompleted = uniqueCompletedLevelsBefore;
         saveCounter("levels_completed", levelsCompleted);
         
         // Level progression achievements
@@ -806,10 +815,21 @@ public class AchievementManager {
         noHintRandomGamesTotal = 0;
         dailyLoginStreak = 0;
         speedrunRandomGamesUnder30s = 0;
-        
-        Timber.d("[ACHIEVEMENTS] All achievements reset");
+        sameWallsMaxPositions = 0;
+    }
+
+    private int getUniqueCompletedLevelCount() {
+        Activity activity = currentActivity != null ? currentActivity.get() : null;
+        if (activity == null) {
+            return levelsCompleted;
+        }
+        return GameHistoryManager.getUniqueCompletedLevelCount(activity);
     }
     
+    /**
+     * Sync achievement unlock to the server after unlock.
+     * No-op if user is not authenticated.
+     */
     // ========== SERVER SYNC ==========
     
     /**

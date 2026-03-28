@@ -672,6 +672,50 @@ public class GameHistoryManager {
     public static int getUniqueMapCount(Activity activity) {
         return getHistoryEntries(activity).size();
     }
+
+    /**
+     * Get the total count of unique completed levels from history.
+     * Only entries with map names like "Level N" or matching level file paths are counted.
+     * @param activity The activity context
+     * @return Number of unique completed levels in history
+     */
+    public static int getUniqueCompletedLevelCount(Activity activity) {
+        List<GameHistoryEntry> entries = getHistoryEntries(activity);
+        java.util.Set<String> uniqueLevelKeys = new java.util.HashSet<>();
+
+        for (GameHistoryEntry entry : entries) {
+            String levelKey = extractLevelKey(entry);
+            if (levelKey != null) {
+                uniqueLevelKeys.add(levelKey);
+            }
+        }
+        Timber.d("[GAME_HISTORY][ACHIEVEMENTS][LEVEL] getUniqueCompletedLevelCount: Found %d unique levels", uniqueLevelKeys.size());
+        return uniqueLevelKeys.size();
+    }
+
+    private static String extractLevelKey(GameHistoryEntry entry) {
+        String mapName = entry.getMapName();
+        if (mapName != null && mapName.matches("(?i)Level \\d+")) {
+            int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
+            
+            String levelKey = id >= 141 ? "custom_level_" + id : "level_" + id;
+            // Timber.d("[GAME_HISTORY][ACHIEVEMENTS][LEVEL] extractLevelKey: Found level key for entry: %s", levelKey);
+            return levelKey;
+        }
+
+        String mapPath = entry.getMapPath();
+        if (mapPath != null) {
+            String base = mapPath.contains("/")
+                    ? mapPath.substring(mapPath.lastIndexOf('/') + 1)
+                    : mapPath;
+            if (base.startsWith("level_") || base.startsWith("custom_level_")) {
+                // Timber.d("[GAME_HISTORY][ACHIEVEMENTS][LEVEL] extractLevelKey: Found level key for entry: %s", base);
+                return base.endsWith(".txt") ? base.substring(0, base.length() - 4) : base;
+            }
+        }
+        // Timber.d("[GAME_HISTORY][ACHIEVEMENTS][LEVEL] extractLevelKey: No level key found for entry: %s", entry);
+        return null;
+    }
     
     /**
      * Get the completion count for a specific map.

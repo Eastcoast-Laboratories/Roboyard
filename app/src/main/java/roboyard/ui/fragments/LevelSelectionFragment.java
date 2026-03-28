@@ -541,16 +541,13 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void calculateTotalStars() {
         totalStars = 0;
-        completedLevelCount = 0;
         for (Integer levelId : availableLevels) {
             LevelCompletionData data = completionManager.getLevelCompletionData(levelId);
             if (data != null) {
                 totalStars += data.getStars();
-                if (data.isCompleted()) {
-                    completedLevelCount++;
-                }
             }
         }
+        completedLevelCount = GameHistoryManager.getUniqueCompletedLevelCount(requireActivity());
     }
 
     /**

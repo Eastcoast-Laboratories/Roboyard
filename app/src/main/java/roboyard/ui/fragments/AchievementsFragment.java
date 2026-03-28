@@ -76,12 +76,19 @@ public class AchievementsFragment extends BaseGameFragment {
         updateUserProfileButton(userProfileButton);
         
         achievementManager = AchievementManager.getInstance(requireContext());
+        achievementManager.setCurrentActivity(requireActivity());
         loadAchievements();
     }
     
     @Override
     public void onResume() {
         super.onResume();
+        if (achievementManager != null) {
+            achievementManager.setCurrentActivity(requireActivity());
+        }
+        if (achievementsContainer != null) {
+            loadAchievements();
+        }
         // Update user profile button when returning to this screen
         if (userProfileButton != null) {
             updateUserProfileButton(userProfileButton);
