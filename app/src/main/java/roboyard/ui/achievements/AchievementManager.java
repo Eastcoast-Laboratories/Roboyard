@@ -109,6 +109,7 @@ public class AchievementManager {
      */
     public AchievementProgress getProgress(String achievementId) {
         int uniqueCompletedLevels = getUniqueCompletedLevelCount();
+        int uniqueThreeStarLevels = getUniqueThreeStarLevelCount();
         switch (achievementId) {
             // Level progression
             case "level_10_complete":  return new AchievementProgress(uniqueCompletedLevels, 10);
@@ -119,9 +120,9 @@ public class AchievementManager {
             case "perfect_solutions_10": return new AchievementProgress(perfectSolutions, 10);
             case "perfect_solutions_50": return new AchievementProgress(perfectSolutions, 50);
             // Three-star levels
-            case "3_star_10_levels":      return new AchievementProgress(threeStarLevels, 10);
-            case "3_star_50_levels":      return new AchievementProgress(threeStarLevels, 50);
-            case "3_star_all_levels":     return new AchievementProgress(threeStarLevels, 140);
+            case "3_star_10_levels":      return new AchievementProgress(uniqueThreeStarLevels, 10);
+            case "3_star_50_levels":      return new AchievementProgress(uniqueThreeStarLevels, 50);
+            case "3_star_all_levels":     return new AchievementProgress(uniqueThreeStarLevels, 140);
             case "3_star_10_hard_levels": return new AchievementProgress(threeStarHardLevels, 10);
             // Impossible mode
             case "impossible_mode_5":        return new AchievementProgress(impossibleModeGames, 5);
@@ -824,6 +825,14 @@ public class AchievementManager {
             return levelsCompleted;
         }
         return GameHistoryManager.getUniqueCompletedLevelCount(activity);
+    }
+
+    private int getUniqueThreeStarLevelCount() {
+        Activity activity = currentActivity != null ? currentActivity.get() : null;
+        if (activity == null) {
+            return threeStarLevels;
+        }
+        return GameHistoryManager.getUniqueThreeStarLevelCount(activity);
     }
     
     /**

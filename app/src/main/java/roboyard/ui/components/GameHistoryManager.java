@@ -693,6 +693,30 @@ public class GameHistoryManager {
         return uniqueLevelKeys.size();
     }
 
+    /**
+     * Get the total count of unique completed levels that earned at least three stars.
+     * @param activity The activity context
+     * @return Number of unique 3-star levels in history
+     */
+    public static int getUniqueThreeStarLevelCount(Activity activity) {
+        List<GameHistoryEntry> entries = getHistoryEntries(activity);
+        java.util.Set<String> uniqueLevelKeys = new java.util.HashSet<>();
+
+        for (GameHistoryEntry entry : entries) {
+            if (entry.getStarsEarned() < 3) {
+                continue;
+            }
+
+            String levelKey = extractLevelKey(entry);
+            if (levelKey != null) {
+                uniqueLevelKeys.add(levelKey);
+            }
+        }
+
+        Timber.d("[GAME_HISTORY][ACHIEVEMENTS][LEVEL] getUniqueThreeStarLevelCount: Found %d unique 3-star levels", uniqueLevelKeys.size());
+        return uniqueLevelKeys.size();
+    }
+
     private static String extractLevelKey(GameHistoryEntry entry) {
         String mapName = entry.getMapName();
         if (mapName != null && mapName.matches("(?i)Level \\d+")) {
