@@ -1,6 +1,7 @@
 package roboyard.ui.achievements;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,6 +9,9 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -19,6 +23,10 @@ import timber.log.Timber;
  * Note: Achievement colors are now centralized in AchievementDefinitions.ACHIEVEMENT_COLORS
  */
 public class AchievementIconHelper {
+    private static final Map<String, Bitmap> ICON_BITMAP_CACHE = new HashMap<>();
+    private static final Map<String, Drawable> ICON_DRAWABLE_CACHE = new HashMap<>();
+    private static final int TARGET_ICON_PX = 96;
+
     
     /**
      * Get a bitmap for a specific icon drawable name.
@@ -33,6 +41,12 @@ public class AchievementIconHelper {
             Timber.e("[ACHIEVEMENT_ICONS] ERROR: Icon drawable name cannot be null or empty");
             throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Icon drawable name cannot be null or empty");
         }
+
+        Bitmap cachedBitmap = ICON_BITMAP_CACHE.get(drawableName);
+        if (cachedBitmap != null) {
+            Timber.d("[ACHIEVEMENT_ICONS] Cache hit for icon: %s", drawableName);
+            return cachedBitmap;
+        }
         
         Timber.d("[ACHIEVEMENT_ICONS] Attempting to load icon: %s from package: %s", drawableName, context.getPackageName());
         
@@ -43,14 +57,23 @@ public class AchievementIconHelper {
         }
         
         Timber.d("[ACHIEVEMENT_ICONS] Found resource ID: %d for icon: %s", resId, drawableName);
-        
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
+
+        BitmapFactory.Options boundsOptions = new BitmapFactory.Options();
+        boundsOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(context.getResources(), resId, boundsOptions);
+
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+        decodeOptions.inSampleSize = calculateInSampleSize(boundsOptions, TARGET_ICON_PX, TARGET_ICON_PX);
+        decodeOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId, decodeOptions);
         if (bitmap == null) {
             Timber.e("[ACHIEVEMENT_ICONS] ERROR: Failed to decode drawable: %s (resId=%d)", drawableName, resId);
             throw new IllegalArgumentException("[ACHIEVEMENT_ICONS] Failed to decode drawable: " + drawableName);
         }
         
         Timber.d("[ACHIEVEMENT_ICONS] SUCCESS: Loaded icon %s (%dx%d pixels)", drawableName, bitmap.getWidth(), bitmap.getHeight());
+        ICON_BITMAP_CACHE.put(drawableName, bitmap);
         return bitmap;
     }
     
@@ -64,9 +87,16 @@ public class AchievementIconHelper {
      * @throws IllegalArgumentException if drawable resource not found
      */
     public static Drawable getIconDrawableWithCircle(Context context, String drawableName, int backgroundColor) {
+        String cacheKey = drawableName + "#" + backgroundColor;
+        Drawable cachedDrawable = ICON_DRAWABLE_CACHE.get(cacheKey);
+        if (cachedDrawable != null) {
+            Timber.d("[ACHIEVEMENT_ICONS] Drawable cache hit for icon: %s", cacheKey);
+            return cachedDrawable;
+        }
+
         Bitmap iconBitmap = getIconBitmap(context, drawableName);
         
-        // Create a larger circular background (2x the icon size for better appearance)
+        // Create a larger circular background from the downsampled icon size
         int iconSize = Math.max(iconBitmap.getWidth(), iconBitmap.getHeight());
         int circleSize = iconSize * 2;
         
@@ -93,8 +123,27 @@ public class AchievementIconHelper {
         
         Paint iconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         canvas.drawBitmap(scaledIconBitmap, offsetX, offsetY, iconPaint);
-        
-        return new BitmapDrawable(context.getResources(), circularBitmap);
+
+        Drawable drawable = new BitmapDrawable(context.getResources(), circularBitmap);
+        ICON_DRAWABLE_CACHE.put(cacheKey, drawable);
+        return drawable;
+    }
+
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        int height = options.outHeight;
+        int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            int halfHeight = height / 2;
+            int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return Math.max(inSampleSize, 1);
     }
     
     /**
@@ -142,5 +191,11 @@ public class AchievementIconHelper {
             Timber.e(e, "[ACHIEVEMENT_ICONS] Failed to load icon: %s", drawableName);
             throw e;
         }
+    }
+
+    public static void clearCaches() {
+        ICON_BITMAP_CACHE.clear();
+        ICON_DRAWABLE_CACHE.clear();
+        Timber.d("[ACHIEVEMENT_ICONS] Caches cleared");
     }
 }
