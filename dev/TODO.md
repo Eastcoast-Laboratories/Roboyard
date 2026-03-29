@@ -125,7 +125,7 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 
 
-- Oft, speichert er die neue best moves time nicht am Ende wenn man im Level 3 Sterne erreicht hat
+- Oft, speichert er die neue "best moves time" nicht am Ende wenn man im Level 3 Sterne erreicht hat, es ist dann manchmal immer noch nur ein dash oder die zeit wird nicht aktualisiert. auch die anzahl moves ist dann nicht gespeichert und er zeigt z.b. immer noch +1 moves an obwohl man 3 sterne hatte und diese drei auch ini der übersicht angezeigt werden. nur in dem imfo popup dann hal noch nicht korrekt
 
 - Level 39 zu einfach
 
@@ -139,4 +139,3 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Vielleicht sollte man noch irgendwie recorden, wenn man eine map besonders lange angeschaut hat, dass man sieht dann wahrscheinlich auch im Kopf gelöst hat
 
-- neues achievement: schaue eine map 1h an

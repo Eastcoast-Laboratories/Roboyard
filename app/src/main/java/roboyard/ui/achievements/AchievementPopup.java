@@ -45,6 +45,7 @@ public class AchievementPopup {
     
     private final Context context;
     private final ViewGroup rootView;
+    private final boolean showCloseButtonImmediately;
     private FrameLayout popupContainer;
     private final List<Achievement> pendingAchievements = new ArrayList<>();
     private boolean isShowing = false;
@@ -58,8 +59,13 @@ public class AchievementPopup {
     }
     
     public AchievementPopup(Context context, ViewGroup rootView) {
+        this(context, rootView, false);
+    }
+
+    public AchievementPopup(Context context, ViewGroup rootView, boolean showCloseButtonImmediately) {
         this.context = context;
         this.rootView = rootView;
+        this.showCloseButtonImmediately = showCloseButtonImmediately;
     }
     
     public void setPopupVisibilityListener(PopupVisibilityListener listener) {
@@ -213,7 +219,7 @@ public class AchievementPopup {
         closeButton.setPadding((int)(16 * density), (int)(12 * density), (int)(16 * density), (int)(12 * density));
         closeButton.setBackground(context.getResources().getDrawable(R.drawable.close_button_bg));
         closeButton.setGravity(Gravity.CENTER);
-        closeButton.setVisibility(View.GONE);
+        closeButton.setVisibility(showCloseButtonImmediately ? View.VISIBLE : View.GONE);
         closeButton.setOnClickListener(v -> hidePopup());
         closeButton.setClickable(true);
         closeButton.setFocusable(true);
@@ -249,8 +255,10 @@ public class AchievementPopup {
             if (!isPermanent) {
                 isPermanent = true;
                 handler.removeCallbacksAndMessages(null);
-                closeButton.setVisibility(View.VISIBLE);
-                Timber.d("[ACHIEVEMENT_POPUP] Content area clicked, now permanent - timer paused, close button shown. closeButton visibility=%d", closeButton.getVisibility());
+                if (!showCloseButtonImmediately) {
+                    closeButton.setVisibility(View.VISIBLE);
+                }
+                Timber.d("[ACHIEVEMENT_POPUP] Content area clicked, now permanent - timer paused, close button visibility=%d", closeButton.getVisibility());
             }
         });
         

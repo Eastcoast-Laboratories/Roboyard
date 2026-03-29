@@ -69,7 +69,7 @@ public class MainMenuFragment extends BaseGameFragment {
 
         if (view instanceof ViewGroup) {
             rootViewGroup = (ViewGroup) view;
-            achievementPopup = new AchievementPopup(requireContext(), rootViewGroup);
+            achievementPopup = new AchievementPopup(requireContext(), rootViewGroup, true);
             achievementPopup.setPopupVisibilityListener((isVisible, isStreakPopup) -> {
                 if (!isStreakPopup) {
                     return;
