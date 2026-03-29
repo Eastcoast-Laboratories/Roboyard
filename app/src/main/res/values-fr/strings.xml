@@ -483,8 +483,9 @@
     <string name="achievement_level_50_complete">Mi-parcours</string>
     <string name="achievement_level_50_complete_desc">Terminez 50 niveaux</string>
     <string name="achievement_login_streak">Série de connexions</string>
-    <string name="achievement_login_streak_day_label">%d Tag</string>
-    <string name="achievement_login_streak_days_label">%d Tage</string>
+    <string name="achievement_login_streak_day_label">%d jour</string>
+    <string name="achievement_login_streak_days_label">%d jours</string>
+    <string name="achievement_longest_streak_label">Plus longue série : %1$s</string>
     <string name="achievement_no_hints_random_10">Pas besoin d\'aide 10</string>
     <string name="achievement_no_hints_random_10_desc">Terminez 10 parties aléatoires sans utiliser d\'indices</string>
     <string name="achievement_no_hints_random_50">Pas besoin d\'aide 50</string>

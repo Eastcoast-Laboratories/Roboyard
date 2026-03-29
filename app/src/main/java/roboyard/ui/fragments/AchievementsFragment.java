@@ -32,6 +32,7 @@ public class AchievementsFragment extends BaseGameFragment {
     private LinearLayout achievementsContainer;
     private TextView progressText;
     private int currentLoginStreakDays = 1;
+    private int longestLoginStreakDays = 0;
     private Button userProfileButton;
     
     @Override
@@ -112,7 +113,9 @@ public class AchievementsFragment extends BaseGameFragment {
     }
     
     private void loadAchievements() {
-        currentLoginStreakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
+        StreakManager streakManager = StreakManager.getInstance(requireContext());
+        currentLoginStreakDays = streakManager.getCurrentStreak();
+        longestLoginStreakDays = streakManager.getLongestStreak();
         int unlocked = achievementManager.getUnlockedCount();
         int total = achievementManager.getTotalCount();
         progressText.setText(getString(R.string.achievements_progress, unlocked, total));
@@ -154,7 +157,10 @@ public class AchievementsFragment extends BaseGameFragment {
             String streakLabel = currentLoginStreakDays == 1 
                 ? getString(R.string.achievement_login_streak_day_label, currentLoginStreakDays)
                 : getString(R.string.achievement_login_streak_days_label, currentLoginStreakDays);
-            streakInfo.setText(streakLabel);
+            String longestStreakLabel = longestLoginStreakDays == 1
+                ? getString(R.string.achievement_login_streak_day_label, longestLoginStreakDays)
+                : getString(R.string.achievement_login_streak_days_label, longestLoginStreakDays);
+            streakInfo.setText(streakLabel + " • " + getString(R.string.achievement_longest_streak_label, longestStreakLabel));
             streakInfo.setTextSize(14);
             streakInfo.setTextColor(Color.parseColor("#000000"));
             streakInfo.setPadding(16, 0, 0, 0);

@@ -139,7 +139,3 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Vielleicht sollte man noch irgendwie recorden, wenn man eine map besonders lange angeschaut hat, dass man sieht dann wahrscheinlich auch im Kopf gelöst hat
 
-Longest streak wird noch nirgendwo angezeigt, das soll
-- in den achievements oben bei den streak days rechts daneben: "longes Streak" 
-- und in der Web App bei dem User 
-- und auch in den Rankings als Extra Spalte, so dass man danach sortieren kann
