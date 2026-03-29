@@ -123,9 +123,8 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 ---
 
-- Wenn man in den levels noch keinen Zug gemacht hat und auf den backknopf drückt, dann soll er ein pop-up confirmdialog öffnen, ob er den vorigen Level (-1) spielen soll ausser beim ersten level, da soll er ins level auswahl menu springen
 
-- Wenn man einen Level geschafft hat und ins Menü geht und dann eine Back Geste macht kommt mal wieder in den Level und schafft ihn erneut, das wird auch gespeichert als noch mal geschafft. Soll aber nicht.
+- Wenn man ein random game oder einen Level geschafft hat und ins Menü geht und dann eine system-Back Geste macht kommt man wieder in den game screen mit dem letztten zustand angezeigt, wo der roboter im ziel steht und dabei schafft man ihn fälschlicherweise erneut, und das wird auch so in der history als noch mal gespielt gespeichert als noch mal geschafft. das soll nicht passieren. fixe das!
 
 - Oft, speichert er die neue best moves time nicht am Ende wenn man im Level 3 Sterne erreicht hat
 

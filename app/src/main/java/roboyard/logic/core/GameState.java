@@ -51,6 +51,7 @@ public class GameState implements Serializable {
     private String savedSolutions; // Serialized solutions from save file
     private int targetColorsCount = Constants.NUM_ROBOTS; // Default to 4 different target colors
     private boolean completed = false;
+    private transient boolean completionHandledThisSession = false;
     
     // Hint tracking - tracks max hint used during this game session
     // -1 = no hints, 0+ = hint index (0 = first hint revealing robot colors)
@@ -426,6 +427,17 @@ public class GameState implements Serializable {
      */
     public void setCompleted(boolean completed) {
         this.completed = completed;
+        if (!completed) {
+            completionHandledThisSession = false;
+        }
+    }
+
+    public boolean hasCompletionBeenHandledThisSession() {
+        return completionHandledThisSession;
+    }
+
+    public void markCompletionHandledThisSession() {
+        completionHandledThisSession = true;
     }
     
     /**

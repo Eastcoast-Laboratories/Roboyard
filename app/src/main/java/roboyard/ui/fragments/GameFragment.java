@@ -720,23 +720,25 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         
                         announceAccessibility(completionMessage);
                         
-                        // Save to history immediately on completion (bypasses time threshold)
-                        gameStateManager.saveToHistoryNow("completed");
+                        if (shouldHandleCompletionSideEffects(state, state.getLevelId(), "level")) {
+                            // Save to history immediately on completion (bypasses time threshold)
+                            gameStateManager.saveToHistoryNow("completed");
 
-                        // Trigger achievements for level completion (guard against multiple calls)
-                        long elapsedTime = SystemClock.elapsedRealtime() - startTime;
-                        int currentLevelId = state.getLevelId();
-                        long currentTime = System.currentTimeMillis();
-                        
-                        // Only call onLevelCompleted if this is a different level or enough time has passed
-                        if (currentLevelId != lastCompletedLevelId || (currentTime - lastCompletedTime) > 1000) {
-                            Timber.d("[ACHIEVEMENT_GUARD] Calling onLevelCompleted for levelId=%d (last was %d)", currentLevelId, lastCompletedLevelId);
-                            AchievementManager.getInstance(requireContext())
-                                .onLevelCompleted(currentLevelId, playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
-                            lastCompletedLevelId = currentLevelId;
-                            lastCompletedTime = currentTime;
-                        } else {
-                            Timber.d("[ACHIEVEMENT_GUARD] Skipping duplicate onLevelCompleted call for levelId=%d", currentLevelId);
+                            // Trigger achievements for level completion (guard against multiple calls)
+                            long elapsedTime = SystemClock.elapsedRealtime() - startTime;
+                            int currentLevelId = state.getLevelId();
+                            long currentTime = System.currentTimeMillis();
+                            
+                            // Only call onLevelCompleted if this is a different level or enough time has passed
+                            if (currentLevelId != lastCompletedLevelId || (currentTime - lastCompletedTime) > 1000) {
+                                Timber.d("[ACHIEVEMENT_GUARD] Calling onLevelCompleted for levelId=%d (last was %d)", currentLevelId, lastCompletedLevelId);
+                                AchievementManager.getInstance(requireContext())
+                                    .onLevelCompleted(currentLevelId, playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
+                                lastCompletedLevelId = currentLevelId;
+                                lastCompletedTime = currentTime;
+                            } else {
+                                Timber.d("[ACHIEVEMENT_GUARD] Skipping duplicate onLevelCompleted call for levelId=%d", currentLevelId);
+                            }
                         }
                     } else {
                         // This is a random game
@@ -793,59 +795,61 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         announceAccessibility(completionMessage_a11y);
                         updateStatusText(completionMessage, true);
                         
-                        // Trigger achievements for random game completion
-                        int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
-                                gameStateManager.getMoveCount().getValue() : 0;
-                        int optimalMoves = 0;
-                        GameSolution sol = gameStateManager.getCurrentSolution();
-                        if (sol != null && sol.getMoves() != null) {
-                            optimalMoves = sol.getMoves().size();
-                        } else {
-                            // Solver may still be running - use last known min moves as fallback
-                            optimalMoves = gameStateManager.getLastSolutionMinMoves();
-                            Timber.d("[ACHIEVEMENTS][PERFECT] random game: solution null, fallback optimalMoves=%d from lastSolutionMinMoves", optimalMoves);
-                        }
-                        int hintsUsed = state.getHintCount();
-                        long elapsedTime = SystemClock.elapsedRealtime() - startTime;
-                        // Reload preferences to ensure we have the latest difficulty setting
-                        Preferences.reloadPreferences();
-                        boolean isImpossibleMode = Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE; // Impossible mode
-                        Timber.d("[ACHIEVEMENTS] Game completion: isImpossibleMode=%b (Preferences.difficulty=%d), optimalMoves=%d", 
-                                isImpossibleMode, Preferences.difficulty, optimalMoves);
-                        int robotCount = state.getRobots() != null ? state.getRobots().size() : 4;
-                        int targetCount = state.getTargets() != null ? state.getTargets().size() : 1;
-                        int targetsNeeded = state.getRobotCount();
-                        Timber.d("[ACHIEVEMENTS] Multi-target: targetCount=%d, targetsNeeded=%d", targetCount, targetsNeeded);
-                        
-                        // Check isFirstCompletion BEFORE saveToHistoryNow to avoid race condition:
-                        // saveToHistoryNow writes the entry, so isFirstCompletion would always return false after it.
-                        String mapSignature = state.generateMapSignature();
-                        boolean isFirstCompletion = GameHistoryManager.isFirstCompletion(
-                                requireActivity(), mapSignature);
-                        Timber.d("[ACHIEVEMENTS] isFirstCompletion=%b (checked before saveToHistoryNow)", isFirstCompletion);
-
-                        // Save to history immediately on completion (bypasses time threshold)
-                        gameStateManager.saveToHistoryNow("completed");
-                        // Check if map qualifies for no-hints achievements
-                        // For first completion: based on current session hint usage
-                        // For repeat completion: check history entry
-                        boolean qualifiesForNoHints = !state.hasUsedHintsThisSession();
-                        if (!isFirstCompletion) {
-                            GameHistoryEntry existingEntry = GameHistoryManager.findByMapSignature(
-                                    requireActivity(), mapSignature);
-                            if (existingEntry != null) {
-                                qualifiesForNoHints = existingEntry.qualifiesForNoHintsAchievement();
+                        if (shouldHandleCompletionSideEffects(state, 0, "random")) {
+                            // Trigger achievements for random game completion
+                            int playerMoves = gameStateManager.getMoveCount().getValue() != null ? 
+                                    gameStateManager.getMoveCount().getValue() : 0;
+                            int optimalMoves = 0;
+                            GameSolution sol = gameStateManager.getCurrentSolution();
+                            if (sol != null && sol.getMoves() != null) {
+                                optimalMoves = sol.getMoves().size();
+                            } else {
+                                // Solver may still be running - use last known min moves as fallback
+                                optimalMoves = gameStateManager.getLastSolutionMinMoves();
+                                Timber.d("[ACHIEVEMENTS][PERFECT] random game: solution null, fallback optimalMoves=%d from lastSolutionMinMoves", optimalMoves);
                             }
+                            int hintsUsed = state.getHintCount();
+                            long elapsedTime = SystemClock.elapsedRealtime() - startTime;
+                            // Reload preferences to ensure we have the latest difficulty setting
+                            Preferences.reloadPreferences();
+                            boolean isImpossibleMode = Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE; // Impossible mode
+                            Timber.d("[ACHIEVEMENTS] Game completion: isImpossibleMode=%b (Preferences.difficulty=%d), optimalMoves=%d", 
+                                    isImpossibleMode, Preferences.difficulty, optimalMoves);
+                            int robotCount = state.getRobots() != null ? state.getRobots().size() : 4;
+                            int targetCount = state.getTargets() != null ? state.getTargets().size() : 1;
+                            int targetsNeeded = state.getRobotCount();
+                            Timber.d("[ACHIEVEMENTS] Multi-target: targetCount=%d, targetsNeeded=%d", targetCount, targetsNeeded);
+                            
+                            // Check isFirstCompletion BEFORE saveToHistoryNow to avoid race condition:
+                            // saveToHistoryNow writes the entry, so isFirstCompletion would always return false after it.
+                            String mapSignature = state.generateMapSignature();
+                            boolean isFirstCompletion = GameHistoryManager.isFirstCompletion(
+                                    requireActivity(), mapSignature);
+                            Timber.d("[ACHIEVEMENTS] isFirstCompletion=%b (checked before saveToHistoryNow)", isFirstCompletion);
+
+                            // Save to history immediately on completion (bypasses time threshold)
+                            gameStateManager.saveToHistoryNow("completed");
+                            // Check if map qualifies for no-hints achievements
+                            // For first completion: based on current session hint usage
+                            // For repeat completion: check history entry
+                            boolean qualifiesForNoHints = !state.hasUsedHintsThisSession();
+                            if (!isFirstCompletion) {
+                                GameHistoryEntry existingEntry = GameHistoryManager.findByMapSignature(
+                                        requireActivity(), mapSignature);
+                                if (existingEntry != null) {
+                                    qualifiesForNoHints = existingEntry.qualifiesForNoHintsAchievement();
+                                }
+                            }
+                            String wallSignature = state.generateWallSignature();
+                            Timber.d("[ACHIEVEMENTS] Unique map check: isFirstCompletion=%b, qualifiesForNoHints=%b, mapSignature=%s",
+                                    isFirstCompletion, qualifiesForNoHints, mapSignature);
+                            
+                            AchievementManager am = AchievementManager.getInstance(requireContext());
+                            am.setCurrentActivity(requireActivity());
+                            am.onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
+                                    isImpossibleMode, robotCount, targetCount, targetsNeeded,
+                                    isFirstCompletion, qualifiesForNoHints, wallSignature);
                         }
-                        String wallSignature = state.generateWallSignature();
-                        Timber.d("[ACHIEVEMENTS] Unique map check: isFirstCompletion=%b, qualifiesForNoHints=%b, mapSignature=%s",
-                                isFirstCompletion, qualifiesForNoHints, mapSignature);
-                        
-                        AchievementManager am = AchievementManager.getInstance(requireContext());
-                        am.setCurrentActivity(requireActivity());
-                        am.onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
-                                isImpossibleMode, robotCount, targetCount, targetsNeeded,
-                                isFirstCompletion, qualifiesForNoHints, wallSignature);
                     }
 
                     // change the "Reset" Button to "Retry"
@@ -1178,7 +1182,17 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         startTimer();
         hintContainer.setVisibility(View.GONE);
     }
-    
+
+    private boolean shouldHandleCompletionSideEffects(GameState state, int id, String type) {
+        if (state.hasCompletionBeenHandledThisSession()) {
+            Timber.d("[COMPLETION_GUARD] %s completion already handled for id=%d, skipping side effects", type, id);
+            return false;
+        }
+        state.markCompletionHandledThisSession();
+        Timber.d("[COMPLETION_GUARD] Processing %s completion for id=%d", type, id);
+        return true;
+    }
+
     /**
      * Set up button click listeners
      */
