@@ -1176,9 +1176,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         stopTimer();
         startTimer();
-        if (hintContainer != null) {
-            hintContainer.setVisibility(View.GONE);
-        }
+        hintContainer.setVisibility(View.GONE);
     }
     
     /**
@@ -1783,6 +1781,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     showingPreHints = true;
                     hintButton.setEnabled(true);
                     hintButton.setAlpha(1.0f);
+                    hintButton.setChecked(false);
                     Timber.d("[HINT] Reset hint system for next level");
                     
                     // Hide the Next Level button
