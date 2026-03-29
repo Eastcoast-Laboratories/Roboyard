@@ -2243,6 +2243,17 @@ public class SettingsFragment extends Fragment {
                     apiClient.logout();
                     
                     Toast.makeText(requireContext(), R.string.settings_reset_success, Toast.LENGTH_LONG).show();
+                    
+                    // Restart the app after a short delay
+                    requireView().postDelayed(() -> {
+                        Intent intent = new Intent(requireContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        requireContext().startActivity(intent);
+                        if (requireActivity() != null) {
+                            requireActivity().finish();
+                        }
+                        Timber.d("[RESET] App restart triggered");
+                    }, 500);
                 } catch (Exception e) {
                     Timber.e(e, "Error resetting data");
                     Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
