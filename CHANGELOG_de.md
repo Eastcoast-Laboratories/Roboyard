@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 46 (128)
+- Neues Achievement: Verzage nicht - versuche ein Level 1 Stunde lang zu lösen, ohne es zu schaffen
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+
+
 ## Version 45 (127)
 - fix „Nächstes Spiel“-Button wenn ein spiel geschafft wurde
 - Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen

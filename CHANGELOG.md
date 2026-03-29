@@ -2,6 +2,11 @@
 =========
 
 
+## Version 46 (128) - 2026-03-29
+- New achievement: Don't give up - try to solve a map for 1 hour without completing it
+- Various bug fixes and stability improvements
+
+
 ## Version 45 (127) - 2026-03-28
 - fix "Next Game" button when a game is completed
 - Various bug fixes and stability improvements

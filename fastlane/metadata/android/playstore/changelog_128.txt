@@ -1,0 +1,12 @@
+# Play Store Changelogs für Version 46 (versionCode: 128)
+
+<en-GB>
+- New achievement: Don't give up - try to solve a map for 1 hour without completing it
+- Various bug fixes and stability improvements
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Neues Achievement: Verzage nicht - versuche ein Level 1 Stunde lang zu lösen, ohne es zu schaffen
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>

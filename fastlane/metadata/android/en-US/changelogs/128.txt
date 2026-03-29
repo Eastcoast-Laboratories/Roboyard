@@ -1,0 +1,3 @@
+- New achievement: Don't give up - try to solve a map for 1 hour without completing it
+- Various bug fixes and stability improvements
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

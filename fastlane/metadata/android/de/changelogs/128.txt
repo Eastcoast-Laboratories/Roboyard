@@ -1,0 +1,3 @@
+- Neues Achievement: Verzage nicht - versuche ein Level 1 Stunde lang zu lösen, ohne es zu schaffen
+- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
