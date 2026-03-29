@@ -125,6 +125,7 @@
     <string name="menu_button">Menu</string>
     <string name="retry_button">Retry</string>
     <string name="restart_button">Rejouer</string>
+    <string name="confirm_level_change">Retour au niveau %1$d?</string>
     <string name="button_save_map">Sauv.</string>
     <string name="new_random_game_button">Nouvelle Partie</string>
     <string name="button_back_game">Retour</string>

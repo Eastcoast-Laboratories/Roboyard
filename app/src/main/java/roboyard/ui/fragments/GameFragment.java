@@ -29,6 +29,7 @@ import android.widget.ToggleButton;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.lang.reflect.Method;
@@ -337,7 +338,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Initialize the sound manager
         soundManager = SoundManager.getInstance(requireContext());
         
-        // Handle back button/gesture with improved behavior
+        // Handle system-back button/gesture with improved behavior
         requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -1144,6 +1145,41 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
         }
     }
+
+    private void navigateToLevelSelectionMenu() {
+        Timber.d("[BACK][LEVEL] Navigating to level selection menu");
+        LevelSelectionFragment levelSelectionFragment = new LevelSelectionFragment();
+        navigateToDirect(levelSelectionFragment, false, null);
+    }
+
+    private void showBackToPreviousLevelDialog(int currentLevelId) {
+        if (currentLevelId <= 1) {
+            Timber.d("[BACK][LEVEL] Level 1 reached - going to level selection menu");
+            navigateToLevelSelectionMenu();
+            return;
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("")
+                .setMessage(getString(R.string.confirm_level_change, currentLevelId - 1))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> startPreviousLevel(currentLevelId - 1))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void startPreviousLevel(int previousLevelId) {
+        Timber.d("[BACK][LEVEL] Starting previous level %d", previousLevelId);
+        gameStateManager.startLevelGame(previousLevelId);
+        if (gameGridView != null) {
+            gameGridView.clearRobotPaths();
+            gameGridView.invalidate();
+        }
+        stopTimer();
+        startTimer();
+        if (hintContainer != null) {
+            hintContainer.setVisibility(View.GONE);
+        }
+    }
     
     /**
      * Set up button click listeners
@@ -1168,6 +1204,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (gameStateManager.isGameComplete().getValue()) {
                 Timber.d("GameFragment: Game already complete, back button disabled");
                 Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            GameState backState = gameStateManager.getCurrentState().getValue();
+            Integer moveCount = gameStateManager.getMoveCount().getValue();
+            int currentLevelId = backState != null ? backState.getLevelId() : -1;
+
+            if (isLevelGame && currentLevelId > 0 && (moveCount == null || moveCount == 0)) {
+                Timber.d("[BACK][LEVEL] Back button clicked before first move on level %d", currentLevelId);
+                showBackToPreviousLevelDialog(currentLevelId);
                 return;
             }
             

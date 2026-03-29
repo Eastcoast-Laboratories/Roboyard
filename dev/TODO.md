@@ -123,17 +123,11 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 ---
 
-- Wenn man in den levels noch keinen Zug gemacht hat und auf den backknopf drückt, dann soll er ein pop-up öffnen, ob er den vorigen Level spielen soll
+- Wenn man in den levels noch keinen Zug gemacht hat und auf den backknopf drückt, dann soll er ein pop-up confirmdialog öffnen, ob er den vorigen Level (-1) spielen soll ausser beim ersten level, da soll er ins level auswahl menu springen
 
 - Wenn man einen Level geschafft hat und ins Menü geht und dann eine Back Geste macht kommt mal wieder in den Level und schafft ihn erneut, das wird auch gespeichert als noch mal geschafft. Soll aber nicht.
 
 - Oft, speichert er die neue best moves time nicht am Ende wenn man im Level 3 Sterne erreicht hat
-
-- Er scheint jedes Mal, wenn man einen Level completed hat, das erneut zu den achievements zu zählen. Jeder Level darf aber nur einmal für die achievements zählen
-
-- Der grosse "new Game" Button, wenn man ein random game geschafft hat, funktioniert nicht mehr beim ersten klick, er wird einfach wieder klein und die buttons haben alle wieder die normale grösse in zwei zeilen wie beim game start. der normale "new game" button funktioniert dann  normal und startet ein neues random game, nur halt bei level comlete geht da nicht mehr.
-
-- Speed Runner ist online, aber nicht im Game in der Liste
 
 - Level 39 zu einfach
 

@@ -162,6 +162,7 @@
     <string name="hint_cancel_button" comment="Generic cancel button text [GameFragment]">❌ Hint</string>
     <string name="hint_button_a11y">Hint</string>
     <string name="button_back_game">Back</string>
+    <string name="confirm_level_change">Back to level %1$d?</string>
     <string name="button_reset">Reset</string>
     <string name="button_save_map">Save Map</string>
     <string name="button_new_game">New Game</string>

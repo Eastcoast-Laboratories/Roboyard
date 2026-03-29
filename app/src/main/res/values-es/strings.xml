@@ -164,6 +164,7 @@
     <string name="menu_button">Menú</string>
     <string name="retry_button">Reintentar</string>
     <string name="restart_button">Reiniciar</string>
+    <string name="confirm_level_change">¿Volver al nivel %1$d?</string>
     <string name="new_game_button">Nuevo Juego</string>
     <string name="reset_button">Reset</string>
     <string name="next_robot_button">Siguiente Robot</string>

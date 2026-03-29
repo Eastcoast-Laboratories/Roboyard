@@ -170,6 +170,7 @@
     
     <!-- Additional accessibility strings -->
     <!-- Removed duplicate possible_moves_a11y -->
+    <string name="confirm_level_change">%1$d 레벨로 돌아갈까요?</string>
     <string name="edge_a11y">가장자리</string>
     <string name="wall_a11y">벽</string>
     <string name="walls_a11y">벽들</string>

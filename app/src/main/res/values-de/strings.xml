@@ -241,6 +241,7 @@
     <!-- Game Buttons -->
     <string name="button_reset">Reset</string>
     <string name="hint_button_a11y">Hinweis</string>
+    <string name="confirm_level_change">Zurück zu Level %1$d?</string>
     <string name="button_new_game">Neue Map</string>
     <string name="button_menu">Menü</string>
     <string name="button_back_game">Zurück</string>

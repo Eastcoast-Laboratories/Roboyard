@@ -131,6 +131,7 @@
     <string name="menu_button">菜单</string>
     <string name="retry_button">重试</string>
     <string name="restart_button">重新开始</string>
+    <string name="confirm_level_change">返回到第 %1$d 关？</string>
     <string name="save_map_button">保存地图</string>
     <string name="reset_button">重置</string>
     
