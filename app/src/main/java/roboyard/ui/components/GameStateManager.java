@@ -56,6 +56,7 @@ import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
+import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.ui.animation.RobotAnimationManager;
@@ -154,6 +155,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private long gameStartTime;
     private int totalPlayTime = 0;
     private boolean isHistorySaved = false;
+    private boolean isViewTimeAchievementChecked = false; // prevents double-checking per session
     private boolean isCompletionRecorded = false; // prevents double-counting completions per game session
     private static final int HISTORY_SAVE_THRESHOLD = 30; // seconds threshold for saving to history
 
@@ -2556,6 +2558,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void startGameTimer() {
         gameStartTime = System.currentTimeMillis();
         isHistorySaved = false;
+        isViewTimeAchievementChecked = false; // Reset achievement check for new game
         isCompletionRecorded = false;
         Timber.d("[HISTORY] Game timer started");
     }
@@ -2574,6 +2577,26 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 saveToHistory();
                 isHistorySaved = true;
             }
+
+            // Check for "Don't give up" achievement (view_1_hour)
+            // 5 seconds for testing, should be 3600 in production
+            if (!isViewTimeAchievementChecked && totalPlayTime >= 3600) {
+                checkViewTimeAchievement();
+                isViewTimeAchievementChecked = true;
+            }
+        }
+    }
+
+    /**
+     * Check and unlock the "Don't give up" achievement if conditions are met
+     */
+    private void checkViewTimeAchievement() {
+        if (context == null) return;
+        
+        AchievementManager achievementManager = AchievementManager.getInstance(context);
+        if (!achievementManager.isUnlocked("view_1_hour")) {
+            Timber.d("[ACHIEVEMENT] Unlocking view_1_hour ('Don't give up') - played for %d seconds", totalPlayTime);
+            achievementManager.unlock("view_1_hour");
         }
     }
 

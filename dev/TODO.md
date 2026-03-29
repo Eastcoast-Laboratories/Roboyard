@@ -124,7 +124,6 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 ---
 
 
-- Wenn man ein random game oder einen Level geschafft hat und ins Menü geht und dann eine system-Back Geste macht kommt man wieder in den game screen mit dem letztten zustand angezeigt, wo der roboter im ziel steht und dabei schafft man ihn fälschlicherweise erneut, und das wird auch so in der history als noch mal gespielt gespeichert als noch mal geschafft. das soll nicht passieren. fixe das!
 
 - Oft, speichert er die neue best moves time nicht am Ende wenn man im Level 3 Sterne erreicht hat
 
@@ -141,6 +140,3 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 - Vielleicht sollte man noch irgendwie recorden, wenn man eine map besonders lange angeschaut hat, dass man sieht dann wahrscheinlich auch im Kopf gelöst hat
 
 - neues achievement: schaue eine map 1h an
-
-
-

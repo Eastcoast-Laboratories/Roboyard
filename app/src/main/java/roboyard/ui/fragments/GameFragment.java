@@ -2783,7 +2783,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         super.onPause();
         stopTimer();
     }
-    
+
     /**
      * Play a sound effect
      * @param soundType Type of sound to play ("move", "hit_wall", "hit_robot", "win")

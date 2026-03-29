@@ -547,6 +547,8 @@
     <string name="achievement_speedrun_30s_desc">Complete a level in under 30 seconds</string>
     <string name="achievement_speedrun_10s">Lightning Fast</string>
     <string name="achievement_speedrun_10s_desc">Complete a level in under 10 seconds</string>
+    <string name="achievement_view_1_hour">Don\'t give up</string>
+    <string name="achievement_view_1_hour_desc">Try to solve a map for 1 hour without completing it</string>
     
     <!-- Challenge Achievements -->
     <string name="achievement_solve_custom">Custom Solver</string>

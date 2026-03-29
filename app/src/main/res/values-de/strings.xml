@@ -521,6 +521,8 @@
     <string name="achievement_speedrun_30s_desc">Löse ein Level in unter 30 Sekunden</string>
     <string name="achievement_speedrun_10s">Blitzschnell</string>
     <string name="achievement_speedrun_10s_desc">Löse ein Level in unter 10 Sekunden</string>
+    <string name="achievement_view_1_hour">Verzage nicht</string>
+    <string name="achievement_view_1_hour_desc">Versuche eine Stunde lang eine Map zu lösen</string>
     
     <!-- Challenge Achievements -->
     <string name="achievement_solve_custom">Custom-Löser</string>

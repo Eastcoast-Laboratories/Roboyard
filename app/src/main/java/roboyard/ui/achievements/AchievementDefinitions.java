@@ -125,7 +125,7 @@ public class AchievementDefinitions {
     private static final String ICON_WREATH = "icon_42_laurel";               // Wreath - achievement
     private static final String ICON_TROPHY_MEDAL = "icon_43_trophy_gold";    // Trophy with medal
     private static final String ICON_POWER = "icon_4_power";                  // Power button - comeback
-    private static final String ICON_HOURGLASS = "icon_13_hourglass";         // Hourglass - time
+    private static final String ICON_HOURGLASS = "icon_13_hourglass";         // Hourglass - time-based
     private static final String ICON_BUILDINGS = "icon_12_bars";              // Buildings - levels
     
     private static Map<String, Achievement> achievements;
@@ -300,6 +300,9 @@ public class AchievementDefinitions {
         add(new Achievement("speedrun_under_10s", 
             "achievement_speedrun_10s", "achievement_speedrun_10s_desc",
             AchievementCategory.PERFORMANCE, ICON_LIGHTNING));
+        add(new Achievement("view_1_hour", 
+            "achievement_view_1_hour", "achievement_view_1_hour_desc",
+            AchievementCategory.PERFORMANCE, ICON_HOURGLASS));
             
         // ========== CHALLENGE ACHIEVEMENTS ==========
         // no_hints_10 and no_hints_50 removed - hints are not allowed in levels

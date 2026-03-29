@@ -38,7 +38,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `level_140_complete` | Level Master | Complete all 140 levels | ✅ Implemented |
 | `all_stars_collected` | Star Collector | Collect all 420 stars | ✅ Implemented |
 
-### Performance Achievements (5)
+### Performance Achievements (6)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
@@ -47,6 +47,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `perfect_solutions_50` | Optimization Expert | Solve 50 levels with optimal moves | ✅ Implemented |
 | `speedrun_under_30s` | Quick Thinker | Complete a level in under 30 seconds | ✅ Implemented |
 | `speedrun_under_10s` | Lightning Fast | Complete a level in under 10 seconds | ✅ Implemented |
+| `view_1_hour` | Patient Observer | View a map for 1 hour without completing it | ✅ Implemented |
 
 ### Challenge Achievements (0 active, 3 pending)
 
