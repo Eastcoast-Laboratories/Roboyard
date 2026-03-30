@@ -1881,31 +1881,37 @@ public class SettingsFragment extends Fragment {
             int minMoves = 4;
             int maxMoves = 6;
             boolean allowMulticolor = true;
+            boolean generateNewMapEachTime = true; // Default for beginner/advanced: new map each time
             
             switch (difficulty) {
                 case Constants.DIFFICULTY_BEGINNER:
-                    // Beginner: 4-6 moves, multicolor allowed
+                    // Beginner: 4-6 moves, multicolor allowed, new map each time
                     minMoves = 4;
                     maxMoves = 6;
                     allowMulticolor = true;
+                    generateNewMapEachTime = true; 
                     break;
                 case Constants.DIFFICULTY_ADVANCED:
-                    // Advanced: 6-10 moves, no multicolor
+                    // Advanced: 6-10 moves, no multicolor, new map each time
                     minMoves = 6;
                     maxMoves = 10;
                     allowMulticolor = false;
+                    generateNewMapEachTime = true; 
                     break;
                 case Constants.DIFFICULTY_INSANE:
-                    // Insane: 10+ moves, no multicolor
+                    // Insane: 10+ moves, no multicolor, same map persists across restarts
                     minMoves = 10;
                     maxMoves = 99;
                     allowMulticolor = false;
+                    generateNewMapEachTime = false; // Same map persists across restarts
                     break;
                 case Constants.DIFFICULTY_IMPOSSIBLE:
-                    // Impossible: 17+ moves, no multicolor, max 99
+                    // Impossible: 17+ moves, no multicolor, max 99, don't change new_map setting
                     minMoves = 17;
                     maxMoves = 99;
                     allowMulticolor = false;
+                    // Keep current generateNewMapEachTime setting for impossible difficulty
+                    generateNewMapEachTime = Preferences.generateNewMapEachTime;
                     break;
             }
             
@@ -1913,6 +1919,7 @@ public class SettingsFragment extends Fragment {
             Preferences.setMinSolutionMoves(minMoves);
             Preferences.setMaxSolutionMoves(maxMoves);
             Preferences.setAllowMulticolorTarget(allowMulticolor);
+            Preferences.setGenerateNewMapEachTime(generateNewMapEachTime);
             
             // Update UI
             if (minSolutionMovesInput != null) {
@@ -1928,9 +1935,16 @@ public class SettingsFragment extends Fragment {
                     if (allowMulticolorTargetNo != null) allowMulticolorTargetNo.setChecked(true);
                 }
             }
+            if (newMapRadioGroup != null) {
+                if (generateNewMapEachTime) {
+                    if (newMapYes != null) newMapYes.setChecked(true);
+                } else {
+                    if (newMapNo != null) newMapNo.setChecked(true);
+                }
+            }
             
-            Timber.d("[DIFFICULTY_PARAMS] Adjusted puzzle parameters for difficulty %d: min=%d, max=%d, allowMulticolor=%b", 
-                    difficulty, minMoves, maxMoves, allowMulticolor);
+            Timber.d("[DIFFICULTY_PARAMS] Adjusted puzzle parameters for difficulty %d: min=%d, max=%d, allowMulticolor=%b, newMapEachTime=%b", 
+                    difficulty, minMoves, maxMoves, allowMulticolor, generateNewMapEachTime);
             
             isUpdatingUI = false;
         } catch (Exception e) {

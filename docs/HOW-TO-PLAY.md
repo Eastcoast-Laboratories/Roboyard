@@ -43,7 +43,7 @@ The game generates maps differently depending on the difficulty setting:
 ### Level Structure
 - The game is divided into multiple difficulty sections:
   - Beginner (Levels 1-35)
-  - Intermediate (Levels 36-70) - You need at least 35 stars in Beginner section
+  - Intermediate (Levels 36-70)
   - Advanced (Levels 71-105)
   - Expert (Levels 106-140)
 
@@ -57,9 +57,6 @@ You can earn up to 3 stars per level based on your performance:
 
 ### Level Progression
 - Complete levels to unlock more challenging levels
-- You need at least 35 stars to unlock the Intermediate section
-- Keep practicing to improve your solutions and earn more stars
-- Try to find the most efficient solution for each puzzle
 
 ## Tips for Success
 1. **Plan Ahead**: Look at the entire board before making your first move
