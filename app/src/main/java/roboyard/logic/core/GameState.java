@@ -731,6 +731,7 @@ public class GameState implements Serializable {
         int moveCount = 0;
         int optimalMoveCount = 0;
         long timePlayed = 0;
+        int currentDifficulty = Constants.DIFFICULTY_BEGINNER;
         
         String[] lines = saveData.split("\n");
         
@@ -772,6 +773,8 @@ public class GameState implements Serializable {
                     width = Integer.parseInt(item.substring("WIDTH:".length()).trim().replace(";", ""));
                 } else if (item.startsWith("HEIGHT:")) {
                     height = Integer.parseInt(item.substring("HEIGHT:".length()).trim().replace(";", ""));
+                } else if (item.startsWith("DIFFICULTY:")) {
+                    currentDifficulty = Integer.parseInt(item.substring("DIFFICULTY:".length()).trim().replace(";", ""));
                 }
             } catch (NumberFormatException e) {
                 // Ignore parse errors for individual items
@@ -784,6 +787,7 @@ public class GameState implements Serializable {
         result.put("moveCount", moveCount);
         result.put("optimalMoveCount", optimalMoveCount);
         result.put("timePlayed", timePlayed);
+        result.put("difficulty", currentDifficulty);
         result.put("allItems", allItems);
         
         return result;
@@ -809,8 +813,9 @@ public class GameState implements Serializable {
             String mapName = (String) metadata.get("mapName");
             int moveCount = (Integer) metadata.get("moveCount");
             long timePlayed = (Long) metadata.get("timePlayed");
+            int difficulty = (Integer) metadata.get("difficulty");
             
-            Timber.d("[TARGET LOADING] Parsing save data: %dx%d, %s", width, height, mapName);
+            Timber.d("[TARGET LOADING] Parsing save data: %dx%d, %s, difficulty: %d", width, height, mapName, difficulty);
             
             boolean inRobotsSection = false;
             boolean inInitialPositionsSection = false;
@@ -821,6 +826,7 @@ public class GameState implements Serializable {
             GameState state = new GameState(width, height);
             state.setLevelName(mapName);
             state.setMoveCount(moveCount);
+            state.setDifficulty(difficulty);
             state.startTime = System.currentTimeMillis() - timePlayed;
             
             String[] lines = saveData.split("\n");
@@ -1904,8 +1910,8 @@ public class GameState implements Serializable {
         int boardSizeX = Preferences.boardSizeWidth;
         int boardSizeY = Preferences.boardSizeHeight;
         
-        // Safety check: ensure board dimensions are valid (at least 8x8)
-        if (boardSizeX <= 0 || boardSizeY <= 0) {
+        // Safety check: ensure board dimensions are valid (at least 4x4)
+        if (boardSizeX < 4 || boardSizeY < 4) {
             Timber.tag(TAG).e("[BOARD_SIZE_DEBUG] Invalid board dimensions: %dx%d, using default 16x16", boardSizeX, boardSizeY);
             boardSizeX = 16;
             boardSizeY = 16;

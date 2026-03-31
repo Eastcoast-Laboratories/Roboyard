@@ -61,6 +61,12 @@ public class Constants {
     public static final int DIFFICULTY_INSANE = 2;
     public static final int DIFFICULTY_IMPOSSIBLE = 3;
 
+    // Min moves for difficulty
+    public static final int MIN_MOVES_BEGINNER = 4;
+    public static final int MIN_MOVES_ADVANCED = 6;
+    public static final int MIN_MOVES_INSANE = 10;
+    public static final int MIN_MOVES_IMPOSSIBLE = 17;
+
     // Color constants
     public static final int COLOR_PINK = 0;
     public static final int COLOR_GREEN = 1;

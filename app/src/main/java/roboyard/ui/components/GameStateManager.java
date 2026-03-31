@@ -172,9 +172,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // Flag to indicate if the current game was loaded from a savegame
     // When true, skip min/max moves validation to allow playing saved games regardless of current difficulty settings
     private boolean isLoadedFromSave = false;
-    
-    // Store the difficulty level from the loaded savegame (for display purposes)
-    private int loadedSaveDifficulty = -1;
 
     // Live move counter feature
     private LiveSolverManager liveSolverManager;
@@ -240,7 +237,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Reset loaded game flags - new games should use current difficulty settings
         isLoadedFromSave = false;
-        loadedSaveDifficulty = -1;
         Timber.d("[NEW_GAME] Reset isLoadedFromSave flag, using current difficulty settings");
 
         // Reset any existing solver state to ensure a clean calculation for the new game
@@ -396,10 +392,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true;
                 
-                // Store the difficulty from the savegame for display purposes
-                loadedSaveDifficulty = newState.getDifficulty();
                 Timber.d("[LOAD_GAME] Loading saved game with difficulty: %d (current settings difficulty: %d)", 
-                        loadedSaveDifficulty, Preferences.difficulty);
+                        newState.getDifficulty(), Preferences.difficulty);
                 
                 // Apply the loaded game state using the shared method
                 applyLoadedGameState(newState);
@@ -756,9 +750,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true;
 
-                // Store the difficulty from the save for display purposes
-                loadedSaveDifficulty = newState.getDifficulty();
-                Timber.d("[HISTORY_LOAD] Loaded history entry with difficulty: %d", loadedSaveDifficulty);
+                Timber.d("[HISTORY_LOAD] Loaded history entry with difficulty: %d", newState.getDifficulty());
 
                 // Apply the loaded game state using the shared method
                 applyLoadedGameState(newState);
@@ -2494,15 +2486,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         if (state != null && state.getLevelId() > 0) {
             // Level game: calculate difficulty based on level
             return calculateDifficultyForLevel(state.getLevelId());
-        } else if (isLoadedFromSave && loadedSaveDifficulty >= 0) {
-            // Loaded savegame: use difficulty from the savegame
-            Timber.d("[DIFFICULTY] Using difficulty from loaded savegame: %d (isLoadedFromSave=%s, loadedSaveDifficulty=%d)", 
-                    loadedSaveDifficulty, isLoadedFromSave, loadedSaveDifficulty);
-            return loadedSaveDifficulty;
+        } else if (isLoadedFromSave) {
+            // Loaded savegame: use difficulty from the GameState
+            int difficulty = state.getDifficulty();
+            Timber.d("[DIFFICULTY] Using difficulty from loaded savegame: %d (isLoadedFromSave=%s)", 
+                    difficulty, isLoadedFromSave);
+            return difficulty;
         } else {
             // Random game: use difficulty from preferences
-            Timber.d("[DIFFICULTY] Using difficulty from preferences: %d (isLoadedFromSave=%s, loadedSaveDifficulty=%d)", 
-                    Preferences.difficulty, isLoadedFromSave, loadedSaveDifficulty);
+            Timber.d("[DIFFICULTY] Using difficulty from preferences: %d", Preferences.difficulty);
             return Preferences.difficulty;
         }
     }
