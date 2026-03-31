@@ -176,6 +176,7 @@
     <string name="load_screen_title">Load Game</string>
     <string name="history_screen_title">Game History</string>
     <string name="ai_calculating" comment="Message shown when AI is calculating a solution [GameFragment]">A.I. calculating solution...</string>
+    <string name="keep_map">Play this map. Calculating...</string>
 
     <!-- Game control buttons -->
     <string name="back_button">Back</string>

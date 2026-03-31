@@ -265,6 +265,7 @@
     <string name="restart_button">Nochmal</string>
     <string name="save_map_button">Speichern</string>
     <string name="ai_calculating">KI berechnet Lösung...</string>
+    <string name="keep_map">Diese Karte spielen. Berechne...</string>
 
     <!-- AI and game direction strings -->
     

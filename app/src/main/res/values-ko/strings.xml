@@ -70,6 +70,7 @@
     <string name="back">뒤로</string>
     <string name="reset">초기화</string>
     <string name="save_map">맵 저장</string>
+    <string name="keep_map">이 맵 플레이. 계산 중...</string>
     <string name="new_game">새 게임</string>
     <string name="menu">메뉴</string>
     

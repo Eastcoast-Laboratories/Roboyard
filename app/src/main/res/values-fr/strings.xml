@@ -133,6 +133,7 @@
 
     <!-- Game UI Messages -->
     <string name="ai_calculating">IA calcule une solution...</string>
+    <string name="keep_map">Jouer cette carte. Calcul en cours...</string>
     <string name="solution_found">IA a trouvé une solution!</string>
     <string name="pre_hint_less_than_x">L\'IA a trouvé une solution en moins de %1$d mouvements</string>
     <string name="pre_hint_less_than_1">Vous avez trouvé une meilleure solution que l\'IA!</string>

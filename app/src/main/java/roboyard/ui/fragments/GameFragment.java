@@ -474,10 +474,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Mark that we want to keep the current map despite difficulty
             gameStateManager.keepCurrentMapDespiteDifficulty();
             
-            keepMapButton.setEnabled(false);
-            keepMapButton.setAlpha(0.5f);
+            // Hide keep map button and enable save button
+            keepMapButton.setVisibility(View.GONE);
+            if (saveMapButton != null) {
+                saveMapButton.setEnabled(true);
+                saveMapButton.setAlpha(1.0f);
+            }
+            
             if (statusTextView != null) {
-                statusTextView.setText(getString(R.string.ai_calculating));
+                statusTextView.setText(getString(R.string.keep_map));
             }
         });
         if (hintContainer instanceof LinearLayout linearLayout) {
