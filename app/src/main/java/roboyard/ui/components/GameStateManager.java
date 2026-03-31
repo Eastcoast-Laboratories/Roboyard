@@ -65,7 +65,6 @@ import timber.log.Timber;
 /**
  * Central state manager for the game.
  * Handles game state, navigation, and communication between fragments.
- * This replaces the previous GameManager with a more Android-native approach.
  */
 public class GameStateManager extends AndroidViewModel implements SolverManager.SolverListener {
 
@@ -76,6 +75,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private int regenerationCount = 0;
     private static final int MAX_AUTO_REGENERATIONS = 999;
     private boolean allowRegeneration = true; // Flag to stop regeneration when leaving game
+    private boolean keepCurrentMapDespiteDifficulty = false; // Manual override from the UI to keep the current map
 
     // Game state
     private final MutableLiveData<GameState> currentState = new MutableLiveData<>();
@@ -255,6 +255,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Reset regeneration counter
         regenerationCount = 0;
+        keepCurrentMapDespiteDifficulty = false; // Reset when starting a completely new game
 
         // Reset UI timer for the new game
         resetUiTimer();
@@ -3000,39 +3001,43 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 boolean isTooEasy = moveCount < minRequiredMoves;
                 boolean isTooHard = moveCount > maxRequiredMoves;
 
-                if (isTooEasy) {
-                    // Regenerate if puzzle is too easy
-                    Timber.d("[SOLUTION_SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)",
-                            moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
-                    regenerationCount++;
+                if (keepCurrentMapDespiteDifficulty && (isTooEasy || isTooHard)) {
+                    Timber.d("[SOLUTION_SOLVER][MOVES][KEEP_MAP_ENFORCER] Solution has only %d moves (minimum required: %d), but current map was manually kept", moveCount, minRequiredMoves);
+                } else {
+                    if (isTooEasy) {
+                        // Regenerate if puzzle is too easy (map rejected/discarded)
+                        Timber.d("[SOLUTION_SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)",
+                                moveCount, minRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                        regenerationCount++;
 
-                    // Force reset the solver state before starting a new game
-                    SolverManager solverManager = getSolverManager();
-                    solverManager.resetInitialization();
-                    solverManager.cancelSolver(); // Cancel any running solver process
+                        // Force reset the solver state before starting a new game
+                        SolverManager solverManager = getSolverManager();
+                        solverManager.resetInitialization();
+                        solverManager.cancelSolver(); // Cancel any running solver process
 
-                    // Create a new game after a short delay to ensure the solver is fully reset
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-                    }, 100);
-                    return;
-                } else if (isTooHard) {
-                    // Regenerate if puzzle is too hard for current difficulty mode
-                    Timber.w("[DIFFICULTY ENFORCER] %s mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
-                            getLocalizedDifficultyString(), moveCount, maxRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
-                    regenerationCount++;
+                        // Create a new game after a short delay to ensure the solver is fully reset
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+                        }, 100);
+                        return;
+                    } else if (isTooHard) {
+                        // Regenerate if puzzle is too hard for current difficulty mode (map rejected/discarded)
+                        Timber.w("[SOLUTION_SOLVER][MOVES] %s mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
+                                getLocalizedDifficultyString(), moveCount, maxRequiredMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS);
+                        regenerationCount++;
 
-                    // Force reset the solver state before starting a new game
-                    SolverManager solverManager = getSolverManager();
-                    solverManager.resetInitialization();
-                    solverManager.cancelSolver(); // Cancel any running solver process
+                        // Force reset the solver state before starting a new game
+                        SolverManager solverManager = getSolverManager();
+                        solverManager.resetInitialization();
+                        solverManager.cancelSolver(); // Cancel any running solver process
 
-                    // Create a new game after a short delay to ensure the solver is fully reset
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        validateDifficulty = true; // Make sure difficulty is checked
-                        createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
-                    }, 100);
-                    return;
+                        // Create a new game after a short delay to ensure the solver is fully reset
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            validateDifficulty = true; // Make sure difficulty is checked
+                            createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight);
+                        }, 100);
+                        return;
+                    }
                 }
             } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
                 Timber.d("[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.", MAX_AUTO_REGENERATIONS);
@@ -3129,6 +3134,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             solverFuture.cancel(true);
         }
         isSolverRunning.setValue(false);
+        // Call the failure handler for normal cancellation
+        onSolutionCalculationFailed("Solver was cancelled");
     }
     
     /**
@@ -3145,6 +3152,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     public void resumeRegeneration() {
         allowRegeneration = true;
         Timber.d("[SOLUTION_SOLVER] Map regeneration enabled");
+    }
+
+    /**
+     * Keep the current map even if it does not satisfy the active difficulty limits.
+     * This is triggered manually from the UI.
+     */
+    public void keepCurrentMapDespiteDifficulty() {
+        keepCurrentMapDespiteDifficulty = true;
+        Timber.d("[DIFFICULTY_ENFORCER] Current map will be kept despite difficulty limits");
     }
 
     /**
@@ -3276,6 +3292,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     private void createValidGame(int width, int height) {
         Timber.d("GameStateManager: createValidGame() called");
+
+        // If the user has clicked keep-map, do not create a new map
+        if (keepCurrentMapDespiteDifficulty) {
+            Timber.d("[KEEP_MAP_ENFORCER] createValidGame() blocked - user chose to keep current map");
+            return;
+        }
 
         // Update WallStorage with current board size to ensure we're using the right storage
         WallStorage wallStorage = WallStorage.getInstance();
@@ -3443,56 +3465,64 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int requiredMoves = getMinimumRequiredMoves();
             int maxMoves = getMaximumRequiredMoves();
 
-            // if only one move is needed, then the puzzle is too easy
-            if (getSolverManager().isSolution01()) {
-                Timber.d("[DifficultyValidationCallback]: Puzzle too easy (1 move), generating new one");
-                createValidGame(width, height);
-                return;
-            }
-
-            Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
-                    moveCount, requiredMoves, maxMoves);
-
-            // moveCount==0 means solver couldn't find a solution (memory/depth limit).
-            // Try a new map instead of accepting an unsolved puzzle.
-            if (moveCount == 0 && attemptCount < MAX_ATTEMPTS) {
-                Timber.d("[DifficultyValidationCallback]: Solver found no solution (memory/depth limit), trying new map (attempt %d/%d)", attemptCount, MAX_ATTEMPTS);
-                createValidGame(width, height);
-                return;
-            } else if (moveCount == 0) {
-                // Exhausted attempts - accept puzzle as-is to avoid infinite loop
-                Timber.w("[DifficultyValidationCallback]: No solution after %d attempts, accepting puzzle", attemptCount);
-                validateDifficulty = true;
-                solutionWasAccepted = true;
-                isSolverRunning.setValue(false);
-                return;
-            }
-
-            if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
-                // Puzzle too easy, generate a new one
-                Timber.d("[DifficultyValidationCallback]: Puzzle too easy (%d moves), generating new one", moveCount);
-                createValidGame(width, height);
-            } else if (moveCount > maxMoves && attemptCount < MAX_ATTEMPTS) {
-                // Puzzle too hard, generate a new one
-                Timber.d("[DifficultyValidationCallback]: Puzzle too hard (%d moves), generating new one", moveCount);
-                createValidGame(width, height);
+            // If user manually chose to keep the current map, skip all difficulty validation
+            if (keepCurrentMapDespiteDifficulty) {
+                Timber.d("[DifficultyValidationCallback][KEEP_MAP_ENFORCER] Skipping difficulty validation - map was manually kept (moves=%d)", moveCount);
+                // Fall through to acceptance below
             } else {
-                // Puzzle is good enough or we've tried too many times
-                Timber.d("[DifficultyValidationCallback][calculateSolutionAsync] Accepted puzzle with %d moves after %d attempts",
-                        moveCount, attemptCount);
-                validateDifficulty = true; // Reset validation flag
-                // Store the solution
-                currentSolution = solution;
-                currentSolutionStep = 0;
-                updatePreCompRobotOrder(solution);
-                
-                // Set flag to signal Fragment that solution was accepted
-                solutionWasAccepted = true;
-                
-                isSolverRunning.setValue(false);
-                // Signal to UI that solution was accepted and hint container should be hidden
-                Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] Solution accepted, notifying UI to hide hint container");
+                // if only one move is needed, then the puzzle is too easy
+                if (getSolverManager().isSolution01()) {
+                    Timber.d("[DifficultyValidationCallback]: Puzzle too easy (1 move), generating new one");
+                    createValidGame(width, height);
+                    return;
+                }
+
+                Timber.d("[DifficultyValidationCallback]: Found solution with %d moves (minimum required: %d, maximum required: %d)",
+                        moveCount, requiredMoves, maxMoves);
+
+                // moveCount==0 means solver couldn't find a solution (memory/depth limit).
+                // Try a new map instead of accepting an unsolved puzzle.
+                if (moveCount == 0 && attemptCount < MAX_ATTEMPTS) {
+                    Timber.d("[DifficultyValidationCallback]: Solver found no solution (memory/depth limit), trying new map (attempt %d/%d)", attemptCount, MAX_ATTEMPTS);
+                    createValidGame(width, height);
+                    return;
+                } else if (moveCount == 0) {
+                    // Exhausted attempts - accept puzzle as-is to avoid infinite loop
+                    Timber.w("[DifficultyValidationCallback]: No solution after %d attempts, accepting puzzle", attemptCount);
+                    validateDifficulty = true;
+                    solutionWasAccepted = true;
+                    isSolverRunning.setValue(false);
+                    return;
+                }
+
+                if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
+                    // Puzzle too easy, generate a new one
+                    Timber.d("[DifficultyValidationCallback]: Puzzle too easy (%d moves), generating new one", moveCount);
+                    createValidGame(width, height);
+                    return;
+                } else if (moveCount > maxMoves && attemptCount < MAX_ATTEMPTS) {
+                    // Puzzle too hard, generate a new one
+                    Timber.d("[DifficultyValidationCallback]: Puzzle too hard (%d moves), generating new one", moveCount);
+                    createValidGame(width, height);
+                    return;
+                }
             }
+
+            // Puzzle is good enough, kept by user, or we've tried too many times
+            Timber.d("[DifficultyValidationCallback][calculateSolutionAsync] Accepted puzzle with %d moves after %d attempts",
+                    moveCount, attemptCount);
+            validateDifficulty = true; // Reset validation flag
+            // Store the solution
+            currentSolution = solution;
+            currentSolutionStep = 0;
+            updatePreCompRobotOrder(solution);
+            
+            // Set flag to signal Fragment that solution was accepted
+            solutionWasAccepted = true;
+            
+            isSolverRunning.setValue(false);
+            // Signal to UI that solution was accepted and hint container should be hidden
+            Timber.d("[SOLUTION][ACCEPTED][calculateSolutionAsync] Solution accepted, notifying UI to hide hint container");
         }
 
         @Override
@@ -3543,11 +3573,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         new Handler(Looper.getMainLooper()).post(() -> {
             // Check if map regeneration is enabled
             if (Preferences.generateNewMapEachTime) {
-                Timber.d("[SOLUTION_SOLVER] Map regeneration enabled - discarding unsolvable map and generating new one");
+                Timber.d("[SOLUTION_SOLVER] generateNewMapEachTime enabled - discarding unsolvable map and generating new one");
                 // TODO: Implement map regeneration retry loop when solver is cancelled
                 // For now, just notify user that solver was cancelled
             } else {
-                Timber.d("[SOLUTION_SOLVER] Map regeneration disabled - showing error to user");
+                Timber.d("[SOLUTION_SOLVER] generateNewMapEachTime disabled - showing error to user");
             }
             
             onSolutionCalculationFailed("Solver was cancelled");

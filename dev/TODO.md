@@ -139,3 +139,6 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Vielleicht sollte man noch irgendwie recorden, wenn man eine map besonders lange angeschaut hat, dass man sieht dann wahrscheinlich auch im Kopf gelöst hat
 
+- Wenn es sehr lange dauert eine map zu  solven, dann soll ein haken-button in dem hint-text "A.I. calculating solution" erscheinen, wenn der benutzer den klickt, soll die map auch dann behälten werden, wenn sie im endeffekt nicht die anforderungen aus den settings erfüllt, also nicht gross genug züge benötigt. sie darf also nicht mehr verworfen werden und der save und hint button müssen wieder anklickbar werden, damit man die map trotzdem lösen kann, auch wenn  sie weniger schritte benötigt. 
+  - @GameStateManager.java#L3005-3049 hier muss das eingebaut werden, wenn man den button gedrckt hat
+  - @GameFragment.java#L3063-3064 hier steht a.i.calculating

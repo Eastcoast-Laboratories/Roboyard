@@ -93,6 +93,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private TextView statusTextView;
     // Hint navigation components
     private ViewGroup hintContainer;
+    private Button keepMapButton;
     private TextView prevHintButton;
     private TextView nextHintButton;
     private ToggleButton liveMoveCounterToggle;
@@ -463,6 +464,39 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         optimalMovesButton = view.findViewById(R.id.optimal_moves_button);
         layoutToggleButton = view.findViewById(R.id.layout_toggle_button);
         hintContainer = view.findViewById(R.id.hint_container);
+        keepMapButton = new Button(requireContext());
+        keepMapButton.setText("✓");
+        keepMapButton.setAllCaps(false);
+        keepMapButton.setVisibility(View.GONE);
+        keepMapButton.setOnClickListener(v -> {
+            Timber.d("[KEEP_MAP_ENFORCER] Keep-map button clicked while solver is running");
+            
+            // Mark that we want to keep the current map despite difficulty
+            gameStateManager.keepCurrentMapDespiteDifficulty();
+            
+            keepMapButton.setEnabled(false);
+            keepMapButton.setAlpha(0.5f);
+            if (statusTextView != null) {
+                statusTextView.setText(getString(R.string.ai_calculating));
+            }
+        });
+        if (hintContainer instanceof LinearLayout linearLayout) {
+            LinearLayout.LayoutParams keepMapParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            keepMapParams.setMargins(8, 0, 2, 0);
+            keepMapButton.setPadding(2, 2, 2, 2);
+            
+            // Set rounded corners background
+            GradientDrawable background = new GradientDrawable();
+            background.setShape(GradientDrawable.RECTANGLE);
+            background.setCornerRadius(60f);
+            background.setColor(Color.parseColor("#4CAF50")); // Green color
+            keepMapButton.setBackground(background);
+            keepMapButton.setTextColor(Color.WHITE);
+            
+            linearLayout.addView(keepMapButton, keepMapParams);
+        }
         prevHintButton = view.findViewById(R.id.prev_hint_button);
         nextHintButton = view.findViewById(R.id.next_hint_button);
         liveMoveCounterToggle = view.findViewById(R.id.live_move_counter_toggle);
@@ -932,10 +966,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     Timber.d("[HINT_SYSTEM] Solver finished - keeping hint button checked (no solution accepted yet)");
                 }
                 
-                // Enable save map button when solver finishes (solution found or cancelled)
+                // Enable save map button and disable keep map Button when solver finishes (solution found or cancelled)
                 if (saveMapButton != null && gameStateManager.getCurrentSolution() != null) {
                     saveMapButton.setEnabled(true);
                     saveMapButton.setAlpha(1.0f);
+                    keepMapButton.setVisibility(View.GONE);
                 }
             }
         });
@@ -3086,6 +3121,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Prevent this particular status from being announced via accessibility
             // by setting it as an announcement for another accessibility event type
             statusTextView.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_NONE);
+        }
+        
+        if (keepMapButton != null && solverRestartCount > 1) {
+            keepMapButton.setVisibility(View.VISIBLE);
+            keepMapButton.setEnabled(true);
+            keepMapButton.setAlpha(1.0f);
         }
         Timber.d("[SOLVER_STATUS] %s (not announced to accessibility)", messageBase + counterInfo);
     }
