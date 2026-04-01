@@ -2,6 +2,11 @@
 =========
 
 
+## Version 47 (129) - 2026-04-01
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese and Portuguese (Brazil)
+- Keep-map button to play a generated map even if it does not meet difficulty settings
+
+
 ## Version 46 (128) - 2026-03-29
 - New achievement: Don't give up - try to solve a map for 1 hour without completing it
 - Various bug fixes and stability improvements

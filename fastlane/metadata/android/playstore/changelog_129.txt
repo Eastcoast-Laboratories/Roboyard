@@ -1,0 +1,12 @@
+# Play Store Changelogs für Version 47 (versionCode: 129)
+
+<en-GB>
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese and Portuguese (Brazil)
+- Keep-map button to play a generated map even if it does not meet difficulty settings
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch und Portugiesisch (Brasilien)
+- Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>

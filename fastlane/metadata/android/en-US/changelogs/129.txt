@@ -1,0 +1,3 @@
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese and Portuguese (Brazil)
+- Keep-map button to play a generated map even if it does not meet difficulty settings
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

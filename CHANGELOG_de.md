@@ -2,6 +2,11 @@ Changelog Deutsch
 =================
 
 
+## Version 47 (129)
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch und Portugiesisch (Brasilien)
+- Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen
+
+
 ## Version 46 (128)
 - Neues Achievement: Verzage nicht - versuche ein Level 1 Stunde lang zu lösen, ohne es zu schaffen
 - Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen

@@ -1,0 +1,3 @@
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch und Portugiesisch (Brasilien)
+- Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
