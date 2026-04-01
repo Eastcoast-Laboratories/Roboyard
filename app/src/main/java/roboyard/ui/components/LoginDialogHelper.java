@@ -37,7 +37,7 @@ public class LoginDialogHelper {
         layout.setPadding(48, 24, 48, 24);
         
         EditText emailInput = new EditText(context);
-        emailInput.setHint(R.string.login_dialog_email);
+        emailInput.setHint(R.string.login_dialog_email_or_username);
         emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         layout.addView(emailInput);
         

@@ -156,12 +156,13 @@ public class RoboyardApiClient {
     
     /**
      * Login to roboyard.z11.de.
+     * Supports email, username, user ID, or email prefix (if unique).
      */
-    public void login(String email, String password, ApiCallback<LoginResult> callback) {
+    public void login(String identifier, String password, ApiCallback<LoginResult> callback) {
         executor.execute(() -> {
             try {
                 JSONObject requestBody = new JSONObject();
-                requestBody.put("email", email);
+                requestBody.put("identifier", identifier); // Changed from "email" to "identifier"
                 requestBody.put("password", password);
                 requestBody.put("ver", API_VERSION);
                 
@@ -178,8 +179,10 @@ public class RoboyardApiClient {
                 }
                 
                 String token = json.getString("token");
-                String userName = json.optString("name", email);
-                int userId = json.optInt("user_id", -1);
+                JSONObject userObject = json.getJSONObject("user");
+                String userName = userObject.optString("name", "");
+                String email = userObject.optString("email", "");
+                int userId = userObject.optInt("id", -1);
                 
                 // Save credentials including password for auto re-login
                 prefs.edit()
