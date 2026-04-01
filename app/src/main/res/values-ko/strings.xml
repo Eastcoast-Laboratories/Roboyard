@@ -401,6 +401,7 @@
     <string name="settings_hint_auto_move_full_auto_a11y">완전 자동 모드: 로봇이 자동으로 이동합니다</string>
     
     <!-- Help screen -->
+    <string name="help_title">도움말</string>
     <string name="help_screen_content_title">로보야드 플레이 방법</string>
     <string name="help_goal_section_title">목표</string>
     <string name="help_goal_description">색깔별 로봇을 해당하는 색깔의 목표 지점으로 움직이세요. 모든 로봇이 자신의 목표 지점에 도달하면 게임이 완료됩니다.</string>

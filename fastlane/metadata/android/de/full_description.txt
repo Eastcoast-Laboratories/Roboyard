@@ -10,6 +10,6 @@ Dieses Spiel ist Open Source und wird ohne Adds ausgeliefert. Inspiriert von Ras
 
 Quellcode unter https://roboyard.z11.de/
 
-Unterstützte Sprachen: Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Koreanisch
+Unterstützte Sprachen: Deutsch, Englisch, Französisch, Spanisch, Chinesisch, Koreanisch, Japanisch und Portugiesisch (Brasilien)
 
 Vollständige Barrierefreiheit: Das Spiel ist komplett für blinde Spieler spielbar und unterstützt alle Bedienungshilfen mit TalkBack.

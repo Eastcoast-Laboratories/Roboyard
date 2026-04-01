@@ -101,7 +101,7 @@
     <string name="talkback_language_same_value" translatable="false">same</string>
     
     <!-- Help content -->
-    <string name="help_title" translatable="false">Help</string>
+    <string name="help_title">ヘルプ</string>
     
     <!-- Credits screen -->
     <string name="version_format">バージョン：%1$s（ビルド %2$d）</string>

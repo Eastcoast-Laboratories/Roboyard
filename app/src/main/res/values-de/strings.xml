@@ -117,7 +117,7 @@
     <string name="talkback_language_same_value" translatable="false">same</string>
     
     <!-- Help content -->
-    <string name="help_title" translatable="false">Hilfe</string>
+    <string name="help_title">Hilfe</string>
     
     <!-- Credits screen -->
     <string name="version_format">Version: %1$s (Build %2$d)</string>

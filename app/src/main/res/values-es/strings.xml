@@ -30,6 +30,7 @@
     <string name="help_screen_title">Ayuda</string>
 
     <!-- Help screen -->
+    <string name="help_title">Ayuda</string>
     <string name="help_screen_content_title">Cómo jugar a Roboyard</string>
     <string name="help_goal_section_title">Objetivo</string>
 

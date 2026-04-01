@@ -66,15 +66,15 @@ check_length() {
 
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
-- Neues Achievement: Verzage nicht - versuche ein Level 1 Stunde lang zu lösen, ohne es zu schaffen
-- Verschiedene Fehlerbehebungen und Stabilitätsverbesserungen
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch und Portugiesisch (Brasilien)
+- Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
-- New achievement: Don't give up - try to solve a map for 1 hour without completing it
-- Various bug fixes and stability improvements
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese and Portuguese (Brazil)
+- Keep-map button to play a generated map even if it does not meet difficulty settings
 EOF
 )
 

@@ -663,7 +663,6 @@
     <string name="streak_popup_day_9_headline">Neuf et ça continue !</string>
     <string name="streak_popup_message">Vous vous êtes connecté %1$d jours consécutifs.</string>
     <string name="streak_popup_title">Série quotidienne</string>
-    <string name="talkback_language_same_value">identique</string>
     <string name="unique_map_id">%1$s</string>
     <string name="unknown_color">Inconnu : %1$s</string>
     <string name="until_feminine">jusqu\'à</string>
