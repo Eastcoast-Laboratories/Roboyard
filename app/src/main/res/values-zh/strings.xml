@@ -30,7 +30,6 @@
     <string name="user_profile_button_a11y">用户资料和登录</string>
     
     <!-- Game Screens -->
-    <string name="help_screen_title">帮助</string>
 
     <!-- Level Selection Screen -->
 
@@ -59,7 +58,6 @@
     <string name="color_white">白色</string>
     <string name="color_black">黑色</string>
     <string name="color_silver">银色</string>
-    <string name="color_none">无</string>
 
     <!-- Accessibility Color Names -->
     
@@ -80,9 +78,6 @@
     <string name="color_green_adj">绿色</string>
     <string name="color_yellow_adj">黄色</string>
     <string name="color_pink_adj">粉色</string>
-    <string name="color_orange_adj">橙色</string>
-    <string name="color_white_adj">白色</string>
-    <string name="color_black_adj">黑色</string>
     <string name="color_silver_adj">银色</string>
     
     <!-- Target color forms -->
@@ -91,9 +86,6 @@
     <string name="color_green_target">绿色</string>
     <string name="color_yellow_target">黄色</string>
     <string name="color_pink_target">粉色</string>
-    <string name="color_orange_target">橙色</string>
-    <string name="color_white_target">白色</string>
-    <string name="color_black_target">黑色</string>
     <string name="color_silver_target">银色</string>
     
     <!-- Additional accessibility strings -->
@@ -140,7 +132,6 @@
     <string name="retry_button">重试</string>
     <string name="restart_button">重新开始</string>
     <string name="confirm_level_change">返回到第 %1$d 关？</string>
-    <string name="save_map_button">保存地图</string>
     <string name="keep_map">玩这张地图。计算中...</string>
     <string name="reset_button">重置</string>
     
@@ -149,21 +140,6 @@
     <string name="restart_button_a11y">重新开始此关卡</string>
     <string name="save_map_button_a11y">保存当前地图</string>
     <string name="dice_button_a11y">生成新地图</string>
-    <string name="new_game_button_a11y">开始新游戏</string>
-    <string name="reset_button_a11y">重置游戏</string>
-    <string name="help_button_a11y">显示游戏说明</string>
-    <string name="settings_button_a11y">打开游戏设置</string>
-    <string name="credits_button_a11y">查看制作人员</string>
-    <string name="game_grid_a11y">游戏棋盘</string>
-    <string name="move_in_progress_a11y">正在移动 %1$s 机器人</string>
-    <string name="direction_selector_a11y">%1$s 机器人的方向选择器</string>
-    <string name="up_direction_a11y">向上移动</string>
-    <string name="down_direction_a11y">向下移动</string>
-    <string name="left_direction_a11y">向左移动</string>
-    <string name="right_direction_a11y">向右移动</string>
-    <string name="hint_next_button_a11y">显示下一提示</string>
-    <string name="hint_previous_button_a11y">显示上一提示</string>
-    <string name="help_accessibility_title">无障碍功能</string>
     <string name="help_accessibility_description">本游戏完全兼容TalkBack屏幕阅读器。使用触摸探索来听取关于游戏元素和按钮的信息。双击激活按钮或选择机器人。</string>
     
     <!-- Game Status Messages -->
@@ -211,37 +187,13 @@
     <string name="settings_no">否</string>
     <string name="settings_on">开</string>
     <string name="settings_off">关</string>
-    <string name="settings_language">语言：</string>
     <string name="settings_english">English</string>
     <string name="settings_german">Deutsch</string>
     <string name="settings_french">Français</string>
     <string name="settings_spanish">Español</string>
     <string name="settings_chinese">中文</string>
     <string name="settings_korean">한국어</string>
-    <string name="settings_accessibility">无障碍：</string>
-    <string name="settings_enhanced_accessibility">增强无障碍：</string>
-    <string name="settings_reset_tutorial">重置教程：</string>
-    <string name="settings_reset_progress">重置进度：</string>
-    <string name="settings_reset_progress_confirm">您确定要重置所有进度吗？这将删除所有保存的游戏数据和解锁的关卡。</string>
-    <string name="settings_reset_progress_success">进度已重置</string>
-    <string name="settings_reset_tutorial_confirm">您确定要重置教程吗？您将失去所有的游戏进度和解锁的关卡。</string>
-    <string name="settings_reset_tutorial_success">教程已重置</string>
-    <string name="settings_about">关于：</string>
-    <string name="settings_version">版本：</string>
-    <string name="settings_contact">联系我们：</string>
-    <string name="settings_contact_email">support@eclabs.com</string>
-    <string name="settings_contact_us">联系我们</string>
-    <string name="settings_contact_subject">关于 Roboyard 的反馈</string>
-    <string name="settings_contact_body">您好，Roboyard 团队，\n\n</string>
-    <string name="settings_privacy_policy">隐私政策</string>
-    <string name="settings_licenses">开源许可</string>
-    <string name="settings_ok">确定</string>
-    <string name="settings_cancel">取消</string>
-    <string name="settings_save">保存</string>
-    <string name="settings_apply">应用</string>
-    <string name="settings_reset">重置</string>
-    <string name="settings_done">完成</string>
-    
+
     <!-- Directions for hints -->
     <string name="direction_up">向上</string>
     <string name="direction_down">向下</string>
@@ -261,8 +213,6 @@
     </plurals>
 
     <!-- Accessibility Controls -->
-    <string name="next_robot_button">下一个机器人</string>
-    <string name="announce_hint">提示</string>
     <string name="announce">播报</string>
     <string name="next_robot">下一个机器人</string>
     <string name="announce_a11y">播报游戏状态</string>
@@ -288,10 +238,7 @@
     <string name="button_new_game">新游戏</string>
     <string name="button_menu">菜单</string>
     <string name="reset">重置</string>
-    <string name="save_map">保存地图</string>
-    <string name="new_game">新游戏</string>
-    <string name="menu">菜单</string>
-    
+
     <!-- Settings strings -->
     <string name="settings_game_mode">游戏模式：</string>
     <string name="settings_standard_game">标准游戏</string>
@@ -392,7 +339,6 @@
     <string name="editor_mode_wall_h">– 墙</string>
     <string name="editor_mode_wall_v">| 墙</string>
     <string name="editor_mode_erase">擦除</string>
-    <string name="editor_color_pink">粉红色</string>
     <string name="editor_color_multi">多色</string>
     <string name="editor_load_autosave">加载自动保存</string>
     <string name="editor_cancel">取消</string>
@@ -850,8 +796,7 @@
     <string name="streak_popup_day_31_headline">传奇地位！</string>
     
     <!-- Level Strings -->
-    <string name="settings_final_settings_strings">设置</string>
-    
+
     <!-- Missing Help and Hint Strings -->
     <string name="help_a11y">如何玩</string>
     <string name="hint_button_a11y">提示</string>

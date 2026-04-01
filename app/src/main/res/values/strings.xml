@@ -817,5 +817,5 @@
     <string name="profile_a11y">User profile</string>
     
     <!-- Empty text placeholder used in layouts -->
-    <string name="empty_text" comment="Empty text placeholder"></string>
+    <string name="empty_text" comment="Empty text placeholder" translatable="false"></string>
 </resources>

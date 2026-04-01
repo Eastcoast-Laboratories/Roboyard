@@ -26,7 +26,6 @@
     <string name="color_orange">Orange</string>
     <string name="color_white">Blanc</string>
     <string name="color_black">Noir</string>
-    <string name="color_teal">Turquoise</string>
     <string name="color_silver">Argent</string>
     
     <!-- Deklinierte Farbformen -->
@@ -62,7 +61,6 @@
     <string name="color_orange_dative">orange</string>
     <string name="color_white_dative">blanc</string>
     <string name="color_black_dative">noir</string>
-    <string name="color_teal_dative">turquoise</string>
     <string name="color_silver_dative">argent</string>
     
     <!-- Difficulty Levels -->
@@ -74,8 +72,6 @@
     
     <!-- Additional localization strings -->
     <string name="of">de</string>
-    <string name="colors">couleurs</string>
-    <string name="color_count_format">%1$d sur %2$d couleurs</string>
     <string name="impossible_small_board_warning">Le niveau Impossible sur les petits plateaux peut prendre plusieurs minutes pour générer une carte adaptée</string>
     
     <!-- Toast messages -->
@@ -185,8 +181,6 @@
     <string name="settings_fullscreen_applying">Application des paramètres plein écran</string>
 
     <!-- Accessibility Controls -->
-    <string name="next_robot_button">Robot Suivant</string>
-    <string name="announce_hint">Annoncer Indice</string>
     <string name="announce">Annoncer</string>
     <string name="next_robot">Robot suivant</string>
     <string name="announce_a11y">Annoncer la situation du jeu</string>
@@ -232,9 +226,6 @@
     <string name="help_star_system_0_stars">Aucune étoile : Tous les autres cas. Continuez à vous entraîner pour améliorer vos performances !</string>
     <string name="help_star_system_hint_penalty">Note : Utiliser des indices réduira votre notation par étoiles, vous encourageant à résoudre les puzzles de manière indépendante.</string>
 
-    <string name="new_game">Recréer</string>
-    <string name="menu">Menu</string>
-    
     <!-- Puzzle Parameters -->
     <string name="settings_puzzle_parameters">Nombre de mouvements:</string>
     <string name="settings_min_solution_moves">Min:</string>
@@ -602,7 +593,6 @@
     <string name="button_menu">Menu</string>
     <string name="button_new_game">Prochain</string>
     <string name="cannot_move_in_this_direction">Impossible de se déplacer dans cette direction</string>
-    <string name="editor_level_editor_unlocked">Éditeur de niveau débloqué !</string>
     <string name="help_accessibility_description">Ce jeu est entièrement compatible avec le lecteur d\'écran TalkBack. Utilisez l\'exploration tactile pour entendre des informations sur les éléments du jeu et les boutons. Double-appuyez pour activer les boutons ou sélectionner les robots.</string>
     <string name="help_accessibility_section_title">Accessibilité</string>
     <string name="help_controls_point_1">- Indice : affiche un coup suggéré.</string>
@@ -655,7 +645,6 @@
     <string name="save_empty">Vide</string>
     <string name="save_game_screen_title">Sauvegarder la partie</string>
     <string name="save_game_title">Sauvegarder la partie</string>
-    <string name="save_map_button">Sauvegarder</string>
     <string name="save_map_button_a11y">Sauvegarder la carte actuelle</string>
     <string name="save_screen_title">Sauvegarder la partie</string>
     <string name="save_slots_tab">Emplacements de sauvegarde</string>

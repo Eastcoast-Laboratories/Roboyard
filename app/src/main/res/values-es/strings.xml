@@ -25,7 +25,6 @@
     <string name="user_profile_button_a11y">Perfil de usuario e inicio de sesión</string>
     
     <!-- Game Screens -->
-    <string name="help_screen_title">Ayuda</string>
 
     <!-- Help screen -->
     <string name="help_title">Ayuda</string>
@@ -58,9 +57,8 @@
     <string name="color_white">Blanco</string>
     <string name="color_black">Negro</string>
     <string name="color_silver">Plateado</string>
-    <string name="color_none">Ninguno</string>
-    
-    
+
+
     <!-- Accessibility Color Names -->
     
     <!-- Color Names (Dative Case) -->
@@ -80,9 +78,6 @@
     <string name="color_green_adj">verde</string>
     <string name="color_yellow_adj">amarillo</string>
     <string name="color_pink_adj">rosa</string>
-    <string name="color_orange_adj">naranja</string>
-    <string name="color_white_adj">blanco</string>
-    <string name="color_black_adj">negro</string>
     <string name="color_silver_adj">plateado</string>
     
     <!-- Target color forms -->
@@ -91,9 +86,6 @@
     <string name="color_green_target">verde</string>
     <string name="color_yellow_target">amarillo</string>
     <string name="color_pink_target">rosa</string>
-    <string name="color_orange_target">naranja</string>
-    <string name="color_white_target">blanco</string>
-    <string name="color_black_target">negro</string>
     <string name="color_silver_target">plateado</string>
     
     <!-- Additional accessibility strings -->
@@ -106,54 +98,20 @@
     <!-- Removed duplicate color_silver_dative -->
     
     <!-- Save Game -->
-    <string name="save_slot">Espacio %1$d</string>
-    <string name="save_game">Guardar Juego</string>
-    <string name="save_game_success">Juego guardado correctamente</string>
-    <string name="save_game_failed">Error al guardar el juego</string>
-    <string name="save_date">Guardado: %1$s</string>
-    <string name="confirm_overwrite">¿Estás seguro de que quieres sobrescribir esta partida guardada?</string>
-    <string name="delete_save">Eliminar</string>
-    <string name="confirm_delete">¿Estás seguro de que quieres eliminar esta partida guardada?</string>
-    <string name="delete_save_success">Partida guardada eliminada correctamente</string>
-    <string name="delete_save_failed">Error al eliminar la partida guardada</string>
-    
+
     <!-- Load Game -->
-    <string name="load_game_button">Cargar Juego</string>
-    <string name="load_game_success">Juego cargado correctamente</string>
-    <string name="load_game_failed">Error al cargar el juego</string>
-    <string name="no_save_data">No hay datos guardados</string>
-    <string name="no_saves">No hay partidas guardadas disponibles</string>
-    
+
     <!-- Credits Screen -->
-    <string name="credits_title">Créditos</string>
-    <string name="credits_developers">Desarrolladores</string>
-    <string name="credits_designers">Diseñadores</string>
-    <string name="credits_testers">Probadores</string>
-    <string name="credits_special_thanks">Agradecimientos Especiales</string>
-    <string name="credits_version">Versión %1$s</string>
-    <string name="credits_eclabs">ECLabs</string>
-    
+
     <!-- Level Selection screen -->
     <string name="level_selection_title">Selección de Nivel</string>
     <string name="level_difficulty">Dificultad: %1$s</string>
     <string name="level_stars">Estrellas: %1$d/%2$d</string>
-    <string name="level_size">Tamaño: %1$dx%2$d</string>
-    <string name="filter_played">Jugados</string>
-    <string name="level_filter">Filtro: %1$s</string>
-    <string name="robots_label">Robots:</string>
-    
+
     <!-- Game UI text -->
-    <string name="move_count">Movimientos: %1$d</string>
     <string name="robot_count">Robots: %1$d</string>
-    <string name="optimum_moves">Óptimo: %1$d</string>
-    <string name="game_over">¡Juego Terminado!</string>
-    <string name="game_completion_message">¡Juego completado en %1$d movimientos!</string>
-    <string name="restart_game">Reiniciar</string>
-    <string name="quit_game">Salir</string>
-    <string name="continue_game">Continuar</string>
     <string name="robot_selected">Robot %1$s seleccionado</string>
     <string name="robot_selected_info">Seleccionado: robot %1$s en (%2$d, %3$d)</string>
-    <string name="robot_moved">Robot %1$s movido a (%2$d, %3$d)</string>
     <string name="no_target_for_robot">No hay objetivo para este robot</string>
     <string name="move_count_text">Movimientos: %1$d</string>
     <string name="moves_count">%1$d Movimientos</string>
@@ -168,51 +126,26 @@
         <item quantity="one">Casilla</item>
         <item quantity="other">Casillas</item>
     </plurals>
-    <string name="robot_info">Robot %1$s en (%2$d, %3$d)</string>
-    <string name="target_info">Objetivo para robot %1$s en (%2$d, %3$d)</string>
-    
+
     <!-- Hint System -->
     <string name="hint_button">💡 Pista</string>
     <string name="hint_cancel_button">❌ Pista</string>
-    <string name="hint_next_button">Siguiente Pista</string>
-    <string name="hint_previous_button">Pista Anterior</string>
-    <string name="hint_loading">Calculando solución...</string>
-    <string name="hint_move_robot">Mueve el robot %1$s</string>
-    <string name="hint_move_robot_direction">Mueve el robot %1$s %2$s</string>
-    
+
     <!-- Game Buttons -->
     <string name="back_button">Atrás</string>
     <string name="menu_button">Menú</string>
     <string name="retry_button">Reintentar</string>
     <string name="restart_button">Reiniciar</string>
     <string name="confirm_level_change">¿Volver al nivel %1$d?</string>
-    <string name="new_game_button">Nuevo Juego</string>
     <string name="keep_map">Jugar este mapa. Calculando...</string>
     <string name="reset_button">Reset</string>
-    <string name="next_robot_button">Siguiente Robot</string>
-    <string name="announce_hint">Anunciar Pista</string>
-    
+
     <!-- Accessibility Descriptions -->
     <string name="menu_button_a11y">Volver al menú principal</string>
     <string name="restart_button_a11y">Reiniciar este nivel</string>
     <string name="save_map_button_a11y">Guardar el mapa actual</string>
     <string name="dice_button_a11y">Generar un nuevo mapa</string>
-    <string name="new_game_button_a11y">Comenzar un nuevo juego</string>
-    <string name="reset_button_a11y">Reiniciar el juego</string>
-    <string name="help_button_a11y">Mostrar instrucciones de juego</string>
-    <string name="settings_button_a11y">Abrir ajustes del juego</string>
-    <string name="credits_button_a11y">Ver créditos</string>
-    <string name="game_grid_a11y">Tablero de juego</string>
-    <string name="move_in_progress_a11y">Moviendo robot %1$s</string>
-    <string name="direction_selector_a11y">Selector de dirección para robot %1$s</string>
-    <string name="up_direction_a11y">Mover hacia arriba</string>
-    <string name="down_direction_a11y">Mover hacia abajo</string>
-    <string name="left_direction_a11y">Mover hacia la izquierda</string>
-    <string name="right_direction_a11y">Mover hacia la derecha</string>
     <string name="hint_button_a11y">Mostrar pista</string>
-    <string name="hint_next_button_a11y">Mostrar siguiente pista</string>
-    <string name="hint_previous_button_a11y">Mostrar pista anterior</string>
-    <string name="help_accessibility_title">Accesibilidad</string>
     <string name="help_accessibility_description">Este juego es totalmente compatible con el lector de pantalla TalkBack. Usa explorar por tacto para escuchar información sobre los elementos del juego y los botones. Toca dos veces para activar botones o seleccionar robots.</string>
     <string name="help_tips_section_title">Consejos</string>
     <string name="help_tips_point_1">- Trata de resolver los rompecabezas con el mínimo número de movimientos.</string>
@@ -282,24 +215,13 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">Ajustes</string>
-    <string name="settings_language">Idioma</string>
     <string name="settings_sound">Sonido</string>
     <string name="settings_background_sound">Sonido de fondo:</string>
     <string name="settings_background_sound_a11y">Control deslizante de volumen de sonido de fondo</string>
     <string name="settings_sound_effects_volume">Volumen de efectos de sonido:</string>
     <string name="settings_sound_effects_volume_a11y">Control deslizante de volumen de efectos de sonido</string>
-    <string name="settings_music">Música</string>
-    <string name="settings_enhanced_accessibility">Accesibilidad mejorada</string>
-    <string name="settings_accessibility">Accesibilidad</string>
     <string name="settings_board_size">Tamaño del tablero</string>
-    <string name="settings_robot_count">Número de robots</string>
-    <string name="settings_wall_density">Densidad de paredes</string>
     <string name="settings_difficulty">Dificultad</string>
-    <string name="settings_apply">Aplicar</string>
-    <string name="settings_done">Listo</string>
-    <string name="settings_save">Guardar</string>
-    <string name="settings_ok">Aceptar</string>
-    <string name="settings_cancel">Cancelar</string>
     <string name="settings_yes">Sí</string>
     <string name="settings_no">No</string>
     <string name="settings_on">Activado</string>
@@ -310,18 +232,6 @@
     <!-- Language Settings -->
     <string name="language_settings_label">Idioma:</string>
     <string name="language_settings_a11y">Seleccionar idioma de la aplicación</string>
-    <string name="settings_contact">Contacto</string>
-    <string name="settings_contact_us">Contáctanos</string>
-    <string name="settings_contact_email">soporte@roboyard.com</string>
-    <string name="settings_contact_subject">Feedback de Roboyard</string>
-    <string name="settings_about">Acerca de:</string>
-    <string name="settings_version">Versión:</string>
-    <string name="settings_reset_tutorial">Restablecer Tutorial:</string>
-    <string name="settings_reset_progress">Restablecer Progreso:</string>
-    <string name="settings_reset_progress_confirm">¿Estás seguro de que quieres restablecer todo el progreso? Esto eliminará todas las partidas guardadas y desbloqueos de niveles.</string>
-    <string name="settings_reset_progress_success">Progreso restablecido correctamente</string>
-    <string name="settings_reset_tutorial_confirm">¿Estás seguro de que quieres restablecer el tutorial? Volverás a ver todas las pantallas de ayuda.</string>
-    <string name="settings_reset_tutorial_success">Tutorial restablecido correctamente</string>
     <string name="settings_new_map_each_time">Nuevo Mapa Cada Vez</string>
     <string name="settings_robots_reach_targets">Robots que deben alcanzar objetivos</string>
     <string name="settings_targets">objetivos</string>
@@ -332,10 +242,7 @@
     <string name="settings_spanish">Español</string>
     <string name="settings_chinese">中文</string>
     <string name="settings_korean">한국어</string>
-    <string name="settings_privacy_policy">Política de Privacidad</string>
-    <string name="settings_licenses">Licencias de Código Abierto</string>
-    <string name="settings_reset">Restablecer</string>
-    
+
     <!-- Directions for hints -->
     <string name="direction_up">hacia arriba</string>
     <string name="direction_down">hacia abajo</string>
@@ -375,10 +282,7 @@
     <string name="button_menu">Menú</string>
     <string name="back">Atrás</string>
     <string name="reset">Restablecer</string>
-    <string name="save_map">Guardar mapa</string>
-    <string name="new_game">Nuevo juego</string>
-    <string name="menu">Menú</string>
-    
+
     <!-- Accessibility controls -->
     <string name="announce">Anunciar</string>
     <string name="next_robot">Siguiente robot</string>
@@ -454,7 +358,6 @@
     <string name="editor_mode_wall_h">– Pared</string>
     <string name="editor_mode_wall_v">| Pared</string>
     <string name="editor_mode_erase">Borrar</string>
-    <string name="editor_color_silver">Plata</string>
     <string name="editor_color_multi">Multi</string>
     <string name="editor_load_autosave">Cargar Guardado Automático</string>
     <string name="editor_cancel">Cancelar</string>
