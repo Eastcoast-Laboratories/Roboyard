@@ -561,5 +561,320 @@
     <string name="robot_a11y">位置上的机器人</string>
     <string name="minimap_description">显示整体棋盘布局的小地图</string>
     <string name="save_game_screen_title">保存游戏</string>
+    
+    <!-- Save/Load UI Strings -->
+    <string name="save_slots_tab">保存槽位</string>
+    <string name="history_tab">历史记录</string>
+    <string name="save_confirm_title">保存游戏</string>
+    <string name="share_button_a11y">分享保存的游戏</string>
+    <string name="info_button_a11y">显示地图详情</string>
+    <string name="saved_on">保存于：</string>
+    <string name="share_a11y">分享</string>
+    
+    <!-- Accessibility & Language Strings -->
+    <string name="accessibility_language_label">TalkBack 语言：</string>
+    <string name="accessibility_language_a11y">选择 TalkBack 通知语言</string>
+    <string name="settings_japanese">日本語</string>
+    <string name="settings_portuguese">Português (Brasil)</string>
+    <string name="language_same_as_app">与应用语言相同</string>
+    <string name="ok">确定</string>
+    <string name="language_flag_description">语言标志</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    <string name="robot_selected_a11y">已选择 %1$s 机器人</string>
+    <string name="version_format">版本：%1$s (构建 %2$d)</string>
+    
+    <!-- Level Editor & Save/Load Strings -->
+    <string name="level_editor_button">关卡编辑器</string>
+    <string name="level_editor_button_short">编辑器</string>
+    <string name="save_game_title">保存游戏</string>
+    <string name="save_empty">空</string>
+    <string name="save_tab_title">保存</string>
+    <string name="load_tab_title">加载</string>
+    <string name="history_tab_title">历史记录</string>
+    <string name="save_screen_title">保存游戏</string>
+    <string name="load_screen_title">加载游戏</string>
+    <string name="history_screen_title">游戏历史</string>
+    
+    <!-- AI & Game Info Strings -->
+    <string name="ai_calculating">A.I. 正在计算解决方案...</string>
+    <string name="no_robot_selected">未选择机器人</string>
+    <string name="robot_target_info">%1$s 目标: (%2$d, %3$d)</string>
+    <string name="board_size">棋盘: %1$dx%2$d</string>
+    <string name="solution_error">无法找到解决方案: %1$s</string>
+    <string name="cancel_button">取消</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="level_id_text">关卡 %1$d</string>
+    <string name="nothing_to_undo">无法撤销</string>
+    <string name="history_completed_once">已完成一次</string>
+    
+    <!-- History & Game Status Strings -->
+    <string name="history_completed_times">已完成 %1$d 次</string>
+    <string name="history_not_completed">尚未完成</string>
+    <string name="robots_reset">机器人已重置到起始位置</string>
+    <string name="no_game_in_progress">没有进行中的游戏</string>
+    <string name="no_robots_available">没有可用的机器人</string>
+    <string name="cannot_move_in_this_direction">无法朝此方向移动</string>
+    <string name="level_robots_label">机器人：</string>
+    <string name="level_squares_label">格子：</string>
+    <string name="achievement_login_streak">登录连续记录</string>
+    <string name="achievement_category_progression">进度</string>
+    
+    <!-- Achievement Category Strings -->
+    <string name="achievement_category_performance">性能</string>
+    <string name="achievement_category_challenge">挑战</string>
+    <string name="achievement_category_mastery">精通</string>
+    <string name="achievement_category_random_speed">速度</string>
+    <string name="achievement_category_random_difficulty">难度</string>
+    <string name="achievement_category_random_solution">解决方案长度</string>
+    <string name="achievement_category_random_resolution">屏幕分辨率</string>
+    <string name="achievement_category_random_targets">多个目标</string>
+    <string name="achievement_category_random_robots">有趣挑战</string>
+    <string name="achievement_category_random_coverage">覆盖范围</string>
+    
+    <!-- Streak & Achievement Strings -->
+    <string name="achievement_category_random_streaks">连续记录</string>
+    <string name="achievement_streak_7">每周玩家</string>
+    <string name="achievement_streak_7_desc">连续登录7天</string>
+    <string name="achievement_streak_30">专注玩家</string>
+    <string name="achievement_streak_30_desc">连续登录30天</string>
+    <string name="achievement_comeback">欢迎回来!</string>
+    <string name="achievement_comeback_desc">30天不活跃后回归</string>
+    <string name="achievement_first_game">欢迎!</string>
+    <string name="achievement_first_game_desc">玩你的第一场游戏</string>
+    <string name="achievement_level_1_complete">完成第一关</string>
+    
+    <!-- Level Completion Achievement Strings -->
+    <string name="achievement_level_1_complete_desc">完成第1关</string>
+    <string name="achievement_level_10_complete">入门</string>
+    <string name="achievement_level_10_complete_desc">完成10个关卡</string>
+    <string name="achievement_level_50_complete">半程</string>
+    <string name="achievement_level_50_complete_desc">完成50个关卡</string>
+    <string name="achievement_level_140_complete">关卡大师</string>
+    <string name="achievement_level_140_complete_desc">完成所有140个关卡</string>
+    <string name="achievement_all_stars">星星收集者</string>
+    <string name="achievement_all_stars_desc">收集所有420颗星星</string>
+    <string name="achievement_perfect_5">完美开始</string>
+    
+    <!-- Performance Achievement Strings -->
+    <string name="achievement_perfect_5_desc">用最优步数解决5个关卡</string>
+    <string name="achievement_perfect_10">精准玩家</string>
+    <string name="achievement_perfect_10_desc">用最优步数解决10个关卡</string>
+    <string name="achievement_perfect_50">优化专家</string>
+    <string name="achievement_perfect_50_desc">用最优步数解决50个关卡</string>
+    <string name="achievement_speedrun_30s">快速思考</string>
+    <string name="achievement_speedrun_30s_desc">30秒内完成一个关卡</string>
+    <string name="achievement_speedrun_10s">闪电般快速</string>
+    <string name="achievement_speedrun_10s_desc">10秒内完成一个关卡</string>
+    <string name="achievement_view_1_hour">游戏探索者</string>
+    
+    <!-- Custom Level Achievement Strings -->
+    <string name="achievement_view_1_hour_desc">尝试解决地图1小时而不完成</string>
+    <string name="achievement_solve_custom">自定义解决者</string>
+    <string name="achievement_solve_custom_desc">解决自定义创建的关卡</string>
+    <string name="achievement_create_custom">关卡设计师</string>
+    <string name="achievement_create_custom_desc">创建并保存自定义关卡</string>
+    <string name="achievement_share_custom">分享就是关爱</string>
+    <string name="achievement_share_custom_desc">与他人分享自定义关卡</string>
+    <string name="achievement_3_star_1">困难关卡星星</string>
+    <string name="achievement_3_star_1_desc">在5+最优步数关卡上获得3星</string>
+    <string name="achievement_3_star_10">星星收集者</string>
+    
+    <!-- Star Achievement Strings -->
+    <string name="achievement_3_star_10_desc">在10个关卡上获得3星</string>
+    <string name="achievement_3_star_10_hard">困难关卡大师</string>
+    <string name="achievement_3_star_10_hard_desc">在10个5+最优步数关卡上获得3星</string>
+    <string name="achievement_3_star_50">超级明星</string>
+    <string name="achievement_3_star_50_desc">在50个关卡上获得3星</string>
+    <string name="achievement_3_star_all">完美大师</string>
+    <string name="achievement_3_star_all_desc">在所有140个关卡上获得3星</string>
+    <string name="achievement_impossible_1">不可能的梦想</string>
+    <string name="achievement_impossible_1_desc">在不可能模式中完成1个游戏</string>
+    <string name="achievement_impossible_5">不可能的挑战</string>
+    
+    <!-- Impossible Mode Achievement Strings -->
+    <string name="achievement_impossible_5_desc">在不可能模式中完成5个游戏</string>
+    <string name="achievement_impossible_streak_5">不可能的连续记录</string>
+    <string name="achievement_impossible_streak_5_desc">在不可能模式中以最优步数连续完成5个游戏</string>
+    <string name="achievement_impossible_streak_10">不可能的传奇</string>
+    <string name="achievement_impossible_streak_10_desc">在不可能模式中以最优步数连续完成10个游戏</string>
+    <string name="achievement_solution_18">18步大师</string>
+    <string name="achievement_solution_18_desc">以18步最优解完成游戏</string>
+    <string name="achievement_solution_19">19步大师</string>
+    <string name="achievement_solution_19_desc">以19步最优解完成游戏</string>
+    <string name="achievement_solution_20">20步大师</string>
+    
+    <!-- Solution Achievement Strings -->
+    <string name="achievement_solution_20_desc">以20步最优解完成游戏</string>
+    <string name="achievement_solution_21">21步大师</string>
+    <string name="achievement_solution_21_desc">以21步最优解完成游戏</string>
+    <string name="achievement_solution_22">22步大师</string>
+    <string name="achievement_solution_22_desc">以22步最优解完成游戏</string>
+    <string name="achievement_solution_23">23步大师</string>
+    <string name="achievement_solution_23_desc">以23步最优解完成游戏</string>
+    <string name="achievement_solution_24">24步大师</string>
+    <string name="achievement_solution_24_desc">以24步最优解完成游戏</string>
+    <string name="achievement_solution_25">25步大师</string>
+    
+    <!-- Remaining Solution Achievement Strings -->
+    <string name="achievement_solution_25_desc">以25步最优解完成游戏</string>
+    <string name="achievement_solution_26">26步大师</string>
+    <string name="achievement_solution_26_desc">以26步最优解完成游戏</string>
+    <string name="achievement_solution_27">27步大师</string>
+    <string name="achievement_solution_27_desc">以27步最优解完成游戏</string>
+    <string name="achievement_solution_28">28步大师</string>
+    <string name="achievement_solution_28_desc">以28步最优解完成游戏</string>
+    <string name="achievement_solution_29">29步大师</string>
+    <string name="achievement_solution_29_desc">以29步最优解完成游戏</string>
+    <string name="achievement_solution_30_plus">30+步大师</string>
+    
+    <!-- Resolution & Target Achievement Strings -->
+    <string name="achievement_solution_30_plus_desc">以30+步最优解完成游戏</string>
+    <string name="achievement_resolution_10">分辨率探索者10</string>
+    <string name="achievement_resolution_10_desc">在所有屏幕分辨率上游玩10+步的游戏</string>
+    <string name="achievement_resolution_12">分辨率探索者12</string>
+    <string name="achievement_resolution_12_desc">在所有屏幕分辨率上游玩12+步的游戏</string>
+    <string name="achievement_resolution_15">分辨率探索者15</string>
+    <string name="achievement_resolution_15_desc">在所有屏幕分辨率上游玩15+步的游戏</string>
+    <string name="achievement_2_targets">双重目标</string>
+    <string name="achievement_2_targets_desc">完成2个目标的游戏</string>
+    <string name="achievement_3_targets">三重目标</string>
+    
+    <!-- Remaining Target Achievement Strings -->
+    <string name="achievement_3_targets_desc">完成3个目标的游戏</string>
+    <string name="achievement_4_targets">四重目标</string>
+    <string name="achievement_4_targets_desc">完成4个目标的游戏</string>
+    <string name="achievement_2_of_3_targets">3中2</string>
+    <string name="achievement_2_of_3_targets_desc">完成需要3个中2个目标的游戏</string>
+    <string name="achievement_2_of_4_targets">4中2</string>
+    <string name="achievement_2_of_4_targets_desc">完成需要4个中2个目标的游戏</string>
+    <string name="achievement_3_of_4_targets">4中3</string>
+    <string name="achievement_3_of_4_targets_desc">完成需要4个中3个目标的游戏</string>
+    <string name="achievement_2_of_2_targets">2中2</string>
+    
+    <!-- Remaining Target & Robot Achievement Strings -->
+    <string name="achievement_2_of_2_targets_desc">完成需要2个中2个目标的游戏</string>
+    <string name="achievement_3_of_3_targets">3中3</string>
+    <string name="achievement_3_of_3_targets_desc">完成需要3个中3个目标的游戏</string>
+    <string name="achievement_4_of_4_targets">4中4</string>
+    <string name="achievement_4_of_4_targets_desc">完成需要所有4个目标的游戏</string>
+    <string name="achievement_5_robots">完整团队</string>
+    <string name="achievement_5_robots_desc">用5个机器人完成游戏</string>
+    <string name="achievement_gimme_five">击掌</string>
+    <string name="achievement_gimme_five_desc">所有机器人必须互相接触</string>
+    <string name="achievement_traverse_1_robot">机器人穿越</string>
+    
+    <!-- Traverse Achievement Strings -->
+    <string name="achievement_traverse_1_robot_desc">用1个机器人访问棋盘上的所有格子</string>
+    <string name="achievement_traverse_1_robot_goal">单人目标探索者</string>
+    <string name="achievement_traverse_1_robot_goal_desc">用1个机器人访问所有格子，最后到达目标</string>
+    <string name="achievement_traverse_all_robots">团队探索者</string>
+    <string name="achievement_traverse_all_robots_desc">用所有机器人访问棋盘上的所有格子</string>
+    <string name="achievement_traverse_all_robots_goal">团队目标探索者</string>
+    <string name="achievement_traverse_all_robots_goal_desc">用所有机器人访问所有格子，最后到达目标</string>
+    <string name="achievement_perfect_random_5">完美5</string>
+    <string name="achievement_perfect_random_5_desc">用最优步数完成5个随机游戏</string>
+    <string name="achievement_perfect_random_10">完美10</string>
+    
+    <!-- Perfect Random Achievement Strings -->
+    <string name="achievement_perfect_random_10_desc">用最优步数完成10个随机游戏</string>
+    <string name="achievement_perfect_random_20">完美20</string>
+    <string name="achievement_perfect_random_20_desc">用最优步数完成20个随机游戏</string>
+    <string name="achievement_perfect_random_streak_5">完美连续5</string>
+    <string name="achievement_perfect_random_streak_5_desc">用最优步数连续完成5个随机游戏</string>
+    <string name="achievement_perfect_random_streak_10">完美连续10</string>
+    <string name="achievement_perfect_random_streak_10_desc">用最优步数连续完成10个随机游戏</string>
+    <string name="achievement_perfect_random_streak_20">完美连续20</string>
+    <string name="achievement_perfect_random_streak_20_desc">用最优步数连续完成20个随机游戏</string>
+    <string name="achievement_perfect_no_hints_random_1">完美无提示1</string>
+    
+    <!-- No Hints Achievement Strings -->
+    <string name="achievement_perfect_no_hints_random_1_desc">不使用提示，用最优步数（10+步）完成一个随机游戏</string>
+    <string name="achievement_no_hints_random_10">无需帮助10</string>
+    <string name="achievement_no_hints_random_10_desc">不使用提示完成10个随机游戏</string>
+    <string name="achievement_no_hints_random_50">无需帮助50</string>
+    <string name="achievement_no_hints_random_50_desc">不使用提示完成50个随机游戏</string>
+    <string name="achievement_no_hints_streak_random_10">无提示连续10</string>
+    <string name="achievement_no_hints_streak_random_10_desc">不使用提示连续完成10个随机游戏</string>
+    <string name="achievement_no_hints_streak_random_50">无提示连续50</string>
+    <string name="achievement_no_hints_streak_random_50_desc">不使用提示连续完成50个随机游戏</string>
+    <string name="achievement_speedrun_random_20s">快速随机20秒</string>
+    
+    <!-- Speedrun & Achievements UI Strings -->
+    <string name="achievement_speedrun_random_20s_desc">20秒内完成随机游戏</string>
+    <string name="achievement_speedrun_random_10s">闪电速度</string>
+    <string name="achievement_speedrun_random_10s_desc">10秒内完成随机游戏</string>
+    <string name="achievement_speedrun_random_5x30s">速度连续</string>
+    <string name="achievement_speedrun_random_5x30s_desc">每个30秒内完成5个随机游戏</string>
+    <string name="achievements_title">成就</string>
+    <string name="achievements_unlocked">已解锁</string>
+    <string name="achievements_locked">已锁定</string>
+    <string name="achievements_progress">%1$d / %2$d</string>
+    <string name="achievement_unlocked">成就已解锁</string>
+    
+    <!-- Achievements & Streak Popup Strings -->
+    <string name="achievements_unlocked_multiple">成就已解锁！</string>
+    <string name="view_achievements">查看成就</string>
+    <string name="streak_popup_title">每日连续</string>
+    <string name="streak_popup_message">您已连续登录%1$d天。</string>
+    <string name="streak_popup_day_1_headline">开始您的连续记录！</string>
+    <string name="streak_popup_day_1_message">您已开始新的连续记录。明天再次登录以保持连续记录。</string>
+    <string name="streak_popup_day_2_headline">您回来了！</string>
+    <string name="streak_popup_day_3_headline">继续登录！</string>
+    <string name="streak_popup_day_4_headline">已经过半！</string>
+    <string name="streak_popup_day_5_headline">快完成了！</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_6_headline">差不多一周了！</string>
+    <string name="streak_popup_day_7_headline">一周连续记录！</string>
+    <string name="streak_popup_day_8_headline">您是最棒的！</string>
+    <string name="streak_popup_day_9_headline">九天并继续！</string>
+    <string name="streak_popup_day_10_headline">两位数！</string>
+    <string name="streak_popup_day_11_headline">两周减3天！</string>
+    <string name="streak_popup_day_12_headline">不可阻挡！</string>
+    <string name="streak_popup_day_13_headline">13是幸运数字！</string>
+    <string name="streak_popup_day_14_headline">两周！</string>
+    <string name="streak_popup_day_15_headline">已经过半！</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_16_headline">不可阻挡的连续记录！</string>
+    <string name="streak_popup_day_17_headline">势不可挡！</string>
+    <string name="streak_popup_day_18_headline">不可思议！</string>
+    <string name="streak_popup_day_19_headline">快到了！</string>
+    <string name="streak_popup_day_20_headline">超级明星！</string>
+    <string name="streak_popup_day_21_headline">三周！</string>
+    <string name="streak_popup_day_22_headline">非凡！</string>
+    <string name="streak_popup_day_23_headline">卓越！</string>
+    <string name="streak_popup_day_24_headline">传奇！</string>
+    <string name="streak_popup_day_25_headline">近一个月！</string>
+    
+    <!-- Final Streak Popup Strings -->
+    <string name="streak_popup_day_26_headline">绝对碾压！</string>
+    <string name="streak_popup_day_27_headline">差不多一个月了！</string>
+    <string name="streak_popup_day_28_headline">四周！</string>
+    <string name="streak_popup_day_29_headline">还有一天！</string>
+    <string name="streak_popup_day_30_headline">差不多一个月了！</string>
+    <string name="streak_popup_day_31_headline">传奇地位！</string>
+    
+    <!-- Direction Strings -->
+    <string name="direction_north">北</string>
+    <string name="direction_south">南</string>
+    <string name="direction_east">东</string>
+    <string name="direction_west">西</string>
+    
+    <!-- Help Strings -->
+    <string name="help_goal_description">将彩色机器人移动到匹配颜色的目标。所有机器人都到达目标时游戏完成。</string>
+    <string name="help_movement_section_title">移动</string>
+    <string name="help_movement_point_1">- 点击机器人选择它。</string>
+    <string name="help_movement_point_2">- 点击选中的机器人选择移动方向。</string>
+    <string name="help_movement_point_3">- 机器人会直线移动，直到撞到墙、其他机器人或棋盘边缘。</string>
+    <string name="help_controls_section_title">控制</string>
+    <string name="help_controls_point_1">- 提示：显示建议的移动。</string>
+    <string name="help_controls_point_2">- 重置：重新开始当前关卡。</string>
+    <string name="help_controls_point_3">- 保存：保存当前地图。</string>
+    <string name="help_controls_point_4">- 菜单：返回主菜单。</string>
+    <string name="help_accessibility_section_title">无障碍</string>
+    <string name="help_level_editor_section_title">关卡编辑器</string>
+    <string name="help_level_editor_description">一旦您解锁了所有140个关卡，主菜单上将出现关卡编辑器按钮。创建您自己的地图并与朋友分享！</string>
+    <string name="button_back_game">返回</string>
 
 </resources>

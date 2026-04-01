@@ -595,5 +595,320 @@
     <string name="robot_a11y">Robot en posición</string>
     <string name="minimap_description">Minimapa que muestra el diseño general del tablero</string>
     <string name="save_game_screen_title">Guardar juego</string>
+    
+    <!-- Save/Load UI Strings -->
+    <string name="save_slots_tab">Slots de guardado</string>
+    <string name="history_tab">Historial</string>
+    <string name="save_confirm_title">Guardar juego</string>
+    <string name="share_button_a11y">Compartir juego guardado</string>
+    <string name="info_button_a11y">Mostrar detalles del mapa</string>
+    <string name="saved_on">guardado el</string>
+    <string name="share_a11y">Compartir</string>
+    
+    <!-- Accessibility & Language Strings -->
+    <string name="accessibility_language_label">Idioma de TalkBack:</string>
+    <string name="accessibility_language_a11y">Seleccionar idioma de anuncios de TalkBack</string>
+    <string name="settings_japanese">日本語</string>
+    <string name="settings_portuguese">Português (Brasil)</string>
+    <string name="language_same_as_app">Igual que el idioma de la aplicación</string>
+    <string name="ok">Aceptar</string>
+    <string name="language_flag_description">Bandera de idioma</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    <string name="robot_selected_a11y">Robot %1$s seleccionado</string>
+    <string name="version_format">Versión: %1$s (Build %2$d)</string>
+    
+    <!-- Level Editor & Save/Load Strings -->
+    <string name="level_editor_button">Editor de Niveles</string>
+    <string name="level_editor_button_short">Editor</string>
+    <string name="save_game_title">Guardar Juego</string>
+    <string name="save_empty">Vacío</string>
+    <string name="save_tab_title">Guardar</string>
+    <string name="load_tab_title">Cargar</string>
+    <string name="history_tab_title">Historial</string>
+    <string name="save_screen_title">Guardar Juego</string>
+    <string name="load_screen_title">Cargar Juego</string>
+    <string name="history_screen_title">Historial del Juego</string>
+    
+    <!-- AI & Game Info Strings -->
+    <string name="ai_calculating">A.I. calculando solución...</string>
+    <string name="no_robot_selected">Ningún robot seleccionado</string>
+    <string name="robot_target_info">Objetivo %1$s: (%2$d, %3$d)</string>
+    <string name="board_size">Tablero: %1$dx%2$d</string>
+    <string name="solution_error">No se pudo encontrar una solución: %1$s</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="level_id_text">Nivel %1$d</string>
+    <string name="nothing_to_undo">No hay nada que deshacer</string>
+    <string name="history_completed_once">Completado una vez</string>
+    
+    <!-- History & Game Status Strings -->
+    <string name="history_completed_times">Completado %1$d veces</string>
+    <string name="history_not_completed">No completado aún</string>
+    <string name="robots_reset">Robots reiniciados a posiciones iniciales</string>
+    <string name="no_game_in_progress">No hay juego en progreso</string>
+    <string name="no_robots_available">No hay robots disponibles</string>
+    <string name="cannot_move_in_this_direction">No se puede mover en esta dirección</string>
+    <string name="level_robots_label">robots:</string>
+    <string name="level_squares_label">cuadrados:</string>
+    <string name="achievement_login_streak">Racha de inicio de sesión</string>
+    <string name="achievement_category_progression">Progresión</string>
+    
+    <!-- Achievement Category Strings -->
+    <string name="achievement_category_performance">Rendimiento</string>
+    <string name="achievement_category_challenge">Desafío</string>
+    <string name="achievement_category_mastery">Dominio</string>
+    <string name="achievement_category_random_speed">Velocidad</string>
+    <string name="achievement_category_random_difficulty">Dificultad</string>
+    <string name="achievement_category_random_solution">Longitud de solución</string>
+    <string name="achievement_category_random_resolution">Resoluciones de pantalla</string>
+    <string name="achievement_category_random_targets">Múltiples objetivos</string>
+    <string name="achievement_category_random_robots">Desafíos divertidos</string>
+    <string name="achievement_category_random_coverage">Cobertura</string>
+    
+    <!-- Streak & Achievement Strings -->
+    <string name="achievement_category_random_streaks">Rachas</string>
+    <string name="achievement_streak_7">Jugador Semanal</string>
+    <string name="achievement_streak_7_desc">Inicia sesión 7 días seguidos</string>
+    <string name="achievement_streak_30">Jugador Dedicado</string>
+    <string name="achievement_streak_30_desc">Inicia sesión 30 días seguidos</string>
+    <string name="achievement_comeback">¡Bienvenido de vuelta!</string>
+    <string name="achievement_comeback_desc">Regresa después de 30 días de inactividad</string>
+    <string name="achievement_first_game">¡Bienvenido!</string>
+    <string name="achievement_first_game_desc">Juega tu primer juego</string>
+    <string name="achievement_level_1_complete">Primer nivel completado</string>
+    
+    <!-- Level Completion Achievement Strings -->
+    <string name="achievement_level_1_complete_desc">Completar Nivel 1</string>
+    <string name="achievement_level_10_complete">Empezando</string>
+    <string name="achievement_level_10_complete_desc">Completar 10 niveles</string>
+    <string name="achievement_level_50_complete">A mitad de camino</string>
+    <string name="achievement_level_50_complete_desc">Completar 50 niveles</string>
+    <string name="achievement_level_140_complete">Maestro de Niveles</string>
+    <string name="achievement_level_140_complete_desc">Completar todos los 140 niveles</string>
+    <string name="achievement_all_stars">Coleccionista de Estrellas</string>
+    <string name="achievement_all_stars_desc">Coleccionar todas las 420 estrellas</string>
+    <string name="achievement_perfect_5">Inicio Perfecto</string>
+    
+    <!-- Performance Achievement Strings -->
+    <string name="achievement_perfect_5_desc">Resolver 5 niveles con movimientos óptimos</string>
+    <string name="achievement_perfect_10">Jugador de Precisión</string>
+    <string name="achievement_perfect_10_desc">Resolver 10 niveles con movimientos óptimos</string>
+    <string name="achievement_perfect_50">Experto en Optimización</string>
+    <string name="achievement_perfect_50_desc">Resolver 50 niveles con movimientos óptimos</string>
+    <string name="achievement_speedrun_30s">Pensador Rápido</string>
+    <string name="achievement_speedrun_30s_desc">Completar un nivel en menos de 30 segundos</string>
+    <string name="achievement_speedrun_10s">Veloz como el Rayo</string>
+    <string name="achievement_speedrun_10s_desc">Completar un nivel en menos de 10 segundos</string>
+    <string name="achievement_view_1_hour">Explorador de Juegos</string>
+    
+    <!-- Custom Level Achievement Strings -->
+    <string name="achievement_view_1_hour_desc">Intentar resolver un mapa durante 1 hora sin completarlo</string>
+    <string name="achievement_solve_custom">Resolvedor Personalizado</string>
+    <string name="achievement_solve_custom_desc">Resolver un nivel creado personalmente</string>
+    <string name="achievement_create_custom">Diseñador de Niveles</string>
+    <string name="achievement_create_custom_desc">Crear y guardar un nivel personalizado</string>
+    <string name="achievement_share_custom">Compartir es Cuidar</string>
+    <string name="achievement_share_custom_desc">Compartir un nivel personalizado con otros</string>
+    <string name="achievement_3_star_1">Estrella de Nivel Difícil</string>
+    <string name="achievement_3_star_1_desc">Lograr 3 estrellas en un nivel con 5+ movimientos óptimos</string>
+    <string name="achievement_3_star_10">Coleccionista de Estrellas</string>
+    
+    <!-- Star Achievement Strings -->
+    <string name="achievement_3_star_10_desc">Lograr 3 estrellas en 10 niveles</string>
+    <string name="achievement_3_star_10_hard">Maestro de Niveles Difíciles</string>
+    <string name="achievement_3_star_10_hard_desc">Lograr 3 estrellas en 10 niveles con 5+ movimientos óptimos</string>
+    <string name="achievement_3_star_50">Superestrella</string>
+    <string name="achievement_3_star_50_desc">Lograr 3 estrellas en 50 niveles</string>
+    <string name="achievement_3_star_all">Maestro Perfecto</string>
+    <string name="achievement_3_star_all_desc">Lograr 3 estrellas en todos los 140 niveles</string>
+    <string name="achievement_impossible_1">Sueño Imposible</string>
+    <string name="achievement_impossible_1_desc">Completar 1 juego en modo Imposible</string>
+    <string name="achievement_impossible_5">Desafío Imposible</string>
+    
+    <!-- Impossible Mode Achievement Strings -->
+    <string name="achievement_impossible_5_desc">Completar 5 juegos en modo Imposible</string>
+    <string name="achievement_impossible_streak_5">Racha Imposible</string>
+    <string name="achievement_impossible_streak_5_desc">Completar 5 juegos seguidos en modo Imposible con movimientos óptimos</string>
+    <string name="achievement_impossible_streak_10">Leyenda Imposible</string>
+    <string name="achievement_impossible_streak_10_desc">Completar 10 juegos seguidos en modo Imposible con movimientos óptimos</string>
+    <string name="achievement_solution_18">Maestro de 18 Movimientos</string>
+    <string name="achievement_solution_18_desc">Completar un juego con solución óptima de 18 movimientos</string>
+    <string name="achievement_solution_19">Maestro de 19 Movimientos</string>
+    <string name="achievement_solution_19_desc">Completar un juego con solución óptima de 19 movimientos</string>
+    <string name="achievement_solution_20">Maestro de 20 Movimientos</string>
+    
+    <!-- Solution Achievement Strings -->
+    <string name="achievement_solution_20_desc">Completar un juego con solución óptima de 20 movimientos</string>
+    <string name="achievement_solution_21">Maestro de 21 Movimientos</string>
+    <string name="achievement_solution_21_desc">Completar un juego con solución óptima de 21 movimientos</string>
+    <string name="achievement_solution_22">Maestro de 22 Movimientos</string>
+    <string name="achievement_solution_22_desc">Completar un juego con solución óptima de 22 movimientos</string>
+    <string name="achievement_solution_23">Maestro de 23 Movimientos</string>
+    <string name="achievement_solution_23_desc">Completar un juego con solución óptima de 23 movimientos</string>
+    <string name="achievement_solution_24">Maestro de 24 Movimientos</string>
+    <string name="achievement_solution_24_desc">Completar un juego con solución óptima de 24 movimientos</string>
+    <string name="achievement_solution_25">Maestro de 25 Movimientos</string>
+    
+    <!-- Remaining Solution Achievement Strings -->
+    <string name="achievement_solution_25_desc">Completar un juego con solución óptima de 25 movimientos</string>
+    <string name="achievement_solution_26">Maestro de 26 Movimientos</string>
+    <string name="achievement_solution_26_desc">Completar un juego con solución óptima de 26 movimientos</string>
+    <string name="achievement_solution_27">Maestro de 27 Movimientos</string>
+    <string name="achievement_solution_27_desc">Completar un juego con solución óptima de 27 movimientos</string>
+    <string name="achievement_solution_28">Maestro de 28 Movimientos</string>
+    <string name="achievement_solution_28_desc">Completar un juego con solución óptima de 28 movimientos</string>
+    <string name="achievement_solution_29">Maestro de 29 Movimientos</string>
+    <string name="achievement_solution_29_desc">Completar un juego con solución óptima de 29 movimientos</string>
+    <string name="achievement_solution_30_plus">Maestro de 30+ Movimientos</string>
+    
+    <!-- Resolution & Target Achievement Strings -->
+    <string name="achievement_solution_30_plus_desc">Completar un juego con solución óptima de 30+ movimientos</string>
+    <string name="achievement_resolution_10">Explorador de Resolución 10</string>
+    <string name="achievement_resolution_10_desc">Jugar juegos con 10+ movimientos en todas las resoluciones de pantalla</string>
+    <string name="achievement_resolution_12">Explorador de Resolución 12</string>
+    <string name="achievement_resolution_12_desc">Jugar juegos con 12+ movimientos en todas las resoluciones de pantalla</string>
+    <string name="achievement_resolution_15">Explorador de Resolución 15</string>
+    <string name="achievement_resolution_15_desc">Jugar juegos con 15+ movimientos en todas las resoluciones de pantalla</string>
+    <string name="achievement_2_targets">Objetivo Doble</string>
+    <string name="achievement_2_targets_desc">Completar un juego con 2 objetivos</string>
+    <string name="achievement_3_targets">Objetivo Triple</string>
+    
+    <!-- Remaining Target Achievement Strings -->
+    <string name="achievement_3_targets_desc">Completar un juego con 3 objetivos</string>
+    <string name="achievement_4_targets">Objetivo Cuádruple</string>
+    <string name="achievement_4_targets_desc">Completar un juego con 4 objetivos</string>
+    <string name="achievement_2_of_3_targets">2 de 3</string>
+    <string name="achievement_2_of_3_targets_desc">Completar un juego donde necesitas 2 de 3 objetivos</string>
+    <string name="achievement_2_of_4_targets">2 de 4</string>
+    <string name="achievement_2_of_4_targets_desc">Completar un juego donde necesitas 2 de 4 objetivos</string>
+    <string name="achievement_3_of_4_targets">3 de 4</string>
+    <string name="achievement_3_of_4_targets_desc">Completar un juego donde necesitas 3 de 4 objetivos</string>
+    <string name="achievement_2_of_2_targets">2 de 2</string>
+    
+    <!-- Remaining Target & Robot Achievement Strings -->
+    <string name="achievement_2_of_2_targets_desc">Completar un juego donde necesitas 2 de 2 objetivos</string>
+    <string name="achievement_3_of_3_targets">3 de 3</string>
+    <string name="achievement_3_of_3_targets_desc">Completar un juego donde necesitas 3 de 3 objetivos</string>
+    <string name="achievement_4_of_4_targets">4 de 4</string>
+    <string name="achievement_4_of_4_targets_desc">Completar un juego donde necesitas todos los 4 objetivos</string>
+    <string name="achievement_5_robots">Equipo Completo</string>
+    <string name="achievement_5_robots_desc">Completar un juego con 5 robots</string>
+    <string name="achievement_gimme_five">Dame Cinco</string>
+    <string name="achievement_gimme_five_desc">Todos los robots deben tocarse entre sí</string>
+    <string name="achievement_traverse_1_robot">Cruce de Robot</string>
+    
+    <!-- Traverse Achievement Strings -->
+    <string name="achievement_traverse_1_robot_desc">Visitar todas las casillas del tablero con 1 robot</string>
+    <string name="achievement_traverse_1_robot_goal">Explorador de Objetivo Individual</string>
+    <string name="achievement_traverse_1_robot_goal_desc">Visitar todas las casillas con 1 robot, alcanzando el objetivo al final</string>
+    <string name="achievement_traverse_all_robots">Explorador de Equipo</string>
+    <string name="achievement_traverse_all_robots_desc">Visitar todas las casillas del tablero con todos los robots combinados</string>
+    <string name="achievement_traverse_all_robots_goal">Explorador de Objetivo de Equipo</string>
+    <string name="achievement_traverse_all_robots_goal_desc">Visitar todas las casillas con todos los robots, alcanzando el objetivo al final</string>
+    <string name="achievement_perfect_random_5">Perfecto 5</string>
+    <string name="achievement_perfect_random_5_desc">Completar 5 juegos aleatorios con movimientos óptimos</string>
+    <string name="achievement_perfect_random_10">Perfecto 10</string>
+    
+    <!-- Perfect Random Achievement Strings -->
+    <string name="achievement_perfect_random_10_desc">Completar 10 juegos aleatorios con movimientos óptimos</string>
+    <string name="achievement_perfect_random_20">Perfecto 20</string>
+    <string name="achievement_perfect_random_20_desc">Completar 20 juegos aleatorios con movimientos óptimos</string>
+    <string name="achievement_perfect_random_streak_5">Racha Perfecta 5</string>
+    <string name="achievement_perfect_random_streak_5_desc">Completar 5 juegos aleatorios con movimientos óptimos seguidos</string>
+    <string name="achievement_perfect_random_streak_10">Racha Perfecta 10</string>
+    <string name="achievement_perfect_random_streak_10_desc">Completar 10 juegos aleatorios con movimientos óptimos seguidos</string>
+    <string name="achievement_perfect_random_streak_20">Racha Perfecta 20</string>
+    <string name="achievement_perfect_random_streak_20_desc">Completar 20 juegos aleatorios con movimientos óptimos seguidos</string>
+    <string name="achievement_perfect_no_hints_random_1">Perfecto Sin Pistas 1</string>
+    
+    <!-- No Hints Achievement Strings -->
+    <string name="achievement_perfect_no_hints_random_1_desc">Completar un juego aleatorio con movimientos óptimos (10+ movimientos) sin usar pistas</string>
+    <string name="achievement_no_hints_random_10">Sin Ayuda Necesaria 10</string>
+    <string name="achievement_no_hints_random_10_desc">Completar 10 juegos aleatorios sin usar pistas</string>
+    <string name="achievement_no_hints_random_50">Sin Ayuda Necesaria 50</string>
+    <string name="achievement_no_hints_random_50_desc">Completar 50 juegos aleatorios sin usar pistas</string>
+    <string name="achievement_no_hints_streak_random_10">Racha Sin Pistas 10</string>
+    <string name="achievement_no_hints_streak_random_10_desc">Completar 10 juegos aleatorios sin usar pistas seguidos</string>
+    <string name="achievement_no_hints_streak_random_50">Racha Sin Pistas 50</string>
+    <string name="achievement_no_hints_streak_random_50_desc">Completar 50 juegos aleatorios sin usar pistas seguidos</string>
+    <string name="achievement_speedrun_random_20s">Velocidad Aleatoria 20s</string>
+    
+    <!-- Speedrun & Achievements UI Strings -->
+    <string name="achievement_speedrun_random_20s_desc">Completar un juego aleatorio en menos de 20 segundos</string>
+    <string name="achievement_speedrun_random_10s">Velocidad Relámpago</string>
+    <string name="achievement_speedrun_random_10s_desc">Completar un juego aleatorio en menos de 10 segundos</string>
+    <string name="achievement_speedrun_random_5x30s">Racha de Velocidad</string>
+    <string name="achievement_speedrun_random_5x30s_desc">Completar 5 juegos aleatorios en menos de 30 segundos cada uno</string>
+    <string name="achievements_title">Logros</string>
+    <string name="achievements_unlocked">Desbloqueado</string>
+    <string name="achievements_locked">Bloqueado</string>
+    <string name="achievements_progress">%1$d / %2$d</string>
+    <string name="achievement_unlocked">Logro Desbloqueado</string>
+    
+    <!-- Achievements & Streak Popup Strings -->
+    <string name="achievements_unlocked_multiple">¡Logros desbloqueados!</string>
+    <string name="view_achievements">Ver logros</string>
+    <string name="streak_popup_title">Racha diaria</string>
+    <string name="streak_popup_message">Has iniciado sesión %1$d días seguidos.</string>
+    <string name="streak_popup_day_1_headline">¡Comienza tu racha!</string>
+    <string name="streak_popup_day_1_message">Has comenzado una nueva racha. Inicia sesión mañana para mantener tu racha.</string>
+    <string name="streak_popup_day_2_headline">¡Has vuelto!</string>
+    <string name="streak_popup_day_3_headline">¡Sigue iniciando sesión!</string>
+    <string name="streak_popup_day_4_headline">¡A mitad de camino!</string>
+    <string name="streak_popup_day_5_headline">¡Casi ahí!</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_6_headline">¡Casi una semana!</string>
+    <string name="streak_popup_day_7_headline">¡Una semana de racha!</string>
+    <string name="streak_popup_day_8_headline">¡Eres el mejor!</string>
+    <string name="streak_popup_day_9_headline">¡Nueve y contando!</string>
+    <string name="streak_popup_day_10_headline">¡Doble dígito!</string>
+    <string name="streak_popup_day_11_headline">¡Dos semanas menos 3!</string>
+    <string name="streak_popup_day_12_headline">¡Imparable!</string>
+    <string name="streak_popup_day_13_headline">¡Trece es suerte!</string>
+    <string name="streak_popup_day_14_headline">¡Dos semanas!</string>
+    <string name="streak_popup_day_15_headline">¡A mitad de camino!</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_16_headline">¡Racha imparable!</string>
+    <string name="streak_popup_day_17_headline">¡En racha!</string>
+    <string name="streak_popup_day_18_headline">¡Increíble!</string>
+    <string name="streak_popup_day_19_headline">¡Casi allí!</string>
+    <string name="streak_popup_day_20_headline">¡Súper estrella!</string>
+    <string name="streak_popup_day_21_headline">¡Tres semanas!</string>
+    <string name="streak_popup_day_22_headline">¡Fenomenal!</string>
+    <string name="streak_popup_day_23_headline">¡Extraordinario!</string>
+    <string name="streak_popup_day_24_headline">¡Legendario!</string>
+    <string name="streak_popup_day_25_headline">¡Casi un mes!</string>
+    
+    <!-- Final Streak Popup Strings -->
+    <string name="streak_popup_day_26_headline">¡Absolutamente destrozándolo!</string>
+    <string name="streak_popup_day_27_headline">¡Casi un mes!</string>
+    <string name="streak_popup_day_28_headline">¡Cuatro semanas!</string>
+    <string name="streak_popup_day_29_headline">¡A un día!</string>
+    <string name="streak_popup_day_30_headline">¡Casi un mes!</string>
+    <string name="streak_popup_day_31_headline">¡Estatus legendario!</string>
+    
+    <!-- Direction Strings -->
+    <string name="direction_north">Norte</string>
+    <string name="direction_south">Sur</string>
+    <string name="direction_east">Este</string>
+    <string name="direction_west">Oeste</string>
+    
+    <!-- Help Strings -->
+    <string name="help_goal_description">Mueve los robots coloreados a sus objetivos del mismo color. El juego se completa cuando todos los robots alcanzan sus objetivos.</string>
+    <string name="help_movement_section_title">Movimiento</string>
+    <string name="help_movement_point_1">- Toca un robot para seleccionarlo.</string>
+    <string name="help_movement_point_2">- Toca el robot seleccionado para elegir la dirección de movimiento.</string>
+    <string name="help_movement_point_3">- Los robots se moverán en línea recta hasta golpear una pared, otro robot o el borde del tablero.</string>
+    <string name="help_controls_section_title">Controles</string>
+    <string name="help_controls_point_1">- Pista: Muestra un movimiento sugerido.</string>
+    <string name="help_controls_point_2">- Reiniciar: Comienza el nivel actual de nuevo.</string>
+    <string name="help_controls_point_3">- Guardar: Guarda tu mapa actual.</string>
+    <string name="help_controls_point_4">- Menú: Regresa al menú principal.</string>
+    <string name="help_accessibility_section_title">Accesibilidad</string>
+    <string name="help_level_editor_section_title">Editor de Niveles</string>
+    <string name="help_level_editor_description">Una vez que hayas desbloqueado todos los 140 niveles, aparecerá un botón de Editor de Niveles en el menú principal. ¡Crea tus propios mapas y compártelos con tus amigos!</string>
+    <string name="button_back_game">Atrás</string>
 
 </resources>

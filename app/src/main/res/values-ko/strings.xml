@@ -439,5 +439,393 @@
     <string name="robot_a11y">위치의 로봇</string>
     <string name="minimap_description">전체 보드 레이아웃을 보여주는 미니맵</string>
     <string name="save_game_screen_title">게임 저장</string>
+    
+    <!-- Save/Load UI Strings -->
+    <string name="save_slots_tab">저장 슬롯</string>
+    <string name="history_tab">기록</string>
+    <string name="save_confirm_title">게임 저장</string>
+    <string name="share_button_a11y">저장된 게임 공유</string>
+    <string name="info_button_a11y">맵 세부 정보 표시</string>
+    <string name="saved_on">저장일:</string>
+    <string name="share_a11y">공유</string>
+    
+    <!-- Accessibility & Language Strings -->
+    <string name="accessibility_language_label">TalkBack 언어:</string>
+    <string name="accessibility_language_a11y">TalkBack 알림 언어 선택</string>
+    <string name="settings_japanese">日本語</string>
+    <string name="settings_portuguese">Português (Brasil)</string>
+    <string name="language_same_as_app">앱 언어와 동일</string>
+    <string name="ok">확인</string>
+    <string name="language_flag_description">언어 플래그</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    <string name="robot_selected_a11y">%1$s 로봇 선택됨</string>
+    <string name="version_format">버전: %1$s (빌드 %2$d)</string>
+    
+    <!-- Level Editor & Save/Load Strings -->
+    <string name="level_editor_button">레벨 에디터</string>
+    <string name="level_editor_button_short">에디터</string>
+    <string name="save_game_title">게임 저장</string>
+    <string name="save_empty">비어있음</string>
+    <string name="save_tab_title">저장</string>
+    <string name="load_tab_title">로드</string>
+    <string name="history_tab_title">기록</string>
+    <string name="save_screen_title">게임 저장</string>
+    <string name="load_screen_title">게임 로드</string>
+    <string name="history_screen_title">게임 기록</string>
+    
+    <!-- AI & Game Info Strings -->
+    <string name="ai_calculating">A.I. 솔루션 계산 중...</string>
+    <string name="no_robot_selected">로봇이 선택되지 않음</string>
+    <string name="robot_target_info">%1$s 목표: (%2$d, %3$d)</string>
+    <string name="board_size">보드: %1$dx%2$d</string>
+    <string name="solution_error">솔루션을 찾을 수 없음: %1$s</string>
+    <string name="cancel_button">취소</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="level_id_text">레벨 %1$d</string>
+    <string name="nothing_to_undo">실행 취소 불가</string>
+    <string name="history_completed_once">한 번 완료됨</string>
+    
+    <!-- History & Game Status Strings -->
+    <string name="history_completed_times">%1$d번 완료됨</string>
+    <string name="history_not_completed">아직 완료되지 않음</string>
+    <string name="robots_reset">로봇이 시작 위치로 재설정됨</string>
+    <string name="no_game_in_progress">진행 중인 게임 없음</string>
+    <string name="no_robots_available">사용 가능한 로봇 없음</string>
+    <string name="cannot_move_in_this_direction">이 방향으로 이동할 수 없음</string>
+    <string name="level_robots_label">로봇:</string>
+    <string name="level_squares_label">칸:</string>
+    <string name="achievement_login_streak">로그인 연속 기록</string>
+    <string name="achievement_category_progression">진행</string>
+    
+    <!-- Achievement Category Strings -->
+    <string name="achievement_category_performance">성능</string>
+    <string name="achievement_category_challenge">도전</string>
+    <string name="achievement_category_mastery">숙련</string>
+    <string name="achievement_category_random_speed">속도</string>
+    <string name="achievement_category_random_difficulty">난이도</string>
+    <string name="achievement_category_random_solution">솔루션 길이</string>
+    <string name="achievement_category_random_resolution">화면 해상도</string>
+    <string name="achievement_category_random_targets">다중 목표</string>
+    <string name="achievement_category_random_robots">재미있는 도전</string>
+    <string name="achievement_category_random_coverage">범위</string>
+    
+    <!-- Streak & Achievement Strings -->
+    <string name="achievement_category_random_streaks">연속 기록</string>
+    <string name="achievement_streak_7">주간 플레이어</string>
+    <string name="achievement_streak_7_desc">7일 연속 로그인</string>
+    <string name="achievement_streak_30">헌신적인 플레이어</string>
+    <string name="achievement_streak_30_desc">30일 연속 로그인</string>
+    <string name="achievement_comeback">환영합니다!</string>
+    <string name="achievement_comeback_desc">30일 비활동 후 복귀</string>
+    <string name="achievement_first_game">환영!</string>
+    <string name="achievement_first_game_desc">첫 번째 게임 플레이</string>
+    <string name="achievement_level_1_complete">첫 단계 완료</string>
+    
+    <!-- Level Completion Achievement Strings -->
+    <string name="achievement_level_1_complete_desc">레벨 1 완료</string>
+    <string name="achievement_level_10_complete">시작 중</string>
+    <string name="achievement_level_10_complete_desc">10개 레벨 완료</string>
+    <string name="achievement_level_50_complete">절반 도달</string>
+    <string name="achievement_level_50_complete_desc">50개 레벨 완료</string>
+    <string name="achievement_level_140_complete">레벨 마스터</string>
+    <string name="achievement_level_140_complete_desc">모든 140개 레벨 완료</string>
+    <string name="achievement_all_stars">별 수집가</string>
+    <string name="achievement_all_stars_desc">모든 420개 별 수집</string>
+    <string name="achievement_perfect_5">완벽한 시작</string>
+    
+    <!-- Performance Achievement Strings -->
+    <string name="achievement_perfect_5_desc">최적 움직임으로 5개 레벨 해결</string>
+    <string name="achievement_perfect_10">정밀 플레이어</string>
+    <string name="achievement_perfect_10_desc">최적 움직임으로 10개 레벨 해결</string>
+    <string name="achievement_perfect_50">최적화 전문가</string>
+    <string name="achievement_perfect_50_desc">최적 움직임으로 50개 레벨 해결</string>
+    <string name="achievement_speedrun_30s">빠른 생각</string>
+    <string name="achievement_speedrun_30s_desc">30초 이내에 레벨 완료</string>
+    <string name="achievement_speedrun_10s">번개 같은 속도</string>
+    <string name="achievement_speedrun_10s_desc">10초 이내에 레벨 완료</string>
+    <string name="achievement_view_1_hour">게임 탐험가</string>
+    
+    <!-- Custom Level Achievement Strings -->
+    <string name="achievement_view_1_hour_desc">완료하지 않고 1시간 동안 맵 해결 시도</string>
+    <string name="achievement_solve_custom">커스텀 해결사</string>
+    <string name="achievement_solve_custom_desc">커스텀 생성 레벨 해결</string>
+    <string name="achievement_create_custom">레벨 디자이너</string>
+    <string name="achievement_create_custom_desc">커스텀 레벨 생성 및 저장</string>
+    <string name="achievement_share_custom">공유는 배려</string>
+    <string name="achievement_share_custom_desc">다른 사람과 커스텀 레벨 공유</string>
+    <string name="achievement_3_star_1">어려운 레벨 별</string>
+    <string name="achievement_3_star_1_desc">5+ 최적 움직임 레벨에서 3별 달성</string>
+    <string name="achievement_3_star_10">별 수집가</string>
+    
+    <!-- Star Achievement Strings -->
+    <string name="achievement_3_star_10_desc">10개 레벨에서 3별 달성</string>
+    <string name="achievement_3_star_10_hard">어려운 레벨 마스터</string>
+    <string name="achievement_3_star_10_hard_desc">5+ 최적 움직임 레벨 10개에서 3별 달성</string>
+    <string name="achievement_3_star_50">슈퍼스타</string>
+    <string name="achievement_3_star_50_desc">50개 레벨에서 3별 달성</string>
+    <string name="achievement_3_star_all">완벽한 마스터</string>
+    <string name="achievement_3_star_all_desc">모든 140개 레벨에서 3별 달성</string>
+    <string name="achievement_impossible_1">불가능한 꿈</string>
+    <string name="achievement_impossible_1_desc">불가능 모드에서 1개 게임 완료</string>
+    <string name="achievement_impossible_5">불가능한 도전</string>
+    
+    <!-- Impossible Mode Achievement Strings -->
+    <string name="achievement_impossible_5_desc">불가능 모드에서 5개 게임 완료</string>
+    <string name="achievement_impossible_streak_5">불가능한 연속 기록</string>
+    <string name="achievement_impossible_streak_5_desc">불가능 모드에서 최적 움직임으로 5개 게임 연속 완료</string>
+    <string name="achievement_impossible_streak_10">불가능한 전설</string>
+    <string name="achievement_impossible_streak_10_desc">불가능 모드에서 최적 움직임으로 10개 게임 연속 완료</string>
+    <string name="achievement_solution_18">18 움직임 마스터</string>
+    <string name="achievement_solution_18_desc">최적 솔루션 18 움직임으로 게임 완료</string>
+    <string name="achievement_solution_19">19 움직임 마스터</string>
+    <string name="achievement_solution_19_desc">최적 솔루션 19 움직임으로 게임 완료</string>
+    <string name="achievement_solution_20">20 움직임 마스터</string>
+    
+    <!-- Solution Achievement Strings -->
+    <string name="achievement_solution_20_desc">최적 솔루션 20 움직임으로 게임 완료</string>
+    <string name="achievement_solution_21">21 움직임 마스터</string>
+    <string name="achievement_solution_21_desc">최적 솔루션 21 움직임으로 게임 완료</string>
+    <string name="achievement_solution_22">22 움직임 마스터</string>
+    <string name="achievement_solution_22_desc">최적 솔루션 22 움직임으로 게임 완료</string>
+    <string name="achievement_solution_23">23 움직임 마스터</string>
+    <string name="achievement_solution_23_desc">최적 솔루션 23 움직임으로 게임 완료</string>
+    <string name="achievement_solution_24">24 움직임 마스터</string>
+    <string name="achievement_solution_24_desc">최적 솔루션 24 움직임으로 게임 완료</string>
+    <string name="achievement_solution_25">25 움직임 마스터</string>
+    
+    <!-- Remaining Solution Achievement Strings -->
+    <string name="achievement_solution_25_desc">최적 솔루션 25 움직임으로 게임 완료</string>
+    <string name="achievement_solution_26">26 움직임 마스터</string>
+    <string name="achievement_solution_26_desc">최적 솔루션 26 움직임으로 게임 완료</string>
+    <string name="achievement_solution_27">27 움직임 마스터</string>
+    <string name="achievement_solution_27_desc">최적 솔루션 27 움직임으로 게임 완료</string>
+    <string name="achievement_solution_28">28 움직임 마스터</string>
+    <string name="achievement_solution_28_desc">최적 솔루션 28 움직임으로 게임 완료</string>
+    <string name="achievement_solution_29">29 움직임 마스터</string>
+    <string name="achievement_solution_29_desc">최적 솔루션 29 움직임으로 게임 완료</string>
+    <string name="achievement_solution_30_plus">30+ 움직임 마스터</string>
+    
+    <!-- Resolution & Target Achievement Strings -->
+    <string name="achievement_solution_30_plus_desc">최적 솔루션 30+ 움직임으로 게임 완료</string>
+    <string name="achievement_resolution_10">해상도 탐험가 10</string>
+    <string name="achievement_resolution_10_desc">모든 화면 해상도에서 10+ 움직임 게임 플레이</string>
+    <string name="achievement_resolution_12">해상도 탐험가 12</string>
+    <string name="achievement_resolution_12_desc">모든 화면 해상도에서 12+ 움직임 게임 플레이</string>
+    <string name="achievement_resolution_15">해상도 탐험가 15</string>
+    <string name="achievement_resolution_15_desc">모든 화면 해상도에서 15+ 움직임 게임 플레이</string>
+    <string name="achievement_2_targets">이중 목표</string>
+    <string name="achievement_2_targets_desc">2개 목표로 게임 완료</string>
+    <string name="achievement_3_targets">삼중 목표</string>
+    
+    <!-- Remaining Target Achievement Strings -->
+    <string name="achievement_3_targets_desc">3개 목표로 게임 완료</string>
+    <string name="achievement_4_targets">사중 목표</string>
+    <string name="achievement_4_targets_desc">4개 목표로 게임 완료</string>
+    <string name="achievement_2_of_3_targets">3중 2</string>
+    <string name="achievement_2_of_3_targets_desc">3개 중 2개 목표가 필요한 게임 완료</string>
+    <string name="achievement_2_of_4_targets">4중 2</string>
+    <string name="achievement_2_of_4_targets_desc">4개 중 2개 목표가 필요한 게임 완료</string>
+    <string name="achievement_3_of_4_targets">4중 3</string>
+    <string name="achievement_3_of_4_targets_desc">4개 중 3개 목표가 필요한 게임 완료</string>
+    <string name="achievement_2_of_2_targets">2중 2</string>
+    
+    <!-- Remaining Target & Robot Achievement Strings -->
+    <string name="achievement_2_of_2_targets_desc">2개 중 2개 목표가 필요한 게임 완료</string>
+    <string name="achievement_3_of_3_targets">3중 3</string>
+    <string name="achievement_3_of_3_targets_desc">3개 중 3개 목표가 필요한 게임 완료</string>
+    <string name="achievement_4_of_4_targets">4중 4</string>
+    <string name="achievement_4_of_4_targets_desc">모든 4개 목표가 필요한 게임 완료</string>
+    <string name="achievement_5_robots">풀 팀</string>
+    <string name="achievement_5_robots_desc">5개 로봇으로 게임 완료</string>
+    <string name="achievement_gimme_five">하이파이브</string>
+    <string name="achievement_gimme_five_desc">모든 로봇이 서로 닿아야 함</string>
+    <string name="achievement_traverse_1_robot">로봇 횡단</string>
+    
+    <!-- Traverse Achievement Strings -->
+    <string name="achievement_traverse_1_robot_desc">1개 로봇으로 보드의 모든 칸 방문</string>
+    <string name="achievement_traverse_1_robot_goal">솔로 목표 탐험가</string>
+    <string name="achievement_traverse_1_robot_goal_desc">1개 로봇으로 모든 칸 방문, 마지막에 목표 도달</string>
+    <string name="achievement_traverse_all_robots">팀 탐험가</string>
+    <string name="achievement_traverse_all_robots_desc">모든 로봇으로 보드의 모든 칸 방문</string>
+    <string name="achievement_traverse_all_robots_goal">팀 목표 탐험가</string>
+    <string name="achievement_traverse_all_robots_goal_desc">모든 로봇으로 모든 칸 방문, 마지막에 목표 도달</string>
+    <string name="achievement_perfect_random_5">완벽한 5</string>
+    <string name="achievement_perfect_random_5_desc">최적 움직임으로 5개 랜덤 게임 완료</string>
+    <string name="achievement_perfect_random_10">완벽한 10</string>
+    
+    <!-- Perfect Random Achievement Strings -->
+    <string name="achievement_perfect_random_10_desc">최적 움직임으로 10개 랜덤 게임 완료</string>
+    <string name="achievement_perfect_random_20">완벽한 20</string>
+    <string name="achievement_perfect_random_20_desc">최적 움직임으로 20개 랜덤 게임 완료</string>
+    <string name="achievement_perfect_random_streak_5">완벽한 연속 5</string>
+    <string name="achievement_perfect_random_streak_5_desc">최적 움직임으로 5개 랜덤 게임 연속 완료</string>
+    <string name="achievement_perfect_random_streak_10">완벽한 연속 10</string>
+    <string name="achievement_perfect_random_streak_10_desc">최적 움직임으로 10개 랜덤 게임 연속 완료</string>
+    <string name="achievement_perfect_random_streak_20">완벽한 연속 20</string>
+    <string name="achievement_perfect_random_streak_20_desc">최적 움직임으로 20개 랜덤 게임 연속 완료</string>
+    <string name="achievement_perfect_no_hints_random_1">완벽한 힌트 없음 1</string>
+    
+    <!-- No Hints Achievement Strings -->
+    <string name="achievement_perfect_no_hints_random_1_desc">힌트 없이 최적 움직임(10+ 움직임)으로 랜덤 게임 완료</string>
+    <string name="achievement_no_hints_random_10">도움 불필요 10</string>
+    <string name="achievement_no_hints_random_10_desc">힌트 없이 10개 랜덤 게임 완료</string>
+    <string name="achievement_no_hints_random_50">도움 불필요 50</string>
+    <string name="achievement_no_hints_random_50_desc">힌트 없이 50개 랜덤 게임 완료</string>
+    <string name="achievement_no_hints_streak_random_10">힌트 없음 연속 10</string>
+    <string name="achievement_no_hints_streak_random_10_desc">힌트 없이 10개 랜덤 게임 연속 완료</string>
+    <string name="achievement_no_hints_streak_random_50">힌트 없음 연속 50</string>
+    <string name="achievement_no_hints_streak_random_50_desc">힌트 없이 50개 랜덤 게임 연속 완료</string>
+    <string name="achievement_speedrun_random_20s">빠른 랜덤 20초</string>
+    
+    <!-- Speedrun & Achievements UI Strings -->
+    <string name="achievement_speedrun_random_20s_desc">20초 이내에 랜덤 게임 완료</string>
+    <string name="achievement_speedrun_random_10s">번개 속도</string>
+    <string name="achievement_speedrun_random_10s_desc">10초 이내에 랜덤 게임 완료</string>
+    <string name="achievement_speedrun_random_5x30s">속도 연속</string>
+    <string name="achievement_speedrun_random_5x30s_desc">각각 30초 이내에 5개 랜덤 게임 완료</string>
+    <string name="achievements_title">성취</string>
+    <string name="achievements_unlocked">해제됨</string>
+    <string name="achievements_locked">잠김</string>
+    <string name="achievements_progress">%1$d / %2$d</string>
+    <string name="achievement_unlocked">성취 해제됨</string>
+    
+    <!-- Achievements & Streak Popup Strings -->
+    <string name="achievements_unlocked_multiple">성취 해제됨!</string>
+    <string name="view_achievements">성취 보기</string>
+    <string name="streak_popup_title">일일 연속</string>
+    <string name="streak_popup_message">%1$d일 연속으로 로그인했습니다.</string>
+    <string name="streak_popup_day_1_headline">연속 시작!</string>
+    <string name="streak_popup_day_1_message">새 연속을 시작했습니다. 연속을 유지하려면 내일 다시 로그인하세요.</string>
+    <string name="streak_popup_day_2_headline">돌아오셨군요!</string>
+    <string name="streak_popup_day_3_headline">계속 로그인하세요!</string>
+    <string name="streak_popup_day_4_headline">절반까지 왔습니다!</string>
+    <string name="streak_popup_day_5_headline">거의 다 왔습니다!</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_6_headline">거의 일주일!</string>
+    <string name="streak_popup_day_7_headline">일주일 연속!</string>
+    <string name="streak_popup_day_8_headline">최고입니다!</string>
+    <string name="streak_popup_day_9_headline">9일이고 계속됩니다!</string>
+    <string name="streak_popup_day_10_headline">두 자리 숫자!</string>
+    <string name="streak_popup_day_11_headline">2주에서 3일 빠짐!</string>
+    <string name="streak_popup_day_12_headline">멈출 수 없습니다!</string>
+    <string name="streak_popup_day_13_headline">13은 행운의 숫자!</string>
+    <string name="streak_popup_day_14_headline">2주!</string>
+    <string name="streak_popup_day_15_headline">절반까지 왔습니다!</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_16_headline">멈출 수 없는 연속!</string>
+    <string name="streak_popup_day_17_headline">잘하고 있습니다!</string>
+    <string name="streak_popup_day_18_headline">놀랍습니다!</string>
+    <string name="streak_popup_day_19_headline">거의 다 왔습니다!</string>
+    <string name="streak_popup_day_20_headline">슈퍼스타!</string>
+    <string name="streak_popup_day_21_headline">3주!</string>
+    <string name="streak_popup_day_22_headline">뛰어납니다!</string>
+    <string name="streak_popup_day_23_headline">특별합니다!</string>
+    <string name="streak_popup_day_24_headline">전설적입니다!</string>
+    <string name="streak_popup_day_25_headline">한 달 가까이!</string>
+    
+    <!-- Final Streak Popup Strings -->
+    <string name="streak_popup_day_26_headline">완전히 압도하고 있습니다!</string>
+    <string name="streak_popup_day_27_headline">거의 한 달!</string>
+    <string name="streak_popup_day_28_headline">4주!</string>
+    <string name="streak_popup_day_29_headline">하루 남았습니다!</string>
+    <string name="streak_popup_day_30_headline">거의 한 달!</string>
+    <string name="streak_popup_day_31_headline">전설 지위!</string>
+    
+    <!-- Direction Strings -->
+    <string name="direction_north">북쪽</string>
+    <string name="direction_south">남쪽</string>
+    <string name="direction_east">동쪽</string>
+    <string name="direction_west">서쪽</string>
+    
+    <!-- Help Strings -->
+    <string name="help_goal_description">색상이 있는 로봇을 일치하는 색상의 목표로 이동시키세요. 모든 로봇이 목표에 도달하면 게임이 완료됩니다.</string>
+    <string name="help_movement_section_title">이동</string>
+    <string name="help_movement_point_1">- 로봇을 탭하여 선택하세요.</string>
+    <string name="help_movement_point_2">- 선택한 로봇을 탭하여 이동 방향을 선택하세요.</string>
+    <string name="help_movement_point_3">- 로봇은 벽, 다른 로봇, 또는 보드 가장자리에 부딪힐 때까지 직선으로 이동합니다.</string>
+    <string name="help_controls_section_title">컨트롤</string>
+    <string name="help_controls_point_1">- 힌트: 제안된 움직임을 보여줍니다.</string>
+    <string name="help_controls_point_2">- 재설정: 현재 레벨을 다시 시작합니다.</string>
+    <string name="help_controls_point_3">- 저장: 현재 맵을 저장합니다.</string>
+    <string name="help_controls_point_4">- 메뉴: 메인 메뉴로 돌아갑니다.</string>
+    <string name="help_accessibility_section_title">접근성</string>
+    <string name="help_level_editor_section_title">레벨 편집기</string>
+    <string name="help_level_editor_description">모든 140개 레벨을 잠금 해제하면 메인 메뉴에 레벨 편집기 버튼이 나타납니다. 자신만의 맵을 만들고 친구들과 공유하세요!</string>
+    <string name="button_back_game">뒤로</string>
+    
+    <!-- Level Strings -->
+    <string name="level_stars">%1$d개의 별을 획득했습니다</string>
+    <string name="level_locked">이 레벨을 잠금 해제하려면 %1$d개의 별이 더 필요합니다</string>
+    <string name="level_progress_completed">레벨 완료</string>
+    <string name="back_description">이전 화면으로 돌아가기</string>
+    <string name="next_level">다음 레벨</string>
+    <string name="next_level_description">다음 레벨로 가기</string>
+    <string name="optimal_moves">최적: %1$d 움직임</string>
+    <string name="level_complete">레벨 완료!</string>
+    <string name="level_stars_description">%1$d개의 별을 획득했습니다</string>
+    <string name="stars_count">별 개수</string>
+    
+    <!-- Additional Missing Strings -->
+    <string name="random_game_complete">레벨 완료!</string>
+    <string name="level_difficulty">난이도</string>
+    <string name="settings_english">English</string>
+    <string name="settings_german">Deutsch</string>
+    <string name="settings_french">Français</string>
+    <string name="settings_spanish">Español</string>
+    <string name="settings_chinese">中文</string>
+    <string name="settings_korean">한국어</string>
+    <string name="level_selection_title">레벨 선택</string>
+    
+    <!-- Final Missing Strings -->
+    <string name="level_editor_unlocked">레벨 편집기 잠금 해제됨!</string>
+    <string name="level_editor_hint">레벨 편집기를 잠금 해제했습니다! 자신만의 레벨을 만드세요.</string>
+    <string name="language_flag_description">언어 깃발</string>
+    <string name="direction_up">위</string>
+    
+    <!-- Help and Button Strings -->
+    <string name="help_star_system_section_title">별 등급 시스템</string>
+    <string name="back_button">뒤로</string>
+    <string name="menu_button">메뉴</string>
+    <string name="retry_button">재시도</string>
+    <string name="restart_button">재시작</string>
+    <string name="menu_button_a11y">메인 메뉴로 돌아가기</string>
+    <string name="restart_button_a11y">이 레벨 재시작</string>
+    
+    <!-- Remaining Missing Strings -->
+    <string name="save_map_button_a11y">현재 맵 저장</string>
+    <string name="robot_selected">선택됨: (%2$d, %3$d)의 %1$s 로봇</string>
+    <string name="robot_selected_info">선택됨: 위치 (%2$d, %3$d)의 %1$s 로봇</string>
+    <string name="no_target_for_robot">이 로봇의 목표 없음</string>
+    <string name="move_count_text">움직임: %1$d</string>
+    <string name="reset_button">재설정</string>
+    <string name="target_reached">목표 도달! %1$d 움직임과 %2$d 칸 이동으로 게임 완료</string>
+    <string name="unknown_color">알 수 없음: %1$s</string>
+    <string name="solution_found">A.I.가 해결책을 찾았습니다!</string>
+    <string name="no_solution_found">해결책을 찾을 수 없습니다</string>
+    
+    <!-- Final Missing Strings -->
+    <string name="difficulty_beginner">초보자</string>
+    <string name="difficulty_advanced">고급</string>
+    <string name="difficulty_insane">미친</string>
+    <string name="difficulty_impossible">불가능</string>
+    <string name="difficulty_unknown">알 수 없음</string>
+    <string name="of">/</string>
+    <string name="impossible_small_board_warning">작은 보드에서 불가능 모드는 적합한 맵을 생성하는 데 몇 분이 걸릴 수 있습니다</string>
+    <string name="error_email_app">이메일 앱을 열 수 없습니다</string>
+    <string name="robot_movement_canceled">로봇 움직임 취소됨</string>
+    <string name="settings_title">설정</string>
+    
+    <!-- Final Settings Strings -->
+    <string name="settings_board_size">보드 크기:</string>
+    <string name="settings_difficulty">난이도 레벨:</string>
+    <string name="settings_new_map_each_time">매번 새 맵 생성:</string>
+    <string name="settings_robots_reach_targets">목표 설정:</string>
+    <string name="settings_out_of">/</string>
+    <string name="settings_targets">목표</string>
+    <string name="settings_sound">사운드 효과:</string>
+    <string name="settings_hint_auto_move_semi_auto">반자동 (다음 힌트 버튼으로 이동)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">반자동 모드: 다음 힌트 버튼을 클릭하면 로봇이 이동합니다</string>
 
 </resources>

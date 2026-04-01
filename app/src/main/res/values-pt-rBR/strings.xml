@@ -802,6 +802,89 @@
     <!-- Login and Account Strings -->
     <string name="profile_a11y">Perfil do usuário</string>
     
+    <!-- Speedrun & Achievements UI Strings -->
+    <string name="achievement_speedrun_random_20s">Velocidade Aleatória 20s</string>
+    <string name="achievement_speedrun_random_20s_desc">Complete um jogo aleatório em menos de 20 segundos</string>
+    <string name="achievement_speedrun_random_10s">Velocidade Relâmpago</string>
+    <string name="achievement_speedrun_random_10s_desc">Complete um jogo aleatório em menos de 10 segundos</string>
+    <string name="achievement_speedrun_random_5x30s">Sequência de Velocidade</string>
+    <string name="achievement_speedrun_random_5x30s_desc">Complete 5 jogos aleatórios em menos de 30 segundos cada</string>
+    <string name="achievements_title">Conquistas</string>
+    <string name="achievements_unlocked">Desbloqueado</string>
+    <string name="achievements_locked">Bloqueado</string>
+    <string name="achievements_progress">%1$d / %2$d</string>
+    <string name="achievement_unlocked">Conquista Desbloqueada</string>
+    
+    <!-- Achievements & Streak Popup Strings -->
+    <string name="achievements_unlocked_multiple">Conquistas desbloqueadas!</string>
+    <string name="view_achievements">Ver conquistas</string>
+    <string name="streak_popup_title">Sequência diária</string>
+    <string name="streak_popup_message">Você fez login por %1$d dias seguidos.</string>
+    <string name="streak_popup_day_1_headline">Comece sua sequência!</string>
+    <string name="streak_popup_day_1_message">Você começou uma nova sequência. Faça login amanhã para manter sua sequência.</string>
+    <string name="streak_popup_day_2_headline">Você voltou!</string>
+    <string name="streak_popup_day_3_headline">Continue fazendo login!</string>
+    <string name="streak_popup_day_4_headline">Metade do caminho!</string>
+    <string name="streak_popup_day_5_headline">Quase lá!</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_6_headline">Quase uma semana!</string>
+    <string name="streak_popup_day_7_headline">Uma semana de sequência!</string>
+    <string name="streak_popup_day_8_headline">Você é o melhor!</string>
+    <string name="streak_popup_day_9_headline">Nove e contando!</string>
+    <string name="streak_popup_day_10_headline">Dois dígitos!</string>
+    <string name="streak_popup_day_11_headline">Duas semanas menos 3!</string>
+    <string name="streak_popup_day_12_headline">Imparável!</string>
+    <string name="streak_popup_day_13_headline">Treze é sorte!</string>
+    <string name="streak_popup_day_14_headline">Duas semanas!</string>
+    <string name="streak_popup_day_15_headline">Metade do caminho!</string>
+    
+    <!-- Remaining Streak Popup Strings -->
+    <string name="streak_popup_day_16_headline">Sequência imparável!</string>
+    <string name="streak_popup_day_17_headline">Em alta!</string>
+    <string name="streak_popup_day_18_headline">Incrível!</string>
+    <string name="streak_popup_day_19_headline">Quase lá!</string>
+    <string name="streak_popup_day_20_headline">Superstar!</string>
+    <string name="streak_popup_day_21_headline">Três semanas!</string>
+    <string name="streak_popup_day_22_headline">Fenomenal!</string>
+    <string name="streak_popup_day_23_headline">Extraordinário!</string>
+    <string name="streak_popup_day_24_headline">Lendário!</string>
+    <string name="streak_popup_day_25_headline">Quase um mês!</string>
+    
+    <!-- Final Streak Popup Strings -->
+    <string name="streak_popup_day_26_headline">Absolutamente arrasando!</string>
+    <string name="streak_popup_day_27_headline">Quase um mês!</string>
+    <string name="streak_popup_day_28_headline">Quatro semanas!</string>
+    <string name="streak_popup_day_29_headline">A um dia!</string>
+    <string name="streak_popup_day_30_headline">Quase um mês!</string>
+    <string name="streak_popup_day_31_headline">Status lendário!</string>
+    
+    <!-- Direction Strings -->
+    <string name="direction_north">Norte</string>
+    <string name="direction_south">Sul</string>
+    <string name="direction_east">Leste</string>
+    <string name="direction_west">Oeste</string>
+    
+    <!-- Help Strings -->
+    <string name="help_goal_description">Mova os robôs coloridos para seus objetivos da mesma cor. O jogo é completado quando todos os robôs alcançam seus objetivos.</string>
+    <string name="help_movement_section_title">Movimento</string>
+    <string name="help_movement_point_1">- Toque em um robô para selecioná-lo.</string>
+    <string name="help_movement_point_2">- Toque no robô selecionado para escolher a direção do movimento.</string>
+    <string name="help_movement_point_3">- Os robôs se moverão em linha reta até atingir uma parede, outro robô ou a borda do tabuleiro.</string>
+    <string name="help_controls_section_title">Controles</string>
+    <string name="help_controls_point_1">- Dica: Mostra um movimento sugerido.</string>
+    <string name="help_controls_point_2">- Reiniciar: Recomeça o nível atual.</string>
+    <string name="help_controls_point_3">- Salvar: Salva seu mapa atual.</string>
+    <string name="help_controls_point_4">- Menu: Retorna ao menu principal.</string>
+    <string name="help_accessibility_section_title">Acessibilidade</string>
+    <string name="help_level_editor_section_title">Editor de Níveis</string>
+    <string name="help_level_editor_description">Uma vez que você tenha desbloqueado todos os 140 níveis, um botão de Editor de Níveis aparecerá no menu principal. Crie seus próprios mapas e compartilhe com seus amigos!</string>
+    <string name="button_back_game">Voltar</string>
+    
+    <!-- Missing Strings -->
+    <string name="language_flag_description">Bandeira do idioma</string>
+    <string name="direction_up">cima</string>
+    
     <!-- Empty text placeholder used in layouts -->
     <string name="empty_text"></string>
 </resources>

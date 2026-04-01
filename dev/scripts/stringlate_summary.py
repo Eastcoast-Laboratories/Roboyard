@@ -26,7 +26,7 @@ class StringlateSummaryReporter:
                     languages["en"] = item
                 else:
                     # Extract language code from values-xx or values-xx-rYY
-                    match = re.match(r'values-(\w+)', item.name)
+                    match = re.match(r'values-([\w-]+)', item.name)
                     if match:
                         lang_code = match.group(1)
                         # Map pt-rBR to pt for consistency
@@ -151,7 +151,7 @@ class StringlateSummaryReporter:
             report.append("")
         
         # Language-specific critical missing strings
-        report.append("## Language-Specific Missing Strings (Top 5 per language)")
+        report.append("## Language-Specific Missing Strings (Top 21 per language)")
         report.append("")
         
         for lang_code in sorted(missing.keys()):
@@ -159,11 +159,11 @@ class StringlateSummaryReporter:
                 continue
                 
             lang_name = language_names.get(lang_code, lang_code.upper())
-            report.append(f"### {lang_name} (Top 5 missing)")
+            report.append(f"### {lang_name} (Top 21 missing)")
             report.append("")
             
-            # Show first 5 missing strings for this language
-            missing_strings = list(missing[lang_code].items())[:5]
+            # Show first 21 missing strings for this language
+            missing_strings = list(missing[lang_code].items())[:21]
             for string_name, english_text in missing_strings:
                 report.append(f"- `{string_name}`")
                 report.append(f"  - English: `{english_text[:80]}{'...' if len(english_text) > 80 else ''}`")
