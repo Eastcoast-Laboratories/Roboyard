@@ -222,10 +222,6 @@
     
     <!-- Help system -->
     <string name="help_tips_section_title">Conseils</string>
-    <string name="help_tips_point_1">- Essayez de résoudre les puzzles avec le nombre minimum de mouvements.</string>
-    <string name="help_tips_point_2">- Parfois, vous devez déplacer des robots vers des positions spécifiques pour dégager des chemins pour d\'autres robots.</string>
-    <string name="help_tips_point_3">- Si vous êtes bloqué, utilisez la fonction Indice pour obtenir une suggestion.</string>
-    <string name="help_star_system_section_title">Système de Notation par Étoiles</string>
     <string name="help_star_system_description">Votre performance sur chaque niveau est notée avec des étoiles basées sur l\'efficacité avec laquelle vous résolvez le puzzle :</string>
     <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Solution hyper-optimale : Vous avez trouvé une solution meilleure que la solution optimale de l\'IA !</string>
     <string name="help_star_system_3_stars">⭐⭐⭐ - Solution optimale : Vous l\'avez résolu dans le même nombre de mouvements que la solution optimale de l\'IA sans utiliser d\'indices.</string>
@@ -257,7 +253,8 @@
     <string name="settings_register_failed">Échec de l\'inscription: %1$s</string>
     <string name="settings_logout_success">Déconnecté</string>
     <string name="login_dialog_title">Connexion à Roboyard</string>
-    <string name="login_dialog_email">E-mail</string>
+    <string name="login_dialog_email">Email</string>
+    <string name="login_dialog_email_or_username">Email, nom d\'utilisateur ou ID utilisateur</string>
     <string name="login_dialog_password">Mot de passe</string>
     <string name="register_dialog_title">S\'inscrire à Roboyard</string>
     <string name="register_dialog_name">Nom</string>
@@ -400,17 +397,7 @@
     
     <!-- Pagination -->
     <string name="pagination_page_info">Page %1$d sur %2$d (%3$d)</string>
-    <string name="pagination_prev">Précédent</string>
     <string name="pagination_next">Suivant</string>
-    
-    <!-- Hint Auto-Move Settings -->
-    <string name="settings_hint_auto_move">Mouvement auto des indices:</string>
-    <string name="settings_hint_auto_move_manual">Manuel (déplacer les robots vous-même)</string>
-    <string name="settings_hint_auto_move_manual_a11y">Mode manuel: vous déplacez les robots vous-même</string>
-    <string name="settings_hint_auto_move_full_auto">Automatique complet (robot se déplace automatiquement)</string>
-    <string name="settings_hint_auto_move_full_auto_a11y">Mode automatique complet: le robot se déplace automatiquement lorsque l\'indice est affiché et passe à l\'indice suivant</string>
-    <string name="settings_hint_auto_move_semi_auto">Semi-automatique (déplacement au bouton indice suivant)</string>
-    <string name="settings_hint_auto_move_semi_auto_a11y">Mode semi-automatique: le robot se déplace lorsque vous cliquez sur le bouton indice suivant</string>
 
     <!-- Auto-generated translations based on German -->
     <string name="accessibility_language_a11y">Sélectionner la langue de TalkBack</string>
@@ -596,20 +583,10 @@
     <string name="help_controls_point_2">- Réinitialiser : redémarre le niveau actuel.</string>
     <string name="help_controls_point_3">- Sauvegarder : sauvegarde votre carte actuelle.</string>
     <string name="help_controls_point_4">- Menu : retour au menu principal.</string>
-    <string name="help_controls_section_title">Contrôles</string>
-    <string name="help_goal_description">Déplacez les robots colorés vers leurs objectifs de couleur correspondante. Le jeu est terminé lorsque tous les robots sont sur leurs objectifs correspondants.</string>
-    <string name="help_goal_section_title">Objectif</string>
     <string name="help_level_editor_description">Une fois que vous avez débloqué les 140 niveaux, un bouton Éditeur de niveau apparaîtra en bas de l\'écran de sélection de niveau. Utilisez-le pour créer vos propres niveaux et les partager avec d\'autres !</string>
     <string name="help_level_editor_section_title">Éditeur de niveau</string>
-    <string name="help_movement_point_1">- Appuyez sur un robot pour le sélectionner.</string>
-    <string name="help_movement_point_2">- Appuyez sur une case vide pour déplacer le robot sélectionné dans cette direction.</string>
-    <string name="help_movement_point_3">- Les robots se déplacent en ligne droite jusqu\'à ce qu\'ils touchent un mur, un autre robot ou le bord du plateau.</string>
-    <string name="help_movement_section_title">Mouvement</string>
-    <string name="help_screen_content_title">Comment jouer à Roboyard</string>
     <string name="help_title">Aide</string>
-    <string name="history_screen_title">Historique du jeu</string>
     <string name="history_tab">Historique</string>
-    <string name="history_tab_title">Historique</string>
     <string name="language_same_as_app">Identique à la langue de l\'application</string>
     <string name="language_settings_a11y">Sélectionner la langue d\'affichage de l\'application</string>
     <string name="language_settings_label">Langue:</string>
@@ -696,4 +673,15 @@
     <string name="url_opensource">https://git.io/fjs5H</string>
     <string name="version_format">Version : %1$s (Build %2$d)</string>
     <string name="view_achievements">Voir les succès</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">Comment jouer à Roboy</string>
+    <string name="help_goal_section_title">Objectif</string>
+    <string name="help_goal_description">Déplacez les robots colorés vers leurs cibles colorées correspondantes. Le jeu est terminé lorsque tous les robots se tiennent sur leurs cibles correspondantes.</string>
+    <string name="help_movement_section_title">Mouvement</string>
+    <string name="help_movement_point_1">- Appuyez sur un robot pour le sélectionner.</string>
+    <string name="help_movement_point_2">- Appuyez sur un espace vide pour déplacer le robot sélectionné dans cette direction.</string>
+    <string name="help_tips_point_2">- Parfois, vous devez déplacer des robots vers des positions spécifiques pour libérer des chemins pour d\'autres robots.</string>
+    <string name="help_tips_point_3">- Si vous êtes bloqué, utilisez la fonction d\'indice pour obtenir une suggestion.</string>
+    <string name="help_star_system_section_title">Système de notation par étoiles</string>
 </resources>

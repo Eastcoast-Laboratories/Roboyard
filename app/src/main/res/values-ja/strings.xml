@@ -128,14 +128,6 @@
     <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
     
     <!-- Help screen -->
-    <string name="help_screen_content_title">Roboyardの遊び方</string>
-    <string name="help_goal_section_title">ゴール</string>
-    <string name="help_goal_description">色付きのロボットを一致する色のゴールに移動させます。すべてのロボットが一致するゴールの上にいるとゲーム完了です。</string>
-    <string name="help_movement_section_title">移動</string>
-    <string name="help_movement_point_1">- ロボットをタップして選択します。</string>
-    <string name="help_movement_point_2">- 空のセルをタップして、選択したロボットをその方向に移動させます。</string>
-    <string name="help_movement_point_3">- ロボットは壁、他のロボット、またはボードの端にぶつかるまで直線で移動します。</string>
-    <string name="help_controls_section_title">コントロール</string>
     <string name="help_controls_point_1">- ヒント：提案された手を表示します。</string>
     <string name="help_controls_point_2">- リセット：現在のレベルを再開します。</string>
     <string name="help_controls_point_3">- 保存：現在のマップを保存します。</string>
@@ -145,8 +137,7 @@
     <string name="help_tips_section_title">ヒント</string>
     <string name="help_tips_point_1">- 最少手数でパズルを解決してみてください。</string>
     <string name="help_tips_point_2">- 他のロボットの経路を確保するために、ロボットを特定の位置に移動させる必要があります。</string>
-    <string name="help_tips_point_3">- 行き詰まった場合は、ヒント機能を使用して提案を取得してください。</string>
-    <string name="help_star_system_section_title">星評価システム</string>
+    <string name="help_tips_point_3">- 行き詰まったら、ヒント機能を使用して提案を得てください。</string>
     <string name="help_star_system_description">各レベルでのパフォーマンスは、パズルをどれだけ効率的に解決したかに基づいて星で評価されます：</string>
     <string name="help_star_system_4_stars">⭐⭐⭐⭐ - 超最適解：AIの最適解より良い解決策を見つけました！</string>
     <string name="help_star_system_3_stars">⭐⭐⭐ - 最適解：ヒントなしでAIの最適解と同じ手数で解決しました。</string>
@@ -418,6 +409,7 @@
     <string name="needs_update_toast">この機能を使用するにはアプリの更新が必要です。</string>
     <string name="login_dialog_title">Roboyardにログイン</string>
     <string name="login_dialog_email">メール</string>
+    <string name="login_dialog_email_or_username">メール、ユーザー名、またはユーザーID</string>
     <string name="login_dialog_password">パスワード</string>
     <string name="register_dialog_title">Roboyardに登録</string>
     <string name="register_dialog_name">名前</string>
@@ -787,6 +779,16 @@
     <string name="editor_error_creating_share_url">共有URLの作成エラー</string>
     <string name="editor_no_browser_available">URLを開くためのブラウザがありません</string>
     <string name="editor_saved_to_sourcecode">レベル%1$dをソースコードに保存しました！</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">ロボヤードの遊び方</string>
+    <string name="help_goal_section_title">目標</string>
+    <string name="help_goal_description">色付きロボットを対応する色付き目標地点に移動させます。すべてのロボットが対応する目標の上に立つとゲーム完了です。</string>
+    <string name="help_movement_section_title">移動</string>
+    <string name="help_movement_point_1">- ロボットをタップして選択します。</string>
+    <string name="help_movement_point_2">- 空きスペースをタップして、選択したロボットをその方向に移動させます。</string>
+    <string name="help_movement_point_3">- ロボットは壁、他のロボット、またはゲームボードの端にぶつかるまで直線的に移動します。</string>
+    <string name="help_controls_section_title">操作</string>
     <string name="editor_added_robot">%1$sロボットを（%2$d, %3$d）に追加</string>
     <string name="editor_removed_robot">（%1$d, %2$d）のロボットを削除</string>
     <string name="editor_added_target">%1$sゴールを（%2$d, %3$d）に追加</string>

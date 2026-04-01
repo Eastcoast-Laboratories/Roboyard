@@ -425,6 +425,7 @@
     <string name="needs_update_toast">Your app needs an update to use this feature.</string>
     <string name="login_dialog_title">Login to Roboyard</string>
     <string name="login_dialog_email">Email</string>
+    <string name="login_dialog_email_or_username">Email, Username, or User ID</string>
     <string name="login_dialog_password">Password</string>
     <string name="register_dialog_title">Register for Roboyard</string>
     <string name="register_dialog_name">Name</string>

@@ -29,6 +29,10 @@
     <!-- Game Screens -->
     <string name="help_screen_title">Ayuda</string>
 
+    <!-- Help screen -->
+    <string name="help_screen_content_title">Cómo jugar a Roboyard</string>
+    <string name="help_goal_section_title">Objetivo</string>
+
     <!-- Level Selection Screen -->
 
     <string name="back_description">Volver a la pantalla anterior</string>
@@ -46,34 +50,52 @@
     <string name="new_random_game_button">Nuevo Juego</string>
     
     <!-- Robot Colors -->
+    <string name="color_red">Rojo</string>
     <string name="color_blue">Azul</string>
     <string name="color_green">Verde</string>
     <string name="color_yellow">Amarillo</string>
+    <string name="color_pink">Rosa</string>
+    <string name="color_orange">Naranja</string>
+    <string name="color_white">Blanco</string>
+    <string name="color_black">Negro</string>
     <string name="color_silver">Plateado</string>
     <string name="color_none">Ninguno</string>
+    
     
     <!-- Accessibility Color Names -->
     
     <!-- Color Names (Dative Case) -->
+    <string name="color_red_dative">rojo</string>
     <string name="color_blue_dative">azul</string>
     <string name="color_green_dative">verde</string>
     <string name="color_yellow_dative">amarillo</string>
     <string name="color_pink_dative">rosa</string>
+    <string name="color_orange_dative">naranja</string>
+    <string name="color_white_dative">blanco</string>
+    <string name="color_black_dative">negro</string>
     <string name="color_silver_dative">plateado</string>
     
     <!-- Adjective forms for colors -->
-    <string name="color_blue_adj">Azul</string>
-    <string name="color_green_adj">Verde</string>
-    <string name="color_yellow_adj">Amarillo</string>
-    <string name="color_pink_adj">Rosa</string>
-    <string name="color_silver_adj">Plateado</string>
+    <string name="color_red_adj">rojo</string>
+    <string name="color_blue_adj">azul</string>
+    <string name="color_green_adj">verde</string>
+    <string name="color_yellow_adj">amarillo</string>
+    <string name="color_pink_adj">rosa</string>
+    <string name="color_orange_adj">naranja</string>
+    <string name="color_white_adj">blanco</string>
+    <string name="color_black_adj">negro</string>
+    <string name="color_silver_adj">plateado</string>
     
     <!-- Target color forms -->
-    <string name="color_blue_target">Azul</string>
-    <string name="color_green_target">Verde</string>
-    <string name="color_yellow_target">Amarillo</string>
-    <string name="color_pink_target">Rosa</string>
-    <string name="color_silver_target">Plateado</string>
+    <string name="color_red_target">rojo</string>
+    <string name="color_blue_target">azul</string>
+    <string name="color_green_target">verde</string>
+    <string name="color_yellow_target">amarillo</string>
+    <string name="color_pink_target">rosa</string>
+    <string name="color_orange_target">naranja</string>
+    <string name="color_white_target">blanco</string>
+    <string name="color_black_target">negro</string>
+    <string name="color_silver_target">plateado</string>
     
     <!-- Additional accessibility strings -->
     <string name="possible_moves_a11y">Movimientos posibles</string>
@@ -196,7 +218,7 @@
     <string name="help_tips_section_title">Consejos</string>
     <string name="help_tips_point_1">- Trata de resolver los rompecabezas con el mínimo número de movimientos.</string>
     <string name="help_tips_point_2">- A veces necesitas mover robots a posiciones específicas para despejar caminos para otros robots.</string>
-    <string name="help_tips_point_3">- Si te quedas atascado, usa la función de Pista para obtener una sugerencia.</string>
+    <string name="help_tips_point_3">- Si estás atascado, usa la función de Sugerencia para obtener una recomendación.</string>
     <string name="help_star_system_section_title">Sistema de Calificación con Estrellas</string>
     <string name="help_star_system_description">Tu rendimiento en cada nivel se califica con estrellas basándose en qué tan eficientemente resuelves el rompecabezas:</string>
     <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Solución hiper-óptima: ¡Encontraste una solución mejor que la solución óptima de la IA!</string>
@@ -382,7 +404,8 @@
     <string name="settings_register_failed">Registro fallido: %1$s</string>
     <string name="settings_logout_success">Sesión cerrada</string>
     <string name="login_dialog_title">Iniciar Sesión en Roboyard</string>
-    <string name="login_dialog_email">Correo Electrónico</string>
+    <string name="login_dialog_email">Email</string>
+    <string name="login_dialog_email_or_username">Email, usuario o ID de usuario</string>
     <string name="login_dialog_password">Contraseña</string>
     <string name="register_dialog_title">Registrarse en Roboyard</string>
     <string name="register_dialog_name">Nombre</string>

@@ -150,7 +150,7 @@
     <string name="help_tips_section_title">Dicas</string>
     <string name="help_tips_point_1">- Tente resolver quebra-cabeças no número mínimo de movimentos.</string>
     <string name="help_tips_point_2">- Às vezes você precisa mover robôs para posições específicas para liberar caminhos para outros robôs.</string>
-    <string name="help_tips_point_3">- Se estiver preso, use o recurso Dica para obter uma sugestão.</string>
+    <string name="help_tips_point_3">- Se estiver preso, use a função de Dica para obter uma sugestão.</string>
     <string name="help_star_system_section_title">Sistema de Avaliação por Estrelas</string>
     <string name="help_star_system_description">Seu desempenho em cada nível é avaliado com estrelas com base em quão eficientemente você resolve o quebra-cabeça:</string>
     <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Solução hiper-ótima: Você encontrou uma solução melhor que a solução ótima da IA!</string>
@@ -211,31 +211,31 @@
     <!-- Accessibility versions -->
 
     <!-- Dative forms (English doesn't change, but needed for resource references) -->
-    <string name="color_red_dative">Vermelho</string>
-    <string name="color_blue_dative">Azul</string>
-    <string name="color_green_dative">Verde</string>
-    <string name="color_yellow_dative">Amarelo</string>
-    <string name="color_pink_dative">Rosa</string>
-    <string name="color_orange_dative">Laranja</string>
-    <string name="color_white_dative">Branco</string>
-    <string name="color_black_dative">Preto</string>
-    <string name="color_silver_dative">Prata</string>
+    <string name="color_red_dative">vermelho</string>
+    <string name="color_blue_dative">azul</string>
+    <string name="color_green_dative">verde</string>
+    <string name="color_yellow_dative">amarelo</string>
+    <string name="color_pink_dative">rosa</string>
+    <string name="color_orange_dative">laranja</string>
+    <string name="color_white_dative">branco</string>
+    <string name="color_black_dative">preto</string>
+    <string name="color_silver_dative">prata</string>
 
     <!-- Adjective forms for colors -->
-    <string name="color_red_adj">Vermelho</string>
-    <string name="color_blue_adj">Azul</string>
-    <string name="color_green_adj">Verde</string>
-    <string name="color_yellow_adj">Amarelo</string>
-    <string name="color_pink_adj">Rosa</string>
-    <string name="color_silver_adj">Prata</string>
+    <string name="color_red_adj">vermelho</string>
+    <string name="color_blue_adj">azul</string>
+    <string name="color_green_adj">verde</string>
+    <string name="color_yellow_adj">amarelo</string>
+    <string name="color_pink_adj">rosa</string>
+    <string name="color_silver_adj">prata</string>
 
     <!-- goal color forms -->
-    <string name="color_red_target">Vermelho</string>
-    <string name="color_blue_target">Azul</string>
-    <string name="color_green_target">Verde</string>
-    <string name="color_yellow_target">Amarelo</string>
-    <string name="color_pink_target">Rosa</string>
-    <string name="color_silver_target">Prata</string>
+    <string name="color_red_target">vermelho</string>
+    <string name="color_blue_target">azul</string>
+    <string name="color_green_target">verde</string>
+    <string name="color_yellow_target">amarelo</string>
+    <string name="color_pink_target">rosa</string>
+    <string name="color_silver_target">prata</string>
 
     <string name="no_robot_selected">Nenhum robô selecionado</string>
     <string name="robot_selected">Selecionado: robô %1$s em (%2$d, %3$d)</string>
@@ -413,7 +413,8 @@
     <string name="settings_logging_out">Fazendo logout…</string>
     <string name="needs_update_toast">Seu aplicativo precisa de uma atualização para usar este recurso.</string>
     <string name="login_dialog_title">Login no Roboyard</string>
-    <string name="login_dialog_email">E-mail</string>
+    <string name="login_dialog_email">Email</string>
+    <string name="login_dialog_email_or_username">Email, nome de usuário ou ID do usuário</string>
     <string name="login_dialog_password">Senha</string>
     <string name="register_dialog_title">Registrar no Roboyard</string>
     <string name="register_dialog_name">Nome</string>
