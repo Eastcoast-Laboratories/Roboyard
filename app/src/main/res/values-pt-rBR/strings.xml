@@ -19,8 +19,6 @@
     
     <string name="help">Como Jogar</string>
     <string name="help_a11y">Explicação de como jogar</string>
-    
-    <string name="main_menu_title" translatable="false">Roboyard</string>
 
     <string name="credits">Créditos</string>
     
@@ -90,7 +88,6 @@
     <string name="settings_portuguese">Português (Brasil)</string>
     <string name="ok">OK</string>
     <!-- Non-translatable string example -->
-    <string name="app_version" translatable="false">Version: 1.0.0</string>
     <!-- Direction strings -->
     <string name="direction_north">Norte</string>
     <string name="direction_south">Sul</string>
@@ -102,8 +99,7 @@
     <string name="robot_selected_a11y">Robô %1$s selecionado</string>
     
     <!-- TalkBack language constant - do not translate -->
-    <string name="talkback_language_same_value" translatable="false">same</string>
-    
+
     <!-- Help content -->
     <string name="help_title">Ajuda</string>
     
@@ -120,18 +116,13 @@
     <!-- Save game screen -->
     <string name="save_game_title">Salvar Jogo</string>
     <string name="save_empty">Vazio</string>
-    <string name="save_no_targets_a11y" translatable="false">Warning: This save has no goals and may cause problems</string>
-    
+
     <!-- Game screen -->
     
     <!-- Autosave tags - non-translatable -->
-    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
-    
+
     <!-- URLs - non-translatable -->
-    <string name="url_imprint" translatable="false">https://roboyard.z11.de/impressum</string>
-    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
-    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
-    
+
     <!-- Help screen -->
     <string name="help_screen_content_title">Como Jogar Roboyard</string>
     <string name="help_goal_section_title">Objetivo</string>

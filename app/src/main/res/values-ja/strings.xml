@@ -19,8 +19,6 @@
     
     <string name="help">遊び方</string>
     <string name="help_a11y">遊び方の説明</string>
-    
-    <string name="main_menu_title" translatable="false">Roboyard</string>
 
     <string name="credits">クレジット</string>
     
@@ -89,7 +87,6 @@
     <string name="language_flag_description">言語フラグ</string>
     <string name="ok">OK</string>
     <!-- Non-translatable string example -->
-    <string name="app_version" translatable="false">Version: 1.0.0</string>
     <!-- Direction strings -->
     <string name="direction_north">北</string>
     <string name="direction_south">南</string>
@@ -101,8 +98,7 @@
     <string name="robot_selected_a11y">%1$sロボットが選択されました</string>
     
     <!-- TalkBack language constant - do not translate -->
-    <string name="talkback_language_same_value" translatable="false">same</string>
-    
+
     <!-- Help content -->
     <string name="help_title">ヘルプ</string>
     <string name="help_star_system_section_title">星評価システム</string>
@@ -124,13 +120,9 @@
     <!-- Game screen -->
     
     <!-- Autosave tags - non-translatable -->
-    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
-    
+
     <!-- URLs - non-translatable -->
-    <string name="url_imprint" translatable="false">https://roboyard.z11.de/impressum</string>
-    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
-    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
-    
+
     <!-- Help screen -->
     <string name="help_controls_point_1">- ヒント：提案された手を表示します。</string>
     <string name="help_controls_point_2">- リセット：現在のレベルを再開します。</string>

@@ -19,8 +19,6 @@
     
     <string name="help">Wie spielt man?</string>
     <string name="help_a11y">Erklärung, wie man spielt</string>
-    
-    <string name="main_menu_title" translatable="false">Roboyard</string>
 
     <string name="credits">Credits</string>
     
@@ -98,7 +96,6 @@
     <string name="ok">OK</string>
 
     <!-- Non-translatable string example -->
-    <string name="app_version" translatable="false">Version: 1.0.0</string>
     <!-- Direction strings -->
     <string name="direction_north">Norden</string>
     <string name="direction_south">Süden</string>
@@ -125,8 +122,7 @@
     <string name="target_reached_a11y">mit erreichtem Ziel</string>
     
     <!-- TalkBack language constant - do not translate -->
-    <string name="talkback_language_same_value" translatable="false">same</string>
-    
+
     <!-- Help content -->
     <string name="help_title">Hilfe</string>
     
@@ -143,13 +139,9 @@
     <!-- Game screen -->
     
     <!-- Autosave tags - non-translatable -->
-    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
-    
+
     <!-- URLs - non-translatable -->
-    <string name="url_imprint" translatable="false">https://roboyard.z11.de/impressum</string>
-    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
-    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
-    
+
     <!-- Help screen -->
     <string name="help_screen_content_title">Wie man Roboyard spielt</string>
     <string name="help_goal_section_title">Ziel</string>

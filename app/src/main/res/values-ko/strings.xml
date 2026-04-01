@@ -29,8 +29,6 @@
     
     <string name="help">플레이 방법</string>
     <string name="help_a11y">게임 설명</string>
-    
-    <string name="main_menu_title" translatable="false">Roboyard</string>
 
     <string name="credits">크레딧</string>
     

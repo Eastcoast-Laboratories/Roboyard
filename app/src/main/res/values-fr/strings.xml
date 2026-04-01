@@ -582,8 +582,6 @@
     <string name="achievements_title">Succès</string>
     <string name="achievements_unlocked">Débloqué</string>
     <string name="achievements_unlocked_multiple">Succès débloqués !</string>
-    <string name="app_version">Version: 1.0.0</string>
-    <string name="autosave_tag">[AUTOSAVE]</string>
     <string name="back">Retour</string>
     <string name="back_description">Retour à l\'écran précédent</string>
     <string name="button_back">Retour</string>
@@ -639,7 +637,6 @@
     <string name="level_stars_description">Vous avez gagné %1$d étoiles</string>
     <string name="load_screen_title">Charger la partie</string>
     <string name="load_tab_title">Charger</string>
-    <string name="main_menu_title">Roboyard</string>
     <string name="menu_button_a11y">Retour au menu principal</string>
     <string name="minimap_description">Minicarte montrant l\'ensemble du plateau</string>
     <string name="next_level">Niveau suivant</string>
@@ -703,9 +700,6 @@
     <string name="unknown_color">Inconnu : %1$s</string>
     <string name="until_feminine">jusqu\'à</string>
     <string name="until_masculine">jusqu\'à</string>
-    <string name="url_contact">https://eclabs.de/#kontakt</string>
-    <string name="url_imprint">https://roboyard.z11.de/impressum</string>
-    <string name="url_opensource">https://git.io/fjs5H</string>
     <string name="version_format">Version : %1$s (Build %2$d)</string>
     <string name="view_achievements">Voir les succès</string>
     
