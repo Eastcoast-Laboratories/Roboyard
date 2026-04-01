@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="16">
+    <!-- Red background -->
+    <path
+        android:fillColor="#DE2910"
+        android:pathData="M0,0h24v16H0V0z"/>
+    <!-- Large star (center) -->
+    <path
+        android:fillColor="#FFDE00"
+        android:pathData="M6,4l0.4,1.2h1.2l-1,0.8l0.4,1.2l-1,-0.8l-1,0.8l0.4,-1.2l-1,-0.8h1.2z"/>
+    <!-- Small stars (around large star) -->
+    <path
+        android:fillColor="#FFDE00"
+        android:pathData="M10,2l0.2,0.6h0.6l-0.5,0.4l0.2,0.6l-0.5,-0.4l-0.5,0.4l0.2,-0.6l-0.5,-0.4h0.6z"/>
+    <path
+        android:fillColor="#FFDE00"
+        android:pathData="M10,4l0.2,0.6h0.6l-0.5,0.4l0.2,0.6l-0.5,-0.4l-0.5,0.4l0.2,-0.6l-0.5,-0.4h0.6z"/>
+    <path
+        android:fillColor="#FFDE00"
+        android:pathData="M10,6l0.2,0.6h0.6l-0.5,0.4l0.2,0.6l-0.5,-0.4l-0.5,0.4l0.2,-0.6l-0.5,-0.4h0.6z"/>
+    <path
+        android:fillColor="#FFDE00"
+        android:pathData="M9,5l0.2,0.6h0.6l-0.5,0.4l0.2,0.6l-0.5,-0.4l-0.5,0.4l0.2,-0.6l-0.5,-0.4h0.6z"/>
+</vector>

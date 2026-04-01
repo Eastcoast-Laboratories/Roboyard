@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+
+    <string name="new_random_game">Jogar</string>
+    <string name="new_random_game_a11y">Iniciar novo jogo</string>
+    
+    <string name="level_game">Níveis</string>
+    <string name="level_game_a11y">Jogar níveis predefinidos</string>
+    
+    <string name="load_game">Carregar Jogo</string>
+    <string name="load_game_a11y">Carregar jogo salvo</string>
+    
+    <string name="settings">Configurações</string>
+    <string name="settings_a11y">Configurações do jogo</string>
+    
+    <string name="help">Como Jogar</string>
+    <string name="help_a11y">Explicação de como jogar</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">Créditos</string>
+    
+    <string name="user_profile_button_a11y">Perfil do usuário e login</string>
+    
+    <!-- Button texts for various screens -->
+    <string name="button_cancel">Cancelar</string>
+    <string name="button_save">Salvar</string>
+    <string name="button_back">Voltar</string>
+    <string name="button_next">Próximo</string>
+
+    <!-- Main menu buttons -->
+
+    <!-- Modal dialog buttons -->
+
+    <!-- Game Screens -->
+
+    <!-- Level Selection Screen -->
+    <string name="level_stars">Você ganhou %1$d estrelas</string>
+    <string name="level_locked">Você precisa de %1$d estrelas para desbloquear este nível</string>
+    <string name="level_progress_completed">Nível concluído</string>
+
+    <string name="back">Voltar</string>
+    <string name="back_description">Retornar à tela anterior</string>
+
+    <string name="next_level">Próximo Nível</string>
+    <string name="next_level_description">Ir para o próximo nível</string>
+    
+    <string name="optimal_moves">Ótimo: %1$d movimentos</string>
+    <string name="level_complete">Nível Concluído!</string>
+    <string name="wrong_robot_on_target">Robô errado! Mova o robô da cor correta para o objetivo.</string>
+    <string name="level_stars_description">Você ganhou %1$d estrelas</string>
+    <string name="stars_count">%1$d Estrelas</string>
+    <string name="random_game_complete">Nível Concluído!</string>
+    <string name="new_random_game_button">Novo Jogo</string>
+    <string name="robot_a11y">Robô na posição</string>
+    <string name="target_a11y">Alvo na posição %1$d, %2$d</string>
+    <string name="minimap_description">Minimapa mostrando layout geral do tabuleiro</string>
+    
+    <!-- Exit Dialog -->
+    
+    <!-- Save Game Screen -->
+    <string name="save_game_screen_title">Salvar Jogo</string>
+    <string name="save_slots_tab">Slots de Salvamento</string>
+    <string name="history_tab">Histórico</string>
+    <string name="save_confirm_title">Salvar Jogo</string>
+    <string name="share_button_a11y">Compartilhar este jogo salvo</string>
+    <string name="info_button_a11y">Mostrar detalhes do mapa</string>
+    <string name="level_difficulty">Dificuldade</string>
+    <string name="saved_on">salvo em</string>
+    <string name="share_a11y">Compartilhar</string>
+    <string name="empty_slot">Vazio</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">Idioma:</string>
+    <string name="language_settings_a11y">Selecionar idioma de exibição do app</string>
+    <string name="accessibility_language_label">Idioma TalkBack:</string>
+    <string name="accessibility_language_a11y">Selecionar idioma de anúncio TalkBack</string>
+    <string name="language_same_as_app">Mesmo idioma do app</string>
+    <string name="settings_english">Inglês</string>
+    <string name="settings_german">Alemão</string>
+    <string name="settings_french">Francês</string>
+    <string name="settings_spanish">Espanhol</string>
+    <string name="settings_chinese">Chinês</string>
+    <string name="settings_korean">Coreano</string>
+    <string name="settings_japanese">Japonês</string>
+    <string name="settings_portuguese">Português (Brasil)</string>
+    <string name="ok">OK</string>
+    <!-- Non-translatable string example -->
+    <string name="app_version" translatable="false">Version: 1.0.0</string>
+    <!-- Direction strings -->
+    <string name="direction_north">Norte</string>
+    <string name="direction_south">Sul</string>
+    <string name="direction_east">Leste</string>
+    <string name="direction_west">Oeste</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    
+    <!-- Accessibility strings -->
+    <string name="robot_selected_a11y">Robô %1$s selecionado</string>
+    
+    <!-- TalkBack language constant - do not translate -->
+    <string name="talkback_language_same_value" translatable="false">same</string>
+    
+    <!-- Help content -->
+    <string name="help_title" translatable="false">Help</string>
+    
+    <!-- Credits screen -->
+    <string name="version_format">Versão: %1$s (Build %2$d)</string>
+    
+    <!-- Level Selection screen -->
+    <string name="level_selection_title">Seleção de Nível</string>
+    <string name="level_editor_button">Editor de Nível</string>
+    <string name="level_editor_button_short">Editor</string>
+    <string name="level_editor_unlocked">Editor de Nível desbloqueado!</string>
+    <string name="level_editor_hint">Você desbloqueou o Editor de Nível! Crie seus próprios níveis.</string>
+
+    <!-- Save game screen -->
+    <string name="save_game_title">Salvar Jogo</string>
+    <string name="save_empty">Vazio</string>
+    <string name="save_no_targets_a11y" translatable="false">Warning: This save has no goals and may cause problems</string>
+    
+    <!-- Game screen -->
+    
+    <!-- Autosave tags - non-translatable -->
+    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
+    
+    <!-- URLs - non-translatable -->
+    <string name="url_imprint" translatable="false">https://roboyard.z11.de/impressum</string>
+    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
+    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">Como Jogar Roboyard</string>
+    <string name="help_goal_section_title">Objetivo</string>
+    <string name="help_goal_description">Mova os robôs coloridos para seus objetivos coloridos correspondentes. O jogo é concluído quando todos os robôs estão em seus objetivos correspondentes.</string>
+    <string name="help_movement_section_title">Movimento</string>
+    <string name="help_movement_point_1">- Toque em um robô para selecioná-lo.</string>
+    <string name="help_movement_point_2">- Toque em uma célula vazia para mover o robô selecionado naquela direção.</string>
+    <string name="help_movement_point_3">- Os robôs se moverão em linhas retas até atingir uma parede, outro robô ou a borda do tabuleiro.</string>
+    <string name="help_controls_section_title">Controles</string>
+    <string name="help_controls_point_1">- Dica: Mostra um movimento sugerido.</string>
+    <string name="help_controls_point_2">- Reiniciar: Reinicia o nível atual.</string>
+    <string name="help_controls_point_3">- Salvar: Salva seu mapa atual.</string>
+    <string name="help_controls_point_4">- Menu: Retorna ao menu principal.</string>
+    <string name="help_accessibility_section_title">Acessibilidade</string>
+    <string name="help_accessibility_description">Este jogo é totalmente compatível com o leitor de tela TalkBack. Use explorar por toque para ouvir informações sobre os elementos do jogo e botões. Toque duplo para ativar botões ou selecionar robôs.</string>
+    <string name="help_tips_section_title">Dicas</string>
+    <string name="help_tips_point_1">- Tente resolver quebra-cabeças no número mínimo de movimentos.</string>
+    <string name="help_tips_point_2">- Às vezes você precisa mover robôs para posições específicas para liberar caminhos para outros robôs.</string>
+    <string name="help_tips_point_3">- Se estiver preso, use o recurso Dica para obter uma sugestão.</string>
+    <string name="help_star_system_section_title">Sistema de Avaliação por Estrelas</string>
+    <string name="help_star_system_description">Seu desempenho em cada nível é avaliado com estrelas com base em quão eficientemente você resolve o quebra-cabeça:</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Solução hiper-ótima: Você encontrou uma solução melhor que a solução ótima da IA!</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - Solução ótima: Você resolveu no mesmo número de movimentos que a solução ótima da IA sem usar dicas.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - Solução quase ótima: Você usou um movimento a mais que o ótimo sem dicas, OU você encontrou a solução ótima com uma dica.</string>
+    <string name="help_star_system_1_star">⭐ - Boa solução: Você encontrou a solução ótima com duas dicas, OU você usou dois movimentos a mais que o ótimo sem dicas.</string>
+    <string name="help_star_system_0_stars">Sem estrelas: Todos os outros casos. Continue praticando para melhorar seu desempenho!</string>
+    <string name="help_star_system_hint_penalty">Nota: Usar dicas reduzirá sua avaliação por estrelas, incentivando você a resolver quebra-cabeças independentemente.</string>
+    <string name="help_level_editor_section_title">Editor de Nível</string>
+    <string name="help_level_editor_description">Uma vez que você tenha desbloqueado todos os 140 níveis, um botão Editor de Nível aparecerá na parte inferior da tela de seleção de nível. Use-o para criar seus próprios níveis personalizados e compartilhá-los com outros!</string>
+    
+    <!-- Game Buttons -->
+    <string name="hint_button">💡Dica</string>
+    <string name="hint_cancel_button">❌ Dica</string>
+    <string name="hint_button_a11y">Dica</string>
+    <string name="button_back_game">Voltar</string>
+    <string name="confirm_level_change">Voltar para o nível %1$d?</string>
+    <string name="button_reset">Redefinir</string>
+    <string name="button_save_map">Salvar Mapa</string>
+    <string name="button_new_game">Novo Jogo</string>
+    <string name="button_menu">Menu</string>
+    
+    <!-- Game screen -->
+    <string name="save_tab_title">Salvar</string>
+    <string name="load_tab_title">Carregar</string>
+    <string name="history_tab_title">Histórico</string>
+    <string name="save_screen_title">Salvar Jogo</string>
+    <string name="load_screen_title">Carregar Jogo</string>
+    <string name="history_screen_title">Histórico do Jogo</string>
+    <string name="ai_calculating">IA calculando solução...</string>
+    <string name="keep_map">Jogar este mapa. Calculando...</string>
+
+    <!-- Game control buttons -->
+    <string name="back_button">Voltar</string>
+    <string name="menu_button">Menu</string>
+    <string name="retry_button">Tentar Novamente</string>
+    <string name="restart_button">Reiniciar</string>
+    
+    <!-- AI and game direction strings -->
+    
+    <!-- Accessibility versions -->
+    <string name="menu_button_a11y">Retornar ao menu principal</string>
+    <string name="restart_button_a11y">Reiniciar este nível</string>
+    <string name="save_map_button_a11y">Salvar mapa atual</string>
+    <string name="dice_button_a11y">Gerar novo mapa</string>
+
+    <!-- Color names for robots and game elements -->
+    <string name="color_red">Vermelho</string>
+    <string name="color_blue">Azul</string>
+    <string name="color_green">Verde</string>
+    <string name="color_yellow">Amarelo</string>
+    <string name="color_pink">Rosa</string>
+    <string name="color_orange">Laranja</string>
+    <string name="color_white">Branco</string>
+    <string name="color_black">Preto</string>
+    <string name="color_silver">Prata</string>
+    
+    <!-- Accessibility versions -->
+
+    <!-- Dative forms (English doesn't change, but needed for resource references) -->
+    <string name="color_red_dative">Vermelho</string>
+    <string name="color_blue_dative">Azul</string>
+    <string name="color_green_dative">Verde</string>
+    <string name="color_yellow_dative">Amarelo</string>
+    <string name="color_pink_dative">Rosa</string>
+    <string name="color_orange_dative">Laranja</string>
+    <string name="color_white_dative">Branco</string>
+    <string name="color_black_dative">Preto</string>
+    <string name="color_silver_dative">Prata</string>
+
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">Vermelho</string>
+    <string name="color_blue_adj">Azul</string>
+    <string name="color_green_adj">Verde</string>
+    <string name="color_yellow_adj">Amarelo</string>
+    <string name="color_pink_adj">Rosa</string>
+    <string name="color_silver_adj">Prata</string>
+
+    <!-- goal color forms -->
+    <string name="color_red_target">Vermelho</string>
+    <string name="color_blue_target">Azul</string>
+    <string name="color_green_target">Verde</string>
+    <string name="color_yellow_target">Amarelo</string>
+    <string name="color_pink_target">Rosa</string>
+    <string name="color_silver_target">Prata</string>
+
+    <string name="no_robot_selected">Nenhum robô selecionado</string>
+    <string name="robot_selected">Selecionado: robô %1$s em (%2$d, %3$d)</string>
+    <string name="robot_selected_info">Selecionado: robô %1$s na posição (%2$d, %3$d)</string>
+    <string name="robot_target_info">Alvo do %1$s: (%2$d, %3$d)</string>
+    <string name="no_target_for_robot">Nenhum alvo para este robô</string>
+    <string name="move_count_text">Movimentos: %1$d</string>
+    <string name="moves_count">%1$d movimentos</string>
+    <string name="moves_label">Movimentos</string>
+    <string name="squares_moved">%1$d quadrados</string>
+    <string name="squares_label">Quadrados</string>
+    <string name="board_size">Tabuleiro: %1$dx%2$d</string>
+    <string name="solution_error">Nenhuma solução encontrada: %1$s</string>
+    <string name="direction_down">baixo</string>
+    <string name="direction_right">direita</string>
+    <string name="direction_left">esquerda</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="cancel_button">Cancelar</string>
+    <string name="reset_button">Redefinir</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="level_id_text">Nível %1$d</string>
+    <string name="target_reached">Alvo alcançado! Jogo completo em %1$d movimentos e %2$d quadrados movidos</string>
+    <string name="unknown_color">Desconhecido: %1$s</string>
+
+    <!-- Accessibility versions -->
+    <string name="game_completed_a11y">Alvo alcançado! Jogo completo em %1$d movimentos e %2$d quadrados movidos</string>
+
+    <string name="nothing_to_undo">Nada para desfazer</string>
+    <string name="robots_reset">Robôs redefinidos para posições iniciais</string>
+    <string name="no_game_in_progress">Nenhum jogo em andamento</string>
+    <string name="no_robots_available">Nenhum robô disponível</string>
+    <string name="cannot_move_in_this_direction">Não pode mover nesta direção</string>
+    <string name="pre_hint_less_than_x">A IA encontrou uma solução com menos de %1$d movimentos</string>
+    <string name="pre_hint_less_than_1">Você encontrou uma solução melhor que a IA!</string>
+    <string name="pre_hint_exact_solution">A IA encontrou uma solução com %1$d movimentos</string>
+    <string name="solution_found">A IA encontrou uma solução!</string>
+    <string name="pre_hint_involved_robots">Mova</string>
+    <string name="and">e</string>
+    <string name="pre_hint_first_move">Primeiro mova o robô %1$s</string>
+    <string name="no_solution_found">Nenhuma solução encontrada</string>
+    <string name="live_move_counter_label_a11y">Mostrar movimentos restantes</string>
+    <string name="live_move_counter_optimal">%1$d movimentos daqui</string>
+    <string name="pre_hint_ready">Pronto para dicas passo a passo</string>
+    <string name="all_hints_shown">Todas as dicas foram mostradas</string>
+    <string name="no_valid_hint">Nenhuma dica válida disponível</string>
+    <string name="error_displaying_hint">Erro ao exibir dica</string>
+    <string name="history_completed_once">Concluído uma vez</string>
+    <string name="history_completed_times">Concluído %1$d vezes</string>
+    <string name="history_not_completed">Ainda não concluído</string>
+    <string name="perfect_solution">Perfeito! Você encontrou a solução ótima!</string>
+    <plurals name="live_move_counter_optimal_plural">
+        <item quantity="one">%1$d movimento daqui</item>
+        <item quantity="other">%1$d movimentos daqui</item>
+    </plurals>
+    
+    <!-- Game History Details Popup -->
+    <string name="history_detail_completions">Conclusões:</string>
+    <string name="history_detail_first_started">Primeiro início:</string>
+    <string name="history_detail_last_played">Última jogada:</string>
+    <string name="history_detail_all_completions">Todas as conclusões:</string>
+    <string name="history_detail_best_time">Melhor tempo:</string>
+    <string name="history_detail_best_moves">Melhores movimentos:</string>
+    <string name="history_detail_optimal_moves">Movimentos ótimos:</string>
+    <string name="history_detail_perfect">perfeito!</string>
+    <string name="history_detail_extra_moves">+%1$d extra</string>
+    <string name="history_detail_hint_usage_last">Uso de dicas (última sessão):</string>
+    <string name="history_detail_no_hints_used">Nenhuma dica usada</string>
+    <string name="history_detail_pre_hint_viewed">Pré-dica visualizada (cores dos robôs reveladas)</string>
+    <string name="history_detail_up_to_hint">Até a dica #%1$d visualizada</string>
+    <string name="history_detail_hints_ever_used">Dicas já usadas (todas as tentativas):</string>
+    <string name="history_detail_qualifies_no_hints">Qualifica para conquista sem dicas:</string>
+    <string name="history_detail_last_solved_no_hints">Último resolvido sem dicas:</string>
+    <string name="history_detail_last_perfect_no_hints">Último perfeitamente resolvido sem dicas:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifica para conquista perfeita sem dicas:</string>
+    <string name="history_detail_board">Tabuleiro:</string>
+    <string name="history_detail_map">Mapa:</string>
+    <string name="history_detail_yes">Sim</string>
+    <string name="history_detail_no">Não</string>
+    
+    <!-- Save Slot Info Popup -->
+    <string name="save_slot_saved">Salvo:</string>
+    <string name="save_slot_status">Status:</string>
+    <string name="save_slot_solved">Resolvido</string>
+    <string name="save_slot_in_progress">Em progresso</string>
+    <string name="save_slot_moves_at_save">Movimentos ao salvar:</string>
+    <string name="save_slot_difficulty">Dificuldade:</string>
+    <string name="save_slot_hint_usage_at_save">Uso de dicas ao salvar:</string>
+    <string name="save_slot_history_header">--- Histórico deste mapa ---</string>
+    <string name="save_slot_no_history_entry">Nenhuma entrada de histórico encontrada (mapa ainda não jogado)</string>
+    <string name="save_slot_no_history_old_format">Nenhum histórico disponível (formato de salvamento antigo)</string>
+
+    <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">Por Data</string>
+    <string name="sort_last_solved">Último Resolvido</string>
+    <string name="sort_longest_first_attempt">Primeira Tentativa Mais Longa</string>
+    <string name="sort_optimal_not_found">Ótimo Não Encontrado</string>
+    <string name="sort_unsolved">Não Resolvido</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_optimal_not_found">Ótimo Não Encontrado</string>
+    <string name="filter_unsolved">Não Resolvido</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">Página %1$d de %2$d (%3$d)</string>
+    <string name="pagination_prev">Anterior</string>
+    <string name="pagination_next">Próximo</string>
+
+    <string name="difficulty_beginner">Iniciante</string>
+    <string name="difficulty_advanced">Avançado</string>
+    <string name="difficulty_insane">Insano</string>
+    <string name="difficulty_impossible">Impossível</string>
+    <string name="difficulty_unknown">Desconhecido</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">de</string>
+    <string name="impossible_small_board_warning">Impossível em tabuleiros pequenos pode levar vários minutos para gerar um mapa adequado</string>
+    
+    <!-- Toast messages -->
+    <string name="error_email_app">Não foi possível abrir o aplicativo de e-mail</string>
+    <string name="robot_movement_canceled">Movimento do robô cancelado</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Configurações</string>
+    <string name="settings_board_size">Tamanho do Tabuleiro:</string>
+    <string name="settings_difficulty">Nível de Dificuldade:</string>
+    <string name="settings_new_map_each_time">Gerar Novo Mapa Cada Vez:</string>
+    <string name="settings_robots_reach_targets">Configurações de Objetivos:</string>
+    <string name="settings_out_of">de</string>
+    <string name="settings_targets">Objetivos</string>
+    <string name="settings_sound">Efeitos Sonoros:</string>
+    <string name="settings_background_sound">Som de Fundo:</string>
+    <string name="settings_background_sound_a11y">Controle deslizante de volume de som de fundo</string>
+    <string name="settings_sound_effects_volume">Volume dos Efeitos Sonoros:</string>
+    <string name="settings_sound_effects_volume_a11y">Controle deslizante de volume de efeitos sonoros</string>
+    <string name="settings_yes">Sim</string>
+    <string name="settings_no">Não</string>
+    <string name="settings_on">Ligado</string>
+    <string name="settings_off">Desligado</string>
+    <string name="settings_back">Voltar</string>
+    <string name="settings_game_mode">Modo de Jogo:</string>
+    <string name="settings_standard_game">Jogo Padrão</string>
+    <string name="settings_standard_game_a11y">Modo de Jogo Padrão</string>
+    <string name="settings_multi_target_mode">Modo Multi-Objetivo (beta)</string>
+    <string name="settings_multi_target_mode_a11y">Modo Multi-Objetivo beta</string>
+    <string name="settings_fullscreen">Modo Tela Cheia:</string>
+    <string name="settings_fullscreen_a11y">Alternar modo tela cheia</string>
+    <string name="settings_fullscreen_applying">Aplicando configurações de tela cheia</string>
+    <string name="settings_puzzle_parameters">Nº de Movimentos:</string>
+    <string name="settings_min_solution_moves">Mín:</string>
+    <string name="settings_max_solution_moves">Máx:</string>
+    <string name="settings_allow_multicolor_target">Permitir Objetivo Multicolor:</string>
+    <string name="settings_high_contrast_mode">Modo Alto Contraste:</string>
+    <string name="settings_hint_auto_move">Movimento Automático da Dica:</string>
+    <string name="settings_hint_auto_move_manual">Manual (mova os robôs você mesmo)</string>
+    <string name="settings_hint_auto_move_manual_a11y">Modo manual: você move os robôs você mesmo</string>
+    <string name="settings_hint_auto_move_full_auto">Totalmente Automático (robô se move automaticamente)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Modo totalmente automático: robô se move automaticamente quando a dica é mostrada e avança para a próxima dica</string>
+    <string name="settings_hint_auto_move_semi_auto">Semi-Automático (mover no botão próxima-dica)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Modo semi-automático: robô se move quando você clica no botão próxima-dica</string>
+    
+    <!-- Account Section -->
+    <string name="settings_account_section">Conta Roboyard</string>
+    <string name="settings_account_description">Faça login para compartilhar mapas diretamente para roboyard.z11.de</string>
+    <string name="settings_login">Login</string>
+    <string name="settings_register">Registrar</string>
+    <string name="settings_logout">Logout</string>
+    <string name="settings_logged_in_as">Logado como: %1$s</string>
+    <string name="settings_login_success">Login bem-sucedido</string>
+    <string name="settings_login_failed">Login falhou: %1$s</string>
+    <string name="settings_register_success">Registro bem-sucedido</string>
+    <string name="settings_register_failed">Registro falhou: %1$s</string>
+    <string name="settings_logout_success">Deslogado</string>
+    <string name="settings_logout_confirm_title">Logout?</string>
+    <string name="settings_logout_confirm_message">Fazer logout limpará todas as conquistas locais, progresso de níveis, histórico de jogos e sequências deste dispositivo. Seus dados são salvos no servidor e serão restaurados no próximo login.</string>
+    <string name="settings_logging_out">Fazendo logout…</string>
+    <string name="needs_update_toast">Seu aplicativo precisa de uma atualização para usar este recurso.</string>
+    <string name="login_dialog_title">Login no Roboyard</string>
+    <string name="login_dialog_email">E-mail</string>
+    <string name="login_dialog_password">Senha</string>
+    <string name="register_dialog_title">Registrar no Roboyard</string>
+    <string name="register_dialog_name">Nome</string>
+    <string name="register_dialog_confirm_password">Confirmar Senha</string>
+    
+    <!-- Data Export/Import Section -->
+    <string name="settings_data_section">Gerenciamento de Dados</string>
+    <string name="settings_data_description">Exporte ou importe todos os seus dados do jogo incluindo preferências, conquistas, progresso de níveis e jogos salvos.</string>
+    <string name="settings_export_data">Exportar Dados</string>
+    <string name="settings_import_data">Importar Dados</string>
+    <string name="settings_reset_data">Redefinir Todos os Dados</string>
+    <string name="settings_export_success">Dados exportados com sucesso</string>
+    <string name="settings_export_failed">Exportação falhou: %1$s</string>
+    <string name="settings_import_success">Dados importados com sucesso. Por favor, reinicie o aplicativo.</string>
+    <string name="settings_import_failed">Importação falhou: %1$s</string>
+    <string name="settings_reset_confirm_title">Redefinir Todos os Dados?</string>
+    <string name="settings_reset_confirm_message">Isso excluirá todas as suas preferências, conquistas, progresso de níveis e jogos salvos. Esta ação não pode ser desfeita.</string>
+    <string name="settings_reset_success">Todos os dados foram redefinidos. Por favor, reinicie o aplicativo.</string>
+    
+    <!-- Share Dialog -->
+    <string name="share_dialog_title">Compartilhar Mapa</string>
+    <string name="share_dialog_logged_in_message">Você está logado como %1$s. Compartilhar diretamente para sua conta roboyard.z11.de?</string>
+    <string name="share_to_account">Compartilhar para Conta</string>
+    <string name="share_via_url">Compartilhar via URL</string>
+    <string name="share_success">Mapa compartilhado com sucesso!</string>
+    <string name="share_failed">Compartilhamento falhou: %1$s</string>
+    <string name="sharing_map">Compartilhando mapa...</string>
+    
+    <!-- Level Selection Item Strings -->
+    <string name="level_robots_label">robôs:</string>
+    <string name="level_squares_label">quadrados:</string>
+    
+    
+    <string name="squares_north">quadrados ao norte</string>
+    <string name="squares_south">quadrados ao sul</string>
+    <string name="squares_east">quadrados ao leste</string>
+    <string name="squares_west">quadrados ao oeste</string>
+    <string name="until">até</string>
+    <string name="until_masculine">até o</string>
+    <string name="until_feminine">até a</string>
+    <string name="edge">borda</string>
+    <string name="no_movement_north">sem movimento para o norte</string>
+    <string name="no_movement_south">sem movimento para o sul</string>
+    <string name="no_movement_east">sem movimento para o leste</string>
+    <string name="no_movement_west">sem movimento para o oeste</string>
+
+    <!-- Game text -->
+    <string name="possible_moves_a11y">Movimentos possíveis</string>
+    <string name="edge_a11y">borda</string>
+    <string name="wall_a11y">parede</string>
+    <string name="walls_a11y">paredes</string>
+    <string name="target_reached_a11y">com objetivo alcançado</string>
+        
+    <string name="announce">Anunciar</string>
+    <string name="next_robot">Próximo Robô</string>
+    <string name="announce_a11y">Anunciar situação do jogo</string>
+    <string name="next_robot_a11y">Selecionar próximo robô</string>
+
+    <!-- Accessibility strings for GameGridView's components -->
+    <string name="robot_position_a11y">robô na posição</string>
+    <string name="target_position_a11y">Seu objetivo está na posição</string>
+    <string name="position_a11y">Posição</string>
+    <string name="multicolored_a11y">Multicolorido</string>
+    <string name="walls_on_a11y">Paredes em</string>
+    <string name="north_a11y">Norte</string>
+    <string name="south_a11y">Sul</string>
+    <string name="east_a11y">Leste</string>
+    <string name="west_a11y">Oeste</string>
+    <string name="empty_space_a11y">Espaço vazio</string>
+
+
+    <!-- Achievement Strings -->
+    
+    <!-- Achievement Category Names -->
+    <string name="achievement_login_streak">Sequência de Login</string>
+    <string name="achievement_category_progression">Progressão</string>
+    <string name="achievement_category_performance">Desempenho</string>
+    <string name="achievement_category_challenge">Desafio</string>
+    <string name="achievement_category_mastery">Maestria</string>
+    <string name="achievement_category_random_speed">Velocidade</string>
+    <string name="achievement_category_random_difficulty">Dificuldade</string>
+    <string name="achievement_category_random_solution">Comprimento da Solução</string>
+    <string name="achievement_category_random_resolution">Resoluções de Tela</string>
+    <string name="achievement_category_random_targets">Múltiplos Objetivos</string>
+    <string name="achievement_category_random_robots">Desafios Divertidos</string>
+    <string name="achievement_category_random_coverage">Cobertura de Quadrados</string>
+    <string name="achievement_category_random_streaks">Sequências</string>
+    
+    <!-- Login Streak -->
+    <string name="achievement_login_streak_day_label">%d dia</string>
+    <string name="achievement_login_streak_days_label">%d dias</string>
+    <string name="achievement_longest_streak_label">Maior Sequência: %1$s</string>
+    <string name="achievement_streak_7">Jogador Semanal</string>
+    <string name="achievement_streak_7_desc">Faça login 7 dias seguidos</string>
+    <string name="achievement_streak_30">Jogador Dedicado</string>
+    <string name="achievement_streak_30_desc">Faça login 30 dias seguidos</string>
+    <string name="achievement_comeback">Bem-vindo de Volta!</string>
+    <string name="achievement_comeback_desc">Retorne após 30 dias de inatividade</string>
+    
+    <!-- Progression Achievements -->
+    <string name="achievement_first_game">Bem-vindo!</string>
+    <string name="achievement_first_game_desc">Jogue seu primeiro jogo</string>
+    <string name="achievement_level_1_complete">Primeiros Passos</string>
+    <string name="achievement_level_1_complete_desc">Complete o Nível 1</string>
+    <string name="achievement_level_10_complete">Começando</string>
+    <string name="achievement_level_10_complete_desc">Complete 10 níveis</string>
+    <string name="achievement_level_50_complete">Pelo Caminho</string>
+    <string name="achievement_level_50_complete_desc">Complete 50 níveis</string>
+    <string name="achievement_level_140_complete">Mestre de Níveis</string>
+    <string name="achievement_level_140_complete_desc">Complete todos os 140 níveis</string>
+    <string name="achievement_all_stars">Colecionador de Estrelas</string>
+    <string name="achievement_all_stars_desc">Colete todas as 420 estrelas</string>
+    
+    <!-- Performance Achievements -->
+    <string name="achievement_perfect_5">Movimento Perfeito</string>
+    <string name="achievement_perfect_5_desc">Resolva 5 níveis com movimentos ótimos</string>
+    <string name="achievement_perfect_10">Jogador de Precisão</string>
+    <string name="achievement_perfect_10_desc">Resolva 10 níveis com movimentos ótimos</string>
+    <string name="achievement_perfect_50">Especialista em Otimização</string>
+    <string name="achievement_perfect_50_desc">Resolva 50 níveis com movimentos ótimos</string>
+    <string name="achievement_speedrun_30s">Pensador Rápido</string>
+    <string name="achievement_speedrun_30s_desc">Complete um nível em menos de 30 segundos</string>
+    <string name="achievement_speedrun_10s">Velocidade de Relâmpago</string>
+    <string name="achievement_speedrun_10s_desc">Complete um nível em menos de 10 segundos</string>
+    <string name="achievement_view_1_hour">Não Desista</string>
+    <string name="achievement_view_1_hour_desc">Tente resolver um mapa por 1 hora sem completá-lo</string>
+    
+    <!-- Challenge Achievements -->
+    <string name="achievement_solve_custom">Solvedor Personalizado</string>
+    <string name="achievement_solve_custom_desc">Resolva um nível criado personalizado</string>
+    <string name="achievement_create_custom">Designer de Nível</string>
+    <string name="achievement_create_custom_desc">Crie e salve um nível personalizado</string>
+    <string name="achievement_share_custom">Compartilhamento é Cuidado</string>
+    <string name="achievement_share_custom_desc">Compartilhe um nível personalizado com outros</string>
+    
+    <!-- Mastery Achievements -->
+    <string name="achievement_3_star_1">Estrela de Nível Difícil</string>
+    <string name="achievement_3_star_1_desc">Alcance 3 estrelas em um nível com 5+ movimentos ótimos</string>
+    <string name="achievement_3_star_10">Estrela em Ascensão</string>
+    <string name="achievement_3_star_10_desc">Alcance 3 estrelas em 10 níveis</string>
+    <string name="achievement_3_star_10_hard">Mestre de Níveis Difíceis</string>
+    <string name="achievement_3_star_10_hard_desc">Alcance 3 estrelas em 10 níveis com 5+ movimentos ótimos</string>
+    <string name="achievement_3_star_50">Super Estrela</string>
+    <string name="achievement_3_star_50_desc">Alcance 3 estrelas em 50 níveis</string>
+    <string name="achievement_3_star_all">Mestre Perfeito</string>
+    <string name="achievement_3_star_all_desc">Alcance 3 estrelas em todos os 140 níveis</string>
+    
+    <!-- Random Game - Difficulty -->
+    <string name="achievement_impossible_1">Sonho Impossível</string>
+    <string name="achievement_impossible_1_desc">Complete 1 jogo no modo Impossível</string>
+    <string name="achievement_impossible_5">Campeão Impossível</string>
+    <string name="achievement_impossible_5_desc">Complete 5 jogos no modo Impossível</string>
+    <string name="achievement_impossible_streak_5">Sequência Impossível</string>
+    <string name="achievement_impossible_streak_5_desc">Complete 5 jogos seguidos no modo Impossível com movimentos ótimos</string>
+    <string name="achievement_impossible_streak_10">Lenda Impossível</string>
+    <string name="achievement_impossible_streak_10_desc">Complete 10 jogos seguidos no modo Impossível com movimentos ótimos</string>
+    
+    <!-- Random Game - Solution Length -->
+    <string name="achievement_solution_18">Mestre de 18 Movimentos</string>
+    <string name="achievement_solution_18_desc">Complete um jogo com solução ótima de 18 movimentos</string>
+    <string name="achievement_solution_19">Mestre de 19 Movimentos</string>
+    <string name="achievement_solution_19_desc">Complete um jogo com solução ótima de 19 movimentos</string>
+    <string name="achievement_solution_20">Mestre de 20 Movimentos</string>
+    <string name="achievement_solution_20_desc">Complete um jogo com solução ótima de 20 movimentos</string>
+    <string name="achievement_solution_21">Mestre de 21 Movimentos</string>
+    <string name="achievement_solution_21_desc">Complete um jogo com solução ótima de 21 movimentos</string>
+    <string name="achievement_solution_22">Mestre de 22 Movimentos</string>
+    <string name="achievement_solution_22_desc">Complete um jogo com solução ótima de 22 movimentos</string>
+    <string name="achievement_solution_23">Mestre de 23 Movimentos</string>
+    <string name="achievement_solution_23_desc">Complete um jogo com solução ótima de 23 movimentos</string>
+    <string name="achievement_solution_24">Mestre de 24 Movimentos</string>
+    <string name="achievement_solution_24_desc">Complete um jogo com solução ótima de 24 movimentos</string>
+    <string name="achievement_solution_25">Mestre de 25 Movimentos</string>
+    <string name="achievement_solution_25_desc">Complete um jogo com solução ótima de 25 movimentos</string>
+    <string name="achievement_solution_26">Mestre de 26 Movimentos</string>
+    <string name="achievement_solution_26_desc">Complete um jogo com solução ótima de 26 movimentos</string>
+    <string name="achievement_solution_27">Mestre de 27 Movimentos</string>
+    <string name="achievement_solution_27_desc">Complete um jogo com solução ótima de 27 movimentos</string>
+    <string name="achievement_solution_28">Mestre de 28 Movimentos</string>
+    <string name="achievement_solution_28_desc">Complete um jogo com solução ótima de 28 movimentos</string>
+    <string name="achievement_solution_29">Mestre de 29 Movimentos</string>
+    <string name="achievement_solution_29_desc">Complete um jogo com solução ótima de 29 movimentos</string>
+    <string name="achievement_solution_30_plus">Mestre de 30+ Movimentos</string>
+    <string name="achievement_solution_30_plus_desc">Complete um jogo com solução ótima de 30+ movimentos</string>
+    
+    <!-- Random Game - Screen Resolutions -->
+    <string name="achievement_resolution_10">Resolution Explorer 10</string>
+    <string name="achievement_resolution_10_desc">Play games with 10+ moves on all screen resolutions</string>
+    <string name="achievement_resolution_12">Resolution Explorer 12</string>
+    <string name="achievement_resolution_12_desc">Play games with 12+ moves on all screen resolutions</string>
+    <string name="achievement_resolution_15">Resolution Explorer 15</string>
+    <string name="achievement_resolution_15_desc">Play games with 15+ moves on all screen resolutions</string>
+    
+    <!-- Random Game - Multiple Targets -->
+    <string name="achievement_2_targets">Double Target</string>
+    <string name="achievement_2_targets_desc">Complete a game with 2 targets</string>
+    <string name="achievement_3_targets">Triple Target</string>
+    <string name="achievement_3_targets_desc">Complete a game with 3 targets</string>
+    <string name="achievement_4_targets">Quad Target</string>
+    <string name="achievement_4_targets_desc">Complete a game with 4 targets</string>
+    <string name="achievement_2_of_3_targets">2 of 3</string>
+    <string name="achievement_2_of_3_targets_desc">Complete a game where you need 2 out of 3 targets</string>
+    <string name="achievement_2_of_4_targets">2 of 4</string>
+    <string name="achievement_2_of_4_targets_desc">Complete a game where you need 2 out of 4 targets</string>
+    <string name="achievement_3_of_4_targets">3 of 4</string>
+    <string name="achievement_3_of_4_targets_desc">Complete a game where you need 3 out of 4 targets</string>
+    <string name="achievement_2_of_2_targets">2 of 2</string>
+    <string name="achievement_2_of_2_targets_desc">Complete a game where you need 2 out of 2 targets</string>
+    <string name="achievement_3_of_3_targets">3 of 3</string>
+    <string name="achievement_3_of_3_targets_desc">Complete a game where you need 3 out of 3 targets</string>
+    <string name="achievement_4_of_4_targets">4 of 4</string>
+    <string name="achievement_4_of_4_targets_desc">Complete a game where you need all 4 targets</string>
+    
+    <!-- Random Game - Fun Challenges -->
+    <string name="achievement_5_robots">Full Team</string>
+    <string name="achievement_5_robots_desc">Complete a game with 5 robots</string>
+    <string name="achievement_gimme_five">Gimme Five</string>
+    <string name="achievement_gimme_five_desc">All robots must touch each other</string>
+
+    <!-- Same-walls achievements -->
+    <string name="achievement_same_walls_2">Déjà Vu</string>
+    <string name="achievement_same_walls_2_desc">Solve the same wall layout with 2 different robot positions</string>
+    <string name="achievement_same_walls_10">Wall Expert</string>
+    <string name="achievement_same_walls_10_desc">Solve the same wall layout with 5 different robot positions</string>
+    <string name="achievement_same_walls_100">Wall Master</string>
+    <string name="achievement_same_walls_100_desc">Solve the same wall layout with 10 different robot positions</string>
+    
+    <!-- Random Game - Square Coverage -->
+    <string name="achievement_traverse_1_robot">Solo Explorer</string>
+    <string name="achievement_traverse_1_robot_desc">Visit all squares on the board with 1 robot</string>
+    <string name="achievement_traverse_1_robot_goal">Solo Goal Explorer</string>
+    <string name="achievement_traverse_1_robot_goal_desc">Visit all squares with 1 robot, reaching the goal last</string>
+    <string name="achievement_traverse_all_robots">Team Explorer</string>
+    <string name="achievement_traverse_all_robots_desc">Visit all squares on the board with all robots combined</string>
+    <string name="achievement_traverse_all_robots_goal">Team Goal Explorer</string>
+    <string name="achievement_traverse_all_robots_goal_desc">Visit all squares with all robots, reaching the goal last</string>
+    
+    <!-- Random Game - Streaks -->
+    <!-- Perfect random games (cumulative) -->
+    <string name="achievement_perfect_random_5">Perfect 5</string>
+    <string name="achievement_perfect_random_5_desc">Complete 5 random games with optimal moves</string>
+    <string name="achievement_perfect_random_10">Perfect 10</string>
+    <string name="achievement_perfect_random_10_desc">Complete 10 random games with optimal moves</string>
+    <string name="achievement_perfect_random_20">Perfect 20</string>
+    <string name="achievement_perfect_random_20_desc">Complete 20 random games with optimal moves</string>
+    <!-- Perfect random games streak -->
+    <string name="achievement_perfect_random_streak_5">Perfect Streak 5</string>
+    <string name="achievement_perfect_random_streak_5_desc">Complete 5 random games with optimal moves in a row</string>
+    <string name="achievement_perfect_random_streak_10">Perfect Streak 10</string>
+    <string name="achievement_perfect_random_streak_10_desc">Complete 10 random games with optimal moves in a row</string>
+    <string name="achievement_perfect_random_streak_20">Perfect Streak 20</string>
+    <string name="achievement_perfect_random_streak_20_desc">Complete 20 random games with optimal moves in a row</string>
+    <!-- Perfect solution with no hints -->
+    <string name="achievement_perfect_no_hints_random_1">Perfect No Help</string>
+    <string name="achievement_perfect_no_hints_random_1_desc">Complete a random game with optimal moves (10+ moves) without using hints</string>
+    <!-- No hints random games (cumulative) -->
+    <string name="achievement_no_hints_random_10">No Help Needed 10</string>
+    <string name="achievement_no_hints_random_10_desc">Complete 10 random games without using hints</string>
+    <string name="achievement_no_hints_random_50">No Help Needed 50</string>
+    <string name="achievement_no_hints_random_50_desc">Complete 50 random games without using hints</string>
+    <!-- No hints random games streak -->
+    <string name="achievement_no_hints_streak_random_10">No Help Streak 10</string>
+    <string name="achievement_no_hints_streak_random_10_desc">Complete 10 random games without using hints in a row</string>
+    <string name="achievement_no_hints_streak_random_50">No Help Streak 50</string>
+    <string name="achievement_no_hints_streak_random_50_desc">Complete 50 random games without using hints in a row</string>
+    
+    <!-- Random Game - Speed -->
+    <string name="achievement_speedrun_random_20s">Speed Demon</string>
+    <string name="achievement_speedrun_random_20s_desc">Complete a random game in under 20 seconds</string>
+    <string name="achievement_speedrun_random_10s">Lightning Speed</string>
+    <string name="achievement_speedrun_random_10s_desc">Complete a random game in under 10 seconds</string>
+    <string name="achievement_speedrun_random_5x30s">Speed Streak</string>
+    <string name="achievement_speedrun_random_5x30s_desc">Complete 5 random games in under 30 seconds each</string>
+    
+    <!-- Achievement UI -->
+    <string name="achievements_title">Achievements</string>
+    <string name="achievements_unlocked">Unlocked</string>
+    <string name="achievements_locked">Locked</string>
+    <string name="achievements_progress">%1$d / %2$d</string>
+    <string name="achievement_unlocked">Achievement unlocked!</string>
+    <string name="achievements_unlocked_multiple">Achievements unlocked!</string>
+    <string name="view_achievements">View achievements</string>
+    <string name="streak_popup_title">Daily streak</string>
+    <string name="streak_popup_message">Você fez login %1$d dias consecutivos.</string>
+    <string name="streak_popup_day_1_headline">Comece sua sequência!</string>
+    <string name="streak_popup_day_1_message">Você começou uma nova sequência. Faça login novamente amanhã para manter sua sequência.</string>
+    <string name="streak_popup_day_2_headline">Você voltou!</string>
+    <string name="streak_popup_day_3_headline">Continue fazendo login!</string>
+    <string name="streak_popup_day_4_headline">Pela metade!</string>
+    <string name="streak_popup_day_5_headline">Você está em chamas!</string>
+    <string name="streak_popup_day_6_headline">Quase uma semana!</string>
+    <string name="streak_popup_day_7_headline">Uma semana de sequência!</string>
+    <string name="streak_popup_day_8_headline">Você é o melhor!</string>
+    <string name="streak_popup_day_9_headline">Nove e contando!</string>
+    <string name="streak_popup_day_10_headline">Dois dígitos!</string>
+    <string name="streak_popup_day_11_headline">Duas semanas menos 3!</string>
+    <string name="streak_popup_day_12_headline">Inparável!</string>
+    <string name="streak_popup_day_13_headline">Treze é sorte!</string>
+    <string name="streak_popup_day_14_headline">Duas semanas!</string>
+    <string name="streak_popup_day_15_headline">Pela metade de um mês!</string>
+    <string name="streak_popup_day_16_headline">Sequência inparável!</string>
+    <string name="streak_popup_day_17_headline">Em rolamento!</string>
+    <string name="streak_popup_day_18_headline">Incrível!</string>
+    <string name="streak_popup_day_19_headline">Quase lá!</string>
+    <string name="streak_popup_day_20_headline">Superstar!</string>
+    <string name="streak_popup_day_21_headline">Três semanas!</string>
+    <string name="streak_popup_day_22_headline">Fenomenal!</string>
+    <string name="streak_popup_day_23_headline">Extraordinário!</string>
+    <string name="streak_popup_day_24_headline">Lendário!</string>
+    <string name="streak_popup_day_25_headline">Força inparável!</string>
+    <string name="streak_popup_day_26_headline">Esmagando completamente!</string>
+    <string name="streak_popup_day_27_headline">Quase um mês!</string>
+    <string name="streak_popup_day_28_headline">Quatro semanas!</string>
+    <string name="streak_popup_day_29_headline">Falta um dia!</string>
+    <string name="streak_popup_day_30_headline">Quase um mês!</string>
+    <string name="streak_popup_day_31_headline">Status de lenda!</string>
+    
+    <!-- Level Editor Strings -->
+    <string name="editor_title">Editor de Design de Nível</string>
+    <string name="editor_new_map">Novo Mapa</string>
+    <string name="editor_level_map">Mapa do Nível %1$d</string>
+    <string name="editor_select_level">Selecionar Nível: </string>
+    <string name="editor_board_size">Tamanho do Tabuleiro: </string>
+    <string name="editor_apply">Aplicar</string>
+    <string name="editor_board_preview">Visualização do Tabuleiro</string>
+    <string name="editor_board_preview_hint">Visualização do Tabuleiro (Toque para editar)</string>
+    <string name="editor_mode_robot">Robô</string>
+    <string name="editor_mode_target">Objetivo</string>
+    <string name="editor_mode_wall_h">- Parede</string>
+    <string name="editor_mode_wall_v">| Parede</string>
+    <string name="editor_mode_erase">Apagar</string>
+    <string name="editor_color_multi">Múltiplo</string>
+    <string name="editor_load_autosave">Carregar Salvamento Automático</string>
+    <string name="editor_cancel">Cancelar</string>
+    <string name="editor_random_robots_targets">Robôs &amp; Objetivos Aleatórios</string>
+    <string name="editor_export_level">Exportar Texto do Nível</string>
+    <string name="editor_import_ascii_map">Importar Mapa ASCII</string>
+    <string name="editor_import_ascii_map_title">Colar Mapa ASCII</string>
+    <string name="editor_import_ascii_map_hint">Cole o mapa ASCII aqui…</string>
+    <string name="editor_generate_walls">Gerar Paredes</string>
+    <string name="editor_generate">Gerar</string>
+    <string name="editor_load_savegame">Carregar Salvamento: </string>
+    <string name="editor_pattern_label">Padrão:</string>
+    <string name="editor_pattern_classic">Clássico (Formas L)</string>
+    <string name="editor_pattern_spiral">Espiral</string>
+    <string name="editor_pattern_rooms">Salas</string>
+    <string name="editor_pattern_maze">Labirinto</string>
+    <string name="editor_pattern_diagonal">Diagonal</string>
+    <string name="editor_pattern_symmetric">Simétrico</string>
+    <string name="editor_pattern_corridors">Corredores</string>
+    <string name="editor_pattern_islands">Ilhas</string>
+    <string name="editor_pattern_border_heavy">Borda Pesada</string>
+    <string name="editor_pattern_scatter">Disperso</string>
+    <string name="editor_generate_border_stubs">Toques de Borda</string>
+    <string name="editor_play_map">▶ Jogar Mapa</string>
+    <string name="map_dimensions_mismatch">Dimensões do mapa %1$dx%2$d não cabem nas configurações %3$dx%4$d - gerando novas paredes</string>
+    <string name="editor_no_level_loaded">Nenhum nível carregado</string>
+    <string name="editor_save_slot_empty">Slot de salvamento vazio</string>
+    <string name="editor_could_not_load_save">Não foi possível carregar salvamento</string>
+    <string name="editor_loaded_map">Carregado último mapa jogado: %1$s</string>
+    <string name="editor_board_size_invalid">O tamanho do tabuleiro deve estar entre 4x4 e 24x24</string>
+    <string name="editor_invalid_numbers">Por favor, insira números válidos</string>
+    <string name="editor_map_needs_robot_target">O mapa precisa de pelo menos um robô e um objetivo para jogar</string>
+    <string name="editor_error_encoding_map">Erro ao codificar dados do mapa</string>
+    <string name="editor_cannot_open_game">Não é possível abrir jogo a partir do editor</string>
+    <string name="editor_copied_to_clipboard">Dados do nível copiados para a área de transferência</string>
+    <string name="editor_sharing_to_account">Compartilhando com a conta…</string>
+    <string name="editor_map_already_exists">Mapa já existe</string>
+    <string name="editor_opening_share_url">Abrindo URL de compartilhamento no navegador</string>
+    <string name="editor_error_creating_share_url">Erro ao criar URL de compartilhamento</string>
+    <string name="editor_no_browser_available">Nenhum navegador disponível para abrir URL</string>
+    <string name="editor_saved_to_sourcecode">Nível %1$d salvo no código-fonte!</string>
+    <string name="editor_added_robot">Adicionado robô %1$s em (%2$d, %3$d)</string>
+    <string name="editor_removed_robot">Removido robô em (%1$d, %2$d)</string>
+    <string name="editor_added_target">Adicionado objetivo %1$s em (%2$d, %3$d)</string>
+    <string name="editor_removed_target">Removido objetivo em (%1$d, %2$d)</string>
+    <string name="editor_added_horizontal_wall">Adicionada parede horizontal em (%1$d, %2$d)</string>
+    <string name="editor_removed_horizontal_wall">Removida parede horizontal em (%1$d, %2$d)</string>
+    <string name="editor_added_vertical_wall">Adicionada parede vertical em (%1$d, %2$d)</string>
+    <string name="editor_removed_vertical_wall">Removida parede vertical em (%1$d, %2$d)</string>
+    <string name="editor_erased_element">Apagado elemento em (%1$d, %2$d)</string>
+    <string name="editor_nothing_to_erase">Nada para apagar em (%1$d, %2$d)</string>
+    <string name="editor_cannot_place_in_carree">Não é possível colocar robô ou objetivo no centro do carree</string>
+
+    <!-- Login and Account Strings -->
+    <string name="profile_a11y">Perfil do usuário</string>
+    
+    <!-- Empty text placeholder used in layouts -->
+    <string name="empty_text"></string>
+</resources>

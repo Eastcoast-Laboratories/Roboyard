@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="16">
+    <!-- White background -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0h24v16H0V0z"/>
+    <!-- Taeguk circle (red and blue yin-yang) -->
+    <!-- Red half -->
+    <path
+        android:fillColor="#CD2E3A"
+        android:pathData="M12,4a4,4 0,1,1,0,8a2,2 0,1,0,0,-4a2,2 0,1,1,0,-4z"/>
+    <!-- Blue half -->
+    <path
+        android:fillColor="#0047A0"
+        android:pathData="M12,4a4,4 0,1,0,0,8a2,2 0,1,1,0,-4a2,2 0,1,0,0,-4z"/>
+    <!-- Small circles in Taeguk -->
+    <path
+        android:fillColor="#0047A0"
+        android:pathData="M12,6a1,1 0,1,1,0,2a1,1 0,1,1,0,-2z"/>
+    <path
+        android:fillColor="#CD2E3A"
+        android:pathData="M12,8a1,1 0,1,1,0,2a1,1 0,1,1,0,-2z"/>
+    <!-- Trigrams (simplified black lines) -->
+    <!-- Top left trigram (Heaven) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2,2h2v0.5H2V2z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2,3h2v0.5H2V3z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2,4h2v0.5H2V4z"/>
+    <!-- Top right trigram (Water) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,2h2v0.5H20V2z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20.5,3h1v0.5H20.5V3z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,4h2v0.5H20V4z"/>
+    <!-- Bottom left trigram (Fire) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2,11.5h2v0.5H2V11.5z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2.5,12.5h1v0.5H2.5V12.5z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2,13.5h2v0.5H2V13.5z"/>
+    <!-- Bottom right trigram (Earth) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,11.5h2v0.5H20V11.5z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20.5,12.5h1v0.5H20.5V12.5z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,13.5h2v0.5H20V13.5z"/>
+</vector>

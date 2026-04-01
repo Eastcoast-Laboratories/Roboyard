@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="16">
+    <!-- Red stripe (top) - 1/4 of height -->
+    <path
+        android:fillColor="#AD1519"
+        android:pathData="M0,0h24v4H0V0z"/>
+    <!-- Yellow stripe (middle) - 1/2 of height -->
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M0,4h24v8H0V4z"/>
+    <!-- Red stripe (bottom) - 1/4 of height -->
+    <path
+        android:fillColor="#AD1519"
+        android:pathData="M0,12h24v4H0V12z"/>
+    <!-- Simplified coat of arms representation -->
+    <!-- Shield background -->
+    <path
+        android:fillColor="#AD1519"
+        android:pathData="M3,6h6v4H3V6z"/>
+    <!-- Castle (top left) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3.5,6.5h1.5v1h-0.5v0.5h-0.5V7.5H3.5V6.5z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3.75,7h1v0.5h-1V7z"/>
+    <!-- Lion (top right) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6.5,6.5h1.5v1h-0.5v0.5h-0.5V7.5H6.5V6.5z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6.75,7h1v0.5h-1V7z"/>
+    <!-- Pomegranate (bottom) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M4.5,8.5h3v1h-3V8.5z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M5.5,9h1v0.5h-1V9z"/>
+    <!-- Crown -->
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M3,6h6v0.5H3V6z"/>
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M4,5.5h4v0.5H4V5.5z"/>
+    <!-- Small crown details -->
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M3.5,5h0.5v0.5H3.5V5z"/>
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M4.75,5h0.5v0.5h-0.5V5z"/>
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M6,5h0.5v0.5H6V5z"/>
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M7.25,5h0.5v0.5h-0.5V5z"/>
+    <path
+        android:fillColor="#FABD00"
+        android:pathData="M8.5,5h0.5v0.5H8.5V5z"/>
+</vector>

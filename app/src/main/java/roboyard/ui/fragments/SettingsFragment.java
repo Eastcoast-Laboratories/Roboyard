@@ -28,8 +28,9 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboyard.ui.components.DataExportImportManager;
 import roboyard.eclabs.R;
+import roboyard.ui.adapters.LanguageSpinnerAdapter;
+import roboyard.ui.components.DataExportImportManager;
 import roboyard.ui.components.RoboyardApiClient;
 import roboyard.ui.RoboyardApplication;
 import roboyard.ui.activities.MainActivity;
@@ -725,6 +726,10 @@ public class SettingsFragment extends Fragment {
                 appLanguageIndex = 4; // Chinese
             } else if ("ko".equals(appLanguage)) {
                 appLanguageIndex = 5; // Korean
+            } else if ("ja".equals(appLanguage)) {
+                appLanguageIndex = 6; // Japanese
+            } else if ("pt".equals(appLanguage)) {
+                appLanguageIndex = 7; // Portuguese
             }
             languageSpinner.setSelection(appLanguageIndex);
             
@@ -742,6 +747,10 @@ public class SettingsFragment extends Fragment {
                 talkbackLanguageIndex = 5; // Chinese
             } else if ("ko".equals(talkbackLanguage)) {
                 talkbackLanguageIndex = 6; // Korean
+            } else if ("ja".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 7; // Japanese
+            } else if ("pt".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 8; // Portuguese
             }
             talkbackLanguageSpinner.setSelection(talkbackLanguageIndex);
             
@@ -1181,31 +1190,33 @@ public class SettingsFragment extends Fragment {
     private void setupLanguageSpinners() {
         Timber.d("Setting up language spinners");
         
-        // Set up app language spinner
+        // Set up app language spinner with custom adapter
         List<String> languages = new ArrayList<>();
-        languages.add(getString(R.string.settings_english));
-        languages.add(getString(R.string.settings_german));
-        languages.add(getString(R.string.settings_french));
-        languages.add(getString(R.string.settings_spanish));
-        languages.add(getString(R.string.settings_chinese));
-        languages.add(getString(R.string.settings_korean));
+        languages.add("English");
+        languages.add("Deutsch");
+        languages.add("Français");
+        languages.add("Español");
+        languages.add("中文");
+        languages.add("한국어");
+        languages.add("日本語");
+        languages.add("Português (Brasil)");
         
-        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, languages);
+        LanguageSpinnerAdapter languageAdapter = new LanguageSpinnerAdapter(requireContext(), languages);
         languageSpinner.setAdapter(languageAdapter);
         
-        // Set up TalkBack language spinner (including "Same as app" option)
+        // Set up TalkBack language spinner with custom adapter (including "Same as app" option)
         List<String> talkbackLanguages = new ArrayList<>();
-        talkbackLanguages.add(getString(R.string.language_same_as_app));
-        talkbackLanguages.add(getString(R.string.settings_english));
-        talkbackLanguages.add(getString(R.string.settings_german));
-        talkbackLanguages.add(getString(R.string.settings_french));
-        talkbackLanguages.add(getString(R.string.settings_spanish));
-        talkbackLanguages.add(getString(R.string.settings_chinese));
-        talkbackLanguages.add(getString(R.string.settings_korean));
+        talkbackLanguages.add("Same as app language");
+        talkbackLanguages.add("English");
+        talkbackLanguages.add("Deutsch");
+        talkbackLanguages.add("Français");
+        talkbackLanguages.add("Español");
+        talkbackLanguages.add("中文");
+        talkbackLanguages.add("한국어");
+        talkbackLanguages.add("日本語");
+        talkbackLanguages.add("Português (Brasil)");
         
-        ArrayAdapter<String> talkbackLanguageAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, talkbackLanguages);
+        LanguageSpinnerAdapter talkbackLanguageAdapter = new LanguageSpinnerAdapter(requireContext(), talkbackLanguages);
         talkbackLanguageSpinner.setAdapter(talkbackLanguageAdapter);
         
         // Show/hide TalkBack language selection based on accessibility setting
@@ -1327,6 +1338,10 @@ public class SettingsFragment extends Fragment {
                 return "zh";
             case "한국어":
                 return "ko";
+            case "日本語":
+                return "ja";
+            case "Português (Brasil)":
+                return "pt";
             default:
                 return "en"; // Default to English
         }
@@ -1339,7 +1354,7 @@ public class SettingsFragment extends Fragment {
      */
     private String getTalkbackLanguageCode(String language) {
         switch (language) {
-            case "Same as app":
+            case "Same as app language":
                 return "same";
             case "English":
                 return "en";
@@ -1353,6 +1368,10 @@ public class SettingsFragment extends Fragment {
                 return "zh";
             case "한국어":
                 return "ko";
+            case "日本語":
+                return "ja";
+            case "Português (Brasil)":
+                return "pt";
             default:
                 return "same"; // Default to "Same as app"
         }

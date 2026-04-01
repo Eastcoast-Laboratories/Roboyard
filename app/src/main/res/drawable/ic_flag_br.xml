@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="16">
+    <!-- Green background -->
+    <path
+        android:fillColor="#009739"
+        android:pathData="M0,0h24v16H0V0z"/>
+    <!-- Yellow diamond (rhombus) -->
+    <path
+        android:fillColor="#FEDD00"
+        android:pathData="M12,2L20,8L12,14L4,8Z"/>
+    <!-- Blue circle -->
+    <path
+        android:fillColor="#002776"
+        android:pathData="M12,6a2,2 0,1,1,0,4a2,2 0,1,1,0,-4z"/>
+    <!-- Simplified stars representation (small white dots) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10.5,7a0.3,0.3 0,1,1,0,0.6a0.3,0.3 0,1,1,0,-0.6z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13,7a0.3,0.3 0,1,1,0,0.6a0.3,0.3 0,1,1,0,-0.6z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M11.5,8a0.3,0.3 0,1,1,0,0.6a0.3,0.3 0,1,1,0,-0.6z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,9a0.3,0.3 0,1,1,0,0.6a0.3,0.3 0,1,1,0,-0.6z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10.5,8.5a0.3,0.3 0,1,1,0,0.6a0.3,0.3 0,1,1,0,-0.6z"/>
+</vector>

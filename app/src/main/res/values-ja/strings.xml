@@ -1,0 +1,807 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Roboyard</string>
+    
+    <!-- Main Menu Strings -->
+
+    <string name="new_random_game">プレイ</string>
+    <string name="new_random_game_a11y">新しいゲームを開始</string>
+    
+    <string name="level_game">レベル</string>
+    <string name="level_game_a11y">定義済みゲームレベルをプレイ</string>
+    
+    <string name="load_game">ゲームを読み込む</string>
+    <string name="load_game_a11y">ゲームセーブを読み込む</string>
+    
+    <string name="settings">設定</string>
+    <string name="settings_a11y">ゲーム設定</string>
+    
+    <string name="help">遊び方</string>
+    <string name="help_a11y">遊び方の説明</string>
+    
+    <string name="main_menu_title" translatable="false">Roboyard</string>
+
+    <string name="credits">クレジット</string>
+    
+    <!-- Button texts for various screens -->
+    <string name="button_cancel">キャンセル</string>
+    <string name="button_save">保存</string>
+    <string name="button_back">戻る</string>
+    <string name="button_next">次へ</string>
+
+    <!-- Main menu buttons -->
+
+    <!-- Modal dialog buttons -->
+
+    <!-- Game Screens -->
+
+    <!-- Level Selection Screen -->
+    <string name="level_stars">%1$d個の星を獲得しました</string>
+    <string name="level_locked">このレベルを解除するには%1$d個の星が必要です</string>
+    <string name="level_progress_completed">レベル完了</string>
+
+    <string name="back">戻る</string>
+    <string name="back_description">前の画面に戻る</string>
+
+    <string name="next_level">次のレベル</string>
+    <string name="next_level_description">次のレベルへ進む</string>
+    
+    <string name="optimal_moves">最適：%1$d手</string>
+    <string name="level_complete">レベル完了！</string>
+    <string name="wrong_robot_on_target">間違ったロボット！正しい色のロボットをゴールに移動してください。</string>
+    <string name="level_stars_description">%1$d個の星を獲得しました</string>
+    <string name="stars_count">%1$d個の星</string>
+    <string name="random_game_complete">レベル完了！</string>
+    <string name="new_random_game_button">新しいゲーム</string>
+    <string name="robot_a11y">ロボットの位置</string>
+    <string name="target_a11y">位置%1$d、%2$dの目標</string>
+    <string name="minimap_description">全体のボードレイアウトを表示するミニマップ</string>
+    
+    <!-- Exit Dialog -->
+    
+    <!-- Save Game Screen -->
+    <string name="save_game_screen_title">ゲームを保存</string>
+    <string name="save_slots_tab">保存スロット</string>
+    <string name="history_tab">履歴</string>
+    <string name="save_confirm_title">ゲームを保存</string>
+    <string name="share_button_a11y">この保存ゲームを共有</string>
+    <string name="info_button_a11y">マップ詳細を表示</string>
+    <string name="level_difficulty">難易度</string>
+    <string name="saved_on">保存日時</string>
+    <string name="share_a11y">共有</string>
+    <string name="empty_slot">空き</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings_label">言語：</string>
+    <string name="language_settings_a11y">アプリの表示言語を選択</string>
+    <string name="accessibility_language_label">TalkBack言語：</string>
+    <string name="accessibility_language_a11y">TalkBackアナウンス言語を選択</string>
+    <string name="language_same_as_app">アプリ言語と同じ</string>
+    <string name="settings_english">英語</string>
+    <string name="settings_german">ドイツ語</string>
+    <string name="settings_french">フランス語</string>
+    <string name="settings_spanish">スペイン語</string>
+    <string name="settings_chinese">中国語</string>
+    <string name="settings_korean">韓国語</string>
+    <string name="ok">OK</string>
+    <!-- Non-translatable string example -->
+    <string name="app_version" translatable="false">Version: 1.0.0</string>
+    <!-- Direction strings -->
+    <string name="direction_north">北</string>
+    <string name="direction_south">南</string>
+    <string name="direction_east">東</string>
+    <string name="direction_west">西</string>
+    <string name="robot_move_direction">%1$s %2$s</string>
+    
+    <!-- Accessibility strings -->
+    <string name="robot_selected_a11y">%1$sロボットが選択されました</string>
+    
+    <!-- TalkBack language constant - do not translate -->
+    <string name="talkback_language_same_value" translatable="false">same</string>
+    
+    <!-- Help content -->
+    <string name="help_title" translatable="false">Help</string>
+    
+    <!-- Credits screen -->
+    <string name="version_format">バージョン：%1$s（ビルド %2$d）</string>
+    
+    <!-- Level Selection screen -->
+    <string name="level_selection_title">レベル選択</string>
+    <string name="level_editor_button">レベルエディター</string>
+    <string name="level_editor_button_short">エディター</string>
+    <string name="level_editor_unlocked">レベルエディター解除！</string>
+    <string name="level_editor_hint">レベルエディターを解除しました！独自のレベルを作成できます。</string>
+
+    <!-- Save game screen -->
+    <string name="save_game_title">ゲームを保存</string>
+    <string name="save_empty">空き</string>
+    
+    <!-- Game screen -->
+    
+    <!-- Autosave tags - non-translatable -->
+    <string name="autosave_tag" translatable="false">[AUTOSAVE]</string>
+    
+    <!-- URLs - non-translatable -->
+    <string name="url_imprint" translatable="false">https://roboyard.z11.de/impressum</string>
+    <string name="url_opensource" translatable="false">https://git.io/fjs5H</string>
+    <string name="url_contact" translatable="false">https://eclabs.de/#kontakt</string>
+    
+    <!-- Help screen -->
+    <string name="help_screen_content_title">Roboyardの遊び方</string>
+    <string name="help_goal_section_title">ゴール</string>
+    <string name="help_goal_description">色付きのロボットを一致する色のゴールに移動させます。すべてのロボットが一致するゴールの上にいるとゲーム完了です。</string>
+    <string name="help_movement_section_title">移動</string>
+    <string name="help_movement_point_1">- ロボットをタップして選択します。</string>
+    <string name="help_movement_point_2">- 空のセルをタップして、選択したロボットをその方向に移動させます。</string>
+    <string name="help_movement_point_3">- ロボットは壁、他のロボット、またはボードの端にぶつかるまで直線で移動します。</string>
+    <string name="help_controls_section_title">コントロール</string>
+    <string name="help_controls_point_1">- ヒント：提案された手を表示します。</string>
+    <string name="help_controls_point_2">- リセット：現在のレベルを再開します。</string>
+    <string name="help_controls_point_3">- 保存：現在のマップを保存します。</string>
+    <string name="help_controls_point_4">- メニュー：メインメニューに戻ります。</string>
+    <string name="help_accessibility_section_title">アクセシビリティ</string>
+    <string name="help_accessibility_description">このゲームはTalkBackスクリーンリーダーと完全に互換性があります。タッチ探索を使用してゲーム要素やボタンの情報を聞いてください。ボタンを有効にするかロボットを選択するにはダブルタップしてください。</string>
+    <string name="help_tips_section_title">ヒント</string>
+    <string name="help_tips_point_1">- 最少手数でパズルを解決してみてください。</string>
+    <string name="help_tips_point_2">- 他のロボットの経路を確保するために、ロボットを特定の位置に移動させる必要があります。</string>
+    <string name="help_tips_point_3">- 行き詰まった場合は、ヒント機能を使用して提案を取得してください。</string>
+    <string name="help_star_system_section_title">星評価システム</string>
+    <string name="help_star_system_description">各レベルでのパフォーマンスは、パズルをどれだけ効率的に解決したかに基づいて星で評価されます：</string>
+    <string name="help_star_system_4_stars">⭐⭐⭐⭐ - 超最適解：AIの最適解より良い解決策を見つけました！</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - 最適解：ヒントなしでAIの最適解と同じ手数で解決しました。</string>
+    <string name="help_star_system_2_stars">⭐⭐ - 準最適解：ヒントなしで最適より1手多く使用したか、または1つのヒントで最適解を見つけました。</string>
+    <string name="help_star_system_1_star">⭐ - 良い解決策：2つのヒントで最適解を見つけたか、またはヒントなしで最適より2手多く使用しました。</string>
+    <string name="help_star_system_0_stars">星なし：その他すべての場合。練習を続けてパフォーマンスを向上させてください！</string>
+    <string name="help_star_system_hint_penalty">注：ヒントを使用すると星評価が下がり、独立してパズルを解決するよう促されます。</string>
+    <string name="help_level_editor_section_title">レベルエディター</string>
+    <string name="help_level_editor_description">全140レベルを解除すると、レベル選択画面の下部にレベルエディターボタンが表示されます。これを使用して独自のカスタムレベルを作成し、他の人と共有してください！</string>
+    
+    <!-- Game Buttons -->
+    <string name="hint_button">💡ヒント</string>
+    <string name="hint_cancel_button">❌ ヒント</string>
+    <string name="hint_button_a11y">ヒント</string>
+    <string name="button_back_game">戻る</string>
+    <string name="confirm_level_change">レベル%1$dに戻りますか？</string>
+    <string name="button_reset">リセット</string>
+    <string name="button_save_map">マップを保存</string>
+    <string name="button_new_game">新しいゲーム</string>
+    <string name="button_menu">メニュー</string>
+    
+    <!-- Game screen -->
+    <string name="save_tab_title">保存</string>
+    <string name="load_tab_title">読み込み</string>
+    <string name="history_tab_title">履歴</string>
+    <string name="save_screen_title">ゲームを保存</string>
+    <string name="load_screen_title">ゲームを読み込む</string>
+    <string name="history_screen_title">ゲーム履歴</string>
+    <string name="ai_calculating">AIが解決策を計算中...</string>
+    <string name="keep_map">このマップでプレイ。計算中...</string>
+
+    <!-- Game control buttons -->
+    <string name="back_button">戻る</string>
+    <string name="menu_button">メニュー</string>
+    <string name="retry_button">再試行</string>
+    <string name="restart_button">再開始</string>
+    
+    <!-- AI and game direction strings -->
+    
+    <!-- Accessibility versions -->
+    <string name="menu_button_a11y">メインメニューに戻る</string>
+    <string name="restart_button_a11y">このレベルを再開始</string>
+    <string name="save_map_button_a11y">現在のマップを保存</string>
+    <string name="dice_button_a11y">新しいマップを生成</string>
+    <string name="user_profile_button_a11y">ユーザープロフィールとログイン</string>
+
+    <!-- Color names for robots and game elements -->
+    <string name="color_red">赤</string>
+    <string name="color_blue">青</string>
+    <string name="color_green">緑</string>
+    <string name="color_yellow">黄</string>
+    <string name="color_pink">ピンク</string>
+    <string name="color_orange">オレンジ</string>
+    <string name="color_white">白</string>
+    <string name="color_black">黒</string>
+    <string name="color_silver">銀</string>
+    
+    <!-- Accessibility versions -->
+
+    <!-- Dative forms (English doesn't change, but needed for resource references) -->
+    <string name="color_red_dative">赤</string>
+    <string name="color_blue_dative">青</string>
+    <string name="color_green_dative">緑</string>
+    <string name="color_yellow_dative">黄</string>
+    <string name="color_pink_dative">ピンク</string>
+    <string name="color_orange_dative">オレンジ</string>
+    <string name="color_white_dative">白</string>
+    <string name="color_black_dative">黒</string>
+    <string name="color_silver_dative">銀</string>
+
+    <!-- Adjective forms for colors -->
+    <string name="color_red_adj">赤</string>
+    <string name="color_blue_adj">青</string>
+    <string name="color_green_adj">緑</string>
+    <string name="color_yellow_adj">黄</string>
+    <string name="color_pink_adj">ピンク</string>
+    <string name="color_silver_adj">銀</string>
+
+    <!-- goal color forms -->
+    <string name="color_red_target">赤</string>
+    <string name="color_blue_target">青</string>
+    <string name="color_green_target">緑</string>
+    <string name="color_yellow_target">黄</string>
+    <string name="color_pink_target">ピンク</string>
+    <string name="color_silver_target">銀</string>
+    <!-- Game UI text for GameFragment -->
+    <string name="no_robot_selected">ロボットが選択されていません</string>
+    <string name="robot_selected">選択中：%1$sロボットが（%2$d、%3$d）に</string>
+    <string name="robot_selected_info">選択中：%1$sロボットが位置（%2$d、%3$d）に</string>
+    <string name="robot_target_info">%1$sの目標：（%2$d、%3$d）</string>
+    <string name="no_target_for_robot">このロボットの目標がありません</string>
+    <string name="move_count_text">手数：%1$d</string>
+    <string name="moves_count">%1$d手</string>
+    <string name="moves_label">手数</string>
+    <plurals name="moves_label_plural">
+        <item quantity="one">手</item>
+        <item quantity="other">手</item>
+    </plurals>
+    <string name="squares_moved">%1$dマス</string>
+    <string name="squares_label">マス</string>
+    <plurals name="squares_label_plural">
+        <item quantity="one">マス</item>
+        <item quantity="other">マス</item>
+    </plurals>
+    <string name="board_size">ボード：%1$dx%2$d</string>
+    <string name="solution_error">解決策が見つかりません：%1$s</string>
+    <string name="direction_up">上</string>
+    <string name="direction_down">下</string>
+    <string name="direction_right">右</string>
+    <string name="direction_left">左</string>
+
+    <!-- Game UI Buttons and Messages -->
+    <string name="cancel_button">キャンセル</string>
+    <string name="reset_button">リセット</string>
+    <string name="unique_map_id">%1$s</string>
+    <string name="level_id_text">レベル %1$d</string>
+    <string name="target_reached">ゴール達成！%1$d手、%2$dマス移動してゲーム完了</string>
+    <string name="unknown_color">不明：%1$s</string>
+
+    <!-- Accessibility versions -->
+    <string name="game_completed_a11y">ゴール達成！%1$d手、%2$dマス移動してゲーム完了</string>
+
+    <string name="nothing_to_undo">元に戻せるものがありません</string>
+    <string name="robots_reset">ロボットが開始位置にリセットされました</string>
+    <string name="no_game_in_progress">ゲームが進行中ではありません</string>
+    <string name="no_robots_available">利用可能なロボットがありません</string>
+    <string name="cannot_move_in_this_direction">この方向には移動できません</string>
+    <string name="pre_hint_less_than_x">AIが%1$d手未満の解決策を見つけました</string>
+    <string name="pre_hint_less_than_1">AIより良い解決策を見つけました！</string>
+    <string name="pre_hint_exact_solution">AIが%1$d手の解決策を見つけました</string>
+    <string name="solution_found">AIが解決策を見つけました！</string>
+    <string name="pre_hint_involved_robots">動かしてください</string>
+    <string name="and">と</string>
+    <string name="pre_hint_first_move">まず%1$sロボットを動かしてください</string>
+    <string name="no_solution_found">解決策が見つかりませんでした</string>
+    <string name="live_move_counter_label_a11y">残り手数を表示</string>
+    <string name="live_move_counter_optimal">ここから%1$d手</string>
+    <string name="pre_hint_ready">ステップバイステップのヒントの準備完了</string>
+    <string name="all_hints_shown">すべてのヒントが表示されました</string>
+    <string name="no_valid_hint">有効なヒントがありません</string>
+    <string name="error_displaying_hint">ヒントの表示中にエラーが発生しました</string>
+    <string name="history_completed_once">1回完了</string>
+    <string name="history_completed_times">%1$d回完了</string>
+    <string name="history_not_completed">まだ完了していません</string>
+    <string name="perfect_solution">完璧！最適解を見つけました！</string>
+    <plurals name="live_move_counter_optimal_plural">
+        <item quantity="one">%1$d move from here</item>
+        <item quantity="other">%1$d moves from here</item>
+    </plurals>
+    
+    <!-- Game History Details Popup -->
+    <string name="history_detail_completions">完了回数：</string>
+    <string name="history_detail_first_started">最初の開始：</string>
+    <string name="history_detail_last_played">最後のプレイ：</string>
+    <string name="history_detail_all_completions">すべての完了：</string>
+    <string name="history_detail_best_time">ベストタイム：</string>
+    <string name="history_detail_best_moves">ベスト手数：</string>
+    <string name="history_detail_optimal_moves">最適手数：</string>
+    <string name="history_detail_perfect">完璧！</string>
+    <string name="history_detail_extra_moves">+%1$d余分</string>
+    <string name="history_detail_hint_usage_last">ヒント使用（最後のセッション）：</string>
+    <string name="history_detail_no_hints_used">ヒント未使用</string>
+    <string name="history_detail_pre_hint_viewed">プレヒント表示（ロボットの色が表示）</string>
+    <string name="history_detail_up_to_hint">ヒント#%1$dまで表示</string>
+    <string name="history_detail_hints_ever_used">使用されたヒント（全試行）：</string>
+    <string name="history_detail_qualifies_no_hints">ノーヒント実績対象：</string>
+    <string name="history_detail_last_solved_no_hints">最後にヒントなしで解決：</string>
+    <string name="history_detail_last_perfect_no_hints">最後にヒントなしで完璧に解決：</string>
+    <string name="history_detail_qualifies_no_hints_perfect">パーフェクトノーヒント実績対象：</string>
+    <string name="history_detail_board">ボード：</string>
+    <string name="history_detail_map">マップ：</string>
+    <string name="history_detail_yes">はい</string>
+    <string name="history_detail_no">いいえ</string>
+    
+    <!-- Save Slot Info Popup -->
+    <string name="save_slot_saved">保存：</string>
+    <string name="save_slot_status">ステータス：</string>
+    <string name="save_slot_solved">解決済み</string>
+    <string name="save_slot_in_progress">進行中</string>
+    <string name="save_slot_moves_at_save">保存時の手数：</string>
+    <string name="save_slot_difficulty">難易度：</string>
+    <string name="save_slot_hint_usage_at_save">保存時のヒント使用：</string>
+    <string name="save_slot_history_header">--- このマップの履歴 ---</string>
+    <string name="save_slot_no_history_entry">履歴エントリが見つかりません（まだプレイされていません）</string>
+    <string name="save_slot_no_history_old_format">履歴がありません（古い保存形式）</string>
+
+    <!-- SaveGameFragment Sort/Filter Options -->
+    <string name="sort_by_date">日付順</string>
+    <string name="sort_last_solved">最後に解決</string>
+    <string name="sort_longest_first_attempt">最長の最初の試行</string>
+    <string name="sort_optimal_not_found">最適解未発見</string>
+    <string name="sort_unsolved">未解決</string>
+    <string name="filter_all">すべて</string>
+    <string name="filter_optimal_not_found">最適解未発見</string>
+    <string name="filter_unsolved">未解決</string>
+    
+    <!-- Pagination -->
+    <string name="pagination_page_info">ページ%1$d / %2$d（%3$d）</string>
+    <string name="pagination_prev">前へ</string>
+    <string name="pagination_next">次へ</string>
+
+    <string name="difficulty_beginner">初心者</string>
+    <string name="difficulty_advanced">上級</string>
+    <string name="difficulty_insane">狂気</string>
+    <string name="difficulty_impossible">不可能</string>
+    <string name="difficulty_unknown">不明</string>
+    
+    <!-- Additional localization strings -->
+    <string name="of">/</string>
+    <string name="impossible_small_board_warning">小さいボードでの不可能モードは、適切なマップを生成するのに数分かかることがあります</string>
+    
+    <!-- Toast messages -->
+    <string name="error_email_app">メールアプリを開けません</string>
+    <string name="robot_movement_canceled">ロボットの移動がキャンセルされました</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">設定</string>
+    <string name="settings_board_size">ボードサイズ：</string>
+    <string name="settings_difficulty">難易度レベル：</string>
+    <string name="settings_new_map_each_time">毎回新しいマップを生成：</string>
+    <string name="settings_robots_reach_targets">ゴール設定：</string>
+    <string name="settings_out_of">/</string>
+    <string name="settings_targets">ゴール</string>
+    <string name="settings_sound">効果音：</string>
+    <string name="settings_background_sound">背景音：</string>
+    <string name="settings_background_sound_a11y">背景音量スライダー</string>
+    <string name="settings_sound_effects_volume">効果音量：</string>
+    <string name="settings_sound_effects_volume_a11y">効果音量スライダー</string>
+    <string name="settings_yes">はい</string>
+    <string name="settings_no">いいえ</string>
+    <string name="settings_on">オン</string>
+    <string name="settings_off">オフ</string>
+    <string name="settings_back">戻る</string>
+    <string name="settings_game_mode">ゲームモード：</string>
+    <string name="settings_standard_game">標準ゲーム</string>
+    <string name="settings_standard_game_a11y">標準ゲームモード</string>
+    <string name="settings_multi_target_mode">マルチゴールモード（ベータ）</string>
+    <string name="settings_multi_target_mode_a11y">マルチゴールモードベータ</string>
+    <string name="settings_fullscreen">フルスクリーンモード：</string>
+    <string name="settings_fullscreen_a11y">フルスクリーンモードの切り替え</string>
+    <string name="settings_fullscreen_applying">フルスクリーン設定を適用しています</string>
+    <string name="settings_puzzle_parameters">パズルパラメータ：</string>
+    <string name="settings_min_solution_moves">最小：</string>
+    <string name="settings_max_solution_moves">最大：</string>
+    <string name="settings_allow_multicolor_target">マルチカラーゴールを許可：</string>
+    <string name="settings_high_contrast_mode">ハイコントラストモード：</string>
+    <string name="settings_hint_auto_move">ヒント自動移動：</string>
+    <string name="settings_hint_auto_move_manual">手動（ロボットを自分で移動）</string>
+    <string name="settings_hint_auto_move_manual_a11y">手動モード：ロボットを自分で移動します</string>
+    <string name="settings_hint_auto_move_full_auto">フルオート（ロボットが自動的に移動）</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">フルオートモード：ロボットが自動的に移動します</string>
+    <string name="settings_hint_auto_move_semi_auto">セミオート（次のヒントボタンで移動）</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">セミオートモード：次のヒントボタンでロボットが移動します</string>
+    
+    <string name="settings_account_section">Roboyardアカウント</string>
+    <string name="settings_account_description">roboyard.z11.deに直接マップを共有するためにログイン</string>
+    <string name="settings_login">ログイン</string>
+    <string name="settings_register">登録</string>
+    <string name="settings_logout">ログアウト</string>
+    <string name="settings_logged_in_as">ログイン中：%1$s</string>
+    <string name="settings_login_success">ログイン成功</string>
+    <string name="settings_login_failed">ログイン失敗：%1$s</string>
+    <string name="settings_register_success">登録成功</string>
+    <string name="settings_register_failed">登録失敗：%1$s</string>
+    <string name="settings_logout_success">ログアウトしました</string>
+    <string name="settings_logout_confirm_title">ログアウトしますか？</string>
+    <string name="settings_logout_confirm_message">ログアウトすると、このデバイスからすべてのローカル実績、レベル進行状況、ゲーム履歴、連続記録がクリアされます。データはサーバーに保存されており、次回ログイン時に復元されます。</string>
+    <string name="settings_logging_out">ログアウト中…</string>
+    <string name="needs_update_toast">この機能を使用するにはアプリの更新が必要です。</string>
+    <string name="login_dialog_title">Roboyardにログイン</string>
+    <string name="login_dialog_email">メール</string>
+    <string name="login_dialog_password">パスワード</string>
+    <string name="register_dialog_title">Roboyardに登録</string>
+    <string name="register_dialog_name">名前</string>
+    <string name="register_dialog_confirm_password">パスワードを確認</string>
+    
+    <string name="settings_data_section">データ管理</string>
+    <string name="settings_data_description">設定、実績、レベル進行状況、保存ゲームを含むすべてのゲームデータをエクスポートまたはインポートします。</string>
+    <string name="settings_export_data">データをエクスポート</string>
+    <string name="settings_import_data">データをインポート</string>
+    <string name="settings_reset_data">すべてのデータをリセット</string>
+    <string name="settings_export_success">データが正常にエクスポートされました</string>
+    <string name="settings_export_failed">エクスポート失敗：%1$s</string>
+    <string name="settings_import_success">データが正常にインポートされました。アプリを再起動してください。</string>
+    <string name="settings_import_failed">インポート失敗：%1$s</string>
+    <string name="settings_reset_confirm_title">すべてのデータをリセットしますか？</string>
+    <string name="settings_reset_confirm_message">これにより、すべての設定、実績、レベル進行状況、保存ゲームが削除されます。この操作は元に戻せません。</string>
+    <string name="settings_reset_success">すべてのデータがリセットされました。アプリを再起動してください。</string>
+    
+    <string name="share_dialog_title">マップを共有</string>
+    <string name="share_dialog_logged_in_message">%1$sとしてログインしています。roboyard.z11.deアカウントに直接共有しますか？</string>
+    <string name="share_to_account">アカウントに共有</string>
+    <string name="share_via_url">URLで共有</string>
+    <string name="share_success">マップが正常に共有されました！</string>
+    <string name="share_failed">共有失敗：%1$s</string>
+    <string name="sharing_map">Sharing map...</string>
+    
+    <!-- Level Selection Item Strings -->
+    <string name="level_robots_label">robots:</string>
+    <string name="level_squares_label">squares:</string>
+    
+    <string name="squares_north">北のマス</string>
+    <string name="squares_south">南のマス</string>
+    <string name="squares_east">東のマス</string>
+    <string name="squares_west">西のマス</string>
+    <string name="until">まで</string>
+    <string name="until_masculine">まで</string>
+    <string name="until_feminine">まで</string>
+    <string name="edge">端</string>
+    <string name="no_movement_north">北への移動なし</string>
+    <string name="no_movement_south">南への移動なし</string>
+    <string name="no_movement_east">東への移動なし</string>
+    <string name="no_movement_west">西への移動なし</string>
+
+    <!-- Game text -->
+    <string name="possible_moves_a11y">可能な手</string>
+    <string name="edge_a11y">端</string>
+    <string name="wall_a11y">壁</string>
+    <string name="walls_a11y">壁</string>
+    <string name="target_reached_a11y">ゴール達成</string>
+        
+    <string name="announce">アナウンス</string>
+    <string name="next_robot">次のロボット</string>
+    <string name="announce_a11y">ゲーム状況をアナウンス</string>
+    <string name="next_robot_a11y">次のロボットを選択</string>
+
+    <!-- Accessibility strings for GameGridView's components -->
+    <string name="robot_position_a11y">ロボットが位置に</string>
+    <string name="target_position_a11y">ゴールが位置に</string>
+    <string name="position_a11y">位置</string>
+    <string name="multicolored_a11y">多色</string>
+    <string name="walls_on_a11y">壁オン</string>
+    <string name="north_a11y">北</string>
+    <string name="south_a11y">南</string>
+    <string name="east_a11y">東</string>
+    <string name="west_a11y">西</string>
+    <string name="empty_space_a11y">空きスペース</string>
+
+
+    <!-- Achievement Strings -->
+    
+    <!-- Achievement Category Names -->
+    <string name="achievement_login_streak">ログイン連続記録</string>
+    <string name="achievement_category_progression">進行</string>
+    <string name="achievement_category_performance">パフォーマンス</string>
+    <string name="achievement_category_challenge">チャレンジ</string>
+    <string name="achievement_category_mastery">マスター</string>
+    <string name="achievement_category_random_speed">速度</string>
+    <string name="achievement_category_random_difficulty">難易度</string>
+    <string name="achievement_category_random_solution">解決長</string>
+    <string name="achievement_category_random_resolution">画面解像度</string>
+    <string name="achievement_category_random_targets">複数ゴール</string>
+    <string name="achievement_category_random_robots">楽チャレンジ</string>
+    <string name="achievement_category_random_coverage">フィールドカバレッジ</string>
+    <string name="achievement_category_random_streaks">連続記録</string>
+    
+    <!-- Login Streak -->
+    <string name="achievement_login_streak_day_label">%d日</string>
+    <string name="achievement_login_streak_days_label">%d日</string>
+    <string name="achievement_longest_streak_label">最長連続記録：%1$s</string>
+    <string name="achievement_streak_7">週間プレイヤー</string>
+    <string name="achievement_streak_7_desc">7日連続でログイン</string>
+    <string name="achievement_streak_30">熱心プレイヤー</string>
+    <string name="achievement_streak_30_desc">30日連続でログイン</string>
+    <string name="achievement_comeback">おかえりなさい！</string>
+    <string name="achievement_comeback_desc">30日間の非アクティブ後に戻る</string>
+    
+    <!-- Progression Achievements -->
+    <string name="achievement_first_game">ようこそ！</string>
+    <string name="achievement_first_game_desc">最初のゲームをプレイ</string>
+    <string name="achievement_level_1_complete">最初の一歩</string>
+    <string name="achievement_level_1_complete_desc">レベル1を完了</string>
+    <string name="achievement_level_10_complete">始まりました</string>
+    <string name="achievement_level_10_complete_desc">10レベルを完了</string>
+    <string name="achievement_level_50_complete">半分完了</string>
+    <string name="achievement_level_50_complete_desc">50レベルを完了</string>
+    <string name="achievement_level_140_complete">レベルマスター</string>
+    <string name="achievement_level_140_complete_desc">全140レベルを完了</string>
+    <string name="achievement_all_stars">星コレクター</string>
+    <string name="achievement_all_stars_desc">全420個の星を収集</string>
+    
+    <!-- Performance Achievements -->
+    <string name="achievement_perfect_5">完璧ムーバー</string>
+    <string name="achievement_perfect_5_desc">5レベルを最適手で解決</string>
+    <string name="achievement_perfect_10">精密プレイヤー</string>
+    <string name="achievement_perfect_10_desc">10レベルを最適手で解決</string>
+    <string name="achievement_perfect_50">最適化エキスパート</string>
+    <string name="achievement_perfect_50_desc">50レベルを最適手で解決</string>
+    <string name="achievement_speedrun_30s">クックシンカー</string>
+    <string name="achievement_speedrun_30s_desc">30秒以内にレベルを完了</string>
+    <string name="achievement_speedrun_10s">稲妻のように速い</string>
+    <string name="achievement_speedrun_10s_desc">10秒以内にレベルを完了</string>
+    <string name="achievement_view_1_hour">諦めないで</string>
+    <string name="achievement_view_1_hour_desc">1時間マップを解こうと試みるが完了しない</string>
+    
+    <!-- Challenge Achievements -->
+    <string name="achievement_solve_custom">カスタムソルバー</string>
+    <string name="achievement_solve_custom_desc">カスタム作成レベルを解決</string>
+    <string name="achievement_create_custom">レベルデザイナー</string>
+    <string name="achievement_create_custom_desc">カスタムレベルを作成して保存</string>
+    <string name="achievement_share_custom">共有は思いやり</string>
+    <string name="achievement_share_custom_desc">カスタムレベルを他の人と共有</string>
+    
+    <!-- Mastery Achievements -->
+    <string name="achievement_3_star_1">ハードレベルスター</string>
+    <string name="achievement_3_star_1_desc">5+最適手のレベルで3つ星を達成</string>
+    <string name="achievement_3_star_10">昇る星</string>
+    <string name="achievement_3_star_10_desc">10レベルで3つ星を達成</string>
+    <string name="achievement_3_star_10_hard">ハードレベルマスター</string>
+    <string name="achievement_3_star_10_hard_desc">5+最適手の10レベルで3つ星を達成</string>
+    <string name="achievement_3_star_50">スーパースター</string>
+    <string name="achievement_3_star_50_desc">50レベルで3つ星を達成</string>
+    <string name="achievement_3_star_all">パーフェクトマスター</string>
+    <string name="achievement_3_star_all_desc">全140レベルで3つ星を達成</string>
+    
+    <!-- Random Game - Difficulty -->
+    <string name="achievement_impossible_1">不可能な夢</string>
+    <string name="achievement_impossible_1_desc">不可能モードで1ゲームを完了</string>
+    <string name="achievement_impossible_5">不可能チャンピオン</string>
+    <string name="achievement_impossible_5_desc">不可能モードで5ゲームを完了</string>
+    <string name="achievement_impossible_streak_5">不可能連続記録</string>
+    <string name="achievement_impossible_streak_5_desc">不可能モードで最適手で5ゲーム連続完了</string>
+    <string name="achievement_impossible_streak_10">不可能伝説</string>
+    <string name="achievement_impossible_streak_10_desc">不可能モードで最適手で10ゲーム連続完了</string>
+    
+    <!-- Random Game - Solution Length -->
+    <string name="achievement_solution_18">18手マスター</string>
+    <string name="achievement_solution_18_desc">18手の最適解でゲームを完了</string>
+    <string name="achievement_solution_19">19手マスター</string>
+    <string name="achievement_solution_19_desc">19手の最適解でゲームを完了</string>
+    <string name="achievement_solution_20">20手マスター</string>
+    <string name="achievement_solution_20_desc">20手の最適解でゲームを完了</string>
+    <string name="achievement_solution_21">21手マスター</string>
+    <string name="achievement_solution_21_desc">21手の最適解でゲームを完了</string>
+    <string name="achievement_solution_22">22手マスター</string>
+    <string name="achievement_solution_22_desc">22手の最適解でゲームを完了</string>
+    <string name="achievement_solution_23">23手マスター</string>
+    <string name="achievement_solution_23_desc">23手の最適解でゲームを完了</string>
+    <string name="achievement_solution_24">24手マスター</string>
+    <string name="achievement_solution_24_desc">24手の最適解でゲームを完了</string>
+    <string name="achievement_solution_25">25手マスター</string>
+    <string name="achievement_solution_25_desc">25手の最適解でゲームを完了</string>
+    <string name="achievement_solution_26">26手マスター</string>
+    <string name="achievement_solution_26_desc">26手の最適解でゲームを完了</string>
+    <string name="achievement_solution_27">27手マスター</string>
+    <string name="achievement_solution_27_desc">27手の最適解でゲームを完了</string>
+    <string name="achievement_solution_28">28手マスター</string>
+    <string name="achievement_solution_28_desc">28手の最適解でゲームを完了</string>
+    <string name="achievement_solution_29">29手マスター</string>
+    <string name="achievement_solution_29_desc">29手の最適解でゲームを完了</string>
+    <string name="achievement_solution_30_plus">30+手マスター</string>
+    <string name="achievement_solution_30_plus_desc">30+手の最適解でゲームを完了</string>
+    
+    <!-- Random Game - Screen Resolutions -->
+    <string name="achievement_resolution_10">解像度探検家10</string>
+    <string name="achievement_resolution_10_desc">全画面解像度で10+手のゲームをプレイ</string>
+    <string name="achievement_resolution_12">解像度探検家12</string>
+    <string name="achievement_resolution_12_desc">全画面解像度で12+手のゲームをプレイ</string>
+    <string name="achievement_resolution_15">解像度探検家15</string>
+    <string name="achievement_resolution_15_desc">全画面解像度で15+手のゲームをプレイ</string>
+    
+    <!-- Random Game - Multiple Targets -->
+    <string name="achievement_2_targets">ダブルターゲット</string>
+    <string name="achievement_2_targets_desc">2つのターゲットでゲームを完了</string>
+    <string name="achievement_3_targets">トリプルターゲット</string>
+    <string name="achievement_3_targets_desc">3つのターゲットでゲームを完了</string>
+    <string name="achievement_4_targets">クアッドターゲット</string>
+    <string name="achievement_4_targets_desc">4つのターゲットでゲームを完了</string>
+    <string name="achievement_2_of_3_targets">3のうち2</string>
+    <string name="achievement_2_of_3_targets_desc">3つのターゲットのうち2つ必要なゲームを完了</string>
+    <string name="achievement_2_of_4_targets">4のうち2</string>
+    <string name="achievement_2_of_4_targets_desc">4つのターゲットのうち2つ必要なゲームを完了</string>
+    <string name="achievement_3_of_4_targets">4のうち3</string>
+    <string name="achievement_3_of_4_targets_desc">4つのターゲットのうち3つ必要なゲームを完了</string>
+    <string name="achievement_2_of_2_targets">2のうち2</string>
+    <string name="achievement_2_of_2_targets_desc">2つのターゲットのうち2つ必要なゲームを完了</string>
+    <string name="achievement_3_of_3_targets">3のうち3</string>
+    <string name="achievement_3_of_3_targets_desc">3つのターゲットのうち3つ必要なゲームを完了</string>
+    <string name="achievement_4_of_4_targets">4のうち4</string>
+    <string name="achievement_4_of_4_targets_desc">全4つのターゲットが必要なゲームを完了</string>
+    
+    <!-- Random Game - Fun Challenges -->
+    <string name="achievement_5_robots">フルチーム</string>
+    <string name="achievement_5_robots_desc">5つのロボットでゲームを完了</string>
+    <string name="achievement_gimme_five">ハイファイブ</string>
+    <string name="achievement_gimme_five_desc">全ロボットが互いに触れ合う必要</string>
+
+    <!-- Same-walls achievements -->
+    <string name="achievement_same_walls_2">デジャヴ</string>
+    <string name="achievement_same_walls_2_desc">2つの異なるロボット位置で同じ壁配置を解決</string>
+    <string name="achievement_same_walls_10">壁エキスパート</string>
+    <string name="achievement_same_walls_10_desc">5つの異なるロボット位置で同じ壁配置を解決</string>
+    <string name="achievement_same_walls_100">壁マスター</string>
+    <string name="achievement_same_walls_100_desc">10つの異なるロボット位置で同じ壁配置を解決</string>
+    
+    <!-- Random Game - Square Coverage -->
+    <string name="achievement_traverse_1_robot">ソロ探検家</string>
+    <string name="achievement_traverse_1_robot_desc">1つのロボットでボード上の全マスを訪問</string>
+    <string name="achievement_traverse_1_robot_goal">ソロゴール探検家</string>
+    <string name="achievement_traverse_1_robot_goal_desc">1つのロボットで全マスを訪問し、最後にゴール到達</string>
+    <string name="achievement_traverse_all_robots">チーム探検家</string>
+    <string name="achievement_traverse_all_robots_desc">全ロボットでボード上の全マスを訪問</string>
+    <string name="achievement_traverse_all_robots_goal">チームゴール探検家</string>
+    <string name="achievement_traverse_all_robots_goal_desc">全ロボットで全マスを訪問し、最後にゴール到達</string>
+    
+    <!-- Random Game - Streaks -->
+    <!-- Perfect random games (cumulative) -->
+    <string name="achievement_perfect_random_5">パーフェクト5</string>
+    <string name="achievement_perfect_random_5_desc">5つのランダムゲームを最適手で完了</string>
+    <string name="achievement_perfect_random_10">パーフェクト10</string>
+    <string name="achievement_perfect_random_10_desc">10つのランダムゲームを最適手で完了</string>
+    <string name="achievement_perfect_random_20">パーフェクト20</string>
+    <string name="achievement_perfect_random_20_desc">20つのランダムゲームを最適手で完了</string>
+    <!-- Perfect random games streak -->
+    <string name="achievement_perfect_random_streak_5">パーフェクト連続記録5</string>
+    <string name="achievement_perfect_random_streak_5_desc">5つのランダムゲームを最適手で連続完了</string>
+    <string name="achievement_perfect_random_streak_10">パーフェクト連続記録10</string>
+    <string name="achievement_perfect_random_streak_10_desc">10つのランダムゲームを最適手で連続完了</string>
+    <string name="achievement_perfect_random_streak_20">パーフェクト連続記録20</string>
+    <string name="achievement_perfect_random_streak_20_desc">20つのランダムゲームを最適手で連続完了</string>
+    <!-- Perfect solution with no hints -->
+    <string name="achievement_perfect_no_hints_random_1">パーフェクトノーヘルプ</string>
+    <string name="achievement_perfect_no_hints_random_1_desc">ヒントなしでランダムゲームを最適手で完了（10+手）</string>
+    <!-- No hints random games (cumulative) -->
+    <string name="achievement_no_hints_random_10">ノーヘルプ必要10</string>
+    <string name="achievement_no_hints_random_10_desc">ヒントなしで10つのランダムゲームを完了</string>
+    <string name="achievement_no_hints_random_50">ノーヘルプ必要50</string>
+    <string name="achievement_no_hints_random_50_desc">ヒントなしで50つのランダムゲームを完了</string>
+    <!-- No hints random games streak -->
+    <string name="achievement_no_hints_streak_random_10">ノーヘルプ連続記録10</string>
+    <string name="achievement_no_hints_streak_random_10_desc">ヒントなしで10つのランダムゲームを連続完了</string>
+    <string name="achievement_no_hints_streak_random_50">ノーヘルプ連続記録50</string>
+    <string name="achievement_no_hints_streak_random_50_desc">ヒントなしで50つのランダムゲームを連続完了</string>
+    
+    <!-- Random Game - Speed -->
+    <string name="achievement_speedrun_random_20s">スピードデーモン</string>
+    <string name="achievement_speedrun_random_20s_desc">20秒以内にランダムゲームを完了</string>
+    <string name="achievement_speedrun_random_10s">稲妻スピード</string>
+    <string name="achievement_speedrun_random_10s_desc">10秒以内にランダムゲームを完了</string>
+    <string name="achievement_speedrun_random_5x30s">スピード連続記録</string>
+    <string name="achievement_speedrun_random_5x30s_desc">5つのランダムゲームをそれぞれ30秒以内に完了</string>
+    
+    <!-- Achievement UI -->
+    <string name="achievements_title">実績</string>
+    <string name="achievements_unlocked">解除済み</string>
+    <string name="achievements_locked">ロック中</string>
+    <string name="achievements_progress">%1$d / %2$d</string>
+    <string name="achievement_unlocked">実績解除！</string>
+    <string name="achievements_unlocked_multiple">実績解除！</string>
+    <string name="view_achievements">実績を表示</string>
+    <string name="streak_popup_title">日次連続記録</string>
+    <string name="streak_popup_message">%1$d日連続でログインしました。</string>
+    <string name="streak_popup_day_1_headline">連続記録を始めよう！</string>
+    <string name="streak_popup_day_1_message">新しい連続記録を開始しました。連続記録を維持するために明日もログインしてください。</string>
+    <string name="streak_popup_day_2_headline">おかえりなさい！</string>
+    <string name="streak_popup_day_3_headline">ログインを続けよう！</string>
+    <string name="streak_popup_day_4_headline">半分完了！</string>
+    <string name="streak_popup_day_5_headline">燃えてるね！</string>
+    <string name="streak_popup_day_6_headline">もうすぐ一週間！</string>
+    <string name="streak_popup_day_7_headline">一週間連続記録！</string>
+    <string name="streak_popup_day_8_headline">最高だね！</string>
+    <string name="streak_popup_day_9_headline">9日目と続く！</string>
+    <string name="streak_popup_day_10_headline">二桁！</string>
+    <string name="streak_popup_day_11_headline">二週間マイナス3！</string>
+    <string name="streak_popup_day_12_headline">止まらない！</string>
+    <string name="streak_popup_day_13_headline">13はラッキー！</string>
+    <string name="streak_popup_day_14_headline">二週間！</string>
+    <string name="streak_popup_day_15_headline">一ヶ月の半分！</string>
+    <string name="streak_popup_day_16_headline">止まらない連続記録！</string>
+    <string name="streak_popup_day_17_headline">調子がいい！</string>
+    <string name="streak_popup_day_18_headline">信じられない！</string>
+    <string name="streak_popup_day_19_headline">もうすぐ！</string>
+    <string name="streak_popup_day_20_headline">スーパースター！</string>
+    <string name="streak_popup_day_21_headline">三週間！</string>
+    <string name="streak_popup_day_22_headline">驚異的！</string>
+    <string name="streak_popup_day_23_headline">非凡！</string>
+    <string name="streak_popup_day_24_headline">伝説的！</string>
+    <string name="streak_popup_day_25_headline">止まらない力！</string>
+    <string name="streak_popup_day_26_headline">完全に圧倒！</string>
+    <string name="streak_popup_day_27_headline">もうすぐ一ヶ月！</string>
+    <string name="streak_popup_day_28_headline">四週間！</string>
+    <string name="streak_popup_day_29_headline">あと一日！</string>
+    <string name="streak_popup_day_30_headline">もうすぐ一ヶ月！</string>
+    <string name="streak_popup_day_31_headline">伝説のステータス！</string>
+    
+    <!-- Level Editor Strings -->
+    <string name="editor_title">レベルデザインエディター</string>
+    <string name="editor_new_map">新しいマップ</string>
+    <string name="editor_level_map">レベル%1$dマップ</string>
+    <string name="editor_select_level">レベルを選択：</string>
+    <string name="editor_board_size">ボードサイズ：</string>
+    <string name="editor_apply">適用</string>
+    <string name="editor_board_preview">ボードプレビュー</string>
+    <string name="editor_board_preview_hint">ボードプレビュー（タップして編集）</string>
+    <string name="editor_mode_robot">ロボット</string>
+    <string name="editor_mode_target">ゴール</string>
+    <string name="editor_mode_wall_h">- 壁</string>
+    <string name="editor_mode_wall_v">| 壁</string>
+    <string name="editor_mode_erase">消去</string>
+    <string name="editor_color_multi">マルチ</string>
+    <string name="editor_load_autosave">自動保存を読み込む</string>
+    <string name="editor_cancel">キャンセル</string>
+    <string name="editor_random_robots_targets">ランダムロボット＆ゴール</string>
+    <string name="editor_export_level">レベルテキストをエクスポート</string>
+    <string name="editor_import_ascii_map">ASCIIマップをインポート</string>
+    <string name="editor_import_ascii_map_title">ASCIIマップを貼り付け</string>
+    <string name="editor_import_ascii_map_hint">ここにASCIIマップを貼り付け…</string>
+    <string name="editor_generate_walls">壁を生成</string>
+    <string name="editor_generate">生成</string>
+    <string name="editor_load_savegame">セーブを読み込む：</string>
+    <string name="editor_pattern_label">パターン：</string>
+    <string name="editor_pattern_classic">クラシック（L字型）</string>
+    <string name="editor_pattern_spiral">スパイラル</string>
+    <string name="editor_pattern_rooms">ルーム</string>
+    <string name="editor_pattern_maze">迷路</string>
+    <string name="editor_pattern_diagonal">対角線</string>
+    <string name="editor_pattern_symmetric">対称</string>
+    <string name="editor_pattern_corridors">廊下</string>
+    <string name="editor_pattern_islands">島</string>
+    <string name="editor_pattern_border_heavy">境界線重視</string>
+    <string name="editor_pattern_scatter">散在</string>
+    <string name="editor_generate_border_stubs">境界スタブ</string>
+    <string name="editor_play_map">▶ マップをプレイ</string>
+    <string name="map_dimensions_mismatch">マップサイズ%1$dx%2$dが設定%3$dx%4$dに適合しません - 新しい壁を生成</string>
+    <string name="editor_no_level_loaded">レベルが読み込まれていません</string>
+    <string name="editor_save_slot_empty">セーブスロットが空です</string>
+    <string name="editor_could_not_load_save">セーブを読み込めませんでした</string>
+    <string name="editor_loaded_map">最後にプレイしたマップを読み込みました：%1$s</string>
+    <string name="editor_board_size_invalid">ボードサイズは4x4から24x24の間である必要があります</string>
+    <string name="editor_invalid_numbers">有効な数字を入力してください</string>
+    <string name="editor_map_needs_robot_target">プレイするにはマップに少なくとも1つのロボットと1つのゴールが必要です</string>
+    <string name="editor_error_encoding_map">マップデータのエンコードエラー</string>
+    <string name="editor_cannot_open_game">エディターからゲームを開けません</string>
+    <string name="editor_copied_to_clipboard">レベルデータをクリップボードにコピーしました</string>
+    <string name="editor_sharing_to_account">アカウントに共有中…</string>
+    <string name="editor_map_already_exists">マップは既に存在します</string>
+    <string name="editor_opening_share_url">共有URLをブラウザで開いています</string>
+    <string name="editor_error_creating_share_url">共有URLの作成エラー</string>
+    <string name="editor_no_browser_available">URLを開くためのブラウザがありません</string>
+    <string name="editor_saved_to_sourcecode">レベル%1$dをソースコードに保存しました！</string>
+    <string name="editor_added_robot">%1$sロボットを（%2$d, %3$d）に追加</string>
+    <string name="editor_removed_robot">（%1$d, %2$d）のロボットを削除</string>
+    <string name="editor_added_target">%1$sゴールを（%2$d, %3$d）に追加</string>
+    <string name="editor_removed_target">（%1$d, %2$d）のゴールを削除</string>
+    <string name="editor_added_horizontal_wall">水平壁を（%1$d, %2$d）に追加</string>
+    <string name="editor_removed_horizontal_wall">（%1$d, %2$d）の水平壁を削除</string>
+    <string name="editor_added_vertical_wall">垂直壁を（%1$d, %2$d）に追加</string>
+    <string name="editor_removed_vertical_wall">（%1$d, %2$d）の垂直壁を削除</string>
+    <string name="editor_erased_element">（%1$d, %2$d）の要素を消去</string>
+    <string name="editor_nothing_to_erase">（%1$d, %2$d）に消去するものがありません</string>
+    <string name="editor_cannot_place_in_carree">ロボットまたはゴールを中央の正方形に配置できません</string>
+
+    <!-- Login and Account Strings -->
+    <string name="profile_a11y">ユーザープロフィール</string>
+    
+    <!-- Empty text placeholder used in layouts -->
+    <string name="empty_text"></string>
+</resources>

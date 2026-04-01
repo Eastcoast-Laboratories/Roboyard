@@ -82,8 +82,11 @@
     <string name="settings_spanish">Español</string>
     <string name="settings_chinese">中文</string>
     <string name="settings_korean">한국어</string>
+    <string name="settings_japanese">日本語</string>
+    <string name="settings_portuguese">Português (Brasil)</string>
     <string name="language_same_as_app">Same as app language</string>
     <string name="ok">OK</string>
+    <string name="language_flag_description">Language flag</string>
     <!-- Non-translatable string example -->
     <string name="app_version" translatable="false">Version: 1.0.0</string>
     <!-- Direction strings -->
