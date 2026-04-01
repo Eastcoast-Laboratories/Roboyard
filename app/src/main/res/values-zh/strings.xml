@@ -24,7 +24,6 @@
     <string name="settings_a11y">游戏设置</string>
     
     <string name="help">如何玩</string>
-    <string name="help_a11y">游戏说明</string>
     
     <string name="main_menu_title" translatable="false">Roboyard</string>
 
@@ -121,12 +120,9 @@
     <string name="move_count_text">步数: %1$d</string>
 
     <!-- Hint System -->
-    <string name="hint_button">💡 提示</string>
-    <string name="hint_button_a11y">提示</string>
-    <string name="hint_cancel_button">❌ 提示</string>
+    <string name="hint_button">提示</string>
+    <string name="hint_cancel_button">提示</string>
     <string name="pre_hint_less_than_x">AI找到了少于 %1$d 步的解决方案</string>
-    <string name="pre_hint_less_than_1">你找到了比AI更好的解决方案!</string>
-    <string name="pre_hint_exact_solution">AI找到了 %1$d 步的解决方案</string>
     <string name="pre_hint_involved_robots">移动机器人</string>
     <string name="and">和</string>
     <string name="pre_hint_ready">准备好显示分步提示</string>
@@ -855,26 +851,13 @@
     <string name="streak_popup_day_30_headline">差不多一个月了！</string>
     <string name="streak_popup_day_31_headline">传奇地位！</string>
     
-    <!-- Direction Strings -->
-    <string name="direction_north">北</string>
-    <string name="direction_south">南</string>
-    <string name="direction_east">东</string>
-    <string name="direction_west">西</string>
+    <!-- Level Strings -->
+    <string name="settings_final_settings_strings">设置</string>
     
-    <!-- Help Strings -->
-    <string name="help_goal_description">将彩色机器人移动到匹配颜色的目标。所有机器人都到达目标时游戏完成。</string>
-    <string name="help_movement_section_title">移动</string>
-    <string name="help_movement_point_1">- 点击机器人选择它。</string>
-    <string name="help_movement_point_2">- 点击选中的机器人选择移动方向。</string>
-    <string name="help_movement_point_3">- 机器人会直线移动，直到撞到墙、其他机器人或棋盘边缘。</string>
-    <string name="help_controls_section_title">控制</string>
-    <string name="help_controls_point_1">- 提示：显示建议的移动。</string>
-    <string name="help_controls_point_2">- 重置：重新开始当前关卡。</string>
-    <string name="help_controls_point_3">- 保存：保存当前地图。</string>
-    <string name="help_controls_point_4">- 菜单：返回主菜单。</string>
-    <string name="help_accessibility_section_title">无障碍</string>
-    <string name="help_level_editor_section_title">关卡编辑器</string>
-    <string name="help_level_editor_description">一旦您解锁了所有140个关卡，主菜单上将出现关卡编辑器按钮。创建您自己的地图并与朋友分享！</string>
-    <string name="button_back_game">返回</string>
+    <!-- Missing Help and Hint Strings -->
+    <string name="help_a11y">如何玩</string>
+    <string name="hint_button_a11y">提示</string>
+    <string name="pre_hint_less_than_1">您找到了比A.I.更好的解决方案！</string>
+    <string name="pre_hint_exact_solution">A.I.在%1$d步中找到了解决方案</string>
 
 </resources>
