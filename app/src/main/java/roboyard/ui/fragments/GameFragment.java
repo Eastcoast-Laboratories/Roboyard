@@ -34,8 +34,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import roboyard.logic.core.Constants;
@@ -3472,20 +3474,65 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         Locale currentLocale = getResources().getConfiguration().getLocales().get(0);
         String languageCode = currentLocale.getLanguage();
         
-        // Spezielle Behandlung für Deutsch
-        if (languageCode.equals("de")) {
-            // Prüfen auf deutsche Farbduplikate (Grün/Gelb)
-            if (colorName.equalsIgnoreCase("Grün") || colorName.startsWith("Gr")) {
-                return "Gr";
-            } else if (colorName.equalsIgnoreCase("Gelb") || colorName.startsWith("Ge")) {
-                return "Ge";
+        // Alle verfügbaren Farben in der aktuellen Sprache
+        String[] colors = {
+            getString(R.string.color_pink),
+            getString(R.string.color_blue), 
+            getString(R.string.color_green),
+            getString(R.string.color_yellow),
+            getString(R.string.color_silver)
+        };
+        
+        // Debug logging to see which colors are loaded
+        Timber.d("ColorAbbreviation Debug - Language: %s", languageCode);
+        for (int i = 0; i < colors.length; i++) {
+            Timber.d("Color[%d]: '%s' (first letter: '%s')", i, colors[i], 
+                colors[i] != null && !colors[i].isEmpty() ? String.valueOf(colors[i].charAt(0)) : "null");
+        }
+        
+        // Prüfen auf Konflikte in der aktuellen Sprache
+        Set<Character> usedFirstLetters = new HashSet<>();
+        Set<String> conflictingColors = new HashSet<>();
+        
+        // Erste Buchstaben sammeln
+        for (String color : colors) {
+            if (color != null && !color.isEmpty()) {
+                char firstLetter = Character.toUpperCase(color.charAt(0));
+                if (!usedFirstLetters.add(firstLetter)) {
+                    // Konflikt gefunden - beide Farben merken
+                    Timber.d("Conflict detected for letter '%s' in color '%s'", firstLetter, color);
+                    conflictingColors.add(color);
+                    // Finde die andere Farbe mit demselben ersten Buchstaben
+                    for (String otherColor : colors) {
+                        if (otherColor != null && !otherColor.isEmpty() && 
+                            !otherColor.equals(color) && 
+                            Character.toUpperCase(otherColor.charAt(0)) == firstLetter) {
+                            conflictingColors.add(otherColor);
+                            Timber.d("Also conflicting color: '%s'", otherColor);
+                            break;
+                        }
+                    }
+                }
             }
         }
         
-        // Bei allen anderen Sprachen oder Farben den ersten Buchstaben verwenden
+        Timber.d("Conflicting colors: %s", conflictingColors.toString());
+        
+        // Wenn die aktuelle Farbe einen Konflikt hat, erste beiden Buchstaben verwenden
+        if (conflictingColors.contains(colorName) && colorName != null && colorName.length() >= 2) {
+            String result = colorName.substring(0, 1).toUpperCase() + colorName.substring(1, 2).toLowerCase();
+            Timber.d("Color '%s' has conflict, using 2-letter abbreviation: '%s'", colorName, result);
+            return result;
+        }
+        
+        
+        // Bei allen anderen Farben den ersten Buchstaben verwenden
         if (colorName != null && !colorName.isEmpty()) {
-            return String.valueOf(colorName.charAt(0)).toUpperCase();
+            String result = String.valueOf(colorName.charAt(0)).toUpperCase();
+            Timber.d("Color '%s' has no conflict, using 1-letter abbreviation: '%s'", colorName, result);
+            return result;
         } else {
+            Timber.d("Color name is null or empty, using '?'");
             return "?";
         }
     }
