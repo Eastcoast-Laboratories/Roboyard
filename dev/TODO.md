@@ -139,9 +139,6 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Vielleicht sollte man noch irgendwie recorden, wenn man eine map besonders lange angeschaut hat, dass man sieht dann wahrscheinlich auch im Kopf gelöst hat
 
-✅ ERLEDIGT: Japanisch 🇯🇵 und Portugiesisch (Brasilien) 🇧🇷 Lokalisierung komplett implementiert
-- Sprachressourcen values-ja/ und values-pt-rBR/ erstellt
-- Alle wichtigen UI-Strings übersetzt (Menü, Spiel-Steuerung, Farben, Schwierigkeitsgrade)
-- Settings-Sprach-Spinner auf 8 Sprachen erweitert
-- TalkBack-Unterstützung für beide Sprachen
-- Alle Tests bestanden
+
+- in dem popup beim savegame sollte der anzeigen, ob eine lsung in dem game gespeichert ist, wenn ja, soll diese im errorlog erscheinen. Wir brachen einen weg, eine nicht funktionierende lösung aus einem savegame zu löschen oder eine neue lösung zu genereieren, obwohl eine falsche im savegame gespeichert ist
+- baue einen spinner overlay ein, wenn man auf den achievements button drückt
