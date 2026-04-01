@@ -240,6 +240,10 @@
     <string name="settings_register_success">가입 성공</string>
     <string name="settings_register_failed">가입 실패: %1$s</string>
     <string name="settings_logout_success">로그아웃됨</string>
+    <string name="settings_logout_confirm_title">로그아웃하시겠습니까?</string>
+    <string name="settings_logout_confirm_message">로그아웃하면 이 기기에서 모든 로컬 성취, 레벨 진행 상황, 게임 기록 및 연속 기록이 삭제됩니다. 데이터는 서버에 저장되어 있으며 다음 로그인 시 복원됩니다.</string>
+    <string name="settings_logging_out">로그아웃 중…</string>
+    <string name="needs_update_toast">이 기능을 사용하려면 앱을 업데이트해야 합니다.</string>
     <string name="login_dialog_title">Roboyard 로그인</string>
     <string name="login_dialog_email">이메일</string>
     <string name="login_dialog_email_or_username">이메일, 사용자 이름 또는 사용자 ID</string>
@@ -408,6 +412,32 @@
     <string name="help_movement_section_title">움직임</string>
     <string name="help_movement_point_1">- 로봇을 터치하여 선택하세요.</string>
     <string name="help_movement_point_2">- 빈 공간을 터치하여 선택된 로봇을 해당 방향으로 움직이세요.</string>
-    <string name="help_movement_point_3">- 로봇은 벽, 다른 로봇, 또는 게임판 가장자리에 부딪힐 때까지 직선으로 움직입니다.</string>
+    
+    <!-- Missing Sound, Achievement and Sharing Strings -->
+    <string name="settings_background_sound">배경 사운드:</string>
+    <string name="settings_background_sound_a11y">배경 사운드 볼륨 슬라이더</string>
+    <string name="settings_sound_effects_volume">사운드 효과 볼륨:</string>
+    <string name="settings_sound_effects_volume_a11y">사운드 효과 볼륨 슬라이더</string>
+    <string name="achievement_login_streak_day_label">%d 일</string>
+    <string name="achievement_login_streak_days_label">%d 일</string>
+    <string name="achievement_longest_streak_label">가장 긴 연속 기록: %1$s</string>
+    <string name="achievement_same_walls_2">데자뷰</string>
+    <string name="achievement_same_walls_2_desc">동일한 벽 레이아웃을 2개의 다른 로봇 위치로 해결하세요</string>
+    <string name="achievement_same_walls_10">벽 전문가</string>
+    <string name="achievement_same_walls_10_desc">동일한 벽 레이아웃을 5개의 다른 로봇 위치로 해결하세요</string>
+    <string name="achievement_same_walls_100">벽 마스터</string>
+    <string name="achievement_same_walls_100_desc">동일한 벽 레이아웃을 10개의 다른 로봇 위치로 해결하세요</string>
+    <string name="sharing_map">맵 공유 중...</string>
+    <string name="profile_a11y">사용자 프로필</string>
+    <string name="empty_text"></string>
+    
+    <!-- Missing UI Strings -->
+    <string name="button_cancel">취소</string>
+    <string name="button_save">저장</string>
+    <string name="button_next">다음</string>
+    <string name="wrong_robot_on_target">잘못된 로봇! 올바른 색상의 로봇을 목표로 움직이세요.</string>
+    <string name="robot_a11y">위치의 로봇</string>
+    <string name="minimap_description">전체 보드 레이아웃을 보여주는 미니맵</string>
+    <string name="save_game_screen_title">게임 저장</string>
 
 </resources>

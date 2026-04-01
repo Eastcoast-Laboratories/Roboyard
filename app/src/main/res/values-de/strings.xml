@@ -62,7 +62,9 @@
     <string name="settings_out_of">von</string>
     <string name="settings_sound">Ton:</string>
     <string name="settings_background_sound">Hintergrundmusik:</string>
+    <string name="settings_background_sound_a11y">Hintergrundmusik-Lautstärkeregler</string>
     <string name="settings_sound_effects_volume">Soundeffekt-Lautstärke:</string>
+    <string name="settings_sound_effects_volume_a11y">Soundeffekt-Lautstärkeregler</string>
     <string name="settings_yes">Ja</string>
     <string name="settings_no">Nein</string>
     <string name="settings_on">An</string>
@@ -84,6 +86,15 @@
     <string name="accessibility_language_label">TalkBack-Sprache:</string>
     <string name="accessibility_language_a11y">TalkBack-Ansagesprache auswählen</string>
     <string name="language_same_as_app">Gleich wie App-Sprache</string>
+    <string name="settings_english">Englisch</string>
+    <string name="settings_german">Deutsch</string>
+    <string name="settings_french">Französisch</string>
+    <string name="settings_spanish">Spanisch</string>
+    <string name="settings_chinese">Chinesisch</string>
+    <string name="settings_korean">Koreanisch</string>
+    <string name="settings_japanese">Japanisch</string>
+    <string name="settings_portuguese">Portugiesisch (Brasilien)</string>
+    <string name="language_flag_description">Sprach-Flagge</string>
     <string name="ok">OK</string>
 
     <!-- Non-translatable string example -->
@@ -246,6 +257,19 @@
     <string name="button_menu">Menü</string>
     <string name="button_back_game">Zurück</string>
     <string name="button_back">Zurück</string>
+    <string name="button_cancel">Abbrechen</string>
+    <string name="button_save">Speichern</string>
+    <string name="button_next">Weiter</string>
+    <string name="wrong_robot_on_target">Falscher Roboter! Bewege den richtigen farbigen Roboter zum Ziel.</string>
+    <string name="share_button_a11y">Dieses gespeicherte Spiel teilen</string>
+    <string name="info_button_a11y">Kartendetails anzeigen</string>
+    <string name="saved_on">gespeichert am</string>
+    <string name="share_a11y">Teilen</string>
+    <string name="level_editor_button_short">Editor</string>
+    <string name="history_completed_once">Einmal abgeschlossen</string>
+    <string name="history_completed_times">%1$d Mal abgeschlossen</string>
+    <string name="history_not_completed">Noch nicht abgeschlossen</string>
+    <string name="level_stars">Du hast %1$d Sterne verdient</string>
     <string name="back">Zurück</string>
     <string name="back_description">Zurück zum vorherigen Bildschirm</string>
     <string name="button_save_map">Save</string>
@@ -492,6 +516,15 @@
     <string name="achievement_login_streak_day_label">%d Tag</string>
     <string name="achievement_login_streak_days_label">%d Tage</string>
     <string name="achievement_longest_streak_label">Längste Serie: %1$s</string>
+    <string name="achievement_same_walls_2">Déjà Vu</string>
+    <string name="achievement_same_walls_2_desc">Löse dieselbe Wandanordnung mit 2 verschiedenen Roboter-Positionen</string>
+    <string name="achievement_same_walls_10">Wand-Experte</string>
+    <string name="achievement_same_walls_10_desc">Löse dieselbe Wandanordnung mit 5 verschiedenen Roboter-Positionen</string>
+    <string name="achievement_same_walls_100">Wand-Meister</string>
+    <string name="achievement_same_walls_100_desc">Löse dieselbe Wandanordnung mit 10 verschiedenen Roboter-Positionen</string>
+    <string name="sharing_map">Karte wird geteilt...</string>
+    <string name="profile_a11y">Benutzerprofil</string>
+    <string name="empty_text"></string>
     <string name="achievement_streak_7">Wöchentlicher Spieler</string>
     <string name="achievement_streak_7_desc">Melde dich 7 Tage hintereinander an</string>
     <string name="achievement_streak_30">Engagierter Spieler</string>
@@ -771,4 +804,12 @@
     <string name="settings_hint_auto_move_full_auto_a11y">Voll-Automatischer Modus: Roboter bewegt sich automatisch wenn Hinweis angezeigt wird und geht zum nächsten Hinweis</string>
     <string name="settings_hint_auto_move_semi_auto">Automatisch (Bewegung bei Nächster-Hinweis-Button)</string>
     <string name="settings_hint_auto_move_semi_auto_a11y">Automatischer Modus: Roboter bewegt sich, wenn Sie den Nächster-Hinweis-Button klicken</string>
+    
+    <!-- Remaining Missing Strings -->
+    <string name="level_difficulty">Schwierigkeit</string>
+    <string name="level_editor_unlocked">Level-Editor freigeschaltet!</string>
+    <string name="settings_logout_confirm_title">Abmelden?</string>
+    <string name="settings_logout_confirm_message">Das Abmelden löscht alle lokalen Achievements, Level-Fortschritte, Spielhistorie und Streaks von diesem Gerät. Ihre Daten sind auf dem Server gespeichert und werden beim nächsten Login wiederhergestellt.</string>
+    <string name="settings_logging_out">Abmelden…</string>
+    <string name="needs_update_toast">Ihre App benötigt ein Update, um diese Funktion zu verwenden.</string>
 </resources>

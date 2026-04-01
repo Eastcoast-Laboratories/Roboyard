@@ -210,7 +210,9 @@
     <string name="settings_out_of">中的</string>
     <string name="settings_sound">声音：</string>
     <string name="settings_background_sound">背景音乐：</string>
+    <string name="settings_background_sound_a11y">背景音乐音量滑块</string>
     <string name="settings_sound_effects_volume">音效音量：</string>
+    <string name="settings_sound_effects_volume_a11y">音效音量滑块</string>
     <string name="settings_yes">是</string>
     <string name="settings_no">否</string>
     <string name="settings_on">开</string>
@@ -346,8 +348,13 @@
     <string name="settings_register_success">注册成功</string>
     <string name="settings_register_failed">注册失败: %1$s</string>
     <string name="settings_logout_success">已登出</string>
+    <string name="settings_logout_confirm_title">登出？</string>
+    <string name="settings_logout_confirm_message">登出将清除此设备上的所有本地成就、关卡进度、游戏历史和连续记录。您的数据已保存在服务器上，将在下次登录时恢复。</string>
+    <string name="settings_logging_out">登出中…</string>
+    <string name="needs_update_toast">您的应用需要更新才能使用此功能。</string>
     <string name="login_dialog_title">登录 Roboyard</string>
-    <string name="login_dialog_email">邮箱、用户名或用户ID</string>
+    <string name="login_dialog_email">邮箱</string>
+    <string name="login_dialog_email_or_username">邮箱、用户名或用户ID</string>
     <string name="login_dialog_password">密码</string>
     <string name="register_dialog_title">注册 Roboyard</string>
     <string name="register_dialog_name">名称</string>
@@ -530,6 +537,29 @@
 
     <!-- Level Editor Strings -->
     <string name="level_editor_unlocked">关卡编辑器已解锁！</string>
-    <string name="level_editor_hint">你已解锁关卡编辑器！创建你自己的关卡。</string>
+    <string name="level_editor_hint">您已解锁关卡编辑器！创建您自己的自定义关卡。</string>
+    
+    <!-- Missing Achievement and Sharing Strings -->
+    <string name="achievement_login_streak_day_label">%d 天</string>
+    <string name="achievement_login_streak_days_label">%d 天</string>
+    <string name="achievement_longest_streak_label">最长连续记录：%1$s</string>
+    <string name="achievement_same_walls_2">既视感</string>
+    <string name="achievement_same_walls_2_desc">用2个不同的机器人位置解决相同的墙壁布局</string>
+    <string name="achievement_same_walls_10">墙壁专家</string>
+    <string name="achievement_same_walls_10_desc">用5个不同的机器人位置解决相同的墙壁布局</string>
+    <string name="achievement_same_walls_100">墙壁大师</string>
+    <string name="achievement_same_walls_100_desc">用10个不同的机器人位置解决相同的墙壁布局</string>
+    <string name="sharing_map">正在分享地图...</string>
+    <string name="profile_a11y">用户资料</string>
+    <string name="empty_text"></string>
+    
+    <!-- Missing UI Strings -->
+    <string name="button_cancel">取消</string>
+    <string name="button_save">保存</string>
+    <string name="button_next">下一步</string>
+    <string name="wrong_robot_on_target">错误的机器人！移动正确颜色的机器人到目标。</string>
+    <string name="robot_a11y">位置上的机器人</string>
+    <string name="minimap_description">显示整体棋盘布局的小地图</string>
+    <string name="save_game_screen_title">保存游戏</string>
 
 </resources>

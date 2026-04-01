@@ -84,6 +84,9 @@
     <string name="settings_spanish">スペイン語</string>
     <string name="settings_chinese">中国語</string>
     <string name="settings_korean">韓国語</string>
+    <string name="settings_japanese">日本語</string>
+    <string name="settings_portuguese">ポルトガル語 (ブラジル)</string>
+    <string name="language_flag_description">言語フラグ</string>
     <string name="ok">OK</string>
     <!-- Non-translatable string example -->
     <string name="app_version" translatable="false">Version: 1.0.0</string>
@@ -102,6 +105,7 @@
     
     <!-- Help content -->
     <string name="help_title">ヘルプ</string>
+    <string name="help_star_system_section_title">星評価システム</string>
     
     <!-- Credits screen -->
     <string name="version_format">バージョン：%1$s（ビルド %2$d）</string>

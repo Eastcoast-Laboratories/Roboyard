@@ -287,7 +287,9 @@
     <string name="settings_language">Idioma</string>
     <string name="settings_sound">Sonido</string>
     <string name="settings_background_sound">Sonido de fondo:</string>
+    <string name="settings_background_sound_a11y">Control deslizante de volumen de sonido de fondo</string>
     <string name="settings_sound_effects_volume">Volumen de efectos de sonido:</string>
+    <string name="settings_sound_effects_volume_a11y">Control deslizante de volumen de efectos de sonido</string>
     <string name="settings_music">Música</string>
     <string name="settings_enhanced_accessibility">Accesibilidad mejorada</string>
     <string name="settings_accessibility">Accesibilidad</string>
@@ -404,6 +406,10 @@
     <string name="settings_register_success">Registro exitoso</string>
     <string name="settings_register_failed">Registro fallido: %1$s</string>
     <string name="settings_logout_success">Sesión cerrada</string>
+    <string name="settings_logout_confirm_title">¿Cerrar sesión?</string>
+    <string name="settings_logout_confirm_message">Cerrar sesión borrará todos los logros locales, progreso de niveles, historial de juegos y rachas de este dispositivo. Tus datos están guardados en el servidor y se restaurarán en el próximo inicio de sesión.</string>
+    <string name="settings_logging_out">Cerrando sesión…</string>
+    <string name="needs_update_toast">Tu aplicación necesita una actualización para usar esta función.</string>
     <string name="login_dialog_title">Iniciar Sesión en Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_email_or_username">Email, usuario o ID de usuario</string>
@@ -566,5 +572,28 @@
     <!-- Level Editor Strings -->
     <string name="level_editor_unlocked">¡Editor de Niveles desbloqueado!</string>
     <string name="level_editor_hint">¡Has desbloqueado el Editor de Niveles! Crea tus propios niveles.</string>
+    
+    <!-- Missing Achievement and Sharing Strings -->
+    <string name="achievement_login_streak_day_label">%d día</string>
+    <string name="achievement_login_streak_days_label">%d días</string>
+    <string name="achievement_longest_streak_label">Racha más larga: %1$s</string>
+    <string name="achievement_same_walls_2">Déjà Vu</string>
+    <string name="achievement_same_walls_2_desc">Resuelve la misma disposición de paredes con 2 posiciones de robot diferentes</string>
+    <string name="achievement_same_walls_10">Experto en paredes</string>
+    <string name="achievement_same_walls_10_desc">Resuelve la misma disposición de paredes con 5 posiciones de robot diferentes</string>
+    <string name="achievement_same_walls_100">Maestro de paredes</string>
+    <string name="achievement_same_walls_100_desc">Resuelve la misma disposición de paredes con 10 posiciones de robot diferentes</string>
+    <string name="sharing_map">Compartiendo mapa...</string>
+    <string name="profile_a11y">Perfil de usuario</string>
+    <string name="empty_text"></string>
+    
+    <!-- Missing UI Strings -->
+    <string name="button_cancel">Cancelar</string>
+    <string name="button_save">Guardar</string>
+    <string name="button_next">Siguiente</string>
+    <string name="wrong_robot_on_target">¡Robot incorrecto! Mueve el robot del color correcto hacia el objetivo.</string>
+    <string name="robot_a11y">Robot en posición</string>
+    <string name="minimap_description">Minimapa que muestra el diseño general del tablero</string>
+    <string name="save_game_screen_title">Guardar juego</string>
 
 </resources>

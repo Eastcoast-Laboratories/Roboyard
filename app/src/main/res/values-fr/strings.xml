@@ -164,7 +164,9 @@
     <string name="settings_out_of">sur</string>
     <string name="settings_sound">Son:</string>
     <string name="settings_background_sound">Musique de fond:</string>
+    <string name="settings_background_sound_a11y">Curseur de volume de la musique de fond</string>
     <string name="settings_sound_effects_volume">Volume des effets sonores:</string>
+    <string name="settings_sound_effects_volume_a11y">Curseur de volume des effets sonores</string>
     <string name="settings_yes">Oui</string>
     <string name="settings_no">Non</string>
     <string name="settings_on">Activé</string>
@@ -252,6 +254,10 @@
     <string name="settings_register_success">Inscription réussie</string>
     <string name="settings_register_failed">Échec de l\'inscription: %1$s</string>
     <string name="settings_logout_success">Déconnecté</string>
+    <string name="settings_logout_confirm_title">Déconnexion ?</string>
+    <string name="settings_logout_confirm_message">La déconnexion effacera tous les succès locaux, la progression des niveaux, l\'historique des jeux et les séries de cet appareil. Vos données sont sauvegardées sur le serveur et seront restaurées à la prochaine connexion.</string>
+    <string name="settings_logging_out">Déconnexion…</string>
+    <string name="needs_update_toast">Votre application a besoin d\'une mise à jour pour utiliser cette fonctionnalité.</string>
     <string name="login_dialog_title">Connexion à Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_email_or_username">Email, nom d\'utilisateur ou ID utilisateur</string>
@@ -281,7 +287,7 @@
     <string name="share_via_url">Partager via URL</string>
     <string name="share_success">Carte partagée avec succès!</string>
     <string name="share_failed">Erreur lors du partage: %1$s</string>
-    <string name="map_dimensions_mismatch">Dimensions de la carte %1$dx%2$d ne correspondent pas aux paramètres %3$dx%4$d - génération de nouveaux murs</string>
+    <string name="sharing_map">Partage de la carte...</string>
     
     <!-- Level Editor Strings -->
     <string name="editor_title">Éditeur de Conception de Niveaux</string>
@@ -473,7 +479,15 @@
     <string name="achievement_login_streak">Série de connexions</string>
     <string name="achievement_login_streak_day_label">%d jour</string>
     <string name="achievement_login_streak_days_label">%d jours</string>
-    <string name="achievement_longest_streak_label">Plus longue série : %1$s</string>
+    <string name="achievement_longest_streak_label">Série la plus longue: %1$s</string>
+    <string name="achievement_same_walls_2">Déjà Vu</string>
+    <string name="achievement_same_walls_2_desc">Résolvez la même disposition de murs avec 2 positions de robot différentes</string>
+    <string name="achievement_same_walls_10">Expert des murs</string>
+    <string name="achievement_same_walls_10_desc">Résolvez la même disposition de murs avec 5 positions de robot différentes</string>
+    <string name="achievement_same_walls_100">Maître des murs</string>
+    <string name="achievement_same_walls_100_desc">Résolvez la même disposition de murs avec 10 positions de robot différentes</string>
+    <string name="profile_a11y">Profil utilisateur</string>
+    <string name="empty_text"></string>
     <string name="achievement_no_hints_random_10">Pas besoin d\'aide 10</string>
     <string name="achievement_no_hints_random_10_desc">Terminez 10 parties aléatoires sans utiliser d\'indices</string>
     <string name="achievement_no_hints_random_50">Pas besoin d\'aide 50</string>
@@ -573,6 +587,20 @@
     <string name="back">Retour</string>
     <string name="back_description">Retour à l\'écran précédent</string>
     <string name="button_back">Retour</string>
+    <string name="button_cancel">Annuler</string>
+    <string name="button_save">Sauvegarder</string>
+    <string name="button_next">Suivant</string>
+    <string name="wrong_robot_on_target">Mauvais robot ! Déplacez le robot de la bonne couleur vers la cible.</string>
+    <string name="share_button_a11y">Partager cette partie sauvegardée</string>
+    <string name="info_button_a11y">Afficher les détails de la carte</string>
+    <string name="saved_on">sauvegardé le</string>
+    <string name="share_a11y">Partager</string>
+    <string name="level_editor_button_short">Éditeur</string>
+    <string name="history_completed_once">Terminé une fois</string>
+    <string name="history_completed_times">Terminé %1$d fois</string>
+    <string name="history_not_completed">Pas encore terminé</string>
+    <string name="level_stars">Vous avez gagné %1$d étoiles</string>
+    <string name="robot_a11y">Robot à la position</string>
     <string name="button_menu">Menu</string>
     <string name="button_new_game">Prochain</string>
     <string name="cannot_move_in_this_direction">Impossible de se déplacer dans cette direction</string>
@@ -590,6 +618,15 @@
     <string name="language_same_as_app">Identique à la langue de l\'application</string>
     <string name="language_settings_a11y">Sélectionner la langue d\'affichage de l\'application</string>
     <string name="language_settings_label">Langue:</string>
+    <string name="settings_english">Anglais</string>
+    <string name="settings_german">Allemand</string>
+    <string name="settings_french">Français</string>
+    <string name="settings_spanish">Espagnol</string>
+    <string name="settings_chinese">Chinois</string>
+    <string name="settings_korean">Coréen</string>
+    <string name="settings_japanese">Japonais</string>
+    <string name="settings_portuguese">Portugais (Brésil)</string>
+    <string name="language_flag_description">Drapeau de langue</string>
     <string name="level_complete">Niveau terminé !</string>
     <string name="level_editor_button">Éditeur de niveau</string>
     <string name="level_editor_hint">Vous avez débloqué l\'Éditeur de niveau ! Créez vos propres niveaux.</string>
@@ -614,7 +651,6 @@
     <string name="optimal_moves">Optimal : %1$d coups</string>
     <string name="random_game_complete">Niveau terminé !</string>
     <string name="restart_button_a11y">Redémarrer ce niveau</string>
-    <string name="robot_a11y">Robot en position</string>
     <string name="robot_move_direction">%1$s %2$s</string>
     <string name="robot_selected_a11y">%1$s robot sélectionné</string>
     <string name="robots_reset">Robots réinitialisés aux positions de départ</string>
@@ -683,4 +719,20 @@
     <string name="help_tips_point_2">- Parfois, vous devez déplacer des robots vers des positions spécifiques pour libérer des chemins pour d\'autres robots.</string>
     <string name="help_tips_point_3">- Si vous êtes bloqué, utilisez la fonction d\'indice pour obtenir une suggestion.</string>
     <string name="help_star_system_section_title">Système de notation par étoiles</string>
+    <string name="help_movement_point_3">- Les robots se déplaceront en ligne droite jusqu\'à ce qu\'ils heurtent un mur, un autre robot ou le bord du plateau.</string>
+    <string name="help_controls_section_title">Contrôles</string>
+    <string name="help_tips_point_1">- Essayez de résoudre les puzzles avec un minimum de coups.</string>
+    <string name="history_tab_title">Historique</string>
+    <string name="history_screen_title">Historique du jeu</string>
+    <string name="pagination_prev">Précédent</string>
+    <string name="level_difficulty">Difficulté</string>
+    <string name="level_editor_unlocked">Éditeur de niveau débloqué!</string>
+    <string name="settings_hint_auto_move">Mouvement automatique des indices:</string>
+    <string name="settings_hint_auto_move_manual">Manuel (déplacez les robots vous-même)</string>
+    <string name="settings_hint_auto_move_manual_a11y">Mode manuel: vous déplacez les robots vous-même</string>
+    <string name="settings_hint_auto_move_full_auto">Plein automatique (robot se déplace automatiquement)</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Mode plein automatique: le robot se déplace automatiquement quand l\'indice est affiché et passe à l\'indice suivant</string>
+    <string name="settings_hint_auto_move_semi_auto">Semi-automatique (déplacement sur bouton indice suivant)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Mode semi-automatique: le robot se déplace quand vous cliquez sur le bouton indice suivant</string>
+    <string name="map_dimensions_mismatch">Les dimensions de la carte %1$dx%2$d ne correspondent pas aux paramètres %3$dx%4$d - génération de nouveaux murs</string>
 </resources>
