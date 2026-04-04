@@ -39,6 +39,7 @@ public class LanguageSpinnerAdapter extends ArrayAdapter<String> {
         languageFlags.put("한국어", R.drawable.ic_flag_kr);
         languageFlags.put("日本語", R.drawable.ic_flag_jp);
         languageFlags.put("Português (Brasil)", R.drawable.ic_flag_br);
+        languageFlags.put("Polski", R.drawable.ic_flag_pl);
         languageFlags.put("Same as app language", R.drawable.icon_10_gear); // Use gear icon for "Same as app"
     }
     

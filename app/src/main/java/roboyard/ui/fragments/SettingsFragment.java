@@ -730,6 +730,8 @@ public class SettingsFragment extends Fragment {
                 appLanguageIndex = 6; // Japanese
             } else if ("pt".equals(appLanguage)) {
                 appLanguageIndex = 7; // Portuguese
+            } else if ("pl".equals(appLanguage)) {
+                appLanguageIndex = 8; // Polish
             }
             languageSpinner.setSelection(appLanguageIndex);
             
@@ -751,6 +753,8 @@ public class SettingsFragment extends Fragment {
                 talkbackLanguageIndex = 7; // Japanese
             } else if ("pt".equals(talkbackLanguage)) {
                 talkbackLanguageIndex = 8; // Portuguese
+            } else if ("pl".equals(talkbackLanguage)) {
+                talkbackLanguageIndex = 9; // Polish
             }
             talkbackLanguageSpinner.setSelection(talkbackLanguageIndex);
             
@@ -1200,6 +1204,7 @@ public class SettingsFragment extends Fragment {
         languages.add("한국어");
         languages.add("日本語");
         languages.add("Português (Brasil)");
+        languages.add("Polski");
         
         LanguageSpinnerAdapter languageAdapter = new LanguageSpinnerAdapter(requireContext(), languages);
         languageSpinner.setAdapter(languageAdapter);
@@ -1215,6 +1220,7 @@ public class SettingsFragment extends Fragment {
         talkbackLanguages.add("한국어");
         talkbackLanguages.add("日本語");
         talkbackLanguages.add("Português (Brasil)");
+        talkbackLanguages.add("Polski");
         
         LanguageSpinnerAdapter talkbackLanguageAdapter = new LanguageSpinnerAdapter(requireContext(), talkbackLanguages);
         talkbackLanguageSpinner.setAdapter(talkbackLanguageAdapter);
@@ -1342,6 +1348,8 @@ public class SettingsFragment extends Fragment {
                 return "ja";
             case "Português (Brasil)":
                 return "pt";
+            case "Polski":
+                return "pl";
             default:
                 return "en"; // Default to English
         }
@@ -1372,6 +1380,8 @@ public class SettingsFragment extends Fragment {
                 return "ja";
             case "Português (Brasil)":
                 return "pt";
+            case "Polski":
+                return "pl";
             default:
                 return "same"; // Default to "Same as app"
         }
