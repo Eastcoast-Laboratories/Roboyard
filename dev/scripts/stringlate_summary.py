@@ -13,7 +13,7 @@ class StringlateSummaryReporter:
     def __init__(self, project_root):
         self.project_root = Path(project_root)
         self.res_dir = self.project_root / "app/src/main/res"
-        self.main_languages = ["en", "de", "es", "fr", "ja", "ko", "zh", "pt-rBR"]
+        self.main_languages = ["en", "de", "es", "fr", "ja", "ko", "zh", "pt-rBR", "pl"]
         self.languages = self._discover_main_languages()
         self.base_strings = self._load_base_strings()
         
@@ -102,7 +102,8 @@ class StringlateSummaryReporter:
             "ja": "日本語 (Japanese)",
             "ko": "한국어 (Korean)",
             "zh": "中文 (Chinese)",
-            "pt-rBR": "Português (Brazilian Portuguese)"
+            "pt-rBR": "Português (Brazilian Portuguese)",
+            "pl": "Polish"
         }
         
         for lang_code in sorted(self.languages.keys()):
