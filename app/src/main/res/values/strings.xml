@@ -84,6 +84,7 @@
     <string name="settings_korean">한국어</string>
     <string name="settings_japanese">日本語</string>
     <string name="settings_portuguese">Português (Brasil)</string>
+    <string name="settings_polish">Polski</string>
     <string name="language_same_as_app">Same as app language</string>
     <string name="ok">OK</string>
     <string name="language_flag_description">Language flag</string>

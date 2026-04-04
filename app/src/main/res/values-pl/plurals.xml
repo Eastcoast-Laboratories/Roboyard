@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Plurals for robot movements -->
+    <!-- Polish plurals: one (1), few (2-4, 22-24, ...), many (5-21, 25-31, ...), other (fractions, 0) -->
+    <plurals name="robot_moved_squares">
+        <item quantity="one">Robot %1$s przesunął się o %2$d pole</item>
+        <item quantity="few">Robot %1$s przesunął się o %2$d pola</item>
+        <item quantity="many">Robot %1$s przesunął się o %2$d pól</item>
+        <item quantity="other">Robot %1$s przesunął się o %2$d pola</item>
+    </plurals>
+    
+    <!-- Plurals for hints -->
+    <plurals name="hint_move_count">
+        <item quantity="one">Podpowiedź %1$d z %2$d ruchu</item>
+        <item quantity="few">Podpowiedź %1$d z %2$d ruchów</item>
+        <item quantity="many">Podpowiedź %1$d z %2$d ruchów</item>
+        <item quantity="other">Podpowiedź %1$d z %2$d ruchów</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility hint announcements -->
+    <plurals name="hint_move_count_a11y">
+        <item quantity="one">Podpowiedź %1$d z %2$d ruchu</item>
+        <item quantity="few">Podpowiedź %1$d z %2$d ruchów</item>
+        <item quantity="many">Podpowiedź %1$d z %2$d ruchów</item>
+        <item quantity="other">Podpowiedź %1$d z %2$d ruchów</item>
+    </plurals>
+    
+    <!-- Plurals for game completion -->
+    <plurals name="moves_to_complete">
+        <item quantity="one">Ukończono w %1$d ruchu</item>
+        <item quantity="few">Ukończono w %1$d ruchach</item>
+        <item quantity="many">Ukończono w %1$d ruchach</item>
+        <item quantity="other">Ukończono w %1$d ruchach</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility game completion announcements -->
+    <plurals name="moves_to_complete_a11y">
+        <item quantity="one">Poziom ukończony w %1$d ruchu</item>
+        <item quantity="few">Poziom ukończony w %1$d ruchach</item>
+        <item quantity="many">Poziom ukończony w %1$d ruchach</item>
+        <item quantity="other">Poziom ukończony w %1$d ruchach</item>
+    </plurals>
+    
+    <!-- Plurals for accessibility robot movement announcements -->
+    <plurals name="robot_moved_squares_a11y">
+        <item quantity="one">Robot %1$s przesunął się o %2$d pole %3$s</item>
+        <item quantity="few">Robot %1$s przesunął się o %2$d pola %3$s</item>
+        <item quantity="many">Robot %1$s przesunął się o %2$d pól %3$s</item>
+        <item quantity="other">Robot %1$s przesunął się o %2$d pola %3$s</item>
+    </plurals>
+</resources>
