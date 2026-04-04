@@ -2,6 +2,9 @@ Changelog Deutsch
 =================
 
 
+## Version 48 (2026-04-04)
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
+
 ## Version 47 (129)
 - Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch und Portugiesisch (Brasilien)
 - Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen

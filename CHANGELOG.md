@@ -2,6 +2,9 @@
 =========
 
 
+## Version 48 (130) - 2026-04-04
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
+
 ## Version 47 (129) - 2026-04-01
 - Switch between English, German, Spanish, French, Korean, Chinese, Japanese and Portuguese (Brazil)
 - Keep-map button to play a generated map even if it does not meet difficulty settings
