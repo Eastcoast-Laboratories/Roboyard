@@ -2,7 +2,6 @@ package roboyard.logic.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -604,33 +603,7 @@ public class Preferences {
         
         Timber.d("[PREFERENCES] Live move counter enabled set to %s", enabled);
     }
-    
-    /**
-     * Set the hint auto-move enabled state and save to preferences
-     * @param enabled True to enable auto-move when selecting hints, false to disable
-     */
-    public static void setHintAutoMoveEnabled(boolean enabled) {
-        if (prefs == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveEnabled, attempting to initialize");
-            if (roboyard.ui.RoboyardApplication.getAppContext() != null) {
-                initialize(roboyard.ui.RoboyardApplication.getAppContext());
-            } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null");
-                hintAutoMoveEnabled = enabled;
-                return;
-            }
-        }
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(KEY_HINT_AUTO_MOVE_ENABLED, enabled);
-        editor.apply();
-        
-        hintAutoMoveEnabled = enabled;
-        
-        notifyPreferencesChanged();
-        Timber.d("[PREFERENCES] Hint auto-move enabled set to %s", enabled);
-    }
-    
+
     /**
      * Set the hint auto-move mode and save to preferences
      * @param mode 0=Manual, 1=Full-Auto, 2=Semi-Auto (move on next-hint button)
@@ -998,147 +971,7 @@ public class Preferences {
         loadCachedValues();
         Timber.d("[PREFERENCES] Preferences reloaded from disk");
     }
-    
-    /**
-     * For backward compatibility: Get a preference value as a string
-     * @param context Context to use for accessing preferences
-     * @param key Preference key
-     * @return Preference value as a string, or null if not found
-     */
-    public static String getPreferenceValue(Context context, String key) {
-        if (prefs == null) {
-            initialize(context);
-        }
-        
-        // Map old keys to new keys
-        String mappedKey = key;
-        switch (key) {
-            case "robot_count":
-                mappedKey = KEY_ROBOT_COUNT;
-                return String.valueOf(robotCount);
-            case "target_colors":
-                mappedKey = KEY_TARGET_COLORS;
-                return String.valueOf(targetColors);
-            case "sound":
-                mappedKey = KEY_SOUND_ENABLED;
-                return soundEnabled ? "true" : "false";
-            case "difficulty":
-                mappedKey = KEY_DIFFICULTY;
-                return String.valueOf(difficulty);
-            case "boardSizeX":
-                mappedKey = KEY_BOARD_SIZE_WIDTH;
-                return String.valueOf(boardSizeWidth);
-            case "boardSizeY":
-                mappedKey = KEY_BOARD_SIZE_HEIGHT;
-                return String.valueOf(boardSizeHeight);
-            case "newMapEachTime":
-                mappedKey = KEY_GENERATE_NEW_MAP;
-                return generateNewMapEachTime ? "true" : "false";
-            case "accessibilityMode":
-                mappedKey = KEY_ACCESSIBILITY_MODE;
-                return accessibilityMode ? "true" : "false";
-            case "appLanguage":
-                mappedKey = KEY_APP_LANGUAGE;
-                return appLanguage;
-            case "talkbackLanguage":
-                mappedKey = KEY_TALKBACK_LANGUAGE;
-                return talkbackLanguage;
-            case "gameMode":
-                mappedKey = KEY_GAME_MODE;
-                return String.valueOf(gameMode);
-            case "fullscreenEnabled":
-                mappedKey = KEY_FULLSCREEN_ENABLED;
-                return fullscreenEnabled ? "true" : "false";
-        }
-        
-        // For any other keys, try to get the value directly
-        return prefs.getString(mappedKey, null);
-    }
-    
-    /**
-     * For backward compatibility: Set a preference value as a string
-     * @param context Context to use for accessing preferences
-     * @param key Preference key
-     * @param value Preference value as a string
-     */
-    public static void setPreferences(Context context, String key, String value) {
-        if (prefs == null) {
-            initialize(context);
-        }
-        
-        // Map old keys to new methods
-        switch (key) {
-            case "robot_count":
-                try {
-                    setRobotCount(Integer.parseInt(value));
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "Error parsing robot count: %s", value);
-                }
-                return;
-            case "target_colors":
-                try {
-                    setTargetColors(Integer.parseInt(value));
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "Error parsing target colors: %s", value);
-                }
-                return;
-            case "sound":
-                setSoundEnabled(value.equals("true"));
-                return;
-            case "difficulty":
-                try {
-                    setDifficulty(Integer.parseInt(value));
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "Error parsing difficulty: %s", value);
-                }
-                return;
-            case "boardSizeX":
-                try {
-                    int x = Integer.parseInt(value);
-                    int y = boardSizeHeight; // Keep existing height
-                    setBoardSize(x, y);
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "Error parsing board width: %s", value);
-                }
-                return;
-            case "boardSizeY":
-                try {
-                    int x = boardSizeWidth; // Keep existing width
-                    int y = Integer.parseInt(value);
-                    setBoardSize(x, y);
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "Error parsing board height: %s", value);
-                }
-                return;
-            case "newMapEachTime":
-                setgenerateNewMapEachTime(value.equals("true"));
-                return;
-            case "accessibilityMode":
-                setAccessibilityMode(value.equals("true"));
-                return;
-            case "appLanguage":
-                setAppLanguage(value);
-                return;
-            case "talkbackLanguage":
-                setTalkbackLanguage(value);
-                return;
-            case "gameMode":
-                try {
-                    setGameMode(Integer.parseInt(value));
-                } catch (NumberFormatException e) {
-                    Timber.e(e, "Error parsing game mode: %s", value);
-                }
-                return;
-            case "fullscreenEnabled":
-                setFullscreenEnabled(value.equals("true"));
-                return;
-        }
-        
-        // For any other keys, save the value directly
-        prefs.edit().putString(key, value).apply();
-        Timber.d("[PREFERENCES] Set custom preference %s = %s", key, value);
-    }
-    
+
     /**
      * Set the minimum solution moves and save to preferences
      * @param moves Minimum number of moves required for a solution
