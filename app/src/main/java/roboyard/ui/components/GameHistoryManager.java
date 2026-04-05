@@ -174,12 +174,22 @@ public class GameHistoryManager {
      */
     public static List<GameHistoryEntry> getHistoryEntries(Activity activity) {
         List<GameHistoryEntry> entries = new ArrayList<>();
+        boolean anyMigrated = false;
         try {
             String indexJson = FileReadWrite.readPrivateData(activity, HISTORY_INDEX_FILE);
             
             if (indexJson != null && !indexJson.isEmpty()) {
-                JSONObject root = new JSONObject(indexJson);
-                JSONArray entriesArray = root.getJSONArray("historyEntries");
+                JSONArray entriesArray;
+                
+                // Handle both formats: direct array [...] and wrapped object {"historyEntries":[...]}
+                if (indexJson.trim().startsWith("{")) {
+                    // Wrapped format - extract the array
+                    JSONObject wrapperObject = new JSONObject(indexJson);
+                    entriesArray = wrapperObject.getJSONArray("historyEntries");
+                } else {
+                    // Direct array format
+                    entriesArray = new JSONArray(indexJson);
+                }
                 
                 for (int i = 0; i < entriesArray.length(); i++) {
                     JSONObject entryJson = entriesArray.getJSONObject(i);
@@ -190,6 +200,7 @@ public class GameHistoryManager {
                     if (mapPath.startsWith("history/")) {
                         mapPath = mapPath.substring(8); // Remove "history/" prefix
                         Timber.d("[HISTORY_MIGRATION] Removed 'history/' prefix from mapPath: %s", mapPath);
+                        anyMigrated = true;
                     }
                     entry.setMapPath(mapPath);
                     entry.setMapName(entryJson.optString("mapName", "Unnamed"));
@@ -253,21 +264,13 @@ public class GameHistoryManager {
                     // MIGRATION: If mapSignature is missing, compute it from the saved game file
                     if (entry.getMapSignature() == null || entry.getMapSignature().isEmpty()) {
                         computeAndSetMapSignature(activity, entry);
+                        anyMigrated = true;
                     }
                     
                     entries.add(entry);
                 }
                 
                 // Save index if any entries were migrated (to persist the computed signatures or removed prefixes)
-                boolean anyMigrated = false;
-                for (GameHistoryEntry e : entries) {
-                    // Check if mapSignature was computed OR if mapPath had history/ prefix removed
-                    if ((e.getMapSignature() != null && !e.getMapSignature().isEmpty()) ||
-                        (!e.getMapPath().startsWith("history/") && entriesArray.getJSONObject(entries.indexOf(e)).getString("mapPath").startsWith("history/"))) {
-                        anyMigrated = true;
-                        break;
-                    }
-                }
                 if (anyMigrated) {
                     saveHistoryIndex(activity, entries);
                     Timber.d("[HISTORY_MIGRATION] Saved migrated entries (signatures or removed 'history/' prefix) to index");
