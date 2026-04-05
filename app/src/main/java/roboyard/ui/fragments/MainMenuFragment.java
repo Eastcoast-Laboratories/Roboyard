@@ -1,11 +1,14 @@
 package roboyard.ui.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +40,7 @@ public class MainMenuFragment extends BaseGameFragment {
     private ImageButton helpIconButton;
     private ImageButton settingsIconButton;
     private ImageButton achievementsIconButton;
+    private ProgressBar achievementsLoadingSpinner;
     private Button creditsButton;
     private Button userProfileButton;
     private ViewGroup rootViewGroup;
@@ -64,6 +68,7 @@ public class MainMenuFragment extends BaseGameFragment {
         helpIconButton = view.findViewById(R.id.help_icon_button);
         settingsIconButton = view.findViewById(R.id.settings_icon_button);
         achievementsIconButton = view.findViewById(R.id.achievements_icon_button);
+        achievementsLoadingSpinner = view.findViewById(R.id.achievements_loading_spinner);
         creditsButton = view.findViewById(R.id.credits_button);
         userProfileButton = view.findViewById(R.id.user_profile_button);
 
@@ -343,6 +348,13 @@ public class MainMenuFragment extends BaseGameFragment {
         // Achievements icon button - go to achievements screen
         achievementsIconButton.setOnClickListener(v -> {
             Timber.d("MainMenuFragment: Achievements icon button clicked");
+            
+            // Show loading spinner
+            if (achievementsLoadingSpinner != null) {
+                achievementsLoadingSpinner.setVisibility(View.VISIBLE);
+            }
+            
+            // Navigate to achievements fragment
             AchievementsFragment achievementsFragment = new AchievementsFragment();
             navigateToDirect(achievementsFragment);
         });

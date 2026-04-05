@@ -122,6 +122,19 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <!-- Achievements Loading Spinner Overlay -->
+    <ProgressBar
+        android:id="@+id/achievements_loading_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
+        style="?android:attr/progressBarStyleLarge"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Top header bar with Roboyard title centered and all buttons on the right -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_bar"
