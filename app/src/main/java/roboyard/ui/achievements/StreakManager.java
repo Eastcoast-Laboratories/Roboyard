@@ -279,13 +279,29 @@ public class StreakManager {
      */
     public void restoreFromServer(int serverStreak, String serverLastDate) {
         int localStreak = getCurrentStreak();
-        if (serverStreak > localStreak) {
+        int localLongest = prefs.getInt(KEY_LONGEST_STREAK, 0);
+        int maxStreak = Math.max(serverStreak, localStreak);
+        
+        if (maxStreak != localStreak) {
             prefs.edit()
-                .putInt(KEY_CURRENT_STREAK, serverStreak)
+                .putInt(KEY_CURRENT_STREAK, maxStreak)
                 .apply();
-            Timber.d("[STREAK_SYNC] Restored streak from server: %d (was %d locally)", serverStreak, localStreak);
+            Timber.d("[STREAK_SYNC] Updated streak to max value: %d (local: %d, server: %d)", maxStreak, localStreak, serverStreak);
+            
+            // Also update longest streak if max streak is higher
+            if (maxStreak > localLongest) {
+                prefs.edit()
+                    .putInt(KEY_LONGEST_STREAK, maxStreak)
+                    .putString(KEY_LONGEST_STREAK_DATE, serverLastDate != null ? serverLastDate : getLongestStreakDateString(getTodayDate()))
+                    .apply();
+                Timber.d("[STREAK_SYNC] Updated longest streak to: %d (was %d locally)", maxStreak, localLongest);
+            }
+            
+            // Update AchievementManager to keep it in sync
+            achievementManager.updateDailyLoginStreak(maxStreak);
+            Timber.d("[STREAK_SYNC] Updated AchievementManager dailyLoginStreak to: %d", maxStreak);
         } else {
-            Timber.d("[STREAK_SYNC] Local streak %d >= server streak %d, keeping local", localStreak, serverStreak);
+            Timber.d("[STREAK_SYNC] Local streak %d is already the maximum (server: %d), keeping local", localStreak, serverStreak);
         }
     }
     

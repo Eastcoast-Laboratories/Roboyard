@@ -114,8 +114,15 @@ public class AchievementsFragment extends BaseGameFragment {
     
     private void loadAchievements() {
         StreakManager streakManager = StreakManager.getInstance(requireContext());
+        // Load streak data
         currentLoginStreakDays = streakManager.getCurrentStreak();
         longestLoginStreakDays = streakManager.getLongestStreak();
+        
+        // Debug logging to identify the issue
+        Timber.d("[ACHIEVEMENTS][STREAK] - current: %d, longest: %d", currentLoginStreakDays, longestLoginStreakDays);
+        if (currentLoginStreakDays > longestLoginStreakDays) {
+            Timber.w("[ACHIEVEMENTS][STREAK] LOGIC ERROR: Current streak (%d) > longest streak (%d) - this should not happen!", currentLoginStreakDays, longestLoginStreakDays);
+        }
         int unlocked = achievementManager.getUnlockedCount();
         int total = achievementManager.getTotalCount();
         progressText.setText(getString(R.string.achievements_progress, unlocked, total));
@@ -161,6 +168,7 @@ public class AchievementsFragment extends BaseGameFragment {
                 ? getString(R.string.achievement_login_streak_day_label, longestLoginStreakDays)
                 : getString(R.string.achievement_login_streak_days_label, longestLoginStreakDays);
             streakInfo.setText(streakLabel + " • " + getString(R.string.achievement_longest_streak_label, longestStreakLabel));
+            Timber.d("[ACHIEVEMENTS][STREAK] Streak info: currentLoginStreakDays: %s, longestLoginStreakDays: %s", currentLoginStreakDays, longestLoginStreakDays);
             streakInfo.setTextSize(14);
             streakInfo.setTextColor(Color.parseColor("#000000"));
             streakInfo.setPadding(16, 0, 0, 0);

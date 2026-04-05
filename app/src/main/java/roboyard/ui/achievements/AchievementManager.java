@@ -738,6 +738,16 @@ public class AchievementManager {
     }
     
     /**
+     * Update daily login streak from server sync - keeps AchievementManager in sync with StreakManager
+     */
+    public void updateDailyLoginStreak(int streakDays) {
+        int beforeStreak = dailyLoginStreak;
+        dailyLoginStreak = streakDays;
+        saveCounter("daily_login_streak", dailyLoginStreak);
+        Timber.d("[ACHIEVEMENT] Daily login streak updated from sync - streak: %d days (was: %d)", streakDays, beforeStreak);
+    }
+    
+    /**
      * Called when player starts a new game - check and unlock login streak achievements
      */
     public void checkAndUnlockStreakAchievements() {

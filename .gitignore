@@ -22,3 +22,4 @@ zzbak~*
 /dev/translation_stats/
 androidTestResultsUserPreferences.xml
 /dev/pgs_import/*.png
+/.idea/androidTestResultsUserPreferences.xml

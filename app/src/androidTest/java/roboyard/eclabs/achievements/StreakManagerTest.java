@@ -175,4 +175,68 @@ public class StreakManagerTest {
         assertTrue("comeback_player achievement should be unlocked after 30+ days away", 
                 achievementManager.isUnlocked("comeback_player"));
     }
+    
+    @Test
+    public void testStreakLossAndLongestStreakPreservation() {
+        long day1 = 7000;
+        long day2 = day1 + 1;
+        long day4 = day1 + 3;  // Skip day 3 (lose streak)
+        
+        // Build a 5-day streak
+        streakManager.setMockTodayDate(day1);
+        streakManager.recordDailyLogin();  // Streak: 1
+        assertEquals("Streak should be 1 on day 1", 1, streakManager.getCurrentStreak());
+        assertEquals("Longest should be 1", 1, streakManager.getLongestStreak());
+        
+        streakManager.setMockTodayDate(day2);
+        streakManager.recordDailyLogin();  // Streak: 2
+        assertEquals("Streak should be 2 on day 2", 2, streakManager.getCurrentStreak());
+        assertEquals("Longest should be 2", 2, streakManager.getLongestStreak());
+        
+        // Skip day 3, login on day 4 - should lose streak
+        streakManager.setMockTodayDate(day4);
+        streakManager.recordDailyLogin();  // Streak: 1 (reset)
+        assertEquals("Streak should reset to 1 after skipping day", 1, streakManager.getCurrentStreak());
+        assertEquals("Longest streak should be preserved at 2", 2, streakManager.getLongestStreak());
+        
+        // Continue streak to day 5
+        streakManager.setMockTodayDate(day4 + 1);
+        streakManager.recordDailyLogin();  // Streak: 2
+        assertEquals("Streak should be 2 on new streak", 2, streakManager.getCurrentStreak());
+        assertEquals("Longest should still be 2", 2, streakManager.getLongestStreak());
+        
+        streakManager.clearMockTodayDate();
+    }
+    
+    @Test
+    public void testServerSyncTakesMaximumStreak() {
+        long day1 = 8000;
+        
+        // Build local streak of 5
+        streakManager.setMockTodayDate(day1);
+        for (int i = 0; i < 5; i++) {
+            streakManager.setMockTodayDate(day1 + i);
+            streakManager.recordDailyLogin();
+        }
+        assertEquals("Local streak should be 5", 5, streakManager.getCurrentStreak());
+        assertEquals("Local longest should be 5", 5, streakManager.getLongestStreak());
+        
+        // Server has lower streak (3) - should keep local
+        streakManager.restoreFromServer(3, "2023-01-01");
+        assertEquals("Should keep higher local streak (5)", 5, streakManager.getCurrentStreak());
+        assertEquals("Should keep higher local longest (5)", 5, streakManager.getLongestStreak());
+        
+        // Server has higher streak (8) - should update to server
+        streakManager.restoreFromServer(8, "2023-01-02");
+        assertEquals("Should update to higher server streak (8)", 8, streakManager.getCurrentStreak());
+        assertEquals("Should update longest to server streak (8)", 8, streakManager.getLongestStreak());
+        
+        // AchievementManager should also be updated
+        achievementManager.checkAndUnlockStreakAchievements();
+        // Verify achievement progress reflects the updated streak
+        assertEquals("AchievementManager should have updated streak", 8, 
+                achievementManager.getProgress("daily_login_7").current);
+        
+        streakManager.clearMockTodayDate();
+    }
 }
