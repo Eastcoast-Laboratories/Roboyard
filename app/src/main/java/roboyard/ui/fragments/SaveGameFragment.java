@@ -425,7 +425,7 @@ public class SaveGameFragment extends BaseGameFragment {
         if (sizeMatcher.find()) {
             int width = Integer.parseInt(sizeMatcher.group(2));
             int height = Integer.parseInt(sizeMatcher.group(3));
-            meta.boardSize = "Board: " + width + "\u00D7" + height;
+            meta.boardSize = getString(R.string.board_size, width, height);
         } else {
             Pattern widthPattern = Pattern.compile("WIDTH:(\\d+);");
             Pattern heightPattern = Pattern.compile("HEIGHT:(\\d+);");
@@ -435,7 +435,7 @@ public class SaveGameFragment extends BaseGameFragment {
             if (widthMatcher.find()) width = Integer.parseInt(widthMatcher.group(1));
             if (heightMatcher.find()) height = Integer.parseInt(heightMatcher.group(1));
             if (width > 0 && height > 0) {
-                meta.boardSize = "Board: " + width + "\u00D7" + height;
+                meta.boardSize = getString(R.string.board_size, width, height);
             }
         }
         
