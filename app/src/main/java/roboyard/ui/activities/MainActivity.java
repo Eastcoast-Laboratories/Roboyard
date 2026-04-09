@@ -419,12 +419,11 @@ public class MainActivity extends AppCompatActivity {
         for (String part : parts) {
             if (part.startsWith("target_")) {
                 targetParts.add(part);
+                if (targetParts.size() > DEEPLINK_MAX_TARGETS) {
+                    Timber.e("[DEEPLINK_CONVERT] Too many targets (max %d)", DEEPLINK_MAX_TARGETS);
+                    return null;
+                }
             }
-        }
-
-        if (targetParts.size() > DEEPLINK_MAX_TARGETS) {
-            Timber.e("[DEEPLINK_CONVERT] Too many targets: %d (max %d)", targetParts.size(), DEEPLINK_MAX_TARGETS);
-            return null;
         }
         
         appFormat.append("TARGET_SECTION:\n");
@@ -537,12 +536,11 @@ public class MainActivity extends AppCompatActivity {
         for (String part : parts) {
             if (part.startsWith("robot_")) {
                 robotParts.add(part);
+                if (robotParts.size() > DEEPLINK_MAX_ROBOTS) {
+                    Timber.e("[DEEPLINK_CONVERT] Too many robots (max %d)", DEEPLINK_MAX_ROBOTS);
+                    return null;
+                }
             }
-        }
-
-        if (robotParts.size() > DEEPLINK_MAX_ROBOTS) {
-            Timber.e("[DEEPLINK_CONVERT] Too many robots: %d (max %d)", robotParts.size(), DEEPLINK_MAX_ROBOTS);
-            return null;
         }
         
         appFormat.append("ROBOTS:\n");
