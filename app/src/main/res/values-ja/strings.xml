@@ -403,6 +403,7 @@
     <string name="settings_logout_confirm_message">ログアウトすると、このデバイスからすべてのローカル実績、レベル進行状況、ゲーム履歴、連続記録がクリアされます。データはサーバーに保存されており、次回ログイン時に復元されます。</string>
     <string name="settings_logging_out">ログアウト中…</string>
     <string name="needs_update_toast">この機能を使用するにはアプリの更新が必要です。</string>
+    <string name="deeplink_map_too_large">このマップは大きすぎて開けません（サイズ制限超過）。</string>
     <string name="login_dialog_title">Roboyardにログイン</string>
     <string name="login_dialog_email">メール</string>
     <string name="login_dialog_email_or_username">メール、ユーザー名、またはユーザーID</string>

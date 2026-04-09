@@ -429,6 +429,7 @@
     <string name="settings_logout_confirm_message">Wylogowanie usunie wszystkie lokalne osiągnięcia, postęp poziomów, historię gier i serie z tego urządzenia. Twoje dane są zapisane na serwerze i zostaną przywrócone przy następnym logowaniu.</string>
     <string name="settings_logging_out">Wylogowywanie…</string>
     <string name="needs_update_toast">Twoja aplikacja wymaga aktualizacji, aby korzystać z tej funkcji.</string>
+    <string name="deeplink_map_too_large">Ta mapa jest za duża, aby ją otworzyć (przekroczono limity rozmiaru).</string>
     <string name="login_dialog_title">Zaloguj się do Roboyard</string>
     <string name="login_dialog_email">E-mail</string>
     <string name="login_dialog_email_or_username">E-mail, nazwa użytkownika lub ID użytkownika</string>

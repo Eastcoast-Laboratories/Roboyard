@@ -312,6 +312,7 @@
     <string name="settings_logout_confirm_message">Cerrar sesión borrará todos los logros locales, progreso de niveles, historial de juegos y rachas de este dispositivo. Tus datos están guardados en el servidor y se restaurarán en el próximo inicio de sesión.</string>
     <string name="settings_logging_out">Cerrando sesión…</string>
     <string name="needs_update_toast">Tu aplicación necesita una actualización para usar esta función.</string>
+    <string name="deeplink_map_too_large">Este mapa es demasiado grande para abrirse (supera los límites de tamaño).</string>
     <string name="login_dialog_title">Iniciar Sesión en Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_email_or_username">Email, usuario o ID de usuario</string>

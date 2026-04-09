@@ -424,6 +424,7 @@
     <string name="settings_logout_confirm_message">Logging out will clear all local achievements, level progress, game history, and streaks from this device. Your data is saved on the server and will be restored on next login.</string>
     <string name="settings_logging_out">Logging out…</string>
     <string name="needs_update_toast">Your app needs an update to use this feature.</string>
+    <string name="deeplink_map_too_large">This map is too large to open (exceeds size limits).</string>
     <string name="login_dialog_title">Login to Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_email_or_username">Email, Username, or User ID</string>

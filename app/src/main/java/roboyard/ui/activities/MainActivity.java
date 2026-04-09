@@ -212,6 +212,13 @@ public class MainActivity extends AppCompatActivity {
     /** Current supported deep-link protocol version. Increment when breaking changes are introduced. */
     private static final int DEEPLINK_API_VERSION = 1;
 
+    // Size limits for deep-link map data to prevent denial-of-service via crafted links
+    private static final int DEEPLINK_MAX_WIDTH   = 64;
+    private static final int DEEPLINK_MAX_HEIGHT  = 64;
+    private static final int DEEPLINK_MAX_CELLS   = 5000;
+    private static final int DEEPLINK_MAX_ROBOTS  = 16;
+    private static final int DEEPLINK_MAX_TARGETS = 16;
+
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         Uri data = intent.getData();
@@ -290,6 +297,11 @@ public class MainActivity extends AppCompatActivity {
                 if (mapData.startsWith("name:") || mapData.contains("mh") || mapData.contains("mv")) {
                     Timber.d("[DEEPLINK_FORMAT] Detected web format, converting to app format");
                     String convertedMapData = convertWebFormatToAppFormat(mapData);
+                    if (convertedMapData == null) {
+                        Timber.e("[DEEPLINK] Map data rejected: size limits exceeded");
+                        android.widget.Toast.makeText(this, R.string.deeplink_map_too_large, android.widget.Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     Timber.d("[DEEPLINK_CONVERT] Converted map data preview: %s", 
                              convertedMapData.substring(0, Math.min(100, convertedMapData.length())));
                     
@@ -372,6 +384,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        // Validate board dimensions before allocating any data structures
+        if (width <= 2 || height <= 2
+                || width > DEEPLINK_MAX_WIDTH
+                || height > DEEPLINK_MAX_HEIGHT
+                || (long) width * height > DEEPLINK_MAX_CELLS) {
+            Timber.e("[DEEPLINK_CONVERT] Board dimensions out of range: %dx%d (max %dx%d, max cells %d)",
+                    width, height, DEEPLINK_MAX_WIDTH, DEEPLINK_MAX_HEIGHT, DEEPLINK_MAX_CELLS);
+            return null;
+        }
         
         // Start building the app format
         appFormat.append("#MAPNAME:").append(mapName)
@@ -397,6 +419,10 @@ public class MainActivity extends AppCompatActivity {
         for (String part : parts) {
             if (part.startsWith("target_")) {
                 targetParts.add(part);
+                if (targetParts.size() > DEEPLINK_MAX_TARGETS) {
+                    Timber.e("[DEEPLINK_CONVERT] Too many targets (max %d)", DEEPLINK_MAX_TARGETS);
+                    return null;
+                }
             }
         }
         
@@ -510,6 +536,10 @@ public class MainActivity extends AppCompatActivity {
         for (String part : parts) {
             if (part.startsWith("robot_")) {
                 robotParts.add(part);
+                if (robotParts.size() > DEEPLINK_MAX_ROBOTS) {
+                    Timber.e("[DEEPLINK_CONVERT] Too many robots (max %d)", DEEPLINK_MAX_ROBOTS);
+                    return null;
+                }
             }
         }
         
