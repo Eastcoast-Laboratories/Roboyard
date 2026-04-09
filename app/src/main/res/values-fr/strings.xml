@@ -249,6 +249,7 @@
     <string name="settings_logout_confirm_message">La déconnexion effacera tous les succès locaux, la progression des niveaux, l\'historique des jeux et les séries de cet appareil. Vos données sont sauvegardées sur le serveur et seront restaurées à la prochaine connexion.</string>
     <string name="settings_logging_out">Déconnexion…</string>
     <string name="needs_update_toast">Votre application a besoin d\'une mise à jour pour utiliser cette fonctionnalité.</string>
+    <string name="deeplink_map_too_large">Cette carte est trop grande pour être ouverte (limites de taille dépassées).</string>
     <string name="login_dialog_title">Connexion à Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_email_or_username">Email, nom d\'utilisateur ou ID utilisateur</string>

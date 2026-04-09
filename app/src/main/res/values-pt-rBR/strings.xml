@@ -403,6 +403,7 @@
     <string name="settings_logout_confirm_message">Fazer logout limpará todas as conquistas locais, progresso de níveis, histórico de jogos e sequências deste dispositivo. Seus dados são salvos no servidor e serão restaurados no próximo login.</string>
     <string name="settings_logging_out">Fazendo logout…</string>
     <string name="needs_update_toast">Seu aplicativo precisa de uma atualização para usar este recurso.</string>
+    <string name="deeplink_map_too_large">Este mapa é grande demais para ser aberto (limites de tamanho excedidos).</string>
     <string name="login_dialog_title">Login no Roboyard</string>
     <string name="login_dialog_email">Email</string>
     <string name="login_dialog_email_or_username">Email, nome de usuário ou ID do usuário</string>
