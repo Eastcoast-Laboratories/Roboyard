@@ -233,6 +233,7 @@
     <string name="settings_logout_confirm_message">로그아웃하면 이 기기에서 모든 로컬 성취, 레벨 진행 상황, 게임 기록 및 연속 기록이 삭제됩니다. 데이터는 서버에 저장되어 있으며 다음 로그인 시 복원됩니다.</string>
     <string name="settings_logging_out">로그아웃 중…</string>
     <string name="needs_update_toast">이 기능을 사용하려면 앱을 업데이트해야 합니다.</string>
+    <string name="deeplink_map_too_large">이 지도는 너무 커서 열 수 없습니다(크기 제한 초과).</string>
     <string name="login_dialog_title">Roboyard 로그인</string>
     <string name="login_dialog_email">이메일</string>
     <string name="login_dialog_email_or_username">이메일, 사용자 이름 또는 사용자 ID</string>

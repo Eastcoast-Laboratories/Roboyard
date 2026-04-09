@@ -293,6 +293,7 @@
     <string name="settings_logout_confirm_message">登出将清除此设备上的所有本地成就、关卡进度、游戏历史和连续记录。您的数据已保存在服务器上，将在下次登录时恢复。</string>
     <string name="settings_logging_out">登出中…</string>
     <string name="needs_update_toast">您的应用需要更新才能使用此功能。</string>
+    <string name="deeplink_map_too_large">此地图太大，无法打开（超出大小限制）。</string>
     <string name="login_dialog_title">登录 Roboyard</string>
     <string name="login_dialog_email">邮箱</string>
     <string name="login_dialog_email_or_username">邮箱、用户名或用户ID</string>

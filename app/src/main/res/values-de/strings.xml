@@ -802,4 +802,5 @@
     <string name="settings_logout_confirm_message">Das Abmelden löscht alle lokalen Achievements, Level-Fortschritte, Spielhistorie und Streaks von diesem Gerät. Ihre Daten sind auf dem Server gespeichert und werden beim nächsten Login wiederhergestellt.</string>
     <string name="settings_logging_out">Abmelden…</string>
     <string name="needs_update_toast">Ihre App benötigt ein Update, um diese Funktion zu verwenden.</string>
+    <string name="deeplink_map_too_large">Diese Karte ist zu groß zum Öffnen (Größenlimits überschritten).</string>
 </resources>
