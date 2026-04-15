@@ -28,6 +28,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <!-- Green checkmark (shown when completed with 0 stars) -->
+            <ImageView
+                android:id="@+id/level_check_green"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginEnd="1dp"
+                android:src="@drawable/ic_check_green"
+                android:visibility="gone"
+                android:importantForAccessibility="no" />
+
             <ImageView
                 android:id="@+id/level_star_1"
                 android:layout_width="14dp"
