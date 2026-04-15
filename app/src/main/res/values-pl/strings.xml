@@ -5,24 +5,24 @@
     
     <!-- Main Menu Strings -->
 
-    <string name="new_random_game">Graj</string>
-    <string name="new_random_game_a11y">Rozpocznij nową grę</string>
+    <string name="new_random_game">Rozpocznij grę</string>
+    <string name="new_random_game_a11y">Rozpocznij grę</string>
     
-    <string name="level_game">Poziomy</string>
-    <string name="level_game_a11y">Graj na predefiniowanych poziomach</string>
+    <string name="level_game">Poziomy gry</string>
+    <string name="level_game_a11y">Poziomy gry</string>
     
     <string name="load_game">Wczytaj grę</string>
     <string name="load_game_a11y">Wczytaj grę</string>
     
-    <string name="settings">Ustawienia</string>
+    <string name="settings">Ustawienia gry</string>
     <string name="settings_a11y">Ustawienia gry</string>
     
-    <string name="help">Jak grać</string>
-    <string name="help_a11y">Jak grać</string>
+    <string name="help">Pomoc</string>
+    <string name="help_a11y">Pomoc</string>
     
     <string name="main_menu_title" translatable="false">Roboyard</string>
 
-    <string name="credits">Autorzy</string>
+    <string name="credits">Podziękowania</string>
     
     <!-- Button texts for various screens -->
     <string name="button_cancel">Anuluj</string>
@@ -429,7 +429,6 @@
     <string name="settings_logout_confirm_message">Wylogowanie usunie wszystkie lokalne osiągnięcia, postęp poziomów, historię gier i serie z tego urządzenia. Twoje dane są zapisane na serwerze i zostaną przywrócone przy następnym logowaniu.</string>
     <string name="settings_logging_out">Wylogowywanie…</string>
     <string name="needs_update_toast">Twoja aplikacja wymaga aktualizacji, aby korzystać z tej funkcji.</string>
-    <string name="deeplink_map_too_large">Ta mapa jest za duża, aby ją otworzyć (przekroczono limity rozmiaru).</string>
     <string name="login_dialog_title">Zaloguj się do Roboyard</string>
     <string name="login_dialog_email">E-mail</string>
     <string name="login_dialog_email_or_username">E-mail, nazwa użytkownika lub ID użytkownika</string>
@@ -703,7 +702,7 @@
     <string name="achievement_no_hints_streak_random_50_desc">Ukończ 50 losowych gier bez użycia podpowiedzi z rzędu</string>
     
     <!-- Random Game - Speed -->
-    <string name="achievement_speedrun_random_20s">Demon prędkości</string>
+    <string name="achievement_speedrun_random_20s">Mistrz prędkości</string>
     <string name="achievement_speedrun_random_20s_desc">Ukończ losową grę w mniej niż 20 sekund</string>
     <string name="achievement_speedrun_random_10s">Błyskawiczna prędkość</string>
     <string name="achievement_speedrun_random_10s_desc">Ukończ losową grę w mniej niż 10 sekund</string>
