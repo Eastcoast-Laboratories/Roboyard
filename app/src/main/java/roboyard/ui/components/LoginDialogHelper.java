@@ -128,6 +128,9 @@ public class LoginDialogHelper {
                         if (restoredCount > 0) {
                             Toast.makeText(context, restoredCount + " achievements restored from server", Toast.LENGTH_SHORT).show();
                         }
+                        // Upload corrected local state back to server (e.g. streak reset after long absence)
+                        Timber.d("[LOGIN_SYNC] Uploading corrected local state back to server");
+                        AchievementManager.getInstance(context).syncToServer();
                     }
                     
                     @Override
@@ -135,9 +138,6 @@ public class LoginDialogHelper {
                         Timber.e("[LOGIN_SYNC] Achievement sync failed: %s", error);
                     }
                 });
-                
-                // Also upload local achievements to server (bidirectional sync)
-                AchievementManager.getInstance(context).syncToServer();
                 
                 // Sync save games and history (bidirectional)
                 if (context instanceof android.app.Activity) {

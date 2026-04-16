@@ -275,33 +275,69 @@ public class StreakManager {
     
     /**
      * Restore streak data from server (bidirectional sync).
-     * Takes the higher streak value. Also syncs longest streak.
+     * Resets current streak if server data is stale. Always preserves the highest longest streak.
      */
-    public void restoreFromServer(int serverStreak, String serverLastDate) {
+    public void restoreFromServer(int serverStreak, String serverLastDate, int serverLongestStreak, String serverLongestStreakDate) {
         int localStreak = getCurrentStreak();
         int localLongest = prefs.getInt(KEY_LONGEST_STREAK, 0);
+        
+        // Always restore longest streak first - takes max of server and local, never loses it
+        int maxLongest = Math.max(serverLongestStreak, localLongest);
+        if (maxLongest > localLongest) {
+            prefs.edit()
+                .putInt(KEY_LONGEST_STREAK, maxLongest)
+                .putString(KEY_LONGEST_STREAK_DATE, serverLongestStreakDate != null ? serverLongestStreakDate : getLongestStreakDateString(getTodayDate()))
+                .apply();
+            Timber.d("[STREAK_SYNC] Restored longest streak: %d (local was: %d, server: %d)", maxLongest, localLongest, serverLongestStreak);
+        }
+        
+        // Check if current streak data is stale (user was absent for >1 day)
+        if (serverStreak > 1 && serverLastDate != null) {
+            long serverLastLoginDay = parseDateStringToDayNumber(serverLastDate);
+            long today = getTodayDate();
+            long daysSinceServerLogin = today - serverLastLoginDay;
+            
+            Timber.d("[STREAK_SYNC] Checking server data freshness: serverStreak=%d, serverLastDate=%s, daysSince=%d", 
+                    serverStreak, serverLastDate, daysSinceServerLogin);
+            
+            if (daysSinceServerLogin > 1) {
+                Timber.d("[STREAK_SYNC] Server data is stale: %d days since last login, resetting server streak to 1", daysSinceServerLogin);
+                serverStreak = 1;
+            } else {
+                Timber.d("[STREAK_SYNC] Server data is fresh (%d days), keeping server streak %d", daysSinceServerLogin, serverStreak);
+            }
+        }
+        
         int maxStreak = Math.max(serverStreak, localStreak);
         
         if (maxStreak != localStreak) {
             prefs.edit()
                 .putInt(KEY_CURRENT_STREAK, maxStreak)
                 .apply();
-            Timber.d("[STREAK_SYNC] Updated streak to max value: %d (local: %d, server: %d)", maxStreak, localStreak, serverStreak);
-            
-            // Also update longest streak if max streak is higher
-            if (maxStreak > localLongest) {
-                prefs.edit()
-                    .putInt(KEY_LONGEST_STREAK, maxStreak)
-                    .putString(KEY_LONGEST_STREAK_DATE, serverLastDate != null ? serverLastDate : getLongestStreakDateString(getTodayDate()))
-                    .apply();
-                Timber.d("[STREAK_SYNC] Updated longest streak to: %d (was %d locally)", maxStreak, localLongest);
-            }
-            
-            // Update AchievementManager to keep it in sync
-            achievementManager.updateDailyLoginStreak(maxStreak);
-            Timber.d("[STREAK_SYNC] Updated AchievementManager dailyLoginStreak to: %d", maxStreak);
+            Timber.d("[STREAK_SYNC] Updated current streak to: %d (local: %d, server: %d)", maxStreak, localStreak, serverStreak);
         } else {
             Timber.d("[STREAK_SYNC] Local streak %d is already the maximum (server: %d), keeping local", localStreak, serverStreak);
+        }
+        
+        // Update AchievementManager to keep it in sync
+        achievementManager.updateDailyLoginStreak(maxStreak);
+        Timber.d("[STREAK_SYNC] AchievementManager dailyLoginStreak updated to: %d", maxStreak);
+    }
+    
+    /**
+     * Parse ISO date string to day number (inverse of getLongestStreakDateString)
+     */
+    private long parseDateStringToDayNumber(String dateString) {
+        if (dateString == null) return 0;
+        
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+            long timestampMs = sdf.parse(dateString).getTime();
+            long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
+            return timestampMs / dayDuration;
+        } catch (Exception e) {
+            Timber.w(e, "[STREAK] Failed to parse date string: %s", dateString);
+            return 0;
         }
     }
     

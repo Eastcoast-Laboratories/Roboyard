@@ -882,6 +882,7 @@ public class AchievementManager {
             // Include streak data for bidirectional sync
             StreakManager streakManager = StreakManager.getInstance(context);
             stats.put("daily_login_streak", streakManager.getCurrentStreak());
+            stats.put("last_login_date", streakManager.getLastLoginDateString());
             stats.put("last_streak_date", streakManager.getLastLoginDateString());
             stats.put("longest_streak", streakManager.getLongestStreak());
             stats.put("longest_streak_date", streakManager.getLongestStreakDate());
@@ -991,8 +992,10 @@ public class AchievementManager {
                     // Restore streak data from server (bidirectional)
                     if (result.stats != null) {
                         int serverStreak = result.stats.optInt("daily_login_streak", 0);
-                        String serverLastDate = result.stats.optString("last_streak_date", null);
-                        StreakManager.getInstance(context).restoreFromServer(serverStreak, serverLastDate);
+                        int serverLongestStreak = result.stats.optInt("longest_streak", 0);
+                        String serverLastLoginDate = result.stats.optString("last_login_date", null);
+                        String serverLongestStreakDate = result.stats.optString("longest_streak_date", null);
+                        StreakManager.getInstance(context).restoreFromServer(serverStreak, serverLastLoginDate, serverLongestStreak, serverLongestStreakDate);
                     }
                     
                 } catch (JSONException e) {

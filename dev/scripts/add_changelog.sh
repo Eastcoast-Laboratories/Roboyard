@@ -67,15 +67,19 @@ check_length() {
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
 - Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
-- Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen
+- Fehler in der Querformat-Ansicht behoben bei der Level-Auswahl
+- Achievement Screen Loadzeit verbessert
+- Streak-Sync mit Server behoben
+
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
 - Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
-- Keep-map button to play a generated map even if it does not meet difficulty settings
-
+- Fix level selection crash in landscape mode
+- Speedup achievement screen loading
+- Fix streak sync with server
 EOF
 )
 

@@ -222,12 +222,12 @@ public class StreakManagerTest {
         assertEquals("Local longest should be 5", 5, streakManager.getLongestStreak());
         
         // Server has lower streak (3) - should keep local
-        streakManager.restoreFromServer(3, "2023-01-01");
+        streakManager.restoreFromServer(3, "2023-01-01", 3, "2023-01-01");
         assertEquals("Should keep higher local streak (5)", 5, streakManager.getCurrentStreak());
         assertEquals("Should keep higher local longest (5)", 5, streakManager.getLongestStreak());
         
         // Server has higher streak (8) - should update to server
-        streakManager.restoreFromServer(8, "2023-01-02");
+        streakManager.restoreFromServer(8, "2023-01-02", 8, "2023-01-02");
         assertEquals("Should update to higher server streak (8)", 8, streakManager.getCurrentStreak());
         assertEquals("Should update longest to server streak (8)", 8, streakManager.getLongestStreak());
         
@@ -236,6 +236,57 @@ public class StreakManagerTest {
         // Verify achievement progress reflects the updated streak
         assertEquals("AchievementManager should have updated streak", 8, 
                 achievementManager.getProgress("daily_login_7").current);
+        
+        streakManager.clearMockTodayDate();
+    }
+    
+    @Test
+    public void testServerSyncResetsStreakAfterLongAbsence() {
+        long day1 = 9000;
+        
+        // Build local streak first to establish longest streak
+        streakManager.setMockTodayDate(day1);
+        for (int i = 0; i < 11; i++) {
+            streakManager.setMockTodayDate(day1 + i);
+            streakManager.recordDailyLogin();
+        }
+        assertEquals("Local streak should be 11", 11, streakManager.getCurrentStreak());
+        assertEquals("Local longest should be 11", 11, streakManager.getLongestStreak());
+        
+        // Get the date when streak was 11 (today in mock time)
+        String streakDate = streakManager.getLastLoginDateString();
+        
+        // Advance 90 days into future (simulate long absence)
+        streakManager.setMockTodayDate(day1 + 90);
+        
+        // Server has old streak data (11) from 90 days ago, longest=11
+        streakManager.restoreFromServer(11, streakDate, 11, streakDate);
+        
+        // Should reset to 1 due to long absence
+        assertEquals("Streak should reset to 1 after 90 days absence", 1, streakManager.getCurrentStreak());
+        
+        // Longest streak should still be preserved (it was 11)
+        assertEquals("Longest streak should be preserved at 11", 11, streakManager.getLongestStreak());
+        
+        streakManager.clearMockTodayDate();
+    }
+    
+    @Test
+    public void testServerSyncKeepsStreakForRecentData() {
+        long day1 = 10000;
+        
+        // Simulate recent server data (streak 5, yesterday)
+        streakManager.setMockTodayDate(day1);
+        String yesterdayDate = streakManager.getLastLoginDateString();
+        
+        // Advance to today (1 day later)
+        streakManager.setMockTodayDate(day1 + 1);
+        
+        // Server has recent streak data (5) from yesterday
+        streakManager.restoreFromServer(5, yesterdayDate, 5, yesterdayDate);
+        
+        // Should keep streak 5 (only 1 day gap)
+        assertEquals("Streak should be preserved for 1 day gap", 5, streakManager.getCurrentStreak());
         
         streakManager.clearMockTodayDate();
     }
