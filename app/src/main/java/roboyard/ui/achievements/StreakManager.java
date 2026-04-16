@@ -120,7 +120,7 @@ public class StreakManager {
             .putInt(KEY_CURRENT_STREAK, currentStreak)
             .putLong(KEY_LAST_STREAK_DATE, today)
             .putInt(KEY_LONGEST_STREAK, longestStreak)
-            .putString(KEY_LONGEST_STREAK_DATE, getLongestStreakDateString(today))
+            .putString(KEY_LONGEST_STREAK_DATE, dayNumberToDateString(today))
             .apply();
         
         // Notify achievement manager
@@ -185,14 +185,19 @@ public class StreakManager {
 
     /**
      * Get today's date as number of "days" since epoch.
+     * Uses the device's local timezone so the day changes at local midnight, not UTC midnight.
      * In test mode, a "day" is 10 seconds for quick testing.
      */
-    private long getTodayDate() {
+    protected long getTodayDate() {
         if (mockTodayDate != null) {
             return mockTodayDate;
         }
-        long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
-        return System.currentTimeMillis() / dayDuration;
+        if (testMode) {
+            return System.currentTimeMillis() / TEST_DAY_MS;
+        }
+        long now = System.currentTimeMillis();
+        int offsetMs = java.util.TimeZone.getDefault().getOffset(now);
+        return (now + offsetMs) / NORMAL_DAY_MS;
     }
     
     /**
@@ -254,23 +259,33 @@ public class StreakManager {
     }
     
     /**
-     * Convert a day number to ISO date string
+     * Convert a day number to ISO date string.
+     * Day numbers include local TZ offset, so we subtract it to get UTC millis for formatting.
      */
-    private String getLongestStreakDateString(long dayNumber) {
-        long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
-        long timestampMs = dayNumber * dayDuration;
-        return new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(timestampMs));
+    private String dayNumberToDateString(long dayNumber) {
+        if (testMode) {
+            long timestampMs = dayNumber * TEST_DAY_MS;
+            return new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(timestampMs));
+        }
+        long timestampMs = dayNumber * NORMAL_DAY_MS;
+        int offsetMs = java.util.TimeZone.getDefault().getOffset(timestampMs);
+        return new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(timestampMs - offsetMs));
     }
     
     /**
      * Get last login date as ISO date string for server sync.
+     * Always updates to today first, since syncing means the user is active right now.
      */
     public String getLastLoginDateString() {
+        long today = getTodayDate();
         long lastLoginDate = prefs.getLong(KEY_LAST_LOGIN_DATE, 0);
         if (lastLoginDate == 0) return null;
-        long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
-        long timestampMs = lastLoginDate * dayDuration;
-        return new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(timestampMs));
+        if (lastLoginDate != today) {
+            prefs.edit().putLong(KEY_LAST_LOGIN_DATE, today).apply();
+            Timber.d("[STREAK] Updated last_login_date from %d to %d (today) before sync", lastLoginDate, today);
+            lastLoginDate = today;
+        }
+        return dayNumberToDateString(lastLoginDate);
     }
     
     /**
@@ -286,7 +301,7 @@ public class StreakManager {
         if (maxLongest > localLongest) {
             prefs.edit()
                 .putInt(KEY_LONGEST_STREAK, maxLongest)
-                .putString(KEY_LONGEST_STREAK_DATE, serverLongestStreakDate != null ? serverLongestStreakDate : getLongestStreakDateString(getTodayDate()))
+                .putString(KEY_LONGEST_STREAK_DATE, serverLongestStreakDate != null ? serverLongestStreakDate : dayNumberToDateString(getTodayDate()))
                 .apply();
             Timber.d("[STREAK_SYNC] Restored longest streak: %d (local was: %d, server: %d)", maxLongest, localLongest, serverLongestStreak);
         }
@@ -319,22 +334,33 @@ public class StreakManager {
             Timber.d("[STREAK_SYNC] Local streak %d is already the maximum (server: %d), keeping local", localStreak, serverStreak);
         }
         
+        // Always set last_login_date to today - we are actively syncing right now
+        long today = getTodayDate();
+        prefs.edit()
+            .putLong(KEY_LAST_LOGIN_DATE, today)
+            .putLong(KEY_LAST_STREAK_DATE, today)
+            .apply();
+        Timber.d("[STREAK_SYNC] Set last_login_date to today (%d) for subsequent upload", today);
+        
         // Update AchievementManager to keep it in sync
         achievementManager.updateDailyLoginStreak(maxStreak);
         Timber.d("[STREAK_SYNC] AchievementManager dailyLoginStreak updated to: %d", maxStreak);
     }
     
     /**
-     * Parse ISO date string to day number (inverse of getLongestStreakDateString)
+     * Parse ISO date string to day number (inverse of dayNumberToDateString)
      */
     private long parseDateStringToDayNumber(String dateString) {
-        if (dateString == null) return 0;
+        if (dateString == null || "null".equals(dateString) || dateString.isEmpty()) return 0;
         
         try {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
             long timestampMs = sdf.parse(dateString).getTime();
-            long dayDuration = testMode ? TEST_DAY_MS : NORMAL_DAY_MS;
-            return timestampMs / dayDuration;
+            if (testMode) {
+                return timestampMs / TEST_DAY_MS;
+            }
+            int offsetMs = java.util.TimeZone.getDefault().getOffset(timestampMs);
+            return (timestampMs + offsetMs) / NORMAL_DAY_MS;
         } catch (Exception e) {
             Timber.w(e, "[STREAK] Failed to parse date string: %s", dateString);
             return 0;

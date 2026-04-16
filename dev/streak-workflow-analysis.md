@@ -2,6 +2,23 @@
 
 ## Local Streak Management
 
+**Anforderungen an den Workflow:**
+
+1. **Täglicher Upload**: Jedes Mal wenn der User  oder eine Achievement freischaltet, wird der lokale Streak zum Server hochgeladen (mit `last_login_date` des aktuellen Tages). dazu ist es nicht nötig ein spiel zu spielen
+
+2. **Server-seitiger Upload-Verarbeitung**: Beim Upload prüft der Server ob sein gespeicherter Streak stale ist (basierend auf `last_login_date` oder Fallback auf `last_streak_date`/`updated_at`). Wenn stale, wird er auf 0 zurückgesetzt, sodass der eingehende Wert vom Client gewinnt. Wenn nicht stale, wird `max(server, incoming)` genommen. Der `longest_streak` wird immer mit `max(server, incoming)` aktualisiert und geht nie verloren.
+
+3. **Login auf neuem Gerät**: Nach Login wird der Server-Streak heruntergeladen. Der Client prüft ob der Server-Streak stale ist (basierend auf `last_login_date`). Wenn stale, wird er lokal auf 1 zurückgesetzt. Der `longest_streak` wird vom Server wiederhergestellt (lokal ist es 0, also gewinnt der Server).
+
+4. **Login auf bekanntem Gerät**: Nach Login wird der Server-Streak heruntergeladen und lokal wiederhergestellt. Der lokale Streak wird nicht verändert (Server ist Referenz). Kein Upload nötig. (PROBLEM)
+
+5. **Offline-Spielen**: Wenn der User offline spielt und dann später synct, wird sein lokaler Streak (der durch `recordDailyLogin()` korrekt verwaltet wurde) hochgeladen und überschreibt den alten Server-Streak.
+   
+6. Wenn ein spieler online sich nicht eingeloggt hat, aber offline weiterspielt, dann soll online bei current streak ein hinswis, wann der "letzter login" war angezeigt werden, da der server nichdt weis, ob der spieler überhaupt noch am leben ist.
+
+7. Alle Streaks beziehen sich immer auf die Zeitzone der Android app.
+
+
 **StreakManager.java** - SharedPreferences keys:
 - `KEY_CURRENT_STREAK` - current consecutive login days
 - `KEY_LAST_LOGIN_DATE` - last login as day-number since epoch

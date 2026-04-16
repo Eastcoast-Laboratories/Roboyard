@@ -886,6 +886,11 @@ public class AchievementManager {
             stats.put("last_streak_date", streakManager.getLastLoginDateString());
             stats.put("longest_streak", streakManager.getLongestStreak());
             stats.put("longest_streak_date", streakManager.getLongestStreakDate());
+            stats.put("timezone", java.util.TimeZone.getDefault().getID());
+            
+            Timber.d("[ACHIEVEMENT_SYNC_UP] Uploading: streak=%d, last_login_date=%s, longest=%d, timezone=%s",
+                    streakManager.getCurrentStreak(), streakManager.getLastLoginDateString(),
+                    streakManager.getLongestStreak(), java.util.TimeZone.getDefault().getID());
             
             // Send to server
             apiClient.syncAchievements(achievementsArray, stats, new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult>() {
@@ -993,8 +998,12 @@ public class AchievementManager {
                     if (result.stats != null) {
                         int serverStreak = result.stats.optInt("daily_login_streak", 0);
                         int serverLongestStreak = result.stats.optInt("longest_streak", 0);
-                        String serverLastLoginDate = result.stats.optString("last_login_date", null);
-                        String serverLongestStreakDate = result.stats.optString("longest_streak_date", null);
+                        // Use last_login_date with fallback to last_streak_date (for users who synced before last_login_date was introduced)
+                        String serverLastLoginDate = result.stats.isNull("last_login_date") ? null : result.stats.optString("last_login_date", null);
+                        if (serverLastLoginDate == null) {
+                            serverLastLoginDate = result.stats.isNull("last_streak_date") ? null : result.stats.optString("last_streak_date", null);
+                        }
+                        String serverLongestStreakDate = result.stats.isNull("longest_streak_date") ? null : result.stats.optString("longest_streak_date", null);
                         StreakManager.getInstance(context).restoreFromServer(serverStreak, serverLastLoginDate, serverLongestStreak, serverLongestStreakDate);
                     }
                     
