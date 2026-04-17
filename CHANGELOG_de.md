@@ -2,6 +2,13 @@ Changelog Deutsch
 =================
 
 
+## Version 48 (132)
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
+- Fehler in der Querformat-Ansicht behoben bei der Level-Auswahl
+- Achievement Screen Loadzeit verbessert
+- Streak-Sync mit Server behoben
+
+
 ## Version 47 (129)
 - Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch und Portugiesisch (Brasilien)
 - Map behalten-Button um eine generierte Map trotz nicht passender Schwierigkeit zu spielen

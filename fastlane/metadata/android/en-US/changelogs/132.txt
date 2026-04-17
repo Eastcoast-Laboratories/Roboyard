@@ -1,0 +1,5 @@
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
+- Fix level selection crash in landscape mode
+- Speedup achievement screen loading
+- Fix streak sync with server
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

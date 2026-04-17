@@ -2,6 +2,13 @@
 =========
 
 
+## Version 48 (132) - 2026-04-17
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
+- Fix level selection crash in landscape mode
+- Speedup achievement screen loading
+- Fix streak sync with server
+
+
 ## Version 47 (129) - 2026-04-01
 - Switch between English, German, Spanish, French, Korean, Chinese, Japanese and Portuguese (Brazil)
 - Keep-map button to play a generated map even if it does not meet difficulty settings
