@@ -1,0 +1,4 @@
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
+- Beim App start erscheint jetzt ein Hinweis, wenn es eine neue Version gibt
+- Achievement-Unlock-Fehler behoben
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md

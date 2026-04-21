@@ -2,6 +2,12 @@
 =========
 
 
+## Version 49 (133) - 2026-04-21
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
+- Fix Achievement unlock tracking
+- App now shows a hint when a new version is available
+
+
 ## Version 48 (132) - 2026-04-17
 - Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
 - Fix level selection crash in landscape mode

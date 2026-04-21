@@ -2,6 +2,12 @@ Changelog Deutsch
 =================
 
 
+## Version 49 (133)
+- Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
+- Beim App start erscheint jetzt ein Hinweis, wenn es eine neue Version gibt
+- Achievement-Unlock-Fehler behoben
+
+
 ## Version 48 (132)
 - Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
 - Fehler in der Querformat-Ansicht behoben bei der Level-Auswahl

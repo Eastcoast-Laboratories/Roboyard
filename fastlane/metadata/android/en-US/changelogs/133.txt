@@ -1,0 +1,4 @@
+- Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
+- Fix Achievement unlock tracking
+- App now shows a hint when a new version is available
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
