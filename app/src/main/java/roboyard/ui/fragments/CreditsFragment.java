@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
+import roboyard.ui.achievements.AchievementManager;
 import timber.log.Timber;
 
 /**
@@ -45,7 +46,10 @@ public class CreditsFragment extends BaseGameFragment {
         
         // Programmatically disable accessibility for wall elements
         disableAccessibilityForDecorations(view);
-        
+
+        // Show update nudge if new version available (always on credits page, no cooldown)
+        AchievementManager.getInstance(requireContext()).showUpdateNudgeForCredits(requireActivity());
+
         // Set up back button
         view.findViewById(R.id.back_button).setOnClickListener(v -> {
             Timber.d("CreditsFragment: Back button clicked");

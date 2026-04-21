@@ -87,6 +87,45 @@ public class AchievementManager {
 
     public void setCurrentActivity(Activity activity) {
         this.currentActivity = new WeakReference<>(activity);
+        // Show any pending update nudge now that we have an activity
+        if (activity != null && pendingNudgeVersion != null) {
+            showUpdateNudgeInternal(activity, pendingNudgeVersion);
+            pendingNudgeVersion = null;
+        }
+    }
+
+    /**
+     * Show update nudge on credits page - always shows, no cooldown.
+     * Should be called when opening the credits/about screen.
+     */
+    public void showUpdateNudgeForCredits(Activity activity) {
+        Timber.d("[UPDATE_NUDGE_CREDITS] Called, activity=%s", activity != null ? activity.getClass().getSimpleName() : "null");
+        String latestAppVersion = prefs.getString(KEY_PENDING_NUDGE_VERSION, null);
+        Timber.d("[UPDATE_NUDGE_CREDITS] Pending version from prefs: %s", latestAppVersion);
+        if (latestAppVersion == null) {
+            Timber.d("[UPDATE_NUDGE_CREDITS] No pending version stored, checking fallback...");
+            return;
+        }
+        String current = BuildConfig.VERSION_NAME;
+        Timber.d("[UPDATE_NUDGE_CREDITS] Comparing: current=%s, latest=%s", current, latestAppVersion);
+        if (compareVersions(current, latestAppVersion) >= 0) {
+            Timber.d("[UPDATE_NUDGE_CREDITS] App is up to date, not showing nudge");
+            return; // up to date
+        }
+        Timber.i("[UPDATE_NUDGE_CREDITS] Showing nudge for version %s", latestAppVersion);
+        showUpdateNudgeInternal(activity, latestAppVersion);
+    }
+
+    private void showUpdateNudgeInternal(Activity activity, String version) {
+        final String message = activity.getString(R.string.update_available_nudge, version);
+        activity.runOnUiThread(() -> {
+            try {
+                android.widget.Toast.makeText(activity, message, android.widget.Toast.LENGTH_LONG).show();
+                Timber.d("[UPDATE_NUDGE] Showed nudge: version=%s", version);
+            } catch (Exception e) {
+                Timber.e(e, "[UPDATE_NUDGE] Failed to show toast");
+            }
+        });
     }
 
     /**
@@ -925,6 +964,7 @@ public class AchievementManager {
                     Timber.d("[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new achievements",
                             result.syncedCount, result.newAchievements);
                     // Optional "update available" nudge if server reports a newer version
+                    Timber.d("[UPDATE_NUDGE] Latest app version: %s", result.latestAppVersion);
                     if (result.latestAppVersion != null) {
                         maybeShowUpdateNudge(result.latestAppVersion);
                     }
@@ -975,7 +1015,11 @@ public class AchievementManager {
     // Prefs key for dedup of the update nudge: we store "last_nudged_version"
     private static final String KEY_LAST_NUDGED_VERSION = "last_nudged_version";
     private static final String KEY_LAST_NUDGE_MS = "last_nudge_ms";
-    private static final long NUDGE_COOLDOWN_MS = 24L * 60 * 60 * 1000; // once per day per version
+    private static final long NUDGE_COOLDOWN_MS = 7L * 24 * 60 * 60 * 1000; // once per week per version
+
+    // Pending nudge when no activity available at sync time
+    private static final String KEY_PENDING_NUDGE_VERSION = "pending_update_nudge_version";
+    private String pendingNudgeVersion = null;
 
     /**
      * Compare two dotted version strings ("3.14.0" vs "3.15.1").
@@ -1004,17 +1048,42 @@ public class AchievementManager {
      */
     private void maybeShowUpdateNudge(String latestAppVersion) {
         String current = BuildConfig.VERSION_NAME;
-        if (compareVersions(current, latestAppVersion) >= 0) {
+        Timber.d("[UPDATE_NUDGE] Checking: current=%s, latest=%s", current, latestAppVersion);
+
+        if (latestAppVersion == null || latestAppVersion.isEmpty()) {
+            Timber.d("[UPDATE_NUDGE] Skipping: latestAppVersion is null or empty");
+            return;
+        }
+
+        int cmp = compareVersions(current, latestAppVersion);
+        Timber.d("[UPDATE_NUDGE] Version compare result: %d (negative=update available)", cmp);
+
+        if (cmp >= 0) {
+            Timber.d("[UPDATE_NUDGE] Skipping: current >= latest (no update needed)");
             return; // we're up to date or ahead (dev builds)
         }
+
         String lastNudgedVersion = prefs.getString(KEY_LAST_NUDGED_VERSION, null);
         long lastNudgeMs = prefs.getLong(KEY_LAST_NUDGE_MS, 0L);
         long now = System.currentTimeMillis();
+        long elapsed = now - lastNudgeMs;
         boolean sameVersion = latestAppVersion.equals(lastNudgedVersion);
-        if (sameVersion && (now - lastNudgeMs) < NUDGE_COOLDOWN_MS) {
-            Timber.d("[UPDATE_NUDGE] Skipping nudge (cooldown), version=%s", latestAppVersion);
+
+        Timber.d("[UPDATE_NUDGE] Cooldown check: lastNudgedVersion=%s, sameVersion=%b, elapsed=%d ms, cooldown=%d ms",
+                lastNudgedVersion, sameVersion, elapsed, NUDGE_COOLDOWN_MS);
+
+        // Always store the latest version for credits page (independent of cooldown)
+        prefs.edit().putString(KEY_PENDING_NUDGE_VERSION, latestAppVersion).apply();
+        Timber.d("[UPDATE_NUDGE] Stored pending version for credits: %s", latestAppVersion);
+
+        // Check cooldown - only affects automatic nudge at app start, not credits page
+        if (sameVersion && elapsed < NUDGE_COOLDOWN_MS) {
+            Timber.d("[UPDATE_NUDGE] Cooldown active, storing for later. remaining=%d ms", NUDGE_COOLDOWN_MS - elapsed);
+            pendingNudgeVersion = latestAppVersion;
             return;
         }
+
+        Timber.i("[UPDATE_NUDGE] Conditions met - will show nudge for version %s", latestAppVersion);
         prefs.edit()
                 .putString(KEY_LAST_NUDGED_VERSION, latestAppVersion)
                 .putLong(KEY_LAST_NUDGE_MS, now)
@@ -1022,18 +1091,11 @@ public class AchievementManager {
 
         Activity act = currentActivity != null ? currentActivity.get() : null;
         if (act == null) {
-            Timber.d("[UPDATE_NUDGE] No activity available for nudge, version=%s", latestAppVersion);
+            Timber.d("[UPDATE_NUDGE] No activity available, storing pending nudge for version=%s", latestAppVersion);
+            pendingNudgeVersion = latestAppVersion;
             return;
         }
-        final String message = act.getString(R.string.update_available_nudge, latestAppVersion);
-        act.runOnUiThread(() -> {
-            try {
-                android.widget.Toast.makeText(act, message, android.widget.Toast.LENGTH_LONG).show();
-                Timber.d("[UPDATE_NUDGE] Showed nudge: current=%s, latest=%s", current, latestAppVersion);
-            } catch (Exception e) {
-                Timber.e(e, "[UPDATE_NUDGE] Failed to show toast");
-            }
-        });
+        showUpdateNudgeInternal(act, latestAppVersion);
     }
 
     /**
