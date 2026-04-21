@@ -50,6 +50,7 @@
     <string name="optimal_moves">Optimal: %1$d moves</string>
     <string name="level_complete">Level Complete!</string>
     <string name="wrong_robot_on_target">Wrong robot! Move the correct colored robot to the goal.</string>
+    <string name="update_available_nudge">A new version of Roboyard is available: %1$s</string>
     <string name="level_stars_description">You earned %1$d stars</string>
     <string name="stars_count">%1$d Stars</string>
     <string name="random_game_complete">Level Complete!</string>

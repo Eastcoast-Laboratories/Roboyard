@@ -548,11 +548,13 @@ public class RoboyardApiClient {
         public final int syncedCount;
         public final int newAchievements;
         public final boolean statsUpdated;
-        
-        public AchievementSyncResult(boolean success, int syncedCount, int newAchievements, boolean statsUpdated) {
+        public final String latestAppVersion; // server-side published version, null if unknown
+
+        public AchievementSyncResult(boolean success, int syncedCount, int newAchievements, boolean statsUpdated, String latestAppVersion) {
             this.success = success;
             this.syncedCount = syncedCount;
             this.newAchievements = newAchievements;
+            this.latestAppVersion = latestAppVersion;
             this.statsUpdated = statsUpdated;
         }
     }
@@ -817,8 +819,9 @@ public class RoboyardApiClient {
                 int syncedCount = json.optInt("synced_count", 0);
                 int newAchievements = json.optInt("new_achievements", 0);
                 boolean statsUpdated = json.optBoolean("stats_updated", false);
-                
-                AchievementSyncResult result = new AchievementSyncResult(success, syncedCount, newAchievements, statsUpdated);
+                String latestAppVersion = json.isNull("latest_app_version") ? null : json.optString("latest_app_version", null);
+
+                AchievementSyncResult result = new AchievementSyncResult(success, syncedCount, newAchievements, statsUpdated, latestAppVersion);
                 postSuccess(callback, result);
                 
                 Timber.tag(TAG).d("[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new", syncedCount, newAchievements);

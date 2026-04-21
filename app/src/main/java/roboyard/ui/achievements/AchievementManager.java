@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import roboyard.eclabs.BuildConfig;
+import roboyard.eclabs.R;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.PlayGamesManager;
 import roboyard.ui.components.RoboyardApiClient;
@@ -897,19 +898,38 @@ public class AchievementManager {
             stats.put("longest_streak", streakManager.getLongestStreak());
             stats.put("longest_streak_date", streakManager.getLongestStreakDate());
             stats.put("timezone", java.util.TimeZone.getDefault().getID());
-            
-            Timber.d("[ACHIEVEMENT_SYNC_UP] Uploading: streak=%d, last_login_date=%s, longest=%d, timezone=%s",
+
+            // Device / app metadata for server-side rankings and analytics
+            // system_language: TRUE device locale, bypassing the app-level Locale override done
+            //                  by RoboyardApplication.updateAppContextLocale().
+            //                  Reads from Resources.getSystem() which is not affected by app overrides.
+            // app_language:    user-chosen language preference from Settings (Preferences.appLanguage).
+            String systemLanguage = getSystemLanguageTag();
+            String appLanguage = roboyard.logic.core.Preferences.appLanguage;
+            String appVersion = BuildConfig.VERSION_NAME;
+            String androidVersion = android.os.Build.VERSION.RELEASE + " (API " + android.os.Build.VERSION.SDK_INT + ")";
+            if (systemLanguage != null) stats.put("system_language", systemLanguage);
+            if (appLanguage != null && !appLanguage.isEmpty()) stats.put("app_language", appLanguage);
+            stats.put("app_version", appVersion);
+            stats.put("android_version", androidVersion);
+
+            Timber.d("[ACHIEVEMENT_SYNC_UP] Uploading: streak=%d, last_login_date=%s, longest=%d, timezone=%s, sysLang=%s, appLang=%s, app=%s, android=%s",
                     streakManager.getCurrentStreak(), streakManager.getLastLoginDateString(),
-                    streakManager.getLongestStreak(), java.util.TimeZone.getDefault().getID());
+                    streakManager.getLongestStreak(), java.util.TimeZone.getDefault().getID(),
+                    systemLanguage, appLanguage, appVersion, androidVersion);
             
             // Send to server
             apiClient.syncAchievements(achievementsArray, stats, new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult>() {
                 @Override
                 public void onSuccess(RoboyardApiClient.AchievementSyncResult result) {
-                    Timber.d("[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new achievements", 
+                    Timber.d("[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new achievements",
                             result.syncedCount, result.newAchievements);
+                    // Optional "update available" nudge if server reports a newer version
+                    if (result.latestAppVersion != null) {
+                        maybeShowUpdateNudge(result.latestAppVersion);
+                    }
                 }
-                
+
                 @Override
                 public void onError(String error) {
                     Timber.e("[ACHIEVEMENT_SYNC] Sync failed: %s", error);
@@ -921,6 +941,101 @@ public class AchievementManager {
         }
     }
     
+    /**
+     * Get the true device/system language tag, ignoring any app-level Locale override
+     * done via {@code Locale.setDefault(...)} (e.g. in RoboyardApplication.updateAppContextLocale()).
+     * Uses Resources.getSystem() which is backed by the framework config, not the app config.
+     */
+    private static String getSystemLanguageTag() {
+        try {
+            android.content.res.Configuration sysConfig = android.content.res.Resources.getSystem().getConfiguration();
+            java.util.Locale locale;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                android.os.LocaleList locales = sysConfig.getLocales();
+                if (locales == null || locales.isEmpty()) return null;
+                locale = locales.get(0);
+            } else {
+                //noinspection deprecation
+                locale = sysConfig.locale;
+            }
+            if (locale == null) return null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                return locale.toLanguageTag();
+            }
+            // Fallback for very old API levels — simple "lang-REGION" join
+            String lang = locale.getLanguage();
+            String country = locale.getCountry();
+            return (country == null || country.isEmpty()) ? lang : (lang + "-" + country);
+        } catch (Exception e) {
+            Timber.w(e, "[LOCALE] Failed to read system language tag");
+            return null;
+        }
+    }
+
+    // Prefs key for dedup of the update nudge: we store "last_nudged_version"
+    private static final String KEY_LAST_NUDGED_VERSION = "last_nudged_version";
+    private static final String KEY_LAST_NUDGE_MS = "last_nudge_ms";
+    private static final long NUDGE_COOLDOWN_MS = 24L * 60 * 60 * 1000; // once per day per version
+
+    /**
+     * Compare two dotted version strings ("3.14.0" vs "3.15.1").
+     * Returns negative if a < b, 0 if equal, positive if a > b.
+     * Non-numeric segments are compared lexicographically.
+     */
+    private static int compareVersions(String a, String b) {
+        if (a == null || b == null) return 0;
+        String[] pa = a.split("\\.");
+        String[] pb = b.split("\\.");
+        int n = Math.max(pa.length, pb.length);
+        for (int i = 0; i < n; i++) {
+            String sa = i < pa.length ? pa[i] : "0";
+            String sb = i < pb.length ? pb[i] : "0";
+            int na, nb;
+            try { na = Integer.parseInt(sa.replaceAll("\\D", "")); } catch (NumberFormatException e) { na = 0; }
+            try { nb = Integer.parseInt(sb.replaceAll("\\D", "")); } catch (NumberFormatException e) { nb = 0; }
+            if (na != nb) return Integer.compare(na, nb);
+        }
+        return 0;
+    }
+
+    /**
+     * If the server reports a newer published app version than the installed one,
+     * show a Toast nudge — but only once per (version, 24h) window to avoid spam.
+     */
+    private void maybeShowUpdateNudge(String latestAppVersion) {
+        String current = BuildConfig.VERSION_NAME;
+        if (compareVersions(current, latestAppVersion) >= 0) {
+            return; // we're up to date or ahead (dev builds)
+        }
+        String lastNudgedVersion = prefs.getString(KEY_LAST_NUDGED_VERSION, null);
+        long lastNudgeMs = prefs.getLong(KEY_LAST_NUDGE_MS, 0L);
+        long now = System.currentTimeMillis();
+        boolean sameVersion = latestAppVersion.equals(lastNudgedVersion);
+        if (sameVersion && (now - lastNudgeMs) < NUDGE_COOLDOWN_MS) {
+            Timber.d("[UPDATE_NUDGE] Skipping nudge (cooldown), version=%s", latestAppVersion);
+            return;
+        }
+        prefs.edit()
+                .putString(KEY_LAST_NUDGED_VERSION, latestAppVersion)
+                .putLong(KEY_LAST_NUDGE_MS, now)
+                .apply();
+
+        Activity act = currentActivity != null ? currentActivity.get() : null;
+        if (act == null) {
+            Timber.d("[UPDATE_NUDGE] No activity available for nudge, version=%s", latestAppVersion);
+            return;
+        }
+        final String message = act.getString(R.string.update_available_nudge, latestAppVersion);
+        act.runOnUiThread(() -> {
+            try {
+                android.widget.Toast.makeText(act, message, android.widget.Toast.LENGTH_LONG).show();
+                Timber.d("[UPDATE_NUDGE] Showed nudge: current=%s, latest=%s", current, latestAppVersion);
+            } catch (Exception e) {
+                Timber.e(e, "[UPDATE_NUDGE] Failed to show toast");
+            }
+        });
+    }
+
     /**
      * Sync achievements to server after unlocking.
      * Called automatically when an achievement is unlocked.
