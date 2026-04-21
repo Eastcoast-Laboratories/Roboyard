@@ -1732,6 +1732,30 @@ public class GameState implements Serializable {
     }
 
     /**
+     * Check if the given robot is standing on a target that does NOT match its color.
+     * Used to show the "wrong robot" hint toast only for the specific robot that just moved.
+     * @param robot the robot to check
+     * @return true if the robot is on a target of a different (non-multi) color
+     */
+    public boolean isRobotOnWrongTarget(GameElement robot) {
+        if (robot == null || robot.getType() != GameElement.TYPE_ROBOT) {
+            return false;
+        }
+        int rx = robot.getX();
+        int ry = robot.getY();
+        for (GameElement element : gameElements) {
+            if (element.getType() == GameElement.TYPE_TARGET &&
+                    element.getX() == rx && element.getY() == ry) {
+                if (element.getColor() != Constants.COLOR_MULTI &&
+                        element.getColor() != robot.getColor()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Check if any robot is on a target that does NOT match its color.
      * Used to show the "wrong robot" hint toast.
      * @return true if at least one wrong-colored robot is standing on any target

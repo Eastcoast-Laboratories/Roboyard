@@ -82,7 +82,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private final MutableLiveData<Integer> moveCount = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> squaresMoved = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isGameComplete = new MutableLiveData<>(false);
-    private final MutableLiveData<Boolean> wrongRobotAtTarget = new MutableLiveData<>(false);
+    private final MutableLiveData<Integer> wrongRobotAtTarget = new MutableLiveData<>(-1); // carries color of wrong robot that just landed on a target, -1 = none
 
     // Move history for undo functionality
     private final ArrayList<GameState> stateHistory = new ArrayList<>();
@@ -157,6 +157,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private boolean isHistorySaved = false;
     private boolean isViewTimeAchievementChecked = false; // prevents double-checking per session
     private boolean isCompletionRecorded = false; // prevents double-counting completions per game session
+    private final java.util.Set<Integer> wrongRobotToastShownColors = new java.util.HashSet<>(); // robot colors that already triggered the "wrong robot on target" toast this game
     private static final int HISTORY_SAVE_THRESHOLD = 30; // seconds threshold for saving to history
 
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
@@ -1689,9 +1690,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // This prevents triggering goal event twice
                 if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
-                } else if (!isGameComplete.getValue() && state.isAnyWrongRobotOnTarget()) {
-                    wrongRobotAtTarget.setValue(true);
-                    wrongRobotAtTarget.setValue(false);
+                } else if (!isGameComplete.getValue() && state.isRobotOnWrongTarget(robot)) {
+                    wrongRobotAtTarget.setValue(robot.getColor());
+                    wrongRobotAtTarget.setValue(-1);
                 }
 
                 // Notify observers that the state has changed
@@ -1747,9 +1748,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // This prevents triggering goal event twice
                 if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
-                } else if (!isGameComplete.getValue() && state.isAnyWrongRobotOnTarget()) {
-                    wrongRobotAtTarget.setValue(true);
-                    wrongRobotAtTarget.setValue(false);
+                } else if (!isGameComplete.getValue() && state.isRobotOnWrongTarget(robot)) {
+                    wrongRobotAtTarget.setValue(robot.getColor());
+                    wrongRobotAtTarget.setValue(-1);
                 }
 
                 // Notify observers
@@ -2553,6 +2554,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         isHistorySaved = false;
         isViewTimeAchievementChecked = false; // Reset achievement check for new game
         isCompletionRecorded = false;
+        wrongRobotToastShownColors.clear();
         Timber.d("[HISTORY] Game timer started");
     }
 
@@ -3168,7 +3170,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      *
      * @return The current solution or null if none is available
      */
-    public LiveData<Boolean> getWrongRobotAtTarget() {
+    public LiveData<Integer> getWrongRobotAtTarget() {
         return wrongRobotAtTarget;
     }
 
@@ -3748,6 +3750,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         totalPlayTime = 0;
         isHistorySaved = false;
         isCompletionRecorded = false;
+        wrongRobotToastShownColors.clear();
+    }
+
+    /**
+     * Check if the wrong-robot-on-target toast has already been shown for this robot color this game.
+     * Used by GameFragment to ensure the toast appears only once per robot color per game.
+     */
+    public boolean hasWrongRobotToastBeenShownFor(int robotColor) {
+        return wrongRobotToastShownColors.contains(robotColor);
+    }
+
+    /**
+     * Mark the wrong-robot-on-target toast as shown for this robot color in this game.
+     */
+    public void markWrongRobotToastShownFor(int robotColor) {
+        wrongRobotToastShownColors.add(robotColor);
     }
 
     /**

@@ -1058,10 +1058,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
         });
 
-        // Show toast when a wrong-colored robot lands on a target
-        gameStateManager.getWrongRobotAtTarget().observe(getViewLifecycleOwner(), wrongRobot -> {
-            if (Boolean.TRUE.equals(wrongRobot)) {
+        // Show toast when a wrong-colored robot lands on a target - but only once per robot color per game
+        gameStateManager.getWrongRobotAtTarget().observe(getViewLifecycleOwner(), robotColor -> {
+            if (robotColor != null && robotColor >= 0
+                    && !gameStateManager.hasWrongRobotToastBeenShownFor(robotColor)) {
                 Toast.makeText(requireContext(), R.string.wrong_robot_on_target, Toast.LENGTH_SHORT).show();
+                gameStateManager.markWrongRobotToastShownFor(robotColor);
             }
         });
     }
