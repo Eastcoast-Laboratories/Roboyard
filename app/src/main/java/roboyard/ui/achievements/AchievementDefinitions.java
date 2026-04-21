@@ -475,18 +475,18 @@ public class AchievementDefinitions {
             
         // ========== RANDOM GAME - SQUARE COVERAGE ==========
         // 4 achievements: with/without goal requirement, 1 robot/all robots
-        add(new Achievement("traverse_all_squares_1_robot", 
-            "achievement_traverse_1_robot", "achievement_traverse_1_robot_desc",
-            AchievementCategory.RANDOM_COVERAGE, ICON_MAP));
-        add(new Achievement("traverse_all_squares_1_robot_goal", 
-            "achievement_traverse_1_robot_goal", "achievement_traverse_1_robot_goal_desc",
-            AchievementCategory.RANDOM_COVERAGE, ICON_TARGET));
         add(new Achievement("traverse_all_squares_all_robots", 
             "achievement_traverse_all_robots", "achievement_traverse_all_robots_desc",
             AchievementCategory.RANDOM_COVERAGE, ICON_SATELLITE));
         add(new Achievement("traverse_all_squares_all_robots_goal", 
             "achievement_traverse_all_robots_goal", "achievement_traverse_all_robots_goal_desc",
             AchievementCategory.RANDOM_COVERAGE, ICON_TARGET_BLUE));
+        add(new Achievement("traverse_all_squares_1_robot", 
+            "achievement_traverse_1_robot", "achievement_traverse_1_robot_desc",
+            AchievementCategory.RANDOM_COVERAGE, ICON_MAP));
+        add(new Achievement("traverse_all_squares_1_robot_goal", 
+            "achievement_traverse_1_robot_goal", "achievement_traverse_1_robot_goal_desc",
+            AchievementCategory.RANDOM_COVERAGE, ICON_TARGET));
         
         
     }
