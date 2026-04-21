@@ -455,6 +455,14 @@ public class AchievementManager {
     
     /**
      * Called when a random game is completed
+     * @param playerMoves number of moves made by the player
+     * @param optimalMoves number of optimal moves for the game
+     * @param hintsUsed number of hints used in the current game session (history-wide tracking is done via qualifiesForNoHints)
+     * @param timeMs time taken to complete the game in milliseconds
+     * @param isImpossibleMode true if the game was played in impossible mode
+     * @param robotCount number of robots in the game
+     * @param targetCount number of targets in the game
+     * @param targetsNeeded number of targets needed to complete the game
      * @param isFirstCompletion true if this is the first time this exact map is completed (unique map)
      * @param qualifiesForNoHints true if map qualifies for no-hints achievements (first solve was hint-free)
      * @param wallSignature wall-layout signature for same-walls tracking (may be null)
@@ -503,8 +511,8 @@ public class AchievementManager {
         }
         
         // Solution length achievements (18-29 moves individually, 30+ as one)
-        // Only unlock on FIRST completion AND without hint usage
-        if (isFirstCompletion && hintsUsed == 0) {
+        // Only unlock on FIRST completion AND without hint usage (current + history) AND with optimal play
+        if (isFirstCompletion && qualifiesForNoHints && playerMoves == optimalMoves) {
             if (optimalMoves >= 18 && optimalMoves <= 29) {
                 unlock("solution_" + optimalMoves + "_moves");
             } else if (optimalMoves >= 30) {
@@ -512,8 +520,10 @@ public class AchievementManager {
             }
         } else if (!isFirstCompletion) {
             Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - map already completed before");
+        } else if (!qualifiesForNoHints) {
+            Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - hints were used");
         } else {
-            Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - hints were used (%d)", hintsUsed);
+            Timber.d("[ACHIEVEMENTS] Solution length achievements skipped - not optimal (playerMoves=%d, optimalMoves=%d)", playerMoves, optimalMoves);
         }
         
         // Multiple targets

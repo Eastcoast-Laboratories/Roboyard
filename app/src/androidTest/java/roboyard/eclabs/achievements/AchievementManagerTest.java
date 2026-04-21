@@ -252,17 +252,17 @@ public class AchievementManagerTest {
     public void testSolutionLengthAchievements() {
         // Test 20 moves
         achievementManager.onNewGameStarted();
-        achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 1, 1, true, false, null);
+        achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 1, 1, true, true, null);
         assertTrue("solution_20_moves should be unlocked", achievementManager.isUnlocked("solution_20_moves"));
         
         // Test 25 moves
         achievementManager.onNewGameStarted();
-        achievementManager.onRandomGameCompleted(25, 25, 0, 90000, false, 4, 1, 1, true, false, null);
+        achievementManager.onRandomGameCompleted(25, 25, 0, 90000, false, 4, 1, 1, true, true, null);
         assertTrue("solution_25_moves should be unlocked", achievementManager.isUnlocked("solution_25_moves"));
         
         // Test 30+ moves
         achievementManager.onNewGameStarted();
-        achievementManager.onRandomGameCompleted(35, 35, 0, 120000, false, 4, 1, 1, true, false, null);
+        achievementManager.onRandomGameCompleted(35, 35, 0, 120000, false, 4, 1, 1, true, true, null);
         assertTrue("solution_30_plus_moves should be unlocked", achievementManager.isUnlocked("solution_30_plus_moves"));
     }
 
@@ -289,7 +289,7 @@ public class AchievementManagerTest {
         
         // Now complete without hints — SHOULD unlock
         achievementManager.onNewGameStarted();
-        achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 1, 1, true, false, null);
+        achievementManager.onRandomGameCompleted(20, 20, 0, 60000, false, 4, 1, 1, true, true, null);
         assertTrue("solution_20_moves SHOULD be unlocked without hints",
                 achievementManager.isUnlocked("solution_20_moves"));
     }
