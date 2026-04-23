@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ShareActivity"
+        <activity android:name="roboyard.ui.activities.ShareActivity"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
