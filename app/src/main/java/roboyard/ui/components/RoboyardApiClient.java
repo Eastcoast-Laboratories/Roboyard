@@ -95,6 +95,29 @@ public class RoboyardApiClient {
     }
     
     /**
+     * Get the install source (store) of this app using PackageManager.
+     * Uses getInstallSourceInfo() on API 30+ and getInstallerPackageName() on older versions.
+     * @return e.g. "com.android.vending" (Play Store), "com.amazon.venezia" (Amazon), "sideload", etc.
+     */
+    public String getInstallSource() {
+        try {
+            String packageName = context.getPackageName();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                android.content.pm.InstallSourceInfo info = context.getPackageManager().getInstallSourceInfo(packageName);
+                String installer = info.getInstallingPackageName();
+                return installer != null ? installer : "sideload";
+            } else {
+                @SuppressWarnings("deprecation")
+                String installer = context.getPackageManager().getInstallerPackageName(packageName);
+                return installer != null ? installer : "sideload";
+            }
+        } catch (Exception e) {
+            Timber.e(e, "[INSTALL_SOURCE] Failed to get install source");
+            return "unknown";
+        }
+    }
+    
+    /**
      * Check if user is logged in.
      */
     public boolean isLoggedIn() {
@@ -165,6 +188,7 @@ public class RoboyardApiClient {
                 requestBody.put("identifier", identifier); // Changed from "email" to "identifier"
                 requestBody.put("password", password);
                 requestBody.put("ver", API_VERSION);
+                requestBody.put("install_source", getInstallSource());
                 
                 String response = makePostRequest("/api/mobile/login", requestBody.toString());
                 JSONObject json = new JSONObject(response);
@@ -222,6 +246,7 @@ public class RoboyardApiClient {
                 requestBody.put("password", password);
                 requestBody.put("password_confirmation", password);
                 requestBody.put("ver", API_VERSION);
+                requestBody.put("install_source", getInstallSource());
                 
                 String response = makePostRequest("/api/mobile/register", requestBody.toString());
                 JSONObject json = new JSONObject(response);
