@@ -1531,50 +1531,58 @@ public class SaveGameFragment extends BaseGameFragment {
                     continue;
                 }
                 
-                if (data.matches("R-?\\d+@\\d+,\\d+")) {
-                    String[] parts = data.split("@");
-                    int color = Integer.parseInt(parts[0].substring(1));
-                    String[] coords = parts[1].split(",");
-                    int x = Integer.parseInt(coords[0]);
-                    int y = Integer.parseInt(coords[1]);
-                    String colorName = getRobotColorName(color);
-                    String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
-                    if (robotEntries.add(robotEntry)) {
-                        formattedData.append(robotEntry);
-                        robotCount++;
+                // Save format concatenates multiple entries per line, e.g.
+                //   "tm4,15;tr10,4;"      (all targets)
+                //   "h0,1;h2,3;v5,7;"     (all walls)
+                //   "rr1,5;rg2,3;rb4,8;"  (all robots)
+                // Split by ; and parse each piece.
+                for (String piece : data.split(";")) {
+                    if (piece.isEmpty()) continue;
+                    
+                    // Compact robot: r{colorChar}{x},{y}  e.g. rr3,4
+                    if (piece.matches("r[a-z]\\d+,\\d+")) {
+                        char colorChar = piece.charAt(1);
+                        String[] coords = piece.substring(2).split(",");
+                        int x = Integer.parseInt(coords[0]);
+                        int y = Integer.parseInt(coords[1]);
+                        String colorName = getColorNameFromChar(colorChar);
+                        String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
+                        if (robotEntries.add(robotEntry)) {
+                            formattedData.append(robotEntry);
+                            robotCount++;
+                        }
+                        continue;
                     }
-                    continue;
-                }
-                
-                if (data.matches("T-?\\d+@\\d+,\\d+")) {
-                    String[] parts = data.split("@");
-                    int color = Integer.parseInt(parts[0].substring(1));
-                    String[] coords = parts[1].split(",");
-                    int x = Integer.parseInt(coords[0]);
-                    int y = Integer.parseInt(coords[1]);
-                    String colorName = getRobotColorName(color);
-                    String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
-                    if (targetEntries.add(targetEntry)) {
-                        formattedData.append(targetEntry);
-                        targetCount++;
+                    
+                    // Compact target: t{colorChar}{x},{y}  e.g. tm4,15
+                    if (piece.matches("t[a-z]\\d+,\\d+")) {
+                        char colorChar = piece.charAt(1);
+                        String[] coords = piece.substring(2).split(",");
+                        int x = Integer.parseInt(coords[0]);
+                        int y = Integer.parseInt(coords[1]);
+                        String colorName = getColorNameFromChar(colorChar);
+                        String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
+                        if (targetEntries.add(targetEntry)) {
+                            formattedData.append(targetEntry);
+                            targetCount++;
+                        }
+                        continue;
                     }
-                    continue;
-                }
-                
-                if (data.matches("m[hv]\\d+,\\d+")) {
-                    String type = data.substring(0, 2);
-                    String coords = data.substring(2);
-                    String[] parts = coords.split(",");
-                    int coordY = Integer.parseInt(parts[0]);
-                    int coordX = Integer.parseInt(parts[1]);
-                    if (!isBorderWall(coordX, coordY, width, height)) {
-                        String wallEntry = "\n" + type + coordY + "," + coordX + ";";
-                        if (wallEntries.add(wallEntry)) {
-                            formattedData.append(wallEntry);
-                            wallCount++;
+                    
+                    // Compact wall: h{x},{y} or v{x},{y}
+                    if (piece.matches("[hv]\\d+,\\d+")) {
+                        String type = "m" + piece.charAt(0);
+                        String[] parts = piece.substring(1).split(",");
+                        int coordX = Integer.parseInt(parts[0]);
+                        int coordY = Integer.parseInt(parts[1]);
+                        if (!isBorderWall(coordX, coordY, width, height)) {
+                            String wallEntry = "\n" + type + coordX + "," + coordY + ";";
+                            if (wallEntries.add(wallEntry)) {
+                                formattedData.append(wallEntry);
+                                wallCount++;
+                            }
                         }
                     }
-                    continue;
                 }
             } catch (Exception e) {
                 Timber.e(e, "[SHARE] Error parsing item in static method: %s", item);
@@ -1585,6 +1593,21 @@ public class SaveGameFragment extends BaseGameFragment {
                 wallCount, targetCount, robotCount, numMoves);
     }
     
+    /**
+     * Inverse of GameState.getColorChar - maps compact color char to share-URL color name.
+     */
+    static String getColorNameFromChar(char colorChar) {
+        switch (colorChar) {
+            case 'm': return "multi";
+            case 'r': return "red";
+            case 'g': return "green";
+            case 'b': return "blue";
+            case 'y': return "yellow";
+            case 's': return "silver";
+            default:  return "unknown";
+        }
+    }
+
     /**
      * Result of parsing save data for sharing.
      * Package-visible for testing.
