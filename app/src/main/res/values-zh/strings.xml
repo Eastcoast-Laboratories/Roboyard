@@ -308,6 +308,7 @@
     <string name="settings_export_data">导出数据</string>
     <string name="settings_import_data">导入数据</string>
     <string name="settings_reset_data">重置所有数据</string>
+    <string name="settings_view_logs">查看错误日志</string>
     <string name="settings_export_success">数据导出成功</string>
     <string name="settings_export_failed">导出失败: %1$s</string>
     <string name="settings_import_success">数据导入成功。请重启应用。</string>

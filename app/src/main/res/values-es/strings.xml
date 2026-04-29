@@ -327,6 +327,7 @@
     <string name="settings_export_data">Exportar Datos</string>
     <string name="settings_import_data">Importar Datos</string>
     <string name="settings_reset_data">Restablecer Todos los Datos</string>
+    <string name="settings_view_logs">Ver registros de errores</string>
     <string name="settings_export_success">Datos exportados exitosamente</string>
     <string name="settings_export_failed">Error al exportar: %1$s</string>
     <string name="settings_import_success">Datos importados exitosamente. Por favor reinicia la aplicación.</string>

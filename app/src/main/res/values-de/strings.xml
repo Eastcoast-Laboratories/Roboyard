@@ -471,6 +471,7 @@
     <string name="settings_export_data">Daten exportieren</string>
     <string name="settings_import_data">Daten importieren</string>
     <string name="settings_reset_data">Alle Daten zurücksetzen</string>
+    <string name="settings_view_logs">Fehlerlogs anzeigen</string>
     <string name="settings_export_success">Daten erfolgreich exportiert</string>
     <string name="settings_export_failed">Export fehlgeschlagen: %1$s</string>
     <string name="settings_import_success">Daten erfolgreich importiert. Bitte starten Sie die App neu.</string>

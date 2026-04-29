@@ -417,7 +417,8 @@
     <string name="settings_data_description">Exporte ou importe todos os seus dados do jogo incluindo preferências, conquistas, progresso de níveis e jogos salvos.</string>
     <string name="settings_export_data">Exportar Dados</string>
     <string name="settings_import_data">Importar Dados</string>
-    <string name="settings_reset_data">Redefinir Todos os Dados</string>
+    <string name="settings_reset_data">Redefinir todos os dados</string>
+    <string name="settings_view_logs">Ver logs de erros</string>
     <string name="settings_export_success">Dados exportados com sucesso</string>
     <string name="settings_export_failed">Exportação falhou: %1$s</string>
     <string name="settings_import_success">Dados importados com sucesso. Por favor, reinicie o aplicativo.</string>

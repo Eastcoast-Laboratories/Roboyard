@@ -417,6 +417,7 @@
     <string name="settings_export_data">データをエクスポート</string>
     <string name="settings_import_data">データをインポート</string>
     <string name="settings_reset_data">すべてのデータをリセット</string>
+    <string name="settings_view_logs">エラーログを表示</string>
     <string name="settings_export_success">データが正常にエクスポートされました</string>
     <string name="settings_export_failed">エクスポート失敗：%1$s</string>
     <string name="settings_import_success">データが正常にインポートされました。アプリを再起動してください。</string>

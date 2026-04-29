@@ -248,6 +248,7 @@
     <string name="settings_export_data">데이터 내보내기</string>
     <string name="settings_import_data">데이터 가져오기</string>
     <string name="settings_reset_data">모든 데이터 초기화</string>
+    <string name="settings_view_logs">오류 로그 보기</string>
     <string name="settings_export_success">데이터가 성공적으로 내보내졌습니다</string>
     <string name="settings_export_failed">내보내기 실패: %1$s</string>
     <string name="settings_import_success">데이터가 성공적으로 가져와졌습니다. 앱을 다시 시작하세요.</string>

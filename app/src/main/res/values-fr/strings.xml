@@ -263,7 +263,8 @@
     <string name="settings_data_description">Exportez ou importez toutes vos données de jeu, y compris les préférences, les réalisations, la progression des niveaux et les parties sauvegardées.</string>
     <string name="settings_export_data">Exporter les Données</string>
     <string name="settings_import_data">Importer les Données</string>
-    <string name="settings_reset_data">Réinitialiser Toutes les Données</string>
+    <string name="settings_reset_data">Réinitialiser toutes les données</string>
+    <string name="settings_view_logs">Voir les journaux d\'erreurs</string>
     <string name="settings_export_success">Données exportées avec succès</string>
     <string name="settings_export_failed">Erreur lors de l\'export: %1$s</string>
     <string name="settings_import_success">Données importées avec succès. Veuillez redémarrer l\'application.</string>

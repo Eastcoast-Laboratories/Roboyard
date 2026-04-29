@@ -443,6 +443,7 @@
     <string name="settings_export_data">Eksportuj dane</string>
     <string name="settings_import_data">Importuj dane</string>
     <string name="settings_reset_data">Resetuj wszystkie dane</string>
+    <string name="settings_view_logs">Zobacz dzienniki błędów</string>
     <string name="settings_export_success">Dane wyeksportowane pomyślnie</string>
     <string name="settings_export_failed">Eksport nieudany: %1$s</string>
     <string name="settings_import_success">Dane zaimportowane pomyślnie. Uruchom ponownie aplikację.</string>
