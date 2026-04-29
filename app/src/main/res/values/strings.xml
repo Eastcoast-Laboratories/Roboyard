@@ -440,6 +440,7 @@
     <string name="settings_export_data">Export Data</string>
     <string name="settings_import_data">Import Data</string>
     <string name="settings_reset_data">Reset All Data</string>
+    <string name="settings_view_logs">View Error Logs</string>
     <string name="settings_export_success">Data exported successfully</string>
     <string name="settings_export_failed">Export failed: %1$s</string>
     <string name="settings_import_success">Data imported successfully. Please restart the app.</string>

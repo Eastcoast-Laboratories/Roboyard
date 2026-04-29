@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,6 +124,7 @@ public class SettingsFragment extends Fragment {
     private Button exportDataButton;
     private Button importDataButton;
     private Button resetDataButton;
+    private Button viewLogsButton;
     
     private List<int[]> validBoardSizes;
     
@@ -263,6 +267,7 @@ public class SettingsFragment extends Fragment {
             exportDataButton = view.findViewById(R.id.export_data_button);
             importDataButton = view.findViewById(R.id.import_data_button);
             resetDataButton = view.findViewById(R.id.reset_data_button);
+            viewLogsButton = view.findViewById(R.id.view_logs_button);
             
             // Set up board size options
             setupBoardSizeOptions();
@@ -288,6 +293,7 @@ public class SettingsFragment extends Fragment {
             // Set up account and data management listeners
             setupAccountListeners();
             setupDataManagementListeners();
+            setupLogsButtonListener();
             
             // Update account UI state
             updateAccountUI();
@@ -2143,6 +2149,75 @@ public class SettingsFragment extends Fragment {
         
         if (resetDataButton != null) {
             resetDataButton.setOnClickListener(v -> showResetConfirmDialog());
+        }
+    }
+    
+    /**
+     * Set up logs button listener to show recent error logs
+     */
+    private void setupLogsButtonListener() {
+        if (viewLogsButton != null) {
+            viewLogsButton.setOnClickListener(v -> showLogsDialog());
+        }
+    }
+    
+    /**
+     * Show dialog with recent error logs for bug reporting
+     */
+    private void showLogsDialog() {
+        try {
+            // Read last 500 lines from logcat (errors and warnings)
+            Process process = Runtime.getRuntime().exec("logcat -d -t 500 *:E *:W *:D");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder logBuilder = new StringBuilder();
+            String line;
+            int lineCount = 0;
+            while ((line = reader.readLine()) != null && lineCount < 300) {
+                logBuilder.append(line).append("\n");
+                lineCount++;
+            }
+            reader.close();
+            
+            final String logs = logBuilder.length() > 0 ? logBuilder.toString() : "No error logs found.";
+            
+            // Create scrollable text view for logs
+            ScrollView scrollView = new ScrollView(requireContext());
+            TextView textView = new TextView(requireContext());
+            textView.setText(logs);
+            textView.setTextIsSelectable(true);
+            textView.setPadding(16, 16, 16, 16);
+            textView.setTextSize(12);
+            textView.setBackgroundColor(0xFF1a1a1a);
+            textView.setTextColor(0xFFffffff);
+            scrollView.addView(textView);
+            
+            // Show dialog with logs
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Error Logs (last 300 lines)")
+                    .setView(scrollView)
+                    .setPositiveButton("Share", (dialog, which) -> shareLogs(logs))
+                    .setNegativeButton("Close", null)
+                    .show();
+                    
+        } catch (Exception e) {
+            Timber.e(e, "Failed to read logs");
+            Toast.makeText(requireContext(), "Failed to read logs: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    /**
+     * Share logs via email or other apps
+     */
+    private void shareLogs(String logs) {
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Roboyard Error Logs");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, logs);
+            startActivity(Intent.createChooser(shareIntent, "Share Logs"));
+        } catch (Exception e) {
+            Timber.e(e, "Failed to share logs");
+            Toast.makeText(requireContext(), "Failed to share logs", Toast.LENGTH_SHORT).show();
         }
     }
     
