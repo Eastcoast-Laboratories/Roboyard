@@ -483,6 +483,52 @@ public class MainActivity extends AppCompatActivity {
         // Process walls
         appFormat.append("WALLS:\n");
         
+        // Collect existing horizontal/vertical wall coords to avoid duplicates
+        // when auto-adding perimeter walls below.
+        java.util.Set<String> existingH = new java.util.HashSet<>();
+        java.util.Set<String> existingV = new java.util.HashSet<>();
+        for (String part : parts) {
+            if (part.startsWith("mh")) existingH.add(part.substring(2));
+            else if (part.startsWith("mv")) existingV.add(part.substring(2));
+        }
+        
+        // Auto-add MISSING perimeter walls. Maps that already include perimeter
+        // walls render with gridWidth=width+1 (because setGridElements uses maxX+1).
+        // Without perimeter walls the board ends up rendered one column/row too small.
+        // [BOARD_SIZE_DEBUG] Adding only walls that are not already present.
+        int addedPerimeter = 0;
+        // Top (y=0) and bottom (y=height) horizontal walls for x in 0..width-1
+        for (int x = 0; x < width; x++) {
+            String topKey = x + ",0";
+            String bottomKey = x + "," + height;
+            if (!existingH.contains(topKey)) {
+                appFormat.append("H,").append(x).append(",0\n");
+                existingH.add(topKey);
+                addedPerimeter++;
+            }
+            if (!existingH.contains(bottomKey)) {
+                appFormat.append("H,").append(x).append(",").append(height).append("\n");
+                existingH.add(bottomKey);
+                addedPerimeter++;
+            }
+        }
+        // Left (x=0) and right (x=width) vertical walls for y in 0..height-1
+        for (int y = 0; y < height; y++) {
+            String leftKey = "0," + y;
+            String rightKey = width + "," + y;
+            if (!existingV.contains(leftKey)) {
+                appFormat.append("V,0,").append(y).append("\n");
+                existingV.add(leftKey);
+                addedPerimeter++;
+            }
+            if (!existingV.contains(rightKey)) {
+                appFormat.append("V,").append(width).append(",").append(y).append("\n");
+                existingV.add(rightKey);
+                addedPerimeter++;
+            }
+        }
+        Timber.d("[BOARD_SIZE_DEBUG] Auto-added %d missing perimeter walls", addedPerimeter);
+        
         // Parse horizontal walls
         for (String part : parts) {
             if (part.startsWith("mh")) {

@@ -602,6 +602,8 @@ public class GameGridView extends View {
         // Adjust view size to maintain aspect ratio
         int newWidth = (int) (cellSize * gridWidth);
         int newHeight = (int) (cellSize * gridHeight);
+        Timber.d("[BOARD_SIZE_DEBUG] onMeasure: container=%dx%d, grid=%dx%d, multiplier=%.3f, cellSize=%.2f, final=%dx%d",
+                width, height, gridWidth, gridHeight, gridSizeMultiplier, cellSize, newWidth, newHeight);
         setMeasuredDimension(newWidth, newHeight);
     }
     
