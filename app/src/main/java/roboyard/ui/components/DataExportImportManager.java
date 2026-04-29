@@ -259,7 +259,16 @@ public class DataExportImportManager {
                     editor.putBoolean(key, (Boolean) value);
                     importedCount++;
                 } else if (value instanceof Integer) {
-                    editor.putInt(key, (Integer) value);
+                    // For roboyard_streaks, certain fields must be stored as Long, not Integer
+                    // to avoid ClassCastException when reading with getLong()
+                    if ("roboyard_streaks".equals(prefsName) && 
+                        (key.equals("last_login_date") || 
+                         key.equals("last_streak_date") || 
+                         key.equals("last_popup_date"))) {
+                        editor.putLong(key, ((Integer) value).longValue());
+                    } else {
+                        editor.putInt(key, (Integer) value);
+                    }
                     importedCount++;
                 } else if (value instanceof Long) {
                     editor.putLong(key, (Long) value);
