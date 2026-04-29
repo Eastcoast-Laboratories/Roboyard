@@ -659,13 +659,14 @@ public class MainActivity extends AppCompatActivity {
      */
     private int getColorId(String colorName) {
         switch (colorName.toLowerCase()) {
-            case "red": return Constants.COLOR_RED;
-            case "pink": return Constants.COLOR_RED;
+            case "multi": return Constants.COLOR_MULTI;
+            case "red": return Constants.COLOR_PINK; // Red is pink in our system
+            case "pink": return Constants.COLOR_PINK;
             case "green": return Constants.COLOR_GREEN;
             case "blue": return Constants.COLOR_BLUE;
             case "yellow": return Constants.COLOR_YELLOW;
             case "silver": return Constants.COLOR_SILVER;
-            default: return Constants.COLOR_RED; // Default to red
+            default: return Constants.COLOR_GREEN; // Default to green
         }
     }
     
