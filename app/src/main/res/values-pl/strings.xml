@@ -161,9 +161,9 @@
     <string name="help_level_editor_description">Po odblokowaniu wszystkich 140 poziomów, na dole ekranu wyboru poziomów pojawi się przycisk Edytora poziomów. Użyj go, aby tworzyć własne poziomy i dzielić się nimi z innymi!</string>
     
     <!-- Game Buttons -->
-    <string name="hint_button">💡Podpowiedź</string>
-    <string name="hint_cancel_button">❌ Podpowiedź</string>
-    <string name="hint_button_a11y">Podpowiedź</string>
+    <string name="hint_button">💡Hint</string>
+    <string name="hint_cancel_button">❌ Hint</string>
+    <string name="hint_button_a11y">Hint</string>
     <string name="button_back_game">Wstecz</string>
     <string name="confirm_level_change">Wróć do poziomu %1$d?</string>
     <string name="button_reset">Reset</string>

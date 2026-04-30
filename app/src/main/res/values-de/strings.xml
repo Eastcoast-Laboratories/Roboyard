@@ -151,7 +151,7 @@
     <string name="help_movement_point_2">- Tippe auf ein leeres Feld, um den ausgewählten Roboter in diese Richtung zu bewegen.</string>
     <string name="help_movement_point_3">- Roboter bewegen sich in geraden Linien, bis sie auf eine Wand, einen anderen Roboter oder den Spielfeldrand treffen.</string>
     <string name="help_controls_section_title">Steuerung</string>
-    <string name="help_controls_point_1">- Hinweis: Zeigt einen vorgeschlagenen Zug.</string>
+    <string name="help_controls_point_1">- Tipp: Zeigt einen vorgeschlagenen Zug.</string>
     <string name="help_controls_point_2">- Zurücksetzen: Startet das aktuelle Level neu.</string>
     <string name="help_controls_point_3">- Speichern: Speichert deine aktuelle Karte.</string>
     <string name="help_controls_point_4">- Menü: Kehrt zum Hauptmenü zurück.</string>
@@ -160,15 +160,15 @@
     <string name="help_tips_section_title">Tipps</string>
     <string name="help_tips_point_1">- Versuche, Rätsel mit der minimalen Anzahl von Zügen zu lösen.</string>
     <string name="help_tips_point_2">- Manchmal musst du Roboter an bestimmte Positionen bewegen, um Wege für andere Roboter freizumachen.</string>
-    <string name="help_tips_point_3">- Wenn du feststeckst, benutze die Hinweis-Funktion, um einen Vorschlag zu erhalten.</string>
+    <string name="help_tips_point_3">- Wenn du feststeckst, benutze die Tipp-Funktion, um einen Vorschlag zu erhalten.</string>
     <string name="help_star_system_section_title">Sterne-Bewertungssystem</string>
     <string name="help_star_system_description">Deine Leistung in jedem Level wird mit Sternen bewertet, basierend darauf, wie effizient du das Rätsel löst:</string>
     <string name="help_star_system_4_stars">⭐⭐⭐⭐ - Hyper-optimale Lösung: Du hast eine Lösung gefunden, die besser ist als die optimale Lösung der KI!</string>
-    <string name="help_star_system_3_stars">⭐⭐⭐ - Optimale Lösung: Du hast es in der gleichen Anzahl von Zügen wie die optimale Lösung der KI gelöst, ohne Hinweise zu verwenden.</string>
-    <string name="help_star_system_2_stars">⭐⭐ - Fast optimale Lösung: Du hast einen Zug mehr als optimal verwendet ohne Hinweise, ODER du hast die optimale Lösung mit einem Hinweis gefunden.</string>
-    <string name="help_star_system_1_star">⭐ - Gute Lösung: Du hast die optimale Lösung mit zwei Hinweisen gefunden, ODER du hast zwei Züge mehr als optimal verwendet ohne Hinweise.</string>
+    <string name="help_star_system_3_stars">⭐⭐⭐ - Optimale Lösung: Du hast es in der gleichen Anzahl von Zügen wie die optimale Lösung der KI gelöst, ohne Tipps zu verwenden.</string>
+    <string name="help_star_system_2_stars">⭐⭐ - Fast optimale Lösung: Du hast einen Zug mehr als die optimale Lösung verwendet ohne Tipps, ODER du hast die optimale Lösung mit einem Tipp gefunden.</string>
+    <string name="help_star_system_1_star">⭐ - Gute Lösung: Du hast die optimale Lösung mit zwei Tipps gefunden, ODER du hast zwei Züge mehr als optimal verwendet ohne Tipps.</string>
     <string name="help_star_system_0_stars">Keine Sterne: Alle anderen Fälle. Übe weiter, um deine Leistung zu verbessern!</string>
-    <string name="help_star_system_hint_penalty">Hinweis: Die Verwendung von Hinweisen reduziert deine Sterne-Bewertung und ermutigt dich, Rätsel selbstständig zu lösen.</string>
+    <string name="help_star_system_hint_penalty">Hinweis: Die Verwendung von Tipps reduziert deine Sterne-Bewertung und ermutigt dich, Rätsel selbstständig zu lösen.</string>
     <string name="help_level_editor_section_title">Level-Editor</string>
     <string name="help_level_editor_description">Sobald du alle 140 Level freigeschaltet hast, erscheint unten im Level-Auswahlbildschirm ein Level-Editor-Button. Erstelle damit eigene Level und teile sie mit anderen!</string>
     
@@ -242,7 +242,7 @@
     
     <!-- Game Buttons -->
     <string name="button_reset">Reset</string>
-    <string name="hint_button_a11y">Hinweis</string>
+    <string name="hint_button_a11y">Tipp</string>
     <string name="confirm_level_change">Zurück zu Level %1$d?</string>
     <string name="button_new_game">Neue Map</string>
     <string name="button_menu">Menü</string>
@@ -382,10 +382,10 @@
         <item quantity="one">%1$d Zug von hier</item>
         <item quantity="other">%1$d Züge von hier</item>
     </plurals>
-    <string name="pre_hint_ready">Bereit für schrittweise Hinweise</string>
-    <string name="all_hints_shown">Alle Hinweise wurden angezeigt</string>
-    <string name="no_valid_hint">Kein gültiger Hinweis verfügbar</string>
-    <string name="error_displaying_hint">Fehler beim Anzeigen des Hinweises</string>
+    <string name="pre_hint_ready">Bereit für schrittweise Tipps</string>
+    <string name="all_hints_shown">Alle Tipps wurden angezeigt</string>
+    <string name="no_valid_hint">Kein gültiger Tipp verfügbar</string>
+    <string name="error_displaying_hint">Fehler beim Anzeigen des Tipps</string>
 
     <!-- Difficulty Levels -->
     <string name="difficulty_beginner">Anfänger</string>
@@ -396,14 +396,14 @@
     
     <!-- Additional localization strings -->
     <string name="of">von</string>
-    <string name="impossible_small_board_warning">Unmöglich auf kleinen Spielfeldern kann mehrere Minuten dauern, um eine passende Karte zu generieren</string>
+    <string name="impossible_small_board_warning">Bei der Schwierigkeit \"Unmöglich\" auf kleinen Spielfeldern kann es mehrere Minuten dauern, eine passende Karte zu generieren</string>
 
     <!-- Toast messages -->
     <string name="error_email_app">E-Mail-App konnte nicht geöffnet werden</string>
     <string name="robot_movement_canceled">Roboterbewegung abgebrochen</string>
     <string name="cancel_button">Cancel</string>
-    <string name="hint_button">💡Hinweis</string>
-    <string name="hint_cancel_button">❌ Hinweis</string>
+    <string name="hint_button">💡Tipp</string>
+    <string name="hint_cancel_button">❌ Tipp</string>
 
     <!-- Level Selection Item Strings -->
     <string name="level_robots_label">Roboter:</string>
@@ -670,17 +670,17 @@
     <string name="achievement_perfect_random_streak_20_desc">Schaffe 20 Zufallsspiele hintereinander mit optimalen Zügen</string>
     <!-- Perfect solution with no hints -->
     <string name="achievement_perfect_no_hints_random_1">Perfekt ohne Hilfe</string>
-    <string name="achievement_perfect_no_hints_random_1_desc">Schaffe ein Zufallsspiel mit optimalen Zügen (10+ Züge) ohne Hinweise zu verwenden</string>
+    <string name="achievement_perfect_no_hints_random_1_desc">Schaffe ein Zufallsspiel mit optimalen Zügen (10+ Züge) ohne Tipps zu verwenden</string>
     <!-- No hints random games (cumulative) -->
     <string name="achievement_no_hints_random_10">Keine Hilfe nötig 10</string>
-    <string name="achievement_no_hints_random_10_desc">Schaffe 10 Zufallsspiele ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_random_10_desc">Schaffe 10 Zufallsspiele ohne Tipps zu verwenden</string>
     <string name="achievement_no_hints_random_50">Keine Hilfe nötig 50</string>
-    <string name="achievement_no_hints_random_50_desc">Schaffe 50 Zufallsspiele ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_random_50_desc">Schaffe 50 Zufallsspiele ohne Tipps zu verwenden</string>
     <!-- No hints random games streak -->
     <string name="achievement_no_hints_streak_random_10">Kein-Hilfe-Streak 10</string>
-    <string name="achievement_no_hints_streak_random_10_desc">Schaffe 10 Zufallsspiele hintereinander ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_streak_random_10_desc">Schaffe 10 Zufallsspiele hintereinander ohne Tipps zu verwenden</string>
     <string name="achievement_no_hints_streak_random_50">Kein-Hilfe-Streak 50</string>
-    <string name="achievement_no_hints_streak_random_50_desc">Schaffe 50 Zufallsspiele hintereinander ohne Hinweise zu verwenden</string>
+    <string name="achievement_no_hints_streak_random_50_desc">Schaffe 50 Zufallsspiele hintereinander ohne Tipps zu verwenden</string>
     
     <!-- Random Game - Speed -->
     <string name="achievement_speedrun_random_20s">Geschwindigkeits-Dämon</string>
@@ -746,15 +746,15 @@
     <string name="history_detail_optimal_moves">Optimale Züge:</string>
     <string name="history_detail_perfect">perfekt!</string>
     <string name="history_detail_extra_moves">+%1$d extra</string>
-    <string name="history_detail_hint_usage_last">Hinweis-Nutzung (letzte Sitzung):</string>
-    <string name="history_detail_no_hints_used">Keine Hinweise benutzt</string>
-    <string name="history_detail_pre_hint_viewed">Vor-Hinweis angesehen (Roboterfarben enthüllt)</string>
-    <string name="history_detail_up_to_hint">Bis Hinweis #%1$d angesehen</string>
-    <string name="history_detail_hints_ever_used">Hinweise jemals benutzt (alle Versuche):</string>
-    <string name="history_detail_qualifies_no_hints">Qualifiziert für Keine-Hinweise-Achievement:</string>
-    <string name="history_detail_qualifies_no_hints_perfect">Qualifiziert für Perfekt-\u200Bohne-\u200BHinweise-\u200BAchievement:</string>
-    <string name="history_detail_last_solved_no_hints">Zuletzt ohne Hinweise gelöst:</string>
-    <string name="history_detail_last_perfect_no_hints">Zuletzt perfekt ohne Hinweise gelöst:</string>
+    <string name="history_detail_hint_usage_last">Tipp-Nutzung (letzte Sitzung):</string>
+    <string name="history_detail_no_hints_used">Keine Tipps benutzt</string>
+    <string name="history_detail_pre_hint_viewed">Kleinen Tipp angesehen (Roboterfarben enthüllt)</string>
+    <string name="history_detail_up_to_hint">Bis Tipp #%1$d angesehen</string>
+    <string name="history_detail_hints_ever_used">Tipps jemals benutzt (alle Versuche):</string>
+    <string name="history_detail_qualifies_no_hints">Qualifiziert für Keine-Tipps-Achievement:</string>
+    <string name="history_detail_qualifies_no_hints_perfect">Qualifiziert für Perfekt-\u200Bohne-\u200BTipps-\u200BAchievement:</string>
+    <string name="history_detail_last_solved_no_hints">Zuletzt ohne Tipps gelöst:</string>
+    <string name="history_detail_last_perfect_no_hints">Zuletzt perfekt ohne Tipps gelöst:</string>
     <string name="history_detail_board">Brett:</string>
     <string name="history_detail_map">Karte:</string>
     <string name="history_detail_yes">Ja</string>
@@ -767,7 +767,7 @@
     <string name="save_slot_in_progress">nicht gelöst</string>
     <string name="save_slot_moves_at_save">Züge beim Speichern:</string>
     <string name="save_slot_difficulty">Schwierigkeit:</string>
-    <string name="save_slot_hint_usage_at_save">Hinweis-Nutzung beim Speichern:</string>
+    <string name="save_slot_hint_usage_at_save">Tipp-Nutzung beim Speichern:</string>
     <string name="save_slot_history_header">--- History für diese Karte ---</string>
     <string name="save_slot_no_history_entry">Kein History-Eintrag gefunden (Karte noch nicht gespielt)</string>
     <string name="save_slot_no_history_old_format">Keine History verfügbar (altes Speicherformat)</string>
@@ -788,13 +788,13 @@
     <string name="pagination_next">Weiter</string>
     
     <!-- Hint Auto-Move Settings -->
-    <string name="settings_hint_auto_move">Hinweis Auto-Bewegung:</string>
+    <string name="settings_hint_auto_move">Tipp-Auto-Bewegung:</string>
     <string name="settings_hint_auto_move_manual">Manuell (Roboter selbst bewegen)</string>
     <string name="settings_hint_auto_move_manual_a11y">Manueller Modus: Sie bewegen die Roboter selbst</string>
     <string name="settings_hint_auto_move_full_auto">Voll-Automatisch (Roboter bewegt sich automatisch)</string>
-    <string name="settings_hint_auto_move_full_auto_a11y">Voll-Automatischer Modus: Roboter bewegt sich automatisch wenn Hinweis angezeigt wird und geht zum nächsten Hinweis</string>
-    <string name="settings_hint_auto_move_semi_auto">Automatisch (Bewegung bei Nächster-Hinweis-Button)</string>
-    <string name="settings_hint_auto_move_semi_auto_a11y">Automatischer Modus: Roboter bewegt sich, wenn Sie den Nächster-Hinweis-Button klicken</string>
+    <string name="settings_hint_auto_move_full_auto_a11y">Voll-Automatischer Modus: Roboter bewegt sich automatisch wenn ein Tipp angezeigt wird und geht zum nächsten Tipp</string>
+    <string name="settings_hint_auto_move_semi_auto">Automatisch (Bewegung bei Nächster-Tipp-Button)</string>
+    <string name="settings_hint_auto_move_semi_auto_a11y">Automatischer Modus: Roboter bewegt sich, wenn Sie den Nächster-Tipp-Button klicken</string>
     
     <!-- Remaining Missing Strings -->
     <string name="level_difficulty">Schwierigkeit</string>
