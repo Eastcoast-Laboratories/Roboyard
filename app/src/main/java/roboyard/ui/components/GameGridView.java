@@ -2088,6 +2088,18 @@ public class GameGridView extends View {
                 case Constants.COLOR_SILVER:
                     color = context.getString(R.string.color_silver_adj);
                     break;
+                case Constants.COLOR_RED:
+                    color = context.getString(R.string.color_red_adj);
+                    break;
+                case Constants.COLOR_BROWN:
+                    color = context.getString(R.string.color_brown_adj);
+                    break;
+                case Constants.COLOR_ORANGE:
+                    color = context.getString(R.string.color_orange_adj);
+                    break;
+                case Constants.COLOR_WHITE:
+                    color = context.getString(R.string.color_white_adj);
+                    break;
             }
         }
         

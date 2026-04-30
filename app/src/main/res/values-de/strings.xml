@@ -298,6 +298,7 @@
     <string name="color_orange">Orange</string>
     <string name="color_white">Weiß</string>
     <string name="color_black">Schwarz</string>
+    <string name="color_brown">Braun</string>
     <string name="color_silver">Silber</string>
     
     <!-- Color names for accessibility -->
@@ -311,6 +312,7 @@
     <string name="color_orange_dative">orangen</string>
     <string name="color_white_dative">weißen</string>
     <string name="color_black_dative">schwarzen</string>
+    <string name="color_brown_dative">braunen</string>
 
     <!-- Adjektivformen für deutsche Grammatik -->
     <string name="color_red_adj">Roter</string>
@@ -318,6 +320,9 @@
     <string name="color_green_adj">Grüner</string>
     <string name="color_yellow_adj">Gelber</string>
     <string name="color_pink_adj">Pinker</string>
+    <string name="color_orange_adj">Oranger</string>
+    <string name="color_white_adj">Weißer</string>
+    <string name="color_brown_adj">Brauner</string>
     <string name="color_silver_adj">Silberner</string>
     
     <!-- Neutrum Adjektivformen für Ziele -->
@@ -326,9 +331,12 @@
     <string name="color_green_target">Grünes</string>
     <string name="color_yellow_target">Gelbes</string>
     <string name="color_pink_target">Pinkes</string>
+    <string name="color_orange_target">Oranges</string>
+    <string name="color_white_target">Weißes</string>
+    <string name="color_brown_target">Braunes</string>
     <string name="color_silver_target">Silbernes</string>
     <string name="color_silver_dative">silbernen</string>
-    
+
     <!-- Game UI text -->
     <string name="no_robot_selected">Kein Roboter ausgewählt</string>
     <string name="robot_selected">Ausgewählt: %1$ser Roboter bei (%2$d, %3$d)</string>

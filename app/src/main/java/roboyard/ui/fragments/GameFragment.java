@@ -2965,6 +2965,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             case Constants.COLOR_BLUE: return getString(R.string.color_blue);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow);
             case Constants.COLOR_SILVER: return getString(R.string.color_silver);
+            case Constants.COLOR_RED: return getString(R.string.color_red);
+            case Constants.COLOR_BROWN: return getString(R.string.color_brown);
+            case Constants.COLOR_ORANGE: return getString(R.string.color_orange);
+            case Constants.COLOR_WHITE: return getString(R.string.color_white);
             default:
                 return getString(R.string.unknown_color, robotId);
         }
@@ -2982,6 +2986,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             case Constants.COLOR_BLUE: return getString(R.string.color_blue_dative);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_dative);
             case Constants.COLOR_SILVER: return getString(R.string.color_silver_dative);
+            case Constants.COLOR_RED: return getString(R.string.color_red_dative);
+            case Constants.COLOR_BROWN: return getString(R.string.color_brown_dative);
+            case Constants.COLOR_ORANGE: return getString(R.string.color_orange_dative);
+            case Constants.COLOR_WHITE: return getString(R.string.color_white_dative);
             default:
                 return getString(R.string.unknown_color, robotId);
         }
@@ -2997,6 +3005,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             case Constants.COLOR_BLUE: return getString(R.string.color_blue_target);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_target);
             case Constants.COLOR_SILVER: return getString(R.string.color_silver_target);
+            case Constants.COLOR_RED: return getString(R.string.color_red_target);
+            case Constants.COLOR_BROWN: return getString(R.string.color_brown_target);
+            case Constants.COLOR_ORANGE: return getString(R.string.color_orange_target);
+            case Constants.COLOR_WHITE: return getString(R.string.color_white_target);
             default:
                 return getString(R.string.unknown_color, robotId);
         }
@@ -3015,6 +3027,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             case 2: return getString(R.string.color_blue);
             case 3: return getString(R.string.color_yellow);
             case 4: return getString(R.string.color_silver);
+            case 5: return getString(R.string.color_red);
+            case 6: return getString(R.string.color_brown);
+            case 7: return getString(R.string.color_orange);
+            case 8: return getString(R.string.color_white);
             default:
                 Timber.e("Unknown robot color: '%d'", c);
                 return getString(R.string.unknown_color, c);
@@ -3031,6 +3047,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             case Constants.COLOR_BLUE: return getString(R.string.color_blue_adj);
             case Constants.COLOR_YELLOW: return getString(R.string.color_yellow_adj);
             case Constants.COLOR_SILVER: return getString(R.string.color_silver_adj);
+            case Constants.COLOR_RED: return getString(R.string.color_red_adj);
+            case Constants.COLOR_BROWN: return getString(R.string.color_brown_adj);
+            case Constants.COLOR_ORANGE: return getString(R.string.color_orange_adj);
+            case Constants.COLOR_WHITE: return getString(R.string.color_white_adj);
             default:
                 return getString(R.string.unknown_color, robotId);
         }
@@ -3479,10 +3499,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Alle verfügbaren Farben in der aktuellen Sprache
         String[] colors = {
             getString(R.string.color_pink),
-            getString(R.string.color_blue), 
+            getString(R.string.color_blue),
             getString(R.string.color_green),
             getString(R.string.color_yellow),
-            getString(R.string.color_silver)
+            getString(R.string.color_silver),
+            getString(R.string.color_red),
+            getString(R.string.color_brown),
+            getString(R.string.color_orange),
+            getString(R.string.color_white)
         };
         
         // Debug logging to see which colors are loaded

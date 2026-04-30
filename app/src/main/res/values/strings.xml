@@ -207,6 +207,7 @@
     <string name="color_orange">Orange</string>
     <string name="color_white">White</string>
     <string name="color_black">Black</string>
+    <string name="color_brown">Brown</string>
     <string name="color_silver">Silver</string>
     
     <!-- Accessibility versions -->
@@ -220,6 +221,7 @@
     <string name="color_orange_dative">Orange</string>
     <string name="color_white_dative">White</string>
     <string name="color_black_dative">Black</string>
+    <string name="color_brown_dative">Brown</string>
     <string name="color_silver_dative">Silver</string>
 
     <!-- Adjective forms for colors -->
@@ -228,6 +230,9 @@
     <string name="color_green_adj">Green</string>
     <string name="color_yellow_adj">Yellow</string>
     <string name="color_pink_adj">Pink</string>
+    <string name="color_orange_adj">Orange</string>
+    <string name="color_white_adj">White</string>
+    <string name="color_brown_adj">Brown</string>
     <string name="color_silver_adj">Silver</string>
 
     <!-- goal color forms -->
@@ -236,6 +241,9 @@
     <string name="color_green_target">Green</string>
     <string name="color_yellow_target">Yellow</string>
     <string name="color_pink_target">Pink</string>
+    <string name="color_orange_target">Orange</string>
+    <string name="color_white_target">White</string>
+    <string name="color_brown_target">Brown</string>
     <string name="color_silver_target">Silver</string>
 
     <!-- Game UI text for GameFragment -->
