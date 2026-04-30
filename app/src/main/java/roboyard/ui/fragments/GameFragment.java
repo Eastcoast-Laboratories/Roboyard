@@ -3281,7 +3281,31 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         
         // Display the pre-hint
-        updateStatusText(preHintText, true);
+        // For pre-hint showing involved robots: only use color if exactly one robot
+        int robotColorForBackground = -1;
+        if (currentHintStep == numPreHints + 1) {
+            // Count unique robot colors in solution
+            ArrayList<Integer> uniqueColors = new ArrayList<>();
+            for (IGameMove move : solution.getMoves()) {
+                if (move instanceof RRGameMove) {
+                    RRGameMove rrMove = (RRGameMove) move;
+                    if (!uniqueColors.contains(rrMove.getColor())) {
+                        uniqueColors.add(rrMove.getColor());
+                    }
+                }
+            }
+            // Only use color if exactly one robot is involved
+            if (uniqueColors.size() == 1) {
+                robotColorForBackground = uniqueColors.get(0);
+            }
+        } else if (currentHintStep == numPreHints + 2) {
+            // For "move X first" hint, always use the first robot's color
+            if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
+                robotColorForBackground = ((RRGameMove) solution.getMoves().get(0)).getColor();
+            }
+        }
+        
+        updateStatusText(preHintText, true, robotColorForBackground);
         Timber.d("[HINT_SYSTEM] Displayed pre-hint: %s", preHintText);
         // Announce hint
         announceAccessibility(preHintText);
@@ -3403,8 +3427,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     Timber.d("[HINT_SYSTEM] Subsequent hint format: %s", hintMessage.toString());
                 }
                 
-                // Update the status text
-                updateStatusText(hintMessage.toString(), true);
+                // Update the status text with robot color ID
+                int robotColorForBackground = rrMove.getColor();
+                updateStatusText(hintMessage.toString(), true, robotColorForBackground);
                 Timber.d("[HINT_SYSTEM] Displayed hint: %s", hintMessage);
 
                 // Announce hint
@@ -3713,8 +3738,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      * Helper method to update the status text with a consistent approach
      * @param message The message to display
      * @param isVisible Whether to make the status text visible
+     * @param robotColorId Robot color ID for background color (-1 = no color change)
      */
-    private void updateStatusText(String message, boolean isVisible) {
+    private void updateStatusText(String message, boolean isVisible, int robotColorId) {
         Timber.d("[STATUS_TEXT] Updating status text: '%s', visible: %b", message, isVisible);
         if (statusTextView != null) {
             // Format hint text with SVG arrows instead of UTF-8 characters
@@ -3740,8 +3766,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     hintContainer.setVisibility(View.VISIBLE);
                 }
                 
-                // Check if the hint message contains a robot color name and change background color accordingly
-                String lowerMessage = message.toLowerCase();
+                // Change background color based on robot color ID (if provided)
                 GradientDrawable backgroundDrawable = new GradientDrawable();
                 backgroundDrawable.setShape(GradientDrawable.RECTANGLE);
                 backgroundDrawable.setColor(Color.parseColor("#1976D2")); // Default blue
@@ -3750,36 +3775,55 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 // Default to using the drawable resource
                 boolean useCustomColors = false;
                 
-                // Change background color based on robot color mentioned in hint
-                // TODO: localization strings instead of all extra
-                if (lowerMessage.contains("red") || lowerMessage.contains("rot")) {
-                    backgroundDrawable.setColor(Color.parseColor("#f77070"));
-                    backgroundDrawable.setStroke(3, Color.RED);
-                    useCustomColors = true;
-                } else if (lowerMessage.contains("blue") || lowerMessage.contains("blau")) {
-                    backgroundDrawable.setColor(Color.parseColor("#71a6ff"));
-                    backgroundDrawable.setStroke(3, Color.BLUE);
-                    useCustomColors = true;
-                } else if (lowerMessage.contains("green") || lowerMessage.contains("grun")) {
-                    backgroundDrawable.setColor(lightgreen);
-                    backgroundDrawable.setStroke(3, darkgreen);
-                    useCustomColors = true;
-                } else if (lowerMessage.contains("yellow") || lowerMessage.contains("gelb")) {
-                    backgroundDrawable.setColor(Color.parseColor("#fffe71"));
-                    backgroundDrawable.setStroke(3, Color.parseColor("#DAA520"));
-                    useCustomColors = true;
-                } else if (lowerMessage.contains("pink") || lowerMessage.contains("rosa") || lowerMessage.contains("purple") || lowerMessage.contains("violet")) {
-                    backgroundDrawable.setColor(Color.parseColor("#eb91ff"));
-                    backgroundDrawable.setStroke(3, Color.parseColor("#800080"));
-                    useCustomColors = true;
-                } else if (lowerMessage.contains("silver") || lowerMessage.contains("silber")) {
-                    backgroundDrawable.setColor(Color.parseColor("#c0c0c0"));
-                    backgroundDrawable.setStroke(3, Color.GRAY); // (Silver)
-                    useCustomColors = true;
-                } else if (lowerMessage.contains("orange") || lowerMessage.contains("orange")) {
-                    backgroundDrawable.setColor(Color.parseColor("#ffa77f"));
-                    backgroundDrawable.setStroke(3, Color.parseColor("#FFA500"));
-                    useCustomColors = true;
+                // Change background color based on robot color ID
+                if (robotColorId >= 0) {
+                    switch (robotColorId) {
+                        case Constants.COLOR_PINK:
+                            backgroundDrawable.setColor(Color.parseColor("#eb91ff"));
+                            backgroundDrawable.setStroke(3, Color.parseColor("#800080"));
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_GREEN:
+                            backgroundDrawable.setColor(lightgreen);
+                            backgroundDrawable.setStroke(3, darkgreen);
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_BLUE:
+                            backgroundDrawable.setColor(Color.parseColor("#71a6ff"));
+                            backgroundDrawable.setStroke(3, Color.BLUE);
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_YELLOW:
+                            backgroundDrawable.setColor(Color.parseColor("#fffe71"));
+                            backgroundDrawable.setStroke(3, Color.parseColor("#DAA520"));
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_SILVER:
+                            backgroundDrawable.setColor(Color.parseColor("#c0c0c0"));
+                            backgroundDrawable.setStroke(3, Color.GRAY);
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_RED:
+                            backgroundDrawable.setColor(Color.parseColor("#f77070"));
+                            backgroundDrawable.setStroke(3, Color.RED);
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_BROWN:
+                            backgroundDrawable.setColor(Color.parseColor("#a0522d"));
+                            backgroundDrawable.setStroke(3, Color.parseColor("#654321"));
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_ORANGE:
+                            backgroundDrawable.setColor(Color.parseColor("#ffa77f"));
+                            backgroundDrawable.setStroke(3, Color.parseColor("#FFA500"));
+                            useCustomColors = true;
+                            break;
+                        case Constants.COLOR_WHITE:
+                            backgroundDrawable.setColor(Color.parseColor("#f0f0f0"));
+                            backgroundDrawable.setStroke(3, Color.GRAY);
+                            useCustomColors = true;
+                            break;
+                    }
                 }
                 
                 // High contrast mode: white background, black text for hint container
@@ -3821,6 +3865,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 statusTextView.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.status_text_background));
             }
         }
+    }
+    
+    /**
+     * Helper method to update the status text (backward compatibility overload)
+     * @param message The message to display
+     * @param isVisible Whether to make the status text visible
+     */
+    private void updateStatusText(String message, boolean isVisible) {
+        updateStatusText(message, isVisible, -1);
     }
     
     /**
