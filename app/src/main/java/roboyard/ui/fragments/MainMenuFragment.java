@@ -145,6 +145,9 @@ public class MainMenuFragment extends BaseGameFragment {
             achievementPopup.show(achievement);
             Timber.d("[ACHIEVEMENT_POPUP] Main menu displayed achievement: %s", achievement.getId());
         });
+        StreakManager.StreakUpdate streakUpdate = StreakManager.getInstance(requireContext()).recordDailyLogin();
+        Timber.d("[STREAK][APP_START] Daily login checked on main menu resume: newDayRecorded=%b, streak=%d",
+                streakUpdate.isNewDayRecorded(), streakUpdate.getStreakDays());
         maybeShowDailyStreakPopup();
     }
 
@@ -193,13 +196,7 @@ public class MainMenuFragment extends BaseGameFragment {
             return false;
         }
         int streakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
-        
-        // If streak is 0 (first app launch), treat it as day 1
-        // because recordDailyLogin() will set it to 1 when called
-        if (streakDays == 0) {
-            streakDays = 1;
-            Timber.d("[STREAK_POPUP] Streak was 0, treating as day 1 for first launch");
-        }
+        Timber.d("[STREAK_POPUP] Using persisted streak for popup: %d", streakDays);
         
         // Determine headline based on streak day
         // For days 1-31, use specific headlines; for day 31+, always use "Legend status"

@@ -67,12 +67,23 @@ check_length() {
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
 - Fix Share button im Speichern-Dialog
+- Streak-Verlust beim nächsten Tageslogin behoben
+- Tipps in farbiger Hintergrundfarbe bei Roboterbewegung in allen Sprachen
+- "Hiniweis" heißt jetzt "Tipp"
+- "View Error Logs" für einfachere Fehlerberichterstattung in Settings
+- Externe Spielfelder können jetzt wieder alle geladen werden
+
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
-- Fix Share button in Save Screen
+- Fixed share button in save screen
+- Fixed streak sync issue consuming next-day login
+- Improved hints showing the robot to move in background in all languages
+- Updated hint wording in German and Polish
+- Added View Error Logs button for easier bug reporting
+- Fixed external map loading
 EOF
 )
 

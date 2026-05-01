@@ -145,6 +145,14 @@ public class StreakManager {
             this.newStreak = newStreak;
             this.comebackTriggered = comebackTriggered;
         }
+
+        public boolean isNewDayRecorded() {
+            return newDayRecorded;
+        }
+
+        public int getStreakDays() {
+            return streakDays;
+        }
     }
     
     /**
