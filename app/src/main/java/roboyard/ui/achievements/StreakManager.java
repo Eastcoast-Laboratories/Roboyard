@@ -274,17 +274,12 @@ public class StreakManager {
     
     /**
      * Get last login date as ISO date string for server sync.
-     * Always updates to today first, since syncing means the user is active right now.
      */
     public String getLastLoginDateString() {
-        long today = getTodayDate();
         long lastLoginDate = prefs.getLong(KEY_LAST_LOGIN_DATE, 0);
         if (lastLoginDate == 0) return null;
-        if (lastLoginDate != today) {
-            prefs.edit().putLong(KEY_LAST_LOGIN_DATE, today).apply();
-            Timber.d("[STREAK] Updated last_login_date from %d to %d (today) before sync", lastLoginDate, today);
-            lastLoginDate = today;
-        }
+        Timber.d("[STREAK_SYNC_DATE] Returning stored last_login_date=%d (%s) without mutating streak state",
+                lastLoginDate, dayNumberToDateString(lastLoginDate));
         return dayNumberToDateString(lastLoginDate);
     }
     
@@ -334,13 +329,7 @@ public class StreakManager {
             Timber.d("[STREAK_SYNC] Local streak %d is already the maximum (server: %d), keeping local", localStreak, serverStreak);
         }
         
-        // Always set last_login_date to today - we are actively syncing right now
-        long today = getTodayDate();
-        prefs.edit()
-            .putLong(KEY_LAST_LOGIN_DATE, today)
-            .putLong(KEY_LAST_STREAK_DATE, today)
-            .apply();
-        Timber.d("[STREAK_SYNC] Set last_login_date to today (%d) for subsequent upload", today);
+        Timber.d("[STREAK_SYNC_DATE] Server restore kept stored last_login_date unchanged; recordDailyLogin owns day advancement");
         
         // Update AchievementManager to keep it in sync
         achievementManager.updateDailyLoginStreak(maxStreak);

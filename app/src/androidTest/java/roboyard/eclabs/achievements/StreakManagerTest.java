@@ -105,6 +105,25 @@ public class StreakManagerTest {
         assertEquals("Duplicate login on same day should not increase streak", 
                 firstStreak, secondStreak);
     }
+
+    @Test
+    public void testSyncDateGetterDoesNotConsumeNextDayLogin() {
+        long day1 = 3100;
+        long day2 = day1 + 1;
+        
+        streakManager.setMockTodayDate(day1);
+        streakManager.recordDailyLogin();
+        assertEquals("First day should create streak of 1", 1, streakManager.getCurrentStreak());
+        
+        streakManager.setMockTodayDate(day2);
+        String lastLoginDateForSync = streakManager.getLastLoginDateString();
+        assertNotNull("Sync date should be available after first login", lastLoginDateForSync);
+        
+        streakManager.recordDailyLogin();
+        assertEquals("Next-day login should continue streak even after sync date read", 2, streakManager.getCurrentStreak());
+        
+        streakManager.clearMockTodayDate();
+    }
     
     @Test
     public void testStreakPopupOnlyOncePerDay() {
@@ -262,8 +281,11 @@ public class StreakManagerTest {
         // Server has old streak data (11) from 90 days ago, longest=11
         streakManager.restoreFromServer(11, streakDate, 11, streakDate);
         
-        // Should reset to 1 due to long absence
-        assertEquals("Streak should reset to 1 after 90 days absence", 1, streakManager.getCurrentStreak());
+        // Restore must not consume today's login; it only rejects stale server streak data.
+        assertEquals("Streak should keep local value before explicit daily login", 11, streakManager.getCurrentStreak());
+        
+        streakManager.recordDailyLogin();
+        assertEquals("Streak should reset to 1 after explicit daily login following 90 days absence", 1, streakManager.getCurrentStreak());
         
         // Longest streak should still be preserved (it was 11)
         assertEquals("Longest streak should be preserved at 11", 11, streakManager.getLongestStreak());
