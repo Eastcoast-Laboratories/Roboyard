@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Resources that are dynamically loaded via getResources().getIdentifier()
+    or string concatenation. The resource shrinker cannot detect these references,
+    so we must explicitly tell it to keep them.
+    
+    Used by:
+    - MainMenuFragment.showDailyStreakPopup() -> streak_popup_day_N_headline/message
+    - AchievementPopup.getStringByName() -> achievement_* (name + description keys)
+    - AchievementIconHelper.getIconBitmap() -> icon_* drawables
+    - AchievementCategory.getDisplayName() -> achievement_category_*
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="
+        @string/achievement_*,
+        @string/streak_popup_*,
+        @drawable/icon_*
+    "
+    tools:shrinkMode="safe" />
