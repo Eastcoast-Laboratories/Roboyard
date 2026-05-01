@@ -2,6 +2,15 @@
 =========
 
 
+## Version 50 (134) - 2026-05-01
+- Fixed share button in save screen
+- Fixed streak sync issue consuming next-day login
+- Improved hints showing the robot to move in background in all languages
+- Updated hint wording in German and Polish
+- Added View Error Logs button for easier bug reporting
+- Fixed external map loading
+
+
 ## Version 49 (133) - 2026-04-21
 - Switch between English, German, Spanish, French, Korean, Chinese, Japanese, Polish and Portuguese (Brazil)
 - Fix Achievement unlock tracking

@@ -2,6 +2,15 @@ Changelog Deutsch
 =================
 
 
+## Version 50 (134)
+- Fix Share button im Speichern-Dialog
+- Streak-Verlust beim nächsten Tageslogin behoben
+- Tipps in farbiger Hintergrundfarbe bei Roboterbewegung in allen Sprachen
+- "Hiniweis" heißt jetzt "Tipp"
+- "View Error Logs" für einfachere Fehlerberichterstattung in Settings
+- Externe Spielfelder können jetzt wieder alle geladen werden
+
+
 ## Version 49 (133)
 - Jetzt in Englisch, Deutsch, Spanisch, Französisch, Koreanisch, Chinesisch, Japanisch, Polnisch und Portugiesisch (Brasilien)
 - Beim App start erscheint jetzt ein Hinweis, wenn es eine neue Version gibt
