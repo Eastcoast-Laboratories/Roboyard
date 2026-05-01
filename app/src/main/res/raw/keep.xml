@@ -7,13 +7,17 @@
     Used by:
     - MainMenuFragment.showDailyStreakPopup() -> streak_popup_day_N_headline/message
     - AchievementPopup.getStringByName() -> achievement_* (name + description keys)
+    - AchievementsFragment.getStringByName() -> achievement_* (name + description keys)
     - AchievementIconHelper.getIconBitmap() -> icon_* drawables
     - AchievementCategory.getDisplayName() -> achievement_category_*
+    - AchievementManager.getPlayGamesAchievementId() -> pgs_* (Play Games Services IDs)
+    - AchievementDefinitions.initializeAchievements() -> achievement_solution_N / achievement_solution_N_desc
 -->
 <resources xmlns:tools="http://schemas.android.com/tools"
     tools:keep="
         @string/achievement_*,
         @string/streak_popup_*,
+        @string/pgs_*,
         @drawable/icon_*
     "
     tools:shrinkMode="safe" />
