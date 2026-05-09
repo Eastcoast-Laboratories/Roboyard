@@ -1949,6 +1949,8 @@ public class LevelDesignEditorFragment extends Fragment {
         private final Paint gridPaint = new Paint();
         private int cellSize = 0;
         private Bitmap gridTileBitmap;
+        // [MEMORY] Cache decoded bitmaps to avoid re-decoding on every onDraw() call
+        private final java.util.HashMap<Integer, Bitmap> bitmapCache = new java.util.HashMap<>();
 
         public GameBoardView(Context context) {
             super(context);
@@ -2042,15 +2044,23 @@ public class LevelDesignEditorFragment extends Fragment {
                 Rect dst = new Rect(left, top, left + cellSize, top + cellSize);
                 
                 if (element.getType() == GameElement.TYPE_ROBOT) {
-                    int resId = getRobotDrawableId(element.getColor());
-                    Bitmap bmp = BitmapFactory.decodeResource(getContext().getResources(), resId);
+                    Bitmap bmp = getCachedBitmap(getRobotDrawableId(element.getColor()));
                     if (bmp != null) canvas.drawBitmap(bmp, null, dst, null);
                 } else if (element.getType() == GameElement.TYPE_TARGET) {
-                    int resId = getTargetDrawableId(element.getColor());
-                    Bitmap bmp = BitmapFactory.decodeResource(getContext().getResources(), resId);
+                    Bitmap bmp = getCachedBitmap(getTargetDrawableId(element.getColor()));
                     if (bmp != null) canvas.drawBitmap(bmp, null, dst, null);
                 }
             }
+        }
+
+        // [MEMORY] Get bitmap from cache or decode and cache it. Avoids re-decoding on every onDraw().
+        private Bitmap getCachedBitmap(int resId) {
+            Bitmap bmp = bitmapCache.get(resId);
+            if (bmp == null) {
+                bmp = BitmapFactory.decodeResource(getContext().getResources(), resId);
+                if (bmp != null) bitmapCache.put(resId, bmp);
+            }
+            return bmp;
         }
 
         private int getRobotDrawableId(int colorIndex) {

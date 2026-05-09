@@ -10,8 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import java.util.HashMap;
-import java.util.Map;
+import android.util.LruCache;
 
 import timber.log.Timber;
 
@@ -23,8 +22,10 @@ import timber.log.Timber;
  * Note: Achievement colors are now centralized in AchievementDefinitions.ACHIEVEMENT_COLORS
  */
 public class AchievementIconHelper {
-    private static final Map<String, Bitmap> ICON_BITMAP_CACHE = new HashMap<>();
-    private static final Map<String, Drawable> ICON_DRAWABLE_CACHE = new HashMap<>();
+    // [MEMORY] Use bounded LruCache instead of unbounded HashMap to prevent OOM
+    private static final int MAX_CACHE_ENTRIES = 64;
+    private static final LruCache<String, Bitmap> ICON_BITMAP_CACHE = new LruCache<>(MAX_CACHE_ENTRIES);
+    private static final LruCache<String, Drawable> ICON_DRAWABLE_CACHE = new LruCache<>(MAX_CACHE_ENTRIES);
     private static final int TARGET_ICON_PX = 96;
 
     
@@ -124,6 +125,11 @@ public class AchievementIconHelper {
         Paint iconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         canvas.drawBitmap(scaledIconBitmap, offsetX, offsetY, iconPaint);
 
+        // [MEMORY] Recycle intermediate scaled bitmap if it's a new instance (createScaledBitmap may return same bitmap if no scaling needed)
+        if (scaledIconBitmap != iconBitmap) {
+            scaledIconBitmap.recycle();
+        }
+
         Drawable drawable = new BitmapDrawable(context.getResources(), circularBitmap);
         ICON_DRAWABLE_CACHE.put(cacheKey, drawable);
         return drawable;
@@ -194,8 +200,8 @@ public class AchievementIconHelper {
     }
 
     public static void clearCaches() {
-        ICON_BITMAP_CACHE.clear();
-        ICON_DRAWABLE_CACHE.clear();
+        ICON_BITMAP_CACHE.evictAll();
+        ICON_DRAWABLE_CACHE.evictAll();
         Timber.d("[ACHIEVEMENT_ICONS] Caches cleared");
     }
 }

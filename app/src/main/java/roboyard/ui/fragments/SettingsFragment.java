@@ -2436,6 +2436,8 @@ public class SettingsFragment extends Fragment {
             sfxPreviewPlayer.release();
             sfxPreviewPlayer = null;
         }
+        // [MEMORY] Remove preference change listener to prevent fragment memory leak
+        Preferences.setPreferenceChangeListener(null);
     }
     
     /**
