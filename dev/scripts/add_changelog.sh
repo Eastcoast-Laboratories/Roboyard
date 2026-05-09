@@ -72,7 +72,7 @@ DE_CHANGES=$(cat << EOF
 - "Hiniweis" heißt jetzt "Tipp"
 - "View Error Logs" für einfachere Fehlerberichterstattung in Settings
 - Externe Spielfelder können jetzt wieder alle geladen werden
-
+- Diverse kleine Fixes
 EOF
 )
 
@@ -84,6 +84,7 @@ EN_CHANGES=$(cat << EOF
 - Updated hint wording in German and Polish
 - Added View Error Logs button for easier bug reporting
 - Fixed external map loading
+- Various small fixes
 EOF
 )
 

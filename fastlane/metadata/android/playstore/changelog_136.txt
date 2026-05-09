@@ -1,0 +1,22 @@
+# Play Store Changelogs für Version 51 (versionCode: 136)
+
+<en-GB>
+- Fixed share button in save screen
+- Fixed streak sync issue consuming next-day login
+- Improved hints showing the robot to move in background in all languages
+- Updated hint wording in German and Polish
+- Added View Error Logs button for easier bug reporting
+- Fixed external map loading
+- Various small fixes
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Fix Share button im Speichern-Dialog
+- Streak-Verlust beim nächsten Tageslogin behoben
+- Tipps in farbiger Hintergrundfarbe bei Roboterbewegung in allen Sprachen
+- "Hiniweis" heißt jetzt "Tipp"
+- "View Error Logs" für einfachere Fehlerberichterstattung in Settings
+- Externe Spielfelder können jetzt wieder alle geladen werden
+- Diverse kleine Fixes
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>

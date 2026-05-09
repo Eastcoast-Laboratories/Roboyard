@@ -2,6 +2,10 @@
 =========
 
 
+## Version 51 (136) - 2026-05-09
+- Various small fixes
+
+
 ## Version 50 (134) - 2026-05-01
 - Fixed share button in save screen
 - Fixed streak sync issue consuming next-day login

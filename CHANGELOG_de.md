@@ -2,6 +2,10 @@ Changelog Deutsch
 =================
 
 
+## Version 51 (136)
+- Diverse kleine Fixes
+
+
 ## Version 50 (134)
 - Fix Share button im Speichern-Dialog
 - Streak-Verlust beim nächsten Tageslogin behoben
