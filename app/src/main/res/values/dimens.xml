@@ -15,7 +15,7 @@
     <dimen name="game_button_text_size">14dp</dimen>
     <dimen name="game_button_text_size_min">8dp</dimen>
     <dimen name="game_button_text_size_max">16dp</dimen>
-    <dimen name="game_button_margin">0dp</dimen>
+    <dimen name="game_button_margin">3dp</dimen>
     <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Level selection screen dimensions -->

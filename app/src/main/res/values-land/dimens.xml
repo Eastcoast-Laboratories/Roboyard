@@ -10,9 +10,9 @@
     <dimen name="achievement_icon_size">36dp</dimen>
     
     <!-- Game buttons dimensions for landscape -->
-    <dimen name="game_button_height">40dp</dimen>
+    <dimen name="game_button_height">20dp</dimen>
     <dimen name="game_button_text_size">12dp</dimen>
-    <dimen name="game_button_margin">0dp</dimen>
+    <dimen name="game_button_margin">5dp</dimen>
     <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Status text size for landscape -->
