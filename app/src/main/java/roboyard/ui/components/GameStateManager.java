@@ -3924,6 +3924,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         liveSolverCalculating.setValue(true);
 
+        // Ensure lastSolutionMinMoves is up-to-date from currentSolution
+        if (lastSolutionMinMoves == 0 && currentSolution != null && currentSolution.getMoves() != null) {
+            lastSolutionMinMoves = currentSolution.getMoves().size();
+            Timber.d("[LIVE_SOLVER] Updated lastSolutionMinMoves from currentSolution: %d", lastSolutionMinMoves);
+        }
+
         // Check pre-computation cache first
         String stateHash = computeStateHash(state);
         Integer cachedResult = nextMovesCache.get(stateHash);
