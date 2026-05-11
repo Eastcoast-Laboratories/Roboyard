@@ -11,4 +11,8 @@
 
     <!-- Status text size for landscape -->
     <dimen name="status_text_size">18dp</dimen>
+
+    <!-- Achievement icon dimensions for landscape mode (40% of standard size) -->
+    <dimen name="achievement_icon_size">36dp</dimen>
+    
 </resources>

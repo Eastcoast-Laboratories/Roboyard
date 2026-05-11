@@ -33,7 +33,7 @@
     <dimen name="game_area_top_margin">0dp</dimen>
     
     <!-- Achievement icon dimensions -->
-    <dimen name="achievement_icon_size">90dp</dimen>
+    <dimen name="achievement_icon_size">40dp</dimen>
     
     <!-- Accessibility controls button dimensions -->
     <dimen name="accessibility_button_width">80dp</dimen>
