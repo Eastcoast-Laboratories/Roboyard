@@ -9,7 +9,7 @@
 ## Version 50 (134) - 2026-05-01
 - Fixed share button in save screen
 - Fixed streak sync issue consuming next-day login
-- Improved hints showing the robot to move in background in all languages
+- Improved hints: showing which robot to move in the background-color works now in all languages
 - Updated hint wording in German and Polish
 - Added View Error Logs button for easier bug reporting
 - Fixed external map loading
