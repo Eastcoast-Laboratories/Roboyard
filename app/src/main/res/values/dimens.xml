@@ -4,7 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     
     <!-- Text sizes - smaller for compact displays (Hints) -->
-    <dimen name="status_text_size">18sp</dimen>
+    <dimen name="status_text_size">18dp</dimen>
     <dimen name="status_text_padding">4dp</dimen>
     <dimen name="settings_title_text_size">32dp</dimen>
     <dimen name="settings_label_text_size">24dp</dimen>
@@ -12,11 +12,11 @@
     
     <!-- Game buttons dimensions -->
     <dimen name="game_button_height">48dp</dimen>
-    <dimen name="game_button_text_size">14sp</dimen>
-    <dimen name="game_button_text_size_min">8sp</dimen>
-    <dimen name="game_button_text_size_max">16sp</dimen>
+    <dimen name="game_button_text_size">14dp</dimen>
+    <dimen name="game_button_text_size_min">8dp</dimen>
+    <dimen name="game_button_text_size_max">16dp</dimen>
     <dimen name="game_button_margin">8dp</dimen>
-    <dimen name="game_button_padding">1dp</dimen>
+    <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Level selection screen dimensions -->
     <dimen name="stars_count_text_size">12dp</dimen>
@@ -24,10 +24,10 @@
     <dimen name="level_item_name_text_size">14dp</dimen>
     
     <!-- Game info text sizes -->
-    <dimen name="game_info_primary_text_size">16sp</dimen>
-    <dimen name="game_info_secondary_text_size">10sp</dimen>
-    <dimen name="game_info_small_text_size">8sp</dimen>
-    <dimen name="game_info_optimal_moves_text_size">24sp</dimen>
+    <dimen name="game_info_primary_text_size">16dp</dimen>
+    <dimen name="game_info_secondary_text_size">10dp</dimen>
+    <dimen name="game_info_small_text_size">8dp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">24dp</dimen>
     
     <!-- Game area top margin (default: no margin) -->
     <dimen name="game_area_top_margin">0dp</dimen>
@@ -38,8 +38,8 @@
     <!-- Accessibility controls button dimensions -->
     <dimen name="accessibility_button_width">80dp</dimen>
     <dimen name="accessibility_button_height">32dp</dimen>
-    <dimen name="accessibility_button_text_size">12sp</dimen>
-    <dimen name="accessibility_text_size">12sp</dimen>
+    <dimen name="accessibility_button_text_size">12dp</dimen>
+    <dimen name="accessibility_text_size">12dp</dimen>
     <dimen name="accessibility_button_padding">0dp</dimen>
     <dimen name="accessibility_button_margin">4dp</dimen>
 </resources>

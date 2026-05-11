@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Not long aspect ratios: 4:3, 16:10 (tablets, less tall displays) -->
+    <!-- Based on former values-sw600dp - optimized for tablets and wide displays -->
+    
     <!-- Game buttons dimensions for tablets -->
     <dimen name="game_button_height">60dp</dimen>
     <dimen name="game_button_text_size">20dp</dimen>
     <dimen name="game_button_margin">10dp</dimen>
-    <dimen name="game_button_padding">1dp</dimen>
+    <dimen name="game_button_padding">0dp</dimen>
     
-    <!-- Status text size for tablets (slightly smaller than default) -->
-    <dimen name="status_text_size">36dp</dimen>
+    <!-- Status text size for tablets (Hint container) -->
+    <dimen name="status_text_size">16dp</dimen>
     <dimen name="status_text_padding">10dp</dimen>
     
     <!-- Level selection screen dimensions for tablets -->
@@ -21,8 +24,8 @@
     <dimen name="settings_option_text_size">24dp</dimen>
     
     <!-- Game info text sizes for tablets -->
-    <dimen name="game_info_primary_text_size">46sp</dimen>
-    <dimen name="game_info_secondary_text_size">42sp</dimen>
-    <dimen name="game_info_small_text_size">32sp</dimen>
-    <dimen name="game_info_optimal_moves_text_size">62sp</dimen>
+    <dimen name="game_info_primary_text_size">23dp</dimen>
+    <dimen name="game_info_secondary_text_size">21dp</dimen>
+    <dimen name="game_info_small_text_size">15dp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">36dp</dimen>
 </resources>
