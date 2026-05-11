@@ -3,10 +3,10 @@
     <!-- Not long aspect ratios: 4:3, 16:10 (tablets, less tall displays) -->
     <!-- Based on former values-sw600dp - optimized for tablets and wide displays -->
     
-    <!-- Game buttons dimensions for tablets -->
-    <dimen name="game_button_height">60dp</dimen>
+    <!-- Game buttons dimensions for tablets - flat buttons, text fills button -->
+    <dimen name="game_button_height">28dp</dimen>
     <dimen name="game_button_text_size">20dp</dimen>
-    <dimen name="game_button_margin">0dp</dimen>
+    <dimen name="game_button_margin">1dp</dimen>
     <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Status text size for tablets (Hint container) -->
