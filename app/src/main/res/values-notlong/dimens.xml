@@ -6,12 +6,12 @@
     <!-- Game buttons dimensions for tablets -->
     <dimen name="game_button_height">60dp</dimen>
     <dimen name="game_button_text_size">20dp</dimen>
-    <dimen name="game_button_margin">10dp</dimen>
+    <dimen name="game_button_margin">0dp</dimen>
     <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Status text size for tablets (Hint container) -->
     <dimen name="status_text_size">16dp</dimen>
-    <dimen name="status_text_padding">10dp</dimen>
+    <dimen name="status_text_padding">0dp</dimen>
     
     <!-- Level selection screen dimensions for tablets -->
     <dimen name="stars_count_text_size">18dp</dimen>

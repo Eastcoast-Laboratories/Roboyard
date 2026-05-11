@@ -6,12 +6,12 @@
     <!-- Game buttons dimensions -->
     <dimen name="game_button_height">52dp</dimen>
     <dimen name="game_button_text_size">22dp</dimen>
-    <dimen name="game_button_margin">8dp</dimen>
+    <dimen name="game_button_margin">0dp</dimen>
     <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Status text size for tall devices (Hint container) -->
     <dimen name="status_text_size">22dp</dimen>
-    <dimen name="status_text_padding">5dp</dimen>
+    <dimen name="status_text_padding">0dp</dimen>
     
     <!-- Game area top margin for very tall displays -->
     <dimen name="game_area_top_margin">16dp</dimen>

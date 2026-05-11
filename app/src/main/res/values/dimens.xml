@@ -1,11 +1,11 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin">0dp</dimen>
+    <dimen name="activity_vertical_margin">0dp</dimen>
     
     <!-- Text sizes - smaller for compact displays (Hints) -->
     <dimen name="status_text_size">18dp</dimen>
-    <dimen name="status_text_padding">4dp</dimen>
+    <dimen name="status_text_padding">0dp</dimen>
     <dimen name="settings_title_text_size">32dp</dimen>
     <dimen name="settings_label_text_size">24dp</dimen>
     <dimen name="settings_option_text_size">20dp</dimen>
@@ -15,7 +15,7 @@
     <dimen name="game_button_text_size">14dp</dimen>
     <dimen name="game_button_text_size_min">8dp</dimen>
     <dimen name="game_button_text_size_max">16dp</dimen>
-    <dimen name="game_button_margin">8dp</dimen>
+    <dimen name="game_button_margin">0dp</dimen>
     <dimen name="game_button_padding">0dp</dimen>
     
     <!-- Level selection screen dimensions -->
@@ -41,5 +41,5 @@
     <dimen name="accessibility_button_text_size">12dp</dimen>
     <dimen name="accessibility_text_size">12dp</dimen>
     <dimen name="accessibility_button_padding">0dp</dimen>
-    <dimen name="accessibility_button_margin">4dp</dimen>
+    <dimen name="accessibility_button_margin">0dp</dimen>
 </resources>
