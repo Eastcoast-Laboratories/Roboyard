@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Tall phones: 16:9, 18:9, 20:9, 21:9, 2:1 aspect ratios -->
+    <!-- Based on former values-h820dp - optimized for tall displays like Xiaomi 2:1 -->
+    
     <!-- Game buttons dimensions -->
     <dimen name="game_button_height">52dp</dimen>
     <dimen name="game_button_text_size">22dp</dimen>
-    <dimen name="game_button_margin">8dp</dimen>
-    <dimen name="game_button_padding">1dp</dimen>
+    <dimen name="game_button_margin">5dp</dimen>
+    <dimen name="game_button_padding">0dp</dimen>
     
-    <!-- Status text size for tall devices (slightly smaller than default) -->
-    <dimen name="status_text_size">22sp</dimen>
-    <dimen name="status_text_padding">5dp</dimen>
+    <!-- Status text size for tall devices (Hint container) -->
+    <dimen name="status_text_size">22dp</dimen>
+    <dimen name="status_text_padding">0dp</dimen>
     
     <!-- Game area top margin for very tall displays -->
-    <dimen name="game_area_top_margin">16sp</dimen>
+    <dimen name="game_area_top_margin">16dp</dimen>
     
     <!-- Level selection screen dimensions -->
     <dimen name="stars_count_text_size">24dp</dimen>
@@ -24,8 +27,8 @@
     <dimen name="settings_option_text_size">20dp</dimen>
 
     <!-- Game info text sizes -->
-    <dimen name="game_info_primary_text_size">32sp</dimen>
-    <dimen name="game_info_secondary_text_size">28sp</dimen>
-    <dimen name="game_info_small_text_size">20sp</dimen>
-    <dimen name="game_info_optimal_moves_text_size">48sp</dimen>
+    <dimen name="game_info_primary_text_size">32dp</dimen>
+    <dimen name="game_info_secondary_text_size">28dp</dimen>
+    <dimen name="game_info_small_text_size">20dp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">48dp</dimen>
 </resources>

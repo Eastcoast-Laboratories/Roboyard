@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Game info text sizes for landscape -->
+    <dimen name="game_info_primary_text_size">30dp</dimen>
+    <dimen name="game_info_secondary_text_size">18dp</dimen>
+    <dimen name="game_info_small_text_size">18dp</dimen>
+    <dimen name="game_info_optimal_moves_text_size">28dp</dimen>
+    
+    <!-- Game buttons dimensions for landscape -->
+    <dimen name="game_button_text_size">14dp</dimen>
+
+    <!-- Status text size for landscape -->
+    <dimen name="status_text_size">18dp</dimen>
+
+    <!-- Achievement icon dimensions for landscape mode (40% of standard size) -->
+    <dimen name="achievement_icon_size">36dp</dimen>
+    
+</resources>
