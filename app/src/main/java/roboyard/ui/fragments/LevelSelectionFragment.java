@@ -75,6 +75,12 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private static final int CUSTOM_LEVEL_START_ID = 141;
     private static final int STARS_PER_LEVEL = 1; // Number of stars required per level
 
+    static boolean isLevelPlayable(int levelId, int totalStars, boolean isCompleted) {
+        return isCompleted
+                || levelId >= CUSTOM_LEVEL_START_ID
+                || (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
+    }
+
     /**
      * Interface for handling level selection events.
      * When a level button is clicked, this listener is called with the level ID.
@@ -638,10 +644,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
     public void onLevelSelected(int levelId, View clickedCard) {
         Timber.d("Selected level: %d", levelId);
 
-        // Custom levels are always unlocked, regular levels have star requirements
-        boolean isCustomLevel = levelId >= CUSTOM_LEVEL_START_ID;
-        boolean isUnlocked = isCustomLevel || 
-                (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
+        // Completed levels stay playable even if star requirements change in future versions.
+        boolean isCompleted = completionManager.isLevelCompleted(levelId);
+        boolean isUnlocked = isLevelPlayable(levelId, totalStars, isCompleted);
 
         if (!isUnlocked) {
             int starsNeeded = (levelId - 1) * STARS_PER_LEVEL - totalStars;
@@ -676,7 +681,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
         }
         
         // Determine card type and set borderless background
-        boolean isCompleted = completionManager.isLevelCompleted(levelId);
         if (isCompleted) {
             // Gold card - use borderless version
             clickedCard.setBackgroundResource(R.drawable.bg_level_card_gold_no_border);
@@ -984,10 +988,8 @@ public class LevelSelectionFragment extends BaseGameFragment {
                         starsEarned = completionData.getStars();
                     }
 
-                    // Custom levels are always unlocked
-                    boolean isUnlocked = levelId >= CUSTOM_LEVEL_START_ID || 
-                            // Regular levels unlock based on total stars
-                            (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
+                    // Completed levels stay playable, custom levels are always playable.
+                    boolean isUnlocked = isLevelPlayable(levelId, totalStars, isCompleted);
 
                     // Look up history entry for this level (e.g. "level_1" for levelId=1)
                     String mapKey = levelId < CUSTOM_LEVEL_START_ID
