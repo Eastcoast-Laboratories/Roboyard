@@ -75,6 +75,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private static final int CUSTOM_LEVEL_START_ID = 141;
     private static final int STARS_PER_LEVEL = 1; // Number of stars required per level
 
+    // Package-private for focused unit testing.
     static boolean isLevelPlayable(int levelId, int totalStars, boolean isCompleted) {
         return isCompleted
                 || levelId >= CUSTOM_LEVEL_START_ID
