@@ -153,6 +153,9 @@
     <string name="button_reset">リセット</string>
     <string name="button_save_map">マップを保存</string>
     <string name="button_new_game">新しいゲーム</string>
+    <string name="button_next_game">次のゲーム</string>
+    <string name="level_not_unlocked">アンロックにはあと%1$d個の星が必要です</string>
+    <string name="no_more_history_entries">これ以上の履歴はありません</string>
     <string name="button_menu">メニュー</string>
     
     <!-- Game screen -->

@@ -61,6 +61,9 @@
     <string name="button_reset">초기화</string>
     <string name="button_save_map">맵 저장</string>
     <string name="button_new_game">새 게임</string>
+    <string name="button_next_game">다음 게임</string>
+    <string name="level_not_unlocked">잠금 해제하려면 %1$d개의 별이 더 필요합니다</string>
+    <string name="no_more_history_entries">더 이상 기록이 없습니다</string>
     <string name="new_random_game_button">새 게임</string>
     <string name="button_menu">메뉴</string>
     <string name="back">뒤로</string>

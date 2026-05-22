@@ -169,6 +169,9 @@
     <string name="button_reset">Reset</string>
     <string name="button_save_map">Zapisz mapę</string>
     <string name="button_new_game">Nowa gra</string>
+    <string name="button_next_game">Następna gra</string>
+    <string name="level_not_unlocked">Potrzebujesz %1$d gwiazdek do odblokowania</string>
+    <string name="no_more_history_entries">Brak kolejnych wpisów w historii</string>
     <string name="button_menu">Menu</string>
     
     <!-- Game screen -->
