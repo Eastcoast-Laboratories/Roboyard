@@ -2612,13 +2612,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (isLevelGame || isHistoryGame) {
                 // Level games and history games: green like new game button (similar navigation function)
                 backButton.setBackgroundResource(R.drawable.button_fancy_green);
+                backButton.setTextColor(Color.WHITE);
             } else {
                 // Savegame and random games: gray like menu button (returns to menu)
                 backButton.setBackgroundResource(R.drawable.button_fancy_gray);
+                backButton.setTextColor(Color.WHITE);
             }
         } else {
             // Moves have been made - clicking back would undo last move
             backButton.setBackgroundResource(R.drawable.hint_button_fancy);
+            backButton.setTextColor(Color.parseColor("#1A1A1A"));
         }
     }
     
