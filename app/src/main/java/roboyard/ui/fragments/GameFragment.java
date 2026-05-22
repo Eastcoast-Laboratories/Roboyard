@@ -1288,8 +1288,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (!isSavegame && !isLevelGame && (moveCount == null || moveCount == 0)) {
                 java.util.List<roboyard.logic.core.GameHistoryEntry> filteredHistoryEntries = getFilteredHistoryEntries();
                 if (!filteredHistoryEntries.isEmpty()) {
-                    roboyard.logic.core.GameHistoryEntry lastEntry = filteredHistoryEntries.get(filteredHistoryEntries.size() - 1);
-                    Timber.d("[BACK][RANDOM] Back button clicked before first move on random game, loading last history entry: %s", lastEntry.getMapPath());
+                    // History entries are in reverse chronological order (oldest first, newest last)
+                    // So we take the first entry to get the most recent one
+                    roboyard.logic.core.GameHistoryEntry lastEntry = filteredHistoryEntries.get(0);
+                    Timber.d("[BACK][RANDOM] Back button clicked before first move on random game, loading most recent history entry: %s", lastEntry.getMapPath());
                     gameStateManager.loadHistoryEntry(lastEntry.getMapPath());
                     return;
                 }
