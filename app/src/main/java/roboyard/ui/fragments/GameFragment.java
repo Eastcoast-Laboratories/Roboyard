@@ -1253,6 +1253,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         backButton = view.findViewById(R.id.back_button);
         // Add left arrow icon to back button text
         backButton.setText("◂ " + getString(R.string.button_back_game));
+        // Set initial color based on current move count (will be green if no moves yet)
+        updateBackButtonColor(gameStateManager.getMoveCount().getValue());
         backButton.setOnClickListener(v -> {
             Timber.d("GameFragment: Back button clicked");
             
@@ -2551,14 +2553,43 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             String countStr = String.valueOf(count);
             String labelStr = " " + getResources().getQuantityString(R.plurals.moves_label_plural, count);
             String fullText = countStr + labelStr;
-            
+
             SpannableString spannable = new SpannableString(fullText);
             // Make number larger (1.5x base size)
             spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, countStr.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             // Make label smaller (0.7x base size)
             spannable.setSpan(new android.text.style.RelativeSizeSpan(0.7f), countStr.length(), fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            
+
             moveCountTextView.setText(spannable);
+        }
+
+        // Update back button color based on move count
+        updateBackButtonColor(count);
+    }
+
+    /**
+     * Updates the back button color based on move count and game type.
+     * When moveCount is 0 (at start):
+     *   - Level/History games: green (like new game button) - clicking goes to previous level/history entry
+     *   - Random games: gray (like menu button) - clicking goes to menu
+     * When moveCount > 0: yellow - clicking undoes last move
+     */
+    private void updateBackButtonColor(Integer moveCount) {
+        if (backButton == null) return;
+
+        boolean isAtStart = (moveCount == null || moveCount == 0);
+        if (isAtStart) {
+            // At start - clicking back would go to previous level/history entry (green) or menu (gray)
+            if (isLevelGame) {
+                // Level games: green like new game button (similar navigation function)
+                backButton.setBackgroundResource(R.drawable.button_fancy_green);
+            } else {
+                // Random games: gray like menu button (returns to menu)
+                backButton.setBackgroundResource(R.drawable.button_fancy_gray);
+            }
+        } else {
+            // Moves have been made - clicking back would undo last move
+            backButton.setBackgroundResource(R.drawable.hint_button_fancy);
         }
     }
     
