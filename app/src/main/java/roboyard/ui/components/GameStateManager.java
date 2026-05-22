@@ -2534,6 +2534,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Load the previous history entry (if one exists)
+     * Uses filtered entries (excluding level games) to match history tab display
      * @return true if successful, false otherwise
      */
     public boolean loadPreviousHistoryEntry() {
@@ -2549,23 +2550,37 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         try {
-            List<roboyard.logic.core.GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
-            if (entries.isEmpty()) {
+            List<roboyard.logic.core.GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
+            if (allEntries.isEmpty()) {
                 Timber.d("[HISTORY_NAV] No history entries found");
                 return false;
             }
 
-            // Find the index of the current entry
+            // Filter out level games (matching SaveGameFragment filtering)
+            List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new ArrayList<>();
+            for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
+                String mapName = entry.getMapName();
+                if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
+                    filteredEntries.add(entry);
+                }
+            }
+
+            if (filteredEntries.isEmpty()) {
+                Timber.d("[HISTORY_NAV] No filtered history entries found");
+                return false;
+            }
+
+            // Find the index of the current entry in filtered list
             int currentIndex = -1;
-            for (int i = 0; i < entries.size(); i++) {
-                if (entries.get(i).getMapPath().equals(currentHistoryPath)) {
+            for (int i = 0; i < filteredEntries.size(); i++) {
+                if (filteredEntries.get(i).getMapPath().equals(currentHistoryPath)) {
                     currentIndex = i;
                     break;
                 }
             }
 
             if (currentIndex == -1) {
-                Timber.d("[HISTORY_NAV] Current history entry not found in list");
+                Timber.d("[HISTORY_NAV] Current history entry not found in filtered list");
                 return false;
             }
 
@@ -2576,7 +2591,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
 
             // Load the previous entry
-            roboyard.logic.core.GameHistoryEntry previousEntry = entries.get(currentIndex - 1);
+            roboyard.logic.core.GameHistoryEntry previousEntry = filteredEntries.get(currentIndex - 1);
             Timber.d("[HISTORY_NAV] Loading previous history entry: %s", previousEntry.getMapPath());
             loadHistoryEntry(previousEntry.getMapPath());
             return true;
@@ -2589,6 +2604,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Load the next history entry (if one exists)
+     * Uses filtered entries (excluding level games) to match history tab display
      * @return true if successful, false otherwise
      */
     public boolean loadNextHistoryEntry() {
@@ -2604,34 +2620,48 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         try {
-            List<roboyard.logic.core.GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
-            if (entries.isEmpty()) {
+            List<roboyard.logic.core.GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
+            if (allEntries.isEmpty()) {
                 Timber.d("[HISTORY_NAV] No history entries found");
                 return false;
             }
 
-            // Find the index of the current entry
+            // Filter out level games (matching SaveGameFragment filtering)
+            List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new ArrayList<>();
+            for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
+                String mapName = entry.getMapName();
+                if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
+                    filteredEntries.add(entry);
+                }
+            }
+
+            if (filteredEntries.isEmpty()) {
+                Timber.d("[HISTORY_NAV] No filtered history entries found");
+                return false;
+            }
+
+            // Find the index of the current entry in filtered list
             int currentIndex = -1;
-            for (int i = 0; i < entries.size(); i++) {
-                if (entries.get(i).getMapPath().equals(currentHistoryPath)) {
+            for (int i = 0; i < filteredEntries.size(); i++) {
+                if (filteredEntries.get(i).getMapPath().equals(currentHistoryPath)) {
                     currentIndex = i;
                     break;
                 }
             }
 
             if (currentIndex == -1) {
-                Timber.d("[HISTORY_NAV] Current history entry not found in list");
+                Timber.d("[HISTORY_NAV] Current history entry not found in filtered list");
                 return false;
             }
 
             // Check if there's a next entry
-            if (currentIndex == entries.size() - 1) {
+            if (currentIndex == filteredEntries.size() - 1) {
                 Timber.d("[HISTORY_NAV] Already at last history entry, no next entry");
                 return false;
             }
 
             // Load the next entry
-            roboyard.logic.core.GameHistoryEntry nextEntry = entries.get(currentIndex + 1);
+            roboyard.logic.core.GameHistoryEntry nextEntry = filteredEntries.get(currentIndex + 1);
             Timber.d("[HISTORY_NAV] Loading next history entry: %s", nextEntry.getMapPath());
             loadHistoryEntry(nextEntry.getMapPath());
             return true;
@@ -2644,6 +2674,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
     /**
      * Check if there is a next history entry available
+     * Uses filtered entries (excluding level games) to match history tab display
      * @return true if next entry exists, false otherwise
      */
     public boolean hasNextHistoryEntry() {
@@ -2657,21 +2688,34 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         try {
-            List<roboyard.logic.core.GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
-            if (entries.isEmpty()) {
+            List<roboyard.logic.core.GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
+            if (allEntries.isEmpty()) {
                 return false;
             }
 
-            // Find the index of the current entry
+            // Filter out level games (matching SaveGameFragment filtering)
+            List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new ArrayList<>();
+            for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
+                String mapName = entry.getMapName();
+                if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
+                    filteredEntries.add(entry);
+                }
+            }
+
+            if (filteredEntries.isEmpty()) {
+                return false;
+            }
+
+            // Find the index of the current entry in filtered list
             int currentIndex = -1;
-            for (int i = 0; i < entries.size(); i++) {
-                if (entries.get(i).getMapPath().equals(currentHistoryPath)) {
+            for (int i = 0; i < filteredEntries.size(); i++) {
+                if (filteredEntries.get(i).getMapPath().equals(currentHistoryPath)) {
                     currentIndex = i;
                     break;
                 }
             }
 
-            return currentIndex != -1 && currentIndex < entries.size() - 1;
+            return currentIndex != -1 && currentIndex < filteredEntries.size() - 1;
 
         } catch (Exception e) {
             Timber.e(e, "[HISTORY_NAV] Error checking for next history entry");
