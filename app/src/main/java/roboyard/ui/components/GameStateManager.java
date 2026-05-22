@@ -2533,6 +2533,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
+     * Clear the loaded from history flag
+     * Used when loading a history entry from a random game context
+     */
+    public void clearLoadedFromHistoryFlag() {
+        isLoadedFromHistory = false;
+        currentHistoryPath = null;
+        Timber.d("[HISTORY_NAV] Cleared loaded from history flag");
+    }
+
+    /**
      * Load the previous history entry (if one exists)
      * Uses filtered entries (excluding level games) to match history tab display
      * @return true if successful, false otherwise

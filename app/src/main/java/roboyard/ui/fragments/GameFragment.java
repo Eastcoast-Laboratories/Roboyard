@@ -1746,6 +1746,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     // Toast.makeText(requireContext(), "Loaded next history entry", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
+                    // Clear history flag so new game button works as new game again
+                    gameStateManager.clearLoadedFromHistoryFlag();
                 }
                 return;
             }
