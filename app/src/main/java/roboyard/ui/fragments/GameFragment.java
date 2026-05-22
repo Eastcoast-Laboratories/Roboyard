@@ -1733,7 +1733,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 if (gameStateManager.loadNextHistoryEntry()) {
                     // Toast.makeText(requireContext(), "Loaded next history entry", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(requireContext(), "No more history entries", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -2804,7 +2804,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Toast.makeText(requireContext(), "Loaded previous history entry", Toast.LENGTH_SHORT).show();
         } else {
             // No previous entry or error
-            Toast.makeText(requireContext(), "No more history entries", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
         }
     }
 

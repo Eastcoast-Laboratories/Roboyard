@@ -162,6 +162,9 @@
     <string name="button_reset">Redefinir</string>
     <string name="button_save_map">Salvar Mapa</string>
     <string name="button_new_game">Novo Jogo</string>
+    <string name="button_next_game">Próximo Jogo</string>
+    <string name="level_not_unlocked">Você precisa de %1$d estrela(s) mais para desbloquear</string>
+    <string name="no_more_history_entries">Não há mais entradas no histórico</string>
     <string name="button_menu">Menu</string>
     
     <!-- Game screen -->

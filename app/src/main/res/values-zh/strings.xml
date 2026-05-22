@@ -236,6 +236,9 @@
     <string name="button_reset">重置</string>
     <string name="button_save_map">保存地图</string>
     <string name="button_new_game">新游戏</string>
+    <string name="button_next_game">下一局</string>
+    <string name="level_not_unlocked">你需要 %1$d 颗星星才能解锁</string>
+    <string name="no_more_history_entries">没有更多历史记录</string>
     <string name="button_menu">菜单</string>
     <string name="reset">重置</string>
 

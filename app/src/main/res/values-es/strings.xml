@@ -279,6 +279,9 @@
     <string name="button_reset">Restablecer</string>
     <string name="button_save_map">Guardar mapa</string>
     <string name="button_new_game">Nuevo juego</string>
+    <string name="button_next_game">Siguiente juego</string>
+    <string name="level_not_unlocked">Necesitas %1$d estrella(s) más para desbloquear</string>
+    <string name="no_more_history_entries">No hay más entradas del historial</string>
     <string name="button_menu">Menú</string>
     <string name="back">Atrás</string>
     <string name="reset">Restablecer</string>

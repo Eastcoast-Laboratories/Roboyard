@@ -245,6 +245,9 @@
     <string name="hint_button_a11y">Tipp</string>
     <string name="confirm_level_change">Zurück zu Level %1$d?</string>
     <string name="button_new_game">Neue Map</string>
+    <string name="button_next_game">Nächstes Spiel</string>
+    <string name="level_not_unlocked">Du benötigst %1$d weitere Sterne zum Freischalten</string>
+    <string name="no_more_history_entries">Keine weiteren Einträge im Verlauf</string>
     <string name="button_menu">Menü</string>
     <string name="button_back_game">Zurück</string>
     <string name="button_back">Zurück</string>

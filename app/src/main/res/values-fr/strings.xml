@@ -594,6 +594,9 @@
     <string name="robot_a11y">Robot à la position</string>
     <string name="button_menu">Menu</string>
     <string name="button_new_game">Prochain</string>
+    <string name="button_next_game">Suivant</string>
+    <string name="level_not_unlocked">Vous avez besoin de %1$d étoile(s) supplémentaire(s) pour débloquer</string>
+    <string name="no_more_history_entries">Aucune autre entrée dans l\'historique</string>
     <string name="cannot_move_in_this_direction">Impossible de se déplacer dans cette direction</string>
     <string name="help_accessibility_description">Ce jeu est entièrement compatible avec le lecteur d\'écran TalkBack. Utilisez l\'exploration tactile pour entendre des informations sur les éléments du jeu et les boutons. Double-appuyez pour activer les boutons ou sélectionner les robots.</string>
     <string name="help_accessibility_section_title">Accessibilité</string>
