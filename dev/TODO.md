@@ -141,3 +141,16 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 
 - in dem popup beim savegame sollte der anzeigen, ob eine lösung in dem game gespeichert ist, wenn ja, soll diese im errorlog erscheinen. Wir brachen einen weg, eine nicht funktionierende lösung aus einem savegame zu löschen oder eine neue lösung zu genereieren, obwohl eine falsche im savegame gespeichert ist
+
+- Wenn man sich ein paar tage nicht eingeloggt hat in roboyard, dann funktioniert der automatische login nicht mehr, man hat dann zwar noch all seine achievements, aber man ist nicht mehr eigeloggt. 
+
+
+- Wenn der Back button, die previous function aufruft im Level oder einem history game, dann soll er eine andere Farbe bekommen, sobald man einen Zug gemacht hat, wird er wieder gelb
+- Wenn man einen History eintrag geladen hat, dann soll im game der "back" button, wenn man noch keinen zug gemacht hat, also im ersten Schritt, dann springt er dann zurück zum vorigen history Eintrag (falls man nicht den ersten history eintrag geladen hat)
+- Es soll so geändert werden: Wenn man ein Spiel aus der history aufgerufen hat, dann soll der button unten statt "new Game" "next Game" stehen, er soll dann auch nicht ein neues game generieren, sondern in den gespieeicherten history games den nächsten eintrag laden
+
+
+Wenn man in einem history Eintrag schon einmal die Tipps benutzt hat, um sich die Anzahl optimale anzeigen zu lassen. Dann soll dies auch gleich beim Start eines history Games angezeigt werden
+
+Der new Game Button im random game braucht einen ladebalken, so dass er erst nach zwei Sekunden drücken aktiviert wird
+
