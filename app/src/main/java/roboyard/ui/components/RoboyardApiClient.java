@@ -293,7 +293,17 @@ public class RoboyardApiClient {
      */
     public void verifyToken(ApiCallback<Boolean> callback) {
         if (!isLoggedIn()) {
-            postSuccess(callback, false);
+            // No token, but maybe we still have stored credentials from a previous session
+            // (e.g. token was cleared due to a previous bug). Try re-login before giving up.
+            String email = prefs.getString(KEY_USER_EMAIL, null);
+            String password = prefs.getString(KEY_USER_PASSWORD, null);
+            if (email != null && password != null) {
+                Timber.tag(TAG).d("[AUTH_DEBUG] No token but stored credentials found, attempting re-login");
+                tryReLoginOrLogout(callback);
+            } else {
+                Timber.tag(TAG).d("[AUTH_DEBUG] No token and no stored credentials, user must login manually");
+                postSuccess(callback, false);
+            }
             return;
         }
         
@@ -304,24 +314,55 @@ public class RoboyardApiClient {
                 JSONObject json = new JSONObject(response);
                 
                 if (json.has("error")) {
-                    // Token is invalid, logout
-                    Timber.tag(TAG).d("Token verification failed, logging out");
-                    logout();
-                    postSuccess(callback, false);
+                    // Token is invalid - try to re-login with stored credentials before giving up
+                    Timber.tag(TAG).d("[AUTH_DEBUG] Token verification failed, attempting auto re-login");
+                    tryReLoginOrLogout(callback);
                     return;
                 }
                 
                 // Token is valid
-                Timber.tag(TAG).d("Token verified successfully");
+                Timber.tag(TAG).d("[AUTH_DEBUG] Token verified successfully");
                 postSuccess(callback, true);
                 
             } catch (JSONException e) {
-                Timber.tag(TAG).e(e, "JSON error during token verification");
-                logout();
-                postSuccess(callback, false);
+                Timber.tag(TAG).e(e, "[AUTH_DEBUG] JSON error during token verification, attempting auto re-login");
+                tryReLoginOrLogout(callback);
             } catch (IOException e) {
-                Timber.tag(TAG).e(e, "Network error during token verification");
+                Timber.tag(TAG).e(e, "[AUTH_DEBUG] Network error during token verification");
                 // Don't logout on network error - token might still be valid
+                postSuccess(callback, false);
+            }
+        });
+    }
+
+    /**
+     * Attempt re-login using stored credentials. If re-login fails, perform full logout.
+     * This is used when the token is invalid/expired, so we don't lose the user's session
+     * just because the server-side token expired.
+     */
+    private void tryReLoginOrLogout(ApiCallback<Boolean> callback) {
+        String email = prefs.getString(KEY_USER_EMAIL, null);
+        String password = prefs.getString(KEY_USER_PASSWORD, null);
+
+        if (email == null || password == null) {
+            Timber.tag(TAG).d("[AUTH_DEBUG] No stored credentials for re-login, logging out");
+            logout();
+            postSuccess(callback, false);
+            return;
+        }
+
+        Timber.tag(TAG).d("[AUTH_DEBUG] Re-login with stored credentials for: %s", email);
+        login(email, password, new ApiCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult result) {
+                Timber.tag(TAG).d("[AUTH_DEBUG] Auto re-login successful");
+                postSuccess(callback, true);
+            }
+
+            @Override
+            public void onError(String error) {
+                Timber.tag(TAG).e("[AUTH_DEBUG] Auto re-login failed: %s — logging out", error);
+                logout();
                 postSuccess(callback, false);
             }
         });
