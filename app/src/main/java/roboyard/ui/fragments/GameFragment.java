@@ -1270,6 +1270,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             Integer moveCount = gameStateManager.getMoveCount().getValue();
             int currentLevelId = backState != null ? backState.getLevelId() : -1;
             boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
+            boolean isSavegame = gameStateManager.isLoadedFromSave();
 
             if (isLevelGame && currentLevelId > 0 && (moveCount == null || moveCount == 0)) {
                 Timber.d("[BACK][LEVEL] Back button clicked before first move on level %d", currentLevelId);
@@ -1281,6 +1282,19 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 Timber.d("[BACK][HISTORY] Back button clicked before first move on history game");
                 loadPreviousHistoryEntry();
                 return;
+            }
+
+            // Random game with history entries - load last history entry
+            if (!isSavegame && !isLevelGame && (moveCount == null || moveCount == 0)) {
+                java.util.List<roboyard.logic.core.GameHistoryEntry> filteredHistoryEntries = getFilteredHistoryEntries();
+                if (!filteredHistoryEntries.isEmpty()) {
+                    // History entries are in reverse chronological order (oldest first, newest last)
+                    // So we take the first entry to get the most recent one
+                    roboyard.logic.core.GameHistoryEntry lastEntry = filteredHistoryEntries.get(0);
+                    Timber.d("[BACK][RANDOM] Back button clicked before first move on random game, loading most recent history entry: %s", lastEntry.getMapPath());
+                    gameStateManager.loadHistoryEntry(lastEntry.getMapPath());
+                    return;
+                }
             }
             
             // Check if hint container is visible (hints are being shown)
@@ -1734,6 +1748,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     // Toast.makeText(requireContext(), "Loaded next history entry", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
+                    // Clear history flag so new game button works as new game again
+                    gameStateManager.clearLoadedFromHistoryFlag();
                 }
                 return;
             }
@@ -2641,11 +2657,29 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     }
 
     /**
+     * Get filtered history entries (excluding level games)
+     * This matches the filtering used in SaveGameFragment for the history tab
+     */
+    private java.util.List<roboyard.logic.core.GameHistoryEntry> getFilteredHistoryEntries() {
+        java.util.List<roboyard.logic.core.GameHistoryEntry> allEntries =
+            roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+        java.util.List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new java.util.ArrayList<>();
+        for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
+            String mapName = entry.getMapName();
+            if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
+                filteredEntries.add(entry);
+            }
+        }
+        return filteredEntries;
+    }
+
+    /**
      * Updates the back button color based on move count and game type.
      * When moveCount is 0 (at start):
      *   - Level games: green (like new game button) - clicking goes to previous level
      *   - History games: green (like new game button) - clicking goes to previous history entry
-     *   - Savegame/Random games: gray (like menu button) - clicking goes to menu
+     *   - Random games: green if history has entries (loads last history entry), gray otherwise (goes to menu)
+     *   - Savegame: gray (like menu button) - clicking goes to menu
      * When moveCount > 0: yellow - clicking undoes last move
      */
     private void updateBackButtonColor(Integer moveCount) {
@@ -2661,8 +2695,18 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 // Level games and history games: green like new game button (similar navigation function)
                 backButton.setBackgroundResource(R.drawable.button_fancy_green);
                 backButton.setTextColor(Color.WHITE);
+            } else if (!isSavegame) {
+                // Random games: green if history has entries, gray otherwise
+                boolean hasHistoryEntries = !getFilteredHistoryEntries().isEmpty();
+                if (hasHistoryEntries) {
+                    backButton.setBackgroundResource(R.drawable.button_fancy_green);
+                    backButton.setTextColor(Color.WHITE);
+                } else {
+                    backButton.setBackgroundResource(R.drawable.button_fancy_gray);
+                    backButton.setTextColor(Color.WHITE);
+                }
             } else {
-                // Savegame and random games: gray like menu button (returns to menu)
+                // Savegame: gray like menu button (returns to menu)
                 backButton.setBackgroundResource(R.drawable.button_fancy_gray);
                 backButton.setTextColor(Color.WHITE);
             }
