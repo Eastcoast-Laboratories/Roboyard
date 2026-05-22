@@ -1268,10 +1268,17 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             GameState backState = gameStateManager.getCurrentState().getValue();
             Integer moveCount = gameStateManager.getMoveCount().getValue();
             int currentLevelId = backState != null ? backState.getLevelId() : -1;
+            boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
 
             if (isLevelGame && currentLevelId > 0 && (moveCount == null || moveCount == 0)) {
                 Timber.d("[BACK][LEVEL] Back button clicked before first move on level %d", currentLevelId);
                 showBackToPreviousLevelDialog(currentLevelId);
+                return;
+            }
+
+            if (isHistoryGame && (moveCount == null || moveCount == 0)) {
+                Timber.d("[BACK][HISTORY] Back button clicked before first move on history game");
+                loadPreviousHistoryEntry();
                 return;
             }
             
@@ -2570,8 +2577,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     /**
      * Updates the back button color based on move count and game type.
      * When moveCount is 0 (at start):
-     *   - Level/History games: green (like new game button) - clicking goes to previous level/history entry
-     *   - Random games: gray (like menu button) - clicking goes to menu
+     *   - Level games: green (like new game button) - clicking goes to previous level
+     *   - History games: green (like new game button) - clicking goes to previous history entry
+     *   - Savegame/Random games: gray (like menu button) - clicking goes to menu
      * When moveCount > 0: yellow - clicking undoes last move
      */
     private void updateBackButtonColor(Integer moveCount) {
@@ -2579,12 +2587,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
         boolean isAtStart = (moveCount == null || moveCount == 0);
         if (isAtStart) {
-            // At start - clicking back would go to previous level/history entry (green) or menu (gray)
-            if (isLevelGame) {
-                // Level games: green like new game button (similar navigation function)
+            // At start - determine color based on game type
+            boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
+            boolean isSavegame = gameStateManager.isLoadedFromSave();
+
+            if (isLevelGame || isHistoryGame) {
+                // Level games and history games: green like new game button (similar navigation function)
                 backButton.setBackgroundResource(R.drawable.button_fancy_green);
             } else {
-                // Random games: gray like menu button (returns to menu)
+                // Savegame and random games: gray like menu button (returns to menu)
                 backButton.setBackgroundResource(R.drawable.button_fancy_gray);
             }
         } else {
@@ -2681,21 +2692,21 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             Timber.d("[DICE_BUTTON] New map generated successfully");
         });
     }
-    
+
     private void updateUniqueMapIdText(GameState state) {
         if (state == null) {
             return;
         }
-        
+
         // Get map name from GameStateManager for debugging
         String gameManagerMapName = gameStateManager.getLevelName();
         String gameStateMapName = state.getLevelName();
-        Timber.d("[MAPNAME] GameState levelName: '%s', GameStateManager levelName: '%s'", 
+        Timber.d("[MAPNAME] GameState levelName: '%s', GameStateManager levelName: '%s'",
                 gameStateMapName, gameManagerMapName);
-        
+
         // Get the unique map ID
         String uniqueMapId = state.getUniqueMapId();
-        
+
         // Update the unique map ID text view
         // Check if this is a level game and include level name
         if (state.getLevelId() > 0) {
@@ -2703,7 +2714,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             String levelText = getString(R.string.level_id_text, state.getLevelId());
             uniqueMapIdTextView.setText(levelText);
             Timber.d("[MAPNAME] Showing level ID text: %s", levelText);
-        } 
+        }
         // Check for valid map name from GameState
         else if (gameStateMapName != null && !gameStateMapName.isEmpty() ) {
             uniqueMapIdTextView.setText(gameStateMapName);
@@ -2711,6 +2722,20 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         } else if (uniqueMapIdTextView != null) {
             uniqueMapIdTextView.setText(getString(R.string.unique_map_id, uniqueMapId));
             Timber.d("[MAPNAME] Showing unique map ID as fallback: %s", uniqueMapId);
+        }
+    }
+
+    /**
+     * Load the previous history entry
+     * Called when back button is pressed at move count 0 in a history game
+     */
+    private void loadPreviousHistoryEntry() {
+        if (gameStateManager.loadPreviousHistoryEntry()) {
+            // Successfully loaded previous entry
+            Toast.makeText(requireContext(), "Loaded previous history entry", Toast.LENGTH_SHORT).show();
+        } else {
+            // No previous entry or error
+            Toast.makeText(requireContext(), "No previous history entry", Toast.LENGTH_SHORT).show();
         }
     }
     

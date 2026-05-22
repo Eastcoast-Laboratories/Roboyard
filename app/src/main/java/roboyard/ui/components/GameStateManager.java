@@ -174,6 +174,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     // When true, skip min/max moves validation to allow playing saved games regardless of current difficulty settings
     private boolean isLoadedFromSave = false;
 
+    // Flag to indicate if the current game was loaded from history
+    // When true, back button should navigate to previous history entry instead of undo
+    private boolean isLoadedFromHistory = false;
+
+    // Track the current history entry path for navigation
+    private String currentHistoryPath = null;
+
     // Live move counter feature
     private LiveSolverManager liveSolverManager;
     private boolean liveMoveCounterEnabled = false;
@@ -238,7 +245,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Reset loaded game flags - new games should use current difficulty settings
         isLoadedFromSave = false;
-        Timber.d("[NEW_GAME] Reset isLoadedFromSave flag, using current difficulty settings");
+        isLoadedFromHistory = false;
+        currentHistoryPath = null;
+        Timber.d("[NEW_GAME] Reset isLoadedFromSave, isLoadedFromHistory and currentHistoryPath, using current difficulty settings");
 
         // Reset any existing solver state to ensure a clean calculation for the new game
         SolverManager solverManager = getSolverManager();
@@ -393,10 +402,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (newState != null) {
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true;
-                
-                Timber.d("[LOAD_GAME] Loading saved game with difficulty: %d (current settings difficulty: %d)", 
+                // Ensure this is NOT treated as a history game
+                isLoadedFromHistory = false;
+
+                Timber.d("[LOAD_GAME] Loading saved game with difficulty: %d (current settings difficulty: %d)",
                         newState.getDifficulty(), Preferences.difficulty);
-                
+
                 // Apply the loaded game state using the shared method
                 applyLoadedGameState(newState);
                 Timber.d("Successfully loaded game from slot %d", saveId);
@@ -751,6 +762,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (newState != null) {
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true;
+                // Set flag to indicate this is a history game (not a savegame)
+                isLoadedFromHistory = true;
+                // Track the current history path for navigation
+                currentHistoryPath = mapPath;
 
                 Timber.d("[HISTORY_LOAD] Loaded history entry with difficulty: %d", newState.getDifficulty());
 
@@ -2507,6 +2522,69 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     public boolean isLoadedFromSave() {
         return isLoadedFromSave;
+    }
+
+    /**
+     * Check if the current game was loaded from history
+     * @return true if loaded from history, false otherwise
+     */
+    public boolean isLoadedFromHistory() {
+        return isLoadedFromHistory;
+    }
+
+    /**
+     * Load the previous history entry (if one exists)
+     * @return true if successful, false otherwise
+     */
+    public boolean loadPreviousHistoryEntry() {
+        if (currentHistoryPath == null) {
+            Timber.d("[HISTORY_NAV] No current history path, cannot load previous entry");
+            return false;
+        }
+
+        Activity activity = getActivity();
+        if (activity == null) {
+            Timber.e("[HISTORY_NAV] Activity is null, cannot load previous history entry");
+            return false;
+        }
+
+        try {
+            List<roboyard.logic.core.GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            if (entries.isEmpty()) {
+                Timber.d("[HISTORY_NAV] No history entries found");
+                return false;
+            }
+
+            // Find the index of the current entry
+            int currentIndex = -1;
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getMapPath().equals(currentHistoryPath)) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex == -1) {
+                Timber.d("[HISTORY_NAV] Current history entry not found in list");
+                return false;
+            }
+
+            // Check if there's a previous entry
+            if (currentIndex == 0) {
+                Timber.d("[HISTORY_NAV] Already at first history entry, no previous entry");
+                return false;
+            }
+
+            // Load the previous entry
+            roboyard.logic.core.GameHistoryEntry previousEntry = entries.get(currentIndex - 1);
+            Timber.d("[HISTORY_NAV] Loading previous history entry: %s", previousEntry.getMapPath());
+            loadHistoryEntry(previousEntry.getMapPath());
+            return true;
+
+        } catch (Exception e) {
+            Timber.e(e, "[HISTORY_NAV] Error loading previous history entry");
+            return false;
+        }
     }
     
 
