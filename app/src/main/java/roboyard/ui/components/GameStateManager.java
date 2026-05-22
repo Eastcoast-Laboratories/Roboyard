@@ -2586,6 +2586,98 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             return false;
         }
     }
+
+    /**
+     * Load the next history entry (if one exists)
+     * @return true if successful, false otherwise
+     */
+    public boolean loadNextHistoryEntry() {
+        if (currentHistoryPath == null) {
+            Timber.d("[HISTORY_NAV] No current history path, cannot load next entry");
+            return false;
+        }
+
+        Activity activity = getActivity();
+        if (activity == null) {
+            Timber.e("[HISTORY_NAV] Activity is null, cannot load next history entry");
+            return false;
+        }
+
+        try {
+            List<roboyard.logic.core.GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            if (entries.isEmpty()) {
+                Timber.d("[HISTORY_NAV] No history entries found");
+                return false;
+            }
+
+            // Find the index of the current entry
+            int currentIndex = -1;
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getMapPath().equals(currentHistoryPath)) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex == -1) {
+                Timber.d("[HISTORY_NAV] Current history entry not found in list");
+                return false;
+            }
+
+            // Check if there's a next entry
+            if (currentIndex == entries.size() - 1) {
+                Timber.d("[HISTORY_NAV] Already at last history entry, no next entry");
+                return false;
+            }
+
+            // Load the next entry
+            roboyard.logic.core.GameHistoryEntry nextEntry = entries.get(currentIndex + 1);
+            Timber.d("[HISTORY_NAV] Loading next history entry: %s", nextEntry.getMapPath());
+            loadHistoryEntry(nextEntry.getMapPath());
+            return true;
+
+        } catch (Exception e) {
+            Timber.e(e, "[HISTORY_NAV] Error loading next history entry");
+            return false;
+        }
+    }
+
+    /**
+     * Check if there is a next history entry available
+     * @return true if next entry exists, false otherwise
+     */
+    public boolean hasNextHistoryEntry() {
+        if (currentHistoryPath == null) {
+            return false;
+        }
+
+        Activity activity = getActivity();
+        if (activity == null) {
+            return false;
+        }
+
+        try {
+            List<roboyard.logic.core.GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            if (entries.isEmpty()) {
+                return false;
+            }
+
+            // Find the index of the current entry
+            int currentIndex = -1;
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getMapPath().equals(currentHistoryPath)) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            return currentIndex != -1 && currentIndex < entries.size() - 1;
+
+        } catch (Exception e) {
+            Timber.e(e, "[HISTORY_NAV] Error checking for next history entry");
+            return false;
+        }
+    }
     
 
     /**

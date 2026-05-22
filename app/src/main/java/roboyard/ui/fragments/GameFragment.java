@@ -1668,6 +1668,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             newMapButton.setVisibility(View.VISIBLE);
             saveMapButton.setVisibility(View.VISIBLE);
         }
+
+        // Update new game button for history games
+        updateNewGameButtonForHistory();
         
         // Dice button for generating new map (only visible when generateNewMapEachTime is false and not in level game)
         diceButton = view.findViewById(R.id.dice_button);
@@ -1675,8 +1678,23 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
         // "New Game" Button
         newMapButton.setOnClickListener(v -> {
+            // Check if this is a history game
+            boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
+
+            if (isHistoryGame) {
+                // Load next history entry
+                Timber.d("GameFragment: New Game button clicked in history game, loading next entry");
+                if (gameStateManager.loadNextHistoryEntry()) {
+                    // Toast.makeText(requireContext(), "Loaded next history entry", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "No more history entries", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            // Normal new game behavior for non-history games
             Timber.d("GameFragment: Restart button clicked. calling startGame()");
-            
+
             // Dismiss achievement popup if visible
             if (achievementPopup != null) {
                 achievementPopup.dismiss();
@@ -1705,11 +1723,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 gameGridView.clearRobotPaths();
                 Timber.d("[ROBOTS] Cleared robot paths before starting new game");
             }
-            
+
             // Cancel all active solvers before generating new map
             gameStateManager.cancelSolver();
             Timber.d("[NEW_GAME] Cancelled all active solvers before starting new game");
-            
+
 			// Reset move counts and history explicitly to ensure all counters are zeroed
 	        gameStateManager.resetMoveCountsAndHistory();
 	        Timber.d("[NEW_GAME] Reset move counts and game history");
@@ -1718,7 +1736,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             gameStateManager.startGame();
             // Reset timer to 0 for the new game
             resetAndStartTimer();
-            
+
             // Randomize pre-hints count for the new game
             numPreHints = ThreadLocalRandom.current().nextInt(2, 5);
             Timber.d("[HINT] Randomized pre-hints for new game: %d", numPreHints);
@@ -2732,10 +2750,37 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private void loadPreviousHistoryEntry() {
         if (gameStateManager.loadPreviousHistoryEntry()) {
             // Successfully loaded previous entry
-            Toast.makeText(requireContext(), "Loaded previous history entry", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(requireContext(), "Loaded previous history entry", Toast.LENGTH_SHORT).show();
         } else {
             // No previous entry or error
-            Toast.makeText(requireContext(), "No previous history entry", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "No more history entries", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Update the new game button for history games
+     * Changes text to "Next Game" and disables button if at last history entry
+     */
+    private void updateNewGameButtonForHistory() {
+        if (newMapButton == null) return;
+
+        boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
+
+        if (isHistoryGame) {
+            // Change text to "Next Game"
+            newMapButton.setText(getString(R.string.button_next_game));
+
+            // Disable button if at last history entry
+            boolean hasNext = gameStateManager.hasNextHistoryEntry();
+            newMapButton.setEnabled(hasNext);
+            newMapButton.setAlpha(hasNext ? 1.0f : 0.5f);
+
+            Timber.d("[HISTORY_NAV] New game button updated: hasNext=%b, enabled=%b", hasNext, hasNext);
+        } else {
+            // Reset to normal "New Game" behavior
+            newMapButton.setText(getString(R.string.button_new_game));
+            newMapButton.setEnabled(true);
+            newMapButton.setAlpha(1.0f);
         }
     }
     

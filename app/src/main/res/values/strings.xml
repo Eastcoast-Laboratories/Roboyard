@@ -277,6 +277,7 @@
     <string name="reset_button" comment="Button to reset the current game/level [GameFragment]">Reset</string>
     <string name="unique_map_id" comment="Unique identifier for a game map [GameFragment]">%1$s</string>
     <string name="level_id_text" comment="Text showing the current level number [GameFragment]">Level %1$d</string>
+    <string name="button_next_game" comment="Button text for loading next history entry [GameFragment]">Next Game</string>
     <string name="target_reached" comment="Message shown when a robot reaches its target">Goal reached! Game complete in %1$d moves and %2$d squares moved</string>
     <string name="unknown_color">Unknown: %1$s</string>
 
