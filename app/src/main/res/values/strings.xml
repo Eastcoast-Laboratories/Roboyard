@@ -278,6 +278,7 @@
     <string name="unique_map_id" comment="Unique identifier for a game map [GameFragment]">%1$s</string>
     <string name="level_id_text" comment="Text showing the current level number [GameFragment]">Level %1$d</string>
     <string name="button_next_game" comment="Button text for loading next history entry [GameFragment]">Next Game</string>
+    <string name="level_not_unlocked" comment="Message when next level is not unlocked [GameFragment]">You need %1$d more star(s) to unlock</string>
     <string name="target_reached" comment="Message shown when a robot reaches its target">Goal reached! Game complete in %1$d moves and %2$d squares moved</string>
     <string name="unknown_color">Unknown: %1$s</string>
 
