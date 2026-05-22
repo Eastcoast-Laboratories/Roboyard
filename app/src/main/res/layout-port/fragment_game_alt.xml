@@ -311,7 +311,8 @@
             android:textOff=""
             android:textSize="0sp"
             android:gravity="center"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/hint_button_fancy"
+            android:textColor="#1A1A1A"
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:contentDescription="@string/hint_button_a11y" />

@@ -142,12 +142,8 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - in dem popup beim savegame sollte der anzeigen, ob eine lösung in dem game gespeichert ist, wenn ja, soll diese im errorlog erscheinen. Wir brachen einen weg, eine nicht funktionierende lösung aus einem savegame zu löschen oder eine neue lösung zu genereieren, obwohl eine falsche im savegame gespeichert ist
 
-- Wenn sich der back button style ändert, soll die font-farbe mit geändert werden auf weiss
-- Wenn man einen History eintrag geladen hat, dann soll im game der "back" button, wenn man noch keinen zug gemacht hat, also im ersten Schritt, dann springt er dann zurück zum vorigen history Eintrag (falls man nicht den ersten history eintrag geladen hat) (beim savegame geladen soll er sich so verhalten, wie beim normalen random game)
-- Es soll so geändert werden: Wenn man ein Spiel aus der history aufgerufen hat, dann soll der button unten statt "new Game" "next Game" stehen, er soll dann auch nicht ein neues game generieren, sondern in den gespieeicherten history games den nächsten eintrag laden
+- Wenn man in einem history Eintrag schon einmal die Tipps benutzt hat, um sich die Anzahl optimale anzeigen zu lassen. Dann soll dies auch gleich beim Start eines history Games angezeigt werden
 
+- Der new Game Button im random game braucht einen ladebalken, so dass er erst nach zwei Sekunden drücken aktiviert wird
 
-Wenn man in einem history Eintrag schon einmal die Tipps benutzt hat, um sich die Anzahl optimale anzeigen zu lassen. Dann soll dies auch gleich beim Start eines history Games angezeigt werden
-
-Der new Game Button im random game braucht einen ladebalken, so dass er erst nach zwei Sekunden drücken aktiviert wird
-
+- es kann vorkommen, dass bei benutzing der history back und vor und benutzung der hints beim level complete der nächste game button zwar neu startet, aber der optimal moves hint bleibt stehen, also die grosse ahl oprtimal oves im neuen gamnoch die alte zahl bleibt hängen.
