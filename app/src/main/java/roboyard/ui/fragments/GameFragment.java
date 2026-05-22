@@ -52,6 +52,7 @@ import roboyard.logic.core.GameSolution;
 import roboyard.ui.components.GameGridView;
 import roboyard.ui.components.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
+import roboyard.ui.components.LevelCompletionManager;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.achievements.Achievement;
 import roboyard.ui.achievements.AchievementManager;
@@ -1670,7 +1671,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
 
         // Update new game button for history games
-        updateNewGameButtonForHistory();
+        updateNewGameButtonForHistoryOrLevel();
         
         // Dice button for generating new map (only visible when generateNewMapEachTime is false and not in level game)
         diceButton = view.findViewById(R.id.dice_button);
@@ -1678,6 +1679,51 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
         // "New Game" Button
         newMapButton.setOnClickListener(v -> {
+            // Check if this is a level game
+            if (isLevelGame) {
+                GameState levelState = gameStateManager.getCurrentState().getValue();
+                if (levelState != null) {
+                    int currentLevelId = levelState.getLevelId();
+                    int nextLevelId = currentLevelId + 1;
+
+                    // Check if next level is unlocked
+                    LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
+                    int totalStars = lcm.getTotalStars();
+                    boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
+
+                    if (isNextLevelUnlocked) {
+                        // Start next level
+                        Timber.d("GameFragment: Starting next level %d from level %d", nextLevelId, currentLevelId);
+                        gameStateManager.startLevelGame(nextLevelId);
+
+                        // Clear robot paths
+                        if (gameGridView != null) {
+                            gameGridView.clearRobotPaths();
+                            gameGridView.invalidate();
+                        }
+
+                        // Reset timer
+                        stopTimer();
+                        startTimer();
+
+                        // Reset hint system
+                        gameStateManager.resetSolutionStep();
+                        showingPreHints = true;
+                        hintButton.setEnabled(true);
+                        hintButton.setAlpha(1.0f);
+                        hintButton.setChecked(false);
+                    } else {
+                        // Show toast message that level is not unlocked
+                        int starsNeeded = (nextLevelId - 1) - totalStars;
+                        Toast.makeText(requireContext(),
+                                getString(R.string.level_not_unlocked, starsNeeded),
+                                Toast.LENGTH_SHORT).show();
+                        Timber.d("[LEVEL_NAV] Level %d not unlocked, you need %d more stars", nextLevelId, starsNeeded);
+                    }
+                }
+                return;
+            }
+
             // Check if this is a history game
             boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
 
@@ -1692,7 +1738,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 return;
             }
 
-            // Normal new game behavior for non-history games
+            // Normal new game behavior for random games
             Timber.d("GameFragment: Restart button clicked. calling startGame()");
 
             // Dismiss achievement popup if visible
@@ -2761,11 +2807,36 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     }
 
     /**
-     * Update the new game button for history games
-     * Changes text to "Next Game" and disables button if at last history entry
+     * Update the new game button for history games and Level games
+     * Changes text to "Next Game" for history games, "Next Level" for level games
+     * Disables button if at last history entry or last unlocked level
      */
-    private void updateNewGameButtonForHistory() {
+    private void updateNewGameButtonForHistoryOrLevel() {
         if (newMapButton == null) return;
+
+        if (isLevelGame) {
+            // Level game - change to "Next Level" and check if next level is unlocked
+            GameState currentState = gameStateManager.getCurrentState().getValue();
+            if (currentState != null) {
+                int currentLevelId = currentState.getLevelId();
+                int nextLevelId = currentLevelId + 1;
+
+                // Check if next level is unlocked (need at least (nextLevelId - 1) stars)
+                LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
+                int totalStars = lcm.getTotalStars();
+                boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
+
+                newMapButton.setText(getString(R.string.next_level));
+
+                // Disable button if next level is not unlocked
+                newMapButton.setEnabled(isNextLevelUnlocked);
+                newMapButton.setAlpha(isNextLevelUnlocked ? 1.0f : 0.5f);
+
+                Timber.d("[LEVEL_NAV] New game button for level %d: next=%d, unlocked=%b, totalStars=%d",
+                        currentLevelId, nextLevelId, isNextLevelUnlocked, totalStars);
+            }
+            return;
+        }
 
         boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
 
@@ -2780,7 +2851,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
             Timber.d("[HISTORY_NAV] New game button updated: hasNext=%b, enabled=%b", hasNext, hasNext);
         } else {
-            // Reset to normal "New Game" behavior
+            // Reset to normal "New Game" behavior for random games
             newMapButton.setText(getString(R.string.button_new_game));
             newMapButton.setEnabled(true);
             newMapButton.setAlpha(1.0f);
