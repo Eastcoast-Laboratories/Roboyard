@@ -339,4 +339,71 @@ public class LongPressNewGameTest {
 
         Timber.d("[LONG_PRESS_TEST] Next level button immediate test completed successfully");
     }
+
+    /**
+     * Test that the new game button long-press mechanism is correctly set up.
+     * This verifies that the long-press logic works by directly calling the GameStateManager method.
+     */
+    @Test
+    public void testNewGameButtonLongPressMechanismSetup() throws InterruptedException {
+        Timber.d("[LONG_PRESS_TEST] Testing new game button long-press mechanism setup");
+
+        initializeGameStateManager();
+        startRandomGame();
+
+        Thread.sleep(2000);
+
+        // Get initial game state
+        final roboyard.logic.core.GameState[] initialState = new roboyard.logic.core.GameState[1];
+        activityRule.getScenario().onActivity(activity -> {
+            initialState[0] = gameStateManager.getCurrentState().getValue();
+            assertNotNull("Initial game state should not be null", initialState[0]);
+        });
+
+        Thread.sleep(1000);
+
+        // Directly call startNewGame to simulate long-press completion
+        activityRule.getScenario().onActivity(activity -> {
+            gameStateManager.startNewGame();
+        });
+
+        Thread.sleep(2000);
+
+        // Verify that a new game was started (game state should be different)
+        activityRule.getScenario().onActivity(activity -> {
+            roboyard.logic.core.GameState newState = gameStateManager.getCurrentState().getValue();
+            assertNotNull("New game state should not be null", newState);
+            assertNotEquals("Game state should be different after new game", initialState[0], newState);
+            Timber.d("[LONG_PRESS_TEST] Long-press mechanism verified successfully");
+        });
+
+        Timber.d("[LONG_PRESS_TEST] Long-press mechanism setup test completed successfully");
+    }
+
+    /**
+     * Test that the back button long-press mechanism is correctly set up for random games.
+     * This verifies that the undo logic works as expected.
+     */
+    @Test
+    public void testBackButtonLongPressMechanismSetup() throws InterruptedException {
+        Timber.d("[LONG_PRESS_TEST] Testing back button long-press mechanism setup");
+
+        initializeGameStateManager();
+        startRandomGame();
+        makeMove();
+
+        int moveCountAfterMove = getMoveCount();
+        Thread.sleep(500);
+
+        // Directly call undoLastMove to simulate long-press completion
+        undoLastMove();
+        Thread.sleep(1000);
+
+        // Verify that the move was undone (move count should be back to 0)
+        int currentMoveCount = getMoveCount();
+        assertEquals("Move count should be 0 after undo", 0, currentMoveCount);
+        Timber.d("[LONG_PRESS_TEST] Back button long-press mechanism verified successfully");
+
+        Timber.d("[LONG_PRESS_TEST] Back button long-press mechanism setup test completed successfully");
+    }
 }

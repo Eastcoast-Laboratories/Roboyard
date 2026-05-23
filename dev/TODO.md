@@ -144,7 +144,5 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Wenn man in einem history Eintrag schon einmal die Tipps benutzt hat, um sich die Anzahl optimale anzeigen zu lassen. Dann soll dies auch gleich beim Start eines history Games angezeigt werden
 
-- Der new Game Button im random game braucht einen ladebalken, so dass er erst nach zwei Sekunden drücken aktiviert wird
-
 - es kann vorkommen, dass bei benutzing der history back und vor und benutzung der hints beim level complete der nächste game button zwar neu startet, aber der optimal moves hint bleibt stehen, also die grosse ahl oprtimal oves im neuen gamnoch die alte zahl bleibt hängen.
 

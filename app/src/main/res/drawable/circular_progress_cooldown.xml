@@ -4,16 +4,18 @@
     <item android:id="@android:id/secondaryProgress">
         <shape
             android:shape="ring"
+            android:innerRadius="12dp"
             android:thickness="4dp"
             android:useLevel="false">
             <solid android:color="#40FFFFFF" />
         </shape>
     </item>
-    
+
     <!-- Progress circle (white) -->
     <item android:id="@android:id/progress">
         <shape
             android:shape="ring"
+            android:innerRadius="12dp"
             android:thickness="4dp"
             android:useLevel="true">
             <solid android:color="#FFFFFF" />
