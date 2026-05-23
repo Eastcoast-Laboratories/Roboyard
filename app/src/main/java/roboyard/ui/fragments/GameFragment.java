@@ -1267,12 +1267,27 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         backButton.setText("◂ " + getString(R.string.button_back_game));
         // Set initial color based on current move count (will be green if no moves yet)
         updateBackButtonColor(gameStateManager.getMoveCount().getValue());
-        // Back button - long-press mechanism for random games
+        // Back button - long-press mechanism for random games at start (disabled for level games)
         backButton.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    // Start long-press detection only for random games
-                    if (!isLevelGame && !gameStateManager.isLoadedFromHistory() && !gameStateManager.isLoadedFromSave()) {
+                    Integer moveCount = gameStateManager.getMoveCount().getValue();
+                    boolean isAtStart = (moveCount == null || moveCount == 0);
+
+                    // If moveCount > 0 (yellow/undo mode), trigger immediately
+                    if (!isAtStart) {
+                        handleBackButtonClick();
+                        return true;
+                    }
+
+                    // For level games, trigger immediately (no cooldown)
+                    if (isLevelGame) {
+                        handleBackButtonClick();
+                        return true;
+                    }
+
+                    // At start: long-press only for random games
+                    if (!gameStateManager.isLoadedFromHistory() && !gameStateManager.isLoadedFromSave()) {
                         isLongPressInProgress = true;
                         startCircularProgressAnimation(backButton);
                         longPressHandler.postDelayed(() -> {
@@ -1284,7 +1299,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             }
                         }, BUTTON_COOLDOWN_MS);
                     } else {
-                        // For level/history games, trigger immediately (normal click behavior)
+                        // For history games at start, trigger immediately (normal click behavior)
                         handleBackButtonClick();
                     }
                     return true;
@@ -1625,11 +1640,17 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         diceButton = view.findViewById(R.id.dice_button);
         updateDiceButtonVisibility();
 
-        // "New Game" Button - Long-press mechanism for random games
+        // "New Game" Button - Long-press mechanism for random games (disabled for level games)
         newMapButton.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    // Start long-press detection
+                    // For level games, trigger immediately (no cooldown)
+                    if (isLevelGame) {
+                        handleNewMapButtonClick();
+                        return true;
+                    }
+
+                    // For other game types, use long-press
                     isLongPressInProgress = true;
                     startCircularProgressAnimation(newMapButton);
                     longPressHandler.postDelayed(() -> {
