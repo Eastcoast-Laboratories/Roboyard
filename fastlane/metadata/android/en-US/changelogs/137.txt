@@ -1,0 +1,5 @@
+- Added long-press protection in game screen for New Game
+- Added history navigation in game screen
+- Fixed keep login when session expires
+- Improved button-size across different devices and UI scaling
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

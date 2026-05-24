@@ -2,6 +2,13 @@ Changelog Deutsch
 =================
 
 
+## Version 52 (137)
+- Long-Press-Schutz fuer Neues Spiel im Spielbildschirm hinzugefuegt
+- Verlauf-Navigation im Spielbildschirm hinzugefuegt
+- Login bleibt jetzt bei abgelaufener Sitzung erhalten
+- Button-Groessen und UI-Skalierung auf verschiedenen Geraeten verbessert
+
+
 ## Version 51 (136)
 - Diverse kleine Fixes
 
