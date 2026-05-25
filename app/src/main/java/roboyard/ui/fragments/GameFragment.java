@@ -1409,7 +1409,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 }
                 
                 // Make info box padding compact when hints are visible
-                View gameInfoContainer = getView().findViewById(R.id.game_info_container);
+                View gameInfoContainer = getView() != null ? getView().findViewById(R.id.game_info_container) : null;
                 if (gameInfoContainer != null) {
                     gameInfoContainer.setPadding(16, 0, 16, 5);
                     Timber.d("[HINT_SYSTEM] Set compact info box padding when hints ON");
@@ -1448,7 +1448,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 }
                 
                 // WICHTIG: Info Box Padding NACH showPreHint/showNormalHint setzen (kompakt)
-                View gameInfoContainer2 = getView().findViewById(R.id.game_info_container);
+                View gameInfoContainer2 = getView() != null ? getView().findViewById(R.id.game_info_container) : null;
                 if (gameInfoContainer2 != null) {
                     gameInfoContainer2.setPadding(16, 0, 16, 5);
                     Timber.d("[HINT_SYSTEM] RE-SET compact info box padding AFTER hint display");
@@ -1473,7 +1473,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 }
                 
                 // Set bigger info box padding when hints are hidden
-                View gameInfoContainer = getView().findViewById(R.id.game_info_container);
+                View gameInfoContainer = getView() != null ? getView().findViewById(R.id.game_info_container) : null;
                 if (gameInfoContainer != null) {
                     gameInfoContainer.setPadding(16, 16, 16, 16);
                     Timber.d("[HINT_SYSTEM] Set bigger info box padding when hints OFF");
@@ -4220,6 +4220,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private void slideDownHintContainer() {
         if (hintContainer == null) return;
+        if (getView() == null) return; // Fragment not attached
         
         // Get info box for synchronized animation
         View gameInfoContainer = getView().findViewById(R.id.game_info_container);
@@ -4276,6 +4277,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private void slideUpHintContainer() {
         if (hintContainer == null) return;
+        if (getView() == null) return; // Fragment not attached
         
         // Get info box for synchronized animation
         View gameInfoContainer = getView().findViewById(R.id.game_info_container);
