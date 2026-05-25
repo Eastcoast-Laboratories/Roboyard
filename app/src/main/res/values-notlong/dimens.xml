@@ -28,4 +28,8 @@
     <dimen name="game_info_secondary_text_size">21dp</dimen>
     <dimen name="game_info_small_text_size">15dp</dimen>
     <dimen name="game_info_optimal_moves_text_size">36dp</dimen>
+    
+    <!-- Cooldown ring position offset (smaller for tablets) -->
+    <dimen name="cooldown_ring_left_offset">-90dp</dimen>
+    <dimen name="cooldown_ring_inner_radius">10dp</dimen>
 </resources>

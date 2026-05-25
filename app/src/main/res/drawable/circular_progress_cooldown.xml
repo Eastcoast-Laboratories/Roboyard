@@ -1,22 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Background circle (gray) -->
-    <item android:id="@android:id/secondaryProgress">
+    <!-- Background ring (semi-transparent) - left-aligned, 10% larger -->
+    <item
+        android:id="@android:id/secondaryProgress"
+        android:left="@dimen/cooldown_ring_left_offset"
+        android:top="0dp"
+        android:right="0dp"
+        android:bottom="0dp">
         <shape
             android:shape="ring"
+            android:innerRadius="@dimen/cooldown_ring_inner_radius"
             android:thickness="4dp"
             android:useLevel="false">
             <solid android:color="#40FFFFFF" />
         </shape>
     </item>
-    
-    <!-- Progress circle (white) -->
-    <item android:id="@android:id/progress">
+
+    <!-- Progress ring with sweep gradient - left-aligned, 10% larger -->
+    <item
+        android:id="@android:id/progress"
+        android:left="@dimen/cooldown_ring_left_offset"
+        android:top="0dp"
+        android:right="0dp"
+        android:bottom="0dp">
         <shape
             android:shape="ring"
+            android:innerRadius="@dimen/cooldown_ring_inner_radius"
             android:thickness="4dp"
             android:useLevel="true">
-            <solid android:color="#FFFFFF" />
+            <gradient
+                android:type="sweep"
+                android:startColor="#FFFFFF"
+                android:centerColor="#40FFFFFF"
+                android:endColor="#40FFFFFF" />
         </shape>
     </item>
 </layer-list>

@@ -42,4 +42,8 @@
     <dimen name="accessibility_text_size">12dp</dimen>
     <dimen name="accessibility_button_padding">0dp</dimen>
     <dimen name="accessibility_button_margin">0dp</dimen>
+    
+    <!-- Cooldown ring position offset -->
+    <dimen name="cooldown_ring_left_offset">-86dp</dimen>
+    <dimen name="cooldown_ring_inner_radius">18dp</dimen>
 </resources>

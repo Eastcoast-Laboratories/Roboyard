@@ -17,8 +17,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.animation.ValueAnimator;
+import android.animation.ObjectAnimator;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -76,6 +82,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private static final int MAX_HINTS_UP_TO_LEVEL_10 = 4; // Maximum hints allowed for levels 1-10 (increase this for debugging)
     private static final int LEVEL_10_THRESHHOLD = 10; // this should be set to 10, increase only for debugging
     private static final int MAX_HINT_HISTORY = 6;
+    private static final int BUTTON_COOLDOWN_MS = 1200; // 1,2 seconds for long-press
     private GameGridView gameGridView;
     private TextView moveCountTextView;
     private TextView squaresMovedTextView;
@@ -137,6 +144,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private boolean historySaveRunning = false;
     private static final int AUTOSAVE_INTERVAL_MS = 60 * 1000; // 60 seconds
     private static final int HISTORY_CHECK_INTERVAL_MS = 3000; // Check every 3 seconds
+
+    // Long-press variables for newMapButton and backButton
+    private Handler longPressHandler = new Handler(Looper.getMainLooper());
+    private ValueAnimator circularProgressAnimator;
+    private boolean isLongPressInProgress = false;
     
     // Guard to prevent onLevelCompleted from being called multiple times for the same level
     private int lastCompletedLevelId = -1;
@@ -1256,116 +1268,39 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         backButton.setText("◂ " + getString(R.string.button_back_game));
         // Set initial color based on current move count (will be green if no moves yet)
         updateBackButtonColor(gameStateManager.getMoveCount().getValue());
-        backButton.setOnClickListener(v -> {
-            Timber.d("GameFragment: Back button clicked");
-            
-            // Disable back button after goal is reached
-            if (gameStateManager.isGameComplete().getValue()) {
-                Timber.d("GameFragment: Game already complete, back button disabled");
-                Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            GameState backState = gameStateManager.getCurrentState().getValue();
-            Integer moveCount = gameStateManager.getMoveCount().getValue();
-            int currentLevelId = backState != null ? backState.getLevelId() : -1;
-            boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
-            boolean isSavegame = gameStateManager.isLoadedFromSave();
-
-            if (isLevelGame && currentLevelId > 0 && (moveCount == null || moveCount == 0)) {
-                Timber.d("[BACK][LEVEL] Back button clicked before first move on level %d", currentLevelId);
-                showBackToPreviousLevelDialog(currentLevelId);
-                return;
-            }
-
-            if (isHistoryGame && (moveCount == null || moveCount == 0)) {
-                Timber.d("[BACK][HISTORY] Back button clicked before first move on history game");
-                loadPreviousHistoryEntry();
-                return;
-            }
-
-            // Random game with history entries - load last history entry
-            if (!isSavegame && !isLevelGame && (moveCount == null || moveCount == 0)) {
-                java.util.List<roboyard.logic.core.GameHistoryEntry> filteredHistoryEntries = getFilteredHistoryEntries();
-                if (!filteredHistoryEntries.isEmpty()) {
-                    // History entries are in reverse chronological order (oldest first, newest last)
-                    // So we take the first entry to get the most recent one
-                    roboyard.logic.core.GameHistoryEntry lastEntry = filteredHistoryEntries.get(0);
-                    Timber.d("[BACK][RANDOM] Back button clicked before first move on random game, loading most recent history entry: %s", lastEntry.getMapPath());
-                    gameStateManager.loadHistoryEntry(lastEntry.getMapPath());
-                    return;
-                }
-            }
-            
-            // Check if hint container is visible (hints are being shown)
-            if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE && currentHintStep > 0) {
-                // Go back one step in hints
-                currentHintStep--;
-                // Update the current solution step
-                gameStateManager.resetSolutionStep();
-                for (int i = 0; i < currentHintStep; i++) {
-                    gameStateManager.incrementSolutionStep();
-                }
-                Timber.d("[HINT_SYSTEM] Moving to previous hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
-                
-                // Display the previous hint
-                GameSolution solution = gameStateManager.getCurrentSolution();
-                if (solution != null) {
-                    int totalMoves = solution.getMoves().size();
-                    GameState state = gameStateManager.getCurrentState().getValue();
-                    
-                    // Clear hint arrow on manual navigation
-                    if (gameGridView != null) {
-                        gameGridView.setHintArrow(-1, -1);
-                    }
-                    // Show the appropriate hint based on the currentHintStep
-                    int backHintRobotColor;
-                    if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
-                        backHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
+        // Back button - long-press mechanism for random games
+        backButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // Start long-press detection only for random games
+                    if (!isLevelGame && !gameStateManager.isLoadedFromHistory() && !gameStateManager.isLoadedFromSave()) {
+                        isLongPressInProgress = true;
+                        startCircularProgressAnimation(backButton);
+                        longPressHandler.postDelayed(() -> {
+                            if (isLongPressInProgress) {
+                                // Long-press completed, trigger action
+                                handleBackButtonClick();
+                                isLongPressInProgress = false;
+                                stopCircularProgressAnimation();
+                            }
+                        }, BUTTON_COOLDOWN_MS);
                     } else {
-                        int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
-                        backHintRobotColor = showNormalHint(solution, state, totalMoves, normalHintIndex);
+                        // For level/history games, trigger immediately (normal click behavior)
+                        handleBackButtonClick();
                     }
-                    if (backHintRobotColor >= 0 && gameGridView != null) {
-                        gameGridView.selectRobotByColor(backHintRobotColor);
+                    return true;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    // Cancel long-press if released early
+                    if (isLongPressInProgress) {
+                        isLongPressInProgress = false;
+                        longPressHandler.removeCallbacksAndMessages(null);
+                        stopCircularProgressAnimation();
                     }
-                }
+                    return true;
             }
-            
-            // Standard undo functionality (original code)
-            // Remember which robot was last moved before undoing (pathHistory still contains it)
-            int lastMovedRobotColor = -1;
-            java.util.ArrayList<int[]> pathHistory = gameStateManager.getPathHistory();
-            if (!pathHistory.isEmpty()) {
-                lastMovedRobotColor = pathHistory.get(pathHistory.size() - 1)[0];
-            }
-            // Undo the last move
-            if (gameStateManager.undoLastMove()) {
-                // Force grid view update after undo
-                if (gameGridView != null) {
-                    // Get the current state AFTER undo to get correct dimensions
-                    GameState undoState = gameStateManager.getCurrentState().getValue();
-                    
-                    // Remove only the last path segment instead of clearing all paths
-                    gameGridView.undoLastPathSegment();
-                    // Re-select the robot that was undone with full visual treatment
-                    if (lastMovedRobotColor >= 0) {
-                        gameGridView.selectRobotByColor(lastMovedRobotColor);
-                        Timber.d("[ROBOTS][UNDO] Back-button: re-selected robot %d after undo", lastMovedRobotColor);
-                    }
-                    // Force the grid view to redraw completely
-                    gameGridView.invalidate();
-                    
-                    // Update the game state display to reflect the undone move
-                    if (undoState != null) {
-                        updateGameState(undoState);
-                    }else{
-                        Timber.e("[ROBOTS][UNDO] Back-button: undoState is null after undo");
-                    }
-                }
-            } else {
-                Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
-            }
+            return false;
         });
         
         // Button text: "Reset"
@@ -1691,166 +1626,36 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         diceButton = view.findViewById(R.id.dice_button);
         updateDiceButtonVisibility();
 
-        // "New Game" Button
-        newMapButton.setOnClickListener(v -> {
-            // Check if this is a level game
-            if (isLevelGame) {
-                GameState levelState = gameStateManager.getCurrentState().getValue();
-                if (levelState != null) {
-                    int currentLevelId = levelState.getLevelId();
-                    int nextLevelId = currentLevelId + 1;
-
-                    // Check if next level is unlocked
-                    LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
-                    int totalStars = lcm.getTotalStars();
-                    boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
-
-                    if (isNextLevelUnlocked) {
-                        // Start next level
-                        Timber.d("GameFragment: Starting next level %d from level %d", nextLevelId, currentLevelId);
-                        gameStateManager.startLevelGame(nextLevelId);
-
-                        // Clear robot paths
-                        if (gameGridView != null) {
-                            gameGridView.clearRobotPaths();
-                            gameGridView.invalidate();
+        // "New Game" Button - Long-press mechanism for random games
+        newMapButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // Start long-press detection
+                    isLongPressInProgress = true;
+                    startCircularProgressAnimation(newMapButton);
+                    longPressHandler.postDelayed(() -> {
+                        if (isLongPressInProgress) {
+                            // Long-press completed, trigger action
+                            handleNewMapButtonClick();
+                            isLongPressInProgress = false;
+                            stopCircularProgressAnimation();
                         }
+                    }, BUTTON_COOLDOWN_MS);
+                    return true;
 
-                        // Reset timer
-                        stopTimer();
-                        startTimer();
-
-                        // Reset hint system
-                        gameStateManager.resetSolutionStep();
-                        showingPreHints = true;
-                        hintButton.setEnabled(true);
-                        hintButton.setAlpha(1.0f);
-                        hintButton.setChecked(false);
-                    } else {
-                        // Show toast message that level is not unlocked
-                        int starsNeeded = (nextLevelId - 1) - totalStars;
-                        Toast.makeText(requireContext(),
-                                getString(R.string.level_not_unlocked, starsNeeded),
-                                Toast.LENGTH_SHORT).show();
-                        Timber.d("[LEVEL_NAV] Level %d not unlocked, you need %d more stars", nextLevelId, starsNeeded);
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    // Cancel long-press if released early
+                    if (isLongPressInProgress) {
+                        isLongPressInProgress = false;
+                        longPressHandler.removeCallbacksAndMessages(null);
+                        stopCircularProgressAnimation();
                     }
-                }
-                return;
+                    return true;
             }
-
-            // Check if this is a history game
-            boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
-
-            if (isHistoryGame) {
-                // Load next history entry
-                Timber.d("GameFragment: New Game button clicked in history game, loading next entry");
-                if (gameStateManager.loadNextHistoryEntry()) {
-                    // Toast.makeText(requireContext(), "Loaded next history entry", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
-                    // Clear history flag so new game button works as new game again
-                    gameStateManager.clearLoadedFromHistoryFlag();
-                }
-                return;
-            }
-
-            // Normal new game behavior for random games
-            Timber.d("GameFragment: Restart button clicked. calling startGame()");
-
-            // Dismiss achievement popup if visible
-            if (achievementPopup != null) {
-                achievementPopup.dismiss();
-            }
-
-            // If generateNewMapEachTime is off, check if current map ratio matches settings
-            if (!Preferences.generateNewMapEachTime) {
-                GameState curState = gameStateManager.getCurrentState().getValue();
-                if (curState != null) {
-                    int mapW = curState.getWidth();
-                    int mapH = curState.getHeight();
-                    int settW = Preferences.boardSizeWidth;
-                    int settH = Preferences.boardSizeHeight;
-                    if (mapW != settW || mapH != settH) {
-                        Toast.makeText(requireContext(),
-                                getString(R.string.map_dimensions_mismatch, mapW, mapH, settW, settH),
-                                Toast.LENGTH_LONG).show();
-                        Timber.d("[NEW_GAME] Map ratio mismatch: map=%dx%d, settings=%dx%d — forcing new walls",
-                                mapW, mapH, settW, settH);
-                    }
-                }
-            }
-
-            // Clear robot paths BEFORE starting a new game
-            if (gameGridView != null) {
-                gameGridView.clearRobotPaths();
-                Timber.d("[ROBOTS] Cleared robot paths before starting new game");
-            }
-
-            // Cancel all active solvers before generating new map
-            gameStateManager.cancelSolver();
-            Timber.d("[NEW_GAME] Cancelled all active solvers before starting new game");
-
-			// Reset move counts and history explicitly to ensure all counters are zeroed
-	        gameStateManager.resetMoveCountsAndHistory();
-	        Timber.d("[NEW_GAME] Reset move counts and game history");
-
-            // Start a new game
-            gameStateManager.startGame();
-            // Reset timer to 0 for the new game
-            resetAndStartTimer();
-
-            // Randomize pre-hints count for the new game
-            numPreHints = ThreadLocalRandom.current().nextInt(2, 5);
-            Timber.d("[HINT] Randomized pre-hints for new game: %d", numPreHints);
-            
-            // Reset hint system for new game
-            gameStateManager.resetSolutionStep();
-            showingPreHints = true;
-            hintButton.setEnabled(true);
-            hintButton.setAlpha(1.0f);
-            
-            // Hide hint container when starting new game
-            if (hintButton.isChecked()) {
-                hintButton.setChecked(false);
-                Timber.d("[HINT_SYSTEM] Unchecked hint button when starting new game");
-            }
-            
-            Timber.d("[HINT] Reset hint system for new random game via New Game button");
-            
-            // Hide the optimal moves button when starting a new game
-            if (optimalMovesButton != null) {
-                optimalMovesButton.setVisibility(View.GONE);
-            }
-            
-            // Make the close button visible again
-            ImageButton closeButton = view.findViewById(R.id.game_info_close_button);
-            if (closeButton != null) {
-                closeButton.setVisibility(View.VISIBLE);
-            }
-            
-            // Restore accessibility controls if they were hidden
-            if (accessibilityControlsContainer != null && accessibilityControlsVisible) {
-                accessibilityControlsContainer.setVisibility(View.VISIBLE);
-                Timber.d("[ACCESSIBILITY] Restored controls on restart");
-            }
-            
-            // Clear any hint text from the status display
-            updateStatusText("", false);
-            
-            // Reset button text to "Reset"
-            resetRobotsButton.setText(R.string.reset_button);
-            
-            // Force another path clearing to ensure all paths are removed
-            if (gameGridView != null) {
-                gameGridView.clearRobotPaths();
-                gameGridView.invalidate();
-                Timber.d("[ROBOT_PATHS] Forced additional path clearing after new game start");
-            }
-            
-            // Announce the robots and their positions
-            announceGameStart();
+            return false;
         });
-        
+
         // (Button text: "Menu")
         // Menu button - go back to level selection
         menuButton = view.findViewById(R.id.menu_button);
@@ -2119,35 +1924,327 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (robot == null) {
             return null;
         }
-        
+
         try {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
                 // Try to find the robot by examining the game state
                 List<GameElement> elements = state.getGameElements();
                 for (GameElement element : elements) {
-                    if (element.isRobot() && element.getColor() == robot.getColor()) {
-
-                        try {
-                            Timber.d("[ACCESSIBILITY_ROBOT] Using gameGridView to show robot position");
-                            return new int[]{element.getX(), element.getY()};
-                        } catch (Exception e) {
-                            Timber.e("[ACCESSIBILITY_ROBOT] Error finding robot position: %s", e.getMessage());
-                            return null;
-                        }
+                    if (element.equals(robot)) {
+                        return new int[]{element.getX(), element.getY()};
                     }
                 }
             }
         } catch (Exception e) {
-            Timber.e("[ACCESSIBILITY_ERROR] Error finding robot position: %s", e.getMessage());
+            Timber.e("Error finding robot position: %s", e.getMessage());
         }
-        
         return null;
     }
-    
+
+    /**
+     * Handle the new map button click action (called after long-press completes).
+     */
+    private void handleNewMapButtonClick() {
+        // Check if this is a level game
+        if (isLevelGame) {
+            GameState levelState = gameStateManager.getCurrentState().getValue();
+            if (levelState != null) {
+                int currentLevelId = levelState.getLevelId();
+                int nextLevelId = currentLevelId + 1;
+
+                // Check if next level is unlocked
+                LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
+                int totalStars = lcm.getTotalStars();
+                boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
+
+                if (isNextLevelUnlocked) {
+                    // Start next level
+                    Timber.d("GameFragment: Starting next level %d from level %d", nextLevelId, currentLevelId);
+                    gameStateManager.startLevelGame(nextLevelId);
+
+                    // Clear robot paths
+                    if (gameGridView != null) {
+                        gameGridView.clearRobotPaths();
+                        gameGridView.invalidate();
+                    }
+
+                    // Reset timer
+                    stopTimer();
+                    startTimer();
+
+                    // Reset hint system
+                    gameStateManager.resetSolutionStep();
+                    showingPreHints = true;
+                    hintButton.setEnabled(true);
+                    hintButton.setAlpha(1.0f);
+                    hintButton.setChecked(false);
+                } else {
+                    // Show toast message that level is not unlocked
+                    int starsNeeded = (nextLevelId - 1) - totalStars;
+                    Toast.makeText(requireContext(),
+                            getString(R.string.level_not_unlocked, starsNeeded),
+                            Toast.LENGTH_SHORT).show();
+                    Timber.d("[LEVEL_NAV] Level %d not unlocked, you need %d more stars", nextLevelId, starsNeeded);
+                }
+            }
+            return;
+        }
+
+        // Check if this is a history game
+        boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
+
+        if (isHistoryGame) {
+            // Load next history entry
+            Timber.d("GameFragment: New Game button clicked in history game, loading next entry");
+            if (gameStateManager.loadNextHistoryEntry()) {
+                // Toast.makeText(requireContext(), "Loaded next history entry", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
+                // Clear history flag so new game button works as new game again
+                gameStateManager.clearLoadedFromHistoryFlag();
+            }
+            return;
+        }
+
+        // Normal new game behavior for random games
+        Timber.d("GameFragment: Restart button clicked. calling startGame()");
+
+        // Dismiss achievement popup if visible
+        if (achievementPopup != null) {
+            achievementPopup.dismiss();
+        }
+
+        // If generateNewMapEachTime is off, check if current map ratio matches settings
+        if (!Preferences.generateNewMapEachTime) {
+            GameState curState = gameStateManager.getCurrentState().getValue();
+            if (curState != null) {
+                int mapW = curState.getWidth();
+                int mapH = curState.getHeight();
+                int settW = Preferences.boardSizeWidth;
+                int settH = Preferences.boardSizeHeight;
+                if (mapW != settW || mapH != settH) {
+                    Toast.makeText(requireContext(),
+                            getString(R.string.map_dimensions_mismatch, mapW, mapH, settW, settH),
+                            Toast.LENGTH_LONG).show();
+                    Timber.d("[NEW_GAME] Map ratio mismatch: map=%dx%d, settings=%dx%d — forcing new walls",
+                            mapW, mapH, settW, settH);
+                }
+            }
+        }
+
+        // Clear robot paths BEFORE starting a new game
+        if (gameGridView != null) {
+            gameGridView.clearRobotPaths();
+            Timber.d("[ROBOTS] Cleared robot paths before starting new game");
+        }
+
+        // Cancel all active solvers before generating new map
+        gameStateManager.cancelSolver();
+        Timber.d("[NEW_GAME] Cancelled all active solvers before starting new game");
+
+        // Reset move counts and history explicitly to ensure all counters are zeroed
+        gameStateManager.resetMoveCountsAndHistory();
+        Timber.d("[NEW_GAME] Reset move counts and game history");
+
+        // Start a new game
+        gameStateManager.startGame();
+        // Reset timer to 0 for the new game
+        resetAndStartTimer();
+
+        // Randomize pre-hints count for the new game
+        numPreHints = ThreadLocalRandom.current().nextInt(2, 5);
+        Timber.d("[HINT] Randomized pre-hints for new game: %d", numPreHints);
+
+        // Reset hint system for new game
+        gameStateManager.resetSolutionStep();
+        showingPreHints = true;
+        hintButton.setEnabled(true);
+        hintButton.setAlpha(1.0f);
+
+        // Hide hint container when starting new game
+        if (hintButton.isChecked()) {
+            hintButton.setChecked(false);
+            Timber.d("[HINT_SYSTEM] Unchecked hint button when starting new game");
+        }
+
+        Timber.d("[HINT] Reset hint system for new random game via New Game button");
+    }
+
+    /**
+     * Handle the back button click action (called after long-press completes or immediately for level/history games).
+     */
+    private void handleBackButtonClick() {
+        Timber.d("GameFragment: Back button clicked");
+
+        // Disable back button after goal is reached
+        if (gameStateManager.isGameComplete().getValue()) {
+            Timber.d("GameFragment: Game already complete, back button disabled");
+            Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        GameState backState = gameStateManager.getCurrentState().getValue();
+        Integer moveCount = gameStateManager.getMoveCount().getValue();
+        int currentLevelId = backState != null ? backState.getLevelId() : -1;
+        boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
+        boolean isSavegame = gameStateManager.isLoadedFromSave();
+
+        if (isLevelGame && currentLevelId > 0 && (moveCount == null || moveCount == 0)) {
+            Timber.d("[BACK][LEVEL] Back button clicked before first move on level %d", currentLevelId);
+            showBackToPreviousLevelDialog(currentLevelId);
+            return;
+        }
+
+        if (isHistoryGame && (moveCount == null || moveCount == 0)) {
+            Timber.d("[BACK][HISTORY] Back button clicked before first move on history game");
+            loadPreviousHistoryEntry();
+            return;
+        }
+
+        // Random game with history entries - load last history entry
+        if (!isSavegame && !isLevelGame && (moveCount == null || moveCount == 0)) {
+            java.util.List<roboyard.logic.core.GameHistoryEntry> filteredHistoryEntries = getFilteredHistoryEntries();
+            if (!filteredHistoryEntries.isEmpty()) {
+                // History entries are in reverse chronological order (oldest first, newest last)
+                // So we take the first entry to get the most recent one
+                roboyard.logic.core.GameHistoryEntry lastEntry = filteredHistoryEntries.get(0);
+                Timber.d("[BACK][RANDOM] Back button clicked before first move on random game, loading most recent history entry: %s", lastEntry.getMapPath());
+                gameStateManager.loadHistoryEntry(lastEntry.getMapPath());
+                return;
+            }
+        }
+
+        // Check if hint container is visible (hints are being shown)
+        if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE && currentHintStep > 0) {
+            // Go back one step in hints
+            currentHintStep--;
+            // Update the current solution step
+            gameStateManager.resetSolutionStep();
+            for (int i = 0; i < currentHintStep; i++) {
+                gameStateManager.incrementSolutionStep();
+            }
+            Timber.d("[HINT_SYSTEM] Moving to previous hint: step=%d of %d", currentHintStep, totalPossibleHints - 1);
+
+            // Display the previous hint
+            GameSolution solution = gameStateManager.getCurrentSolution();
+            if (solution != null) {
+                int totalMoves = solution.getMoves().size();
+                GameState state = gameStateManager.getCurrentState().getValue();
+
+                // Clear hint arrow on manual navigation
+                if (gameGridView != null) {
+                    gameGridView.setHintArrow(-1, -1);
+                }
+                // Show the appropriate hint based on the currentHintStep
+                int backHintRobotColor;
+                if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+                    backHintRobotColor = showPreHint(solution, totalMoves, currentHintStep);
+                } else {
+                    int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
+                    backHintRobotColor = showNormalHint(solution, state, totalMoves, normalHintIndex);
+                }
+                if (backHintRobotColor >= 0 && gameGridView != null) {
+                    gameGridView.selectRobotByColor(backHintRobotColor);
+                }
+            }
+        }
+
+        // Standard undo functionality (original code)
+        // Remember which robot was last moved before undoing (pathHistory still contains it)
+        int lastMovedRobotColor = -1;
+        java.util.ArrayList<int[]> pathHistory = gameStateManager.getPathHistory();
+        if (!pathHistory.isEmpty()) {
+            lastMovedRobotColor = pathHistory.get(pathHistory.size() - 1)[0];
+        }
+        // Undo the last move
+        if (gameStateManager.undoLastMove()) {
+            // Force grid view update after undo
+            if (gameGridView != null) {
+                // Get the current state AFTER undo to get correct dimensions
+                GameState undoState = gameStateManager.getCurrentState().getValue();
+
+                // Remove only the last path segment instead of clearing all paths
+                gameGridView.undoLastPathSegment();
+                // Re-select the robot that was undone with full visual treatment
+                if (lastMovedRobotColor >= 0) {
+                    gameGridView.selectRobotByColor(lastMovedRobotColor);
+                    Timber.d("[ROBOTS][UNDO] Back-button: re-selected robot %d after undo", lastMovedRobotColor);
+                }
+                // Force the grid view to redraw completely
+                gameGridView.invalidate();
+
+                // Update the game state display to reflect the undone move
+                if (undoState != null) {
+                    updateGameState(undoState);
+                } else {
+                    Timber.e("[ROBOTS][UNDO] Back-button: undoState is null after undo");
+                }
+            }
+        } else {
+            Toast.makeText(requireContext(), getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Start circular progress animation on a button.
+     */
+    private void startCircularProgressAnimation(Button button) {
+        if (button == null) return;
+
+        // Load the circular progress drawable
+        Drawable originalDrawable = button.getBackground();
+        if (originalDrawable == null) return;
+
+        // Create a LayerDrawable with the circular progress on top
+        Drawable circularProgress = getResources().getDrawable(R.drawable.circular_progress_cooldown, null);
+        if (circularProgress == null) return;
+
+        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{originalDrawable, circularProgress});
+        button.setBackground(layerDrawable);
+
+        // Animate the sweep gradient by rotating the drawable
+        circularProgressAnimator = ObjectAnimator.ofInt(circularProgress, "level", 0, 10000);
+        circularProgressAnimator.setDuration(BUTTON_COOLDOWN_MS);
+        circularProgressAnimator.setInterpolator(new LinearInterpolator());
+        circularProgressAnimator.start();
+    }
+
+    /**
+     * Stop circular progress animation and restore original button background.
+     */
+    private void stopCircularProgressAnimation() {
+        if (circularProgressAnimator != null && circularProgressAnimator.isRunning()) {
+            circularProgressAnimator.cancel();
+            circularProgressAnimator = null;
+        }
+
+        // Restore original background for newMapButton
+        if (newMapButton != null) {
+            // Remove the LayerDrawable and restore original
+            Drawable current = newMapButton.getBackground();
+            if (current instanceof LayerDrawable) {
+                LayerDrawable layerDrawable = (LayerDrawable) current;
+                Drawable original = layerDrawable.getDrawable(0);
+                newMapButton.setBackground(original);
+            }
+        }
+
+        // Restore original background for backButton
+        if (backButton != null) {
+            // Remove the LayerDrawable and restore original
+            Drawable current = backButton.getBackground();
+            if (current instanceof LayerDrawable) {
+                LayerDrawable layerDrawable = (LayerDrawable) current;
+                Drawable original = layerDrawable.getDrawable(0);
+                backButton.setBackground(original);
+            }
+        }
+    }
+
     /**
      * Move the selected robot in the specified direction.
-     * 
+     *
      * Note: This method is only called by the accessibility directional buttons
      * (btnMoveNorth, btnMoveSouth, btnMoveEast, btnMoveWest). Sound effects,
      * achievement tracking, and collision detection are handled by GameGridView
@@ -4478,13 +4575,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Only check for history saving if game is in progress and not already saved
         if (gameStateManager != null && !gameStateManager.isGameComplete().getValue()) {
             GameState currentState = gameStateManager.getCurrentState().getValue();
-            
+
             // Check if this is a level game (levelId > 0 means it's a level game)
             if (currentState != null && currentState.getLevelId() > 0) {
                 Timber.d("[HISTORY] Skipping history save for level game (levelId: %d)", currentState.getLevelId());
                 return;
             }
-            
+
             Timber.d("[HISTORY] Checking if game should be saved to history (random game)");
             gameStateManager.updateGameTimer(); // This handles threshold checking and saving
         }
