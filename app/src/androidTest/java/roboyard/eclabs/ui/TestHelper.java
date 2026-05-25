@@ -260,8 +260,9 @@ public class TestHelper {
 
     /**
      * Custom long press action with configurable duration.
+     * Public method for use in tests that need precise long-press timing.
      */
-    private static androidx.test.espresso.ViewAction longPressFor(final long durationMs) {
+    public static androidx.test.espresso.ViewAction longPressFor(final long durationMs) {
         return new androidx.test.espresso.ViewAction() {
             @Override
             public org.hamcrest.Matcher<android.view.View> getConstraints() {
