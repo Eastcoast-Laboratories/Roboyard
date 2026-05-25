@@ -2062,7 +2062,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                             entry.setMovesMade(finalMoves);
                                         }
                                         if (entry.getCompletionCount() == 0) {
-                                            entry.recordCompletion(0, finalMoves);
+                                            entry.recordCompletion(0, finalMoves, finalStars);
                                         }
                                         updatedCount++;
                                         Timber.d("[HISTORY_SYNC] Set stars=%d, moves=%d for history entry '%s'", finalStars, entry.getMovesMade(), entry.getMapName());
@@ -2887,18 +2887,32 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 if (Boolean.TRUE.equals(isGameComplete.getValue()) && !isCompletionRecorded) {
                     int actualMoveCount = gameState.getMoveCount();
                     int countBefore = existing.getCompletionCount();
-                    existing.recordCompletion((int)((System.currentTimeMillis() - gameStartTime) / 1000), actualMoveCount);
-                    isCompletionRecorded = true;
-                    Timber.d("[HISTORY_FLOW] updateHintTracking: recordCompletion called, countBefore=%d, countAfter=%d, moveCount=%d",
-                            countBefore, existing.getCompletionCount(), actualMoveCount);
 
-                    // Update optimalMoves from current solution (was missing here, causing 0 in history details)
+                    // [STARS_PER_COMPLETION] Calculate current attempt's stars for level games
+                    // and pass them to recordCompletion. Without this, the 2-arg overload
+                    // falls back to existing.starsEarned which holds the BEST stars from
+                    // LevelCompletionManager, not the current attempt's stars.
                     int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
                             ? currentSolution.getMoves().size() : 0;
                     if (optMoves > 0) {
                         existing.setOptimalMoves(optMoves);
                         Timber.d("[HISTORY] updateHintTracking: setOptimalMoves=%d", optMoves);
                     }
+
+                    int levelIdForStars = gameState.getLevelId();
+                    int currentAttemptStars;
+                    if (levelIdForStars > 0) {
+                        currentAttemptStars = calculateStars(actualMoveCount, optMoves, hintsShown);
+                        if (currentAttemptStars < 1 && levelIdForStars <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
+                            currentAttemptStars = 1;
+                        }
+                    } else {
+                        currentAttemptStars = existing.getStarsEarned();
+                    }
+                    existing.recordCompletion((int)((System.currentTimeMillis() - gameStartTime) / 1000), actualMoveCount, currentAttemptStars);
+                    isCompletionRecorded = true;
+                    Timber.d("[HISTORY_FLOW][STARS_PER_COMPLETION] updateHintTracking: recordCompletion called, countBefore=%d, countAfter=%d, moveCount=%d, stars=%d",
+                            countBefore, existing.getCompletionCount(), actualMoveCount, currentAttemptStars);
 
                     // If completed without hints, record the no-hints timestamp (never overwritten by later hint usage)
                     if (maxHint < 0 && actualMoveCount > 0) {
@@ -3027,13 +3041,22 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[MAPSIG] saveToHistory: posSig=%s", posSig);
             Timber.d("[MAPSIG] saveToHistory: mapSig=%s", mapSig);
             
-            // Set stars earned from LevelCompletionData (if this is a level game)
+            // Set stars earned for THIS completion (if this is a level game)
+            // [STARS_PER_COMPLETION] Use the CURRENT attempt's star count, not the best from
+            // LevelCompletionManager (which only stores the highest stars ever earned). This
+            // ensures the history entry's completionStars array reflects each attempt accurately.
             int levelId = gameState.getLevelId();
             if (levelId > 0 && isGameComplete.getValue()) {
-                LevelCompletionManager lcm = LevelCompletionManager.getInstance(context);
-                LevelCompletionData lcd = lcm.getLevelCompletionData(levelId);
-                entry.setStarsEarned(lcd.getStars());
-                Timber.d("[HISTORY] Set starsEarned=%d for level %d", lcd.getStars(), levelId);
+                int optMovesForStars = (currentSolution != null && currentSolution.getMoves() != null)
+                        ? currentSolution.getMoves().size() : 0;
+                int currentAttemptStars = calculateStars(actualMoveCount, optMovesForStars, hintsShown);
+                // For beginner levels (1-10), always earn at least 1 star (matches saveLevelCompletionData)
+                if (currentAttemptStars < 1 && levelId <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
+                    currentAttemptStars = 1;
+                }
+                entry.setStarsEarned(currentAttemptStars);
+                Timber.d("[HISTORY][STARS_PER_COMPLETION] Set starsEarned=%d for level %d (moves=%d, optimal=%d, hints=%d)",
+                        currentAttemptStars, levelId, actualMoveCount, optMovesForStars, hintsShown);
             }
 
             // Set hint tracking - record if hints were used during this session

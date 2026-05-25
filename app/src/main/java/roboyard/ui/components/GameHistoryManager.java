@@ -66,7 +66,7 @@ public class GameHistoryManager {
                         // Don't record completion for intermediate saves (e.g., when hints are shown)
                         int countBefore = existing.getCompletionCount();
                         if (entry.getMovesMade() > 0) {
-                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade(), entry.getStarsEarned());
                             Timber.d("[HISTORY_FLOW] addHistoryEntry(existing): recordCompletion called, movesMade=%d, countBefore=%d, countAfter=%d",
                                     entry.getMovesMade(), countBefore, existing.getCompletionCount());
                         } else {
@@ -121,7 +121,7 @@ public class GameHistoryManager {
                         GameHistoryEntry existing = entries.get(i);
                         // Only record completion if moves > 0 (game was actually played)
                         if (entry.getMovesMade() > 0) {
-                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade(), entry.getStarsEarned());
                         }
                         updated = true;
                         break;
@@ -134,7 +134,7 @@ public class GameHistoryManager {
                 // If game was completed (movesMade > 0) AND completionCount is still 0 (not pre-set from server restore),
                 // record the completion on the new entry
                 if (entry.getMovesMade() > 0 && entry.getCompletionCount() == 0) {
-                    entry.recordCompletion(entry.getPlayDuration(), entry.getMovesMade());
+                    entry.recordCompletion(entry.getPlayDuration(), entry.getMovesMade(), entry.getStarsEarned());
                     Timber.d("[HISTORY_FLOW] addHistoryEntry(new): recordCompletion called on new entry, movesMade=%d, countAfter=%d",
                             entry.getMovesMade(), entry.getCompletionCount());
                 } else if (entry.getCompletionCount() > 0) {
@@ -249,9 +249,41 @@ public class GameHistoryManager {
                         completionTimestamps.add(entry.getTimestamp());
                         entry.setCompletionTimestamps(completionTimestamps);
                     }
+
+                    int completionSize = entry.getCompletionTimestamps() != null ? entry.getCompletionTimestamps().size() : 0;
+
+                    if (entryJson.has("completionMoves")) {
+                        JSONArray movesArray = entryJson.getJSONArray("completionMoves");
+                        List<Integer> completionMoves = new ArrayList<>();
+                        for (int j = 0; j < movesArray.length(); j++) {
+                            completionMoves.add(movesArray.getInt(j));
+                        }
+                        entry.setCompletionMoves(completionMoves);
+                    } else {
+                        List<Integer> completionMoves = new ArrayList<>();
+                        for (int j = 0; j < completionSize; j++) {
+                            completionMoves.add(entry.getMovesMade());
+                        }
+                        entry.setCompletionMoves(completionMoves);
+                    }
                     
                     // Load stars earned
                     entry.setStarsEarned(entryJson.optInt("starsEarned", 0));
+
+                    if (entryJson.has("completionStars")) {
+                        JSONArray starsArray = entryJson.getJSONArray("completionStars");
+                        List<Integer> completionStars = new ArrayList<>();
+                        for (int j = 0; j < starsArray.length(); j++) {
+                            completionStars.add(starsArray.getInt(j));
+                        }
+                        entry.setCompletionStars(completionStars);
+                    } else {
+                        List<Integer> completionStars = new ArrayList<>();
+                        for (int j = 0; j < completionSize; j++) {
+                            completionStars.add(entry.getStarsEarned());
+                        }
+                        entry.setCompletionStars(completionStars);
+                    }
                     
                     // Load hint tracking fields
                     entry.setMaxHintUsed(entryJson.optInt("maxHintUsed", -1));
@@ -423,6 +455,22 @@ public class GameHistoryManager {
                     }
                 }
                 entryJson.put("completionTimestamps", timestamps);
+
+                JSONArray completionMoves = new JSONArray();
+                if (entry.getCompletionMoves() != null) {
+                    for (Integer moves : entry.getCompletionMoves()) {
+                        completionMoves.put(moves);
+                    }
+                }
+                entryJson.put("completionMoves", completionMoves);
+
+                JSONArray completionStars = new JSONArray();
+                if (entry.getCompletionStars() != null) {
+                    for (Integer stars : entry.getCompletionStars()) {
+                        completionStars.put(stars);
+                    }
+                }
+                entryJson.put("completionStars", completionStars);
                 
                 // Save stars earned
                 entryJson.put("starsEarned", entry.getStarsEarned());

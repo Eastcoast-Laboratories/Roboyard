@@ -193,10 +193,30 @@ public abstract class BaseGameFragment extends Fragment {
         }
         List<Long> timestamps = entry.getCompletionTimestamps();
         if (timestamps != null && timestamps.size() > 1) {
+            boolean isLevelGame = entry.getMapName() != null && entry.getMapName().startsWith("Level ");
+            List<Integer> completionStars = entry.getCompletionStars();
+            List<Integer> completionMoves = entry.getCompletionMoves();
             sb.append("\n").append(getString(R.string.history_detail_all_completions)).append("\n");
             for (int i = 0; i < timestamps.size(); i++) {
                 sb.append("  ").append(i + 1).append(". ")
-                  .append(sdf.format(new Date(timestamps.get(i)))).append("\n");
+                  .append(sdf.format(new Date(timestamps.get(i))));
+                if (isLevelGame) {
+                    int stars = (completionStars != null && i < completionStars.size()) ? completionStars.get(i) : entry.getStarsEarned();
+                    int moves = (completionMoves != null && i < completionMoves.size()) ? completionMoves.get(i) : entry.getMovesMade();
+                    // append one or three star icons or \u2713 if no stars
+                    if (stars == 0) {
+                        sb.append(" \u2713");
+                    } else {
+                        for (int j = 0; j < stars; j++) {
+                            sb.append("★");
+                        }
+                    }
+                    sb.append(" - ").append(moves);
+                } else {
+                    int moves = (completionMoves != null && i < completionMoves.size()) ? completionMoves.get(i) : entry.getMovesMade();
+                    sb.append(" - ").append(moves);
+                }
+                sb.append("\n");
             }
         }
         sb.append("\n").append(getString(R.string.history_detail_best_time)).append(" ");

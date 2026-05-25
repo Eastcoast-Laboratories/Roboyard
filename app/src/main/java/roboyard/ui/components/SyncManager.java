@@ -319,6 +319,23 @@ public class SyncManager {
                     }
                 }
                 historyJson.put("completion_timestamps", tsArray);
+                // [HISTORY_SYNC] Upload per-completion moves and stars arrays so receiving
+                // devices can show the correct values for each completion (otherwise arrays
+                // get out of sync with timestamps after multi-device play)
+                JSONArray movesArray = new JSONArray();
+                if (entry.getCompletionMoves() != null) {
+                    for (Integer moves : entry.getCompletionMoves()) {
+                        movesArray.put(moves);
+                    }
+                }
+                historyJson.put("completion_moves", movesArray);
+                JSONArray starsArray = new JSONArray();
+                if (entry.getCompletionStars() != null) {
+                    for (Integer stars : entry.getCompletionStars()) {
+                        starsArray.put(stars);
+                    }
+                }
+                historyJson.put("completion_stars", starsArray);
                 
                 // Log timestamps with human-readable format for debugging timezone issues
                 String playedAtStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp()));
@@ -473,7 +490,25 @@ public class SyncManager {
                                 }
                                 historyEntry.setCompletionTimestamps(timestamps);
                             }
-                            
+                            // [HISTORY_SYNC] Restore per-completion moves and stars arrays
+                            // to keep them aligned with completion_timestamps
+                            JSONArray movesArrayDl = entry.optJSONArray("completion_moves");
+                            if (movesArrayDl != null) {
+                                java.util.List<Integer> movesList = new java.util.ArrayList<>();
+                                for (int j = 0; j < movesArrayDl.length(); j++) {
+                                    movesList.add(movesArrayDl.optInt(j, 0));
+                                }
+                                historyEntry.setCompletionMoves(movesList);
+                            }
+                            JSONArray starsArrayDl = entry.optJSONArray("completion_stars");
+                            if (starsArrayDl != null) {
+                                java.util.List<Integer> starsList = new java.util.ArrayList<>();
+                                for (int j = 0; j < starsArrayDl.length(); j++) {
+                                    starsList.add(starsArrayDl.optInt(j, 0));
+                                }
+                                historyEntry.setCompletionStars(starsList);
+                            }
+
                             GameHistoryManager.addHistoryEntry(activity, historyEntry);
                             restoredCount++;
                             

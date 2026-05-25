@@ -28,6 +28,8 @@ public class GameHistoryEntry {
     
     // New fields for unique map tracking
     private List<Long> completionTimestamps;  // All timestamps when this map was completed
+    private List<Integer> completionMoves;     // Moves per completion (same index as completionTimestamps)
+    private List<Integer> completionStars;     // Stars per completion for level games (same index as completionTimestamps)
     private int completionCount;              // How many times this map was completed
     private long lastCompletionTimestamp;     // When the map was most recently completed
     private int bestTime;                     // Fastest completion time in seconds
@@ -79,6 +81,8 @@ public class GameHistoryEntry {
         // Initialize new fields
         // completionCount starts at 0 - only incremented by recordCompletion() when goal is reached
         this.completionTimestamps = new ArrayList<>();
+        this.completionMoves = new ArrayList<>();
+        this.completionStars = new ArrayList<>();
         this.completionCount = 0;
         this.lastCompletionTimestamp = 0;
         this.bestTime = 0;
@@ -91,6 +95,8 @@ public class GameHistoryEntry {
     public GameHistoryEntry() {
         // Default constructor for JSON deserialization
         this.completionTimestamps = new ArrayList<>();
+        this.completionMoves = new ArrayList<>();
+        this.completionStars = new ArrayList<>();
     }
     
     /**
@@ -100,8 +106,14 @@ public class GameHistoryEntry {
      * @return true if this was a new best time or best moves
      */
     public boolean recordCompletion(int completionTime, int moves) {
+        return recordCompletion(completionTime, moves, starsEarned);
+    }
+
+    public boolean recordCompletion(int completionTime, int moves, int stars) {
         long now = System.currentTimeMillis();
         completionTimestamps.add(now);
+        completionMoves.add(Math.max(0, moves));
+        completionStars.add(Math.max(0, Math.min(4, stars)));
         completionCount++;
         lastCompletionTimestamp = now;
         
@@ -203,6 +215,22 @@ public class GameHistoryEntry {
     
     public void setCompletionTimestamps(List<Long> completionTimestamps) {
         this.completionTimestamps = completionTimestamps != null ? completionTimestamps : new ArrayList<>();
+    }
+
+    public List<Integer> getCompletionMoves() {
+        return completionMoves;
+    }
+
+    public void setCompletionMoves(List<Integer> completionMoves) {
+        this.completionMoves = completionMoves != null ? completionMoves : new ArrayList<>();
+    }
+
+    public List<Integer> getCompletionStars() {
+        return completionStars;
+    }
+
+    public void setCompletionStars(List<Integer> completionStars) {
+        this.completionStars = completionStars != null ? completionStars : new ArrayList<>();
     }
     
     public int getCompletionCount() {
