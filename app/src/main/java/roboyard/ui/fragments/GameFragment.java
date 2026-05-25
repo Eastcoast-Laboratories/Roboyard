@@ -1939,9 +1939,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     // Reset button text to "Reset"
                     resetRobotsButton.setText(R.string.reset_button);
                 } else {
-                    // Random game - delegate to the small "New Game" button (DRY)
-                    Timber.d("[NEW_GAME] Big completion button clicked for random game, delegating to newMapButton");
-                    newMapButton.performClick();
+                    // Random game - start new random game directly (bypass long-press cooldown)
+                    // [NEXT_GAME_BUTTON] For random games, the big completion button should start
+                    // a new random game immediately, not delegate to the small button which has cooldown.
+                    Timber.d("[NEW_GAME] Big completion button clicked for random game, starting new game directly");
+                    handleNewMapButtonClick();
                 }
 
                 // Reset move counts and history explicitly to ensure all counters are zeroed
