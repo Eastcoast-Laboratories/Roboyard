@@ -2062,7 +2062,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                             entry.setMovesMade(finalMoves);
                                         }
                                         if (entry.getCompletionCount() == 0) {
-                                            entry.recordCompletion(0, finalMoves);
+                                            entry.recordCompletion(0, finalMoves, finalStars);
                                         }
                                         updatedCount++;
                                         Timber.d("[HISTORY_SYNC] Set stars=%d, moves=%d for history entry '%s'", finalStars, entry.getMovesMade(), entry.getMapName());

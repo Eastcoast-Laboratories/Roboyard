@@ -43,6 +43,10 @@ public class GameHistoryTest {
         assertEquals(0, entry.getBestMoves());
         assertNotNull(entry.getCompletionTimestamps());
         assertEquals(0, entry.getCompletionTimestamps().size());
+        assertNotNull(entry.getCompletionMoves());
+        assertEquals(0, entry.getCompletionMoves().size());
+        assertNotNull(entry.getCompletionStars());
+        assertEquals(0, entry.getCompletionStars().size());
     }
 
     @Test
@@ -63,11 +67,26 @@ public class GameHistoryTest {
         assertEquals(1, entry.getCompletionCount());
         assertTrue(entry.isFirstCompletion());
         assertEquals(1, entry.getCompletionTimestamps().size());
+        assertEquals(1, entry.getCompletionMoves().size());
+        assertEquals(Integer.valueOf(12), entry.getCompletionMoves().get(0));
 
         entry.recordCompletion(90, 11);
         assertEquals(2, entry.getCompletionCount());
         assertFalse(entry.isFirstCompletion());
         assertEquals(2, entry.getCompletionTimestamps().size());
+        assertEquals(2, entry.getCompletionMoves().size());
+        assertEquals(Integer.valueOf(11), entry.getCompletionMoves().get(1));
+    }
+
+    @Test
+    public void testRecordCompletionTracksStarsPerCompletion() {
+        entry.recordCompletion(100, 12, 2);
+        entry.recordCompletion(90, 11, 3);
+
+        assertEquals(2, entry.getCompletionCount());
+        assertEquals(2, entry.getCompletionStars().size());
+        assertEquals(Integer.valueOf(2), entry.getCompletionStars().get(0));
+        assertEquals(Integer.valueOf(3), entry.getCompletionStars().get(1));
     }
 
     @Test
