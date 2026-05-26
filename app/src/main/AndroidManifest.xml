@@ -38,6 +38,21 @@
                 <data android:scheme="http" android:host="roboyard.z11.de" android:pathPrefix="/open" />
                 <data android:scheme="https" android:host="roboyard.z11.de" android:pathPrefix="/open" />
             </intent-filter>
+            
+            <!-- Deep link for random game -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="roboyard" android:host="random" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="roboyard.z11.de" android:path="/random" />
+                <data android:scheme="https" android:host="roboyard.z11.de" android:path="/random" />
+            </intent-filter>
         </activity>
 
         <activity android:name="roboyard.ui.activities.ShareActivity"

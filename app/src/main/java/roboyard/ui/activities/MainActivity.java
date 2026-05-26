@@ -227,6 +227,17 @@ public class MainActivity extends AppCompatActivity {
             // This is a deep link
             Timber.d("[DEEPLINK] Received deep link: %s", data.toString());
 
+            // Check if this is a random game deep link (roboyard://random or https://roboyard.z11.de/random)
+            String scheme = data.getScheme();
+            String host = data.getHost();
+            String path = data.getPath();
+            
+            if (("roboyard".equals(scheme) && "random".equals(host)) || (path != null && path.equals("/random"))) {
+                String source = ("roboyard".equals(scheme) && "random".equals(host)) ? "roboyard://random" : "https://roboyard.z11.de/random";
+                handleRandomGameDeepLink(source);
+                return;
+            }
+
             // Version check: if server sends a higher version than we support, redirect to menu
             String verStr = data.getQueryParameter("ver");
             if (verStr != null && !verStr.isEmpty()) {
@@ -800,6 +811,35 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Timber.e(e, "[DEEPLINK_PROCESS] Error processing map data: %s", e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Handle random game deep link
+     * Start random game directly like the Play button
+     */
+    private void handleRandomGameDeepLink(String source) {
+        Timber.d("[DEEPLINK] Random game deep link detected (%s)", source);
+        if (gameStateManager != null) {
+            // Record daily login when starting a new game
+            roboyard.ui.achievements.StreakManager.getInstance(this).recordDailyLogin();
+            Timber.d("[STREAK] Daily login recorded on random game deep link");
+            
+            // Reset achievement game session flags for new game
+            roboyard.ui.achievements.AchievementManager.getInstance(this).onNewGameStarted();
+            
+            // Start a new game
+            gameStateManager.startGame();
+            Timber.d("[DEEPLINK] Started random game from deep link");
+            
+            // Navigate to game screen
+            if (navController != null) {
+                navController.navigate(R.id.mainMenuFragment);
+                // Navigate to game fragment after menu is loaded
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    navController.navigate(R.id.gameFragment);
+                }, 300);
+            }
         }
     }
     
