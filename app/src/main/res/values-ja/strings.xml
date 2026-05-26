@@ -44,6 +44,7 @@
 
     <string name="next_level">次のレベル</string>
     <string name="next_level_description">次のレベルへ進む</string>
+    <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     
     <string name="optimal_moves">最適：%1$d手</string>
     <string name="level_complete">レベル完了！</string>

@@ -37,6 +37,7 @@
 
     <string name="next_level">Siguiente Nivel</string>
     <string name="next_level_description">Ir al siguiente nivel</string>
+    <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     
     <string name="optimal_moves">Óptimo: %1$d movimientos</string>
     <string name="level_complete">¡Nivel Completado!</string>

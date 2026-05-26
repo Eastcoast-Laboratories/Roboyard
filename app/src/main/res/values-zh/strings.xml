@@ -38,6 +38,7 @@
 
     <string name="next_level">下一关</string>
     <string name="next_level_description">前往下一关</string>
+    <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     
     <string name="optimal_moves">最优: %1$d 步</string>
     <string name="level_complete">关卡完成！</string>
