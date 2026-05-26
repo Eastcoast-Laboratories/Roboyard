@@ -359,26 +359,7 @@ public class MainMenuFragment extends BaseGameFragment {
         // User profile button - login or open profile
         userProfileButton.setOnClickListener(v -> {
             Timber.d("MainMenuFragment: User profile button clicked");
-            RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
-            if (apiClient.isLoggedIn()) {
-                // Open profile in browser with auto-login token
-                String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(intent);
-            } else {
-                // Show login dialog
-                LoginDialogHelper.showLoginDialog(requireContext(), new LoginDialogHelper.LoginCallback() {
-                    @Override
-                    public void onLoginSuccess(RoboyardApiClient.LoginResult result) {
-                        updateUserProfileButton();
-                    }
-                    
-                    @Override
-                    public void onLoginError(String error) {
-                        // Error handling is done in LoginDialogHelper
-                    }
-                });
-            }
+            openProfilePage();
         });
     }
     

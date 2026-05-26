@@ -258,6 +258,46 @@ public abstract class BaseGameFragment extends Fragment {
     }
     
     /**
+     * Open the roboyard.z11.de profile page with auto-login if user is logged in
+     * If not logged in, shows login dialog and optionally opens profile after successful login
+     * @param openAfterLogin If true, opens profile page after successful login
+     */
+    protected void openProfilePage(boolean openAfterLogin) {
+        roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+        if (apiClient.isLoggedIn()) {
+            // Open profile in browser with auto-login token
+            String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+            startActivity(intent);
+        } else {
+            // Show login dialog
+            roboyard.ui.components.LoginDialogHelper.showLoginDialog(requireContext(), new roboyard.ui.components.LoginDialogHelper.LoginCallback() {
+                @Override
+                public void onLoginSuccess(roboyard.ui.components.RoboyardApiClient.LoginResult result) {
+                    if (openAfterLogin) {
+                        // After login, open profile page
+                        openProfilePage(true);
+                    }
+                }
+                
+                @Override
+                public void onLoginError(String error) {
+                    // Error handling is done in LoginDialogHelper
+                }
+            });
+        }
+    }
+    
+    /**
+     * Open the roboyard.z11.de profile page with auto-login if user is logged in
+     * If not logged in, shows login dialog but does NOT open profile after login
+     * This is the default behavior for the user profile button
+     */
+    protected void openProfilePage() {
+        openProfilePage(false);
+    }
+    
+    /**
      * Setup user profile button with click listener
      * Handles both initialization and click listener setup in one call
      * Shows user initials in circle when logged in, or user icon when logged out
@@ -274,26 +314,7 @@ public abstract class BaseGameFragment extends Fragment {
         
         // Set up click listener
         userProfileButton.setOnClickListener(v -> {
-            roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
-            if (apiClient.isLoggedIn()) {
-                // Open profile in browser with auto-login token
-                String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
-                android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
-                startActivity(intent);
-            } else {
-                // Show login dialog
-                roboyard.ui.components.LoginDialogHelper.showLoginDialog(requireContext(), new roboyard.ui.components.LoginDialogHelper.LoginCallback() {
-                    @Override
-                    public void onLoginSuccess(roboyard.ui.components.RoboyardApiClient.LoginResult result) {
-                        updateUserProfileButton(userProfileButton);
-                    }
-                    
-                    @Override
-                    public void onLoginError(String error) {
-                        // Error handling is done in LoginDialogHelper
-                    }
-                });
-            }
+            openProfilePage();
         });
     }
     

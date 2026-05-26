@@ -1736,6 +1736,21 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     int nextLevelId = currentLevelId + 1;
                     Timber.d("GameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
                     
+                    // Check if this is the last level (140)
+                    if (currentLevelId >= 140) {
+                        // Show confirmation dialog
+                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Last Level")
+                            .setMessage(getString(R.string.last_level_message))
+                            .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                                // Open profile page to play custom maps (open after login if not logged in)
+                                openProfilePage(true);
+                            })
+                            .setNegativeButton(android.R.string.no, null)
+                            .show();
+                        return;
+                    }
+                    
                     // Start the next level
                     gameStateManager.startLevelGame(nextLevelId);
                     
@@ -1973,6 +1988,21 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (levelState != null) {
                 int currentLevelId = levelState.getLevelId();
                 int nextLevelId = currentLevelId + 1;
+
+                // Check if this is the last level (140)
+                if (currentLevelId >= 140) {
+                    // Show confirmation dialog
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Last Level")
+                        .setMessage(getString(R.string.last_level_message))
+                        .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                            // Open profile page to play custom maps (open after login if not logged in)
+                            openProfilePage(true);
+                        })
+                        .setNegativeButton(android.R.string.no, null)
+                        .show();
+                    return;
+                }
 
                 // Check if next level is unlocked
                 LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
