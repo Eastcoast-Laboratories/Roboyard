@@ -2254,6 +2254,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{originalDrawable, circularProgress});
         button.setBackground(layerDrawable);
 
+        // Set button to semi-transparent to show it's responding
+        button.setAlpha(0.7f);
+
         // Animate the sweep gradient by rotating the drawable
         circularProgressAnimator = ObjectAnimator.ofInt(circularProgress, "level", 0, 10000);
         circularProgressAnimator.setDuration(BUTTON_COOLDOWN_MS);
@@ -2279,6 +2282,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 Drawable original = layerDrawable.getDrawable(0);
                 newMapButton.setBackground(original);
             }
+            // Restore full opacity
+            newMapButton.setAlpha(1.0f);
         }
 
         // Restore original background for backButton
@@ -2290,6 +2295,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 Drawable original = layerDrawable.getDrawable(0);
                 backButton.setBackground(original);
             }
+            // Restore full opacity
+            backButton.setAlpha(1.0f);
         }
     }
 
