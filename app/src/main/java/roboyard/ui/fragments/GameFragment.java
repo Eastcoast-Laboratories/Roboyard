@@ -1781,10 +1781,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         Timber.d("[ACCESSIBILITY] Restored controls on next level");
                     }
                     
-                    // Hide the optimal moves button when advancing to next level
-                    if (optimalMovesButton != null) {
-                        optimalMovesButton.setVisibility(View.GONE);
-                    }
+                    hideOptimalMovesButton();
                     
                     // Clear any hint text from the status display
                     updateStatusText("", false);
@@ -2030,6 +2027,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     hintButton.setEnabled(true);
                     hintButton.setAlpha(1.0f);
                     hintButton.setChecked(false);
+
+                    hideOptimalMovesButton();
                 } else {
                     // Show toast message that level is not unlocked
                     int starsNeeded = (nextLevelId - 1) - totalStars;
@@ -2055,6 +2054,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 // Clear history flag so new game button works as new game again
                 gameStateManager.clearLoadedFromHistoryFlag();
             }
+            hideOptimalMovesButton();
             return;
         }
 
@@ -2065,6 +2065,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (achievementPopup != null) {
             achievementPopup.dismiss();
         }
+
+        hideOptimalMovesButton();
 
         // If generateNewMapEachTime is off, check if current map ratio matches settings
         if (!Preferences.generateNewMapEachTime) {
@@ -2162,6 +2164,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 roboyard.logic.core.GameHistoryEntry lastEntry = filteredHistoryEntries.get(0);
                 Timber.d("[BACK][RANDOM] Back button clicked before first move on random game, loading most recent history entry: %s", lastEntry.getMapPath());
                 gameStateManager.loadHistoryEntry(lastEntry.getMapPath());
+                hideOptimalMovesButton();
                 return;
             }
         }
@@ -2952,10 +2955,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             hintButton.setEnabled(true);
             hintButton.setAlpha(1.0f);
             
-            // Hide the optimal moves button when starting a new game
-            if (optimalMovesButton != null) {
-                optimalMovesButton.setVisibility(View.GONE);
-            }
+            hideOptimalMovesButton();
             
             Timber.d("[DICE_BUTTON] New map generated successfully");
         });
@@ -3005,6 +3005,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // No previous entry or error
             Toast.makeText(requireContext(), getString(R.string.no_more_history_entries), Toast.LENGTH_SHORT).show();
         }
+        hideOptimalMovesButton();
     }
 
     /**
@@ -3059,6 +3060,15 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
     }
     
+    /**
+     * Hide the optimal moves button
+     */
+    private void hideOptimalMovesButton() {
+        if (optimalMovesButton != null) {
+            optimalMovesButton.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Update the optimal moves button with the given number of moves
      * @param optimalMoves Number of optimal moves
