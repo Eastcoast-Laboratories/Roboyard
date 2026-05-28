@@ -1,0 +1,6 @@
+- Long-Press-Schutz fuer Neues Spiel im Spielbildschirm hinzugefuegt
+- Verlauf-Navigation im Spielbildschirm hinzugefuegt
+- Login bleibt jetzt bei abgelaufener Sitzung erhalten
+- Button-Groessen und UI-Skalierung auf verschiedenen Geraeten verbessert
+- Deep Link Support fuer Random Game aus dem Web hinzugefuegt
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
