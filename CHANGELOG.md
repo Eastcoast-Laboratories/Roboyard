@@ -2,6 +2,13 @@
 =========
 
 
+## Version 52 (140) - 2026-05-28
+- Added long-press protection in game screen for New Game
+- Added history navigation in game screen
+- Fixed keep login when session expires
+- Improved button-size across different devices and UI scaling
+- Added deep link support for random game from web
+
 ## Version 51 (136) - 2026-05-09
 - Various small fixes
 
