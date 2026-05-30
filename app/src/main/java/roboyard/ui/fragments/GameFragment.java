@@ -1330,6 +1330,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (hintButton != null && hintButton.isChecked()) {
                 hintButton.setChecked(false); // triggers onCheckedChanged → slideUpHintContainer
                 Timber.d("[HINT_SYSTEM] Reset: unchecked hint button");
+            } else if (hintContainer != null && hintContainer.getVisibility() == View.VISIBLE) {
+                // Hint container may be visible from completion message even if hint button is not checked
+                slideUpHintContainer();
+                Timber.d("[HINT_SYSTEM] Reset: hiding hint container (was showing completion message)");
             }
             currentHintStep = 0;
             showingPreHints = true;
@@ -1769,7 +1773,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     showingPreHints = true;
                     hintButton.setEnabled(true);
                     hintButton.setAlpha(1.0f);
-                    hintButton.setChecked(false);
+                    boolean wasHintChecked = hintButton.isChecked();
+                    hintButton.setChecked(false); // triggers onCheckedChanged → slideUpHintContainer if checked
+                    // Also hide hint container if it was showing the completion message (hint button not checked)
+                    if (!wasHintChecked && hintContainer != null && hintContainer.getVisibility() == View.VISIBLE) {
+                        slideUpHintContainer();
+                    }
                     Timber.d("[HINT] Reset hint system for next level");
                     
                     // Hide the Next Level button
