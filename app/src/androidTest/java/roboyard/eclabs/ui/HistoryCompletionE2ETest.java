@@ -454,7 +454,7 @@ public class HistoryCompletionE2ETest {
             }
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) { Timber.e(TAG + " GameState null"); return; }
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;
@@ -484,7 +484,7 @@ public class HistoryCompletionE2ETest {
         activityRule.getScenario().onActivity(a -> {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 if (el.getType() == Constants.TYPE_ROBOT && !solutionColors.contains(el.getColor())) {
                     nonSolutionRobot.set(el);
                     break;
@@ -509,7 +509,7 @@ public class HistoryCompletionE2ETest {
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state == null) return;
                 // Re-select the non-solution robot by color each time (position may have changed)
-                for (GameElement el : state.getGameElements()) {
+                for (GameElement el : state.gameElements) {
                     if (el.getType() == Constants.TYPE_ROBOT
                             && el.getColor() == nonSolutionRobot.get().getColor()) {
                         state.setSelectedRobot(el);
@@ -542,7 +542,7 @@ public class HistoryCompletionE2ETest {
                     if (state == null) {
                         return;
                     }
-                    for (GameElement el : state.getGameElements()) {
+                    for (GameElement el : state.gameElements) {
                         if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == c) {
                             state.setSelectedRobot(el);
                             break;

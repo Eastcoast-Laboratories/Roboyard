@@ -44,7 +44,7 @@ public class WallSerializationTest {
      */
     private GameState createTestGameState(int width, int height) {
         GameState state = new GameState(width, height);
-        state.setLevelName("WallTest");
+        state.levelName = "WallTest";
 
         // Add all outer boundary walls
         // Top: horizontal walls at y=0
@@ -72,7 +72,7 @@ public class WallSerializationTest {
         state.addTarget(1, 1, Constants.COLOR_GREEN);
         GameElement robot = new GameElement(GameElement.TYPE_ROBOT, 4, 4);
         robot.setColor(Constants.COLOR_GREEN);
-        state.getGameElements().add(robot);
+        state.gameElements.add(robot);
         state.setRobotCount(1);
         state.storeInitialRobotPositions();
 
@@ -171,11 +171,11 @@ public class WallSerializationTest {
         int origHWalls = 0, origVWalls = 0;
         int loadedHWalls = 0, loadedVWalls = 0;
 
-        for (GameElement e : original.getGameElements()) {
+        for (GameElement e : original.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL) origHWalls++;
             if (e.getType() == GameElement.TYPE_VERTICAL_WALL) origVWalls++;
         }
-        for (GameElement e : loaded.getGameElements()) {
+        for (GameElement e : loaded.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL) loadedHWalls++;
             if (e.getType() == GameElement.TYPE_VERTICAL_WALL) loadedVWalls++;
         }
@@ -198,7 +198,7 @@ public class WallSerializationTest {
 
         // Check that right boundary walls (x=width) exist in loaded state
         Set<String> rightWalls = new HashSet<>();
-        for (GameElement e : loaded.getGameElements()) {
+        for (GameElement e : loaded.gameElements) {
             if (e.getType() == GameElement.TYPE_VERTICAL_WALL && e.getX() == width) {
                 rightWalls.add(e.getX() + "," + e.getY());
             }
@@ -224,7 +224,7 @@ public class WallSerializationTest {
 
         // Check that bottom boundary walls (y=height) exist in loaded state
         Set<String> bottomWalls = new HashSet<>();
-        for (GameElement e : loaded.getGameElements()) {
+        for (GameElement e : loaded.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL && e.getY() == height) {
                 bottomWalls.add(e.getX() + "," + e.getY());
             }
@@ -252,7 +252,7 @@ public class WallSerializationTest {
         int expectedV = height + height + 1; // left + right + 1 inner
 
         int hCount = 0, vCount = 0;
-        for (GameElement e : state.getGameElements()) {
+        for (GameElement e : state.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL) hCount++;
             if (e.getType() == GameElement.TYPE_VERTICAL_WALL) vCount++;
         }
@@ -293,12 +293,12 @@ public class WallSerializationTest {
 
         // Count all walls
         int origWalls = 0, loadedWalls = 0;
-        for (GameElement e : original.getGameElements()) {
+        for (GameElement e : original.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL || e.getType() == GameElement.TYPE_VERTICAL_WALL) {
                 origWalls++;
             }
         }
-        for (GameElement e : loaded.getGameElements()) {
+        for (GameElement e : loaded.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL || e.getType() == GameElement.TYPE_VERTICAL_WALL) {
                 loadedWalls++;
             }
@@ -309,7 +309,7 @@ public class WallSerializationTest {
 
         // Verify right boundary
         boolean hasRightWall = false;
-        for (GameElement e : loaded.getGameElements()) {
+        for (GameElement e : loaded.gameElements) {
             if (e.getType() == GameElement.TYPE_VERTICAL_WALL && e.getX() == width) {
                 hasRightWall = true;
                 break;
@@ -319,7 +319,7 @@ public class WallSerializationTest {
 
         // Verify bottom boundary
         boolean hasBottomWall = false;
-        for (GameElement e : loaded.getGameElements()) {
+        for (GameElement e : loaded.gameElements) {
             if (e.getType() == GameElement.TYPE_HORIZONTAL_WALL && e.getY() == height) {
                 hasBottomWall = true;
                 break;

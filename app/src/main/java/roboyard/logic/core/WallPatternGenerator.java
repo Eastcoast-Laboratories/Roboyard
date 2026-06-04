@@ -140,14 +140,14 @@ public class WallPatternGenerator {
      * Top/bottom borders get vertical stubs, left/right borders get horizontal stubs.
      */
     public static void generateBorderStubs(GameState state) {
-        int w = state.getWidth();
-        int h = state.getHeight();
+        int w = state.width;
+        int h = state.height;
         Random r = new Random();
         int minCornerDist = 2;
 
         // Remove existing border stubs (perpendicular walls touching the border)
         List<GameElement> toRemove = new ArrayList<>();
-        for (GameElement el : state.getGameElements()) {
+        for (GameElement el : state.gameElements) {
             if (el.getType() == GameElement.TYPE_VERTICAL_WALL) {
                 // Vertical wall on top border (y=0) or bottom border (y=h-1)
                 if (el.getY() == 0 || el.getY() == h - 1) {
@@ -170,7 +170,7 @@ public class WallPatternGenerator {
         for (GameElement el : toRemove) {
             state.setCellType(el.getX(), el.getY(), 0);
         }
-        state.getGameElements().removeAll(toRemove);
+        state.gameElements.removeAll(toRemove);
 
         Timber.d("[BORDER_STUBS] Removed %d old border stubs from %dx%d board", toRemove.size(), w, h);
 

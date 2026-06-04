@@ -880,12 +880,12 @@ public class SaveGameFragment extends BaseGameFragment {
                 }
                 
                 if (currentState != null) {
-                    int width = currentState.getWidth();
-                    int height = currentState.getHeight();
+                    int width = currentState.width;
+                    int height = currentState.height;
                     boardSize = "Board: " + width + "×" + height;
                     Timber.d("[SAVEDATA] Board size: %s", boardSize);
                     
-                    int moves = currentState.getMoveCount();
+                    int moves = currentState.moveCount;
                     movesCount = "Moves: " + moves;
                     Timber.d("[SAVEDATA] Moves count: %s", movesCount);
                     

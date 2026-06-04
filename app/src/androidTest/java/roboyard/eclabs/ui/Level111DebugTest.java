@@ -80,8 +80,8 @@ public class Level111DebugTest {
             if (gameStateManager != null) {
                 GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
-                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Board dimensions: %d x %d", state.getWidth(), state.getHeight());
-                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Level ID: %d", state.getLevelId());
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Board dimensions: %d x %d", state.width, state.height);
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Level ID: %d", state.levelId);
                     
                     // Log robot positions
                     for (GameElement robot : state.getRobots()) {

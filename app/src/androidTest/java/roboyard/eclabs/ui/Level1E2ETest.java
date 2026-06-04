@@ -181,7 +181,7 @@ public class Level1E2ETest {
                 if (state != null) {
                     // Find the robot by color
                     GameElement selectedRobot = null;
-                    for (GameElement element : state.getGameElements()) {
+                    for (GameElement element : state.gameElements) {
                         if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotColor) {
                             selectedRobot = element;
                             break;

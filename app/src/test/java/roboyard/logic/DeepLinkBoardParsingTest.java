@@ -201,8 +201,8 @@ public class DeepLinkBoardParsingTest {
         GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12, null);
 
         assertNotNull("parseFromSaveData should return a non-null GameState", state);
-        assertEquals("Board width should be 12", 12, state.getWidth());
-        assertEquals("Board height should be 12", 12, state.getHeight());
+        assertEquals("Board width should be 12", 12, state.width);
+        assertEquals("Board height should be 12", 12, state.height);
     }
 
     @Test
@@ -212,7 +212,7 @@ public class DeepLinkBoardParsingTest {
         assertNotNull("GameState should not be null", state);
 
         int robotCount = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
                 robotCount++;
             }
@@ -227,7 +227,7 @@ public class DeepLinkBoardParsingTest {
         assertNotNull("GameState should not be null", state);
 
         int targetCount = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 targetCount++;
             }
@@ -243,7 +243,7 @@ public class DeepLinkBoardParsingTest {
 
         // Target ts10,0 = silver target at (10, 0)
         boolean found = false;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 assertEquals("Target X should be 10", 10, element.getX());
                 assertEquals("Target Y should be 0", 0, element.getY());
@@ -261,7 +261,7 @@ public class DeepLinkBoardParsingTest {
 
         int hWallCount = 0;
         int vWallCount = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 hWallCount++;
             } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
@@ -279,8 +279,8 @@ public class DeepLinkBoardParsingTest {
         GameState state = GameState.parseLevel(null, DEEP_LINK_MAP_DATA_12x12, -1);
 
         assertNotNull("parseLevel should return a non-null GameState", state);
-        assertEquals("Board width should be 12", 12, state.getWidth());
-        assertEquals("Board height should be 12", 12, state.getHeight());
+        assertEquals("Board width should be 12", 12, state.width);
+        assertEquals("Board height should be 12", 12, state.height);
     }
 
     @Test
@@ -299,8 +299,8 @@ public class DeepLinkBoardParsingTest {
         GameState state = GameState.parseFromSaveData(smallBoard, null);
 
         assertNotNull("GameState should not be null", state);
-        assertEquals("Board width should be 8", 8, state.getWidth());
-        assertEquals("Board height should be 8", 8, state.getHeight());
+        assertEquals("Board width should be 8", 8, state.width);
+        assertEquals("Board height should be 8", 8, state.height);
     }
 
     @Test
@@ -316,8 +316,8 @@ public class DeepLinkBoardParsingTest {
         GameState state = GameState.parseFromSaveData(largeBoard, null);
 
         assertNotNull("GameState should not be null", state);
-        assertEquals("Board width should be 16", 16, state.getWidth());
-        assertEquals("Board height should be 16", 16, state.getHeight());
+        assertEquals("Board width should be 16", 16, state.width);
+        assertEquals("Board height should be 16", 16, state.height);
     }
 
     @Test

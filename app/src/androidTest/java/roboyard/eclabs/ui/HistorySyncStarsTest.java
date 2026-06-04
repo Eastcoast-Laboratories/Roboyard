@@ -96,7 +96,7 @@ public class HistorySyncStarsTest {
                     roboyard.logic.core.GameState state = gameStateManager.getCurrentState().getValue();
                     if (state != null) {
                         GameElement selectedRobot = null;
-                        for (GameElement element : state.getGameElements()) {
+                        for (GameElement element : state.gameElements) {
                             if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == rrMove.getColor()) {
                                 selectedRobot = element;
                                 break;

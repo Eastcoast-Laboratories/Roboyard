@@ -24,12 +24,9 @@ class GameState(
      * Get board width
      */
     // Board properties
-    val width: Int, height: Int
+    @JvmField var width: Int,
+    @JvmField var height: Int
 ) : Serializable {
-    /**
-     * Get board height
-     */
-    val height: Int
 
     /**
      * Get map data for minimap generation (used by GameButtonGotoSavedGame)
@@ -42,6 +39,7 @@ class GameState(
      * Get all game elements (robots and targets)
      */
     // Game elements (robots and targets)
+    @JvmField
     val gameElements: MutableList<GameElement>
 
     /**
@@ -51,6 +49,7 @@ class GameState(
      * Set the level ID
      */
     // Game information
+    @JvmField
     var levelId: Int
     /**
      * Get the level name
@@ -58,6 +57,7 @@ class GameState(
     /**
      * Set the level name
      */
+    @JvmField
     var levelName: String?
     private var startTime: Long
     /**
@@ -66,6 +66,7 @@ class GameState(
     /**
      * Set the move count
      */
+    @JvmField
     var moveCount: Int
     private var robotCount = 1 // Default to 1 robot per color
     /**
@@ -74,6 +75,7 @@ class GameState(
     /**
      * Set the saved solutions string (used when loading from save file)
      */
+    @JvmField
     var savedSolutions: String? = null // Serialized solutions from save file
     private var targetColorsCount = Constants.NUM_ROBOTS // Default to 4 different target colors
 
@@ -97,6 +99,7 @@ class GameState(
      */
     // Hint tracking - tracks max hint used during this game session
     // -1 = no hints, 0+ = hint index (0 = first hint revealing robot colors)
+    @JvmField
     var maxHintUsedThisSession: Int = -1
 
     /**
@@ -113,6 +116,7 @@ class GameState(
      * Set the unique map ID for this game
      * @param uniqueMapId The 5-letter unique map ID
      */
+    @JvmField
     var uniqueMapId: String = "" // 5-letter unique ID for map identification
 
     /**
@@ -158,6 +162,7 @@ class GameState(
     private var gameStateManager: GameStateManager? = null
 
     // Store initial robot positions for reset functionality
+    @JvmField
     var initialRobotPositions: MutableMap<Int?, IntArray?>? = null
 
     /**
@@ -168,6 +173,7 @@ class GameState(
      * Set the predefined solution string
      */
     // Predefined solution from level file (for levels that are too complex to solve at runtime)
+    @JvmField
     var predefinedSolution: String? = null
     /**
      * Get the predefined number of moves from the level file
@@ -176,6 +182,7 @@ class GameState(
     /**
      * Set the predefined number of moves
      */
+    @JvmField
     var predefinedNumMoves: Int = 0
 
     /**
@@ -187,14 +194,13 @@ class GameState(
      * @param difficulty The difficulty level (Constants.DIFFICULTY_*)
      */
     // Difficulty level when the game was created (for savegame restoration)
+    @JvmField
     var difficulty: Int = Constants.DIFFICULTY_BEGINNER
 
     /**
      * Create a new game state with specified dimensions
      */
     init {
-        this.width = width
-        this.height = height
         this.mapData = Array<IntArray?>(height) { IntArray(width) }
         this.targetColors = Array<IntArray?>(height) { IntArray(width) }
         this.gameElements = java.util.ArrayList<GameElement>()
@@ -551,7 +557,6 @@ class GameState(
                             gridElementType = "robot_silver"
                         } else {
                             gridElementType = "robot_red"
-                            robotColor = 0
                         }
                         robotColorsAdded[robotColor] = true
                     }
@@ -1249,7 +1254,7 @@ class GameState(
                 walls.add("mv" + element.getX() + "," + element.getY())
             }
         }
-        Collections.sort<String?>(walls)
+        Collections.sort(walls as MutableList<String>)
         for (wall in walls) {
             sb.append(wall).append(";")
         }
@@ -1272,7 +1277,7 @@ class GameState(
                 robots.add("R" + entry.key + "@" + pos[0] + "," + pos[1])
             }
         }
-        Collections.sort<String?>(robots)
+        Collections.sort(robots as MutableList<String>)
         for (robot in robots) {
             sb.append(robot).append(";")
         }
@@ -1287,7 +1292,7 @@ class GameState(
                 targets.add("T" + element.getColor() + "@" + element.getX() + "," + element.getY())
             }
         }
-        Collections.sort<String?>(targets)
+        Collections.sort(targets as MutableList<String>)
         for (target in targets) {
             sb.append(target).append(";")
         }
@@ -1312,6 +1317,7 @@ class GameState(
         /**
          * Load a saved game from a file
          */
+        @JvmStatic
         fun loadSavedGame(context: Context, slotId: Int): GameState? {
             try {
                 val saveDir = File(context.getFilesDir(), Constants.SAVE_DIRECTORY)
@@ -1456,6 +1462,7 @@ class GameState(
          * @param saveData The raw save data string
          * @return Map with keys: mapName, width, height, moveCount, optimalMoveCount, timePlayed, allItems
          */
+        @JvmStatic
         fun parseMetadata(saveData: String?): MutableMap<String?, Any?>? {
             val result: MutableMap<String?, Any?> = HashMap<String?, Any?>()
 
@@ -1545,6 +1552,7 @@ class GameState(
          * @param context The context
          * @return The parsed game state or null if parsing failed
          */
+        @JvmStatic
         fun parseFromSaveData(saveData: String, context: Context?): GameState? {
             try {
                 // Use central metadata parser (DRY)
@@ -2146,6 +2154,7 @@ class GameState(
         /**
          * Load a level from assets
          */
+        @JvmStatic
         fun loadLevel(context: Context, levelId: Int): GameState {
             Timber.d("Loading level %d from assets", levelId)
 
@@ -2195,6 +2204,7 @@ class GameState(
          * Uses central LevelFormatParser for DRY principle
          * Supports comments (#) and optional line breaks
          */
+        @JvmStatic
         fun parseLevel(context: Context?, levelContent: String?, levelId: Int): GameState {
             // Default board size
             var width = 14
@@ -2448,6 +2458,7 @@ class GameState(
         /**
          * Create a random game state
          */
+        @JvmStatic
         fun createRandom(): GameState {
             // Set the global difficulty level first so difficulty is consistent
             val difficultyString: String = difficultyIntToString(Preferences.difficulty)
@@ -2669,6 +2680,7 @@ class GameState(
          * @param gridElements The grid elements to create the state from
          * @return A new GameState populated with the given elements
          */
+        @JvmStatic
         fun createFromGridElements(gridElements: java.util.ArrayList<GridElement>): GameState {
             // Determine board dimensions from elements.
             // Walls (mh/mv) can have coordinates equal to the board size (border walls),

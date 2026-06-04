@@ -101,7 +101,7 @@ public class MoveCountDebugTest {
         GameState gameState = gameStateManager.getCurrentState().getValue();
         assertNotNull("Game state should be loaded", gameState);
         
-        int initialMoves = gameState.getMoveCount();
+        int initialMoves = gameState.moveCount;
         Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Initial move count: %d", initialMoves);
 
         // Get the solution
@@ -135,7 +135,7 @@ public class MoveCountDebugTest {
             // gameStateManager.executeMove(...) - would need proper move object
         }
 
-        int finalMoves = gameState.getMoveCount();
+        int finalMoves = gameState.moveCount;
         Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Final move count: %d (optimal=%d, expected=%d)",
                 finalMoves, optimalMoves, optimalMoves + 5);
 

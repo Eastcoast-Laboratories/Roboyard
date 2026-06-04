@@ -109,11 +109,11 @@ public class LoadGameDifficultyTest {
         
         assertNotNull("Game state should not be null", gameStateHolder[0]);
         Timber.d("[UNITTESTS][LOAD_GAME_TEST] Game created with %d solution moves, difficulty: %d", 
-                solutionMovesHolder[0], gameStateHolder[0].getDifficulty());
+                solutionMovesHolder[0], gameStateHolder[0].difficulty);
         
         // Verify the game difficulty is Beginner
         assertEquals("Game difficulty should be Beginner", 
-                Constants.DIFFICULTY_BEGINNER, gameStateHolder[0].getDifficulty());
+                Constants.DIFFICULTY_BEGINNER, gameStateHolder[0].difficulty);
         
         // Step 2: Save the game
         Timber.d("[UNITTESTS][LOAD_GAME_TEST] Step 2: Saving the game");
@@ -198,11 +198,11 @@ public class LoadGameDifficultyTest {
                 Constants.DIFFICULTY_BEGINNER, effectiveDifficultyHolder[0]);
         
         Timber.d("[UNITTESTS][LOAD_GAME_TEST] Loaded game difficulty: %d, effective difficulty: %d, settings difficulty: %d",
-                loadedStateHolder[0].getDifficulty(), effectiveDifficultyHolder[0], Preferences.difficulty);
+                loadedStateHolder[0].difficulty, effectiveDifficultyHolder[0], Preferences.difficulty);
         
         // Verify the game state difficulty matches the original Beginner game
         assertEquals("Loaded game should have Beginner difficulty stored", 
-                Constants.DIFFICULTY_BEGINNER, loadedStateHolder[0].getDifficulty());
+                Constants.DIFFICULTY_BEGINNER, loadedStateHolder[0].difficulty);
         
         // Verify settings still show Insane (unchanged)
         assertEquals("Settings difficulty should still be Insane", 

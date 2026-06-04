@@ -223,7 +223,7 @@ public class LevelScreenMinimapE2ETest {
         activityRule.getScenario().onActivity(a -> {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                actualSize.set(state.getWidth() + "x" + state.getHeight());
+                actualSize.set(state.width + "x" + state.height);
             }
         });
         if (actualSize.get() != null) {
@@ -299,7 +299,7 @@ public class LevelScreenMinimapE2ETest {
             }
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;

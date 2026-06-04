@@ -194,8 +194,8 @@ public class DeepLinkBoardSizeE2ETest {
             GameState currentState = (GameState) gameStateManager.getCurrentState().getValue();
             assertNotNull("GameState should not be null", currentState);
 
-            int width = currentState.getWidth();
-            int height = currentState.getHeight();
+            int width = currentState.width;
+            int height = currentState.height;
 
             Timber.d("[UNITTESTS][DEEPLINK_E2E] Board dimensions: %dx%d", width, height);
 
@@ -233,7 +233,7 @@ public class DeepLinkBoardSizeE2ETest {
 
             // Find robot at (11, 3) - this is beyond 8x8
             GameElement robotAtEdge = null;
-            for (GameElement element : currentState.getGameElements()) {
+            for (GameElement element : currentState.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT &&
                     element.getX() == 11 && element.getY() == 3) {
                     robotAtEdge = element;
@@ -252,7 +252,7 @@ public class DeepLinkBoardSizeE2ETest {
 
             // Find robot at (7,8) - rg7,8
             GameElement targetRobot = null;
-            for (GameElement element : currentState.getGameElements()) {
+            for (GameElement element : currentState.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT &&
                     element.getX() == 7 && element.getY() == 8) {
                     targetRobot = element;
@@ -279,8 +279,8 @@ public class DeepLinkBoardSizeE2ETest {
             assertNotNull("GameState should still be valid after move", currentState);
 
             // Verify board is still 12x12 (not reset to 8x8)
-            assertEquals("Board width should remain 12 after move", 12, currentState.getWidth());
-            assertEquals("Board height should remain 12 after move", 12, currentState.getHeight());
+            assertEquals("Board width should remain 12 after move", 12, currentState.width);
+            assertEquals("Board height should remain 12 after move", 12, currentState.height);
 
             Timber.d("[UNITTESTS][DEEPLINK_E2E] ✓ Robot movement processed on 12x12 board");
         });
@@ -310,7 +310,7 @@ public class DeepLinkBoardSizeE2ETest {
             int targetCount = 0;
             int wallCount = 0;
 
-            for (GameElement element : currentState.getGameElements()) {
+            for (GameElement element : currentState.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT) {
                     robotCount++;
                     Timber.d("[UNITTESTS][DEEPLINK_E2E] Robot at (%d,%d) color=%d", 
@@ -359,7 +359,7 @@ public class DeepLinkBoardSizeE2ETest {
 
             // Find target at (10,0) - ts10,0 from deep-link
             GameElement targetAtEdge = null;
-            for (GameElement element : currentState.getGameElements()) {
+            for (GameElement element : currentState.gameElements) {
                 if (element.getType() == GameElement.TYPE_TARGET &&
                     element.getX() == 10 && element.getY() == 0) {
                     targetAtEdge = element;

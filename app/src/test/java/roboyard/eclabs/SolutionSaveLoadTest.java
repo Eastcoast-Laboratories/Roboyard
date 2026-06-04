@@ -186,10 +186,10 @@ public class SolutionSaveLoadTest {
         
         // Note: In the actual load flow, GameState.loadSavedGame() calls setSavedSolutions()
         // Here we simulate that by manually setting it
-        state.setSavedSolutions(solutionsStr);
+        state.savedSolutions = solutionsStr;
         
         // Step 4: Verify solutions are stored in GameState
-        String storedSolutions = state.getSavedSolutions();
+        String storedSolutions = state.savedSolutions;
         assertNotNull("Stored solutions should not be null", storedSolutions);
         assertEquals("Stored solutions should match original", solutionsStr, storedSolutions);
         

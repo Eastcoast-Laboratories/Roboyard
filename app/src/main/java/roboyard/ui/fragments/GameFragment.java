@@ -309,7 +309,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Find the robot's goal
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state != null) {
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
                     int goalX = element.getX();
                     int goalY = element.getY();
@@ -371,8 +371,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     GameElement robot = gameState.getSelectedRobot();
                     int robotX = robot.getX();
                     int robotY = robot.getY();
-                    int boardWidth = gameState.getWidth();
-                    int boardHeight = gameState.getHeight();
+                    int boardWidth = gameState.width;
+                    int boardHeight = gameState.height;
                     
                     // Check if robot is at an edge and move it inward
                     boolean moved = false;
@@ -573,7 +573,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     Boolean isComplete = gameStateManager.isGameComplete().getValue();
                     if (isComplete != null && isComplete) {
                         GameState state = gameStateManager.getCurrentState().getValue();
-                        if (state != null && state.getLevelId() > 0) {
+                        if (state != null && state.levelId > 0) {
                             nextLevelButton.setVisibility(View.VISIBLE);
                         }
                     }
@@ -715,7 +715,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     // Hide the small New Game button when showing the big completion buttons
                     newMapButton.setVisibility(View.GONE);
                     
-                    if (state.getLevelId() > 0) {
+                    if (state.levelId > 0) {
                         // This is a level game, show the Next Level button
                         nextLevelButton.setVisibility(View.VISIBLE);
                         
@@ -742,7 +742,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         int hintsUsed = state.getHintCount();
                         int stars = gameStateManager.calculateStars(playerMoves, optimalMoves, hintsUsed);
                         // For beginner levels (1-10), always earn at least 1 star
-                        if (stars < 1 && state.getLevelId() <= Constants.MIN_STAR_GUARANTEE_LEVEL) {
+                        if (stars < 1 && state.levelId <= Constants.MIN_STAR_GUARANTEE_LEVEL) {
                             stars = 1;
                         }
                         
@@ -762,7 +762,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
                         // Announce level completion for accessibility
                         String completionMessage = getString(R.string.level_complete) + 
-                                " Level " + state.getLevelId() + " completed in " + 
+                                " Level " + state.levelId + " completed in " +
                                 gameStateManager.getMoveCount().getValue() + " moves. ";
                         
                         // Add a verbal description of stars for accessibility
@@ -774,13 +774,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         
                         announceAccessibility(completionMessage);
                         
-                        if (shouldHandleCompletionSideEffects(state, state.getLevelId(), "level")) {
+                        if (shouldHandleCompletionSideEffects(state, state.levelId, "level")) {
                             // Save to history immediately on completion (bypasses time threshold)
                             gameStateManager.saveToHistoryNow("completed");
 
                             // Trigger achievements for level completion (guard against multiple calls)
                             long elapsedTime = SystemClock.elapsedRealtime() - startTime;
-                            int currentLevelId = state.getLevelId();
+                            int currentLevelId = state.levelId;
                             long currentTime = System.currentTimeMillis();
                             
                             // Only call onLevelCompleted if this is a different level or enough time has passed
@@ -1090,7 +1090,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // This ensures the toggle appears immediately when the first move is made
         // BUT: Never show in level games
         if (showingPreHints && currentHintStep == numPreHints && liveMoveCounterToggle != null && !isLevelGame) {
-            int moveCount = state.getMoveCount();
+            int moveCount = state.moveCount;
             // Keep toggle visible if live move counter is enabled
             boolean visible = moveCount >= 1 || gameStateManager.isLiveMoveCounterEnabled();
             liveMoveCounterToggle.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -1114,7 +1114,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     // Make sure we're within bounds
                     if (normalHintIndex >= 0 && normalHintIndex < solution.getMoves().size()) {
                         // Get the current move count
-                        int currentMoveCount = state.getMoveCount();
+                        int currentMoveCount = state.moveCount;
                         Timber.d("[HINT_SYSTEM] Current move count: %d", currentMoveCount);
                         
                         // Get the hint move
@@ -1255,7 +1255,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private void setupButtons(View view) {
         GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState != null && currentState.getLevelId() > 0) {
+        if (currentState != null && currentState.levelId > 0) {
             isLevelGame = true;
         } else {
             isLevelGame = false;
@@ -1346,7 +1346,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             
             if (stateAfterReset != null) {
                 // Clear animation positions for all robots
-                for (GameElement element : stateAfterReset.getGameElements()) {
+                for (GameElement element : stateAfterReset.gameElements) {
                     if (element.getType() == GameElement.TYPE_ROBOT) {
                         // Clear any animation positions by explicitly setting them to match logical positions
                         element.clearAnimationPosition();
@@ -1730,9 +1730,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Get the current level ID
             GameState gameState = gameStateManager.getCurrentState().getValue();
             if (gameState != null) {
-                if (gameState.getLevelId() > 0) {
+                if (gameState.levelId > 0) {
                     // Level game - go to next level
-                    int currentLevelId = gameState.getLevelId();
+                    int currentLevelId = gameState.levelId;
                     int nextLevelId = currentLevelId + 1;
                     Timber.d("GameFragment: Moving from level %d to level %d", currentLevelId, nextLevelId);
                     
@@ -1857,7 +1857,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // Create a list of all robots in the game
         List<GameElement> robots = new ArrayList<>();
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.isRobot()) {
                 robots.add(element);
             }
@@ -1901,7 +1901,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             
             // Check for goal robot by examining goal elements in the game state
             boolean hasGoal = false;
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 // Check if element is a goal post and matches the robot color
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == nextRobot.getColor()) {
                     hasGoal = true;
@@ -1962,7 +1962,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
                 // Try to find the robot by examining the game state
-                List<GameElement> elements = state.getGameElements();
+                List<GameElement> elements = state.gameElements;
                 for (GameElement element : elements) {
                     if (element.equals(robot)) {
                         return new int[]{element.getX(), element.getY()};
@@ -1983,7 +1983,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (isLevelGame) {
             GameState levelState = gameStateManager.getCurrentState().getValue();
             if (levelState != null) {
-                int currentLevelId = levelState.getLevelId();
+                int currentLevelId = levelState.levelId;
                 int nextLevelId = currentLevelId + 1;
 
                 // Check if this is the last level (140)
@@ -2072,8 +2072,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (!Preferences.generateNewMapEachTime) {
             GameState curState = gameStateManager.getCurrentState().getValue();
             if (curState != null) {
-                int mapW = curState.getWidth();
-                int mapH = curState.getHeight();
+                int mapW = curState.width;
+                int mapH = curState.height;
                 int settW = Preferences.boardSizeWidth;
                 int settH = Preferences.boardSizeHeight;
                 if (mapW != settW || mapH != settH) {
@@ -2139,7 +2139,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
         GameState backState = gameStateManager.getCurrentState().getValue();
         Integer moveCount = gameStateManager.getMoveCount().getValue();
-        int currentLevelId = backState != null ? backState.getLevelId() : -1;
+        int currentLevelId = backState != null ? backState.levelId : -1;
         boolean isHistoryGame = gameStateManager.isLoadedFromHistory();
         boolean isSavegame = gameStateManager.isLoadedFromSave();
 
@@ -2454,7 +2454,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         int eastDistance = 0;
         String eastObstacle = getString(R.string.edge_a11y);
         int obstacleX = x;
-        for (int i = x + 1; i < state.getWidth(); i++) {
+        for (int i = x + 1; i < state.width; i++) {
             if (state.canRobotMoveTo(robot, i, y)) {
                 eastDistance++;
                 obstacleX = i;
@@ -2563,7 +2563,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Check south movement (down)
         int southDistance = 0;
         String southObstacle = getString(R.string.edge_a11y);
-        for (int i = y + 1; i < state.getHeight(); i++) {
+        for (int i = y + 1; i < state.height; i++) {
             if (state.canRobotMoveTo(robot, x, i)) {
                 southDistance++;
             } else {
@@ -2616,7 +2616,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         GameElement selectedRobot = state.getSelectedRobot();
         
         // Announce only the target at game start
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 String targetColor = getLocalizedTargetColorName(element.getColor());
                 // Use format parameters directly in the target_a11y string
@@ -2637,7 +2637,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             List<String> walls = new ArrayList<>();
             
             // Check east wall
-            if (!state.canRobotMoveTo(selectedRobot, x + 1, y) && x + 1 < state.getWidth() && 
+            if (!state.canRobotMoveTo(selectedRobot, x + 1, y) && x + 1 < state.width &&
                 state.getRobotAt(x + 1, y) == null) {
                 walls.add("east");
             }
@@ -2655,7 +2655,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
             
             // Check south wall
-            if (!state.canRobotMoveTo(selectedRobot, x, y + 1) && y + 1 < state.getHeight() && 
+            if (!state.canRobotMoveTo(selectedRobot, x, y + 1) && y + 1 < state.height &&
                 state.getRobotAt(x, y + 1) == null) {
                 walls.add("south");
             }
@@ -2692,7 +2692,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // First, identify the target
         GameElement targetElement = null;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 targetElement = element;
                 break; // Only consider one target for simplicity
@@ -2703,7 +2703,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (targetElement == null) return false;
         
         // Now find a robot matching the target's color
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.isRobot() && element.getColor() == targetElement.getColor()) {
                 // Found a matching robot, select it
                 state.setSelectedRobot(element);
@@ -2892,8 +2892,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // If there's an active game state, use its dimensions
         if (currentState != null) {
-            int boardWidth = currentState.getWidth();
-            int boardHeight = currentState.getHeight();
+            int boardWidth = currentState.width;
+            int boardHeight = currentState.height;
             Timber.d("[BOARD_SIZE_DEBUG] GameFragment.updateBoardSizeText() from GameState: %dx%d", boardWidth, boardHeight);
             //boardSizeTextView.setText(getString(R.string.board_size, boardWidth, boardHeight));
         } else {
@@ -2913,7 +2913,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (diceButton == null) return;
         
         GameState state = gameStateManager.getCurrentState().getValue();
-        boolean isLevelGame = state != null && state.getLevelId() > 0;
+        boolean isLevelGame = state != null && state.levelId > 0;
         
         // Show dice button only when generateNewMapEachTime is false AND not in level game
         boolean showDiceButton = !Preferences.generateNewMapEachTime && !isLevelGame;
@@ -2968,18 +2968,18 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
         // Get map name from GameStateManager for debugging
         String gameManagerMapName = gameStateManager.getLevelName();
-        String gameStateMapName = state.getLevelName();
+        String gameStateMapName = state.levelName;
         Timber.d("[MAPNAME] GameState levelName: '%s', GameStateManager levelName: '%s'",
                 gameStateMapName, gameManagerMapName);
 
         // Get the unique map ID
-        String uniqueMapId = state.getUniqueMapId();
+        String uniqueMapId = state.uniqueMapId;
 
         // Update the unique map ID text view
         // Check if this is a level game and include level name
-        if (state.getLevelId() > 0) {
+        if (state.levelId > 0) {
             // For level game - display board size with level name/number
-            String levelText = getString(R.string.level_id_text, state.getLevelId());
+            String levelText = getString(R.string.level_id_text, state.levelId);
             uniqueMapIdTextView.setText(levelText);
             Timber.d("[MAPNAME] Showing level ID text: %s", levelText);
         }
@@ -3020,7 +3020,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Level game - change to "Next Level" and check if next level is unlocked
             GameState currentState = gameStateManager.getCurrentState().getValue();
             if (currentState != null) {
-                int currentLevelId = currentState.getLevelId();
+                int currentLevelId = currentState.levelId;
                 int nextLevelId = currentLevelId + 1;
 
                 // Check if next level is unlocked (need at least (nextLevelId - 1) stars)
@@ -3733,7 +3733,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             currentState.recordHintUsed(hintIndex);
             AchievementManager.getInstance(requireContext()).onHintUsed();
             Timber.d("[HINT_SYSTEM] Hint counted for achievements: hintCount=%d, maxHintUsed=%d", 
-                    currentState.getHintCount(), currentState.getMaxHintUsedThisSession());
+                    currentState.getHintCount(), currentState.maxHintUsedThisSession);
         }
         // Save to history immediately when a hint is shown (bypasses time threshold)
         gameStateManager.saveToHistoryNow("hint_shown_" + hintIndex);
@@ -4006,11 +4006,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         GameState currentState = gameStateManager.getCurrentState().getValue();
         
         // For level games > 10, no hints allowed
-        if (currentState != null && currentState.getLevelId() > LEVEL_10_THRESHHOLD) {
+        if (currentState != null && currentState.levelId > LEVEL_10_THRESHHOLD) {
             canShowNextHint = false;
         }
         // For level games 1-10, limit to MAX_HINTS_UP_TO_LEVEL_10
-        else if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= LEVEL_10_THRESHHOLD) {
+        else if (currentState != null && currentState.levelId > 0 && currentState.levelId <= LEVEL_10_THRESHHOLD) {
             if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10 - 1) {
                 canShowNextHint = false;
             }
@@ -4046,13 +4046,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // Check if this is a level game with level > 10 (no hints allowed)
         GameState currentState = gameStateManager.getCurrentState().getValue();
-        if (currentState != null && currentState.getLevelId() > LEVEL_10_THRESHHOLD) {
+        if (currentState != null && currentState.levelId > LEVEL_10_THRESHHOLD) {
             Timber.d("[HINT_SYSTEM] Level > 10, hints are disabled for %s", source);
             return;
         }
         
         // For level games 1-10, limit to only 2 hints
-        if (currentState != null && currentState.getLevelId() > 0 && currentState.getLevelId() <= LEVEL_10_THRESHHOLD) {
+        if (currentState != null && currentState.levelId > 0 && currentState.levelId <= LEVEL_10_THRESHHOLD) {
             // Limit to only the first two hints for levels 1-10
             if (currentHintStep >= MAX_HINTS_UP_TO_LEVEL_10) {
                 Timber.d("[HINT_SYSTEM] Level 1-10 reached maximum allowed hints (%d) for %s, currentHintStep=%d", MAX_HINTS_UP_TO_LEVEL_10, source, currentHintStep);
@@ -4395,7 +4395,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         GameState currentState = gameStateManager.getCurrentState().getValue();
         
         // Check if this is a random game (not a level) and randomize pre-hints
-        if (currentState != null && currentState.getLevelId() <= 0) {
+        if (currentState != null && currentState.levelId <= 0) {
             // Randomize pre-hints for random games when we initialize
             int randomHintCount = ThreadLocalRandom.current().nextInt(2, 5);
             Timber.d("[HINT] Randomized hint count: %d", randomHintCount);
@@ -4523,8 +4523,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             GameState currentState = gameStateManager.getCurrentState().getValue();
             
             // Check if this is a level game (levelId > 0 means it's a level game)
-            if (currentState != null && currentState.getLevelId() > 0) {
-                Timber.d("[AUTOSAVE] Skipping autosave for level game (levelId: %d)", currentState.getLevelId());
+            if (currentState != null && currentState.levelId > 0) {
+                Timber.d("[AUTOSAVE] Skipping autosave for level game (levelId: %d)", currentState.levelId);
                 return;
             }
             
@@ -4647,8 +4647,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             GameState currentState = gameStateManager.getCurrentState().getValue();
 
             // Check if this is a level game (levelId > 0 means it's a level game)
-            if (currentState != null && currentState.getLevelId() > 0) {
-                Timber.d("[HISTORY] Skipping history save for level game (levelId: %d)", currentState.getLevelId());
+            if (currentState != null && currentState.levelId > 0) {
+                Timber.d("[HISTORY] Skipping history save for level game (levelId: %d)", currentState.levelId);
                 return;
             }
 

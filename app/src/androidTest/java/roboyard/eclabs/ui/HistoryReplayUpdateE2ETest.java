@@ -227,7 +227,7 @@ public class HistoryReplayUpdateE2ETest {
             }
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == robotColor) {
                     state.setSelectedRobot(el);
                     break;
@@ -275,7 +275,7 @@ public class HistoryReplayUpdateE2ETest {
             }
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;

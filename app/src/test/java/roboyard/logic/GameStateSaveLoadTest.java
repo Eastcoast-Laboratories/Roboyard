@@ -27,7 +27,7 @@ public class GameStateSaveLoadTest {
     @Before
     public void setUp() {
         gameState = new GameState(8, 8);
-        gameState.setLevelName("Test Game");
+        gameState.levelName = "Test Game";
         // Add a target - serialize() requires at least one target
         gameState.addTarget(5, 5, 1);
         // Add robots - serialize() requires initialRobotPositions
@@ -40,7 +40,7 @@ public class GameStateSaveLoadTest {
     
     @Test
     public void testMoveCountPreservedAfterSaveLoad() {
-        gameState.setMoveCount(5);
+        gameState.moveCount = 5;
         
         String serialized = gameState.serialize();
         
@@ -49,7 +49,7 @@ public class GameStateSaveLoadTest {
     
     @Test
     public void testRobotPositionsPreservedAfterSaveLoad() {
-        gameState.setMoveCount(1);
+        gameState.moveCount = 1;
         
         String serialized = gameState.serialize();
         
@@ -61,9 +61,9 @@ public class GameStateSaveLoadTest {
     
     @Test
     public void testGameStateMetadataPreserved() {
-        gameState.setMoveCount(7);
+        gameState.moveCount = 7;
         String mapName = "Custom Level";
-        gameState.setLevelName(mapName);
+        gameState.levelName = mapName;
         
         String serialized = gameState.serialize();
         
@@ -73,7 +73,7 @@ public class GameStateSaveLoadTest {
     
     @Test
     public void testMultipleRobotsPreserved() {
-        gameState.setMoveCount(3);
+        gameState.moveCount = 3;
         
         String serialized = gameState.serialize();
         
@@ -88,7 +88,7 @@ public class GameStateSaveLoadTest {
     @Test
     public void testMoveCountPreservedInMetadata() {
         int expectedMoveCount = 42;
-        gameState.setMoveCount(expectedMoveCount);
+        gameState.moveCount = expectedMoveCount;
         
         String serialized = gameState.serialize();
         String[] lines = serialized.split("\n");

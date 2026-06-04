@@ -27,7 +27,7 @@ public class SpecialTargetSaveLoadTest {
     @Test
     public void testSilverRobotAndTarget() {
         GameState state = new GameState(8, 8);
-        state.setLevelName("Silver Test");
+        state.levelName = "Silver Test";
 
         // Add silver robot and silver target
         state.addRobot(2, 3, Constants.COLOR_SILVER);
@@ -58,7 +58,7 @@ public class SpecialTargetSaveLoadTest {
     @Test
     public void testMultiColorTarget() {
         GameState state = new GameState(8, 8);
-        state.setLevelName("Multi Target Test");
+        state.levelName = "Multi Target Test";
 
         // Add a robot (required for serialization)
         state.addRobot(0, 0, Constants.COLOR_PINK);
@@ -78,7 +78,7 @@ public class SpecialTargetSaveLoadTest {
 
         // Verify target is in gameElements with correct color
         int multiTargetCount = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == Constants.COLOR_MULTI) {
                 multiTargetCount++;
             }
@@ -93,7 +93,7 @@ public class SpecialTargetSaveLoadTest {
     @Test
     public void testTwoTargetsOneRobot() {
         GameState state = new GameState(8, 8);
-        state.setLevelName("Two Targets Test");
+        state.levelName = "Two Targets Test";
 
         // Add 1 robot (pink)
         state.addRobot(0, 0, Constants.COLOR_PINK);
@@ -119,7 +119,7 @@ public class SpecialTargetSaveLoadTest {
         // Verify exactly 2 targets and 1 robot in gameElements
         int targetCount = 0;
         int robotCount = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) targetCount++;
             if (element.getType() == GameElement.TYPE_ROBOT) robotCount++;
         }
@@ -133,7 +133,7 @@ public class SpecialTargetSaveLoadTest {
     @Test
     public void testMultiColorTargetInBoard() {
         GameState state = new GameState(8, 8);
-        state.setLevelName("Multi Board Test");
+        state.levelName = "Multi Board Test";
 
         state.addTarget(4, 5, Constants.COLOR_MULTI);
 
@@ -152,7 +152,7 @@ public class SpecialTargetSaveLoadTest {
     @Test
     public void testSilverTargetSyncPreservesColor() {
         GameState state = new GameState(8, 8);
-        state.setLevelName("Silver Sync Test");
+        state.levelName = "Silver Sync Test";
 
         state.addRobot(0, 0, Constants.COLOR_SILVER);
         state.addTarget(6, 6, Constants.COLOR_SILVER);

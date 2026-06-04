@@ -159,7 +159,7 @@ public class RandomGameHistoryMinimapTest {
             }
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
-            for (roboyard.logic.core.GameElement el : state.getGameElements()) {
+            for (roboyard.logic.core.GameElement el : state.gameElements) {
                 if (el.getType() == roboyard.logic.core.Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;

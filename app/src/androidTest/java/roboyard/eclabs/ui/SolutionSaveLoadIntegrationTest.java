@@ -100,7 +100,7 @@ public class SolutionSaveLoadIntegrationTest {
             GameStateManager gsm = activity.getGameStateManager();
             GameState stateA = gsm.getCurrentState().getValue();
             assertNotNull("Game A state should exist", stateA);
-            mapNameA.set(stateA.getLevelName());
+            mapNameA.set(stateA.levelName);
             Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Game A map: %s", mapNameA.get());
         });
         
@@ -147,7 +147,7 @@ public class SolutionSaveLoadIntegrationTest {
             GameStateManager gsm = activity.getGameStateManager();
             GameState stateB = gsm.getCurrentState().getValue();
             assertNotNull("Game B state should exist", stateB);
-            mapNameB.set(stateB.getLevelName());
+            mapNameB.set(stateB.levelName);
             Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Game B map: %s", mapNameB.get());
         });
         
@@ -185,7 +185,7 @@ public class SolutionSaveLoadIntegrationTest {
             GameStateManager gsm = activity.getGameStateManager();
             GameState loadedState = gsm.getCurrentState().getValue();
             assertNotNull("Loaded state should exist", loadedState);
-            loadedMapName.set(loadedState.getLevelName());
+            loadedMapName.set(loadedState.levelName);
             Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Loaded map name: %s (expected: %s)", 
                     loadedMapName.get(), mapNameA.get());
         });
@@ -248,7 +248,7 @@ public class SolutionSaveLoadIntegrationTest {
             GameStateManager gsm = activity.getGameStateManager();
             GameState loadedState = gsm.getCurrentState().getValue();
             assertNotNull("Loaded state should exist", loadedState);
-            loadedMapName.set(loadedState.getLevelName());
+            loadedMapName.set(loadedState.levelName);
             Timber.d("[UNITTESTS][TEST_SOLUTION_LEAK] Loaded map name: %s (expected: %s)", 
                     loadedMapName.get(), mapNameB.get());
         });

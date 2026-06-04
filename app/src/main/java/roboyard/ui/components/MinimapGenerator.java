@@ -77,17 +77,17 @@ public class MinimapGenerator {
         canvas.drawColor(Color.rgb(200, 240, 200));
         
         // Calculate cell size
-        float cellWidth = (float) width / state.getWidth();
-        float cellHeight = (float) height / state.getHeight();
+        float cellWidth = (float) width / state.width;
+        float cellHeight = (float) height / state.height;
         float cellSize = Math.min(cellWidth, cellHeight);
         
         // Center the minimap
-        float offsetX = (width - (cellSize * state.getWidth())) / 2;
-        float offsetY = (height - (cellSize * state.getHeight())) / 2;
+        float offsetX = (width - (cellSize * state.width)) / 2;
+        float offsetY = (height - (cellSize * state.height)) / 2;
         
         // Draw cells
-        for (int y = 0; y < state.getHeight(); y++) {
-            for (int x = 0; x < state.getWidth(); x++) {
+        for (int y = 0; y < state.height; y++) {
+            for (int x = 0; x < state.width; x++) {
                 float left = offsetX + (x * cellSize);
                 float top = offsetY + (y * cellSize);
                 float right = left + cellSize;
@@ -113,20 +113,20 @@ public class MinimapGenerator {
         gridPaint.setAntiAlias(true);
         
         // Draw vertical grid lines (including middle)
-        for (int x = 0; x <= state.getWidth(); x++) {
+        for (int x = 0; x <= state.width; x++) {
             float lineX = offsetX + (x * cellSize);
-            canvas.drawLine(lineX, offsetY, lineX, offsetY + (cellSize * state.getHeight()), gridPaint);
+            canvas.drawLine(lineX, offsetY, lineX, offsetY + (cellSize * state.height), gridPaint);
         }
         
         // Draw horizontal grid lines (including middle)
-        for (int y = 0; y <= state.getHeight(); y++) {
+        for (int y = 0; y <= state.height; y++) {
             float lineY = offsetY + (y * cellSize);
-            canvas.drawLine(offsetX, lineY, offsetX + (cellSize * state.getWidth()), lineY, gridPaint);
+            canvas.drawLine(offsetX, lineY, offsetX + (cellSize * state.width), lineY, gridPaint);
         }
         
         // Draw center carree (2x2 dark green square in the middle)
-        int centerX = (state.getWidth() / 2) - 1;
-        int centerY = (state.getHeight() / 2) - 1;
+        int centerX = (state.width / 2) - 1;
+        int centerY = (state.height / 2) - 1;
         Paint carreePaint = new Paint();
         carreePaint.setColor(Color.rgb(0, 100, 0));
         carreePaint.setStyle(Paint.Style.FILL);
@@ -142,7 +142,7 @@ public class MinimapGenerator {
         targetXPaint.setStyle(Paint.Style.STROKE);
         targetXPaint.setStrokeWidth(Math.max(1.5f, cellSize * 0.15f));
         targetXPaint.setAntiAlias(true);
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 float left = offsetX + (element.getX() * cellSize);
                 float top = offsetY + (element.getY() * cellSize);
@@ -171,7 +171,7 @@ public class MinimapGenerator {
         wallLinePaint.setStrokeWidth(Math.max(2.0f, cellSize * 0.2f));
         wallLinePaint.setAntiAlias(true);
         
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 // Horizontal wall: draw line above the cell
                 float wallX1 = offsetX + (element.getX() * cellSize);
@@ -188,7 +188,7 @@ public class MinimapGenerator {
         }
         
         // Draw robots
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
                 float centerX_robot = offsetX + ((element.getX() + 0.5f) * cellSize);
                 float centerY_robot = offsetY + ((element.getY() + 0.5f) * cellSize);

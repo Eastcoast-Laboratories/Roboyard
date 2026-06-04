@@ -741,15 +741,15 @@ public class MainActivity extends AppCompatActivity {
             
             if (gameState != null) {
                 // If we successfully parsed the game state, load it
-                Timber.d("[DEEPLINK_PROCESS] Successfully parsed game state: board size=%dx%d, elements=%d", 
-                        gameState.getWidth(), gameState.getHeight(), gameState.getGameElements().size());
+                Timber.d("[DEEPLINK_PROCESS] Successfully parsed game state: board size=%dx%d, elements=%d",
+                        gameState.width, gameState.height, gameState.gameElements.size());
                 
                 // Log the types of elements in the game state
                 int robotCount = 0;
                 int targetCount = 0;
                 int wallCount = 0;
                 
-                for (GameElement element : gameState.getGameElements()) {
+                for (GameElement element : gameState.gameElements) {
                     if (element.getType() == GameElement.TYPE_ROBOT) {
                         robotCount++;
                         Timber.d("[DEEPLINK_ELEMENTS] Robot at (%d,%d) with color %d", 
@@ -768,14 +768,14 @@ public class MainActivity extends AppCompatActivity {
                 
                 // Override the map name if provided in the deep link
                 if (mapName != null && !mapName.isEmpty()) {
-                    gameState.setLevelName(mapName);
+                    gameState.levelName = mapName;
                     Timber.d("[DEEPLINK_PROCESS] Set custom map name: %s", mapName);
                 } else {
                     // No name provided: generate "Web <hash>" like random maps do
                     String uniqueId = MapIdGenerator.generateUniqueId(gameState.getGridElements());
                     String generatedName = "Web " + uniqueId;
-                    gameState.setLevelName(generatedName);
-                    gameState.setUniqueMapId(uniqueId);
+                    gameState.levelName = generatedName;
+                    gameState.uniqueMapId = uniqueId;
                     Timber.d("[DEEPLINK_PROCESS] Generated web map name: %s", generatedName);
                 }
                 

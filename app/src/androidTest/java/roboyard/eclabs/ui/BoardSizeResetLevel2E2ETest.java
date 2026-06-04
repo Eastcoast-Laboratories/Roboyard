@@ -81,8 +81,8 @@ public class BoardSizeResetLevel2E2ETest {
         activityRule.getScenario().onActivity(activity -> {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                level1Size[0] = state.getWidth();
-                level1Size[1] = state.getHeight();
+                level1Size[0] = state.width;
+                level1Size[1] = state.height;
                 Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Level 1 board size: %dx%d", level1Size[0], level1Size[1]);
             }
         });
@@ -111,8 +111,8 @@ public class BoardSizeResetLevel2E2ETest {
         activityRule.getScenario().onActivity(activity -> {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                level2Size[0] = state.getWidth();
-                level2Size[1] = state.getHeight();
+                level2Size[0] = state.width;
+                level2Size[1] = state.height;
                 Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Level 2 board size: %dx%d", level2Size[0], level2Size[1]);
             }
         });
@@ -137,8 +137,8 @@ public class BoardSizeResetLevel2E2ETest {
         activityRule.getScenario().onActivity(activity -> {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                sizeBeforeUndo[0] = state.getWidth();
-                sizeBeforeUndo[1] = state.getHeight();
+                sizeBeforeUndo[0] = state.width;
+                sizeBeforeUndo[1] = state.height;
                 Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Board size BEFORE undo: %dx%d", sizeBeforeUndo[0], sizeBeforeUndo[1]);
             }
         });
@@ -153,8 +153,8 @@ public class BoardSizeResetLevel2E2ETest {
         activityRule.getScenario().onActivity(activity -> {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                sizeAfterUndo[0] = state.getWidth();
-                sizeAfterUndo[1] = state.getHeight();
+                sizeAfterUndo[0] = state.width;
+                sizeAfterUndo[1] = state.height;
                 Timber.d("[UNITTESTS][BOARD_SIZE_E2E] Board size AFTER undo: %dx%d", sizeAfterUndo[0], sizeAfterUndo[1]);
             }
         });

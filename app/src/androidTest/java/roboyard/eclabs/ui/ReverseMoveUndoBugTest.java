@@ -79,7 +79,7 @@ public class ReverseMoveUndoBugTest {
             if (state == null) return;
 
             // Find and select blue robot
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
                     state.setSelectedRobot(el);
                     break;
@@ -118,7 +118,7 @@ public class ReverseMoveUndoBugTest {
             moveCountAfterUp[0] = gameStateManager.getMoveCount().getValue();
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                for (GameElement el : state.getGameElements()) {
+                for (GameElement el : state.gameElements) {
                     if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
                         blueXAfterUp[0] = el.getX();
                         blueYAfterUp[0] = el.getY();
@@ -141,7 +141,7 @@ public class ReverseMoveUndoBugTest {
             moveCountAfterUndo[0] = gameStateManager.getMoveCount().getValue();
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                for (GameElement el : state.getGameElements()) {
+                for (GameElement el : state.gameElements) {
                     if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
                         blueXAfterUndo[0] = el.getX();
                         blueYAfterUndo[0] = el.getY();
@@ -171,7 +171,7 @@ public class ReverseMoveUndoBugTest {
             moveCountAfterRight[0] = gameStateManager.getMoveCount().getValue();
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
-                for (GameElement el : state.getGameElements()) {
+                for (GameElement el : state.gameElements) {
                     if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
                         blueXAfterRight[0] = el.getX();
                         blueYAfterRight[0] = el.getY();

@@ -62,9 +62,9 @@ public class LevelEditorParsingTest {
         GameState state = GameState.parseLevel(context, levelContent, 999);
 
         assertNotNull("Parsed state should not be null", state);
-        assertEquals("Board width should be 12", 12, state.getWidth());
-        assertEquals("Board height should be 14", 14, state.getHeight());
-        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Board dimensions parsed correctly: %dx%d", state.getWidth(), state.getHeight());
+        assertEquals("Board width should be 12", 12, state.width);
+        assertEquals("Board height should be 14", 14, state.height);
+        Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Board dimensions parsed correctly: %dx%d", state.width, state.height);
     }
 
     /**
@@ -81,7 +81,7 @@ public class LevelEditorParsingTest {
         boolean foundMiddle = false;
         boolean foundBottomRight = false;
 
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 hWallCount++;
                 if (element.getX() == 0 && element.getY() == 0) foundTopLeft = true;
@@ -111,7 +111,7 @@ public class LevelEditorParsingTest {
         boolean foundMiddle = false;
         boolean foundRight = false;
 
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
                 vWallCount++;
                 if (element.getX() == 0 && element.getY() == 0) foundLeft = true;
@@ -146,15 +146,15 @@ public class LevelEditorParsingTest {
         GameState state = GameState.parseLevel(context, content.toString(), 1);
 
         assertNotNull("Parsed level 1 should not be null", state);
-        assertEquals("Level 1 width should be 12", 12, state.getWidth());
-        assertEquals("Level 1 height should be 14", 14, state.getHeight());
+        assertEquals("Level 1 width should be 12", 12, state.width);
+        assertEquals("Level 1 height should be 14", 14, state.height);
 
         // Count walls, robots, targets
         int hWalls = 0, vWalls = 0, robots = 0, targets = 0;
         boolean hasBottomWall = false;
         boolean hasRightWall = false;
 
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             switch (element.getType()) {
                 case GameElement.TYPE_HORIZONTAL_WALL:
                     hWalls++;
@@ -201,7 +201,7 @@ public class LevelEditorParsingTest {
         GameState state = GameState.parseLevel(context, levelContent, 999);
 
         int robots = 0, targets = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) robots++;
             if (element.getType() == GameElement.TYPE_TARGET) targets++;
         }
@@ -247,7 +247,7 @@ public class LevelEditorParsingTest {
         GameState state = GameState.parseLevel(context, sb.toString(), 999);
 
         int topWalls = 0, bottomWalls = 0, leftWalls = 0, rightWalls = 0;
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 if (element.getY() == 0) topWalls++;
                 if (element.getY() == boardHeight) bottomWalls++;

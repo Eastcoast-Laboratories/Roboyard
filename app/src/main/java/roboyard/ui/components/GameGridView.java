@@ -385,8 +385,8 @@ public class GameGridView extends View {
         // Update width and height based on state
         if (gameStateManager != null && gameStateManager.getCurrentState().getValue() != null) {
             GameState state = gameStateManager.getCurrentState().getValue();
-            gridWidth = state.getWidth();
-            gridHeight = state.getHeight();
+            gridWidth = state.width;
+            gridHeight = state.height;
             
             // Calculate carré (center square) coordinates - same as GameLogic
             carrePosX = (gridWidth / 2) - 1;
@@ -419,7 +419,7 @@ public class GameGridView extends View {
             // Compare current robot positions with stored starting positions
             // If any robot is at a different position than what we have stored,
             // and it matches its initial position in the GameState, it's a new game
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT) {
                     int color = element.getColor();
                     int x = element.getX();
@@ -458,7 +458,7 @@ public class GameGridView extends View {
             gameStateManager.clearRobotStartingPositions();
             
             // Store positions of all robots
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT) {
                     gameStateManager.setRobotStartingPosition(element.getColor(), element.getX(), element.getY());
                     Timber.d("Stored starting position for robot color %d at (%d,%d)", 
@@ -484,14 +484,14 @@ public class GameGridView extends View {
                     GameElement selectedRobot = state.getSelectedRobot();
                     
                     // Update robot scales based on selection
-                    for (GameElement element : state.getGameElements()) {
+                    for (GameElement element : state.gameElements) {
                         if (element.getType() == GameElement.TYPE_ROBOT) {
                             if (element == selectedRobot) {
                                 // If this is the first selection of this robot
                                 if (!robotScaleMap.containsKey(element) || robotScaleMap.get(element) == DEFAULT_ROBOT_SCALE || robotScaleMap.get(element) == INITIAL_SELECTED_ROBOT_SCALE) {
                                     // Robot first selected - animate to initial large scale
                                     animateRobotScale(element, DEFAULT_ROBOT_SCALE, INITIAL_SELECTED_ROBOT_SCALE);
-                                } else if (robotScaleMap.get(element) == INITIAL_SELECTED_ROBOT_SCALE && state.getMoveCount() > 0) {
+                                } else if (robotScaleMap.get(element) == INITIAL_SELECTED_ROBOT_SCALE && state.moveCount > 0) {
                                     // After first move, shrink to regular selected scale
                                     animateRobotScale(element, INITIAL_SELECTED_ROBOT_SCALE, SELECTED_ROBOT_SCALE);
                                 } else if (robotScaleMap.get(element) < SELECTED_ROBOT_SCALE) {
@@ -642,8 +642,8 @@ public class GameGridView extends View {
         }
         
         GameState state = gameStateManager.getCurrentState().getValue();
-        gridWidth = state.getWidth();
-        gridHeight = state.getHeight();
+        gridWidth = state.width;
+        gridHeight = state.height;
         // if (newGridWidth != gridWidth || newGridHeight != gridHeight) {
         //     gridWidth = newGridWidth;
         //     gridHeight = newGridHeight;
@@ -656,7 +656,7 @@ public class GameGridView extends View {
         if (ENABLE_ULTRA_DEBUG) {
             int robotsDrawn = 0;
             Timber.d("[ULTRA_DEBUG_ROBOTS] Starting debug of robots drawn in GameGridView.onDraw()");
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.isRobot()) {
                     robotsDrawn++;
                     Timber.d("[ULTRA_DEBUG_ROBOTS] Will draw robot #%d at (%d,%d) with color %d (colorName: %s)",
@@ -771,7 +771,7 @@ public class GameGridView extends View {
         }
         
         // Draw targets
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET) {
                 float left = offsetX + (element.getX() * cellSize);
                 float top = offsetY + (element.getY() * cellSize);
@@ -814,7 +814,7 @@ public class GameGridView extends View {
         // Draw walls between cells, not on cells
         // Create wall model from game state
         WallModel wallModel = WallModel.fromGameElements(
-            state.getGameElements(),
+                state.gameElements,
             gridWidth, gridHeight
         );
         
@@ -936,7 +936,7 @@ public class GameGridView extends View {
         }
         
         // Draw robots (on top of walls and targets)
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT) {
                 // Draw the robot using the drawable
                 drawRobotWithGraphics(canvas, element, state);
@@ -945,7 +945,7 @@ public class GameGridView extends View {
 
         // Draw hint direction arrow next to the hinted robot
         if (hintRobotColor >= 0 && hintDirection >= 0) {
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == hintRobotColor) {
                     drawHintArrow(canvas, element, offsetX, offsetY);
                     break;
@@ -2106,7 +2106,7 @@ public class GameGridView extends View {
         // Find the robot's target if available
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state != null) {
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
                     return color + " " + getContext().getString(R.string.robot_position_a11y) + " " + (robot.getX() + 1) + "," + (robot.getY() + 1) + 
                            ". " + getContext().getString(R.string.target_position_a11y) + " " + (element.getX() + 1) + "," + (element.getY() + 1);
@@ -2136,7 +2136,7 @@ public class GameGridView extends View {
             description.append(color + " " + getContext().getString(R.string.robot_a11y) + ". ");
             
             // Find the robot's target
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
                     description.append(String.format(getContext().getString(R.string.target_a11y), element.getX() + 1, element.getY() + 1) + ". ");
                     break;
@@ -2145,7 +2145,7 @@ public class GameGridView extends View {
         }
         
         // Check for target
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
                 String color = GameLogic.getColorName(element.getColor(), true);
                 if (element.getColor() == Constants.COLOR_MULTI) {
@@ -2163,7 +2163,7 @@ public class GameGridView extends View {
         boolean hasWestWall = false;
         
         // Check for walls around this cell
-        for (GameElement element : state.getGameElements()) {
+        for (GameElement element : state.gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 // Horizontal wall at the north edge of the cell
                 if (element.getX() == x && element.getY() == y) {
@@ -2369,7 +2369,7 @@ public class GameGridView extends View {
     public void selectRobotByColor(int color) {
         GameState state = gameStateManager != null ? gameStateManager.getCurrentState().getValue() : null;
         if (state == null) return;
-        for (GameElement el : state.getGameElements()) {
+        for (GameElement el : state.gameElements) {
             if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == color) {
                 selectRobot(el);
                 return;

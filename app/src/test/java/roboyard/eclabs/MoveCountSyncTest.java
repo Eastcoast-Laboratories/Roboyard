@@ -21,18 +21,18 @@ public class MoveCountSyncTest {
     @Before
     public void setUp() {
         gameState = new GameState(16, 16);
-        gameState.setMoveCount(0);
+        gameState.moveCount = 0;
     }
 
     @Test
     public void testGameStateMoveCounting() {
         // Initial state
-        assertEquals("Initial moveCount should be 0", 0, gameState.getMoveCount());
+        assertEquals("Initial moveCount should be 0", 0, gameState.moveCount);
 
         // Simulate 5 moves
         for (int i = 1; i <= 5; i++) {
-            gameState.setMoveCount(i);
-            assertEquals("After " + i + " moves", i, gameState.getMoveCount());
+            gameState.moveCount = i;
+            assertEquals("After " + i + " moves", i, gameState.moveCount);
         }
     }
 

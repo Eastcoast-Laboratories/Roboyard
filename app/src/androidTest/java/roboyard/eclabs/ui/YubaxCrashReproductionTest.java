@@ -166,7 +166,7 @@ public class YubaxCrashReproductionTest {
             
             // Verify we have all 4 robots (rg, ry, rr, rb)
             int robotCount = 0;
-            for (GameElement element : state.getGameElements()) {
+            for (GameElement element : state.gameElements) {
                 if (element.getType() == GameElement.TYPE_ROBOT) {
                     robotCount++;
                     Timber.d("[YUBAX_CRASH_TEST] Robot found at (%d,%d) color=%d",
@@ -216,8 +216,8 @@ public class YubaxCrashReproductionTest {
             assertNotNull("GameState should still be valid after move sequence", state);
             
             // Verify board dimensions are still correct
-            assertEquals("Board width should be 12", 12, state.getWidth());
-            assertEquals("Board height should be 14", 14, state.getHeight());
+            assertEquals("Board width should be 12", 12, state.width);
+            assertEquals("Board height should be 14", 14, state.height);
             
             Timber.d("[YUBAX_CRASH_TEST] ✓ Game state is valid after all moves");
         });

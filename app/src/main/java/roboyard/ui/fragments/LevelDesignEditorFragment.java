@@ -413,10 +413,10 @@ public class LevelDesignEditorFragment extends Fragment {
                 currentState = state;
                 EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
                 EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
-                widthEdit.setText(String.valueOf(currentState.getWidth()));
-                heightEdit.setText(String.valueOf(currentState.getHeight()));
+                widthEdit.setText(String.valueOf(currentState.width));
+                heightEdit.setText(String.valueOf(currentState.height));
                 editLevelSpinner.setSelection(0);
-                String mapName = state.getLevelName() != null ? state.getLevelName() : "Save " + slot;
+                String mapName = state.levelName != null ? state.levelName : "Save " + slot;
                 levelIdTextView.setText(mapName);
                 updateUI();
                 savegameSpinner.setSelection(0);
@@ -473,7 +473,7 @@ public class LevelDesignEditorFragment extends Fragment {
             
             // Diagnostic logging for autosave load
             int robots = 0, walls = 0, targets = 0;
-            for (GameElement el : state.getGameElements()) {
+            for (GameElement el : state.gameElements) {
                 switch (el.getType()) {
                     case GameElement.TYPE_ROBOT: robots++; break;
                     case GameElement.TYPE_HORIZONTAL_WALL: // fall through
@@ -482,7 +482,7 @@ public class LevelDesignEditorFragment extends Fragment {
                 }
             }
             Timber.d("[EDITOR] Parsed autosave: %dx%d, %d elements (robots=%d, walls=%d, targets=%d)",
-                    state.getWidth(), state.getHeight(), state.getGameElements().size(),
+                    state.width, state.height, state.gameElements.size(),
                     robots, walls, targets);
             
             // Successfully loaded - set as current state
@@ -492,19 +492,19 @@ public class LevelDesignEditorFragment extends Fragment {
             // Update board size fields
             EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
             EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
-            widthEdit.setText(String.valueOf(currentState.getWidth()));
-            heightEdit.setText(String.valueOf(currentState.getHeight()));
+            widthEdit.setText(String.valueOf(currentState.width));
+            heightEdit.setText(String.valueOf(currentState.height));
             
             // Set spinner to "New Level" (index 0) since this is not a built-in level
             editLevelSpinner.setSelection(0);
             
-            String mapName = state.getLevelName() != null ? state.getLevelName() : "Random Map";
+            String mapName = state.levelName != null ? state.levelName : "Random Map";
             levelIdTextView.setText(mapName);
             
             updateUI();
             
             Timber.d("[EDITOR] Loaded last random/web map: %s (%dx%d, %d elements)", 
-                    mapName, state.getWidth(), state.getHeight(), state.getGameElements().size());
+                    mapName, state.width, state.height, state.gameElements.size());
             Toast.makeText(requireContext(), getString(R.string.editor_loaded_map, mapName), Toast.LENGTH_SHORT).show();
             return true;
             
@@ -664,14 +664,14 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         int pattern = wallPatternSpinner != null ? wallPatternSpinner.getSelectedItemPosition() : 0;
-        int w = currentState.getWidth();
-        int h = currentState.getHeight();
+        int w = currentState.width;
+        int h = currentState.height;
         
         Timber.d("[LEVEL_EDITOR] Generating walls: pattern=%d, board=%dx%d", pattern, w, h);
         
         // Preserve existing robots and targets
         List<GameElement> robotsAndTargets = new ArrayList<>();
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
                 robotsAndTargets.add(element);
             }
@@ -682,19 +682,19 @@ public class LevelDesignEditorFragment extends Fragment {
         GameState newState = generator.generate(pattern);
         
         // Copy level metadata
-        newState.setLevelId(currentState.getLevelId());
-        newState.setLevelName(currentState.getLevelName());
+        newState.levelId = currentState.levelId;
+        newState.levelName = currentState.levelName;
         
         // Re-add robots and targets
         for (GameElement element : robotsAndTargets) {
-            newState.getGameElements().add(element);
+            newState.gameElements.add(element);
         }
         
         currentState = newState;
         updateUI();
         
         Timber.d("[LEVEL_EDITOR] Generated %d elements with pattern %d", 
-                currentState.getGameElements().size(), pattern);
+                currentState.gameElements.size(), pattern);
     }
     
     /**
@@ -709,7 +709,7 @@ public class LevelDesignEditorFragment extends Fragment {
 
         // Check that there is at least one robot and one target
         boolean hasRobot = false, hasTarget = false;
-        for (GameElement el : currentState.getGameElements()) {
+        for (GameElement el : currentState.gameElements) {
             if (el.getType() == GameElement.TYPE_ROBOT) hasRobot = true;
             if (el.getType() == GameElement.TYPE_TARGET) hasTarget = true;
         }
@@ -1042,7 +1042,7 @@ public class LevelDesignEditorFragment extends Fragment {
                 // Parse the level content
                 currentState = parseLevelContent(content.toString());
                 Timber.d("Loaded custom level %d from internal storage with %d elements", 
-                        levelId, currentState.getGameElements().size());
+                        levelId, currentState.gameElements.size());
             } else {
                 // Load the built-in level from assets
                 String assetPath = "Maps/" + levelFileName;
@@ -1065,8 +1065,8 @@ public class LevelDesignEditorFragment extends Fragment {
                 // Parse the level content
                 currentState = parseLevelContent(levelContent);
                 Timber.d("Loaded built-in level %d from assets with %d elements, board size %dx%d", 
-                        levelId, currentState.getGameElements().size(), 
-                        currentState.getWidth(), currentState.getHeight());
+                        levelId, currentState.gameElements.size(),
+                        currentState.width, currentState.height);
             }
             
             currentLevelId = levelId;
@@ -1074,8 +1074,8 @@ public class LevelDesignEditorFragment extends Fragment {
             // Update UI with the loaded level
             EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
             EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
-            widthEdit.setText(String.valueOf(currentState.getWidth()));
-            heightEdit.setText(String.valueOf(currentState.getHeight()));
+            widthEdit.setText(String.valueOf(currentState.width));
+            heightEdit.setText(String.valueOf(currentState.height));
             
         } catch (IOException e) {
             Timber.e(e, "Error loading level %d: %s", levelId, e.getMessage());
@@ -1117,7 +1117,7 @@ public class LevelDesignEditorFragment extends Fragment {
         
         List<GameElement> elementsToRemove = new ArrayList<>();
         
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             int x = element.getX();
             int y = element.getY();
             
@@ -1143,7 +1143,7 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
         
         Timber.d("[LEVEL_EDITOR] Removed %d center carree walls", elementsToRemove.size());
@@ -1159,7 +1159,7 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Remove any elements inside the carree 2x2 cells
         List<GameElement> insideCarree = new ArrayList<>();
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             int x = element.getX();
             int y = element.getY();
             if (x >= centerX && x <= centerX + 1 && y >= centerY && y <= centerY + 1) {
@@ -1167,7 +1167,7 @@ public class LevelDesignEditorFragment extends Fragment {
             }
         }
         for (GameElement element : insideCarree) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
         if (!insideCarree.isEmpty()) {
             Timber.d("[LEVEL_EDITOR] Removed %d elements inside carree area", insideCarree.size());
@@ -1209,8 +1209,8 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void updateBoardSize(int newWidth, int newHeight) {
-        int oldWidth = currentState.getWidth();
-        int oldHeight = currentState.getHeight();
+        int oldWidth = currentState.width;
+        int oldHeight = currentState.height;
         
         Timber.d("[LEVEL_EDITOR] Resizing board from %dx%d to %dx%d", oldWidth, oldHeight, newWidth, newHeight);
         
@@ -1231,13 +1231,13 @@ public class LevelDesignEditorFragment extends Fragment {
         GameState newState = new GameState(newWidth, newHeight);
         
         // Copy game elements to the new state
-        for (GameElement element : currentState.getGameElements()) {
-            newState.getGameElements().add(element);
+        for (GameElement element : currentState.gameElements) {
+            newState.gameElements.add(element);
         }
         
         // Copy other properties
-        newState.setLevelId(currentState.getLevelId());
-        newState.setLevelName(currentState.getLevelName());
+        newState.levelId = currentState.levelId;
+        newState.levelName = currentState.levelName;
         
         currentState = newState;
         
@@ -1245,7 +1245,7 @@ public class LevelDesignEditorFragment extends Fragment {
         createBorderWalls(newWidth, newHeight);
         createCenterCarree(newWidth, newHeight);
         
-        Timber.d("[LEVEL_EDITOR] Board resized successfully. New element count: %d", currentState.getGameElements().size());
+        Timber.d("[LEVEL_EDITOR] Board resized successfully. New element count: %d", currentState.gameElements.size());
         
         // Update UI
         updateUI();
@@ -1256,22 +1256,22 @@ public class LevelDesignEditorFragment extends Fragment {
      * Elements that fall outside the board after shifting are removed.
      */
     private void shiftContent(int dx, int dy) {
-        int width = currentState.getWidth();
-        int height = currentState.getHeight();
+        int width = currentState.width;
+        int height = currentState.height;
         
         // Step 1: Remove outer walls and carree
         removeOuterWalls();
         removeCenterCarree(width, height);
         
         // Step 2: Shift all remaining elements
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             element.setX(element.getX() + dx);
             element.setY(element.getY() + dy);
         }
         
         // Step 3: Remove elements that fell outside the board
         List<GameElement> outsideElements = new ArrayList<>();
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             int x = element.getX();
             int y = element.getY();
             if (x < 0 || y < 0 || x >= width || y >= height) {
@@ -1279,7 +1279,7 @@ public class LevelDesignEditorFragment extends Fragment {
             }
         }
         for (GameElement element : outsideElements) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
         
         // Step 4: Re-create outer walls and carree
@@ -1295,12 +1295,12 @@ public class LevelDesignEditorFragment extends Fragment {
      * Remove all outer walls (boundary walls at x=0, x=width, y=0, y=height)
      */
     private void removeOuterWalls() {
-        int width = currentState.getWidth();
-        int height = currentState.getHeight();
+        int width = currentState.width;
+        int height = currentState.height;
         
         List<GameElement> elementsToRemove = new ArrayList<>();
         
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             int x = element.getX();
             int y = element.getY();
             
@@ -1326,7 +1326,7 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Remove outer walls
         for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
         
         Timber.d("[LEVEL_EDITOR] Removed %d outer walls", elementsToRemove.size());
@@ -1343,7 +1343,7 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("[LEVEL_EDITOR] Centering content with offset (%d, %d)", offsetX, offsetY);
         
         // Move all elements by the offset
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             element.setX(element.getX() + offsetX);
             element.setY(element.getY() + offsetY);
         }
@@ -1362,7 +1362,7 @@ public class LevelDesignEditorFragment extends Fragment {
         int shiftX = oldWidth - newWidth;
         int shiftY = oldHeight - newHeight;
         
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             // don't need to schift horizontally, it already cuts off on the right
             // element.setX(element.getX() - shiftX); this would cut off on the left
 
@@ -1371,7 +1371,7 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         // Remove elements that now fall outside the new board bounds or have invalid coordinates
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             int x = element.getX();
             int y = element.getY();
             
@@ -1384,7 +1384,7 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Remove the elements
         for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
         
         Timber.d("[LEVEL_EDITOR] Removed %d elements that didn't fit", elementsToRemove.size());
@@ -1409,8 +1409,8 @@ public class LevelDesignEditorFragment extends Fragment {
         // Enable hardwareAccelerated mode for better performance
         boardView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         
-        Timber.d("Adding board view to container. Board dimensions: %dx%d", 
-                currentState.getWidth(), currentState.getHeight());
+        Timber.d("Adding board view to container. Board dimensions: %dx%d",
+                currentState.width, currentState.height);
         
         // Add the board view to the container
         boardPreviewContainer.addView(boardView);
@@ -1424,9 +1424,9 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         Timber.d("Updated UI with current state: %d elements, board size: %dx%d", 
-                currentState.getGameElements().size(),
-                currentState.getWidth(),
-                currentState.getHeight());
+                currentState.gameElements.size(),
+                currentState.width,
+                currentState.height);
     }
     
     private String generateLevelText() {
@@ -1436,7 +1436,7 @@ public class LevelDesignEditorFragment extends Fragment {
         StringBuilder sb = new StringBuilder();
         
         // Board dimensions
-        sb.append("board:").append(currentState.getWidth()).append(",").append(currentState.getHeight()).append(";\n");
+        sb.append("board:").append(currentState.width).append(",").append(currentState.height).append(";\n");
         
         // Collect elements by type with their coordinates for numeric sorting
         List<GameElement> horizontalWalls = new ArrayList<>();
@@ -1444,7 +1444,7 @@ public class LevelDesignEditorFragment extends Fragment {
         List<GameElement> targets = new ArrayList<>();
         List<GameElement> robots = new ArrayList<>();
         
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
                 horizontalWalls.add(element);
             } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
@@ -1508,8 +1508,8 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("Adding robot at (%d, %d) with color %d", x, y, currentRobotColor);
         
         // Check if position is in carree (2x2 center square)
-        int w = currentState.getWidth();
-        int h = currentState.getHeight();
+        int w = currentState.width;
+        int h = currentState.height;
         int cx = w / 2 - 1;
         int cy = h / 2 - 1;
         if (x >= cx && x <= cx + 1 && y >= cy && y <= cy + 1) {
@@ -1521,13 +1521,13 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Remove all robots of the same color (anywhere on the board)
         List<GameElement> robotsToRemove = new ArrayList<>();
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == currentRobotColor) {
                 robotsToRemove.add(element);
             }
         }
         for (GameElement robot : robotsToRemove) {
-            currentState.getGameElements().remove(robot);
+            currentState.gameElements.remove(robot);
             Timber.d("[EDITOR] Removed %s robot at (%d,%d)", getColorName(currentRobotColor), robot.getX(), robot.getY());
         }
         
@@ -1544,8 +1544,8 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("Adding target at (%d, %d) with color %d", x, y, currentTargetColor);
         
         // Check if position is in carree (2x2 center square)
-        int w = currentState.getWidth();
-        int h = currentState.getHeight();
+        int w = currentState.width;
+        int h = currentState.height;
         int cx = w / 2 - 1;
         int cy = h / 2 - 1;
         if (x >= cx && x <= cx + 1 && y >= cy && y <= cy + 1) {
@@ -1557,13 +1557,13 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Remove all targets of the same color (anywhere on the board)
         List<GameElement> targetsToRemove = new ArrayList<>();
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == currentTargetColor) {
                 targetsToRemove.add(element);
             }
         }
         for (GameElement target : targetsToRemove) {
-            currentState.getGameElements().remove(target);
+            currentState.gameElements.remove(target);
             Timber.d("[EDITOR] Removed %s target at (%d,%d)", getColorName(currentTargetColor), target.getX(), target.getY());
         }
         
@@ -1590,8 +1590,8 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         // Redraw outer walls and carree
-        createBorderWalls(currentState.getWidth(), currentState.getHeight());
-        createCenterCarree(currentState.getWidth(), currentState.getHeight());
+        createBorderWalls(currentState.width, currentState.height);
+        createCenterCarree(currentState.width, currentState.height);
         
         // Immediately update UI
         updateUI();
@@ -1611,8 +1611,8 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         // Redraw outer walls and carree
-        createBorderWalls(currentState.getWidth(), currentState.getHeight());
-        createCenterCarree(currentState.getWidth(), currentState.getHeight());
+        createBorderWalls(currentState.width, currentState.height);
+        createCenterCarree(currentState.width, currentState.height);
         
         // Immediately update UI
         updateUI();
@@ -1626,8 +1626,8 @@ public class LevelDesignEditorFragment extends Fragment {
         }
         
         // Redraw outer walls and carree
-        createBorderWalls(currentState.getWidth(), currentState.getHeight());
-        createCenterCarree(currentState.getWidth(), currentState.getHeight());
+        createBorderWalls(currentState.width, currentState.height);
+        createCenterCarree(currentState.width, currentState.height);
         
         // Immediately update UI
         updateUI();
@@ -1640,7 +1640,7 @@ public class LevelDesignEditorFragment extends Fragment {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
         // Find and remove only robots and targets, NOT walls
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getX() == x && element.getY() == y) {
                 if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
                     elementsToRemove.add(element);
@@ -1650,7 +1650,7 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Remove the robots and targets
         for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
     }
     
@@ -1658,7 +1658,7 @@ public class LevelDesignEditorFragment extends Fragment {
      * Check if a wall of a specific type exists at the given position
      */
     private boolean hasWallOfType(int x, int y, int wallType) {
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getX() == x && element.getY() == y && element.getType() == wallType) {
                 return true;
             }
@@ -1672,26 +1672,26 @@ public class LevelDesignEditorFragment extends Fragment {
     private void removeWallByTypeAt(int x, int y, int wallType) {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getX() == x && element.getY() == y && element.getType() == wallType) {
                 elementsToRemove.add(element);
             }
         }
         
         for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
     }
     
     
     private boolean removeElementsAt(int x, int y) {
         boolean removed = false;
-        List<GameElement> elements = new ArrayList<>(currentState.getGameElements());
+        List<GameElement> elements = new ArrayList<>(currentState.gameElements);
         
         // Create a new list without the elements at the specified position
         for (GameElement element : elements) {
             if (element.getX() == x && element.getY() == y) {
-                currentState.getGameElements().remove(element);
+                currentState.gameElements.remove(element);
                 removed = true;
             }
         }
@@ -1740,18 +1740,18 @@ public class LevelDesignEditorFragment extends Fragment {
     private void randomlyPlaceRobotsAndTargets() {
         if (currentState == null) return;
         
-        int width = currentState.getWidth();
-        int height = currentState.getHeight();
+        int width = currentState.width;
+        int height = currentState.height;
         
         // Remove all existing robots and targets
         List<GameElement> elementsToRemove = new ArrayList<>();
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
                 elementsToRemove.add(element);
             }
         }
         for (GameElement element : elementsToRemove) {
-            currentState.getGameElements().remove(element);
+            currentState.gameElements.remove(element);
         }
         
         // Determine how many robots to place (2-4 robots)
@@ -1807,7 +1807,7 @@ public class LevelDesignEditorFragment extends Fragment {
      * Check if there's any element (robot, target, or wall) at the given position
      */
     private boolean hasElementAt(int x, int y) {
-        for (GameElement element : currentState.getGameElements()) {
+        for (GameElement element : currentState.gameElements) {
             if (element.getX() == x && element.getY() == y) {
                 return true;
             }
@@ -1819,7 +1819,7 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("Handling board click at: (%d, %d), mode: %d", x, y, currentEditMode);
         
         // First check if the coordinates are valid
-        if (x < 0 || y < 0 || x >= currentState.getWidth() || y >= currentState.getHeight()) {
+        if (x < 0 || y < 0 || x >= currentState.width || y >= currentState.height) {
             Timber.w("Board click coordinates out of bounds: (%d, %d)", x, y);
             return;
         }
@@ -1921,19 +1921,19 @@ public class LevelDesignEditorFragment extends Fragment {
 
             EditText widthEdit = requireView().findViewById(R.id.board_width_edit_text);
             EditText heightEdit = requireView().findViewById(R.id.board_height_edit_text);
-            widthEdit.setText(String.valueOf(currentState.getWidth()));
-            heightEdit.setText(String.valueOf(currentState.getHeight()));
+            widthEdit.setText(String.valueOf(currentState.width));
+            heightEdit.setText(String.valueOf(currentState.height));
 
             editLevelSpinner.setSelection(0);
-            levelIdTextView.setText(state.getLevelName());
+            levelIdTextView.setText(state.levelName);
 
             updateUI();
 
             Timber.d("[EDITOR] Imported ASCII map: %dx%d, %d elements",
-                    state.getWidth(), state.getHeight(), state.getGameElements().size());
+                    state.width, state.height, state.gameElements.size());
             Toast.makeText(requireContext(),
-                    "Imported " + state.getWidth() + "x" + state.getHeight() + " map with " +
-                    state.getGameElements().size() + " elements", Toast.LENGTH_SHORT).show();
+                    "Imported " + state.width + "x" + state.height + " map with " +
+                    state.gameElements.size() + " elements", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Timber.e(e, "[EDITOR] Error importing ASCII map");
@@ -1981,8 +1981,8 @@ public class LevelDesignEditorFragment extends Fragment {
             
             int width = getWidth();
             int height = getHeight();
-            int boardWidth = currentState.getWidth();
-            int boardHeight = currentState.getHeight();
+            int boardWidth = currentState.width;
+            int boardHeight = currentState.height;
             
             // Calculate cell size based on available space and board dimensions
             int cellWidth = width / boardWidth;
@@ -2023,7 +2023,7 @@ public class LevelDesignEditorFragment extends Fragment {
             }
             
             // Draw walls
-            for (GameElement element : currentState.getGameElements()) {
+            for (GameElement element : currentState.gameElements) {
                 int ex = element.getX();
                 int ey = element.getY();
                 if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
@@ -2036,7 +2036,7 @@ public class LevelDesignEditorFragment extends Fragment {
             }
             
             // Draw robots and targets using real images
-            for (GameElement element : currentState.getGameElements()) {
+            for (GameElement element : currentState.gameElements) {
                 int x = element.getX();
                 int y = element.getY();
                 int left = offsetX + x * cellSize;
@@ -2106,8 +2106,8 @@ public class LevelDesignEditorFragment extends Fragment {
                 
                 int width = getWidth();
                 int height = getHeight();
-                int boardWidth = currentState.getWidth();
-                int boardHeight = currentState.getHeight();
+                int boardWidth = currentState.width;
+                int boardHeight = currentState.height;
                 
                 // Calculate cell size based on available space and board dimensions
                 int cellWidth = width / boardWidth;

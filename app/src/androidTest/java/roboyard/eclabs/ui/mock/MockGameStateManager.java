@@ -38,7 +38,7 @@ public class MockGameStateManager extends GameStateManager {
     public void loadLevel(int level) {
         // Simplified level loading for testing
         GameState newState = GameState.createRandom();
-        newState.setLevelId(level);
+        newState.levelId = level;
         currentState.setValue(newState);
     }
     
