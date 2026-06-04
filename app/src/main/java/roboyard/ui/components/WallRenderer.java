@@ -52,7 +52,7 @@ public class WallRenderer {
                 continue;
             }
             
-            if (wall.getType() == WallType.HORIZONTAL) {
+            if (wall.type == WallType.HORIZONTAL) {
                 drawHorizontalWall(canvas, wall, offsetX, offsetY);
             } else {
                 drawVerticalWall(canvas, wall, offsetX, offsetY);
@@ -70,13 +70,13 @@ public class WallRenderer {
      * @return true if the wall is one of the 4 center cross walls, false otherwise
      */
     private boolean isWallInCenterSquare(Wall wall) {
-        int x = wall.getX();
-        int y = wall.getY();
-        WallType type = wall.getType();
+        int x = wall.x;
+        int y = wall.y;
+        WallType type = wall.type;
         
         // Calculate center square top-left corner
-        int centerX = (model.getBoardWidth() / 2) - 1;
-        int centerY = (model.getBoardHeight() / 2) - 1;
+        int centerX = (model.boardWidth / 2) - 1;
+        int centerY = (model.boardHeight / 2) - 1;
         
         // The 4 walls that form the cross inside the 2x2 center:
         boolean isCenterWall = false;
@@ -95,7 +95,7 @@ public class WallRenderer {
         
         if (isCenterWall) {
             Timber.d("[CARREE] Filtering wall: type=%s, x=%d, y=%d (center at %d,%d, board %dx%d)", 
-                    type, x, y, centerX, centerY, model.getBoardWidth(), model.getBoardHeight());
+                    type, x, y, centerX, centerY, model.boardWidth, model.boardHeight);
         }
         
         return isCenterWall;
@@ -115,8 +115,8 @@ public class WallRenderer {
             return;
         }
         
-        int x = wall.getX();
-        int y = wall.getY();
+        int x = wall.x;
+        int y = wall.y;
         
         // Calculate wall dimensions with proper scaling
         float offset = cellSize * WALL_OFFSET_FACTOR;
@@ -126,14 +126,14 @@ public class WallRenderer {
         float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
         
         // Handle the border case for bottom border correctly
-        if (y == model.getBoardHeight()) {
+        if (y == model.boardHeight) {
             // Bottom border wall at edge of board
-            top = offsetY + (model.getBoardHeight() * cellSize);
+            top = offsetY + (model.boardHeight * cellSize);
         }
         
         // Ensure the wall doesn't extend beyond the board boundaries
-        if (right > offsetX + (model.getBoardWidth() * cellSize)) {
-            right = offsetX + (model.getBoardWidth() * cellSize);
+        if (right > offsetX + (model.boardWidth * cellSize)) {
+            right = offsetX + (model.boardWidth * cellSize);
         }
         
         // Draw the wall
@@ -160,8 +160,8 @@ public class WallRenderer {
             return;
         }
         
-        int x = wall.getX();
-        int y = wall.getY();
+        int x = wall.x;
+        int y = wall.y;
         
         // Calculate wall dimensions with proper scaling
         float offset = cellSize * WALL_OFFSET_FACTOR;
@@ -171,14 +171,14 @@ public class WallRenderer {
         float wallThickness = cellSize * WALL_THICKNESS_FACTOR;
         
         // Handle the border case for right border correctly
-        if (x == model.getBoardWidth()) {
+        if (x == model.boardWidth) {
             // Right border wall at edge of board
-            left = offsetX + (model.getBoardWidth() * cellSize);
+            left = offsetX + (model.boardWidth * cellSize);
         }
         
         // Ensure the wall doesn't extend beyond the board boundaries
-        if (bottom > offsetY + (model.getBoardHeight() * cellSize)) {
-            bottom = offsetY + (model.getBoardHeight() * cellSize);
+        if (bottom > offsetY + (model.boardHeight * cellSize)) {
+            bottom = offsetY + (model.boardHeight * cellSize);
         }
         
         // Draw the wall

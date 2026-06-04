@@ -1,259 +1,256 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import timber.log.Timber;
+import android.content.Context
+import roboyard.logic.core.Preferences.context
+import timber.log.Timber
 
 /**
  * Stores and manages wall configurations for preserving walls across game changes.
  * This class allows the game to maintain the same wall layout when resetting robots
  * or starting a new game, based on user preferences.
  */
-public class WallStorage {
-    private static final String TAG = "WallStorage";
-    private static final String PREFS_NAME = "WallStoragePrefs";
-    private static final String KEY_WALLS_PREFIX = "walls_";
-    
-    // Singleton instance
-    private static WallStorage instance;
-    
+class WallStorage  // Private constructor for singleton pattern
+private constructor() {
     // Stored wall elements
-    private ArrayList<GridElement> storedWalls = new ArrayList<>();
-    
+    private val storedWalls = ArrayList<GridElement>()
+
     // Current board size
-    private int currentBoardWidth = 0;
-    private int currentBoardHeight = 0;
-    
-    // Private constructor for singleton pattern
-    private WallStorage() {
-        // Private constructor to enforce singleton pattern
-    }
-    
-    /**
-     * Get the singleton instance of WallStorage
-     * @return The WallStorage instance
-     */
-    public static synchronized WallStorage getInstance() {
-        if (instance == null) {
-            instance = new WallStorage();
-        }
-        return instance;
-    }
-    
+    private var currentBoardWidth = 0
+    private var currentBoardHeight = 0
+
     /**
      * Store wall elements from a list of grid elements
      * @param elements List of grid elements containing walls and other elements
      */
-    public void storeWalls(List<GridElement> elements) {
-        storedWalls.clear();
-        
+    fun storeWalls(elements: MutableList<GridElement>?) {
+        storedWalls.clear()
+
         if (elements == null || elements.isEmpty()) {
-            Timber.tag(TAG).d("No elements to store");
-            return;
+            Timber.tag(TAG).d("No elements to store")
+            return
         }
-        
+
+
         // Extract only wall elements (horizontal and vertical walls)
-        for (GridElement element : elements) {
-            String type = element.getType();
-            if ("mh".equals(type) || "mv".equals(type)) {
-                storedWalls.add(element);
+        for (element in elements) {
+            val type = element.getType()
+            if ("mh" == type || "mv" == type) {
+                storedWalls.add(element)
             }
         }
-        
+
+
         // Update current board size
-        updateCurrentBoardSize();
-        
-        Timber.tag(TAG).d("[WALL STORAGE] Stored %d wall elements for board size %dx%d", 
-            storedWalls.size(), currentBoardWidth, currentBoardHeight);
-        
+        updateCurrentBoardSize()
+
+        Timber.tag(TAG).d(
+            "[WALL STORAGE] Stored %d wall elements for board size %dx%d",
+            storedWalls.size, currentBoardWidth, currentBoardHeight
+        )
+
+
         // Save to persistent storage
-        saveWallsToDisk();
+        saveWallsToDisk()
     }
-    
+
     /**
      * Update the current board size from Preferences
      */
-    public void updateCurrentBoardSize() {
-        int newWidth = Preferences.boardSizeWidth;
-        int newHeight = Preferences.boardSizeHeight;
-        
+    fun updateCurrentBoardSize() {
+        val newWidth = Preferences.boardSizeWidth
+        val newHeight = Preferences.boardSizeHeight
+
+
         // If board size has changed, clear the in-memory walls
         if (currentBoardWidth != newWidth || currentBoardHeight != newHeight) {
-            Timber.tag(TAG).d("[WALL STORAGE] Board size changed from %dx%d to %dx%d, clearing in-memory walls", 
-                currentBoardWidth, currentBoardHeight, newWidth, newHeight);
-            storedWalls.clear();
+            Timber.tag(TAG).d(
+                "[WALL STORAGE] Board size changed from %dx%d to %dx%d, clearing in-memory walls",
+                currentBoardWidth, currentBoardHeight, newWidth, newHeight
+            )
+            storedWalls.clear()
         }
-        
-        currentBoardWidth = newWidth;
-        currentBoardHeight = newHeight;
+
+        currentBoardWidth = newWidth
+        currentBoardHeight = newHeight
     }
-    
+
     /**
      * Save walls to disk for persistence across app restarts
      */
-    private void saveWallsToDisk() {
-        Context context = Preferences.getContext();
+    private fun saveWallsToDisk() {
+        val context = context
         if (context == null) {
-            Timber.tag(TAG).e("Cannot save walls: context is null");
-            return;
+            Timber.tag(TAG).e("Cannot save walls: context is null")
+            return
         }
-        
-        updateCurrentBoardSize();
-        String key = getWallsKey(currentBoardWidth, currentBoardHeight);
-        
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        
+
+        updateCurrentBoardSize()
+        val key = getWallsKey(currentBoardWidth, currentBoardHeight)
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+
+
         // Convert walls to a string representation
-        String wallsData = gridElementsToString(storedWalls);
-        
-        editor.putString(key, wallsData);
-        editor.apply();
-        
-        Timber.tag(TAG).d("[WALL STORAGE] Saved %d walls to disk for board size %dx%d: String: %s", 
-            storedWalls.size(), currentBoardWidth, currentBoardHeight, wallsData);
+        val wallsData = gridElementsToString(storedWalls)
+
+        editor.putString(key, wallsData)
+        editor.apply()
+
+        Timber.tag(TAG).d(
+            "[WALL STORAGE] Saved %d walls to disk for board size %dx%d: String: %s",
+            storedWalls.size, currentBoardWidth, currentBoardHeight, wallsData
+        )
     }
-    
+
     /**
      * Convert GridElements to a string for storage
      */
-    private String gridElementsToString(ArrayList<GridElement> elements) {
-        StringBuilder sb = new StringBuilder();
-        int count = 0;
-        
+    private fun gridElementsToString(elements: ArrayList<GridElement>): String {
+        val sb = StringBuilder()
+        var count = 0
+
+
         // Count walls by type and position for debugging
-        int topWalls = 0;
-        int bottomWalls = 0;
-        int leftWalls = 0;
-        int rightWalls = 0;
-        int otherWalls = 0;
-        int horizontalWalls = 0;
-        int verticalWalls = 0;
-        
-        for (GridElement element : elements) {
+        var topWalls = 0
+        var bottomWalls = 0
+        var leftWalls = 0
+        var rightWalls = 0
+        var otherWalls = 0
+        var horizontalWalls = 0
+        var verticalWalls = 0
+
+        for (element in elements) {
             // Only store walls (mh, mv)
-            if (element.getType().equals("mh") || element.getType().equals("mv")) {
+            if (element.getType() == "mh" || element.getType() == "mv") {
                 if (count > 0) {
-                    sb.append(";");
+                    sb.append(";")
                 }
-                sb.append(element.getType()).append(",").append(element.getX()).append(",").append(element.getY());
-                count++;
-                
+                sb.append(element.getType()).append(",").append(element.getX()).append(",")
+                    .append(element.getY())
+                count++
+
+
                 // Count wall types for debugging
-                if (element.getType().equals("mh")) {
-                    horizontalWalls++;
+                if (element.getType() == "mh") {
+                    horizontalWalls++
                     if (element.getY() == 0) {
-                        topWalls++;
+                        topWalls++
                     } else if (element.getY() == currentBoardHeight) {
-                        bottomWalls++;
+                        bottomWalls++
                     } else {
-                        otherWalls++;
+                        otherWalls++
                     }
-                } else if (element.getType().equals("mv")) {
-                    verticalWalls++;
+                } else if (element.getType() == "mv") {
+                    verticalWalls++
                     if (element.getX() == 0) {
-                        leftWalls++;
+                        leftWalls++
                     } else if (element.getX() == currentBoardWidth) {
-                        rightWalls++;
+                        rightWalls++
                     } else {
-                        otherWalls++;
+                        otherWalls++
                     }
                 }
             }
         }
-        
-        Timber.d("[WALL STORAGE] Wall count by position: top=%d, bottom=%d, left=%d, right=%d, other=%d, horizontal=%d, vertical=%d", 
-                topWalls, bottomWalls, leftWalls, rightWalls, otherWalls, horizontalWalls, verticalWalls);
-        
-        return sb.toString();
+
+        Timber.d(
+            "[WALL STORAGE] Wall count by position: top=%d, bottom=%d, left=%d, right=%d, other=%d, horizontal=%d, vertical=%d",
+            topWalls, bottomWalls, leftWalls, rightWalls, otherWalls, horizontalWalls, verticalWalls
+        )
+
+        return sb.toString()
     }
-    
+
     /**
      * Load walls from disk for the current board size
      */
-    public void loadStoredWalls() {
-        Context context = Preferences.getContext();
+    fun loadStoredWalls() {
+        val context = context
         if (context == null) {
-            Timber.tag(TAG).e("Cannot load walls: context is null");
-            return;
+            Timber.tag(TAG).e("Cannot load walls: context is null")
+            return
         }
-        
-        updateCurrentBoardSize();
-        String key = getWallsKey(currentBoardWidth, currentBoardHeight);
-        
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String wallsData = prefs.getString(key, "");
-        
-        storedWalls.clear();
-        
+
+        updateCurrentBoardSize()
+        val key = getWallsKey(currentBoardWidth, currentBoardHeight)
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val wallsData: String = prefs.getString(key, "")!!
+
+        storedWalls.clear()
+
         if (wallsData.isEmpty()) {
-            Timber.tag(TAG).d("No saved walls found for board size %dx%d", 
-                currentBoardWidth, currentBoardHeight);
-            return;
+            Timber.tag(TAG).d(
+                "No saved walls found for board size %dx%d",
+                currentBoardWidth, currentBoardHeight
+            )
+            return
         }
-        
+
+
         // Parse the string representation back to GridElements
-        String[] wallEntries = wallsData.split(";");
-        for (String entry : wallEntries) {
-            if (entry.isEmpty()) continue;
-            
-            String[] parts = entry.split(",");
-            if (parts.length != 3) continue;
-            
+        val wallEntries =
+            wallsData.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        for (entry in wallEntries) {
+            if (entry.isEmpty()) continue
+
+            val parts = entry.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            if (parts.size != 3) continue
+
             try {
-                String type = parts[0];
-                int x = Integer.parseInt(parts[1]);
-                int y = Integer.parseInt(parts[2]);
-                
-                GridElement wall = new GridElement(x, y, type);
-                storedWalls.add(wall);
-            } catch (NumberFormatException e) {
-                Timber.tag(TAG).e("Error parsing wall data: %s", e.getMessage());
+                val type: String? = parts[0]
+                val x = parts[1].toInt()
+                val y = parts[2].toInt()
+
+                val wall = GridElement(x, y, type)
+                storedWalls.add(wall)
+            } catch (e: NumberFormatException) {
+                Timber.tag(TAG).e("Error parsing wall data: %s", e.message)
             }
         }
-        
-        Timber.tag(TAG).d("Loaded %d walls from disk for board size %dx%d", 
-            storedWalls.size(), currentBoardWidth, currentBoardHeight);
+
+        Timber.tag(TAG).d(
+            "Loaded %d walls from disk for board size %dx%d",
+            storedWalls.size, currentBoardWidth, currentBoardHeight
+        )
     }
-    
+
     /**
      * Get the key for storing walls based on board size
      */
-    private String getWallsKey(int width, int height) {
-        return KEY_WALLS_PREFIX + width + "x" + height;
+    private fun getWallsKey(width: Int, height: Int): String {
+        return KEY_WALLS_PREFIX + width + "x" + height
     }
-    
+
     /**
      * Clear stored walls for a specific board size
      * @param width Board width
      * @param height Board height
      */
-    public void clearStoredWallsForBoardSize(int width, int height) {
-        Context context = Preferences.getContext();
+    fun clearStoredWallsForBoardSize(width: Int, height: Int) {
+        val context = context
         if (context == null) {
-            Timber.tag(TAG).e("Cannot clear walls: context is null");
-            return;
+            Timber.tag(TAG).e("Cannot clear walls: context is null")
+            return
         }
-        
-        String key = getWallsKey(width, height);
-        
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(key);
-        editor.apply();
-        
+
+        val key = getWallsKey(width, height)
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.remove(key)
+        editor.apply()
+
+
         // If this is the current board size, also clear the in-memory walls
         if (width == currentBoardWidth && height == currentBoardHeight) {
-            storedWalls.clear();
+            storedWalls.clear()
         }
-        
-        Timber.tag(TAG).d("Cleared stored walls for board size %dx%d", width, height);
+
+        Timber.tag(TAG).d("Cleared stored walls for board size %dx%d", width, height)
     }
-    
+
     /**
      * Store wall elements for a specific board size (not necessarily the current one).
      * Used when loading a savegame with a different board size.
@@ -261,121 +258,158 @@ public class WallStorage {
      * @param boardWidth Board width of the savegame
      * @param boardHeight Board height of the savegame
      */
-    public void storeWallsForBoardSize(List<GridElement> elements, int boardWidth, int boardHeight) {
+    fun storeWallsForBoardSize(
+        elements: MutableList<GridElement>?,
+        boardWidth: Int,
+        boardHeight: Int
+    ) {
         if (elements == null || elements.isEmpty()) {
-            Timber.tag(TAG).d("[WALL STORAGE] No elements to store for %dx%d", boardWidth, boardHeight);
-            return;
+            Timber.tag(TAG)
+                .d("[WALL STORAGE] No elements to store for %dx%d", boardWidth, boardHeight)
+            return
         }
 
         // If this matches the current board size, use the normal storeWalls path
         if (boardWidth == currentBoardWidth && boardHeight == currentBoardHeight) {
-            storeWalls(elements);
-            return;
+            storeWalls(elements)
+            return
         }
 
         // Extract only wall elements
-        ArrayList<GridElement> walls = new ArrayList<>();
-        for (GridElement element : elements) {
-            String type = element.getType();
-            if ("mh".equals(type) || "mv".equals(type)) {
-                walls.add(element);
+        val walls = ArrayList<GridElement>()
+        for (element in elements) {
+            val type = element.getType()
+            if ("mh" == type || "mv" == type) {
+                walls.add(element)
             }
         }
 
         // Save directly to disk for this board size
-        Context context = Preferences.getContext();
+        val context = context
         if (context == null) {
-            Timber.tag(TAG).e("[WALL STORAGE] Cannot save walls: context is null");
-            return;
+            Timber.tag(TAG).e("[WALL STORAGE] Cannot save walls: context is null")
+            return
         }
 
-        String key = getWallsKey(boardWidth, boardHeight);
-        StringBuilder sb = new StringBuilder();
-        int count = 0;
-        for (GridElement wall : walls) {
-            if (count > 0) sb.append(";");
-            sb.append(wall.getType()).append(",").append(wall.getX()).append(",").append(wall.getY());
-            count++;
+        val key = getWallsKey(boardWidth, boardHeight)
+        val sb = StringBuilder()
+        var count = 0
+        for (wall in walls) {
+            if (count > 0) sb.append(";")
+            sb.append(wall.getType()).append(",").append(wall.getX()).append(",")
+                .append(wall.getY())
+            count++
         }
 
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(key, sb.toString()).apply();
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(key, sb.toString()).apply()
 
-        Timber.tag(TAG).d("[WALL STORAGE] Stored %d walls to disk for board size %dx%d (different from current %dx%d)",
-                count, boardWidth, boardHeight, currentBoardWidth, currentBoardHeight);
+        Timber.tag(TAG).d(
+            "[WALL STORAGE] Stored %d walls to disk for board size %dx%d (different from current %dx%d)",
+            count, boardWidth, boardHeight, currentBoardWidth, currentBoardHeight
+        )
     }
 
     /**
      * Check if there are stored walls available
      * @return true if walls are stored, false otherwise
      */
-    public boolean hasStoredWalls() {
+    fun hasStoredWalls(): Boolean {
         // If in-memory walls are empty, try loading from disk
         if (storedWalls.isEmpty()) {
-            loadStoredWalls();
+            loadStoredWalls()
         }
-        
-        return !storedWalls.isEmpty();
+
+        return !storedWalls.isEmpty()
     }
-    
+
     /**
      * Get the stored wall elements
      * @return List of stored wall elements
      */
-    public ArrayList<GridElement> getStoredWalls() {
+    fun getStoredWalls(): ArrayList<GridElement?> {
         // If in-memory walls are empty, try loading from disk
         if (storedWalls.isEmpty()) {
-            loadStoredWalls();
+            loadStoredWalls()
         }
-        
-        return new ArrayList<>(storedWalls);
+
+        return ArrayList<GridElement?>(storedWalls)
     }
-    
-    
+
+
     /**
      * Apply stored walls to a list of grid elements
      * @param elements Original grid elements
      * @return Updated grid elements with walls applied
      */
-    public ArrayList<GridElement> applyWallsToElements(ArrayList<GridElement> elements) {
+    fun applyWallsToElements(elements: ArrayList<GridElement>): ArrayList<GridElement> {
         // If no stored walls, return original elements
         if (storedWalls.isEmpty()) {
             // Try to load from disk
-            loadStoredWalls();
-            
+            loadStoredWalls()
+
+
             // If still empty after loading, return original elements
             if (storedWalls.isEmpty()) {
-                Timber.tag(TAG).d("No stored walls to apply");
-                return elements;
+                Timber.tag(TAG).d("No stored walls to apply")
+                return elements
             }
         }
-        
+
+
         // Ensure the stored walls match the current board size
-        boolean wallsMatchBoardSize = true;
-        for (GridElement wall : storedWalls) {
+        var wallsMatchBoardSize = true
+        for (wall in storedWalls) {
             if (wall.getX() >= currentBoardWidth || wall.getY() >= currentBoardHeight) {
-                wallsMatchBoardSize = false;
-                Timber.tag(TAG).w("[WALL STORAGE] Stored wall at (%d,%d) is outside current board size %dx%d", 
-                    wall.getX(), wall.getY(), currentBoardWidth, currentBoardHeight);
-                break;
+                wallsMatchBoardSize = false
+                Timber.tag(TAG).w(
+                    "[WALL STORAGE] Stored wall at (%d,%d) is outside current board size %dx%d",
+                    wall.getX(), wall.getY(), currentBoardWidth, currentBoardHeight
+                )
+                break
             }
         }
-        
+
+
         // If walls don't match board size, clear them and return original elements
         if (!wallsMatchBoardSize) {
-            Timber.tag(TAG).d("[WALL STORAGE] Stored walls don't match current board size, clearing and generating new map");
-            storedWalls.clear();
-            clearStoredWallsForBoardSize(currentBoardWidth, currentBoardHeight);
-            return elements;
+            Timber.tag(TAG)
+                .d("[WALL STORAGE] Stored walls don't match current board size, clearing and generating new map")
+            storedWalls.clear()
+            clearStoredWallsForBoardSize(currentBoardWidth, currentBoardHeight)
+            return elements
         }
-        
+
+
         // Create a copy of the original elements
-        ArrayList<GridElement> result = new ArrayList<>(elements);
-        
+        val result = ArrayList<GridElement>(elements)
+
+
         // Add stored walls
-        result.addAll(storedWalls);
-        Timber.tag(TAG).d("Applied %d stored walls to grid elements", storedWalls.size());
-        
-        return result;
+        result.addAll(storedWalls)
+        Timber.tag(TAG).d("Applied %d stored walls to grid elements", storedWalls.size)
+
+        return result
+    }
+
+    companion object {
+        private const val TAG = "WallStorage"
+        private const val PREFS_NAME = "WallStoragePrefs"
+        private const val KEY_WALLS_PREFIX = "walls_"
+
+        private var instance: WallStorage? = null
+
+        /**
+         * Get the singleton instance of WallStorage
+         * @return The WallStorage instance
+         */
+        @JvmStatic
+        @Synchronized
+        fun getInstance(): WallStorage {
+            if (instance == null) {
+                instance = WallStorage()
+            }
+            return instance!!
+        }
     }
 }

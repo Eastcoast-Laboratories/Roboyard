@@ -1,122 +1,116 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import roboyard.logic.core.GameElement;
-import roboyard.logic.core.Constants;
-import timber.log.Timber;
+import java.util.Collections
 
 /**
  * Model class that represents all walls on a game board.
  * This class serves as a single source of truth for wall data.
  */
-public class WallModel {
-    private final List<Wall> walls = new ArrayList<>();
-    private final int boardWidth;
-    private final int boardHeight;
-    
+class WallModel
+/**
+ * Creates a new wall model with the specified board dimensions.
+ * 
+ * @param boardWidth The width of the game board
+ * @param boardHeight The height of the game board
+ */(
     /**
-     * Creates a new wall model with the specified board dimensions.
-     *
-     * @param boardWidth The width of the game board
-     * @param boardHeight The height of the game board
+     * Gets the width of the board.
+     * 
+     * @return The board width
      */
-    public WallModel(int boardWidth, int boardHeight) {
-        this.boardWidth = boardWidth;
-        this.boardHeight = boardHeight;
-    }
-    
+    @JvmField val boardWidth: Int,
+    /**
+     * Gets the height of the board.
+     * 
+     * @return The board height
+     */
+    @JvmField val boardHeight: Int
+) {
+    private val walls: MutableList<Wall?> = ArrayList<Wall?>()
+
     /**
      * Adds a wall to the model.
-     *
+     * 
      * @param x The x-coordinate of the wall
      * @param y The y-coordinate of the wall
      * @param type The type of wall (horizontal or vertical)
      */
-    public void addWall(int x, int y, WallType type) {
-        Wall wall = new Wall(x, y, type);
+    fun addWall(x: Int, y: Int, type: WallType?) {
+        val wall = Wall(x, y, type)
         if (!walls.contains(wall)) {
-            walls.add(wall);
+            walls.add(wall)
         }
     }
-    
+
     /**
      * Gets all walls in the model.
-     *
+     * 
      * @return An unmodifiable list of all walls
      */
-    public List<Wall> getWalls() {
-        return Collections.unmodifiableList(walls);
+    fun getWalls(): MutableList<Wall?> {
+        return Collections.unmodifiableList<Wall?>(walls)
     }
-    
-    /**
-     * Gets the width of the board.
-     *
-     * @return The board width
-     */
-    public int getBoardWidth() {
-        return boardWidth;
-    }
-    
-    /**
-     * Gets the height of the board.
-     *
-     * @return The board height
-     */
-    public int getBoardHeight() {
-        return boardHeight;
-    }
-    
-    
-    /**
-     * Creates a WallModel from a list of GameElement objects.
-     *
-     * @param elements The list of game elements
-     * @param width The width of the game board
-     * @param height The height of the game board
-     * @return A new WallModel containing all walls from the game elements
-     */
-    public static WallModel fromGameElements(List<GameElement> elements, int width, int height) {
-        WallModel model = new WallModel(width, height);
-        
-        for (GameElement element : elements) {
-            if (element.getType() == Constants.TYPE_HORIZONTAL_WALL) {
-                model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL);
-                // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
-            } else if (element.getType() == Constants.TYPE_VERTICAL_WALL) {
-                model.addWall(element.getX(), element.getY(), WallType.VERTICAL);
-                // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
+
+
+    companion object {
+        /**
+         * Creates a WallModel from a list of GameElement objects.
+         * 
+         * @param elements The list of game elements
+         * @param width The width of the game board
+         * @param height The height of the game board
+         * @return A new WallModel containing all walls from the game elements
+         */
+        @JvmStatic
+        fun fromGameElements(
+            elements: MutableList<GameElement>,
+            width: Int,
+            height: Int
+        ): WallModel {
+            val model = WallModel(width, height)
+
+            for (element in elements) {
+                if (element.getType() == Constants.TYPE_HORIZONTAL_WALL) {
+                    model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL)
+                    // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
+                } else if (element.getType() == Constants.TYPE_VERTICAL_WALL) {
+                    model.addWall(element.getX(), element.getY(), WallType.VERTICAL)
+                    // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
+                }
             }
+
+            return model
         }
-        
-        return model;
-    }
-    
-    /**
-     * Creates a WallModel from a list of GridElement objects.
-     * This is used for compatibility with the older grid element system.
-     *
-     * @param elements The list of grid elements
-     * @param width The width of the game board
-     * @param height The height of the game board
-     * @return A new WallModel containing all walls from the grid elements
-     */
-    public static WallModel fromGridElements(List<GridElement> elements, int width, int height) {
-        WallModel model = new WallModel(width, height);
-        
-        for (GridElement element : elements) {
-            String type = element.getType();
-            if ("mh".equals(type)) {
-                model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL);
-                // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
-            } else if ("mv".equals(type)) {
-                model.addWall(element.getX(), element.getY(), WallType.VERTICAL);
-                // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
+
+        /**
+         * Creates a WallModel from a list of GridElement objects.
+         * This is used for compatibility with the older grid element system.
+         * 
+         * @param elements The list of grid elements
+         * @param width The width of the game board
+         * @param height The height of the game board
+         * @return A new WallModel containing all walls from the grid elements
+         */
+        @JvmStatic
+        fun fromGridElements(
+            elements: MutableList<GridElement>,
+            width: Int,
+            height: Int
+        ): WallModel {
+            val model = WallModel(width, height)
+
+            for (element in elements) {
+                val type = element.getType()
+                if ("mh" == type) {
+                    model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL)
+                    // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
+                } else if ("mv" == type) {
+                    model.addWall(element.getX(), element.getY(), WallType.VERTICAL)
+                    // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
+                }
             }
+
+            return model
         }
-        
-        return model;
     }
 }

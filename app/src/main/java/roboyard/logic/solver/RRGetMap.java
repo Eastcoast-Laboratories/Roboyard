@@ -165,15 +165,15 @@ public class RRGetMap {
         // direction is "N" for horizontal and "W" for vertical
         // the y position is stored in the same key as multiple of the width of the board
         for (Wall wall : wallModel.getWalls()) {
-            int x = wall.getX();
-            int y = wall.getY();
+            int x = wall.x;
+            int y = wall.y;
             int position = y * board.width + x;
             
-            if (wall.getType() == WallType.HORIZONTAL) {
+            if (wall.type == WallType.HORIZONTAL) {
                 board.setWall(position, "N", true);  // treated as "N" of the current field in driftingdroids solver
                 
                 Timber.d("[SOLUTION_SOLVER] Setting horizontal wall at position %d (x=%d, y=%d)", position, x, y);
-            } else if (wall.getType() == WallType.VERTICAL) {
+            } else if (wall.type == WallType.VERTICAL) {
                 board.setWall(position, "W", true);  // treated as "W" of the current field in driftingdroids solver
                 
                 Timber.d("[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)", position, x, y);
