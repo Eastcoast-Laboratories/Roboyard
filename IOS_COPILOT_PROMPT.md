@@ -19,7 +19,7 @@ Create an iOS app that looks and behaves exactly like the Android Roboyard puzzl
 
 ### roboyard.logic.core (22 files)
 - [x] GameState.java (103K)
-- [ ] GameLogic.java (60K)
+- [x] GameLogic.java (60K)
 - [ ] Preferences.java (47K)
 - [ ] WallPatternGenerator.java (25K)
 - [ ] WallStorage.java (14K)
