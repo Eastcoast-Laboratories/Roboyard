@@ -30,10 +30,12 @@ object LevelFormatParser {
      */
     fun parseEntries(content: String): List<RawEntry> {
         val entries = mutableListOf<RawEntry>()
-        val lines = content.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        // Split by both ; and \n to handle various formats, then trim each part
+        val lines = content.split("[;\\n]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
-        for (line in lines) {
-            if (line.isBlank()) continue
+        for (rawLine in lines) {
+            val line = rawLine.trim()
+            if (line.isBlank() || line.startsWith("#")) continue
 
             // Find the first digit to separate type from data
             var firstDigitIndex = -1
@@ -45,12 +47,12 @@ object LevelFormatParser {
             }
 
             if (firstDigitIndex != -1) {
-                val type = line.substring(0, firstDigitIndex)
-                val data = line.substring(firstDigitIndex)
+                val type = line.substring(0, firstDigitIndex).trim()
+                val data = line.substring(firstDigitIndex).trim()
                 entries.add(RawEntry(type, data))
             } else if (line.contains(":")) {
                 val parts = line.split(":".toRegex(), limit = 2).toTypedArray()
-                entries.add(RawEntry(parts[0], parts[1]))
+                entries.add(RawEntry(parts[0].trim(), parts[1].trim()))
             }
         }
 

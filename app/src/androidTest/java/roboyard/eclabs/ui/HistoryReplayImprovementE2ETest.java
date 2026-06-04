@@ -89,7 +89,7 @@ public class HistoryReplayImprovementE2ETest {
             entry.mapSignature = mapSig;
             
             // Record the first completion WITHOUT hints
-            entry.recordCompletion(30, 8);
+            entry.recordCompletion(30, 8, 1);
             // Mark as solved without hints (maxHintUsed stays -1)
             entry.setSolvedWithoutHints(true);
             entry.lastSolvedWithoutHints = System.currentTimeMillis();

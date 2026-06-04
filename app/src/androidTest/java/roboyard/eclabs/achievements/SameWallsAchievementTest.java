@@ -110,7 +110,7 @@ public class SameWallsAchievementTest {
             entry.wallSignature = wallSig;
             entry.positionSignature = positionSignature;
             entry.mapSignature = mapSignature;
-            entry.recordCompletion(30, 5);
+            entry.recordCompletion(30, 5, 3);
             GameHistoryManager.addHistoryEntry(act, entry);
             Timber.d("[UNITTESTS][SAME_WALLS_TEST] Added history entry #%d: wallSig=%s", positionIndex, wallSig);
 

@@ -19,6 +19,8 @@ class GameHistoryEntry(
     @JvmField var starsEarned: Int = 0
     @JvmField var movesMade: Int = 0
     @JvmField var completionCount: Int = 0
+
+    fun getCompletionCount(): Int = completionCount
     @JvmField var timestamp: Long = 0
     @JvmField var lastCompletionTimestamp: Long = 0
     @JvmField var difficulty: Int = 0
@@ -67,19 +69,30 @@ class GameHistoryEntry(
         this.positionSignature = positionSignature
     }
 
-    fun recordCompletion(time: Int, moves: Int, stars: Int) {
+    fun recordCompletion(time: Int, moves: Int, stars: Int): Boolean {
         completionCount++
         lastCompletionTimestamp = System.currentTimeMillis()
         playDuration += time
+        var newRecord = false
         if (movesMade == 0 || moves < movesMade) {
             movesMade = moves
+            newRecord = true
         }
         if (stars > starsEarned) {
             starsEarned = stars
         }
+        if (bestMoves == 0 || moves < bestMoves) {
+            bestMoves = moves
+            newRecord = true
+        }
+        if (bestTime == 0 || time < bestTime) {
+            bestTime = time
+            newRecord = true
+        }
         completionTimestamps.add(lastCompletionTimestamp)
         completionStars.add(stars)
         completionMoves.add(moves)
+        return newRecord
     }
 
     fun getMapPath(): String = mapPath ?: mapName ?: ""

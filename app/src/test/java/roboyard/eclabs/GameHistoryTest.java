@@ -57,20 +57,20 @@ public class GameHistoryTest {
 
     @Test
     public void testIsFirstCompletionAfterOneCompletion() {
-        entry.recordCompletion(120, 15);
+        entry.recordCompletion(120, 15, 3);
         assertTrue(entry.isFirstCompletion());
     }
 
     @Test
     public void testRecordCompletionIncrementsCount() {
-        entry.recordCompletion(100, 12);
+        entry.recordCompletion(100, 12, 3);
         assertEquals(1, entry.completionCount);
         assertTrue(entry.isFirstCompletion());
         assertEquals(1, entry.getCompletionTimestamps().size());
         assertEquals(1, entry.getCompletionMoves().size());
         assertEquals(Integer.valueOf(12), entry.getCompletionMoves().get(0));
 
-        entry.recordCompletion(90, 11);
+        entry.recordCompletion(90, 11, 3);
         assertEquals(2, entry.completionCount);
         assertFalse(entry.isFirstCompletion());
         assertEquals(2, entry.getCompletionTimestamps().size());
@@ -92,11 +92,11 @@ public class GameHistoryTest {
     @Test
     public void testRecordCompletionUpdatesBestTime() {
         // First completion sets best time
-        entry.recordCompletion(120, 15);
+        entry.recordCompletion(120, 15, 3);
         assertEquals(120, entry.bestTime);
 
         // Record faster completion
-        boolean newBest = entry.recordCompletion(80, 20);
+        boolean newBest = entry.recordCompletion(80, 20, 2);
         assertTrue(newBest);
         assertEquals(80, entry.bestTime);
         // Best moves should still be 15 (first completion)
@@ -106,11 +106,11 @@ public class GameHistoryTest {
     @Test
     public void testRecordCompletionUpdatesBestMoves() {
         // First completion
-        entry.recordCompletion(200, 15);
+        entry.recordCompletion(200, 15, 3);
         assertEquals(15, entry.bestMoves);
 
         // Record completion with fewer moves
-        boolean newBest = entry.recordCompletion(200, 10);
+        boolean newBest = entry.recordCompletion(200, 10, 3);
         assertTrue(newBest);
         assertEquals(10, entry.bestMoves);
     }
@@ -118,10 +118,10 @@ public class GameHistoryTest {
     @Test
     public void testRecordCompletionNoNewBest() {
         // First completion
-        entry.recordCompletion(120, 15);
+        entry.recordCompletion(120, 15, 3);
 
         // Record worse completion
-        boolean newBest = entry.recordCompletion(200, 20);
+        boolean newBest = entry.recordCompletion(200, 20, 2);
         assertFalse(newBest);
         assertEquals(120, entry.bestTime);
         assertEquals(15, entry.bestMoves);
@@ -129,9 +129,9 @@ public class GameHistoryTest {
 
     @Test
     public void testMultipleCompletionsTracked() {
-        entry.recordCompletion(100, 12);
-        entry.recordCompletion(90, 11);
-        entry.recordCompletion(85, 10);
+        entry.recordCompletion(100, 12, 3);
+        entry.recordCompletion(90, 11, 3);
+        entry.recordCompletion(85, 10, 3);
 
         assertEquals(3, entry.completionCount);
         assertEquals(3, entry.getCompletionTimestamps().size());
@@ -187,12 +187,12 @@ public class GameHistoryTest {
         // Initially 0 (not completed)
         assertEquals(0L, entry.lastCompletionTimestamp);
 
-        entry.recordCompletion(100, 12);
+        entry.recordCompletion(100, 12, 3);
         assertTrue(entry.lastCompletionTimestamp > 0);
 
         long afterFirst = entry.lastCompletionTimestamp;
         try { Thread.sleep(10); } catch (InterruptedException e) { }
-        entry.recordCompletion(90, 11);
+        entry.recordCompletion(90, 11, 3);
         assertTrue(entry.lastCompletionTimestamp > afterFirst);
     }
 
@@ -216,7 +216,7 @@ public class GameHistoryTest {
         assertFalse(entry.isFirstCompletion());
 
         // After first completion it should be marked
-        entry.recordCompletion(120, 15);
+        entry.recordCompletion(120, 15, 3);
         assertEquals(1, entry.completionCount);
         assertTrue(entry.isFirstCompletion());
     }
@@ -292,15 +292,15 @@ public class GameHistoryTest {
         assertTrue(entry.qualifiesForNoHintsAchievement());
         
         // Second completion - record completion doesn't change hint status
-        entry.recordCompletion(100, 12);
+        entry.recordCompletion(100, 12, 3);
         assertTrue(entry.qualifiesForNoHintsAchievement());
         
         // If hints are used later, qualification is NOT revoked (new behavior)
         entry.recordHintUsed(0);
-        assertTrue("Qualification must NOT be revoked by later hint usage", entry.qualifiesForNoHintsAchievement());
+        assertTrue("Qualification must survive later hint usage", entry.qualifiesForNoHintsAchievement());
         
         // Even more completions don't change it
-        entry.recordCompletion(80, 10);
+        entry.recordCompletion(80, 10, 3);
         assertTrue(entry.qualifiesForNoHintsAchievement());
     }
 
@@ -322,22 +322,22 @@ public class GameHistoryTest {
     public void testOptimalMovesSurvivesRecordCompletion() {
         // optimalMoves should not be changed by recordCompletion
         assertEquals(10, entry.optimalMoves);
-        entry.recordCompletion(100, 12);
+        entry.recordCompletion(100, 12, 3);
         assertEquals(10, entry.optimalMoves);
     }
 
     @Test
     public void testBestMovesUpdatedByRecordCompletion() {
         // First completion sets bestMoves
-        entry.recordCompletion(100, 12);
+        entry.recordCompletion(100, 12, 2);
         assertEquals(12, entry.bestMoves);
 
         // Better completion updates bestMoves
-        entry.recordCompletion(80, 8);
+        entry.recordCompletion(80, 8, 3);
         assertEquals(8, entry.bestMoves);
 
         // Worse completion does NOT update bestMoves
-        entry.recordCompletion(120, 15);
+        entry.recordCompletion(120, 15, 1);
         assertEquals(8, entry.bestMoves);
     }
 
@@ -347,10 +347,10 @@ public class GameHistoryTest {
         assertEquals(15, entry.movesMade);
 
         // recordCompletion always updates movesMade to latest
-        entry.recordCompletion(100, 12);
+        entry.recordCompletion(100, 12, 3);
         assertEquals(12, entry.movesMade);
 
-        entry.recordCompletion(80, 20);
+        entry.recordCompletion(80, 20, 1);
         assertEquals(20, entry.movesMade);
     }
 
@@ -366,7 +366,7 @@ public class GameHistoryTest {
         assertEquals(5, intermediateEntry.optimalMoves);
 
         // recordCompletion updates bestMoves and movesMade but not optimalMoves
-        intermediateEntry.recordCompletion(90, 7);
+        intermediateEntry.recordCompletion(90, 7, 2);
         assertEquals(5, intermediateEntry.optimalMoves);
         assertEquals(7, intermediateEntry.bestMoves);
         assertEquals(7, intermediateEntry.movesMade);
