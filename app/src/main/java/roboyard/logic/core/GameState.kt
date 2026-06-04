@@ -2210,42 +2210,43 @@ class GameState(
             var width = 14
             var height = 14
 
+            // Parse entries using central parser (handles comments and line breaks)
+            val entries = LevelFormatParser.parseEntries(levelContent ?: "")
 
-            // Create a new game state
+            // First pass: extract board dimensions
+            for (entry in entries) {
+                if (entry.type == "board") {
+                    val data = entry.data
+                    val cleanData = if (data.startsWith(":")) data.substring(1) else data
+                    val parts = cleanData.split(",".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                    if (parts.size == 2) {
+                        try {
+                            width = parts[0].trim().toInt()
+                            height = parts[1].trim().toInt()
+                            Timber.d("[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d", levelId, width, height)
+                        } catch (e: NumberFormatException) {
+                            Timber.e(e, "[BOARD_SIZE_DEBUG] Error parsing board dimensions")
+                        }
+                    }
+                    break
+                }
+            }
+
+            // Create the game state with correctly identified dimensions
             var state = GameState(width, height)
-
 
             // Track if we have at least one target
             var hasTarget = false
 
-
-            // Parse entries using central parser (handles comments and line breaks)
-            val entries = LevelFormatParser.parseEntries(levelContent ?: "")
-
+            // Second pass: parse all other entries
             for (entry in entries) {
                 val type = entry.type
                 val data = entry.data
 
                 try {
-                    // Parse board dimensions
-                    if (type == "board") {
-                        // Remove leading colon if present (board:10,10 -> data=:10,10)
-                        val cleanData = if (data.startsWith(":")) data.substring(1) else data
-                        val parts = cleanData.split(",".toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                        if (parts.size == 2) {
-                            width = parts[0].toInt()
-                            height = parts[1].toInt()
-                            state = GameState(width, height)
-                            Timber.d(
-                                "[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d",
-                                levelId,
-                                width,
-                                height
-                            )
-                        }
-                        continue
-                    }
+                    // Skip board dimensions (already handled)
+                    if (type == "board") continue
 
 
                     // Parse horizontal walls - new compact format (h) or legacy format (mh)

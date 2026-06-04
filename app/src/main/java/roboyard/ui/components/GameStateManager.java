@@ -56,6 +56,7 @@ import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
+import roboyard.ui.activities.MainActivity;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
@@ -543,6 +544,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         currentState.setValue(newState);
         moveCount.setValue(newState.moveCount);
         isGameComplete.setValue(newState.isComplete());
+
+        // Update board size globals for UI and other components
+        MainActivity.boardSizeX = newState.width;
+        MainActivity.boardSizeY = newState.height;
+        Timber.d("[BOARD_SIZE_DEBUG] Updated MainActivity board size to: %dx%d", newState.width, newState.height);
 
         // Store walls from loaded game in WallStorage if generateNewMapEachTime is off
         if (!Preferences.generateNewMapEachTime) {

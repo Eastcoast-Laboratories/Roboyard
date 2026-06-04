@@ -37,7 +37,8 @@ object LevelFormatParser {
             val line = rawLine.trim()
             if (line.isBlank() || line.startsWith("#")) continue
 
-            // Find the first digit to separate type from data
+            // Try to find the separator: either a colon or the first digit
+            val colonIndex = line.indexOf(':')
             var firstDigitIndex = -1
             for (i in line.indices) {
                 if (line[i].isDigit()) {
@@ -46,13 +47,19 @@ object LevelFormatParser {
                 }
             }
 
-            if (firstDigitIndex != -1) {
+            if (colonIndex != -1 && (firstDigitIndex == -1 || colonIndex < firstDigitIndex)) {
+                // Separator is a colon (e.g. "board:10,10" or "solution:ABC")
+                val type = line.substring(0, colonIndex).trim()
+                val data = line.substring(colonIndex + 1).trim()
+                entries.add(RawEntry(type, data))
+            } else if (firstDigitIndex != -1) {
+                // Separator is the first digit (e.g. "tb8,7" or "h0,0")
                 val type = line.substring(0, firstDigitIndex).trim()
                 val data = line.substring(firstDigitIndex).trim()
                 entries.add(RawEntry(type, data))
-            } else if (line.contains(":")) {
-                val parts = line.split(":".toRegex(), limit = 2).toTypedArray()
-                entries.add(RawEntry(parts[0].trim(), parts[1].trim()))
+            } else {
+                // No separator found, but might be a type-only line
+                entries.add(RawEntry(line, ""))
             }
         }
 
