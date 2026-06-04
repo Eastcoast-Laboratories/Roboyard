@@ -1,9 +1,9 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
 /**
  * Enum representing the type of wall in the game.
  */
-public enum WallType {
+enum class WallType {
     HORIZONTAL,
     VERTICAL
 }
