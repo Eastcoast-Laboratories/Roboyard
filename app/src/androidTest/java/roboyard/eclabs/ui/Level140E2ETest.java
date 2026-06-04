@@ -168,8 +168,8 @@ public class Level140E2ETest {
                             gameStateManager.getMoveCount().getValue() : 0;
                     currentResult.optimalMoves = 0;
                     GameSolution solution = gameStateManager.getCurrentSolution();
-                    if (solution != null && solution.getMoves() != null && solution.getMoves().size() > 0) {
-                        currentResult.optimalMoves = solution.getMoves().size();
+                    if (solution != null && solution.moves != null && solution.moves.size() > 0) {
+                        currentResult.optimalMoves = solution.moves.size();
                     }
                     currentResult.hintsUsed = gameStateManager.getCurrentState().getValue() != null ?
                             gameStateManager.getCurrentState().getValue().getHintCount() : 0;

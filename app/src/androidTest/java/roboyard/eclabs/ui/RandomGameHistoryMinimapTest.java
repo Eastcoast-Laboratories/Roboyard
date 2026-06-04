@@ -89,11 +89,11 @@ public class RandomGameHistoryMinimapTest {
         step("3/8", "Waiting for solver solution");
         roboyard.logic.core.GameSolution solution = waitForSolution(15);
         assertNotNull(TAG + " Solution must be available", solution);
-        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
-        step("3/8", "Solution ready: " + solution.getMoves().size() + " moves");
+        assertTrue(TAG + " Solution must have moves", solution.moves.size() > 0);
+        step("3/8", "Solution ready: " + solution.moves.size() + " moves");
         
         step("4/8", "Executing first move from solution");
-        executeMove(solution.getMoves().get(0));
+        executeMove(solution.moves.get(0));
         Thread.sleep(2000);
 
         step("5/8", "Navigating to Save/Load screen");
@@ -139,7 +139,7 @@ public class RandomGameHistoryMinimapTest {
     private roboyard.logic.core.GameSolution waitForSolution(int maxAttempts) throws InterruptedException {
         for (int i = 0; i < maxAttempts; i++) {
             roboyard.logic.core.GameSolution s = gameStateManager.getCurrentSolution();
-            if (s != null && !s.getMoves().isEmpty()) return s;
+            if (s != null && !s.moves.isEmpty()) return s;
             step("solver", "Waiting... attempt " + (i + 1) + "/" + maxAttempts);
             Thread.sleep(2000);
         }

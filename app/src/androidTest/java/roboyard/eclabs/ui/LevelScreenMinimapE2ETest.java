@@ -105,8 +105,8 @@ public class LevelScreenMinimapE2ETest {
         step("2/7", "Waiting for solver solution");
         GameSolution solution = waitForSolution(15);
         assertNotNull(TAG + " Solution must be available for Level 1", solution);
-        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
-        step("2/7", "Solution ready: " + solution.getMoves().size() + " moves");
+        assertTrue(TAG + " Solution must have moves", solution.moves.size() > 0);
+        step("2/7", "Solution ready: " + solution.moves.size() + " moves");
 
         step("3/7", "Playing all solution moves to complete Level 1");
         playAllMoves(solution);
@@ -266,7 +266,7 @@ public class LevelScreenMinimapE2ETest {
     private GameSolution waitForSolution(int maxAttempts) throws InterruptedException {
         for (int i = 0; i < maxAttempts; i++) {
             GameSolution s = gameStateManager.getCurrentSolution();
-            if (s != null && !s.getMoves().isEmpty()) return s;
+            if (s != null && !s.moves.isEmpty()) return s;
             step("solver", "Waiting... attempt " + (i + 1) + "/" + maxAttempts);
             Thread.sleep(2000);
         }
@@ -274,7 +274,7 @@ public class LevelScreenMinimapE2ETest {
     }
 
     private void playAllMoves(GameSolution solution) throws InterruptedException {
-        List<IGameMove> moves = solution.getMoves();
+        List<IGameMove> moves = solution.moves;
         for (int i = 0; i < moves.size(); i++) {
             step("move", (i + 1) + "/" + moves.size() + ": " + moves.get(i));
             executeMove(moves.get(i));

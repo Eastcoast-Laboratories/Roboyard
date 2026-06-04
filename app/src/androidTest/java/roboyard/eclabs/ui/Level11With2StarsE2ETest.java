@@ -143,8 +143,8 @@ public class Level11With2StarsE2ETest {
                             gameStateManager.getMoveCount().getValue() : 0;
                     int optimalMoves = 0;
                     GameSolution solution = gameStateManager.getCurrentSolution();
-                    if (solution != null && solution.getMoves() != null && solution.getMoves().size() > 0) {
-                        optimalMoves = solution.getMoves().size();
+                    if (solution != null && solution.moves != null && solution.moves.size() > 0) {
+                        optimalMoves = solution.moves.size();
                     }
                     int hintsUsed = gameStateManager.getCurrentState().getValue() != null ?
                             gameStateManager.getCurrentState().getValue().getHintCount() : 0;

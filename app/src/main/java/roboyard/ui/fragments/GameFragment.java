@@ -731,8 +731,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                 gameStateManager.getMoveCount().getValue() : 0;
                         int optimalMoves = 0;
                         GameSolution solution = gameStateManager.getCurrentSolution();
-                        if (solution != null && solution.getMoves() != null && solution.getMoves().size() > 0) {
-                            optimalMoves = solution.getMoves().size();
+                        if (solution != null && solution.moves != null && solution.moves.size() > 0) {
+                            optimalMoves = solution.moves.size();
                             Timber.d("Solution object hash (completion): %s", System.identityHashCode(solution));
                         } else {
                             // Solver may still be running - use last known min moves as fallback
@@ -815,8 +815,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         
                         // Add optimal moves information if no hints were used
                         GameSolution solution = gameStateManager.getCurrentSolution();
-                        if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty() && currentHintStep < 4) {
-                            int optimalMoves = solution.getMoves().size();
+                        if (solution != null && solution.moves != null && !solution.moves.isEmpty() && currentHintStep < 4) {
+                            int optimalMoves = solution.moves.size();
                             int actualMoves = gameStateManager.getMoveCount().getValue();
                             
                             if (actualMoves == optimalMoves) {
@@ -855,8 +855,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                     gameStateManager.getMoveCount().getValue() : 0;
                             int optimalMoves = 0;
                             GameSolution sol = gameStateManager.getCurrentSolution();
-                            if (sol != null && sol.getMoves() != null) {
-                                optimalMoves = sol.getMoves().size();
+                            if (sol != null && sol.moves != null) {
+                                optimalMoves = sol.moves.size();
                             } else {
                                 // Solver may still be running - use last known min moves as fallback
                                 optimalMoves = gameStateManager.getLastSolutionMinMoves();
@@ -1105,20 +1105,20 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             GameSolution solution = gameStateManager.getCurrentSolution();
             
             // Check if the solution is valid and has moves
-            if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
+            if (solution != null && solution.moves != null && !solution.moves.isEmpty()) {
                 // Only check normal hints (not pre-hints)
                 if (!showingPreHints || currentHintStep >= (numPreHints + NUM_FIXED_PRE_HINTS)) {
                     // Calculate the index for the normal hint
                     int normalHintIndex = showingPreHints ? currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
                     
                     // Make sure we're within bounds
-                    if (normalHintIndex >= 0 && normalHintIndex < solution.getMoves().size()) {
+                    if (normalHintIndex >= 0 && normalHintIndex < solution.moves.size()) {
                         // Get the current move count
                         int currentMoveCount = state.moveCount;
                         Timber.d("[HINT_SYSTEM] Current move count: %d", currentMoveCount);
                         
                         // Get the hint move
-                        IGameMove hintMove = solution.getMoves().get(normalHintIndex);
+                        IGameMove hintMove = solution.moves.get(normalHintIndex);
                         
                         // Get the last moved robot from the state
                         GameElement lastMovedRobot = state.getLastMovedRobot();
@@ -1148,7 +1148,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                     gameGridView.setHintArrow(-1, -1);
                                 }
                                 // Advance to the next hint
-                                int totalMoves = solution.getMoves().size();
+                                int totalMoves = solution.moves.size();
                                 totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
                                 
                                 // Increment hint step if possible
@@ -1168,8 +1168,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                                     currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) : currentHintStep;
                                             autoHintRobotColor = showNormalHint(solution, state, totalMoves, nextNormalHintIndex);
                                             // Get direction of the next hint move for the arrow
-                                            if (nextNormalHintIndex >= 0 && nextNormalHintIndex < solution.getMoves().size()) {
-                                                IGameMove nextMove = solution.getMoves().get(nextNormalHintIndex);
+                                            if (nextNormalHintIndex >= 0 && nextNormalHintIndex < solution.moves.size()) {
+                                                IGameMove nextMove = solution.moves.get(nextNormalHintIndex);
                                                 if (nextMove instanceof roboyard.pm.ia.ricochet.RRGameMove) {
                                                     autoHintDirection = ((roboyard.pm.ia.ricochet.RRGameMove) nextMove).getDirection();
                                                 }
@@ -1419,7 +1419,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 
                 // Check if we have a solution object at all
                 GameSolution solution = gameStateManager.getCurrentSolution();
-                if (solution == null || solution.getMoves() == null || solution.getMoves().isEmpty()) {
+                if (solution == null || solution.moves == null || solution.moves.isEmpty()) {
                     Timber.d("[HINT_SYSTEM] No solution available, calculating...");
                     showSolverCalculatingMessage();
                     return;
@@ -1427,7 +1427,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 
                 // If we already have a solution, show the current hint
                 GameState currentGameState = gameStateManager.getCurrentState().getValue();
-                int totalMoves = solution.getMoves().size();
+                int totalMoves = solution.moves.size();
                 int currentStep = gameStateManager.getCurrentSolutionStep();
                 Timber.d("[HINT_SYSTEM] Showing current hint: step=%d, totalMoves=%d", currentStep, totalMoves);
                 
@@ -1491,7 +1491,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         prevHintButton.setOnClickListener(v -> {
             Timber.d("[HINT_SYSTEM] Previous hint button clicked");
             GameSolution solution = gameStateManager.getCurrentSolution();
-            if (solution == null || solution.getMoves().isEmpty()) {
+            if (solution == null || solution.moves.isEmpty()) {
                 Timber.d("[HINT_SYSTEM] No solution available for previous hint");
                 return;
             }
@@ -1501,7 +1501,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 currentHintStep--;
                 Timber.d("[HINT_SYSTEM] Moving to previous hint: step=%d", currentHintStep);
                 GameState currentGameState = gameStateManager.getCurrentState().getValue();
-                int totalMoves = solution.getMoves().size();
+                int totalMoves = solution.moves.size();
                 
                 // Clear hint arrow on manual navigation
                 if (gameGridView != null) {
@@ -2183,7 +2183,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Display the previous hint
             GameSolution solution = gameStateManager.getCurrentSolution();
             if (solution != null) {
-                int totalMoves = solution.getMoves().size();
+                int totalMoves = solution.moves.size();
                 GameState state = gameStateManager.getCurrentState().getValue();
 
                 // Clear hint arrow on manual navigation
@@ -3600,13 +3600,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             // Create hint message with the correct hint number format
             StringBuilder message = new StringBuilder();
             int displayHintNumber = currentHintStep + 1;
-            int totalPossibleHints = numPreHints + NUM_FIXED_PRE_HINTS + solution.getMoves().size();
+            int totalPossibleHints = numPreHints + NUM_FIXED_PRE_HINTS + solution.moves.size();
             message.append(displayHintNumber).append("/").append(totalPossibleHints).append(": ");
             message.append(getString(R.string.pre_hint_involved_robots)).append(" ");
             
             // Analyze ALL moves to see which robots are involved
             ArrayList<String> robotsInvolved = new ArrayList<>();
-            List<IGameMove> moves = solution.getMoves();
+            List<IGameMove> moves = solution.moves;
             for (IGameMove move : moves) {
                 if (move instanceof RRGameMove) {
                     RRGameMove rrMove = (RRGameMove) move;
@@ -3648,8 +3648,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         // Last fixed pre-hint: Show which robot to move first
         else if (currentHintStep == numPreHints + 2) {
-            if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
-                RRGameMove firstMove = (RRGameMove) solution.getMoves().get(0);
+            if (!solution.moves.isEmpty() && solution.moves.get(0) instanceof RRGameMove) {
+                RRGameMove firstMove = (RRGameMove) solution.moves.get(0);
                 String robotColorName = getLocalizedRobotColorNameDative(firstMove.getColor());
                 
                 preHintText = getString(R.string.pre_hint_first_move, robotColorName); // "Move the X robot first"
@@ -3672,7 +3672,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         if (currentHintStep == numPreHints + 1) {
             // Count unique robot colors in solution
             ArrayList<Integer> uniqueColors = new ArrayList<>();
-            for (IGameMove move : solution.getMoves()) {
+            for (IGameMove move : solution.moves) {
                 if (move instanceof RRGameMove) {
                     RRGameMove rrMove = (RRGameMove) move;
                     if (!uniqueColors.contains(rrMove.getColor())) {
@@ -3686,8 +3686,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
         } else if (currentHintStep == numPreHints + 2) {
             // For "move X first" hint, always use the first robot's color
-            if (!solution.getMoves().isEmpty() && solution.getMoves().get(0) instanceof RRGameMove) {
-                robotColorForBackground = ((RRGameMove) solution.getMoves().get(0)).getColor();
+            if (!solution.moves.isEmpty() && solution.moves.get(0) instanceof RRGameMove) {
+                robotColorForBackground = ((RRGameMove) solution.moves.get(0)).getColor();
             }
         }
         
@@ -3697,9 +3697,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         announceAccessibility(preHintText);
         // Return the robot color for the last fixed pre-hint ("move X first"), else -1
         if (currentHintStep == numPreHints + 2
-                && !solution.getMoves().isEmpty()
-                && solution.getMoves().get(0) instanceof RRGameMove) {
-            return ((RRGameMove) solution.getMoves().get(0)).getColor();
+                && !solution.moves.isEmpty()
+                && solution.moves.get(0) instanceof RRGameMove) {
+            return ((RRGameMove) solution.moves.get(0)).getColor();
         }
         return -1;
     }
@@ -3740,7 +3740,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         try {
             // Get the specific move for this hint
-            IGameMove hintMove = solution.getMoves().get(hintIndex);
+            IGameMove hintMove = solution.moves.get(hintIndex);
             
             if (hintMove instanceof RRGameMove rrMove) {
                 // Get the robot's color name - use the color from the move
@@ -3787,7 +3787,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             hintMessage.append("...,");
                         }
                         
-                        IGameMove prevMove = solution.getMoves().get(i);
+                        IGameMove prevMove = solution.moves.get(i);
                         if (prevMove instanceof RRGameMove prevRRMove) {
                             // Get abbreviated color and direction
                             String prevColorName = getColorAbbreviation(getLocalizedRobotColorName(prevRRMove.getColor()));
@@ -3984,14 +3984,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private void updateHintNavigationArrows() {
         GameSolution solution = gameStateManager.getCurrentSolution();
-        if (solution == null || solution.getMoves().isEmpty()) {
+        if (solution == null || solution.moves.isEmpty()) {
             // No solution yet, hide both arrows
             prevHintButton.setVisibility(View.GONE);
             nextHintButton.setVisibility(View.GONE);
             return;
         }
         
-        int totalMoves = solution.getMoves().size();
+        int totalMoves = solution.moves.size();
         int totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
         
         // Hide prev arrow if at first hint
@@ -4061,12 +4061,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         
         GameSolution solution = gameStateManager.getCurrentSolution();
-        if (solution == null || solution.getMoves().isEmpty()) {
+        if (solution == null || solution.moves.isEmpty()) {
             Timber.d("[HINT_SYSTEM] No solution available for next hint from %s", source);
             return;
         }
         
-        int totalMoves = solution.getMoves().size();
+        int totalMoves = solution.moves.size();
         totalPossibleHints = totalMoves + numPreHints + NUM_FIXED_PRE_HINTS;
         
         // Increment hint step if possible
@@ -4089,8 +4089,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 nextHintRobotColor = showNormalHint(solution, currentGameState, totalMoves, normalHintIndex);
                 
                 // Get direction for Semi-Auto mode
-                if (normalHintIndex >= 0 && normalHintIndex < solution.getMoves().size()) {
-                    IGameMove nextMove = solution.getMoves().get(normalHintIndex);
+                if (normalHintIndex >= 0 && normalHintIndex < solution.moves.size()) {
+                    IGameMove nextMove = solution.moves.get(normalHintIndex);
                     if (nextMove instanceof roboyard.pm.ia.ricochet.RRGameMove) {
                         nextHintDirection = ((roboyard.pm.ia.ricochet.RRGameMove) nextMove).getDirection();
                     }

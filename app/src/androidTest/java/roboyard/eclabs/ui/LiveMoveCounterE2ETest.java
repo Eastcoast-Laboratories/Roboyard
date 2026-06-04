@@ -103,7 +103,7 @@ public class LiveMoveCounterE2ETest {
             return;
         }
 
-        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Solution has %d moves", solution.getMoves().size());
+        Timber.d("[UNITTESTS][LIVE_COUNTER_TEST] Solution has %d moves", solution.moves.size());
 
         // Verify live counter is NOT enabled by default
         assertFalse("Live counter should be disabled by default",

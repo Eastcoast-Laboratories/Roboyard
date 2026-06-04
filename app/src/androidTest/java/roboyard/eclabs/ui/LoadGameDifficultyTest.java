@@ -101,7 +101,7 @@ public class LoadGameDifficultyTest {
             if (gameStateManager != null) {
                 gameStateHolder[0] = gameStateManager.getCurrentState().getValue();
                 if (gameStateManager.getCurrentSolution() != null) {
-                    solutionMovesHolder[0] = gameStateManager.getCurrentSolution().getMoves().size();
+                    solutionMovesHolder[0] = gameStateManager.getCurrentSolution().moves.size();
                 }
             }
         });

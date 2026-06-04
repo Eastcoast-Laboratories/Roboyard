@@ -167,7 +167,7 @@ public class PerfectRandom5E2ETest {
         roboyard.logic.core.GameSolution solution = TestHelper.waitForSolution(activityRule, gameStateManager, 30);
         if (solution != null) {
             Timber.d("[UNITTESTS][PERFECT5_TEST] Game %d: Solver found solution with %d moves",
-                    game, solution.getMoves().size());
+                    game, solution.moves.size());
         } else {
             Timber.w("[PERFECT5_TEST] Game %d: Solver timeout", game);
         }

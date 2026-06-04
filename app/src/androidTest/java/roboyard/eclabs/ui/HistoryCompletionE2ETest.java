@@ -96,8 +96,8 @@ public class HistoryCompletionE2ETest {
         step("2/8", "Waiting for AI solution");
         GameSolution solution = waitForSolution(15);
         assertNotNull(TAG + " Solution must be available", solution);
-        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
-        step("2/8", "Solution ready: " + solution.getMoves().size() + " moves");
+        assertTrue(TAG + " Solution must have moves", solution.moves.size() > 0);
+        step("2/8", "Solution ready: " + solution.moves.size() + " moves");
 
         step("3/8", "Playing all solution moves");
         playAllMoves(solution);
@@ -198,7 +198,7 @@ public class HistoryCompletionE2ETest {
         assertNotNull(TAG + " Solution must be available", solution);
 
         step("3/4", "Executing only first move (no completion)");
-        executeMove(solution.getMoves().get(0));
+        executeMove(solution.moves.get(0));
         Thread.sleep(2000);
 
         assertFalse(TAG + " Game must NOT be complete after first move only",
@@ -237,8 +237,8 @@ public class HistoryCompletionE2ETest {
         step("SOL", "Waiting for AI solution");
         GameSolution solution = waitForSolution(20);
         assertNotNull(TAG + " Solution must be available", solution);
-        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
-        int optimalMoveCount = solution.getMoves().size();
+        assertTrue(TAG + " Solution must have moves", solution.moves.size() > 0);
+        int optimalMoveCount = solution.moves.size();
         step("SOL", "Optimal solution: " + optimalMoveCount + " moves");
 
         step("EXTRA", "Making extra moves with a non-solution robot");
@@ -285,7 +285,7 @@ public class HistoryCompletionE2ETest {
         step("REPLAY", "Waiting for solution on replayed map");
         GameSolution solution2 = waitForSolution(20);
         assertNotNull(TAG + " Solution must be available for replay", solution2);
-        int optimalMoveCount2 = solution2.getMoves().size();
+        int optimalMoveCount2 = solution2.moves.size();
         step("REPLAY", "Replay solution: " + optimalMoveCount2 + " moves");
 
         step("HINT", "Clicking hint button");
@@ -414,7 +414,7 @@ public class HistoryCompletionE2ETest {
     }
 
     private void playAllMoves(GameSolution solution) throws InterruptedException {
-        List<IGameMove> moves = solution.getMoves();
+        List<IGameMove> moves = solution.moves;
         for (int i = 0; i < moves.size(); i++) {
             step("move", (i + 1) + "/" + moves.size() + ": " + moves.get(i));
             executeMove(moves.get(i));
@@ -429,7 +429,7 @@ public class HistoryCompletionE2ETest {
     private GameSolution waitForSolution(int maxAttempts) throws InterruptedException {
         for (int i = 0; i < maxAttempts; i++) {
             GameSolution s = gameStateManager.getCurrentSolution();
-            if (s != null && !s.getMoves().isEmpty()) {
+            if (s != null && !s.moves.isEmpty()) {
                 return s;
             }
             step("solver", "Waiting... attempt " + (i + 1) + "/" + maxAttempts);
@@ -473,7 +473,7 @@ public class HistoryCompletionE2ETest {
 
         // Collect colors used in the solution
         java.util.Set<Integer> solutionColors = new java.util.HashSet<>();
-        for (IGameMove m : solution.getMoves()) {
+        for (IGameMove m : solution.moves) {
             if (m instanceof RRGameMove) {
                 solutionColors.add(((RRGameMove) m).getColor());
             }

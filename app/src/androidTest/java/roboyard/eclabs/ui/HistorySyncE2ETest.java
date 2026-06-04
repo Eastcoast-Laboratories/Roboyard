@@ -141,8 +141,8 @@ public class HistorySyncE2ETest {
         step("2/8", "Waiting for AI solution");
         GameSolution solution = waitForSolution(30);
         assertNotNull(TAG + " Solution must be available", solution);
-        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
-        int optimalMoves = solution.getMoves().size();
+        assertTrue(TAG + " Solution must have moves", solution.moves.size() > 0);
+        int optimalMoves = solution.moves.size();
         step("2/8", "Solution ready: " + optimalMoves + " moves");
 
         step("2/8", "Playing all solution moves");
@@ -382,7 +382,7 @@ public class HistorySyncE2ETest {
     }
 
     private void playAllMoves(GameSolution solution) throws InterruptedException {
-        List<IGameMove> moves = solution.getMoves();
+        List<IGameMove> moves = solution.moves;
         for (int i = 0; i < moves.size(); i++) {
             step("move", (i + 1) + "/" + moves.size() + ": " + moves.get(i));
             executeMove(moves.get(i));
@@ -397,7 +397,7 @@ public class HistorySyncE2ETest {
     private GameSolution waitForSolution(int maxAttempts) throws InterruptedException {
         for (int i = 0; i < maxAttempts; i++) {
             GameSolution s = gameStateManager.getCurrentSolution();
-            if (s != null && !s.getMoves().isEmpty()) {
+            if (s != null && !s.moves.isEmpty()) {
                 return s;
             }
             step("solver", "Waiting... attempt " + (i + 1) + "/" + maxAttempts);

@@ -97,10 +97,10 @@ public class Level111DebugTest {
                 }
                 
                 GameSolution solution = gameStateManager.getCurrentSolution();
-                if (solution != null && solution.getMoves() != null) {
-                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Solution has %d moves", solution.getMoves().size());
-                    for (int i = 0; i < solution.getMoves().size(); i++) {
-                        IGameMove move = solution.getMoves().get(i);
+                if (solution != null && solution.moves != null) {
+                    Timber.d("[UNITTESTS][LEVEL111_DEBUG] Solution has %d moves", solution.moves.size());
+                    for (int i = 0; i < solution.moves.size(); i++) {
+                        IGameMove move = solution.moves.get(i);
                         if (move instanceof RRGameMove) {
                             RRGameMove rrMove = (RRGameMove) move;
                             Timber.d("[UNITTESTS][LEVEL111_DEBUG] Move %d: Robot %d -> %s", 

@@ -264,13 +264,13 @@ public class PreComputationTest {
 
         GameSolution solution = solver.getSolution(0);
         assertNotNull("First solution should not be null", solution);
-        int moves = solution.getMoves().size();
+        int moves = solution.moves.size();
         Timber.d("[UNITTESTS][PRECOMP_TEST] Solution found with %d moves", moves);
         
         // Log ALL moves using toString
-        if (solution.getMoves() != null && solution.getMoves().size() > 0) {
-            for (int i = 0; i < solution.getMoves().size(); i++) {
-                IGameMove m = solution.getMoves().get(i);
+        if (solution.moves != null && solution.moves.size() > 0) {
+            for (int i = 0; i < solution.moves.size(); i++) {
+                IGameMove m = solution.moves.get(i);
                 Timber.d("[UNITTESTS][PRECOMP_TEST] Move %d: %s (class: %s)", i, m.toString(), m.getClass().getSimpleName());
             }
         }
@@ -447,7 +447,7 @@ public class PreComputationTest {
                 int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
                 if (numSolutions > 0) {
                     GameSolution solution = solver.getSolution(0);
-                    int moves = (solution != null && solution.getMoves() != null) ? solution.getMoves().size() : 0;
+                    int moves = (solution != null && solution.moves != null) ? solution.moves.size() : 0;
                     if (solver.isSolution01()) moves = 1;
                     solved++;
                     Timber.d("[UNITTESTS][PRECOMP_TEST] [%d/%d] Solved in %dms: %s %s → (%d,%d) = %d moves",

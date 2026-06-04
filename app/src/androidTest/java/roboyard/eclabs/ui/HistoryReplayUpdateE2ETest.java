@@ -80,14 +80,14 @@ public class HistoryReplayUpdateE2ETest {
         step("1/5", "Waiting for AI solution");
         GameSolution solution = waitForSolution(30);
         assertNotNull(TAG + " Solution must be available", solution);
-        assertTrue(TAG + " Solution must have moves", solution.getMoves().size() > 0);
-        int optimalMoves = solution.getMoves().size();
+        assertTrue(TAG + " Solution must have moves", solution.moves.size() > 0);
+        int optimalMoves = solution.moves.size();
         step("1/5", "Optimal solution has " + optimalMoves + " moves");
 
         // Make an extra move: move the first robot in the solution back and forth
         // to add non-optimal moves before playing the solution
         step("1/5", "Making extra non-optimal moves first");
-        IGameMove firstMove = solution.getMoves().get(0);
+        IGameMove firstMove = solution.moves.get(0);
         RRGameMove rrFirst = (RRGameMove) firstMove;
 
         // Move a different robot (or same robot in opposite direction) to add extra moves
@@ -145,7 +145,7 @@ public class HistoryReplayUpdateE2ETest {
         step("3/5", "Waiting for AI solution on replayed game");
         GameSolution replaySolution = waitForSolution(30);
         assertNotNull(TAG + " Replay solution must be available", replaySolution);
-        int replayOptimalMoves = replaySolution.getMoves().size();
+        int replayOptimalMoves = replaySolution.moves.size();
         step("3/5", "Replay solution has " + replayOptimalMoves + " moves");
 
         // === STEP 4: Play optimal solution on replay ===
@@ -238,7 +238,7 @@ public class HistoryReplayUpdateE2ETest {
     }
 
     private void playAllMoves(GameSolution solution) throws InterruptedException {
-        List<IGameMove> moves = solution.getMoves();
+        List<IGameMove> moves = solution.moves;
         for (int i = 0; i < moves.size(); i++) {
             step("move", (i + 1) + "/" + moves.size() + ": " + moves.get(i));
             executeMove(moves.get(i));
@@ -253,7 +253,7 @@ public class HistoryReplayUpdateE2ETest {
     private GameSolution waitForSolution(int maxAttempts) throws InterruptedException {
         for (int i = 0; i < maxAttempts; i++) {
             GameSolution s = gameStateManager.getCurrentSolution();
-            if (s != null && !s.getMoves().isEmpty()) {
+            if (s != null && !s.moves.isEmpty()) {
                 return s;
             }
             step("solver", "Waiting... attempt " + (i + 1) + "/" + maxAttempts);

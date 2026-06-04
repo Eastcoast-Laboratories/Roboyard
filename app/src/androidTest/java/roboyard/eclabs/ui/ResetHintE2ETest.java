@@ -97,18 +97,18 @@ public class ResetHintE2ETest {
         GameSolution solution = null;
         for (int i = 0; i < 10; i++) {
             solution = gameStateManager.getCurrentSolution();
-            if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
+            if (solution != null && solution.moves != null && !solution.moves.isEmpty()) {
                 break;
             }
             Timber.d("[UNITTESTS][RESET_HINT_TEST] Waiting for solution... attempt %d", i + 1);
             Thread.sleep(2000);
         }
         assertNotNull("Solution should be available", solution);
-        assertTrue("Solution should have moves", solution.getMoves().size() > 0);
-        Timber.d("[UNITTESTS][RESET_HINT_TEST] Solution ready with %d moves", solution.getMoves().size());
+        assertTrue("Solution should have moves", solution.moves.size() > 0);
+        Timber.d("[UNITTESTS][RESET_HINT_TEST] Solution ready with %d moves", solution.moves.size());
 
         // Step 2: Move a robot successfully (first move of the solution)
-        IGameMove firstMove = solution.getMoves().get(0);
+        IGameMove firstMove = solution.moves.get(0);
         Timber.d("[UNITTESTS][RESET_HINT_TEST] Executing first move: %s", firstMove);
         activityRule.getScenario().onActivity(activity -> {
             executeSolutionMove(firstMove);

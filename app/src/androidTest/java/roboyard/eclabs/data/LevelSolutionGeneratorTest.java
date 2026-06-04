@@ -163,7 +163,7 @@ public class LevelSolutionGeneratorTest {
                     result.solutionCount = solutions.size();
                     GameSolution gameSolution = solver.getSolution(0);
                     if (gameSolution != null) {
-                        result.optimalMoves = gameSolution.getMoves().size();
+                        result.optimalMoves = gameSolution.moves.size();
                         result.solution = formatSolution(gameSolution);
                         result.solved = true;
                     } else {
@@ -189,7 +189,7 @@ public class LevelSolutionGeneratorTest {
      */
     private String formatSolution(GameSolution solution) {
         StringBuilder sb = new StringBuilder();
-        ArrayList<IGameMove> moves = solution.getMoves();
+        ArrayList<IGameMove> moves = solution.moves;
         
         for (int i = 0; i < moves.size(); i++) {
             if (i > 0) sb.append(",");

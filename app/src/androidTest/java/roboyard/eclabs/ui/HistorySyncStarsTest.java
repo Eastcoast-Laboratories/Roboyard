@@ -75,20 +75,20 @@ public class HistorySyncStarsTest {
                 holder[0] = gameStateManager.getCurrentSolution();
             });
             solution = holder[0];
-            if (solution != null && solution.getMoves() != null && !solution.getMoves().isEmpty()) {
-                Timber.d("[UNITTESTS][SYNC_TEST] Solution found with %d moves", solution.getMoves().size());
+            if (solution != null && solution.moves != null && !solution.moves.isEmpty()) {
+                Timber.d("[UNITTESTS][SYNC_TEST] Solution found with %d moves", solution.moves.size());
                 break;
             }
             Thread.sleep(1000);
         }
         assertNotNull("Solver should find a solution for Level 1", solution);
-        assertNotNull("Solution should have moves", solution.getMoves());
-        assertFalse("Solution should not be empty", solution.getMoves().isEmpty());
+        assertNotNull("Solution should have moves", solution.moves);
+        assertFalse("Solution should not be empty", solution.moves.isEmpty());
 
         // Execute solution moves
-        for (int i = 0; i < solution.getMoves().size(); i++) {
-            IGameMove move = solution.getMoves().get(i);
-            Timber.d("[UNITTESTS][SYNC_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
+        for (int i = 0; i < solution.moves.size(); i++) {
+            IGameMove move = solution.moves.get(i);
+            Timber.d("[UNITTESTS][SYNC_TEST] Executing move %d/%d: %s", i + 1, solution.moves.size(), move);
 
             activityRule.getScenario().onActivity(activity -> {
                 if (move instanceof RRGameMove) {

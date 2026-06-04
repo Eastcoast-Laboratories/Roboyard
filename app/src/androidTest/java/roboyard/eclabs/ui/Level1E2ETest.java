@@ -108,12 +108,12 @@ public class Level1E2ETest {
             Timber.w("[E2E_TEST] Solution could not be loaded, but continuing with manual moves");
             // Continue anyway - we can still test manual moves
         } else {
-            Timber.d("[UNITTESTS][E2E_TEST] Solution has %d moves", solution.getMoves().size());
+            Timber.d("[UNITTESTS][E2E_TEST] Solution has %d moves", solution.moves.size());
             
             // Execute each move from the solution
-            for (int i = 0; i < solution.getMoves().size() && i < 20; i++) {
-                IGameMove move = solution.getMoves().get(i);
-                Timber.d("[UNITTESTS][E2E_TEST] Executing move %d/%d: %s", i + 1, solution.getMoves().size(), move);
+            for (int i = 0; i < solution.moves.size() && i < 20; i++) {
+                IGameMove move = solution.moves.get(i);
+                Timber.d("[UNITTESTS][E2E_TEST] Executing move %d/%d: %s", i + 1, solution.moves.size(), move);
                 
                 executeMove(move);
                 
@@ -232,12 +232,12 @@ public class Level1E2ETest {
         // Get the solution
         GameSolution solution = gameStateManager.getCurrentSolution();
         
-        if (solution != null && solution.getMoves().size() > 0) {
-            Timber.d("[UNITTESTS][E2E_TEST] Solution has %d moves", solution.getMoves().size());
+        if (solution != null && solution.moves.size() > 0) {
+            Timber.d("[UNITTESTS][E2E_TEST] Solution has %d moves", solution.moves.size());
             
             // Execute moves by simulating swipes
-            for (int i = 0; i < solution.getMoves().size() && i < 20; i++) {
-                IGameMove move = solution.getMoves().get(i);
+            for (int i = 0; i < solution.moves.size() && i < 20; i++) {
+                IGameMove move = solution.moves.get(i);
                 Timber.d("[UNITTESTS][E2E_TEST] Executing move %d: %s", i + 1, move);
                 
                 // Simulate the move by calling the game state manager directly
@@ -313,12 +313,12 @@ public class Level1E2ETest {
         // Get solution and execute all moves
         GameSolution solution = gameStateManager.getCurrentSolution();
         
-        if (solution != null && solution.getMoves().size() > 0) {
-            Timber.d("[UNITTESTS][E2E_TEST] Executing %d moves", solution.getMoves().size());
+        if (solution != null && solution.moves.size() > 0) {
+            Timber.d("[UNITTESTS][E2E_TEST] Executing %d moves", solution.moves.size());
             
             // Execute all moves
-            for (int i = 0; i < solution.getMoves().size() && i < 20; i++) {
-                IGameMove move = solution.getMoves().get(i);
+            for (int i = 0; i < solution.moves.size() && i < 20; i++) {
+                IGameMove move = solution.moves.get(i);
                 executeMoveDirectly(move);
                 Thread.sleep(800);
                 

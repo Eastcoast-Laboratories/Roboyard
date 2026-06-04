@@ -107,14 +107,14 @@ public class MoveCountDebugTest {
         // Get the solution
         GameSolution solution = gameStateManager.getCurrentSolution();
         assertNotNull("Solution should be available", solution);
-        assertNotNull("Solution moves should not be null", solution.getMoves());
+        assertNotNull("Solution moves should not be null", solution.moves);
         
-        int optimalMoves = solution.getMoves().size();
+        int optimalMoves = solution.moves.size();
         Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Optimal solution requires %d moves", optimalMoves);
 
         // Execute the optimal solution moves
         for (int i = 0; i < optimalMoves; i++) {
-            IGameMove move = solution.getMoves().get(i);
+            IGameMove move = solution.moves.get(i);
             if (move instanceof RRGameMove) {
                 RRGameMove rrMove = (RRGameMove) move;
                 Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Executing optimal move %d: robot color=%d, direction=%d",

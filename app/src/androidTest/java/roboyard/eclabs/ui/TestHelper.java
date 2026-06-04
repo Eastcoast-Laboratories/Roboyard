@@ -568,7 +568,7 @@ public class TestHelper {
 
         if (holder[0] != null) {
             Timber.d("[UNITTESTS][TEST_HELPER] Solution found with %d moves (after %d retries)",
-                    holder[0].getMoves().size(), retries);
+                    holder[0].moves.size(), retries);
         } else {
             Timber.e("[UNITTESTS][TEST_HELPER] No solution found after %d retries", retries);
         }
@@ -596,7 +596,7 @@ public class TestHelper {
             return false;
         }
 
-        java.util.ArrayList<roboyard.logic.core.IGameMove> moves = solution.getMoves();
+        java.util.ArrayList<roboyard.logic.core.IGameMove> moves = solution.moves;
         Timber.d("[UNITTESTS][%s] Level %d: Executing %d moves", logTag, levelId, moves.size());
 
         for (int i = 0; i < moves.size(); i++) {

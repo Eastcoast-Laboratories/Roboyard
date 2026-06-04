@@ -581,18 +581,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 this.currentSolutionStep = 0;
                 Timber.d("[SOLUTIONS_SAVE_LOAD] Loaded %d solutions from save, using first solution with %d moves",
                         loadedSolutions.size(), 
-                        currentSolution.getMoves() != null ? currentSolution.getMoves().size() : 0);
+                        currentSolution.moves != null ? currentSolution.moves.size() : 0);
                 
                 // Set predefined solution in SolverManager so solver doesn't need to run
                 SolverManager solverManager = getSolverManager();
-                if (solverManager != null && currentSolution.getMoves() != null) {
+                if (solverManager != null && currentSolution.moves != null) {
                     // Store the loaded solutions in GameStateManager for re-saving
                     this.loadedSolutions = loadedSolutions;
                     Timber.d("[SOLUTIONS_SAVE_LOAD] Stored %d solutions in GameStateManager for re-saving", loadedSolutions.size());
                     // Convert solution to string format for predefined solution
                     // Use the same format as serializeAllSolutions: colorDirection (e.g., 0U,1R,0D,1L)
                     StringBuilder solutionStr = new StringBuilder();
-                    for (IGameMove move : currentSolution.getMoves()) {
+                    for (IGameMove move : currentSolution.moves) {
                         if (solutionStr.length() > 0) {
                             solutionStr.append(" ");
                         }
@@ -617,19 +617,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             break;
                         }
                     }
-                    solverManager.setPredefinedSolution(solutionStr.toString(), currentSolution.getMoves().size());
+                    solverManager.setPredefinedSolution(solutionStr.toString(), currentSolution.moves.size());
                     Timber.d("[SOLUTIONS_SAVE_LOAD] Set predefined solution in SolverManager: %s", solutionStr.toString());
                 }
             }
         }
         
         // Only start solver if no solution was loaded from save file
-        if (currentSolution == null || currentSolution.getMoves() == null || currentSolution.getMoves().isEmpty()) {
+        if (currentSolution == null || currentSolution.moves == null || currentSolution.moves.isEmpty()) {
             Timber.d("[GAME_LOAD] No saved solution found, starting solver for loaded map");
             calculateSolutionAsync(null);
         } else {
             Timber.d("[SOLUTIONS_SAVE_LOAD] Using loaded solution with %d moves, skipping solver calculation", 
-                    currentSolution.getMoves().size());
+                    currentSolution.moves.size());
             // Signal Fragment that solution was accepted (hides hint container)
             solutionWasAccepted = true;
             // Mark solver as not running since we're using a pre-loaded solution
@@ -1106,16 +1106,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: GameSolution is null", i);
                     continue;
                 }
-                if (gameSolution.getMoves() == null) {
+                if (gameSolution.moves == null) {
                     Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Moves list is null", i);
                     continue;
                 }
-                if (gameSolution.getMoves().isEmpty()) {
+                if (gameSolution.moves.isEmpty()) {
                     Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Moves list is empty", i);
                     continue;
                 }
                 
-                Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Has %d moves", i, gameSolution.getMoves().size());
+                Timber.d("[SOLUTIONS_SAVE_LOAD] Solution %d: Has %d moves", i, gameSolution.moves.size());
                 
                 if (!first) {
                     sb.append("|");
@@ -1124,7 +1124,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 
                 // Encode each move as colorDirection
                 boolean firstMove = true;
-                for (IGameMove move : gameSolution.getMoves()) {
+                for (IGameMove move : gameSolution.moves) {
                     if (!firstMove) {
                         sb.append(",");
                     }
@@ -1180,7 +1180,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int serializedCount = 0;
             
             for (GameSolution gameSolution : gameSolutions) {
-                if (gameSolution == null || gameSolution.getMoves() == null || gameSolution.getMoves().isEmpty()) {
+                if (gameSolution == null || gameSolution.moves == null || gameSolution.moves.isEmpty()) {
                     Timber.d("[SOLUTIONS_SAVE_LOAD] Skipping empty solution");
                     continue;
                 }
@@ -1192,7 +1192,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 
                 // Encode each move as colorDirection
                 boolean firstMove = true;
-                for (IGameMove move : gameSolution.getMoves()) {
+                for (IGameMove move : gameSolution.moves) {
                     if (!firstMove) {
                         sb.append(",");
                     }
@@ -1795,13 +1795,13 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return The next move according to the solver, or null if no solution exists
      */
     public IGameMove getHint() {
-        if (currentSolution != null && currentSolution.getMoves() != null &&
-                currentSolutionStep < currentSolution.getMoves().size()) {
+        if (currentSolution != null && currentSolution.moves != null &&
+                currentSolutionStep < currentSolution.moves.size()) {
 
             // Increment hint counter for level completion statistics
             hintsShown++;
 
-            IGameMove move = currentSolution.getMoves().get(currentSolutionStep);
+            IGameMove move = currentSolution.moves.get(currentSolutionStep);
             incrementSolutionStep();
             return move;
         }
@@ -2165,8 +2165,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Set optimal moves if we have a solution
         int optimalMoves = 0;
-        if (currentSolution != null && currentSolution.getMoves() != null) {
-            optimalMoves = currentSolution.getMoves().size();
+        if (currentSolution != null && currentSolution.moves != null) {
+            optimalMoves = currentSolution.moves.size();
             data.setOptimalMoves(optimalMoves);
         }
 
@@ -2892,8 +2892,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     // and pass them to recordCompletion. Without this, the 2-arg overload
                     // falls back to existing.starsEarned which holds the BEST stars from
                     // LevelCompletionManager, not the current attempt's stars.
-                    int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
-                            ? currentSolution.getMoves().size() : 0;
+                    int optMoves = (currentSolution != null && currentSolution.moves != null)
+                            ? currentSolution.moves.size() : 0;
                     if (optMoves > 0) {
                         existing.setOptimalMoves(optMoves);
                         Timber.d("[HISTORY] updateHintTracking: setOptimalMoves=%d", optMoves);
@@ -3006,8 +3006,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Get optimal moves from current solution if available
             int optimalMovesCount = 0;
             GameSolution currentSolution = getCurrentSolution();
-            if (currentSolution != null && currentSolution.getMoves() != null) {
-                optimalMovesCount = currentSolution.getMoves().size();
+            if (currentSolution != null && currentSolution.moves != null) {
+                optimalMovesCount = currentSolution.moves.size();
             }
 
             // Create history entry with available information
@@ -3047,8 +3047,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // ensures the history entry's completionStars array reflects each attempt accurately.
             int levelId = gameState.levelId;
             if (levelId > 0 && isGameComplete.getValue()) {
-                int optMovesForStars = (currentSolution != null && currentSolution.getMoves() != null)
-                        ? currentSolution.getMoves().size() : 0;
+                int optMovesForStars = (currentSolution != null && currentSolution.moves != null)
+                        ? currentSolution.moves.size() : 0;
                 int currentAttemptStars = calculateStars(actualMoveCount, optMovesForStars, hintsShown);
                 // For beginner levels (1-10), always earn at least 1 star (matches saveLevelCompletionData)
                 if (currentAttemptStars < 1 && levelId <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
@@ -3071,8 +3071,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             }
             // If completed without hints, record the timestamp (never overwritten by later hint usage)
             if (noHintsThisSession && actualMoveCount > 0) {
-                int optMoves = (currentSolution != null && currentSolution.getMoves() != null)
-                        ? currentSolution.getMoves().size() : 0;
+                int optMoves = (currentSolution != null && currentSolution.moves != null)
+                        ? currentSolution.moves.size() : 0;
                 boolean isOptimal = optMoves > 0 && actualMoveCount == optMoves;
                 entry.recordSolvedWithoutHints(isOptimal);
                 Timber.d("[HISTORY] recordSolvedWithoutHints: isOptimal=%b, moves=%d, optimal=%d",
@@ -3235,9 +3235,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         boolean isLevelMode = (state != null && state.levelId > 0);
         
         // Add more detailed logging about the solution
-        int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
+        int moveCount = solution != null && solution.moves != null ? solution.moves.size() : 0;
         if (moveCount > 0) {
-            Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.getMoves().size());
+            Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves", solution.moves.size());
             // If solution requires fewer moves than required minimum and we're not in level mode,
             // automatically start a new game because this one is too easy
             int minRequiredMoves = getMinimumRequiredMoves();
@@ -3341,7 +3341,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         // Store the minimum moves from this solution for display
-        lastSolutionMinMoves = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
+        lastSolutionMinMoves = solution != null && solution.moves != null ? solution.moves.size() : 0;
         Timber.d("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: Found solution with %d moves after %d regeneration(s)", lastSolutionMinMoves, regenerationCount);
     }
 
@@ -3486,7 +3486,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      * @return The SolutionAnimator instance (so the caller can store and control it)
      */
     public SolutionAnimator animateSolution(GameSolution solution, SolutionAnimator.AnimationListener listener) {
-        if (solution == null || solution.getMoves().isEmpty()) {
+        if (solution == null || solution.moves.isEmpty()) {
             Timber.w("Cannot animate null or empty solution");
             if (listener != null) {
                 listener.onAnimationComplete();
@@ -3494,7 +3494,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             return null;
         }
 
-        Timber.d("Animating solution with %d moves", solution.getMoves().size());
+        Timber.d("Animating solution with %d moves", solution.moves.size());
 
         // Create and configure animator
         SolutionAnimator animator = new SolutionAnimator();
@@ -3710,7 +3710,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         @Override
         public void onSolutionCalculationCompleted(GameSolution solution) {
             attemptCount++;
-            int moveCount = solution != null && solution.getMoves() != null ? solution.getMoves().size() : 0;
+            int moveCount = solution != null && solution.moves != null ? solution.moves.size() : 0;
             int requiredMoves = getMinimumRequiredMoves();
             int maxMoves = getMaximumRequiredMoves();
 
@@ -3796,7 +3796,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     GameSolution solution = getSolverManager().getCurrentSolution();
                     if (solution != null) {
                         Timber.d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves",
-                                solution.getMoves() != null ? solution.getMoves().size() : 0);
+                                solution.moves != null ? solution.moves.size() : 0);
                         // Forward to the regular solution handling
                         onSolutionCalculationCompleted(solution);
                     } else {
@@ -4172,8 +4172,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         liveSolverCalculating.setValue(true);
 
         // Ensure lastSolutionMinMoves is up-to-date from currentSolution
-        if (lastSolutionMinMoves == 0 && currentSolution != null && currentSolution.getMoves() != null) {
-            lastSolutionMinMoves = currentSolution.getMoves().size();
+        if (lastSolutionMinMoves == 0 && currentSolution != null && currentSolution.moves != null) {
+            lastSolutionMinMoves = currentSolution.moves.size();
             Timber.d("[LIVE_SOLVER] Updated lastSolutionMinMoves from currentSolution: %d", lastSolutionMinMoves);
         }
 
@@ -4299,8 +4299,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     private List<Integer> getSolutionRobotOrder(GameSolution solution) {
         List<Integer> order = new ArrayList<>();
-        if (solution != null && solution.getMoves() != null) {
-            List<IGameMove> moves = solution.getMoves();
+        if (solution != null && solution.moves != null) {
+            List<IGameMove> moves = solution.moves;
             int startStep = (solution == currentSolution) ? currentSolutionStep : 0;
             for (int i = startStep; i < moves.size(); i++) {
                 IGameMove move = moves.get(i);
@@ -4321,8 +4321,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
      */
     private void updatePreCompRobotOrder(GameSolution solution) {
         preCompRobotOrder.clear();
-        if (solution != null && solution.getMoves() != null) {
-            for (IGameMove move : solution.getMoves()) {
+        if (solution != null && solution.moves != null) {
+            for (IGameMove move : solution.moves) {
                 if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
                     int color = ((roboyard.pm.ia.ricochet.RRGameMove) move).getColor();
                     if (!preCompRobotOrder.contains(color)) {
@@ -4540,7 +4540,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
                             if (numSolutions > 0) {
                                 roboyard.logic.core.GameSolution solution = solver.getSolution(0);
-                                int moves = (solution != null && solution.getMoves() != null) ? solution.getMoves().size() : 0;
+                                int moves = (solution != null && solution.moves != null) ? solution.moves.size() : 0;
                                 if (solver.isSolution01()) moves = 1;
                                 nextMovesCache.put(hypotheticalHash, moves);
                                 computed++;

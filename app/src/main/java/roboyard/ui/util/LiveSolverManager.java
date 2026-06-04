@@ -59,7 +59,7 @@ public class LiveSolverManager {
                     int numSolutions = solver.getSolutionList() != null ? solver.getSolutionList().size() : 0;
                     if (numSolutions > 0) {
                         GameSolution solution = solver.getSolution(0);
-                        int moves = (solution != null && solution.getMoves() != null) ? solution.getMoves().size() : 0;
+                        int moves = (solution != null && solution.moves != null) ? solution.moves.size() : 0;
                         if (solver.isSolution01()) {
                             moves = 1;
                         }

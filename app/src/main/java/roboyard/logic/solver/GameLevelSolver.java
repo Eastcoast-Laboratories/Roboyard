@@ -79,7 +79,7 @@ public class GameLevelSolver {
             List<Solution> solutions = solver.getSolutionList();
             if (!solutions.isEmpty()) {
                 GameSolution solution = solver.getSolution(0);
-                return solution.getMoves().size();
+                return solution.moves.size();
             }
         }
         

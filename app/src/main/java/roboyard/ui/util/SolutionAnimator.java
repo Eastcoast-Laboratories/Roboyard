@@ -73,7 +73,7 @@ public class SolutionAnimator {
         }
         
         // Copy the moves to avoid modifying the original solution
-        moves = new ArrayList<>(solution.getMoves());
+        moves = new ArrayList<>(solution.moves);
         currentMoveIndex = 0;
         
         if (moves.isEmpty()) {

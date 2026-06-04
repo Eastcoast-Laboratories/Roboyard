@@ -311,8 +311,8 @@ public class SolverManager implements Runnable {
             if (hasPredefinedSolution()) {
                 Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Using predefined solution with %d moves", idForLog, predefinedNumMoves);
                 currentSolution = parsePredefinedSolution(predefinedSolution);
-                if (currentSolution != null && currentSolution.getMoves() != null) {
-                    int moveCount = currentSolution.getMoves().size();
+                if (currentSolution != null && currentSolution.moves != null) {
+                    int moveCount = currentSolution.moves.size();
                     Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC][SOLUTIONS_SAVE_LOAD] Parsed predefined solution with %d moves", idForLog, moveCount);
                     if (listener != null) {
                         listener.onSolverFinished(true, moveCount, 1);
@@ -337,8 +337,8 @@ public class SolverManager implements Runnable {
                     // Get the first solution and process it
                     currentSolution = solver.getSolution(0);
                     int moveCount = 0;
-                    if (currentSolution != null && currentSolution.getMoves() != null) {
-                        moveCount = currentSolution.getMoves().size();
+                    if (currentSolution != null && currentSolution.moves != null) {
+                        moveCount = currentSolution.moves.size();
                         Timber.d("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] First solution has %d moves", idForLog, moveCount);
                     } else {
                         Timber.w("[SOLUTION_SOLVER][ID:%d][DIAGNOSTIC] Solution or moves is null!", idForLog);
@@ -445,7 +445,7 @@ public class SolverManager implements Runnable {
             solution.addMove(new roboyard.pm.ia.ricochet.RRGameMove(piece, direction));
         }
         
-        Timber.d("[SOLUTION_SOLVER] Parsed predefined solution: %d moves", solution.getMoves().size());
+        Timber.d("[SOLUTION_SOLVER] Parsed predefined solution: %d moves", solution.moves.size());
         return solution;
     }
 }
