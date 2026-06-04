@@ -234,8 +234,8 @@ public class DeepLinkBoardSizeE2ETest {
             // Find robot at (11, 3) - this is beyond 8x8
             GameElement robotAtEdge = null;
             for (GameElement element : currentState.gameElements) {
-                if (element.getType() == GameElement.TYPE_ROBOT &&
-                    element.getX() == 11 && element.getY() == 3) {
+                if (element.type == GameElement.TYPE_ROBOT &&
+                    element.x == 11 && element.y == 3) {
                     robotAtEdge = element;
                     break;
                 }
@@ -253,8 +253,8 @@ public class DeepLinkBoardSizeE2ETest {
             // Find robot at (7,8) - rg7,8
             GameElement targetRobot = null;
             for (GameElement element : currentState.gameElements) {
-                if (element.getType() == GameElement.TYPE_ROBOT &&
-                    element.getX() == 7 && element.getY() == 8) {
+                if (element.type == GameElement.TYPE_ROBOT &&
+                    element.x == 7 && element.y == 8) {
                     targetRobot = element;
                     break;
                 }
@@ -311,16 +311,16 @@ public class DeepLinkBoardSizeE2ETest {
             int wallCount = 0;
 
             for (GameElement element : currentState.gameElements) {
-                if (element.getType() == GameElement.TYPE_ROBOT) {
+                if (element.type == GameElement.TYPE_ROBOT) {
                     robotCount++;
-                    Timber.d("[UNITTESTS][DEEPLINK_E2E] Robot at (%d,%d) color=%d", 
-                            element.getX(), element.getY(), element.getColor());
-                } else if (element.getType() == GameElement.TYPE_TARGET) {
+                    Timber.d("[UNITTESTS][DEEPLINK_E2E] Robot at (%d,%d) color=%d",
+                            element.x, element.y, element.color);
+                } else if (element.type == GameElement.TYPE_TARGET) {
                     targetCount++;
-                    Timber.d("[UNITTESTS][DEEPLINK_E2E] Target at (%d,%d) color=%d", 
-                            element.getX(), element.getY(), element.getColor());
-                } else if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL ||
-                           element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                    Timber.d("[UNITTESTS][DEEPLINK_E2E] Target at (%d,%d) color=%d",
+                            element.x, element.y, element.color);
+                } else if (element.type == GameElement.TYPE_HORIZONTAL_WALL ||
+                           element.type == GameElement.TYPE_VERTICAL_WALL) {
                     wallCount++;
                 }
             }
@@ -360,8 +360,8 @@ public class DeepLinkBoardSizeE2ETest {
             // Find target at (10,0) - ts10,0 from deep-link
             GameElement targetAtEdge = null;
             for (GameElement element : currentState.gameElements) {
-                if (element.getType() == GameElement.TYPE_TARGET &&
-                    element.getX() == 10 && element.getY() == 0) {
+                if (element.type == GameElement.TYPE_TARGET &&
+                    element.x == 10 && element.y == 0) {
                     targetAtEdge = element;
                     break;
                 }

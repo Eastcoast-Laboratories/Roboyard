@@ -143,15 +143,15 @@ public class MinimapGenerator {
         targetXPaint.setStrokeWidth(Math.max(1.5f, cellSize * 0.15f));
         targetXPaint.setAntiAlias(true);
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                float left = offsetX + (element.getX() * cellSize);
-                float top = offsetY + (element.getY() * cellSize);
+            if (element.type == GameElement.TYPE_TARGET) {
+                float left = offsetX + (element.x * cellSize);
+                float top = offsetY + (element.y * cellSize);
                 float right = left + cellSize;
                 float bottom = top + cellSize;
                 float pad = cellSize * 0.2f;
                 
                 // Set target X color based on target color
-                switch (element.getColor()) {
+                switch (element.color) {
                     case 0: targetXPaint.setColor(Color.rgb(255, 100, 150)); break; // Pink
                     case 1: targetXPaint.setColor(Color.rgb(0, 180, 0)); break;     // Green
                     case 2: targetXPaint.setColor(Color.rgb(50, 50, 255)); break;   // Blue
@@ -172,16 +172,16 @@ public class MinimapGenerator {
         wallLinePaint.setAntiAlias(true);
         
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 // Horizontal wall: draw line above the cell
-                float wallX1 = offsetX + (element.getX() * cellSize);
-                float wallY = offsetY + (element.getY() * cellSize);
+                float wallX1 = offsetX + (element.x * cellSize);
+                float wallY = offsetY + (element.y * cellSize);
                 float wallX2 = wallX1 + cellSize;
                 canvas.drawLine(wallX1, wallY, wallX2, wallY, wallLinePaint);
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                 // Vertical wall: draw line to the left of the cell
-                float wallX = offsetX + (element.getX() * cellSize);
-                float wallY1 = offsetY + (element.getY() * cellSize);
+                float wallX = offsetX + (element.x * cellSize);
+                float wallY1 = offsetY + (element.y * cellSize);
                 float wallY2 = wallY1 + cellSize;
                 canvas.drawLine(wallX, wallY1, wallX, wallY2, wallLinePaint);
             }
@@ -189,13 +189,13 @@ public class MinimapGenerator {
         
         // Draw robots
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                float centerX_robot = offsetX + ((element.getX() + 0.5f) * cellSize);
-                float centerY_robot = offsetY + ((element.getY() + 0.5f) * cellSize);
+            if (element.type == GameElement.TYPE_ROBOT) {
+                float centerX_robot = offsetX + ((element.x + 0.5f) * cellSize);
+                float centerY_robot = offsetY + ((element.y + 0.5f) * cellSize);
                 float radius = cellSize * 0.4f;
                 
                 // Set color based on robot color
-                switch (element.getColor()) {
+                switch (element.color) {
                     case 0: robotPaint.setColor(Color.rgb(255, 105, 180)); break; // Pink
                     case 1: robotPaint.setColor(Color.rgb(0, 100, 0)); break;     // Dark green
                     case 2: robotPaint.setColor(Color.BLUE); break;

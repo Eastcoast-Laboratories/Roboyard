@@ -162,16 +162,16 @@ public class HistorySyncE2ETest {
         assertNotNull("Local history entries must not be null", localEntries);
         assertFalse("Local history must have at least one entry", localEntries.isEmpty());
         GameHistoryEntry uploadedEntry = localEntries.get(0);
-        String uploadedMapName = uploadedEntry.getMapName();
-        int uploadedOptimalMoves = uploadedEntry.getOptimalMoves();
-        int uploadedMaxHintUsed = uploadedEntry.getMaxHintUsed();
+        String uploadedMapName = uploadedEntry.mapName;
+        int uploadedOptimalMoves = uploadedEntry.optimalMoves;
+        int uploadedMaxHintUsed = uploadedEntry.maxHintUsed;
         boolean uploadedEverUsedHints = uploadedEntry.isEverUsedHints();
-        int uploadedBestTime = uploadedEntry.getBestTime();
-        int uploadedBestMoves = uploadedEntry.getBestMoves();
-        int uploadedCompletionCount = uploadedEntry.getCompletionCount();
+        int uploadedBestTime = uploadedEntry.bestTime;
+        int uploadedBestMoves = uploadedEntry.bestMoves;
+        int uploadedCompletionCount = uploadedEntry.completionCount;
         int uploadedTimestampsSize = uploadedEntry.getCompletionTimestamps() != null ? uploadedEntry.getCompletionTimestamps().size() : 0;
-        long uploadedLastSolvedWithoutHints = uploadedEntry.getLastSolvedWithoutHints();
-        long uploadedLastPerfectlySolvedWithoutHints = uploadedEntry.getLastPerfectlySolvedWithoutHints();
+        long uploadedLastSolvedWithoutHints = uploadedEntry.lastSolvedWithoutHints;
+        long uploadedLastPerfectlySolvedWithoutHints = uploadedEntry.lastPerfectlySolvedWithoutHints;
         step("3/8", "Local entry: mapName=" + uploadedMapName +
                 ", optimalMoves=" + uploadedOptimalMoves +
                 ", maxHintUsed=" + uploadedMaxHintUsed +
@@ -306,7 +306,7 @@ public class HistorySyncE2ETest {
         // Find the entry that matches our uploaded map
         GameHistoryEntry restoredEntry = null;
         for (GameHistoryEntry entry : restoredEntries) {
-            if (entry.getMapName() != null && entry.getMapName().equals(uploadedMapName)) {
+            if (entry.mapName != null && entry.mapName.equals(uploadedMapName)) {
                 restoredEntry = entry;
                 break;
             }
@@ -317,54 +317,54 @@ public class HistorySyncE2ETest {
             restoredEntry = restoredEntries.get(0);
         }
 
-        step("8/8", "Restored entry: mapName=" + restoredEntry.getMapName() +
-                ", optimalMoves=" + restoredEntry.getOptimalMoves() +
-                ", maxHintUsed=" + restoredEntry.getMaxHintUsed() +
+        step("8/8", "Restored entry: mapName=" + restoredEntry.mapName +
+                ", optimalMoves=" + restoredEntry.optimalMoves +
+                ", maxHintUsed=" + restoredEntry.maxHintUsed +
                 ", everUsedHints=" + restoredEntry.isEverUsedHints() +
-                ", bestTime=" + restoredEntry.getBestTime() +
-                ", bestMoves=" + restoredEntry.getBestMoves() +
-                ", completionCount=" + restoredEntry.getCompletionCount() +
+                ", bestTime=" + restoredEntry.bestTime +
+                ", bestMoves=" + restoredEntry.bestMoves +
+                ", completionCount=" + restoredEntry.completionCount +
                 ", timestamps=" + (restoredEntry.getCompletionTimestamps() != null ? restoredEntry.getCompletionTimestamps().size() : 0) +
-                ", starsEarned=" + restoredEntry.getStarsEarned() +
-                ", lastSolvedNoHints=" + restoredEntry.getLastSolvedWithoutHints() +
-                ", lastPerfectNoHints=" + restoredEntry.getLastPerfectlySolvedWithoutHints() +
-                ", movesMade=" + restoredEntry.getMovesMade());
+                ", starsEarned=" + restoredEntry.starsEarned +
+                ", lastSolvedNoHints=" + restoredEntry.lastSolvedWithoutHints +
+                ", lastPerfectNoHints=" + restoredEntry.lastPerfectlySolvedWithoutHints +
+                ", movesMade=" + restoredEntry.movesMade);
 
         // Verify key fields were restored
         assertEquals("OptimalMoves must be restored",
-                uploadedOptimalMoves, restoredEntry.getOptimalMoves());
+                uploadedOptimalMoves, restoredEntry.optimalMoves);
         assertEquals("MaxHintUsed must be restored",
-                uploadedMaxHintUsed, restoredEntry.getMaxHintUsed());
+                uploadedMaxHintUsed, restoredEntry.maxHintUsed);
         assertEquals("EverUsedHints must be restored",
                 uploadedEverUsedHints, restoredEntry.isEverUsedHints());
         assertTrue("MovesMade must be > 0 after restore",
-                restoredEntry.getMovesMade() > 0);
+                restoredEntry.movesMade > 0);
         assertEquals("BestMoves must be restored",
-                uploadedBestMoves, restoredEntry.getBestMoves());
+                uploadedBestMoves, restoredEntry.bestMoves);
         assertEquals("BestTime must be restored",
-                uploadedBestTime, restoredEntry.getBestTime());
+                uploadedBestTime, restoredEntry.bestTime);
         assertEquals("CompletionCount must be restored",
-                uploadedCompletionCount, restoredEntry.getCompletionCount());
+                uploadedCompletionCount, restoredEntry.completionCount);
         int restoredTimestampsSize = restoredEntry.getCompletionTimestamps() != null ? restoredEntry.getCompletionTimestamps().size() : 0;
         assertEquals("CompletionTimestamps count must be restored",
                 uploadedTimestampsSize, restoredTimestampsSize);
         assertEquals("LastSolvedWithoutHints must be restored",
-                uploadedLastSolvedWithoutHints, restoredEntry.getLastSolvedWithoutHints());
+                uploadedLastSolvedWithoutHints, restoredEntry.lastSolvedWithoutHints);
         assertEquals("LastPerfectlySolvedWithoutHints must be restored",
-                uploadedLastPerfectlySolvedWithoutHints, restoredEntry.getLastPerfectlySolvedWithoutHints());
+                uploadedLastPerfectlySolvedWithoutHints, restoredEntry.lastPerfectlySolvedWithoutHints);
 
         // Verify timestamps are not in the future (timezone bug check)
         long now = System.currentTimeMillis();
-        long timeDiffMs = restoredEntry.getTimestamp() - now;
+        long timeDiffMs = restoredEntry.timestamp - now;
         long timeDiffSeconds = timeDiffMs / 1000;
-        step("8/8", "Timestamp check: restored=" + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(restoredEntry.getTimestamp())) +
+        step("8/8", "Timestamp check: restored=" + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(restoredEntry.timestamp)) +
                 ", now=" + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(now)) +
                 ", diff=" + timeDiffSeconds + "s");
         assertTrue("Restored timestamp must not be more than 60s in the future (timezone bug), diff=" + timeDiffSeconds + "s",
                 timeDiffMs < 60000);
         
-        if (restoredEntry.getLastCompletionTimestamp() > 0) {
-            long lastCompDiffMs = restoredEntry.getLastCompletionTimestamp() - now;
+        if (restoredEntry.lastCompletionTimestamp > 0) {
+            long lastCompDiffMs = restoredEntry.lastCompletionTimestamp - now;
             long lastCompDiffSeconds = lastCompDiffMs / 1000;
             assertTrue("Last completion timestamp must not be more than 60s in the future, diff=" + lastCompDiffSeconds + "s",
                     lastCompDiffMs < 60000);
@@ -420,7 +420,7 @@ public class HistorySyncE2ETest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
             for (GameElement el : state.gameElements) {
-                if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
+                if (el.type == Constants.TYPE_ROBOT && el.color == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;
                 }

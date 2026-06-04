@@ -365,7 +365,7 @@ public class RobotAnimationManager {
             
             if (isProcessing) {
                 // Clear animation position
-                robot.setAnimationPosition(robot.getX(), robot.getY());
+                robot.setAnimationPosition(robot.x, robot.y);
                 isProcessingRobotAnimations.put(robot, false);
             }
         }

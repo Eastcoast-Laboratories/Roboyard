@@ -217,7 +217,7 @@ public class ResetHintE2ETest {
         // Find the robot with matching color
         GameElement selectedRobot = null;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == robotColor) {
+            if (element.type == GameElement.TYPE_ROBOT && element.color == robotColor) {
                 selectedRobot = element;
                 break;
             }

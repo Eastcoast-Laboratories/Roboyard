@@ -80,7 +80,7 @@ public class ReverseMoveUndoBugTest {
 
             // Find and select blue robot
             for (GameElement el : state.gameElements) {
-                if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
+                if (el.type == GameElement.TYPE_ROBOT && el.color == Constants.COLOR_BLUE) {
                     state.setSelectedRobot(el);
                     break;
                 }
@@ -119,9 +119,9 @@ public class ReverseMoveUndoBugTest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
                 for (GameElement el : state.gameElements) {
-                    if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
-                        blueXAfterUp[0] = el.getX();
-                        blueYAfterUp[0] = el.getY();
+                    if (el.type == GameElement.TYPE_ROBOT && el.color == Constants.COLOR_BLUE) {
+                        blueXAfterUp[0] = el.x;
+                        blueYAfterUp[0] = el.y;
                         break;
                     }
                 }
@@ -142,9 +142,9 @@ public class ReverseMoveUndoBugTest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
                 for (GameElement el : state.gameElements) {
-                    if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
-                        blueXAfterUndo[0] = el.getX();
-                        blueYAfterUndo[0] = el.getY();
+                    if (el.type == GameElement.TYPE_ROBOT && el.color == Constants.COLOR_BLUE) {
+                        blueXAfterUndo[0] = el.x;
+                        blueYAfterUndo[0] = el.y;
                         break;
                     }
                 }
@@ -172,9 +172,9 @@ public class ReverseMoveUndoBugTest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state != null) {
                 for (GameElement el : state.gameElements) {
-                    if (el.getType() == GameElement.TYPE_ROBOT && el.getColor() == Constants.COLOR_BLUE) {
-                        blueXAfterRight[0] = el.getX();
-                        blueYAfterRight[0] = el.getY();
+                    if (el.type == GameElement.TYPE_ROBOT && el.color == Constants.COLOR_BLUE) {
+                        blueXAfterRight[0] = el.x;
+                        blueYAfterRight[0] = el.y;
                         break;
                     }
                 }

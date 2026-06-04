@@ -56,28 +56,28 @@ public class LevelCompletionManager {
      * @param data The completion data to save
      */
     public void saveLevelCompletionData(LevelCompletionData data) {
-        int levelId = data.getLevelId();
+        int levelId = data.levelId;
         
         Timber.d("[LEVEL_COMPLETION] Saving data for level %d - Stars: %d, Moves: %d, Time: %d, Squares: %d",
-                levelId, data.getStars(), data.getMovesNeeded(), data.getTimeNeeded(), data.getSquaresSurpassed());
+                levelId, data.getStars(), data.movesNeeded, data.timeNeeded, data.squaresSurpassed);
         
         // Check if we already have data for this level
         if (completionDataMap.containsKey(levelId)) {
             LevelCompletionData existingData = completionDataMap.get(levelId);
             
             Timber.d("[LEVEL_COMPLETION] Existing data - Stars: %d, Moves: %d, Time: %d, Squares: %d",
-                    existingData.getStars(), existingData.getMovesNeeded(), 
-                    existingData.getTimeNeeded(), existingData.getSquaresSurpassed());
+                    existingData.getStars(), existingData.movesNeeded,
+                    existingData.timeNeeded, existingData.squaresSurpassed);
             
             // Only update stars if new value is greater
             boolean starsImproved = data.getStars() > existingData.getStars();
             boolean starsAtLeastSame = data.getStars() >= existingData.getStars();
 
             // Always update hints shown (relevant for achievement tracking)
-            existingData.setHintsShown(data.getHintsShown());
+            existingData.hintsShown = data.hintsShown;
             // Only update optimal moves if new value is valid (> 0), to avoid overwriting with 0
-            if (data.getOptimalMoves() > 0) {
-                existingData.setOptimalMoves(data.getOptimalMoves());
+            if (data.optimalMoves > 0) {
+                existingData.optimalMoves = data.optimalMoves;
             }
 
             if (starsImproved) {
@@ -86,10 +86,10 @@ public class LevelCompletionManager {
 
                 // If stars have improved, update stars and related metrics
                 existingData.setStars(data.getStars());
-                existingData.setMovesNeeded(data.getMovesNeeded());
-                existingData.setTimeNeeded(data.getTimeNeeded());
-                existingData.setRobotsUsed(data.getRobotsUsed());
-                existingData.setSquaresSurpassed(data.getSquaresSurpassed());
+                existingData.movesNeeded = data.movesNeeded;
+                existingData.timeNeeded = data.timeNeeded;
+                existingData.robotsUsed = data.robotsUsed;
+                existingData.squaresSurpassed = data.squaresSurpassed;
             } else {
                 Timber.d("[LEVEL_COMPLETION] Stars not improved (%d vs %d) - not updating stars",
                         data.getStars(), existingData.getStars());
@@ -98,29 +98,29 @@ public class LevelCompletionManager {
             // Only update robotsUsed if stars are at least the same
             if (data.isCompleted() && starsAtLeastSame) {
                 existingData.setCompleted(true);
-                existingData.setRobotsUsed(data.getRobotsUsed());
+                existingData.robotsUsed = data.robotsUsed;
                 // TODO: robots used is nowhere displayed, maybe an achievement later
             }
 
             // Always update moves if it's lower (better) than existing value
-            if (data.isCompleted() && (existingData.getMovesNeeded() == 0 || data.getMovesNeeded() < existingData.getMovesNeeded())) {
+            if (data.isCompleted() && (existingData.movesNeeded == 0 || data.movesNeeded < existingData.movesNeeded)) {
                 Timber.d("[LEVEL_COMPLETION] Moves improved from %d to %d",
-                        existingData.getMovesNeeded(), data.getMovesNeeded());
-                existingData.setMovesNeeded(data.getMovesNeeded());
+                        existingData.movesNeeded, data.movesNeeded);
+                existingData.movesNeeded = data.movesNeeded;
             }
 
             // Always update time if it's lower (faster) than existing value
-            if (data.isCompleted() && (existingData.getTimeNeeded() == 0 || data.getTimeNeeded() < existingData.getTimeNeeded())) {
+            if (data.isCompleted() && (existingData.timeNeeded == 0 || data.timeNeeded < existingData.timeNeeded)) {
                 Timber.d("[LEVEL_COMPLETION] Time improved from %d to %d",
-                        existingData.getTimeNeeded(), data.getTimeNeeded());
-                existingData.setTimeNeeded(data.getTimeNeeded());
+                        existingData.timeNeeded, data.timeNeeded);
+                existingData.timeNeeded = data.timeNeeded;
             }
 
             // Always update squares if it's more (better) than existing value
-            if (data.isCompleted() && data.getSquaresSurpassed() > existingData.getSquaresSurpassed()) {
+            if (data.isCompleted() && data.squaresSurpassed > existingData.squaresSurpassed) {
                 Timber.d("[LEVEL_COMPLETION] Squares improved from %d to %d",
-                        existingData.getSquaresSurpassed(), data.getSquaresSurpassed());
-                existingData.setSquaresSurpassed(data.getSquaresSurpassed());
+                        existingData.squaresSurpassed, data.squaresSurpassed);
+                existingData.squaresSurpassed = data.squaresSurpassed;
             }
             
             // Use the updated existing data
@@ -251,9 +251,9 @@ public class LevelCompletionManager {
             LevelCompletionData data = getLevelCompletionData(levelId);
             data.setCompleted(true);
             data.setStars(1);
-            data.setOptimalMoves(1);
-            data.setTimeNeeded(1);
-            data.setSquaresSurpassed(0);
+            data.optimalMoves = 1;
+            data.timeNeeded = 1;
+            data.squaresSurpassed = 0;
         }
         
         saveCompletionData();

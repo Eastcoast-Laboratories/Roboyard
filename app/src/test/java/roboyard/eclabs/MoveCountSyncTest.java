@@ -50,10 +50,10 @@ public class MoveCountSyncTest {
                 "preview.txt"
         );
 
-        assertEquals("movesMade should be 5", 5, entry.getMovesMade());
-        assertEquals("optimalMoves should be 3", 3, entry.getOptimalMoves());
+        assertEquals("movesMade should be 5", 5, entry.movesMade);
+        assertEquals("optimalMoves should be 3", 3, entry.optimalMoves);
         // bestMoves is 0 until recordCompletion() is called
-        assertEquals("bestMoves should be 0 before completion", 0, entry.getBestMoves());
+        assertEquals("bestMoves should be 0 before completion", 0, entry.bestMoves);
     }
 
     @Test
@@ -74,11 +74,11 @@ public class MoveCountSyncTest {
                 "preview.txt"
         );
 
-        assertEquals("Player should have made 8 moves", 8, entry.getMovesMade());
-        assertEquals("Optimal should be 3 moves", 3, entry.getOptimalMoves());
+        assertEquals("Player should have made 8 moves", 8, entry.movesMade);
+        assertEquals("Optimal should be 3 moves", 3, entry.optimalMoves);
         assertEquals("Extra moves should be 5", 5, extraMoves);
         // bestMoves is 0 until recordCompletion() is called
-        assertEquals("bestMoves should be 0 before completion", 0, entry.getBestMoves());
+        assertEquals("bestMoves should be 0 before completion", 0, entry.bestMoves);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class MoveCountSyncTest {
         );
 
         // Verify the bug is NOT present
-        assertNotEquals("movesMade should NOT be optimalMoves + 1", buggyRecordedMoves, entry.getMovesMade());
-        assertEquals("movesMade should be actual player moves", actualPlayerMoves, entry.getMovesMade());
+        assertNotEquals("movesMade should NOT be optimalMoves + 1", buggyRecordedMoves, entry.movesMade);
+        assertEquals("movesMade should be actual player moves", actualPlayerMoves, entry.movesMade);
     }
 }

@@ -33,7 +33,7 @@ private constructor() {
 
         // Extract only wall elements (horizontal and vertical walls)
         for (element in elements) {
-            val type = element.getType()
+            val type = element.type
             if ("mh" == type || "mv" == type) {
                 storedWalls.add(element)
             }
@@ -122,30 +122,30 @@ private constructor() {
 
         for (element in elements) {
             // Only store walls (mh, mv)
-            if (element.getType() == "mh" || element.getType() == "mv") {
+            if (element.type == "mh" || element.type == "mv") {
                 if (count > 0) {
                     sb.append(";")
                 }
-                sb.append(element.getType()).append(",").append(element.getX()).append(",")
-                    .append(element.getY())
+                sb.append(element.type).append(",").append(element.x).append(",")
+                    .append(element.y)
                 count++
 
 
                 // Count wall types for debugging
-                if (element.getType() == "mh") {
+                if (element.type == "mh") {
                     horizontalWalls++
-                    if (element.getY() == 0) {
+                    if (element.y == 0) {
                         topWalls++
-                    } else if (element.getY() == currentBoardHeight) {
+                    } else if (element.y == currentBoardHeight) {
                         bottomWalls++
                     } else {
                         otherWalls++
                     }
-                } else if (element.getType() == "mv") {
+                } else if (element.type == "mv") {
                     verticalWalls++
-                    if (element.getX() == 0) {
+                    if (element.x == 0) {
                         leftWalls++
-                    } else if (element.getX() == currentBoardWidth) {
+                    } else if (element.x == currentBoardWidth) {
                         rightWalls++
                     } else {
                         otherWalls++
@@ -278,7 +278,7 @@ private constructor() {
         // Extract only wall elements
         val walls = ArrayList<GridElement>()
         for (element in elements) {
-            val type = element.getType()
+            val type = element.type
             if ("mh" == type || "mv" == type) {
                 walls.add(element)
             }
@@ -296,8 +296,8 @@ private constructor() {
         var count = 0
         for (wall in walls) {
             if (count > 0) sb.append(";")
-            sb.append(wall.getType()).append(",").append(wall.getX()).append(",")
-                .append(wall.getY())
+            sb.append(wall.type).append(",").append(wall.x).append(",")
+                .append(wall.y)
             count++
         }
 
@@ -360,11 +360,11 @@ private constructor() {
         // Ensure the stored walls match the current board size
         var wallsMatchBoardSize = true
         for (wall in storedWalls) {
-            if (wall.getX() >= currentBoardWidth || wall.getY() >= currentBoardHeight) {
+            if (wall.x >= currentBoardWidth || wall.y >= currentBoardHeight) {
                 wallsMatchBoardSize = false
                 Timber.tag(TAG).w(
                     "[WALL STORAGE] Stored wall at (%d,%d) is outside current board size %dx%d",
-                    wall.getX(), wall.getY(), currentBoardWidth, currentBoardHeight
+                    wall.x, wall.y, currentBoardWidth, currentBoardHeight
                 )
                 break
             }

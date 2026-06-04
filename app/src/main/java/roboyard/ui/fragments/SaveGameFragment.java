@@ -717,7 +717,7 @@ public class SaveGameFragment extends BaseGameFragment {
         // Filter out level saves (entries with mapName starting with "Level")
         List<GameHistoryEntry> nonLevelEntries = new ArrayList<>();
         for (GameHistoryEntry entry : allHistoryEntries) {
-            String mapName = entry.getMapName();
+            String mapName = entry.mapName;
             if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
                 nonLevelEntries.add(entry);
             }
@@ -732,12 +732,12 @@ public class SaveGameFragment extends BaseGameFragment {
                     break;
                 case OPTIMAL_NOT_FOUND:
                     // Optimal not found = no optimal moves recorded (0 means unknown/not found)
-                    if (entry.getOptimalMoves() == 0) {
+                    if (entry.optimalMoves == 0) {
                         filteredHistoryEntries.add(entry);
                     }
                     break;
                 case UNSOLVED:
-                    if (entry.getCompletionCount() == 0) {
+                    if (entry.completionCount == 0) {
                         filteredHistoryEntries.add(entry);
                     }
                     break;
@@ -748,20 +748,20 @@ public class SaveGameFragment extends BaseGameFragment {
         switch (currentSort) {
             case BY_DATE:
                 // Sort by timestamp (newest first)
-                filteredHistoryEntries.sort((a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
+                filteredHistoryEntries.sort((a, b) -> Long.compare(b.timestamp, a.timestamp));
                 break;
             case LAST_SOLVED:
-                filteredHistoryEntries.sort((a, b) -> Long.compare(b.getLastCompletionTimestamp(), a.getLastCompletionTimestamp()));
+                filteredHistoryEntries.sort((a, b) -> Long.compare(b.lastCompletionTimestamp, a.lastCompletionTimestamp));
                 break;
             case LONGEST_FIRST_ATTEMPT:
-                filteredHistoryEntries.sort((a, b) -> Integer.compare(b.getBestTime(), a.getBestTime()));
+                filteredHistoryEntries.sort((a, b) -> Integer.compare(b.bestTime, a.bestTime));
                 break;
             case OPTIMAL_NOT_FOUND:
                 // Sort by optimal moves (0 = not found, higher = found)
-                filteredHistoryEntries.sort((a, b) -> Integer.compare(a.getOptimalMoves(), b.getOptimalMoves()));
+                filteredHistoryEntries.sort((a, b) -> Integer.compare(a.optimalMoves, b.optimalMoves));
                 break;
             case UNSOLVED:
-                filteredHistoryEntries.sort((a, b) -> Integer.compare(a.getCompletionCount(), b.getCompletionCount()));
+                filteredHistoryEntries.sort((a, b) -> Integer.compare(a.completionCount, b.completionCount));
                 break;
         }
         
@@ -788,26 +788,26 @@ public class SaveGameFragment extends BaseGameFragment {
         // NOTE: Minimaps are NOT loaded here to save memory - they are loaded on-demand in the adapter
         List<HistoryEntry> entries = new ArrayList<>();
         for (GameHistoryEntry entry : pageEntries) {
-            String name = entry.getMapName();
-            int moves = entry.getMovesMade();
+            String name = entry.mapName;
+            int moves = entry.movesMade;
             String mapPath = entry.getMapPath();
             
             // Completion status
             String completionStatus;
-            if (entry.getCompletionCount() > 0) {
-                completionStatus = entry.getCompletionCount() == 1
+            if (entry.completionCount > 0) {
+                completionStatus = entry.completionCount == 1
                         ? getString(R.string.history_completed_once)
-                        : getString(R.string.history_completed_times, entry.getCompletionCount());
+                        : getString(R.string.history_completed_times, entry.completionCount);
             } else {
                 completionStatus = getString(R.string.history_not_completed);
             }
             
             // Translate difficulty int ID to localized string for display
-            String difficulty = difficultyIntToString(entry.getDifficulty());
-            String boardSize = entry.getBoardSize();
+            String difficulty = difficultyIntToString(entry.difficulty);
+            String boardSize = entry.boardSize;
             
             // Create entry without minimap - will be loaded on-demand in adapter
-            HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.getTimestamp()), moves,
+            HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.timestamp), moves,
                     boardSize, mapPath, null, difficulty, completionStatus, entry);
             entries.add(historyEntry);
         }

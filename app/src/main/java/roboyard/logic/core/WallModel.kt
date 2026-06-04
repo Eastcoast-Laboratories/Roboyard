@@ -70,11 +70,11 @@ class WallModel
             val model = WallModel(width, height)
 
             for (element in elements) {
-                if (element.getType() == Constants.TYPE_HORIZONTAL_WALL) {
-                    model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL)
+                if (element.type == Constants.TYPE_HORIZONTAL_WALL) {
+                    model.addWall(element.x, element.y, WallType.HORIZONTAL)
                     // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
-                } else if (element.getType() == Constants.TYPE_VERTICAL_WALL) {
-                    model.addWall(element.getX(), element.getY(), WallType.VERTICAL)
+                } else if (element.type == Constants.TYPE_VERTICAL_WALL) {
+                    model.addWall(element.x, element.y, WallType.VERTICAL)
                     // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
                 }
             }
@@ -100,12 +100,12 @@ class WallModel
             val model = WallModel(width, height)
 
             for (element in elements) {
-                val type = element.getType()
+                val type = element.type
                 if ("mh" == type) {
-                    model.addWall(element.getX(), element.getY(), WallType.HORIZONTAL)
+                    model.addWall(element.x, element.y, WallType.HORIZONTAL)
                     // Timber.d("Added horizontal wall at (%d,%d)", element.getX(), element.getY());
                 } else if ("mv" == type) {
-                    model.addWall(element.getX(), element.getY(), WallType.VERTICAL)
+                    model.addWall(element.x, element.y, WallType.VERTICAL)
                     // Timber.d("Added vertical wall at (%d,%d)", element.getX(), element.getY());
                 }
             }

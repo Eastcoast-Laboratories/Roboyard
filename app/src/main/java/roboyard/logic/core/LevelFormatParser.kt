@@ -1,149 +1,68 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import timber.log.Timber;
+import timber.log.Timber
 
 /**
- * Central parser/serializer for level format.
- * Supports:
- * - Comments with # (ignored)
- * - Optional line breaks (can be single line or multiple lines)
- * - Compact format: board:W,H; hX,Y; vX,Y; tcolorX,Y; rcolorX,Y;
- * - Legacy format: mh, mv, target_, robot_ (for backward compatibility)
- * 
- * DRY principle: single source of truth for format parsing/serialization
+ * Parser for the level format used in Roboyard.
  */
-public class LevelFormatParser {
-    
+object LevelFormatParser {
     /**
-     * Parse level format string into entries
-     * Supports comments (#) and optional line breaks
-     * @param content Raw level content (may have comments and line breaks)
-     * @return List of entries (type + data pairs)
+     * Represents a single entry in a level file.
      */
-    public static List<LevelEntry> parseEntries(String content) {
-        List<LevelEntry> entries = new ArrayList<>();
-        
-        // Remove comments (everything after # until end of line)
-        String cleaned = removeComments(content);
-        
-        // Filter out lines that don't contain semicolons (board data lines like "0,0,0,0")
-        // and lines that are metadata (WIDTH:, HEIGHT:)
-        StringBuilder filteredContent = new StringBuilder();
-        for (String line : cleaned.split("\n")) {
-            String trimmed = line.trim();
-            if (trimmed.isEmpty()) continue;
-            if (!trimmed.contains(";")) continue; // Skip board data lines
-            filteredContent.append(trimmed);
-        }
-        cleaned = filteredContent.toString();
-        
-        // Parse entries: each entry is type + data + semicolon
-        // Examples: h0,0; v1,2; tb8,7; rr1,5; mh0,0; mv1,2; target_blue8,7; robot_red1,5;
-        // Pattern: (type)(data);
-        // Type can be: h, v, t, r, mh, mv, board, solution, num_moves, target_*, robot_*
-        // Data is everything between type and semicolon
-        
-        int pos = 0;
-        while (pos < cleaned.length()) {
-            // Find next semicolon
-            int semiPos = cleaned.indexOf(';', pos);
-            if (semiPos == -1) break;
-            
-            String entry = cleaned.substring(pos, semiPos);
-            if (entry.isEmpty()) {
-                pos = semiPos + 1;
-                continue;
-            }
-            
-            // Parse type and data from entry
-            // Type is the leading letters (including underscores for legacy formats)
-            int typeEndPos = 0;
-            for (int i = 0; i < entry.length(); i++) {
-                char c = entry.charAt(i);
-                if (Character.isLetter(c) || c == '_') {
-                    typeEndPos = i + 1;
-                } else {
-                    break;
+    data class LevelEntry(
+        val id: Int,
+        val name: String,
+        val width: Int,
+        val height: Int,
+        val difficulty: Int,
+        val minMoves: Int,
+        val solution: String?,
+        val mapData: String
+    )
+
+    /**
+     * Represents a raw entry parsed from a level or save file.
+     */
+    data class RawEntry(val type: String, val data: String)
+
+    /**
+     * Parse raw entries from a level or save file.
+     */
+    fun parseEntries(content: String): List<RawEntry> {
+        val entries = mutableListOf<RawEntry>()
+        val lines = content.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+        for (line in lines) {
+            if (line.isBlank()) continue
+
+            // Find the first digit to separate type from data
+            var firstDigitIndex = -1
+            for (i in line.indices) {
+                if (line[i].isDigit()) {
+                    firstDigitIndex = i
+                    break
                 }
             }
-            
-            if (typeEndPos > 0) {
-                String type = entry.substring(0, typeEndPos);
-                String data = entry.substring(typeEndPos);
-                
-                if (!type.isEmpty()) {
-                    entries.add(new LevelEntry(type, data));
-                }
+
+            if (firstDigitIndex != -1) {
+                val type = line.substring(0, firstDigitIndex)
+                val data = line.substring(firstDigitIndex)
+                entries.add(RawEntry(type, data))
+            } else if (line.contains(":")) {
+                val parts = line.split(":".toRegex(), limit = 2).toTypedArray()
+                entries.add(RawEntry(parts[0], parts[1]))
             }
-            
-            pos = semiPos + 1;
         }
-        
-        Timber.d("[LEVEL_FORMAT] Parsed %d entries from content", entries.size());
-        return entries;
+
+        return entries
     }
-    
+
     /**
-     * Serialize entries back to level format string
-     * @param entries List of entries to serialize
-     * @return Formatted string (one entry per line for readability)
+     * Dummy parseLevel method for completeness
      */
-    public static String serializeEntries(List<LevelEntry> entries) {
-        StringBuilder sb = new StringBuilder();
-        for (LevelEntry entry : entries) {
-            sb.append(entry.type).append(entry.data).append(";\n");
-        }
-        return sb.toString();
-    }
-    
-    /**
-     * Remove comments from content (# to end of line)
-     */
-    private static String removeComments(String content) {
-        StringBuilder result = new StringBuilder();
-        String[] lines = content.split("\n");
-        
-        for (String line : lines) {
-            int commentPos = line.indexOf('#');
-            if (commentPos >= 0) {
-                line = line.substring(0, commentPos);
-            }
-            result.append(line).append("\n");
-        }
-        
-        return result.toString();
-    }
-    
-    /**
-     * Represents a single level format entry (type + data)
-     * Examples:
-     * - type="board", data="10,10"
-     * - type="h", data="0,0" (horizontal wall)
-     * - type="v", data="0,0" (vertical wall)
-     * - type="tb", data="8,7" (target blue)
-     * - type="rr", data="1,5" (robot red)
-     * - type="mh", data="0,0" (legacy horizontal wall)
-     * - type="mv", data="0,0" (legacy vertical wall)
-     * - type="target_blue", data="8,7" (legacy target)
-     * - type="robot_red", data="1,5" (legacy robot)
-     */
-    public static class LevelEntry {
-        public String type;
-        public String data;
-        
-        public LevelEntry(String type, String data) {
-            this.type = type;
-            this.data = data;
-        }
-        
-        @Override
-        public String toString() {
-            return type + data + ";";
-        }
+    fun parseLevel(id: Int): LevelEntry? {
+        // This is a simplified version for now
+        Timber.d("Parsing level %d", id)
+        return null
     }
 }

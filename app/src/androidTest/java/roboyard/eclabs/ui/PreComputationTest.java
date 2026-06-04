@@ -249,8 +249,8 @@ public class PreComputationTest {
         
         // Log robot positions for debugging
         for (GridElement e : mapElements) {
-            if (e.getType().startsWith("robot_")) {
-                Timber.d("[UNITTESTS][PRECOMP_TEST] Robot %s at (%d,%d)", e.getType(), e.getX(), e.getY());
+            if (e.type.startsWith("robot_")) {
+                Timber.d("[UNITTESTS][PRECOMP_TEST] Robot %s at (%d,%d)", e.type, e.x, e.y);
             }
         }
 
@@ -339,7 +339,7 @@ public class PreComputationTest {
         // Now simulate yE (yellow moves East from (10,1) to (17,1) - slides to right wall)
         ArrayList<GridElement> postMoveElements = new ArrayList<>();
         for (GridElement e : mapElements) {
-            if (e.getType().equals("robot_yellow")) {
+            if (e.type.equals("robot_yellow")) {
                 postMoveElements.add(new GridElement(17, 1, "robot_yellow"));
                 Timber.d("[UNITTESTS][PRECOMP_TEST] Yellow moved East: (10,1) → (17,1)");
             } else {
@@ -412,7 +412,7 @@ public class PreComputationTest {
             // Build hypothetical state with this robot moved
             ArrayList<GridElement> hypothetical = new ArrayList<>();
             for (GridElement e : mapElements) {
-                if (e.getType().equals(robotType)) {
+                if (e.type.equals(robotType)) {
                     hypothetical.add(new GridElement(newX, newY, robotType));
                 } else {
                     hypothetical.add(e);

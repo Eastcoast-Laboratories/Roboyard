@@ -86,13 +86,13 @@ public class HistoryReplayImprovementE2ETest {
             );
             
             // Set mapSignature
-            entry.setMapSignature(mapSig);
+            entry.mapSignature = mapSig;
             
             // Record the first completion WITHOUT hints
             entry.recordCompletion(30, 8);
             // Mark as solved without hints (maxHintUsed stays -1)
             entry.setSolvedWithoutHints(true);
-            entry.setLastSolvedWithoutHints(System.currentTimeMillis());
+            entry.lastSolvedWithoutHints = System.currentTimeMillis();
             // NOT perfect (8 moves vs 5 optimal), so lastPerfectlySolvedWithoutHints stays 0
             
             // Save to history
@@ -112,10 +112,10 @@ public class HistoryReplayImprovementE2ETest {
             
             GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
             assertNotNull("Initial history entry should be found by mapSignature", entry);
-            initialHintStats[0] = entry.getBestMoves();
-            initialHintStats[1] = entry.getCompletionCount();
-            initialHintStats[3] = entry.getLastSolvedWithoutHints();
-            initialHintStats[4] = entry.getLastPerfectlySolvedWithoutHints();
+            initialHintStats[0] = entry.bestMoves;
+            initialHintStats[1] = entry.completionCount;
+            initialHintStats[3] = entry.lastSolvedWithoutHints;
+            initialHintStats[4] = entry.lastPerfectlySolvedWithoutHints;
             
             step("INFO", String.format("Initial: bestMoves=%d, count=%d, everHints=%b, lastNoHints=%d, lastPerfect=%d",
                     initialHintStats[0], initialHintStats[1], entry.isEverUsedHints(), 
@@ -136,10 +136,10 @@ public class HistoryReplayImprovementE2ETest {
             GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
             if (entry != null) {
                 // Update maxHintUsed to 2 (viewed hints 0, 1, 2)
-                entry.setMaxHintUsed(2);
+                entry.maxHintUsed = 2;
                 entry.markEverUsedHints();
                 // Hint-only update: set movesMade=0 so addHistoryEntry does NOT record another completion
-                entry.setMovesMade(0);
+                entry.movesMade = 0;
                 GameHistoryManager.addHistoryEntry(activity, entry);
                 step("INFO", "Updated entry: maxHintUsed=2, everUsedHints=true (no completion)");
             }
@@ -155,8 +155,8 @@ public class HistoryReplayImprovementE2ETest {
             hintVerify[0] = entry.isEverUsedHints();
             hintVerify[1] = entry.qualifiesForNoHintsAchievement();
             hintVerify[2] = entry.qualifiesForPerfectNoHintsAchievement();
-            hintTimestamps[0] = entry.getLastSolvedWithoutHints();
-            hintTimestamps[1] = entry.getLastPerfectlySolvedWithoutHints();
+            hintTimestamps[0] = entry.lastSolvedWithoutHints;
+            hintTimestamps[1] = entry.lastPerfectlySolvedWithoutHints;
             
             step("INFO", String.format("After hints: everHints=%b, qualifyNoHints=%b, qualifyPerfect=%b, lastNoHints=%d, lastPerfect=%d",
                     hintVerify[0], hintVerify[1], hintVerify[2], hintTimestamps[0], hintTimestamps[1]));
@@ -184,7 +184,7 @@ public class HistoryReplayImprovementE2ETest {
             );
             
             // Set the same mapSignature
-            improvedEntry.setMapSignature(testData[1]);
+            improvedEntry.mapSignature = testData[1];
             
             // Add to history - should update existing entry, not create new one
             GameHistoryManager.addHistoryEntry(activity, improvedEntry);
@@ -201,10 +201,10 @@ public class HistoryReplayImprovementE2ETest {
             
             GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
             assertNotNull("Updated history entry should still be found by mapSignature", entry);
-            updatedStats[0] = entry.getBestMoves();
-            updatedStats[1] = entry.getCompletionCount();
-            updatedStats[3] = entry.getLastSolvedWithoutHints();
-            updatedStats[4] = entry.getLastPerfectlySolvedWithoutHints();
+            updatedStats[0] = entry.bestMoves;
+            updatedStats[1] = entry.completionCount;
+            updatedStats[3] = entry.lastSolvedWithoutHints;
+            updatedStats[4] = entry.lastPerfectlySolvedWithoutHints;
             
             step("INFO", String.format("Updated: bestMoves=%d, count=%d, size=%d, lastNoHints=%d, lastPerfect=%d",
                     updatedStats[0], updatedStats[1], updatedStats[2], updatedStats[3], updatedStats[4]));

@@ -1,124 +1,125 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
-import android.graphics.Color;
+import android.graphics.Color
 
-public class Constants {
+object Constants {
     // Screen indices (preserved for compatibility with existing code)
-    public static final int SCREEN_START = 0;
-    public static final int SCREEN_SETTINGS = 2;
-    public static final int SCREEN_CREDITS = 3;
-    public static final int SCREEN_GAME = 4;
-    public static final int SCREEN_LEVEL_BEGINNER = 5;  // Beginner levels (1-35)
-    public static final int SCREEN_LEVEL_INTERMEDIATE = 6;  // Intermediate levels (36-70)
-    public static final int SCREEN_LEVEL_ADVANCED = 7;  // Advanced levels (71-105)
-    public static final int SCREEN_LEVEL_EXPERT = 8;  // Expert levels (106-140)
-    public static final int SCREEN_SAVE_GAMES = 9;
+    const val SCREEN_START: Int = 0
+    const val SCREEN_SETTINGS: Int = 2
+    const val SCREEN_CREDITS: Int = 3
+    const val SCREEN_GAME: Int = 4
+    const val SCREEN_LEVEL_BEGINNER: Int = 5 // Beginner levels (1-35)
+    const val SCREEN_LEVEL_INTERMEDIATE: Int = 6 // Intermediate levels (36-70)
+    const val SCREEN_LEVEL_ADVANCED: Int = 7 // Advanced levels (71-105)
+    const val SCREEN_LEVEL_EXPERT: Int = 8 // Expert levels (106-140)
+    const val SCREEN_SAVE_GAMES: Int = 9
 
     // Movement directions
-    public static final int NORTH = 0; // up
-    public static final int EAST = 1; // right
-    public static final int SOUTH = 2; // down
-    public static final int WEST = 3; // left
+    const val NORTH: Int = 0 // up
+    const val EAST: Int = 1 // right
+    const val SOUTH: Int = 2 // down
+    const val WEST: Int = 3 // left
 
     // Background elements (lowest z-index)
-    public static final int BACKGROUND = 10;
+    const val BACKGROUND: Int = 10
 
     // Grid elements
-    public static final int GRID = 20;
+    const val GRID: Int = 20
 
     // Target markers
-    public static final int TARGET = 30;
+    const val TARGET: Int = 30
 
     // Robot markers (the transparent markers showing starting positions)
-    public static final int ROBOT_MARKER = 35;
+    const val ROBOT_MARKER: Int = 35
 
     // Base z-index for game objects (walls and robots)
     // Actual z-index will be calculated based on position
     // each element gets one z-index value lower than the previous one
-    public static final int GAME_OBJECT_BASE = 9000;
+    const val GAME_OBJECT_BASE: Int = 9000
 
     // UI elements (highest z-index)
-    public static final int UI_ELEMENT = 10000;
-    
+    const val UI_ELEMENT: Int = 10000
+
     // Native UI constants
-    public static final String PREFS_NAME = "roboyard_prefs";
-    public static final String PREF_SOUND_ENABLED = "sound_enabled";
-    
+    const val PREFS_NAME: String = "roboyard_prefs"
+    const val PREF_SOUND_ENABLED: String = "sound_enabled"
+
     // Game state cell types
-    public static final int TYPE_EMPTY = 0;
-    public static final int TYPE_ROBOT = 1;
-    public static final int TYPE_TARGET = 2;
-    public static final int TYPE_HORIZONTAL_WALL = 3;
-    public static final int TYPE_VERTICAL_WALL = 4;
-    
+    const val TYPE_EMPTY: Int = 0
+    const val TYPE_ROBOT: Int = 1
+    const val TYPE_TARGET: Int = 2
+    const val TYPE_HORIZONTAL_WALL: Int = 3
+    const val TYPE_VERTICAL_WALL: Int = 4
+
     // Game modes
-    public static final int GAME_MODE_STANDARD = 0;
-    public static final int GAME_MODE_MULTI_TARGET = 1;
+    const val GAME_MODE_STANDARD: Int = 0
+    const val GAME_MODE_MULTI_TARGET: Int = 1
 
     // Difficulty levels
-    public static final int DIFFICULTY_BEGINNER = 0;
-    public static final int DIFFICULTY_ADVANCED = 1;
-    public static final int DIFFICULTY_INSANE = 2;
-    public static final int DIFFICULTY_IMPOSSIBLE = 3;
+    const val DIFFICULTY_BEGINNER: Int = 0
+    const val DIFFICULTY_ADVANCED: Int = 1
+    const val DIFFICULTY_INSANE: Int = 2
+    const val DIFFICULTY_IMPOSSIBLE: Int = 3
 
     // Min moves for difficulty
-    public static final int MIN_MOVES_BEGINNER = 4;
-    public static final int MIN_MOVES_ADVANCED = 6;
-    public static final int MIN_MOVES_INSANE = 10;
-    public static final int MIN_MOVES_IMPOSSIBLE = 17;
+    const val MIN_MOVES_BEGINNER: Int = 4
+    const val MIN_MOVES_ADVANCED: Int = 6
+    const val MIN_MOVES_INSANE: Int = 10
+    const val MIN_MOVES_IMPOSSIBLE: Int = 17
 
     // Color constants
-    public static final int COLOR_PINK = 0;
-    public static final int COLOR_GREEN = 1;
-    public static final int COLOR_BLUE = 2;
-    public static final int COLOR_YELLOW = 3;
-    public static final int COLOR_SILVER = 4;
-    public static final int COLOR_RED = 5;
-    public static final int COLOR_BROWN = 6;
-    public static final int COLOR_ORANGE = 7;
-    public static final int COLOR_WHITE = 8;
-    public static final int COLOR_MULTI = -1; // the multi target
+    const val COLOR_PINK: Int = 0
+    const val COLOR_GREEN: Int = 1
+    const val COLOR_BLUE: Int = 2
+    const val COLOR_YELLOW: Int = 3
+    const val COLOR_SILVER: Int = 4
+    const val COLOR_RED: Int = 5
+    const val COLOR_BROWN: Int = 6
+    const val COLOR_ORANGE: Int = 7
+    const val COLOR_WHITE: Int = 8
+    @JvmField
+    val COLOR_MULTI: Int = -1 // the multi target
 
-    public static final int NUM_ROBOTS = 4; // number of robots
-    public static final int MAX_NUM_ROBOTS = 5; // maximal allowed num robots
-    
+    const val NUM_ROBOTS: Int = 4 // number of robots
+    const val MAX_NUM_ROBOTS: Int = 5 // maximal allowed num robots
+
     // Default board sizes
-    public static final int DEFAULT_BOARD_SIZE_X = 12;
-    public static final int DEFAULT_BOARD_SIZE_Y = 14;
-    
+    const val DEFAULT_BOARD_SIZE_X: Int = 12
+    const val DEFAULT_BOARD_SIZE_Y: Int = 14
+
     // Debug settings
-    public static final long DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS = 3000; // milliseconds to open debug screen
+    const val DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS: Long = 3000 // milliseconds to open debug screen
 
     // Pre-computation solver timeout per solve (seconds)
-    public static final int PRECOMP_SOLVER_TIMEOUT_SECONDS = 120;
+    const val PRECOMP_SOLVER_TIMEOUT_SECONDS: Int = 120
 
     // RGB color values for robots (used in solver)
-    public static final int[] colors_rgb = {
+    val colors_rgb: IntArray = intArrayOf(
         Color.MAGENTA,  // Pink (COLOR_PINK)
-        Color.GREEN,    // Green (COLOR_GREEN)
-        Color.BLUE,     // Blue (COLOR_BLUE)
-        Color.YELLOW,   // Yellow (COLOR_YELLOW)
-        Color.GRAY,     // Silver (COLOR_SILVER)
-        Color.RED,      // Red (COLOR_RED)
-        0xFFA52A2A,     // Brown (COLOR_BROWN)
-        0xFFFFA500,     // Orange (COLOR_ORANGE)
-        Color.WHITE     // White (COLOR_WHITE)
-    };
+        Color.GREEN,  // Green (COLOR_GREEN)
+        Color.BLUE,  // Blue (COLOR_BLUE)
+        Color.YELLOW,  // Yellow (COLOR_YELLOW)
+        Color.GRAY,  // Silver (COLOR_SILVER)
+        Color.RED,  // Red (COLOR_RED)
+        -0x5ad5d6,  // Brown (COLOR_BROWN)
+        -0x5b00,  // Orange (COLOR_ORANGE)
+        Color.WHITE // White (COLOR_WHITE)
+    )
 
     // File and directory paths
-    public static final String SAVE_DIRECTORY = "saves";
-    public static final String AUTO_SAVE_FILENAME = "autosave.dat";
-    public static final String SAVE_FILENAME_PREFIX = "save_";
-    public static final String SAVE_FILENAME_EXTENSION = ".dat";
-    public static final String HISTORY_DIRECTORY = "history";
-    
+    const val SAVE_DIRECTORY: String = "saves"
+    const val AUTO_SAVE_FILENAME: String = "autosave.dat"
+    const val SAVE_FILENAME_PREFIX: String = "save_"
+    const val SAVE_FILENAME_EXTENSION: String = ".dat"
+    const val HISTORY_DIRECTORY: String = "history"
+
     // Accessibility constants
-    public static final long ACCESSIBILITY_FOCUS_DELAY_MS = 500;
-    public static final int MIN_BOARD_SIZE = 6;
-    public static final int MAX_BOARD_SIZE = 22;
-    
+    const val ACCESSIBILITY_FOCUS_DELAY_MS: Long = 500
+    const val MIN_BOARD_SIZE: Int = 6
+    const val MAX_BOARD_SIZE: Int = 22
+
     // Level completion stars configuration
     // Levels 1-10: always earn at least 1 star (beginner-friendly)
     // Levels 11+: must earn stars based on performance (no guaranteed star)
-    public static final int MIN_STAR_GUARANTEE_LEVEL = 10;
+    const val MIN_STAR_GUARANTEE_LEVEL: Int = 10
 }

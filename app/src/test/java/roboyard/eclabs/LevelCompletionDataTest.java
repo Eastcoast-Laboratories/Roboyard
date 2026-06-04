@@ -18,12 +18,12 @@ public class LevelCompletionDataTest {
     @Test
     public void testNewDataHasZeroDefaults() {
         LevelCompletionData data = new LevelCompletionData(1);
-        assertEquals(1, data.getLevelId());
+        assertEquals(1, data.levelId);
         assertFalse(data.isCompleted());
         assertEquals(0, data.getStars());
-        assertEquals(0, data.getOptimalMoves());
-        assertEquals(0, data.getHintsShown());
-        assertEquals(0, data.getMovesNeeded());
+        assertEquals(0, data.optimalMoves);
+        assertEquals(0, data.hintsShown);
+        assertEquals(0, data.movesNeeded);
     }
 
     @Test
@@ -45,14 +45,14 @@ public class LevelCompletionDataTest {
         LevelCompletionData existing = new LevelCompletionData(5);
         existing.setCompleted(true);
         existing.setStars(2);
-        existing.setOptimalMoves(4);
-        existing.setMovesNeeded(5);
+        existing.optimalMoves = 4;
+        existing.movesNeeded = 5;
 
         LevelCompletionData newData = new LevelCompletionData(5);
         newData.setCompleted(true);
         newData.setStars(1); // worse
-        newData.setOptimalMoves(4);
-        newData.setMovesNeeded(6);
+        newData.optimalMoves = 4;
+        newData.movesNeeded = 6;
 
         // Apply save logic
         boolean starsImproved = newData.getStars() > existing.getStars();
@@ -66,12 +66,12 @@ public class LevelCompletionDataTest {
         LevelCompletionData existing = new LevelCompletionData(5);
         existing.setCompleted(true);
         existing.setStars(1);
-        existing.setOptimalMoves(4);
+        existing.optimalMoves = 4;
 
         LevelCompletionData newData = new LevelCompletionData(5);
         newData.setCompleted(true);
         newData.setStars(3); // better
-        newData.setOptimalMoves(4);
+        newData.optimalMoves = 4;
 
         boolean starsImproved = newData.getStars() > existing.getStars();
         assertTrue("Stars should improve from 1 to 3", starsImproved);
@@ -87,47 +87,47 @@ public class LevelCompletionDataTest {
     @Test
     public void testOptimalMovesNotOverwrittenWithZero() {
         LevelCompletionData existing = new LevelCompletionData(10);
-        existing.setOptimalMoves(5);
+        existing.optimalMoves = 5;
 
         LevelCompletionData newData = new LevelCompletionData(10);
-        newData.setOptimalMoves(0); // e.g. from restore without solver data
+        newData.optimalMoves = 0; // e.g. from restore without solver data
 
         // Apply logic: only update if > 0
-        if (newData.getOptimalMoves() > 0) {
-            existing.setOptimalMoves(newData.getOptimalMoves());
+        if (newData.optimalMoves > 0) {
+            existing.optimalMoves = newData.optimalMoves;
         }
 
-        assertEquals("OptimalMoves should NOT be overwritten with 0", 5, existing.getOptimalMoves());
+        assertEquals("OptimalMoves should NOT be overwritten with 0", 5, existing.optimalMoves);
     }
 
     @Test
     public void testOptimalMovesUpdatedWhenValid() {
         LevelCompletionData existing = new LevelCompletionData(10);
-        existing.setOptimalMoves(0); // no solver data yet
+        existing.optimalMoves = 0; // no solver data yet
 
         LevelCompletionData newData = new LevelCompletionData(10);
-        newData.setOptimalMoves(4); // solver found solution
+        newData.optimalMoves = 4; // solver found solution
 
-        if (newData.getOptimalMoves() > 0) {
-            existing.setOptimalMoves(newData.getOptimalMoves());
+        if (newData.optimalMoves > 0) {
+            existing.optimalMoves = newData.optimalMoves;
         }
 
-        assertEquals("OptimalMoves should be updated to 4", 4, existing.getOptimalMoves());
+        assertEquals("OptimalMoves should be updated to 4", 4, existing.optimalMoves);
     }
 
     @Test
     public void testOptimalMovesUpdatedWhenBothValid() {
         LevelCompletionData existing = new LevelCompletionData(10);
-        existing.setOptimalMoves(5);
+        existing.optimalMoves = 5;
 
         LevelCompletionData newData = new LevelCompletionData(10);
-        newData.setOptimalMoves(4); // solver found better solution
+        newData.optimalMoves = 4; // solver found better solution
 
-        if (newData.getOptimalMoves() > 0) {
-            existing.setOptimalMoves(newData.getOptimalMoves());
+        if (newData.optimalMoves > 0) {
+            existing.optimalMoves = newData.optimalMoves;
         }
 
-        assertEquals("OptimalMoves should be updated to 4", 4, existing.getOptimalMoves());
+        assertEquals("OptimalMoves should be updated to 4", 4, existing.optimalMoves);
     }
 
     // ========== HintsShown: Always Updated ==========
@@ -135,25 +135,25 @@ public class LevelCompletionDataTest {
     @Test
     public void testHintsShownAlwaysUpdated() {
         LevelCompletionData existing = new LevelCompletionData(10);
-        existing.setHintsShown(0);
+        existing.hintsShown = 0;
 
         LevelCompletionData newData = new LevelCompletionData(10);
-        newData.setHintsShown(2);
+        newData.hintsShown = 2;
 
-        existing.setHintsShown(newData.getHintsShown());
-        assertEquals("HintsShown should be updated to 2", 2, existing.getHintsShown());
+        existing.hintsShown = newData.hintsShown;
+        assertEquals("HintsShown should be updated to 2", 2, existing.hintsShown);
     }
 
     @Test
     public void testHintsShownCanGoToZero() {
         LevelCompletionData existing = new LevelCompletionData(10);
-        existing.setHintsShown(3);
+        existing.hintsShown = 3;
 
         LevelCompletionData newData = new LevelCompletionData(10);
-        newData.setHintsShown(0); // this attempt used no hints
+        newData.hintsShown = 0; // this attempt used no hints
 
-        existing.setHintsShown(newData.getHintsShown());
-        assertEquals("HintsShown should be updated to 0", 0, existing.getHintsShown());
+        existing.hintsShown = newData.hintsShown;
+        assertEquals("HintsShown should be updated to 0", 0, existing.hintsShown);
     }
 
     // ========== Direct Hint Field Sync (no conversion, all fields synced individually) ==========
@@ -222,8 +222,8 @@ public class LevelCompletionDataTest {
         LevelCompletionData existing = new LevelCompletionData(5);
         existing.setCompleted(true);
         existing.setStars(1);
-        existing.setOptimalMoves(0);
-        existing.setHintsShown(0);
+        existing.optimalMoves = 0;
+        existing.hintsShown = 0;
 
         int serverStars = 3;
         int serverOptimal = 4;
@@ -231,19 +231,19 @@ public class LevelCompletionDataTest {
         int hintsShown = serverMaxHintUsed >= 0 ? serverMaxHintUsed + 1 : 0;
 
         boolean starsImproved = serverStars > existing.getStars();
-        boolean hasNewMetadata = (serverOptimal > 0 && existing.getOptimalMoves() == 0);
+        boolean hasNewMetadata = (serverOptimal > 0 && existing.optimalMoves == 0);
 
         assertTrue("Stars should be improved", starsImproved);
         assertTrue("Should have new metadata", hasNewMetadata);
 
         // Apply
         existing.setStars(serverStars);
-        if (serverOptimal > 0) existing.setOptimalMoves(serverOptimal);
-        existing.setHintsShown(hintsShown);
+        if (serverOptimal > 0) existing.optimalMoves = serverOptimal;
+        existing.hintsShown = hintsShown;
 
         assertEquals(3, existing.getStars());
-        assertEquals(4, existing.getOptimalMoves());
-        assertEquals(0, existing.getHintsShown());
+        assertEquals(4, existing.optimalMoves);
+        assertEquals(0, existing.hintsShown);
     }
 
     @Test
@@ -252,8 +252,8 @@ public class LevelCompletionDataTest {
         LevelCompletionData existing = new LevelCompletionData(5);
         existing.setCompleted(true);
         existing.setStars(2);
-        existing.setOptimalMoves(0); // no solver data locally
-        existing.setHintsShown(0);
+        existing.optimalMoves = 0; // no solver data locally
+        existing.hintsShown = 0;
 
         int serverStars = 2;
         int serverOptimal = 5;
@@ -261,19 +261,19 @@ public class LevelCompletionDataTest {
         int hintsShown = serverMaxHintUsed >= 0 ? serverMaxHintUsed + 1 : 0;
 
         boolean starsImproved = serverStars > existing.getStars();
-        boolean hasNewMetadata = (serverOptimal > 0 && existing.getOptimalMoves() == 0);
+        boolean hasNewMetadata = (serverOptimal > 0 && existing.optimalMoves == 0);
 
         assertFalse("Stars should NOT be improved (same)", starsImproved);
         assertTrue("Should have new metadata (optimal moves)", hasNewMetadata);
 
         // Apply
         if (starsImproved) existing.setStars(serverStars);
-        if (serverOptimal > 0) existing.setOptimalMoves(serverOptimal);
-        existing.setHintsShown(hintsShown);
+        if (serverOptimal > 0) existing.optimalMoves = serverOptimal;
+        existing.hintsShown = hintsShown;
 
         assertEquals(2, existing.getStars());
-        assertEquals(5, existing.getOptimalMoves());
-        assertEquals(1, existing.getHintsShown());
+        assertEquals(5, existing.optimalMoves);
+        assertEquals(1, existing.hintsShown);
     }
 
     @Test
@@ -282,15 +282,15 @@ public class LevelCompletionDataTest {
         LevelCompletionData existing = new LevelCompletionData(5);
         existing.setCompleted(true);
         existing.setStars(3);
-        existing.setOptimalMoves(4);
-        existing.setHintsShown(0);
+        existing.optimalMoves = 4;
+        existing.hintsShown = 0;
 
         int serverStars = 2; // worse
         int serverOptimal = 4; // same
         int serverMaxHintUsed = -1;
 
         boolean starsImproved = serverStars > existing.getStars();
-        boolean hasNewMetadata = (serverOptimal > 0 && existing.getOptimalMoves() == 0);
+        boolean hasNewMetadata = (serverOptimal > 0 && existing.optimalMoves == 0);
 
         assertFalse("Stars should NOT be improved", starsImproved);
         assertFalse("Should NOT have new metadata (already has optimal)", hasNewMetadata);
@@ -304,15 +304,15 @@ public class LevelCompletionDataTest {
         LevelCompletionData localData = new LevelCompletionData(7);
         localData.setCompleted(true);
         localData.setStars(3);
-        localData.setOptimalMoves(4);
-        localData.setHintsShown(0);
-        localData.setMovesNeeded(4);
+        localData.optimalMoves = 4;
+        localData.hintsShown = 0;
+        localData.movesNeeded = 4;
 
         // Step 2: Upload converts to JSON
-        int uploadOptimal = localData.getOptimalMoves();
-        int uploadHints = localData.getHintsShown(); // 0
+        int uploadOptimal = localData.optimalMoves;
+        int uploadHints = localData.hintsShown; // 0
         int uploadStars = localData.getStars();
-        int uploadMoves = localData.getMovesNeeded();
+        int uploadMoves = localData.movesNeeded;
 
         // Step 3: Server stores and returns these values
 
@@ -320,14 +320,14 @@ public class LevelCompletionDataTest {
         LevelCompletionData restored = new LevelCompletionData(7);
         restored.setCompleted(true);
         restored.setStars(uploadStars);
-        if (uploadMoves > 0) restored.setMovesNeeded(uploadMoves);
-        if (uploadOptimal > 0) restored.setOptimalMoves(uploadOptimal);
-        restored.setHintsShown(uploadHints);
+        if (uploadMoves > 0) restored.movesNeeded = uploadMoves;
+        if (uploadOptimal > 0) restored.optimalMoves = uploadOptimal;
+        restored.hintsShown = uploadHints;
 
         assertEquals(3, restored.getStars());
-        assertEquals(4, restored.getOptimalMoves());
-        assertEquals(0, restored.getHintsShown());
-        assertEquals(4, restored.getMovesNeeded());
+        assertEquals(4, restored.optimalMoves);
+        assertEquals(0, restored.hintsShown);
+        assertEquals(4, restored.movesNeeded);
     }
 
     @Test
@@ -336,24 +336,24 @@ public class LevelCompletionDataTest {
         LevelCompletionData localData = new LevelCompletionData(8);
         localData.setCompleted(true);
         localData.setStars(1);
-        localData.setOptimalMoves(3);
-        localData.setHintsShown(2);
-        localData.setMovesNeeded(5);
+        localData.optimalMoves = 3;
+        localData.hintsShown = 2;
+        localData.movesNeeded = 5;
 
         // Upload
-        int uploadOptimal = localData.getOptimalMoves();
-        int uploadHints = localData.getHintsShown();
+        int uploadOptimal = localData.optimalMoves;
+        int uploadHints = localData.hintsShown;
         int uploadStars = localData.getStars();
 
         // Restore
         LevelCompletionData restored = new LevelCompletionData(8);
         restored.setCompleted(true);
         restored.setStars(uploadStars);
-        if (uploadOptimal > 0) restored.setOptimalMoves(uploadOptimal);
-        restored.setHintsShown(uploadHints);
+        if (uploadOptimal > 0) restored.optimalMoves = uploadOptimal;
+        restored.hintsShown = uploadHints;
 
         assertEquals(1, restored.getStars());
-        assertEquals(3, restored.getOptimalMoves());
-        assertEquals(2, restored.getHintsShown());
+        assertEquals(3, restored.optimalMoves);
+        assertEquals(2, restored.hintsShown);
     }
 }

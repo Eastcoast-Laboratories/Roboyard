@@ -280,8 +280,8 @@ public class SyncManager {
             for (GameHistoryEntry entry : entries) {
                 // Only upload entries that were actually played (has stars or moves)
                 // to prevent overwriting server data with empty entries
-                if (entry.getStarsEarned() == 0 && entry.getMovesMade() == 0) {
-                    Timber.d("[HISTORY_SYNC] Skipping unplayed entry: %s (stars=0, moves=0)", entry.getMapName());
+                if (entry.starsEarned == 0 && entry.movesMade == 0) {
+                    Timber.d("[HISTORY_SYNC] Skipping unplayed entry: %s (stars=0, moves=0)", entry.mapName);
                     continue;
                 }
                 
@@ -290,28 +290,28 @@ public class SyncManager {
                 if (mapData == null || mapData.isEmpty()) continue;
                 
                 JSONObject historyJson = new JSONObject();
-                historyJson.put("map_name", entry.getMapName());
+                historyJson.put("map_name", entry.mapName);
                 historyJson.put("save_data", mapData);
-                historyJson.put("board_width", extractBoardWidthFromSize(entry.getBoardSize()));
-                historyJson.put("board_height", extractBoardHeightFromSize(entry.getBoardSize()));
-                historyJson.put("move_count", entry.getMovesMade());
-                historyJson.put("optimal_moves", entry.getOptimalMoves());
-                historyJson.put("max_hint_used", entry.getMaxHintUsed());
+                historyJson.put("board_width", extractBoardWidthFromSize(entry.boardSize));
+                historyJson.put("board_height", extractBoardHeightFromSize(entry.boardSize));
+                historyJson.put("move_count", entry.movesMade);
+                historyJson.put("optimal_moves", entry.optimalMoves);
+                historyJson.put("max_hint_used", entry.maxHintUsed);
                 historyJson.put("ever_used_hints", entry.isEverUsedHints());
                 historyJson.put("solved_without_hints", entry.isSolvedWithoutHints());
-                historyJson.put("last_solved_without_hints", entry.getLastSolvedWithoutHints());
-                historyJson.put("last_perfectly_solved_without_hints", entry.getLastPerfectlySolvedWithoutHints());
-                historyJson.put("is_solved", entry.getMovesMade() > 0);
-                historyJson.put("play_time_seconds", entry.getPlayDuration());
-                historyJson.put("stars_earned", entry.getStarsEarned());
+                historyJson.put("last_solved_without_hints", entry.lastSolvedWithoutHints);
+                historyJson.put("last_perfectly_solved_without_hints", entry.lastPerfectlySolvedWithoutHints);
+                historyJson.put("is_solved", entry.movesMade > 0);
+                historyJson.put("play_time_seconds", entry.playDuration);
+                historyJson.put("stars_earned", entry.starsEarned);
                 // CRITICAL: Send played_at in UTC timezone to prevent timezone offset issues
                 java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US);
                 utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-                historyJson.put("played_at", utcFormat.format(new java.util.Date(entry.getTimestamp())));
-                historyJson.put("best_time", entry.getBestTime());
-                historyJson.put("best_moves", entry.getBestMoves());
-                historyJson.put("completion_count", entry.getCompletionCount());
-                historyJson.put("last_completion_timestamp", entry.getLastCompletionTimestamp());
+                historyJson.put("played_at", utcFormat.format(new java.util.Date(entry.timestamp)));
+                historyJson.put("best_time", entry.bestTime);
+                historyJson.put("best_moves", entry.bestMoves);
+                historyJson.put("completion_count", entry.completionCount);
+                historyJson.put("last_completion_timestamp", entry.lastCompletionTimestamp);
                 JSONArray tsArray = new JSONArray();
                 if (entry.getCompletionTimestamps() != null) {
                     for (Long ts : entry.getCompletionTimestamps()) {
@@ -338,15 +338,15 @@ public class SyncManager {
                 historyJson.put("completion_stars", starsArray);
                 
                 // Log timestamps with human-readable format for debugging timezone issues
-                String playedAtStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.getTimestamp()));
-                String lastCompletionStr = entry.getLastCompletionTimestamp() > 0 
-                    ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(entry.getLastCompletionTimestamp()))
+                String playedAtStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US).format(new java.util.Date(entry.timestamp));
+                String lastCompletionStr = entry.lastCompletionTimestamp > 0
+                    ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(entry.lastCompletionTimestamp))
                     : "never";
-                Timber.d("[HISTORY_SYNC] Uploading: %s (moves=%d, optimal=%d, maxHint=%d, everHints=%b, stars=%d)", 
-                        entry.getMapName(), entry.getMovesMade(), entry.getOptimalMoves(), 
-                        entry.getMaxHintUsed(), entry.isEverUsedHints(), entry.getStarsEarned());
+                Timber.d("[HISTORY_SYNC] Uploading: %s (moves=%d, optimal=%d, maxHint=%d, everHints=%b, stars=%d)",
+                        entry.mapName, entry.movesMade, entry.optimalMoves,
+                        entry.maxHintUsed, entry.isEverUsedHints(), entry.starsEarned);
                 Timber.d("[HISTORY_SYNC_TIME] Upload timestamps - played_at='%s' (millis=%d), last_completion='%s' (millis=%d)", 
-                        playedAtStr, entry.getTimestamp(), lastCompletionStr, entry.getLastCompletionTimestamp());
+                        playedAtStr, entry.timestamp, lastCompletionStr, entry.lastCompletionTimestamp);
                 
                 historyArray.put(historyJson);
             }
@@ -449,7 +449,7 @@ public class SyncManager {
                         // Check if we already have this entry locally (by map name)
                         boolean exists = false;
                         for (GameHistoryEntry existing : existingEntries) {
-                            if (existing.getMapName().equals(mapName)) {
+                            if (existing.mapName.equals(mapName)) {
                                 exists = true;
                                 break;
                             }
@@ -465,23 +465,23 @@ public class SyncManager {
                             // Create a history entry
                             GameHistoryEntry historyEntry = new GameHistoryEntry();
                             historyEntry.setMapPath(historyPath);
-                            historyEntry.setMapName(mapName);
-                            historyEntry.setTimestamp(parseTimestamp(entry.optString("played_at", null)));
-                            historyEntry.setPlayDuration(entry.optInt("play_time_seconds", 0));
-                            historyEntry.setMovesMade(entry.optInt("move_count", 0));
-                            historyEntry.setOptimalMoves(entry.optInt("optimal_moves", 0));
-                            historyEntry.setMaxHintUsed(entry.optInt("max_hint_used", -1));
+                            historyEntry.mapName = mapName;
+                            historyEntry.timestamp = parseTimestamp(entry.optString("played_at", null));
+                            historyEntry.playDuration = entry.optInt("play_time_seconds", 0);
+                            historyEntry.movesMade = entry.optInt("move_count", 0);
+                            historyEntry.optimalMoves = entry.optInt("optimal_moves", 0);
+                            historyEntry.maxHintUsed = entry.optInt("max_hint_used", -1);
                             historyEntry.setEverUsedHints(entry.optBoolean("ever_used_hints", false));
                             historyEntry.setSolvedWithoutHints(entry.optBoolean("solved_without_hints", false));
-                            historyEntry.setLastSolvedWithoutHints(entry.optLong("last_solved_without_hints", 0));
-                            historyEntry.setLastPerfectlySolvedWithoutHints(entry.optLong("last_perfectly_solved_without_hints", 0));
-                            historyEntry.setBoardSize(entry.optInt("board_width", 12) + "x" + entry.optInt("board_height", 12));
-                            historyEntry.setPreviewImagePath("");
-                            historyEntry.setStarsEarned(entry.optInt("stars_earned", 0));
-                            historyEntry.setBestTime(entry.optInt("best_time", 0));
-                            historyEntry.setBestMoves(entry.optInt("best_moves", 0));
-                            historyEntry.setCompletionCount(entry.optInt("completion_count", 0));
-                            historyEntry.setLastCompletionTimestamp(entry.optLong("last_completion_timestamp", 0));
+                            historyEntry.lastSolvedWithoutHints = entry.optLong("last_solved_without_hints", 0);
+                            historyEntry.lastPerfectlySolvedWithoutHints = entry.optLong("last_perfectly_solved_without_hints", 0);
+                            historyEntry.boardSize = entry.optInt("board_width", 12) + "x" + entry.optInt("board_height", 12);
+                            historyEntry.previewImagePath = "";
+                            historyEntry.starsEarned = entry.optInt("stars_earned", 0);
+                            historyEntry.bestTime = entry.optInt("best_time", 0);
+                            historyEntry.bestMoves = entry.optInt("best_moves", 0);
+                            historyEntry.completionCount = entry.optInt("completion_count", 0);
+                            historyEntry.lastCompletionTimestamp = entry.optLong("last_completion_timestamp", 0);
                             JSONArray tsArray = entry.optJSONArray("completion_timestamps");
                             if (tsArray != null) {
                                 java.util.List<Long> timestamps = new java.util.ArrayList<>();
@@ -514,13 +514,13 @@ public class SyncManager {
                             
                             // Log timestamps with human-readable format for debugging timezone issues
                             String downloadedPlayedAt = entry.optString("played_at", "null");
-                            String parsedTimestampStr = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(historyEntry.getTimestamp()));
-                            String lastCompletionStr = historyEntry.getLastCompletionTimestamp() > 0 
-                                ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(historyEntry.getLastCompletionTimestamp()))
+                            String parsedTimestampStr = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(historyEntry.timestamp));
+                            String lastCompletionStr = historyEntry.lastCompletionTimestamp > 0
+                                ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date(historyEntry.lastCompletionTimestamp))
                                 : "never";
                             Timber.d("[HISTORY_SYNC] Restored history entry: %s", mapName);
                             Timber.d("[HISTORY_SYNC_TIME] Download timestamps - server_played_at='%s', parsed_timestamp='%s' (millis=%d), last_completion='%s' (millis=%d)", 
-                                    downloadedPlayedAt, parsedTimestampStr, historyEntry.getTimestamp(), lastCompletionStr, historyEntry.getLastCompletionTimestamp());
+                                    downloadedPlayedAt, parsedTimestampStr, historyEntry.timestamp, lastCompletionStr, historyEntry.lastCompletionTimestamp);
                         }
                     }
                     
@@ -571,7 +571,7 @@ public class SyncManager {
                         try {
                             List<GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
                             for (GameHistoryEntry entry : allEntries) {
-                                if (entry.getMapName() != null && entry.getMapName().startsWith("Level ")) {
+                                if (entry.mapName != null && entry.mapName.startsWith("Level ")) {
                                     levelsRestored++;
                                 }
                             }
@@ -757,19 +757,19 @@ public class SyncManager {
                 LevelCompletionData existing = lcm.getLevelCompletionData(levelId);
                 // Update if stars improved OR if we have new optimal_moves data for existing level
                 boolean starsImproved = stars > existing.getStars();
-                boolean hasNewMetadata = (optimalMoves > 0 && existing.getOptimalMoves() == 0);
+                boolean hasNewMetadata = (optimalMoves > 0 && existing.optimalMoves == 0);
                 
                 if (starsImproved || hasNewMetadata) {
                     LevelCompletionData data = new LevelCompletionData(levelId);
                     data.setCompleted(true);
                     data.setStars(stars);
                     if (moves > 0) {
-                        data.setMovesNeeded(moves);
+                        data.movesNeeded = moves;
                     }
                     if (optimalMoves > 0) {
-                        data.setOptimalMoves(optimalMoves);
+                        data.optimalMoves = optimalMoves;
                     }
-                    data.setHintsShown(hintsShown);
+                    data.hintsShown = hintsShown;
                     lcm.saveLevelCompletionData(data);
                     restoredLevels++;
                     Timber.d("[HISTORY_SYNC] Restored level %d stars: %d (moves=%d, optimal=%d, maxHint=%d)", 

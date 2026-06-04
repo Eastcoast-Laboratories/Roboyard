@@ -263,7 +263,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private int getColorForRobot(GameElement robot) {
         if (robot == null) return Color.BLUE;
         
-        switch (robot.getColor()) {
+        switch (robot.color) {
             case 0: return Color.RED; // (Pink)
             case 1: return Color.GREEN;
             case 2: return Color.BLUE;
@@ -294,8 +294,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // Get robot color and position
         String colorName = getLocalizedRobotColorNameByGridElement(robot);
-        int x = robot.getX();
-        int y = robot.getY();
+        int x = robot.x;
+        int y = robot.y;
         
         // Create content for the selected robot info
         String robotInfo = getString(R.string.robot_selected_info, colorName, x, y);
@@ -310,9 +310,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         GameState state = gameStateManager.getCurrentState().getValue();
         if (state != null) {
             for (GameElement element : state.gameElements) {
-                if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == robot.getColor()) {
-                    int goalX = element.getX();
-                    int goalY = element.getY();
+                if (element.type == GameElement.TYPE_TARGET && element.color == robot.color) {
+                    int goalX = element.x;
+                    int goalY = element.y;
                     
                     // Create content for the goal info
                     String goalInfo = getString(R.string.robot_target_info, colorName, goalX, goalY);
@@ -369,8 +369,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     
                     // Move robot away from the edge if it's at one
                     GameElement robot = gameState.getSelectedRobot();
-                    int robotX = robot.getX();
-                    int robotY = robot.getY();
+                    int robotX = robot.x;
+                    int robotY = robot.y;
                     int boardWidth = gameState.width;
                     int boardHeight = gameState.height;
                     
@@ -1132,10 +1132,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             
                             // Log the hint and actual move details for debugging
                             Timber.d("[HINT_SYSTEM] Move verification - Hint robot: %d, Moved robot: %d, Hint direction: %d, Move direction: %d", 
-                                hintRobotColor, lastMovedRobot.getColor(), hintDirection, lastMoveDirection);
+                                hintRobotColor, lastMovedRobot.color, hintDirection, lastMoveDirection);
                             
                             // Check if the robot color and direction match the hint
-                            boolean robotMatches = (hintRobotColor == lastMovedRobot.getColor());
+                            boolean robotMatches = (hintRobotColor == lastMovedRobot.color);
                             boolean directionMatches = (hintDirection == lastMoveDirection);
                             
                             // Only advance to the next hint if both robot and direction match
@@ -1347,11 +1347,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             if (stateAfterReset != null) {
                 // Clear animation positions for all robots
                 for (GameElement element : stateAfterReset.gameElements) {
-                    if (element.getType() == GameElement.TYPE_ROBOT) {
+                    if (element.type == GameElement.TYPE_ROBOT) {
                         // Clear any animation positions by explicitly setting them to match logical positions
                         element.clearAnimationPosition();
-                        Timber.d("[ROBOTS] Cleared animation position for robot color %d at position (%d,%d)", 
-                            element.getColor(), element.getX(), element.getY());
+                        Timber.d("[ROBOTS] Cleared animation position for robot color %d at position (%d,%d)",
+                                element.color, element.x, element.y);
                     }
                 }
                 
@@ -1873,7 +1873,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         GameElement currentRobot = state.getSelectedRobot();
         if (currentRobot != null) {
             for (int i = 0; i < robots.size(); i++) {
-                if (robots.get(i).getColor() == currentRobot.getColor()) {
+                if (robots.get(i).color == currentRobot.color) {
                     currentIndex = i;
                     break;
                 }
@@ -1903,7 +1903,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             boolean hasGoal = false;
             for (GameElement element : state.gameElements) {
                 // Check if element is a goal post and matches the robot color
-                if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == nextRobot.getColor()) {
+                if (element.type == GameElement.TYPE_TARGET && element.color == nextRobot.color) {
                     hasGoal = true;
                     break;
                 }
@@ -1965,7 +1965,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 List<GameElement> elements = state.gameElements;
                 for (GameElement element : elements) {
                     if (element.equals(robot)) {
-                        return new int[]{element.getX(), element.getY()};
+                        return new int[]{element.x, element.y};
                     }
                 }
             }
@@ -2323,16 +2323,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         }
         
         GameElement robot = state.getSelectedRobot();
-        int startX = robot.getX();
-        int startY = robot.getY();
+        int startX = robot.x;
+        int startY = robot.y;
         
         // Use GameGridView to handle the movement - it will handle sounds, achievements, and announcements
         boolean moved = gameGridView.moveRobotInDirectionWithEffects(robot, dx, dy);
         
         if (moved) {
             // Calculate distance for accessibility announcement
-            int endX = robot.getX();
-            int endY = robot.getY();
+            int endX = robot.x;
+            int endY = robot.y;
             int dist = Math.abs(endX - startX) + Math.abs(endY - startY);
             
             // Announce the movement for accessibility
@@ -2365,8 +2365,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Play appropriate sound
         if (hitRobotElement != null) {
             // Play robot-specific collision sound based on attacker and target robot IDs
-            int attackerRobotId = movingRobot.getColor();
-            int targetRobotId = hitRobotElement.getColor();
+            int attackerRobotId = movingRobot.color;
+            int targetRobotId = hitRobotElement.color;
             playSoundWithRobotIds("hit_robot", attackerRobotId, targetRobotId);
             // Track robot touch for gimme_five achievement
             trackRobotTouch(state, movingRobot, hitRobotElement);
@@ -2443,8 +2443,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             return;
         }
         
-        int x = robot.getX();
-        int y = robot.getY();
+        int x = robot.x;
+        int y = robot.y;
         
         // Build the announcement message with detailed information about possible moves
         StringBuilder announcement = new StringBuilder();
@@ -2617,11 +2617,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // Announce only the target at game start
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                String targetColor = getLocalizedTargetColorName(element.getColor());
+            if (element.type == GameElement.TYPE_TARGET) {
+                String targetColor = getLocalizedTargetColorName(element.color);
                 // Use format parameters directly in the target_a11y string
                 announcement.append(targetColor).append(" ")
-                          .append(getString(R.string.target_a11y, element.getX() + 1, element.getY() + 1))
+                          .append(getString(R.string.target_a11y, element.x + 1, element.y + 1))
                           .append(". ");
                 break; // Only announce one target
             }
@@ -2630,8 +2630,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // If a robot is selected, announce it as well
         if (selectedRobot != null) {
             String robotColor = getLocalizedRobotColorNameAdjByGridElement(selectedRobot);
-            int x = selectedRobot.getX();
-            int y = selectedRobot.getY();
+            int x = selectedRobot.x;
+            int y = selectedRobot.y;
             
             // Find walls - check each direction
             List<String> walls = new ArrayList<>();
@@ -2693,7 +2693,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // First, identify the target
         GameElement targetElement = null;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
+            if (element.type == GameElement.TYPE_TARGET) {
                 targetElement = element;
                 break; // Only consider one target for simplicity
             }
@@ -2704,7 +2704,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         
         // Now find a robot matching the target's color
         for (GameElement element : state.gameElements) {
-            if (element.isRobot() && element.getColor() == targetElement.getColor()) {
+            if (element.isRobot() && element.color == targetElement.color) {
                 // Found a matching robot, select it
                 state.setSelectedRobot(element);
                 isRobotSelected = true;
@@ -2823,7 +2823,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
         java.util.List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new java.util.ArrayList<>();
         for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
-            String mapName = entry.getMapName();
+            String mapName = entry.mapName;
             if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
                 filteredEntries.add(entry);
             }
@@ -3406,7 +3406,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private String getLocalizedRobotColorNameByGridElement(GameElement robot) {
         if (robot == null) return "";
         
-        int c = robot.getColor();
+        int c = robot.color;
         switch (c) {
             case 0: return getString(R.string.color_pink);
             case 1: return getString(R.string.color_green);
@@ -3447,7 +3447,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private String getLocalizedRobotColorNameAdjByGridElement(GameElement robot) {
         if (robot == null) return "";
-        return getLocalizedRobotColorNameAdj(robot.getColor());
+        return getLocalizedRobotColorNameAdj(robot.color);
     }
     
     /**

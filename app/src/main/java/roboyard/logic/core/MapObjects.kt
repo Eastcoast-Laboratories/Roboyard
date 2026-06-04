@@ -1,153 +1,123 @@
-package roboyard.logic.core;
-import roboyard.logic.core.GridElement;
-import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GridGameView;
+package roboyard.logic.core
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import timber.log.Timber
 
-import timber.log.Timber;
-
-public class MapObjects {
-
-    // Compile patterns once as static fields for reuse
-    private static final Pattern BOARD_SIZE_PATTERN = Pattern.compile("board:(\\d+),(\\d+);");
-
-    /*
-     * Constructor of the class
+/**
+ * Helper class for managing map objects and their properties.
+ */
+object MapObjects {
+    /**
+     * Map object types for reference
      */
-    public MapObjects(){
+    const val TYPE_ROBOT: String = "robot"
+    const val TYPE_TARGET: String = "target"
+    const val TYPE_WALL: String = "wall"
 
+    /**
+     * Get the base type of a map object (robot, target, or wall)
+     * @param objectType The full object type string (e.g., "robot_blue")
+     * @return The base type string
+     */
+    fun getBaseType(objectType: String?): String {
+        if (objectType == null) return "unknown"
+
+        return if (objectType.startsWith("robot_")) {
+            TYPE_ROBOT
+        } else if (objectType.startsWith("target_")) {
+            TYPE_TARGET
+        } else if (objectType == "mh" || objectType == "mv") {
+            TYPE_WALL
+        } else {
+            "unknown"
+        }
     }
 
     /**
-     * Extract the data from the _data string
-     * Returns a list of all extracted elements
-     * @param data The string containing map data
-     * @return ArrayList<GridElement> List of grid elements
+     * Get all available target types
+     * @return List of target type strings
      */
-    public static ArrayList<GridElement> extractDataFromString(String data)
-    {
-        // By default, don't apply board size when just extracting data (for previews)
-        return extractDataFromString(data, false);
+    val allTargetTypes: MutableList<String>
+        get() {
+            val targets = mutableListOf<String>()
+            targets.add("target_pink")
+            targets.add("target_green")
+            targets.add("target_blue")
+            targets.add("target_yellow")
+            targets.add("target_silver")
+            targets.add("target_multi")
+            return targets
+        }
+
+    /**
+     * Get all available robot types
+     * @return List of robot type strings
+     */
+    val allRobotTypes: MutableList<String>
+        get() {
+            val robots = mutableListOf<String>()
+            robots.add("robot_pink")
+            robots.add("robot_green")
+            robots.add("robot_blue")
+            robots.add("robot_yellow")
+            robots.add("robot_silver")
+            return robots
+        }
+
+    /**
+     * Check if an object type is a robot
+     * @param objectType The object type string
+     * @return true if it's a robot
+     */
+    fun isRobot(objectType: String?): Boolean {
+        return objectType != null && objectType.startsWith("robot_")
     }
 
     /**
-     * Extract the data from the _data string
-     * Returns a list of all extracted elements
-     * @param data The string containing map data
-     * @param applyBoardSize Whether to apply the board size from the save data
-     * @return ArrayList<GridElement> List of grid elements
+     * Check if an object type is a target
+     * @param objectType The object type string
+     * @return true if it's a target
      */
-    public static ArrayList<GridElement> extractDataFromString(String data, boolean applyBoardSize)
-    {
-        int x = 0;
-        int y = 0;
+    fun isTarget(objectType: String?): Boolean {
+        return objectType != null && objectType.startsWith("target_")
+    }
 
-        // First check if the save contains board size information
-        Matcher boardSizeMatcher = BOARD_SIZE_PATTERN.matcher(data);
-        if (boardSizeMatcher.find()) {
-            int boardX = Integer.parseInt(boardSizeMatcher.group(1));
-            int boardY = Integer.parseInt(boardSizeMatcher.group(2));
-            
-            // Only update board size if explicitly requested (when loading a game)
-            if (applyBoardSize) {
-                // Update and persist board size for this game
-                Timber.d("Loading board size from save: %dx%d", boardX, boardY);
-                Preferences.setBoardSize(boardX, boardY);
-                MainActivity.boardSizeX = boardX;
-                MainActivity.boardSizeY = boardY;
-            }
-        }
+    /**
+     * Check if an object type is a wall
+     * @param objectType The object type string
+     * @return true if it's a wall
+     */
+    fun isWall(objectType: String?): Boolean {
+        return objectType == "mh" || objectType == "mv"
+    }
 
-        ArrayList<GridElement> elements = new ArrayList<>();
-
-        // r=robot (v=green, j=yellow, red, blue)
-        // c=target
-        // m=wall (horizontal, vertical)
-        // v=vertical wall
-        // h=horizontal wall
-        List<String> objectTypes = Arrays.asList("mh", "mv", // wall (mur)
-                "robot_green", "robot_yellow", "robot_red", "robot_blue", // robots
-                "target_green", "target_yellow", "target_red", "target_blue", "target_multi"); // targets (cible)
-
-        // Process each line of data once
-        // Use negative limit to keep empty strings at end
-        String[] lines = data.split(";", -1);
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-            
-            // Find matching object type
-            String matchedType = null;
-            for (String type : objectTypes) {
-                if (line.startsWith(type)) {
-                    matchedType = type;
-                    break;
-                }
-            }
-            
-            if (matchedType != null) {
-                // Extract coordinates using indexOf instead of regex
-                int coordStart = matchedType.length();
-                String coords = line.substring(coordStart).trim();
-                
-                int commaIndex = coords.indexOf(',');
-                if (commaIndex > 0) {
-                    try {
-                        String xStr = coords.substring(0, commaIndex).trim();
-                        String yStr = coords.substring(commaIndex + 1).trim();
-                        x = Integer.parseInt(xStr);
-                        y = Integer.parseInt(yStr);
-                        elements.add(new GridElement(x, y, matchedType));
-                    } catch (NumberFormatException e) {
-                    }
-                } else {
-                }
-            } else {
-            }
-        }
+    /**
+     * Extract map data from a string
+     */
+    @JvmStatic
+    fun extractDataFromString(data: String?, someFlag: Boolean): MutableList<GridElement> {
+        val result = mutableListOf<GridElement>()
+        if (data.isNullOrBlank()) return result
         
-        return elements;
-    }
-
-    /*
-     * Generate a unique string from the input string
-     * @param input The input string
-     * @return A unique 5-letter string altering between vowels and consonants
-     */
-    public static String generateUnique5LetterFromString(String input) {
-        try {
-            // Create a SHA-256 message digest instance
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            // Get the hash bytes for the input string
-            byte[] hashBytes = digest.digest(input.getBytes());
-
-            // Define vowels and consonants
-            char[] vowels = {'A', 'E', 'I', 'O', 'U'};
-            char[] consonants = {'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'};
-
-            // Convert the hash bytes to a 5-letter string, alternating between vowels and consonants
-            StringBuilder uniqueString = new StringBuilder();
-            for (int i = 0; i < 5; i++) {
-                // Convert each byte to a positive integer and take modulo 26 to get a letter
-                int index = Math.abs(hashBytes[i]) % (i % 2 == 0 ? consonants.length : vowels.length);
-                // Map the index to an uppercase letter (ASCII code for 'A' is 65)
-                char letter = (i % 2 == 0 ? consonants[index] : vowels[index]);
-                // Append the letter to the unique string
-                uniqueString.append(letter);
+        // Split data by semicolon
+        val entries = data.split(";").filter { it.isNotBlank() }
+        for (entry in entries) {
+            // Very simple parsing for GridElement(x,y,type)
+            // Expecting format like "mh1,2" or "robot_blue5,6"
+            try {
+                // Find where the numbers start
+                val firstDigitIndex = entry.indexOfFirst { it.isDigit() }
+                if (firstDigitIndex != -1) {
+                    val type = entry.substring(0, firstDigitIndex)
+                    val coords = entry.substring(firstDigitIndex).split(",")
+                    if (coords.size == 2) {
+                        result.add(GridElement(coords[0].toInt(), coords[1].toInt(), type))
+                    }
+                }
+            } catch (e: Exception) {
+                Timber.e("Error parsing map object data: $entry")
             }
-            return uniqueString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            // Handle NoSuchAlgorithmException if the specified algorithm is not available
-            e.printStackTrace();
-            return null; // or throw an exception
         }
+
+        return result
     }
 }

@@ -617,19 +617,19 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
             // Remove existing border stubs (perpendicular walls touching the border)
             val toRemove: MutableList<GameElement> = ArrayList<GameElement>()
             for (el in state.gameElements) {
-                if (el.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                if (el.type == GameElement.TYPE_VERTICAL_WALL) {
                     // Vertical wall on top border (y=0) or bottom border (y=h-1)
-                    if (el.getY() == 0 || el.getY() == h - 1) {
+                    if (el.y == 0 || el.y == h - 1) {
                         // Don't remove corner border walls (x=0 or x=w)
-                        if (el.getX() > 0 && el.getX() < w) {
+                        if (el.x > 0 && el.x < w) {
                             toRemove.add(el)
                         }
                     }
-                } else if (el.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                } else if (el.type == GameElement.TYPE_HORIZONTAL_WALL) {
                     // Horizontal wall on left border (x=0) or right border (x=w-1)
-                    if (el.getX() == 0 || el.getX() == w - 1) {
+                    if (el.x == 0 || el.x == w - 1) {
                         // Don't remove corner border walls (y=0 or y=h)
-                        if (el.getY() > 0 && el.getY() < h) {
+                        if (el.y > 0 && el.y < h) {
                             toRemove.add(el)
                         }
                     }
@@ -637,7 +637,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
             }
             // Clean up board[][] for removed stubs
             for (el in toRemove) {
-                state.setCellType(el.getX(), el.getY(), 0)
+                state.setCellType(el.x, el.y, 0)
             }
             state.gameElements.removeAll(toRemove)
 

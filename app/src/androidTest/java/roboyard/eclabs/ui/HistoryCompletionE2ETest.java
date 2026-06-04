@@ -146,13 +146,13 @@ public class HistoryCompletionE2ETest {
         // Check history after first play
         List<GameHistoryEntry> afterFirst = getHistoryEntries();
         assertFalse(TAG + " History must have entry after play 1", afterFirst.isEmpty());
-        step("PLAY1", "After first play: completionCount=" + afterFirst.get(0).getCompletionCount());
+        step("PLAY1", "After first play: completionCount=" + afterFirst.get(0).completionCount);
         assertEquals(TAG + " completionCount must be 1 after first play",
-                1, afterFirst.get(0).getCompletionCount());
+                1, afterFirst.get(0).completionCount);
 
         step("PLAY2", "=== Second play of same map ===");
         // Reload same map (same wall signature → same history entry)
-        String mapSig = afterFirst.get(0).getMapSignature();
+        String mapSig = afterFirst.get(0).mapSignature;
         startRandomGameViaGameStateManager();
         Thread.sleep(5000);
 
@@ -208,9 +208,9 @@ public class HistoryCompletionE2ETest {
         List<GameHistoryEntry> entries = getHistoryEntries();
         if (entries != null && !entries.isEmpty()) {
             GameHistoryEntry entry = entries.get(0);
-            step("4/4", "Entry found: completionCount=" + entry.getCompletionCount());
+            step("4/4", "Entry found: completionCount=" + entry.completionCount);
             assertEquals(TAG + " completionCount must be 0 for incomplete game",
-                    0, entry.getCompletionCount());
+                    0, entry.completionCount);
         } else {
             step("4/4", "No history entry yet after first move - OK");
         }
@@ -455,7 +455,7 @@ public class HistoryCompletionE2ETest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) { Timber.e(TAG + " GameState null"); return; }
             for (GameElement el : state.gameElements) {
-                if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
+                if (el.type == Constants.TYPE_ROBOT && el.color == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;
                 }
@@ -485,7 +485,7 @@ public class HistoryCompletionE2ETest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
             for (GameElement el : state.gameElements) {
-                if (el.getType() == Constants.TYPE_ROBOT && !solutionColors.contains(el.getColor())) {
+                if (el.type == Constants.TYPE_ROBOT && !solutionColors.contains(el.color)) {
                     nonSolutionRobot.set(el);
                     break;
                 }
@@ -497,7 +497,7 @@ public class HistoryCompletionE2ETest {
             return 0;
         }
 
-        step("EXTRA", "Moving non-solution robot (color=" + nonSolutionRobot.get().getColor() + ") in all 4 directions");
+        step("EXTRA", "Moving non-solution robot (color=" + nonSolutionRobot.get().color + ") in all 4 directions");
 
         int startMoveCount = gameStateManager.getMoveCount().getValue() != null
                 ? gameStateManager.getMoveCount().getValue() : 0;
@@ -510,8 +510,8 @@ public class HistoryCompletionE2ETest {
                 if (state == null) return;
                 // Re-select the non-solution robot by color each time (position may have changed)
                 for (GameElement el : state.gameElements) {
-                    if (el.getType() == Constants.TYPE_ROBOT
-                            && el.getColor() == nonSolutionRobot.get().getColor()) {
+                    if (el.type == Constants.TYPE_ROBOT
+                            && el.color == nonSolutionRobot.get().color) {
                         state.setSelectedRobot(el);
                         break;
                     }
@@ -543,7 +543,7 @@ public class HistoryCompletionE2ETest {
                         return;
                     }
                     for (GameElement el : state.gameElements) {
-                        if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == c) {
+                        if (el.type == Constants.TYPE_ROBOT && el.color == c) {
                             state.setSelectedRobot(el);
                             break;
                         }

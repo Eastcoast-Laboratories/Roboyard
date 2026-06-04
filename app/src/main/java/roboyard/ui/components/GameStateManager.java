@@ -451,16 +451,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int horizontalWallCount = 0;
         int verticalWallCount = 0;
         for (GameElement element : newState.gameElements) {
-            switch (element.getType()) {
+            switch (element.type) {
                 case GameElement.TYPE_ROBOT:
                     robotCount++;
                     Timber.d("[GAME_LOAD] Found robot at (%d,%d) with color %d",
-                            element.getX(), element.getY(), element.getColor());
+                            element.x, element.y, element.color);
                     break;
                 case GameElement.TYPE_TARGET:
                     targetCount++;
                     Timber.d("[GAME_LOAD] Found target at (%d,%d) with color %d",
-                            element.getX(), element.getY(), element.getColor());
+                            element.x, element.y, element.color);
                     break;
                 case GameElement.TYPE_HORIZONTAL_WALL:
                     horizontalWallCount++;
@@ -502,7 +502,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     if (newState.getCellType(x, y) == Constants.TYPE_TARGET) {
                         int color = newState.getTargetColor(x, y);
                         GameElement target = new GameElement(GameElement.TYPE_TARGET, x, y);
-                        target.setColor(color);
+                        target.color = color;
                         newState.gameElements.add(target);
                         Timber.d("[GAME_LOAD] Recreated target element at (%d,%d) with color %d", x, y, color);
                     }
@@ -655,16 +655,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Convert GameElements to GridElements for the solver
         for (GameElement element : state.gameElements) {
             GridElement gridElement = null;
-            switch (element.getType()) {
+            switch (element.type) {
                 case GameElement.TYPE_ROBOT:
-                    String robotType = "robot_" + GameLogic.getColorName(element.getColor(), false);
-                    gridElement = new GridElement(element.getX(), element.getY(), robotType);
-                    Timber.d("[SOLVER_INIT] Added robot GridElement: %s at (%d,%d)", robotType, element.getX(), element.getY());
+                    String robotType = "robot_" + GameLogic.getColorName(element.color, false);
+                    gridElement = new GridElement(element.x, element.y, robotType);
+                    Timber.d("[SOLVER_INIT] Added robot GridElement: %s at (%d,%d)", robotType, element.x, element.y);
                     break;
 
                 case GameElement.TYPE_TARGET:
                     // Get the raw color value from the element
-                    int targetColorId = element.getColor();
+                    int targetColorId = element.color;
                     String colorName = GameLogic.getColorName(targetColorId, false);
                     String targetType = "target_" + colorName;
                     
@@ -673,23 +673,23 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             targetColorId, (targetColorId == Constants.COLOR_MULTI ? "MULTI" : colorName), targetType);
                     
                     // Create GridElement with the correct type
-                    gridElement = new GridElement(element.getX(), element.getY(), targetType);
+                    gridElement = new GridElement(element.x, element.y, targetType);
                     
                     // More verbose logging for multi-color targets
                     if (targetColorId == Constants.COLOR_MULTI) {
                         Timber.d("[POSSIBLE_UNREACHEABLE_CODE][SOLUTION_SOLVER_TARGET] Created multi-color target GridElement: %s at (%d,%d)", 
-                                targetType, element.getX(), element.getY());
+                                targetType, element.x, element.y);
                     } else {
-                        Timber.d("[POSSIBLE_UNREACHEABLE_CODE][SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.getX(), element.getY());
+                        Timber.d("[POSSIBLE_UNREACHEABLE_CODE][SOLVER_INIT] Added target GridElement: %s at (%d,%d)", targetType, element.x, element.y);
                     }
                     break;
 
                 case GameElement.TYPE_HORIZONTAL_WALL:
-                    gridElement = new GridElement(element.getX(), element.getY(), "mh");
+                    gridElement = new GridElement(element.x, element.y, "mh");
                     break;
 
                 case GameElement.TYPE_VERTICAL_WALL:
-                    gridElement = new GridElement(element.getX(), element.getY(), "mv");
+                    gridElement = new GridElement(element.x, element.y, "mv");
                     break;
             }
 
@@ -1347,15 +1347,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     state.setSelectedRobot(touchedRobot);
 
                     // Add used robot to the set
-                    if (touchedRobot.getColor() >= 0) {
-                        robotsUsed.add(touchedRobot.getColor());
+                    if (touchedRobot.color >= 0) {
+                        robotsUsed.add(touchedRobot.color);
                     }
 
                     currentState.setValue(state);
                 } else if (selectedRobot != null) {
                     // User tapped on an empty space - try to move the selected robot
-                    int robotX = selectedRobot.getX();
-                    int robotY = selectedRobot.getY();
+                    int robotX = selectedRobot.x;
+                    int robotY = selectedRobot.y;
 
                     // Determine movement direction
                     int dx = 0;
@@ -1428,7 +1428,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Check if the robot is moving back to its last position in the path history (reverse move = undo)
         // But only if game is not already complete - after goal, reverse moves are treated as normal forward moves
         Timber.d("[ROBOTS][UNDO] moveRobotInDirection: robot=%d at (%d,%d), dx=%d dy=%d, pathHistory.size=%d, gameComplete=%b",
-                robot.getColor(), robot.getX(), robot.getY(), dx, dy, pathHistory.size(), isGameComplete.getValue());
+                robot.color, robot.x, robot.y, dx, dy, pathHistory.size(), isGameComplete.getValue());
         if (!isGameComplete.getValue() && !pathHistory.isEmpty()) {
             int[] lastPath = pathHistory.get(pathHistory.size() - 1);
             int lastColor = lastPath[0];
@@ -1439,11 +1439,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             Timber.d("[ROBOTS][UNDO] lastPath: color=%d from=(%d,%d) to=(%d,%d)",
                     lastColor, lastFromX, lastFromY, lastToX, lastToY);
             // Only applies to the same robot
-            if (lastColor == robot.getColor()
-                    && robot.getX() == lastToX && robot.getY() == lastToY) {
+            if (lastColor == robot.color
+                    && robot.x == lastToX && robot.y == lastToY) {
                 // Determine which direction the robot would slide to
-                int startX2 = robot.getX();
-                int startY2 = robot.getY();
+                int startX2 = robot.x;
+                int startY2 = robot.y;
                 int endX2 = startX2;
                 int endY2 = startY2;
                 if (dx != 0) {
@@ -1463,8 +1463,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // If the robot would land exactly on its previous position, treat as undo
                 if (endX2 == lastFromX && endY2 == lastFromY) {
                     Timber.d("[ROBOTS][UNDO] Reverse move detected for robot %d: (%d,%d)->(%d,%d), triggering undo",
-                            robot.getColor(), lastToX, lastToY, lastFromX, lastFromY);
-                    final int undoneRobotColor = robot.getColor();
+                            robot.color, lastToX, lastToY, lastFromX, lastFromY);
+                    final int undoneRobotColor = robot.color;
                     // Remove the path history entry first, then undo the game state
                     int[] removedPath = removeLastPathFromHistory();
                     boolean undone = undoLastMove();
@@ -1486,14 +1486,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
 
         // Advance preCompRobotOrder: if the moved robot matches the first expected color, remove it
-        if (!preCompRobotOrder.isEmpty() && preCompRobotOrder.get(0) == robot.getColor()) {
+        if (!preCompRobotOrder.isEmpty() && preCompRobotOrder.get(0) == robot.color) {
             preCompRobotOrder.remove(0);
             Timber.d("[PRECOMP_SOLUTION] Advanced preCompRobotOrder after %s move, remaining first: %s",
-                    robotColorShort(robot.getColor()),
+                    robotColorShort(robot.color),
                     preCompRobotOrder.isEmpty() ? "none" : robotColorShort(preCompRobotOrder.get(0)));
         }
-        int startX = robot.getX();
-        int startY = robot.getY();
+        int startX = robot.x;
+        int startY = robot.y;
 
         // Initialize end position to the current position (in case no movement is possible)
         int endX = startX;
@@ -1534,25 +1534,25 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         if (elements != null) {
             for (GameElement element : elements) {
                 // Add the element based on its type
-                if (element.getType() == GameElement.TYPE_ROBOT) {
-                    stateBeforeMove.addRobot(element.getX(), element.getY(), element.getColor());
+                if (element.type == GameElement.TYPE_ROBOT) {
+                    stateBeforeMove.addRobot(element.x, element.y, element.color);
 
                     // Find the newly added robot and set its direction
                     for (GameElement newElement : stateBeforeMove.gameElements) {
-                        if (newElement.getType() == GameElement.TYPE_ROBOT &&
-                                newElement.getColor() == element.getColor() &&
-                                newElement.getX() == element.getX() &&
-                                newElement.getY() == element.getY()) {
+                        if (newElement.type == GameElement.TYPE_ROBOT &&
+                                newElement.color == element.color &&
+                                newElement.x == element.x &&
+                                newElement.y == element.y) {
                             newElement.setDirectionX(element.getDirectionX());
                             break;
                         }
                     }
-                } else if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                    stateBeforeMove.addHorizontalWall(element.getX(), element.getY());
-                } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                    stateBeforeMove.addVerticalWall(element.getX(), element.getY());
-                } else if (element.getType() == GameElement.TYPE_TARGET) {
-                    stateBeforeMove.addTarget(element.getX(), element.getY(), element.getColor());
+                } else if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
+                    stateBeforeMove.addHorizontalWall(element.x, element.y);
+                } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
+                    stateBeforeMove.addVerticalWall(element.x, element.y);
+                } else if (element.type == GameElement.TYPE_TARGET) {
+                    stateBeforeMove.addTarget(element.x, element.y, element.color);
                 }
             }
         }
@@ -1647,7 +1647,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
             // Log the movement initiation
             Timber.d("[ROBOT][HINT_SYSTEM] Movement INITIATED: Robot %d moving from (%d,%d) to (%d,%d)",
-                    robot.getColor(), originalX, originalY, targetX, targetY);
+                    robot.color, originalX, originalY, targetX, targetY);
 
             // Only increment counters if game is not already complete
             // Once goal is reached, stop counting moves and squares
@@ -1692,21 +1692,21 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             state.setLastMovedRobot(robot);
             state.setLastMoveDirection(directionConstant);
 
-            Timber.d("[HINT_SYSTEM] Robot moved: color=%d, direction=%d", robot.getColor(), directionConstant);
+            Timber.d("[HINT_SYSTEM] Robot moved: color=%d, direction=%d", robot.color, directionConstant);
             Timber.d("[HINT_SYSTEM] Updated moveCount in GameState to %d", state.moveCount);
 
             // Create completion callback for when animation finishes
             Runnable completionCallback = () -> {
                 // Update the robot's actual position after animation completes
-                robot.setX(targetX);
-                robot.setY(targetY);
+                robot.x = targetX;
+                robot.y = targetY;
 
                 // Check for game completion after animation - but only if not already complete
                 // This prevents triggering goal event twice
                 if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
                 } else if (!isGameComplete.getValue() && state.isRobotOnWrongTarget(robot)) {
-                    wrongRobotAtTarget.setValue(robot.getColor());
+                    wrongRobotAtTarget.setValue(robot.color);
                     wrongRobotAtTarget.setValue(-1);
                 }
 
@@ -1731,8 +1731,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 }
 
                 // Capture current position for path tracking
-                final int oldX = robot.getX();
-                final int oldY = robot.getY();
+                final int oldX = robot.x;
+                final int oldY = robot.y;
 
                 // Create enhanced completion callback that tracks paths
                 Runnable enhancedCallback = () -> {
@@ -1745,8 +1745,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     }
 
                     // Add this robot to the used set
-                    if (robot.getColor() >= 0) {
-                        robotsUsed.add(robot.getColor());
+                    if (robot.color >= 0) {
+                        robotsUsed.add(robot.color);
                     }
                 };
 
@@ -1756,15 +1756,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Immediate mode - update position without animation
                 Timber.d("[ANIM] Animations disabled or manager null (enabled=%b, manager=%s), moving robot immediately",
                         animationsEnabled, robotAnimationManager != null ? "exists" : "null");
-                robot.setX(targetX);
-                robot.setY(targetY);
+                robot.x = targetX;
+                robot.y = targetY;
 
                 // Check for game completion - but only if not already complete
                 // This prevents triggering goal event twice
                 if (!isGameComplete.getValue() && state.areAllRobotsAtTargets()) {
                     setGameComplete(true);
                 } else if (!isGameComplete.getValue() && state.isRobotOnWrongTarget(robot)) {
-                    wrongRobotAtTarget.setValue(robot.getColor());
+                    wrongRobotAtTarget.setValue(robot.color);
                     wrongRobotAtTarget.setValue(-1);
                 }
 
@@ -2056,16 +2056,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 int updatedCount = 0;
                                 String levelName = "Level " + finalLevelId;
                                 for (GameHistoryEntry entry : allEntries) {
-                                    if (entry.getMapName() != null && entry.getMapName().equals(levelName)) {
-                                        entry.setStarsEarned(finalStars);
-                                        if (finalMoves > 0 && (entry.getMovesMade() == 0 || finalMoves < entry.getMovesMade())) {
-                                            entry.setMovesMade(finalMoves);
+                                    if (entry.mapName != null && entry.mapName.equals(levelName)) {
+                                        entry.starsEarned = finalStars;
+                                        if (finalMoves > 0 && (entry.movesMade == 0 || finalMoves < entry.movesMade)) {
+                                            entry.movesMade = finalMoves;
                                         }
-                                        if (entry.getCompletionCount() == 0) {
+                                        if (entry.completionCount == 0) {
                                             entry.recordCompletion(0, finalMoves, finalStars);
                                         }
                                         updatedCount++;
-                                        Timber.d("[HISTORY_SYNC] Set stars=%d, moves=%d for history entry '%s'", finalStars, entry.getMovesMade(), entry.getMapName());
+                                        Timber.d("[HISTORY_SYNC] Set stars=%d, moves=%d for history entry '%s'", finalStars, entry.movesMade, entry.mapName);
                                     }
                                 }
                                 if (updatedCount > 0) {
@@ -2157,17 +2157,17 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
 
         // Update completion data
         data.setCompleted(true);
-        data.setHintsShown(hintsShown);
-        data.setTimeNeeded(System.currentTimeMillis() - startTime);
-        data.setMovesNeeded(moveCount.getValue() != null ? moveCount.getValue() : 0);
-        data.setRobotsUsed(robotsUsed.size());
-        data.setSquaresSurpassed(squaresMoved.getValue() != null ? squaresMoved.getValue() : 0);
+        data.hintsShown = hintsShown;
+        data.timeNeeded = System.currentTimeMillis() - startTime;
+        data.movesNeeded = moveCount.getValue() != null ? moveCount.getValue() : 0;
+        data.robotsUsed = robotsUsed.size();
+        data.squaresSurpassed = squaresMoved.getValue() != null ? squaresMoved.getValue() : 0;
 
         // Set optimal moves if we have a solution
         int optimalMoves = 0;
         if (currentSolution != null && currentSolution.moves != null) {
             optimalMoves = currentSolution.moves.size();
-            data.setOptimalMoves(optimalMoves);
+            data.optimalMoves = optimalMoves;
         }
 
         // Calculate stars based on the criteria
@@ -2407,8 +2407,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         int maxX = 0, maxY = 0;
 
         for (GridElement element : elements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             minX = Math.min(minX, x);
             minY = Math.min(minY, y);
             maxX = Math.max(maxX, x);
@@ -2427,29 +2427,29 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         paint.setAntiAlias(true);
 
         for (GridElement element : elements) {
-            int x = element.getX() - minX + 1; // Add padding
-            int y = element.getY() - minY + 1;
+            int x = element.x - minX + 1; // Add padding
+            int y = element.y - minY + 1;
             float left = x * scale;
             float top = y * scale;
             float right = (x + 1) * scale;
             float bottom = (y + 1) * scale;
 
-            if (element.getType().startsWith("robot_")) {
+            if (element.type.startsWith("robot_")) {
                 // Draw robots
                 paint.setColor(Color.RED);
                 canvas.drawCircle((left + right) / 2, (top + bottom) / 2, scale / 2, paint);
-            } else if (element.getType().startsWith("target_")) {
+            } else if (element.type.startsWith("target_")) {
                 // Draw targets
                 paint.setStyle(Paint.Style.STROKE);
                 paint.setStrokeWidth(2);
                 paint.setColor(Color.RED);
                 canvas.drawRect(left, top, right, bottom, paint);
                 paint.setStyle(Paint.Style.FILL);
-            } else if (element.getType().equals("mv")) {
+            } else if (element.type.equals("mv")) {
                 // Draw walls
                 paint.setColor(Color.DKGRAY);
                 canvas.drawRect(left + scale / 3, top, right - scale / 3, bottom, paint);
-            } else if (element.getType().equals("mh")) {
+            } else if (element.type.equals("mh")) {
                 // Draw walls
                 paint.setColor(Color.DKGRAY);
                 canvas.drawRect(left, top + scale / 3, right, bottom - scale / 3, paint);
@@ -2569,7 +2569,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Filter out level games (matching SaveGameFragment filtering)
             List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new ArrayList<>();
             for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
-                String mapName = entry.getMapName();
+                String mapName = entry.mapName;
                 if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
                     filteredEntries.add(entry);
                 }
@@ -2639,7 +2639,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Filter out level games (matching SaveGameFragment filtering)
             List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new ArrayList<>();
             for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
-                String mapName = entry.getMapName();
+                String mapName = entry.mapName;
                 if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
                     filteredEntries.add(entry);
                 }
@@ -2706,7 +2706,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Filter out level games (matching SaveGameFragment filtering)
             List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new ArrayList<>();
             for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
-                String mapName = entry.getMapName();
+                String mapName = entry.mapName;
                 if (mapName == null || !mapName.matches("(?i)^Level\\s+\\d+.*")) {
                     filteredEntries.add(entry);
                 }
@@ -2860,7 +2860,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             java.util.List<GameHistoryEntry> allEntries = GameHistoryManager.getHistoryEntries(activity);
             GameHistoryEntry existing = null;
             for (GameHistoryEntry e : allEntries) {
-                if (mapSig.equals(e.getMapSignature())) {
+                if (mapSig.equals(e.mapSignature)) {
                     existing = e;
                     break;
                 }
@@ -2868,10 +2868,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (existing == null) {
                 Timber.d("[MAPSIG] updateHintTracking: NOT FOUND. Searching for: %s", mapSig);
                 for (GameHistoryEntry e : allEntries) {
-                    Timber.d("[MAPSIG] updateHintTracking: stored entry mapSig=%s", e.getMapSignature());
+                    Timber.d("[MAPSIG] updateHintTracking: stored entry mapSig=%s", e.mapSignature);
                 }
             }
-            Timber.d("[HISTORY] findByMapSignature result: %s", existing != null ? existing.getMapName() : "null - NOT FOUND");
+            Timber.d("[HISTORY] findByMapSignature result: %s", existing != null ? existing.mapName : "null - NOT FOUND");
 
             if (existing != null) {
                 int maxHint = gameState.maxHintUsedThisSession;
@@ -2886,7 +2886,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Guard: only record completion once per game session
                 if (Boolean.TRUE.equals(isGameComplete.getValue()) && !isCompletionRecorded) {
                     int actualMoveCount = gameState.moveCount;
-                    int countBefore = existing.getCompletionCount();
+                    int countBefore = existing.completionCount;
 
                     // [STARS_PER_COMPLETION] Calculate current attempt's stars for level games
                     // and pass them to recordCompletion. Without this, the 2-arg overload
@@ -2895,7 +2895,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     int optMoves = (currentSolution != null && currentSolution.moves != null)
                             ? currentSolution.moves.size() : 0;
                     if (optMoves > 0) {
-                        existing.setOptimalMoves(optMoves);
+                        existing.optimalMoves = optMoves;
                         Timber.d("[HISTORY] updateHintTracking: setOptimalMoves=%d", optMoves);
                     }
 
@@ -2907,12 +2907,12 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             currentAttemptStars = 1;
                         }
                     } else {
-                        currentAttemptStars = existing.getStarsEarned();
+                        currentAttemptStars = existing.starsEarned;
                     }
                     existing.recordCompletion((int)((System.currentTimeMillis() - gameStartTime) / 1000), actualMoveCount, currentAttemptStars);
                     isCompletionRecorded = true;
                     Timber.d("[HISTORY_FLOW][STARS_PER_COMPLETION] updateHintTracking: recordCompletion called, countBefore=%d, countAfter=%d, moveCount=%d, stars=%d",
-                            countBefore, existing.getCompletionCount(), actualMoveCount, currentAttemptStars);
+                            countBefore, existing.completionCount, actualMoveCount, currentAttemptStars);
 
                     // If completed without hints, record the no-hints timestamp (never overwritten by later hint usage)
                     if (maxHint < 0 && actualMoveCount > 0) {
@@ -2932,7 +2932,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 // Save the same list we modified (not a freshly-read copy from disk)
                 GameHistoryManager.saveHistoryIndex(activity, allEntries);
                 Timber.d("[HISTORY] Saved updated history entry: completionCount=%d, maxHintUsed=%d, everUsedHints=%b",
-                        existing.getCompletionCount(), maxHint, existing.isEverUsedHints());
+                        existing.completionCount, maxHint, existing.isEverUsedHints());
             }
         } catch (Exception e) {
             Timber.e("[HISTORY] Error updating hint tracking: %s", e.getMessage());
@@ -3028,15 +3028,15 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     actualMoveCount, isGameComplete.getValue(), optimalMovesCount);
             
             // Set difficulty as int ID (0-3), not localized string
-            entry.setDifficulty(getEffectiveDifficulty());
+            entry.difficulty = getEffectiveDifficulty();
 
             // Set map signatures for unique map tracking
             String wallSig = gameState.generateWallSignature();
             String posSig = gameState.generatePositionSignature();
             String mapSig = gameState.generateMapSignature();
-            entry.setWallSignature(wallSig);
-            entry.setPositionSignature(posSig);
-            entry.setMapSignature(mapSig);
+            entry.wallSignature = wallSig;
+            entry.positionSignature = posSig;
+            entry.mapSignature = mapSig;
             Timber.d("[MAPSIG] saveToHistory: wallSig=%s", wallSig);
             Timber.d("[MAPSIG] saveToHistory: posSig=%s", posSig);
             Timber.d("[MAPSIG] saveToHistory: mapSig=%s", mapSig);
@@ -3054,14 +3054,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                 if (currentAttemptStars < 1 && levelId <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
                     currentAttemptStars = 1;
                 }
-                entry.setStarsEarned(currentAttemptStars);
+                entry.starsEarned = currentAttemptStars;
                 Timber.d("[HISTORY][STARS_PER_COMPLETION] Set starsEarned=%d for level %d (moves=%d, optimal=%d, hints=%d)",
                         currentAttemptStars, levelId, actualMoveCount, optMovesForStars, hintsShown);
             }
 
             // Set hint tracking - record if hints were used during this session
             int maxHintUsed = gameState.maxHintUsedThisSession;
-            entry.setMaxHintUsed(maxHintUsed);
+            entry.maxHintUsed = maxHintUsed;
             // Mark as solved without hints only if no hints were used
             boolean noHintsThisSession = maxHintUsed < 0;
             entry.setSolvedWithoutHints(noHintsThisSession);
@@ -3079,7 +3079,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         isOptimal, actualMoveCount, optMoves);
             }
             Timber.d("[HISTORY] Hint tracking: maxHintUsed=%d, solvedWithoutHints=%b, everUsedHints=%b, lastSolvedWithoutHints=%d", 
-                    maxHintUsed, entry.isSolvedWithoutHints(), entry.isEverUsedHints(), entry.getLastSolvedWithoutHints());
+                    maxHintUsed, entry.isSolvedWithoutHints(), entry.isEverUsedHints(), entry.lastSolvedWithoutHints);
 
             // Add entry to history index
             GameHistoryManager.addHistoryEntry(activity, entry);
@@ -3087,7 +3087,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Verify the entry was stored with the correct mapSignature
             GameHistoryEntry stored = GameHistoryManager.findByMapSignature(activity, mapSig);
             Timber.d("[MAPSIG] saveToHistory: after addHistoryEntry, findByMapSignature('%s') = %s",
-                    mapSig, stored != null ? "FOUND (completionCount=" + stored.getCompletionCount() + ")" : "NOT FOUND");
+                    mapSig, stored != null ? "FOUND (completionCount=" + stored.completionCount + ")" : "NOT FOUND");
 
             // If game was complete when saved, mark completion as recorded to prevent double-counting
             if (actualMoveCount > 0) {
@@ -3137,14 +3137,14 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         List<GameElement> robots = state.getRobots();
         for (GameElement robot : robots) {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Robot ID %d (color %d) at position (%d, %d)",
-                    robot.getColor(), robot.getColor(), robot.getX(), robot.getY());
+                    robot.color, robot.color, robot.x, robot.y);
         }
 
         // Log target position
         GameElement target = state.getTarget();
         if (target != null) {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] Target for robot Color %d (color %d) at position (%d, %d)",
-                    target.getColor(), target.getColor(), target.getX(), target.getY());
+                    target.color, target.color, target.x, target.y);
         } else {
             Timber.d("[SOLUTION_SOLVER][calculateSolutionAsync] No target found in current game state");
         }
@@ -3565,8 +3565,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             if (element.isRobot()) {
                 robotCount++;
                 Timber.d("[DEBUG_ROBOTS] Robot #%d at (%d,%d) with color %d (colorName: %s)",
-                        robotCount, element.getX(), element.getY(), element.getColor(), 
-                        GameLogic.getColorName(element.getColor(), true));
+                        robotCount, element.x, element.y, element.color,
+                        GameLogic.getColorName(element.color, true));
             }
         }
         Timber.d("[DEBUG_ROBOTS] Total robots in new GameState: %d (should be %d)", 
@@ -3633,19 +3633,19 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Check if any robot can reach its target in one move
         // This is a quick heuristic check - not perfect but catches most trivial cases
         for (GameElement robot : state.gameElements) {
-            if (robot.getType() != GameElement.TYPE_ROBOT) continue;
+            if (robot.type != GameElement.TYPE_ROBOT) continue;
             
-            int robotX = robot.getX();
-            int robotY = robot.getY();
-            int robotColor = robot.getColor();
+            int robotX = robot.x;
+            int robotY = robot.y;
+            int robotColor = robot.color;
             
             // Find matching target
             for (GameElement target : state.gameElements) {
-                if (target.getType() != GameElement.TYPE_TARGET) continue;
-                if (target.getColor() != robotColor) continue;
+                if (target.type != GameElement.TYPE_TARGET) continue;
+                if (target.color != robotColor) continue;
                 
-                int targetX = target.getX();
-                int targetY = target.getY();
+                int targetX = target.x;
+                int targetY = target.y;
                 
                 // Check if robot can reach target in one move (same row or column)
                 if (robotX == targetX || robotY == targetY) {
@@ -4239,20 +4239,20 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         ArrayList<GridElement> gridElements = new ArrayList<>();
         for (GameElement element : state.gameElements) {
             GridElement gridElement = null;
-            switch (element.getType()) {
+            switch (element.type) {
                 case GameElement.TYPE_ROBOT:
-                    String robotType = "robot_" + GameLogic.getColorName(element.getColor(), false);
-                    gridElement = new GridElement(element.getX(), element.getY(), robotType);
+                    String robotType = "robot_" + GameLogic.getColorName(element.color, false);
+                    gridElement = new GridElement(element.x, element.y, robotType);
                     break;
                 case GameElement.TYPE_TARGET:
-                    String targetType = "target_" + GameLogic.getColorName(element.getColor(), false);
-                    gridElement = new GridElement(element.getX(), element.getY(), targetType);
+                    String targetType = "target_" + GameLogic.getColorName(element.color, false);
+                    gridElement = new GridElement(element.x, element.y, targetType);
                     break;
                 case GameElement.TYPE_HORIZONTAL_WALL:
-                    gridElement = new GridElement(element.getX(), element.getY(), "mh");
+                    gridElement = new GridElement(element.x, element.y, "mh");
                     break;
                 case GameElement.TYPE_VERTICAL_WALL:
-                    gridElement = new GridElement(element.getX(), element.getY(), "mv");
+                    gridElement = new GridElement(element.x, element.y, "mv");
                     break;
             }
             if (gridElement != null) {
@@ -4283,10 +4283,10 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     private String computeStateHash(GameState state) {
         StringBuilder sb = new StringBuilder();
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
-                sb.append(robotColorShort(element.getColor())).append(':')
-                  .append(element.getX()).append(',')
-                  .append(element.getY()).append(';');
+            if (element.type == GameElement.TYPE_ROBOT) {
+                sb.append(robotColorShort(element.color)).append(':')
+                  .append(element.x).append(',')
+                  .append(element.y).append(';');
             }
         }
         return sb.toString();
@@ -4362,7 +4362,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         List<GameElement> robots = new ArrayList<>();
         List<GameElement> nonRobots = new ArrayList<>();
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
+            if (element.type == GameElement.TYPE_ROBOT) {
                 robots.add(element);
             } else {
                 nonRobots.add(element);
@@ -4384,8 +4384,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         }
         if (!priorityColors.isEmpty()) {
             robots.sort((a, b) -> {
-                int idxA = priorityColors.indexOf(a.getColor());
-                int idxB = priorityColors.indexOf(b.getColor());
+                int idxA = priorityColors.indexOf(a.color);
+                int idxB = priorityColors.indexOf(b.color);
                 // Robots in priority list come first, in their solution order
                 if (idxA >= 0 && idxB >= 0) return idxA - idxB;
                 if (idxA >= 0) return -1;
@@ -4394,7 +4394,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             });
             StringBuilder orderLog = new StringBuilder();
             for (GameElement r : robots) {
-                orderLog.append(robotColorShort(r.getColor()));
+                orderLog.append(robotColorShort(r.color));
             }
             Timber.d("[PRECOMP_SOLUTION] Robot order (solution-prioritized): %s", orderLog);
         }
@@ -4424,8 +4424,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         int dy = directions[d][1];
 
                         // Simulate the slide: move robot until it hits wall/robot/boundary
-                        int newX = robot.getX();
-                        int newY = robot.getY();
+                        int newX = robot.x;
+                        int newY = robot.y;
                         if (dx != 0) {
                             int step = dx > 0 ? 1 : -1;
                             for (int i = newX + step; i >= 0 && i < width; i += step) {
@@ -4448,7 +4448,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         }
 
                         // Skip if robot didn't move
-                        if (newX == robot.getX() && newY == robot.getY()) {
+                        if (newX == robot.x && newY == robot.y) {
                             skipped++;
                             continue;
                         }
@@ -4456,11 +4456,11 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         // Compute hash for the hypothetical state
                         StringBuilder sb = new StringBuilder();
                         for (GameElement r : robots) {
-                            sb.append(robotColorShort(r.getColor())).append(':');
+                            sb.append(robotColorShort(r.color)).append(':');
                             if (r == robot) {
                                 sb.append(newX).append(',').append(newY);
                             } else {
-                                sb.append(r.getX()).append(',').append(r.getY());
+                                sb.append(r.x).append(',').append(r.y);
                             }
                             sb.append(';');
                         }
@@ -4475,33 +4475,33 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                         // Build grid elements for the hypothetical state
                         ArrayList<GridElement> gridElements = new ArrayList<>();
                         for (GameElement r : robots) {
-                            String rType = "robot_" + GameLogic.getColorName(r.getColor(), false);
+                            String rType = "robot_" + GameLogic.getColorName(r.color, false);
                             if (r == robot) {
                                 gridElements.add(new GridElement(newX, newY, rType));
                             } else {
-                                gridElements.add(new GridElement(r.getX(), r.getY(), rType));
+                                gridElements.add(new GridElement(r.x, r.y, rType));
                             }
                         }
                         for (GameElement nr : nonRobots) {
                             GridElement ge = null;
-                            switch (nr.getType()) {
+                            switch (nr.type) {
                                 case GameElement.TYPE_TARGET:
-                                    ge = new GridElement(nr.getX(), nr.getY(), "target_" + GameLogic.getColorName(nr.getColor(), false));
+                                    ge = new GridElement(nr.x, nr.y, "target_" + GameLogic.getColorName(nr.color, false));
                                     break;
                                 case GameElement.TYPE_HORIZONTAL_WALL:
-                                    ge = new GridElement(nr.getX(), nr.getY(), "mh");
+                                    ge = new GridElement(nr.x, nr.y, "mh");
                                     break;
                                 case GameElement.TYPE_VERTICAL_WALL:
-                                    ge = new GridElement(nr.getX(), nr.getY(), "mv");
+                                    ge = new GridElement(nr.x, nr.y, "mv");
                                     break;
                             }
                             if (ge != null) gridElements.add(ge);
                         }
 
-                        String colorLetter = robotColorShort(robot.getColor());
+                        String colorLetter = robotColorShort(robot.color);
                         Timber.d("[PRECOMP_SOLUTION] [%d/%d] Solving: %s%s (%d,%d)→(%d,%d)...",
                                 computed + skipped + 1, robots.size() * 4,
-                                colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
+                                colorLetter, dirNames[d], robot.x, robot.y, newX, newY);
                         long solveStart = System.currentTimeMillis();
 
                         // Solve with some minutes timeout using a sub-executor
@@ -4518,7 +4518,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             long elapsed = System.currentTimeMillis() - solveStart;
                             Timber.w("[PRECOMP_SOLUTION] [%d/%d] TIMEOUT after %dms: %s%s (%d,%d)→(%d,%d)",
                                     computed + skipped + 1, robots.size() * 4,
-                                    elapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
+                                    elapsed, colorLetter, dirNames[d], robot.x, robot.y, newX, newY);
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
                         } catch (java.util.concurrent.ExecutionException ee) {
@@ -4546,16 +4546,16 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                                 computed++;
                                 Timber.d("[PRECOMP_SOLUTION] [%d/%d] Solved in %dms: %s%s (%d,%d)→(%d,%d) = %d moves",
                                         computed + skipped, robots.size() * 4,
-                                        solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY, moves);
+                                        solveElapsed, colorLetter, dirNames[d], robot.x, robot.y, newX, newY, moves);
                             } else {
                                 Timber.d("[PRECOMP_SOLUTION] [%d/%d] No solution in %dms: %s%s (%d,%d)→(%d,%d)",
                                         computed + skipped + 1, robots.size() * 4,
-                                        solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
+                                        solveElapsed, colorLetter, dirNames[d], robot.x, robot.y, newX, newY);
                             }
                         } else if (solverCompleted) {
                             Timber.d("[PRECOMP_SOLUTION] [%d/%d] Solver not finished in %dms: %s%s (%d,%d)→(%d,%d)",
                                     computed + skipped + 1, robots.size() * 4,
-                                    solveElapsed, colorLetter, dirNames[d], robot.getX(), robot.getY(), newX, newY);
+                                    solveElapsed, colorLetter, dirNames[d], robot.x, robot.y, newX, newY);
                         }
                     }
                 }
@@ -4609,7 +4609,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         // Count targets in the state
         int targets = 0;
         for (GameElement el : state.gameElements) {
-            if (el.getType() == GameElement.TYPE_TARGET) targets++;
+            if (el.type == GameElement.TYPE_TARGET) targets++;
         }
         prefs.edit()
                 .putInt(AUTOSAVE_META_BOARD_W, state.width)

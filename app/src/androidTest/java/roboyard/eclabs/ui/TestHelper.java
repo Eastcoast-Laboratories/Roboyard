@@ -518,7 +518,7 @@ public class TestHelper {
                 roboyard.logic.core.GameState state = gameStateManager.getCurrentState().getValue();
                 if (state != null) {
                     for (roboyard.logic.core.GameElement element : state.getRobots()) {
-                        if (element.getColor() == robotColor) {
+                        if (element.color == robotColor) {
                             state.setSelectedRobot(element);
                             break;
                         }

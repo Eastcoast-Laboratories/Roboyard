@@ -513,8 +513,8 @@ public class DebugSettingsFragment extends Fragment {
                 long historyMemoryBytes = 0;
                 for (roboyard.logic.core.GameHistoryEntry entry : historyEntries) {
                     if (entry.getMapPath() != null) historyMemoryBytes += entry.getMapPath().length();
-                    if (entry.getMapName() != null) historyMemoryBytes += entry.getMapName().length();
-                    if (entry.getBoardSize() != null) historyMemoryBytes += entry.getBoardSize().length();
+                    if (entry.mapName != null) historyMemoryBytes += entry.mapName.length();
+                    if (entry.boardSize != null) historyMemoryBytes += entry.boardSize.length();
                     historyMemoryBytes += 200;
                 }
                 long historyMemoryKB = historyMemoryBytes / 1024;
@@ -587,7 +587,7 @@ public class DebugSettingsFragment extends Fragment {
                     roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
                 int nextTestNumber = 1;
                 for (roboyard.logic.core.GameHistoryEntry entry : existingEntries) {
-                    String mapName = entry.getMapName();
+                    String mapName = entry.mapName;
                     if (mapName != null && mapName.startsWith("Test")) {
                         try {
                             int testNum = Integer.parseInt(mapName.substring(4));
@@ -665,23 +665,23 @@ public class DebugSettingsFragment extends Fragment {
                     // Create dummy history entry with absolute path
                     roboyard.logic.core.GameHistoryEntry entry = new roboyard.logic.core.GameHistoryEntry();
                     entry.setMapPath(absolutePath);
-                    entry.setMapName("Test" + currentTestNumber);
-                    entry.setTimestamp(System.currentTimeMillis() - (i * 60000)); // Spread over time
-                    entry.setPlayDuration((int)(Math.random() * 300) + 30); // 30-330 seconds
-                    entry.setMovesMade((int)(Math.random() * 50) + 10); // 10-60 moves
-                    entry.setOptimalMoves((int)(Math.random() * 30) + 5); // 5-35 optimal
-                    entry.setBoardSize("12x12");
+                    entry.mapName = "Test" + currentTestNumber;
+                    entry.timestamp = System.currentTimeMillis() - (i * 60000); // Spread over time
+                    entry.playDuration = (int)(Math.random() * 300) + 30; // 30-330 seconds
+                    entry.movesMade = (int)(Math.random() * 50) + 10; // 10-60 moves
+                    entry.optimalMoves = (int)(Math.random() * 30) + 5; // 5-35 optimal
+                    entry.boardSize = "12x12";
                     // Use difficulty int IDs (0-3) instead of strings
-                    entry.setDifficulty(i % 4); // 0=Beginner, 1=Advanced, 2=Insane, 3=Impossible
-                    entry.setCompletionCount(i % 3 == 0 ? 1 : 0); // Some completed
+                    entry.difficulty = i % 4; // 0=Beginner, 1=Advanced, 2=Insane, 3=Impossible
+                    entry.completionCount = i % 3 == 0 ? 1 : 0; // Some completed
                     
-                    Timber.d("[DEBUG_DUMMY] Entry %d boardSize before save: '%s'", i + 1, entry.getBoardSize());
+                    Timber.d("[DEBUG_DUMMY] Entry %d boardSize before save: '%s'", i + 1, entry.boardSize);
                     
                     // Add to history
                     Boolean success = roboyard.ui.components.GameHistoryManager.addHistoryEntry(requireActivity(), entry);
                     if (success != null && success) {
                         added++;
-                        Timber.d("[DEBUG_DUMMY] Entry %d added successfully, boardSize='%s'", i + 1, entry.getBoardSize());
+                        Timber.d("[DEBUG_DUMMY] Entry %d added successfully, boardSize='%s'", i + 1, entry.boardSize);
                     } else {
                         failed++;
                         Timber.e("[DEBUG_DUMMY] Failed to add entry %d, success=%s", i + 1, success);

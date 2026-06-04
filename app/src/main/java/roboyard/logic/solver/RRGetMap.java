@@ -44,8 +44,8 @@ public class RRGetMap {
         int maxY = 0;
         for (Object element : gridElements) {
             GridElement gridElement = (GridElement) element;
-            maxX = Math.max(maxX, gridElement.getX());
-            maxY = Math.max(maxY, gridElement.getY());
+            maxX = Math.max(maxX, gridElement.x);
+            maxY = Math.max(maxY, gridElement.y);
         }
         
         // Add 1 to get width/height from max coordinates
@@ -95,9 +95,9 @@ public class RRGetMap {
         // This ensures targets get priority over walls at the same position
         for (Object element : gridElements) {
             GridElement gridElement = (GridElement) element;
-            String type = gridElement.getType();
-            int x = gridElement.getX();
-            int y = gridElement.getY();
+            String type = gridElement.type;
+            int x = gridElement.x;
+            int y = gridElement.y;
             int position = y * board.width + x;
             
             // Skip walls - we'll handle them separately after targets
@@ -304,8 +304,8 @@ public class RRGetMap {
         int maxX = 0;
         int maxY = 0;
         for (GridElement element : gridElements) {
-            maxX = Math.max(maxX, element.getX());
-            maxY = Math.max(maxY, element.getY());
+            maxX = Math.max(maxX, element.x);
+            maxY = Math.max(maxY, element.y);
         }
         int mapWidth = maxX + 1;
         int mapHeight = maxY + 1;
@@ -321,21 +321,21 @@ public class RRGetMap {
         
         // First pass: collect all elements by position to handle overlaps
         for (GridElement element : gridElements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             String key = x + "," + y;
             
-            if (element.getType().equals("mh")) {
+            if (element.type.equals("mh")) {
                 // Remember this position has a horizontal wall
                 String prevContent = cellContents.getOrDefault(key, "");
                 cellContents.put(key, prevContent + "mh,");
-            } else if (element.getType().equals("mv")) {
+            } else if (element.type.equals("mv")) {
                 // Vertical walls go in their own position
                 asciiMap[x*2][y] = "|";
             } else {
                 // Remember this position has a robot or target
                 String prevContent = cellContents.getOrDefault(key, "");
-                cellContents.put(key, prevContent + element.getType() + ",");
+                cellContents.put(key, prevContent + element.type + ",");
             }
         }
         

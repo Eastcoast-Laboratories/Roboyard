@@ -56,59 +56,59 @@ public class GameHistoryManager {
             
             // Check if we already have an entry with the same mapSignature
             boolean updated = false;
-            String newMapSignature = entry.getMapSignature();
+            String newMapSignature = entry.mapSignature;
             
             if (newMapSignature != null && !newMapSignature.isEmpty()) {
                 for (int i = 0; i < entries.size(); i++) {
                     GameHistoryEntry existing = entries.get(i);
-                    if (newMapSignature.equals(existing.getMapSignature())) {
+                    if (newMapSignature.equals(existing.mapSignature)) {
                         // Same map found - only record completion if moves > 0 (game was actually played)
                         // Don't record completion for intermediate saves (e.g., when hints are shown)
-                        int countBefore = existing.getCompletionCount();
-                        if (entry.getMovesMade() > 0) {
-                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade(), entry.getStarsEarned());
+                        int countBefore = existing.completionCount;
+                        if (entry.movesMade > 0) {
+                            existing.recordCompletion(entry.playDuration, entry.movesMade, entry.starsEarned);
                             Timber.d("[HISTORY_FLOW] addHistoryEntry(existing): recordCompletion called, movesMade=%d, countBefore=%d, countAfter=%d",
-                                    entry.getMovesMade(), countBefore, existing.getCompletionCount());
+                                    entry.movesMade, countBefore, existing.completionCount);
                         } else {
                             Timber.d("[HISTORY_FLOW] addHistoryEntry(existing): movesMade=0, skipping recordCompletion, count stays %d", countBefore);
                         }
-                        if (entry.getOptimalMoves() > 0) {
-                            existing.setOptimalMoves(entry.getOptimalMoves());
+                        if (entry.optimalMoves > 0) {
+                            existing.optimalMoves = entry.optimalMoves;
                         }
                         // Merge hint tracking - once hints used, permanently marked
                         // Update maxHintUsed to the higher value (more hints = worse)
-                        if (entry.getMaxHintUsed() > existing.getMaxHintUsed()) {
-                            existing.setMaxHintUsed(entry.getMaxHintUsed());
+                        if (entry.maxHintUsed > existing.maxHintUsed) {
+                            existing.maxHintUsed = entry.maxHintUsed;
                         }
                         // everUsedHints is cumulative: true if hints used in ANY attempt
-                        if (entry.getMaxHintUsed() >= 0 || entry.isEverUsedHints()) {
+                        if (entry.maxHintUsed >= 0 || entry.isEverUsedHints()) {
                             existing.markEverUsedHints();
                         }
                         // lastSolvedWithoutHints / lastPerfectlySolvedWithoutHints:
                         // Only update if new entry has a more recent no-hints solve
-                        if (entry.getLastSolvedWithoutHints() > existing.getLastSolvedWithoutHints()) {
-                            existing.setLastSolvedWithoutHints(entry.getLastSolvedWithoutHints());
+                        if (entry.lastSolvedWithoutHints > existing.lastSolvedWithoutHints) {
+                            existing.lastSolvedWithoutHints = entry.lastSolvedWithoutHints;
                         }
-                        if (entry.getLastPerfectlySolvedWithoutHints() > existing.getLastPerfectlySolvedWithoutHints()) {
-                            existing.setLastPerfectlySolvedWithoutHints(entry.getLastPerfectlySolvedWithoutHints());
+                        if (entry.lastPerfectlySolvedWithoutHints > existing.lastPerfectlySolvedWithoutHints) {
+                            existing.lastPerfectlySolvedWithoutHints = entry.lastPerfectlySolvedWithoutHints;
                         }
                         
                         // Log optimal solution achievement with full hint history
-                        int optMoves = existing.getOptimalMoves() > 0 ? existing.getOptimalMoves() : entry.getOptimalMoves();
-                        boolean isOptimal = optMoves > 0 && entry.getMovesMade() == optMoves;
+                        int optMoves = existing.optimalMoves > 0 ? existing.optimalMoves : entry.optimalMoves;
+                        boolean isOptimal = optMoves > 0 && entry.movesMade == optMoves;
                         if (isOptimal) {
                             boolean neverHints = !existing.isEverUsedHints();
                             Timber.d("[HISTORY] OPTIMAL SOLUTION on completion #%d: map=%s, moves=%d, " +
                                     "everUsedHints=%b, solvedWithoutHints=%b, qualifiesNoHints=%b",
-                                    existing.getCompletionCount(), existing.getMapPath(),
-                                    entry.getMovesMade(), existing.isEverUsedHints(),
+                                    existing.completionCount, existing.getMapPath(),
+                                    entry.movesMade, existing.isEverUsedHints(),
                                     existing.isSolvedWithoutHints(), neverHints);
                         }
                         
                         updated = true;
-                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s, maxHintUsed=%d, everUsedHints=%b", 
-                                existing.getCompletionCount(), existing.getMapPath(),
-                                existing.getMaxHintUsed(), existing.isEverUsedHints());
+                        Timber.d("[HISTORY] Updated existing map (completion #%d): %s, maxHintUsed=%d, everUsedHints=%b",
+                                existing.completionCount, existing.getMapPath(),
+                                existing.maxHintUsed, existing.isEverUsedHints());
                         break;
                     }
                 }
@@ -117,11 +117,11 @@ public class GameHistoryManager {
             // Fallback: check by mapName (legacy entries)
             if (!updated) {
                 for (int i = 0; i < entries.size(); i++) {
-                    if (entries.get(i).getMapName().equals(entry.getMapName())) {
+                    if (entries.get(i).mapName.equals(entry.mapName)) {
                         GameHistoryEntry existing = entries.get(i);
                         // Only record completion if moves > 0 (game was actually played)
-                        if (entry.getMovesMade() > 0) {
-                            existing.recordCompletion(entry.getPlayDuration(), entry.getMovesMade(), entry.getStarsEarned());
+                        if (entry.movesMade > 0) {
+                            existing.recordCompletion(entry.playDuration, entry.movesMade, entry.starsEarned);
                         }
                         updated = true;
                         break;
@@ -133,13 +133,13 @@ public class GameHistoryManager {
             if (!updated) {
                 // If game was completed (movesMade > 0) AND completionCount is still 0 (not pre-set from server restore),
                 // record the completion on the new entry
-                if (entry.getMovesMade() > 0 && entry.getCompletionCount() == 0) {
-                    entry.recordCompletion(entry.getPlayDuration(), entry.getMovesMade(), entry.getStarsEarned());
+                if (entry.movesMade > 0 && entry.completionCount == 0) {
+                    entry.recordCompletion(entry.playDuration, entry.movesMade, entry.starsEarned);
                     Timber.d("[HISTORY_FLOW] addHistoryEntry(new): recordCompletion called on new entry, movesMade=%d, countAfter=%d",
-                            entry.getMovesMade(), entry.getCompletionCount());
-                } else if (entry.getCompletionCount() > 0) {
+                            entry.movesMade, entry.completionCount);
+                } else if (entry.completionCount > 0) {
                     Timber.d("[HISTORY_FLOW] addHistoryEntry(new): completionCount already set to %d (server restore), skipping recordCompletion",
-                            entry.getCompletionCount());
+                            entry.completionCount);
                 } else {
                     Timber.d("[HISTORY_FLOW] addHistoryEntry(new): movesMade=0, new entry added with completionCount=0");
                 }
@@ -150,8 +150,8 @@ public class GameHistoryManager {
             Collections.sort(entries, new Comparator<GameHistoryEntry>() {
                 @Override
                 public int compare(GameHistoryEntry o1, GameHistoryEntry o2) {
-                    long t1 = o1.getLastCompletionTimestamp() > 0 ? o1.getLastCompletionTimestamp() : o1.getTimestamp();
-                    long t2 = o2.getLastCompletionTimestamp() > 0 ? o2.getLastCompletionTimestamp() : o2.getTimestamp();
+                    long t1 = o1.lastCompletionTimestamp > 0 ? o1.lastCompletionTimestamp : o1.timestamp;
+                    long t2 = o2.lastCompletionTimestamp > 0 ? o2.lastCompletionTimestamp : o2.timestamp;
                     return Long.compare(t2, t1);
                 }
             });
@@ -203,13 +203,13 @@ public class GameHistoryManager {
                         anyMigrated = true;
                     }
                     entry.setMapPath(mapPath);
-                    entry.setMapName(entryJson.optString("mapName", "Unnamed"));
-                    entry.setTimestamp(entryJson.getLong("timestamp"));
-                    entry.setPlayDuration(entryJson.getInt("playDuration"));
-                    entry.setMovesMade(entryJson.getInt("movesMade"));
-                    entry.setOptimalMoves(entryJson.optInt("optimalMoves", 0));
-                    entry.setBoardSize(entryJson.optString("boardSize", ""));
-                    entry.setPreviewImagePath(entryJson.optString("previewImagePath", ""));
+                    entry.mapName = entryJson.optString("mapName", "Unnamed");
+                    entry.timestamp = entryJson.getLong("timestamp");
+                    entry.playDuration = entryJson.getInt("playDuration");
+                    entry.movesMade = entryJson.getInt("movesMade");
+                    entry.optimalMoves = entryJson.optInt("optimalMoves", 0);
+                    entry.boardSize = entryJson.optString("boardSize", "");
+                    entry.previewImagePath = entryJson.optString("previewImagePath", "");
                     
                     // Load difficulty - support both int (new) and string (legacy migration)
                     int difficultyId = Constants.DIFFICULTY_BEGINNER; // default
@@ -224,16 +224,16 @@ public class GameHistoryManager {
                             Timber.d("[HISTORY_MIGRATION] Converted difficulty '%s' to %d", diffStr, difficultyId);
                         }
                     }
-                    entry.setDifficulty(difficultyId);
+                    entry.difficulty = difficultyId;
                     
                     // Load new fields for unique map tracking
-                    entry.setCompletionCount(entryJson.optInt("completionCount", 0));
-                    entry.setLastCompletionTimestamp(entryJson.optLong("lastCompletionTimestamp", entry.getTimestamp()));
-                    entry.setBestTime(entryJson.optInt("bestTime", entry.getPlayDuration()));
-                    entry.setBestMoves(entryJson.optInt("bestMoves", entry.getMovesMade()));
-                    entry.setWallSignature(entryJson.optString("wallSignature", null));
-                    entry.setPositionSignature(entryJson.optString("positionSignature", null));
-                    entry.setMapSignature(entryJson.optString("mapSignature", null));
+                    entry.completionCount = entryJson.optInt("completionCount", 0);
+                    entry.lastCompletionTimestamp = entryJson.optLong("lastCompletionTimestamp", entry.timestamp);
+                    entry.bestTime = entryJson.optInt("bestTime", entry.playDuration);
+                    entry.bestMoves = entryJson.optInt("bestMoves", entry.movesMade);
+                    entry.wallSignature = entryJson.optString("wallSignature", null);
+                    entry.positionSignature = entryJson.optString("positionSignature", null);
+                    entry.mapSignature = entryJson.optString("mapSignature", null);
                     
                     // Load completion timestamps array
                     if (entryJson.has("completionTimestamps")) {
@@ -246,7 +246,7 @@ public class GameHistoryManager {
                     } else {
                         // Legacy entry - create list with single timestamp
                         List<Long> completionTimestamps = new ArrayList<>();
-                        completionTimestamps.add(entry.getTimestamp());
+                        completionTimestamps.add(entry.timestamp);
                         entry.setCompletionTimestamps(completionTimestamps);
                     }
 
@@ -262,13 +262,13 @@ public class GameHistoryManager {
                     } else {
                         List<Integer> completionMoves = new ArrayList<>();
                         for (int j = 0; j < completionSize; j++) {
-                            completionMoves.add(entry.getMovesMade());
+                            completionMoves.add(entry.movesMade);
                         }
                         entry.setCompletionMoves(completionMoves);
                     }
                     
                     // Load stars earned
-                    entry.setStarsEarned(entryJson.optInt("starsEarned", 0));
+                    entry.starsEarned = entryJson.optInt("starsEarned", 0);
 
                     if (entryJson.has("completionStars")) {
                         JSONArray starsArray = entryJson.getJSONArray("completionStars");
@@ -280,21 +280,21 @@ public class GameHistoryManager {
                     } else {
                         List<Integer> completionStars = new ArrayList<>();
                         for (int j = 0; j < completionSize; j++) {
-                            completionStars.add(entry.getStarsEarned());
+                            completionStars.add(entry.starsEarned);
                         }
                         entry.setCompletionStars(completionStars);
                     }
                     
                     // Load hint tracking fields
-                    entry.setMaxHintUsed(entryJson.optInt("maxHintUsed", -1));
+                    entry.maxHintUsed = entryJson.optInt("maxHintUsed", -1);
                     entry.setSolvedWithoutHints(entryJson.optBoolean("solvedWithoutHints", false));
                     entry.setEverUsedHints(entryJson.optBoolean("everUsedHints", false));
                     // Load no-hints timestamp fields (0 = never solved without hints)
-                    entry.setLastSolvedWithoutHints(entryJson.optLong("lastSolvedWithoutHints", 0));
-                    entry.setLastPerfectlySolvedWithoutHints(entryJson.optLong("lastPerfectlySolvedWithoutHints", 0));
+                    entry.lastSolvedWithoutHints = entryJson.optLong("lastSolvedWithoutHints", 0);
+                    entry.lastPerfectlySolvedWithoutHints = entryJson.optLong("lastPerfectlySolvedWithoutHints", 0);
                     
                     // MIGRATION: If mapSignature is missing, compute it from the saved game file
-                    if (entry.getMapSignature() == null || entry.getMapSignature().isEmpty()) {
+                    if (entry.mapSignature == null || entry.mapSignature.isEmpty()) {
                         computeAndSetMapSignature(activity, entry);
                         anyMigrated = true;
                     }
@@ -349,11 +349,11 @@ public class GameHistoryManager {
                 String posSig = state.generatePositionSignature();
                 String mapSig = state.generateMapSignature();
                 
-                entry.setWallSignature(wallSig);
-                entry.setPositionSignature(posSig);
-                entry.setMapSignature(mapSig);
+                entry.wallSignature = wallSig;
+                entry.positionSignature = posSig;
+                entry.mapSignature = mapSig;
                 
-                Timber.d("[HISTORY_MIGRATION] Computed mapSignature for '%s': %s", entry.getMapName(), mapSig);
+                Timber.d("[HISTORY_MIGRATION] Computed mapSignature for '%s': %s", entry.mapName, mapSig);
             } else {
                 Timber.w("[HISTORY_MIGRATION] Failed to parse GameState for: %s", entry.getMapPath());
             }
@@ -403,8 +403,8 @@ public class GameHistoryManager {
             FileReadWrite.deletePrivateData(activity, entry.getMapPath());
             
             // Delete preview image if it exists
-            if (entry.getPreviewImagePath() != null) {
-                FileReadWrite.deletePrivateData(activity, entry.getPreviewImagePath());
+            if (entry.previewImagePath != null) {
+                FileReadWrite.deletePrivateData(activity, entry.previewImagePath);
             }
         } catch (Exception e) {
             Timber.e("Error deleting history files: %s", e.getMessage());
@@ -424,27 +424,27 @@ public class GameHistoryManager {
             for (GameHistoryEntry entry : entries) {
                 JSONObject entryJson = new JSONObject();
                 entryJson.put("mapPath", entry.getMapPath());
-                entryJson.put("mapName", entry.getMapName());
-                entryJson.put("timestamp", entry.getTimestamp());
-                entryJson.put("playDuration", entry.getPlayDuration());
-                entryJson.put("movesMade", entry.getMovesMade());
-                entryJson.put("optimalMoves", entry.getOptimalMoves());
-                entryJson.put("boardSize", entry.getBoardSize());
-                entryJson.put("previewImagePath", entry.getPreviewImagePath());
+                entryJson.put("mapName", entry.mapName);
+                entryJson.put("timestamp", entry.timestamp);
+                entryJson.put("playDuration", entry.playDuration);
+                entryJson.put("movesMade", entry.movesMade);
+                entryJson.put("optimalMoves", entry.optimalMoves);
+                entryJson.put("boardSize", entry.boardSize);
+                entryJson.put("previewImagePath", entry.previewImagePath);
                 
                 // Save new fields for unique map tracking
-                entryJson.put("completionCount", entry.getCompletionCount());
-                entryJson.put("lastCompletionTimestamp", entry.getLastCompletionTimestamp());
-                entryJson.put("bestTime", entry.getBestTime());
-                entryJson.put("bestMoves", entry.getBestMoves());
-                if (entry.getWallSignature() != null) {
-                    entryJson.put("wallSignature", entry.getWallSignature());
+                entryJson.put("completionCount", entry.completionCount);
+                entryJson.put("lastCompletionTimestamp", entry.lastCompletionTimestamp);
+                entryJson.put("bestTime", entry.bestTime);
+                entryJson.put("bestMoves", entry.bestMoves);
+                if (entry.wallSignature != null) {
+                    entryJson.put("wallSignature", entry.wallSignature);
                 }
-                if (entry.getPositionSignature() != null) {
-                    entryJson.put("positionSignature", entry.getPositionSignature());
+                if (entry.positionSignature != null) {
+                    entryJson.put("positionSignature", entry.positionSignature);
                 }
-                if (entry.getMapSignature() != null) {
-                    entryJson.put("mapSignature", entry.getMapSignature());
+                if (entry.mapSignature != null) {
+                    entryJson.put("mapSignature", entry.mapSignature);
                 }
                 
                 // Save completion timestamps array
@@ -473,16 +473,16 @@ public class GameHistoryManager {
                 entryJson.put("completionStars", completionStars);
                 
                 // Save stars earned
-                entryJson.put("starsEarned", entry.getStarsEarned());
+                entryJson.put("starsEarned", entry.starsEarned);
                 
                 // Save hint tracking fields
-                entryJson.put("maxHintUsed", entry.getMaxHintUsed());
+                entryJson.put("maxHintUsed", entry.maxHintUsed);
                 entryJson.put("solvedWithoutHints", entry.isSolvedWithoutHints());
                 entryJson.put("everUsedHints", entry.isEverUsedHints());
-                entryJson.put("lastSolvedWithoutHints", entry.getLastSolvedWithoutHints());
-                entryJson.put("lastPerfectlySolvedWithoutHints", entry.getLastPerfectlySolvedWithoutHints());
+                entryJson.put("lastSolvedWithoutHints", entry.lastSolvedWithoutHints);
+                entryJson.put("lastPerfectlySolvedWithoutHints", entry.lastPerfectlySolvedWithoutHints);
                 // Save difficulty as int ID (0-3), not localized string
-                entryJson.put("difficulty", entry.getDifficulty());
+                entryJson.put("difficulty", entry.difficulty);
                 
                 entriesArray.put(entryJson);
             }
@@ -588,7 +588,7 @@ public class GameHistoryManager {
                 // Match by either full path or just filename
                 if (entryPath.equals(mapPath) || entryFileName.equals(fileName)) {
                     entryToDelete = entry;
-                    Timber.d("Found entry to delete: %s", entry.getMapName());
+                    Timber.d("Found entry to delete: %s", entry.mapName);
                     break;
                 }
             }
@@ -673,7 +673,7 @@ public class GameHistoryManager {
         GameHistoryEntry existing = findByMapSignature(activity, mapSignature);
         // An entry is created on the first move (before completion), so we check
         // completionCount == 0 to distinguish "started but not yet completed" from "already completed before".
-        return existing == null || existing.getCompletionCount() == 0;
+        return existing == null || existing.completionCount == 0;
     }
     
     /**
@@ -688,7 +688,7 @@ public class GameHistoryManager {
         }
         List<GameHistoryEntry> entries = getHistoryEntries(activity);
         for (GameHistoryEntry entry : entries) {
-            if (mapSignature.equals(entry.getMapSignature())) {
+            if (mapSignature.equals(entry.mapSignature)) {
                 return entry;
             }
         }
@@ -708,7 +708,7 @@ public class GameHistoryManager {
         }
         List<GameHistoryEntry> entries = getHistoryEntries(activity);
         for (GameHistoryEntry entry : entries) {
-            if (wallSignature.equals(entry.getWallSignature())) {
+            if (wallSignature.equals(entry.wallSignature)) {
                 result.add(entry);
             }
         }
@@ -754,7 +754,7 @@ public class GameHistoryManager {
         java.util.Set<String> uniqueLevelKeys = new java.util.HashSet<>();
 
         for (GameHistoryEntry entry : entries) {
-            if (entry.getStarsEarned() < 3) {
+            if (entry.starsEarned < 3) {
                 continue;
             }
 
@@ -769,7 +769,7 @@ public class GameHistoryManager {
     }
 
     private static String extractLevelKey(GameHistoryEntry entry) {
-        String mapName = entry.getMapName();
+        String mapName = entry.mapName;
         if (mapName != null && mapName.matches("(?i)Level \\d+")) {
             int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
             
@@ -800,7 +800,7 @@ public class GameHistoryManager {
      */
     public static int getCompletionCount(Activity activity, String mapSignature) {
         GameHistoryEntry entry = findByMapSignature(activity, mapSignature);
-        return entry != null ? entry.getCompletionCount() : 0;
+        return entry != null ? entry.completionCount : 0;
     }
     
     /**

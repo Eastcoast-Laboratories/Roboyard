@@ -58,15 +58,15 @@ public class SolverDD implements ISolver{
             Timber.d("[SOLUTION_SOLVER] SolverDD.init(): First few elements:");
             for (int i = 0; i < Math.min(5, elements.size()); i++) {
                 GridElement element = elements.get(i);
-                Timber.d("[SOLUTION_SOLVER] Element %d: type=%s, position=(%d,%d)", i, element.getType(), element.getX(), element.getY());
+                Timber.d("[SOLUTION_SOLVER] Element %d: type=%s, position=(%d,%d)", i, element.type, element.x, element.y);
             }
         }
         
         // Search for and log any multi-color targets
         for (GridElement element : elements) {
-            if (element.getType() != null && element.getType().equals("target_multi")) {
+            if (element.type != null && element.type.equals("target_multi")) {
                 Timber.d("[SOLUTION_SOLVER_TARGET] SolverDD.init(): Found multi-color target at position (%d,%d)",
-                        element.getX(), element.getY());
+                        element.x, element.y);
             }
         }
         

@@ -82,11 +82,11 @@ public class LevelEditorParsingTest {
         boolean foundBottomRight = false;
 
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 hWallCount++;
-                if (element.getX() == 0 && element.getY() == 0) foundTopLeft = true;
-                if (element.getX() == 5 && element.getY() == 7) foundMiddle = true;
-                if (element.getX() == 11 && element.getY() == 14) foundBottomRight = true;
+                if (element.x == 0 && element.y == 0) foundTopLeft = true;
+                if (element.x == 5 && element.y == 7) foundMiddle = true;
+                if (element.x == 11 && element.y == 14) foundBottomRight = true;
             }
         }
 
@@ -112,11 +112,11 @@ public class LevelEditorParsingTest {
         boolean foundRight = false;
 
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+            if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                 vWallCount++;
-                if (element.getX() == 0 && element.getY() == 0) foundLeft = true;
-                if (element.getX() == 6 && element.getY() == 5) foundMiddle = true;
-                if (element.getX() == 12 && element.getY() == 13) foundRight = true;
+                if (element.x == 0 && element.y == 0) foundLeft = true;
+                if (element.x == 6 && element.y == 5) foundMiddle = true;
+                if (element.x == 12 && element.y == 13) foundRight = true;
             }
         }
 
@@ -155,14 +155,14 @@ public class LevelEditorParsingTest {
         boolean hasRightWall = false;
 
         for (GameElement element : state.gameElements) {
-            switch (element.getType()) {
+            switch (element.type) {
                 case GameElement.TYPE_HORIZONTAL_WALL:
                     hWalls++;
-                    if (element.getY() == 14) hasBottomWall = true;
+                    if (element.y == 14) hasBottomWall = true;
                     break;
                 case GameElement.TYPE_VERTICAL_WALL:
                     vWalls++;
-                    if (element.getX() == 12) hasRightWall = true;
+                    if (element.x == 12) hasRightWall = true;
                     break;
                 case GameElement.TYPE_ROBOT:
                     robots++;
@@ -202,8 +202,8 @@ public class LevelEditorParsingTest {
 
         int robots = 0, targets = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) robots++;
-            if (element.getType() == GameElement.TYPE_TARGET) targets++;
+            if (element.type == GameElement.TYPE_ROBOT) robots++;
+            if (element.type == GameElement.TYPE_TARGET) targets++;
         }
 
         assertEquals("Should have 4 robots", 4, robots);
@@ -248,12 +248,12 @@ public class LevelEditorParsingTest {
 
         int topWalls = 0, bottomWalls = 0, leftWalls = 0, rightWalls = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                if (element.getY() == 0) topWalls++;
-                if (element.getY() == boardHeight) bottomWalls++;
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                if (element.getX() == 0) leftWalls++;
-                if (element.getX() == boardWidth) rightWalls++;
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
+                if (element.y == 0) topWalls++;
+                if (element.y == boardHeight) bottomWalls++;
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
+                if (element.x == 0) leftWalls++;
+                if (element.x == boardWidth) rightWalls++;
             }
         }
 

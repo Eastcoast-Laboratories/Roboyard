@@ -167,7 +167,7 @@ public abstract class BaseGameFragment extends Fragment {
         
         // Create dialog with smaller text size
         androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle(entry.getMapName())
+            .setTitle(entry.mapName)
             .setMessage(sb.toString())
             .setPositiveButton(android.R.string.ok, null)
             .create();
@@ -186,14 +186,14 @@ public abstract class BaseGameFragment extends Fragment {
         }
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
         StringBuilder sb = new StringBuilder();
-        sb.append(getString(R.string.history_detail_completions)).append(" ").append(entry.getCompletionCount()).append("\n");
-        sb.append(getString(R.string.history_detail_first_started)).append(" ").append(sdf.format(new Date(entry.getTimestamp()))).append("\n");
-        if (entry.getLastCompletionTimestamp() > 0) {
-            sb.append(getString(R.string.history_detail_last_played)).append(" ").append(sdf.format(new Date(entry.getLastCompletionTimestamp()))).append("\n");
+        sb.append(getString(R.string.history_detail_completions)).append(" ").append(entry.completionCount).append("\n");
+        sb.append(getString(R.string.history_detail_first_started)).append(" ").append(sdf.format(new Date(entry.timestamp))).append("\n");
+        if (entry.lastCompletionTimestamp > 0) {
+            sb.append(getString(R.string.history_detail_last_played)).append(" ").append(sdf.format(new Date(entry.lastCompletionTimestamp))).append("\n");
         }
         List<Long> timestamps = entry.getCompletionTimestamps();
         if (timestamps != null && timestamps.size() > 1) {
-            boolean isLevelGame = entry.getMapName() != null && entry.getMapName().startsWith("Level ");
+            boolean isLevelGame = entry.mapName != null && entry.mapName.startsWith("Level ");
             List<Integer> completionStars = entry.getCompletionStars();
             List<Integer> completionMoves = entry.getCompletionMoves();
             sb.append("\n").append(getString(R.string.history_detail_all_completions)).append("\n");
@@ -201,8 +201,8 @@ public abstract class BaseGameFragment extends Fragment {
                 sb.append("  ").append(i + 1).append(". ")
                   .append(sdf.format(new Date(timestamps.get(i))));
                 if (isLevelGame) {
-                    int stars = (completionStars != null && i < completionStars.size()) ? completionStars.get(i) : entry.getStarsEarned();
-                    int moves = (completionMoves != null && i < completionMoves.size()) ? completionMoves.get(i) : entry.getMovesMade();
+                    int stars = (completionStars != null && i < completionStars.size()) ? completionStars.get(i) : entry.starsEarned;
+                    int moves = (completionMoves != null && i < completionMoves.size()) ? completionMoves.get(i) : entry.movesMade;
                     // append one or three star icons or \u2713 if no stars
                     if (stars == 0) {
                         sb.append(" \u2713");
@@ -213,22 +213,22 @@ public abstract class BaseGameFragment extends Fragment {
                     }
                     sb.append(" - ").append(moves);
                 } else {
-                    int moves = (completionMoves != null && i < completionMoves.size()) ? completionMoves.get(i) : entry.getMovesMade();
+                    int moves = (completionMoves != null && i < completionMoves.size()) ? completionMoves.get(i) : entry.movesMade;
                     sb.append(" - ").append(moves);
                 }
                 sb.append("\n");
             }
         }
         sb.append("\n").append(getString(R.string.history_detail_best_time)).append(" ");
-        int bestTime = entry.getBestTime();
+        int bestTime = entry.bestTime;
         if (bestTime > 0) sb.append(bestTime / 60).append("m ").append(bestTime % 60).append("s");
         else sb.append("\u2014");
         sb.append("\n");
         sb.append(getString(R.string.history_detail_best_moves)).append(" ");
-        int bestMoves = entry.getBestMoves();
+        int bestMoves = entry.bestMoves;
         sb.append(bestMoves > 0 ? bestMoves : "\u2014").append("\n");
         sb.append(getString(R.string.history_detail_optimal_moves)).append(" ");
-        int optimalMoves = entry.getOptimalMoves();
+        int optimalMoves = entry.optimalMoves;
         if (optimalMoves > 0) {
             sb.append(optimalMoves);
             if (bestMoves > 0 && bestMoves == optimalMoves) sb.append(" \u2713 (").append(getString(R.string.history_detail_perfect)).append(")");
@@ -236,7 +236,7 @@ public abstract class BaseGameFragment extends Fragment {
         } else sb.append("\u2014");
         sb.append("\n");
         sb.append("\n").append(getString(R.string.history_detail_hint_usage_last)).append(" ");
-        int maxHint = entry.getMaxHintUsed();
+        int maxHint = entry.maxHintUsed;
         if (maxHint < 0) sb.append(getString(R.string.history_detail_no_hints_used));
         else if (maxHint == 0) sb.append(getString(R.string.history_detail_pre_hint_viewed));
         else sb.append(getString(R.string.history_detail_up_to_hint, maxHint + 1));
@@ -247,10 +247,10 @@ public abstract class BaseGameFragment extends Fragment {
           .append(entry.qualifiesForNoHintsAchievement() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
         sb.append(getString(R.string.history_detail_qualifies_no_hints_perfect)).append(" ")
           .append(entry.qualifiesForPerfectNoHintsAchievement() ? getString(R.string.history_detail_yes) : getString(R.string.history_detail_no)).append("\n");
-        long lastNoHints = entry.getLastSolvedWithoutHints();
+        long lastNoHints = entry.lastSolvedWithoutHints;
         sb.append(getString(R.string.history_detail_last_solved_no_hints)).append(" ")
           .append(lastNoHints > 0 ? sdf.format(new Date(lastNoHints)) : "\u2014").append("\n");
-        long lastPerfect = entry.getLastPerfectlySolvedWithoutHints();
+        long lastPerfect = entry.lastPerfectlySolvedWithoutHints;
         sb.append(getString(R.string.history_detail_last_perfect_no_hints)).append(" ")
           .append(lastPerfect > 0 ? sdf.format(new Date(lastPerfect)) : "\u2014").append("\n");
         

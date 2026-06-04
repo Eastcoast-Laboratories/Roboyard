@@ -85,14 +85,14 @@ public class Level111DebugTest {
                     
                     // Log robot positions
                     for (GameElement robot : state.getRobots()) {
-                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Robot color=%d at (%d, %d)", 
-                                robot.getColor(), robot.getX(), robot.getY());
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Robot color=%d at (%d, %d)",
+                                robot.color, robot.x, robot.y);
                     }
                     
                     // Log target position
                     for (GameElement target : state.getTargets()) {
-                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Target color=%d at (%d, %d)", 
-                                target.getColor(), target.getX(), target.getY());
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Target color=%d at (%d, %d)",
+                                target.color, target.x, target.y);
                     }
                 }
                 
@@ -131,12 +131,12 @@ public class Level111DebugTest {
                 if (state != null) {
                     Timber.d("[UNITTESTS][LEVEL111_DEBUG] ===== FINAL POSITIONS =====");
                     for (GameElement robot : state.getRobots()) {
-                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Robot color=%d at (%d, %d)", 
-                                robot.getColor(), robot.getX(), robot.getY());
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Robot color=%d at (%d, %d)",
+                                robot.color, robot.x, robot.y);
                     }
                     for (GameElement target : state.getTargets()) {
-                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Target color=%d at (%d, %d)", 
-                                target.getColor(), target.getX(), target.getY());
+                        Timber.d("[UNITTESTS][LEVEL111_DEBUG] Target color=%d at (%d, %d)",
+                                target.color, target.x, target.y);
                     }
                 }
             }

@@ -474,7 +474,7 @@ public class LevelDesignEditorFragment extends Fragment {
             // Diagnostic logging for autosave load
             int robots = 0, walls = 0, targets = 0;
             for (GameElement el : state.gameElements) {
-                switch (el.getType()) {
+                switch (el.type) {
                     case GameElement.TYPE_ROBOT: robots++; break;
                     case GameElement.TYPE_HORIZONTAL_WALL: // fall through
                     case GameElement.TYPE_VERTICAL_WALL: walls++; break;
@@ -672,7 +672,7 @@ public class LevelDesignEditorFragment extends Fragment {
         // Preserve existing robots and targets
         List<GameElement> robotsAndTargets = new ArrayList<>();
         for (GameElement element : currentState.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
+            if (element.type == GameElement.TYPE_ROBOT || element.type == GameElement.TYPE_TARGET) {
                 robotsAndTargets.add(element);
             }
         }
@@ -710,8 +710,8 @@ public class LevelDesignEditorFragment extends Fragment {
         // Check that there is at least one robot and one target
         boolean hasRobot = false, hasTarget = false;
         for (GameElement el : currentState.gameElements) {
-            if (el.getType() == GameElement.TYPE_ROBOT) hasRobot = true;
-            if (el.getType() == GameElement.TYPE_TARGET) hasTarget = true;
+            if (el.type == GameElement.TYPE_ROBOT) hasRobot = true;
+            if (el.type == GameElement.TYPE_TARGET) hasTarget = true;
         }
         if (!hasRobot || !hasTarget) {
             Toast.makeText(requireContext(),
@@ -1118,18 +1118,18 @@ public class LevelDesignEditorFragment extends Fragment {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
         for (GameElement element : currentState.gameElements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             
             boolean isCarreeWall = false;
             
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 // Top edge of carree: (centerX, centerY) and (centerX+1, centerY)
                 // Bottom edge of carree: (centerX, centerY+2) and (centerX+1, centerY+2)
                 if ((y == centerY || y == centerY + 2) && (x == centerX || x == centerX + 1)) {
                     isCarreeWall = true;
                 }
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                 // Left edge of carree: (centerX, centerY) and (centerX, centerY+1)
                 // Right edge of carree: (centerX+2, centerY) and (centerX+2, centerY+1)
                 if ((x == centerX || x == centerX + 2) && (y == centerY || y == centerY + 1)) {
@@ -1160,8 +1160,8 @@ public class LevelDesignEditorFragment extends Fragment {
         // Remove any elements inside the carree 2x2 cells
         List<GameElement> insideCarree = new ArrayList<>();
         for (GameElement element : currentState.gameElements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             if (x >= centerX && x <= centerX + 1 && y >= centerY && y <= centerY + 1) {
                 insideCarree.add(element);
             }
@@ -1265,15 +1265,15 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Step 2: Shift all remaining elements
         for (GameElement element : currentState.gameElements) {
-            element.setX(element.getX() + dx);
-            element.setY(element.getY() + dy);
+            element.x = element.x + dx;
+            element.y = element.y + dy;
         }
         
         // Step 3: Remove elements that fell outside the board
         List<GameElement> outsideElements = new ArrayList<>();
         for (GameElement element : currentState.gameElements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             if (x < 0 || y < 0 || x >= width || y >= height) {
                 outsideElements.add(element);
             }
@@ -1301,18 +1301,18 @@ public class LevelDesignEditorFragment extends Fragment {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
         for (GameElement element : currentState.gameElements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             
             // Check if this is an outer wall
             boolean isOuterWall = false;
             
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 // Top or bottom wall
                 if (y == 0 || y == height) {
                     isOuterWall = true;
                 }
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                 // Left or right wall
                 if (x == 0 || x == width) {
                     isOuterWall = true;
@@ -1344,8 +1344,8 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Move all elements by the offset
         for (GameElement element : currentState.gameElements) {
-            element.setX(element.getX() + offsetX);
-            element.setY(element.getY() + offsetY);
+            element.x = element.x + offsetX;
+            element.y = element.y + offsetY;
         }
     }
     
@@ -1367,13 +1367,13 @@ public class LevelDesignEditorFragment extends Fragment {
             // element.setX(element.getX() - shiftX); this would cut off on the left
 
             // Shift all elements up
-            element.setY(element.getY() - shiftY);
+            element.y = element.y - shiftY;
         }
         
         // Remove elements that now fall outside the new board bounds or have invalid coordinates
         for (GameElement element : currentState.gameElements) {
-            int x = element.getX();
-            int y = element.getY();
+            int x = element.x;
+            int y = element.y;
             
             // Remove if outside new bounds or has negative/invalid coordinates
             if (x < 0 || y < 0 || x >= newWidth || y >= newHeight) {
@@ -1445,21 +1445,21 @@ public class LevelDesignEditorFragment extends Fragment {
         List<GameElement> robots = new ArrayList<>();
         
         for (GameElement element : currentState.gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 horizontalWalls.add(element);
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                 verticalWalls.add(element);
-            } else if (element.getType() == GameElement.TYPE_TARGET) {
+            } else if (element.type == GameElement.TYPE_TARGET) {
                 targets.add(element);
-            } else if (element.getType() == GameElement.TYPE_ROBOT) {
+            } else if (element.type == GameElement.TYPE_ROBOT) {
                 robots.add(element);
             }
         }
         
         // Sort numerically by X first, then Y
         java.util.Comparator<GameElement> numericSort = (a, b) -> {
-            if (a.getX() != b.getX()) return Integer.compare(a.getX(), b.getX());
-            return Integer.compare(a.getY(), b.getY());
+            if (a.x != b.x) return Integer.compare(a.x, b.x);
+            return Integer.compare(a.y, b.y);
         };
         java.util.Collections.sort(horizontalWalls, numericSort);
         java.util.Collections.sort(verticalWalls, numericSort);
@@ -1468,21 +1468,21 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Write horizontal walls in compact format (hX,Y;)
         for (GameElement e : horizontalWalls) {
-            sb.append("h").append(e.getX()).append(",").append(e.getY()).append(";\n");
+            sb.append("h").append(e.x).append(",").append(e.y).append(";\n");
         }
         // Write vertical walls in compact format (vX,Y;)
         for (GameElement e : verticalWalls) {
-            sb.append("v").append(e.getX()).append(",").append(e.getY()).append(";\n");
+            sb.append("v").append(e.x).append(",").append(e.y).append(";\n");
         }
         // Write targets in compact format (tcolorX,Y;)
         for (GameElement e : targets) {
-            sb.append("t").append(getColorChar(e.getColor()))
-              .append(e.getX()).append(",").append(e.getY()).append(";\n");
+            sb.append("t").append(getColorChar(e.color))
+              .append(e.x).append(",").append(e.y).append(";\n");
         }
         // Write robots in compact format (rcolorX,Y;)
         for (GameElement e : robots) {
-            sb.append("r").append(getColorChar(e.getColor()))
-              .append(e.getX()).append(",").append(e.getY()).append(";\n");
+            sb.append("r").append(getColorChar(e.color))
+              .append(e.x).append(",").append(e.y).append(";\n");
         }
         
         return sb.toString();
@@ -1522,13 +1522,13 @@ public class LevelDesignEditorFragment extends Fragment {
         // Remove all robots of the same color (anywhere on the board)
         List<GameElement> robotsToRemove = new ArrayList<>();
         for (GameElement element : currentState.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == currentRobotColor) {
+            if (element.type == GameElement.TYPE_ROBOT && element.color == currentRobotColor) {
                 robotsToRemove.add(element);
             }
         }
         for (GameElement robot : robotsToRemove) {
             currentState.gameElements.remove(robot);
-            Timber.d("[EDITOR] Removed %s robot at (%d,%d)", getColorName(currentRobotColor), robot.getX(), robot.getY());
+            Timber.d("[EDITOR] Removed %s robot at (%d,%d)", getColorName(currentRobotColor), robot.x, robot.y);
         }
         
         // Add the new robot
@@ -1558,13 +1558,13 @@ public class LevelDesignEditorFragment extends Fragment {
         // Remove all targets of the same color (anywhere on the board)
         List<GameElement> targetsToRemove = new ArrayList<>();
         for (GameElement element : currentState.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == currentTargetColor) {
+            if (element.type == GameElement.TYPE_TARGET && element.color == currentTargetColor) {
                 targetsToRemove.add(element);
             }
         }
         for (GameElement target : targetsToRemove) {
             currentState.gameElements.remove(target);
-            Timber.d("[EDITOR] Removed %s target at (%d,%d)", getColorName(currentTargetColor), target.getX(), target.getY());
+            Timber.d("[EDITOR] Removed %s target at (%d,%d)", getColorName(currentTargetColor), target.x, target.y);
         }
         
         // Add the new target
@@ -1641,8 +1641,8 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Find and remove only robots and targets, NOT walls
         for (GameElement element : currentState.gameElements) {
-            if (element.getX() == x && element.getY() == y) {
-                if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
+            if (element.x == x && element.y == y) {
+                if (element.type == GameElement.TYPE_ROBOT || element.type == GameElement.TYPE_TARGET) {
                     elementsToRemove.add(element);
                 }
             }
@@ -1659,7 +1659,7 @@ public class LevelDesignEditorFragment extends Fragment {
      */
     private boolean hasWallOfType(int x, int y, int wallType) {
         for (GameElement element : currentState.gameElements) {
-            if (element.getX() == x && element.getY() == y && element.getType() == wallType) {
+            if (element.x == x && element.y == y && element.type == wallType) {
                 return true;
             }
         }
@@ -1673,7 +1673,7 @@ public class LevelDesignEditorFragment extends Fragment {
         List<GameElement> elementsToRemove = new ArrayList<>();
         
         for (GameElement element : currentState.gameElements) {
-            if (element.getX() == x && element.getY() == y && element.getType() == wallType) {
+            if (element.x == x && element.y == y && element.type == wallType) {
                 elementsToRemove.add(element);
             }
         }
@@ -1690,7 +1690,7 @@ public class LevelDesignEditorFragment extends Fragment {
         
         // Create a new list without the elements at the specified position
         for (GameElement element : elements) {
-            if (element.getX() == x && element.getY() == y) {
+            if (element.x == x && element.y == y) {
                 currentState.gameElements.remove(element);
                 removed = true;
             }
@@ -1706,8 +1706,8 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private String getColorName(int colorIndex) {
+        if (colorIndex == Constants.COLOR_MULTI) return "Multi";
         switch (colorIndex) {
-            case Constants.COLOR_MULTI: return "Multi";
             case Constants.COLOR_PINK: return "Red";
             case Constants.COLOR_GREEN: return "Green";
             case Constants.COLOR_BLUE: return "Blue";
@@ -1746,7 +1746,7 @@ public class LevelDesignEditorFragment extends Fragment {
         // Remove all existing robots and targets
         List<GameElement> elementsToRemove = new ArrayList<>();
         for (GameElement element : currentState.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT || element.getType() == GameElement.TYPE_TARGET) {
+            if (element.type == GameElement.TYPE_ROBOT || element.type == GameElement.TYPE_TARGET) {
                 elementsToRemove.add(element);
             }
         }
@@ -1808,7 +1808,7 @@ public class LevelDesignEditorFragment extends Fragment {
      */
     private boolean hasElementAt(int x, int y) {
         for (GameElement element : currentState.gameElements) {
-            if (element.getX() == x && element.getY() == y) {
+            if (element.x == x && element.y == y) {
                 return true;
             }
         }
@@ -2024,12 +2024,12 @@ public class LevelDesignEditorFragment extends Fragment {
             
             // Draw walls
             for (GameElement element : currentState.gameElements) {
-                int ex = element.getX();
-                int ey = element.getY();
-                if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+                int ex = element.x;
+                int ey = element.y;
+                if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                     canvas.drawRect(offsetX + ex * cellSize, offsetY + ey * cellSize - cellSize/8,
                                   offsetX + (ex+1) * cellSize, offsetY + ey * cellSize + cellSize/8, wallPaint);
-                } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                     canvas.drawRect(offsetX + ex * cellSize - cellSize/8, offsetY + ey * cellSize,
                                   offsetX + ex * cellSize + cellSize/8, offsetY + (ey+1) * cellSize, wallPaint);
                 }
@@ -2037,17 +2037,17 @@ public class LevelDesignEditorFragment extends Fragment {
             
             // Draw robots and targets using real images
             for (GameElement element : currentState.gameElements) {
-                int x = element.getX();
-                int y = element.getY();
+                int x = element.x;
+                int y = element.y;
                 int left = offsetX + x * cellSize;
                 int top = offsetY + y * cellSize;
                 Rect dst = new Rect(left, top, left + cellSize, top + cellSize);
                 
-                if (element.getType() == GameElement.TYPE_ROBOT) {
-                    Bitmap bmp = getCachedBitmap(getRobotDrawableId(element.getColor()));
+                if (element.type == GameElement.TYPE_ROBOT) {
+                    Bitmap bmp = getCachedBitmap(getRobotDrawableId(element.color));
                     if (bmp != null) canvas.drawBitmap(bmp, null, dst, null);
-                } else if (element.getType() == GameElement.TYPE_TARGET) {
-                    Bitmap bmp = getCachedBitmap(getTargetDrawableId(element.getColor()));
+                } else if (element.type == GameElement.TYPE_TARGET) {
+                    Bitmap bmp = getCachedBitmap(getTargetDrawableId(element.color));
                     if (bmp != null) canvas.drawBitmap(bmp, null, dst, null);
                 }
             }

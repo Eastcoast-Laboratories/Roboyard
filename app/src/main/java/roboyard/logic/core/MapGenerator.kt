@@ -1,11 +1,10 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import roboyard.ui.activities.MainActivity;
-import timber.log.Timber;
-import roboyard.logic.core.WallStorage;
+import roboyard.ui.activities.MainActivity
+import timber.log.Timber
+import java.util.Random
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Created by Alain on 04/02/2015.
@@ -13,64 +12,98 @@ import roboyard.logic.core.WallStorage;
  * This class has been modified to use GameLogic internally while maintaining
  * backward compatibility with the original implementation.
  */
-public class MapGenerator {
-
-    private final Random rand;
-    private final GameLogic gameLogic;
-
-    // Difficulty level constants
-    private static final int DIFFICULTY_BEGINNER = 0;
-    private static final int DIFFICULTY_ADVANCED = 1;
-    private static final int DIFFICULTY_INSANE = 2;
-    private static final int DIFFICULTY_IMPOSSIBLE = 3;
+class MapGenerator {
+    private val rand: Random
+    private val gameLogic: GameLogic?
 
     // position of the square in the middle of the game board
-    int carrePosX; // horizontal position of the top wall of square, starting with 0
-    int carrePosY; // vertical position of the left wall of the square
+    var carrePosX: Int // horizontal position of the top wall of square, starting with 0
+    var carrePosY: Int // vertical position of the left wall of the square
 
-    Boolean targetMustBeInCorner = true; // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
-    Boolean allowMulticolorTarget = true;
-    public static Boolean generateNewMapEachTime = true; // option in settings
-    
-    // Flag to force generating a new map once (used by dice button in game screen)
-    // This flag is automatically reset to false after the next map generation
-    public static boolean forceGenerateNewMapOnce = false;
-    private int robotCount = 1; // Default to 1 robot per color
-    private int targetColors = Constants.NUM_ROBOTS; // Default to 4 different target colors
+    var targetMustBeInCorner: Boolean =
+        true // TODO: only works together with generateNewMapEachTime==true (which is set only in Beginner Mode)
+    var allowMulticolorTarget: Boolean = true
+
+    /**
+     * Gets the current robot count setting
+     * @return Number of robots per color (1-4)
+     */
+    var robotCount: Int = 1 // Default to 1 robot per color
+        /**
+         * Sets the number of robots per color for map generation
+         * @param count Number of robots per color (1-4)
+         */
+        set(count) {
+            field = max(
+                1,
+                min(Constants.NUM_ROBOTS, count)
+            )
+
+
+            // Pass the robot count to the GameLogic if it exists
+            if (gameLogic != null) {
+                gameLogic.robotCount = field
+            }
+
+            Timber.d("MapGenerator robot count set to %d", field)
+        }
+
+    /**
+     * Gets the current target colors setting
+     * @return Number of different target colors (1-4)
+     */
+    var targetColors: Int = Constants.NUM_ROBOTS // Default to 4 different target colors
+        /**
+         * Sets the number of different target colors for map generation
+         * @param count Number of different target colors (1-4)
+         */
+        set(count) {
+            field = max(1, min(4, count))
+
+
+            // Pass the target colors to the GameLogic if it exists
+            if (gameLogic != null) {
+                gameLogic.setTargetColors(field)
+            }
+
+            Timber.d("MapGenerator target colors set to %d", field)
+        }
 
     // Wall configuration
-    int maxWallsInOneVerticalCol = 2;    // Maximum number of walls allowed in one vertical column
-    int maxWallsInOneHorizontalRow = 2;  // Maximum number of walls allowed in one horizontal row
-    int wallsPerQuadrant;                // Number of walls to place in each quadrant of the board
+    var maxWallsInOneVerticalCol: Int = 2 // Maximum number of walls allowed in one vertical column
+    var maxWallsInOneHorizontalRow: Int = 2 // Maximum number of walls allowed in one horizontal row
+    var wallsPerQuadrant: Int // Number of walls to place in each quadrant of the board
 
-    Boolean loneWallsAllowed = false; // walls that are not attached in a 90 deg. angle
+    var loneWallsAllowed: Boolean = false // walls that are not attached in a 90 deg. angle
 
-    public MapGenerator(){
-        rand = new Random();
+    init {
+        rand = Random()
 
         // Initialize square position based on current board size
-        carrePosX = (MainActivity.boardSizeX/2)-1;
-        carrePosY = (MainActivity.boardSizeY/2)-1;
+        carrePosX = (MainActivity.boardSizeX / 2) - 1
+        carrePosY = (MainActivity.boardSizeY / 2) - 1
 
         // Calculate walls per quadrant based on board width
-        wallsPerQuadrant = MainActivity.boardSizeX/4;  // Default: quarter of board width
+        wallsPerQuadrant = MainActivity.boardSizeX / 4 // Default: quarter of board width
 
         // Get difficulty directly from Preferences
-        int level = Preferences.difficulty;
-        
+        val level = Preferences.difficulty
+
+
         // Initialize GameLogic with the same configuration
-        gameLogic = new GameLogic(MainActivity.boardSizeX, MainActivity.boardSizeY, level);
-        
+        gameLogic = GameLogic(MainActivity.boardSizeX, MainActivity.boardSizeY, level)
+
+
         // Synchronize with GameLogic's static setting
-        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
-        
-        if(level == DIFFICULTY_BEGINNER){ // Difficulty Beginner
+        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime)
+
+        if (level == Constants.DIFFICULTY_BEGINNER) { // Difficulty Beginner
             // For beginner level
         } else {
-            if(level == DIFFICULTY_ADVANCED){ // Advanced
+            if (level == Constants.DIFFICULTY_ADVANCED) { // Advanced
                 // nothing to do
             }
-            
+
             if (generateNewMapEachTime) {
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
                 // TODO: does not work with the roboyard in the middle, that is not moved to the new random position
@@ -78,166 +111,161 @@ public class MapGenerator {
                 // carrePosX=getRandom(3,MainActivity.boardSizeX-5);
                 // carrePosY=getRandom(3,MainActivity.boardSizeY-5);
             }
-            
-            if(level == DIFFICULTY_INSANE){ // Insane
-                allowMulticolorTarget = false;
+
+            if (level == Constants.DIFFICULTY_INSANE) { // Insane
+                allowMulticolorTarget = false
                 // target must be in corner is left to "true"
             }
-            
-            if(level == DIFFICULTY_IMPOSSIBLE){ // Impossible
+
+            if (level == Constants.DIFFICULTY_IMPOSSIBLE) { // Impossible
                 // Get a completely different wall layout then the target is harder to reach
-                loneWallsAllowed = true;
-                maxWallsInOneVerticalCol = 3;
-                maxWallsInOneHorizontalRow = 3;
-                targetMustBeInCorner = false;
+                loneWallsAllowed = true
+                maxWallsInOneVerticalCol = 3
+                maxWallsInOneHorizontalRow = 3
+                targetMustBeInCorner = false
             }
         }
 
-        if(level == DIFFICULTY_INSANE || level == DIFFICULTY_IMPOSSIBLE) {
-            targetMustBeInCorner = false;
+        if (level == Constants.DIFFICULTY_INSANE || level == Constants.DIFFICULTY_IMPOSSIBLE) {
+            targetMustBeInCorner = false
 
-            maxWallsInOneVerticalCol = 5;
-            maxWallsInOneHorizontalRow = 5;
-            wallsPerQuadrant = MainActivity.boardSizeX/3;
+            maxWallsInOneVerticalCol = 5
+            maxWallsInOneHorizontalRow = 5
+            wallsPerQuadrant = MainActivity.boardSizeX / 3
         }
-        if(level == DIFFICULTY_IMPOSSIBLE) {
-            wallsPerQuadrant = (int) (MainActivity.boardSizeX/2.3); // for debug, set to 1.3 with lots of walls
+        if (level == Constants.DIFFICULTY_IMPOSSIBLE) {
+            wallsPerQuadrant =
+                (MainActivity.boardSizeX / 2.3).toInt() // for debug, set to 1.3 with lots of walls
         }
         if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
-        
-        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY);
-    }
-    
-    /**
-     * Sets the number of robots per color for map generation
-     * @param count Number of robots per color (1-4)
-     */
-    public void setRobotCount(int count) {
-        this.robotCount = Math.max(1, Math.min(Constants.NUM_ROBOTS, count));
-        
-        // Pass the robot count to the GameLogic if it exists
-        if (gameLogic != null) {
-            gameLogic.setRobotCount(this.robotCount);
-        }
-        
-        Timber.d("MapGenerator robot count set to %d", this.robotCount);
-    }
-    
-    /**
-     * Gets the current robot count setting
-     * @return Number of robots per color (1-4)
-     */
-    public int getRobotCount() {
-        return robotCount;
-    }
 
-    /**
-     * Sets the number of different target colors for map generation
-     * @param count Number of different target colors (1-4)
-     */
-    public void setTargetColors(int count) {
-        this.targetColors = Math.max(1, Math.min(4, count));
-        
-        // Pass the target colors to the GameLogic if it exists
-        if (gameLogic != null) {
-            gameLogic.setTargetColors(this.targetColors);
-        }
-        
-        Timber.d("MapGenerator target colors set to %d", this.targetColors);
-    }
-    
-    /**
-     * Gets the current target colors setting
-     * @return Number of different target colors (1-4)
-     */
-    public int getTargetColors() {
-        return targetColors;
+        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY)
     }
 
 
-    public ArrayList<GridElement> removeGameElementsFromMap(ArrayList<GridElement> data) {
+    fun removeGameElementsFromMap(data: java.util.ArrayList<GridElement>): java.util.ArrayList<GridElement> {
         // Delegate to GameLogic
-        return gameLogic.removeGameElementsFromMap(data);
+        return gameLogic!!.removeGameElementsFromMap(data)
     }
 
-    public ArrayList<GridElement> translateArraysToMap(int[][] horizontalWalls, int[][] verticalWalls) {
+    fun translateArraysToMap(
+        horizontalWalls: Array<IntArray?>,
+        verticalWalls: Array<IntArray?>
+    ): java.util.ArrayList<GridElement> {
         // Delegate to GameLogic
-        return gameLogic.translateArraysToMap(horizontalWalls, verticalWalls);
+        return gameLogic!!.translateArraysToMap(horizontalWalls, verticalWalls)
     }
 
-    public int getRandom(int min, int max) {
+    fun getRandom(min: Int, max: Int): Int {
         // Delegate to GameLogic
-        return gameLogic.getRandom(min, max);
+        return gameLogic!!.getRandom(min, max)
     }
 
-    /**
-     * generates a new map. The map is divided into four quadrants, like in the game ricochet robots. and walls are evenly distributed among all quadrants.
-     * for each quadrant there are 2 walls placed at a right-angle to the each border.
-     * @return Arraylist with all grid elements that belong to the map
-     */
-    public ArrayList<GridElement> getGeneratedGameMap() {
-        // We'll check the latest value of generateNewMapEachTime from our static variable
-        // which is already set by SettingsGameScreen when preferences are changed
-        Timber.d("[WALL STORAGE] class default value for generateNewMapEachTime: %s", generateNewMapEachTime);
-        
-        ArrayList<GridElement> data = new ArrayList<>();
-        
-        // Synchronize static settings with GameLogic
-        GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime);
-        
-        // Check if we should preserve walls
-        WallStorage wallStorage = WallStorage.getInstance();
-        // Update board size to ensure we're using the right storage
-        wallStorage.updateCurrentBoardSize();
-        
-        // Check if dice button was pressed (one-time override)
-        boolean forceNewMap = forceGenerateNewMapOnce;
-        if (forceGenerateNewMapOnce) {
-            Timber.d("[DICE_BUTTON] Force new map flag is set, generating new map once");
-            forceGenerateNewMapOnce = false; // Reset the flag after use
-        }
-        
-        boolean preserveWalls = !Preferences.generateNewMapEachTime && !forceNewMap && wallStorage.hasStoredWalls();
-        Timber.d("[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s, forceNewMap: %s, Preserving walls: %s, hasStoredWalls: %s", 
-                Preferences.generateNewMapEachTime, forceNewMap, preserveWalls, wallStorage.hasStoredWalls());
-        
-        if (preserveWalls) {
-            Timber.d("[WALL STORAGE] Preserving walls from stored configuration");
-            // Remove game elements (robots and targets) but keep walls
-            if (data != null && !data.isEmpty()) {
-                data = removeGameElementsFromMap(data);
-                
-                // Apply stored walls to the map
-                data = wallStorage.applyWallsToElements(data);
+    val generatedGameMap: ArrayList<GridElement>?
+        /**
+         * generates a new map. The map is divided into four quadrants, like in the game ricochet robots. and walls are evenly distributed among all quadrants.
+         * for each quadrant there are 2 walls placed at a right-angle to the each border.
+         * @return Arraylist with all grid elements that belong to the map
+         */
+        get() {
+            // We'll check the latest value of generateNewMapEachTime from our static variable
+            // which is already set by SettingsGameScreen when preferences are changed
+            Timber.d(
+                "[WALL STORAGE] class default value for generateNewMapEachTime: %s",
+                generateNewMapEachTime
+            )
+
+            var data = java.util.ArrayList<GridElement>()
+
+
+            // Synchronize static settings with GameLogic
+            GameLogic.setgenerateNewMapEachTime(generateNewMapEachTime)
+
+
+            // Check if we should preserve walls
+            val wallStorage = WallStorage.getInstance()
+            // Update board size to ensure we're using the right storage
+            wallStorage.updateCurrentBoardSize()
+
+
+            // Check if dice button was pressed (one-time override)
+            val forceNewMap: Boolean = forceGenerateNewMapOnce
+            if (forceGenerateNewMapOnce) {
+                Timber.d("[DICE_BUTTON] Force new map flag is set, generating new map once")
+                forceGenerateNewMapOnce = false // Reset the flag after use
+            }
+
+            val preserveWalls =
+                !Preferences.generateNewMapEachTime && !forceNewMap && wallStorage.hasStoredWalls()
+            Timber.d(
+                "[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s, forceNewMap: %s, Preserving walls: %s, hasStoredWalls: %s",
+                Preferences.generateNewMapEachTime,
+                forceNewMap,
+                preserveWalls,
+                wallStorage.hasStoredWalls()
+            )
+
+            if (preserveWalls) {
+                Timber.d("[WALL STORAGE] Preserving walls from stored configuration")
+                // Remove game elements (robots and targets) but keep walls
+                if (!data.isEmpty()) {
+                    data = removeGameElementsFromMap(data)
+
+
+                    // Apply stored walls to the map
+                    data = wallStorage.applyWallsToElements(data)
+                } else {
+                    // If no existing map, use the stored walls
+                    // Convert stored walls (ArrayList<GridElement?>) to ArrayList<GridElement>
+                    val stored = wallStorage.getStoredWalls()
+                    for (ge in stored) {
+                        if (ge != null) data.add(ge)
+                    }
+                }
+
+
+                // IMPORTANT: Ensure all outer walls exist before adding game elements
+                // This ensures consistent wall behavior even with preserved walls
+                data = gameLogic!!.ensureOuterWalls(data)
+                Timber.d(
+                    "[WALL STORAGE] MapGenerator - Verified outer walls in preserved walls: %d elements",
+                    data.size
+                )
+
+
+                // Delegate to GameLogic to add robots and targets
+                data = gameLogic.addGameElementsToGameMap(data, null, null)
             } else {
-                // If no existing map, use the stored walls
-                data = new ArrayList<>(wallStorage.getStoredWalls());
+                // Generate a completely new map
+                val newData = gameLogic!!.generateGameMap(null) ?: return null
+
+
+                // IMPORTANT: Explicitly ensure all outer walls exist before storing
+                data = gameLogic.ensureOuterWalls(newData)
+                Timber.d(
+                    "[WALL STORAGE] MapGenerator - Verified outer walls in new map: %d elements",
+                    data.size
+                )
+
+
+                // Store the walls for future use if we're not generating new maps each time
+                if (!Preferences.generateNewMapEachTime) {
+                    wallStorage.storeWalls(data)
+                    Timber.d("[WALL STORAGE] Stored walls for future use")
+                }
             }
-            
-            // IMPORTANT: Ensure all outer walls exist before adding game elements
-            // This ensures consistent wall behavior even with preserved walls
-            data = gameLogic.ensureOuterWalls(data);
-            Timber.d("[WALL STORAGE] MapGenerator - Verified outer walls in preserved walls: %d elements", data.size());
-            
-            // Delegate to GameLogic to add robots and targets
-            data = gameLogic.addGameElementsToGameMap(data, null, null);
-        } else {
-            // Generate a completely new map
-            data = gameLogic.generateGameMap(data);
-            
-            // IMPORTANT: Explicitly ensure all outer walls exist before storing
-            data = gameLogic.ensureOuterWalls(data);
-            Timber.d("[WALL STORAGE] MapGenerator - Verified outer walls in new map: %d elements", data.size());
-            
-            // Store the walls for future use if we're not generating new maps each time
-            if (!Preferences.generateNewMapEachTime) {
-                wallStorage.storeWalls(data);
-                Timber.d("[WALL STORAGE] Stored walls for future use");
-            }
+
+            return data
         }
-        
-        return data;
+
+    companion object {
+        var generateNewMapEachTime: Boolean = true // option in settings
+
+        // Flag to force generating a new map once (used by dice button in game screen)
+        // This flag is automatically reset to false after the next map generation
+        @JvmField
+        var forceGenerateNewMapOnce: Boolean = false
     }
 }

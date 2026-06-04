@@ -79,7 +79,7 @@ public class SpecialTargetSaveLoadTest {
         // Verify target is in gameElements with correct color
         int multiTargetCount = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET && element.getColor() == Constants.COLOR_MULTI) {
+            if (element.type == GameElement.TYPE_TARGET && element.color == Constants.COLOR_MULTI) {
                 multiTargetCount++;
             }
         }
@@ -120,8 +120,8 @@ public class SpecialTargetSaveLoadTest {
         int targetCount = 0;
         int robotCount = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) targetCount++;
-            if (element.getType() == GameElement.TYPE_ROBOT) robotCount++;
+            if (element.type == GameElement.TYPE_TARGET) targetCount++;
+            if (element.type == GameElement.TYPE_ROBOT) robotCount++;
         }
         assertEquals("Should have exactly 2 targets", 2, targetCount);
         assertEquals("Should have exactly 1 robot", 1, robotCount);

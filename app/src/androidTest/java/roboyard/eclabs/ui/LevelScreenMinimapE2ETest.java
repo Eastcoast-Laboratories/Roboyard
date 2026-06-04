@@ -122,24 +122,24 @@ public class LevelScreenMinimapE2ETest {
 
         GameHistoryEntry level1Entry = null;
         for (GameHistoryEntry e : entries) {
-            if (e.getMapName() != null && e.getMapName().matches("(?i)Level 1")) {
+            if (e.mapName != null && e.mapName.matches("(?i)Level 1")) {
                 level1Entry = e;
                 break;
             }
         }
         assertNotNull(TAG + " History must have an entry for 'Level 1'", level1Entry);
-        step("5/7", "History entry: completionCount=" + level1Entry.getCompletionCount()
-                + ", boardSize=" + level1Entry.getBoardSize()
-                + ", bestMoves=" + level1Entry.getBestMoves());
+        step("5/7", "History entry: completionCount=" + level1Entry.completionCount
+                + ", boardSize=" + level1Entry.boardSize
+                + ", bestMoves=" + level1Entry.bestMoves);
 
         assertEquals(TAG + " completionCount must be 1 after first completion",
-                1, level1Entry.getCompletionCount());
+                1, level1Entry.completionCount);
         assertTrue(TAG + " bestMoves must be > 0 after completion (was 0 before fix)",
-                level1Entry.getBestMoves() > 0);
-        assertNotNull(TAG + " boardSize must not be null", level1Entry.getBoardSize());
-        assertFalse(TAG + " boardSize must not be empty", level1Entry.getBoardSize().isEmpty());
+                level1Entry.bestMoves > 0);
+        assertNotNull(TAG + " boardSize must not be null", level1Entry.boardSize);
+        assertFalse(TAG + " boardSize must not be empty", level1Entry.boardSize.isEmpty());
         assertFalse(TAG + " boardSize must not be default 16x16",
-                "16x16".equals(level1Entry.getBoardSize()));
+                "16x16".equals(level1Entry.boardSize));
 
         step("6/7", "Navigating to LevelSelectionFragment");
         navigateToLevelSelectionFragment();
@@ -211,7 +211,7 @@ public class LevelScreenMinimapE2ETest {
         assertFalse(TAG + " History must not be empty", entries.isEmpty());
 
         GameHistoryEntry entry = entries.get(0);
-        String boardSize = entry.getBoardSize();
+        String boardSize = entry.boardSize;
         step("3/4", "boardSize in history: '" + boardSize + "'");
 
         assertNotNull(TAG + " boardSize must not be null", boardSize);
@@ -300,7 +300,7 @@ public class LevelScreenMinimapE2ETest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
             for (GameElement el : state.gameElements) {
-                if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
+                if (el.type == Constants.TYPE_ROBOT && el.color == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;
                 }

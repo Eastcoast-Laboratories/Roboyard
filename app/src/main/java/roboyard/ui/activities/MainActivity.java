@@ -750,15 +750,15 @@ public class MainActivity extends AppCompatActivity {
                 int wallCount = 0;
                 
                 for (GameElement element : gameState.gameElements) {
-                    if (element.getType() == GameElement.TYPE_ROBOT) {
+                    if (element.type == GameElement.TYPE_ROBOT) {
                         robotCount++;
-                        Timber.d("[DEEPLINK_ELEMENTS] Robot at (%d,%d) with color %d", 
-                                element.getX(), element.getY(), element.getColor());
-                    } else if (element.getType() == GameElement.TYPE_TARGET) {
+                        Timber.d("[DEEPLINK_ELEMENTS] Robot at (%d,%d) with color %d",
+                                element.x, element.y, element.color);
+                    } else if (element.type == GameElement.TYPE_TARGET) {
                         targetCount++;
-                        Timber.d("[DEEPLINK_ELEMENTS] Target at (%d,%d) with color %d", 
-                                element.getX(), element.getY(), element.getColor());
-                    } else if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL || element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+                        Timber.d("[DEEPLINK_ELEMENTS] Target at (%d,%d) with color %d",
+                                element.x, element.y, element.color);
+                    } else if (element.type == GameElement.TYPE_HORIZONTAL_WALL || element.type == GameElement.TYPE_VERTICAL_WALL) {
                         wallCount++;
                     }
                 }

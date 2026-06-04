@@ -118,10 +118,10 @@ public class HistoryReplayUpdateE2ETest {
 
         GameHistoryEntry firstEntry = entriesAfterFirst.get(0);
         String mapPath = firstEntry.getMapPath();
-        int firstMovesMade = firstEntry.getMovesMade();
-        int firstBestMoves = firstEntry.getBestMoves();
-        int firstCompletionCount = firstEntry.getCompletionCount();
-        int firstOptimalMoves = firstEntry.getOptimalMoves();
+        int firstMovesMade = firstEntry.movesMade;
+        int firstBestMoves = firstEntry.bestMoves;
+        int firstCompletionCount = firstEntry.completionCount;
+        int firstOptimalMoves = firstEntry.optimalMoves;
 
         step("2/5", "After 1st play: movesMade=" + firstMovesMade +
                 ", bestMoves=" + firstBestMoves +
@@ -176,14 +176,14 @@ public class HistoryReplayUpdateE2ETest {
             replayEntry = entriesAfterReplay.get(0);
         }
 
-        int replayMovesMade = replayEntry.getMovesMade();
-        int replayBestMoves = replayEntry.getBestMoves();
-        int replayCompletionCount = replayEntry.getCompletionCount();
+        int replayMovesMade = replayEntry.movesMade;
+        int replayBestMoves = replayEntry.bestMoves;
+        int replayCompletionCount = replayEntry.completionCount;
 
         step("5/5", "After replay: movesMade=" + replayMovesMade +
                 ", bestMoves=" + replayBestMoves +
                 ", completionCount=" + replayCompletionCount +
-                ", optimalMoves=" + replayEntry.getOptimalMoves());
+                ", optimalMoves=" + replayEntry.optimalMoves);
 
         // bestMoves should now be the optimal move count (from replay)
         assertEquals(TAG + " bestMoves must be updated to optimal after replay",
@@ -228,7 +228,7 @@ public class HistoryReplayUpdateE2ETest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
             for (GameElement el : state.gameElements) {
-                if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == robotColor) {
+                if (el.type == Constants.TYPE_ROBOT && el.color == robotColor) {
                     state.setSelectedRobot(el);
                     break;
                 }
@@ -276,7 +276,7 @@ public class HistoryReplayUpdateE2ETest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
             for (GameElement el : state.gameElements) {
-                if (el.getType() == Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
+                if (el.type == Constants.TYPE_ROBOT && el.color == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;
                 }

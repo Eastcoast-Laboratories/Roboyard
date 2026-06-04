@@ -85,8 +85,8 @@ public class GameHistoryManagerTest {
         for (GameHistoryEntry e : entries) {
             assertFalse("mapPath must not contain path separator: " + e.getMapPath(),
                     e.getMapPath().contains("/"));
-            assertFalse("previewImagePath must not contain path separator: " + e.getPreviewImagePath(),
-                    e.getPreviewImagePath().contains("/"));
+            assertFalse("previewImagePath must not contain path separator: " + e.previewImagePath,
+                    e.previewImagePath.contains("/"));
         }
     }
 
@@ -113,9 +113,9 @@ public class GameHistoryManagerTest {
 
         List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
         assertEquals("Should have 1 entry", 1, entries.size());
-        assertEquals("MyMap", entries.get(0).getMapName());
-        assertEquals(5, entries.get(0).getMovesMade());
-        assertEquals("12x12", entries.get(0).getBoardSize());
+        assertEquals("MyMap", entries.get(0).mapName);
+        assertEquals(5, entries.get(0).movesMade);
+        assertEquals("12x12", entries.get(0).boardSize);
     }
 
     @Test
@@ -134,16 +134,16 @@ public class GameHistoryManagerTest {
         for (int i = 0; i < 3; i++) {
             GameHistoryEntry entry = createTestEntry(i, "Map_" + i);
             // Set timestamps so Map_2 is newest
-            entry.setTimestamp(1000L + i * 1000L);
+            entry.timestamp = 1000L + i * 1000L;
             GameHistoryManager.addHistoryEntry(activity, entry);
         }
 
         List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
         assertEquals(3, entries.size());
         // Newest first
-        assertEquals("Map_2", entries.get(0).getMapName());
-        assertEquals("Map_1", entries.get(1).getMapName());
-        assertEquals("Map_0", entries.get(2).getMapName());
+        assertEquals("Map_2", entries.get(0).mapName);
+        assertEquals("Map_1", entries.get(1).mapName);
+        assertEquals("Map_0", entries.get(2).mapName);
     }
 
     // ==================== UPDATE TESTS ====================
@@ -151,17 +151,17 @@ public class GameHistoryManagerTest {
     @Test
     public void testUpdateExistingEntryByMapName() {
         GameHistoryEntry entry1 = createTestEntry(0, "SameMap");
-        entry1.setMovesMade(3);
+        entry1.movesMade = 3;
         GameHistoryManager.addHistoryEntry(activity, entry1);
 
         // Add another entry with the same mapName — should update, not duplicate
         GameHistoryEntry entry2 = createTestEntry(0, "SameMap");
-        entry2.setMovesMade(7);
+        entry2.movesMade = 7;
         GameHistoryManager.addHistoryEntry(activity, entry2);
 
         List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
         assertEquals("Should have 1 entry (updated, not duplicated)", 1, entries.size());
-        assertEquals(7, entries.get(0).getMovesMade());
+        assertEquals(7, entries.get(0).movesMade);
     }
 
     // ==================== DELETE TESTS ====================
@@ -203,7 +203,7 @@ public class GameHistoryManagerTest {
         // MAX_HISTORY_ENTRIES is 11
         for (int i = 0; i < 15; i++) {
             GameHistoryEntry entry = createTestEntry(i, "Map_" + i);
-            entry.setTimestamp(System.currentTimeMillis() + i * 1000L);
+            entry.timestamp = System.currentTimeMillis() + i * 1000L;
             GameHistoryManager.addHistoryEntry(activity, entry);
         }
 

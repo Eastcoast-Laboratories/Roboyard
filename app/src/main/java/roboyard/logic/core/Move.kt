@@ -1,26 +1,15 @@
-package roboyard.eclabs;
-import roboyard.ui.components.GamePiece;
+package roboyard.logic.core
+
+import java.io.Serializable
 
 /**
- * Created by Alain on 25/03/2015.
+ * Represents a basic move in the game.
  */
-public class Move {
-    public final GamePiece _p;
-    public final int _x;
-    public final int _y;
-    private int squaresMoved;
-
-    public Move(GamePiece p, int x, int y){
-        _p = p;
-        _x = x;
-        _y = y;
-    }
-
-    public int getSquaresMoved(){
-        return this.squaresMoved;
-    }
-
-    public void setSquaresMoved(int moved){
-        this.squaresMoved=moved;
+class Move(
+    @JvmField val robotColor: Int,
+    @JvmField val direction: Int
+) : Serializable {
+    companion object {
+        private const val serialVersionUID = 1L
     }
 }

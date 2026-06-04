@@ -97,7 +97,7 @@ public class HistorySyncStarsTest {
                     if (state != null) {
                         GameElement selectedRobot = null;
                         for (GameElement element : state.gameElements) {
-                            if (element.getType() == GameElement.TYPE_ROBOT && element.getColor() == rrMove.getColor()) {
+                            if (element.type == GameElement.TYPE_ROBOT && element.color == rrMove.getColor()) {
                                 selectedRobot = element;
                                 break;
                             }
@@ -150,10 +150,10 @@ public class HistorySyncStarsTest {
         activityRule.getScenario().onActivity(activity -> {
             List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
             for (GameHistoryEntry entry : entries) {
-                if ("Level 1".equals(entry.getMapName())) {
+                if ("Level 1".equals(entry.mapName)) {
                     histFound[0] = true;
-                    histStars[0] = entry.getStarsEarned();
-                    histMoves[0] = entry.getMovesMade();
+                    histStars[0] = entry.starsEarned;
+                    histMoves[0] = entry.movesMade;
                     Timber.d("[UNITTESTS][SYNC_TEST] History entry 'Level 1': stars=%d, moves=%d", histStars[0], histMoves[0]);
                     break;
                 }

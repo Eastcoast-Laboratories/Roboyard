@@ -208,7 +208,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         val iterator = data.iterator()
         while (iterator.hasNext()) {
             val e = iterator.next()
-            if (Arrays.asList<String?>(*gameElementTypes).contains(e.getType())) {
+            if (Arrays.asList<String?>(*gameElementTypes).contains(e.type)) {
                 iterator.remove()
             }
         }
@@ -260,30 +260,30 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // First pass: check which outer walls already exist
         for (element in data) {
-            if (element.getType() == "mh") {
+            if (element.type == "mh") {
                 // Horizontal walls
-                if (element.getY() == 0) {
-                    horizontalTopExists[element.getX()] = true
-                    Timber.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.getX())
-                } else if (element.getY() == boardHeight) {
-                    horizontalBottomExists[element.getX()] = true
+                if (element.y == 0) {
+                    horizontalTopExists[element.x] = true
+                    Timber.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.x)
+                } else if (element.y == boardHeight) {
+                    horizontalBottomExists[element.x] = true
                     Timber.d(
                         "[WALL STORAGE] Horizontal bottom wall found at (%d,%d)",
-                        element.getX(),
+                        element.x,
                         boardHeight
                     )
                 }
-            } else if (element.getType() == "mv") {
+            } else if (element.type == "mv") {
                 // Vertical walls
-                if (element.getX() == 0) {
-                    verticalLeftExists[element.getY()] = true
-                    Timber.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.getY())
-                } else if (element.getX() == boardWidth) {
-                    verticalRightExists[element.getY()] = true
+                if (element.x == 0) {
+                    verticalLeftExists[element.y] = true
+                    Timber.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.y)
+                } else if (element.x == boardWidth) {
+                    verticalRightExists[element.y] = true
                     Timber.d(
                         "[WALL STORAGE] Vertical right wall found at (%d,%d)",
                         boardWidth,
-                        element.getY()
+                        element.y
                     )
                 }
             }
@@ -447,9 +447,9 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             // Extract wall information from data if available
             if (data != null) {
                 for (element in data) {
-                    val type = element.getType()
-                    val x = element.getX()
-                    val y = element.getY()
+                    val type = element.type
+                    val x = element.x
+                    val y = element.y
 
                     if ("mh" == type && x < boardWidth && y < boardHeight) {
                         horizontalWalls[x]!![y] = 1
@@ -574,7 +574,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
                 // Check if position is already occupied by another element
                 for (element in allElements) {
-                    if (element.getX() == targetX && element.getY() == targetY) {
+                    if (element.x == targetX && element.y == targetY) {
                         abandon = true
                         Timber.d(
                             "[TARGET PLACEMENT] Position (%d,%d) abandoned - already occupied",
@@ -612,7 +612,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
                 // Check if position is already occupied
                 for (element in allElements) {
-                    if (element.getX() == cX && element.getY() == cY) {
+                    if (element.x == cX && element.y == cY) {
                         abandon = true
                         break
                     }
@@ -1558,12 +1558,12 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             Timber.d("[TARGET CHECK] Checking %d grid elements for targets", gridElements.size)
             var targetCount = 0
             for (element in gridElements) {
-                val type = element.getType()
+                val type = element.type
                 if (type != null && type.startsWith("target_")) {
                     targetCount++
                     Timber.d(
                         "[TARGET CHECK] Found target of type %s at position (%d,%d)",
-                        type, element.getX(), element.getY()
+                        type, element.x, element.y
                     )
                 }
             }

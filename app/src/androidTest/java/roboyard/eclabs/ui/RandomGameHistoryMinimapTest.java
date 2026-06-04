@@ -110,9 +110,9 @@ public class RandomGameHistoryMinimapTest {
                 entries.size() > 0);
         
         GameHistoryEntry entry = entries.get(0);
-        step("7/8", "History entry: mapName=" + entry.getMapName() 
+        step("7/8", "History entry: mapName=" + entry.mapName
                 + ", mapPath=" + entry.getMapPath()
-                + ", moves=" + entry.getMovesMade());
+                + ", moves=" + entry.movesMade);
 
         step("8/8", "Verifying minimap is displayed correctly (not dummy)");
         verifyMinimapAtPosition(0);
@@ -160,7 +160,7 @@ public class RandomGameHistoryMinimapTest {
             GameState state = gameStateManager.getCurrentState().getValue();
             if (state == null) return;
             for (roboyard.logic.core.GameElement el : state.gameElements) {
-                if (el.getType() == roboyard.logic.core.Constants.TYPE_ROBOT && el.getColor() == rrMove.getColor()) {
+                if (el.type == roboyard.logic.core.Constants.TYPE_ROBOT && el.color == rrMove.getColor()) {
                     state.setSelectedRobot(el);
                     break;
                 }

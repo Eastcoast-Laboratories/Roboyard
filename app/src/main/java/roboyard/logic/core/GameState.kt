@@ -133,7 +133,7 @@ class GameState(
             field = robot
             Timber.d(
                 "[MOVE_TRACKING] Last moved robot set to color: %d",
-                if (robot != null) robot.getColor() else -1
+                if (robot != null) robot.color else -1
             )
         }
 
@@ -280,7 +280,7 @@ class GameState(
     fun addTarget(x: Int, y: Int, color: Int) {
         Timber.d("[TARGET LOADING] Adding target at (%d,%d) with color %d", x, y, color)
         val target = GameElement(GameElement.TYPE_TARGET, x, y)
-        target.setColor(color)
+        target.color = color
         gameElements.add(target)
         setCellType(x, y, Constants.TYPE_TARGET)
         setTargetColor(x, y, color)
@@ -295,7 +295,7 @@ class GameState(
      */
     fun addRobot(x: Int, y: Int, color: Int) {
         val robot = GameElement(GameElement.TYPE_ROBOT, x, y)
-        robot.setColor(color)
+        robot.color = color
         gameElements.add(robot)
     }
 
@@ -304,7 +304,7 @@ class GameState(
      */
     fun getRobotAt(x: Int, y: Int): GameElement? {
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT && element.getX() == x && element.getY() == y) {
+            if (element.type == GameElement.TYPE_ROBOT && element.x == x && element.y == y) {
                 return element
             }
         }
@@ -324,13 +324,13 @@ class GameState(
     fun setSelectedRobot(robot: GameElement?) {
         // Deselect previous robot
         if (selectedRobot != null) {
-            selectedRobot!!.setSelected(false)
+            selectedRobot!!.isSelected = false
         }
 
 
         // Select new robot
         if (robot != null) {
-            robot.setSelected(true)
+            robot.isSelected = true
         }
 
         selectedRobot = robot
@@ -343,7 +343,7 @@ class GameState(
     private fun hasVerticalWall(x: Int, y: Int): Boolean {
         // Check vertical walls from the game elements
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_VERTICAL_WALL && element.getX() == x && element.getY() == y) {
+            if (element.type == GameElement.TYPE_VERTICAL_WALL && element.x == x && element.y == y) {
                 return true
             }
         }
@@ -357,7 +357,7 @@ class GameState(
     private fun hasHorizontalWall(x: Int, y: Int): Boolean {
         // Check horizontal walls from the game elements
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL && element.getX() == x && element.getY() == y) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL && element.x == x && element.y == y) {
                 return true
             }
         }
@@ -404,16 +404,16 @@ class GameState(
                 robotsAtTarget++
                 Timber.d(
                     "[GOAL DEBUG] Robot %d is at target (%d,%d)",
-                    robot.getColor(),
-                    robot.getX(),
-                    robot.getY()
+                    robot.color,
+                    robot.x,
+                    robot.y
                 )
             } else {
                 Timber.d(
                     "[GOAL DEBUG] Robot %d is NOT at target (%d,%d)",
-                    robot.getColor(),
-                    robot.getX(),
-                    robot.getY()
+                    robot.color,
+                    robot.x,
+                    robot.y
                 )
             }
         }
@@ -510,17 +510,17 @@ class GameState(
             for (element in gameElements) {
                 var gridElementType: String? = null
 
-                when (element.getType()) {
+                when (element.type) {
                     GameElement.TYPE_HORIZONTAL_WALL -> gridElementType = "mh"
                     GameElement.TYPE_VERTICAL_WALL -> gridElementType = "mv"
                     GameElement.TYPE_TARGET -> {
-                        val targetColor = element.getColor()
+                        val targetColor = element.color
                         if (targetColor == Constants.COLOR_MULTI) {
                             gridElementType = "target_multi"
                             Timber.d(
                                 "[SOLUTION_SOLVER_TARGET] Found multi-color target at (%d,%d) in gameElements",
-                                element.getX(),
-                                element.getY()
+                                element.x,
+                                element.y
                             )
                         } else if (targetColor == 0) {
                             gridElementType = "target_red"
@@ -537,14 +537,14 @@ class GameState(
                             Timber.w(
                                 "[SOLUTION_SOLVER_TARGET] Unknown target color: %d at (%d,%d), defaulting to red",
                                 targetColor,
-                                element.getX(),
-                                element.getY()
+                                element.x,
+                                element.y
                             )
                         }
                     }
 
                     GameElement.TYPE_ROBOT -> {
-                        val robotColor = element.getColor()
+                        val robotColor = element.color
                         if (robotColor == 0) {
                             gridElementType = "robot_red"
                         } else if (robotColor == 1) {
@@ -563,7 +563,7 @@ class GameState(
                 }
 
                 if (gridElementType != null) {
-                    elements.add(GridElement(element.getX(), element.getY(), gridElementType))
+                    elements.add(GridElement(element.x, element.y, gridElementType))
                 }
             }
 
@@ -615,10 +615,10 @@ class GameState(
      */
     private fun isPositionOccupied(x: Int, y: Int): Boolean {
         for (element in gameElements) {
-            if (element.getX() == x && element.getY() == y) {
+            if (element.x == x && element.y == y) {
                 // Position is occupied by a wall, target, or robot
-                if (element.getType() == GameElement.TYPE_TARGET ||
-                    element.getType() == GameElement.TYPE_ROBOT
+                if (element.type == GameElement.TYPE_TARGET ||
+                    element.type == GameElement.TYPE_ROBOT
                 ) {
                     return true
                 }
@@ -698,8 +698,8 @@ class GameState(
                             color
                         )
                         for (element in gameElements) {
-                            if (element.getType() == GameElement.TYPE_TARGET && element.getX() == x && element.getY() == y) {
-                                color = element.getColor()
+                            if (element.type == GameElement.TYPE_TARGET && element.x == x && element.y == y) {
+                                color = element.color
                                 Timber.d(
                                     "[SAVE_DATA] Recovered target color %d from gameElement at (%d,%d)",
                                     color,
@@ -801,7 +801,7 @@ class GameState(
         // Get current robot elements
         val currentRobots: MutableList<GameElement> = java.util.ArrayList<GameElement>()
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
+            if (element.type == GameElement.TYPE_ROBOT) {
                 currentRobots.add(element)
             }
         }
@@ -818,17 +818,17 @@ class GameState(
 
         // Reset each robot to its initial position
         for (robot in currentRobots) {
-            val robotColor = robot.getColor()
+            val robotColor = robot.color
             Timber.d("[ROBOTS] resetRobotPositions: Processing robot with color %d", robotColor)
 
             if (initialRobotPositions!!.containsKey(robotColor)) {
                 val position = initialRobotPositions!!.get(robotColor)
                 Timber.d(
                     "[ROBOTS] resetRobotPositions: Resetting robot color %d from (%d, %d) to (%d, %d)",
-                    robotColor, robot.getX(), robot.getY(), position!![0], position[1]
+                    robotColor, robot.x, robot.y, position!![0], position[1]
                 )
-                robot.setX(position[0])
-                robot.setY(position[1])
+                robot.x = position[0]
+                robot.y = position[1]
             } else {
                 Timber.e(
                     "[ROBOTS] resetRobotPositions: No initial position found for robot color %d",
@@ -859,30 +859,30 @@ class GameState(
      * @return True if the robot is at its matching target, false otherwise
      */
     fun isRobotAtTarget(robot: GameElement?): Boolean {
-        if (robot == null || robot.getType() != GameElement.TYPE_ROBOT) {
+        if (robot == null || robot.type != GameElement.TYPE_ROBOT) {
             return false
         }
 
-        val robotX = robot.getX()
-        val robotY = robot.getY()
-        val robotColor = robot.getColor()
+        val robotX = robot.x
+        val robotY = robot.y
+        val robotColor = robot.color
 
 
         // Find matching target
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET && element.getX() == robotX && element.getY() == robotY) {
+            if (element.type == GameElement.TYPE_TARGET && element.x == robotX && element.y == robotY) {
                 // Allow any robot to match a multi-color target
-                if (element.getColor() == Constants.COLOR_MULTI) {
+                if (element.color == Constants.COLOR_MULTI) {
                     Timber.d(
                         "[TARGET_MULTI_MATCH] Robot %d matches multi target at (%d,%d)",
-                        robot.getColor(),
+                        robot.color,
                         robotX,
                         robotY
                     )
                     return true
                 }
                 // Otherwise, require color match
-                if (element.getColor() == robotColor) {
+                if (element.color == robotColor) {
                     return true
                 }
             }
@@ -897,15 +897,15 @@ class GameState(
      * @return true if the robot is on a target of a different (non-multi) color
      */
     fun isRobotOnWrongTarget(robot: GameElement?): Boolean {
-        if (robot == null || robot.getType() != GameElement.TYPE_ROBOT) {
+        if (robot == null || robot.type != GameElement.TYPE_ROBOT) {
             return false
         }
-        val rx = robot.getX()
-        val ry = robot.getY()
+        val rx = robot.x
+        val ry = robot.y
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET && element.getX() == rx && element.getY() == ry) {
-                if (element.getColor() != Constants.COLOR_MULTI &&
-                    element.getColor() != robot.getColor()
+            if (element.type == GameElement.TYPE_TARGET && element.x == rx && element.y == ry) {
+                if (element.color != Constants.COLOR_MULTI &&
+                    element.color != robot.color
                 ) {
                     return true
                 }
@@ -922,12 +922,12 @@ class GameState(
          */
         get() {
             for (robot in this.robots) {
-                val rx = robot.getX()
-                val ry = robot.getY()
+                val rx = robot.x
+                val ry = robot.y
                 for (element in gameElements) {
-                    if (element.getType() == GameElement.TYPE_TARGET && element.getX() == rx && element.getY() == ry) {
-                        if (element.getColor() != Constants.COLOR_MULTI &&
-                            element.getColor() != robot.getColor()
+                    if (element.type == GameElement.TYPE_TARGET && element.x == rx && element.y == ry) {
+                        if (element.color != Constants.COLOR_MULTI &&
+                            element.color != robot.color
                         ) {
                             return true
                         }
@@ -946,7 +946,7 @@ class GameState(
             val robots: MutableList<GameElement> =
                 java.util.ArrayList<GameElement>()
             for (element in gameElements) {
-                if (element.getType() == GameElement.TYPE_ROBOT) {
+                if (element.type == GameElement.TYPE_ROBOT) {
                     robots.add(element)
                 }
             }
@@ -960,7 +960,7 @@ class GameState(
          */
         get() {
             for (element in gameElements) {
-                if (element.getType() == GameElement.TYPE_TARGET) {
+                if (element.type == GameElement.TYPE_TARGET) {
                     return element
                 }
             }
@@ -976,7 +976,7 @@ class GameState(
             val targets: MutableList<GameElement?> =
                 java.util.ArrayList<GameElement?>()
             for (element in gameElements) {
-                if (element.getType() == GameElement.TYPE_TARGET) {
+                if (element.type == GameElement.TYPE_TARGET) {
                     targets.add(element)
                 }
             }
@@ -1044,13 +1044,13 @@ class GameState(
         var robotCount = 0
         // Loop through all game elements to find robots
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
+            if (element.type == GameElement.TYPE_ROBOT) {
                 // Store the robot's position by its color
-                val position = intArrayOf(element.getX(), element.getY())
-                initialRobotPositions!!.put(element.getColor(), position)
+                val position = intArrayOf(element.x, element.y)
+                initialRobotPositions!!.put(element.color, position)
                 Timber.d(
                     "[ROBOTS] storeInitialRobotPositions: Stored robot color %d at position (%d, %d)",
-                    element.getColor(), position[0], position[1]
+                    element.color, position[0], position[1]
                 )
                 robotCount++
             }
@@ -1082,8 +1082,8 @@ class GameState(
 
 
         // Check current robot position
-        val currentX = robot.getX()
-        val currentY = robot.getY()
+        val currentX = robot.x
+        val currentY = robot.y
 
 
         // Check for walls in the movement path
@@ -1150,7 +1150,7 @@ class GameState(
 
         var elementTargets = 0
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
+            if (element.type == GameElement.TYPE_TARGET) {
                 elementTargets++
             }
         }
@@ -1163,10 +1163,10 @@ class GameState(
 
         // Now update the board array to match the gameElements list
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                val x = element.getX()
-                val y = element.getY()
-                val color = element.getColor()
+            if (element.type == GameElement.TYPE_TARGET) {
+                val x = element.x
+                val y = element.y
+                val color = element.color
 
                 Timber.d(
                     "[TARGET SYNC] GameElement target at (%d,%d) with color %d, board=%d, targetColors=%d",
@@ -1248,10 +1248,10 @@ class GameState(
         // Collect all walls in sorted order
         val walls: MutableList<String?> = java.util.ArrayList<String?>()
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
-                walls.add("mh" + element.getX() + "," + element.getY())
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
-                walls.add("mv" + element.getX() + "," + element.getY())
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
+                walls.add("mh" + element.x + "," + element.y)
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
+                walls.add("mv" + element.x + "," + element.y)
             }
         }
         Collections.sort(walls as MutableList<String>)
@@ -1288,8 +1288,8 @@ class GameState(
         // Collect target positions in sorted order
         val targets: MutableList<String?> = java.util.ArrayList<String?>()
         for (element in gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                targets.add("T" + element.getColor() + "@" + element.getX() + "," + element.getY())
+            if (element.type == GameElement.TYPE_TARGET) {
+                targets.add("T" + element.color + "@" + element.x + "," + element.y)
             }
         }
         Collections.sort(targets as MutableList<String>)
@@ -1388,11 +1388,11 @@ class GameState(
                     // First check targets in the gameElements list - this is more reliable
                     // especially for targets at x=0 which may be affected by wall indexing
                     for (element in state.gameElements) {
-                        if (element.getType() == GameElement.TYPE_TARGET) {
+                        if (element.type == GameElement.TYPE_TARGET) {
                             targetCount++
                             Timber.d(
                                 "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Found target in gameElements at (%d,%d) with color %d",
-                                element.getX(), element.getY(), element.getColor()
+                                element.x, element.y, element.color
                             )
                         }
                     }
@@ -1794,7 +1794,7 @@ class GameState(
                         var removedWalls = 0
                         val wallIt = state.gameElements.iterator()
                         while (wallIt.hasNext()) {
-                            val t = wallIt.next().getType()
+                            val t = wallIt.next().type
                             if (t == GameElement.TYPE_HORIZONTAL_WALL || t == GameElement.TYPE_VERTICAL_WALL) {
                                 wallIt.remove()
                                 removedWalls++
@@ -1818,7 +1818,7 @@ class GameState(
                         var removedCount = 0
                         val it = state.gameElements.iterator()
                         while (it.hasNext()) {
-                            if (it.next().getType() == GameElement.TYPE_TARGET) {
+                            if (it.next().type == GameElement.TYPE_TARGET) {
                                 it.remove()
                                 removedCount++
                             }
@@ -1857,7 +1857,7 @@ class GameState(
 
                             // Also add as a game element for rendering
                             val target = GameElement(GameElement.TYPE_TARGET, x, y)
-                            target.setColor(color)
+                            target.color = color
                             state.gameElements.add(target)
 
                             targetsAdded++
@@ -2098,7 +2098,7 @@ class GameState(
                 // Count targets in game elements as a verification
                 var targetElementsCount = 0
                 for (element in state.gameElements) {
-                    if (element.getType() == GameElement.TYPE_TARGET) {
+                    if (element.type == GameElement.TYPE_TARGET) {
                         targetElementsCount++
                     }
                 }
@@ -2220,7 +2220,7 @@ class GameState(
 
 
             // Parse entries using central parser (handles comments and line breaks)
-            val entries = LevelFormatParser.parseEntries(levelContent)
+            val entries = LevelFormatParser.parseEntries(levelContent ?: "")
 
             for (entry in entries) {
                 val type = entry.type
@@ -2522,14 +2522,16 @@ class GameState(
             val mapGenerator = MapGenerator()
 
 
-            // Set the robot count and target colors from static Preferences
-            state.robotCount = Preferences.robotCount
-            state.targetColorsCount = Preferences.targetColors
+            val robotCountFromPrefs = Preferences.robotCount
+            val targetColorsFromPrefs = Preferences.targetColors
+
+            state.robotCount = robotCountFromPrefs
+            state.targetColorsCount = targetColorsFromPrefs
 
 
             // Pass the values to the MapGenerator
-            mapGenerator.setRobotCount(state.robotCount)
-            mapGenerator.setTargetColors(state.targetColorsCount)
+            mapGenerator.robotCount = state.robotCount
+            mapGenerator.targetColors = state.targetColorsCount
 
             Timber.tag(TAG).d(
                 "[PREFERENCES] Using robotCount=%d, targetColors=%d from static Preferences",
@@ -2538,16 +2540,22 @@ class GameState(
 
 
             // Generate a new game map
-            val gridElements = mapGenerator.getGeneratedGameMap()
+            val gridElements = mapGenerator.generatedGameMap
 
             Timber.tag(TAG)
-                .d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements.size + " grid elements")
+                .d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements?.size + " grid elements")
+
+            if (gridElements == null) {
+                Timber.tag(TAG).e("[BOARD_SIZE_DEBUG] MapGenerator returned null gridElements!")
+                return state
+            }
 
             // Process grid elements to create game state
             for (element in gridElements) {
-                val type = element.getType()
-                val x = element.getX()
-                val y = element.getY()
+                if (element == null) continue
+                val type = element.type ?: continue
+                val x = element.x
+                val y = element.y
 
                 // Handle all wall types
                 if (type == "mh") {
@@ -2691,13 +2699,13 @@ class GameState(
             var maxWallX = 0
             var maxWallY = 0
             for (element in gridElements) {
-                val type = element.getType()
+                val type = element.type
                 if (type == "mh" || type == "mv") {
-                    maxWallX = max(maxWallX, element.getX())
-                    maxWallY = max(maxWallY, element.getY())
+                    maxWallX = max(maxWallX, element.x)
+                    maxWallY = max(maxWallY, element.y)
                 } else {
-                    maxCellX = max(maxCellX, element.getX())
-                    maxCellY = max(maxCellY, element.getY())
+                    maxCellX = max(maxCellX, element.x)
+                    maxCellY = max(maxCellY, element.y)
                 }
             }
             // Border walls sit at coordinate = boardSize (e.g. right wall at x=18 for 18-wide board).
@@ -2712,9 +2720,9 @@ class GameState(
             val state = GameState(width, height)
 
             for (element in gridElements) {
-                val type = element.getType()
-                val x = element.getX()
-                val y = element.getY()
+                val type = element.type ?: continue
+                val x = element.x
+                val y = element.y
 
                 if (type == "mh") {
                     state.addHorizontalWall(x, y)

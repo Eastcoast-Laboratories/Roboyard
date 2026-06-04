@@ -38,28 +38,28 @@ public class RoboyardSmokeTest {
     public void testGameElementCreation() {
         // TYPE_ROBOT = 1 (from Constants)
         roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 5, 7);
-        assertEquals(1, robot.getType());
-        assertEquals(5, robot.getX());
-        assertEquals(7, robot.getY());
-        assertEquals(0, robot.getColor()); // default color
+        assertEquals(1, robot.type);
+        assertEquals(5, robot.x);
+        assertEquals(7, robot.y);
+        assertEquals(0, robot.color); // default color
         assertFalse(robot.isSelected());
     }
 
     @Test
     public void testGameElementPositionUpdate() {
         roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
-        robot.setX(10);
-        robot.setY(12);
-        assertEquals(10, robot.getX());
-        assertEquals(12, robot.getY());
+        robot.x = 10;
+        robot.y = 12;
+        assertEquals(10, robot.x);
+        assertEquals(12, robot.y);
     }
 
     @Test
     public void testGameElementColorAndSelection() {
         roboyard.logic.core.GameElement robot = new roboyard.logic.core.GameElement(1, 0, 0);
-        robot.setColor(3); // yellow
+        robot.color = 3; // yellow
         robot.setSelected(true);
-        assertEquals(3, robot.getColor());
+        assertEquals(3, robot.color);
         assertTrue(robot.isSelected());
         
         robot.setSelected(false);
@@ -129,12 +129,12 @@ public class RoboyardSmokeTest {
     @Test
     public void testGameMoveCreationHorizontal() {
         roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(0, 0, 2, 5, 8, 5);
-        assertEquals(0, move.getRobotId());
-        assertEquals(0, move.getRobotColor());
-        assertEquals(2, move.getFromX());
-        assertEquals(5, move.getFromY());
-        assertEquals(8, move.getToX());
-        assertEquals(5, move.getToY());
+        assertEquals(0, move.robotId);
+        assertEquals(0, move.robotColor);
+        assertEquals(2, move.fromX);
+        assertEquals(5, move.fromY);
+        assertEquals(8, move.toX);
+        assertEquals(5, move.toY);
         assertEquals(roboyard.logic.core.GameMove.RIGHT, move.getDirection());
         assertEquals(6, move.getDistance());
     }
@@ -190,10 +190,10 @@ public class RoboyardSmokeTest {
     @Test
     public void testGameMoveFromDirectionConstructor() {
         roboyard.logic.core.GameMove move = new roboyard.logic.core.GameMove(2, roboyard.logic.core.GameMove.DOWN, 4);
-        assertEquals(2, move.getRobotId());
+        assertEquals(2, move.robotId);
         assertEquals(roboyard.logic.core.GameMove.DOWN, move.getDirection());
         assertEquals(4, move.getDistance());
-        assertEquals(-1, move.getRobotColor()); // unknown color
+        assertEquals(-1, move.robotColor); // unknown color
     }
 
     // ========================================================================
@@ -203,14 +203,14 @@ public class RoboyardSmokeTest {
     @Test
     public void testLevelCompletionDataDefaults() {
         roboyard.logic.core.LevelCompletionData data = new roboyard.logic.core.LevelCompletionData(42);
-        assertEquals(42, data.getLevelId());
+        assertEquals(42, data.levelId);
         assertFalse(data.isCompleted());
-        assertEquals(0, data.getHintsShown());
-        assertEquals(0, data.getTimeNeeded());
-        assertEquals(0, data.getMovesNeeded());
-        assertEquals(0, data.getOptimalMoves());
-        assertEquals(0, data.getRobotsUsed());
-        assertEquals(0, data.getSquaresSurpassed());
+        assertEquals(0, data.hintsShown);
+        assertEquals(0, data.timeNeeded);
+        assertEquals(0, data.movesNeeded);
+        assertEquals(0, data.optimalMoves);
+        assertEquals(0, data.robotsUsed);
+        assertEquals(0, data.squaresSurpassed);
         assertEquals(0, data.getStars());
     }
 
@@ -218,21 +218,21 @@ public class RoboyardSmokeTest {
     public void testLevelCompletionDataSetters() {
         roboyard.logic.core.LevelCompletionData data = new roboyard.logic.core.LevelCompletionData(1);
         data.setCompleted(true);
-        data.setHintsShown(2);
-        data.setTimeNeeded(45000);
-        data.setMovesNeeded(5);
-        data.setOptimalMoves(3);
-        data.setRobotsUsed(2);
-        data.setSquaresSurpassed(15);
+        data.hintsShown = 2;
+        data.timeNeeded = 45000;
+        data.movesNeeded = 5;
+        data.optimalMoves = 3;
+        data.robotsUsed = 2;
+        data.squaresSurpassed = 15;
         data.setStars(3);
         
         assertTrue(data.isCompleted());
-        assertEquals(2, data.getHintsShown());
-        assertEquals(45000, data.getTimeNeeded());
-        assertEquals(5, data.getMovesNeeded());
-        assertEquals(3, data.getOptimalMoves());
-        assertEquals(2, data.getRobotsUsed());
-        assertEquals(15, data.getSquaresSurpassed());
+        assertEquals(2, data.hintsShown);
+        assertEquals(45000, data.timeNeeded);
+        assertEquals(5, data.movesNeeded);
+        assertEquals(3, data.optimalMoves);
+        assertEquals(2, data.robotsUsed);
+        assertEquals(15, data.squaresSurpassed);
         assertEquals(3, data.getStars());
     }
 
@@ -265,20 +265,20 @@ public class RoboyardSmokeTest {
     @Test
     public void testGridElementCreation() {
         roboyard.logic.core.GridElement elem = new roboyard.logic.core.GridElement(3, 7, "robot_red");
-        assertEquals(3, elem.getX());
-        assertEquals(7, elem.getY());
-        assertEquals("robot_red", elem.getType());
+        assertEquals(3, elem.x);
+        assertEquals(7, elem.y);
+        assertEquals("robot_red", elem.type);
     }
 
     @Test
     public void testGridElementSetters() {
         roboyard.logic.core.GridElement elem = new roboyard.logic.core.GridElement(0, 0, "mh");
-        elem.setX(15);
-        elem.setY(20);
-        elem.setType("mv");
-        assertEquals(15, elem.getX());
-        assertEquals(20, elem.getY());
-        assertEquals("mv", elem.getType());
+        elem.x = 15;
+        elem.y = 20;
+        elem.type = "mv";
+        assertEquals(15, elem.x);
+        assertEquals(20, elem.y);
+        assertEquals("mv", elem.type);
     }
 
     // ========================================================================
@@ -294,9 +294,9 @@ public class RoboyardSmokeTest {
         assertEquals("Should extract 5 elements (robots, walls, target)", 5, elements.size());
         
         // Verify first element is robot_red at (5,7)
-        assertEquals("robot_red", elements.get(0).getType());
-        assertEquals(5, elements.get(0).getX());
-        assertEquals(7, elements.get(0).getY());
+        assertEquals("robot_red", elements.get(0).type);
+        assertEquals(5, elements.get(0).x);
+        assertEquals(7, elements.get(0).y);
     }
 
     @Test

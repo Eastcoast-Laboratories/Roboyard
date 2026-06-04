@@ -442,7 +442,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                     if (key == null) continue;
                     // Keep the entry with the most completions if there are duplicates
                     GameHistoryEntry existing = historyByMapName.get(key);
-                    if (existing == null || entry.getCompletionCount() >= existing.getCompletionCount()) {
+                    if (existing == null || entry.completionCount >= existing.completionCount) {
                         historyByMapName.put(key, entry);
                     }
                 }
@@ -462,7 +462,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private static String extractLevelKey(GameHistoryEntry entry) {
         // Try mapName "Level N" -> "level_N"
-        String mapName = entry.getMapName();
+        String mapName = entry.mapName;
         if (mapName != null) {
             if (mapName.matches("(?i)Level \\d+")) {
                 int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);

@@ -102,7 +102,7 @@ public class Level11With2StarsE2ETest {
                         if (state != null) {
                             // Find and select blue robot (color 0)
                             for (GameElement element : state.getRobots()) {
-                                if (element.getColor() == 0) {
+                                if (element.color == 0) {
                                     state.setSelectedRobot(element);
                                     Timber.d("[UNITTESTS][E2E_2STARS] Selected blue robot");
                                     break;

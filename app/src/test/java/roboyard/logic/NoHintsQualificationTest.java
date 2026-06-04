@@ -33,8 +33,8 @@ public class NoHintsQualificationTest {
         GameHistoryEntry entry = makeEntry();
         assertFalse("Fresh entry should NOT qualify", entry.qualifiesForNoHintsAchievement());
         assertFalse("Fresh entry should NOT qualify for perfect", entry.qualifiesForPerfectNoHintsAchievement());
-        assertEquals("lastSolvedWithoutHints should be 0", 0L, entry.getLastSolvedWithoutHints());
-        assertEquals("lastPerfectlySolvedWithoutHints should be 0", 0L, entry.getLastPerfectlySolvedWithoutHints());
+        assertEquals("lastSolvedWithoutHints should be 0", 0L, entry.lastSolvedWithoutHints);
+        assertEquals("lastPerfectlySolvedWithoutHints should be 0", 0L, entry.lastPerfectlySolvedWithoutHints);
     }
 
     @Test
@@ -43,8 +43,8 @@ public class NoHintsQualificationTest {
         entry.recordSolvedWithoutHints(false);
         assertTrue("Should qualify after no-hints solve", entry.qualifiesForNoHintsAchievement());
         assertFalse("Should NOT qualify for perfect (non-optimal)", entry.qualifiesForPerfectNoHintsAchievement());
-        assertTrue("lastSolvedWithoutHints should be set", entry.getLastSolvedWithoutHints() > 0);
-        assertEquals("lastPerfectlySolvedWithoutHints should still be 0", 0L, entry.getLastPerfectlySolvedWithoutHints());
+        assertTrue("lastSolvedWithoutHints should be set", entry.lastSolvedWithoutHints > 0);
+        assertEquals("lastPerfectlySolvedWithoutHints should still be 0", 0L, entry.lastPerfectlySolvedWithoutHints);
     }
 
     @Test
@@ -53,8 +53,8 @@ public class NoHintsQualificationTest {
         entry.recordSolvedWithoutHints(true);
         assertTrue("Should qualify after optimal no-hints solve", entry.qualifiesForNoHintsAchievement());
         assertTrue("Should qualify for perfect after optimal no-hints solve", entry.qualifiesForPerfectNoHintsAchievement());
-        assertTrue("lastSolvedWithoutHints should be set", entry.getLastSolvedWithoutHints() > 0);
-        assertTrue("lastPerfectlySolvedWithoutHints should be set", entry.getLastPerfectlySolvedWithoutHints() > 0);
+        assertTrue("lastSolvedWithoutHints should be set", entry.lastSolvedWithoutHints > 0);
+        assertTrue("lastPerfectlySolvedWithoutHints should be set", entry.lastPerfectlySolvedWithoutHints > 0);
     }
 
     // --- Core regression test: later hint usage must NOT revoke qualification ---
@@ -76,7 +76,7 @@ public class NoHintsQualificationTest {
         assertTrue("qualifiesForNoHintsAchievement must survive later hint usage", entry.qualifiesForNoHintsAchievement());
         assertTrue("qualifiesForPerfectNoHintsAchievement must survive later hint usage", entry.qualifiesForPerfectNoHintsAchievement());
         assertTrue("everUsedHints is true", entry.isEverUsedHints());
-        assertTrue("lastSolvedWithoutHints still set", entry.getLastSolvedWithoutHints() > 0);
+        assertTrue("lastSolvedWithoutHints still set", entry.lastSolvedWithoutHints > 0);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class NoHintsQualificationTest {
 
         // First: solve optimally without hints
         entry.recordSolvedWithoutHints(true);
-        long firstTimestamp = entry.getLastPerfectlySolvedWithoutHints();
+        long firstTimestamp = entry.lastPerfectlySolvedWithoutHints;
         assertTrue(firstTimestamp > 0);
 
         // Later: solve again without hints but non-optimally
@@ -97,10 +97,10 @@ public class NoHintsQualificationTest {
         // Perfect still qualifies (from first solve)
         assertTrue(entry.qualifiesForPerfectNoHintsAchievement());
         // lastSolvedWithoutHints updated to newer timestamp
-        assertTrue(entry.getLastSolvedWithoutHints() >= firstTimestamp);
+        assertTrue(entry.lastSolvedWithoutHints >= firstTimestamp);
         // lastPerfectlySolvedWithoutHints still from first solve (not overwritten by non-optimal)
         assertEquals("Perfect timestamp should remain from first optimal solve",
-                firstTimestamp, entry.getLastPerfectlySolvedWithoutHints());
+                firstTimestamp, entry.lastPerfectlySolvedWithoutHints);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class NoHintsQualificationTest {
 
         assertFalse("Once disqualified by hints, cannot be re-qualified", entry.qualifiesForNoHintsAchievement());
         assertEquals("lastSolvedWithoutHints must NOT be set after disqualification",
-                0L, entry.getLastSolvedWithoutHints());
+                0L, entry.lastSolvedWithoutHints);
     }
 
     // --- Getters/Setters round-trip ---
@@ -139,11 +139,11 @@ public class NoHintsQualificationTest {
         long ts1 = 1_700_000_000_000L;
         long ts2 = 1_800_000_000_000L;
 
-        entry.setLastSolvedWithoutHints(ts1);
-        entry.setLastPerfectlySolvedWithoutHints(ts2);
+        entry.lastSolvedWithoutHints = ts1;
+        entry.lastPerfectlySolvedWithoutHints = ts2;
 
-        assertEquals(ts1, entry.getLastSolvedWithoutHints());
-        assertEquals(ts2, entry.getLastPerfectlySolvedWithoutHints());
+        assertEquals(ts1, entry.lastSolvedWithoutHints);
+        assertEquals(ts2, entry.lastPerfectlySolvedWithoutHints);
         assertTrue(entry.qualifiesForNoHintsAchievement());
         assertTrue(entry.qualifiesForPerfectNoHintsAchievement());
     }
@@ -151,8 +151,8 @@ public class NoHintsQualificationTest {
     @Test
     public void testZeroTimestampsDoNotQualify() {
         GameHistoryEntry entry = makeEntry();
-        entry.setLastSolvedWithoutHints(0);
-        entry.setLastPerfectlySolvedWithoutHints(0);
+        entry.lastSolvedWithoutHints = 0;
+        entry.lastPerfectlySolvedWithoutHints = 0;
 
         assertFalse(entry.qualifiesForNoHintsAchievement());
         assertFalse(entry.qualifiesForPerfectNoHintsAchievement());
@@ -163,11 +163,11 @@ public class NoHintsQualificationTest {
         GameHistoryEntry entry = makeEntry();
 
         entry.recordSolvedWithoutHints(true);
-        long first = entry.getLastPerfectlySolvedWithoutHints();
+        long first = entry.lastPerfectlySolvedWithoutHints;
 
         try { Thread.sleep(10); } catch (InterruptedException ignored) {}
         entry.recordSolvedWithoutHints(true);
-        long second = entry.getLastPerfectlySolvedWithoutHints();
+        long second = entry.lastPerfectlySolvedWithoutHints;
 
         assertTrue("Second optimal timestamp should be >= first", second >= first);
     }

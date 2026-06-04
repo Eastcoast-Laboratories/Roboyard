@@ -148,12 +148,12 @@ public class MoveCountDebugTest {
 
         for (GameHistoryEntry entry : entries) {
             Timber.d("[UNITTESTS][MOVE_COUNT_TEST] ===== HISTORY ENTRY =====");
-            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Map: %s", entry.getMapName());
-            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Moves made: %d", entry.getMovesMade());
-            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Best moves: %d", entry.getBestMoves());
-            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Optimal moves: %d", entry.getOptimalMoves());
-            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Completion count: %d", entry.getCompletionCount());
-            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Max hint used: %d", entry.getMaxHintUsed());
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Map: %s", entry.mapName);
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Moves made: %d", entry.movesMade);
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Best moves: %d", entry.bestMoves);
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Optimal moves: %d", entry.optimalMoves);
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Completion count: %d", entry.completionCount);
+            Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Max hint used: %d", entry.maxHintUsed);
             Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Ever used hints: %b", entry.isEverUsedHints());
             Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Solved without hints: %b", entry.isSolvedWithoutHints());
             Timber.d("[UNITTESTS][MOVE_COUNT_TEST] Qualifies no-hints: %b", entry.qualifiesForNoHintsAchievement());
@@ -163,8 +163,8 @@ public class MoveCountDebugTest {
         // Verify that move counts are reasonable
         if (!entries.isEmpty()) {
             GameHistoryEntry lastEntry = entries.get(0);
-            int movesMade = lastEntry.getMovesMade();
-            int optimalMovesInEntry = lastEntry.getOptimalMoves();
+            int movesMade = lastEntry.movesMade;
+            int optimalMovesInEntry = lastEntry.optimalMoves;
             
             Timber.d("[UNITTESTS][MOVE_COUNT_TEST] ANALYSIS: movesMade=%d, optimalMoves=%d, difference=%d",
                     movesMade, optimalMovesInEntry, movesMade - optimalMovesInEntry);

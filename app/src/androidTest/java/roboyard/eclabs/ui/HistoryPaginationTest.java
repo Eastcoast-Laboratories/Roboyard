@@ -67,14 +67,14 @@ public class HistoryPaginationTest {
                     
                     GameHistoryEntry entry = new GameHistoryEntry();
                     entry.setMapPath(mapPath);
-                    entry.setMapName("Pagination Test " + (i + 1));
-                    entry.setTimestamp(System.currentTimeMillis() - (i * 60000));
-                    entry.setPlayDuration((int)(Math.random() * 300) + 30);
-                    entry.setMovesMade((int)(Math.random() * 50) + 10);
-                    entry.setOptimalMoves((int)(Math.random() * 30) + 5);
-                    entry.setBoardSize("12×12");
-                    entry.setDifficulty(i % 4); // 0=Beginner, 1=Intermediate, 2=Advanced, 3=Expert
-                    entry.setCompletionCount(i % 3 == 0 ? 1 : 0);
+                    entry.mapName = "Pagination Test " + (i + 1);
+                    entry.timestamp = System.currentTimeMillis() - (i * 60000);
+                    entry.playDuration = (int)(Math.random() * 300) + 30;
+                    entry.movesMade = (int)(Math.random() * 50) + 10;
+                    entry.optimalMoves = (int)(Math.random() * 30) + 5;
+                    entry.boardSize = "12×12";
+                    entry.difficulty = i % 4; // 0=Beginner, 1=Intermediate, 2=Advanced, 3=Expert
+                    entry.completionCount = i % 3 == 0 ? 1 : 0;
                     
                     GameHistoryManager.addHistoryEntry(activity, entry);
                     

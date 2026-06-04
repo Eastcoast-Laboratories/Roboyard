@@ -26,10 +26,10 @@ public class MapIdGenerator {
         // Build a string representation of the map for hashing
         StringBuilder mapData = new StringBuilder();
         for (GridElement element : gridElements) {
-            mapData.append(element.getType())
-                   .append(element.getX())
+            mapData.append(element.type)
+                   .append(element.x)
                    .append(",")
-                   .append(element.getY())
+                   .append(element.y)
                    .append(";");
         }
         

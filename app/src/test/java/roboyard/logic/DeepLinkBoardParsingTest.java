@@ -213,7 +213,7 @@ public class DeepLinkBoardParsingTest {
 
         int robotCount = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_ROBOT) {
+            if (element.type == GameElement.TYPE_ROBOT) {
                 robotCount++;
             }
         }
@@ -228,7 +228,7 @@ public class DeepLinkBoardParsingTest {
 
         int targetCount = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
+            if (element.type == GameElement.TYPE_TARGET) {
                 targetCount++;
             }
         }
@@ -244,9 +244,9 @@ public class DeepLinkBoardParsingTest {
         // Target ts10,0 = silver target at (10, 0)
         boolean found = false;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_TARGET) {
-                assertEquals("Target X should be 10", 10, element.getX());
-                assertEquals("Target Y should be 0", 0, element.getY());
+            if (element.type == GameElement.TYPE_TARGET) {
+                assertEquals("Target X should be 10", 10, element.x);
+                assertEquals("Target Y should be 0", 0, element.y);
                 found = true;
             }
         }
@@ -262,9 +262,9 @@ public class DeepLinkBoardParsingTest {
         int hWallCount = 0;
         int vWallCount = 0;
         for (GameElement element : state.gameElements) {
-            if (element.getType() == GameElement.TYPE_HORIZONTAL_WALL) {
+            if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 hWallCount++;
-            } else if (element.getType() == GameElement.TYPE_VERTICAL_WALL) {
+            } else if (element.type == GameElement.TYPE_VERTICAL_WALL) {
                 vWallCount++;
             }
         }

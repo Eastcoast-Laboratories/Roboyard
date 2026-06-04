@@ -167,10 +167,10 @@ public class YubaxCrashReproductionTest {
             // Verify we have all 4 robots (rg, ry, rr, rb)
             int robotCount = 0;
             for (GameElement element : state.gameElements) {
-                if (element.getType() == GameElement.TYPE_ROBOT) {
+                if (element.type == GameElement.TYPE_ROBOT) {
                     robotCount++;
                     Timber.d("[YUBAX_CRASH_TEST] Robot found at (%d,%d) color=%d",
-                            element.getX(), element.getY(), element.getColor());
+                            element.x, element.y, element.color);
                 }
             }
             assertEquals("Should have 4 robots", 4, robotCount);
@@ -269,7 +269,7 @@ public class YubaxCrashReproductionTest {
             // Find robot by color
             GameElement targetRobot = null;
             for (GameElement element : state.getRobots()) {
-                if (element.getColor() == color) {
+                if (element.color == color) {
                     targetRobot = element;
                     break;
                 }
@@ -283,7 +283,7 @@ public class YubaxCrashReproductionTest {
             // Select the robot
             state.setSelectedRobot(targetRobot);
             Timber.d("[YUBAX_CRASH_TEST] Selected %s robot at (%d,%d)", 
-                    colorStr, targetRobot.getX(), targetRobot.getY());
+                    colorStr, targetRobot.x, targetRobot.y);
         });
 
         // Small delay for selection
