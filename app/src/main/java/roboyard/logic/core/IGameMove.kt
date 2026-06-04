@@ -1,8 +1,7 @@
-package roboyard.logic.core;
+package roboyard.logic.core
 
 /**
- *
+ * 
  * @author usrlocal
  */
-public interface IGameMove {
-}
+interface IGameMove 
