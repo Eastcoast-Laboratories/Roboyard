@@ -1,4 +1,4 @@
-package roboyard.pm.ia.ricochet
+package roboyard.logic.solver
 
 import driftingdroids.model.Board
 import driftingdroids.model.Board.Goal
@@ -295,10 +295,10 @@ object RRGetMap {
                 pieces[i] = RRPiece(0, 0, i, i)
             }
 
-            val position = pieces[i]!!.getY() * board.width + pieces[i]!!.getX()
+            val position = pieces[i]!!.y * board.width + pieces[i]!!.x
             Timber.d(
                 "[ROBOT_MAPPING] Setting robot %d at board position %d (x=%d, y=%d)",
-                i, position, pieces[i]!!.getX(), pieces[i]!!.getY()
+                i, position, pieces[i]!!.x, pieces[i]!!.y
             )
             board.setRobot(i, position, false)
 
@@ -306,7 +306,7 @@ object RRGetMap {
             if (!board.setRobot(i, position, false)) {
                 Timber.e(
                     "[ROBOT_MAPPING][ERRROR] FATAL: Could not set robot %d at position %d (%d,%d). Position may be occupied or invalid.",
-                    i, position, pieces[i]!!.getX(), pieces[i]!!.getY()
+                    i, position, pieces[i]!!.x, pieces[i]!!.y
                 )
             }
         }
@@ -550,13 +550,13 @@ object RRGetMap {
      * @return ArrayList of GridElement, or null if parsing failed
      */
     @JvmStatic
-    fun parseAsciiMap(asciiMap: String?): ArrayList<GridElement?>? {
+    fun parseAsciiMap(asciiMap: String?): ArrayList<GridElement>? {
         if (asciiMap == null || asciiMap.isEmpty()) {
             Timber.e("[ASCII_PARSE] Input is null or empty")
             return null
         }
 
-        val elements = ArrayList<GridElement?>()
+        val elements = ArrayList<GridElement>()
 
         // Split into lines and find the data lines (skip header/prefix lines)
         val allLines = asciiMap.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

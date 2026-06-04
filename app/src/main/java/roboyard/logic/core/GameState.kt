@@ -2374,7 +2374,7 @@ class GameState(
             // If no target was found, throw an exception
             // This prevents the NullPointerException in the solver
             if (!hasTarget && !state.gameElements.isEmpty()) {
-//            Timber.d("[LEVEL LOADING] Generated ASCII map:\n%s", roboyard.pm.ia.ricochet.RRGetMap.generateAsciiMap(state.getGameElements()));
+//            Timber.d("[LEVEL LOADING] Generated ASCII map:\n%s", roboyard.logic.solver.RRGetMap.generateAsciiMap(state.getGameElements()));
 
                 Timber.e("[LEVEL LOADING] No target found in level")
                 val t = Throwable()

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.logic.solver.SolverDD;
 import roboyard.ui.util.LiveSolverManager;
 import timber.log.Timber;

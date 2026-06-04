@@ -1,51 +1,71 @@
-package roboyard.pm.ia.ricochet;
+package roboyard.logic.solver
 
-import roboyard.logic.core.AGameState;
-import roboyard.logic.core.IGameMove;
-import java.util.ArrayList;
-import java.util.Arrays;
+import roboyard.logic.core.AGameState
+import roboyard.logic.core.IGameMove
 
 /**
- *
+ * 
  * @author Pierre Michel
  */
-public class RRGameState extends AGameState {
-  
-  public RRGameState(AGameState parentState, IGameMove previousMove){
-    super(parentState, previousMove);
-    if(parentState != null){
-      this.allPieces = new ArrayList<>();
-      this.mainPieces = new RRPiece[((RRGameState)parentState).mainPieces.length];
-      this.secondaryPieces = new RRPiece[((RRGameState)parentState).secondaryPieces.length];
-      for(int i=0; i<((RRGameState)parentState).mainPieces.length; i++){
-        this.mainPieces[i] = new RRPiece(((RRGameState)parentState).mainPieces[i]);
-      }
-      for(int i=0; i<((RRGameState)parentState).secondaryPieces.length; i++){
-        this.secondaryPieces[i] = new RRPiece(((RRGameState)parentState).secondaryPieces[i]);
-      }
-      this.allPieces.addAll(Arrays.asList(mainPieces));
-      this.allPieces.addAll(Arrays.asList(secondaryPieces));
-    }
-  }
+class RRGameState(parentState: AGameState?, previousMove: IGameMove?) :
+    AGameState(parentState, previousMove) {
+    override fun toString(): String {
+        val str = StringBuilder()
+        str.append(this.hashCode())
+        str.append("\nMain Piece:\n")
+        for (p in this.mainPieces) {
+            if (p != null) {
+                str.append(
+                    String.format(
+                        "%d -> x:%d, y:%d, color:%d\n",
+                        p.hashCode(),
+                        p.x,
+                        p.y,
+                        p.color
+                    )
+                )
+            }
+        }
+        str.append("Secondary Pieces:\n")
+        for (p in this.secondaryPieces) {
+            if (p != null) {
+                str.append(
+                    String.format(
+                        "%d -> x:%d, y:%d, color:%d\n",
+                        p.hashCode(),
+                        p.x,
+                        p.y,
+                        p.color
+                    )
+                )
+            }
+        }
 
-  @Override
-  public String toString(){
-    StringBuilder str = new StringBuilder();
-    str.append(this.hashCode());
-    str.append("\nMain Piece:\n");
-    for(RRPiece p : this.mainPieces){
-      str.append(String.format("%d -> x:%d, y:%d, color:%d\n", p.hashCode(), p.getX(), p.getY(), p.getColor()));
+        return str.toString()
     }
-    str.append("Secondary Pieces:\n");
-    for(RRPiece p : this.secondaryPieces){
-      str.append(String.format("%d -> x:%d, y:%d, color:%d\n", p.hashCode(), p.getX(), p.getY(), p.getColor()));
+
+    private var allPieces: ArrayList<RRPiece?>? = null
+    private var secondaryPieces: Array<RRPiece?> = emptyArray()
+    private var mainPieces: Array<RRPiece?> = emptyArray()
+
+    init {
+        if (parentState != null) {
+            val ps = parentState as RRGameState
+            this.allPieces = ArrayList<RRPiece?>()
+            this.mainPieces = arrayOfNulls<RRPiece>(ps.mainPieces.size)
+            this.secondaryPieces = arrayOfNulls<RRPiece>(ps.secondaryPieces.size)
+            for (i in ps.mainPieces.indices) {
+                if (ps.mainPieces[i] != null) {
+                    this.mainPieces[i] = RRPiece(ps.mainPieces[i]!!)
+                }
+            }
+            for (i in ps.secondaryPieces.indices) {
+                if (ps.secondaryPieces[i] != null) {
+                    this.secondaryPieces[i] = RRPiece(ps.secondaryPieces[i]!!)
+                }
+            }
+            this.allPieces!!.addAll(this.mainPieces)
+            this.allPieces!!.addAll(this.secondaryPieces)
+        }
     }
-    
-    return str.toString();
-  }
-  
-  private ArrayList<RRPiece> allPieces;
-  private RRPiece[] secondaryPieces;
-  private RRPiece[] mainPieces;
-  
 }

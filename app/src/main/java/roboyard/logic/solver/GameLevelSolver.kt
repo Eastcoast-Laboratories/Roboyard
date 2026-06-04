@@ -1,14 +1,7 @@
-package roboyard.logic.solver;
+package roboyard.logic.solver
 
-import java.util.ArrayList;
-import java.util.List;
-
-import roboyard.logic.core.GridElement;
-import roboyard.logic.core.GameSolution;
-import driftingdroids.model.Solution;
-import roboyard.logic.solver.SolverDD;
-import roboyard.logic.solver.SolverStatus;
-import timber.log.Timber;
+import roboyard.logic.core.GridElement
+import timber.log.Timber
 
 /**
  * GameLevelSolver - The main game solver with full solution tracking
@@ -32,68 +25,74 @@ import timber.log.Timber;
  * - Solution replay feature
  * - Achievement tracking
  */
-public class GameLevelSolver {
+object GameLevelSolver {
     // Single static solver instance to be used across the entire app
-    private static SolverDD solverInstance;
-    
-    /**
-     * Get the singleton SolverDD instance, creating it if necessary
-     */
-    public static synchronized SolverDD getSolverInstance() {
-        if (solverInstance == null) {
-            Timber.d("[SOLUTION_SOLVER] GameLevelSolver.getSolverInstance(): Creating SolverDD instance");
-            solverInstance = new SolverDD();
+    @JvmStatic
+    @get:Synchronized
+    var solverInstance: SolverDD? = null
+        /**
+         * Get the singleton SolverDD instance, creating it if necessary
+         */
+        get() {
+            if (field == null) {
+                Timber.d("[SOLUTION_SOLVER] GameLevelSolver.getSolverInstance(): Creating SolverDD instance")
+                field = SolverDD()
+            }
+            return field
         }
-        return solverInstance;
-    }
-    
-    public static int solveLevelFromString(String mapContent) {
+        private set
+
+    fun solveLevelFromString(mapContent: String): Int {
         // Parse map content into GridElements
-        ArrayList<GridElement> elements = new ArrayList<>();
-        String[] lines = mapContent.split("\n");
-        
-        for (String line : lines) {
+        val elements = ArrayList<GridElement>()
+        val lines = mapContent.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+        for (line in lines) {
             if (line.startsWith("board:")) {
-                continue; // Skip board size line
+                continue  // Skip board size line
             }
             // Format: type x,y;
-            String[] parts = line.split("[,;]");
-            if (parts.length >= 2) {
-                String type = parts[0].replaceAll("\\d+$", "");
-                int x = Integer.parseInt(parts[0].replaceAll("[^0-9]", ""));
-                int y = Integer.parseInt(parts[1]);
-                elements.add(new GridElement(x, y, type));
+            val parts = line.split("[,;]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            if (parts.size >= 2) {
+                val type = parts[0].replace("\\d+$".toRegex(), "")
+                val x = parts[0].replace("[^0-9]".toRegex(), "").toInt()
+                val y = parts[1].toInt()
+                elements.add(GridElement(x, y, type))
             }
         }
-        
+
+
         // Get the solver instance and initialize it
-        Timber.d("[SOLUTION_SOLVER] GameLevelSolver.solveLevelFromString(): Using singleton solver instance");
-        SolverDD solver = getSolverInstance();
-        solver.init(elements);
-        
+        Timber.d("[SOLUTION_SOLVER] GameLevelSolver.solveLevelFromString(): Using singleton solver instance")
+        val solver = solverInstance!!
+        solver.init(elements)
+
+
         // Run solver
-        solver.run();
-        
+        solver.run()
+
+
         // Check result
         if (solver.getSolverStatus() == SolverStatus.solved) {
-            List<Solution> solutions = solver.getSolutionList();
-            if (!solutions.isEmpty()) {
-                GameSolution solution = solver.getSolution(0);
-                return solution.moves.size();
+            val solutions = solver.getSolutionList()
+            if (!solutions!!.isEmpty()) {
+                val solution = solver.getSolution(0)
+                return solution!!.moves.size
             }
         }
-        
-        return -1; // No solution found
+
+        return -1 // No solution found
     }
-    
-    public static void main(String[] args) {
-        if (args.length > 0) {
-            StringBuilder mapContent = new StringBuilder();
-            for (String arg : args) {
-                mapContent.append(arg).append("\n");
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        if (args.size > 0) {
+            val mapContent = StringBuilder()
+            for (arg in args) {
+                mapContent.append(arg).append("\n")
             }
-            int moves = solveLevelFromString(mapContent.toString());
-            Timber.d(String.valueOf(moves)); // Print number of moves, -1 if no solution
+            val moves = solveLevelFromString(mapContent.toString())
+            Timber.d(moves.toString()) // Print number of moves, -1 if no solution
         }
     }
 }

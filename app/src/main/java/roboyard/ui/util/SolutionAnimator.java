@@ -8,7 +8,7 @@ import java.util.List;
 
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import timber.log.Timber;
 
 /**

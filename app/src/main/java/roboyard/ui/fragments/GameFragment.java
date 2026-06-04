@@ -51,7 +51,7 @@ import roboyard.eclabs.R;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.util.SoundManager;
 import roboyard.logic.core.GameSolution;
 
@@ -1127,8 +1127,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         // If we have both the hint and the actual move information, compare them
                         if (hintMove != null && lastMovedRobot != null && lastMoveDirection != null) {
                             // Get the hint move details
-                            int hintRobotColor = ((roboyard.pm.ia.ricochet.RRGameMove)hintMove).getColor();
-                            int hintDirection = ((roboyard.pm.ia.ricochet.RRGameMove)hintMove).getDirection();
+                            int hintRobotColor = ((RRGameMove)hintMove).getColor();
+                            int hintDirection = ((RRGameMove)hintMove).getDirection();
                             
                             // Log the hint and actual move details for debugging
                             Timber.d("[HINT_SYSTEM] Move verification - Hint robot: %d, Moved robot: %d, Hint direction: %d, Move direction: %d", 
@@ -1170,8 +1170,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                                             // Get direction of the next hint move for the arrow
                                             if (nextNormalHintIndex >= 0 && nextNormalHintIndex < solution.moves.size()) {
                                                 IGameMove nextMove = solution.moves.get(nextNormalHintIndex);
-                                                if (nextMove instanceof roboyard.pm.ia.ricochet.RRGameMove) {
-                                                    autoHintDirection = ((roboyard.pm.ia.ricochet.RRGameMove) nextMove).getDirection();
+                                                if (nextMove instanceof RRGameMove) {
+                                                    autoHintDirection = ((RRGameMove) nextMove).getDirection();
                                                 }
                                             }
                                         }
@@ -4091,8 +4091,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 // Get direction for Semi-Auto mode
                 if (normalHintIndex >= 0 && normalHintIndex < solution.moves.size()) {
                     IGameMove nextMove = solution.moves.get(normalHintIndex);
-                    if (nextMove instanceof roboyard.pm.ia.ricochet.RRGameMove) {
-                        nextHintDirection = ((roboyard.pm.ia.ricochet.RRGameMove) nextMove).getDirection();
+                    if (nextMove instanceof RRGameMove) {
+                        nextHintDirection = ((RRGameMove) nextMove).getDirection();
                     }
                 }
             }

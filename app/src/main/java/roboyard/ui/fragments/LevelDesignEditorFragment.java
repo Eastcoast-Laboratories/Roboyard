@@ -48,6 +48,7 @@ import java.util.Scanner;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.RoboyardApiClient;
 import roboyard.logic.core.Constants;
+import roboyard.logic.solver.RRGetMap;
 import roboyard.logic.core.WallPatternGenerator;
 import roboyard.eclabs.R;
 
@@ -1902,7 +1903,7 @@ public class LevelDesignEditorFragment extends Fragment {
     private void importAsciiMap(String asciiText) {
         try {
             ArrayList<roboyard.logic.core.GridElement> gridElements =
-                    roboyard.pm.ia.ricochet.RRGetMap.parseAsciiMap(asciiText);
+                    RRGetMap.parseAsciiMap(asciiText);
 
             if (gridElements == null || gridElements.isEmpty()) {
                 Toast.makeText(requireContext(), "Could not parse ASCII map", Toast.LENGTH_SHORT).show();

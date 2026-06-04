@@ -29,7 +29,7 @@ import roboyard.ui.components.GameStateManager;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import timber.log.Timber;
 
 /**

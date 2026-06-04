@@ -7,10 +7,6 @@ import roboyard.logic.core.Constants
 import roboyard.logic.core.GameLogic.Companion.getColor
 import roboyard.logic.core.GameSolution
 import roboyard.logic.core.GridElement
-import roboyard.pm.ia.ricochet.ERRGameMove
-import roboyard.pm.ia.ricochet.RRGameMove
-import roboyard.pm.ia.ricochet.RRGetMap
-import roboyard.pm.ia.ricochet.RRPiece
 import timber.log.Timber
 import kotlin.math.min
 
@@ -37,7 +33,7 @@ class SolverDD : ISolver {
         pieces = kotlin.arrayOfNulls<RRPiece>(Constants.NUM_ROBOTS)
     }
 
-    override fun init(elements: ArrayList<GridElement>) {
+    override fun init(elements: ArrayList<GridElement>?) {
         // Reset solver state
         solver = null
         solutions = null
@@ -45,15 +41,15 @@ class SolverDD : ISolver {
 
         Timber.d(
             "[SOLUTION_SOLVER] SolverDD.init(): Initializing solver with %d grid elements",
-            elements.size
+            elements?.size ?: 0
         )
 
 
         // Log some sample elements to verify data
-        if (elements.size > 0) {
+        if (elements != null && elements.size > 0) {
             Timber.d("[SOLUTION_SOLVER] SolverDD.init(): First few elements:")
-            for (i in 0..<min(5, elements.size)) {
-                val element = elements.get(i)
+            for (i in 0 until min(5, elements.size)) {
+                val element = elements[i]
                 Timber.d(
                     "[SOLUTION_SOLVER] Element %d: type=%s, position=(%d,%d)",
                     i,
@@ -66,19 +62,23 @@ class SolverDD : ISolver {
 
 
         // Search for and log any multi-color targets
-        for (element in elements) {
-            if (element.type != null && element.type == "target_multi") {
-                Timber.d(
-                    "[SOLUTION_SOLVER_TARGET] SolverDD.init(): Found multi-color target at position (%d,%d)",
-                    element.x, element.y
-                )
+        if (elements != null) {
+            for (element in elements) {
+                if (element.type != null && element.type == "target_multi") {
+                    Timber.d(
+                        "[SOLUTION_SOLVER_TARGET] SolverDD.init(): Found multi-color target at position (%d,%d)",
+                        element.x, element.y
+                    )
+                }
             }
         }
 
 
         // Initialize new board and solver
         Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Creating DD World from elements")
-        board = RRGetMap.createDDWorld(elements, pieces)
+        if (elements != null) {
+            board = RRGetMap.createDDWorld(elements, pieces)
+        }
 
 
         // Log robot pieces information
@@ -87,7 +87,7 @@ class SolverDD : ISolver {
             if (pieces[i] != null) {
                 Timber.d(
                     "[SOLUTION_SOLVER] Robot %d: color=%d, position=(%d,%d)",
-                    i, pieces[i]!!.getColor(), pieces[i]!!.getX(), pieces[i]!!.getY()
+                    i, pieces[i]!!.color, pieces[i]!!.x, pieces[i]!!.y
                 )
             } else {
                 Timber.d("[SOLUTION_SOLVER] Robot %d: null", i)
@@ -204,7 +204,7 @@ class SolverDD : ISolver {
                 3 -> mv = ERRGameMove.LEFT
                 else -> mv = ERRGameMove.NOMOVE
             }
-            print(m.direction.toString() + "," + pieces[m.robotNumber]!!.getColor() + ";")
+            print(m.direction.toString() + "," + pieces[m.robotNumber]!!.color + ";")
             s.addMove(RRGameMove(pieces[m.robotNumber]!!, mv))
             m = solution.getNextMove()
         }

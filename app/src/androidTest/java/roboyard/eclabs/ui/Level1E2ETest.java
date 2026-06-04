@@ -26,7 +26,7 @@ import roboyard.logic.core.GameElement;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.components.GameStateManager;
 
 import timber.log.Timber;

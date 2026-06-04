@@ -5,8 +5,11 @@ import java.util.List;
 
 import driftingdroids.model.Solution;
 
+import roboyard.logic.solver.ERRGameMove;
 import roboyard.logic.solver.GameLevelSolver;
 import roboyard.logic.solver.ISolver;
+import roboyard.logic.solver.RRGameMove;
+import roboyard.logic.solver.RRPiece;
 import roboyard.logic.solver.SolverDD;
 import roboyard.logic.core.GridElement;
 import roboyard.logic.core.GameSolution;
@@ -427,22 +430,22 @@ public class SolverManager implements Runnable {
             }
             
             // Parse direction
-            roboyard.pm.ia.ricochet.ERRGameMove direction;
+            ERRGameMove direction;
             switch (dirChar) {
-                case 'N': direction = roboyard.pm.ia.ricochet.ERRGameMove.UP; break;
-                case 'S': direction = roboyard.pm.ia.ricochet.ERRGameMove.DOWN; break;
-                case 'E': direction = roboyard.pm.ia.ricochet.ERRGameMove.RIGHT; break;
-                case 'W': direction = roboyard.pm.ia.ricochet.ERRGameMove.LEFT; break;
+                case 'N': direction = ERRGameMove.UP; break;
+                case 'S': direction = ERRGameMove.DOWN; break;
+                case 'E': direction = ERRGameMove.RIGHT; break;
+                case 'W': direction = ERRGameMove.LEFT; break;
                 default:
                     Timber.w("[SOLUTION_SOLVER] Unknown direction: %c", dirChar);
                     continue;
             }
             
             // Create a RRPiece for this robot color (position 0,0 is placeholder, color and id are what matter)
-            roboyard.pm.ia.ricochet.RRPiece piece = new roboyard.pm.ia.ricochet.RRPiece(0, 0, robotColor, robotColor);
+            RRPiece piece = new RRPiece(0, 0, robotColor, robotColor);
             
             // Add the move to the solution
-            solution.addMove(new roboyard.pm.ia.ricochet.RRGameMove(piece, direction));
+            solution.addMove(new RRGameMove(piece, direction));
         }
         
         Timber.d("[SOLUTION_SOLVER] Parsed predefined solution: %d moves", solution.moves.size());

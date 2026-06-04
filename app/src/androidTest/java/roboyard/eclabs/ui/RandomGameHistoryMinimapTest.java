@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameState;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
@@ -148,8 +149,8 @@ public class RandomGameHistoryMinimapTest {
 
     private void executeMove(roboyard.logic.core.IGameMove move) {
         activityRule.getScenario().onActivity(a -> {
-            if (!(move instanceof roboyard.pm.ia.ricochet.RRGameMove)) return;
-            roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+            if (!(move instanceof RRGameMove)) return;
+            RRGameMove rrMove = (RRGameMove) move;
             int dx = 0, dy = 0;
             switch (rrMove.getDirection()) {
                 case 1: dy = -1; break;

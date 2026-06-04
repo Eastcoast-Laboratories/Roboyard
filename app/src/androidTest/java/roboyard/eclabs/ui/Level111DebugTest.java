@@ -20,7 +20,7 @@ import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.components.GameStateManager;
 
 import timber.log.Timber;
@@ -104,7 +104,7 @@ public class Level111DebugTest {
                         if (move instanceof RRGameMove) {
                             RRGameMove rrMove = (RRGameMove) move;
                             Timber.d("[UNITTESTS][LEVEL111_DEBUG] Move %d: Robot %d -> %s", 
-                                    i + 1, rrMove.getColor(), rrMove.getMove());
+                                    i + 1, rrMove.getColor(), rrMove.move);
                         }
                     }
                 } else {

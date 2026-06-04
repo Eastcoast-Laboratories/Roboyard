@@ -33,7 +33,7 @@ import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.IGameMove;
-import roboyard.pm.ia.ricochet.RRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.DataExportImportManager;
 import roboyard.ui.components.FileReadWrite;

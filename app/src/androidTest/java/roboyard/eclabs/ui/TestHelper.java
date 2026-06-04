@@ -20,6 +20,8 @@ import java.util.List;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
+import roboyard.logic.solver.ERRGameMove;
+import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.FileReadWrite;
 import roboyard.ui.components.GameHistoryManager;
@@ -479,7 +481,7 @@ public class TestHelper {
      * @param direction ERRGameMove enum value
      * @return -1 for LEFT, +1 for RIGHT, 0 otherwise
      */
-    public static int getDirectionX(roboyard.pm.ia.ricochet.ERRGameMove direction) {
+    public static int getDirectionX(ERRGameMove direction) {
         switch (direction) {
             case LEFT: return -1;
             case RIGHT: return 1;
@@ -492,7 +494,7 @@ public class TestHelper {
      * @param direction ERRGameMove enum value
      * @return -1 for UP, +1 for DOWN, 0 otherwise
      */
-    public static int getDirectionY(roboyard.pm.ia.ricochet.ERRGameMove direction) {
+    public static int getDirectionY(ERRGameMove direction) {
         switch (direction) {
             case UP: return -1;
             case DOWN: return 1;
@@ -601,10 +603,10 @@ public class TestHelper {
 
         for (int i = 0; i < moves.size(); i++) {
             roboyard.logic.core.IGameMove move = moves.get(i);
-            if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
-                roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+            if (move instanceof RRGameMove) {
+                RRGameMove rrMove = (RRGameMove) move;
                 int robotColor = rrMove.getColor();
-                roboyard.pm.ia.ricochet.ERRGameMove direction = rrMove.getMove();
+                ERRGameMove direction = rrMove.move;
                 int dx = getDirectionX(direction);
                 int dy = getDirectionY(direction);
 

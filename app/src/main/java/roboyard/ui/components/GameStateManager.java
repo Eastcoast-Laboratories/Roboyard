@@ -59,6 +59,9 @@ import roboyard.logic.core.WallStorage;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
+import roboyard.logic.solver.ERRGameMove;
+import roboyard.logic.solver.RRGameMove;
+import roboyard.logic.solver.RRPiece;
 import roboyard.logic.core.IGameMove;
 import roboyard.ui.animation.RobotAnimationManager;
 import timber.log.Timber;
@@ -603,7 +606,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                             solutionStr.append(" ");
                         }
                         // Cast to RRGameMove to access methods
-                        roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                        RRGameMove rrMove = (RRGameMove) move;
                         int color = rrMove.getColor();
                         int direction = rrMove.getDirection();
                         
@@ -1137,7 +1140,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     firstMove = false;
                     
                     // Cast to RRGameMove to access methods
-                    roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                    RRGameMove rrMove = (RRGameMove) move;
                     int color = rrMove.getColor();
                     int direction = rrMove.getDirection();
                     
@@ -1205,7 +1208,7 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     firstMove = false;
                     
                     // Cast to RRGameMove to access methods
-                    roboyard.pm.ia.ricochet.RRGameMove rrMove = (roboyard.pm.ia.ricochet.RRGameMove) move;
+                    RRGameMove rrMove = (RRGameMove) move;
                     int color = rrMove.getColor();
                     int direction = rrMove.getDirection();
                     
@@ -1266,18 +1269,18 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
                     
                     // Parse direction (last char)
                     char dirChar = moveStr.charAt(moveStr.length() - 1);
-                    roboyard.pm.ia.ricochet.ERRGameMove direction;
+                    ERRGameMove direction;
                     switch (dirChar) {
-                        case 'U': direction = roboyard.pm.ia.ricochet.ERRGameMove.UP; break;
-                        case 'R': direction = roboyard.pm.ia.ricochet.ERRGameMove.RIGHT; break;
-                        case 'D': direction = roboyard.pm.ia.ricochet.ERRGameMove.DOWN; break;
-                        case 'L': direction = roboyard.pm.ia.ricochet.ERRGameMove.LEFT; break;
-                        default: direction = roboyard.pm.ia.ricochet.ERRGameMove.NOMOVE; break;
+                        case 'U': direction = ERRGameMove.UP; break;
+                        case 'R': direction = ERRGameMove.RIGHT; break;
+                        case 'D': direction = ERRGameMove.DOWN; break;
+                        case 'L': direction = ERRGameMove.LEFT; break;
+                        default: direction = ERRGameMove.NOMOVE; break;
                     }
                     
                     // Create robot piece (position 0,0 is placeholder, color is what matters)
-                    roboyard.pm.ia.ricochet.RRPiece piece = new roboyard.pm.ia.ricochet.RRPiece(0, 0, color, color);
-                    solution.addMove(new roboyard.pm.ia.ricochet.RRGameMove(piece, direction));
+                    RRPiece piece = new RRPiece(0, 0, color, color);
+                    solution.addMove(new RRGameMove(piece, direction));
                 }
                 
                 solutions.add(solution);
@@ -4310,8 +4313,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int startStep = (solution == currentSolution) ? currentSolutionStep : 0;
             for (int i = startStep; i < moves.size(); i++) {
                 IGameMove move = moves.get(i);
-                if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
-                    int color = ((roboyard.pm.ia.ricochet.RRGameMove) move).getColor();
+                if (move instanceof RRGameMove) {
+                    int color = ((RRGameMove) move).getColor();
                     if (!order.contains(color)) {
                         order.add(color);
                     }
@@ -4329,8 +4332,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
         preCompRobotOrder.clear();
         if (solution != null && solution.moves != null) {
             for (IGameMove move : solution.moves) {
-                if (move instanceof roboyard.pm.ia.ricochet.RRGameMove) {
-                    int color = ((roboyard.pm.ia.ricochet.RRGameMove) move).getColor();
+                if (move instanceof RRGameMove) {
+                    int color = ((RRGameMove) move).getColor();
                     if (!preCompRobotOrder.contains(color)) {
                         preCompRobotOrder.add(color);
                     }
