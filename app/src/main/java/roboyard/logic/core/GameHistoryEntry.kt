@@ -69,6 +69,27 @@ class GameHistoryEntry(
         this.positionSignature = positionSignature
     }
 
+    // Constructor for GameStateManager.saveToHistory() with mapPath and previewImagePath
+    constructor(
+        timestamp: Long,
+        mapPath: String?,
+        mapName: String?,
+        playDuration: Int,
+        movesMade: Int,
+        optimalMoves: Int,
+        boardSize: String?,
+        previewImagePath: String?
+    ) : this(0, 0, 0, 0, 0, 0) {
+        this.timestamp = timestamp
+        this.mapPath = mapPath
+        this.mapName = mapName
+        this.playDuration = playDuration
+        this.movesMade = movesMade
+        this.optimalMoves = optimalMoves
+        this.boardSize = boardSize
+        this.previewImagePath = previewImagePath
+    }
+
     fun recordCompletion(time: Int, moves: Int, stars: Int): Boolean {
         completionCount++
         lastCompletionTimestamp = System.currentTimeMillis()

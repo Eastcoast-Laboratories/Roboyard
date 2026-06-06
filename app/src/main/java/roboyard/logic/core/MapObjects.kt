@@ -97,20 +97,41 @@ object MapObjects {
     fun extractDataFromString(data: String?, someFlag: Boolean): MutableList<GridElement> {
         val result = mutableListOf<GridElement>()
         if (data.isNullOrBlank()) return result
-        
+
+        // Compact code to full name mapping
+        val compactCodeMap = mapOf(
+            // Targets
+            "tb" to "target_blue",
+            "tr" to "target_red",
+            "tg" to "target_green",
+            "ty" to "target_yellow",
+            "ts" to "target_silver",
+            "tm" to "target_multi",
+            "tp" to "target_pink",
+            // Robots
+            "rr" to "robot_red",
+            "rb" to "robot_blue",
+            "rg" to "robot_green",
+            "ry" to "robot_yellow",
+            "rs" to "robot_silver",
+            "rp" to "robot_pink"
+        )
+
         // Split data by semicolon
         val entries = data.split(";").filter { it.isNotBlank() }
         for (entry in entries) {
             // Very simple parsing for GridElement(x,y,type)
-            // Expecting format like "mh1,2" or "robot_blue5,6"
+            // Expecting format like "mh1,2" or "robot_blue5,6" or "tb8,7"
             try {
                 // Find where the numbers start
                 val firstDigitIndex = entry.indexOfFirst { it.isDigit() }
                 if (firstDigitIndex != -1) {
                     val type = entry.substring(0, firstDigitIndex)
+                    // Convert compact code to full name if needed
+                    val fullType = compactCodeMap[type] ?: type
                     val coords = entry.substring(firstDigitIndex).split(",")
                     if (coords.size == 2) {
-                        result.add(GridElement(coords[0].toInt(), coords[1].toInt(), type))
+                        result.add(GridElement(coords[0].toInt(), coords[1].toInt(), fullType))
                     }
                 }
             } catch (e: Exception) {

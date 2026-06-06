@@ -2369,106 +2369,6 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
     }
 
     /**
-     * Create a minimap from save data
-     *
-     * @param context  The context
-     * @param saveData The save data
-     * @return The minimap bitmap
-     */
-    private Bitmap createMinimapFromSaveData(Context context, String saveData) {
-        // Skip metadata line if present
-        if (saveData.startsWith("#")) {
-            int newlineIndex = saveData.indexOf('\n');
-            if (newlineIndex >= 0) {
-                saveData = saveData.substring(newlineIndex + 1);
-            }
-        }
-
-        // Extract grid elements
-        List<GridElement> elements = MapObjects.extractDataFromString(saveData, true);
-
-        // Create a simple minimap
-        return createMinimap(context, elements, 100, 100);
-    }
-
-
-    /**
-     * Create a minimap from grid elements
-     *
-     * @param context  The context
-     * @param elements The grid elements
-     * @param width    The minimap width
-     * @param height   The minimap height
-     * @return The minimap bitmap
-     */
-    private Bitmap createMinimap(Context context, List<GridElement> elements, int width, int height) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.WHITE);
-
-        // If no elements, return empty bitmap
-        if (elements == null || elements.isEmpty()) {
-            return bitmap;
-        }
-
-        // Determine grid bounds
-        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
-        int maxX = 0, maxY = 0;
-
-        for (GridElement element : elements) {
-            int x = element.x;
-            int y = element.y;
-            minX = Math.min(minX, x);
-            minY = Math.min(minY, y);
-            maxX = Math.max(maxX, x);
-            maxY = Math.max(maxY, y);
-        }
-
-        // Calculate scaling
-        float gridWidth = maxX - minX + 2; // Add padding
-        float gridHeight = maxY - minY + 2;
-        float scaleX = width / gridWidth;
-        float scaleY = height / gridHeight;
-        float scale = Math.min(scaleX, scaleY);
-
-        // Draw elements
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-
-        for (GridElement element : elements) {
-            int x = element.x - minX + 1; // Add padding
-            int y = element.y - minY + 1;
-            float left = x * scale;
-            float top = y * scale;
-            float right = (x + 1) * scale;
-            float bottom = (y + 1) * scale;
-
-            if (element.type.startsWith("robot_")) {
-                // Draw robots
-                paint.setColor(Color.RED);
-                canvas.drawCircle((left + right) / 2, (top + bottom) / 2, scale / 2, paint);
-            } else if (element.type.startsWith("target_")) {
-                // Draw targets
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(2);
-                paint.setColor(Color.RED);
-                canvas.drawRect(left, top, right, bottom, paint);
-                paint.setStyle(Paint.Style.FILL);
-            } else if (element.type.equals("mv")) {
-                // Draw walls
-                paint.setColor(Color.DKGRAY);
-                canvas.drawRect(left + scale / 3, top, right - scale / 3, bottom, paint);
-            } else if (element.type.equals("mh")) {
-                // Draw walls
-                paint.setColor(Color.DKGRAY);
-                canvas.drawRect(left, top + scale / 3, right, bottom - scale / 3, paint);
-            }
-        }
-
-        return bitmap;
-    }
-
-    /**
      * Get the current difficulty level from Preferences
      *
      * @return Current difficulty level
@@ -3012,6 +2912,26 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // Preview image path (flat filename, no directory separator)
             String previewImagePath = historyFileName + "_preview.txt";
 
+            // Generate and save minimap for preview using MinimapGenerator (DRY - same as SaveGameFragment)
+            Timber.d("[HISTORY] Generating minimap for preview: %s", previewImagePath);
+            Bitmap minimap = null;
+            try {
+                GameState parsedState = GameState.parseFromSaveData(saveData, activity);
+                if (parsedState != null) {
+                    minimap = MinimapGenerator.getInstance().generateMinimap(activity, parsedState, 100, 100);
+                }
+            } catch (Exception e) {
+                Timber.e(e, "[HISTORY] Error generating minimap from save data");
+            }
+
+            if (minimap != null) {
+                boolean saved = FileReadWrite.writeBitmap(activity, previewImagePath, minimap);
+                Timber.d("[HISTORY] Minimap generation: success=%s, saved=%s, path=%s",
+                        minimap != null, saved, previewImagePath);
+            } else {
+                Timber.e("[HISTORY] Minimap generation FAILED: minimap is null");
+            }
+
             // Get optimal moves from current solution if available
             int optimalMovesCount = 0;
             GameSolution currentSolution = getCurrentSolution();
@@ -3024,9 +2944,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // For intermediate saves (hints, live move counter), use 0
             int actualMoveCount = isGameComplete.getValue() ? gameState.moveCount : 0;
             GameHistoryEntry entry = new GameHistoryEntry(
+                    gameStartTime,  // timestamp = when game started, not when first move was made
                     historyPath,
                     mapName,
-                    gameStartTime,  // timestamp = when game started, not when first move was made
                     totalPlayTime,
                     actualMoveCount,
                     optimalMovesCount,

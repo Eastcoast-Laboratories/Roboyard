@@ -436,14 +436,19 @@ public class LevelSelectionFragment extends BaseGameFragment {
         historyByMapName.clear();
         try {
             List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(requireActivity());
+            Timber.d("[LEVEL_SELECTION] getHistoryEntries returned %d entries", entries != null ? entries.size() : 0);
             if (entries != null) {
                 for (GameHistoryEntry entry : entries) {
+                    Timber.d("[LEVEL_SELECTION] Processing entry: mapName='%s', mapPath='%s', previewImagePath='%s'",
+                            entry.mapName, entry.getMapPath(), entry.previewImagePath);
                     String key = extractLevelKey(entry);
+                    Timber.d("[LEVEL_SELECTION] Extracted key: '%s'", key);
                     if (key == null) continue;
                     // Keep the entry with the most completions if there are duplicates
                     GameHistoryEntry existing = historyByMapName.get(key);
                     if (existing == null || entry.completionCount >= existing.completionCount) {
                         historyByMapName.put(key, entry);
+                        Timber.d("[LEVEL_SELECTION] Mapped key '%s' to entry (completionCount=%d)", key, entry.completionCount);
                     }
                 }
             }
@@ -1138,25 +1143,47 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
                 // Show minimap if history entry exists
                 if (historyEntry != null && minimapView != null) {
-                    String mapPath = historyEntry.getMapPath();
-                    String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
-                            ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
-                            : mapPath;
-                    if (absolutePath != null) {
-                        Bitmap minimap = fragment.createMinimapFromPath(
-                                itemView.getContext(), absolutePath, 120, 120);
+                    // Try to load minimap from previewImagePath first
+                    String previewPath = historyEntry.previewImagePath;
+                    Bitmap minimap = null;
+
+                    Timber.d("[LEVEL_SELECTION] Level %d: previewImagePath=%s", levelId, previewPath);
+
+                    if (previewPath != null) {
+                        minimap = roboyard.ui.components.FileReadWrite.readBitmap(
+                                (android.app.Activity) itemView.getContext(), previewPath);
+                        Timber.d("[LEVEL_SELECTION] Level %d: readBitmap result=%s", levelId, minimap != null ? "SUCCESS" : "NULL");
+                    }
+
+                    // Fallback: generate minimap from save data if preview doesn't exist
+                    if (minimap == null) {
+                        String mapPath = historyEntry.getMapPath();
+                        String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
+                                ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
+                                : mapPath;
+                        Timber.d("[LEVEL_SELECTION] Level %d: fallback to generate from mapPath=%s", levelId, absolutePath);
+                        if (absolutePath != null) {
+                            minimap = fragment.createMinimapFromPath(
+                                    itemView.getContext(), absolutePath, 120, 120);
+                            Timber.d("[LEVEL_SELECTION] Level %d: createMinimapFromPath result=%s", levelId, minimap != null ? "SUCCESS" : "NULL");
+                        }
+                    }
+
+                    if (minimap != null) {
                         minimapView.setImageBitmap(minimap);
                         minimapView.setVisibility(View.VISIBLE);
                         levelNumberText.setVisibility(View.GONE);
-                        
+
                         // Show level number overlay on minimap
                         minimapLevelNumber.setText(String.valueOf(levelId));
                         minimapLevelNumber.setVisibility(View.VISIBLE);
+                        Timber.d("[LEVEL_SELECTION] Level %d: minimap displayed", levelId);
                     } else {
                         minimapView.setVisibility(View.GONE);
                         minimapLevelNumber.setVisibility(View.GONE);
                         levelNumberText.setText(String.valueOf(levelId));
                         levelNumberText.setVisibility(View.VISIBLE);
+                        Timber.d("[LEVEL_SELECTION] Level %d: no minimap available", levelId);
                     }
                 } else {
                     if (minimapView != null) minimapView.setVisibility(View.GONE);

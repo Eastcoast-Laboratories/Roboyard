@@ -2,6 +2,8 @@ package roboyard.ui.components;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -217,6 +219,66 @@ public class FileReadWrite {
                     fIn.close();
                 } catch (Exception e) {
                     Timber.d("Error closing stream: %s", e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Write a bitmap to a file in private storage
+     * @param activity The activity context
+     * @param fileLocation The file name (not full path)
+     * @param bitmap The bitmap to save
+     * @return true if write was successful, false otherwise
+     */
+    public static boolean writeBitmap(Activity activity, String fileLocation, Bitmap bitmap) {
+        if (activity == null || bitmap == null) {
+            Timber.d("Activity or bitmap is null in writeBitmap for file: %s", fileLocation);
+            return false;
+        }
+        FileOutputStream fOut = null;
+        try {
+            fOut = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE);
+            bitmap.compress(CompressFormat.PNG, 100, fOut);
+            return true;
+        } catch (Exception e) {
+            Timber.d("Exception in writeBitmap for file: " + fileLocation + ": " + e.getMessage());
+            return false;
+        } finally {
+            if (fOut != null) {
+                try {
+                    fOut.close();
+                } catch (Exception e) {
+                    Timber.d("Error closing stream: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Read a bitmap from a file in private storage
+     * @param activity The activity context
+     * @param fileLocation The file name (not full path)
+     * @return The bitmap, or null if the file could not be read
+     */
+    public static Bitmap readBitmap(Activity activity, String fileLocation) {
+        if (activity == null) {
+            Timber.d("Activity is null in readBitmap for file: %s", fileLocation);
+            return null;
+        }
+        FileInputStream fIn = null;
+        try {
+            fIn = activity.openFileInput(fileLocation);
+            return android.graphics.BitmapFactory.decodeStream(fIn);
+        } catch (Exception e) {
+            Timber.d("Exception in readBitmap for file: " + fileLocation + ": " + e.getMessage());
+            return null;
+        } finally {
+            if (fIn != null) {
+                try {
+                    fIn.close();
+                } catch (Exception e) {
+                    Timber.d("Error closing stream: " + e.getMessage());
                 }
             }
         }
