@@ -2,6 +2,10 @@
 =========
 
 
+## Version 53 (141) - 2026-06-06
+- convert all logic to Kotlin
+
+
 ## Version 52 (140) - 2026-05-28
 - Added long-press protection in game screen for New Game
 - Added history navigation in game screen

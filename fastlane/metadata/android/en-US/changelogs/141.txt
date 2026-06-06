@@ -1,0 +1,2 @@
+- convert all logic to Kotlin
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

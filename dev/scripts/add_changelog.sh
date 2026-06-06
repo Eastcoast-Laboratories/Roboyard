@@ -66,21 +66,13 @@ check_length() {
 
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
-- Long-Press-Schutz fuer Neues Spiel im Spielbildschirm hinzugefuegt
-- Verlauf-Navigation im Spielbildschirm hinzugefuegt
-- Login bleibt jetzt bei abgelaufener Sitzung erhalten
-- Button-Groessen und UI-Skalierung auf verschiedenen Geraeten verbessert
-- Deep Link Support fuer Random Game aus dem Web hinzugefuegt
+- Konvertierung aller Logik zu Kotlin
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
-- Added long-press protection in game screen for New Game
-- Added history navigation in game screen
-- Fixed keep login when session expires
-- Improved button-size across different devices and UI scaling
-- Added deep link support for random game from web
+- convert all logic to Kotlin
 EOF
 )
 

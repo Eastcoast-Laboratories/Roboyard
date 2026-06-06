@@ -2,6 +2,10 @@ Changelog Deutsch
 =================
 
 
+## Version 53 (141)
+- Konvertierung aller Logik zu Kotlin
+
+
 ## Version 52 (140)
 - Long-Press-Schutz fuer Neues Spiel im Spielbildschirm hinzugefuegt
 - Verlauf-Navigation im Spielbildschirm hinzugefuegt

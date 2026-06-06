@@ -1,0 +1,2 @@
+- Konvertierung aller Logik zu Kotlin
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md

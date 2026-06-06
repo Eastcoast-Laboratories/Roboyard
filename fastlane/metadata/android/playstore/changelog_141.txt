@@ -1,0 +1,10 @@
+# Play Store Changelogs für Version 53 (versionCode: 141)
+
+<en-GB>
+- convert all logic to Kotlin
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
+</en-GB>
+<de-DE>
+- Konvertierung aller Logik zu Kotlin
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
+</de-DE>
