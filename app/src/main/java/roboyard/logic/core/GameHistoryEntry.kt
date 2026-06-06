@@ -48,41 +48,20 @@ class GameHistoryEntry(
     // Default constructor for SyncManager/DebugSettingsFragment
     constructor() : this(0, 0, 0, 0, 0, 0)
 
-    // Secondary constructor for GameStateManager
+    // Constructor for GameStateManager.saveToHistory() - matches original Java signature
     constructor(
-        mapName: String?,
-        mapSignature: String?,
-        timestamp: Long,
-        movesMade: Int,
-        starsEarned: Int,
-        difficulty: Int,
-        wallSignature: String?,
-        positionSignature: String?
-    ) : this(0, 0, 0, 0, 0, 0) {
-        this.mapName = mapName
-        this.mapSignature = mapSignature
-        this.timestamp = timestamp
-        this.movesMade = movesMade
-        this.starsEarned = starsEarned
-        this.difficulty = difficulty
-        this.wallSignature = wallSignature
-        this.positionSignature = positionSignature
-    }
-
-    // Constructor for GameStateManager.saveToHistory() with mapPath and previewImagePath
-    constructor(
-        timestamp: Long,
         mapPath: String?,
         mapName: String?,
+        timestamp: Long,
         playDuration: Int,
         movesMade: Int,
         optimalMoves: Int,
         boardSize: String?,
         previewImagePath: String?
     ) : this(0, 0, 0, 0, 0, 0) {
-        this.timestamp = timestamp
         this.mapPath = mapPath
         this.mapName = mapName
+        this.timestamp = timestamp
         this.playDuration = playDuration
         this.movesMade = movesMade
         this.optimalMoves = optimalMoves

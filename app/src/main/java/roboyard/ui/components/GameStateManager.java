@@ -2909,28 +2909,8 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             int boardHeight = gameState.height;
             String boardSize = (boardWidth > 0 && boardHeight > 0) ? boardWidth + "x" + boardHeight : "";
 
-            // Preview image path (flat filename, no directory separator)
+            // Preview image path (flat filename, no directory separator) - kept for compatibility but not used for minimap generation
             String previewImagePath = historyFileName + "_preview.txt";
-
-            // Generate and save minimap for preview using MinimapGenerator (DRY - same as SaveGameFragment)
-            Timber.d("[HISTORY] Generating minimap for preview: %s", previewImagePath);
-            Bitmap minimap = null;
-            try {
-                GameState parsedState = GameState.parseFromSaveData(saveData, activity);
-                if (parsedState != null) {
-                    minimap = MinimapGenerator.getInstance().generateMinimap(activity, parsedState, 100, 100);
-                }
-            } catch (Exception e) {
-                Timber.e(e, "[HISTORY] Error generating minimap from save data");
-            }
-
-            if (minimap != null) {
-                boolean saved = FileReadWrite.writeBitmap(activity, previewImagePath, minimap);
-                Timber.d("[HISTORY] Minimap generation: success=%s, saved=%s, path=%s",
-                        minimap != null, saved, previewImagePath);
-            } else {
-                Timber.e("[HISTORY] Minimap generation FAILED: minimap is null");
-            }
 
             // Get optimal moves from current solution if available
             int optimalMovesCount = 0;
@@ -2944,9 +2924,9 @@ public class GameStateManager extends AndroidViewModel implements SolverManager.
             // For intermediate saves (hints, live move counter), use 0
             int actualMoveCount = isGameComplete.getValue() ? gameState.moveCount : 0;
             GameHistoryEntry entry = new GameHistoryEntry(
-                    gameStartTime,  // timestamp = when game started, not when first move was made
                     historyPath,
                     mapName,
+                    gameStartTime,  // timestamp = when game started, not when first move was made
                     totalPlayTime,
                     actualMoveCount,
                     optimalMovesCount,
