@@ -24,3 +24,4 @@ androidTestResultsUserPreferences.xml
 /dev/pgs_import/*.png
 /.idea/androidTestResultsUserPreferences.xml
 /.idea/planningMode.xml
+.kotlin/errors/*
