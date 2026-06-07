@@ -722,7 +722,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 nonLevelEntries.add(entry);
             }
         }
-        
+
         // Apply additional filter based on currentFilter
         filteredHistoryEntries = new ArrayList<>();
         for (GameHistoryEntry entry : nonLevelEntries) {
@@ -743,7 +743,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     break;
             }
         }
-        
+
         // Apply sort
         switch (currentSort) {
             case BY_DATE:
@@ -791,7 +791,7 @@ public class SaveGameFragment extends BaseGameFragment {
             String name = entry.mapName;
             int moves = entry.movesMade;
             String mapPath = entry.getMapPath();
-            
+
             // Completion status
             String completionStatus;
             if (entry.completionCount > 0) {
@@ -801,11 +801,11 @@ public class SaveGameFragment extends BaseGameFragment {
             } else {
                 completionStatus = getString(R.string.history_not_completed);
             }
-            
+
             // Translate difficulty int ID to localized string for display
             String difficulty = difficultyIntToString(entry.difficulty);
             String boardSize = entry.boardSize;
-            
+
             // Create entry without minimap - will be loaded on-demand in adapter
             HistoryEntry historyEntry = new HistoryEntry(name, new Date(entry.timestamp), moves,
                     boardSize, mapPath, null, difficulty, completionStatus, entry);
@@ -1895,7 +1895,7 @@ public class SaveGameFragment extends BaseGameFragment {
                 } else {
                     // Show placeholder while loading
                     holder.minimapView.setVisibility(View.GONE);
-                    
+
                     // Load asynchronously
                     new android.os.AsyncTask<Void, Void, Bitmap>() {
                         @Override
@@ -1907,7 +1907,7 @@ public class SaveGameFragment extends BaseGameFragment {
                                 return null;
                             }
                         }
-                        
+
                         @Override
                         protected void onPostExecute(Bitmap minimap) {
                             if (minimap != null && holder.minimapView != null) {

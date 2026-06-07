@@ -1,6 +1,7 @@
 package roboyard.logic.core
 
 import java.io.Serializable
+import timber.log.Timber
 
 /**
  * Represents an entry in the game's move history.
@@ -124,7 +125,21 @@ class GameHistoryEntry(
     fun getCompletionMoves(): List<Int> = completionMoves
     fun setCompletionMoves(list: List<Int>) { completionMoves = list.toMutableList() }
 
-    fun getHistoryIndex(): Int = historyIndex
+    fun getHistoryIndex(): Int {
+        // e.g. getMapPath() = history_1.txt -> extract the number
+        val path = mapPath
+        if (path != null) {
+            val parts = path.split("_")
+            if (parts.size > 1) {
+                try {
+                    return parts[1].split(".")[0].toInt()
+                } catch (e: NumberFormatException) {
+                    Timber.e(e, "Failed to parse history index from map path: %s", path)
+                }
+            }
+        }
+        return 0
+    }
     fun setHistoryIndex(index: Int) { historyIndex = index }
 
     companion object {
