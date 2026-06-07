@@ -425,13 +425,15 @@ public class SyncManager {
      * Download history entries from server and write to local storage.
      */
     public void downloadHistory(Activity activity, RoboyardApiClient.ApiCallback<Integer> callback) {
+        Timber.d("[HISTORY_SYNC] downloadHistory called");
         RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
         if (!apiClient.isLoggedIn()) {
             Timber.d("[HISTORY_SYNC] Not logged in, skipping history download");
             if (callback != null) callback.onError("Not logged in");
             return;
         }
-        
+
+        Timber.d("[HISTORY_SYNC] Logged in, fetching history from server");
         apiClient.fetchHistory(new RoboyardApiClient.ApiCallback<JSONArray>() {
             @Override
             public void onSuccess(JSONArray history) {
@@ -445,7 +447,14 @@ public class SyncManager {
                         JSONObject entry = history.getJSONObject(i);
                         String mapName = entry.optString("map_name", "Unnamed");
                         String saveData = entry.getString("save_data");
-                        
+
+                        // VALIDATION: Fix corrupt mapPath values where mapName is "Level X" but mapPath doesn't match
+                        // This prevents corrupt data from server from causing incorrect minimaps
+                        String expectedMapPath = null;
+                        if (mapName != null && mapName.matches("Level \\d+")) {
+                            expectedMapPath = "level_" + mapName.substring(6) + ".txt";
+                        }
+
                         // Check if we already have this entry locally (by map name)
                         boolean exists = false;
                         for (GameHistoryEntry existing : existingEntries) {
@@ -454,14 +463,38 @@ public class SyncManager {
                                 break;
                             }
                         }
-                        
-                        if (!exists) {
+
+                        // For built-in levels, always overwrite the file with correct data from assets
+                        // to fix corrupt server data. For custom levels, only create if not exists.
+                        if (!exists || expectedMapPath != null) {
                             // Save the map data to a history file
-                            int nextIndex = GameHistoryManager.getNextHistoryIndex(activity);
-                            String historyPath = GameHistoryManager.indexToPath(nextIndex);
-                            
-                            FileReadWrite.writePrivateData(activity, historyPath, saveData);
-                            
+                            // For built-in levels (Level X), use the expected mapPath (level_X.txt)
+                            // For custom levels, use the standard history path (history_X.txt)
+                            String historyPath;
+                            if (expectedMapPath != null) {
+                                historyPath = expectedMapPath;
+                                Timber.d("[HISTORY_SYNC] Using expected mapPath for built-in level: %s", historyPath);
+                            } else {
+                                int nextIndex = GameHistoryManager.getNextHistoryIndex(activity);
+                                historyPath = GameHistoryManager.indexToPath(nextIndex);
+                            }
+
+                            // For built-in levels, ALWAYS load the correct level data from assets instead of using corrupt server saveData
+                            // This ensures corrupt files are overwritten on sync
+                            String dataToWrite = saveData;
+                            if (expectedMapPath != null) {
+                                try {
+                                    java.io.InputStream is = activity.getAssets().open("Maps/" + expectedMapPath);
+                                    dataToWrite = new java.util.Scanner(is).useDelimiter("\\A").next();
+                                    is.close();
+                                    Timber.d("[HISTORY_SYNC] Loaded level data from assets for %s instead of server data", expectedMapPath);
+                                } catch (Exception e) {
+                                    Timber.w(e, "[HISTORY_SYNC] Failed to load level data from assets for %s, using server data", expectedMapPath);
+                                }
+                            }
+
+                            FileReadWrite.writePrivateData(activity, historyPath, dataToWrite);
+
                             // Create a history entry
                             GameHistoryEntry historyEntry = new GameHistoryEntry();
                             historyEntry.setMapPath(historyPath);

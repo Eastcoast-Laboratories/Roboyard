@@ -461,24 +461,30 @@ public class LevelSelectionFragment extends BaseGameFragment {
      * @return normalized key like "level_1" or "custom_level_141", or null if not a level entry
      */
     private static String extractLevelKey(GameHistoryEntry entry) {
-        // Try mapName "Level N" -> "level_N"
-        String mapName = entry.mapName;
-        if (mapName != null) {
-            if (mapName.matches("(?i)Level \\d+")) {
-                int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
-                return id >= 141 ? "custom_level_" + id : "level_" + id;
-            }
-        }
-        // Fallback: parse mapPath basename, e.g. "level_1.txt" or "level_1"
+        // Prioritize mapPath parsing to handle corrupt server data where mapNames are 5-letter codes
         String mapPath = entry.getMapPath();
+        Timber.d("[LEVEL_SELECTION] extractLevelKey: mapName='%s', mapPath='%s'", entry.mapName, mapPath);
         if (mapPath != null) {
             String base = mapPath.contains("/")
                     ? mapPath.substring(mapPath.lastIndexOf('/') + 1)
                     : mapPath;
             if (base.startsWith("level_") || base.startsWith("custom_level_")) {
-                return base.endsWith(".txt") ? base.substring(0, base.length() - 4) : base;
+                String key = base.endsWith(".txt") ? base.substring(0, base.length() - 4) : base;
+                Timber.d("[LEVEL_SELECTION] extractLevelKey: parsed from mapPath, key='%s'", key);
+                return key;
             }
         }
+        // Fallback: try mapName "Level N" -> "level_N"
+        String mapName = entry.mapName;
+        if (mapName != null) {
+            if (mapName.matches("(?i)Level \\d+")) {
+                int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
+                String key = id >= 141 ? "custom_level_" + id : "level_" + id;
+                Timber.d("[LEVEL_SELECTION] extractLevelKey: matched Level pattern, key='%s'", key);
+                return key;
+            }
+        }
+        Timber.d("[LEVEL_SELECTION] extractLevelKey: no valid key found, returning null");
         return null;
     }
 
@@ -1139,12 +1145,37 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 // Show minimap if history entry exists
                 if (historyEntry != null && minimapView != null) {
                     String mapPath = historyEntry.getMapPath();
+                    Timber.d("[LEVEL_SELECTION] Level %d: historyEntry exists, mapPath='%s'", levelId, mapPath);
                     String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
                             ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
                             : mapPath;
+                    Timber.d("[LEVEL_SELECTION] Level %d: absolutePath='%s'", levelId, absolutePath);
+                    Bitmap minimap = null;
+
+                    // Try to generate minimap from history file
                     if (absolutePath != null) {
-                        Bitmap minimap = fragment.createMinimapFromPath(
+                        minimap = fragment.createMinimapFromPath(
                                 itemView.getContext(), absolutePath, 120, 120);
+                        Timber.d("[LEVEL_SELECTION] Level %d: minimap from history file: %s", levelId, minimap != null ? "SUCCESS" : "NULL");
+                    }
+
+                    // Fallback: if history file doesn't exist or minimap generation failed,
+                    // generate minimap from original level file in assets
+                    if (minimap == null && levelId < 141) {
+                        try {
+                            String levelFileName = "level_" + levelId + ".txt";
+                            java.io.InputStream is = itemView.getContext().getAssets().open("Maps/" + levelFileName);
+                            String levelData = new java.util.Scanner(is).useDelimiter("\\A").next();
+                            is.close();
+                            minimap = fragment.createMinimapFromString(
+                                    itemView.getContext(), levelData, 120, 120);
+                            Timber.d("[LEVEL_SELECTION] Level %d: Generated minimap from assets: %s", levelId, minimap != null ? "SUCCESS" : "NULL");
+                        } catch (Exception e) {
+                            Timber.e(e, "[LEVEL_SELECTION] Failed to generate minimap from assets for level %d", levelId);
+                        }
+                    }
+
+                    if (minimap != null) {
                         minimapView.setImageBitmap(minimap);
                         minimapView.setVisibility(View.VISIBLE);
                         levelNumberText.setVisibility(View.GONE);
@@ -1153,16 +1184,45 @@ public class LevelSelectionFragment extends BaseGameFragment {
                         minimapLevelNumber.setText(String.valueOf(levelId));
                         minimapLevelNumber.setVisibility(View.VISIBLE);
                     } else {
+                        Timber.w("[LEVEL_SELECTION] Level %d: No minimap generated, showing level number instead", levelId);
                         minimapView.setVisibility(View.GONE);
                         minimapLevelNumber.setVisibility(View.GONE);
                         levelNumberText.setText(String.valueOf(levelId));
                         levelNumberText.setVisibility(View.VISIBLE);
                     }
                 } else {
-                    if (minimapView != null) minimapView.setVisibility(View.GONE);
-                    minimapLevelNumber.setVisibility(View.GONE);
-                    levelNumberText.setText(String.valueOf(levelId));
-                    levelNumberText.setVisibility(View.VISIBLE);
+                    Timber.d("[LEVEL_SELECTION] Level %d: No history entry, trying assets fallback", levelId);
+                    // Fallback: try to generate minimap from assets for levels without history
+                    if (minimapView != null && levelId < 141) {
+                        try {
+                            String levelFileName = "level_" + levelId + ".txt";
+                            java.io.InputStream is = itemView.getContext().getAssets().open("Maps/" + levelFileName);
+                            String levelData = new java.util.Scanner(is).useDelimiter("\\A").next();
+                            is.close();
+                            Bitmap minimap = fragment.createMinimapFromString(
+                                    itemView.getContext(), levelData, 120, 120);
+                            Timber.d("[LEVEL_SELECTION] Level %d: Generated minimap from assets (no history): %s", levelId, minimap != null ? "SUCCESS" : "NULL");
+                            if (minimap != null) {
+                                minimapView.setImageBitmap(minimap);
+                                minimapView.setVisibility(View.VISIBLE);
+                                levelNumberText.setVisibility(View.GONE);
+                                minimapLevelNumber.setText(String.valueOf(levelId));
+                                minimapLevelNumber.setVisibility(View.VISIBLE);
+                            } else {
+                                levelNumberText.setText(String.valueOf(levelId));
+                                levelNumberText.setVisibility(View.VISIBLE);
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "[LEVEL_SELECTION] Failed to generate minimap from assets for level %d (no history)", levelId);
+                            levelNumberText.setText(String.valueOf(levelId));
+                            levelNumberText.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (minimapView != null) minimapView.setVisibility(View.GONE);
+                        minimapLevelNumber.setVisibility(View.GONE);
+                        levelNumberText.setText(String.valueOf(levelId));
+                        levelNumberText.setVisibility(View.VISIBLE);
+                    }
                 }
 
                 // Hide level name (number already shown in center)

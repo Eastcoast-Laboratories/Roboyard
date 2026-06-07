@@ -177,7 +177,8 @@ public class GameHistoryManager {
         boolean anyMigrated = false;
         try {
             String indexJson = FileReadWrite.readPrivateData(activity, HISTORY_INDEX_FILE);
-            
+            Timber.d("[HISTORY] getHistoryEntries: indexJson=%s", indexJson != null ? "loaded (" + indexJson.length() + " chars)" : "null");
+
             if (indexJson != null && !indexJson.isEmpty()) {
                 JSONArray entriesArray;
                 
@@ -311,6 +312,7 @@ public class GameHistoryManager {
         } catch (Exception e) {
             Timber.e("Error loading history entries: %s", e.getMessage());
         }
+        Timber.d("[HISTORY] getHistoryEntries: returning %d entries", entries.size());
         return entries;
     }
 
