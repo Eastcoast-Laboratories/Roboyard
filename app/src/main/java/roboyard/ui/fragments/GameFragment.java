@@ -56,9 +56,9 @@ import roboyard.ui.util.SoundManager;
 import roboyard.logic.core.GameSolution;
 
 import roboyard.ui.components.GameGridView;
-import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.managers.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
-import roboyard.ui.components.LevelCompletionManager;
+import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.achievements.Achievement;
 import roboyard.ui.achievements.AchievementManager;
@@ -2820,7 +2820,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private java.util.List<roboyard.logic.core.GameHistoryEntry> getFilteredHistoryEntries() {
         java.util.List<roboyard.logic.core.GameHistoryEntry> allEntries =
-            roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+            roboyard.logic.managers.GameHistoryManager.getHistoryEntries(requireActivity());
         java.util.List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new java.util.ArrayList<>();
         for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
             String mapName = entry.mapName;

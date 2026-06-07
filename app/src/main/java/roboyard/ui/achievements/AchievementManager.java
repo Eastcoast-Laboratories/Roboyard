@@ -18,9 +18,9 @@ import org.json.JSONObject;
 
 import roboyard.eclabs.BuildConfig;
 import roboyard.eclabs.R;
-import roboyard.ui.components.GameHistoryManager;
-import roboyard.ui.components.PlayGamesManager;
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.managers.GameHistoryManager;
+import roboyard.logic.managers.PlayGamesManager;
+import roboyard.logic.network.RoboyardApiClient;
 import timber.log.Timber;
 
 /**
@@ -640,7 +640,7 @@ public class AchievementManager {
             Activity act = currentActivity.get();
             if (act != null) {
                 List<roboyard.logic.core.GameHistoryEntry> sameWallEntries =
-                        roboyard.ui.components.GameHistoryManager.findByWallSignature(act, wallSignature);
+                        roboyard.logic.managers.GameHistoryManager.findByWallSignature(act, wallSignature);
                 int uniquePositions = sameWallEntries.size(); // each entry = distinct positionSignature
                 Timber.d("[ACHIEVEMENTS] same_walls: wallSig=%s uniquePositions=%d",
                         wallSignature.substring(0, Math.min(30, wallSignature.length())), uniquePositions);

@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.network.RoboyardApiClient;
 import roboyard.ui.achievements.Achievement;
 import roboyard.ui.achievements.AchievementCategory;
 import roboyard.ui.achievements.AchievementManager;
@@ -246,7 +246,7 @@ public class MainMenuFragment extends BaseGameFragment {
             AchievementManager.getInstance(requireContext()).onNewGameStarted();
             
             // Check if auto-save (slot 0) exists and load it
-            String autosavePath = roboyard.ui.components.FileReadWrite.getSaveGamePath(requireActivity(), 0);
+            String autosavePath = roboyard.logic.storage.FileReadWrite.getSaveGamePath(requireActivity(), 0);
             java.io.File autosaveFile = new java.io.File(autosavePath);
             if (autosaveFile.exists()) {
                 // Check if settings changed since autosave was created

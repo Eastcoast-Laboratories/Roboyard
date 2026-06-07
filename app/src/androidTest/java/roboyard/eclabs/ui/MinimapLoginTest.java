@@ -14,8 +14,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.RoboyardApiClient;
-import roboyard.ui.components.SyncManager;
+import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.managers.SyncManager;
 import timber.log.Timber;
 
 /**
@@ -117,7 +117,7 @@ public class MinimapLoginTest {
 
         // Programmatically check all history entries
         activityRule.getScenario().onActivity(activity -> {
-            java.util.List<roboyard.logic.core.GameHistoryEntry> entries = roboyard.ui.components.GameHistoryManager.getHistoryEntries(activity);
+            java.util.List<roboyard.logic.core.GameHistoryEntry> entries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(activity);
             Timber.d("[MINIMAP_LOGIN_TEST] Total history entries: %d", entries.size());
 
             int validMapPaths = 0;

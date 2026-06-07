@@ -43,10 +43,10 @@ import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.eclabs.R;
 import roboyard.ui.achievements.AchievementManager;
-import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.managers.GameHistoryManager;
 import timber.log.Timber;
 import roboyard.logic.core.LevelCompletionData;
-import roboyard.ui.components.LevelCompletionManager;
+import roboyard.logic.managers.LevelCompletionManager;
 
 /**
  * Level selection screen implemented as a Fragment with native Android UI components.

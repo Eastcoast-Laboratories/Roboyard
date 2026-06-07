@@ -15,7 +15,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import android.view.View;
 
 import roboyard.eclabs.R;
-import roboyard.ui.components.SyncManager;
+import roboyard.logic.managers.SyncManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
                 roboyard.logic.core.Preferences.targetColors);
         
         // Verify auth token on app start to maintain login session
-        roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(getApplicationContext());
-        apiClient.verifyToken(new roboyard.ui.components.RoboyardApiClient.ApiCallback<Boolean>() {
+        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(getApplicationContext());
+        apiClient.verifyToken(new roboyard.logic.network.RoboyardApiClient.ApiCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean isValid) {
                 if (isValid) {

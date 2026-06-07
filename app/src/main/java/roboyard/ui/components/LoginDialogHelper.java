@@ -9,8 +9,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
-import roboyard.ui.components.RoboyardApiClient;
-import roboyard.ui.components.SyncManager;
+import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.managers.SyncManager;
 import roboyard.ui.achievements.AchievementManager;
 import timber.log.Timber;
 

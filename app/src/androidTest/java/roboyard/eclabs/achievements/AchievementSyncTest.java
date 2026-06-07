@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.network.RoboyardApiClient;
 import timber.log.Timber;
 
 /**

@@ -20,7 +20,7 @@ import roboyard.eclabs.R;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.FileReadWrite;
+import roboyard.logic.storage.FileReadWrite;
 import roboyard.ui.components.GameStateManager;
 import roboyard.ui.fragments.SaveGameFragment;
 import timber.log.Timber;

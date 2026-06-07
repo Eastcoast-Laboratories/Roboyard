@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.FileReadWrite;
-import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.storage.FileReadWrite;
+import roboyard.logic.managers.GameHistoryManager;
 
 import timber.log.Timber;
 

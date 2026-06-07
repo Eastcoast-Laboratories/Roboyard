@@ -1,4 +1,4 @@
-package roboyard.ui.components;
+package roboyard.logic.network;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,7 +1,7 @@
 package roboyard.eclabs;
 
-import roboyard.ui.components.GameHistoryManager;
-import roboyard.ui.components.FileReadWrite;
+import roboyard.logic.managers.GameHistoryManager;
+import roboyard.logic.storage.FileReadWrite;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +27,7 @@ import timber.log.Timber;
  * Instrumented tests for GameHistoryManager.
  * Tests history entry creation, retrieval, deletion, and path handling.
  *
- * Run with: ./gradlew connectedAndroidTest --tests "roboyard.ui.components.GameHistoryManagerTest"
+ * Run with: ./gradlew connectedAndroidTest --tests "roboyard.logic.managers.GameHistoryManagerTest"
  *
  * Tags: game-history, history-manager, history-entry, instrumented
  */

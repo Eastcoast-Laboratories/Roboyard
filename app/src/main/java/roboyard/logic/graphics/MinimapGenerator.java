@@ -1,4 +1,4 @@
-package roboyard.ui.components;
+package roboyard.logic.graphics;
 
 import android.content.Context;
 import android.graphics.Bitmap;

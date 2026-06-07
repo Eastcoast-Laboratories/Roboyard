@@ -33,8 +33,8 @@ import java.util.List;
 
 import roboyard.eclabs.R;
 import roboyard.ui.adapters.LanguageSpinnerAdapter;
-import roboyard.ui.components.DataExportImportManager;
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.managers.DataExportImportManager;
+import roboyard.logic.network.RoboyardApiClient;
 import roboyard.ui.RoboyardApplication;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.Constants;
@@ -2357,7 +2357,7 @@ public class SettingsFragment extends Fragment {
                     manager.resetAllData();
                     
                     // Logout user when resetting all data
-                    roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+                    roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(requireContext());
                     apiClient.logout();
                     
                     Toast.makeText(requireContext(), R.string.settings_reset_success, Toast.LENGTH_LONG).show();

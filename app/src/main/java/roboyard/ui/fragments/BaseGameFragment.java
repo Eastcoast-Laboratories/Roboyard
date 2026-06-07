@@ -19,8 +19,8 @@ import java.util.Locale;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameState;
-import roboyard.ui.components.FileReadWrite;
-import roboyard.ui.components.MinimapGenerator;
+import roboyard.logic.storage.FileReadWrite;
+import roboyard.logic.graphics.MinimapGenerator;
 import roboyard.ui.util.FontScaleUtil;
 import roboyard.logic.core.Preferences;
 import roboyard.ui.components.GameStateManager;
@@ -270,7 +270,7 @@ public abstract class BaseGameFragment extends Fragment {
      * @param openAfterLogin If true, opens profile page after successful login
      */
     protected void openProfilePage(boolean openAfterLogin) {
-        roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(requireContext());
         if (apiClient.isLoggedIn()) {
             // Open profile in browser with auto-login token
             String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
@@ -280,7 +280,7 @@ public abstract class BaseGameFragment extends Fragment {
             // Show login dialog
             roboyard.ui.components.LoginDialogHelper.showLoginDialog(requireContext(), new roboyard.ui.components.LoginDialogHelper.LoginCallback() {
                 @Override
-                public void onLoginSuccess(roboyard.ui.components.RoboyardApiClient.LoginResult result) {
+                public void onLoginSuccess(roboyard.logic.network.RoboyardApiClient.LoginResult result) {
                     if (openAfterLogin) {
                         // After login, open profile page
                         openProfilePage(true);
@@ -336,7 +336,7 @@ public abstract class BaseGameFragment extends Fragment {
             return;
         }
         
-        roboyard.ui.components.RoboyardApiClient apiClient = roboyard.ui.components.RoboyardApiClient.getInstance(requireContext());
+        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(requireContext());
         if (apiClient.isLoggedIn()) {
             String userName = apiClient.getUserName();
             if (userName == null) userName = apiClient.getUserEmail();

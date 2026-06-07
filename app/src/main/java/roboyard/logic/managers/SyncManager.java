@@ -1,4 +1,4 @@
-package roboyard.ui.components;
+package roboyard.logic.managers;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.storage.FileReadWrite;
 
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;

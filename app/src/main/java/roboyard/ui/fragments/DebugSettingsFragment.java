@@ -21,7 +21,7 @@ import androidx.fragment.app.Fragment;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.ui.achievements.StreakManager;
 import timber.log.Timber;
-import roboyard.ui.components.LevelCompletionManager;
+import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.eclabs.R;
 
 /**
@@ -508,7 +508,7 @@ public class DebugSettingsFragment extends Fragment {
             try {
                 // History entries
                 java.util.List<roboyard.logic.core.GameHistoryEntry> historyEntries = 
-                    roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+                    roboyard.logic.managers.GameHistoryManager.getHistoryEntries(requireActivity());
                 int historyCount = historyEntries.size();
                 long historyMemoryBytes = 0;
                 for (roboyard.logic.core.GameHistoryEntry entry : historyEntries) {
@@ -584,7 +584,7 @@ public class DebugSettingsFragment extends Fragment {
                 
                 // Find the next available Test number
                 java.util.List<roboyard.logic.core.GameHistoryEntry> existingEntries = 
-                    roboyard.ui.components.GameHistoryManager.getHistoryEntries(requireActivity());
+                    roboyard.logic.managers.GameHistoryManager.getHistoryEntries(requireActivity());
                 int nextTestNumber = 1;
                 for (roboyard.logic.core.GameHistoryEntry entry : existingEntries) {
                     String mapName = entry.mapName;
@@ -678,7 +678,7 @@ public class DebugSettingsFragment extends Fragment {
                     Timber.d("[DEBUG_DUMMY] Entry %d boardSize before save: '%s'", i + 1, entry.boardSize);
                     
                     // Add to history
-                    Boolean success = roboyard.ui.components.GameHistoryManager.addHistoryEntry(requireActivity(), entry);
+                    Boolean success = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(requireActivity(), entry);
                     if (success != null && success) {
                         added++;
                         Timber.d("[DEBUG_DUMMY] Entry %d added successfully, boardSize='%s'", i + 1, entry.boardSize);

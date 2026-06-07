@@ -45,8 +45,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import roboyard.ui.components.FileReadWrite;
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.storage.FileReadWrite;
+import roboyard.logic.network.RoboyardApiClient;
 import roboyard.logic.core.Constants;
 import roboyard.logic.solver.RRGetMap;
 import roboyard.logic.core.WallPatternGenerator;
@@ -56,7 +56,7 @@ import roboyard.logic.core.GameState;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 import roboyard.logic.core.GameElement;
-import roboyard.ui.components.LevelCompletionManager;
+import roboyard.logic.managers.LevelCompletionManager;
 
 /**
  * Level Design Editor Fragment

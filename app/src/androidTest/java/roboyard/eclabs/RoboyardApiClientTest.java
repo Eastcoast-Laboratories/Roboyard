@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.network.RoboyardApiClient;
 import timber.log.Timber;
 
 /**
@@ -31,7 +31,7 @@ import timber.log.Timber;
  * They may fail on emulators without proper network configuration.
  * 
  * Tags: api, network, registration, sync, integration-test
- * Run with: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.ui.components.RoboyardApiClientTest
+ * Run with: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=roboyard.logic.network.RoboyardApiClientTest
  */
 @RunWith(AndroidJUnit4.class)
 public class RoboyardApiClientTest {

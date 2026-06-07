@@ -27,8 +27,8 @@ import roboyard.logic.core.GameState;
 import roboyard.logic.core.IGameMove;
 import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.FileReadWrite;
-import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.storage.FileReadWrite;
+import roboyard.logic.managers.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
 import timber.log.Timber;
 

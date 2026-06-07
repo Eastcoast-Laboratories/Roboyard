@@ -9,7 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.network.RoboyardApiClient;
 
 /**
  * Helper class for showing register dialog.

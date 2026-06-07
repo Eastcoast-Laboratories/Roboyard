@@ -1,4 +1,4 @@
-package roboyard.ui.components;
+package roboyard.logic.managers;
 
 import android.app.Activity;
 import android.content.Context;

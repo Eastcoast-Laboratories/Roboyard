@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.managers.GameHistoryManager;
 import timber.log.Timber;
 
 /**

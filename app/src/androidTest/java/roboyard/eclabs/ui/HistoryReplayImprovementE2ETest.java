@@ -19,7 +19,7 @@ import java.util.List;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameState;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GameHistoryManager;
+import roboyard.logic.managers.GameHistoryManager;
 import timber.log.Timber;
 
 /**

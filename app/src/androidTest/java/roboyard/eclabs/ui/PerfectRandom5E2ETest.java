@@ -25,7 +25,7 @@ import roboyard.eclabs.R;
 import roboyard.ui.achievements.AchievementManager;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;
-import roboyard.ui.components.FileReadWrite;
+import roboyard.logic.storage.FileReadWrite;
 
 import timber.log.Timber;
 

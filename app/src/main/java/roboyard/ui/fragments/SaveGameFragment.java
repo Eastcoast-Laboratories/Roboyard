@@ -45,14 +45,14 @@ import java.util.regex.Pattern;
 
 import roboyard.logic.core.GameState;
 import roboyard.eclabs.R;
-import roboyard.ui.components.FileReadWrite;
+import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.ui.components.GameStateManager;
-import roboyard.ui.components.GameHistoryManager;
-import roboyard.ui.components.RoboyardApiClient;
+import roboyard.logic.managers.GameHistoryManager;
+import roboyard.logic.network.RoboyardApiClient;
 import timber.log.Timber;
-import roboyard.ui.components.MinimapGenerator;
+import roboyard.logic.graphics.MinimapGenerator;
 
 /**
  * SaveGameFragment handles saving, loading, and viewing history of games.
