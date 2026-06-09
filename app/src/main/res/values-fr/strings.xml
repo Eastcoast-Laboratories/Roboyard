@@ -635,6 +635,7 @@
     <string name="menu_button_a11y">Retour au menu principal</string>
     <string name="minimap_description">Minicarte montrant l\'ensemble du plateau</string>
     <string name="next_level">Niveau suivant</string>
+    <string name="next_level_short">Niveau +1</string>
     <string name="next_level_description">Aller au niveau suivant</string>
     <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     <string name="no_game_in_progress">Aucune partie en cours</string>

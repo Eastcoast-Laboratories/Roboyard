@@ -728,6 +728,7 @@
     <string name="level_progress_completed">레벨 완료</string>
     <string name="back_description">이전 화면으로 돌아가기</string>
     <string name="next_level">다음 레벨</string>
+    <string name="next_level_short">다음 레벨</string>
     <string name="next_level_description">다음 레벨로 가기</string>
     <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     <string name="optimal_moves">최적: %1$d 움직임</string>

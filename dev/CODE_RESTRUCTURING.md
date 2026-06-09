@@ -1,120 +1,78 @@
-# Code Restructuring: Move Logic Files from UI to Logic Package
+# Code Restructuring: Strict UI vs. Logic Separation
 
 ## Overview
-Many logic files are currently located in `roboyard.ui.components` but contain no UI code. They should be moved to `roboyard.logic` or `roboyard.logic.managers` for better separation of concerns and to prepare for KMP (Kotlin Multiplatform).
+Several files still located under `roboyard.ui` contain no Android UI code and belong in `roboyard.logic`. The goal is a strict separation:
 
-## Files to Move
+- `roboyard.logic.*` — pure game/business logic and data, no Android `View`/`Canvas`/`Activity` rendering. Some files still carry Android *infrastructure* dependencies (`Context`, `SharedPreferences`, `Activity`, `Bitmap`); these are acceptable in `logic` for now but must be abstracted via `expect`/`actual` or interfaces before KMP sharing.
+- `roboyard.ui.*` — everything that draws, animates, inflates layouts, handles dialogs, or extends a `View`/`Fragment`/`Activity`.
 
-### High Priority (Pure Logic, No Android UI Dependencies)
+This prepares the codebase for Kotlin Multiplatform (KMP).
 
-| Current Path | Target Path | Reason |
-|-------------|------------|--------|
-| `roboyard.ui.components/GameHistoryManager.java` | `roboyard.logic.managers/GameHistoryManager.java` | Pure history management logic, no UI |
-| `roboyard.ui/components/LevelCompletionManager.java` | `roboyard.logic.managers/LevelCompletionManager.java` | Level completion tracking, no UI |
-| `roboyard.ui.components/SyncManager.java` | `roboyard.logic.managers/SyncManager.java` | Sync logic, no UI (but has Android network dependencies) |
-| `roboyard.ui.components/RoboyardApiClient.java` | `roboyard.logic.network/RoboyardApiClient.java` | API client logic, no UI (but has Android network dependencies) |
-| `roboyard.ui.components/DataExportImportManager.java` | `roboyard.logic.managers/DataExportImportManager.java` | Export/import logic, no UI |
-| `roboyard.ui.components/FileReadWrite.java` | `roboyard.logic.storage/FileReadWrite.java` | File I/O logic, no UI (but has Android file dependencies) |
-| `roboyard.ui.components/MinimapGenerator.java` | `roboyard.logic.graphics/MinimapGenerator.java` | Minimap generation logic, no UI (but has Android Bitmap dependencies) |
-| `roboyard.ui.components/PlayGamesManager.java` | `roboyard.logic.managers/PlayGamesManager.java` | Google Play Games integration, no UI (but has Android Play Services dependencies) |
+## Current logic package structure
+```
+roboyard.logic/
+├── core/        (GameState.kt, GameLogic.kt, GameHistoryEntry.kt, Constants, ...)
+├── solver/      (RR*/ERR* solver classes)
+├── managers/    (GameHistoryManager, LevelCompletionManager, SyncManager,
+│                 DataExportImportManager, PlayGamesManager)
+├── network/     (RoboyardApiClient)
+├── storage/     (FileReadWrite)
+└── graphics/    (MinimapGenerator)
+```
 
-### Medium Priority (Logic with Some Android Dependencies)
+## Files still to move (non-UI living under `roboyard.ui`)
 
-| Current Path | Target Path | Reason |
-|-------------|------------|--------|
-| `roboyard.ui.components/GameStateManager.java` | `roboyard.logic.managers/GameStateManager.java` | Game state logic, but uses Android ViewModel/Activity (may need refactoring for KMP) |
-| `roboyard.ui/components/InputManager.java` | `roboyard.logic.input/InputManager.java` | Input handling logic, but uses Android MotionEvent (may need refactoring for KMP) |
+| Current Path | Target Path | Android deps | Notes |
+|-------------|------------|--------------|-------|
+| `roboyard.ui.components/GameStateManager.java` | `roboyard.logic.managers/GameStateManager.java` | `Activity`, `ViewModel`, `LiveData` | Core game-state orchestration. Largest dependency surface; the Android lifecycle/ViewModel parts must be abstracted before the move is clean for KMP. Move last. |
+| `roboyard.ui.components/InputManager.java` | `roboyard.logic.input/InputManager.java` | none | Pure touch-state holder (coordinates + boolean flags), no Android imports. Coupled only to the legacy `GameScreen`/`GameManager` loop, so the move is trivial but only worthwhile together with a decision on that legacy rendering stack. |
+| `roboyard.ui.achievements/Achievement.java` | `roboyard.logic.achievements/Achievement.java` | none | Pure data class. |
+| `roboyard.ui.achievements/AchievementCategory.java` | `roboyard.logic.achievements/AchievementCategory.java` | `Context` (string lookup only) | Data/enum with localized labels. |
+| `roboyard.ui.achievements/AchievementDefinitions.java` | `roboyard.logic.achievements/AchievementDefinitions.java` | none | Static definitions. |
+| `roboyard.ui.achievements/AchievementManager.java` | `roboyard.logic.achievements/AchievementManager.java` | `Activity`, `SharedPreferences` | Achievement tracking/persistence logic. |
+| `roboyard.ui.achievements/StreakManager.java` | `roboyard.logic.achievements/StreakManager.java` | `Context`, `SharedPreferences` | Streak tracking/persistence logic. |
 
-### Low Priority (UI-Related or Unclear)
-
-| Current Path | Target Path | Reason |
-|-------------|------------|--------|
-| `roboyard.ui/components/GameManager.java` | Keep in UI or analyze | Need to check if it's pure logic or UI-related |
-| `roboyard.ui.achievements/Achievement.java` | `roboyard.logic.achievements/Achievement.java` | Data class, can be moved to logic |
-| `roboyard.ui.achievements/AchievementCategory.java` | `roboyard.logic.achievements/AchievementCategory.java` | Data class, can be moved to logic |
-| `roboyard.ui.achievements/AchievementDefinitions.java` | `roboyard.logic.achievements/AchievementDefinitions.java` | Definitions, can be moved to logic |
-| `roboyard.ui.achievements/AchievementManager.java` | `roboyard.logic.achievements/AchievementManager.java` | Manager logic, no UI (but has Android SharedPreferences dependencies) |
-| `roboyard.ui.achievements/StreakManager.java` | `roboyard.logic.achievements/StreakManager.java` | Streak logic, no UI (but has Android SharedPreferences dependencies) |
-
-### Keep in UI (UI Components)
+## Files that stay in UI (confirmed UI)
 
 | File | Reason |
 |------|--------|
-| `roboyard.ui.components/GameGridView.java` | Custom View (UI) |
-| `roboyard.ui.components/GamePiece.java` | Custom View (UI) |
-| `roboyard.ui.components/GameScreen.java` | Custom View (UI) |
-| `roboyard.ui.components/GridGameView.java` | Custom View (UI) |
-| `roboyard.ui.components/RenderManager.java` | Rendering logic (UI) |
-| `roboyard.ui.components/WallRenderer.java` | Rendering logic (UI) |
-| `roboyard.ui/components/LiveModeToggleButtonAlt.java` | Custom Button (UI) |
-| `roboyard.ui.components/LoginDialogHelper.java` | Dialog helper (UI) |
-| `roboyard.ui/components/RegisterDialogHelper.java` | Dialog helper (UI) |
-| `roboyard.ui.components/AccessibilityUtil.java` | Accessibility helper (UI) |
-| `roboyard.ui.achievements/AchievementIconHelper.java` | Icon helper (UI) |
-| `roboyard.ui.achievements/AchievementPopup.java` | Popup (UI) |
-| `roboyard.ui.animation/RobotAnimationManager.java` | Animation (UI) |
-| `roboyard.ui/adapters/LanguageSpinnerAdapter.java` | Adapter (UI) |
+| `roboyard.ui.components/GameManager.java` | Orchestrates `GameScreen`/`RenderManager`/`InputManager` and exposes `draw()` — screen/render controller, not pure logic. |
+| `roboyard.ui.components/GameScreen.java` | Screen base for the legacy render loop. |
+| `roboyard.ui.components/GameGridView.java` | Custom `View`. |
+| `roboyard.ui.components/GridGameView.java` | Custom `View`. |
+| `roboyard.ui.components/GamePiece.java` | Drawable piece (UI). |
+| `roboyard.ui.components/RenderManager.java` | Rendering (`Canvas`). |
+| `roboyard.ui.components/WallRenderer.java` | Rendering (`Canvas`). |
+| `roboyard.ui.components/LiveModeToggleButtonAlt.java` | Custom button. |
+| `roboyard.ui.components/LoginDialogHelper.java` | Dialog helper. |
+| `roboyard.ui.components/RegisterDialogHelper.java` | Dialog helper. |
+| `roboyard.ui.components/AccessibilityUtil.java` | Accessibility helper. |
+| `roboyard.ui.achievements/AchievementIconHelper.java` | `Bitmap`/`Canvas`/`Drawable` rendering. |
+| `roboyard.ui.achievements/AchievementPopup.java` | `View`/animation popup. |
+| `roboyard.ui.animation/RobotAnimationManager.java` | Animation. |
+| `roboyard.ui.adapters/LanguageSpinnerAdapter.java` | `Adapter` (UI). |
 
-## Recommended New Package Structure
-
+## Target structure after remaining moves
 ```
 roboyard.logic/
-├── core/ (existing)
-│   ├── GameState.kt
-│   ├── GameLogic.kt
-│   ├── GameHistoryEntry.kt
-│   └── ...
-├── managers/
-│   ├── GameHistoryManager.java
-│   ├── LevelCompletionManager.java
-│   ├── GameStateManager.java
-│   ├── SyncManager.java
-│   ├── DataExportImportManager.java
-│   ├── PlayGamesManager.java
-│   ├── AchievementManager.java
-│   └── StreakManager.java
-├── storage/
-│   └── FileReadWrite.java
+├── core/
+├── solver/
+├── managers/        + GameStateManager
 ├── network/
-│   └── RoboyardApiClient.java
+├── storage/
 ├── graphics/
-│   └── MinimapGenerator.java
-├── input/
-│   └── InputManager.java
-└── achievements/
-    ├── Achievement.java
-    ├── AchievementCategory.java
-    ├── AchievementDefinitions.java
-    ├── AchievementManager.java
-    └── StreakManager.java
+├── input/           InputManager
+└── achievements/    Achievement, AchievementCategory, AchievementDefinitions,
+                     AchievementManager, StreakManager
 ```
 
-## Migration Strategy
+## Migration order
+1. **Achievements** — move the five non-UI achievement files into `roboyard.logic.achievements`. `Achievement`, `AchievementCategory` and `AchievementDefinitions` are trivial; `AchievementManager` and `StreakManager` carry only `Context`/`SharedPreferences`.
+2. **InputManager** — move into `roboyard.logic.input` (decide whether to keep the legacy `GameScreen`/`GameManager` loop alive first).
+3. **GameStateManager** — move last; abstract the `Activity`/`ViewModel`/`LiveData` dependencies before or during the move.
 
-1. **Phase 1**: Move pure logic files (High Priority)
-   - GameHistoryManager
-   - LevelCompletionManager
-   - FileReadWrite
-   - MinimapGenerator
+After each move: update package declarations + imports, then build (`./gradlew assembleDebug`) and run smoke tests.
 
-2. **Phase 2**: Move files with Android dependencies (Medium Priority)
-   - GameStateManager (may need refactoring)
-   - SyncManager
-   - RoboyardApiClient
-   - DataExportImportManager
-   - PlayGamesManager
-
-3. **Phase 3**: Move achievement-related files
-   - Achievement, AchievementCategory, AchievementDefinitions
-   - AchievementManager, StreakManager
-
-4. **Phase 4**: Analyze and decide on remaining files
-   - GameManager (analyze first)
-   - InputManager (may need refactoring for KMP)
-
-## Notes
-
-- Files with Android-specific dependencies (SharedPreferences, Activity, ViewModel, Bitmap, MotionEvent, HttpURLConnection) cannot be directly shared with iOS via KMP without refactoring.
-- For KMP, these dependencies will need to be abstracted through expect/actual declarations or interfaces.
-- The restructuring should be done incrementally to avoid breaking the build.
-- After each move, run tests to ensure nothing is broken.
+## KMP notes
+- Files depending on `SharedPreferences`, `Activity`, `ViewModel`, `LiveData` or `Bitmap` cannot be shared with iOS as-is.
+- Abstract these via `expect`/`actual` declarations or platform interfaces when KMP work begins.

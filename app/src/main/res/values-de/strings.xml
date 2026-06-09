@@ -28,6 +28,7 @@
     <!-- Level Selection Screen -->
 
     <string name="next_level">Nächstes Level</string>
+    <string name="next_level_short">Level +1</string>
     <string name="next_level_description">Zum nächsten Level</string>
     <string name="last_level_message">Dies ist das letzte Level. Willst du roboyard.z11.de öffnen, um custom Maps zu spielen?</string>
     

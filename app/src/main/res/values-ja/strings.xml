@@ -43,6 +43,7 @@
     <string name="back_description">前の画面に戻る</string>
 
     <string name="next_level">次のレベル</string>
+    <string name="next_level_short">次のレベル</string>
     <string name="next_level_description">次のレベルへ進む</string>
     <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     

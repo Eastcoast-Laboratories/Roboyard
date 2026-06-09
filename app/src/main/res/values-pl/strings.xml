@@ -45,6 +45,7 @@
     <string name="back_description">Powróć do poprzedniego ekranu</string>
 
     <string name="next_level">Następny poziom</string>
+    <string name="next_level_short">Poziom +1</string>
     <string name="next_level_description">Przejdź do następnego poziomu</string>
     <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     

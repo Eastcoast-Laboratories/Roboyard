@@ -45,6 +45,7 @@
     <string name="back_description">Return to previous screen</string>
 
     <string name="next_level">Next Level</string>
+    <string name="next_level_short" comment="Short label for the small bottom-right next-level button while playing [GameFragment]">Next Level</string>
     <string name="next_level_description">Go to the next level</string>
     <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     

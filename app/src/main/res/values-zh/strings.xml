@@ -37,6 +37,7 @@
     <string name="back_description">返回上一屏幕</string>
 
     <string name="next_level">下一关</string>
+    <string name="next_level_short">下一关</string>
     <string name="next_level_description">前往下一关</string>
     <string name="last_level_message">This is the last level. Open roboyard.z11.de to play custom maps?</string>
     

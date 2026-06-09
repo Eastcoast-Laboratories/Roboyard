@@ -910,13 +910,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     resetRobotsButton.setText(R.string.retry_button);
                     Timber.d("[UI] Changed reset button text to 'Retry'");
                 }
-            } else {
+            } else { // not completed
                 // Show the small New Game button again when the game is not complete
                 newMapButton.setVisibility(View.VISIBLE);
                 
-                // Hide the Next Level button when game is not complete
+                // Hide the big full-width Next Level button when game is not complete
                 nextLevelButton.setVisibility(View.GONE);
-                
                 // Reset button text just in case it was changed
                 nextLevelButton.setText(R.string.next_level);
             }
@@ -3028,7 +3027,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 int totalStars = lcm.getTotalStars();
                 boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
 
-                newMapButton.setText(getString(R.string.next_level));
+                newMapButton.setText(getString(R.string.next_level_short));
 
                 // Disable button if next level is not unlocked
                 newMapButton.setEnabled(isNextLevelUnlocked);
