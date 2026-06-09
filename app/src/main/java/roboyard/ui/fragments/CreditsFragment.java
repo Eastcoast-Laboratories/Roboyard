@@ -48,7 +48,9 @@ public class CreditsFragment extends BaseGameFragment {
         disableAccessibilityForDecorations(view);
 
         // Show update nudge if new version available (always on credits page, no cooldown)
-        AchievementManager.getInstance(requireContext()).showUpdateNudgeForCredits(requireActivity());
+        AchievementManager am = AchievementManager.getInstance(requireContext());
+        am.setCurrentActivity(requireActivity());
+        am.showUpdateNudgeForCredits();
 
         // Set up back button
         view.findViewById(R.id.back_button).setOnClickListener(v -> {
