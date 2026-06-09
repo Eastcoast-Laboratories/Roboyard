@@ -41,7 +41,7 @@ import kotlin.math.min
 class AchievementManager private constructor(context: Context) {
     private val context: Context
     private val prefs: SharedPreferences
-    private val achievements: MutableMap<String?, Achievement>?
+    private val achievements: MutableMap<String?, Achievement?>?
     private var unlockListener: AchievementUnlockListener? = null
     private var currentActivity: WeakReference<Activity?>? = null
 
@@ -126,7 +126,7 @@ class AchievementManager private constructor(context: Context) {
      * Progress snapshot for a counter-based achievement.
      * current == required means the achievement can be / is unlocked.
      */
-    class AchievementProgress(val current: Int, val required: Int) {
+    class AchievementProgress(@JvmField val current: Int, @JvmField val required: Int) {
         fun hasProgress(): Boolean {
             return required > 1
         }
@@ -260,7 +260,7 @@ class AchievementManager private constructor(context: Context) {
 
 
         // Load unlock status for all achievements
-        for (achievement in achievements!!.values) {
+        for (achievement in achievements!!.values.filterNotNull()) {
             val unlocked = prefs.getBoolean(KEY_PREFIX_UNLOCKED + achievement.id, false)
             val timestamp = prefs.getLong(KEY_PREFIX_TIMESTAMP + achievement.id, 0)
             achievement.setUnlocked(unlocked)
@@ -407,7 +407,7 @@ class AchievementManager private constructor(context: Context) {
     val unlockedCount: Int
         get() {
             var count = 0
-            for (achievement in achievements!!.values) {
+            for (achievement in achievements!!.values.filterNotNull()) {
                 if (achievement.isUnlocked()) {
                     count++
                 }
@@ -948,7 +948,7 @@ class AchievementManager private constructor(context: Context) {
      * Unlock all achievements (for testing/debug)
      */
     fun unlockAll() {
-        for (achievement in achievements!!.values) {
+        for (achievement in achievements!!.values.filterNotNull()) {
             unlock(achievement.id!!)
         }
         d("[ACHIEVEMENTS] All achievements unlocked")
@@ -972,7 +972,7 @@ class AchievementManager private constructor(context: Context) {
      */
     fun resetAll() {
         prefs.edit().clear().apply()
-        for (achievement in achievements!!.values) {
+        for (achievement in achievements!!.values.filterNotNull()) {
             achievement.setUnlocked(false)
             achievement.unlockedTimestamp = 0
         }
@@ -1027,7 +1027,7 @@ class AchievementManager private constructor(context: Context) {
         try {
             // Build achievements array
             val achievementsArray = JSONArray()
-            for (achievement in achievements!!.values) {
+            for (achievement in achievements!!.values.filterNotNull()) {
                 val achievementJson = JSONObject()
                 achievementJson.put("id", achievement.id)
                 achievementJson.put("unlocked", achievement.isUnlocked())
@@ -1082,14 +1082,14 @@ class AchievementManager private constructor(context: Context) {
                 achievementsArray,
                 stats,
                 object : ApiCallback<AchievementSyncResult?> {
-                    override fun onSuccess(result: AchievementSyncResult) {
+                    override fun onSuccess(result: AchievementSyncResult?) {
                         d(
                             "[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new achievements",
-                            result.syncedCount, result.newAchievements
+                            result?.syncedCount, result?.newAchievements
                         )
                         // Optional "update available" nudge if server reports a newer version
-                        d("[UPDATE_NUDGE] Latest app version: %s", result.latestAppVersion)
-                        if (result.latestAppVersion != null) {
+                        d("[UPDATE_NUDGE] Latest app version: %s", result?.latestAppVersion)
+                        if (result?.latestAppVersion != null) {
                             maybeShowUpdateNudge(result.latestAppVersion)
                         }
                     }
@@ -1203,11 +1203,11 @@ class AchievementManager private constructor(context: Context) {
         d("[ACHIEVEMENT_SYNC_DOWN] Starting achievement download from server")
 
         apiClient.fetchAchievements(object : ApiCallback<AchievementFetchResult?> {
-            override fun onSuccess(result: AchievementFetchResult) {
+            override fun onSuccess(result: AchievementFetchResult?) {
                 var restoredCount = 0
 
                 try {
-                    val serverAchievements = result.achievements
+                    val serverAchievements = result?.achievements
                     d(
                         "[ACHIEVEMENT_SYNC_DOWN] Received %d achievements from server",
                         serverAchievements!!.length()
@@ -1330,6 +1330,7 @@ class AchievementManager private constructor(context: Context) {
 
         private var instance: AchievementManager? = null
 
+        @JvmStatic
         @Synchronized
         fun getInstance(context: Context): AchievementManager {
             if (instance == null) {

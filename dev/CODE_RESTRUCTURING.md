@@ -54,7 +54,7 @@ The `logic.core` and `logic.solver` packages are already fully Kotlin. The remai
 | `roboyard.logic.achievements` | `AchievementManager.java` | `Activity`, `SharedPreferences` |
 
 ### Suggested conversion order
-1. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `AchievementManager` and `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
+1. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
 
 ## KMP notes
 - Files depending on `SharedPreferences`, `Activity`, `ViewModel`, `LiveData`, `Bitmap` or `HttpURLConnection` cannot be shared with iOS as-is.
