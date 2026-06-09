@@ -2,14 +2,12 @@ package roboyard.logic.achievements
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import android.widget.Toast
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -21,11 +19,13 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.managers.GameHistoryManager.findByWallSignature
 import roboyard.logic.managers.GameHistoryManager.getUniqueCompletedLevelCount
 import roboyard.logic.managers.GameHistoryManager.getUniqueThreeStarLevelCount
-import roboyard.platform.PlayGamesManager
+import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.network.RoboyardApiClient
 import roboyard.logic.network.RoboyardApiClient.AchievementFetchResult
 import roboyard.logic.network.RoboyardApiClient.AchievementSyncResult
 import roboyard.logic.network.RoboyardApiClient.ApiCallback
+import roboyard.platform.AndroidStorage
+import roboyard.platform.PlayGamesManager
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
 import timber.log.Timber.Forest.i
@@ -42,7 +42,7 @@ import kotlin.math.min
  */
 class AchievementManager private constructor(context: Context) {
     private val context: Context
-    private val prefs: SharedPreferences
+    private val storage: PlatformStorage
     private val achievements: MutableMap<String?, Achievement?>?
     private var unlockListener: AchievementUnlockListener? = null
     private var currentActivity: WeakReference<Activity?>? = null
@@ -126,7 +126,7 @@ class AchievementManager private constructor(context: Context) {
      */
     fun showUpdateNudgeForCredits() {
         d("[UPDATE_NUDGE_CREDITS] Called")
-        val latestAppVersion = prefs.getString(KEY_PENDING_NUDGE_VERSION, null)
+        val latestAppVersion = storage.getString(KEY_PENDING_NUDGE_VERSION, null)
         d("[UPDATE_NUDGE_CREDITS] Pending version from prefs: %s", latestAppVersion)
         if (latestAppVersion == null) {
             d("[UPDATE_NUDGE_CREDITS] No pending version stored, checking fallback...")
@@ -1116,8 +1116,9 @@ class AchievementManager private constructor(context: Context) {
     private var pendingNudgeVersion: String? = null
 
     init {
-        this.context = context.getApplicationContext()
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val appContext = context.getApplicationContext()
+        this.context = appContext
+        this.storage = AndroidStorage.getInstance(appContext)
         this.achievements = all
         loadState()
     }
