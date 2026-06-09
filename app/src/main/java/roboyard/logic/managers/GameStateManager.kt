@@ -106,6 +106,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @return ArrayList of path entries [robotColor, fromX, fromY, toX, toY]
      */
     // Path history for visual robot paths: each entry stores [robotColor, fromX, fromY, toX, toY]
+    @JvmField
     val pathHistory: ArrayList<IntArray> = ArrayList<IntArray>()
 
     /**
@@ -113,6 +114,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @return HashMap of robot color to starting position [x,y]
      */
     // Robot starting positions: Map robot color to starting position [x,y]
+    @JvmField
     val robotStartingPositions: HashMap<Int?, IntArray?> = HashMap<Int?, IntArray?>()
 
     // Game settings
@@ -174,6 +176,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * 
      * @return Acceleration duration in milliseconds
      */
+    @JvmField
     val accelerationDuration: Float = 300f // Reduced from 300f for faster animations
 
     /**
@@ -181,6 +184,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * 
      * @return Maximum speed for animations
      */
+    @JvmField
     val maxSpeed: Float = 1500f // Higher speed but not extreme
 
     /**
@@ -188,6 +192,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * 
      * @return Deceleration duration in milliseconds
      */
+    @JvmField
     val decelerationDuration: Float = 50f // Reduced from 400f for faster animations
 
     /**
@@ -195,6 +200,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * 
      * @return Current animation frame delay
      */
+    @JvmField
     val animationFrameDelay: Long =
         25 // Animation frame delay in ms (default Android is ~16ms = 60fps)
 
@@ -5039,6 +5045,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
          * @param saveData The save data string
          * @return A map containing the metadata or null if no metadata was found
          */
+        @JvmStatic
         fun extractMetadataFromSaveData(saveData: String?): MutableMap<String?, String?> {
             val metadata: MutableMap<String?, String?> = HashMap<String?, String?>()
 

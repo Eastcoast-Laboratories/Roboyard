@@ -2206,7 +2206,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         // Standard undo functionality (original code)
         // Remember which robot was last moved before undoing (pathHistory still contains it)
         int lastMovedRobotColor = -1;
-        java.util.ArrayList<int[]> pathHistory = gameStateManager.getPathHistory();
+        java.util.ArrayList<int[]> pathHistory = gameStateManager.pathHistory;
         if (!pathHistory.isEmpty()) {
             lastMovedRobotColor = pathHistory.get(pathHistory.size() - 1)[0];
         }

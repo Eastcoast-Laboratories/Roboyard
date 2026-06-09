@@ -408,7 +408,7 @@ public class GameGridView extends View {
     private void storeRobotStartingPositions(GameState state) {
         if (state == null || gameStateManager == null) return;
         
-        HashMap<Integer, int[]> robotStartingPositions = gameStateManager.getRobotStartingPositions();
+        HashMap<Integer, int[]> robotStartingPositions = gameStateManager.robotStartingPositions;
         
         // Check if this is a new game by comparing robot positions with stored positions
         boolean isNewGame = false;
@@ -833,7 +833,7 @@ public class GameGridView extends View {
         
         // Draw starting positions of robots
         if (gameStateManager != null) {
-            HashMap<Integer, int[]> robotStartingPositions = gameStateManager.getRobotStartingPositions();
+            HashMap<Integer, int[]> robotStartingPositions = gameStateManager.robotStartingPositions;
             for (int color : robotStartingPositions.keySet()) {
                 int[] position = robotStartingPositions.get(color);
             int x = position[0];
@@ -1882,7 +1882,7 @@ public class GameGridView extends View {
     public void reconstructPathsFromHistory() {
         if (gameStateManager == null) return;
         
-        ArrayList<int[]> pathHistory = gameStateManager.getPathHistory();
+        ArrayList<int[]> pathHistory = gameStateManager.pathHistory;
         if (pathHistory.isEmpty()) return;
         
         // Clear current paths but keep the history

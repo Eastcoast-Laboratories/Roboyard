@@ -216,7 +216,7 @@ public class RobotAnimationManager {
         
         // MEMORY OPTIMIZATION: Track frame timing for throttling
         final long[] lastFrameTimeNs = {System.nanoTime()};
-        final long frameDelayMs = gameStateManager != null ? gameStateManager.getAnimationFrameDelay() : 16;
+        final long frameDelayMs = gameStateManager != null ? gameStateManager.animationFrameDelay : 16;
         final long frameDelayNs = frameDelayMs * 1000000; // Convert ms to ns
         
         Timber.d("[ANIM_FRAMERATE] Using frame delay of %d ms (%d ns)", frameDelayMs, frameDelayNs);
@@ -315,9 +315,9 @@ public class RobotAnimationManager {
         }
         
         // Calculate travel time based on physics parameters
-        float accelTime = gameStateManager.getAccelerationDuration();
-        float maxSpeed = gameStateManager.getMaxSpeed();
-        float decelTime = gameStateManager.getDecelerationDuration();
+        float accelTime = gameStateManager.accelerationDuration;
+        float maxSpeed = gameStateManager.maxSpeed;
+        float decelTime = gameStateManager.decelerationDuration;
         
         // Safeguard against division by zero
         if (maxSpeed <= 0) maxSpeed = 1f;
