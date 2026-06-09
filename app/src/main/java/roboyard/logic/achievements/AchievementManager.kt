@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.os.Build
+import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -127,7 +128,7 @@ class AchievementManager private constructor(context: Context) {
     fun showUpdateNudgeForCredits() {
         d("[UPDATE_NUDGE_CREDITS] Called")
         val latestAppVersion = storage.getString(KEY_PENDING_NUDGE_VERSION, null)
-        d("[UPDATE_NUDGE_CREDITS] Pending version from prefs: %s", latestAppVersion)
+        d("[UPDATE_NUDGE_CREDITS] Pending version from storage: %s", latestAppVersion)
         if (latestAppVersion == null) {
             d("[UPDATE_NUDGE_CREDITS] No pending version stored, checking fallback...")
             return
@@ -238,10 +239,10 @@ class AchievementManager private constructor(context: Context) {
      * This migrates those keys to the correct format and removes the orphaned ones.
      */
     private fun migrateOrphanedSyncKeys() {
-        val migrated = prefs.getBoolean("orphaned_keys_migrated", false)
+        val migrated = storage.getBoolean("orphaned_keys_migrated", false)
         if (migrated) return
 
-        val editor = prefs.edit()
+        // Using storage for migration
         var migratedCount = 0
 
         for (id in achievements!!.keys) {
@@ -251,27 +252,26 @@ class AchievementManager private constructor(context: Context) {
             val correctUnlockedKey = KEY_PREFIX_UNLOCKED + id
             val correctTimestampKey = KEY_PREFIX_TIMESTAMP + id
 
-            if (prefs.contains(wrongUnlockedKey)) {
-                val unlocked = prefs.getBoolean(wrongUnlockedKey, false)
-                val timestamp = prefs.getLong(wrongTimestampKey, 0)
-
+            // Check if orphaned key exists using storage
+            val orphanedValue = storage.getString(wrongUnlockedKey, null)
+            if (orphanedValue != null) {
+                val unlocked = storage.getBoolean(wrongUnlockedKey, false)
+                val timestamp = storage.getLong(wrongTimestampKey, 0)
 
                 // Only migrate if the correct key doesn't already have a value
-                if (unlocked && !prefs.getBoolean(correctUnlockedKey, false)) {
-                    editor.putBoolean(correctUnlockedKey, true)
-                    editor.putLong(correctTimestampKey, timestamp)
+                if (unlocked && !storage.getBoolean(correctUnlockedKey, false)) {
+                    storage.putBoolean(correctUnlockedKey, true)
+                    storage.putLong(correctTimestampKey, timestamp)
                     migratedCount++
                 }
 
-
                 // Remove orphaned keys
-                editor.remove(wrongUnlockedKey)
-                editor.remove(wrongTimestampKey)
+                storage.remove(wrongUnlockedKey)
+                storage.remove(wrongTimestampKey)
             }
         }
 
-        editor.putBoolean("orphaned_keys_migrated", true)
-        editor.apply()
+        storage.putBoolean("orphaned_keys_migrated", true)
 
         if (migratedCount > 0) {
             d("[ACHIEVEMENTS] Migrated %d orphaned sync keys to correct format", migratedCount)
@@ -286,28 +286,28 @@ class AchievementManager private constructor(context: Context) {
 
         // Load unlock status for all achievements
         for (achievement in achievements!!.values.filterNotNull()) {
-            val unlocked = prefs.getBoolean(KEY_PREFIX_UNLOCKED + achievement.id, false)
-            val timestamp = prefs.getLong(KEY_PREFIX_TIMESTAMP + achievement.id, 0)
+            val unlocked = storage.getBoolean(KEY_PREFIX_UNLOCKED + achievement.id, false)
+            val timestamp = storage.getLong(KEY_PREFIX_TIMESTAMP + achievement.id, 0)
             achievement.setUnlocked(unlocked)
             achievement.unlockedTimestamp = timestamp
         }
 
 
         // Load counters
-        levelsCompleted = prefs.getInt(KEY_COUNTER_PREFIX + "levels_completed", 0)
-        perfectSolutions = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_solutions", 0)
-        threeStarLevels = prefs.getInt(KEY_COUNTER_PREFIX + "three_star_levels", 0)
-        threeStarHardLevels = prefs.getInt(KEY_COUNTER_PREFIX + "three_star_hard_levels", 0)
-        impossibleModeGames = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_games", 0)
-        impossibleModeStreak = prefs.getInt(KEY_COUNTER_PREFIX + "impossible_mode_streak", 0)
-        perfectRandomGames = prefs.getInt(KEY_COUNTER_PREFIX + "perfect_random_games", 0)
+        levelsCompleted = storage.getInt(KEY_COUNTER_PREFIX + "levels_completed", 0)
+        perfectSolutions = storage.getInt(KEY_COUNTER_PREFIX + "perfect_solutions", 0)
+        threeStarLevels = storage.getInt(KEY_COUNTER_PREFIX + "three_star_levels", 0)
+        threeStarHardLevels = storage.getInt(KEY_COUNTER_PREFIX + "three_star_hard_levels", 0)
+        impossibleModeGames = storage.getInt(KEY_COUNTER_PREFIX + "impossible_mode_games", 0)
+        impossibleModeStreak = storage.getInt(KEY_COUNTER_PREFIX + "impossible_mode_streak", 0)
+        perfectRandomGames = storage.getInt(KEY_COUNTER_PREFIX + "perfect_random_games", 0)
         perfectRandomGamesStreak =
-            prefs.getInt(KEY_COUNTER_PREFIX + "perfect_random_games_streak", 0)
-        noHintRandomGames = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games", 0)
-        noHintRandomGamesTotal = prefs.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games_total", 0)
-        dailyLoginStreak = prefs.getInt(KEY_COUNTER_PREFIX + "daily_login_streak", 0)
-        speedrunRandomGamesUnder30s = prefs.getInt(KEY_COUNTER_PREFIX + "speedrun_random_30s", 0)
-        sameWallsMaxPositions = prefs.getInt(KEY_COUNTER_PREFIX + "same_walls_max_positions", 0)
+            storage.getInt(KEY_COUNTER_PREFIX + "perfect_random_games_streak", 0)
+        noHintRandomGames = storage.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games", 0)
+        noHintRandomGamesTotal = storage.getInt(KEY_COUNTER_PREFIX + "no_hint_random_games_total", 0)
+        dailyLoginStreak = storage.getInt(KEY_COUNTER_PREFIX + "daily_login_streak", 0)
+        speedrunRandomGamesUnder30s = storage.getInt(KEY_COUNTER_PREFIX + "speedrun_random_30s", 0)
+        sameWallsMaxPositions = storage.getInt(KEY_COUNTER_PREFIX + "same_walls_max_positions", 0)
 
         d(
             "[ACHIEVEMENTS] Loaded state: %d achievements, %d unlocked",
@@ -316,7 +316,7 @@ class AchievementManager private constructor(context: Context) {
     }
 
     private fun saveCounter(key: String?, value: Int) {
-        prefs.edit().putInt(KEY_COUNTER_PREFIX + key, value).apply()
+        storage.putInt(KEY_COUNTER_PREFIX + key, value)
     }
 
     /**
@@ -339,11 +339,9 @@ class AchievementManager private constructor(context: Context) {
         achievement.unlockedTimestamp = timestamp
 
 
-        // Save to SharedPreferences
-        prefs.edit()
-            .putBoolean(KEY_PREFIX_UNLOCKED + achievementId, true)
-            .putLong(KEY_PREFIX_TIMESTAMP + achievementId, timestamp)
-            .apply()
+        // Save to storage
+        storage.putBoolean(KEY_PREFIX_UNLOCKED + achievementId, true)
+        storage.putLong(KEY_PREFIX_TIMESTAMP + achievementId, timestamp)
 
         d("[ACHIEVEMENTS] Unlocked: %s", achievementId)
 
@@ -980,11 +978,12 @@ class AchievementManager private constructor(context: Context) {
      * Lock an achievement by ID (for testing/debug)
      */
     fun lock(achievementId: String?) {
+        if (achievementId == null) return
         val achievement = achievements!!.get(achievementId)
         if (achievement != null) {
             achievement.setUnlocked(false)
             achievement.unlockedTimestamp = 0
-            prefs.edit().putBoolean(achievementId, false).apply()
+            storage.putBoolean(achievementId, false)
             d("[ACHIEVEMENTS] Achievement locked: %s", achievementId)
         }
     }
@@ -993,7 +992,7 @@ class AchievementManager private constructor(context: Context) {
      * Reset all achievements (for testing)
      */
     fun resetAll() {
-        prefs.edit().clear().apply()
+        storage.clear()
         for (achievement in achievements!!.values.filterNotNull()) {
             achievement.setUnlocked(false)
             achievement.unlockedTimestamp = 0
@@ -1144,8 +1143,8 @@ class AchievementManager private constructor(context: Context) {
             return  // we're up to date or ahead (dev builds)
         }
 
-        val lastNudgedVersion = prefs.getString(KEY_LAST_NUDGED_VERSION, null)
-        val lastNudgeMs = prefs.getLong(KEY_LAST_NUDGE_MS, 0L)
+        val lastNudgedVersion = storage.getString(KEY_LAST_NUDGED_VERSION, null)
+        val lastNudgeMs = storage.getLong(KEY_LAST_NUDGE_MS, 0L)
         val now = System.currentTimeMillis()
         val elapsed = now - lastNudgeMs
         val sameVersion = latestAppVersion == lastNudgedVersion
@@ -1156,7 +1155,7 @@ class AchievementManager private constructor(context: Context) {
         )
 
         // Always store the latest version for credits page (independent of cooldown)
-        prefs.edit().putString(KEY_PENDING_NUDGE_VERSION, latestAppVersion).apply()
+        storage.putString(KEY_PENDING_NUDGE_VERSION, latestAppVersion)
         d("[UPDATE_NUDGE] Stored pending version for credits: %s", latestAppVersion)
 
         // Check cooldown - only affects automatic nudge at app start, not credits page
@@ -1170,10 +1169,8 @@ class AchievementManager private constructor(context: Context) {
         }
 
         i("[UPDATE_NUDGE] Conditions met - will show nudge for version %s", latestAppVersion)
-        prefs.edit()
-            .putString(KEY_LAST_NUDGED_VERSION, latestAppVersion)
-            .putLong(KEY_LAST_NUDGE_MS, now)
-            .apply()
+        storage.putString(KEY_LAST_NUDGED_VERSION, latestAppVersion)
+        storage.putLong(KEY_LAST_NUDGE_MS, now)
 
         val act = if (currentActivity != null) currentActivity!!.get() else null
         if (act == null) {
@@ -1268,14 +1265,12 @@ class AchievementManager private constructor(context: Context) {
                                 if (timestamp > 0) timestamp else System.currentTimeMillis()
 
 
-                            // Save to SharedPreferences
-                            prefs.edit()
-                                .putBoolean(KEY_PREFIX_UNLOCKED + id, true)
-                                .putLong(
-                                    KEY_PREFIX_TIMESTAMP + id,
+                            // Save to storage
+                            storage.putBoolean(KEY_PREFIX_UNLOCKED + id, true)
+                            storage.putLong(
+                                KEY_PREFIX_TIMESTAMP + id,
                                     localAchievement.unlockedTimestamp
                                 )
-                                .apply()
 
                             restoredCount++
                             d("[ACHIEVEMENT_SYNC_DOWN] Restored achievement: %s", id)
@@ -1334,7 +1329,7 @@ class AchievementManager private constructor(context: Context) {
     }
 
     companion object {
-        private const val PREFS_NAME = "roboyard_achievements"
+        // Using AndroidStorage instead of direct SharedPreferences
         private const val KEY_PREFIX_UNLOCKED = "unlocked_"
         private const val KEY_PREFIX_TIMESTAMP = "timestamp_"
         private const val KEY_COUNTER_PREFIX = "counter_"
@@ -1382,7 +1377,7 @@ class AchievementManager private constructor(context: Context) {
                 }
             }
 
-        // Prefs key for dedup of the update nudge: we store "last_nudged_version"
+        // Storage key for dedup of the update nudge: we store "last_nudged_version"
         private const val KEY_LAST_NUDGED_VERSION = "last_nudged_version"
         private const val KEY_LAST_NUDGE_MS = "last_nudge_ms"
         private val NUDGE_COOLDOWN_MS = 7L * 24 * 60 * 60 * 1000 // once per week per version
