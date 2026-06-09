@@ -41,7 +41,6 @@ import roboyard.logic.solver.ERRGameMove
 import roboyard.logic.solver.RRGameMove
 import roboyard.logic.solver.RRPiece
 import roboyard.logic.solver.SolverDD
-import roboyard.logic.solver.SolverDD.isSolution01
 import roboyard.logic.storage.FileReadWrite.Companion.writePrivateData
 import roboyard.ui.RoboyardApplication
 import roboyard.ui.activities.MainActivity
@@ -425,12 +424,12 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         preCompRobotOrder.clear()
 
         // Load level from assets
-        val state = GameState.loadLevel(getApplication<Application?>()!!, levelId)
+        val state = GameState.loadLevel(getApplication<Application>()!!, levelId)
         state.levelId = levelId
         state.levelName = "Level " + levelId
 
         // Save last played level for scroll position in level selection
-        LevelCompletionManager.getInstance(getApplication<Application?>()!!).lastPlayedLevel =
+        LevelCompletionManager.getInstance(getApplication<Application>()!!).lastPlayedLevel =
             levelId
 
         // Set reference to this GameStateManager in the new state
@@ -494,7 +493,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      */
     open fun loadLevel(levelId: Int) {
         // Load level from assets
-        val newState = GameState.loadLevel(getApplication<Application?>()!!, levelId)
+        val newState = GameState.loadLevel(getApplication<Application>()!!, levelId)
         newState.levelId = levelId
 
         // Set reference to this GameStateManager in the new state
@@ -521,7 +520,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     fun loadGame(saveId: Int) {
         if (saveId >= 0) {
             // Load saved game using the original method
-            val newState = GameState.loadSavedGame(getApplication<Application?>()!!, saveId)
+            val newState = GameState.loadSavedGame(getApplication<Application>()!!, saveId)
             if (newState != null) {
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true
@@ -698,7 +697,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         if (!Preferences.generateNewMapEachTime) {
             val gridElements = buildGridElements(newState)
             getInstance().storeWallsForBoardSize(
-                gridElements, newState.width, newState.height
+                gridElements.filterNotNull().toMutableList(), newState.width, newState.height
             )
             d(
                 "[GAME_LOAD] Stored walls from loaded savegame for board size %dx%d",
@@ -931,7 +930,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             // Resolve relative path to absolute
             var historyFile = File(mapPath)
             if (!historyFile.isAbsolute()) {
-                historyFile = getApplication<Application?>()!!.getFileStreamPath(mapPath)
+                historyFile = getApplication<Application>()!!.getFileStreamPath(mapPath)
                 d("[HISTORY_LOAD] Resolved relative path to: %s", historyFile.getAbsolutePath())
             }
             if (!historyFile.exists()) {
@@ -956,7 +955,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             )
 
             // Parse the save data into a GameState
-            val newState = parseFromSaveData(saveData.toString(), getApplication<Application?>())
+            val newState = parseFromSaveData(saveData.toString(), getApplication<Application>())
             if (newState != null) {
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true
@@ -2112,7 +2111,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @return Application context
      */
     private fun getContext(): Context? {
-        return getApplication<Application?>()!!.getApplicationContext()
+        return getApplication<Application>()!!.getApplicationContext()
     }
 
     /**
@@ -2231,7 +2230,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             )
 
             // Reset game complete flag if it was set
-            if (isGameComplete.getValue()) {
+            if (isGameComplete.getValue() == true) {
                 isGameComplete.setValue(false)
                 d("[ROBOTS] undoLastMove: Reset game complete flag")
             }
@@ -3213,7 +3212,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             // Create history entry with available information
             // Only save actual move count if game is completed
             // For intermediate saves (hints, live move counter), use 0
-            val actualMoveCount = if (isGameComplete.getValue()) gameState.moveCount else 0
+            val actualMoveCount = if (isGameComplete.getValue() == true) gameState.moveCount else 0
             val entry = GameHistoryEntry(
                 historyPath,
                 mapName,
@@ -3250,7 +3249,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             // LevelCompletionManager (which only stores the highest stars ever earned). This
             // ensures the history entry's completionStars array reflects each attempt accurately.
             val levelId = gameState.levelId
-            if (levelId > 0 && isGameComplete.getValue()) {
+            if (levelId > 0 && isGameComplete.getValue() == true) {
                 val optMovesForStars =
                     if (currentSolution != null && currentSolution.moves != null) currentSolution.moves.size else 0
                 var currentAttemptStars =
@@ -3542,10 +3541,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                         return
                     }
                 }
-            } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
+            } else if (regenerationCount >= Companion.MAX_AUTO_REGENERATIONS) {
                 d(
                     "[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.",
-                    MAX_AUTO_REGENERATIONS
+                    Companion.MAX_AUTO_REGENERATIONS
                 )
                 regenerationCount = 0 // Reset for next time
             } else if (!allowRegeneration) {
@@ -3554,10 +3553,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         } else {
             // moveCount==0: solver hit memory/depth limit or puzzle is unsolvable.
             // Try a new map if regeneration is allowed; otherwise accept as-is.
-            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
+            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < Companion.MAX_AUTO_REGENERATIONS) {
                 d(
                     "[SOLUTION_SOLVER][MOVES] No solution found (memory/depth limit), trying new map (regen %d/%d)",
-                    regenerationCount + 1, MAX_AUTO_REGENERATIONS
+                    regenerationCount + 1, Companion.MAX_AUTO_REGENERATIONS
                 )
                 regenerationCount++
                 val solverManager = this.solverManager
@@ -3858,7 +3857,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
         // Store walls for future use if we're not generating new maps each time
         if (!Preferences.generateNewMapEachTime) {
-            wallStorage.storeWalls(newState.gridElements)
+            wallStorage.storeWalls(newState.gridElements.filterNotNull().toMutableList())
             d("[WALL STORAGE] Stored walls for future use after creating new game")
         }
 
@@ -3998,8 +3997,8 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             attemptCount++
             val moveCount =
                 if (solution != null && solution.moves != null) solution.moves.size else 0
-            val requiredMoves: Int = this.minimumRequiredMoves
-            val maxMoves: Int = this.maximumRequiredMoves
+            val requiredMoves: Int = this@GameStateManager.minimumRequiredMoves
+            val maxMoves: Int = this@GameStateManager.maximumRequiredMoves
 
             // If user manually chose to keep the current map, skip all difficulty validation
             if (keepCurrentMapDespiteDifficulty) {
@@ -4010,7 +4009,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 // Fall through to acceptance below
             } else {
                 // if only one move is needed, then the puzzle is too easy
-                if (this.solverManager.isSolution01()) {
+                if (this@GameStateManager.solverManager.isSolution01()) {
                     d("[DifficultyValidationCallback]: Puzzle too easy (1 move), generating new one")
                     createValidGame(width, height)
                     return
@@ -4089,9 +4088,6 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             isSolverRunning.setValue(false)
         }
 
-        companion object {
-            private const val MAX_ATTEMPTS = 999
-        }
     }
 
     override fun onSolverFinished(success: Boolean, solutionMoves: Int, numSolutions: Int) {
@@ -4275,10 +4271,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         wrongRobotToastShownColors.add(robotColor)
     }
 
-    private var activity: Activity?
+    var activity: Activity?
         /**
          * Get the current activity
-         * 
+         *
          * @return The current activity or null if none is available
          */
         get() {
@@ -4289,7 +4285,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         }
         /**
          * Set the current activity reference
-         * 
+         *
          * @param activity Current activity
          */
         set(activity) {
@@ -4649,14 +4645,16 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             priorityColors = ArrayList<Int?>()
         }
         if (!priorityColors.isEmpty()) {
-            robots.sort(Comparator { a: GameElement?, b: GameElement? ->
+            robots.sortWith(Comparator { a: GameElement?, b: GameElement? ->
                 val idxA = priorityColors.indexOf(a!!.color)
                 val idxB = priorityColors.indexOf(b!!.color)
                 // Robots in priority list come first, in their solution order
-                if (idxA >= 0 && idxB >= 0) return@sort idxA - idxB
-                if (idxA >= 0) return@sort -1
-                if (idxB >= 0) return@sort 1
-                0
+                when {
+                    idxA >= 0 && idxB >= 0 -> idxA - idxB
+                    idxA >= 0 -> -1
+                    idxB >= 0 -> 1
+                    else -> 0
+                }
             })
             val orderLog = StringBuilder()
             for (r in robots) {
@@ -4695,7 +4693,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                                 computed,
                                 skipped
                             )
-                            return@submit
+                            return@Runnable
                         }
 
                         val dx = directions[d]!![0]
@@ -4791,7 +4789,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
                         // Solve with some minutes timeout using a sub-executor
                         val solver = SolverDD()
-                        solver.init(gridElements)
+                        solver.init(ArrayList<GridElement>(gridElements.filterNotNull()))
                         val solverThread = Executors.newSingleThreadExecutor()
                         val solverFuture = solverThread.submit(Runnable { solver.run() })
                         var solverCompleted = false
@@ -4825,7 +4823,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                                 "[PRECOMP_SOLUTION] Cancelled after solve (%s%s, %dms), %d computed so far",
                                 colorLetter, dirNames[d], solveElapsed, computed
                             )
-                            return@submit
+                            return@Runnable
                         }
 
                         if (solverCompleted && solver.getSolverStatus()!!.isFinished) {
@@ -4926,7 +4924,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * if current settings still match the autosaved game.
      */
     private fun saveAutosaveMetadata(state: GameState) {
-        val prefs = getApplication<Application?>()!!.getSharedPreferences(
+        val prefs = getApplication<Application>()!!.getSharedPreferences(
             AUTOSAVE_META_PREFS,
             Context.MODE_PRIVATE
         )
@@ -4948,7 +4946,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @return true if settings match (autosave can be resumed), false if settings changed
      */
     fun autosaveSettingsMatch(): Boolean {
-        val prefs = getApplication<Application?>()!!.getSharedPreferences(
+        val prefs = getApplication<Application>()!!.getSharedPreferences(
             AUTOSAVE_META_PREFS,
             Context.MODE_PRIVATE
         )
@@ -4976,7 +4974,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * Clear autosave metadata (called when autosave is deleted).
      */
     fun clearAutosaveMetadata() {
-        getApplication<Application?>()!!.getSharedPreferences(
+        getApplication<Application>()!!.getSharedPreferences(
             AUTOSAVE_META_PREFS,
             Context.MODE_PRIVATE
         )
@@ -5005,7 +5003,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
 
         // Schedule hint button reset after delay to avoid race condition
-        hintButtonResetRunnable = Runnable? {
+        hintButtonResetRunnable = Runnable {
             if (hintButton != null && hintButton.isChecked()) {
                 d("[HINT_SYSTEM] Executing delayed hint button reset")
                 hintButton.setChecked(false)
@@ -5030,6 +5028,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     }
 
     companion object {
+        private const val MAX_ATTEMPTS = 999
         private const val MAX_AUTO_REGENERATIONS = 999
 
         // Move cooldown to prevent multiple moves within

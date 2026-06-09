@@ -1616,7 +1616,7 @@ class GameState(
 
                 if (isCompactFormat) {
                     // Parse new compact format using central parser (handles comments and line breaks)
-                    val entries = LevelFormatParser.parseEntries(saveData)
+                    val entries = LevelFormatParser.parseRawEntries(saveData)
 
 
                     // First pass: extract board dimensions (may override metadata dimensions)
@@ -1667,16 +1667,16 @@ class GameState(
                                 var colorId = -1
                                 var coords = data
 
-                                if (type.length == 2 && type.get(0) == 't') {
+                                if (type.length == 2 && type[0] == 't') {
                                     // New format: Color is second char of type
-                                    colorId = parseColorChar(type.get(1))
+                                    colorId = parseColorChar(type[1])
                                 } else if (type.startsWith("target_")) {
                                     // Legacy format: target_colorname
                                     val colorName = type.substring(7)
                                     colorId = parseColorName(colorName)
                                 } else if (type.length == 1 && data.length >= 2) {
                                     // Compact format: tcolorX,Y; (color is first char of data)
-                                    colorId = parseColorChar(data.get(0))
+                                    colorId = parseColorChar(data[0])
                                     coords = data.substring(1)
                                 }
 
@@ -1697,16 +1697,16 @@ class GameState(
                                 var colorId = -1
                                 var coords = data
 
-                                if (type.length == 2 && type.get(0) == 'r') {
+                                if (type.length == 2 && type[0] == 'r') {
                                     // New format: Color is second char of type
-                                    colorId = parseColorChar(type.get(1))
+                                    colorId = parseColorChar(type[1])
                                 } else if (type.startsWith("robot_")) {
                                     // Legacy format: robot_colorname
                                     val colorName = type.substring(6)
                                     colorId = parseColorName(colorName)
                                 } else if (type.length == 1 && data.length >= 2) {
                                     // Compact format: rcolorX,Y; (color is first char of data)
-                                    colorId = parseColorChar(data.get(0))
+                                    colorId = parseColorChar(data[0])
                                     coords = data.substring(1)
                                 }
 
@@ -2211,7 +2211,7 @@ class GameState(
             var height = 14
 
             // Parse entries using central parser (handles comments and line breaks)
-            val entries = LevelFormatParser.parseEntries(levelContent ?: "")
+            val entries = LevelFormatParser.parseRawEntries(levelContent ?: "")
 
             // First pass: extract board dimensions
             for (entry in entries) {
@@ -2280,15 +2280,15 @@ class GameState(
                         var colorId = -1
                         var coords = data
 
-                        if (type.length == 2 && type.get(0) == 't') {
+                        if (type.length == 2 && type[0] == 't') {
                             // Compact format: tcolorX,Y; (e.g., tb8,7; parsed as type=tb, data=8,7)
                             // Color is second char of type
-                            colorId = parseColorChar(type.get(1))
+                            colorId = parseColorChar(type[1])
                         } else if (type.length == 1) {
                             // Compact format: tcolorX,Y; (e.g., t b8,7;)
                             // First char of data is color, rest is coordinates
                             if (data.length >= 2) {
-                                colorId = parseColorChar(data.get(0))
+                                colorId = parseColorChar(data[0])
                                 coords = data.substring(1)
                             }
                         } else if (type.startsWith("target_")) {
@@ -2316,15 +2316,15 @@ class GameState(
                         var colorId = -1
                         var coords = data
 
-                        if (type.length == 2 && type.get(0) == 'r') {
+                        if (type.length == 2 && type[0] == 'r') {
                             // Compact format: rcolorX,Y; (e.g., rr1,5; parsed as type=rr, data=1,5)
                             // Color is second char of type
-                            colorId = parseColorChar(type.get(1))
+                            colorId = parseColorChar(type[1])
                         } else if (type.length == 1) {
                             // Compact format: rcolorX,Y; (e.g., r r1,5;)
                             // First char of data is color, rest is coordinates
                             if (data.length >= 2) {
-                                colorId = parseColorChar(data.get(0))
+                                colorId = parseColorChar(data[0])
                                 coords = data.substring(1)
                             }
                         } else if (type.startsWith("robot_")) {

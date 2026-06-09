@@ -94,8 +94,11 @@ object MapObjects {
      * Extract map data from a string
      */
     @JvmStatic
-    fun extractDataFromString(data: String?, someFlag: Boolean): MutableList<GridElement> {
-        val result = mutableListOf<GridElement>()
+    fun extractDataFromString(data: String?): ArrayList<GridElement> = extractDataFromString(data, false)
+
+    @JvmStatic
+    fun extractDataFromString(data: String?, someFlag: Boolean): ArrayList<GridElement> {
+        val result = ArrayList<GridElement>()
         if (data.isNullOrBlank()) return result
 
         // Compact code to full name mapping
@@ -140,5 +143,40 @@ object MapObjects {
         }
 
         return result
+    }
+
+    /**
+     * Generate a unique 5-letter identifier from a string.
+     * Deterministic - same input produces same output.
+     * Alternates vowels and consonants.
+     */
+    @JvmStatic
+    fun generateUnique5LetterFromString(input: String?): String {
+        if (input.isNullOrEmpty()) return "aaaaa"
+        
+        val vowels = "aeiou"
+        val consonants = "bcdfghjklmnpqrstvwxyz"
+        
+        // Simple hash of the input
+        var hash = 0
+        for (char in input) {
+            hash = (hash * 31 + char.code) and 0x7FFFFFFF // Keep positive
+        }
+        
+        // Generate 5 letters alternating consonant/vowel starting with consonant
+        val result = StringBuilder()
+        var useConsonant = true
+        for (i in 0..4) {
+            if (useConsonant) {
+                result.append(consonants[hash % consonants.length])
+                hash /= consonants.length
+            } else {
+                result.append(vowels[hash % vowels.length])
+                hash /= vowels.length
+            }
+            useConsonant = !useConsonant
+        }
+        
+        return result.toString()
     }
 }

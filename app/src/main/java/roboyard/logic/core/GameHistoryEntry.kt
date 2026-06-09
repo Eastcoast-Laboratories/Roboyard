@@ -22,6 +22,8 @@ class GameHistoryEntry(
     @JvmField var completionCount: Int = 0
 
     fun getCompletionCount(): Int = completionCount
+    
+    fun isFirstCompletion(): Boolean = completionCount == 1
     @JvmField var timestamp: Long = 0
     @JvmField var lastCompletionTimestamp: Long = 0
     @JvmField var difficulty: Int = 0
