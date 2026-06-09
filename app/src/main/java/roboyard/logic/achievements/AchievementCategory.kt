@@ -1,6 +1,6 @@
-package roboyard.logic.achievements;
+package roboyard.logic.achievements
 
-import android.content.Context;
+import android.content.Context
 
 /**
  * Categories for achievements.
@@ -9,7 +9,7 @@ import android.content.Context;
  * Display names are loaded from strings.xml using the stringResName.
  * Example: PROGRESSION uses "achievement_category_progression" from strings.xml
  */
-public enum AchievementCategory {
+enum class AchievementCategory(stringResName: String, displayOrder: Int) {
     // Display order is determined by the order of enum values
     PROGRESSION("achievement_category_progression", 0),
     PERFORMANCE("achievement_category_performance", 1),
@@ -25,27 +25,20 @@ public enum AchievementCategory {
     SPECIAL("achievement_login_streak", 11),
     CHALLENGE("achievement_category_challenge", 99); // Disabled, high order to sort last
 
-    private final String stringResName;
-    private final int displayOrder;
-
-    AchievementCategory(String stringResName, int displayOrder) {
-        this.stringResName = stringResName;
-        this.displayOrder = displayOrder;
-    }
-
     /**
      * Get the string resource name for this category.
      * Use with context.getResources().getIdentifier() to get the actual string.
      */
-    public String getStringResName() {
-        return stringResName;
-    }
+    val stringResName: String?
 
     /**
      * Get the display order for sorting categories.
      */
-    public int getDisplayOrder() {
-        return displayOrder;
+    val displayOrder: Int
+
+    init {
+        this.stringResName = stringResName
+        this.displayOrder = displayOrder
     }
 
     /**
@@ -53,19 +46,19 @@ public enum AchievementCategory {
      * @param context Android context for accessing resources
      * @return The localized category name from strings.xml
      */
-    public String getDisplayName(Context context) {
-        int resId = context.getResources().getIdentifier(stringResName, "string", context.getPackageName());
+    fun getDisplayName(context: Context): String {
+        val resId =
+            context.getResources().getIdentifier(stringResName, "string", context.getPackageName())
         if (resId != 0) {
-            return context.getString(resId);
+            return context.getString(resId)
         }
         // Fallback to enum name if string resource not found
-        return name().replace("_", " ");
+        return name.replace("_", " ")
     }
 
-    /**
-     * Check if this category is enabled (has achievements).
-     */
-    public boolean isEnabled() {
-        return this != CHALLENGE; // CHALLENGE is disabled
-    }
+    val isEnabled: Boolean
+        /**
+         * Check if this category is enabled (has achievements).
+         */
+        get() = this != AchievementCategory.CHALLENGE // CHALLENGE is disabled
 }
