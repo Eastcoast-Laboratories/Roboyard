@@ -1,7 +1,5 @@
 package roboyard.logic.achievements
 
-import android.content.Context
-
 /**
  * Categories for achievements.
  * Central definition of category names, display order, and string resource keys.
@@ -45,17 +43,12 @@ enum class AchievementCategory(stringResName: String, displayOrder: Int) {
 
     /**
      * Get the localized display name for this category.
-     * @param context Android context for accessing resources
+     * @param stringResolver Function to resolve string resource by name (e.g., R.string.xxx)
      * @return The localized category name from strings.xml
      */
-    fun getDisplayName(context: Context): String {
-        val resId =
-            context.getResources().getIdentifier(stringResName, "string", context.getPackageName())
-        if (resId != 0) {
-            return context.getString(resId)
-        }
-        // Fallback to enum name if string resource not found
-        return name.replace("_", " ")
+    fun getDisplayName(stringResolver: (String) -> String?): String {
+        val resolved = stringResolver(stringResName!!)
+        return resolved ?: name.replace("_", " ")
     }
 
     val isEnabled: Boolean
