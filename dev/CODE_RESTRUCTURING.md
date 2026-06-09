@@ -21,7 +21,7 @@ roboyard.logic/
 ├── managers/       (Java: GameStateManager, GameHistoryManager, SyncManager,
 │                    DataExportImportManager; Kotlin: LevelCompletionManager,
 │                    PlayGamesManager)
-├── network/        (Java: RoboyardApiClient)
+├── network/        (Kotlin: RoboyardApiClient)
 ├── storage/        (Kotlin: FileReadWrite)
 ├── graphics/       (Kotlin: MinimapGenerator)
 └── achievements/   (Java: AchievementManager; Kotlin: Achievement,
@@ -54,11 +54,10 @@ The `logic.core` and `logic.solver` packages are already fully Kotlin. The remai
 | `roboyard.logic.managers` | `GameHistoryManager.java` | `Activity`, file I/O |
 | `roboyard.logic.managers` | `SyncManager.java` | `Context`, network |
 | `roboyard.logic.managers` | `DataExportImportManager.java` | `Context`, file I/O |
-| `roboyard.logic.network`  | `RoboyardApiClient.java` | `HttpURLConnection` |
 | `roboyard.logic.achievements` | `AchievementManager.java` | `Activity`, `SharedPreferences` |
 
 ### Suggested conversion order
-1. [ ] - Network/file/history infra still pending Java → Kotlin: `RoboyardApiClient`, `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
+1. [ ] - Network/file/history infra still pending Java → Kotlin:  `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
 2. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `AchievementManager` and `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
 
 ## KMP notes

@@ -43,16 +43,16 @@ class RoboyardApiClient private constructor(context: Context) {
     }
 
     class LoginResult(
-        val token: String?,
-        val userName: String?,
+        @JvmField val token: String?,
+        @JvmField val userName: String?,
         val email: String?,
         val userId: Int
     )
 
     class ShareResult @JvmOverloads constructor(
-        val mapId: Int,
-        val shareUrl: String?,
-        val isDuplicate: Boolean = false
+        @JvmField val mapId: Int,
+        @JvmField val shareUrl: String?,
+        @JvmField val isDuplicate: Boolean = false
     )
 
     init {
@@ -169,11 +169,11 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.optBoolean("needs_update", false)) {
                     mainHandler.post(Runnable { callback.onNeedsUpdate() })
-                    return@execute
+                    return@Runnable
                 }
                 if (json.has("error")) {
                     postError<LoginResult?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val token = json.getString("token")
@@ -235,11 +235,11 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.optBoolean("needs_update", false)) {
                     mainHandler.post(Runnable { callback.onNeedsUpdate() })
-                    return@execute
+                    return@Runnable
                 }
                 if (json.has("error")) {
                     postError<LoginResult?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val token = json.getString("token")
@@ -299,7 +299,7 @@ class RoboyardApiClient private constructor(context: Context) {
                     // Token is invalid - try to re-login with stored credentials before giving up
                     tag(TAG).d("[AUTH_DEBUG] Token verification failed, attempting auto re-login")
                     tryReLoginOrLogout(callback)
-                    return@execute
+                    return@Runnable
                 }
 
 
@@ -418,11 +418,11 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.optBoolean("needs_update", false)) {
                     mainHandler.post(Runnable { callback.onNeedsUpdate() })
-                    return@execute
+                    return@Runnable
                 }
                 if (json.has("error")) {
                     postError<ShareResult?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val mapId = json.getInt("map_id")
@@ -596,25 +596,20 @@ class RoboyardApiClient private constructor(context: Context) {
      * Result class for achievement sync.
      */
     class AchievementSyncResult(
-        val success: Boolean,
-        val syncedCount: Int,
-        val newAchievements: Int,
-        statsUpdated: Boolean, // server-side published version, null if unknown
-        val latestAppVersion: String?
-    ) {
-        val statsUpdated: Boolean
-
-        init {
-            this.latestAppVersion = latestAppVersion
-            this.statsUpdated = statsUpdated
-        }
-    }
+        @JvmField val success: Boolean,
+        @JvmField val syncedCount: Int,
+        @JvmField val newAchievements: Int,
+        @JvmField val statsUpdated: Boolean,
+        @JvmField val latestAppVersion: String?
+    )
 
     /**
      * Result class for fetching achievements from server.
      */
     class AchievementFetchResult(achievements: JSONArray?, stats: JSONObject?) {
+        @JvmField
         val achievements: JSONArray?
+        @JvmField
         val stats: JSONObject?
 
         init {
@@ -642,7 +637,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.has("error")) {
                     postError<AchievementFetchResult?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val user = json.getJSONObject("user")
@@ -687,7 +682,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.has("error")) {
                     postError<Int?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val syncedCount = json.optInt("synced_count", 0)
@@ -720,7 +715,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.has("error")) {
                     postError<JSONArray?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val saves = json.getJSONArray("saves")
@@ -758,7 +753,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.has("error")) {
                     postError<JSONObject?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val syncedCount = json.optInt("synced_count", 0)
@@ -819,7 +814,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.has("error")) {
                     postError<JSONArray?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val history = json.getJSONArray("history")
@@ -873,7 +868,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
                 if (json.has("error")) {
                     postError<AchievementSyncResult?>(callback, json.getString("error"))
-                    return@execute
+                    return@Runnable
                 }
 
                 val success = json.optBoolean("success", false)
@@ -925,6 +920,7 @@ class RoboyardApiClient private constructor(context: Context) {
 
         private var instance: RoboyardApiClient? = null
 
+        @JvmStatic
         @Synchronized
         fun getInstance(context: Context): RoboyardApiClient {
             if (instance == null) {
