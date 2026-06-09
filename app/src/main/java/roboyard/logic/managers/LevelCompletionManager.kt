@@ -304,6 +304,7 @@ class LevelCompletionManager private constructor(context: Context) {
 
         private var instance: LevelCompletionManager? = null
 
+        @JvmStatic
         @Synchronized
         fun getInstance(context: Context): LevelCompletionManager {
             if (instance == null) {

@@ -147,7 +147,7 @@ public class MainMenuFragment extends BaseGameFragment {
         });
         StreakManager.StreakUpdate streakUpdate = StreakManager.getInstance(requireContext()).recordDailyLogin();
         Timber.d("[STREAK][APP_START] Daily login checked on main menu resume: newDayRecorded=%b, streak=%d",
-                streakUpdate.isNewDayRecorded(), streakUpdate.getStreakDays());
+                streakUpdate.isNewDayRecorded(), streakUpdate.streakDays);
         maybeShowDailyStreakPopup();
     }
 

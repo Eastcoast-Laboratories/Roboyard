@@ -514,16 +514,16 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCategoryDisplayOrder() {
-        assertEquals(0, roboyard.logic.achievements.AchievementCategory.PROGRESSION.getDisplayOrder());
-        assertEquals(1, roboyard.logic.achievements.AchievementCategory.PERFORMANCE.getDisplayOrder());
-        assertEquals(2, roboyard.logic.achievements.AchievementCategory.MASTERY.getDisplayOrder());
+        assertEquals(0, roboyard.logic.achievements.AchievementCategory.PROGRESSION.displayOrder);
+        assertEquals(1, roboyard.logic.achievements.AchievementCategory.PERFORMANCE.displayOrder);
+        assertEquals(2, roboyard.logic.achievements.AchievementCategory.MASTERY.displayOrder);
     }
 
     @Test
     public void testAchievementCategoryStringResName() {
-        assertNotNull(roboyard.logic.achievements.AchievementCategory.PROGRESSION.getStringResName());
-        assertEquals("achievement_category_progression", 
-            roboyard.logic.achievements.AchievementCategory.PROGRESSION.getStringResName());
+        assertNotNull(roboyard.logic.achievements.AchievementCategory.PROGRESSION.stringResName);
+        assertEquals("achievement_category_progression",
+                roboyard.logic.achievements.AchievementCategory.PROGRESSION.stringResName);
     }
 
     @Test

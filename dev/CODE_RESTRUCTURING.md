@@ -51,24 +51,17 @@ The `logic.core` and `logic.solver` packages are already fully Kotlin. The remai
 |----------------------------------|------|--------------------------------------|
 | `roboyard.logic.managers` | `GameStateManager.java` | `AndroidViewModel`, `Activity`, `LiveData`, `GameGridView`, `RobotAnimationManager` |
 | `roboyard.logic.managers` | `GameHistoryManager.java` | `Activity`, file I/O |
-| `roboyard.logic.managers` | `LevelCompletionManager.java` | `Context`, `SharedPreferences` |
 | `roboyard.logic.managers` | `SyncManager.java` | `Context`, network |
 | `roboyard.logic.managers` | `DataExportImportManager.java` | `Context`, file I/O |
 | `roboyard.logic.managers` | `PlayGamesManager.java` | Play Services (flavor-specific) |
 | `roboyard.logic.network`  | `RoboyardApiClient.java` | `HttpURLConnection` |
 | `roboyard.logic.storage`  | `FileReadWrite.java` | `Context`, Android file APIs |
 | `roboyard.logic.graphics` | `MinimapGenerator.java` | `Bitmap`, `Canvas` |
-| `roboyard.logic.achievements` | `Achievement.java` | none (easy first conversion) |
-| `roboyard.logic.achievements` | `AchievementCategory.java` | `Context` (string lookup) |
-| `roboyard.logic.achievements` | `AchievementDefinitions.java` | none (easy first conversion) |
 | `roboyard.logic.achievements` | `AchievementManager.java` | `Activity`, `SharedPreferences` |
-| `roboyard.logic.achievements` | `StreakManager.java` | `Context`, `SharedPreferences` |
 
 ### Suggested conversion order
-1. Dependency-free data/definitions first: `Achievement`, `AchievementDefinitions`.
-2. Light `Context`-only classes: `AchievementCategory`, `LevelCompletionManager`, `StreakManager`.
-3. File/network/graphics infra: `FileReadWrite`, `RoboyardApiClient`, `MinimapGenerator`, `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
-4. `Activity`-dependent managers: `AchievementManager`, then `PlayGamesManager` (flavor-specific) and `GameStateManager` last — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
+1. [ ] - File/network/graphics infra: `FileReadWrite`, `RoboyardApiClient`, `MinimapGenerator`, `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
+2. [ ] - `Activity`-dependent managers: `AchievementManager`, then `PlayGamesManager` (flavor-specific) and `GameStateManager` last — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
 
 ## KMP notes
 - Files depending on `SharedPreferences`, `Activity`, `ViewModel`, `LiveData`, `Bitmap` or `HttpURLConnection` cannot be shared with iOS as-is.

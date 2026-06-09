@@ -134,7 +134,7 @@ class StreakManager private constructor(context: Context) {
     }
 
     class StreakUpdate(
-        val isNewDayRecorded: Boolean, val streakDays: Int, private val continuation: Boolean,
+        val isNewDayRecorded: Boolean, @JvmField val streakDays: Int, private val continuation: Boolean,
         private val newStreak: Boolean, private val comebackTriggered: Boolean
     )
 
@@ -427,6 +427,7 @@ class StreakManager private constructor(context: Context) {
 
         private var instance: StreakManager? = null
 
+        @JvmStatic
         @Synchronized
         fun getInstance(context: Context): StreakManager {
             if (instance == null) {

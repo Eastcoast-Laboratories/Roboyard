@@ -29,11 +29,13 @@ enum class AchievementCategory(stringResName: String, displayOrder: Int) {
      * Get the string resource name for this category.
      * Use with context.getResources().getIdentifier() to get the actual string.
      */
+    @JvmField
     val stringResName: String?
 
     /**
      * Get the display order for sorting categories.
      */
+    @JvmField
     val displayOrder: Int
 
     init {
