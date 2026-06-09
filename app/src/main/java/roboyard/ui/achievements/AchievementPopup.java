@@ -106,7 +106,7 @@ public class AchievementPopup {
         isShowing = true;
         isPermanent = false;
         isCurrentStreakPopup = pendingAchievements.size() == 1 &&
-                STREAK_POPUP_ID.equals(pendingAchievements.get(0).getId());
+                STREAK_POPUP_ID.equals(pendingAchievements.get(0).id);
         
         // Screen metrics
         float density = context.getResources().getDisplayMetrics().density;
@@ -340,10 +340,10 @@ public class AchievementPopup {
             // Icon with achievement-specific color
             ImageView icon = new ImageView(context);
             // For streak popup, use special background color #00331b for the flame
-            if (isStreakPopup && "icon_46_flame".equals(achievement.getIconDrawableName())) {
-                AchievementIconHelper.setIconWithColor(context, icon, achievement.getIconDrawableName(), Color.parseColor("#00331b"));
+            if (isStreakPopup && "icon_46_flame".equals(achievement.iconDrawableName)) {
+                AchievementIconHelper.setIconWithColor(context, icon, achievement.iconDrawableName, Color.parseColor("#00331b"));
             } else {
-                AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.getIconDrawableName(), achievement.getId());
+                AchievementIconHelper.setIconWithAchievementColor(context, icon, achievement.iconDrawableName, achievement.id);
             }
             int iconSize = (int) context.getResources().getDimension(R.dimen.achievement_icon_size);
             // Increase icon size by 50% for single achievement or streak popup
@@ -364,7 +364,7 @@ public class AchievementPopup {
             
             // Name
             TextView nameText = new TextView(context);
-            nameText.setText(getStringByName(achievement.getNameKey(), achievement.getNameFormatArgs()));
+            nameText.setText(getStringByName(achievement.nameKey, achievement.getNameFormatArgs()));
             nameText.setTextSize(nameTextSize);
             nameText.setTextColor(Color.parseColor("#333333"));
             nameText.setTypeface(null, android.graphics.Typeface.BOLD);
@@ -374,7 +374,7 @@ public class AchievementPopup {
             
             // Description with white outline
             TextView descText = new TextView(context);
-            descText.setText(getStringByName(achievement.getDescriptionKey(), achievement.getDescriptionFormatArgs()));
+            descText.setText(getStringByName(achievement.descriptionKey, achievement.getDescriptionFormatArgs()));
             descText.setTextSize(descTextSize);
             descText.setTextColor(Color.parseColor("#000000"));
             descText.setTypeface(null, android.graphics.Typeface.BOLD_ITALIC);

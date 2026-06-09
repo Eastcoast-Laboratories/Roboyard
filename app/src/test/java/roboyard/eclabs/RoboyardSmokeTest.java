@@ -361,14 +361,14 @@ public class RoboyardSmokeTest {
             "test_id", "name_key", "desc_key",
             roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon_1_lightning");
         
-        assertEquals("test_id", ach.getId());
-        assertEquals("name_key", ach.getNameKey());
-        assertEquals("desc_key", ach.getDescriptionKey());
-        assertEquals(roboyard.logic.achievements.AchievementCategory.PROGRESSION, ach.getCategory());
-        assertEquals("icon_1_lightning", ach.getIconDrawableName());
-        assertEquals(-1, ach.getSpriteIndex());
+        assertEquals("test_id", ach.id);
+        assertEquals("name_key", ach.nameKey);
+        assertEquals("desc_key", ach.descriptionKey);
+        assertEquals(roboyard.logic.achievements.AchievementCategory.PROGRESSION, ach.category);
+        assertEquals("icon_1_lightning", ach.iconDrawableName);
+        assertEquals(-1, ach.spriteIndex);
         assertFalse(ach.isUnlocked());
-        assertEquals(0, ach.getUnlockedTimestamp());
+        assertEquals(0, ach.unlockedTimestamp);
     }
 
     @Test
@@ -377,8 +377,8 @@ public class RoboyardSmokeTest {
             "test_id", "name_key", "desc_key",
             roboyard.logic.achievements.AchievementCategory.PERFORMANCE, 42);
         
-        assertEquals(42, ach.getSpriteIndex());
-        assertNull(ach.getIconDrawableName());
+        assertEquals(42, ach.spriteIndex);
+        assertNull(ach.iconDrawableName);
     }
 
     @Test
@@ -387,15 +387,15 @@ public class RoboyardSmokeTest {
             "test", "n", "d", roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon");
         
         assertFalse(ach.isUnlocked());
-        assertEquals(0, ach.getUnlockedTimestamp());
+        assertEquals(0, ach.unlockedTimestamp);
         
         long before = System.currentTimeMillis();
         ach.setUnlocked(true);
         long after = System.currentTimeMillis();
         
         assertTrue(ach.isUnlocked());
-        assertTrue("Timestamp should be set on unlock", ach.getUnlockedTimestamp() >= before);
-        assertTrue("Timestamp should be set on unlock", ach.getUnlockedTimestamp() <= after);
+        assertTrue("Timestamp should be set on unlock", ach.unlockedTimestamp >= before);
+        assertTrue("Timestamp should be set on unlock", ach.unlockedTimestamp <= after);
     }
 
     @Test
@@ -404,11 +404,11 @@ public class RoboyardSmokeTest {
             "test", "n", "d", roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon");
         
         ach.setUnlocked(true);
-        long firstTimestamp = ach.getUnlockedTimestamp();
+        long firstTimestamp = ach.unlockedTimestamp;
         
         // Unlock again - timestamp should NOT change
         ach.setUnlocked(true);
-        assertEquals("Timestamp should not change on re-unlock", firstTimestamp, ach.getUnlockedTimestamp());
+        assertEquals("Timestamp should not change on re-unlock", firstTimestamp, ach.unlockedTimestamp);
     }
 
     @Test
@@ -448,7 +448,7 @@ public class RoboyardSmokeTest {
             roboyard.logic.achievements.AchievementDefinitions.getAll();
         Set<String> ids = new HashSet<>();
         for (roboyard.logic.achievements.Achievement ach : all.values()) {
-            assertTrue("Duplicate achievement ID: " + ach.getId(), ids.add(ach.getId()));
+            assertTrue("Duplicate achievement ID: " + ach.id, ids.add(ach.id));
         }
     }
 
@@ -457,14 +457,14 @@ public class RoboyardSmokeTest {
         Map<String, roboyard.logic.achievements.Achievement> all = 
             roboyard.logic.achievements.AchievementDefinitions.getAll();
         for (roboyard.logic.achievements.Achievement ach : all.values()) {
-            assertNotNull("Achievement should have ID: " + ach, ach.getId());
-            assertFalse("Achievement ID should not be empty", ach.getId().isEmpty());
-            assertNotNull("Achievement should have name key: " + ach.getId(), ach.getNameKey());
-            assertNotNull("Achievement should have description key: " + ach.getId(), ach.getDescriptionKey());
-            assertNotNull("Achievement should have category: " + ach.getId(), ach.getCategory());
+            assertNotNull("Achievement should have ID: " + ach, ach.id);
+            assertFalse("Achievement ID should not be empty", ach.id.isEmpty());
+            assertNotNull("Achievement should have name key: " + ach.id, ach.nameKey);
+            assertNotNull("Achievement should have description key: " + ach.id, ach.descriptionKey);
+            assertNotNull("Achievement should have category: " + ach.id, ach.category);
             // Must have either drawable name or sprite index
-            assertTrue("Achievement should have icon: " + ach.getId(),
-                ach.getIconDrawableName() != null || ach.getSpriteIndex() >= 0);
+            assertTrue("Achievement should have icon: " + ach.id,
+                ach.iconDrawableName != null || ach.spriteIndex >= 0);
         }
     }
 

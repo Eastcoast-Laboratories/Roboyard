@@ -134,8 +134,8 @@ public class AchievementsFragment extends BaseGameFragment {
         
         for (Achievement achievement : achievementManager.getAllAchievements()) {
             // Add category header if changed
-            if (achievement.getCategory() != currentCategory) {
-                currentCategory = achievement.getCategory();
+            if (achievement.category != currentCategory) {
+                currentCategory = achievement.category;
                 addCategoryHeader(currentCategory);
             }
             
@@ -181,10 +181,10 @@ public class AchievementsFragment extends BaseGameFragment {
     private static final long NEW_ACHIEVEMENT_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
     
     private boolean isNewAchievement(Achievement achievement) {
-        if (!achievement.isUnlocked() || achievement.getUnlockedTimestamp() == 0) {
+        if (!achievement.isUnlocked() || achievement.unlockedTimestamp == 0) {
             return false;
         }
-        long timeSinceUnlock = System.currentTimeMillis() - achievement.getUnlockedTimestamp();
+        long timeSinceUnlock = System.currentTimeMillis() - achievement.unlockedTimestamp;
         return timeSinceUnlock <= NEW_ACHIEVEMENT_THRESHOLD_MS;
     }
     
@@ -212,7 +212,7 @@ public class AchievementsFragment extends BaseGameFragment {
         
         // Icon with achievement-specific color
         ImageView icon = new ImageView(requireContext());
-        AchievementIconHelper.setIconWithAchievementColor(requireContext(), icon, achievement.getIconDrawableName(), achievement.getId());
+        AchievementIconHelper.setIconWithAchievementColor(requireContext(), icon, achievement.iconDrawableName, achievement.id);
         icon.setAlpha(achievement.isUnlocked() ? 1.0f : 0.3f);
         int iconSize = (int) requireContext().getResources().getDimension(R.dimen.achievement_icon_size);
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
@@ -233,7 +233,7 @@ public class AchievementsFragment extends BaseGameFragment {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         
         TextView nameText = new TextView(requireContext());
-        nameText.setText(getStringByName(achievement.getNameKey()));
+        nameText.setText(getStringByName(achievement.nameKey));
         nameText.setTextSize(16);
         nameText.setTypeface(null, android.graphics.Typeface.BOLD);
         nameText.setTextColor(achievement.isUnlocked() ?
@@ -255,7 +255,7 @@ public class AchievementsFragment extends BaseGameFragment {
         
         // Description
         TextView descText = new TextView(requireContext());
-        descText.setText(getStringByName(achievement.getDescriptionKey()));
+        descText.setText(getStringByName(achievement.descriptionKey));
         descText.setTextSize(12);
         descText.setTextColor(Color.parseColor("#666666"));
         textContainer.addView(descText);
@@ -270,7 +270,7 @@ public class AchievementsFragment extends BaseGameFragment {
             unlockedText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
             itemLayout.addView(unlockedText);
         } else {
-            AchievementManager.AchievementProgress progress = achievementManager.getProgress(achievement.getId());
+            AchievementManager.AchievementProgress progress = achievementManager.getProgress(achievement.id);
             if (progress != null && progress.hasProgress()) {
                 TextView progressView = new TextView(requireContext());
                 int clamped = Math.min(progress.current, progress.required);

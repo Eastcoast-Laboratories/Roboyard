@@ -583,7 +583,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         });
         
         AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
-            Timber.d("[ACHIEVEMENT_POPUP] Achievement unlocked: %s", achievement.getId());
+            Timber.d("[ACHIEVEMENT_POPUP] Achievement unlocked: %s", achievement.id);
             pendingAchievements.add(achievement);
             // Show popup after a short delay to allow game completion UI to settle
             new Handler(Looper.getMainLooper()).postDelayed(() -> {

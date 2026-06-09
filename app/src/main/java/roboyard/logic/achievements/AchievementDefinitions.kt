@@ -18,6 +18,7 @@ object AchievementDefinitions {
      * Colors are assigned deterministically based on achievement ID hash.
      * This array is also mirrored in Laravel: app/Config/AchievementDefinitions.php
      */
+    @JvmField
     val ACHIEVEMENT_COLORS: IntArray = intArrayOf(
         -0xb350b0,  // Green
         -0x6800,  // Orange
@@ -85,6 +86,7 @@ object AchievementDefinitions {
      * @param achievementId The achievement ID (used to determine color)
      * @return The color for this achievement
      */
+    @JvmStatic
     fun getAchievementColor(achievementId: String): Int {
         val hash = achievementId.hashCode()
         val colorIndex = abs(hash) % ACHIEVEMENT_COLORS.size
@@ -248,10 +250,12 @@ object AchievementDefinitions {
      * @param achievementId The local achievement ID
      * @return The Play Games string resource key, or null if not found
      */
+    @JvmStatic
     fun getPlayGamesResourceKey(achievementId: String?): String? {
         return PLAY_GAMES_MAPPINGS.get(achievementId)
     }
 
+    @JvmStatic
     val all: MutableMap<String?, Achievement?>?
         get() {
             if (achievements == null) {
@@ -263,7 +267,7 @@ object AchievementDefinitions {
         }
 
     private fun add(achievement: Achievement) {
-        achievements!!.put(achievement.getId(), achievement)
+        achievements!!.put(achievement.id, achievement)
     }
 
     private fun initializeAchievements() {

@@ -4,9 +4,13 @@ package roboyard.logic.achievements
  * Represents a single achievement in the game.
  */
 class Achievement {
+    @JvmField
     val id: String?
+    @JvmField
     val nameKey: String? // String resource key for name
+    @JvmField
     val descriptionKey: String? // String resource key for description
+    @JvmField
     val category: AchievementCategory?
     private val iconResId: Int // Legacy fallback icon resource
 
@@ -14,22 +18,25 @@ class Achievement {
      * Get the sprite sheet icon index (0-63).
      * @return The sprite index
      */
+    @JvmField
     val spriteIndex: Int // Index in the sprite sheet (0-63), deprecated
 
     /**
      * Get the drawable resource name for the icon.
      * @return The drawable resource name (e.g., "1_lightning")
      */
+    @JvmField
     val iconDrawableName: String? // Name of drawable resource (e.g., "1_lightning")
     private var unlocked: Boolean
+    @JvmField
     var unlockedTimestamp: Long
 
     @Transient
-    var nameFormatArgs: Array<Any?>?
+    var nameFormatArgs: Array<out Any?>? = null
         private set
 
     @Transient
-    var descriptionFormatArgs: Array<Any?>?
+    var descriptionFormatArgs: Array<out Any?>? = null
         private set
 
     /**
@@ -79,12 +86,12 @@ class Achievement {
     }
 
     fun setNameFormatArgs(vararg args: Any?): Achievement {
-        this.nameFormatArgs = args
+        this.nameFormatArgs = args as Array<out Any?>
         return this
     }
 
     fun setDescriptionFormatArgs(vararg args: Any?): Achievement {
-        this.descriptionFormatArgs = args
+        this.descriptionFormatArgs = args as Array<out Any?>
         return this
     }
 

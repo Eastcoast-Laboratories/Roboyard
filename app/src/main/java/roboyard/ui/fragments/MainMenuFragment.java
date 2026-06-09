@@ -139,11 +139,11 @@ public class MainMenuFragment extends BaseGameFragment {
         super.onResume();
         AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
             if (achievementPopup == null) {
-                Timber.w("[ACHIEVEMENT_POPUP] Root view missing, cannot show achievement %s", achievement.getId());
+                Timber.w("[ACHIEVEMENT_POPUP] Root view missing, cannot show achievement %s", achievement.id);
                 return;
             }
             achievementPopup.show(achievement);
-            Timber.d("[ACHIEVEMENT_POPUP] Main menu displayed achievement: %s", achievement.getId());
+            Timber.d("[ACHIEVEMENT_POPUP] Main menu displayed achievement: %s", achievement.id);
         });
         StreakManager.StreakUpdate streakUpdate = StreakManager.getInstance(requireContext()).recordDailyLogin();
         Timber.d("[STREAK][APP_START] Daily login checked on main menu resume: newDayRecorded=%b, streak=%d",

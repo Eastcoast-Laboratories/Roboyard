@@ -97,9 +97,9 @@ public class AchievementSyncTest {
         JSONArray achievementsArray = new JSONArray();
         for (Achievement achievement : achievements) {
             JSONObject achievementJson = new JSONObject();
-            achievementJson.put("id", achievement.getId());
+            achievementJson.put("id", achievement.id);
             achievementJson.put("unlocked", achievement.isUnlocked());
-            achievementJson.put("unlocked_timestamp", achievement.getUnlockedTimestamp());
+            achievementJson.put("unlocked_timestamp", achievement.unlockedTimestamp);
             achievementsArray.put(achievementJson);
         }
         
@@ -164,9 +164,9 @@ public class AchievementSyncTest {
             JSONArray achievementsArray = new JSONArray();
             for (Achievement achievement : achievementManager.getAllAchievements()) {
                 JSONObject achievementJson = new JSONObject();
-                achievementJson.put("id", achievement.getId());
+                achievementJson.put("id", achievement.id);
                 achievementJson.put("unlocked", achievement.isUnlocked());
-                achievementJson.put("unlocked_timestamp", achievement.getUnlockedTimestamp());
+                achievementJson.put("unlocked_timestamp", achievement.unlockedTimestamp);
                 achievementsArray.put(achievementJson);
             }
             

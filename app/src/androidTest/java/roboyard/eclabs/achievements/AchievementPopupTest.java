@@ -68,7 +68,7 @@ public class AchievementPopupTest {
         
         achievementManager.setUnlockListener(achievement -> {
             listenerCalled[0] = true;
-            unlockedId[0] = achievement.getId();
+            unlockedId[0] = achievement.id;
         });
         
         achievementManager.unlock("first_game");
@@ -85,7 +85,7 @@ public class AchievementPopupTest {
         final List<String> unlockedIds = new ArrayList<>();
         
         achievementManager.setUnlockListener(achievement -> {
-            unlockedIds.add(achievement.getId());
+            unlockedIds.add(achievement.id);
         });
         
         achievementManager.unlock("first_game");
@@ -106,7 +106,7 @@ public class AchievementPopupTest {
         final List<String> unlockedIds = new ArrayList<>();
         
         achievementManager.setUnlockListener(achievement -> {
-            unlockedIds.add(achievement.getId());
+            unlockedIds.add(achievement.id);
         });
         
         // Complete level 1 with optimal moves and 3 stars
@@ -150,7 +150,7 @@ public class AchievementPopupTest {
         final List<String> unlockedIds = new ArrayList<>();
         
         achievementManager.setUnlockListener(achievement -> {
-            unlockedIds.add(achievement.getId());
+            unlockedIds.add(achievement.id);
         });
         
         // Complete a random game with 2 targets
@@ -173,7 +173,7 @@ public class AchievementPopupTest {
         final Achievement[] receivedAchievement = {null};
         
         achievementManager.setUnlockListener(achievement -> {
-            if (achievement.getId().equals("first_game")) {
+            if (achievement.id.equals("first_game")) {
                 receivedAchievement[0] = achievement;
             }
         });
@@ -181,9 +181,9 @@ public class AchievementPopupTest {
         achievementManager.unlock("first_game");
         
         assertNotNull("Achievement should be passed to listener", receivedAchievement[0]);
-        assertEquals("Achievement ID should match", "first_game", receivedAchievement[0].getId());
+        assertEquals("Achievement ID should match", "first_game", receivedAchievement[0].id);
         assertTrue("Achievement should be marked as unlocked", receivedAchievement[0].isUnlocked());
-        assertTrue("Achievement should have a timestamp", receivedAchievement[0].getUnlockedTimestamp() > 0);
+        assertTrue("Achievement should have a timestamp", receivedAchievement[0].unlockedTimestamp > 0);
     }
 
     /**

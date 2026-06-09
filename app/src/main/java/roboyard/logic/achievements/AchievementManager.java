@@ -262,10 +262,10 @@ public class AchievementManager {
         
         // Load unlock status for all achievements
         for (Achievement achievement : achievements.values()) {
-            boolean unlocked = prefs.getBoolean(KEY_PREFIX_UNLOCKED + achievement.getId(), false);
-            long timestamp = prefs.getLong(KEY_PREFIX_TIMESTAMP + achievement.getId(), 0);
+            boolean unlocked = prefs.getBoolean(KEY_PREFIX_UNLOCKED + achievement.id, false);
+            long timestamp = prefs.getLong(KEY_PREFIX_TIMESTAMP + achievement.id, 0);
             achievement.setUnlocked(unlocked);
-            achievement.setUnlockedTimestamp(timestamp);
+            achievement.unlockedTimestamp = timestamp;
         }
         
         // Load counters
@@ -308,7 +308,7 @@ public class AchievementManager {
         
         achievement.setUnlocked(true);
         long timestamp = System.currentTimeMillis();
-        achievement.setUnlockedTimestamp(timestamp);
+        achievement.unlockedTimestamp = timestamp;
         
         // Save to SharedPreferences
         prefs.edit()
@@ -838,7 +838,7 @@ public class AchievementManager {
      */
     public void unlockAll() {
         for (Achievement achievement : achievements.values()) {
-            unlock(achievement.getId());
+            unlock(achievement.id);
         }
         Timber.d("[ACHIEVEMENTS] All achievements unlocked");
     }
@@ -850,7 +850,7 @@ public class AchievementManager {
         Achievement achievement = achievements.get(achievementId);
         if (achievement != null) {
             achievement.setUnlocked(false);
-            achievement.setUnlockedTimestamp(0);
+            achievement.unlockedTimestamp = 0;
             prefs.edit().putBoolean(achievementId, false).apply();
             Timber.d("[ACHIEVEMENTS] Achievement locked: %s", achievementId);
         }
@@ -863,7 +863,7 @@ public class AchievementManager {
         prefs.edit().clear().apply();
         for (Achievement achievement : achievements.values()) {
             achievement.setUnlocked(false);
-            achievement.setUnlockedTimestamp(0);
+            achievement.unlockedTimestamp = 0;
         }
         levelsCompleted = 0;
         perfectSolutions = 0;
@@ -917,9 +917,9 @@ public class AchievementManager {
             JSONArray achievementsArray = new JSONArray();
             for (Achievement achievement : achievements.values()) {
                 JSONObject achievementJson = new JSONObject();
-                achievementJson.put("id", achievement.getId());
+                achievementJson.put("id", achievement.id);
                 achievementJson.put("unlocked", achievement.isUnlocked());
-                achievementJson.put("unlocked_timestamp", achievement.getUnlockedTimestamp());
+                achievementJson.put("unlocked_timestamp", achievement.unlockedTimestamp);
                 achievementsArray.put(achievementJson);
             }
             
@@ -1166,12 +1166,12 @@ public class AchievementManager {
                             }
                             
                             localAchievement.setUnlocked(true);
-                            localAchievement.setUnlockedTimestamp(timestamp > 0 ? timestamp : System.currentTimeMillis());
+                            localAchievement.unlockedTimestamp = timestamp > 0 ? timestamp : System.currentTimeMillis();
                             
                             // Save to SharedPreferences
                             prefs.edit()
                                 .putBoolean(KEY_PREFIX_UNLOCKED + id, true)
-                                .putLong(KEY_PREFIX_TIMESTAMP + id, localAchievement.getUnlockedTimestamp())
+                                .putLong(KEY_PREFIX_TIMESTAMP + id, localAchievement.unlockedTimestamp)
                                 .apply();
                             
                             restoredCount++;
