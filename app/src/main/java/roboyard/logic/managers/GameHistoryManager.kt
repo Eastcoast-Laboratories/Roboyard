@@ -1,6 +1,7 @@
 package roboyard.logic.managers
 
-import android.app.Activity
+import android.app.Application
+import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import roboyard.logic.core.Constants
@@ -34,13 +35,13 @@ object GameHistoryManager {
      * Initialize the history directory if it doesn't exist
      */
     @JvmStatic
-    fun initialize(activity: Activity) {
+    fun initialize(context: Context) {
         try {
             // Create empty history index file if it doesn't exist
-            if (!privateDataExists(activity, HISTORY_INDEX_FILE)) {
+            if (!privateDataExists(context, HISTORY_INDEX_FILE)) {
                 val indexJson = JSONObject()
                 indexJson.put("historyEntries", JSONArray())
-                writePrivateData(activity, HISTORY_INDEX_FILE, indexJson.toString())
+                writePrivateData(context, HISTORY_INDEX_FILE, indexJson.toString())
                 d("Created empty history index file")
             }
         } catch (e: Exception) {
@@ -56,10 +57,10 @@ object GameHistoryManager {
      * @return true if entry was added/updated successfully
      */
     @JvmStatic
-    fun addHistoryEntry(activity: Activity, entry: GameHistoryEntry): Boolean {
+    fun addHistoryEntry(context: Context, entry: GameHistoryEntry): Boolean {
         try {
             // Load existing entries
-            val entries = getHistoryEntries(activity)
+            val entries = getHistoryEntries(context)
 
 
             // Check if we already have an entry with the same mapSignature
@@ -194,7 +195,7 @@ object GameHistoryManager {
             // No trimming - maps are kept forever for unique map tracking
 
             // Save updated index
-            val isSaved = saveHistoryIndex(activity, entries)
+            val isSaved = saveHistoryIndex(context, entries)
 
             d("Added history entry: %s", entry.getMapPath())
             return isSaved
@@ -208,11 +209,11 @@ object GameHistoryManager {
      * Get all history entries
      */
     @JvmStatic
-    fun getHistoryEntries(activity: Activity): MutableList<GameHistoryEntry> {
+    fun getHistoryEntries(context: Context): MutableList<GameHistoryEntry> {
         val entries: MutableList<GameHistoryEntry> = ArrayList<GameHistoryEntry>()
         var anyMigrated = false
         try {
-            val indexJson = readPrivateData(activity, HISTORY_INDEX_FILE)
+            val indexJson = readPrivateData(context, HISTORY_INDEX_FILE)
             d(
                 "[HISTORY] getHistoryEntries: indexJson=%s",
                 if (indexJson != null) "loaded (" + indexJson.length + " chars)" else "null"
@@ -349,7 +350,7 @@ object GameHistoryManager {
 
                     // MIGRATION: If mapSignature is missing, compute it from the saved game file
                     if (entry.mapSignature == null || entry.mapSignature!!.isEmpty()) {
-                        computeAndSetMapSignature(activity, entry)
+                        computeAndSetMapSignature(context, entry)
                         anyMigrated = true
                     }
 
@@ -359,7 +360,7 @@ object GameHistoryManager {
 
                 // Save index if any entries were migrated (to persist the computed signatures or removed prefixes)
                 if (anyMigrated) {
-                    saveHistoryIndex(activity, entries)
+                    saveHistoryIndex(context, entries)
                     d("[HISTORY_MIGRATION] Saved migrated entries (signatures or removed 'history/' prefix) to index")
                 }
             }
@@ -373,15 +374,15 @@ object GameHistoryManager {
     /**
      * Compute and set mapSignature for a history entry by loading its saved game file.
      * This is used for migration of old entries that don't have mapSignature stored.
-     * @param activity The activity context
+     * @param context The context
      * @param entry The history entry to update
      */
-    private fun computeAndSetMapSignature(activity: Activity, entry: GameHistoryEntry) {
+    private fun computeAndSetMapSignature(context: Context, entry: GameHistoryEntry) {
         try {
             // Read the save data from the history file
             var historyFile = File(entry.getMapPath())
             if (!historyFile.isAbsolute()) {
-                historyFile = activity.getFileStreamPath(entry.getMapPath())
+                historyFile = context.getFileStreamPath(entry.getMapPath())
             }
             if (!historyFile.exists()) {
                 w(
@@ -402,7 +403,8 @@ object GameHistoryManager {
             }
 
             // Parse the save data to get the GameState
-            val state = parseFromSaveData(saveData.toString(), activity.getApplication())
+            val application = context.applicationContext as? Application
+            val state = parseFromSaveData(saveData.toString(), application)
             if (state != null) {
                 // Compute signatures from the loaded state
                 val wallSig = state.generateWallSignature()
@@ -426,10 +428,10 @@ object GameHistoryManager {
      * Delete a history entry
      */
     @JvmStatic
-    fun deleteHistoryEntry(activity: Activity, entry: GameHistoryEntry) {
+    fun deleteHistoryEntry(context: Context, entry: GameHistoryEntry) {
         try {
             // Load existing entries
-            val entries = getHistoryEntries(activity)
+            val entries = getHistoryEntries(context)
 
 
             // Remove the entry
@@ -444,11 +446,11 @@ object GameHistoryManager {
 
             if (removed) {
                 // Delete the files
-                deleteHistoryFiles(activity, entry)
+                deleteHistoryFiles(context, entry)
 
 
                 // Save updated index
-                saveHistoryIndex(activity, entries)
+                saveHistoryIndex(context, entries)
 
                 d("Deleted history entry: %s", entry.getMapPath())
             }
@@ -460,15 +462,15 @@ object GameHistoryManager {
     /**
      * Delete history files for an entry
      */
-    private fun deleteHistoryFiles(activity: Activity, entry: GameHistoryEntry) {
+    private fun deleteHistoryFiles(context: Context, entry: GameHistoryEntry) {
         try {
             // Delete map file
-            deletePrivateData(activity, entry.getMapPath())
+            deletePrivateData(context, entry.getMapPath())
 
 
             // Delete preview image if it exists
             if (entry.previewImagePath != null) {
-                FileReadWrite.deletePrivateData(activity, entry.previewImagePath!!)
+                FileReadWrite.deletePrivateData(context, entry.previewImagePath!!)
             }
         } catch (e: Exception) {
             e("Error deleting history files: %s", e.message)
@@ -481,7 +483,7 @@ object GameHistoryManager {
      * @return
      */
     @JvmStatic
-    fun saveHistoryIndex(activity: Activity?, entries: MutableList<GameHistoryEntry>): Boolean {
+    fun saveHistoryIndex(context: Context?, entries: MutableList<GameHistoryEntry>): Boolean {
         try {
             val root = JSONObject()
             val entriesArray = JSONArray()
@@ -561,7 +563,7 @@ object GameHistoryManager {
 
             root.put("historyEntries", entriesArray)
 
-            val isSaved = writePrivateData(activity, HISTORY_INDEX_FILE, root.toString())
+            val isSaved = writePrivateData(context, HISTORY_INDEX_FILE, root.toString())
 
             d("Saved history index with %d entries", entries.size)
             return isSaved
@@ -573,12 +575,12 @@ object GameHistoryManager {
 
     /**
      * Get the next available history index
-     * @param activity the activity
+     * @param context the context
      * @return the next available index
      */
     @JvmStatic
-    fun getNextHistoryIndex(activity: Activity): Int {
-        val entries = getHistoryEntries(activity)
+    fun getNextHistoryIndex(context: Context): Int {
+        val entries = getHistoryEntries(context)
 
         if (entries.isEmpty()) {
             return 0 // Start with index 0 if no entries exist
@@ -599,8 +601,8 @@ object GameHistoryManager {
      * Find the index of a history entry by map path
      */
     @JvmStatic
-    fun getHistoryIndex(activity: Activity, mapPath: String?): Int {
-        val entries = getHistoryEntries(activity)
+    fun getHistoryIndex(context: Context, mapPath: String?): Int {
+        val entries = getHistoryEntries(context)
         for (i in entries.indices) {
             if (entries.get(i).getMapPath() == mapPath) {
                 return i
@@ -619,18 +621,18 @@ object GameHistoryManager {
 
     /**
      * Delete a history entry by path
-     * @param activity The activity context
+     * @param context The context
      * @param mapPath The map path to delete
      * @return true if the history entry was deleted successfully
      */
     @JvmStatic
-    fun deleteHistoryEntry(activity: Activity, mapPath: String): Boolean {
+    fun deleteHistoryEntry(context: Context, mapPath: String): Boolean {
         try {
             d("[HISTORY_DELETE] Attempting to delete history entry: %s", mapPath)
 
 
             // Initialize if needed
-            initialize(activity)
+            initialize(context)
 
 
             // Extract file name from path if it's a full path
@@ -641,7 +643,7 @@ object GameHistoryManager {
 
 
             // Load existing history entries
-            val historyEntries = getHistoryEntries(activity)
+            val historyEntries = getHistoryEntries(context)
             if (historyEntries == null) {
                 e("[HISTORY_DELETE] Failed to load history entries")
                 return false
@@ -721,7 +723,7 @@ object GameHistoryManager {
 
             // Try with the file in the history directory
             if (!fileDeleted) {
-                val historyDir = File(activity.getFilesDir(), HISTORY_DIR)
+                val historyDir = File(context.filesDir, HISTORY_DIR)
                 val fileInHistoryDir = File(historyDir, fileName)
                 if (fileInHistoryDir.exists()) {
                     fileDeleted = fileInHistoryDir.delete()
@@ -741,7 +743,7 @@ object GameHistoryManager {
 
 
             // Update the history index regardless of file deletion success
-            val indexUpdated = saveHistoryIndex(activity, historyEntries)
+            val indexUpdated = saveHistoryIndex(context, historyEntries)
             if (!indexUpdated) {
                 e("Failed to update history index after deletion")
                 return false
@@ -764,11 +766,11 @@ object GameHistoryManager {
      * @return true if this map has never been completed before
      */
     @JvmStatic
-    fun isFirstCompletion(activity: Activity, mapSignature: String?): Boolean {
+    fun isFirstCompletion(context: Context, mapSignature: String?): Boolean {
         if (mapSignature == null || mapSignature.isEmpty()) {
             return true // No signature = treat as new
         }
-        val existing = findByMapSignature(activity, mapSignature)
+        val existing = findByMapSignature(context, mapSignature)
         // An entry is created on the first move (before completion), so we check
         // completionCount == 0 to distinguish "started but not yet completed" from "already completed before".
         return existing == null || existing.completionCount == 0
@@ -776,16 +778,16 @@ object GameHistoryManager {
 
     /**
      * Find a history entry by its map signature.
-     * @param activity The activity context
+     * @param context The context
      * @param mapSignature The unique map signature to find
      * @return The matching entry, or null if not found
      */
     @JvmStatic
-    fun findByMapSignature(activity: Activity, mapSignature: String?): GameHistoryEntry? {
+    fun findByMapSignature(context: Context, mapSignature: String?): GameHistoryEntry? {
         if (mapSignature == null || mapSignature.isEmpty()) {
             return null
         }
-        val entries = getHistoryEntries(activity)
+        val entries = getHistoryEntries(context)
         for (entry in entries) {
             if (mapSignature == entry.mapSignature) {
                 return entry
@@ -796,20 +798,20 @@ object GameHistoryManager {
 
     /**
      * Find all history entries with the same wall signature (same walls, different positions).
-     * @param activity The activity context
+     * @param context The context
      * @param wallSignature The wall signature to match
      * @return List of entries with matching wall layout
      */
     @JvmStatic
     fun findByWallSignature(
-        activity: Activity,
+        context: Context,
         wallSignature: String?
     ): MutableList<GameHistoryEntry?> {
         val result: MutableList<GameHistoryEntry?> = ArrayList<GameHistoryEntry?>()
         if (wallSignature == null || wallSignature.isEmpty()) {
             return result
         }
-        val entries = getHistoryEntries(activity)
+        val entries = getHistoryEntries(context)
         for (entry in entries) {
             if (wallSignature == entry.wallSignature) {
                 result.add(entry)
@@ -820,22 +822,22 @@ object GameHistoryManager {
 
     /**
      * Get the total count of unique maps completed.
-     * @param activity The activity context
+     * @param context The context
      * @return Number of unique maps in history
      */
-    fun getUniqueMapCount(activity: Activity): Int {
-        return getHistoryEntries(activity).size
+    fun getUniqueMapCount(context: Context): Int {
+        return getHistoryEntries(context).size
     }
 
     /**
      * Get the total count of unique completed levels from history.
      * Only entries with map names like "Level N" or matching level file paths are counted.
-     * @param activity The activity context
+     * @param context The context
      * @return Number of unique completed levels in history
      */
     @JvmStatic
-    fun getUniqueCompletedLevelCount(activity: Activity): Int {
-        val entries = getHistoryEntries(activity)
+    fun getUniqueCompletedLevelCount(context: Context): Int {
+        val entries = getHistoryEntries(context)
         val uniqueLevelKeys: MutableSet<String?> = HashSet<String?>()
 
         for (entry in entries) {
@@ -853,12 +855,12 @@ object GameHistoryManager {
 
     /**
      * Get the total count of unique completed levels that earned at least three stars.
-     * @param activity The activity context
+     * @param context The context
      * @return Number of unique 3-star levels in history
      */
     @JvmStatic
-    fun getUniqueThreeStarLevelCount(activity: Activity): Int {
-        val entries = getHistoryEntries(activity)
+    fun getUniqueThreeStarLevelCount(context: Context): Int {
+        val entries = getHistoryEntries(context)
         val uniqueLevelKeys: MutableSet<String?> = HashSet<String?>()
 
         for (entry in entries) {
@@ -912,8 +914,8 @@ object GameHistoryManager {
      * @param mapSignature The map signature to check
      * @return Number of times this map was completed, or 0 if never
      */
-    fun getCompletionCount(activity: Activity, mapSignature: String?): Int {
-        val entry = findByMapSignature(activity, mapSignature)
+    fun getCompletionCount(context: Context, mapSignature: String?): Int {
+        val entry = findByMapSignature(context, mapSignature)
         return if (entry != null) entry.completionCount else 0
     }
 

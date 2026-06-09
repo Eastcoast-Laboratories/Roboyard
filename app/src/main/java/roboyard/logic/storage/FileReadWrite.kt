@@ -1,6 +1,5 @@
 package roboyard.logic.storage
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
@@ -20,21 +19,21 @@ class FileReadWrite {
     companion object {
         /**
          * overwrites the content of a file. Uses PRIVATE mode to overwrite instead of append
-         * @param activity
+         * @param context
          * @param fileLocation
          * @param content
          * @return true if write was successful, false otherwise
          */
         @JvmStatic
-        fun writePrivateData(activity: Activity?, fileLocation: String, content: String): Boolean {
-            if (activity == null) {
-                Timber.d("Activity is null in writePrivateData for file: %s", fileLocation)
+        fun writePrivateData(context: Context?, fileLocation: String, content: String): Boolean {
+            if (context == null) {
+                Timber.d("Context is null in writePrivateData for file: %s", fileLocation)
                 return false
             }
 
             var output: FileOutputStream? = null
             return try {
-                output = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE)
+                output = context.openFileOutput(fileLocation, Context.MODE_PRIVATE)
                 output.write(content.toByteArray(StandardCharsets.UTF_8))
                 true
             } catch (e: Exception) {
@@ -51,14 +50,14 @@ class FileReadWrite {
 
         /**
          * Read private data from a file.
-         * @param activity The activity.
+         * @param context The context.
          * @param fileLocation The file location.
          * @return The data.
          */
         @JvmStatic
-        fun readPrivateData(activity: Activity?, fileLocation: String): String {
-            if (activity == null) {
-                Timber.d("Activity is null in readPrivateData for file: %s", fileLocation)
+        fun readPrivateData(context: Context?, fileLocation: String): String {
+            if (context == null) {
+                Timber.d("Context is null in readPrivateData for file: %s", fileLocation)
                 return ""
             }
 
@@ -66,12 +65,12 @@ class FileReadWrite {
             var input: FileInputStream? = null
             var reader: BufferedReader? = null
             try {
-                val file = activity.applicationContext.getFileStreamPath(fileLocation)
+                val file = context.getFileStreamPath(fileLocation)
                 if (file == null || !file.exists()) {
                     return ""
                 }
 
-                input = activity.openFileInput(fileLocation)
+                input = context.openFileInput(fileLocation)
                 reader = BufferedReader(InputStreamReader(input, StandardCharsets.UTF_8))
 
                 while (true) {
@@ -102,14 +101,14 @@ class FileReadWrite {
 
         /**
          * Check if a private data file exists
-         * @param activity
+         * @param context
          * @param fileLocation
          * @return true if the file exists, false otherwise
          */
         @JvmStatic
-        fun privateDataExists(activity: Activity, fileLocation: String): Boolean {
+        fun privateDataExists(context: Context, fileLocation: String): Boolean {
             return try {
-                val file = activity.applicationContext.getFileStreamPath(fileLocation)
+                val file = context.getFileStreamPath(fileLocation)
                 file != null && file.exists()
             } catch (e: Exception) {
                 Timber.d("Exception in privateDataExists: ${e.message}")
@@ -119,14 +118,14 @@ class FileReadWrite {
 
         /**
          * Delete a private data file
-         * @param activity
+         * @param context
          * @param fileLocation
          * @return true if the file was deleted, false otherwise
          */
         @JvmStatic
-        fun deletePrivateData(activity: Activity, fileLocation: String): Boolean {
+        fun deletePrivateData(context: Context, fileLocation: String): Boolean {
             return try {
-                val file = activity.applicationContext.getFileStreamPath(fileLocation)
+                val file = context.getFileStreamPath(fileLocation)
                 if (file != null && file.exists()) file.delete() else false
             } catch (e: Exception) {
                 Timber.d("Exception in deletePrivateData: ${e.message}")
@@ -136,14 +135,14 @@ class FileReadWrite {
 
         /**
          * List all files in a directory in the app's private storage
-         * @param activity
+         * @param context
          * @param dirName
          * @return array of file names, or null if the directory doesn't exist
          */
         @JvmStatic
-        fun listPrivateDirectory(activity: Activity, dirName: String): Array<String>? {
+        fun listPrivateDirectory(context: Context, dirName: String): Array<String>? {
             return try {
-                val dir = File(activity.filesDir, dirName)
+                val dir = File(context.filesDir, dirName)
                 if (dir.exists() && dir.isDirectory) dir.list() else null
             } catch (e: Exception) {
                 Timber.d("Exception in listPrivateDirectory: ${e.message}")
@@ -153,14 +152,14 @@ class FileReadWrite {
 
         /**
          * Get the path to a save game file
-         * @param activity The activity context
+         * @param context The context
          * @param slotId The slot ID for the save game
          * @return The absolute path to the save game file
          */
         @JvmStatic
-        fun getSaveGamePath(activity: Activity, slotId: Int): String {
+        fun getSaveGamePath(context: Context, slotId: Int): String {
             val fileName = "save_$slotId.dat"
-            val saveDir = File(activity.filesDir, "saves")
+            val saveDir = File(context.filesDir, "saves")
             if (!saveDir.exists()) {
                 saveDir.mkdirs()
             }
@@ -210,21 +209,21 @@ class FileReadWrite {
 
         /**
          * Write a bitmap to a file in private storage
-         * @param activity The activity context
+         * @param context The context
          * @param fileLocation The file name (not full path)
          * @param bitmap The bitmap to save
          * @return true if write was successful, false otherwise
          */
         @JvmStatic
-        fun writeBitmap(activity: Activity?, fileLocation: String, bitmap: Bitmap?): Boolean {
-            if (activity == null || bitmap == null) {
-                Timber.d("Activity or bitmap is null in writeBitmap for file: %s", fileLocation)
+        fun writeBitmap(context: Context?, fileLocation: String, bitmap: Bitmap?): Boolean {
+            if (context == null || bitmap == null) {
+                Timber.d("Context or bitmap is null in writeBitmap for file: %s", fileLocation)
                 return false
             }
 
             var output: FileOutputStream? = null
             return try {
-                output = activity.openFileOutput(fileLocation, Context.MODE_PRIVATE)
+                output = context.openFileOutput(fileLocation, Context.MODE_PRIVATE)
                 bitmap.compress(CompressFormat.PNG, 100, output)
                 true
             } catch (e: Exception) {
@@ -241,20 +240,20 @@ class FileReadWrite {
 
         /**
          * Read a bitmap from a file in private storage
-         * @param activity The activity context
+         * @param context The context
          * @param fileLocation The file name (not full path)
          * @return The bitmap, or null if the file could not be read
          */
         @JvmStatic
-        fun readBitmap(activity: Activity?, fileLocation: String): Bitmap? {
-            if (activity == null) {
-                Timber.d("Activity is null in readBitmap for file: %s", fileLocation)
+        fun readBitmap(context: Context?, fileLocation: String): Bitmap? {
+            if (context == null) {
+                Timber.d("Context is null in readBitmap for file: %s", fileLocation)
                 return null
             }
 
             var input: FileInputStream? = null
             return try {
-                input = activity.openFileInput(fileLocation)
+                input = context.openFileInput(fileLocation)
                 BitmapFactory.decodeStream(input)
             } catch (e: Exception) {
                 Timber.d("Exception in readBitmap for file: $fileLocation: ${e.message}")

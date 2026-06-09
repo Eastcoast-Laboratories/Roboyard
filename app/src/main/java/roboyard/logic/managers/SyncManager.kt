@@ -1,6 +1,5 @@
 package roboyard.logic.managers
 
-import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
@@ -61,8 +60,8 @@ class SyncManager private constructor(context: Context) {
      * Called from Activity.onResume() to catch offline-to-online transitions.
      * Throttled to avoid excessive syncs.
      */
-    fun syncOnResume(activity: Activity?) {
-        val apiClient = RoboyardApiClient.getInstance(context)
+    fun syncOnResume(context: Context? = null) {
+        val apiClient = RoboyardApiClient.getInstance(this.context)
         if (!apiClient.isLoggedIn) {
             d("[AUTO_SYNC] Not logged in, skipping auto-sync")
             return
@@ -84,12 +83,12 @@ class SyncManager private constructor(context: Context) {
 
 
         // Upload achievements (includes streak data)
-        AchievementManager.getInstance(context).syncToServer()
+        AchievementManager.getInstance(this.context).syncToServer()
 
 
         // Upload save games and history
         uploadSaveGames()
-        uploadHistory(activity)
+        uploadHistory()
     }
 
     // ========== SAVE GAMES ==========
@@ -243,11 +242,10 @@ class SyncManager private constructor(context: Context) {
      * Upload all local history entries to server.
      */
     @JvmOverloads
-    fun uploadHistory(activity: Activity?, callback: HistoryUploadCallback? = null) {
+    fun uploadHistory(context: Context? = null, callback: HistoryUploadCallback? = null) {
         try {
-            if (activity == null) { callback?.onError("Activity is null"); return }
-            val entries = GameHistoryManager.getHistoryEntries(activity)
-            uploadHistory(activity, entries, callback)
+            val entries = GameHistoryManager.getHistoryEntries(this.context)
+            uploadHistory(this.context, entries, callback)
         } catch (e: Exception) {
             e(e, "[HISTORY_SYNC] Error loading history entries for upload")
             if (callback != null) {
@@ -261,11 +259,11 @@ class SyncManager private constructor(context: Context) {
      * This overload accepts pre-loaded entries to avoid race conditions with disk I/O.
      */
     fun uploadHistory(
-        activity: Activity?,
+        context: Context?,
         entries: MutableList<GameHistoryEntry>?,
         callback: HistoryUploadCallback?
     ) {
-        val apiClient = RoboyardApiClient.getInstance(context)
+        val apiClient = RoboyardApiClient.getInstance(this.context)
         if (!apiClient.isLoggedIn) {
             d("[HISTORY_SYNC] Not logged in, skipping history upload")
             if (callback != null) callback.onError("Not logged in")
@@ -294,7 +292,7 @@ class SyncManager private constructor(context: Context) {
 
 
                 // Read the actual map data from the history file
-                val mapData = readHistoryFileData(activity, entry)
+                val mapData = readHistoryFileData(this.context, entry)
                 if (mapData == null || mapData.isEmpty()) continue
 
                 val historyJson = JSONObject()
@@ -418,7 +416,7 @@ class SyncManager private constructor(context: Context) {
                                 if (reLoginSuccess == true) {
                                     d("[HISTORY_SYNC] Re-login successful, retrying upload...")
                                     // Retry the upload with the same entries
-                                    uploadHistory(activity, entries, callback)
+                                    uploadHistory(context, entries, callback)
                                 } else {
                                     e("[HISTORY_SYNC] Re-login failed, user needs to login manually")
                                     if (callback != null) {
@@ -450,9 +448,9 @@ class SyncManager private constructor(context: Context) {
     /**
      * Download history entries from server and write to local storage.
      */
-    fun downloadHistory(activity: Activity, callback: ApiCallback<Int?>?) {
+    fun downloadHistory(context: Context, callback: ApiCallback<Int?>?) {
         d("[HISTORY_SYNC] downloadHistory called")
-        val apiClient = RoboyardApiClient.getInstance(context)
+        val apiClient = RoboyardApiClient.getInstance(this.context)
         if (!apiClient.isLoggedIn) {
             d("[HISTORY_SYNC] Not logged in, skipping history download")
             if (callback != null) callback.onError("Not logged in")
@@ -465,8 +463,8 @@ class SyncManager private constructor(context: Context) {
                 var restoredCount = 0
 
                 try {
-                    GameHistoryManager.initialize(activity)
-                    val existingEntries = GameHistoryManager.getHistoryEntries(activity)
+                    GameHistoryManager.initialize(this@SyncManager.context)
+                    val existingEntries = GameHistoryManager.getHistoryEntries(this@SyncManager.context)
 
                     for (i in 0..<(history?.length() ?: 0)) {
                         val entry = history!!.getJSONObject(i)
@@ -503,7 +501,7 @@ class SyncManager private constructor(context: Context) {
                                     historyPath
                                 )
                             } else {
-                                val nextIndex = GameHistoryManager.getNextHistoryIndex(activity)
+                                val nextIndex = GameHistoryManager.getNextHistoryIndex(this@SyncManager.context)
                                 historyPath = GameHistoryManager.indexToPath(nextIndex)
                             }
 
@@ -512,7 +510,7 @@ class SyncManager private constructor(context: Context) {
                             var dataToWrite = saveData
                             if (expectedMapPath != null) {
                                 try {
-                                    val `is` = activity.getAssets().open("Maps/" + expectedMapPath)
+                                    val `is` = this@SyncManager.context.assets.open("Maps/" + expectedMapPath)
                                     dataToWrite = Scanner(`is`).useDelimiter("\\A").next()
                                     `is`.close()
                                     d(
@@ -528,7 +526,7 @@ class SyncManager private constructor(context: Context) {
                                 }
                             }
 
-                            writePrivateData(activity, historyPath, dataToWrite)
+                            writePrivateData(this@SyncManager.context, historyPath, dataToWrite)
 
                             // Create a history entry
                             val historyEntry = GameHistoryEntry()
@@ -592,7 +590,7 @@ class SyncManager private constructor(context: Context) {
                                 historyEntry.setCompletionStars(starsList)
                             }
 
-                            GameHistoryManager.addHistoryEntry(activity, historyEntry)
+                            GameHistoryManager.addHistoryEntry(this@SyncManager.context, historyEntry)
                             restoredCount++
 
 
@@ -629,7 +627,7 @@ class SyncManager private constructor(context: Context) {
 
 
                     // Restore level stars from ALL history entries to LevelCompletionManager
-                    restoreLevelStarsFromHistory(activity, history ?: JSONArray())
+                    restoreLevelStarsFromHistory(history ?: JSONArray())
                 } catch (e: Exception) {
                     e(e, "[HISTORY_SYNC] Error restoring history")
                     if (callback != null) callback.onError("Error restoring history: " + e.message)
@@ -650,7 +648,7 @@ class SyncManager private constructor(context: Context) {
     /**
      * Perform full sync after login: download everything from server, then upload local data.
      */
-    fun fullSyncOnLogin(activity: Activity, callback: ApiCallback<String?>?) {
+    fun fullSyncOnLogin(context: Context, callback: ApiCallback<String?>?) {
         d("[FULL_SYNC] Starting full sync after login")
 
 
@@ -661,7 +659,7 @@ class SyncManager private constructor(context: Context) {
 
 
                 // Step 2: Download history
-                downloadHistory(activity, object : ApiCallback<Int?> {
+                downloadHistory(this@SyncManager.context, object : ApiCallback<Int?> {
                     override fun onSuccess(historyRestored: Int?) {
                         d("[FULL_SYNC] History downloaded: %d restored", historyRestored)
 
@@ -669,7 +667,7 @@ class SyncManager private constructor(context: Context) {
                         // Count level entries separately
                         var levelsRestored = 0
                         try {
-                            val allEntries = GameHistoryManager.getHistoryEntries(activity)
+                            val allEntries = GameHistoryManager.getHistoryEntries(this@SyncManager.context)
                             for (entry in allEntries) {
                                 if (entry.mapName != null && entry.mapName!!.startsWith("Level ")) {
                                     levelsRestored++
@@ -684,7 +682,7 @@ class SyncManager private constructor(context: Context) {
 
                         // Step 3: Upload local data to server
                         uploadSaveGames()
-                        uploadHistory(activity)
+                        uploadHistory()
 
                         var summary =
                             savesRestored.toString() + " saves, " + levelsRestored + " levels restored"
@@ -699,7 +697,7 @@ class SyncManager private constructor(context: Context) {
                         e("[FULL_SYNC] History download failed: %s", error)
                         // Still try to upload local data
                         uploadSaveGames()
-                        uploadHistory(activity)
+                        uploadHistory()
                         if (callback != null) callback.onSuccess(savesRestored.toString() + " saves restored (history failed)")
                     }
                 })
@@ -708,10 +706,10 @@ class SyncManager private constructor(context: Context) {
             override fun onError(error: String?) {
                 e("[FULL_SYNC] Save game download failed: %s", error)
                 // Still try history
-                downloadHistory(activity, object : ApiCallback<Int?> {
+                downloadHistory(this@SyncManager.context, object : ApiCallback<Int?> {
                     override fun onSuccess(historyRestored: Int?) {
                         uploadSaveGames()
-                        uploadHistory(activity)
+                        uploadHistory()
                         if (callback != null) callback.onSuccess(historyRestored.toString() + " history entries restored (saves failed)")
                     }
 
@@ -746,9 +744,9 @@ class SyncManager private constructor(context: Context) {
         }
     }
 
-    private fun readHistoryFileData(activity: Activity?, entry: GameHistoryEntry): String? {
+    private fun readHistoryFileData(context: Context?, entry: GameHistoryEntry): String? {
         try {
-            return readPrivateData(activity, entry.getMapPath())
+            return readPrivateData(this.context, entry.getMapPath())
         } catch (e: Exception) {
             e(e, "[HISTORY_SYNC] Error reading history file: %s", entry.getMapPath())
             return null
@@ -836,9 +834,9 @@ class SyncManager private constructor(context: Context) {
      * Parses "Level X" from map_name and sets stars in the level completion data.
      * Only updates if the downloaded stars are better than what's already stored.
      */
-    private fun restoreLevelStarsFromHistory(activity: Activity, history: JSONArray) {
+    private fun restoreLevelStarsFromHistory(history: JSONArray) {
         try {
-            val lcm = LevelCompletionManager.getInstance(activity)
+            val lcm = LevelCompletionManager.getInstance(this.context)
             var restoredLevels = 0
 
             for (i in 0..<history.length()) {

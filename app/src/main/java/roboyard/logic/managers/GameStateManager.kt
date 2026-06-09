@@ -2315,7 +2315,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     val finalStars = data.getStars()
                     val finalMoves = state.moveCount
 
-                    val currentActivity = this.activity
+                    val currentActivity = this.context
                     if (currentActivity != null) {
                         Thread(Runnable {
                             try {
@@ -2387,9 +2387,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @param levelId The level ID (>0 for levels, <=0 for random games)
      */
     private fun triggerHistoryUpload(levelId: Int) {
-        val currentActivity = this.activity
-        if (currentActivity == null) {
-            e("[HISTORY_SYNC] Activity is null, cannot upload history")
+        val currentContext = this.context
+        if (currentContext == null) {
+            e("[HISTORY_SYNC] Context is null, cannot upload history")
             return
         }
 
@@ -2403,7 +2403,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
                 d("[HISTORY_SYNC] Starting upload for %s...", gameType)
                 SyncManager.getInstance(context!!)
-                    .uploadHistory(currentActivity, object : HistoryUploadCallback {
+                    .uploadHistory(currentContext, object : HistoryUploadCallback {
                         override fun onSuccess(syncedCount: Int) {
                             d(
                                 "[HISTORY_SYNC] Upload callback: success with %d entries synced after %s",
@@ -2726,9 +2726,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             return false
         }
 
-        val activity = this.activity
+        val activity = this.context
         if (activity == null) {
-            e("[HISTORY_NAV] Activity is null, cannot load previous history entry")
+            e("[HISTORY_NAV] Context is null, cannot load previous history entry")
             return false
         }
 
@@ -2795,9 +2795,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             return false
         }
 
-        val activity = this.activity
+        val activity = this.context
         if (activity == null) {
-            e("[HISTORY_NAV] Activity is null, cannot load next history entry")
+            e("[HISTORY_NAV] Context is null, cannot load next history entry")
             return false
         }
 
@@ -2863,7 +2863,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             return false
         }
 
-        val activity = this.activity
+        val activity = this.context
         if (activity == null) {
             return false
         }
@@ -3026,7 +3026,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      */
     private fun updateHintTrackingInHistory() {
         try {
-            val activity = this.activity
+            val activity = this.context
             val gameState = currentState.getValue()
             if (activity == null || gameState == null) return
 
@@ -3148,10 +3148,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 return
             }
 
-            // Get activity from weak reference to avoid memory leaks
-            val activity = this.activity
+            // Get context from weak reference to avoid memory leaks
+            val activity = this.context
             if (activity == null) {
-                e("[HISTORY] Cannot save to history: no activity")
+                e("[HISTORY] Cannot save to history: no context")
                 return
             }
 
