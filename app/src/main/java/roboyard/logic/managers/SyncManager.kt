@@ -175,7 +175,7 @@ class SyncManager private constructor(context: Context) {
         }
 
         apiClient.fetchSaveGames(object : ApiCallback<JSONArray?> {
-            override fun onSuccess(saves: JSONArray) {
+            override fun onSuccess(saves: JSONArray?) {
                 var restoredCount = 0
 
                 try {
@@ -184,8 +184,8 @@ class SyncManager private constructor(context: Context) {
                         saveDir.mkdirs()
                     }
 
-                    for (i in 0..<saves.length()) {
-                        val save = saves.getJSONObject(i)
+                    for (i in 0..<(saves?.length() ?: 0)) {
+                        val save = saves!!.getJSONObject(i)
                         val slotId = save.getInt("slot_id")
                         val saveData = save.getString("save_data")
 
@@ -245,6 +245,7 @@ class SyncManager private constructor(context: Context) {
     @JvmOverloads
     fun uploadHistory(activity: Activity?, callback: HistoryUploadCallback? = null) {
         try {
+            if (activity == null) { callback?.onError("Activity is null"); return }
             val entries = GameHistoryManager.getHistoryEntries(activity)
             uploadHistory(activity, entries, callback)
         } catch (e: Exception) {
@@ -379,10 +380,10 @@ class SyncManager private constructor(context: Context) {
 
             d("[HISTORY_SYNC] Uploading %d history entries to server", historyArray.length())
             apiClient.syncHistory(historyArray, object : ApiCallback<JSONObject?> {
-                override fun onSuccess(response: JSONObject) {
-                    val syncedCount = response.optInt("synced_count", 0)
-                    val skippedCount = response.optInt("skipped_count", 0)
-                    val totalEntries = response.optInt("total_entries", 0)
+                override fun onSuccess(response: JSONObject?) {
+                    val syncedCount = response?.optInt("synced_count", 0) ?: 0
+                    val skippedCount = response?.optInt("skipped_count", 0) ?: 0
+                    val totalEntries = response?.optInt("total_entries", 0) ?: 0
 
                     d(
                         "[HISTORY_SYNC] ✓ Upload complete: synced=%d, skipped=%d, total=%d",
@@ -413,8 +414,8 @@ class SyncManager private constructor(context: Context) {
                     ) {
                         d("[HISTORY_SYNC] Attempting auto re-login after 401...")
                         apiClient.attemptReLogin(object : ApiCallback<Boolean?> {
-                            override fun onSuccess(reLoginSuccess: Boolean) {
-                                if (reLoginSuccess) {
+                            override fun onSuccess(reLoginSuccess: Boolean?) {
+                                if (reLoginSuccess == true) {
                                     d("[HISTORY_SYNC] Re-login successful, retrying upload...")
                                     // Retry the upload with the same entries
                                     uploadHistory(activity, entries, callback)
@@ -460,15 +461,15 @@ class SyncManager private constructor(context: Context) {
 
         d("[HISTORY_SYNC] Logged in, fetching history from server")
         apiClient.fetchHistory(object : ApiCallback<JSONArray?> {
-            override fun onSuccess(history: JSONArray) {
+            override fun onSuccess(history: JSONArray?) {
                 var restoredCount = 0
 
                 try {
                     GameHistoryManager.initialize(activity)
                     val existingEntries = GameHistoryManager.getHistoryEntries(activity)
 
-                    for (i in 0..<history.length()) {
-                        val entry = history.getJSONObject(i)
+                    for (i in 0..<(history?.length() ?: 0)) {
+                        val entry = history!!.getJSONObject(i)
                         val mapName = entry.optString("map_name", "Unnamed")
                         val saveData = entry.getString("save_data")
 
@@ -566,7 +567,7 @@ class SyncManager private constructor(context: Context) {
                                 entry.optLong("last_completion_timestamp", 0)
                             val tsArray = entry.optJSONArray("completion_timestamps")
                             if (tsArray != null) {
-                                val timestamps: MutableList<Long?> = ArrayList<Long?>()
+                                val timestamps = mutableListOf<Long>()
                                 for (j in 0..<tsArray.length()) {
                                     timestamps.add(tsArray.optLong(j, 0))
                                 }
@@ -576,7 +577,7 @@ class SyncManager private constructor(context: Context) {
                             // to keep them aligned with completion_timestamps
                             val movesArrayDl = entry.optJSONArray("completion_moves")
                             if (movesArrayDl != null) {
-                                val movesList: MutableList<Int?> = ArrayList<Int?>()
+                                val movesList = mutableListOf<Int>()
                                 for (j in 0..<movesArrayDl.length()) {
                                     movesList.add(movesArrayDl.optInt(j, 0))
                                 }
@@ -584,7 +585,7 @@ class SyncManager private constructor(context: Context) {
                             }
                             val starsArrayDl = entry.optJSONArray("completion_stars")
                             if (starsArrayDl != null) {
-                                val starsList: MutableList<Int?> = ArrayList<Int?>()
+                                val starsList = mutableListOf<Int>()
                                 for (j in 0..<starsArrayDl.length()) {
                                     starsList.add(starsArrayDl.optInt(j, 0))
                                 }
@@ -628,7 +629,7 @@ class SyncManager private constructor(context: Context) {
 
 
                     // Restore level stars from ALL history entries to LevelCompletionManager
-                    restoreLevelStarsFromHistory(activity, history)
+                    restoreLevelStarsFromHistory(activity, history ?: JSONArray())
                 } catch (e: Exception) {
                     e(e, "[HISTORY_SYNC] Error restoring history")
                     if (callback != null) callback.onError("Error restoring history: " + e.message)
@@ -661,7 +662,7 @@ class SyncManager private constructor(context: Context) {
 
                 // Step 2: Download history
                 downloadHistory(activity, object : ApiCallback<Int?> {
-                    override fun onSuccess(historyRestored: Int) {
+                    override fun onSuccess(historyRestored: Int?) {
                         d("[FULL_SYNC] History downloaded: %d restored", historyRestored)
 
 
@@ -678,7 +679,7 @@ class SyncManager private constructor(context: Context) {
                             e(e, "[FULL_SYNC] Error counting level entries")
                         }
 
-                        val randomMapsRestored = historyRestored - levelsRestored
+                        val randomMapsRestored = (historyRestored ?: 0) - levelsRestored
 
 
                         // Step 3: Upload local data to server
@@ -921,6 +922,7 @@ class SyncManager private constructor(context: Context) {
         private var instance: SyncManager? = null
         private const val MIN_SYNC_INTERVAL_MS: Long = 60000 // 1 minute between auto-syncs
 
+        @JvmStatic
         @Synchronized
         fun getInstance(context: Context): SyncManager {
             if (instance == null) {

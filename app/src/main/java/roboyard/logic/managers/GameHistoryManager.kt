@@ -18,15 +18,8 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.lang.Long
 import java.util.Collections
 import java.util.Locale
-import kotlin.Boolean
-import kotlin.Comparator
-import kotlin.Exception
-import kotlin.Int
-import kotlin.String
-import kotlin.also
 
 /**
  * Manager class for handling game history entries.
@@ -40,6 +33,7 @@ object GameHistoryManager {
     /**
      * Initialize the history directory if it doesn't exist
      */
+    @JvmStatic
     fun initialize(activity: Activity) {
         try {
             // Create empty history index file if it doesn't exist
@@ -61,6 +55,7 @@ object GameHistoryManager {
      * 
      * @return true if entry was added/updated successfully
      */
+    @JvmStatic
     fun addHistoryEntry(activity: Activity, entry: GameHistoryEntry): Boolean {
         try {
             // Load existing entries
@@ -188,12 +183,10 @@ object GameHistoryManager {
 
             // Sort by lastCompletionTimestamp (most recently played first)
             Collections.sort<GameHistoryEntry?>(entries, object : Comparator<GameHistoryEntry?> {
-                override fun compare(o1: GameHistoryEntry, o2: GameHistoryEntry): Int {
-                    val t1 =
-                        if (o1.lastCompletionTimestamp > 0) o1.lastCompletionTimestamp else o1.timestamp
-                    val t2 =
-                        if (o2.lastCompletionTimestamp > 0) o2.lastCompletionTimestamp else o2.timestamp
-                    return Long.compare(t2, t1)
+                override fun compare(o1: GameHistoryEntry?, o2: GameHistoryEntry?): Int {
+                    val t1 = if ((o1?.lastCompletionTimestamp ?: 0) > 0) o1?.lastCompletionTimestamp ?: 0 else o1?.timestamp ?: 0
+                    val t2 = if ((o2?.lastCompletionTimestamp ?: 0) > 0) o2?.lastCompletionTimestamp ?: 0 else o2?.timestamp ?: 0
+                    return t2.compareTo(t1)
                 }
             })
 
@@ -214,6 +207,7 @@ object GameHistoryManager {
     /**
      * Get all history entries
      */
+    @JvmStatic
     fun getHistoryEntries(activity: Activity): MutableList<GameHistoryEntry> {
         val entries: MutableList<GameHistoryEntry> = ArrayList<GameHistoryEntry>()
         var anyMigrated = false
@@ -294,32 +288,29 @@ object GameHistoryManager {
                     // Load completion timestamps array
                     if (entryJson.has("completionTimestamps")) {
                         val timestamps = entryJson.getJSONArray("completionTimestamps")
-                        val completionTimestamps: MutableList<kotlin.Long?> =
-                            ArrayList<kotlin.Long?>()
+                        val completionTimestamps = mutableListOf<Long>()
                         for (j in 0..<timestamps.length()) {
                             completionTimestamps.add(timestamps.getLong(j))
                         }
                         entry.setCompletionTimestamps(completionTimestamps)
                     } else {
                         // Legacy entry - create list with single timestamp
-                        val completionTimestamps: MutableList<kotlin.Long?> =
-                            ArrayList<kotlin.Long?>()
+                        val completionTimestamps = mutableListOf<Long>()
                         completionTimestamps.add(entry.timestamp)
                         entry.setCompletionTimestamps(completionTimestamps)
                     }
 
-                    val completionSize =
-                        if (entry.getCompletionTimestamps() != null) entry.getCompletionTimestamps().size else 0
+                    val completionSize = entry.getCompletionTimestamps().size
 
                     if (entryJson.has("completionMoves")) {
                         val movesArray = entryJson.getJSONArray("completionMoves")
-                        val completionMoves: MutableList<Int?> = ArrayList<Int?>()
+                        val completionMoves: MutableList<Int> = ArrayList<Int>()
                         for (j in 0..<movesArray.length()) {
                             completionMoves.add(movesArray.getInt(j))
                         }
                         entry.setCompletionMoves(completionMoves)
                     } else {
-                        val completionMoves: MutableList<Int?> = ArrayList<Int?>()
+                        val completionMoves: MutableList<Int> = ArrayList<Int>()
                         for (j in 0..<completionSize) {
                             completionMoves.add(entry.movesMade)
                         }
@@ -332,13 +323,13 @@ object GameHistoryManager {
 
                     if (entryJson.has("completionStars")) {
                         val starsArray = entryJson.getJSONArray("completionStars")
-                        val completionStars: MutableList<Int?> = ArrayList<Int?>()
+                        val completionStars: MutableList<Int> = ArrayList<Int>()
                         for (j in 0..<starsArray.length()) {
                             completionStars.add(starsArray.getInt(j))
                         }
                         entry.setCompletionStars(completionStars)
                     } else {
-                        val completionStars: MutableList<Int?> = ArrayList<Int?>()
+                        val completionStars: MutableList<Int> = ArrayList<Int>()
                         for (j in 0..<completionSize) {
                             completionStars.add(entry.starsEarned)
                         }
@@ -434,6 +425,7 @@ object GameHistoryManager {
     /**
      * Delete a history entry
      */
+    @JvmStatic
     fun deleteHistoryEntry(activity: Activity, entry: GameHistoryEntry) {
         try {
             // Load existing entries
@@ -488,6 +480,7 @@ object GameHistoryManager {
      * 
      * @return
      */
+    @JvmStatic
     fun saveHistoryIndex(activity: Activity?, entries: MutableList<GameHistoryEntry>): Boolean {
         try {
             val root = JSONObject()
@@ -583,6 +576,7 @@ object GameHistoryManager {
      * @param activity the activity
      * @return the next available index
      */
+    @JvmStatic
     fun getNextHistoryIndex(activity: Activity): Int {
         val entries = getHistoryEntries(activity)
 
@@ -604,6 +598,7 @@ object GameHistoryManager {
     /**
      * Find the index of a history entry by map path
      */
+    @JvmStatic
     fun getHistoryIndex(activity: Activity, mapPath: String?): Int {
         val entries = getHistoryEntries(activity)
         for (i in entries.indices) {
@@ -628,6 +623,7 @@ object GameHistoryManager {
      * @param mapPath The map path to delete
      * @return true if the history entry was deleted successfully
      */
+    @JvmStatic
     fun deleteHistoryEntry(activity: Activity, mapPath: String): Boolean {
         try {
             d("[HISTORY_DELETE] Attempting to delete history entry: %s", mapPath)
@@ -767,6 +763,7 @@ object GameHistoryManager {
      * @param mapSignature The unique map signature to check
      * @return true if this map has never been completed before
      */
+    @JvmStatic
     fun isFirstCompletion(activity: Activity, mapSignature: String?): Boolean {
         if (mapSignature == null || mapSignature.isEmpty()) {
             return true // No signature = treat as new
@@ -783,6 +780,7 @@ object GameHistoryManager {
      * @param mapSignature The unique map signature to find
      * @return The matching entry, or null if not found
      */
+    @JvmStatic
     fun findByMapSignature(activity: Activity, mapSignature: String?): GameHistoryEntry? {
         if (mapSignature == null || mapSignature.isEmpty()) {
             return null
@@ -802,6 +800,7 @@ object GameHistoryManager {
      * @param wallSignature The wall signature to match
      * @return List of entries with matching wall layout
      */
+    @JvmStatic
     fun findByWallSignature(
         activity: Activity,
         wallSignature: String?
@@ -834,6 +833,7 @@ object GameHistoryManager {
      * @param activity The activity context
      * @return Number of unique completed levels in history
      */
+    @JvmStatic
     fun getUniqueCompletedLevelCount(activity: Activity): Int {
         val entries = getHistoryEntries(activity)
         val uniqueLevelKeys: MutableSet<String?> = HashSet<String?>()
@@ -856,6 +856,7 @@ object GameHistoryManager {
      * @param activity The activity context
      * @return Number of unique 3-star levels in history
      */
+    @JvmStatic
     fun getUniqueThreeStarLevelCount(activity: Activity): Int {
         val entries = getHistoryEntries(activity)
         val uniqueLevelKeys: MutableSet<String?> = HashSet<String?>()

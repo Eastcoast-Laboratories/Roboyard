@@ -18,7 +18,7 @@ No further package moves are pending.
 roboyard.logic/
 ├── core/           (Kotlin: GameState, GameLogic, GameHistoryEntry, Constants, Wall*, ...)
 ├── solver/         (Kotlin: RR*/ERR*/Solver* classes)
-├── managers/       (Java: GameStateManager, GameHistoryManager, SyncManager,
+├── managers/       (Java: GameStateManager, 1 SyncManager,
 │                    DataExportImportManager; Kotlin: LevelCompletionManager,
 │                    PlayGamesManager)
 ├── network/        (Kotlin: RoboyardApiClient)
@@ -51,14 +51,10 @@ The `logic.core` and `logic.solver` packages are already fully Kotlin. The remai
 | Package (path in Android Studio) | File | Android deps to abstract before KMP |
 |----------------------------------|------|--------------------------------------|
 | `roboyard.logic.managers` | `GameStateManager.java` | `AndroidViewModel`, `Activity`, `LiveData`, `GameGridView`, `RobotAnimationManager` |
-| `roboyard.logic.managers` | `GameHistoryManager.java` | `Activity`, file I/O |
-| `roboyard.logic.managers` | `SyncManager.java` | `Context`, network |
-| `roboyard.logic.managers` | `DataExportImportManager.java` | `Context`, file I/O |
 | `roboyard.logic.achievements` | `AchievementManager.java` | `Activity`, `SharedPreferences` |
 
 ### Suggested conversion order
-1. [ ] - Network/file/history infra still pending Java → Kotlin:  `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
-2. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `AchievementManager` and `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
+1. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `AchievementManager` and `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
 
 ## KMP notes
 - Files depending on `SharedPreferences`, `Activity`, `ViewModel`, `LiveData`, `Bitmap` or `HttpURLConnection` cannot be shared with iOS as-is.
