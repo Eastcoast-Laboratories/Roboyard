@@ -51,10 +51,41 @@ The `logic.core` and `logic.solver` packages are already fully Kotlin. The remai
 | Package (path in Android Studio) | File | Android deps to abstract before KMP |
 |----------------------------------|------|--------------------------------------|
 | `roboyard.logic.managers` | `GameStateManager.java` | `AndroidViewModel`, `Activity`, `LiveData`, `GameGridView`, `RobotAnimationManager` |
-| `roboyard.logic.achievements` | `AchievementManager.java` | `Activity`, `SharedPreferences` |
 
 ### Suggested conversion order
-1. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
+1. [ ] - Last remaining Java → Kotlin: `GameStateManager` (see strategy below).
+
+### GameStateManager conversion strategy
+`GameStateManager` is the central hub: ~4600 lines, ~230 methods, ~370 external
+references across 13 files (184 in `GameFragment.java`, 68 in `GameGridView.java`).
+
+**Decision: convert in one pass with the AS converter, then fix compile errors
+iteratively. Do NOT pre-extract/abstract the UI parts first** — that is a separate,
+later KMP step. For the Kotlin conversion the class may stay an `AndroidViewModel`
+with `LiveData`.
+
+Steps:
+1. [ ] - In Android Studio: *Convert Java File to Kotlin File* on `GameStateManager.java`.
+2. [ ] - Run `./gradlew assembleDebug` and fix compile errors iteratively (same known
+   classes as previous conversions — see checklist below). Expect many follow-up errors
+   in the Java callers, especially `GameFragment.java` and `GameGridView.java`.
+3. [ ] - **Runtime-test afterwards** (start game, save/load, history, robot animations):
+   the auto-converter can introduce subtle nullability/`LiveData`-generics behaviour bugs
+   that still compile.
+
+### Known auto-converter pitfalls (checklist)
+These recurred in every prior conversion:
+- Java getter `getX()` → access Kotlin property directly as `.x`.
+- `static` members → `companion object`/`object` + `@JvmStatic` (else Java callers break,
+  e.g. `getInstance`, `saveHistoryIndex`).
+- `return@methodName` artifact → use the correct lambda label, e.g. `return@Runnable`.
+- Remove spurious `import java.lang.Long` (collides with Kotlin `Long`; breaks `Long.compare`).
+- Interface overrides must match the exact nullability of the signature
+  (e.g. `onSuccess(result: T?)`).
+- Collections: `ArrayList<Long>()` → `mutableListOf<Long>()`; match target signatures
+  (`List<Long>` not `MutableList<Long?>`); iterate nullable map values with `.filterNotNull()`.
+- Run `./gradlew assembleDebug` after each file and fix errors one by one.
+- Do NOT abstract Android dependencies here — that is a later, separate KMP step.
 
 ## KMP notes
 - Files depending on `SharedPreferences`, `Activity`, `ViewModel`, `LiveData`, `Bitmap` or `HttpURLConnection` cannot be shared with iOS as-is.
