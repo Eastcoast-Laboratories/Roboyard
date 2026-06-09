@@ -44,7 +44,7 @@ class AchievementManager private constructor(context: Context) {
     private val achievements: MutableMap<String?, Achievement?>?
     private var unlockListener: AchievementUnlockListener? = null
     private var currentActivity: WeakReference<Activity?>? = null
-    private var uiNotifier: WeakReference<UiNotifier?>? = null
+    private var uiNotifier: UiNotifier? = null
 
     fun interface UiNotifier {
         fun showMessage(message: String)
@@ -86,7 +86,7 @@ class AchievementManager private constructor(context: Context) {
         // Create Android UiNotifier adapter when activity is set
         if (activity != null) {
             val ctx = this.context
-            this.uiNotifier = WeakReference(UiNotifier { message ->
+            this.uiNotifier = UiNotifier { message ->
                 Handler(Looper.getMainLooper()).post {
                     try {
                         Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
@@ -94,7 +94,7 @@ class AchievementManager private constructor(context: Context) {
                         e(e, "[UPDATE_NUDGE] Failed to show toast")
                     }
                 }
-            })
+            }
         }
         // Show any pending update nudge now that we have an activity
         if (activity != null && pendingNudgeVersion != null) {
@@ -108,7 +108,14 @@ class AchievementManager private constructor(context: Context) {
      * Use this on non-Android platforms (KMP/iOS) instead of setCurrentActivity.
      */
     fun setUiNotifier(notifier: UiNotifier?) {
-        this.uiNotifier = if (notifier != null) WeakReference(notifier) else null
+        this.uiNotifier = notifier
+    }
+    
+    /**
+     * Clear UI notifier to prevent memory leaks when activity is destroyed
+     */
+    fun clearUiNotifier() {
+        this.uiNotifier = null
     }
 
     /**
@@ -135,7 +142,7 @@ class AchievementManager private constructor(context: Context) {
 
     private fun showUpdateNudgeInternal(version: String?) {
         val message = context.getString(R.string.update_available_nudge, version)
-        uiNotifier?.get()?.showMessage(message) ?: d("[UPDATE_NUDGE] No UiNotifier available, cannot show nudge: version=%s", version)
+        uiNotifier?.showMessage(message) ?: d("[UPDATE_NUDGE] No UiNotifier available, cannot show nudge: version=%s", version)
     }
 
     /**

@@ -60,7 +60,7 @@ class SyncManager private constructor(context: Context) {
      * Called from Activity.onResume() to catch offline-to-online transitions.
      * Throttled to avoid excessive syncs.
      */
-    fun syncOnResume(context: Context? = null) {
+    fun syncOnResume() {
         val apiClient = RoboyardApiClient.getInstance(this.context)
         if (!apiClient.isLoggedIn) {
             d("[AUTO_SYNC] Not logged in, skipping auto-sync")
@@ -242,7 +242,7 @@ class SyncManager private constructor(context: Context) {
      * Upload all local history entries to server.
      */
     @JvmOverloads
-    fun uploadHistory(context: Context? = null, callback: HistoryUploadCallback? = null) {
+    fun uploadHistory(@Suppress("UNUSED_PARAMETER") _context: Context? = null, callback: HistoryUploadCallback? = null) {
         try {
             val entries = GameHistoryManager.getHistoryEntries(this.context)
             uploadHistory(this.context, entries, callback)

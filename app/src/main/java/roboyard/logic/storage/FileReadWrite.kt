@@ -66,7 +66,7 @@ class FileReadWrite {
             var reader: BufferedReader? = null
             try {
                 val file = context.getFileStreamPath(fileLocation)
-                if (file == null || !file.exists()) {
+                if (!file.exists()) {
                     return ""
                 }
 
@@ -109,7 +109,7 @@ class FileReadWrite {
         fun privateDataExists(context: Context, fileLocation: String): Boolean {
             return try {
                 val file = context.getFileStreamPath(fileLocation)
-                file != null && file.exists()
+                file.exists()
             } catch (e: Exception) {
                 Timber.d("Exception in privateDataExists: ${e.message}")
                 false
@@ -126,7 +126,7 @@ class FileReadWrite {
         fun deletePrivateData(context: Context, fileLocation: String): Boolean {
             return try {
                 val file = context.getFileStreamPath(fileLocation)
-                if (file != null && file.exists()) file.delete() else false
+                if (file.exists()) file.delete() else false
             } catch (e: Exception) {
                 Timber.d("Exception in deletePrivateData: ${e.message}")
                 false

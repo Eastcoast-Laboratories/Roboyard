@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // Auto-sync when coming back online (uploads offline achievements/saves/history/streak)
-        SyncManager.getInstance(this).syncOnResume(this);
+        SyncManager.getInstance(this).syncOnResume();
     }
     
     @Override
