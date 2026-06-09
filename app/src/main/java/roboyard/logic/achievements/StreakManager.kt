@@ -1,7 +1,8 @@
 package roboyard.logic.achievements
 
 import android.content.Context
-import android.content.SharedPreferences
+import roboyard.logic.storage.PlatformStorage
+import roboyard.platform.AndroidStorage
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.w
 import java.text.SimpleDateFormat
@@ -23,19 +24,20 @@ class StreakManager private constructor(context: Context) {
     private var testMode = false
 
     private val context: Context?
-    private val prefs: SharedPreferences
+    private val storage: PlatformStorage
     private val achievementManager: AchievementManager
 
     // For testing: allows overriding the current date
     private var mockTodayDate: Long? = null
 
     init {
-        this.context = context.getApplicationContext()
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        this.achievementManager = AchievementManager.getInstance(context)
-        // Load test mode setting from preferences
-        this.testMode = prefs.getBoolean(KEY_TEST_MODE, false)
-        d("[STREAK] Test mode loaded from preferences: %s", testMode)
+        val appContext = context.getApplicationContext()
+        this.context = appContext
+        this.storage = AndroidStorage.getInstance(appContext)
+        this.achievementManager = AchievementManager.getInstance(appContext)
+        // Load test mode setting from storage
+        this.testMode = storage.getBoolean(KEY_TEST_MODE, false)
+        d("[STREAK] Test mode loaded from storage: %s", testMode)
     }
 
     /**
@@ -43,8 +45,8 @@ class StreakManager private constructor(context: Context) {
      */
     fun recordDailyLogin(): StreakUpdate {
         val today = this.todayDate
-        val lastLoginDate = prefs.getLong(KEY_LAST_LOGIN_DATE, 0)
-        var currentStreak = prefs.getInt(KEY_CURRENT_STREAK, 0)
+        val lastLoginDate = storage.getLong(KEY_LAST_LOGIN_DATE, 0)
+        var currentStreak = storage.getInt(KEY_CURRENT_STREAK, 0)
 
         d(
             "[STREAK] Recording daily login - today: %d, lastLogin: %d, streak: %d",
@@ -103,7 +105,7 @@ class StreakManager private constructor(context: Context) {
 
 
         // Update longest streak if current exceeds it
-        var longestStreak = prefs.getInt(KEY_LONGEST_STREAK, 0)
+        var longestStreak = storage.getInt(KEY_LONGEST_STREAK, 0)
         if (currentStreak > longestStreak) {
             longestStreak = currentStreak
             d("[STREAK] New longest streak record: %d days", longestStreak)
@@ -111,13 +113,11 @@ class StreakManager private constructor(context: Context) {
 
 
         // Save updated values
-        prefs.edit()
-            .putLong(KEY_LAST_LOGIN_DATE, today)
-            .putInt(KEY_CURRENT_STREAK, currentStreak)
-            .putLong(KEY_LAST_STREAK_DATE, today)
-            .putInt(KEY_LONGEST_STREAK, longestStreak)
-            .putString(KEY_LONGEST_STREAK_DATE, dayNumberToDateString(today))
-            .apply()
+        storage.putLong(KEY_LAST_LOGIN_DATE, today)
+        storage.putInt(KEY_CURRENT_STREAK, currentStreak)
+        storage.putLong(KEY_LAST_STREAK_DATE, today)
+        storage.putInt(KEY_LONGEST_STREAK, longestStreak)
+        storage.putString(KEY_LONGEST_STREAK_DATE, dayNumberToDateString(today))
 
 
         // Notify achievement manager
@@ -142,14 +142,14 @@ class StreakManager private constructor(context: Context) {
         /**
          * Get current streak in days
          */
-        get() = prefs.getInt(KEY_CURRENT_STREAK, 0)
+        get() = storage.getInt(KEY_CURRENT_STREAK, 0)
 
 
     val storedStreakDays: Int
         /**
-         * Get stored streak days from SharedPreferences (for debug display)
+         * Get stored streak days from storage (for debug display)
          */
-        get() = prefs.getInt(KEY_CURRENT_STREAK, 0)
+        get() = storage.getInt(KEY_CURRENT_STREAK, 0)
 
     /**
      * Check if the streak popup should be shown today.
@@ -157,7 +157,7 @@ class StreakManager private constructor(context: Context) {
      */
     fun shouldShowStreakPopupToday(): Boolean {
         val today = this.todayDate
-        val lastPopupDate = prefs.getLong(KEY_LAST_POPUP_DATE, 0)
+        val lastPopupDate = storage.getLong(KEY_LAST_POPUP_DATE, 0)
         val shouldShow = lastPopupDate < today
         d(
             "[STREAK_POPUP] shouldShowStreakPopupToday: today=%d, lastPopup=%d, shouldShow=%b",
@@ -173,7 +173,7 @@ class StreakManager private constructor(context: Context) {
      */
     fun markStreakPopupShownToday() {
         val today = this.todayDate
-        prefs.edit().putLong(KEY_LAST_POPUP_DATE, today).apply()
+        storage.putLong(KEY_LAST_POPUP_DATE, today)
         d("[STREAK_POPUP] Marked popup shown for day %d", today)
     }
 
@@ -204,7 +204,7 @@ class StreakManager private constructor(context: Context) {
         val wasTestMode = testMode
         testMode = enabled
         // Persist test mode setting to preferences
-        prefs.edit().putBoolean(KEY_TEST_MODE, enabled).apply()
+        storage.putBoolean(KEY_TEST_MODE, enabled)
 
 
         // Reset streak when switching modes because time units are incompatible
@@ -246,13 +246,13 @@ class StreakManager private constructor(context: Context) {
         /**
          * Get the longest streak ever achieved
          */
-        get() = prefs.getInt(KEY_LONGEST_STREAK, 0)
+        get() = storage.getInt(KEY_LONGEST_STREAK, 0)
 
     val longestStreakDate: String?
         /**
          * Get the date when the longest streak was achieved (ISO format)
          */
-        get() = prefs.getString(KEY_LONGEST_STREAK_DATE, null)
+        get() = storage.getString(KEY_LONGEST_STREAK_DATE, null)
 
     /**
      * Convert a day number to ISO date string.
@@ -274,7 +274,7 @@ class StreakManager private constructor(context: Context) {
          */
         get() {
             val lastLoginDate =
-                prefs.getLong(KEY_LAST_LOGIN_DATE, 0)
+                storage.getLong(KEY_LAST_LOGIN_DATE, 0)
             if (lastLoginDate == 0L) return null
             d(
                 "[STREAK_SYNC_DATE] Returning stored last_login_date=%d (%s) without mutating streak state",
@@ -295,21 +295,17 @@ class StreakManager private constructor(context: Context) {
     ) {
         var serverStreak = serverStreak
         val localStreak = this.currentStreak
-        val localLongest = prefs.getInt(KEY_LONGEST_STREAK, 0)
+        val localLongest = storage.getInt(KEY_LONGEST_STREAK, 0)
 
 
         // Always restore longest streak first - takes max of server and local, never loses it
         val maxLongest = max(serverLongestStreak, localLongest)
         if (maxLongest > localLongest) {
-            prefs.edit()
-                .putInt(KEY_LONGEST_STREAK, maxLongest)
-                .putString(
-                    KEY_LONGEST_STREAK_DATE,
-                    if (serverLongestStreakDate != null) serverLongestStreakDate else dayNumberToDateString(
-                        this.todayDate
-                    )
-                )
-                .apply()
+            storage.putInt(KEY_LONGEST_STREAK, maxLongest)
+            storage.putString(
+                KEY_LONGEST_STREAK_DATE,
+                serverLongestStreakDate ?: dayNumberToDateString(this.todayDate)
+            )
             d(
                 "[STREAK_SYNC] Restored longest streak: %d (local was: %d, server: %d)",
                 maxLongest,
@@ -348,9 +344,7 @@ class StreakManager private constructor(context: Context) {
         val maxStreak = max(serverStreak, localStreak)
 
         if (maxStreak != localStreak) {
-            prefs.edit()
-                .putInt(KEY_CURRENT_STREAK, maxStreak)
-                .apply()
+            storage.putInt(KEY_CURRENT_STREAK, maxStreak)
             d(
                 "[STREAK_SYNC] Updated current streak to: %d (local: %d, server: %d)",
                 maxStreak,
@@ -398,19 +392,18 @@ class StreakManager private constructor(context: Context) {
      * Reset streak (for testing)
      */
     fun resetStreak() {
-        prefs.edit()
-            .remove(KEY_LAST_LOGIN_DATE)
-            .remove(KEY_CURRENT_STREAK)
-            .remove(KEY_LAST_STREAK_DATE)
-            .remove(KEY_LAST_POPUP_DATE)
-            .remove(KEY_LONGEST_STREAK)
-            .remove(KEY_LONGEST_STREAK_DATE)
-            .apply()
+        storage.remove(KEY_LAST_LOGIN_DATE)
+        storage.remove(KEY_CURRENT_STREAK)
+        storage.remove(KEY_LAST_STREAK_DATE)
+        storage.remove(KEY_LAST_POPUP_DATE)
+        storage.remove(KEY_LONGEST_STREAK)
+        storage.remove(KEY_LONGEST_STREAK_DATE)
         d("[STREAK] Streak reset (including longest streak)")
     }
 
     companion object {
-        private const val PREFS_NAME = "roboyard_streaks"
+        // Using AndroidStorage instead of direct SharedPreferences
+    // Keys are prefixed automatically by storage implementation
         private const val KEY_LAST_LOGIN_DATE = "last_login_date"
         private const val KEY_CURRENT_STREAK = "current_streak"
         private const val KEY_LAST_STREAK_DATE = "last_streak_date"
