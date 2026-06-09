@@ -44,6 +44,11 @@ class AchievementManager private constructor(context: Context) {
     private val achievements: MutableMap<String?, Achievement?>?
     private var unlockListener: AchievementUnlockListener? = null
     private var currentActivity: WeakReference<Activity?>? = null
+    private var uiNotifier: WeakReference<UiNotifier?>? = null
+
+    fun interface UiNotifier {
+        fun showMessage(message: String)
+    }
 
     // Counters for tracking progress
     private var levelsCompleted = 0
@@ -78,22 +83,40 @@ class AchievementManager private constructor(context: Context) {
 
     fun setCurrentActivity(activity: Activity?) {
         this.currentActivity = WeakReference<Activity?>(activity)
+        // Create Android UiNotifier adapter when activity is set
+        if (activity != null) {
+            val ctx = this.context
+            this.uiNotifier = WeakReference(UiNotifier { message ->
+                Handler(Looper.getMainLooper()).post {
+                    try {
+                        Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
+                    } catch (e: Exception) {
+                        e(e, "[UPDATE_NUDGE] Failed to show toast")
+                    }
+                }
+            })
+        }
         // Show any pending update nudge now that we have an activity
         if (activity != null && pendingNudgeVersion != null) {
-            showUpdateNudgeInternal(activity, pendingNudgeVersion)
+            showUpdateNudgeInternal(pendingNudgeVersion)
             pendingNudgeVersion = null
         }
+    }
+
+    /**
+     * Set a platform-agnostic UI notifier for showing messages (e.g., update nudges).
+     * Use this on non-Android platforms (KMP/iOS) instead of setCurrentActivity.
+     */
+    fun setUiNotifier(notifier: UiNotifier?) {
+        this.uiNotifier = if (notifier != null) WeakReference(notifier) else null
     }
 
     /**
      * Show update nudge on credits page - always shows, no cooldown.
      * Should be called when opening the credits/about screen.
      */
-    fun showUpdateNudgeForCredits(activity: Activity?) {
-        d(
-            "[UPDATE_NUDGE_CREDITS] Called, activity=%s",
-            if (activity != null) activity.javaClass.getSimpleName() else "null"
-        )
+    fun showUpdateNudgeForCredits() {
+        d("[UPDATE_NUDGE_CREDITS] Called")
         val latestAppVersion = prefs.getString(KEY_PENDING_NUDGE_VERSION, null)
         d("[UPDATE_NUDGE_CREDITS] Pending version from prefs: %s", latestAppVersion)
         if (latestAppVersion == null) {
@@ -107,19 +130,12 @@ class AchievementManager private constructor(context: Context) {
             return  // up to date
         }
         i("[UPDATE_NUDGE_CREDITS] Showing nudge for version %s", latestAppVersion)
-        showUpdateNudgeInternal(activity!!, latestAppVersion)
+        showUpdateNudgeInternal(latestAppVersion)
     }
 
-    private fun showUpdateNudgeInternal(activity: Activity, version: String?) {
-        val message = activity.getString(R.string.update_available_nudge, version)
-        activity.runOnUiThread(Runnable {
-            try {
-                Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
-                d("[UPDATE_NUDGE] Showed nudge: version=%s", version)
-            } catch (e: Exception) {
-                e(e, "[UPDATE_NUDGE] Failed to show toast")
-            }
-        })
+    private fun showUpdateNudgeInternal(version: String?) {
+        val message = context.getString(R.string.update_available_nudge, version)
+        uiNotifier?.get()?.showMessage(message) ?: d("[UPDATE_NUDGE] No UiNotifier available, cannot show nudge: version=%s", version)
     }
 
     /**
@@ -713,25 +729,22 @@ class AchievementManager private constructor(context: Context) {
 
 
         // Same-walls achievements: count unique position-signatures sharing the same wall layout
-        if (wallSignature != null && !wallSignature.isEmpty() && currentActivity != null) {
-            val act = currentActivity!!.get()
-            if (act != null) {
-                val sameWallEntries =
-                    findByWallSignature(act, wallSignature)
-                val uniquePositions =
-                    sameWallEntries.size // each entry = distinct positionSignature
-                d(
-                    "[ACHIEVEMENTS] same_walls: wallSig=%s uniquePositions=%d",
-                    wallSignature.substring(0, min(30, wallSignature.length)), uniquePositions
-                )
-                if (uniquePositions > sameWallsMaxPositions) {
-                    sameWallsMaxPositions = uniquePositions
-                    saveCounter("same_walls_max_positions", sameWallsMaxPositions)
-                }
-                unlockIfComplete("same_walls_2")
-                unlockIfComplete("same_walls_10")
-                unlockIfComplete("same_walls_100")
+        if (wallSignature != null && !wallSignature.isEmpty()) {
+            val sameWallEntries =
+                findByWallSignature(context, wallSignature)
+            val uniquePositions =
+                sameWallEntries.size // each entry = distinct positionSignature
+            d(
+                "[ACHIEVEMENTS] same_walls: wallSig=%s uniquePositions=%d",
+                wallSignature.substring(0, min(30, wallSignature.length)), uniquePositions
+            )
+            if (uniquePositions > sameWallsMaxPositions) {
+                sameWallsMaxPositions = uniquePositions
+                saveCounter("same_walls_max_positions", sameWallsMaxPositions)
             }
+            unlockIfComplete("same_walls_2")
+            unlockIfComplete("same_walls_10")
+            unlockIfComplete("same_walls_100")
         }
 
         // Speed achievements
@@ -991,22 +1004,10 @@ class AchievementManager private constructor(context: Context) {
     }
 
     private val uniqueCompletedLevelCount: Int
-        get() {
-            val activity = if (currentActivity != null) currentActivity!!.get() else null
-            if (activity == null) {
-                return levelsCompleted
-            }
-            return getUniqueCompletedLevelCount(activity)
-        }
+        get() = getUniqueCompletedLevelCount(context)
 
     private val uniqueThreeStarLevelCount: Int
-        get() {
-            val activity = if (currentActivity != null) currentActivity!!.get() else null
-            if (activity == null) {
-                return threeStarLevels
-            }
-            return getUniqueThreeStarLevelCount(activity)
-        }
+        get() = getUniqueThreeStarLevelCount(context)
 
     /**
      * Sync achievement unlock to the server after unlock.
@@ -1173,7 +1174,7 @@ class AchievementManager private constructor(context: Context) {
             pendingNudgeVersion = latestAppVersion
             return
         }
-        showUpdateNudgeInternal(act, latestAppVersion)
+        showUpdateNudgeInternal(latestAppVersion)
     }
 
     /**
