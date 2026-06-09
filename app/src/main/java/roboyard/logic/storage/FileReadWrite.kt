@@ -2,15 +2,15 @@ package roboyard.logic.storage
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
+import android.graphics.Bitmap.CompressFormat
+import roboyard.platform.AndroidStorage
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 
 /**
  * Created by Alain on 21/01/2015.
@@ -30,22 +30,7 @@ class FileReadWrite {
                 Timber.d("Context is null in writePrivateData for file: %s", fileLocation)
                 return false
             }
-
-            var output: FileOutputStream? = null
-            return try {
-                output = context.openFileOutput(fileLocation, Context.MODE_PRIVATE)
-                output.write(content.toByteArray(StandardCharsets.UTF_8))
-                true
-            } catch (e: Exception) {
-                Timber.d("Exception in writePrivateData for file: $fileLocation: ${e.message}")
-                false
-            } finally {
-                try {
-                    output?.close()
-                } catch (e: Exception) {
-                    Timber.d("Error closing stream: %s", e.message)
-                }
-            }
+            return AndroidStorage.getInstance(context).writeFile(fileLocation, content)
         }
 
         /**
@@ -60,43 +45,7 @@ class FileReadWrite {
                 Timber.d("Context is null in readPrivateData for file: %s", fileLocation)
                 return ""
             }
-
-            val buffer = StringBuilder()
-            var input: FileInputStream? = null
-            var reader: BufferedReader? = null
-            try {
-                val file = context.getFileStreamPath(fileLocation)
-                if (!file.exists()) {
-                    return ""
-                }
-
-                input = context.openFileInput(fileLocation)
-                reader = BufferedReader(InputStreamReader(input, StandardCharsets.UTF_8))
-
-                while (true) {
-                    val line = reader.readLine() ?: break
-                    buffer.append(line).append('\n')
-                }
-
-                if (buffer.isNotEmpty() && buffer[buffer.length - 1] == '\n') {
-                    buffer.setLength(buffer.length - 1)
-                }
-            } catch (e: Exception) {
-                Timber.d("Exception readPrivateData: %s", e.toString())
-                return ""
-            } finally {
-                try {
-                    reader?.close()
-                } catch (e: Exception) {
-                    Timber.d("Error closing reader: %s", e.message)
-                }
-                try {
-                    input?.close()
-                } catch (e: Exception) {
-                    Timber.d("Error closing stream: %s", e.message)
-                }
-            }
-            return buffer.toString()
+            return AndroidStorage.getInstance(context).readFile(fileLocation)
         }
 
         /**
@@ -107,13 +56,7 @@ class FileReadWrite {
          */
         @JvmStatic
         fun privateDataExists(context: Context, fileLocation: String): Boolean {
-            return try {
-                val file = context.getFileStreamPath(fileLocation)
-                file.exists()
-            } catch (e: Exception) {
-                Timber.d("Exception in privateDataExists: ${e.message}")
-                false
-            }
+            return AndroidStorage.getInstance(context).fileExists(fileLocation)
         }
 
         /**
@@ -124,13 +67,7 @@ class FileReadWrite {
          */
         @JvmStatic
         fun deletePrivateData(context: Context, fileLocation: String): Boolean {
-            return try {
-                val file = context.getFileStreamPath(fileLocation)
-                if (file.exists()) file.delete() else false
-            } catch (e: Exception) {
-                Timber.d("Exception in deletePrivateData: ${e.message}")
-                false
-            }
+            return AndroidStorage.getInstance(context).deleteFile(fileLocation)
         }
 
         /**
