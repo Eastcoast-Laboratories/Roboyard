@@ -1,0 +1,767 @@
+package roboyard.logic.achievements
+
+import kotlin.math.abs
+
+/**
+ * Defines all achievements in the game.
+ * Each achievement uses individual drawable resources named icon_{number}_{name}.png
+ * (e.g., icon_1_lightning.png, icon_46_flame.png) in res/drawable/.
+ * 
+ * This is the central configuration for all achievement-related data:
+ * - Achievement definitions (ID, name, description, category, icon)
+ * - Achievement icon background colors (ACHIEVEMENT_COLORS)
+ * - Category display names (via AchievementCategory enum)
+ */
+object AchievementDefinitions {
+    /**
+     * Predefined color palette for achievement icon circle backgrounds.
+     * Colors are assigned deterministically based on achievement ID hash.
+     * This array is also mirrored in Laravel: app/Config/AchievementDefinitions.php
+     */
+    val ACHIEVEMENT_COLORS: IntArray = intArrayOf(
+        -0xb350b0,  // Green
+        -0x6800,  // Orange
+        -0xde690d,  // Blue
+        -0x16e19d,  // Pink
+        -0x63d850,  // Purple
+        -0xff432c,  // Cyan
+        -0x3ef9,  // Amber
+        -0x743cb6,  // Light Green
+        -0xa8de,  // Deep Orange
+        -0xc0ae4b,  // Indigo
+        -0xbbcca,  // Red
+        -0xff6978,  // Teal
+        -0x40c9f4,  // Dark Red
+        -0xea9a40,  // Dark Blue
+        -0xff7685,  // Dark Teal
+        -0x2cd0d1,  // Red 700
+        -0xe6892e,  // Blue 700
+        -0xff6859,  // Cyan 700
+        -0x3de7a5,  // Pink 700
+        -0x95e466,  // Purple 700
+        -0xff96a4,  // Teal 700
+        -0xa80e9,  // Amber 900
+        -0xcc96e2,  // Light Green 900
+        -0x40c9f4,  // Deep Orange 900
+        -0xe5dc82,  // Indigo 900
+        -0x48e3e4,  // Red 900
+        -0xffb2c0,  // Teal 900
+        -0x77f1b1,  // Pink 900
+        -0xb5eb74,  // Purple 900
+        -0xe4a1e0,  // Green 900
+        -0x19af00,  // Deep Orange 800
+        -0xf2b85f,  // Blue 900
+        -0xff9f9c,  // Cyan 900
+        -0x52eba9,  // Pink 800
+        -0xaed258,  // Purple 800
+        -0xff7c71,  // Cyan 800
+        -0x43fd3,  // Amber 600
+        -0x834cbe,  // Light Green 600
+        -0x91c0,  // Deep Orange 400
+        -0xa39440,  // Indigo 400
+        -0x10acb0,  // Red 400
+        -0xd93926,  // Cyan 400
+        -0x54b844,  // Purple 400
+        -0xd6490a,  // Light Blue 400
+        -0x13bf86,  // Pink 400
+        -0x994496,  // Green 400
+        -0x35d8,  // Amber 400
+        -0x8fbd,  // Deep Orange 300
+        -0x867935,  // Indigo 300
+        -0x106566,  // Red 200
+        -0x7f2116,  // Cyan 200
+        -0x316c28,  // Purple 200
+        -0x7e2b06,  // Light Blue 200
+        -0xb704f,  // Pink 200
+        -0x5a2959,  // Green 200
+        -0x1f7e,  // Amber 200
+        -0x546f,  // Deep Orange 200
+    )
+
+    /**
+     * Get a color for an achievement based on its ID.
+     * Each achievement gets a unique color from the predefined palette.
+     * 
+     * @param achievementId The achievement ID (used to determine color)
+     * @return The color for this achievement
+     */
+    fun getAchievementColor(achievementId: String): Int {
+        val hash = achievementId.hashCode()
+        val colorIndex = abs(hash) % ACHIEVEMENT_COLORS.size
+        return ACHIEVEMENT_COLORS[colorIndex]
+    }
+
+    // Icon resource names for different achievement types
+    private const val ICON_TROPHY_STAR = "icon_9_trophy" // Trophy with star - progression
+    private const val ICON_MEDAL = "icon_10_gear" // Medal - level completion
+    private const val ICON_CHART_UP = "icon_11_chart" // Chart going up - progress
+    private const val ICON_TROPHY_GOLD = "icon_43_trophy_gold" // Gold trophy - mastery
+    private const val ICON_STAR = "icon_27_star" // Star - stars collected
+    private const val ICON_STARS = "icon_48_stars_gold" // Multiple stars - all stars
+    private const val ICON_CROWN = "icon_41_crown" // Crown - master achievement
+    private const val ICON_DIAMOND_CUP = "icon_45_diamond_blue" // Diamond cup - platinum
+    private const val ICON_CHECKLIST = "icon_14_checkmark" // Checklist - completion
+    private const val ICON_SPEEDOMETER = "icon_16_compass" // Speedometer - speed
+    private const val ICON_LIGHTNING = "icon_1_lightning" // Lightning - fast
+    private const val ICON_FLAME = "icon_46_flame" // Flame - streak/hot
+    private const val ICON_SHIELD_STAR = "icon_27_star" // Shield with star - perfect
+    private const val ICON_SHIELD_RED = "icon_26_shield_red" // Shield red - challenge
+    private const val ICON_BRAIN = "icon_29_brain_green" // Brain - thinking/no hints
+    private const val ICON_LIGHTBULB = "icon_15_lightbulb" // Lightbulb - idea/custom
+    private const val ICON_TOOLS = "icon_18_wrench" // Tools - create
+    private const val ICON_NETWORK = "icon_52_network" // Network - share
+    private const val ICON_HEART_GEAR = "icon_2_heart" // Heart gear - first game
+    private const val ICON_INFINITY = "icon_32_infinity" // Infinity - streak
+    private const val ICON_ROBOT_YELLOW = "icon_49_armor" // Yellow robot - 5 robots
+    private const val ICON_TARGET = "icon_8_target" // Target - targets
+    private const val ICON_TARGET_BLUE = "icon_33_target_blue" // Blue target - multi targets
+    private const val ICON_PUZZLE = "icon_24_robot_gold" // Puzzle - solution
+    private const val ICON_TABLET = "icon_35_door" // Tablet - resolution
+    private const val ICON_MAP = "icon_36_ring" // Map - coverage
+    private const val ICON_SATELLITE = "icon_40_planet" // Satellite - explorer
+    private const val ICON_SPARKLES = "icon_39_stars" // Sparkles - special
+    private const val ICON_WREATH = "icon_42_laurel" // Wreath - achievement
+    private const val ICON_TROPHY_MEDAL = "icon_43_trophy_gold" // Trophy with medal
+    private const val ICON_POWER = "icon_4_power" // Power button - comeback
+    private const val ICON_HOURGLASS = "icon_13_hourglass" // Hourglass - time-based
+    private const val ICON_BUILDINGS = "icon_12_bars" // Buildings - levels
+
+    private var achievements: MutableMap<String?, Achievement?>? = null
+
+    /**
+     * Mapping of local achievement IDs to Google Play Games string resource keys.
+     * Used by AchievementManager.getPlayGamesAchievementId() to look up PGS IDs.
+     */
+    private val PLAY_GAMES_MAPPINGS: MutableMap<String?, String?> =
+        object : LinkedHashMap<String?, String?>() {
+            init {
+                // Login & Special
+                put("daily_login_7", "pgs_weekly_player")
+                put("daily_login_30", "pgs_dedicated_player")
+                put("comeback_player", "pgs_welcome_back")
+
+
+                // Progression
+                put("first_game", "pgs_welcome")
+                put("level_1_complete", "pgs_first_steps")
+                put("level_10_complete", "pgs_getting_started")
+                put("level_50_complete", "pgs_halfway_there")
+                put("level_140_complete", "pgs_level_master")
+                put("all_stars_collected", "pgs_star_collector")
+
+
+                // Performance
+                put("perfect_solutions_5", "pgs_perfect_mover")
+                put("perfect_solutions_10", "pgs_precision_player")
+                put("perfect_solutions_50", "pgs_optimization_expert")
+                put("speedrun_under_30s", "pgs_quick_thinker")
+                put("speedrun_under_10s", "pgs_lightning_fast")
+
+
+                // Mastery
+                put("3_star_hard_level", "pgs_hard_level_star")
+                put("3_star_10_levels", "pgs_rising_star")
+                put("3_star_10_hard_levels", "pgs_hard_level_master")
+                put("3_star_50_levels", "pgs_superstar")
+                put("3_star_all_levels", "pgs_perfect_master")
+
+
+                // Random - Speed
+                put("speedrun_random_under_20s", "pgs_speed_demon")
+                put("speedrun_random_under_10s", "pgs_lightning_speed")
+                put("speedrun_random_5_games_under_30s", "pgs_speed_streak")
+
+
+                // Random - Streaks
+                put("perfect_random_games_5", "pgs_perfect_5")
+                put("perfect_random_games_10", "pgs_perfect_10")
+                put("perfect_random_games_20", "pgs_perfect_20")
+                put("perfect_random_games_streak_5", "pgs_perfect_streak_5")
+                put("perfect_random_games_streak_10", "pgs_perfect_streak_10")
+                put("perfect_random_games_streak_20", "pgs_perfect_streak_20")
+                put("perfect_no_hints_random_1", "pgs_perfect_no_help")
+                put("no_hints_random_10", "pgs_no_help_needed_10")
+                put("no_hints_random_50", "pgs_no_help_needed_50")
+                put("no_hints_streak_random_10", "pgs_no_help_streak_10")
+                put("no_hints_streak_random_50", "pgs_no_help_streak_50")
+
+
+                // Random - Difficulty
+                put("impossible_mode_1", "pgs_impossible_dream")
+                put("impossible_mode_5", "pgs_impossible_champion")
+                put("impossible_mode_streak_5", "pgs_impossible_streak")
+                put("impossible_mode_streak_10", "pgs_impossible_legend")
+
+
+                // Random - Solution Length (18-29)
+                put("solution_18_moves", "pgs_18_move_master")
+                put("solution_19_moves", "pgs_19_move_master")
+                put("solution_20_moves", "pgs_20_move_master")
+                put("solution_21_moves", "pgs_21_move_master")
+                put("solution_22_moves", "pgs_22_move_master")
+                put("solution_23_moves", "pgs_23_move_master")
+                put("solution_24_moves", "pgs_24_move_master")
+                put("solution_25_moves", "pgs_25_move_master")
+                put("solution_26_moves", "pgs_26_move_master")
+                put("solution_27_moves", "pgs_27_move_master")
+                put("solution_28_moves", "pgs_28_move_master")
+                put("solution_29_moves", "pgs_29_move_master")
+                put("solution_30_plus_moves", "pgs_30_move_master")
+
+
+                // Random - Resolution
+                put("play_10_move_games_all_resolutions", "pgs_resolution_explorer_10")
+                put("play_12_move_games_all_resolutions", "pgs_resolution_explorer_12")
+                put("play_15_move_games_all_resolutions", "pgs_resolution_explorer_15")
+
+
+                // Random - Targets
+                put("game_2_targets", "pgs_double_target")
+                put("game_3_targets", "pgs_triple_target")
+                put("game_4_targets", "pgs_quad_target")
+                put("game_2_of_2_targets", "pgs_2_of_2")
+                put("game_2_of_3_targets", "pgs_2_of_3")
+                put("game_2_of_4_targets", "pgs_2_of_4")
+                put("game_3_of_3_targets", "pgs_3_of_3")
+                put("game_3_of_4_targets", "pgs_3_of_4")
+                put("game_4_of_4_targets", "pgs_4_of_4")
+
+
+                // Random - Fun Challenges
+                put("game_5_robots", "pgs_full_team")
+                put("gimme_five", "pgs_gimme_five")
+                put("same_walls_2", "pgs_same_walls_2")
+                put("same_walls_10", "pgs_same_walls_10")
+                put("same_walls_100", "pgs_same_walls_100")
+
+
+                // Random - Coverage
+                put("traverse_all_squares_1_robot", "pgs_solo_explorer")
+                put("traverse_all_squares_1_robot_goal", "pgs_solo_goal_explorer")
+                put("traverse_all_squares_all_robots", "pgs_team_explorer")
+                put("traverse_all_squares_all_robots_goal", "pgs_team_goal_explorer")
+            }
+        }
+
+    /**
+     * Get the Play Games string resource key for an achievement ID.
+     * @param achievementId The local achievement ID
+     * @return The Play Games string resource key, or null if not found
+     */
+    fun getPlayGamesResourceKey(achievementId: String?): String? {
+        return PLAY_GAMES_MAPPINGS.get(achievementId)
+    }
+
+    val all: MutableMap<String?, Achievement?>?
+        get() {
+            if (achievements == null) {
+                achievements =
+                    LinkedHashMap<String?, Achievement?>()
+                initializeAchievements()
+            }
+            return achievements
+        }
+
+    private fun add(achievement: Achievement) {
+        achievements!!.put(achievement.getId(), achievement)
+    }
+
+    private fun initializeAchievements() {
+        // ========== Login Streak ==========
+        add(
+            Achievement(
+                "daily_login_7",
+                "achievement_streak_7", "achievement_streak_7_desc",
+                AchievementCategory.SPECIAL, ICON_FLAME
+            )
+        )
+        add(
+            Achievement(
+                "daily_login_30",
+                "achievement_streak_30", "achievement_streak_30_desc",
+                AchievementCategory.SPECIAL, ICON_INFINITY
+            )
+        )
+        add(
+            Achievement(
+                "comeback_player",
+                "achievement_comeback", "achievement_comeback_desc",
+                AchievementCategory.SPECIAL, ICON_POWER
+            )
+        )
+
+
+        // ========== PROGRESSION ACHIEVEMENTS ==========
+        add(
+            Achievement(
+                "first_game",
+                "achievement_first_game", "achievement_first_game_desc",
+                AchievementCategory.PROGRESSION, ICON_HEART_GEAR
+            )
+        )
+        add(
+            Achievement(
+                "level_1_complete",
+                "achievement_level_1_complete", "achievement_level_1_complete_desc",
+                AchievementCategory.PROGRESSION, ICON_MEDAL
+            )
+        )
+        add(
+            Achievement(
+                "level_10_complete",
+                "achievement_level_10_complete", "achievement_level_10_complete_desc",
+                AchievementCategory.PROGRESSION, ICON_CHART_UP
+            )
+        )
+        add(
+            Achievement(
+                "level_50_complete",
+                "achievement_level_50_complete", "achievement_level_50_complete_desc",
+                AchievementCategory.PROGRESSION, ICON_BUILDINGS
+            )
+        )
+        add(
+            Achievement(
+                "level_140_complete",
+                "achievement_level_140_complete", "achievement_level_140_complete_desc",
+                AchievementCategory.PROGRESSION, ICON_DIAMOND_CUP
+            )
+        )
+        add(
+            Achievement(
+                "all_stars_collected",
+                "achievement_all_stars", "achievement_all_stars_desc",
+                AchievementCategory.PROGRESSION, ICON_STARS
+            )
+        )
+
+
+        // ========== PERFORMANCE ACHIEVEMENTS ==========
+        add(
+            Achievement(
+                "perfect_solutions_5",
+                "achievement_perfect_5", "achievement_perfect_5_desc",
+                AchievementCategory.PERFORMANCE, ICON_SHIELD_STAR
+            )
+        )
+        add(
+            Achievement(
+                "perfect_solutions_10",
+                "achievement_perfect_10", "achievement_perfect_10_desc",
+                AchievementCategory.PERFORMANCE, ICON_TROPHY_STAR
+            )
+        )
+        add(
+            Achievement(
+                "perfect_solutions_50",
+                "achievement_perfect_50", "achievement_perfect_50_desc",
+                AchievementCategory.PERFORMANCE, ICON_CROWN
+            )
+        )
+        add(
+            Achievement(
+                "speedrun_under_30s",
+                "achievement_speedrun_30s", "achievement_speedrun_30s_desc",
+                AchievementCategory.PERFORMANCE, ICON_SPEEDOMETER
+            )
+        )
+        add(
+            Achievement(
+                "speedrun_under_10s",
+                "achievement_speedrun_10s", "achievement_speedrun_10s_desc",
+                AchievementCategory.PERFORMANCE, ICON_LIGHTNING
+            )
+        )
+        add(
+            Achievement(
+                "view_1_hour",
+                "achievement_view_1_hour", "achievement_view_1_hour_desc",
+                AchievementCategory.PERFORMANCE, ICON_HOURGLASS
+            )
+        )
+
+
+        // ========== CHALLENGE ACHIEVEMENTS ==========
+        // no_hints_10 and no_hints_50 removed - hints are not allowed in levels
+        // Custom level achievements - not yet implemented, custom levels feature pending
+        // add(new Achievement("solve_custom_level", 
+        //     "achievement_solve_custom", "achievement_solve_custom_desc",
+        //     AchievementCategory.CHALLENGE, ICON_LIGHTBULB));
+        // add(new Achievement("create_custom_level", 
+        //     "achievement_create_custom", "achievement_create_custom_desc",
+        //     AchievementCategory.CHALLENGE, ICON_TOOLS));
+        // add(new Achievement("share_custom_level", 
+        //     "achievement_share_custom", "achievement_share_custom_desc",
+        //     AchievementCategory.CHALLENGE, ICON_NETWORK));
+
+        // ========== MASTERY ACHIEVEMENTS ==========
+        add(
+            Achievement(
+                "3_star_hard_level",
+                "achievement_3_star_1", "achievement_3_star_1_desc",
+                AchievementCategory.MASTERY, ICON_STAR
+            )
+        )
+        add(
+            Achievement(
+                "3_star_10_levels",
+                "achievement_3_star_10", "achievement_3_star_10_desc",
+                AchievementCategory.MASTERY, ICON_STARS
+            )
+        )
+        add(
+            Achievement(
+                "3_star_10_hard_levels",
+                "achievement_3_star_10_hard", "achievement_3_star_10_hard_desc",
+                AchievementCategory.MASTERY, ICON_STARS
+            )
+        )
+        add(
+            Achievement(
+                "3_star_50_levels",
+                "achievement_3_star_50", "achievement_3_star_50_desc",
+                AchievementCategory.MASTERY, ICON_WREATH
+            )
+        )
+        add(
+            Achievement(
+                "3_star_all_levels",
+                "achievement_3_star_all", "achievement_3_star_all_desc",
+                AchievementCategory.MASTERY, ICON_TROPHY_GOLD
+            )
+        )
+
+        // ========== RANDOM GAME - SPEED ==========
+        add(
+            Achievement(
+                "speedrun_random_under_20s",
+                "achievement_speedrun_random_20s", "achievement_speedrun_random_20s_desc",
+                AchievementCategory.RANDOM_SPEED, ICON_HOURGLASS
+            )
+        )
+        add(
+            Achievement(
+                "speedrun_random_under_10s",
+                "achievement_speedrun_random_10s", "achievement_speedrun_random_10s_desc",
+                AchievementCategory.RANDOM_SPEED, ICON_LIGHTNING
+            )
+        )
+        add(
+            Achievement(
+                "speedrun_random_5_games_under_30s",
+                "achievement_speedrun_random_5x30s", "achievement_speedrun_random_5x30s_desc",
+                AchievementCategory.RANDOM_SPEED, "icon_55_cone"
+            )
+        ) // Rocket
+
+
+        // ========== RANDOM GAME - STREAKS & CHALLENGES ==========
+        // Perfect random games (cumulative - no reset)
+        add(
+            Achievement(
+                "perfect_random_games_5",
+                "achievement_perfect_random_5", "achievement_perfect_random_5_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_FLAME
+            )
+        )
+        add(
+            Achievement(
+                "perfect_random_games_10",
+                "achievement_perfect_random_10", "achievement_perfect_random_10_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_INFINITY
+            )
+        )
+        add(
+            Achievement(
+                "perfect_random_games_20",
+                "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_CROWN
+            )
+        )
+        // Perfect random games streak (resets on non-optimal)
+        add(
+            Achievement(
+                "perfect_random_games_streak_5",
+                "achievement_perfect_random_streak_5", "achievement_perfect_random_streak_5_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_FLAME
+            )
+        )
+        add(
+            Achievement(
+                "perfect_random_games_streak_10",
+                "achievement_perfect_random_streak_10", "achievement_perfect_random_streak_10_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_INFINITY
+            )
+        )
+        add(
+            Achievement(
+                "perfect_random_games_streak_20",
+                "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_CROWN
+            )
+        )
+        // Perfect solution with no hints (10+ moves optimal)
+        add(
+            Achievement(
+                "perfect_no_hints_random_1",
+                "achievement_perfect_no_hints_random_1",
+                "achievement_perfect_no_hints_random_1_desc",
+                AchievementCategory.RANDOM_STREAKS,
+                ICON_BRAIN
+            )
+        )
+        // No hints random games (cumulative - no reset)
+        add(
+            Achievement(
+                "no_hints_random_10",
+                "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_BRAIN
+            )
+        )
+        add(
+            Achievement(
+                "no_hints_random_50",
+                "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
+                AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR
+            )
+        )
+        // No hints random games streak (resets on hint usage)
+        add(
+            Achievement(
+                "no_hints_streak_random_10",
+                "achievement_no_hints_streak_random_10",
+                "achievement_no_hints_streak_random_10_desc",
+                AchievementCategory.RANDOM_STREAKS,
+                ICON_BRAIN
+            )
+        )
+        add(
+            Achievement(
+                "no_hints_streak_random_50",
+                "achievement_no_hints_streak_random_50",
+                "achievement_no_hints_streak_random_50_desc",
+                AchievementCategory.RANDOM_STREAKS,
+                ICON_SHIELD_STAR
+            )
+        )
+
+
+        // ========== RANDOM GAME - DIFFICULTY ==========
+        add(
+            Achievement(
+                "impossible_mode_1",
+                "achievement_impossible_1", "achievement_impossible_1_desc",
+                AchievementCategory.RANDOM_DIFFICULTY, ICON_SHIELD_RED
+            )
+        )
+        add(
+            Achievement(
+                "impossible_mode_5",
+                "achievement_impossible_5", "achievement_impossible_5_desc",
+                AchievementCategory.RANDOM_DIFFICULTY, ICON_FLAME
+            )
+        )
+        add(
+            Achievement(
+                "impossible_mode_streak_5",
+                "achievement_impossible_streak_5", "achievement_impossible_streak_5_desc",
+                AchievementCategory.RANDOM_DIFFICULTY, ICON_TROPHY_STAR
+            )
+        )
+        add(
+            Achievement(
+                "impossible_mode_streak_10",
+                "achievement_impossible_streak_10", "achievement_impossible_streak_10_desc",
+                AchievementCategory.RANDOM_DIFFICULTY, ICON_CROWN
+            )
+        )
+
+
+        // ========== RANDOM GAME - SOLUTION LENGTH ==========
+        // Use different icons for different move counts (18-29)
+        val solutionIcons = arrayOf<String?>(
+            ICON_CHART_UP, ICON_BUILDINGS,  // 18, 19
+            ICON_PUZZLE, ICON_CHECKLIST, ICON_CHART_UP, ICON_BUILDINGS,  // 20-23
+            ICON_TROPHY_MEDAL, ICON_TROPHY_STAR, ICON_WREATH, ICON_TROPHY_GOLD,  // 24-27
+            ICON_DIAMOND_CUP, ICON_CROWN
+        ) // 28, 29
+        for (moves in 18..29) {
+            add(
+                Achievement(
+                    "solution_" + moves + "_moves",
+                    "achievement_solution_" + moves, "achievement_solution_" + moves + "_desc",
+                    AchievementCategory.RANDOM_SOLUTION, solutionIcons[moves - 18]
+                )
+            )
+        }
+        add(
+            Achievement(
+                "solution_30_plus_moves",
+                "achievement_solution_30_plus", "achievement_solution_30_plus_desc",
+                AchievementCategory.RANDOM_SOLUTION, ICON_SPARKLES
+            )
+        )
+
+
+        // ========== RANDOM GAME - SCREEN RESOLUTIONS ==========
+        add(
+            Achievement(
+                "play_10_move_games_all_resolutions",
+                "achievement_resolution_10", "achievement_resolution_10_desc",
+                AchievementCategory.RANDOM_RESOLUTION, ICON_TABLET
+            )
+        )
+        add(
+            Achievement(
+                "play_12_move_games_all_resolutions",
+                "achievement_resolution_12", "achievement_resolution_12_desc",
+                AchievementCategory.RANDOM_RESOLUTION, "icon_5_monitor"
+            )
+        ) // Monitor icon
+        add(
+            Achievement(
+                "play_15_move_games_all_resolutions",
+                "achievement_resolution_15", "achievement_resolution_15_desc",
+                AchievementCategory.RANDOM_RESOLUTION, "icon_5_monitor"
+            )
+        ) // Computer monitor
+
+
+        // ========== RANDOM GAME - MULTIPLE TARGETS ==========
+        add(
+            Achievement(
+                "game_2_targets",
+                "achievement_2_targets", "achievement_2_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, ICON_TARGET
+            )
+        )
+        add(
+            Achievement(
+                "game_3_targets",
+                "achievement_3_targets", "achievement_3_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, ICON_TARGET_BLUE
+            )
+        )
+        add(
+            Achievement(
+                "game_4_targets",
+                "achievement_4_targets", "achievement_4_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, "icon_51_spiral"
+            )
+        ) // Pyramid/triangle
+        add(
+            Achievement(
+                "game_2_of_2_targets",
+                "achievement_2_of_2_targets", "achievement_2_of_2_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, ICON_TARGET_BLUE
+            )
+        ) // Target blue
+        add(
+            Achievement(
+                "game_2_of_3_targets",
+                "achievement_2_of_3_targets", "achievement_2_of_3_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, "icon_53_ring_blue"
+            )
+        ) // Hexagon
+        add(
+            Achievement(
+                "game_2_of_4_targets",
+                "achievement_2_of_4_targets", "achievement_2_of_4_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, "icon_54_cube"
+            )
+        ) // Cube
+        add(
+            Achievement(
+                "game_3_of_3_targets",
+                "achievement_3_of_3_targets", "achievement_3_of_3_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, ICON_MAP
+            )
+        ) // Map
+        add(
+            Achievement(
+                "game_3_of_4_targets",
+                "achievement_3_of_4_targets", "achievement_3_of_4_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, "icon_50_folders"
+            )
+        ) // Triangle eye
+        add(
+            Achievement(
+                "game_4_of_4_targets",
+                "achievement_4_of_4_targets", "achievement_4_of_4_targets_desc",
+                AchievementCategory.RANDOM_TARGETS, ICON_CROWN
+            )
+        ) // Crown for completing all 4
+
+
+        // ========== RANDOM GAME - FUN CHALLENGES ==========
+        add(
+            Achievement(
+                "game_5_robots",
+                "achievement_5_robots", "achievement_5_robots_desc",
+                AchievementCategory.RANDOM_ROBOTS, ICON_ROBOT_YELLOW
+            )
+        )
+        add(
+            Achievement(
+                "gimme_five",
+                "achievement_gimme_five", "achievement_gimme_five_desc",
+                AchievementCategory.RANDOM_ROBOTS, ICON_SPARKLES
+            )
+        )
+
+        // Same-walls achievements: same wall layout solved with N different robot positions
+        add(
+            Achievement(
+                "same_walls_2",
+                "achievement_same_walls_2", "achievement_same_walls_2_desc",
+                AchievementCategory.RANDOM_ROBOTS, ICON_MAP
+            )
+        )
+        add(
+            Achievement(
+                "same_walls_10",
+                "achievement_same_walls_10", "achievement_same_walls_10_desc",
+                AchievementCategory.RANDOM_ROBOTS, ICON_SATELLITE
+            )
+        )
+        add(
+            Achievement(
+                "same_walls_100",
+                "achievement_same_walls_100", "achievement_same_walls_100_desc",
+                AchievementCategory.RANDOM_ROBOTS, ICON_CROWN
+            )
+        )
+
+
+        // ========== RANDOM GAME - SQUARE COVERAGE ==========
+        // 4 achievements: with/without goal requirement, 1 robot/all robots
+        add(
+            Achievement(
+                "traverse_all_squares_all_robots",
+                "achievement_traverse_all_robots", "achievement_traverse_all_robots_desc",
+                AchievementCategory.RANDOM_COVERAGE, ICON_SATELLITE
+            )
+        )
+        add(
+            Achievement(
+                "traverse_all_squares_all_robots_goal",
+                "achievement_traverse_all_robots_goal", "achievement_traverse_all_robots_goal_desc",
+                AchievementCategory.RANDOM_COVERAGE, ICON_TARGET_BLUE
+            )
+        )
+        add(
+            Achievement(
+                "traverse_all_squares_1_robot",
+                "achievement_traverse_1_robot", "achievement_traverse_1_robot_desc",
+                AchievementCategory.RANDOM_COVERAGE, ICON_MAP
+            )
+        )
+        add(
+            Achievement(
+                "traverse_all_squares_1_robot_goal",
+                "achievement_traverse_1_robot_goal", "achievement_traverse_1_robot_goal_desc",
+                AchievementCategory.RANDOM_COVERAGE, ICON_TARGET
+            )
+        )
+    }
+}
