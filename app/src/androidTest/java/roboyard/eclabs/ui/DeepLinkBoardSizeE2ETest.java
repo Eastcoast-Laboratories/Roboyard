@@ -25,7 +25,7 @@ import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 
 import timber.log.Timber;
 

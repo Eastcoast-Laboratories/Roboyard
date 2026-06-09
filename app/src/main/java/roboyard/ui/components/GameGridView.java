@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.ui.fragments.GameFragment;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
@@ -1553,7 +1554,7 @@ public class GameGridView extends View {
     /**
      * Handle effects after a robot has moved (sound, animation, game completion check)
      */
-    void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
+    public void handleRobotMovementEffects(GameState state, GameElement selectedRobot, int oldX, int oldY) {
         Timber.d("[ANIM] handleRobotMovementEffects: Robot %d moved from (%d,%d) to (%d,%d)",
                 selectedRobot.color, oldX, oldY, selectedRobot.x, selectedRobot.y);
         

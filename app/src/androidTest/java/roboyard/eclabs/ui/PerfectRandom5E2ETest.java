@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.logic.achievements.AchievementManager;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.storage.FileReadWrite;
 
 import timber.log.Timber;

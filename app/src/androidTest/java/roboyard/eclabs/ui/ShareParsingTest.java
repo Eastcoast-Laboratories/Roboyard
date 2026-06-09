@@ -21,7 +21,7 @@ import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.storage.FileReadWrite;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.ui.fragments.SaveGameFragment;
 import timber.log.Timber;
 

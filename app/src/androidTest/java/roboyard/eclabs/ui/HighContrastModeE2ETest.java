@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.logic.core.Preferences;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import timber.log.Timber;
 
 import static androidx.test.espresso.Espresso.onView;

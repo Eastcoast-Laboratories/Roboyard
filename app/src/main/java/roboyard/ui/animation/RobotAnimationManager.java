@@ -14,7 +14,7 @@ import java.util.Queue;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameLogic;
 import roboyard.ui.components.GameGridView;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import timber.log.Timber;
 
 /**

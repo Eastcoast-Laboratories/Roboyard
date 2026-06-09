@@ -3,7 +3,7 @@ package roboyard.eclabs;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.core.GameState;
 import android.content.Context;
 import org.mockito.Mockito;

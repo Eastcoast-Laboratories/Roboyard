@@ -23,7 +23,7 @@ import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.graphics.MinimapGenerator;
 import roboyard.ui.util.FontScaleUtil;
 import roboyard.logic.core.Preferences;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import timber.log.Timber;
 
 /**

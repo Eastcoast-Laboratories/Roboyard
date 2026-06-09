@@ -27,7 +27,7 @@ import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 
 import timber.log.Timber;
 

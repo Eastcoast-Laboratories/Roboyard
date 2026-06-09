@@ -20,7 +20,7 @@ import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
 import roboyard.ui.util.MapIdGenerator;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import timber.log.Timber;
 
 import java.util.ArrayList;

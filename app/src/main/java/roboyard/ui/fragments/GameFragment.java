@@ -57,7 +57,7 @@ import roboyard.logic.core.GameSolution;
 
 import roboyard.ui.components.GameGridView;
 import roboyard.logic.managers.GameHistoryManager;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.achievements.Achievement;

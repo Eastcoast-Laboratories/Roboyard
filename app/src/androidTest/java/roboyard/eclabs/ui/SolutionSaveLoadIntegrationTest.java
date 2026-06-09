@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameState;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import timber.log.Timber;
 
 /**

@@ -23,7 +23,7 @@ import roboyard.logic.solver.RRGameMove;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.managers.GameHistoryManager;
 import roboyard.logic.core.GameHistoryEntry;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.managers.LevelCompletionManager;
 
 import timber.log.Timber;

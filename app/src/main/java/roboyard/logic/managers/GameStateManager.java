@@ -1,4 +1,4 @@
-package roboyard.ui.components;
+package roboyard.logic.managers;
 
 import android.app.Application;
 import android.app.Activity;
@@ -64,6 +64,7 @@ import roboyard.logic.solver.RRGameMove;
 import roboyard.logic.solver.RRPiece;
 import roboyard.logic.core.IGameMove;
 import roboyard.ui.animation.RobotAnimationManager;
+import roboyard.ui.components.GameGridView;
 import timber.log.Timber;
 
 /**

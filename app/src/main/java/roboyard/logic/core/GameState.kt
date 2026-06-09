@@ -2,7 +2,7 @@ package roboyard.logic.core
 
 import android.content.Context
 import roboyard.ui.activities.MainActivity
-import roboyard.ui.components.GameStateManager
+import roboyard.logic.managers.GameStateManager
 import roboyard.ui.util.MapIdGenerator
 import timber.log.Timber
 import java.io.BufferedReader

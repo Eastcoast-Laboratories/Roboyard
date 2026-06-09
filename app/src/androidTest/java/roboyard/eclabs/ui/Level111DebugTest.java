@@ -21,7 +21,7 @@ import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.logic.solver.RRGameMove;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 
 import timber.log.Timber;
 

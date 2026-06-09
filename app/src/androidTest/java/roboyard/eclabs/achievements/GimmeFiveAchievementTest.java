@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.components.GameStateManager;
+import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameElement;
 
