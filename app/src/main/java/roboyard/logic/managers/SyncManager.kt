@@ -1,7 +1,6 @@
 package roboyard.logic.managers
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.os.Build
 import org.json.JSONArray
 import org.json.JSONException
@@ -10,10 +9,12 @@ import roboyard.logic.achievements.AchievementManager
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameHistoryEntry
 import roboyard.logic.core.LevelCompletionData
+import roboyard.logic.network.NetworkMonitor
 import roboyard.logic.network.RoboyardApiClient
 import roboyard.logic.network.RoboyardApiClient.ApiCallback
 import roboyard.logic.storage.FileReadWrite.Companion.readPrivateData
 import roboyard.logic.storage.FileReadWrite.Companion.writePrivateData
+import roboyard.platform.AndroidNetworkMonitor
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
 import timber.log.Timber.Forest.w
@@ -37,23 +38,20 @@ import java.util.TimeZone
  */
 class SyncManager private constructor(context: Context) {
     private val context: Context
+    private val networkMonitor: NetworkMonitor
     private var lastSyncTimestamp: Long = 0
 
     init {
-        this.context = context.getApplicationContext()
+        val appContext = context.getApplicationContext()
+        this.context = appContext
+        this.networkMonitor = AndroidNetworkMonitor.getInstance(appContext)
     }
 
     val isNetworkAvailable: Boolean
         /**
          * Check if network is available.
          */
-        get() {
-            val cm =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-            if (cm == null) return false
-            val activeNetwork = cm.getActiveNetworkInfo()
-            return activeNetwork != null && activeNetwork.isConnected()
-        }
+        get() = networkMonitor.isNetworkAvailable()
 
     /**
      * Sync on app resume: upload all local data if online and logged in.
