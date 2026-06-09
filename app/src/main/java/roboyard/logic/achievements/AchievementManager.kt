@@ -19,7 +19,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.managers.GameHistoryManager.findByWallSignature
 import roboyard.logic.managers.GameHistoryManager.getUniqueCompletedLevelCount
 import roboyard.logic.managers.GameHistoryManager.getUniqueThreeStarLevelCount
-import roboyard.logic.managers.PlayGamesManager
+import roboyard.platform.PlayGamesManager
 import roboyard.logic.network.RoboyardApiClient
 import roboyard.logic.network.RoboyardApiClient.AchievementFetchResult
 import roboyard.logic.network.RoboyardApiClient.AchievementSyncResult

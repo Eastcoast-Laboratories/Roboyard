@@ -1,4 +1,4 @@
-package roboyard.logic.managers
+package roboyard.platform
 
 import android.app.Activity
 import android.content.Context

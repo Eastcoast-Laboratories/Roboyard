@@ -1,6 +1,6 @@
 package roboyard.logic.core
 
-import android.graphics.Color
+// ARGB color constants (replaced android.graphics.Color for KMP compatibility)
 
 object Constants {
     // Screen indices (preserved for compatibility with existing code)
@@ -95,15 +95,15 @@ object Constants {
 
     // RGB color values for robots (used in solver)
     val colors_rgb: IntArray = intArrayOf(
-        Color.MAGENTA,  // Pink (COLOR_PINK)
-        Color.GREEN,  // Green (COLOR_GREEN)
-        Color.BLUE,  // Blue (COLOR_BLUE)
-        Color.YELLOW,  // Yellow (COLOR_YELLOW)
-        Color.GRAY,  // Silver (COLOR_SILVER)
-        Color.RED,  // Red (COLOR_RED)
-        -0x5ad5d6,  // Brown (COLOR_BROWN)
-        -0x5b00,  // Orange (COLOR_ORANGE)
-        Color.WHITE // White (COLOR_WHITE)
+        0xFFFF00FF.toInt(),  // Magenta/Pink (COLOR_PINK)
+        0xFF00FF00.toInt(),  // Green (COLOR_GREEN)
+        0xFF0000FF.toInt(),  // Blue (COLOR_BLUE)
+        0xFFFFFF00.toInt(),  // Yellow (COLOR_YELLOW)
+        0xFF888888.toInt(),  // Gray/Silver (COLOR_SILVER)
+        0xFFFF0000.toInt(),  // Red (COLOR_RED)
+        0xFFA52A2A.toInt(),  // Brown (COLOR_BROWN)
+        0xFFFFA500.toInt(),  // Orange (COLOR_ORANGE)
+        0xFFFFFFFF.toInt()   // White (COLOR_WHITE)
     )
 
     // File and directory paths

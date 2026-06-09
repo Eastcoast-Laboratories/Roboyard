@@ -1,6 +1,5 @@
 package roboyard.logic.core
 
-import android.graphics.Color
 import timber.log.Timber
 import java.util.Arrays
 import java.util.Locale
@@ -1535,7 +1534,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             val colorId: Int = getColorIdFromObjectType(objectType)
             // Special case for multi-colored targets
             if (colorId == Constants.COLOR_MULTI) {
-                return Color.WHITE // Default color for multi-target
+                return 0xFFFFFFFF.toInt() // Default color for multi-target (WHITE)
             }
             if (colorId >= 0 && colorId < Constants.colors_rgb.size) {
                 return Constants.colors_rgb[colorId]

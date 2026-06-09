@@ -6,7 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
-import android.util.Base64
+import java.util.Base64
 import android.view.MotionEvent
 import android.widget.Toast
 import android.widget.ToggleButton
@@ -1109,10 +1109,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             if (!enhancedSaveData.toString().contains("MAP_SIG:")) {
                 val mapSig = gameState.generateMapSignature()
                 if (mapSig != null && !mapSig.isEmpty()) {
-                    val encoded = Base64.encodeToString(
-                        mapSig.toByteArray(StandardCharsets.UTF_8),
-                        Base64.NO_WRAP
-                    )
+                    val encoded = Base64.getEncoder().encodeToString(mapSig.toByteArray(StandardCharsets.UTF_8))
                     val sigTag = "MAP_SIG:" + encoded + ";"
                     val insertPos = enhancedSaveData.indexOf(";", 0) + 1
                     enhancedSaveData.insert(insertPos, sigTag)
