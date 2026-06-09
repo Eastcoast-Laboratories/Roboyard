@@ -18,13 +18,14 @@ No further package moves are pending.
 roboyard.logic/
 ├── core/           (Kotlin: GameState, GameLogic, GameHistoryEntry, Constants, Wall*, ...)
 ├── solver/         (Kotlin: RR*/ERR*/Solver* classes)
-├── managers/       (Java: GameStateManager, GameHistoryManager, LevelCompletionManager,
-│                    SyncManager, DataExportImportManager, PlayGamesManager)
+├── managers/       (Java: GameStateManager, GameHistoryManager, SyncManager,
+│                    DataExportImportManager; Kotlin: LevelCompletionManager,
+│                    PlayGamesManager)
 ├── network/        (Java: RoboyardApiClient)
-├── storage/        (Java: FileReadWrite)
-├── graphics/       (Java: MinimapGenerator)
-└── achievements/   (Java: Achievement, AchievementCategory, AchievementDefinitions,
-                     AchievementManager, StreakManager)
+├── storage/        (Kotlin: FileReadWrite)
+├── graphics/       (Kotlin: MinimapGenerator)
+└── achievements/   (Java: AchievementManager; Kotlin: Achievement,
+                     AchievementCategory, AchievementDefinitions, StreakManager)
 ```
 
 ## Files that stay in UI (confirmed UI)
@@ -53,15 +54,12 @@ The `logic.core` and `logic.solver` packages are already fully Kotlin. The remai
 | `roboyard.logic.managers` | `GameHistoryManager.java` | `Activity`, file I/O |
 | `roboyard.logic.managers` | `SyncManager.java` | `Context`, network |
 | `roboyard.logic.managers` | `DataExportImportManager.java` | `Context`, file I/O |
-| `roboyard.logic.managers` | `PlayGamesManager.java` | Play Services (flavor-specific) |
 | `roboyard.logic.network`  | `RoboyardApiClient.java` | `HttpURLConnection` |
-| `roboyard.logic.storage`  | `FileReadWrite.java` | `Context`, Android file APIs |
-| `roboyard.logic.graphics` | `MinimapGenerator.java` | `Bitmap`, `Canvas` |
 | `roboyard.logic.achievements` | `AchievementManager.java` | `Activity`, `SharedPreferences` |
 
 ### Suggested conversion order
-1. [ ] - File/network/graphics infra: `FileReadWrite`, `RoboyardApiClient`, `MinimapGenerator`, `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
-2. [ ] - `Activity`-dependent managers: `AchievementManager`, then `PlayGamesManager` (flavor-specific) and `GameStateManager` last — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
+1. [ ] - Network/file/history infra still pending Java → Kotlin: `RoboyardApiClient`, `DataExportImportManager`, `SyncManager`, `GameHistoryManager`.
+2. [ ] - `Activity`-dependent managers still pending Java → Kotlin: `AchievementManager` and `GameStateManager` — abstract the `Activity`/ViewModel/UI dependencies during the conversion.
 
 ## KMP notes
 - Files depending on `SharedPreferences`, `Activity`, `ViewModel`, `LiveData`, `Bitmap` or `HttpURLConnection` cannot be shared with iOS as-is.
