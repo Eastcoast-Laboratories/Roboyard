@@ -1,7 +1,7 @@
 package roboyard.logic.core
 
-import android.content.Context
 import roboyard.logic.core.Preferences.context
+import roboyard.platform.AndroidStorage
 import timber.log.Timber
 
 /**
@@ -87,15 +87,12 @@ private constructor() {
         updateCurrentBoardSize()
         val key = getWallsKey(currentBoardWidth, currentBoardHeight)
 
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-
+        val storage = AndroidStorage.getInstance(context)
 
         // Convert walls to a string representation
         val wallsData = gridElementsToString(storedWalls)
 
-        editor.putString(key, wallsData)
-        editor.apply()
+        storage.putString(key, wallsData)
 
         Timber.tag(TAG).d(
             "[WALL STORAGE] Saved %d walls to disk for board size %dx%d: String: %s",
@@ -175,8 +172,8 @@ private constructor() {
         updateCurrentBoardSize()
         val key = getWallsKey(currentBoardWidth, currentBoardHeight)
 
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val wallsData: String = prefs.getString(key, "")!!
+        val storage = AndroidStorage.getInstance(context)
+        val wallsData: String = storage.getString(key, "") ?: ""
 
         storedWalls.clear()
 
@@ -237,10 +234,8 @@ private constructor() {
 
         val key = getWallsKey(width, height)
 
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-        editor.remove(key)
-        editor.apply()
+        val storage = AndroidStorage.getInstance(context)
+        storage.remove(key)
 
 
         // If this is the current board size, also clear the in-memory walls
@@ -301,8 +296,8 @@ private constructor() {
             count++
         }
 
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(key, sb.toString()).apply()
+        val storage = AndroidStorage.getInstance(context)
+        storage.putString(key, sb.toString())
 
         Timber.tag(TAG).d(
             "[WALL STORAGE] Stored %d walls to disk for board size %dx%d (different from current %dx%d)",
