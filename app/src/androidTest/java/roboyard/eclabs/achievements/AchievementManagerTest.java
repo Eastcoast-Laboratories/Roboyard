@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -102,6 +103,24 @@ public class AchievementManagerTest {
     public void testUnlockUnknownAchievement() {
         boolean result = achievementManager.unlock("unknown_achievement_xyz");
         assertFalse("Unknown achievement unlock should return false", result);
+    }
+
+    /**
+     * Test that setUiNotifier keeps a strong reference until explicitly cleared.
+     */
+    @Test
+    public void testSetUiNotifierStoresStrongReference() throws Exception {
+        AchievementManager.UiNotifier notifier = message -> {};
+
+        achievementManager.setUiNotifier(notifier);
+
+        Field uiNotifierField = AchievementManager.class.getDeclaredField("uiNotifier");
+        uiNotifierField.setAccessible(true);
+        assertSame("UiNotifier should be stored strongly", notifier, uiNotifierField.get(achievementManager));
+
+        achievementManager.setUiNotifier(null);
+
+        assertNull("UiNotifier should clear when set to null", uiNotifierField.get(achievementManager));
     }
 
     // ==================== PROGRESSION ACHIEVEMENTS TESTS ====================
