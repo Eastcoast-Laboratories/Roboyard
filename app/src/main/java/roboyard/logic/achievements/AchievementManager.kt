@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import android.widget.Toast
 import org.json.JSONArray
 import org.json.JSONException
@@ -87,7 +89,7 @@ class AchievementManager private constructor(context: Context) {
         if (activity != null) {
             val ctx = this.context
             this.uiNotifier = UiNotifier { message ->
-                Handler(Looper.getMainLooper()).post {
+                CoroutineScope(Dispatchers.Main).launch {
                     try {
                         Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
                     } catch (e: Exception) {
@@ -1190,7 +1192,7 @@ class AchievementManager private constructor(context: Context) {
      */
     private fun syncAfterUnlock() {
         // Delay sync slightly to batch multiple unlocks
-        Handler(Looper.getMainLooper()).postDelayed(Runnable { this.syncToServer() }, 2000)
+        CoroutineScope(Dispatchers.Main).launch { delay(2000); this@AchievementManager.syncToServer() }
     }
 
     /**

@@ -4,9 +4,12 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
 import java.util.Base64
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import android.view.MotionEvent
 import android.widget.Toast
 import android.widget.ToggleButton
@@ -315,8 +318,8 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     private var preComputeCancelled = false
 
     // Hint button reset timer to avoid race condition when loading games from history
-    private var hintButtonResetRunnable: Runnable? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private var hintButtonResetJob: Job? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     private val solverManager: SolverManager
         /**
@@ -2358,14 +2361,13 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 val starsAfter = manager.totalStars
                 d("[LEVEL_EDITOR] Stars before=%d, after=%d", starsBefore, starsAfter)
                 if (starsBefore < 140 && starsAfter >= 140) {
-                    Handler(Looper.getMainLooper()).post(Runnable {
+                    coroutineScope.launch {
                         Toast.makeText(
                             context,
                             R.string.level_editor_unlocked,
                             Toast.LENGTH_LONG
                         ).show()
                     }
-                    )
                     d("[LEVEL_EDITOR] Level Editor unlocked at %d stars!", starsAfter)
                 }
             }
@@ -3417,9 +3419,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     manager.run()
                 } catch (e: Exception) {
                     e(e, "[SOLUTION_SOLVER] Error running solver")
-                    Handler(Looper.getMainLooper()).post(Runnable {
+                    coroutineScope.launch {
                         onSolutionCalculationFailed("Error: " + e.message)
-                    })
+                    }
                 }
             })
         } catch (e: Exception) {
@@ -3507,11 +3509,12 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                         solverManager.cancelSolver() // Cancel any running solver process
 
                         // Create a new game after a short delay to ensure the solver is fully reset
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        coroutineScope.launch {
+                            delay(100)
                             createValidGame(
                                 Preferences.boardSizeWidth, Preferences.boardSizeHeight
                             )
-                        }, 100)
+                        }
                         return
                     } else if (isTooHard) {
                         // Regenerate if puzzle is too hard for current difficulty mode (map rejected/discarded)
@@ -3531,10 +3534,11 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                         solverManager.cancelSolver() // Cancel any running solver process
 
                         // Create a new game after a short delay to ensure the solver is fully reset
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        coroutineScope.launch {
+                            delay(100)
                             validateDifficulty = true // Make sure difficulty is checked
                             createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
-                        }, 100)
+                        }
                         return
                     }
                 }
@@ -3559,9 +3563,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 val solverManager = this.solverManager
                 solverManager.resetInitialization()
                 solverManager.cancelSolver()
-                Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                coroutineScope.launch {
+                    delay(100)
                     createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
-                }, 100)
+                }
                 return
             }
             w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found, accepting puzzle (regen exhausted or disabled)")
@@ -4094,11 +4099,11 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         )
 
         // Process on main thread to ensure thread safety with UI updates
-        Handler(Looper.getMainLooper()).post(Runnable {
+        coroutineScope.launch {
             if (success && numSolutions > 0) {
                 // Get the solution from the solver manager
                 try {
-                    val solution = this.solverManager.getCurrentSolution()
+                    val solution = this@GameStateManager.solverManager.getCurrentSolution()
                     if (solution != null) {
                         d(
                             "[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves",
@@ -4122,14 +4127,14 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager - No solution found")
                 onSolutionCalculationFailed("No solution found")
             }
-        })
+        }
     }
 
     override fun onSolverCancelled() {
         d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverCancelled called")
 
         // Process on main thread to ensure thread safety with UI updates
-        Handler(Looper.getMainLooper()).post(Runnable {
+        coroutineScope.launch {
             // Check if map regeneration is enabled
             if (Preferences.generateNewMapEachTime) {
                 d("[SOLUTION_SOLVER] generateNewMapEachTime enabled - discarding unsolvable map and generating new one")
@@ -4139,7 +4144,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 d("[SOLUTION_SOLVER] generateNewMapEachTime disabled - showing error to user")
             }
             onSolutionCalculationFailed("Solver was cancelled")
-        })
+        }
     }
 
 
@@ -4463,7 +4468,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
         liveSolverManager!!.solveAsync(gridElements, object : LiveSolverListener {
             override fun onLiveSolverFinished(remainingMoves: Int, liveSolution: GameSolution?) {
-                Handler(Looper.getMainLooper()).post(Runnable {
+                coroutineScope.launch {
                     liveSolverCalculating.setValue(false)
                     val currentMoves: Int =
                         (if (moveCount.getValue() != null) moveCount.getValue() else 0)!!
@@ -4489,15 +4494,15 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     // Cache this result and pre-compute next moves
                     nextMovesCache.put(stateHash, remainingMoves)
                     preComputeNextMoves(state, liveSolution)
-                })
+                }
             }
 
             override fun onLiveSolverFailed() {
-                Handler(Looper.getMainLooper()).post(Runnable {
+                coroutineScope.launch {
                     liveSolverCalculating.setValue(false)
                     liveMoveCounterText.setValue("?")
                     d("[LIVE_SOLVER] No solution found from current position")
-                })
+                }
             }
         })
     }
@@ -4994,27 +4999,23 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
 
         // Cancel any pending reset
-        if (hintButtonResetRunnable != null) {
-            mainHandler.removeCallbacks(hintButtonResetRunnable!!)
-        }
+        hintButtonResetJob?.cancel()
 
 
         // Schedule hint button reset after delay to avoid race condition
-        hintButtonResetRunnable = Runnable {
+        hintButtonResetJob = coroutineScope.launch {
+            delay(HINT_BUTTON_RESET_DELAY_MS)
             if (hintButton != null && hintButton.isChecked()) {
                 d("[HINT_SYSTEM] Executing delayed hint button reset")
                 hintButton.setChecked(false)
             }
         }
-        mainHandler.postDelayed(hintButtonResetRunnable!!, HINT_BUTTON_RESET_DELAY_MS)
     }
 
     override fun onCleared() {
         super.onCleared()
         // Cancel any pending hint button reset
-        if (hintButtonResetRunnable != null) {
-            mainHandler.removeCallbacks(hintButtonResetRunnable!!)
-        }
+        hintButtonResetJob?.cancel()
         if (liveSolverManager != null) {
             liveSolverManager!!.shutdown()
         }

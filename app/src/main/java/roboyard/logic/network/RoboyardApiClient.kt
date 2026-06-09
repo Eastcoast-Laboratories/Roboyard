@@ -3,8 +3,9 @@ package roboyard.logic.network
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -30,7 +31,7 @@ class RoboyardApiClient private constructor(context: Context) {
     private val context: Context
     private val prefs: SharedPreferences
     private val executor: ExecutorService
-    private val mainHandler: Handler
+    private val coroutineScope: CoroutineScope
 
     interface ApiCallback<T> {
         fun onSuccess(result: T?)
@@ -59,7 +60,7 @@ class RoboyardApiClient private constructor(context: Context) {
         this.context = context.getApplicationContext()
         this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         this.executor = Executors.newSingleThreadExecutor()
-        this.mainHandler = Handler(Looper.getMainLooper())
+        this.coroutineScope = CoroutineScope(Dispatchers.Main)
     }
 
     val installSource: String
@@ -168,7 +169,7 @@ class RoboyardApiClient private constructor(context: Context) {
                 val json = JSONObject(response)
 
                 if (json.optBoolean("needs_update", false)) {
-                    mainHandler.post(Runnable { callback.onNeedsUpdate() })
+                    coroutineScope.launch { callback.onNeedsUpdate() }
                     return@Runnable
                 }
                 if (json.has("error")) {
@@ -234,7 +235,7 @@ class RoboyardApiClient private constructor(context: Context) {
                 val json = JSONObject(response)
 
                 if (json.optBoolean("needs_update", false)) {
-                    mainHandler.post(Runnable { callback.onNeedsUpdate() })
+                    coroutineScope.launch { callback.onNeedsUpdate() }
                     return@Runnable
                 }
                 if (json.has("error")) {
@@ -417,7 +418,7 @@ class RoboyardApiClient private constructor(context: Context) {
                 val json = JSONObject(response)
 
                 if (json.optBoolean("needs_update", false)) {
-                    mainHandler.post(Runnable { callback.onNeedsUpdate() })
+                    coroutineScope.launch { callback.onNeedsUpdate() }
                     return@Runnable
                 }
                 if (json.has("error")) {
@@ -582,14 +583,14 @@ class RoboyardApiClient private constructor(context: Context) {
      * Post success callback to main thread.
      */
     private fun <T> postSuccess(callback: ApiCallback<T?>, result: T?) {
-        mainHandler.post(Runnable { callback.onSuccess(result) })
+        coroutineScope.launch { callback.onSuccess(result) }
     }
 
     /**
      * Post error callback to main thread.
      */
     private fun <T> postError(callback: ApiCallback<T?>, error: String?) {
-        mainHandler.post(Runnable { callback.onError(error) })
+        coroutineScope.launch { callback.onError(error) }
     }
 
     /**
