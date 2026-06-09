@@ -60,8 +60,8 @@ import roboyard.logic.managers.GameHistoryManager;
 import roboyard.ui.components.GameStateManager;
 import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.logic.core.GameHistoryEntry;
-import roboyard.ui.achievements.Achievement;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.Achievement;
+import roboyard.logic.achievements.AchievementManager;
 import roboyard.ui.achievements.AchievementPopup;
 import timber.log.Timber;
 

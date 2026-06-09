@@ -19,7 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManager;
 import timber.log.Timber;
 
 /**

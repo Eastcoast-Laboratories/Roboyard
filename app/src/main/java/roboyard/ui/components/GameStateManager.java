@@ -57,7 +57,7 @@ import roboyard.logic.core.GridElement;
 import roboyard.logic.core.Preferences;
 import roboyard.logic.core.WallStorage;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.solver.ERRGameMove;
 import roboyard.logic.solver.RRGameMove;

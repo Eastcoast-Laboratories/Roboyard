@@ -1756,7 +1756,7 @@ public class GameGridView extends View {
                 // traverse_all_squares_1_robot: Unlock anytime (after goal allowed)
                 if (!allSquaresOneRobotUnlocked) {
                     allSquaresOneRobotUnlocked = true;
-                    roboyard.ui.achievements.AchievementManager.getInstance(getContext())
+                    roboyard.logic.achievements.AchievementManager.getInstance(getContext())
                         .onAllSquaresTraversed(true, false, false, false);
                     Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot unlocked! (%d/%d squares, excluding carré)", visitedCount, totalSquares);
                 }
@@ -1770,7 +1770,7 @@ public class GameGridView extends View {
             // traverse_all_squares_all_robots: Unlock anytime (after goal allowed)
             if (!allSquaresAllRobotsUnlocked) {
                 allSquaresAllRobotsUnlocked = true;
-                roboyard.ui.achievements.AchievementManager.getInstance(getContext())
+                roboyard.logic.achievements.AchievementManager.getInstance(getContext())
                     .onAllSquaresTraversed(false, false, true, false);
                 Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots unlocked! (%d/%d squares, excluding carré)", allVisitedCount, totalSquares);
             }
@@ -1833,7 +1833,7 @@ public class GameGridView extends View {
             int visitedCount = countVisitedSquaresExcludingCarre(visitedSquaresPerRobot.get(goalRobot.color));
             if (visitedCount >= totalSquares && !allSquaresOneRobotGoalUnlocked) {
                 allSquaresOneRobotGoalUnlocked = true;
-                roboyard.ui.achievements.AchievementManager.getInstance(getContext())
+                roboyard.logic.achievements.AchievementManager.getInstance(getContext())
                     .onAllSquaresTraversed(false, true, false, false);
                 Timber.d("[ACHIEVEMENT] traverse_all_squares_1_robot_goal unlocked! Goal robot %d visited %d/%d squares",
                         goalRobot.color, visitedCount, totalSquares);
@@ -1844,7 +1844,7 @@ public class GameGridView extends View {
         int allVisitedCount = countVisitedSquaresExcludingCarre(visitedSquaresAllRobots);
         if (allVisitedCount >= totalSquares && !allSquaresAllRobotsGoalUnlocked) {
             allSquaresAllRobotsGoalUnlocked = true;
-            roboyard.ui.achievements.AchievementManager.getInstance(getContext())
+            roboyard.logic.achievements.AchievementManager.getInstance(getContext())
                 .onAllSquaresTraversed(false, false, false, true);
             Timber.d("[ACHIEVEMENT] traverse_all_squares_all_robots_goal unlocked! All robots visited %d/%d squares", 
                     allVisitedCount, totalSquares);

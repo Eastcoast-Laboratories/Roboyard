@@ -1,4 +1,4 @@
-package roboyard.ui.achievements;
+package roboyard.logic.achievements;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

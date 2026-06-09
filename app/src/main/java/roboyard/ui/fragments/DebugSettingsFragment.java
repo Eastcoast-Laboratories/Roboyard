@@ -18,8 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import roboyard.ui.achievements.AchievementManager;
-import roboyard.ui.achievements.StreakManager;
+import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.StreakManager;
 import timber.log.Timber;
 import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.eclabs.R;

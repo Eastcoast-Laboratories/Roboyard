@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 import roboyard.eclabs.R;
+import roboyard.logic.achievements.Achievement;
 import roboyard.ui.achievements.AchievementIconHelper;
 import roboyard.ui.fragments.AchievementsFragment;
 import timber.log.Timber;

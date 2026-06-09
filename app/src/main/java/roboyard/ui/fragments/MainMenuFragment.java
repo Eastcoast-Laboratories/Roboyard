@@ -15,11 +15,11 @@ import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
 import roboyard.logic.network.RoboyardApiClient;
-import roboyard.ui.achievements.Achievement;
-import roboyard.ui.achievements.AchievementCategory;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.Achievement;
+import roboyard.logic.achievements.AchievementCategory;
+import roboyard.logic.achievements.AchievementManager;
 import roboyard.ui.achievements.AchievementPopup;
-import roboyard.ui.achievements.StreakManager;
+import roboyard.logic.achievements.StreakManager;
 import timber.log.Timber;
 import java.util.Locale;
 import android.content.res.Resources;

@@ -16,11 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import roboyard.eclabs.R;
-import roboyard.ui.achievements.Achievement;
-import roboyard.ui.achievements.AchievementCategory;
+import roboyard.logic.achievements.Achievement;
+import roboyard.logic.achievements.AchievementCategory;
 import roboyard.ui.achievements.AchievementIconHelper;
-import roboyard.ui.achievements.AchievementManager;
-import roboyard.ui.achievements.StreakManager;
+import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.StreakManager;
 import timber.log.Timber;
 
 /**

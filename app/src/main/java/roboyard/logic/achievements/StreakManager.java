@@ -1,4 +1,4 @@
-package roboyard.ui.achievements;
+package roboyard.logic.achievements;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,4 +1,4 @@
-package roboyard.ui.achievements;
+package roboyard.logic.achievements;
 
 import android.app.Activity;
 import android.content.Context;

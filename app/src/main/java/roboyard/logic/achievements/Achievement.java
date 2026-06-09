@@ -1,4 +1,4 @@
-package roboyard.ui.achievements;
+package roboyard.logic.achievements;
 
 /**
  * Represents a single achievement in the game.

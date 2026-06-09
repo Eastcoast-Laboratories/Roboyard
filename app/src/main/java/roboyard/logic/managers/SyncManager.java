@@ -85,7 +85,7 @@ public class SyncManager {
         Timber.d("[AUTO_SYNC] Starting auto-sync on resume");
         
         // Upload achievements (includes streak data)
-        roboyard.ui.achievements.AchievementManager.getInstance(context).syncToServer();
+        roboyard.logic.achievements.AchievementManager.getInstance(context).syncToServer();
         
         // Upload save games and history
         uploadSaveGames();

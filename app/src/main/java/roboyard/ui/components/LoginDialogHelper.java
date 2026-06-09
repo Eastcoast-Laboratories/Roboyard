@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
 import roboyard.logic.network.RoboyardApiClient;
 import roboyard.logic.managers.SyncManager;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManager;
 import timber.log.Timber;
 
 /**

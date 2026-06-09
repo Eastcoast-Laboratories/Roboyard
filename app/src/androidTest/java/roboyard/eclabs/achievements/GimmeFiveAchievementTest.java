@@ -1,7 +1,7 @@
 package roboyard.eclabs.achievements;
 
-import roboyard.ui.achievements.AchievementManager;
-import roboyard.ui.achievements.Achievement;
+import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.Achievement;
 
 import static org.junit.Assert.*;
 

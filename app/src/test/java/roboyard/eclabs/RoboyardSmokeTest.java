@@ -357,14 +357,14 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCreationWithDrawable() {
-        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
+        roboyard.logic.achievements.Achievement ach = new roboyard.logic.achievements.Achievement(
             "test_id", "name_key", "desc_key",
-            roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon_1_lightning");
+            roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon_1_lightning");
         
         assertEquals("test_id", ach.getId());
         assertEquals("name_key", ach.getNameKey());
         assertEquals("desc_key", ach.getDescriptionKey());
-        assertEquals(roboyard.ui.achievements.AchievementCategory.PROGRESSION, ach.getCategory());
+        assertEquals(roboyard.logic.achievements.AchievementCategory.PROGRESSION, ach.getCategory());
         assertEquals("icon_1_lightning", ach.getIconDrawableName());
         assertEquals(-1, ach.getSpriteIndex());
         assertFalse(ach.isUnlocked());
@@ -373,9 +373,9 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCreationWithSpriteIndex() {
-        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
+        roboyard.logic.achievements.Achievement ach = new roboyard.logic.achievements.Achievement(
             "test_id", "name_key", "desc_key",
-            roboyard.ui.achievements.AchievementCategory.PERFORMANCE, 42);
+            roboyard.logic.achievements.AchievementCategory.PERFORMANCE, 42);
         
         assertEquals(42, ach.getSpriteIndex());
         assertNull(ach.getIconDrawableName());
@@ -383,8 +383,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementUnlock() {
-        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
-            "test", "n", "d", roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon");
+        roboyard.logic.achievements.Achievement ach = new roboyard.logic.achievements.Achievement(
+            "test", "n", "d", roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon");
         
         assertFalse(ach.isUnlocked());
         assertEquals(0, ach.getUnlockedTimestamp());
@@ -400,8 +400,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementUnlockTimestampNotOverwritten() {
-        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
-            "test", "n", "d", roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon");
+        roboyard.logic.achievements.Achievement ach = new roboyard.logic.achievements.Achievement(
+            "test", "n", "d", roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon");
         
         ach.setUnlocked(true);
         long firstTimestamp = ach.getUnlockedTimestamp();
@@ -413,8 +413,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementFormatArgs() {
-        roboyard.ui.achievements.Achievement ach = new roboyard.ui.achievements.Achievement(
-            "test", "n", "d", roboyard.ui.achievements.AchievementCategory.PROGRESSION, "icon");
+        roboyard.logic.achievements.Achievement ach = new roboyard.logic.achievements.Achievement(
+            "test", "n", "d", roboyard.logic.achievements.AchievementCategory.PROGRESSION, "icon");
         
         assertNull(ach.getNameFormatArgs());
         assertNull(ach.getDescriptionFormatArgs());
@@ -436,27 +436,27 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementDefinitionsNotEmpty() {
-        Map<String, roboyard.ui.achievements.Achievement> all = 
-            roboyard.ui.achievements.AchievementDefinitions.getAll();
+        Map<String, roboyard.logic.achievements.Achievement> all = 
+            roboyard.logic.achievements.AchievementDefinitions.getAll();
         assertNotNull(all);
         assertTrue("Should have achievements defined", all.size() > 0);
     }
 
     @Test
     public void testAchievementDefinitionsHaveUniqueIds() {
-        Map<String, roboyard.ui.achievements.Achievement> all = 
-            roboyard.ui.achievements.AchievementDefinitions.getAll();
+        Map<String, roboyard.logic.achievements.Achievement> all = 
+            roboyard.logic.achievements.AchievementDefinitions.getAll();
         Set<String> ids = new HashSet<>();
-        for (roboyard.ui.achievements.Achievement ach : all.values()) {
+        for (roboyard.logic.achievements.Achievement ach : all.values()) {
             assertTrue("Duplicate achievement ID: " + ach.getId(), ids.add(ach.getId()));
         }
     }
 
     @Test
     public void testAchievementDefinitionsAllHaveRequiredFields() {
-        Map<String, roboyard.ui.achievements.Achievement> all = 
-            roboyard.ui.achievements.AchievementDefinitions.getAll();
-        for (roboyard.ui.achievements.Achievement ach : all.values()) {
+        Map<String, roboyard.logic.achievements.Achievement> all = 
+            roboyard.logic.achievements.AchievementDefinitions.getAll();
+        for (roboyard.logic.achievements.Achievement ach : all.values()) {
             assertNotNull("Achievement should have ID: " + ach, ach.getId());
             assertFalse("Achievement ID should not be empty", ach.getId().isEmpty());
             assertNotNull("Achievement should have name key: " + ach.getId(), ach.getNameKey());
@@ -470,8 +470,8 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementDefinitionsKnownAchievementsExist() {
-        Map<String, roboyard.ui.achievements.Achievement> all = 
-            roboyard.ui.achievements.AchievementDefinitions.getAll();
+        Map<String, roboyard.logic.achievements.Achievement> all = 
+            roboyard.logic.achievements.AchievementDefinitions.getAll();
         
         // Core achievements that must exist
         String[] requiredIds = {
@@ -486,16 +486,16 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementColorDeterministic() {
-        int color1 = roboyard.ui.achievements.AchievementDefinitions.getAchievementColor("test_id");
-        int color2 = roboyard.ui.achievements.AchievementDefinitions.getAchievementColor("test_id");
+        int color1 = roboyard.logic.achievements.AchievementDefinitions.getAchievementColor("test_id");
+        int color2 = roboyard.logic.achievements.AchievementDefinitions.getAchievementColor("test_id");
         assertEquals("Same ID should produce same color", color1, color2);
     }
 
     @Test
     public void testAchievementColorFromPalette() {
-        int color = roboyard.ui.achievements.AchievementDefinitions.getAchievementColor("any_id");
+        int color = roboyard.logic.achievements.AchievementDefinitions.getAchievementColor("any_id");
         boolean found = false;
-        for (int c : roboyard.ui.achievements.AchievementDefinitions.ACHIEVEMENT_COLORS) {
+        for (int c : roboyard.logic.achievements.AchievementDefinitions.ACHIEVEMENT_COLORS) {
             if (c == color) { found = true; break; }
         }
         assertTrue("Color should be from the predefined palette", found);
@@ -507,36 +507,36 @@ public class RoboyardSmokeTest {
 
     @Test
     public void testAchievementCategoryValues() {
-        roboyard.ui.achievements.AchievementCategory[] categories = 
-            roboyard.ui.achievements.AchievementCategory.values();
+        roboyard.logic.achievements.AchievementCategory[] categories = 
+            roboyard.logic.achievements.AchievementCategory.values();
         assertTrue("Should have categories", categories.length > 0);
     }
 
     @Test
     public void testAchievementCategoryDisplayOrder() {
-        assertEquals(0, roboyard.ui.achievements.AchievementCategory.PROGRESSION.getDisplayOrder());
-        assertEquals(1, roboyard.ui.achievements.AchievementCategory.PERFORMANCE.getDisplayOrder());
-        assertEquals(2, roboyard.ui.achievements.AchievementCategory.MASTERY.getDisplayOrder());
+        assertEquals(0, roboyard.logic.achievements.AchievementCategory.PROGRESSION.getDisplayOrder());
+        assertEquals(1, roboyard.logic.achievements.AchievementCategory.PERFORMANCE.getDisplayOrder());
+        assertEquals(2, roboyard.logic.achievements.AchievementCategory.MASTERY.getDisplayOrder());
     }
 
     @Test
     public void testAchievementCategoryStringResName() {
-        assertNotNull(roboyard.ui.achievements.AchievementCategory.PROGRESSION.getStringResName());
+        assertNotNull(roboyard.logic.achievements.AchievementCategory.PROGRESSION.getStringResName());
         assertEquals("achievement_category_progression", 
-            roboyard.ui.achievements.AchievementCategory.PROGRESSION.getStringResName());
+            roboyard.logic.achievements.AchievementCategory.PROGRESSION.getStringResName());
     }
 
     @Test
     public void testAchievementCategoryChallengeDisabled() {
         assertFalse("CHALLENGE category should be disabled",
-            roboyard.ui.achievements.AchievementCategory.CHALLENGE.isEnabled());
+            roboyard.logic.achievements.AchievementCategory.CHALLENGE.isEnabled());
     }
 
     @Test
     public void testAchievementCategoryOthersEnabled() {
-        for (roboyard.ui.achievements.AchievementCategory cat : 
-                roboyard.ui.achievements.AchievementCategory.values()) {
-            if (cat != roboyard.ui.achievements.AchievementCategory.CHALLENGE) {
+        for (roboyard.logic.achievements.AchievementCategory cat : 
+                roboyard.logic.achievements.AchievementCategory.values()) {
+            if (cat != roboyard.logic.achievements.AchievementCategory.CHALLENGE) {
                 assertTrue("Category " + cat + " should be enabled", cat.isEnabled());
             }
         }

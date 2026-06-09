@@ -72,8 +72,8 @@ public class PlayGamesManager {
             return;
         }
         
-        roboyard.ui.achievements.AchievementManager achievementManager = 
-            roboyard.ui.achievements.AchievementManager.getInstance(context);
+        roboyard.logic.achievements.AchievementManager achievementManager = 
+            roboyard.logic.achievements.AchievementManager.getInstance(context);
         String playGamesId = achievementManager.getPlayGamesAchievementId(localAchievementId);
         if (playGamesId == null || playGamesId.startsWith("REPLACE_")) {
             Timber.w("%s Achievement ID not configured for: %s", TAG, localAchievementId);

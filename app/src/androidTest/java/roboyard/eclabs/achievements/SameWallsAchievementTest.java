@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import roboyard.logic.core.GameHistoryEntry;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManager;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.managers.GameHistoryManager;

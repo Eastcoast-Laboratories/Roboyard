@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import roboyard.eclabs.R;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.ui.activities.MainActivity;
 import roboyard.ui.components.GameStateManager;

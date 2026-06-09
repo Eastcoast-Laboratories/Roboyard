@@ -12,8 +12,8 @@ import java.util.Map;
 
 import timber.log.Timber;
 import roboyard.eclabs.BuildConfig;
-import roboyard.ui.achievements.AchievementManager;
-import roboyard.ui.achievements.StreakManager;
+import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.StreakManager;
 import roboyard.logic.storage.FileReadWrite;
 
 /**

@@ -12,6 +12,7 @@ import android.widget.ImageView;
 
 import android.util.LruCache;
 
+import roboyard.logic.achievements.AchievementDefinitions;
 import timber.log.Timber;
 
 /**

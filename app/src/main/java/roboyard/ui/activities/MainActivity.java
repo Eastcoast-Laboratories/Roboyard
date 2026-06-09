@@ -822,11 +822,11 @@ public class MainActivity extends AppCompatActivity {
         Timber.d("[DEEPLINK] Random game deep link detected (%s)", source);
         if (gameStateManager != null) {
             // Record daily login when starting a new game
-            roboyard.ui.achievements.StreakManager.getInstance(this).recordDailyLogin();
+            roboyard.logic.achievements.StreakManager.getInstance(this).recordDailyLogin();
             Timber.d("[STREAK] Daily login recorded on random game deep link");
             
             // Reset achievement game session flags for new game
-            roboyard.ui.achievements.AchievementManager.getInstance(this).onNewGameStarted();
+            roboyard.logic.achievements.AchievementManager.getInstance(this).onNewGameStarted();
             
             // Start a new game
             gameStateManager.startGame();

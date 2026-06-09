@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
 import roboyard.ui.activities.MainActivity;
-import roboyard.ui.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.logic.solver.RRGameMove;
