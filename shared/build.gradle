@@ -1,15 +1,15 @@
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
-    id 'com.android.library'
+    id 'com.android.kotlin.multiplatform.library'
 }
 
 kotlin {
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = '17'
-            }
-        }
+    jvmToolchain(17)
+
+    androidLibrary {
+        namespace = 'roboyard.shared'
+        compileSdk = 36
+        minSdk = 21
     }
 
     iosX64()
@@ -29,19 +29,5 @@ kotlin {
                 implementation "com.google.code.gson:gson:2.13.2"
             }
         }
-    }
-}
-
-android {
-    namespace 'roboyard.shared'
-    compileSdk 36
-
-    defaultConfig {
-        minSdk 21
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
     }
 }

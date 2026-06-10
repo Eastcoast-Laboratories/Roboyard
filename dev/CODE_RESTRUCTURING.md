@@ -171,3 +171,32 @@ Both must stay green after each step.
 - Change the needed configs, so you can build self to test your changes
 - Don't stop before all tasks are done
 - Complete all steps. Commit between the steps with good commit messages
+
+---
+
+## CURRENT STATE (continuing from copilot's branch)
+
+### Build infrastructure FIXED ✅
+Copilot left the build broken at the Gradle plugin level (AGP 9.x incompatibilities).
+Fixed:
+- `app/build.gradle`: removed `org.jetbrains.kotlin.android` (AGP 9 has built-in Kotlin → conflict `Cannot add extension 'kotlin'`)
+- `shared/build.gradle`: `com.android.library` → `com.android.kotlin.multiplatform.library` (required since AGP 9.0) + new DSL (`androidLibrary {}`, `jvmToolchain(17)`)
+- Gradle config now succeeds; `:app` compiles; `:shared` compiles up to real code-level errors
+
+### REMAINING TASKS ⏳
+
+1. **Move `Preferences.kt` to `shared/commonMain`** (BLOCKER)
+   - `MapGenerator.kt` and `WallStorage.kt` (already in commonMain) reference `Preferences`, which is still Android-only in `app/`
+   - Must remove Android deps: `Context`, `AndroidStorage`, `RoboyardApplication`, `AccessibilityUtil`, `Timber`
+   - Approach (least work): **storage provider lambda** `var storageProvider: (() -> PlatformStorage?)?`
+     - `initialize(storage: PlatformStorage?, accessibilityActive: Boolean = false)`
+     - Replace `RoboyardApplication.getAppContext()` lazy-init guards with provider
+     - Replace `Timber` → `RLog` (Timber-compatible API in `roboyard.logic.util.RLog`)
+     - Move `AccessibilityUtil` detection to Android call site, pass boolean
+   - Update 2 callers: `RoboyardApplication.java`, `MainActivity.java`
+
+2. **Fix `WallModel.kt`** type mismatch (line ~50: expected `MutableList<Wall?>`, actual `List<Wall?>`)
+
+3. **Fix `MapGenerator.kt`** `compareTo` operator issue (line ~140)
+
+4. **Build + test** after each step: `./gradlew assembleDebug` and `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"`

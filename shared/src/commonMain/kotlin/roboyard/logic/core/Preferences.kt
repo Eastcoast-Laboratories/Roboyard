@@ -1,11 +1,7 @@
 package roboyard.logic.core
 
-import android.content.Context
 import roboyard.logic.storage.PlatformStorage
-import roboyard.platform.AndroidStorage
-import roboyard.ui.RoboyardApplication
-import roboyard.ui.components.AccessibilityUtil
-import timber.log.Timber
+import roboyard.logic.util.RLog
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -17,6 +13,14 @@ import kotlin.math.pow
  */
 object Preferences {
     private var storage: PlatformStorage? = null
+    private val log = RLog.tag("Preferences")
+
+    /**
+     * Provider for lazy storage initialization, set by the platform at app start.
+     * Lets commonMain obtain a PlatformStorage without a platform Context.
+     */
+    @JvmStatic
+    var storageProvider: (() -> PlatformStorage?)? = null
 
     // Preference keys
     private const val KEY_ROBOT_COUNT = "robot_count"
@@ -122,9 +126,6 @@ object Preferences {
     var generateNewMap: Boolean = false
     var accessibility: Boolean = false
 
-    // Application context for accessing SharedPreferences
-    private var applicationContext: Context? = null
-
     // Listener for preference changes
     private var preferenceChangeListener: PreferenceChangeListener? = null
 
@@ -137,80 +138,41 @@ object Preferences {
         preferenceChangeListener = listener
     }
 
-    @JvmStatic
-    var context: Context?
-        /**
-         * Get the application context
-         * @return Application context or null if not set
-         */
-        get() = applicationContext
-        /**
-         * Set the application context for accessing SharedPreferences
-         * @param context Application context
-         */
-        set(context) {
-            if (context != null) {
-                applicationContext =
-                    context.getApplicationContext()
-                Timber.d("Application context set for Preferences")
-            }
-        }
-
     /**
      * Initialize the Preferences system. Must be called at app start.
-     * @param context Application context
+     * @param storage Platform storage implementation
+     * @param accessibilityActive Whether a screen reader is active (platform-detected)
      */
     @JvmStatic
-    fun initialize(context: Context?) {
-        if (context == null) {
-            Timber.e("Cannot initialize Preferences with null context")
+    @JvmOverloads
+    fun initialize(storage: PlatformStorage?, accessibilityActive: Boolean = false) {
+        if (storage == null) {
+            log.e("Cannot initialize Preferences with null storage")
             return
         }
 
-
-        // Store the application context for later use
-        Preferences.context = context
-
         try {
-            // Initialize PlatformStorage
-            storage = AndroidStorage.getInstance(context)
-
+            this.storage = storage
 
             // Load all preferences
             loadCachedValues()
-
 
             // For compatibility with existing code
             boardSizeX = boardSizeWidth
             boardSizeY = boardSizeHeight
 
-
             // Check if it's a fresh install (no preferences saved yet)
-            val isFreshInstall = storage!!.getString(KEY_ROBOT_COUNT, null) == null &&
-                storage!!.getString(KEY_BOARD_SIZE_WIDTH, null) == null &&
-                storage!!.getString(KEY_GENERATE_NEW_MAP, null) == null
-
-
-            // Check if accessibility is active
-            val isAccessibilityActive = AccessibilityUtil.isScreenReaderActive(context)
-
+            val isFreshInstall = storage.getString(KEY_ROBOT_COUNT, null) == null &&
+                storage.getString(KEY_BOARD_SIZE_WIDTH, null) == null &&
+                storage.getString(KEY_GENERATE_NEW_MAP, null) == null
 
             // For fresh installs with accessibility active, set appropriate defaults
-            if (isFreshInstall && isAccessibilityActive) {
-                // Set board size to 8x8
-                storage!!.putInt(KEY_BOARD_SIZE_WIDTH, 8)
-                storage!!.putInt(KEY_BOARD_SIZE_HEIGHT, 8)
+            if (isFreshInstall && accessibilityActive) {
+                storage.putInt(KEY_BOARD_SIZE_WIDTH, 8)
+                storage.putInt(KEY_BOARD_SIZE_HEIGHT, 8)
+                storage.putBoolean(KEY_GENERATE_NEW_MAP, false)
+                storage.putBoolean(KEY_ACCESSIBILITY_MODE, true)
 
-
-                // Set "Generate new map each time" to false
-                storage!!.putBoolean(KEY_GENERATE_NEW_MAP, false)
-
-
-                // Set accessibility mode to true
-                storage!!.putBoolean(KEY_ACCESSIBILITY_MODE, true)
-
-
-                // Update cached values
                 boardSizeWidth = 8
                 boardSizeHeight = 8
                 boardSizeX = 8
@@ -218,13 +180,12 @@ object Preferences {
                 generateNewMapEachTime = false
                 accessibilityMode = true
 
-                Timber.d("[PREFERENCES] Fresh install with accessibility detected. Setting defaults: board size=8x8, generate new map=false")
+                log.d("[PREFERENCES] Fresh install with accessibility detected. Setting defaults: board size=8x8, generate new map=false")
             }
 
-            Timber.d("Preferences initialized successfully")
+            log.d("Preferences initialized successfully")
         } catch (e: Exception) {
-            Timber.e(e, "Error initializing preferences")
-            // Use defaults if there's an error
+            log.e(e, "Error initializing preferences")
             resetToDefaults()
         }
     }
@@ -240,7 +201,7 @@ object Preferences {
             try {
                 robotCount = storage!!.getInt(KEY_ROBOT_COUNT, DEFAULT_ROBOT_COUNT)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading robot count: %s", e.message)
+                log.e("[PREFERENCES] Error loading robot count: %s", e.message)
                 // Clear the invalid preference and use default
                 storage!!.remove(KEY_ROBOT_COUNT)
                 robotCount = DEFAULT_ROBOT_COUNT
@@ -249,7 +210,7 @@ object Preferences {
             try {
                 targetColors = storage!!.getInt(KEY_TARGET_COLORS, DEFAULT_TARGET_COLORS)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading target colors: %s", e.message)
+                log.e("[PREFERENCES] Error loading target colors: %s", e.message)
                 storage!!.remove(KEY_TARGET_COLORS)
                 targetColors = DEFAULT_TARGET_COLORS
             }
@@ -257,7 +218,7 @@ object Preferences {
             try {
                 soundEnabled = storage!!.getBoolean(KEY_SOUND_ENABLED, DEFAULT_SOUND_ENABLED)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading sound enabled: %s", e.message)
+                log.e("[PREFERENCES] Error loading sound enabled: %s", e.message)
                 storage!!.remove(KEY_SOUND_ENABLED)
                 soundEnabled = DEFAULT_SOUND_ENABLED
             }
@@ -265,7 +226,7 @@ object Preferences {
             try {
                 difficulty = storage!!.getInt(KEY_DIFFICULTY, DEFAULT_DIFFICULTY)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading difficulty: %s", e.message)
+                log.e("[PREFERENCES] Error loading difficulty: %s", e.message)
                 storage!!.remove(KEY_DIFFICULTY)
                 difficulty = DEFAULT_DIFFICULTY
             }
@@ -273,7 +234,7 @@ object Preferences {
             try {
                 boardSizeWidth = storage!!.getInt(KEY_BOARD_SIZE_WIDTH, DEFAULT_BOARD_SIZE_WIDTH)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading board width: %s", e.message)
+                log.e("[PREFERENCES] Error loading board width: %s", e.message)
                 storage!!.remove(KEY_BOARD_SIZE_WIDTH)
                 boardSizeWidth = DEFAULT_BOARD_SIZE_WIDTH
             }
@@ -281,7 +242,7 @@ object Preferences {
             try {
                 boardSizeHeight = storage!!.getInt(KEY_BOARD_SIZE_HEIGHT, DEFAULT_BOARD_SIZE_HEIGHT)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading board height: %s", e.message)
+                log.e("[PREFERENCES] Error loading board height: %s", e.message)
                 storage!!.remove(KEY_BOARD_SIZE_HEIGHT)
                 boardSizeHeight = DEFAULT_BOARD_SIZE_HEIGHT
             }
@@ -290,7 +251,7 @@ object Preferences {
                 generateNewMapEachTime =
                     storage!!.getBoolean(KEY_GENERATE_NEW_MAP, DEFAULT_GENERATE_NEW_MAP)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading generate new map: %s", e.message)
+                log.e("[PREFERENCES] Error loading generate new map: %s", e.message)
                 storage!!.remove(KEY_GENERATE_NEW_MAP)
                 generateNewMapEachTime = DEFAULT_GENERATE_NEW_MAP
             }
@@ -299,7 +260,7 @@ object Preferences {
                 accessibilityMode =
                     storage!!.getBoolean(KEY_ACCESSIBILITY_MODE, DEFAULT_ACCESSIBILITY_MODE)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading accessibility mode: %s", e.message)
+                log.e("[PREFERENCES] Error loading accessibility mode: %s", e.message)
                 storage!!.remove(KEY_ACCESSIBILITY_MODE)
                 accessibilityMode = DEFAULT_ACCESSIBILITY_MODE
             }
@@ -307,7 +268,7 @@ object Preferences {
             try {
                 appLanguage = storage!!.getString(KEY_APP_LANGUAGE, DEFAULT_APP_LANGUAGE)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading app language: %s", e.message)
+                log.e("[PREFERENCES] Error loading app language: %s", e.message)
                 storage!!.remove(KEY_APP_LANGUAGE)
                 appLanguage = DEFAULT_APP_LANGUAGE
             }
@@ -316,7 +277,7 @@ object Preferences {
                 talkbackLanguage =
                     storage!!.getString(KEY_TALKBACK_LANGUAGE, DEFAULT_TALKBACK_LANGUAGE)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading talkback language: %s", e.message)
+                log.e("[PREFERENCES] Error loading talkback language: %s", e.message)
                 storage!!.remove(KEY_TALKBACK_LANGUAGE)
                 talkbackLanguage = DEFAULT_TALKBACK_LANGUAGE
             }
@@ -324,7 +285,7 @@ object Preferences {
             try {
                 gameMode = storage!!.getInt(KEY_GAME_MODE, DEFAULT_GAME_MODE)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading game mode: %s", e.message)
+                log.e("[PREFERENCES] Error loading game mode: %s", e.message)
                 storage!!.remove(KEY_GAME_MODE)
                 gameMode = DEFAULT_GAME_MODE
             }
@@ -333,7 +294,7 @@ object Preferences {
                 fullscreenEnabled =
                     storage!!.getBoolean(KEY_FULLSCREEN_ENABLED, DEFAULT_FULLSCREEN_ENABLED)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading fullscreen enabled: %s", e.message)
+                log.e("[PREFERENCES] Error loading fullscreen enabled: %s", e.message)
                 storage!!.remove(KEY_FULLSCREEN_ENABLED)
                 fullscreenEnabled = DEFAULT_FULLSCREEN_ENABLED
             }
@@ -342,7 +303,7 @@ object Preferences {
                 minSolutionMoves =
                     storage!!.getInt(KEY_MIN_SOLUTION_MOVES, DEFAULT_MIN_SOLUTION_MOVES)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading min solution moves: %s", e.message)
+                log.e("[PREFERENCES] Error loading min solution moves: %s", e.message)
                 storage!!.remove(KEY_MIN_SOLUTION_MOVES)
                 minSolutionMoves = DEFAULT_MIN_SOLUTION_MOVES
             }
@@ -351,7 +312,7 @@ object Preferences {
                 maxSolutionMoves =
                     storage!!.getInt(KEY_MAX_SOLUTION_MOVES, DEFAULT_MAX_SOLUTION_MOVES)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading max solution moves: %s", e.message)
+                log.e("[PREFERENCES] Error loading max solution moves: %s", e.message)
                 storage!!.remove(KEY_MAX_SOLUTION_MOVES)
                 maxSolutionMoves = DEFAULT_MAX_SOLUTION_MOVES
             }
@@ -360,7 +321,7 @@ object Preferences {
                 allowMulticolorTarget =
                     storage!!.getBoolean(KEY_ALLOW_MULTICOLOR_TARGET, DEFAULT_ALLOW_MULTICOLOR_TARGET)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading allow multicolor target: %s", e.message)
+                log.e("[PREFERENCES] Error loading allow multicolor target: %s", e.message)
                 storage!!.remove(KEY_ALLOW_MULTICOLOR_TARGET)
                 allowMulticolorTarget = DEFAULT_ALLOW_MULTICOLOR_TARGET
             }
@@ -369,7 +330,7 @@ object Preferences {
                 highContrastMode =
                     storage!!.getBoolean(KEY_HIGH_CONTRAST_MODE, DEFAULT_HIGH_CONTRAST_MODE)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading high contrast mode: %s", e.message)
+                log.e("[PREFERENCES] Error loading high contrast mode: %s", e.message)
                 storage!!.remove(KEY_HIGH_CONTRAST_MODE)
                 highContrastMode = DEFAULT_HIGH_CONTRAST_MODE
             }
@@ -377,16 +338,16 @@ object Preferences {
             try {
                 backgroundSoundVolume =
                     storage!!.getInt(KEY_BACKGROUND_SOUND_VOLUME, DEFAULT_BACKGROUND_SOUND_VOLUME)
-                Timber.d(
+                log.d(
                     "[PREFERENCES] Loaded background sound volume: %d (default: %d)",
                     backgroundSoundVolume,
                     DEFAULT_BACKGROUND_SOUND_VOLUME
                 )
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading background sound volume: %s", e.message)
+                log.e("[PREFERENCES] Error loading background sound volume: %s", e.message)
                 storage!!.remove(KEY_BACKGROUND_SOUND_VOLUME)
                 backgroundSoundVolume = DEFAULT_BACKGROUND_SOUND_VOLUME
-                Timber.d(
+                log.d(
                     "[PREFERENCES] Reset background sound volume to default: %d",
                     DEFAULT_BACKGROUND_SOUND_VOLUME
                 )
@@ -398,7 +359,7 @@ object Preferences {
                     DEFAULT_LIVE_MOVE_COUNTER_ENABLED
                 )
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading live move counter enabled: %s", e.message)
+                log.e("[PREFERENCES] Error loading live move counter enabled: %s", e.message)
                 storage!!.remove(KEY_LIVE_MOVE_COUNTER_ENABLED)
                 liveMoveCounterEnabled = DEFAULT_LIVE_MOVE_COUNTER_ENABLED
             }
@@ -407,7 +368,7 @@ object Preferences {
                 hintAutoMoveEnabled =
                     storage!!.getBoolean(KEY_HINT_AUTO_MOVE_ENABLED, DEFAULT_HINT_AUTO_MOVE_ENABLED)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading hint auto move enabled: %s", e.message)
+                log.e("[PREFERENCES] Error loading hint auto move enabled: %s", e.message)
                 storage!!.remove(KEY_HINT_AUTO_MOVE_ENABLED)
                 hintAutoMoveEnabled = DEFAULT_HINT_AUTO_MOVE_ENABLED
             }
@@ -417,20 +378,20 @@ object Preferences {
                     storage!!.getInt(KEY_HINT_AUTO_MOVE_MODE, DEFAULT_HINT_AUTO_MOVE_MODE)
             } catch (e: ClassCastException) {
                 // Migration: Old version stored this as boolean, new version uses int (0, 1, 2)
-                Timber.w("[PREFERENCES] Migrating hint auto move mode from boolean to int")
+                log.w("[PREFERENCES] Migrating hint auto move mode from boolean to int")
                 try {
                     val oldBoolValue = storage!!.getBoolean(KEY_HINT_AUTO_MOVE_MODE, false)
                     hintAutoMoveMode = if (oldBoolValue) 1 else 0 // Convert: false->0, true->1
                     // Save migrated value as int
                     storage!!.remove(KEY_HINT_AUTO_MOVE_MODE)
                     storage!!.putInt(KEY_HINT_AUTO_MOVE_MODE, hintAutoMoveMode)
-                    Timber.d(
+                    log.d(
                         "[PREFERENCES] Migrated hint auto move mode: %b -> %d",
                         oldBoolValue,
                         hintAutoMoveMode
                     )
                 } catch (e2: Exception) {
-                    Timber.e("[PREFERENCES] Failed to migrate hint auto move mode: %s", e2.message)
+                    log.e("[PREFERENCES] Failed to migrate hint auto move mode: %s", e2.message)
                     storage!!.remove(KEY_HINT_AUTO_MOVE_MODE)
                     hintAutoMoveMode = DEFAULT_HINT_AUTO_MOVE_MODE
                 }
@@ -440,7 +401,7 @@ object Preferences {
                 soundEffectsVolume =
                     storage!!.getInt(KEY_SOUND_EFFECTS_VOLUME, DEFAULT_SOUND_EFFECTS_VOLUME)
             } catch (e: ClassCastException) {
-                Timber.e("[PREFERENCES] Error loading sound effects volume: %s", e.message)
+                log.e("[PREFERENCES] Error loading sound effects volume: %s", e.message)
                 storage!!.remove(KEY_SOUND_EFFECTS_VOLUME)
                 soundEffectsVolume = DEFAULT_SOUND_EFFECTS_VOLUME
             }
@@ -451,7 +412,7 @@ object Preferences {
             boardSizeY = boardSizeHeight
         } catch (e: Exception) {
             // Catch any other unexpected errors
-            Timber.e("[PREFERENCES] Unexpected error loading preferences: %s", e.message)
+            log.e("[PREFERENCES] Unexpected error loading preferences: %s", e.message)
             e.printStackTrace()
 
 
@@ -459,7 +420,7 @@ object Preferences {
             resetToDefaults()
         }
 
-        Timber.d(
+        log.d(
             "[PREFERENCES] Cached values loaded - robotCount: %d, targetColors: %d, difficulty: %d, boardSize: %dx%d",
             robotCount, targetColors, difficulty, boardSizeWidth, boardSizeHeight
         )
@@ -495,7 +456,7 @@ object Preferences {
         // Clear all preferences
         if (storage != null) {
             storage!!.clear()
-            Timber.d("[PREFERENCES] Reset all preferences to defaults")
+            log.d("[PREFERENCES] Reset all preferences to defaults")
         }
     }
 
@@ -516,11 +477,12 @@ object Preferences {
     fun setRobotCount(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] Storage is null in setRobotCount, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] Storage is null in setRobotCount, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 robotCount = max(1, min(Constants.NUM_ROBOTS, count))
                 return
@@ -542,7 +504,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Robot count set to %d", validCount)
+        log.d("[PREFERENCES] Robot count set to %d", validCount)
     }
 
     /**
@@ -553,11 +515,12 @@ object Preferences {
     fun setTargetColors(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] Storage is null in setTargetColors, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] Storage is null in setTargetColors, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 targetColors = max(1, min(Constants.NUM_ROBOTS, count))
                 return
@@ -579,7 +542,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Target colors set to %d", validCount)
+        log.d("[PREFERENCES] Target colors set to %d", validCount)
     }
 
     /**
@@ -590,11 +553,12 @@ object Preferences {
     fun setSoundEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] Storage is null in setSoundEnabled, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] Storage is null in setSoundEnabled, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 soundEnabled = enabled
                 return
@@ -612,7 +576,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Sound enabled set to %s", enabled)
+        log.d("[PREFERENCES] Sound enabled set to %s", enabled)
     }
 
     /**
@@ -622,11 +586,12 @@ object Preferences {
     @JvmStatic
     fun setBackgroundSoundVolume(volume: Int) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setBackgroundSoundVolume, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setBackgroundSoundVolume, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 backgroundSoundVolume = volume
                 return
             }
@@ -637,7 +602,7 @@ object Preferences {
         backgroundSoundVolume = volume
 
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Background sound volume set to %d", volume)
+        log.d("[PREFERENCES] Background sound volume set to %d", volume)
     }
 
     /**
@@ -647,11 +612,12 @@ object Preferences {
     @JvmStatic
     fun setLiveMoveCounterEnabled(enabled: Boolean) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setLiveMoveCounterEnabled, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setLiveMoveCounterEnabled, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 liveMoveCounterEnabled = enabled
                 return
             }
@@ -661,7 +627,7 @@ object Preferences {
 
         liveMoveCounterEnabled = enabled
 
-        Timber.d("[PREFERENCES] Live move counter enabled set to %s", enabled)
+        log.d("[PREFERENCES] Live move counter enabled set to %s", enabled)
     }
 
     /**
@@ -671,11 +637,12 @@ object Preferences {
     @JvmStatic
     fun setHintAutoMoveMode(mode: Int) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveMode, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveMode, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 hintAutoMoveMode = mode
                 return
             }
@@ -686,7 +653,7 @@ object Preferences {
         hintAutoMoveMode = mode
 
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Hint auto-move mode set to %d", mode)
+        log.d("[PREFERENCES] Hint auto-move mode set to %d", mode)
     }
 
     /**
@@ -696,11 +663,12 @@ object Preferences {
     @JvmStatic
     fun setSoundEffectsVolume(volume: Int) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setSoundEffectsVolume, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setSoundEffectsVolume, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 soundEffectsVolume = volume
                 return
             }
@@ -711,7 +679,7 @@ object Preferences {
         soundEffectsVolume = volume
 
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Sound effects volume set to %d", volume)
+        log.d("[PREFERENCES] Sound effects volume set to %d", volume)
     }
 
     /**
@@ -722,11 +690,12 @@ object Preferences {
     fun setDifficulty(difficultyLevel: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setDifficulty, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setDifficulty, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 difficulty = max(
                     Constants.DIFFICULTY_BEGINNER,
@@ -754,7 +723,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Difficulty set to %d", validDifficulty)
+        log.d("[PREFERENCES] Difficulty set to %d", validDifficulty)
     }
 
     /**
@@ -766,11 +735,12 @@ object Preferences {
     fun setBoardSize(width: Int, height: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setBoardSize, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setBoardSize, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 boardSizeWidth = max(Constants.MIN_BOARD_SIZE, min(Constants.MAX_BOARD_SIZE, width))
                 boardSizeHeight =
@@ -804,7 +774,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Board size set to %dx%d", validWidth, validHeight)
+        log.d("[PREFERENCES] Board size set to %dx%d", validWidth, validHeight)
     }
 
     /**
@@ -814,7 +784,7 @@ object Preferences {
     @JvmStatic
     fun setGenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
         if (storage == null) {
-            Timber.e("[PREFERENCES] Cannot save preference: SharedPreferences not initialized")
+            log.e("[PREFERENCES] Cannot save preference: SharedPreferences not initialized")
             return
         }
 
@@ -824,7 +794,7 @@ object Preferences {
         // Update cached value
         Preferences.generateNewMapEachTime = generateNewMapEachTime
 
-        Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime)
+        log.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime)
     }
 
     /**
@@ -834,11 +804,12 @@ object Preferences {
     fun setgenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setgenerateNewMapEachTime, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setgenerateNewMapEachTime, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 Preferences.generateNewMapEachTime = generateNewMapEachTime
                 return
@@ -856,7 +827,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime)
+        log.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime)
     }
 
     /**
@@ -867,11 +838,12 @@ object Preferences {
     fun setAccessibilityMode(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setAccessibilityMode, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setAccessibilityMode, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 accessibilityMode = enabled
                 return
@@ -901,7 +873,7 @@ object Preferences {
             boardSizeY = 8
             generateNewMapEachTime = false
 
-            Timber.d("[PREFERENCES] Setting accessibility-friendly defaults: board size=8x8, generate new map=false")
+            log.d("[PREFERENCES] Setting accessibility-friendly defaults: board size=8x8, generate new map=false")
         }
 
 
@@ -911,7 +883,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Accessibility mode set to %s", enabled)
+        log.d("[PREFERENCES] Accessibility mode set to %s", enabled)
     }
 
     /**
@@ -922,11 +894,12 @@ object Preferences {
     fun setAppLanguage(language: String?) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setAppLanguage, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setAppLanguage, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 appLanguage = language
                 return
@@ -946,7 +919,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] App language set to %s", language)
+        log.d("[PREFERENCES] App language set to %s", language)
     }
 
     /**
@@ -957,11 +930,12 @@ object Preferences {
     fun setTalkbackLanguage(language: String?) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setTalkbackLanguage, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setTalkbackLanguage, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 talkbackLanguage = language
                 return
@@ -981,7 +955,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Talkback language set to %s", language)
+        log.d("[PREFERENCES] Talkback language set to %s", language)
     }
 
     /**
@@ -992,11 +966,12 @@ object Preferences {
     fun setGameMode(gameMode: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setGameMode, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setGameMode, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 Preferences.gameMode = gameMode
                 return
@@ -1014,7 +989,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Game mode set to %d", gameMode)
+        log.d("[PREFERENCES] Game mode set to %d", gameMode)
     }
 
     /**
@@ -1025,11 +1000,12 @@ object Preferences {
     fun setFullscreenEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setFullscreenEnabled, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setFullscreenEnabled, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 // Set the static field but don't save to preferences
                 fullscreenEnabled = enabled
                 return
@@ -1047,7 +1023,7 @@ object Preferences {
 
         // Notify listeners
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Fullscreen enabled set to %s", enabled)
+        log.d("[PREFERENCES] Fullscreen enabled set to %s", enabled)
     }
 
     /**
@@ -1057,7 +1033,7 @@ object Preferences {
     @JvmStatic
     fun reloadPreferences() {
         loadCachedValues()
-        Timber.d("[PREFERENCES] Preferences reloaded from disk")
+        log.d("[PREFERENCES] Preferences reloaded from disk")
     }
 
     /**
@@ -1067,11 +1043,12 @@ object Preferences {
     @JvmStatic
     fun setMinSolutionMoves(moves: Int) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setMinSolutionMoves, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setMinSolutionMoves, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 minSolutionMoves = moves
                 return
             }
@@ -1081,7 +1058,7 @@ object Preferences {
 
         minSolutionMoves = moves
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Min solution moves set to %d", moves)
+        log.d("[PREFERENCES] Min solution moves set to %d", moves)
     }
 
     /**
@@ -1091,11 +1068,12 @@ object Preferences {
     @JvmStatic
     fun setMaxSolutionMoves(moves: Int) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setMaxSolutionMoves, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setMaxSolutionMoves, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 maxSolutionMoves = moves
                 return
             }
@@ -1105,7 +1083,7 @@ object Preferences {
 
         maxSolutionMoves = moves
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Max solution moves set to %d", moves)
+        log.d("[PREFERENCES] Max solution moves set to %d", moves)
     }
 
     /**
@@ -1115,11 +1093,12 @@ object Preferences {
     @JvmStatic
     fun setAllowMulticolorTarget(allowed: Boolean) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setAllowMulticolorTarget, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setAllowMulticolorTarget, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 allowMulticolorTarget = allowed
                 return
             }
@@ -1129,7 +1108,7 @@ object Preferences {
 
         allowMulticolorTarget = allowed
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] Allow multicolor target set to %b", allowed)
+        log.d("[PREFERENCES] Allow multicolor target set to %b", allowed)
     }
 
     /**
@@ -1139,11 +1118,12 @@ object Preferences {
     @JvmStatic
     fun setHighContrastMode(enabled: Boolean) {
         if (storage == null) {
-            Timber.w("[PREFERENCES] SharedPreferences is null in setHighContrastMode, attempting to initialize")
-            if (RoboyardApplication.getAppContext() != null) {
-                initialize(RoboyardApplication.getAppContext())
+            log.w("[PREFERENCES] SharedPreferences is null in setHighContrastMode, attempting to initialize")
+            val provided = storageProvider?.invoke()
+            if (provided != null) {
+                initialize(provided)
             } else {
-                Timber.e("[PREFERENCES] Cannot initialize preferences: context is null")
+                log.e("[PREFERENCES] Cannot initialize preferences: context is null")
                 highContrastMode = enabled
                 return
             }
@@ -1153,7 +1133,7 @@ object Preferences {
 
         highContrastMode = enabled
         notifyPreferencesChanged()
-        Timber.d("[PREFERENCES] High contrast mode set to %b", enabled)
+        log.d("[PREFERENCES] High contrast mode set to %b", enabled)
     }
 
     /**
