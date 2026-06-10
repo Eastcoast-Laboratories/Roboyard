@@ -6,7 +6,7 @@ compatibility to enable iOS sharing. This involves abstracting Android-specific
 dependencies behind platform-agnostic interfaces.
 
 **Last Updated:** June 10, 2026  
-**Status:** 18 of 20 major steps completed
+**Status:** 17 of 20 major steps completed, 3 postponed for future sessions
 
 ## Completed Tasks ✅
 
@@ -56,32 +56,37 @@ dependencies behind platform-agnostic interfaces.
 | LevelCompletionManager UiNotifier | ✅ Updated |
 | AchievementCategory StringProvider | ✅ Updated |
 
+### 6. GameStateManager partial abstraction
+| Change | Status |
+|--------|--------|
+| Toast → UiNotifier | ✅ |
+| Remove MainActivity dependency | ✅ |
+| Create GameStateManagerCore (StateFlow) | ✅ |
+| LiveData → StateFlow (kept for UI compatibility) | ⏳ Future |
+| AndroidViewModel split | ⏳ Future |
+
 ## Remaining Tasks ⏳
 
 ### POSTPONED - Very Complex (requires architectural changes)
 
-1. **GameState.kt** (2,772 lines)
-   - **Problem:** Direct `MainActivity.boardSizeX` / `MainActivity.boardSizeY` references
-   - **Impact:** GameState reads/writes static fields from MainActivity
-   - **Solution:** Introduce BoardSizeProvider interface, inject into GameState
-
-2. **GameStateManager.kt** (5,000+ lines)
-   - **Problem:** `AndroidViewModel` with 32× `LiveData`, Toast, ToggleButton, MotionEvent, Bitmap
-   - **Impact:** Core game logic tightly coupled to Android UI framework
+1. **GameStateManager.kt** (5,000+ lines) - LIVE DATA MIGRATION
+   - **Current Status:** Partially abstracted (Toast → UiNotifier, MainActivity removed)
+   - **Remaining:** 32× `LiveData` → `StateFlow`, `AndroidViewModel` → plain class + wrapper
+   - **Impact:** UI layer depends on LiveData; needs migration to StateFlow for KMP
    - **Solution:** 
-     - Split into `GameStateManagerCore` (platform-free, in logic)
-     - Create `GameStateManagerViewModel` (thin Android wrapper in ui)
-     - Replace LiveData with StateFlow
-     - Replace Toast with UiNotifier
-     - Abstract all UI references behind interfaces
+     - Keep GameStateManager as Android wrapper for compatibility
+     - Move all logic to GameStateManagerCore
+     - UI layer migrates from LiveData to StateFlow observers
 
-3. **Preferences.kt** (1,246 lines) - POSTPONED
+2. **Preferences.kt** (1,246 lines) - POSTPONED
    - Central preferences manager with many direct SharedPreferences calls
    - Complex due to numerous get/put operations for various types
+   - **Note:** Can remain Android-specific as it's primarily settings storage
 
-4. **DataExportImportManager.kt** - POSTPONED
+3. **DataExportImportManager.kt** - POSTPONED
    - Complex file system and SharedPreferences operations
    - Multiple file operations require careful abstraction
+   - **Note:** Android-specific feature (export/import app data)
 
 ## New Platform Interfaces
 
