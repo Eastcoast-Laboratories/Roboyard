@@ -11,7 +11,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import android.view.MotionEvent
-import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
@@ -19,6 +18,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation.findNavController
 import roboyard.eclabs.R
+import roboyard.logic.ui.UiNotifier
 import roboyard.logic.achievements.AchievementManager
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameElement
@@ -46,7 +46,6 @@ import roboyard.logic.solver.RRPiece
 import roboyard.logic.solver.SolverDD
 import roboyard.logic.storage.FileReadWrite.Companion.writePrivateData
 import roboyard.ui.RoboyardApplication
-import roboyard.ui.activities.MainActivity
 import roboyard.ui.animation.RobotAnimationManager
 import roboyard.ui.components.GameGridView
 import roboyard.ui.util.LiveSolverManager
@@ -261,6 +260,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
     private var activityRef: WeakReference<Activity?>? = null
+    
+    // Platform-agnostic UI notifier for KMP compatibility
+    private var uiNotifier: UiNotifier? = null
 
     /**
      * Get collision info from the last movement (DRY - avoid recalculating in GameGridView).
@@ -687,11 +689,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         moveCount.setValue(newState.moveCount)
         isGameComplete.setValue(newState.isComplete)
 
-        // Update board size globals for UI and other components
-        MainActivity.boardSizeX = newState.width
-        MainActivity.boardSizeY = newState.height
+        // Board size is now managed via Preferences and GameState only
+        // Removed MainActivity.boardSize dependency for KMP compatibility
         d(
-            "[BOARD_SIZE_DEBUG] Updated MainActivity board size to: %dx%d",
+            "[BOARD_SIZE_DEBUG] GameState board size: %dx%d",
             newState.width,
             newState.height
         )
@@ -2361,13 +2362,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 val starsAfter = manager.totalStars
                 d("[LEVEL_EDITOR] Stars before=%d, after=%d", starsBefore, starsAfter)
                 if (starsBefore < 140 && starsAfter >= 140) {
-                    coroutineScope.launch {
-                        Toast.makeText(
-                            context,
-                            R.string.level_editor_unlocked,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    uiNotifier?.showMessage(context.getString(R.string.level_editor_unlocked))
                     d("[LEVEL_EDITOR] Level Editor unlocked at %d stars!", starsAfter)
                 }
             }
@@ -4296,6 +4291,22 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 d("[HISTORY] Activity reference updated in GameStateManager")
             }
         }
+    
+    /**
+     * Set the UI notifier for platform-agnostic message display (KMP compatibility)
+     * @param notifier The UiNotifier instance, or null to clear
+     */
+    fun setUiNotifier(notifier: UiNotifier?) {
+        this.uiNotifier = notifier
+    }
+    
+    /**
+     * Get the current UI notifier
+     * @return The current UiNotifier or null
+     */
+    fun getUiNotifier(): UiNotifier? {
+        return uiNotifier
+    }
 
     /**
      * Set the current game state
