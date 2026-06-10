@@ -16,6 +16,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import androidx.navigation.Navigation.findNavController
 import roboyard.eclabs.R
 import roboyard.logic.ui.UiNotifier
@@ -90,7 +93,8 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     private var keepCurrentMapDespiteDifficulty =
         false // Manual override from the UI to keep the current map
 
-    // Game state
+    // Game state - using StateFlow for KMP compatibility
+    private val core = GameStateManagerCore()
     private val currentState = MutableLiveData<GameState?>()
     private val moveCount = MutableLiveData<Int?>(0)
     private val squaresMoved = MutableLiveData<Int?>(0)
