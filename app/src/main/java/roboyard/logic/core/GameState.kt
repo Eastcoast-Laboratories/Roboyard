@@ -1,7 +1,6 @@
 package roboyard.logic.core
 
 import android.content.Context
-import roboyard.ui.activities.MainActivity
 import roboyard.logic.managers.GameStateManager
 import roboyard.ui.util.MapIdGenerator
 import timber.log.Timber
@@ -2469,8 +2468,8 @@ class GameState(
             Timber.tag(TAG)
                 .d("[BOARD_SIZE_DEBUG] createRandom called with size: " + Preferences.boardSizeX + "x" + Preferences.boardSizeY)
             Timber.tag(TAG).d(
-                "[BOARD_SIZE_DEBUG] Current board size before setting: " +
-                        MainActivity.boardSizeX + "x" + MainActivity.boardSizeY
+                "[BOARD_SIZE_DEBUG] Current board size from Preferences: " +
+                        Preferences.boardSizeX + "x" + Preferences.boardSizeY
             )
 
 
@@ -2496,11 +2495,7 @@ class GameState(
             }
 
 
-            // Set the board size in MainActivity for compatibility with existing code
-            MainActivity.boardSizeX = boardSizeX
-            MainActivity.boardSizeY = boardSizeY
-
-
+            // Board size is now managed via Preferences only, removed MainActivity dependency
             // Log the board size being used for map generation
             Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Using board size: %dx%d", boardSizeX, boardSizeY)
 
