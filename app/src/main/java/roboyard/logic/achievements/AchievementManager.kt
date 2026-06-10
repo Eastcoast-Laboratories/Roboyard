@@ -27,6 +27,7 @@ import roboyard.logic.network.RoboyardApiClient.AchievementSyncResult
 import roboyard.logic.network.RoboyardApiClient.ApiCallback
 import roboyard.platform.AndroidStorage
 import roboyard.platform.PlayGamesManager
+import roboyard.logic.ui.UiNotifier
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
 import timber.log.Timber.Forest.i
@@ -48,10 +49,6 @@ class AchievementManager private constructor(context: Context) {
     private var unlockListener: AchievementUnlockListener? = null
     private var currentActivity: WeakReference<Activity?>? = null
     private var uiNotifier: UiNotifier? = null
-
-    fun interface UiNotifier {
-        fun showMessage(message: String)
-    }
 
     // Counters for tracking progress
     private var levelsCompleted = 0

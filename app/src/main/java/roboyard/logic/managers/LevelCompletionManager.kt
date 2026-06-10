@@ -1,11 +1,11 @@
 package roboyard.logic.managers
 
 import android.content.Context
-import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import roboyard.logic.core.LevelCompletionData
 import roboyard.logic.storage.PlatformStorage
+import roboyard.logic.ui.UiNotifier
 import roboyard.platform.AndroidStorage
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
@@ -18,6 +18,7 @@ class LevelCompletionManager private constructor(context: Context) {
     private var completionDataMap: MutableMap<Int?, LevelCompletionData>?
     private val context: Context
     private val storage: PlatformStorage
+    private var uiNotifier: UiNotifier? = null
 
     init {
         val appContext = context.getApplicationContext()
@@ -25,6 +26,13 @@ class LevelCompletionManager private constructor(context: Context) {
         this.storage = AndroidStorage.getInstance(appContext)
         this.completionDataMap = HashMap<Int?, LevelCompletionData>()
         loadCompletionData()
+    }
+    
+    /**
+     * Set the UI notifier for displaying messages
+     */
+    fun setUiNotifier(notifier: UiNotifier?) {
+        this.uiNotifier = notifier
     }
 
     /**
@@ -205,8 +213,7 @@ class LevelCompletionManager private constructor(context: Context) {
             } catch (e: Exception) {
                 // More detailed error handling with UI feedback
                 e(e, "Error loading level completion data")
-                Toast.makeText(context, "Error loading level data: " + e.message, Toast.LENGTH_LONG)
-                    .show()
+                uiNotifier?.showMessage("Error loading level data: " + e.message)
                 // Create an empty map as fallback
                 completionDataMap = HashMap<Int?, LevelCompletionData>()
             }
