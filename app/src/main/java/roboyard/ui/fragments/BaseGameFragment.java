@@ -20,7 +20,7 @@ import roboyard.eclabs.R;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.core.GameState;
 import roboyard.logic.storage.FileReadWrite;
-import roboyard.logic.graphics.MinimapGenerator;
+import roboyard.ui.graphics.MinimapGenerator;
 import roboyard.ui.util.FontScaleUtil;
 import roboyard.logic.core.Preferences;
 import roboyard.logic.managers.GameStateManager;

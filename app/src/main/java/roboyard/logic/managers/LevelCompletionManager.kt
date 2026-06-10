@@ -1,10 +1,12 @@
 package roboyard.logic.managers
 
 import android.content.Context
-import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import roboyard.logic.core.LevelCompletionData
+import roboyard.logic.storage.PlatformStorage
+import roboyard.logic.ui.UiNotifier
+import roboyard.platform.AndroidStorage
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
 import timber.log.Timber.Forest.w
@@ -15,11 +17,22 @@ import timber.log.Timber.Forest.w
 class LevelCompletionManager private constructor(context: Context) {
     private var completionDataMap: MutableMap<Int?, LevelCompletionData>?
     private val context: Context
+    private val storage: PlatformStorage
+    private var uiNotifier: UiNotifier? = null
 
     init {
-        this.context = context.getApplicationContext()
+        val appContext = context.getApplicationContext()
+        this.context = appContext
+        this.storage = AndroidStorage.getInstance(appContext)
         this.completionDataMap = HashMap<Int?, LevelCompletionData>()
         loadCompletionData()
+    }
+    
+    /**
+     * Set the UI notifier for displaying messages
+     */
+    fun setUiNotifier(notifier: UiNotifier?) {
+        this.uiNotifier = notifier
     }
 
     /**
@@ -169,8 +182,7 @@ class LevelCompletionManager private constructor(context: Context) {
      * Load all completion data from SharedPreferences
      */
     private fun loadCompletionData() {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val json = prefs.getString(COMPLETION_DATA_KEY, null)
+        val json = storage.getString(COMPLETION_DATA_KEY, null)
 
         d("Loading completion data, found JSON: %s", if (json != null) "yes" else "no")
 
@@ -201,13 +213,12 @@ class LevelCompletionManager private constructor(context: Context) {
             } catch (e: Exception) {
                 // More detailed error handling with UI feedback
                 e(e, "Error loading level completion data")
-                Toast.makeText(context, "Error loading level data: " + e.message, Toast.LENGTH_LONG)
-                    .show()
+                uiNotifier?.showMessage("Error loading level data: " + e.message)
                 // Create an empty map as fallback
                 completionDataMap = HashMap<Int?, LevelCompletionData>()
             }
         } else {
-            d("No completion data found in SharedPreferences")
+            d("No completion data found in storage")
         }
     }
 
@@ -217,23 +228,14 @@ class LevelCompletionManager private constructor(context: Context) {
          * @return The last played level ID, or 1 if none was set
          */
         get() {
-            val prefs = context.getSharedPreferences(
-                PREFS_NAME,
-                Context.MODE_PRIVATE
-            )
-            return prefs.getInt(LAST_PLAYED_LEVEL_KEY, 1)
+            return storage.getInt(LAST_PLAYED_LEVEL_KEY, 1)
         }
         /**
          * Set the last played level ID
          * @param levelId The level ID that was last played
          */
         set(levelId) {
-            val prefs = context.getSharedPreferences(
-                PREFS_NAME,
-                Context.MODE_PRIVATE
-            )
-            prefs.edit().putInt(LAST_PLAYED_LEVEL_KEY, levelId)
-                .apply()
+            storage.putInt(LAST_PLAYED_LEVEL_KEY, levelId)
             d("[LEVEL_COMPLETION] Set last played level to %d", levelId)
         }
 
@@ -243,8 +245,7 @@ class LevelCompletionManager private constructor(context: Context) {
     fun resetAll() {
         d("[LEVEL_COMPLETION] Resetting all level completion data")
         completionDataMap!!.clear()
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().clear().apply()
+        storage.clear()
         d("[LEVEL_COMPLETION] All level data reset successfully")
     }
 
@@ -282,23 +283,19 @@ class LevelCompletionManager private constructor(context: Context) {
      * Save all completion data to SharedPreferences
      */
     private fun saveCompletionData() {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-
         try {
             val gson = Gson()
             val json = gson.toJson(completionDataMap)
             d("Saving completion data JSON: %s", json)
-            editor.putString(COMPLETION_DATA_KEY, json)
-            val success = editor.commit() // Use commit() instead of apply() to get immediate result
-            d("Saved completion data for %d levels, success: %s", completionDataMap!!.size, success)
+            storage.putString(COMPLETION_DATA_KEY, json)
+            d("Saved completion data for %d levels", completionDataMap!!.size)
         } catch (e: Exception) {
             e(e, "Error saving level completion data")
         }
     }
 
     companion object {
-        private const val PREFS_NAME = "level_completion_prefs"
+        // Using AndroidStorage instead of direct SharedPreferences
         private const val COMPLETION_DATA_KEY = "completion_data"
         private const val LAST_PLAYED_LEVEL_KEY = "last_played_level"
 

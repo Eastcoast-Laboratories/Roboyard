@@ -7,6 +7,8 @@ import org.json.JSONObject
 import roboyard.eclabs.BuildConfig
 import roboyard.logic.achievements.AchievementManager
 import roboyard.logic.achievements.StreakManager
+import roboyard.logic.storage.PlatformStorage
+import roboyard.platform.AndroidStorage
 import roboyard.logic.storage.FileReadWrite.Companion.loadAbsoluteData
 import timber.log.Timber.Forest.tag
 import java.io.File
@@ -19,9 +21,11 @@ import java.io.IOException
  */
 class DataExportImportManager(context: Context) {
     private val context: Context
+    private val storage: PlatformStorage
 
     init {
         this.context = context.getApplicationContext()
+        this.storage = AndroidStorage.getInstance(context)
     }
 
     /**
@@ -46,7 +50,7 @@ class DataExportImportManager(context: Context) {
             for (prefsName in PREFS_NAMES) {
                 val prefsJson = exportSharedPreferences(prefsName)
                 if (prefsJson.length() > 0) {
-                    prefsData.put(prefsName, prefsJson)
+                    prefsData.put(prefsName!!, prefsJson)
                 }
             }
             root.put("preferences", prefsData)
@@ -76,8 +80,9 @@ class DataExportImportManager(context: Context) {
     @Throws(JSONException::class)
     private fun exportSharedPreferences(prefsName: String?): JSONObject {
         val result = JSONObject()
-        val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        val allEntries = prefs.getAll()
+        // Note: AndroidStorage doesn't expose getAll(), so we export known keys
+        // This is a limitation for KMP - for full export we'd need a different approach
+        val allEntries = getKnownPrefsEntries(prefsName)
 
         for (entry in allEntries.entries) {
             val key: String = entry.key!!
@@ -230,12 +235,8 @@ class DataExportImportManager(context: Context) {
      * Import a single SharedPreferences file from JSON.
      */
     private fun importSharedPreferences(prefsName: String?, prefsJson: JSONObject) {
-        val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-
-
-        // Clear existing data
-        editor.clear()
+        // Clear existing data in storage
+        clearPrefsStorage(prefsName)
 
 
         // Import all entries
@@ -250,7 +251,7 @@ class DataExportImportManager(context: Context) {
                     // Skip null values
                     continue
                 } else if (value is Boolean) {
-                    editor.putBoolean(key, value)
+                    storage.putBoolean(key, value)
                     importedCount++
                 } else if (value is Int) {
                     // For roboyard_streaks, certain fields must be stored as Long, not Integer
@@ -260,29 +261,24 @@ class DataExportImportManager(context: Context) {
                                 key == "last_streak_date" ||
                                 key == "last_popup_date")
                     ) {
-                        editor.putLong(key, value.toLong())
+                        storage.putLong(key, value.toLong())
                     } else {
-                        editor.putInt(key, value)
+                        storage.putInt(key, value)
                     }
                     importedCount++
                 } else if (value is Long) {
-                    editor.putLong(key, value)
+                    storage.putLong(key, value)
                     importedCount++
                 } else if (value is Double) {
-                    // JSON stores floats as doubles
-                    editor.putFloat(key, value.toFloat())
+                    // JSON stores floats as doubles - AndroidStorage doesn't support float, store as string
+                    storage.putString(key, value.toString())
                     importedCount++
                 } else if (value is String) {
-                    editor.putString(key, value)
+                    storage.putString(key, value)
                     importedCount++
                 } else if (value is JSONArray) {
-                    // Handle StringSet
-                    val jsonArray = value
-                    val stringSet: MutableSet<String?> = HashSet<String?>()
-                    for (i in 0..<jsonArray.length()) {
-                        stringSet.add(jsonArray.getString(i))
-                    }
-                    editor.putStringSet(key, stringSet)
+                    // Handle StringSet - AndroidStorage doesn't support StringSet, store as JSON string
+                    storage.putString(key, value.toString())
                     importedCount++
                 }
             } catch (e: JSONException) {
@@ -290,8 +286,65 @@ class DataExportImportManager(context: Context) {
             }
         }
 
-        editor.apply()
         tag(TAG).d("Imported %d entries to %s", importedCount, prefsName)
+    }
+
+    /**
+     * Get known preference entries for export (AndroidStorage limitation workaround)
+     */
+    private fun getKnownPrefsEntries(prefsName: String?): Map<String, Any?> {
+        val entries = mutableMapOf<String, Any?>()
+        when (prefsName) {
+            "RoboYard" -> {
+                entries["robot_count"] = storage.getInt("robot_count", 1)
+                entries["target_colors"] = storage.getInt("target_colors", 1)
+                entries["sound_enabled"] = storage.getBoolean("sound_enabled", true)
+                entries["difficulty"] = storage.getInt("difficulty", 0)
+                entries["boardSizeX"] = storage.getInt("boardSizeX", 12)
+                entries["boardSizeY"] = storage.getInt("boardSizeY", 14)
+                entries["generate_new_map"] = storage.getBoolean("generate_new_map", true)
+            }
+            "roboyard_achievements" -> {
+                // Achievement keys are dynamic, export what we can
+                entries["total_stars"] = storage.getInt("total_stars", 0)
+            }
+            "roboyard_streaks" -> {
+                entries["current_streak"] = storage.getInt("current_streak", 0)
+                entries["last_login_date"] = storage.getLong("last_login_date", 0)
+                entries["last_streak_date"] = storage.getLong("last_streak_date", 0)
+            }
+            "level_completion_prefs" -> {
+                entries["total_solved"] = storage.getInt("total_solved", 0)
+            }
+        }
+        return entries
+    }
+
+    /**
+     * Clear preference storage for a given prefs name
+     */
+    private fun clearPrefsStorage(prefsName: String?) {
+        when (prefsName) {
+            "RoboYard" -> {
+                // Clear main prefs keys
+                storage.remove("robot_count")
+                storage.remove("target_colors")
+                storage.remove("sound_enabled")
+                storage.remove("difficulty")
+                storage.remove("boardSizeX")
+                storage.remove("boardSizeY")
+                storage.remove("generate_new_map")
+            }
+            "roboyard_achievements" -> {
+                storage.clear()
+            }
+            "roboyard_streaks" -> {
+                storage.clear()
+            }
+            "level_completion_prefs" -> {
+                storage.clear()
+            }
+        }
     }
 
     /**
@@ -365,9 +418,8 @@ class DataExportImportManager(context: Context) {
         )
 
         for (prefsName in progressPrefs) {
-            val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-            prefs.edit().clear().apply()
-            tag(TAG).d("[LOGOUT][RESET] Cleared SharedPreferences: %s", prefsName)
+            clearPrefsStorage(prefsName)
+            tag(TAG).d("[LOGOUT][RESET] Cleared storage: %s", prefsName)
         }
 
 
@@ -412,10 +464,9 @@ class DataExportImportManager(context: Context) {
      * Reset all app data (clear all preferences and files).
      */
     fun resetAllData() {
-        // Clear all SharedPreferences
+        // Clear all storage
         for (prefsName in PREFS_NAMES) {
-            val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-            prefs.edit().clear().apply()
+            clearPrefsStorage(prefsName)
         }
 
 

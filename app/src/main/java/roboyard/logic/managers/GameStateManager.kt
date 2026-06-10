@@ -4,18 +4,24 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
-import android.util.Base64
+import java.util.Base64
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import android.view.MotionEvent
-import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import androidx.navigation.Navigation.findNavController
 import roboyard.eclabs.R
+import roboyard.logic.ui.UiNotifier
 import roboyard.logic.achievements.AchievementManager
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameElement
@@ -43,7 +49,6 @@ import roboyard.logic.solver.RRPiece
 import roboyard.logic.solver.SolverDD
 import roboyard.logic.storage.FileReadWrite.Companion.writePrivateData
 import roboyard.ui.RoboyardApplication
-import roboyard.ui.activities.MainActivity
 import roboyard.ui.animation.RobotAnimationManager
 import roboyard.ui.components.GameGridView
 import roboyard.ui.util.LiveSolverManager
@@ -88,7 +93,8 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     private var keepCurrentMapDespiteDifficulty =
         false // Manual override from the UI to keep the current map
 
-    // Game state
+    // Game state - using StateFlow for KMP compatibility
+    private val core = GameStateManagerCore()
     private val currentState = MutableLiveData<GameState?>()
     private val moveCount = MutableLiveData<Int?>(0)
     private val squaresMoved = MutableLiveData<Int?>(0)
@@ -258,6 +264,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
     // Reference to the current activity - will be updated by getActivity() and setActivity() methods
     private var activityRef: WeakReference<Activity?>? = null
+    
+    // Platform-agnostic UI notifier for KMP compatibility
+    private var uiNotifier: UiNotifier? = null
 
     /**
      * Get collision info from the last movement (DRY - avoid recalculating in GameGridView).
@@ -315,8 +324,8 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     private var preComputeCancelled = false
 
     // Hint button reset timer to avoid race condition when loading games from history
-    private var hintButtonResetRunnable: Runnable? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private var hintButtonResetJob: Job? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     private val solverManager: SolverManager
         /**
@@ -684,11 +693,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         moveCount.setValue(newState.moveCount)
         isGameComplete.setValue(newState.isComplete)
 
-        // Update board size globals for UI and other components
-        MainActivity.boardSizeX = newState.width
-        MainActivity.boardSizeY = newState.height
+        // Board size is now managed via Preferences and GameState only
+        // Removed MainActivity.boardSize dependency for KMP compatibility
         d(
-            "[BOARD_SIZE_DEBUG] Updated MainActivity board size to: %dx%d",
+            "[BOARD_SIZE_DEBUG] GameState board size: %dx%d",
             newState.width,
             newState.height
         )
@@ -1109,10 +1117,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             if (!enhancedSaveData.toString().contains("MAP_SIG:")) {
                 val mapSig = gameState.generateMapSignature()
                 if (mapSig != null && !mapSig.isEmpty()) {
-                    val encoded = Base64.encodeToString(
-                        mapSig.toByteArray(StandardCharsets.UTF_8),
-                        Base64.NO_WRAP
-                    )
+                    val encoded = Base64.getEncoder().encodeToString(mapSig.toByteArray(StandardCharsets.UTF_8))
                     val sigTag = "MAP_SIG:" + encoded + ";"
                     val insertPos = enhancedSaveData.indexOf(";", 0) + 1
                     enhancedSaveData.insert(insertPos, sigTag)
@@ -2315,7 +2320,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     val finalStars = data.getStars()
                     val finalMoves = state.moveCount
 
-                    val currentActivity = this.activity
+                    val currentActivity = this.context
                     if (currentActivity != null) {
                         Thread(Runnable {
                             try {
@@ -2361,14 +2366,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 val starsAfter = manager.totalStars
                 d("[LEVEL_EDITOR] Stars before=%d, after=%d", starsBefore, starsAfter)
                 if (starsBefore < 140 && starsAfter >= 140) {
-                    Handler(Looper.getMainLooper()).post(Runnable {
-                        Toast.makeText(
-                            context,
-                            R.string.level_editor_unlocked,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    )
+                    uiNotifier?.showMessage(context.getString(R.string.level_editor_unlocked))
                     d("[LEVEL_EDITOR] Level Editor unlocked at %d stars!", starsAfter)
                 }
             }
@@ -2387,9 +2385,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @param levelId The level ID (>0 for levels, <=0 for random games)
      */
     private fun triggerHistoryUpload(levelId: Int) {
-        val currentActivity = this.activity
-        if (currentActivity == null) {
-            e("[HISTORY_SYNC] Activity is null, cannot upload history")
+        val currentContext = this.context
+        if (currentContext == null) {
+            e("[HISTORY_SYNC] Context is null, cannot upload history")
             return
         }
 
@@ -2403,7 +2401,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
                 d("[HISTORY_SYNC] Starting upload for %s...", gameType)
                 SyncManager.getInstance(context!!)
-                    .uploadHistory(currentActivity, object : HistoryUploadCallback {
+                    .uploadHistory(currentContext, object : HistoryUploadCallback {
                         override fun onSuccess(syncedCount: Int) {
                             d(
                                 "[HISTORY_SYNC] Upload callback: success with %d entries synced after %s",
@@ -2726,9 +2724,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             return false
         }
 
-        val activity = this.activity
+        val activity = this.context
         if (activity == null) {
-            e("[HISTORY_NAV] Activity is null, cannot load previous history entry")
+            e("[HISTORY_NAV] Context is null, cannot load previous history entry")
             return false
         }
 
@@ -2795,9 +2793,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             return false
         }
 
-        val activity = this.activity
+        val activity = this.context
         if (activity == null) {
-            e("[HISTORY_NAV] Activity is null, cannot load next history entry")
+            e("[HISTORY_NAV] Context is null, cannot load next history entry")
             return false
         }
 
@@ -2863,7 +2861,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             return false
         }
 
-        val activity = this.activity
+        val activity = this.context
         if (activity == null) {
             return false
         }
@@ -3026,7 +3024,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      */
     private fun updateHintTrackingInHistory() {
         try {
-            val activity = this.activity
+            val activity = this.context
             val gameState = currentState.getValue()
             if (activity == null || gameState == null) return
 
@@ -3148,10 +3146,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 return
             }
 
-            // Get activity from weak reference to avoid memory leaks
-            val activity = this.activity
+            // Get context from weak reference to avoid memory leaks
+            val activity = this.context
             if (activity == null) {
-                e("[HISTORY] Cannot save to history: no activity")
+                e("[HISTORY] Cannot save to history: no context")
                 return
             }
 
@@ -3420,9 +3418,9 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     manager.run()
                 } catch (e: Exception) {
                     e(e, "[SOLUTION_SOLVER] Error running solver")
-                    Handler(Looper.getMainLooper()).post(Runnable {
+                    coroutineScope.launch {
                         onSolutionCalculationFailed("Error: " + e.message)
-                    })
+                    }
                 }
             })
         } catch (e: Exception) {
@@ -3510,11 +3508,12 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                         solverManager.cancelSolver() // Cancel any running solver process
 
                         // Create a new game after a short delay to ensure the solver is fully reset
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        coroutineScope.launch {
+                            delay(100)
                             createValidGame(
                                 Preferences.boardSizeWidth, Preferences.boardSizeHeight
                             )
-                        }, 100)
+                        }
                         return
                     } else if (isTooHard) {
                         // Regenerate if puzzle is too hard for current difficulty mode (map rejected/discarded)
@@ -3534,10 +3533,11 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                         solverManager.cancelSolver() // Cancel any running solver process
 
                         // Create a new game after a short delay to ensure the solver is fully reset
-                        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        coroutineScope.launch {
+                            delay(100)
                             validateDifficulty = true // Make sure difficulty is checked
                             createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
-                        }, 100)
+                        }
                         return
                     }
                 }
@@ -3562,9 +3562,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 val solverManager = this.solverManager
                 solverManager.resetInitialization()
                 solverManager.cancelSolver()
-                Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                coroutineScope.launch {
+                    delay(100)
                     createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
-                }, 100)
+                }
                 return
             }
             w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found, accepting puzzle (regen exhausted or disabled)")
@@ -4097,11 +4098,11 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         )
 
         // Process on main thread to ensure thread safety with UI updates
-        Handler(Looper.getMainLooper()).post(Runnable {
+        coroutineScope.launch {
             if (success && numSolutions > 0) {
                 // Get the solution from the solver manager
                 try {
-                    val solution = this.solverManager.getCurrentSolution()
+                    val solution = this@GameStateManager.solverManager.getCurrentSolution()
                     if (solution != null) {
                         d(
                             "[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager found solution with %d moves",
@@ -4125,14 +4126,14 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager - No solution found")
                 onSolutionCalculationFailed("No solution found")
             }
-        })
+        }
     }
 
     override fun onSolverCancelled() {
         d("[SOLUTION_SOLVER][DIAGNOSTIC] GameStateManager.onSolverCancelled called")
 
         // Process on main thread to ensure thread safety with UI updates
-        Handler(Looper.getMainLooper()).post(Runnable {
+        coroutineScope.launch {
             // Check if map regeneration is enabled
             if (Preferences.generateNewMapEachTime) {
                 d("[SOLUTION_SOLVER] generateNewMapEachTime enabled - discarding unsolvable map and generating new one")
@@ -4142,7 +4143,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 d("[SOLUTION_SOLVER] generateNewMapEachTime disabled - showing error to user")
             }
             onSolutionCalculationFailed("Solver was cancelled")
-        })
+        }
     }
 
 
@@ -4294,6 +4295,22 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 d("[HISTORY] Activity reference updated in GameStateManager")
             }
         }
+    
+    /**
+     * Set the UI notifier for platform-agnostic message display (KMP compatibility)
+     * @param notifier The UiNotifier instance, or null to clear
+     */
+    fun setUiNotifier(notifier: UiNotifier?) {
+        this.uiNotifier = notifier
+    }
+    
+    /**
+     * Get the current UI notifier
+     * @return The current UiNotifier or null
+     */
+    fun getUiNotifier(): UiNotifier? {
+        return uiNotifier
+    }
 
     /**
      * Set the current game state
@@ -4466,7 +4483,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
         liveSolverManager!!.solveAsync(gridElements, object : LiveSolverListener {
             override fun onLiveSolverFinished(remainingMoves: Int, liveSolution: GameSolution?) {
-                Handler(Looper.getMainLooper()).post(Runnable {
+                coroutineScope.launch {
                     liveSolverCalculating.setValue(false)
                     val currentMoves: Int =
                         (if (moveCount.getValue() != null) moveCount.getValue() else 0)!!
@@ -4492,15 +4509,15 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     // Cache this result and pre-compute next moves
                     nextMovesCache.put(stateHash, remainingMoves)
                     preComputeNextMoves(state, liveSolution)
-                })
+                }
             }
 
             override fun onLiveSolverFailed() {
-                Handler(Looper.getMainLooper()).post(Runnable {
+                coroutineScope.launch {
                     liveSolverCalculating.setValue(false)
                     liveMoveCounterText.setValue("?")
                     d("[LIVE_SOLVER] No solution found from current position")
-                })
+                }
             }
         })
     }
@@ -4997,27 +5014,23 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
 
         // Cancel any pending reset
-        if (hintButtonResetRunnable != null) {
-            mainHandler.removeCallbacks(hintButtonResetRunnable!!)
-        }
+        hintButtonResetJob?.cancel()
 
 
         // Schedule hint button reset after delay to avoid race condition
-        hintButtonResetRunnable = Runnable {
+        hintButtonResetJob = coroutineScope.launch {
+            delay(HINT_BUTTON_RESET_DELAY_MS)
             if (hintButton != null && hintButton.isChecked()) {
                 d("[HINT_SYSTEM] Executing delayed hint button reset")
                 hintButton.setChecked(false)
             }
         }
-        mainHandler.postDelayed(hintButtonResetRunnable!!, HINT_BUTTON_RESET_DELAY_MS)
     }
 
     override fun onCleared() {
         super.onCleared()
         // Cancel any pending hint button reset
-        if (hintButtonResetRunnable != null) {
-            mainHandler.removeCallbacks(hintButtonResetRunnable!!)
-        }
+        hintButtonResetJob?.cancel()
         if (liveSolverManager != null) {
             liveSolverManager!!.shutdown()
         }

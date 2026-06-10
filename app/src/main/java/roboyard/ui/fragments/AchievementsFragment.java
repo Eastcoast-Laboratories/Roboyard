@@ -153,7 +153,11 @@ public class AchievementsFragment extends BaseGameFragment {
 
         TextView header = new TextView(requireContext());
         // Use centralized category display name from AchievementCategory enum
-        header.setText(category.getDisplayName(requireContext()));
+        // Use lambda-based string resolver for KMP compatibility
+        header.setText(category.getDisplayName(resName -> {
+            int resId = requireContext().getResources().getIdentifier(resName, "string", requireContext().getPackageName());
+            return resId != 0 ? requireContext().getString(resId) : null;
+        }));
         header.setTextSize(20);
         header.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
         headerLayout.addView(header);

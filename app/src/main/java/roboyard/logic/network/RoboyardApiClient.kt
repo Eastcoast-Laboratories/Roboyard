@@ -1,13 +1,15 @@
 package roboyard.logic.network
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import roboyard.logic.storage.PlatformStorage
+import roboyard.platform.AndroidStorage
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
 import timber.log.Timber.Forest.tag
@@ -28,9 +30,9 @@ import kotlin.math.min
  */
 class RoboyardApiClient private constructor(context: Context) {
     private val context: Context
-    private val prefs: SharedPreferences
+    private val storage: PlatformStorage
     private val executor: ExecutorService
-    private val mainHandler: Handler
+    private val coroutineScope: CoroutineScope
 
     interface ApiCallback<T> {
         fun onSuccess(result: T?)
@@ -56,10 +58,11 @@ class RoboyardApiClient private constructor(context: Context) {
     )
 
     init {
-        this.context = context.getApplicationContext()
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val appContext = context.getApplicationContext()
+        this.context = appContext
+        this.storage = AndroidStorage.getInstance(appContext)
         this.executor = Executors.newSingleThreadExecutor()
-        this.mainHandler = Handler(Looper.getMainLooper())
+        this.coroutineScope = CoroutineScope(Dispatchers.Main)
     }
 
     val installSource: String
@@ -93,7 +96,7 @@ class RoboyardApiClient private constructor(context: Context) {
          */
         get() {
             val token =
-                prefs.getString(KEY_AUTH_TOKEN, null)
+                storage.getString(KEY_AUTH_TOKEN, null)
             tag(TAG).d(
                 "[AUTH_DEBUG] isLoggedIn check: token=%s",
                 if (token != null) "present" else "null"
@@ -105,20 +108,20 @@ class RoboyardApiClient private constructor(context: Context) {
         /**
          * Get the logged-in user's email.
          */
-        get() = prefs.getString(KEY_USER_EMAIL, null)
+        get() = storage.getString(KEY_USER_EMAIL, null)
 
     val userName: String?
         /**
          * Get the logged-in user's name.
          */
-        get() = prefs.getString(KEY_USER_NAME, null)
+        get() = storage.getString(KEY_USER_NAME, null)
 
 
     val authToken: String?
         /**
          * Get the auth token for auto-login URL.
          */
-        get() = prefs.getString(KEY_AUTH_TOKEN, null)
+        get() = storage.getString(KEY_AUTH_TOKEN, null)
 
     /**
      * Build a URL that auto-logs the user in via token before redirecting to the target page.
@@ -168,7 +171,7 @@ class RoboyardApiClient private constructor(context: Context) {
                 val json = JSONObject(response)
 
                 if (json.optBoolean("needs_update", false)) {
-                    mainHandler.post(Runnable { callback.onNeedsUpdate() })
+                    coroutineScope.launch { callback.onNeedsUpdate() }
                     return@Runnable
                 }
                 if (json.has("error")) {
@@ -184,16 +187,20 @@ class RoboyardApiClient private constructor(context: Context) {
 
 
                 // Save credentials including password for auto re-login
-                prefs.edit()
-                    .putString(KEY_AUTH_TOKEN, token)
-                    .putString(KEY_USER_EMAIL, email)
-                    .putString(KEY_USER_NAME, userName)
-                    .putInt(KEY_USER_ID, userId)
-                    .putString(KEY_USER_PASSWORD, password)
-                    .apply()
+                storage.putString(KEY_AUTH_TOKEN, token)
+                if (email != null) {
+                    storage.putString(KEY_USER_EMAIL, email)
+                }
+                if (userName != null) {
+                    storage.putString(KEY_USER_NAME, userName)
+                }
+                storage.putInt(KEY_USER_ID, userId)
+                if (password != null) {
+                    storage.putString(KEY_USER_PASSWORD, password)
+                }
 
                 tag(TAG).d(
-                    "[AUTH_DEBUG] Token saved to SharedPreferences: %s",
+                    "[AUTH_DEBUG] Token saved to storage: %s",
                     token.substring(0, min(10, token.length)) + "..."
                 )
 
@@ -234,7 +241,7 @@ class RoboyardApiClient private constructor(context: Context) {
                 val json = JSONObject(response)
 
                 if (json.optBoolean("needs_update", false)) {
-                    mainHandler.post(Runnable { callback.onNeedsUpdate() })
+                    coroutineScope.launch { callback.onNeedsUpdate() }
                     return@Runnable
                 }
                 if (json.has("error")) {
@@ -247,13 +254,17 @@ class RoboyardApiClient private constructor(context: Context) {
 
 
                 // Save credentials including password for auto re-login
-                prefs.edit()
-                    .putString(KEY_AUTH_TOKEN, token)
-                    .putString(KEY_USER_EMAIL, email)
-                    .putString(KEY_USER_NAME, name)
-                    .putInt(KEY_USER_ID, userId)
-                    .putString(KEY_USER_PASSWORD, password)
-                    .apply()
+                storage.putString(KEY_AUTH_TOKEN, token)
+                if (email != null) {
+                    storage.putString(KEY_USER_EMAIL, email)
+                }
+                if (name != null) {
+                    storage.putString(KEY_USER_NAME, name)
+                }
+                storage.putInt(KEY_USER_ID, userId)
+                if (password != null) {
+                    storage.putString(KEY_USER_PASSWORD, password)
+                }
 
                 val result = LoginResult(token, name, email, userId)
                 postSuccess<LoginResult?>(callback, result)
@@ -277,8 +288,8 @@ class RoboyardApiClient private constructor(context: Context) {
         if (!this.isLoggedIn) {
             // No token, but maybe we still have stored credentials from a previous session
             // (e.g. token was cleared due to a previous bug). Try re-login before giving up.
-            val email = prefs.getString(KEY_USER_EMAIL, null)
-            val password = prefs.getString(KEY_USER_PASSWORD, null)
+            val email = storage.getString(KEY_USER_EMAIL, null)
+            val password = storage.getString(KEY_USER_PASSWORD, null)
             if (email != null && password != null) {
                 tag(TAG).d("[AUTH_DEBUG] No token but stored credentials found, attempting re-login")
                 tryReLoginOrLogout(callback)
@@ -326,8 +337,8 @@ class RoboyardApiClient private constructor(context: Context) {
      * just because the server-side token expired.
      */
     private fun tryReLoginOrLogout(callback: ApiCallback<Boolean?>) {
-        val email = prefs.getString(KEY_USER_EMAIL, null)
-        val password = prefs.getString(KEY_USER_PASSWORD, null)
+        val email = storage.getString(KEY_USER_EMAIL, null)
+        val password = storage.getString(KEY_USER_PASSWORD, null)
 
         if (email == null || password == null) {
             tag(TAG).d("[AUTH_DEBUG] No stored credentials for re-login, logging out")
@@ -356,8 +367,8 @@ class RoboyardApiClient private constructor(context: Context) {
      * Called automatically when a 401 Unauthorized error occurs.
      */
     fun attemptReLogin(callback: ApiCallback<Boolean?>) {
-        val email = prefs.getString(KEY_USER_EMAIL, null)
-        val password = prefs.getString(KEY_USER_PASSWORD, null)
+        val email = storage.getString(KEY_USER_EMAIL, null)
+        val password = storage.getString(KEY_USER_PASSWORD, null)
 
         if (email == null || password == null) {
             tag(TAG).d("[AUTO_RELOGIN] No stored credentials, cannot re-login")
@@ -383,13 +394,11 @@ class RoboyardApiClient private constructor(context: Context) {
      * Logout from roboyard.z11.de.
      */
     fun logout() {
-        prefs.edit()
-            .remove(KEY_AUTH_TOKEN)
-            .remove(KEY_USER_EMAIL)
-            .remove(KEY_USER_NAME)
-            .remove(KEY_USER_ID)
-            .remove(KEY_USER_PASSWORD)
-            .apply()
+        storage.remove(KEY_AUTH_TOKEN)
+        storage.remove(KEY_USER_EMAIL)
+        storage.remove(KEY_USER_NAME)
+        storage.remove(KEY_USER_ID)
+        storage.remove(KEY_USER_PASSWORD)
 
         tag(TAG).d("Logged out")
     }
@@ -417,7 +426,7 @@ class RoboyardApiClient private constructor(context: Context) {
                 val json = JSONObject(response)
 
                 if (json.optBoolean("needs_update", false)) {
-                    mainHandler.post(Runnable { callback.onNeedsUpdate() })
+                    coroutineScope.launch { callback.onNeedsUpdate() }
                     return@Runnable
                 }
                 if (json.has("error")) {
@@ -479,7 +488,7 @@ class RoboyardApiClient private constructor(context: Context) {
      */
     @Throws(IOException::class)
     private fun makeAuthenticatedPostRequest(endpoint: String?, body: String): String {
-        val token = prefs.getString(KEY_AUTH_TOKEN, null)
+        val token = storage.getString(KEY_AUTH_TOKEN, null)
         if (token == null) {
             throw IOException("Not authenticated")
         }
@@ -511,7 +520,7 @@ class RoboyardApiClient private constructor(context: Context) {
      */
     @Throws(IOException::class)
     private fun makeAuthenticatedGetRequest(endpoint: String?): String {
-        val token = prefs.getString(KEY_AUTH_TOKEN, null)
+        val token = storage.getString(KEY_AUTH_TOKEN, null)
         if (token == null) {
             throw IOException("Not authenticated")
         }
@@ -582,14 +591,14 @@ class RoboyardApiClient private constructor(context: Context) {
      * Post success callback to main thread.
      */
     private fun <T> postSuccess(callback: ApiCallback<T?>, result: T?) {
-        mainHandler.post(Runnable { callback.onSuccess(result) })
+        coroutineScope.launch { callback.onSuccess(result) }
     }
 
     /**
      * Post error callback to main thread.
      */
     private fun <T> postError(callback: ApiCallback<T?>, error: String?) {
-        mainHandler.post(Runnable { callback.onError(error) })
+        coroutineScope.launch { callback.onError(error) }
     }
 
     /**
@@ -908,7 +917,6 @@ class RoboyardApiClient private constructor(context: Context) {
     companion object {
         private const val TAG = "RoboyardApi"
         private const val BASE_URL = "https://roboyard.z11.de"
-        private const val PREFS_NAME = "roboyard_api"
 
         /** Current API protocol version sent with every request. Increment on breaking changes.  */
         const val API_VERSION: Int = 1

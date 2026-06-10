@@ -52,7 +52,7 @@ import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.managers.GameHistoryManager;
 import roboyard.logic.network.RoboyardApiClient;
 import timber.log.Timber;
-import roboyard.logic.graphics.MinimapGenerator;
+import roboyard.ui.graphics.MinimapGenerator;
 
 /**
  * SaveGameFragment handles saving, loading, and viewing history of games.
