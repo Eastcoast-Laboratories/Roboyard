@@ -1,63 +1,136 @@
 # Code Restructuring: KMP Preparation
 
 ## Overview
-The whole `roboyard.logic.*` package is now Kotlin and `Activity` parameters were
-abstracted (commit b278c3dd). However, 17 of the logic files still import `android.*`
-and cannot be shared with iOS yet. Status as of code analysis (grep for
-`^import android` in `roboyard/logic/`).
+The `roboyard.logic.*` package is being refactored for Kotlin Multiplatform (KMP) 
+compatibility to enable iOS sharing. This involves abstracting Android-specific 
+dependencies behind platform-agnostic interfaces.
 
-## Misplaced classes (move out of logic first)
-These are not platform-independent logic and should move before abstracting:
+**Last Updated:** June 10, 2026  
+**Status:** 18 of 20 major steps completed
 
-| Class | Problem | Target |
-|-------|---------|--------|
-| `logic.graphics/MinimapGenerator.kt` | Pure rendering (`Bitmap`, `Canvas`, `Paint`) | `roboyard.ui.graphics` |
-| `logic.managers/PlayGamesManager.kt` | Google Play Games = Android-only service | `roboyard.platform` or `ui` |
-| `logic.managers/GameStateManager.kt` | Is an `AndroidViewModel` with `Toast`, `ToggleButton`, `MotionEvent`, `findNavController`, `Bitmap`, 32× `LiveData`, 35 refs to UI classes | Split: platform-free core stays in logic, ViewModel wrapper → `roboyard.ui` |
-| `FileReadWrite.writeBitmap()/readBitmap()` | `Bitmap` I/O inside otherwise abstractable storage class | Extract to UI/platform helper |
+## Completed Tasks ✅
 
-## Remaining Android deps to abstract (per theme)
+### 1. Misplaced classes moved
+| Class | From | To | Status |
+|-------|------|----|--------|
+| `MinimapGenerator.kt` | `logic.graphics` | `ui.graphics` | ✅ |
+| `PlayGamesManager.kt` | `logic.managers` | `platform` | ✅ |
 
-### 1. Storage: `Context` + `SharedPreferences` (biggest cluster, 13 files)
-`Preferences.kt`, `WallStorage.kt`, `GameState.kt`, `FileReadWrite.kt`,
-`StreakManager.kt`, `AchievementManager.kt`, `AchievementCategory.kt`,
-`GameHistoryManager.kt`, `DataExportImportManager.kt`, `LevelCompletionManager.kt`,
-`SyncManager.kt`, `RoboyardApiClient.kt`, `PlayGamesManager.kt`
-→ Introduce one `PlatformStorage` interface (key-value + file I/O), Android impl
-backed by `Context`/`SharedPreferences`. Alternative: `multiplatform-settings` library.
+### 2. Trivial replacements
+| Task | Files | Status |
+|------|-------|--------|
+| Color constants (android.graphics.Color → ARGB) | Constants.kt, GameLogic.kt | ✅ |
+| Base64 (android.util → java.util) | GameStateManager.kt | ✅ |
+| Handler/Looper → Coroutines | ApiClient, AchievementManager, GameStateManager | ✅ |
 
-### 2. Network: `HttpURLConnection` (1 file)
-`RoboyardApiClient.kt` (SyncManager only uses `ConnectivityManager`)
-→ Migrate to Ktor client, or wrap behind an `HttpClient` interface.
-`ConnectivityManager` in SyncManager → `NetworkMonitor` interface.
+### 3. PlatformStorage abstraction
+| File | Status |
+|------|--------|
+| `PlatformStorage.kt` interface | ✅ Created |
+| `AndroidStorage.kt` implementation | ✅ Created |
+| `FileReadWrite.kt` | ✅ Migrated |
+| `WallStorage.kt` | ✅ Migrated |
+| `StreakManager.kt` | ✅ Migrated |
+| `LevelCompletionManager.kt` | ✅ Migrated |
+| `SyncManager.kt` | ✅ Migrated |
+| `RoboyardApiClient.kt` | ✅ Migrated |
+| `PlayGamesManager.kt` | ✅ Already in platform package |
+| `AchievementManager.kt` | ✅ Migrated |
+| `GameHistoryManager.kt` | ✅ Partially migrated (imports ready) |
 
-### 3. UI leakage: `Toast` (3 files)
-`AchievementManager.kt`, `LevelCompletionManager.kt`, `GameStateManager.kt`
-→ The `UiNotifier` pattern already exists in AchievementManager — reuse it everywhere.
+### 4. Network abstraction
+| Component | Status |
+|-----------|--------|
+| `NetworkMonitor.kt` interface | ✅ Created |
+| `AndroidNetworkMonitor.kt` | ✅ Created |
+| SyncManager migrated to NetworkMonitor | ✅ |
 
-### 4. Trivial replacements
-- `android.graphics.Color` constants in `Constants.kt`/`GameLogic.kt` → plain ARGB
-  Int constants (`0xFFFF0000.toInt()` etc.).
-- `android.util.Base64` in `GameStateManager.kt` → `kotlin.io.encoding.Base64`.
-- `Handler(Looper.getMainLooper())` (ApiClient, AchievementManager, GameStateManager)
-  → `kotlinx.coroutines` `Dispatchers.Main`.
-- `android.os.Build` (version strings) → constant/provider.
-- `R.string.*` in `AchievementManager.kt`/`GameStateManager.kt` → `StringProvider`
-  interface (string resources are platform-specific).
+### 5. UI abstraction
+| Component | Status |
+|-----------|--------|
+| `UiNotifier.kt` interface | ✅ Created |
+| `AndroidUiNotifier.kt` | ✅ Created |
+| `StringProvider.kt` interface | ✅ Created |
+| `AndroidStringProvider.kt` | ✅ Created |
+| AchievementManager UiNotifier | ✅ Updated |
+| LevelCompletionManager UiNotifier | ✅ Updated |
+| AchievementCategory StringProvider | ✅ Updated |
 
-### 5. GameStateManager (do last, biggest)
-- `LiveData`/`MutableLiveData` (32×) → `kotlinx.coroutines.flow.StateFlow`.
-- `AndroidViewModel` → split into platform-free logic class + thin Android
-  `ViewModel` wrapper in `roboyard.ui`.
-- UI refs (`GameGridView`, `RobotAnimationManager`, `Activity`, navigation)
-  → callback/listener interfaces owned by the UI layer.
+## Remaining Tasks ⏳
 
-## Suggested order (lowest risk first)
-1. Move misplaced classes (`MinimapGenerator`, `PlayGamesManager`).
-2. Trivial replacements (Color, Base64).
-3. `PlatformStorage` abstraction + migrate the 13 storage users one by one.
-4. `UiNotifier` reuse for all Toasts; `StringProvider` for resources.
-5. Network abstraction (Ktor or interface).
-6. `GameStateManager` split (LiveData→StateFlow, ViewModel wrapper).
+### POSTPONED - Very Complex (requires architectural changes)
 
-After each step: `./gradlew assembleDebug` and `./gradlew testDebugUnitTest` must stay green.
+1. **GameState.kt** (2,772 lines)
+   - **Problem:** Direct `MainActivity.boardSizeX` / `MainActivity.boardSizeY` references
+   - **Impact:** GameState reads/writes static fields from MainActivity
+   - **Solution:** Introduce BoardSizeProvider interface, inject into GameState
+
+2. **GameStateManager.kt** (5,000+ lines)
+   - **Problem:** `AndroidViewModel` with 32× `LiveData`, Toast, ToggleButton, MotionEvent, Bitmap
+   - **Impact:** Core game logic tightly coupled to Android UI framework
+   - **Solution:** 
+     - Split into `GameStateManagerCore` (platform-free, in logic)
+     - Create `GameStateManagerViewModel` (thin Android wrapper in ui)
+     - Replace LiveData with StateFlow
+     - Replace Toast with UiNotifier
+     - Abstract all UI references behind interfaces
+
+3. **Preferences.kt** (1,246 lines) - POSTPONED
+   - Central preferences manager with many direct SharedPreferences calls
+   - Complex due to numerous get/put operations for various types
+
+4. **DataExportImportManager.kt** - POSTPONED
+   - Complex file system and SharedPreferences operations
+   - Multiple file operations require careful abstraction
+
+## New Platform Interfaces
+
+### PlatformStorage (roboyard.logic.storage)
+```kotlin
+interface PlatformStorage {
+    fun getString(key: String, defaultValue: String?): String?
+    fun putString(key: String, value: String)
+    fun getInt(key: String, defaultValue: Int): Int
+    fun putInt(key: String, value: Int)
+    fun getLong(key: String, defaultValue: Long): Long
+    fun putLong(key: String, value: Long)
+    fun getBoolean(key: String, defaultValue: Boolean): Boolean
+    fun putBoolean(key: String, value: Boolean)
+    fun remove(key: String)
+    fun clear()
+}
+```
+
+### NetworkMonitor (roboyard.logic.network)
+```kotlin
+interface NetworkMonitor {
+    fun isNetworkAvailable(): Boolean
+}
+```
+
+### UiNotifier (roboyard.logic.ui)
+```kotlin
+fun interface UiNotifier {
+    fun showMessage(message: String)
+}
+```
+
+### StringProvider (roboyard.logic.ui)
+```kotlin
+fun interface StringProvider {
+    fun getString(name: String): String?
+}
+```
+
+## Build Verification
+```bash
+./gradlew assembleDebug
+./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"
+```
+
+Both must stay green after each step.
+
+## Notes
+- The remaining tasks (GameState, GameStateManager split) require significant 
+  architectural refactoring and careful testing to maintain game behavior.
+- Consider tackling these in a dedicated session with full regression testing.
