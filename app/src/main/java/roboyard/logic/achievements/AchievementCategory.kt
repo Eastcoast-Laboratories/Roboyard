@@ -45,17 +45,7 @@ enum class AchievementCategory(stringResName: String, displayOrder: Int) {
 
     /**
      * Get the localized display name for this category.
-     * @param stringProvider StringProvider to resolve string resource by name
-     * @return The localized category name from strings.xml
-     */
-    fun getDisplayName(stringProvider: StringProvider): String {
-        val resolved = stringProvider.getString(stringResName!!)
-        return resolved ?: name.replace("_", " ")
-    }
-    
-    /**
-     * Get the localized display name for this category (legacy lambda version).
-     * @param stringResolver Function to resolve string resource by name
+     * @param stringResolver Function to resolve string resource by name (e.g., Android context)
      * @return The localized category name from strings.xml
      */
     fun getDisplayName(stringResolver: (String) -> String?): String {
