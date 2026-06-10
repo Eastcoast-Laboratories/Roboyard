@@ -1,14 +1,24 @@
-# Code Restructuring: KMP Preparation
+# KMP Migration Instructions for copilot
 
-## Overview
-The `roboyard.logic.*` package is being refactored for Kotlin Multiplatform (KMP) 
-compatibility to enable iOS sharing. This involves abstracting Android-specific 
-dependencies behind platform-agnostic interfaces.
+## Task
+Migrate the Roboyard Android app to Kotlin Multiplatform (KMP) to enable iOS sharing. 
+The `roboyard.logic.*` package has been prepared with all Android-specific dependencies 
+abstracted behind platform-agnostic interfaces.
 
-**Last Updated:** June 10, 2026  
-**Status:** 20 of 20 major steps completed - ALL DONE
+## Current Status
+- **Date:** June 10, 2026
+- **Status:** Logic package is fully KMP-compatible and ready for KMP setup
+- **All 20 preparation steps completed**
 
-## Completed Tasks ✅
+## Your Task
+Set up Kotlin Multiplatform for this project and migrate the logic package to be shared with iOS.
+
+## Project Structure
+- **Android Module:** `app/` (current Android app)
+- **Logic Package:** `roboyard.logic.*` (ready for KMP sharing)
+- **Platform Package:** `roboyard.platform.*` (Android-specific implementations)
+
+## Preparation Work Completed ✅
 
 ### 1. Misplaced classes moved
 | Class | From | To | Status |
@@ -68,17 +78,9 @@ dependencies behind platform-agnostic interfaces.
 | LiveData → StateFlow (kept for UI compatibility) | ⏳ Future |
 | AndroidViewModel split | ⏳ Future |
 
-## Remaining Tasks ⏳
+## Platform Interfaces Available
 
-### UI Layer Only (Not Part of logic Package)
-
-1. **GameStateManager.kt** (5,000+ lines) - LiveData → StateFlow
-   - **Current Status:** Partially abstracted (Toast → UiNotifier, MainActivity removed, GameStateManagerCore created)
-   - **Note:** GameStateManager is an AndroidViewModel (UI layer), not part of roboyard.logic.*
-   - The logic package is now fully KMP-compatible
-   - LiveData → StateFlow migration is a UI layer concern and can be done separately
-
-## New Platform Interfaces
+These interfaces are ready for KMP `expect`/`actual` declarations:
 
 ### PlatformStorage (roboyard.logic.storage)
 ```kotlin
@@ -125,8 +127,47 @@ fun interface StringProvider {
 
 Both must stay green after each step.
 
-## Notes
-- **The roboyard.logic.* package is now fully KMP-compatible.**
-- All Android-specific dependencies in the logic package have been abstracted.
-- GameStateManager is an AndroidViewModel (UI layer), not part of roboyard.logic.*
-- LiveData → StateFlow migration in GameStateManager is a UI layer concern and can be done separately.
+## Instructions for copilot
+
+### Important: Build Configuration
+- Ensure the project is configured for **online mode** (not offline) so copilot can build
+- Run `./gradlew --stop` to stop any offline daemon if needed
+- Run `./gradlew assembleDebug` to verify build works before starting
+- **After each step, run `./gradlew assembleDebug` to verify the build succeeds**
+- **After each step, run `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"` to verify tests pass**
+
+### Step 1: Set up KMP project structure
+1. Convert the project to a Kotlin Multiplatform project
+2. Create a shared module (e.g., `shared/`) for the logic package
+3. Configure `build.gradle.kts` for KMP with Android and iOS targets
+4. **BUILD:** Run `./gradlew assembleDebug` to verify
+5. **TEST:** Run `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"` to verify
+
+### Step 2: Migrate logic package to shared module
+1. Move `roboyard.logic.*` package to the shared module
+2. Create `expect` declarations for platform interfaces in shared module
+3. Create `actual` implementations for Android in the Android module
+4. Create `actual` implementations for iOS in the iOS module (placeholder for now)
+5. **BUILD:** Run `./gradlew assembleDebug` to verify
+6. **TEST:** Run `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"` to verify
+
+### Step 3: Update Android module
+1. Update Android module to use the shared module instead of local logic package
+2. Update imports to use shared module
+3. **BUILD:** Run `./gradlew assembleDebug` to verify
+4. **TEST:** Run `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"` to verify
+
+### Step 4: Create iOS target
+1. Set up iOS target configuration
+2. Create placeholder iOS implementations for platform interfaces
+3. **BUILD:** Run `./gradlew assembleDebug` to verify Android build still works
+4. **TEST:** Run `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"` to verify
+
+## Important Notes
+- **GameStateManager is NOT part of the logic package** - it's an AndroidViewModel (UI layer) and should remain in the Android module
+- **All Android-specific dependencies in the logic package have been abstracted** via the platform interfaces listed above
+- **Build must stay green** after each step - run `./gradlew assembleDebug` after each change
+- Ensure the project is configured for **online mode** (not offline) so copilot can build
+- Change the needed configs, so you can build self to test your changes
+- Don't stop before all tasks are done
+- Complete all steps. Commit between the steps with good commit messages
