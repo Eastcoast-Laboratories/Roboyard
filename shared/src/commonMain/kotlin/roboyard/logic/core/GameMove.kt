@@ -1,6 +1,5 @@
 package roboyard.logic.core
 
-import java.io.Serializable
 
 /**
  * Represents a single move of a robot in the game.
@@ -13,7 +12,7 @@ class GameMove @JvmOverloads constructor(
     @JvmField var endX: Int,
     @JvmField var endY: Int,
     @JvmField val robotId: Int = 0
-) : IGameMove, Serializable {
+) : IGameMove {
 
     // Secondary constructor for Java tests: robotId, direction, distance
     constructor(robotId: Int, direction: Int, distance: Int) : this(

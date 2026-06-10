@@ -1,6 +1,5 @@
 package roboyard.logic.core
 
-import java.io.Serializable
 
 /**
  * Represents a basic move in the game.
@@ -8,7 +7,7 @@ import java.io.Serializable
 class Move(
     @JvmField val robotColor: Int,
     @JvmField val direction: Int
-) : Serializable {
+) {
     companion object {
         private const val serialVersionUID = 1L
     }

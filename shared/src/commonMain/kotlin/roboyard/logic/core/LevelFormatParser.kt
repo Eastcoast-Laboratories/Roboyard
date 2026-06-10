@@ -1,11 +1,14 @@
 package roboyard.logic.core
 
-import timber.log.Timber
+import roboyard.logic.util.RLog
+
 
 /**
  * Parser for the level format used in Roboyard.
  */
 object LevelFormatParser {
+    private val log = RLog.tag("LevelFormatParser")
+
     /**
      * Represents a single entry in a level file.
      * Also used for compact format entries with type/x/y for Java test compatibility.
@@ -155,7 +158,7 @@ object LevelFormatParser {
      */
     fun parseLevel(id: Int): LevelEntry? {
         // This is a simplified version for now
-        Timber.d("Parsing level %d", id)
+        log.d("Parsing level %d", id)
         return null
     }
 }

@@ -1,6 +1,5 @@
 package roboyard.logic.core
 
-import java.io.Serializable
 
 /**
  * Data class for storing level completion information.
@@ -11,7 +10,7 @@ class LevelCompletionData(
     @JvmField val timeMillis: Long,
     @JvmField val stars: Int,
     @JvmField val difficulty: Int
-) : Serializable {
+) {
 
     @JvmField var isCompleted: Boolean = false
     @JvmField var hintsShown: Int = 0

@@ -1,6 +1,5 @@
 package roboyard.logic.core
 
-import java.util.Collections
 
 /**
  * Model class that represents all walls on a game board.
@@ -48,7 +47,7 @@ class WallModel
      * @return An unmodifiable list of all walls
      */
     fun getWalls(): MutableList<Wall?> {
-        return Collections.unmodifiableList<Wall?>(walls)
+        return walls.toList()
     }
 
 

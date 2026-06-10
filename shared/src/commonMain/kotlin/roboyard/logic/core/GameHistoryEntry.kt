@@ -1,7 +1,6 @@
 package roboyard.logic.core
 
-import java.io.Serializable
-import timber.log.Timber
+import roboyard.logic.util.RLog
 
 /**
  * Represents an entry in the game's move history.
@@ -13,7 +12,9 @@ class GameHistoryEntry(
     @JvmField val toX: Int,
     @JvmField val toY: Int,
     @JvmField val moveNumber: Int
-) : Serializable {
+) {
+    private val log = RLog.tag("GameHistoryEntry")
+
 
     // Additional fields required by Java code
     @JvmField var mapName: String? = null
@@ -136,7 +137,7 @@ class GameHistoryEntry(
                 try {
                     return parts[1].split(".")[0].toInt()
                 } catch (e: NumberFormatException) {
-                    Timber.e(e, "Failed to parse history index from map path: %s", path)
+                    log.e(e, "Failed to parse history index from map path: %s", path)
                 }
             }
         }

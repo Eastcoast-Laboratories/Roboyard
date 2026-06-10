@@ -1,11 +1,9 @@
 package roboyard.logic.core
 
-import timber.log.Timber
-import java.util.Arrays
-import java.util.Locale
-import java.util.Random
 import kotlin.math.max
+import kotlin.random.Random
 import kotlin.math.min
+import roboyard.logic.util.RLog
 
 /**
  * A UI-agnostic class that contains the core game logic for map generation.
@@ -14,8 +12,9 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     private val boardWidth: Int,
     private val boardHeight: Int,
     difficultyLevel: Int,
-    private val rand: Random = Random()
+    private val rand: Random = Random.Default
 ) {
+    private val log = RLog.tag("GameLogic")
     // position of the square in the middle of the game board
     private val carrePosX: Int // horizontal position of the top wall of square, starting with 0
     private val carrePosY: Int // vertical position of the left wall of the square
@@ -51,7 +50,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 1,
                 min(Constants.NUM_ROBOTS, count)
             )
-            Timber.d("Robot count set to %d", field)
+            log.d("Robot count set to %d", field)
         }
     private var targetColors =
         1 // Anzahl der verschiedenen Zielfarben (1-4) (overridden by Preferences )
@@ -86,7 +85,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         // Calculate walls per quadrant based on board width
         // Ensure at least 1 wall per quadrant, but not more than board width / 4
         wallsPerQuadrant = max(1, boardWidth / 4) // Default: quarter of board width
-        Timber.d(
+        log.d(
             "[GAME LOGIC] Board size: %dx%d, walls per quadrant: %d",
             boardWidth, boardHeight, wallsPerQuadrant
         )
@@ -110,7 +109,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         // Use configurable preference for multicolor target, or fall back to difficulty-based setting
         allowMulticolorTarget = Preferences.allowMulticolorTarget
 
-        Timber.d(
+        log.d(
             "[DIFFICULTY] Setting difficulty level %d (BEGINNER=%d, ADVANCED=%d, INSANE=%d, IMPOSSIBLE=%d)",
             level,
             DIFFICULTY_BEGINNER,
@@ -122,11 +121,11 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         if (level == DIFFICULTY_BEGINNER) {
             // For beginner level - targets must be in corners
             targetMustBeInCorner = true
-            Timber.d("[DIFFICULTY] Using BEGINNER settings (targets in corners only)")
+            log.d("[DIFFICULTY] Using BEGINNER settings (targets in corners only)")
         } else if (level == DIFFICULTY_ADVANCED) {
             // For Advanced difficulty, targets can be in random positions
             targetMustBeInCorner = false
-            Timber.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement")
+            log.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement")
 
             maxWallsInOneVerticalCol = 3
             maxWallsInOneHorizontalRow = 3
@@ -135,14 +134,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             loneWallsAllowed = true
         } else {
             // Keep targetMustBeInCorner = true
-            Timber.d("[DIFFICULTY] Using INSANE or IMPOSSIBLE settings")
+            log.d("[DIFFICULTY] Using INSANE or IMPOSSIBLE settings")
 
             loneWallsAllowed = true
 
 
             // For Insane and Impossible difficulties, targets can appear anywhere except the center
             targetMustBeInCorner = false
-            Timber.d("[DIFFICULTY] Using INSANE/IMPOSSIBLE settings, targets fully random")
+            log.d("[DIFFICULTY] Using INSANE/IMPOSSIBLE settings, targets fully random")
 
             maxWallsInOneVerticalCol = 5
             maxWallsInOneHorizontalRow = 5
@@ -150,7 +149,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         }
 
         if (level == DIFFICULTY_IMPOSSIBLE) {
-            Timber.d("[DIFFICULTY] Using IMPOSSIBLE settings")
+            log.d("[DIFFICULTY] Using IMPOSSIBLE settings")
             wallsPerQuadrant = (boardWidth / 2.3).toInt()
         }
 
@@ -158,7 +157,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
 
-        Timber.d(
+        log.d(
             "[DIFFICULTY] Final settings: targetMustBeInCorner=%b, allowMulticolorTarget=%b, maxWallsInOneVerticalCol=%d, maxWallsInOneHorizontalRow=%d, wallsPerQuadrant=%d, boardSize=%dx%d",
             targetMustBeInCorner,
             allowMulticolorTarget,
@@ -177,7 +176,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     fun getRandom(min: Int, max: Int): Int {
         // Add safety check to prevent IllegalArgumentException
         if (min > max) {
-            Timber.w(
+            log.w(
                 "[GAME LOGIC] Invalid random range: min(%d) > max(%d). returning max(%d).",
                 min,
                 max,
@@ -207,7 +206,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         val iterator = data.iterator()
         while (iterator.hasNext()) {
             val e = iterator.next()
-            if (Arrays.asList<String?>(*gameElementTypes).contains(e.type)) {
+            if (gameElementTypes.contains(e.type)) {
                 iterator.remove()
             }
         }
@@ -236,7 +235,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // Ensure all outer walls exist in the grid data
         data = ensureOuterWalls(data)
-        Timber.d(
+        log.d(
             "[WALL STORAGE] translateArraysToMap - %d GridElements after ensuring outer walls",
             data.size
         )
@@ -249,7 +248,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      * This is critical for consistent wall behavior when walls are preserved
      */
     fun ensureOuterWalls(data: ArrayList<GridElement>): ArrayList<GridElement> {
-        Timber.d("[WALL STORAGE] ensureOuterWalls called for board %dx%d", boardWidth, boardHeight)
+        log.d("[WALL STORAGE] ensureOuterWalls called for board %dx%d", boardWidth, boardHeight)
         val newData = ArrayList<GridElement>(data)
         // Check each outer wall position and add if missing
         val horizontalTopExists = BooleanArray(boardWidth)
@@ -263,10 +262,10 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 // Horizontal walls
                 if (element.y == 0) {
                     horizontalTopExists[element.x] = true
-                    Timber.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.x)
+                    log.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.x)
                 } else if (element.y == boardHeight) {
                     horizontalBottomExists[element.x] = true
-                    Timber.d(
+                    log.d(
                         "[WALL STORAGE] Horizontal bottom wall found at (%d,%d)",
                         element.x,
                         boardHeight
@@ -276,10 +275,10 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 // Vertical walls
                 if (element.x == 0) {
                     verticalLeftExists[element.y] = true
-                    Timber.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.y)
+                    log.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.y)
                 } else if (element.x == boardWidth) {
                     verticalRightExists[element.y] = true
-                    Timber.d(
+                    log.d(
                         "[WALL STORAGE] Vertical right wall found at (%d,%d)",
                         boardWidth,
                         element.y
@@ -294,7 +293,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (x in 0..<boardWidth) {
             if (!horizontalTopExists[x]) {
                 newData.add(GridElement(x, 0, "mh"))
-                Timber.d("[WALL STORAGE] missing top wall at (%d,0)", x)
+                log.d("[WALL STORAGE] missing top wall at (%d,0)", x)
                 missingWalls++
             }
         }
@@ -303,7 +302,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (x in 0..<boardWidth) {
             if (!horizontalBottomExists[x]) {
                 newData.add(GridElement(x, boardHeight, "mh"))
-                Timber.d("[WALL STORAGE] missing bottom wall at (%d,%d)", x, boardHeight)
+                log.d("[WALL STORAGE] missing bottom wall at (%d,%d)", x, boardHeight)
                 missingWalls++
             }
         }
@@ -312,7 +311,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (y in 0..<boardHeight) {
             if (!verticalLeftExists[y]) {
                 newData.add(GridElement(0, y, "mv"))
-                Timber.d("[WALL STORAGE] missing left wall at (0,%d)", y)
+                log.d("[WALL STORAGE] missing left wall at (0,%d)", y)
                 missingWalls++
             }
         }
@@ -321,12 +320,12 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (y in 0..<boardHeight) {
             if (!verticalRightExists[y]) {
                 newData.add(GridElement(boardWidth, y, "mv"))
-                Timber.d("[WALL STORAGE] missing right wall at (%d,%d)", boardWidth, y)
+                log.d("[WALL STORAGE] missing right wall at (%d,%d)", boardWidth, y)
                 missingWalls++
             }
         }
 
-        Timber.d("[WALL STORAGE] %d missing outer walls", missingWalls)
+        log.d("[WALL STORAGE] %d missing outer walls", missingWalls)
 
         return newData
         // return data; // send back the original data
@@ -343,14 +342,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     ): ArrayList<GridElement> {
         var horizontalWalls = horizontalWalls
         var verticalWalls = verticalWalls
-        Timber.d(
+        log.d(
             "[TARGET PLACEMENT] INITIAL CHECK: currentLevel=%d, targetMustBeInCorner=%b (DIFF_INSANE=%d, DIFF_IMPOSSIBLE=%d)",
             currentLevel, targetMustBeInCorner, DIFFICULTY_INSANE, DIFFICULTY_IMPOSSIBLE
         )
 
         var abandon: Boolean
 
-        Timber.d(
+        log.d(
             "[TARGET PLACEMENT] Starting target placement with difficulty=%d, targetMustBeInCorner=%b",
             currentLevel, targetMustBeInCorner
         )
@@ -361,7 +360,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         val isMultiTargetMode = (targetColors > 1)
         if (isMultiTargetMode && allowMulticolorTarget) {
             allowMulticolorTarget = false
-            Timber.w(
+            log.w(
                 "[TARGET_MULTI] Multi-colored target disabled: multi-target mode active (targetColors=%d)",
                 targetColors
             )
@@ -379,14 +378,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             }
             typesOfTargets[Constants.NUM_ROBOTS] =
                 "target_multi" // Add multi-target at the last index
-            Timber.d("[TARGET_MULTI] Multi-color target INCLUDED in available targets")
+            log.d("[TARGET_MULTI] Multi-color target INCLUDED in available targets")
         } else {
             // Exclude multi-color target if not allowed
             typesOfTargets = arrayOfNulls<String>(Constants.NUM_ROBOTS) // standard targets only
             for (i in 0..<Constants.NUM_ROBOTS) {
                 typesOfTargets[i] = getObjectType(i, false) // false = target
             }
-            Timber.d("[TARGET_MULTI] Multi-color target EXCLUDED from available targets")
+            log.d("[TARGET_MULTI] Multi-color target EXCLUDED from available targets")
         }
 
         val typesOfRobots = arrayOfNulls<String>(Constants.NUM_ROBOTS)
@@ -411,7 +410,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         var targetTypesCount = min(targetColors, maxTargetTypes) // Limit to targetColors
         targetTypesCount = max(1, targetTypesCount) // Ensure at least one target is always created
 
-        Timber.d(
+        log.d(
             "[TARGET GENERATION] targetColors=%d, maxTargetTypes=%d, targetTypesCount=%d",
             targetColors, maxTargetTypes, targetTypesCount
         )
@@ -429,7 +428,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
 
         // Only use the first targetTypesCount elements from the shuffled array
-        Timber.d(
+        log.d(
             "[TARGET] Will use %d different target types out of %d possible types",
             targetTypesCount,
             maxTargetTypes
@@ -438,7 +437,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // If horizontalWalls and verticalWalls are null, create empty arrays
         if (horizontalWalls == null || verticalWalls == null) {
-            Timber.d("[WALL STORAGE] Creating empty wall arrays for target placement")
+            log.d("[WALL STORAGE] Creating empty wall arrays for target placement")
             horizontalWalls = Array<IntArray?>(boardWidth + 1) { IntArray(boardHeight + 1) }
             verticalWalls = Array<IntArray?>(boardWidth + 1) { IntArray(boardHeight + 1) }
 
@@ -474,24 +473,24 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             if (!targetMustBeInCorner && currentLevel == DIFFICULTY_ADVANCED) {
                 // For Advanced difficulty, use 50% probability for corner placement
                 val randomChoice = getRandom(0, 1)
-                Timber.d(
+                log.d(
                     "[TARGET PLACEMENT] DECISION at LINE 385: randomChoice=%d for 50%% probability",
                     randomChoice
                 )
                 if (randomChoice == 0) {
                     useCornerPlacement = true
-                    Timber.d(
+                    log.d(
                         "[TARGET PLACEMENT] Target %d will use corner placement (50%% probability)",
                         i
                     )
                 } else {
-                    Timber.d(
+                    log.d(
                         "[TARGET PLACEMENT] Target %d will use random placement (50%% probability)",
                         i
                     )
                 }
             } else {
-                Timber.d(
+                log.d(
                     "[TARGET PLACEMENT] TARGET=%d MODE=%s FINAL_CHECK: mustBeInCorner=%b, useCornerPlacement=%b, difficulty=%d",
                     i, if (useCornerPlacement) "corner-only" else "fully-random",
                     targetMustBeInCorner, useCornerPlacement, currentLevel
@@ -503,7 +502,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 targetX = getRandom(0, boardWidth - 1)
                 targetY = getRandom(0, boardHeight - 1)
 
-                Timber.d(
+                log.d(
                     "[TARGET PLACEMENT] Generate position at LINE 384: position=(%d,%d), useCornerPlacement=%b",
                     targetX, targetY, useCornerPlacement
                 )
@@ -517,14 +516,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     val hasVerticalWall =
                         (verticalWalls[targetX]!![targetY] == 1 || verticalWalls[targetX + 1]!![targetY] == 1)
 
-                    Timber.d(
+                    log.d(
                         "[TARGET PLACEMENT] CORNER CHECK at LINE 422: position=(%d,%d), hasHWall=%b, hasVWall=%b",
                         targetX, targetY, hasHorizontalWall, hasVerticalWall
                     )
 
 
                     // Debug wall values directly
-                    Timber.d(
+                    log.d(
                         "[TARGET PLACEMENT] WALL VALUES: h1=%d, h2=%d, v1=%d, v2=%d",
                         horizontalWalls[targetX]!![targetY],
                         horizontalWalls[targetX]!![targetY + 1],
@@ -536,19 +535,19 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     // We need both a horizontal and vertical wall to form a corner
                     if (!hasHorizontalWall || !hasVerticalWall) {
                         abandon = true
-                        Timber.d(
+                        log.d(
                             "[TARGET PLACEMENT] Position (%d,%d) abandoned - not in corner (h=%b, v=%b), LINE 395",
                             targetX, targetY, hasHorizontalWall, hasVerticalWall
                         )
                     } else {
-                        Timber.d(
+                        log.d(
                             "[TARGET PLACEMENT] Position (%d,%d) is a valid corner (h=%b, v=%b)",
                             targetX, targetY, hasHorizontalWall, hasVerticalWall
                         )
                     }
                 } else {
                     // If we're NOT using corner placement, let's verify that corners are actually being allowed
-                    Timber.d(
+                    log.d(
                         "[TARGET PLACEMENT] Using random placement at LINE 436 - position=(%d,%d)",
                         targetX,
                         targetY
@@ -563,7 +562,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     || (targetX == carrePosX + 1 && targetY == carrePosY + 1)
                 ) {
                     abandon = true
-                    Timber.d(
+                    log.d(
                         "[TARGET PLACEMENT] Position (%d,%d) abandoned - in center square",
                         targetX,
                         targetY
@@ -575,7 +574,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 for (element in allElements) {
                     if (element.x == targetX && element.y == targetY) {
                         abandon = true
-                        Timber.d(
+                        log.d(
                             "[TARGET PLACEMENT] Position (%d,%d) abandoned - already occupied",
                             targetX,
                             targetY
@@ -591,7 +590,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             data!!.add(newTarget)
             allElements.add(newTarget)
 
-            Timber.d(
+            log.d(
                 "[TARGET PLACEMENT] PLACEMENT_COMPLETE: target=%d at position=(%d,%d) of type=%s",
                 i, targetX, targetY, typesOfTargets[targetType]
             )
@@ -632,7 +631,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             data!!.add(newRobot)
             allElements.add(newRobot)
 
-            Timber.d("Added robot %s at position %d,%d", currentRobotType, cX, cY)
+            log.d("Added robot %s at position %d,%d", currentRobotType, cX, cY)
         }
 
         return data!!
@@ -655,13 +654,13 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      */
     fun generateGameMap(existingMap: ArrayList<GridElement>?): ArrayList<GridElement>? {
         var existingMap = existingMap
-        Timber.d("[WALLS] Using generateNewMapEachTime: %s", Preferences.generateNewMapEachTime)
+        log.d("[WALLS] Using generateNewMapEachTime: %s", Preferences.generateNewMapEachTime)
 
 
         // Check if we should preserve walls from the existing map
         val wallStorage = WallStorage.getInstance()
         val preserveWalls = !Preferences.generateNewMapEachTime && wallStorage.hasStoredWalls()
-        Timber.d(
+        log.d(
             "[WALL STORAGE] GameLogic: generateNewMapEachTime: %s, Preserving walls: %s, hasStoredWalls: %s",
             Preferences.generateNewMapEachTime,
             preserveWalls,
@@ -669,7 +668,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         )
         // If this is the first time generating a map or we're not preserving walls, generate everything new
         if (existingMap == null || existingMap.isEmpty() || Preferences.generateNewMapEachTime) {
-            Timber.d("[WALLS] Generating completely new map")
+            log.d("[WALLS] Generating completely new map")
 
 
             // Generate a new map based on board size
@@ -685,7 +684,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             // Store the walls for future use if we're not generating new maps each time
             if (!Preferences.generateNewMapEachTime) {
                 wallStorage.storeWalls(existingMap)
-                Timber.d("[WALLS][WALL STORAGE] Stored walls for future use")
+                log.d("[WALLS][WALL STORAGE] Stored walls for future use")
             }
 
             return existingMap
@@ -694,7 +693,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             var data: ArrayList<GridElement>?
 
             if (preserveWalls) {
-                Timber.d("[WALLS][WALL STORAGE] Preserving walls from stored configuration")
+                log.d("[WALLS][WALL STORAGE] Preserving walls from stored configuration")
                 // Remove game elements (robots and targets) but keep walls
                 data = removeGameElementsFromMap(existingMap)
 
@@ -719,7 +718,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 // Store the walls for future use
                 if (!Preferences.generateNewMapEachTime) {
                     wallStorage.storeWalls(data)
-                    Timber.d("[WALLS][WALL STORAGE] Stored new walls for future use")
+                    log.d("[WALLS][WALL STORAGE] Stored new walls for future use")
                 }
             }
 
@@ -764,7 +763,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 tolerance = (restartCount - restartRelaxThreshold) / 5
                 maxWallsInOneHorizontalRow = originalMaxWallsInOneHorizontalRow + tolerance
                 maxWallsInOneVerticalCol = originalMaxWallsInOneVerticalCol + tolerance
-                Timber.d(
+                log.d(
                     "Relaxing wall constraints after %d restarts: h=%d, v=%d",
                     restartCount, maxWallsInOneHorizontalRow, maxWallsInOneVerticalCol
                 )
@@ -917,7 +916,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                             countX -= 2
                         }
                         if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) {
-                            // Timber.d("[GAME LOGIC] There are too many walls in the same row/column, we abandon");
+                            // log.d("[GAME LOGIC] There are too many walls in the same row/column, we abandon");
                             abandon = true
                         }
                     }
@@ -967,7 +966,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     }
 
                     if (compteLoop1 > 1000) {
-                        Timber.d(
+                        log.d(
                             "Wall creation restarted, too many loops (%d), tolerance: %d",
                             restartCount,
                             tolerance
@@ -1019,7 +1018,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // IMPORTANT: Always explicitly set border walls - don't rely on automatic addition
         // This ensures consistent behavior especially with saved walls
-        Timber.d(
+        log.d(
             "[WALL STORAGE] Explicitly setting ALL outer border walls for board %dx%d",
             boardWidth,
             boardHeight
@@ -1030,7 +1029,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (x in 0..<boardWidth) {
             horizontalWalls[x]!![0] = 1 // Top border
             horizontalWalls[x]!![boardHeight] = 1 // Bottom border
-            Timber.d(
+            log.d(
                 "[WALL STORAGE] Setting horizontal border walls at (%d,0) and (%d,%d)",
                 x,
                 x,
@@ -1043,7 +1042,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (y in 0..<boardHeight) {
             verticalWalls[0]!![y] = 1 // Left border
             verticalWalls[boardWidth]!![y] = 1 // Right border
-            Timber.d(
+            log.d(
                 "[WALL STORAGE] Setting vertical border walls at (0,%d) and (%d,%d)",
                 y,
                 boardWidth,
@@ -1087,7 +1086,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         var wallsToPlace = min(additionalWalls, maxTotalWalls - 8)
         wallsToPlace = max(wallsToPlace, minTotalWalls - 8) // Ensure minimum walls
 
-        Timber.d(
+        log.d(
             "[GAME LOGIC] Adding %d additional walls (total: %d) for difficulty level %d",
             wallsToPlace, wallsToPlace + 8, currentLevel
         )
@@ -1125,7 +1124,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     verticalWalls[vPos[0]]!![vPos[1]] = 1
                     cornerWallsPlaced += 2 // We placed two walls
                     wallsToPlace -= 2
-                    Timber.d(
+                    log.d(
                         "[GAME LOGIC] Placed corner walls at H(%d,%d) and V(%d,%d)",
                         hPos[0], hPos[1], vPos[0], vPos[1]
                     )
@@ -1199,7 +1198,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
                         edgeWallsPlaced++
                         wallsToPlace--
-                        Timber.d(
+                        log.d(
                             "[GAME LOGIC] Placed %s edge wall at (%d,%d)",
                             if (vertical) "vertical" else "horizontal", pos[0], pos[1]
                         )
@@ -1294,7 +1293,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                         if (horizontalWalls[x]!![y] == 0) {
                             horizontalWalls[x]!![y] = 1
                             additionalWallsPlaced++
-                            Timber.d("[GAME LOGIC] Placed horizontal wall at %d,%d", x, y)
+                            log.d("[GAME LOGIC] Placed horizontal wall at %d,%d", x, y)
                         }
                     }
                 } else if (i % 2 == 1 && (i - 1) / 2 < potentialVerticalWalls.size) {
@@ -1316,14 +1315,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                         if (verticalWalls[x]!![y] == 0) {
                             verticalWalls[x]!![y] = 1
                             additionalWallsPlaced++
-                            Timber.d("[GAME LOGIC] Placed vertical wall at %d,%d", x, y)
+                            log.d("[GAME LOGIC] Placed vertical wall at %d,%d", x, y)
                         }
                     }
                 }
                 i++
             }
 
-            Timber.d(
+            log.d(
                 "[GAME LOGIC] Placed %d additional walls beyond corners and edges",
                 additionalWallsPlaced
             )
@@ -1364,7 +1363,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      */
     private fun shuffleArrayWithFlags(array: Array<IntArray>, flags: BooleanArray) {
         if (array.size != flags.size) {
-            Timber.e("[GAME LOGIC] Cannot shuffle arrays of different lengths")
+            log.e("[GAME LOGIC] Cannot shuffle arrays of different lengths")
             return
         }
 
@@ -1404,7 +1403,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     fun setTargetColors(count: Int) {
         // Ensure count is between 1 and 4
         this.targetColors = max(1, min(Constants.NUM_ROBOTS, count))
-        Timber.d("Target colors set to %d", this.targetColors)
+        log.d("Target colors set to %d", this.targetColors)
     }
 
     /**
@@ -1453,7 +1452,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 Constants.COLOR_WHITE -> name = "white"
                 Constants.COLOR_MULTI -> name = "multi"
                 else -> {
-                    Timber.w("[COLOR] Unknown color ID: %d", colorId)
+                    log.w("[COLOR] Unknown color ID: %d", colorId)
                     throw IllegalArgumentException("Unknown color ID: " + colorId)
                 }
             }
@@ -1468,7 +1467,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             if (input == null || input.isEmpty()) {
                 return input!!
             }
-            return input.substring(0, 1).uppercase(Locale.getDefault()) + input.substring(1)
+            return input.substring(0, 1).uppercase() + input.substring(1)
         }
 
         /**
@@ -1479,7 +1478,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         fun getColorId(colorName: String): Int {
             requireNotNull(colorName) { "Color name cannot be null" }
 
-            when (colorName.lowercase(Locale.getDefault())) {
+            when (colorName.lowercase()) {
                 "pink" -> return Constants.COLOR_PINK
                 "green" -> return Constants.COLOR_GREEN
                 "blue" -> return Constants.COLOR_BLUE
@@ -1491,7 +1490,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 "white" -> return Constants.COLOR_WHITE
                 "multi" -> return Constants.COLOR_MULTI
                 else -> {
-                    Timber.w("[COLOR] Unknown color name: %s", colorName)
+                    log.w("[COLOR] Unknown color name: %s", colorName)
                     throw IllegalArgumentException("Unknown color name: " + colorName)
                 }
             }
@@ -1539,7 +1538,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             if (colorId >= 0 && colorId < Constants.colors_rgb.size) {
                 return Constants.colors_rgb[colorId]
             }
-            Timber.w("[COLOR] Invalid color ID: %d from objectType: %s", colorId, objectType)
+            log.w("[COLOR] Invalid color ID: %d from objectType: %s", colorId, objectType)
             throw IllegalArgumentException("getColor: Invalid color ID: " + colorId + " from objectType: " + objectType)
         }
 
@@ -1550,24 +1549,24 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
          */
         fun hasTargets(gridElements: ArrayList<GridElement>?): Boolean {
             if (gridElements == null) {
-                Timber.e("[TARGET CHECK] gridElements is null!")
+                log.e("[TARGET CHECK] gridElements is null!")
                 return false
             }
 
-            Timber.d("[TARGET CHECK] Checking %d grid elements for targets", gridElements.size)
+            log.d("[TARGET CHECK] Checking %d grid elements for targets", gridElements.size)
             var targetCount = 0
             for (element in gridElements) {
                 val type = element.type
                 if (type != null && type.startsWith("target_")) {
                     targetCount++
-                    Timber.d(
+                    log.d(
                         "[TARGET CHECK] Found target of type %s at position (%d,%d)",
                         type, element.x, element.y
                     )
                 }
             }
 
-            Timber.d("[TARGET CHECK] Found %d targets", targetCount)
+            log.d("[TARGET CHECK] Found %d targets", targetCount)
             return targetCount > 0
         }
 

@@ -1,10 +1,9 @@
 package roboyard.logic.core
 
-import roboyard.ui.activities.MainActivity
-import timber.log.Timber
-import java.util.Random
 import kotlin.math.max
+import kotlin.random.Random
 import kotlin.math.min
+import roboyard.logic.util.RLog
 
 /**
  * Created by Alain on 04/02/2015.
@@ -13,6 +12,7 @@ import kotlin.math.min
  * backward compatibility with the original implementation.
  */
 class MapGenerator {
+    private val log = RLog.tag("MapGenerator")
     private val rand: Random
     private val gameLogic: GameLogic?
 
@@ -45,7 +45,7 @@ class MapGenerator {
                 gameLogic.robotCount = field
             }
 
-            Timber.d("MapGenerator robot count set to %d", field)
+            log.d("MapGenerator robot count set to %d", field)
         }
 
     /**
@@ -66,7 +66,7 @@ class MapGenerator {
                 gameLogic.setTargetColors(field)
             }
 
-            Timber.d("MapGenerator target colors set to %d", field)
+            log.d("MapGenerator target colors set to %d", field)
         }
 
     // Wall configuration
@@ -77,21 +77,21 @@ class MapGenerator {
     var loneWallsAllowed: Boolean = false // walls that are not attached in a 90 deg. angle
 
     init {
-        rand = Random()
+        rand = Random.Default
 
         // Initialize square position based on current board size
-        carrePosX = (MainActivity.boardSizeX / 2) - 1
-        carrePosY = (MainActivity.boardSizeY / 2) - 1
+        carrePosX = (Preferences.boardSizeX / 2) - 1
+        carrePosY = (Preferences.boardSizeY / 2) - 1
 
         // Calculate walls per quadrant based on board width
-        wallsPerQuadrant = MainActivity.boardSizeX / 4 // Default: quarter of board width
+        wallsPerQuadrant = Preferences.boardSizeX / 4 // Default: quarter of board width
 
         // Get difficulty directly from Preferences
         val level = Preferences.difficulty
 
 
         // Initialize GameLogic with the same configuration
-        gameLogic = GameLogic(MainActivity.boardSizeX, MainActivity.boardSizeY, level)
+        gameLogic = GameLogic(Preferences.boardSizeX, Preferences.boardSizeY, level)
 
 
         // Synchronize with GameLogic's static setting
@@ -108,8 +108,8 @@ class MapGenerator {
                 // TODO: doesn't work if not generateNewMapEachTime because the position is not remembered above restarts with the same map
                 // TODO: does not work with the roboyard in the middle, that is not moved to the new random position
                 // random position of square in the middle
-                // carrePosX=getRandom(3,MainActivity.boardSizeX-5);
-                // carrePosY=getRandom(3,MainActivity.boardSizeY-5);
+                // carrePosX=getRandom(3,Preferences.boardSizeX-5);
+                // carrePosY=getRandom(3,Preferences.boardSizeY-5);
             }
 
             if (level == Constants.DIFFICULTY_INSANE) { // Insane
@@ -131,17 +131,17 @@ class MapGenerator {
 
             maxWallsInOneVerticalCol = 5
             maxWallsInOneHorizontalRow = 5
-            wallsPerQuadrant = MainActivity.boardSizeX / 3
+            wallsPerQuadrant = Preferences.boardSizeX / 3
         }
         if (level == Constants.DIFFICULTY_IMPOSSIBLE) {
             wallsPerQuadrant =
-                (MainActivity.boardSizeX / 2.3).toInt() // for debug, set to 1.3 with lots of walls
+                (Preferences.boardSizeX / 2.3).toInt() // for debug, set to 1.3 with lots of walls
         }
-        if (MainActivity.boardSizeX * MainActivity.boardSizeY > 64) {
+        if (Preferences.boardSizeX * Preferences.boardSizeY > 64) {
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
 
-        Timber.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY)
+        log.d("wallsPerQuadrant: " + wallsPerQuadrant + " Board size: " + Preferences.boardSizeX + "x" + Preferences.boardSizeY)
     }
 
 
@@ -172,7 +172,7 @@ class MapGenerator {
         get() {
             // We'll check the latest value of generateNewMapEachTime from our static variable
             // which is already set by SettingsGameScreen when preferences are changed
-            Timber.d(
+            log.d(
                 "[WALL STORAGE] class default value for generateNewMapEachTime: %s",
                 generateNewMapEachTime
             )
@@ -193,13 +193,13 @@ class MapGenerator {
             // Check if dice button was pressed (one-time override)
             val forceNewMap: Boolean = forceGenerateNewMapOnce
             if (forceGenerateNewMapOnce) {
-                Timber.d("[DICE_BUTTON] Force new map flag is set, generating new map once")
+                log.d("[DICE_BUTTON] Force new map flag is set, generating new map once")
                 forceGenerateNewMapOnce = false // Reset the flag after use
             }
 
             val preserveWalls =
                 !Preferences.generateNewMapEachTime && !forceNewMap && wallStorage.hasStoredWalls()
-            Timber.d(
+            log.d(
                 "[WALL STORAGE] MapGenerator: generateNewMapEachTime: %s, forceNewMap: %s, Preserving walls: %s, hasStoredWalls: %s",
                 Preferences.generateNewMapEachTime,
                 forceNewMap,
@@ -208,7 +208,7 @@ class MapGenerator {
             )
 
             if (preserveWalls) {
-                Timber.d("[WALL STORAGE] Preserving walls from stored configuration")
+                log.d("[WALL STORAGE] Preserving walls from stored configuration")
                 // Remove game elements (robots and targets) but keep walls
                 if (!data.isEmpty()) {
                     data = removeGameElementsFromMap(data)
@@ -229,7 +229,7 @@ class MapGenerator {
                 // IMPORTANT: Ensure all outer walls exist before adding game elements
                 // This ensures consistent wall behavior even with preserved walls
                 data = gameLogic!!.ensureOuterWalls(data)
-                Timber.d(
+                log.d(
                     "[WALL STORAGE] MapGenerator - Verified outer walls in preserved walls: %d elements",
                     data.size
                 )
@@ -244,7 +244,7 @@ class MapGenerator {
 
                 // IMPORTANT: Explicitly ensure all outer walls exist before storing
                 data = gameLogic.ensureOuterWalls(newData)
-                Timber.d(
+                log.d(
                     "[WALL STORAGE] MapGenerator - Verified outer walls in new map: %d elements",
                     data.size
                 )
@@ -253,7 +253,7 @@ class MapGenerator {
                 // Store the walls for future use if we're not generating new maps each time
                 if (!Preferences.generateNewMapEachTime) {
                     wallStorage.storeWalls(data)
-                    Timber.d("[WALL STORAGE] Stored walls for future use")
+                    log.d("[WALL STORAGE] Stored walls for future use")
                 }
             }
 

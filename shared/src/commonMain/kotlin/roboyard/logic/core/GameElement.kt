@@ -1,7 +1,6 @@
 package roboyard.logic.core
 
-import timber.log.Timber
-import java.io.Serializable
+import roboyard.logic.util.RLog
 
 /**
  * Represents a game element such as a robot or target.
@@ -29,7 +28,8 @@ class GameElement
      * @param y New Y position
      */
     @JvmField var y: Int
-) : Serializable {
+) {
+    private val log = RLog.tag("GameElement")
 
     @JvmField
     var color: Int = 0 // 0=red, 1=green, 2=blue, 3=yellow
@@ -86,7 +86,7 @@ class GameElement
     fun setAnimationPosition(x: Float, y: Float) {
         // Log the position change for debugging
         if (GameLogic.hasDebugLogging()) {
-            Timber.d(
+            log.d(
                 "[ANIM] Set animation position for %s robot: (%.2f,%.2f)",
                 GameLogic.getColorName(this.color, true), x, y
             )
@@ -95,7 +95,7 @@ class GameElement
 
         // Validate inputs to avoid setting invalid positions
         if (x.isNaN() || y.isNaN() || x.isInfinite() || y.isInfinite()) {
-            Timber.e("[ANIM] Attempted to set invalid animation position: (%.2f,%.2f)", x, y)
+            log.e("[ANIM] Attempted to set invalid animation position: (%.2f,%.2f)", x, y)
             return
         }
 

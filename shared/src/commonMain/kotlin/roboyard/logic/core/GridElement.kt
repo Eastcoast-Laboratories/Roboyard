@@ -1,6 +1,5 @@
 package roboyard.logic.core
 
-import java.io.Serializable
 
 /**
  * Represents a single element in the game grid (wall, robot, or target).
@@ -22,7 +21,7 @@ class GridElement(
      * @return Type string (e.g., "mh", "robot_blue", "target_red")
      */
     @JvmField var type: String?
-) : Serializable {
+) {
     companion object {
         private const val serialVersionUID = 1L
     }

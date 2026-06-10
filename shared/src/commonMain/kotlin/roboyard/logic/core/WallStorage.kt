@@ -1,8 +1,7 @@
 package roboyard.logic.core
 
-import roboyard.logic.core.Preferences.context
-import roboyard.platform.AndroidStorage
-import timber.log.Timber
+import roboyard.logic.util.RLog
+import roboyard.logic.storage.PlatformStorage
 
 /**
  * Stores and manages wall configurations for preserving walls across game changes.
@@ -11,6 +10,7 @@ import timber.log.Timber
  */
 class WallStorage  // Private constructor for singleton pattern
 private constructor() {
+    private val log = RLog.tag("WallStorage")
     // Stored wall elements
     private val storedWalls = ArrayList<GridElement>()
 
@@ -26,7 +26,7 @@ private constructor() {
         storedWalls.clear()
 
         if (elements == null || elements.isEmpty()) {
-            Timber.tag(TAG).d("No elements to store")
+            RLog.tag(TAG).d("No elements to store")
             return
         }
 
@@ -43,7 +43,7 @@ private constructor() {
         // Update current board size
         updateCurrentBoardSize()
 
-        Timber.tag(TAG).d(
+        RLog.tag(TAG).d(
             "[WALL STORAGE] Stored %d wall elements for board size %dx%d",
             storedWalls.size, currentBoardWidth, currentBoardHeight
         )
@@ -63,7 +63,7 @@ private constructor() {
 
         // If board size has changed, clear the in-memory walls
         if (currentBoardWidth != newWidth || currentBoardHeight != newHeight) {
-            Timber.tag(TAG).d(
+            RLog.tag(TAG).d(
                 "[WALL STORAGE] Board size changed from %dx%d to %dx%d, clearing in-memory walls",
                 currentBoardWidth, currentBoardHeight, newWidth, newHeight
             )
@@ -78,23 +78,21 @@ private constructor() {
      * Save walls to disk for persistence across app restarts
      */
     private fun saveWallsToDisk() {
-        val context = context
-        if (context == null) {
-            Timber.tag(TAG).e("Cannot save walls: context is null")
+        val storage = storage
+        if (storage == null) {
+            RLog.tag(TAG).e("Cannot save walls: storage is null")
             return
         }
 
         updateCurrentBoardSize()
         val key = getWallsKey(currentBoardWidth, currentBoardHeight)
 
-        val storage = AndroidStorage.getInstance(context)
-
         // Convert walls to a string representation
         val wallsData = gridElementsToString(storedWalls)
 
         storage.putString(key, wallsData)
 
-        Timber.tag(TAG).d(
+        RLog.tag(TAG).d(
             "[WALL STORAGE] Saved %d walls to disk for board size %dx%d: String: %s",
             storedWalls.size, currentBoardWidth, currentBoardHeight, wallsData
         )
@@ -151,7 +149,7 @@ private constructor() {
             }
         }
 
-        Timber.d(
+        log.d(
             "[WALL STORAGE] Wall count by position: top=%d, bottom=%d, left=%d, right=%d, other=%d, horizontal=%d, vertical=%d",
             topWalls, bottomWalls, leftWalls, rightWalls, otherWalls, horizontalWalls, verticalWalls
         )
@@ -163,22 +161,21 @@ private constructor() {
      * Load walls from disk for the current board size
      */
     fun loadStoredWalls() {
-        val context = context
-        if (context == null) {
-            Timber.tag(TAG).e("Cannot load walls: context is null")
+        val storage = storage
+        if (storage == null) {
+            RLog.tag(TAG).e("Cannot load walls: storage is null")
             return
         }
 
         updateCurrentBoardSize()
         val key = getWallsKey(currentBoardWidth, currentBoardHeight)
 
-        val storage = AndroidStorage.getInstance(context)
         val wallsData: String = storage.getString(key, "") ?: ""
 
         storedWalls.clear()
 
         if (wallsData.isEmpty()) {
-            Timber.tag(TAG).d(
+            RLog.tag(TAG).d(
                 "No saved walls found for board size %dx%d",
                 currentBoardWidth, currentBoardHeight
             )
@@ -203,11 +200,11 @@ private constructor() {
                 val wall = GridElement(x, y, type)
                 storedWalls.add(wall)
             } catch (e: NumberFormatException) {
-                Timber.tag(TAG).e("Error parsing wall data: %s", e.message)
+                RLog.tag(TAG).e("Error parsing wall data: %s", e.message)
             }
         }
 
-        Timber.tag(TAG).d(
+        RLog.tag(TAG).d(
             "Loaded %d walls from disk for board size %dx%d",
             storedWalls.size, currentBoardWidth, currentBoardHeight
         )
@@ -226,15 +223,13 @@ private constructor() {
      * @param height Board height
      */
     fun clearStoredWallsForBoardSize(width: Int, height: Int) {
-        val context = context
-        if (context == null) {
-            Timber.tag(TAG).e("Cannot clear walls: context is null")
+        val storage = storage
+        if (storage == null) {
+            RLog.tag(TAG).e("Cannot clear walls: storage is null")
             return
         }
 
         val key = getWallsKey(width, height)
-
-        val storage = AndroidStorage.getInstance(context)
         storage.remove(key)
 
 
@@ -243,7 +238,7 @@ private constructor() {
             storedWalls.clear()
         }
 
-        Timber.tag(TAG).d("Cleared stored walls for board size %dx%d", width, height)
+        RLog.tag(TAG).d("Cleared stored walls for board size %dx%d", width, height)
     }
 
     /**
@@ -259,7 +254,7 @@ private constructor() {
         boardHeight: Int
     ) {
         if (elements == null || elements.isEmpty()) {
-            Timber.tag(TAG)
+            RLog.tag(TAG)
                 .d("[WALL STORAGE] No elements to store for %dx%d", boardWidth, boardHeight)
             return
         }
@@ -280,9 +275,9 @@ private constructor() {
         }
 
         // Save directly to disk for this board size
-        val context = context
-        if (context == null) {
-            Timber.tag(TAG).e("[WALL STORAGE] Cannot save walls: context is null")
+        val storage = storage
+        if (storage == null) {
+            RLog.tag(TAG).e("[WALL STORAGE] Cannot save walls: storage is null")
             return
         }
 
@@ -296,10 +291,9 @@ private constructor() {
             count++
         }
 
-        val storage = AndroidStorage.getInstance(context)
         storage.putString(key, sb.toString())
 
-        Timber.tag(TAG).d(
+        RLog.tag(TAG).d(
             "[WALL STORAGE] Stored %d walls to disk for board size %dx%d (different from current %dx%d)",
             count, boardWidth, boardHeight, currentBoardWidth, currentBoardHeight
         )
@@ -346,7 +340,7 @@ private constructor() {
 
             // If still empty after loading, return original elements
             if (storedWalls.isEmpty()) {
-                Timber.tag(TAG).d("No stored walls to apply")
+                RLog.tag(TAG).d("No stored walls to apply")
                 return elements
             }
         }
@@ -357,7 +351,7 @@ private constructor() {
         for (wall in storedWalls) {
             if (wall.x >= currentBoardWidth || wall.y >= currentBoardHeight) {
                 wallsMatchBoardSize = false
-                Timber.tag(TAG).w(
+                RLog.tag(TAG).w(
                     "[WALL STORAGE] Stored wall at (%d,%d) is outside current board size %dx%d",
                     wall.x, wall.y, currentBoardWidth, currentBoardHeight
                 )
@@ -368,7 +362,7 @@ private constructor() {
 
         // If walls don't match board size, clear them and return original elements
         if (!wallsMatchBoardSize) {
-            Timber.tag(TAG)
+            RLog.tag(TAG)
                 .d("[WALL STORAGE] Stored walls don't match current board size, clearing and generating new map")
             storedWalls.clear()
             clearStoredWallsForBoardSize(currentBoardWidth, currentBoardHeight)
@@ -382,7 +376,7 @@ private constructor() {
 
         // Add stored walls
         result.addAll(storedWalls)
-        Timber.tag(TAG).d("Applied %d stored walls to grid elements", storedWalls.size)
+        RLog.tag(TAG).d("Applied %d stored walls to grid elements", storedWalls.size)
 
         return result
     }
@@ -391,6 +385,9 @@ private constructor() {
         private const val TAG = "WallStorage"
         private const val PREFS_NAME = "WallStoragePrefs"
         private const val KEY_WALLS_PREFIX = "walls_"
+
+        @JvmStatic
+        var storage: PlatformStorage? = null
 
         private var instance: WallStorage? = null
 

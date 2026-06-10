@@ -1,11 +1,14 @@
 package roboyard.logic.core
 
-import timber.log.Timber
+import roboyard.logic.util.RLog
+
 
 /**
  * Helper class for managing map objects and their properties.
  */
 object MapObjects {
+    private val log = RLog.tag("MapObjects")
+
     /**
      * Map object types for reference
      */
@@ -138,7 +141,7 @@ object MapObjects {
                     }
                 }
             } catch (e: Exception) {
-                Timber.e("Error parsing map object data: $entry")
+                log.e("Error parsing map object data: $entry")
             }
         }
 
