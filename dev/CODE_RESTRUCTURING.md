@@ -6,7 +6,7 @@ compatibility to enable iOS sharing. This involves abstracting Android-specific
 dependencies behind platform-agnostic interfaces.
 
 **Last Updated:** June 10, 2026  
-**Status:** 17 of 20 major steps completed, 3 POSTPONED (architecturally complex)
+**Status:** 19 of 20 major steps completed, 1 POSTPONED (architecturally complex)
 
 ## Completed Tasks ✅
 
@@ -37,6 +37,9 @@ dependencies behind platform-agnostic interfaces.
 | `PlayGamesManager.kt` | ✅ Already in platform package |
 | `AchievementManager.kt` | ✅ Migrated |
 | `GameHistoryManager.kt` | ✅ Partially migrated (imports ready) |
+| `Preferences.kt` | ✅ Migrated |
+| `DataExportImportManager.kt` | ✅ Migrated |
+| `GameState.kt` | ✅ Migrated |
 
 ### 4. Network abstraction
 | Component | Status |
@@ -67,26 +70,13 @@ dependencies behind platform-agnostic interfaces.
 
 ## Remaining Tasks ⏳
 
-### POSTPONED - Very Complex (requires architectural changes)
+### POSTPONED - Requires UI Layer Changes
 
-1. **GameStateManager.kt** (5,000+ lines) - LIVE DATA MIGRATION
-   - **Current Status:** Partially abstracted (Toast → UiNotifier, MainActivity removed)
+1. **GameStateManager.kt** (5,000+ lines) - LiveData → StateFlow
+   - **Current Status:** Partially abstracted (Toast → UiNotifier, MainActivity removed, GameStateManagerCore created)
    - **Remaining:** 32× `LiveData` → `StateFlow`, `AndroidViewModel` → plain class + wrapper
    - **Impact:** UI layer depends on LiveData; needs migration to StateFlow for KMP
-   - **Solution:** 
-     - Keep GameStateManager as Android wrapper for compatibility
-     - Move all logic to GameStateManagerCore
-     - UI layer migrates from LiveData to StateFlow observers
-
-2. **Preferences.kt** (1,246 lines) - POSTPONED
-   - Central preferences manager with many direct SharedPreferences calls
-   - Complex due to numerous get/put operations for various types
-   - **Note:** Can remain Android-specific as it's primarily settings storage
-
-3. **DataExportImportManager.kt** - POSTPONED
-   - Complex file system and SharedPreferences operations
-   - Multiple file operations require careful abstraction
-   - **Note:** Android-specific feature (export/import app data)
+   - **Note:** This is a UI layer concern, not logic package. The logic package is now KMP-compatible.
 
 ## New Platform Interfaces
 
