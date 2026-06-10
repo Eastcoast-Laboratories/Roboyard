@@ -1,0 +1,47 @@
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'com.android.library'
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
+                implementation "co.touchlab:kermit:2.1.0"
+            }
+        }
+        androidMain {
+            dependencies {
+                implementation "com.jakewharton.timber:timber:5.0.1"
+                implementation "com.google.code.gson:gson:2.13.2"
+            }
+        }
+    }
+}
+
+android {
+    namespace 'roboyard.shared'
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 21
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
