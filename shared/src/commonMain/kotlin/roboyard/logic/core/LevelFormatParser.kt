@@ -58,31 +58,40 @@ object LevelFormatParser {
         val result = mutableListOf<LevelEntry>()
         if (content.isBlank()) return result
 
-        val lines = content.split("[;\\n]".toRegex()).dropLastWhile { it.isEmpty() }
+        // Split by newlines first to handle comment lines correctly
+        val lines = content.split("\n".toRegex()).dropLastWhile { it.isEmpty() }
         for (rawLine in lines) {
             val line = rawLine.trim()
+            // Skip empty lines and comment lines (entire line starting with #)
             if (line.isBlank() || line.startsWith("#")) continue
 
-            // Find first digit to separate type from coordinates
-            var firstDigitIndex = -1
-            for (i in line.indices) {
-                if (line[i].isDigit()) {
-                    firstDigitIndex = i
-                    break
-                }
-            }
+            // Split by semicolon to get individual entries within the line
+            val entries = line.split(";").dropLastWhile { it.isEmpty() }
+            for (entry in entries) {
+                val entryTrimmed = entry.trim()
+                if (entryTrimmed.isBlank()) continue
 
-            if (firstDigitIndex > 0) {
-                val type = line.substring(0, firstDigitIndex).trim()
-                val coordStr = line.substring(firstDigitIndex).trim()
-                val coords = coordStr.split(",")
-                if (coords.size >= 2) {
-                    try {
-                        val x = coords[0].toInt()
-                        val y = coords[1].toInt()
-                        result.add(LevelEntry(type = type, x = x, y = y))
-                    } catch (e: NumberFormatException) {
-                        // Skip invalid entries
+                // Find first digit to separate type from coordinates
+                var firstDigitIndex = -1
+                for (i in entryTrimmed.indices) {
+                    if (entryTrimmed[i].isDigit()) {
+                        firstDigitIndex = i
+                        break
+                    }
+                }
+
+                if (firstDigitIndex > 0) {
+                    val type = entryTrimmed.substring(0, firstDigitIndex).trim()
+                    val coordStr = entryTrimmed.substring(firstDigitIndex).trim()
+                    val coords = coordStr.split(",")
+                    if (coords.size >= 2) {
+                        try {
+                            val x = coords[0].toInt()
+                            val y = coords[1].toInt()
+                            result.add(LevelEntry(type = type, x = x, y = y))
+                        } catch (e: NumberFormatException) {
+                            // Skip invalid entries
+                        }
                     }
                 }
             }

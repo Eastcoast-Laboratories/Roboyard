@@ -185,18 +185,30 @@ Fixed:
 
 ### REMAINING TASKS ⏳
 
-1. **Move `Preferences.kt` to `shared/commonMain`** (BLOCKER)
-   - `MapGenerator.kt` and `WallStorage.kt` (already in commonMain) reference `Preferences`, which is still Android-only in `app/`
-   - Must remove Android deps: `Context`, `AndroidStorage`, `RoboyardApplication`, `AccessibilityUtil`, `Timber`
-   - Approach (least work): **storage provider lambda** `var storageProvider: (() -> PlatformStorage?)?`
-     - `initialize(storage: PlatformStorage?, accessibilityActive: Boolean = false)`
-     - Replace `RoboyardApplication.getAppContext()` lazy-init guards with provider
-     - Replace `Timber` → `RLog` (Timber-compatible API in `roboyard.logic.util.RLog`)
-     - Move `AccessibilityUtil` detection to Android call site, pass boolean
-   - Update 2 callers: `RoboyardApplication.java`, `MainActivity.java`
+1. ~~**Move `Preferences.kt` to `shared/commonMain`** (BLOCKER)~~ ✅ COMPLETED
+   - ~~`MapGenerator.kt` and `WallStorage.kt` (already in commonMain) reference `Preferences`, which is still Android-only in `app/`~~
+   - ~~Must remove Android deps: `Context`, `AndroidStorage`, `RoboyardApplication`, `AccessibilityUtil`, `Timber`~~
+   - ~~Approach (least work): **storage provider lambda** `var storageProvider: (() -> PlatformStorage?)?`~~
+     - ~~`initialize(storage: PlatformStorage?, accessibilityActive: Boolean = false)`~~
+     - ~~Replace `RoboyardApplication.getAppContext()` lazy-init guards with provider~~
+     - ~~Replace `Timber` → `RLog` (Timber-compatible API in `roboyard.logic.util.RLog`)~~
+     - ~~Move `AccessibilityUtil` detection to Android call site, pass boolean~~
+   - ~~Update 2 callers: `RoboyardApplication.java`, `MainActivity.java`~~
 
-2. **Fix `WallModel.kt`** type mismatch (line ~50: expected `MutableList<Wall?>`, actual `List<Wall?>`)
+2. ~~**Fix `WallModel.kt`** type mismatch (line ~50: expected `MutableList<Wall?>`, actual `List<Wall?>`)~~ ✅ COMPLETED
 
-3. **Fix `MapGenerator.kt`** `compareTo` operator issue (line ~140)
+3. ~~**Fix `MapGenerator.kt`** `compareTo` operator issue (line ~140)~~ ✅ COMPLETED (no issue found)
 
-4. **Build + test** after each step: `./gradlew assembleDebug` and `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"`
+4. ~~**Build + test** after each step: `./gradlew assembleDebug` and `./gradlew testDebugUnitTest --tests "roboyard.eclabs.RoboyardSmokeTest"`~~ ✅ COMPLETED
+
+### NEXT STEPS
+
+The logic package is now KMP-compatible. The following files in `app/src/main/java/roboyard/logic/` still have Android-specific dependencies and need to be migrated or remain in the Android module:
+
+- `managers/GameStateManager.kt` - AndroidViewModel, LiveData, UI-specific (should remain in Android module)
+- `managers/GameHistoryManager.kt` - may have Android dependencies
+- `network/RoboyardApiClient.kt` - uses HttpURLConnection, Context
+- `storage/FileReadWrite.kt` - uses Context
+- `achievements/AchievementManager.kt` - uses Context
+
+These are UI-layer or Android-specific components and can remain in the Android module. The core logic package is now shared.

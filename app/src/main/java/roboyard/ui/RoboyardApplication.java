@@ -11,6 +11,9 @@ import android.os.Bundle;
 import java.util.Locale;
 
 import roboyard.logic.core.Preferences;
+import roboyard.platform.AndroidStorage;
+import roboyard.ui.components.AccessibilityUtil;
+import roboyard.logic.storage.PlatformStorage;
 import timber.log.Timber;
 
 /**
@@ -99,8 +102,15 @@ public class RoboyardApplication extends Application implements Application.Acti
         // Initialize Timber for logging - always enable it for debugging
         Timber.plant(new FilteredDebugTree());
 
+        // Set up storage provider for Preferences
+        PlatformStorage storage = AndroidStorage.getInstance(appContext);
+        Preferences.storageProvider = () -> storage;
+
+        // Check if accessibility is active
+        boolean isAccessibilityActive = AccessibilityUtil.isScreenReaderActive(appContext);
+
         // Initialize the Preferences system at app startup
-        Preferences.initialize(appContext);
+        Preferences.initialize(storage, isAccessibilityActive);
         Timber.d("Preferences initialized");
         
         // Set app language to match device locale on first launch

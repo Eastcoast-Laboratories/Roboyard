@@ -31,10 +31,14 @@ class LevelCompletionData(
     fun isCompleted(): Boolean = isCompleted
 
     fun setStars(stars: Int) {
-        this.starCount = stars
+        this.starCount = stars.coerceIn(0, 3)
     }
-    
+
     fun getStars(): Int = starCount
+
+    override fun toString(): String {
+        return "LevelCompletionData(levelId=$levelId, moves=$moves, timeMillis=$timeMillis, stars=$starCount, difficulty=$difficulty, isCompleted=$isCompleted)"
+    }
 
     companion object {
         private const val serialVersionUID = 1L

@@ -66,13 +66,7 @@ public class MainActivity extends AppCompatActivity {
         applyFullscreenMode();
         
         setContentView(R.layout.activity_main);
-        
-        // Initialize the static Preferences at app startup
-        roboyard.logic.core.Preferences.initialize(getApplicationContext());
-        Timber.d("[PREFERENCES] Initialized with robotCount=%d, targetColors=%d", 
-                roboyard.logic.core.Preferences.robotCount, 
-                roboyard.logic.core.Preferences.targetColors);
-        
+
         // Verify auth token on app start to maintain login session
         roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(getApplicationContext());
         apiClient.verifyToken(new roboyard.logic.network.RoboyardApiClient.ApiCallback<Boolean>() {

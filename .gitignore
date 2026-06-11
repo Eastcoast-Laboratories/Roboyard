@@ -6,6 +6,7 @@
 /.idea/modules
 .DS_Store
 /build
+/shared/build
 /dev/images/yard/
 zzbak~*
 /app/release/output-metadata.json

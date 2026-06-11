@@ -19,7 +19,7 @@ object Preferences {
      * Provider for lazy storage initialization, set by the platform at app start.
      * Lets commonMain obtain a PlatformStorage without a platform Context.
      */
-    @JvmStatic
+    @JvmField
     var storageProvider: (() -> PlatformStorage?)? = null
 
     // Preference keys

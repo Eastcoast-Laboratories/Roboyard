@@ -47,7 +47,7 @@ class WallModel
      * @return An unmodifiable list of all walls
      */
     fun getWalls(): MutableList<Wall?> {
-        return walls.toList()
+        return walls.toMutableList()
     }
 
 

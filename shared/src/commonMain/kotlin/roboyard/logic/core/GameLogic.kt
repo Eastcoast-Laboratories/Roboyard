@@ -15,6 +15,165 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     private val rand: Random = Random.Default
 ) {
     private val log = RLog.tag("GameLogic")
+
+    companion object {
+        private val companionLog = RLog.tag("GameLogic")
+
+        val DIFFICULTY_BEGINNER: Int = Constants.DIFFICULTY_BEGINNER
+        val DIFFICULTY_ADVANCED: Int = Constants.DIFFICULTY_ADVANCED
+        val DIFFICULTY_INSANE: Int = Constants.DIFFICULTY_INSANE
+        val DIFFICULTY_IMPOSSIBLE: Int = Constants.DIFFICULTY_IMPOSSIBLE
+
+        private var generateNewMapEachTime = true // option in settings
+
+        /**
+         * Set whether to generate a new map each time
+         */
+        @JvmStatic
+        fun setgenerateNewMapEachTime(value: Boolean) {
+            generateNewMapEachTime = value
+        }
+
+        /**
+         * Convert a color ID to its corresponding name
+         * @param colorId The color ID from Constants
+         * @param capitalize Whether to capitalize the first letter of the color name
+         * @return The color name as a string
+         */
+        @JvmStatic
+        fun getColorName(colorId: Int, capitalize: Boolean): String {
+            val name: String?
+            when (colorId) {
+                Constants.COLOR_PINK -> name = "pink"
+                Constants.COLOR_GREEN -> name = "green"
+                Constants.COLOR_BLUE -> name = "blue"
+                Constants.COLOR_YELLOW -> name = "yellow"
+                Constants.COLOR_SILVER -> name = "silver"
+                Constants.COLOR_RED -> name = "red"
+                Constants.COLOR_BROWN -> name = "brown"
+                Constants.COLOR_ORANGE -> name = "orange"
+                Constants.COLOR_WHITE -> name = "white"
+                Constants.COLOR_MULTI -> name = "multi"
+                else -> {
+                    companionLog.w("[COLOR] Unknown color ID: %d", colorId)
+                    throw IllegalArgumentException("Unknown color ID: " + colorId)
+                }
+            }
+
+            return if (capitalize) capitalizeFirstLetter(name) else name
+        }
+
+        /**
+         * Helper method to capitalize the first letter of a string
+         */
+        private fun capitalizeFirstLetter(str: String?): String {
+            if (str == null || str.isEmpty()) return str ?: ""
+            return str.substring(0, 1).uppercase() + str.substring(1)
+        }
+
+        /**
+         * Get the color ID from an object type string ("robot_X" or "target_X")
+         * @param objectType The object type string
+         * @return The color ID from Constants
+         */
+        private fun getColorIdFromObjectType(objectType: String): Int {
+            val colorName = objectType.substring(objectType.indexOf('_') + 1)
+            return getColorIdFromName(colorName)
+        }
+
+        /**
+         * Get the color ID from a color name
+         * @param colorName The color name (e.g., "red", "blue", "multi")
+         * @return The color ID from Constants
+         */
+        private fun getColorIdFromName(colorName: String): Int {
+            return when (colorName.lowercase()) {
+                "pink" -> return Constants.COLOR_PINK
+                "green" -> return Constants.COLOR_GREEN
+                "blue" -> return Constants.COLOR_BLUE
+                "yellow" -> return Constants.COLOR_YELLOW
+                "silver" -> return Constants.COLOR_SILVER
+                "red" -> return Constants.COLOR_RED
+                "brown" -> return Constants.COLOR_BROWN
+                "orange" -> return Constants.COLOR_ORANGE
+                "white" -> return Constants.COLOR_WHITE
+                "multi" -> return Constants.COLOR_MULTI
+                else -> {
+                    companionLog.w("[COLOR] Unknown color name: %s", colorName)
+                    throw IllegalArgumentException("Unknown color name: " + colorName)
+                }
+            }
+        }
+
+        /**
+         * Get the object type string ("robot_X" or "target_X") from color ID
+         * @param colorId The color ID from Constants
+         * @param isRobot Whether this is a robot (true) or target (false)
+         * @return The object type string
+         */
+        private fun getObjectType(colorId: Int, isRobot: Boolean): String {
+            val colorName = getColorName(colorId, false)
+            return if (isRobot) "robot_$colorName" else "target_$colorName"
+        }
+
+        /**
+         * Get the color (RGB value) from an object type string
+         * @param objectType The object type string (e.g., "robot_red", "target_blue")
+         * @return The RGB color value
+         */
+        @JvmStatic
+        fun getColor(objectType: String): Int {
+            val colorId: Int = getColorIdFromObjectType(objectType)
+            // Special case for multi-colored targets
+            if (colorId == Constants.COLOR_MULTI) {
+                return 0xFFFFFFFF.toInt() // Default color for multi-target (WHITE)
+            }
+            if (colorId >= 0 && colorId < Constants.colors_rgb.size) {
+                return Constants.colors_rgb[colorId]
+            }
+            companionLog.w("[COLOR] Invalid color ID: %d from objectType: %s", colorId, objectType)
+            throw IllegalArgumentException("getColor: Invalid color ID: " + colorId + " from objectType: " + objectType)
+        }
+
+        /**
+         * Check if any targets exist in the gridElements list
+         * @param gridElements The list of grid elements to check
+         * @return true if at least one target is found, false otherwise
+         */
+        fun hasTargets(gridElements: ArrayList<GridElement>?): Boolean {
+            if (gridElements == null) {
+                companionLog.e("[TARGET CHECK] gridElements is null!")
+                return false
+            }
+
+            companionLog.d("[TARGET CHECK] Checking %d grid elements for targets", gridElements.size)
+            var targetCount = 0
+            for (element in gridElements) {
+                val type = element.type
+                if (type != null && type.startsWith("target_")) {
+                    targetCount++
+                    companionLog.d(
+                        "[TARGET CHECK] Found target of type %s at position (%d,%d)",
+                        type, element.x, element.y
+                    )
+                }
+            }
+
+            companionLog.d("[TARGET CHECK] Found %d targets", targetCount)
+            return targetCount > 0
+        }
+
+        /**
+         * Check if debug logging is enabled
+         * @return true if debug logging is enabled
+         */
+        @JvmStatic
+        fun hasDebugLogging(): Boolean {
+            // For now, always return false to minimize log output
+            return false
+        }
+    }
+
     // position of the square in the middle of the game board
     private val carrePosX: Int // horizontal position of the top wall of square, starting with 0
     private val carrePosY: Int // vertical position of the left wall of the square
@@ -50,7 +209,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 1,
                 min(Constants.NUM_ROBOTS, count)
             )
-            log.d("Robot count set to %d", field)
+            companionLog.d("Robot count set to %d", field)
         }
     private var targetColors =
         1 // Anzahl der verschiedenen Zielfarben (1-4) (overridden by Preferences )
@@ -85,7 +244,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         // Calculate walls per quadrant based on board width
         // Ensure at least 1 wall per quadrant, but not more than board width / 4
         wallsPerQuadrant = max(1, boardWidth / 4) // Default: quarter of board width
-        log.d(
+        companionLog.d(
             "[GAME LOGIC] Board size: %dx%d, walls per quadrant: %d",
             boardWidth, boardHeight, wallsPerQuadrant
         )
@@ -109,7 +268,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         // Use configurable preference for multicolor target, or fall back to difficulty-based setting
         allowMulticolorTarget = Preferences.allowMulticolorTarget
 
-        log.d(
+        companionLog.d(
             "[DIFFICULTY] Setting difficulty level %d (BEGINNER=%d, ADVANCED=%d, INSANE=%d, IMPOSSIBLE=%d)",
             level,
             DIFFICULTY_BEGINNER,
@@ -121,11 +280,11 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         if (level == DIFFICULTY_BEGINNER) {
             // For beginner level - targets must be in corners
             targetMustBeInCorner = true
-            log.d("[DIFFICULTY] Using BEGINNER settings (targets in corners only)")
+            companionLog.d("[DIFFICULTY] Using BEGINNER settings (targets in corners only)")
         } else if (level == DIFFICULTY_ADVANCED) {
             // For Advanced difficulty, targets can be in random positions
             targetMustBeInCorner = false
-            log.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement")
+            companionLog.d("[DIFFICULTY] Using ADVANCED settings with mixed target placement")
 
             maxWallsInOneVerticalCol = 3
             maxWallsInOneHorizontalRow = 3
@@ -134,14 +293,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             loneWallsAllowed = true
         } else {
             // Keep targetMustBeInCorner = true
-            log.d("[DIFFICULTY] Using INSANE or IMPOSSIBLE settings")
+            companionLog.d("[DIFFICULTY] Using INSANE or IMPOSSIBLE settings")
 
             loneWallsAllowed = true
 
 
             // For Insane and Impossible difficulties, targets can appear anywhere except the center
             targetMustBeInCorner = false
-            log.d("[DIFFICULTY] Using INSANE/IMPOSSIBLE settings, targets fully random")
+            companionLog.d("[DIFFICULTY] Using INSANE/IMPOSSIBLE settings, targets fully random")
 
             maxWallsInOneVerticalCol = 5
             maxWallsInOneHorizontalRow = 5
@@ -149,7 +308,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         }
 
         if (level == DIFFICULTY_IMPOSSIBLE) {
-            log.d("[DIFFICULTY] Using IMPOSSIBLE settings")
+            companionLog.d("[DIFFICULTY] Using IMPOSSIBLE settings")
             wallsPerQuadrant = (boardWidth / 2.3).toInt()
         }
 
@@ -157,7 +316,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             // calculate maxWallsInOneVerticalCol and maxWallsInOneHorizontalRow based on board size
         }
 
-        log.d(
+        companionLog.d(
             "[DIFFICULTY] Final settings: targetMustBeInCorner=%b, allowMulticolorTarget=%b, maxWallsInOneVerticalCol=%d, maxWallsInOneHorizontalRow=%d, wallsPerQuadrant=%d, boardSize=%dx%d",
             targetMustBeInCorner,
             allowMulticolorTarget,
@@ -176,7 +335,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     fun getRandom(min: Int, max: Int): Int {
         // Add safety check to prevent IllegalArgumentException
         if (min > max) {
-            log.w(
+            companionLog.w(
                 "[GAME LOGIC] Invalid random range: min(%d) > max(%d). returning max(%d).",
                 min,
                 max,
@@ -235,7 +394,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // Ensure all outer walls exist in the grid data
         data = ensureOuterWalls(data)
-        log.d(
+        companionLog.d(
             "[WALL STORAGE] translateArraysToMap - %d GridElements after ensuring outer walls",
             data.size
         )
@@ -248,7 +407,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      * This is critical for consistent wall behavior when walls are preserved
      */
     fun ensureOuterWalls(data: ArrayList<GridElement>): ArrayList<GridElement> {
-        log.d("[WALL STORAGE] ensureOuterWalls called for board %dx%d", boardWidth, boardHeight)
+        companionLog.d("[WALL STORAGE] ensureOuterWalls called for board %dx%d", boardWidth, boardHeight)
         val newData = ArrayList<GridElement>(data)
         // Check each outer wall position and add if missing
         val horizontalTopExists = BooleanArray(boardWidth)
@@ -262,10 +421,10 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 // Horizontal walls
                 if (element.y == 0) {
                     horizontalTopExists[element.x] = true
-                    log.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.x)
+                    companionLog.d("[WALL STORAGE] Horizontal top wall found at (%d,0)", element.x)
                 } else if (element.y == boardHeight) {
                     horizontalBottomExists[element.x] = true
-                    log.d(
+                    companionLog.d(
                         "[WALL STORAGE] Horizontal bottom wall found at (%d,%d)",
                         element.x,
                         boardHeight
@@ -275,10 +434,10 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 // Vertical walls
                 if (element.x == 0) {
                     verticalLeftExists[element.y] = true
-                    log.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.y)
+                    companionLog.d("[WALL STORAGE] Vertical left wall found at (0,%d)", element.y)
                 } else if (element.x == boardWidth) {
                     verticalRightExists[element.y] = true
-                    log.d(
+                    companionLog.d(
                         "[WALL STORAGE] Vertical right wall found at (%d,%d)",
                         boardWidth,
                         element.y
@@ -293,7 +452,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (x in 0..<boardWidth) {
             if (!horizontalTopExists[x]) {
                 newData.add(GridElement(x, 0, "mh"))
-                log.d("[WALL STORAGE] missing top wall at (%d,0)", x)
+                companionLog.d("[WALL STORAGE] missing top wall at (%d,0)", x)
                 missingWalls++
             }
         }
@@ -302,7 +461,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (x in 0..<boardWidth) {
             if (!horizontalBottomExists[x]) {
                 newData.add(GridElement(x, boardHeight, "mh"))
-                log.d("[WALL STORAGE] missing bottom wall at (%d,%d)", x, boardHeight)
+                companionLog.d("[WALL STORAGE] missing bottom wall at (%d,%d)", x, boardHeight)
                 missingWalls++
             }
         }
@@ -311,7 +470,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (y in 0..<boardHeight) {
             if (!verticalLeftExists[y]) {
                 newData.add(GridElement(0, y, "mv"))
-                log.d("[WALL STORAGE] missing left wall at (0,%d)", y)
+                companionLog.d("[WALL STORAGE] missing left wall at (0,%d)", y)
                 missingWalls++
             }
         }
@@ -320,12 +479,12 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (y in 0..<boardHeight) {
             if (!verticalRightExists[y]) {
                 newData.add(GridElement(boardWidth, y, "mv"))
-                log.d("[WALL STORAGE] missing right wall at (%d,%d)", boardWidth, y)
+                companionLog.d("[WALL STORAGE] missing right wall at (%d,%d)", boardWidth, y)
                 missingWalls++
             }
         }
 
-        log.d("[WALL STORAGE] %d missing outer walls", missingWalls)
+        companionLog.d("[WALL STORAGE] %d missing outer walls", missingWalls)
 
         return newData
         // return data; // send back the original data
@@ -342,14 +501,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     ): ArrayList<GridElement> {
         var horizontalWalls = horizontalWalls
         var verticalWalls = verticalWalls
-        log.d(
+        companionLog.d(
             "[TARGET PLACEMENT] INITIAL CHECK: currentLevel=%d, targetMustBeInCorner=%b (DIFF_INSANE=%d, DIFF_IMPOSSIBLE=%d)",
             currentLevel, targetMustBeInCorner, DIFFICULTY_INSANE, DIFFICULTY_IMPOSSIBLE
         )
 
         var abandon: Boolean
 
-        log.d(
+        companionLog.d(
             "[TARGET PLACEMENT] Starting target placement with difficulty=%d, targetMustBeInCorner=%b",
             currentLevel, targetMustBeInCorner
         )
@@ -360,7 +519,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         val isMultiTargetMode = (targetColors > 1)
         if (isMultiTargetMode && allowMulticolorTarget) {
             allowMulticolorTarget = false
-            log.w(
+            companionLog.w(
                 "[TARGET_MULTI] Multi-colored target disabled: multi-target mode active (targetColors=%d)",
                 targetColors
             )
@@ -378,14 +537,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             }
             typesOfTargets[Constants.NUM_ROBOTS] =
                 "target_multi" // Add multi-target at the last index
-            log.d("[TARGET_MULTI] Multi-color target INCLUDED in available targets")
+            companionLog.d("[TARGET_MULTI] Multi-color target INCLUDED in available targets")
         } else {
             // Exclude multi-color target if not allowed
             typesOfTargets = arrayOfNulls<String>(Constants.NUM_ROBOTS) // standard targets only
             for (i in 0..<Constants.NUM_ROBOTS) {
                 typesOfTargets[i] = getObjectType(i, false) // false = target
             }
-            log.d("[TARGET_MULTI] Multi-color target EXCLUDED from available targets")
+            companionLog.d("[TARGET_MULTI] Multi-color target EXCLUDED from available targets")
         }
 
         val typesOfRobots = arrayOfNulls<String>(Constants.NUM_ROBOTS)
@@ -410,7 +569,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         var targetTypesCount = min(targetColors, maxTargetTypes) // Limit to targetColors
         targetTypesCount = max(1, targetTypesCount) // Ensure at least one target is always created
 
-        log.d(
+        companionLog.d(
             "[TARGET GENERATION] targetColors=%d, maxTargetTypes=%d, targetTypesCount=%d",
             targetColors, maxTargetTypes, targetTypesCount
         )
@@ -428,7 +587,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
 
         // Only use the first targetTypesCount elements from the shuffled array
-        log.d(
+        companionLog.d(
             "[TARGET] Will use %d different target types out of %d possible types",
             targetTypesCount,
             maxTargetTypes
@@ -437,7 +596,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // If horizontalWalls and verticalWalls are null, create empty arrays
         if (horizontalWalls == null || verticalWalls == null) {
-            log.d("[WALL STORAGE] Creating empty wall arrays for target placement")
+            companionLog.d("[WALL STORAGE] Creating empty wall arrays for target placement")
             horizontalWalls = Array<IntArray?>(boardWidth + 1) { IntArray(boardHeight + 1) }
             verticalWalls = Array<IntArray?>(boardWidth + 1) { IntArray(boardHeight + 1) }
 
@@ -473,24 +632,24 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             if (!targetMustBeInCorner && currentLevel == DIFFICULTY_ADVANCED) {
                 // For Advanced difficulty, use 50% probability for corner placement
                 val randomChoice = getRandom(0, 1)
-                log.d(
+                companionLog.d(
                     "[TARGET PLACEMENT] DECISION at LINE 385: randomChoice=%d for 50%% probability",
                     randomChoice
                 )
                 if (randomChoice == 0) {
                     useCornerPlacement = true
-                    log.d(
+                    companionLog.d(
                         "[TARGET PLACEMENT] Target %d will use corner placement (50%% probability)",
                         i
                     )
                 } else {
-                    log.d(
+                    companionLog.d(
                         "[TARGET PLACEMENT] Target %d will use random placement (50%% probability)",
                         i
                     )
                 }
             } else {
-                log.d(
+                companionLog.d(
                     "[TARGET PLACEMENT] TARGET=%d MODE=%s FINAL_CHECK: mustBeInCorner=%b, useCornerPlacement=%b, difficulty=%d",
                     i, if (useCornerPlacement) "corner-only" else "fully-random",
                     targetMustBeInCorner, useCornerPlacement, currentLevel
@@ -502,7 +661,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 targetX = getRandom(0, boardWidth - 1)
                 targetY = getRandom(0, boardHeight - 1)
 
-                log.d(
+                companionLog.d(
                     "[TARGET PLACEMENT] Generate position at LINE 384: position=(%d,%d), useCornerPlacement=%b",
                     targetX, targetY, useCornerPlacement
                 )
@@ -516,14 +675,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     val hasVerticalWall =
                         (verticalWalls[targetX]!![targetY] == 1 || verticalWalls[targetX + 1]!![targetY] == 1)
 
-                    log.d(
+                    companionLog.d(
                         "[TARGET PLACEMENT] CORNER CHECK at LINE 422: position=(%d,%d), hasHWall=%b, hasVWall=%b",
                         targetX, targetY, hasHorizontalWall, hasVerticalWall
                     )
 
 
                     // Debug wall values directly
-                    log.d(
+                    companionLog.d(
                         "[TARGET PLACEMENT] WALL VALUES: h1=%d, h2=%d, v1=%d, v2=%d",
                         horizontalWalls[targetX]!![targetY],
                         horizontalWalls[targetX]!![targetY + 1],
@@ -535,19 +694,19 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     // We need both a horizontal and vertical wall to form a corner
                     if (!hasHorizontalWall || !hasVerticalWall) {
                         abandon = true
-                        log.d(
+                        companionLog.d(
                             "[TARGET PLACEMENT] Position (%d,%d) abandoned - not in corner (h=%b, v=%b), LINE 395",
                             targetX, targetY, hasHorizontalWall, hasVerticalWall
                         )
                     } else {
-                        log.d(
+                        companionLog.d(
                             "[TARGET PLACEMENT] Position (%d,%d) is a valid corner (h=%b, v=%b)",
                             targetX, targetY, hasHorizontalWall, hasVerticalWall
                         )
                     }
                 } else {
                     // If we're NOT using corner placement, let's verify that corners are actually being allowed
-                    log.d(
+                    companionLog.d(
                         "[TARGET PLACEMENT] Using random placement at LINE 436 - position=(%d,%d)",
                         targetX,
                         targetY
@@ -562,7 +721,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     || (targetX == carrePosX + 1 && targetY == carrePosY + 1)
                 ) {
                     abandon = true
-                    log.d(
+                    companionLog.d(
                         "[TARGET PLACEMENT] Position (%d,%d) abandoned - in center square",
                         targetX,
                         targetY
@@ -574,7 +733,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 for (element in allElements) {
                     if (element.x == targetX && element.y == targetY) {
                         abandon = true
-                        log.d(
+                        companionLog.d(
                             "[TARGET PLACEMENT] Position (%d,%d) abandoned - already occupied",
                             targetX,
                             targetY
@@ -590,7 +749,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             data!!.add(newTarget)
             allElements.add(newTarget)
 
-            log.d(
+            companionLog.d(
                 "[TARGET PLACEMENT] PLACEMENT_COMPLETE: target=%d at position=(%d,%d) of type=%s",
                 i, targetX, targetY, typesOfTargets[targetType]
             )
@@ -631,7 +790,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             data!!.add(newRobot)
             allElements.add(newRobot)
 
-            log.d("Added robot %s at position %d,%d", currentRobotType, cX, cY)
+            companionLog.d("Added robot %s at position %d,%d", currentRobotType, cX, cY)
         }
 
         return data!!
@@ -654,13 +813,13 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      */
     fun generateGameMap(existingMap: ArrayList<GridElement>?): ArrayList<GridElement>? {
         var existingMap = existingMap
-        log.d("[WALLS] Using generateNewMapEachTime: %s", Preferences.generateNewMapEachTime)
+        companionLog.d("[WALLS] Using generateNewMapEachTime: %s", Preferences.generateNewMapEachTime)
 
 
         // Check if we should preserve walls from the existing map
         val wallStorage = WallStorage.getInstance()
         val preserveWalls = !Preferences.generateNewMapEachTime && wallStorage.hasStoredWalls()
-        log.d(
+        companionLog.d(
             "[WALL STORAGE] GameLogic: generateNewMapEachTime: %s, Preserving walls: %s, hasStoredWalls: %s",
             Preferences.generateNewMapEachTime,
             preserveWalls,
@@ -668,7 +827,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         )
         // If this is the first time generating a map or we're not preserving walls, generate everything new
         if (existingMap == null || existingMap.isEmpty() || Preferences.generateNewMapEachTime) {
-            log.d("[WALLS] Generating completely new map")
+            companionLog.d("[WALLS] Generating completely new map")
 
 
             // Generate a new map based on board size
@@ -684,7 +843,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             // Store the walls for future use if we're not generating new maps each time
             if (!Preferences.generateNewMapEachTime) {
                 wallStorage.storeWalls(existingMap)
-                log.d("[WALLS][WALL STORAGE] Stored walls for future use")
+                companionLog.d("[WALLS][WALL STORAGE] Stored walls for future use")
             }
 
             return existingMap
@@ -693,7 +852,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
             var data: ArrayList<GridElement>?
 
             if (preserveWalls) {
-                log.d("[WALLS][WALL STORAGE] Preserving walls from stored configuration")
+                companionLog.d("[WALLS][WALL STORAGE] Preserving walls from stored configuration")
                 // Remove game elements (robots and targets) but keep walls
                 data = removeGameElementsFromMap(existingMap)
 
@@ -718,7 +877,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 // Store the walls for future use
                 if (!Preferences.generateNewMapEachTime) {
                     wallStorage.storeWalls(data)
-                    log.d("[WALLS][WALL STORAGE] Stored new walls for future use")
+                    companionLog.d("[WALLS][WALL STORAGE] Stored new walls for future use")
                 }
             }
 
@@ -763,7 +922,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                 tolerance = (restartCount - restartRelaxThreshold) / 5
                 maxWallsInOneHorizontalRow = originalMaxWallsInOneHorizontalRow + tolerance
                 maxWallsInOneVerticalCol = originalMaxWallsInOneVerticalCol + tolerance
-                log.d(
+                companionLog.d(
                     "Relaxing wall constraints after %d restarts: h=%d, v=%d",
                     restartCount, maxWallsInOneHorizontalRow, maxWallsInOneVerticalCol
                 )
@@ -916,7 +1075,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                             countX -= 2
                         }
                         if (countX >= maxWallsInOneHorizontalRow || countY >= maxWallsInOneVerticalCol) {
-                            // log.d("[GAME LOGIC] There are too many walls in the same row/column, we abandon");
+                            // companionLog.d("[GAME LOGIC] There are too many walls in the same row/column, we abandon");
                             abandon = true
                         }
                     }
@@ -966,7 +1125,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     }
 
                     if (compteLoop1 > 1000) {
-                        log.d(
+                        companionLog.d(
                             "Wall creation restarted, too many loops (%d), tolerance: %d",
                             restartCount,
                             tolerance
@@ -1018,7 +1177,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
         // IMPORTANT: Always explicitly set border walls - don't rely on automatic addition
         // This ensures consistent behavior especially with saved walls
-        log.d(
+        companionLog.d(
             "[WALL STORAGE] Explicitly setting ALL outer border walls for board %dx%d",
             boardWidth,
             boardHeight
@@ -1029,7 +1188,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (x in 0..<boardWidth) {
             horizontalWalls[x]!![0] = 1 // Top border
             horizontalWalls[x]!![boardHeight] = 1 // Bottom border
-            log.d(
+            companionLog.d(
                 "[WALL STORAGE] Setting horizontal border walls at (%d,0) and (%d,%d)",
                 x,
                 x,
@@ -1042,7 +1201,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         for (y in 0..<boardHeight) {
             verticalWalls[0]!![y] = 1 // Left border
             verticalWalls[boardWidth]!![y] = 1 // Right border
-            log.d(
+            companionLog.d(
                 "[WALL STORAGE] Setting vertical border walls at (0,%d) and (%d,%d)",
                 y,
                 boardWidth,
@@ -1086,7 +1245,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         var wallsToPlace = min(additionalWalls, maxTotalWalls - 8)
         wallsToPlace = max(wallsToPlace, minTotalWalls - 8) // Ensure minimum walls
 
-        log.d(
+        companionLog.d(
             "[GAME LOGIC] Adding %d additional walls (total: %d) for difficulty level %d",
             wallsToPlace, wallsToPlace + 8, currentLevel
         )
@@ -1124,7 +1283,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                     verticalWalls[vPos[0]]!![vPos[1]] = 1
                     cornerWallsPlaced += 2 // We placed two walls
                     wallsToPlace -= 2
-                    log.d(
+                    companionLog.d(
                         "[GAME LOGIC] Placed corner walls at H(%d,%d) and V(%d,%d)",
                         hPos[0], hPos[1], vPos[0], vPos[1]
                     )
@@ -1198,7 +1357,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
 
                         edgeWallsPlaced++
                         wallsToPlace--
-                        log.d(
+                        companionLog.d(
                             "[GAME LOGIC] Placed %s edge wall at (%d,%d)",
                             if (vertical) "vertical" else "horizontal", pos[0], pos[1]
                         )
@@ -1293,7 +1452,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                         if (horizontalWalls[x]!![y] == 0) {
                             horizontalWalls[x]!![y] = 1
                             additionalWallsPlaced++
-                            log.d("[GAME LOGIC] Placed horizontal wall at %d,%d", x, y)
+                            companionLog.d("[GAME LOGIC] Placed horizontal wall at %d,%d", x, y)
                         }
                     }
                 } else if (i % 2 == 1 && (i - 1) / 2 < potentialVerticalWalls.size) {
@@ -1315,14 +1474,14 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
                         if (verticalWalls[x]!![y] == 0) {
                             verticalWalls[x]!![y] = 1
                             additionalWallsPlaced++
-                            log.d("[GAME LOGIC] Placed vertical wall at %d,%d", x, y)
+                            companionLog.d("[GAME LOGIC] Placed vertical wall at %d,%d", x, y)
                         }
                     }
                 }
                 i++
             }
 
-            log.d(
+            companionLog.d(
                 "[GAME LOGIC] Placed %d additional walls beyond corners and edges",
                 additionalWallsPlaced
             )
@@ -1363,7 +1522,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      */
     private fun shuffleArrayWithFlags(array: Array<IntArray>, flags: BooleanArray) {
         if (array.size != flags.size) {
-            log.e("[GAME LOGIC] Cannot shuffle arrays of different lengths")
+            companionLog.e("[GAME LOGIC] Cannot shuffle arrays of different lengths")
             return
         }
 
@@ -1403,7 +1562,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
     fun setTargetColors(count: Int) {
         // Ensure count is between 1 and 4
         this.targetColors = max(1, min(Constants.NUM_ROBOTS, count))
-        log.d("Target colors set to %d", this.targetColors)
+        companionLog.d("Target colors set to %d", this.targetColors)
     }
 
     /**
@@ -1412,173 +1571,5 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
      */
     fun getTargetColors(): Int {
         return targetColors
-    }
-
-    companion object {
-        // Difficulty level constants
-        val DIFFICULTY_BEGINNER: Int = Constants.DIFFICULTY_BEGINNER
-        val DIFFICULTY_ADVANCED: Int = Constants.DIFFICULTY_ADVANCED
-        val DIFFICULTY_INSANE: Int = Constants.DIFFICULTY_INSANE
-        val DIFFICULTY_IMPOSSIBLE: Int = Constants.DIFFICULTY_IMPOSSIBLE
-
-        private var generateNewMapEachTime = true // option in settings
-
-        /**
-         * Set whether to generate a new map each time
-         */
-        @JvmStatic
-        fun setgenerateNewMapEachTime(value: Boolean) {
-            generateNewMapEachTime = value
-        }
-
-        /**
-         * Convert a color ID to its corresponding name
-         * @param colorId The color ID from Constants
-         * @param capitalize Whether to capitalize the first letter of the color name
-         * @return The color name as a string
-         */
-        @JvmStatic
-        fun getColorName(colorId: Int, capitalize: Boolean): String {
-            val name: String?
-            when (colorId) {
-                Constants.COLOR_PINK -> name = "pink"
-                Constants.COLOR_GREEN -> name = "green"
-                Constants.COLOR_BLUE -> name = "blue"
-                Constants.COLOR_YELLOW -> name = "yellow"
-                Constants.COLOR_SILVER -> name = "silver"
-                Constants.COLOR_RED -> name = "red"
-                Constants.COLOR_BROWN -> name = "brown"
-                Constants.COLOR_ORANGE -> name = "orange"
-                Constants.COLOR_WHITE -> name = "white"
-                Constants.COLOR_MULTI -> name = "multi"
-                else -> {
-                    log.w("[COLOR] Unknown color ID: %d", colorId)
-                    throw IllegalArgumentException("Unknown color ID: " + colorId)
-                }
-            }
-
-            return if (capitalize) capitalizeFirstLetter(name) else name
-        }
-
-        /**
-         * Helper method to capitalize the first letter of a string
-         */
-        private fun capitalizeFirstLetter(input: String?): String {
-            if (input == null || input.isEmpty()) {
-                return input!!
-            }
-            return input.substring(0, 1).uppercase() + input.substring(1)
-        }
-
-        /**
-         * Converts a color name to its corresponding ID
-         * @param colorName The color name (case insensitive)
-         * @return The color ID from Constants
-         */
-        fun getColorId(colorName: String): Int {
-            requireNotNull(colorName) { "Color name cannot be null" }
-
-            when (colorName.lowercase()) {
-                "pink" -> return Constants.COLOR_PINK
-                "green" -> return Constants.COLOR_GREEN
-                "blue" -> return Constants.COLOR_BLUE
-                "yellow" -> return Constants.COLOR_YELLOW
-                "silver" -> return Constants.COLOR_SILVER
-                "red" -> return Constants.COLOR_RED
-                "brown" -> return Constants.COLOR_BROWN
-                "orange" -> return Constants.COLOR_ORANGE
-                "white" -> return Constants.COLOR_WHITE
-                "multi" -> return Constants.COLOR_MULTI
-                else -> {
-                    log.w("[COLOR] Unknown color name: %s", colorName)
-                    throw IllegalArgumentException("Unknown color name: " + colorName)
-                }
-            }
-        }
-
-        /**
-         * Get the object type string ("robot_X" or "target_X") from color ID
-         * @param colorId The color ID from Constants
-         * @param isRobot Whether this is a robot (true) or target (false)
-         * @return The object type string
-         */
-        fun getObjectType(colorId: Int, isRobot: Boolean): String {
-            val prefix = if (isRobot) "robot_" else "target_"
-            return prefix + getColorName(colorId, false)
-        }
-
-        /**
-         * Extract the color ID from an object type string (e.g., "robot_blue" or "target_pink")
-         * @param objectType The object type string
-         * @return The color ID from Constants
-         */
-        fun getColorIdFromObjectType(objectType: String): Int {
-            require(
-                !(objectType == null || objectType.isEmpty() ||
-                        (!objectType.startsWith("robot_") && !objectType.startsWith("target_")))
-            ) { "Invalid object type: " + objectType }
-
-            val colorName = objectType.substring(objectType.indexOf("_") + 1)
-            return getColorId(colorName)
-        }
-
-
-        /**
-         * Get the RGB color value for an object type
-         * @param objectType The object type string like "robot_blue" or "target_pink"
-         * @return The RGB color value from Constants.colors_rgb
-         */
-        @JvmStatic
-        fun getColor(objectType: String): Int {
-            val colorId: Int = getColorIdFromObjectType(objectType)
-            // Special case for multi-colored targets
-            if (colorId == Constants.COLOR_MULTI) {
-                return 0xFFFFFFFF.toInt() // Default color for multi-target (WHITE)
-            }
-            if (colorId >= 0 && colorId < Constants.colors_rgb.size) {
-                return Constants.colors_rgb[colorId]
-            }
-            log.w("[COLOR] Invalid color ID: %d from objectType: %s", colorId, objectType)
-            throw IllegalArgumentException("getColor: Invalid color ID: " + colorId + " from objectType: " + objectType)
-        }
-
-        /**
-         * Check if any targets exist in the gridElements list
-         * @param gridElements The list of grid elements to check
-         * @return true if at least one target is found, false otherwise
-         */
-        fun hasTargets(gridElements: ArrayList<GridElement>?): Boolean {
-            if (gridElements == null) {
-                log.e("[TARGET CHECK] gridElements is null!")
-                return false
-            }
-
-            log.d("[TARGET CHECK] Checking %d grid elements for targets", gridElements.size)
-            var targetCount = 0
-            for (element in gridElements) {
-                val type = element.type
-                if (type != null && type.startsWith("target_")) {
-                    targetCount++
-                    log.d(
-                        "[TARGET CHECK] Found target of type %s at position (%d,%d)",
-                        type, element.x, element.y
-                    )
-                }
-            }
-
-            log.d("[TARGET CHECK] Found %d targets", targetCount)
-            return targetCount > 0
-        }
-
-        /**
-         * Check if debug logging is enabled
-         * @return true if debug logging is enabled
-         */
-        @JvmStatic
-        fun hasDebugLogging(): Boolean {
-            // For now, always return false to minimize log output
-            // Can be changed to a configurable setting later
-            return false
-        }
     }
 }

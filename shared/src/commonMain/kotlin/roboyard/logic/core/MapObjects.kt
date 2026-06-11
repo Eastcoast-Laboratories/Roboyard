@@ -126,6 +126,11 @@ object MapObjects {
         // Split data by semicolon
         val entries = data.split(";").filter { it.isNotBlank() }
         for (entry in entries) {
+            // Skip metadata entries like "board:12,12"
+            if (entry.startsWith("board:") || entry.startsWith("level:") || entry.startsWith("name:")) {
+                continue
+            }
+
             // Very simple parsing for GridElement(x,y,type)
             // Expecting format like "mh1,2" or "robot_blue5,6" or "tb8,7"
             try {
@@ -152,34 +157,31 @@ object MapObjects {
      * Generate a unique 5-letter identifier from a string.
      * Deterministic - same input produces same output.
      * Alternates vowels and consonants.
+     * Uses SHA-256 hash for consistency with Java implementation.
      */
     @JvmStatic
     fun generateUnique5LetterFromString(input: String?): String {
-        if (input.isNullOrEmpty()) return "aaaaa"
-        
-        val vowels = "aeiou"
-        val consonants = "bcdfghjklmnpqrstvwxyz"
-        
-        // Simple hash of the input
-        var hash = 0
-        for (char in input) {
-            hash = (hash * 31 + char.code) and 0x7FFFFFFF // Keep positive
-        }
-        
-        // Generate 5 letters alternating consonant/vowel starting with consonant
-        val result = StringBuilder()
-        var useConsonant = true
-        for (i in 0..4) {
-            if (useConsonant) {
-                result.append(consonants[hash % consonants.length])
-                hash /= consonants.length
-            } else {
-                result.append(vowels[hash % vowels.length])
-                hash /= vowels.length
+        if (input.isNullOrEmpty()) return "ERROR"
+
+        try {
+            // SHA-256 hash
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            val hashBytes = digest.digest(input.toByteArray())
+
+            val vowels = charArrayOf('A', 'E', 'I', 'O', 'U')
+            val consonants = charArrayOf('B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z')
+
+            val result = StringBuilder()
+            for (i in 0..4) {
+                val index = kotlin.math.abs(hashBytes[i].toInt()) % (if (i % 2 == 0) consonants.size else vowels.size)
+                val letter = if (i % 2 == 0) consonants[index] else vowels[index]
+                result.append(letter)
             }
-            useConsonant = !useConsonant
+
+            return result.toString()
+        } catch (e: Exception) {
+            log.e("Failed to generate unique ID: ${e.message}")
+            return "ERROR"
         }
-        
-        return result.toString()
     }
 }
