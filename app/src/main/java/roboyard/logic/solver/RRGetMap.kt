@@ -33,7 +33,7 @@ object RRGetMap {
      * @param pieces
      * @return
      */
-    fun createDDWorld(gridElements: ArrayList<GridElement>, pieces: Array<RRPiece?>): Board {
+    fun createDDWorld(gridElements: ArrayList<GridElement>, pieces: Array<RRPiece?>): Board? {
         // Find the board dimensions from the GridElements
         var maxX = 0
         var maxY = 0
@@ -60,12 +60,16 @@ object RRGetMap {
         // The GridElements may have coordinates up to boardWidth-1, so we need a board of that size
         // Using MainActivity dimensions caused walls at x=12 to wrap around to x=0 of the next row
         val board = Board.createBoardFreestyle(null, boardWidth, boardHeight, Constants.NUM_ROBOTS)
-        board.removeGoals()
+        if (board == null) {
+            Timber.e("[SOLUTION_SOLVER] Failed to create board with dimensions %dx%d", boardWidth, boardHeight)
+            return null
+        }
+        board!!.removeGoals()
 
         Timber.d(
             "[SOLUTION_SOLVER] Board created with width=%d, height=%d",
-            board.width,
-            board.height
+            board!!.width,
+            board!!.height
         )
 
         // Color mappings for robots and targets
@@ -100,7 +104,7 @@ object RRGetMap {
             val type = gridElement.type
             val x = gridElement.x
             val y = gridElement.y
-            val position = y * board.width + x
+            val position = y * board!!.width + x
 
 
             // Skip walls - we'll handle them separately after targets
@@ -117,13 +121,13 @@ object RRGetMap {
             ) { // Added target_pink here
 
                 val targetColor: Int = colors.getOrDefault(type, Constants.COLOR_PINK)!!
-                board.addGoal(position, targetColor, 1)
+                board!!.addGoal(position, targetColor, 1)
                 targetFound = true
                 targetInfoList.add(intArrayOf(position, targetColor))
 
 
                 // Set this as the active target
-                board.setGoal(position)
+                board!!.setGoal(position)
                 Timber.d(
                     "[SOLUTION_SOLVER_TARGET] Setting goal at position %d (%d,%d) for robot color %d",
                     position, x, y, targetColor
@@ -185,10 +189,10 @@ object RRGetMap {
         for (wall in wallModel.getWalls()) {
             val x = wall!!.x
             val y = wall.y
-            val position = y * board.width + x
+            val position = y * board!!.width + x
 
             if (wall.type == WallType.HORIZONTAL) {
-                board.setWall(
+                board!!.setWall(
                     position,
                     "N",
                     true
@@ -201,7 +205,7 @@ object RRGetMap {
                     y
                 )
             } else if (wall.type == WallType.VERTICAL) {
-                board.setWall(
+                board!!.setWall(
                     position,
                     "W",
                     true
@@ -221,11 +225,11 @@ object RRGetMap {
         var missingWallCountHorizontal = 0
         var missingWallCountVertical = 0
 
-        for (x in 0..<board.width) {
+        for (x in 0..<board!!.width) {
             // Top border
             val topPosition = 0 + x
-            if (!board.isWall(topPosition, Constants.NORTH)) {
-                board.setWall(topPosition, "N", true)
+            if (!board!!.isWall(topPosition, Constants.NORTH)) {
+                board!!.setWall(topPosition, "N", true)
                 Timber.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing top horizontal border wall at position (%d,0)",
                     x
@@ -233,25 +237,25 @@ object RRGetMap {
                 missingWallCountHorizontal++
             }
             // Bottom border
-            val bottomWallY = (board.height - 1) * board.width
+            val bottomWallY = (board!!.height - 1) * board!!.width
             val bottomPosition = bottomWallY + x
-            if (!board.isWall(bottomPosition, Constants.SOUTH)) {
-                board.setWall(bottomPosition, "N", true)
+            if (!board!!.isWall(bottomPosition, Constants.SOUTH)) {
+                board!!.setWall(bottomPosition, "N", true)
                 Timber.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing bottom horizontal border wall at position (%d,%d)",
                     x,
-                    board.height - 1
+                    board!!.height - 1
                 )
                 missingWallCountHorizontal++
             }
         }
 
-        for (y in 0..<board.height) {
+        for (y in 0..<board!!.height) {
             // Left vertical border
-            val verticalWallY = y * board.width
+            val verticalWallY = y * board!!.width
             val leftPosition = 0 + verticalWallY
-            if (!board.isWall(leftPosition, Constants.WEST)) {
-                board.setWall(leftPosition, "W", true)
+            if (!board!!.isWall(leftPosition, Constants.WEST)) {
+                board!!.setWall(leftPosition, "W", true)
                 Timber.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing left vertical border wall at position (0,%d)",
                     y
@@ -259,13 +263,13 @@ object RRGetMap {
                 missingWallCountVertical++
             }
             // Right border
-            val rightWallX = board.width - 1
+            val rightWallX = board!!.width - 1
             val rightPosition = rightWallX + verticalWallY
-            if (!board.isWall(rightPosition, Constants.EAST)) {
-                board.setWall(rightPosition, "W", true)
+            if (!board!!.isWall(rightPosition, Constants.EAST)) {
+                board!!.setWall(rightPosition, "W", true)
                 Timber.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing right vertical border wall at position (%d,%d)",
-                    board.width - 1,
+                    board!!.width - 1,
                     y
                 )
                 missingWallCountVertical++
@@ -295,15 +299,15 @@ object RRGetMap {
                 pieces[i] = RRPiece(0, 0, i, i)
             }
 
-            val position = pieces[i]!!.y * board.width + pieces[i]!!.x
+            val position = pieces[i]!!.y * board!!.width + pieces[i]!!.x
             Timber.d(
                 "[ROBOT_MAPPING] Setting robot %d at board position %d (x=%d, y=%d)",
                 i, position, pieces[i]!!.x, pieces[i]!!.y
             )
-            board.setRobot(i, position, false)
+            board!!.setRobot(i, position, false)
 
             // Verify that setRobot succeeded
-            if (!board.setRobot(i, position, false)) {
+            if (!board!!.setRobot(i, position, false)) {
                 Timber.e(
                     "[ROBOT_MAPPING][ERRROR] FATAL: Could not set robot %d at position %d (%d,%d). Position may be occupied or invalid.",
                     i, position, pieces[i]!!.x, pieces[i]!!.y
@@ -335,7 +339,7 @@ object RRGetMap {
             for (info in targetInfoList) {
                 val pos = info[0]
                 val color = info[1]
-                for (g in board.getGoals()) {
+                for (g in board!!.getGoals()) {
                     if (g.position == pos && g.robotNumber == color) {
                         activeGoals.add(g)
                         break
@@ -343,15 +347,15 @@ object RRGetMap {
                 }
             }
             if (activeGoals.size > 1) {
-                board.setActiveGoals(activeGoals)
+                board!!.setActiveGoals(activeGoals)
                 Timber.d("[SOLUTION_SOLVER] Multi-goal mode: set %d active goals", activeGoals.size)
                 for (g in activeGoals) {
                     Timber.d(
                         "[SOLUTION_SOLVER]   Goal: robot=%d position=%d (%d,%d)",
                         g.robotNumber,
                         g.position,
-                        g.position % board.width,
-                        g.position / board.width
+                        g.position % board!!.width,
+                        g.position / board!!.width
                     )
                 }
             }

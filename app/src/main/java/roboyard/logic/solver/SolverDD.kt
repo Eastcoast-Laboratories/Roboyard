@@ -242,7 +242,7 @@ class SolverDD : ISolver {
      * @return true if the target can be reached in one move
      */
     override fun isSolution01(): Boolean {
-        return board != null && board!!.isSolution01()
+        return board != null && board!!.isSolution01
     }
 
     private fun outerWallsAreComplete(): Boolean {
