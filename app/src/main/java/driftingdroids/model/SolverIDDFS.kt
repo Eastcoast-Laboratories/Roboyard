@@ -20,7 +20,7 @@ import android.util.Log
 import java.util.Arrays
 import kotlin.concurrent.Volatile
 
-class SolverIDDFS protected constructor(board: Board) : Solver(board) {
+class SolverIDDFS(board: Board) : Solver(board) {
     private val MAX_DEPTH: Int // maximal depth of search tree to prevent OOM
 
     private val states: Array<IntArray>
@@ -72,10 +72,10 @@ class SolverIDDFS protected constructor(board: Board) : Solver(board) {
         // Set memory check interval: every recursion for multi-goal (DFS can allocate 100s MB between checks)
         this.memoryCheckInterval = if (this.isMultiGoalMode) 1 else 1000
 
-        this.obstacles = arrayOfNulls<IntArray>(MAX_DEPTH) // Initialize here
+        this.obstacles = Array(MAX_DEPTH) { IntArray(board.size) } // Initialize here
         this.initObstacles() // Call after MAX_DEPTH and obstacles are initialized
-        this.states = Array<IntArray?>(MAX_DEPTH) { IntArray(this.board.robotPositions.size) }
-        this.directions = Array<IntArray?>(MAX_DEPTH) { IntArray(this.board.robotPositions.size) }
+        this.states = Array(MAX_DEPTH) { IntArray(this.board.robotPositions.size) }
+        this.directions = Array(MAX_DEPTH) { IntArray(this.board.robotPositions.size) }
         this.goalPosition = (if (null == this.board.getGoal()) 0 else this.board.getGoal().position)
         this.minRobotLast =
             (if (this.isBoardGoalWildcard) 0 else this.states[0].size - 1) //swapGoalLast
@@ -114,9 +114,9 @@ class SolverIDDFS protected constructor(board: Board) : Solver(board) {
 
 
     @Throws(InterruptedException::class)
-    public override fun execute(): MutableList<Solution?> {
+    public override fun execute(): List<Solution> {
         val startExecute = System.nanoTime()
-        this.lastResultSolutions = ArrayList<Solution?>()
+        this.lastResultSolutions = ArrayList<Solution>()
 
         Logger.println("***** " + this.javaClass.getSimpleName() + " *****")
         Logger.println("Options: " + this.getOptionsAsString())
@@ -163,7 +163,7 @@ class SolverIDDFS protected constructor(board: Board) : Solver(board) {
         this.sortSolutions()
 
         this.solutionMilliSeconds = (System.nanoTime() - startExecute) / 1000000L
-        return this.lastResultSolutions
+        return this.lastResultSolutions!!
     }
 
 
@@ -673,9 +673,8 @@ class SolverIDDFS protected constructor(board: Board) : Solver(board) {
                 return this.theMap.putIfGreater(key, depth)
             }
 
-            override fun getInfo(): String {
-                return this.javaClass.getSimpleName() + "," + this.theMap.javaClass.getSimpleName() + "," + (if (null == this.keyMaker) "n/a" else this.keyMaker.javaClass.getSimpleName())
-            }
+            override val info: String
+                get() = this.javaClass.getSimpleName() + "," + this.theMap.javaClass.getSimpleName() + "," + (if (null == this.keyMaker) "n/a" else this.keyMaker.javaClass.getSimpleName())
         }
 
         //store the unique keys of all known states in 64-bit longs
@@ -693,9 +692,8 @@ class SolverIDDFS protected constructor(board: Board) : Solver(board) {
                 return this.theMap.putIfGreater(key, depth)
             }
 
-            override fun getInfo(): String {
-                return this.javaClass.getSimpleName() + "," + this.theMap.javaClass.getSimpleName() + "," + (if (null == this.keyMaker) "n/a" else this.keyMaker.javaClass.getSimpleName())
-            }
+            override val info: String
+                get() = this.javaClass.getSimpleName() + "," + this.theMap.javaClass.getSimpleName() + "," + (if (null == this.keyMaker) "n/a" else this.keyMaker.javaClass.getSimpleName())
         }
 
         // Deterministic memory limit (Runtime.freeMemory is unreliable on Android ART):
