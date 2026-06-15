@@ -339,7 +339,7 @@ object RRGetMap {
             for (info in targetInfoList) {
                 val pos = info[0]
                 val color = info[1]
-                for (g in board!!.getGoals()) {
+                for (g in board!!.goals) {
                     if (g.position == pos && g.robotNumber == color) {
                         activeGoals.add(g)
                         break

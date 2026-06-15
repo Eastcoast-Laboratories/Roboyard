@@ -70,7 +70,7 @@ public abstract class Solver {
     
     protected Solver(final Board board) {
         this.board = board;
-        this.boardWalls = this.board.getWalls();
+        this.boardWalls = this.board.walls;
         int bitMask = 0;
         for (int i = 0;  i < this.board.sizeNumBits;  ++i) { bitMask += bitMask + 1; }
         this.boardSizeBitMask = bitMask;

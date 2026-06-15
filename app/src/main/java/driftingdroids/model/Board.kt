@@ -34,10 +34,13 @@ import kotlin.math.min
  * Board class represents the game board state including walls, robots, and goals.
  * Handles board creation, modification, and game state management.
  */
-class Board private constructor(val width: Int, val height: Int, numRobots: Int) {
+class Board private constructor(@JvmField val width: Int, val height: Int, numRobots: Int) {
+    @JvmField
     val size: Int // width * height
+    @JvmField
     val sizeNumBits: Int //number of bits required to store any board position (size - 1)
 
+    @JvmField
     val directionIncrement: IntArray
 
     private val quadrants: IntArray // quadrants used for this board (indexes in QUADRANTS) 
@@ -46,7 +49,9 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
      * Gets wall configuration of the board.
      * @return 2D boolean array representing walls
      */
+    @JvmField
     val walls: Array<BooleanArray> // [4][width*height] 4 directions
+    @JvmField
     val goals: MutableList<Goal> // all possible goals on the board
     private val randomGoals: MutableList<Goal?>
     private var goal: Goal? // the current goal
@@ -66,8 +71,9 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
      * Inner class representing a goal on the board with position, robot, and shape information.
      * Implements Comparable to allow sorting of goals by robot number, shape, and position.
      */
-    inner class Goal(val x: Int, val y: Int, val robotNumber: Int, val shape: Int) :
+    inner class Goal(val x: Int, val y: Int, @JvmField val robotNumber: Int, val shape: Int) :
         Comparable<Goal?> {
+        @JvmField
         val position: Int
 
         init {
@@ -855,6 +861,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
     }
 
     companion object {
+        @JvmField
         var L10N: L10N = L10N()
         val WIDTH_STANDARD: Int = MainActivity.boardSizeX
         const val WIDTH_MIN: Int = 3
@@ -865,10 +872,12 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
         const val SIZE_MAX: Int = 4096 // 12 bits
         const val NUMROBOTS_STANDARD: Int = 4
 
+        @JvmField
         val ROBOT_COLOR_NAMES_SHORT: Array<String?> =
             arrayOf<String?>( //also used as part of L10N-keys
                 "r", "g", "b", "y", "s"
             )
+        @JvmField
         val ROBOT_COLOR_NAMES_LONG: Array<String?> =
             arrayOf<String?>( //also used as part of L10N-keys
                 "red", "green", "blue", "yellow", "silver"
@@ -1026,9 +1035,13 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
                 .addWall(7, 7, "NESW")
         }
 
+        @JvmField
         val NORTH: Int = Constants.NORTH // up
+        @JvmField
         val EAST: Int = Constants.EAST // right
+        @JvmField
         val SOUTH: Int = Constants.SOUTH // down
+        @JvmField
         val WEST: Int = Constants.WEST // left
 
         private val RANDOM = Random()
@@ -1088,6 +1101,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @param numRobots Number of robots on new board
          * @return New freestyle board instance
          */
+        @JvmStatic
         fun createBoardFreestyle(
             oldBoard: Board?,
             width: Int,

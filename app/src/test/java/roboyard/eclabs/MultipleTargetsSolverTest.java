@@ -83,7 +83,7 @@ public class MultipleTargetsSolverTest {
 
         // Set active goals for multi-goal mode
         List<Board.Goal> activeGoals = new ArrayList<>();
-        for (Board.Goal g : board.getGoals()) {
+        for (Board.Goal g : board.goals) {
             if (g.position == 57 || g.position == 59) {
                 activeGoals.add(g);
             }
@@ -148,7 +148,7 @@ public class MultipleTargetsSolverTest {
         board.setGoal(57);
 
         List<Board.Goal> activeGoals = new ArrayList<>();
-        for (Board.Goal g : board.getGoals()) {
+        for (Board.Goal g : board.goals) {
             if (g.position == 57 || g.position == 58 || g.position == 59) {
                 activeGoals.add(g);
             }
