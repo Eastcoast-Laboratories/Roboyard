@@ -72,7 +72,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
      * Implements Comparable to allow sorting of goals by robot number, shape, and position.
      */
     inner class Goal(val x: Int, val y: Int, @JvmField val robotNumber: Int, val shape: Int) :
-        Comparable<Goal?> {
+        Comparable<Goal> {
         @JvmField
         val position: Int
 
@@ -147,7 +147,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
         this.directionIncrement[SOUTH] = width
         this.directionIncrement[WEST] = -1
         this.quadrants = IntArray(4)
-        this.walls = Array<BooleanArray?>(4) { BooleanArray(width * height) }  //filled with "false"
+        this.walls = Array<BooleanArray>(4) { BooleanArray(width * height) }  //filled with "false"
         this.robotPositions = IntArray(numRobots)
         this.setRobots(numRobots)
         this.goals = ArrayList<Goal>()
@@ -325,7 +325,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
 
     private fun addQuadrant(qNum: Int, qPos: Int): Board {
         this.quadrants[qPos] = qNum
-        val quadrant: Board = QUADRANTS[qNum]
+        val quadrant: Board = QUADRANTS[qNum]!!
         //qPos (quadrant target position): 0==NW, 1==NE, 2==SE, 3==SW
         var qX: Int
         var qY: Int
@@ -861,8 +861,6 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
     }
 
     companion object {
-        @JvmField
-        var L10N: L10N = L10N()
         val WIDTH_STANDARD: Int = MainActivity.boardSizeX
         const val WIDTH_MIN: Int = 3
         const val WIDTH_MAX: Int = 100
@@ -898,7 +896,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
             "1C", "2C", "3C", "4C",
             "1D", "2D", "3D", "4D"
         )
-        private val QUADRANTS: Array<Board> = arrayOfNulls<Board>(16)
+        private val QUADRANTS: Array<Board?> = arrayOfNulls(16)
 
         init {
             QUADRANTS[0] = Board(WIDTH_STANDARD, HEIGHT_STANDARD, NUMROBOTS_STANDARD) //1A
@@ -1051,9 +1049,9 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
          * @param quadrant Index of the quadrant to get goals from
          * @return List of goals in the quadrant, sorted by robot number, shape, and position
          */
-        fun getStaticQuadrantGoals(quadrant: Int): MutableList<Goal?> {
-            val result: MutableList<Goal?> = ArrayList<Goal?>(QUADRANTS[quadrant].goals)
-            Collections.sort<Goal?>(result)
+        fun getStaticQuadrantGoals(quadrant: Int): MutableList<Goal> {
+            val result: MutableList<Goal> = ArrayList<Goal>(QUADRANTS[quadrant]!!.goals)
+            Collections.sort(result)
             return result
         }
 

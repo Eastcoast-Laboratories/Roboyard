@@ -94,7 +94,7 @@ class SolverDD : ISolver {
             }
         }
 
-        solver = Solver.createInstance(board)
+        solver = Solver.createInstance(board!!)
         Timber.d("[SOLUTION_SOLVER] SolverDD.init(): Solver created successfully")
     }
 
@@ -123,7 +123,7 @@ class SolverDD : ISolver {
 
         try {
             Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Executing solver")
-            solutions = solver!!.execute()
+            solutions = solver!!.execute().toMutableList()
             Timber.d("[SOLUTION_SOLVER] SolverDD.run(): Solver execution complete")
 
             if (solutions!!.size != 0) {
